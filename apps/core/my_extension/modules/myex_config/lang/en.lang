@@ -1,0 +1,56 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-31                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2010-08-09 10:08:51 Mercy Anchundia manchundia@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"My Extension" => "My Extension",
+"no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
+"Call Waiting" => "Call Waiting",
+"Do Not Disturb" => "Do Not Disturb",
+"Error processing CallWaiting" => "Error processing CallWaiting",
+"Error processing Do Not Disturb" => "Error processing Do Not Disturb",
+"Save Configuration" => "Save Configuration",
+"Your configuration has been saved correctly" => "Your configuration has been saved correctly",
+"Call Forward" => "Call Forward",
+"Call Forward on Unavailable" => "Call Forward on Unavailable",
+"Call Forward on Busy" => "Call Forward on Busy",
+"Configure a phone number here..." => "Configure a phone number here...",
+"Validation Error" => "Validation Error",
+"Please check your phone number"      => "Please check your phone number",
+"Please check your phone number for Call Forward" => "Please check your phone number for Call Forward",
+"Please check your phone number for Call Forward On Unavailable" => "Please check your phone number for Call Forward On Unavailable",
+"Please check your phone number for Call Forward On Busy" => "Please check your phone number for Call Forward On Busy",
+"Always" => "Always",
+"Never"  => "Never",
+"On-Demand" => "On-Demand",
+"Record Incoming" => "Record Incoming",
+"Record Outgoing" => "Record Outgoing",
+"SETTINGS FOR YOUR EXTENSION:" => "SETTINGS FOR YOUR EXTENSION:",
+"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension"
+);
+?>

@@ -1,0 +1,77 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<p>La opción "Form Designer" del módulo "Call Center" en Elastix nos permite la creación de formularios, los
+cuales se crean con el objetivo de recolectar datos al
+momento de ejecutar una campaña y realizar llamadas
+desde la consola de agente.
+</p>
+
+<p>La figura 1 nos muestra la lista de formularios existentes, con el objetivo
+de hacer una "vista" de estos, antes de que sean
+usados en una campaña.<br/><br/>
+
+</p>
+<div><img src="../modules/{$node_id}/images/form_designer.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<h3>Create New Form</h3>
+<p>Esta opción nos permite crear un Nuevo Formulario.
+Se mostrará una pantalla en la que se debe ingresar los
+siguientes campos:
+</p>
+<table class="inline">
+  <tr>
+    <th>Campo</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Nombre</td><td>Nombre con que se identifica el formulario.</td>
+  </tr>
+<tr>
+    <td>Descripción</td><td>Una descripción que indique para que fue creado.</td>
+</tr>
+</table>
+<div><img src="../modules/{$node_id}/images/form_designer_1.jpg" border="0"></div>
+<div>Figura 2</div><br/><br/>
+<p>Los formularios pueden llevar n campos que se hayan
+especificado.
+Estos campos son agregados desde la sección que dice
+Nuevo Campo.
+Se deben ingresar los campos que se describen en la
+tabla de abajo y luego hacer click en Agregar Campos<br/><br/>
+<strong>Nota:</strong> Si se selecciona el tipo Type List se debe indicar las
+posibles opciones separadas por coma en el cuadro de
+texto Opciones.
+
+</p>
+<table class="inline">
+  <tr>
+    <th>Campo</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Nombre del Campo</td><td>Nombre del Campo.</td>
+  </tr>
+<tr>
+    <td>Orden</td><td>Orden del Campo.</td>
+</tr>
+<tr>
+    <td>Tipo</td><td>Type Label = Etiqueta<br/>
+                     Type Text  = Caja de Texto<br/>
+                     Type List  = Combo Box<br/>
+                     Type Date  = Campo tipo Fecha<br/>
+                     Type Text Area = Ingreso de Texto extenso.<br/>       
+    </td>
+</tr>
+</table>
+<div><img src="../modules/{$node_id}/images/form_designer_2.jpg" border="0"></div>
+<div>Figura 3</div><br/><br/>
+<h3>View</h3>
+<p>Al dar click sobre  "View" dentro de "Form List", nos llevará a una pantalla donde se mostrará los datos del formulario. A la vez en esta pantalla usted podra "Editar","Desactivar","Eliminar" un formulario.</p>
+<div><img src="../modules/{$node_id}/images/form_edit.jpg" border="0"></div>
+<div>Figura 4</div><br/><br/>
+</body>
+</html>

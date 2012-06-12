@@ -1,0 +1,72 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Chavdar Iliev                                             |
+  | Email: chavdar_75@yahoo.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
+
+global $arrLangModule; 
+ $arrLangModule = array(
+"Ingoing Calls" => "Ingoing Calls",
+"guardar" => "Save",
+"cancelar" => "Cancel",
+"label_choice" => "Select Queue",
+"Form" => "Queue",
+"nameLabel" => "Name",
+"nameForm" => "Select Queue",
+"nameFormChoice" => "Queue selected",
+"Result" => "Result",
+"msgResultado" => "Success",
+"Select Queue" => "Select Queue",
+"Queue List" => "Queue List",
+"Name Queue" => "Name Queue",
+"Status" => "Status",
+"Options" => "Options",
+"View" => "View",
+"Activate" => "Activate",
+"Active" => "Active",
+"View Queue" => "View Queue",
+"edit" => "Edit",
+"dasactivate" => "Desactivate",
+"confirm continue" => "Confirm continue",
+"Script" => "Script",
+"Queue" => "Queue :",
+"Error when connecting to database" => "Error when connecting to database",
+"Desactivate Error" => "Desactivate Error",
+"Error when desactivating the Queue" => "Error when desactivating the Queue",
+"Inactive" => "Inactive",
+"Activate Error" => "Activate Error",
+"Error when Activating the Queue" => "Error when Activating the Queue",
+"apply_changes" => "Apply Changes",
+"Edit Queue" => "Edit Queue",
+"all" => "All",
+"active" => "Active",
+"inactive" => "Inactive",
+
+);
+?>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <menulist>
+    <menuitem menuid='a2b'          desc='Calling Cards' parent='extras' module='yes' link=''                  order='2'>
+		<permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+		</permissions>
+    </menuitem>
+    <menuitem menuid='a2b_admin'    desc='Admin'         parent='a2b'    module='no' link='a2billing/admin'    order='21'>
+		<permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+		</permissions>
+    </menuitem>
+    <menuitem menuid='a2b_agent'    desc='Agent'         parent='a2b'    module='no' link='a2billing/agent'    order='22'>
+		<permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+		</permissions>
+    </menuitem>
+    <menuitem menuid='a2b_customer' desc='Customer'      parent='a2b'    module='no' link='a2billing/customer' order='23'>
+		<permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+		</permissions>
+    </menuitem>
+  </menulist>
+</module>

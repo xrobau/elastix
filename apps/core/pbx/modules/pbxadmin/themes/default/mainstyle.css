@@ -1,0 +1,530 @@
+/** Main layout */
+body { 
+	/** margin: 0; **/
+	padding: 0;
+	
+	font-family: Helvetica, Geneva, Arial, SunSans-Regular, sans-serif, Verdana, "Trebuchet MS", SunSans-Regular;
+	/** font-size:12pt; **/
+	font-size:14px; 
+}
+#header {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	height: 75px;
+}
+#nav {
+	/** position: absolute; **/
+        margin: 0;
+        padding: 0;
+	left: 0;
+        top: 0;
+	/** top: 175px; **/
+	width: 200px;
+	padding:0;
+}
+#wrapper { 
+	/** position:absolute; **/
+	/** top:0px; **/
+        margin-left: 200px;
+	right:0;
+	left:200px;
+}
+#content {
+	top: 0;
+	margin-right: 15px;
+	padding: 5px 0 0 0;
+}
+/**** global elements ****/
+a {
+	text-decoration:none;
+	color:#095a9a;
+}
+/**
+a:visited {
+	color:#095a9a;
+}
+**/
+a:hover {
+	color:#ff8a00;
+}
+h1, h2, h3, h4, h5, h6 { 
+	color: gray;
+}
+input {
+	border:1px solid #ccc;
+}
+
+body { 
+/*	background-image: url('../images/shadow-side-background.png'); */
+/*	background-repeat: repeat-y; */
+/*	background-position: left; */
+}
+
+
+.attention {
+	background:red;
+	color:white;
+	font-weight:bold;
+}
+.attention a {
+	color:white;
+	font-weight:bold;
+}
+div.attention {
+	border:1px solid black;
+	padding:5px;
+}
+
+.warning {
+	padding:10px 10px 0 10px;
+	margin:5px 0;
+	background:rgb(255,242,202);
+	border:1px dotted #ccc;
+}
+.warning p {
+	margin-top: 0;
+	margin-bottom:10px;
+}
+
+/**** header *****/
+#header {
+	background-image: url('../images/header-back.png'); 
+	background-repeat: repeat-x;
+}
+#header #version {
+	position:absolute;
+	top: 20px;
+	width:300px;
+	height:16px;
+	padding:3px 0 0 0;
+	text-align:center;
+	background:black;
+	color:#ccc;
+	font-size:9px;
+	
+	background-image: url('../images/background-triangle.png');
+	background-repeat: no-repeat;
+	background-position: top right; 
+}
+#header #version a {
+	color:#ccc;
+	font-weight:bold;
+}
+#header #version a:hover {
+	color: #ff8a00; 
+}
+#header ul#metanav {
+	position: absolute;
+	top: 10px;
+	left: 330px;
+	margin: 10px 0;
+	padding: 0 5px 0 0;
+	list-style-type: none;
+	font-size:12px;
+	border-right:1px solid black;
+}
+#header ul#metanav li {
+	display: inline;
+	border-left:1px solid black;
+	padding-left:6px;
+}
+#header ul#metanav li.first {
+	border-left: 0;
+}
+#header ul#metanav li a {
+	text-decoration:none;
+}
+#header ul#metanav li.current a {
+	color: #ff8a00; 
+}
+#header #logo {
+	position:absolute;
+	right:0;
+	top:0;
+	margin-right:2px;
+}
+#header #logo img {
+	padding:2px;
+	border:0;
+}
+
+#need_reload_block {
+	/** position: absolute; **/
+	top:5px; 
+	height:15px;
+	margin:0;
+	left:5px;
+	width:300px;
+	padding:1px 5px;
+	text-align:center;
+}
+#need_reload_block a {
+	display:block;
+}
+
+#message {
+	position:absolute;
+	top:50px;
+	right:10px;
+	font-size:12px;
+}
+
+/**** main menu *****/
+#nav {
+	/* background-image: url('../images/shadow-side.png'); */
+	/* background-repeat: repeat-y; */
+	/* background-position:  right; */
+}
+#nav ul {
+	list-style-type: none;
+	margin:0 10px 2em 0;
+	padding:0;
+	border-bottom: 2px solid white;
+}
+#nav ul li {
+	background: #eee;
+	padding: 2px 0px 2px 5px;
+	border-top: 2px solid white;
+	
+	color: #999; /* header items */
+	font-size: 12px;
+}
+#nav ul li a { /* menu links */
+	padding-left:10px;
+	display: block;
+	text-decoration:none;
+	font-size: 14px;
+	font-weight: normal;
+	color: #095a9a;
+}
+#nav ul li a:hover {
+	color: #ff8a00; 
+}
+#nav li.current, #nav li.current a { /* active item */
+	background: white;
+	color: #ff8a00; 
+}
+
+/***** footer *****/
+#footer {
+	/** position:absolute; **/
+	/** margin-top:15px; **/
+	margin-top:10px;
+	font-size:10px;
+	text-align:left;
+	color: #ccc;
+}
+#footer, #footer a {
+	color:#999;
+}
+#footer a:hover {
+	color:#ff8a00;
+}
+#footer hr {
+	width:20%;
+	margin-left:0;
+	color:#ccc;
+	height:1px;
+}
+
+/***** info popups *****/
+a.info {
+	position:relative;
+	color:black;
+	border-bottom:1px dashed #ccc;
+}
+/* Added to solve the z-order problem of IE */
+a.info:hover {
+    z-index:2;
+}
+/* End */
+a.info span{
+    display: none;
+}
+a.info:hover span{
+	display:block;
+	position:absolute;
+	z-index:1;
+	top:2em;
+	left:-10em;
+	width:25em;
+	border:1px solid #F2AF1D;
+	background-color:#FDF1D5;
+	color:#000;
+	text-align:justify;
+	font-size:10px;
+	font-weight:normal;
+	padding:3px;
+	line-height:15px;
+}
+
+/** menu attention class **/
+
+.attention {
+	background:red;
+}
+.attention a {
+	color:white;
+	font-size:12px;
+}
+.attention a.info {
+	border:none;
+}
+.attention a.info:hover span{
+	left:10em; 
+	border:1px solid black;
+	background: red;
+	color:white;
+}
+
+/***** right nav's ********/
+.rnav {
+	float:right;
+}
+.rnav ul {
+	list-style-type: none;
+	margin:0;
+	padding:0;
+	margin-top:15px;
+	/* make it scroll */
+	max-height:35em;
+	max-width:275px;
+	overflow:auto;
+}
+.rnav ul li {
+	padding:2px 10px;
+	font-size: 14px;
+	margin:2px;
+	background: #eee;
+	border:1px solid #ccc;
+}
+.rnav ul li a {
+	display:block;
+}
+.rnav ul li a.current {
+	color:#ff8a00;
+}
+
+/***** main content *********/
+#wrapper {
+	padding-left: 15px;
+	padding-right: 15px;
+	
+	/** background-image: url('../images/shadow-top.png'); **/
+	background-repeat: repeat-x;
+	background-position: top; 
+}
+#background-wrapper {
+	padding:0;
+	margin:0;
+	/** background-image: url('../images/background-grid.png'); **/
+	background-repeat: no-repeat;
+	background-position:bottom right;
+}
+#wrapper #left-corner {
+	position:absolute; /* absolute within #wrapper */
+	top:0;
+	left:-10px; /* because the shadow is actually in #nav.. bit of a hack.. */
+	
+	background-image: url('../images/shadow-corner.png');
+	background-repeat: no-repeat;
+	width:10px;
+	height:11px;
+}
+#wrapper #right-corner { /* Just a hack to make IE expand the content area 100% */
+	float: right; 
+}
+
+.content {
+	padding:0;
+	margin:0;
+}
+
+
+/*********  reload bar *************/
+div.inyourface a{
+	position:fixed;
+	display:block;
+	top:0px;
+	left:0px;
+	width:100%;
+	color:white;
+	background-color:red;
+	font-weight:bold;
+	text-align:center;
+	text-decoration:none;
+	border: 1px solid black;	
+}
+
+.clsWait{ 
+	position: absolute; 
+	top:75px; 
+	left: 15%; 
+	width: 70%; 
+	text-align:center; 
+	border: red solid 1px; 
+	background :#f0d0d0; 
+	display: block; 
+	font-weight: bold 
+}
+
+.clsWaitFinishOK { 
+	position: absolute; 
+	top:75px; left: 15%; 
+	width: 70%; 
+	text-align:center; 
+	border: blue solid 1px; 
+	background:#d0d0f0; 
+	display: block; 
+}
+
+.clsHidden{ 
+	display: none 
+}
+
+
+/************************* For modules page *************************/
+#modulelist ul {
+	padding-left:0;
+	margin-left:0;
+	position:relative;
+}
+#modulelist li {
+    list-style-type: none;
+	border:1px solid #808080;
+}
+#modulelist #modulelist-header {
+	position:relative;
+}
+#modulelist #modulelist-header span {
+	font-size:12px;
+	font-weight:bold;
+	
+}
+#modulelist .moduleheader {
+	background:#ccc;
+	padding:2px;
+}
+#modulelist .modulename {
+	position:absolute;
+	left:2px;
+}
+#modulelist .moduletype {
+	position:absolute;
+	left: 230px;
+}
+#modulelist .moduleversion {
+	position:absolute;
+	left: 290px;
+}
+#modulelist .modulestatus {
+	position:absolute;
+	left: 360px;
+
+}
+#modulelist .clear {
+	clear:both;
+}
+div.modulebuttons {
+	margin:0.5em 0 0.5em 0;
+	text-align:right;
+	width:100%;
+}
+#moduleprogress .error {
+	color:red;
+	font-weight:bold;
+}
+#moduleprogress .success {
+	color:green;
+	font-weight:bold;
+}
+#moduleprogress hr {
+	margin-left:0;
+	width:40%;
+	color:#ccc;
+}
+
+/* for the tabber */
+#modulelist .tabber, #modulelist .tabberlive {
+	/* position:relative; */
+	/*margin-left:130px; */
+}
+#modulelist div.moduleinfopane {
+	display:none; /* hide the information pane by default */
+	background: #eee;
+	height:7em; /* div.tabbertab height should be .5 less than this */
+}
+#modulelist ul.tabbernav {
+	width:8em;
+	float:left;
+	margin-left:0em;
+}
+#modulelist ul.tabbernav li {
+	text-align:right;
+	padding:2px 7px 2px 2px;
+	
+    border-right: 5px solid #808080;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+	
+}
+#modulelist ul.tabbernav li.tabberactive a {
+	color: #ff8a00;
+	font-weight:bold;
+}
+#modulelist ul.tabbernav li a {
+	text-decoration : none;
+}
+#modulelist div.tabbertab {
+	margin-left:1.5em; 
+	height:6.5em; /* This should be .5 less than div.moduleinfopain height */
+	overflow:auto;
+}
+#modulelist h5 {
+	margin-top: 0;
+	margin-bottom: 0.5em;
+}
+#modulelist .alert {
+	color:#a00;
+}
+#modulelist div.moduleinfopane .actiontab {
+	padding-left:10px;
+}
+
+/************************* For tabber *************************/
+/*--------------------------------------------------
+  REQUIRED to hide the non-active tab content.
+  But do not hide them in the print stylesheet!
+  --------------------------------------------------*/
+.tabberlive .tabbertabhide {
+ display:none;
+}
+
+/**************************************************************/
+
+/*************************Reports Page***************************/
+#cdr ul#metanav {
+	position: absolute;
+	top: 45px;
+	left: 5px;
+	margin: 10px 0;
+	padding: 0 0 0 0;
+	list-style-type: none;
+	font-size:15px;
+}
+#cdr ul#metanav li {
+	display: inline;
+	border-right:1px solid black;
+	padding-left:6px;
+	padding-right:6px;
+}
+#cdr ul#metanav li.first {
+	border-left: 0;
+}
+#cdr ul#metanav li a {
+	text-decoration:none;
+}
+#cdr ul#metanav li.current a {
+	color: #ff8a00; 
+}

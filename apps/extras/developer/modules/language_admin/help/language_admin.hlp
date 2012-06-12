@@ -1,0 +1,28 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Language Admin" del módulo "Developer" nos permite
+administrar los diferentes idiomas de los módulos en Elastix.<br/>Podemos consultar si existe un
+lenguaje definido para un modulo y observar una lista de palabras con su respectiva traduccion como lo podemos observar en la figura 1. Estos valores pueden ser modificados de acuerdo al idioma que desee traducir y guardar los cambios presionando el botón "Save all".</p>
+<div><img src="../modules/{$node_id}/images/language.png" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<h2>Add</h2>
+<p>Esta opción pos permite agregar un nuevo lenguaje para el modulo de acuerdo al
+formato como nos indica la figura 2.
+</p>
+<div><img src="../modules/{$node_id}/images/language_new.png" border="0"></div>
+<div>Figura 2</div><br/><br/>
+<p>También nos permite la traducción a otro idioma palabra por palabra de un módulo
+como lo podemos observar en la figura 3.
+</p>
+<div><img src="../modules/{$node_id}/images/language_traslate.png" border="0"></div>
+<div>Figura 2</div><br/><br/>
+
+
+
+</body>
+</html>

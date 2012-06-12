@@ -1,0 +1,48 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opci&oacute;n "Address Book" del men&uacute; "Agenda" en Elastix nos permite tener una visualizaci&oacute;n del directorio telef&oacute;nico de todas las extensiones que existan dentro(Internal) y fuera(External) de la central con la caracter&iacute;stica que adem&aacute;s nos permite realizar la llamada con tan solo dar click
+ en el icono del telefono en la columna "Call". Cabe recalcar que el usuario debe estar obligatoriamente registrado y asignado a una extensi&oacute;n  (m&oacute;dulo System/UserManagement/Users) si deseamos el &oacute;ptimo funcionamiento caso contrario no podr&aacute; 
+ejecutar la acci&oacute;n de llamar "Call". Adem&aacute;s se puede ver un icono que indica que es un contacto grupal no editable en la columna tipo de contacto(Type Contact).</p>
+
+<div><img src="../modules/{$node_id}/images/address1.png" border="0"></div>
+<div>Figura 1</div><br/>
+
+<p>Como podr&aacute;n observar en la Figura 2 cuando nosotros escogemos la opci&oacute;n de filtrado "External" nos presenta un listado de nombres con sus respectivos numeros telef&oacute;nicos ya sean estos fijos
+o m&oacute;viles, ademas nos permite la eliminaci&oacute;n del mismo ya que estos fueron creados por la opci&oacute;n "New Contact" del m&oacute;dulo "Agenda",no es el caso con el listado interno(Internal) que fueron creados por el m&oacute;dulo "Users" del submenu "UserManagement" en el men&uacute; "System".
+Los icono estan representados como:
+<ul>
+<li>contactos p&uacute;blico no editables creados por otro usuario pero que lo crea como p&uacute;blico <img src="../modules/{$node_id}/images/public.png" border="0"></li>
+<li>contactos p&uacute;blico y editables por el usuario que lo creo <img src="../modules/{$node_id}/images/public_edit.png" border="0"></li>
+<li>contactos privados editables por el usuario que lo creo <img src="../modules/{$node_id}/images/contact.png" border="0"></li>
+</ul>
+<br />
+</p>
+
+<div><img src="../modules/{$node_id}/images/address2.png" border="0"></div>
+<div>Figura 2</div>
+<br />
+<p>La opci&oacute;n "New Contact" del modulo "Address Book", nos permite el ingreso de nuevos contactos externos a la central es decir que no posean una extensi&oacute;n dentro de la organizaci&oacute;n. Como podr&aacute;n observar el ingreso de la informaci&oacute;n es campo a campo(Figura 3). </p>
+
+<div><img src="../modules/{$node_id}/images/address3.png" border="0"></div>
+<div>Figura 3</div>
+<br />
+<div><img src="../modules/{$node_id}/images/address4.png" border="0"></div>
+<div>Figura 4</div>
+<br />
+<p>Si el proceso de ingresar la informaci&oacute;n campo a campo le parece poco productivo el m&oacute;dulo "Address Book" nos permite importar un archivo .CSV que contenga la informaci&oacute;n detallada de sus contactos en tres columnas con el siguiente formato: Nombre,Apellido,Número Telefónico. Adem&aacute;s tambi&eacute;n nos permite descargar el directorio telef&oacute;nico existente con solo dar click en el enlace "Download Address book". </p>
+
+<div><img src="../modules/{$node_id}/images/address5.jpg" border="0"></div>
+<div>Figura 5</div>
+<br />
+
+
+
+</body>
+</html>

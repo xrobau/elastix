@@ -1,0 +1,71 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+global $arrLangModule; 
+ $arrLangModule = array(  
+"Ingoing Calls" => "Appels Entrants",
+"guardar" => "Sauver",
+"cancelar" => "Annuler",
+"label_choice" => "S&eacute;lectionner une file",
+"Form" => "Formulaire",
+"nameLabel" => "Nom",
+"nameForm" => "S&eacute;lectionner une file",
+"nameFormChoice" => "File s&eacute;lectionn&eacute;e",
+"Result" => "R&eacute;sultat",
+"msgResultado" => "R&eacute;ussis",
+"Select Queue" => "S&eacute;lectionner une file",
+"Queue List" => "Liste des files",
+"Name Queue" => "Nom des files d'attente",
+"Status" => "Etat",
+"Options" => "Options",
+"View" => "Visualiser",
+"Activate" => "Activer",
+"Active" => "Actif",
+"View Queue" => "Visualisation d'une file",
+"edit" => "Editer",
+"dasactivate" => "D&eacute;sactiver",
+"confirm continue" => "Confirmer continuer",
+"Script" => "Script",
+"Queue" => "File d'attente : ",
+"Error when connecting to database" => "Erreur de connexion &agrave; la base de donn&eacute;es",
+"Desactivate Error" => "Erreur D&eacute;sactivation",
+"Error when desactivating the Queue" => "Erreur en d&eacute;sactivant la File",
+"Inactive" => "Inactif",
+"Activate Error" => "Erreur d'activation",
+"Error when Activating the Queue" => "Erreur lors de l'activation de la file",
+"apply_changes" => "Appliquer",
+"Edit Queue" => "Edition d'une file",
+"all" => "Toutes",
+"active" => "Actives",
+"inactive" => "Inactives",
+
+);
+?>

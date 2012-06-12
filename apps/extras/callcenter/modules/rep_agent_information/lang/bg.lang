@@ -1,0 +1,78 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Chavdar Iliev                                             |
+  | Email: chavdar_75@yahoo.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
+global $arrLangModule;
+$arrLangModule=array(  
+"Time conecction of agents" => "Time conecction of agents",
+"Start Date" => "Start Date",
+"End Date" => "End Date",
+"Query" => "Query",
+"No.Agent" => "No. Agent",
+"Agent" => "Agent",
+"Queue" => "Queue",
+"Type" => "Type",
+"Column" => "Column",
+"Text" => "Text",
+"Error" => "Error",
+"Transfer" => "Transfer",
+"Duration" => "Duration",
+"Average" => "Average",
+"Total" => "Total",
+"Call longest" => "Call longest",
+"Calls answered" => "Calls answered",
+"Error when connecting to database" => "Error when connecting to database",
+"Debe ingresar una fecha" => "Debe ingresar una fecha",
+"Debe ingresar una fecha valida" => "Debe ingresar una fecha valida",
+"Conecction Data" => "Conecction Data",
+"First Conecction" => "First Conecction",
+"Last Conecction" => "Last Disconecction",
+"Time Conecction" => "Time Conecction",
+"Count Conecction" => "Count Conecction",
+"Calls Entry" => "Calls Entry",
+"Reason No Ready" => "Reason Not Ready",
+"Break" => "Break",
+"Bathroom" => "Bathroom",
+"Call" => "Call",
+"Count Calls Entry" => "Count Calls Entry",
+"Calls/h" => "Calls/h",
+"Time Call Entry" => "Time Call Entry",
+"Average Calls Entry" => "Average Calls Entry",
+"Porcent compare whit time not ready" => "Percent compare whit time not ready",
+"Count" => "Count",
+"Hour" => "Hour",
+"Monitored" => "Monitored",
+"Unmonitored" => "Unmonitored",
+"Monitored only" => "Monitored only",
+"There aren't records to show" => "There aren't records to show",
+"Agent name" => "Agent name",
+
+);
+?>

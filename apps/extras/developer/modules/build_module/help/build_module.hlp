@@ -1,0 +1,91 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+
+<p align="Justify">La opción "Build Module" del módulo "Developer" en Elastix nos permite
+crear facilmente modulos hasta de tercer nivel  dentro de Elastix. Hay que tener ciertas
+consideraciones al momento de crearlo y distinguir en que nivel vamos a crearlo. Como podemos
+observar hay 3 secciones en las que se divide el módulo.
+</p>
+<div><img src="../modules/{$node_id}/images/build_module_1.png" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<h2>General Information</h2>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Module Name</td><td>Nombre del Módulo, iniciando la primera letra de cada palabra con mayúscula</td>
+  </tr>
+  <tr>
+    <td>Module Id</td><td>Identificador del Módulo, debe ser en letra minuscula y separada por un subguión tal como se muestra en la figura 1.</td>
+  </tr>
+  <tr>
+    <td>Group Permission</td><td>Esta opción permite elegir el grado de accesibilidad de los usuarios a este módulo.</td>
+  </tr>
+  <tr>
+    <td>Your Name</td><td>Definimos el nombre de quien hizo el módulo.</td>
+  </tr>
+  <tr>
+    <td>Your e-mail</td><td>Dirección de correo electrónico de quien hizo el módulo.</td>
+  </tr>
+  <tr>
+</table>
+<br>
+<h2>Location</h2>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+    <td>Module Type</td><td>Esta opción nos permite elegir el tipo de modulo que deseamos crear,        tenemos dos tipos.<br/><strong>Form:</strong> Creacion de un módulo formulario.<br/>
+    <strong>Grid:</strong> Creación de un módulo reporte</td>
+  </tr>
+  <tr>
+    <td>Module Level</td><td>Aqui definimos el nivel del modulo este puede ser 2 ó 3</td>
+  </tr>
+  <tr>
+    <td>Level 1 Parent Exists</td><td>Esta opción es muy importante pues aqui definimos si el          modulo a crear tiene un "módulo padre existente".<br/><strong>Si:</strong> Escogemos el  "módulo padre".<br/><strong>No:</strong> Procederemos a ingresar información en 2 campos        adicionales, Figura 2 y 3.
+    </td>
+  </tr>
+  <tr>
+    <td>Level 1 Parent Name</td><td>Definimos el nombre del "Modulo Padre" siguiendo el mismo formato es decir solo la primera palabra con letra mayúscula</td>
+  </tr>
+  <tr>
+    <td>Level 1 Parent Id</td><td>Definimos el identificador del "Modulo Padre" siguiendo el mismo formato es decir con letra minúscula y separada de subguiones si es necesario.</td>
+  </tr>
+</table><br/>
+<div><img src="../modules/{$node_id}/images/build_parent_name.png" border="0"></div>
+<div>Figura 2</div><br/><br/>
+<div><img src="../modules/{$node_id}/images/build_parent_id.png" border="0"></div>
+<div>Figura 3</div><br/><br/>
+<p><strong>NOTA:</strong>Cabe recalcar que si escogemos la creación de un modulo de nivel 3, se procedera a escoger a que "Submodulo" pertenece y este a que "Modulo Padre".</p>
+<br/>
+<h2>Module Description</h2>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Module Type</td><td>Esta opción nos permite elegir el tipo de modulo que deseamos crear,        tenemos dos tipos.<br/><strong>Form:</strong> Creacion de un módulo formulario.<br/>
+    <strong>Grid:</strong> Creación de un módulo reporte</td>
+  </tr>
+  <tr>
+    <td>Field Name</td><td>Definimos el nombre del campo a crear</td>
+  </tr>
+  <tr>
+    <td>Field Type</td><td>Definimos el tipo del campo a crear</td>
+  </tr>    
+</table>
+<br/>
+<div><img src="../modules/{$node_id}/images/build_module_addfield.png" border="0"></div>
+<div>Figura 4</div><br/><br/>
+<p><strong>NOTA:</strong> Con los botones  ">>", "<<" podemos añadir o quitar los campos a insertar en nuestro formulario. Ademas, cuando es de tipo
+grid el campo  "Field Type" es oculto, solo basta con escribir en "Field Name" que son los nombres de las columnas a presentar.</p>
+</body>
+</html>

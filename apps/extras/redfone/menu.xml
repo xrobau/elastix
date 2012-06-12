@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+   <menulist>
+     <menuitem menuid="redfone"    desc="Redfone"    parent=""        module="no"  link="" order="0"></menuitem>
+     <menuitem menuid="fonebridge" desc="FoneBridge" parent="redfone" module="yes" link="" order="1"></menuitem>    
+   </menulist>
+</module>

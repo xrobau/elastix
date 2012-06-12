@@ -1,0 +1,24 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<p align="Justify">Muestra la lista de formularios existentes, con el objetivo
+de hacer una vista preliminar de estos, antes de que sean
+usados en una campaña.<br/><br/>
+Para hacer una vista preliminar de los formularios:
+Se debe hacer click sobre PreView y nos llevará a una
+pantalla donde se mostrará: el Nombre, Descripción y los
+campos que contiene un formulario en forma gráfica.
+Es importante tomar en cuenta que desde esta opción no
+se puede ingresar ningún dato.
+</p>
+<div><img src="../modules/{$node_id}/images/form_list.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<div><img src="../modules/{$node_id}/images/form.jpg" border="0"></div>
+<div>Figura 2</div><br/><br/>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<?php
+global $arrLangModule;
+$arrLangModule=array(
+"Form List" => "表格列表",
+"Form Name" => "名称",
+"Form Description" => "描述",
+"Status" => "状态",
+"Options" => "选项",
+"List Item" => "列表项目",
+"Type" => "类型",
+"Preview" => "预览",
+"All" => "全部",
+"Active" => "可用",
+"Inactive" => "不可用",
+"Type Label" => "标签类型",
+"Type Text" => "内容类型",
+"Type List" => "列表类型",
+"Type Date" => "日期类型",
+"Type Text Area" => "内容区类型",
+"View Form" => "查看表格",
+"Cancel" => "取消",
+"Form" => "表格 ",
+"Forms" => "Forms",
+);
+
+
+?>

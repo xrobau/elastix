@@ -1,0 +1,52 @@
+<?php
+global $arrLangModule;
+$arrLangModule = array(
+    "Time conecction of agents"  => "زمان اتصال اپراتورها",
+    "Start Date"    => "تاريخ شروع",
+    "End Date"      => "تاريخ پايان",
+    "Query"         => "دريافت اطلاعات",
+    "No.Agent"      => "اپراتوري وجود ندارد",
+    "Agent"         => "اپراتور",
+    "Queue"         => "صف",
+    "Type"          => "نوع",
+    "Column"        => "صف",
+    "Text"          => "متن",
+    "Error"         => "خطا",
+    "Transfer"      => "انتقال",
+    "Duration"      => "مدت",
+    "Average"       => "ميانگين",
+    "Total"         => "کل",
+    "Call longest"  => "طولاني ترين تماس",
+    "Calls answered" => "تماس هاي پاسخ داده شده",
+    "Error when connecting to database"    => "خطا در هنگام اتصال به ديتابيس",
+    "Debe ingresar una fecha"   => "بايد يک تاريخ را وارد کنيد",
+    "Debe ingresar una fecha valida"    => "بايد يک تاريخ معتبر وارد کنيد",
+
+
+    'Conecction Data'=>'اتصال ديتا',
+    'First Conecction'=>'اولين اتصال',
+    'Last Conecction'=>'آخرين قطع',
+    'Time Conecction'=>'زمان اتصال',
+    'Count Conecction'=>'تعداد تماس ها',
+    'Calls Entry'=>'منشا تماس ها',
+    'Reason No Ready'=>'دليل نامشخص',
+    'Break'=>'تنفس',
+    'Bathroom'=>'حمام',
+    'Call'=>'تماس',
+    'Count Calls Entry'=>'تعداد منشا تماس ها',
+    'Calls/h'=>'تماس ها/ساعت',
+    'Time Call Entry'=>'زمان منشا تماس ',
+    'Average Calls Entry'=>'ميانگين منشا تماس',
+
+    'Porcent compare whit time not ready'=> 'درصد مقايسه با زمان مشخص نيست',
+    'Count'=>'Count',
+    'Hour'=>'ساعت',
+    'Monitored'=>    'نظارت شده',
+    'Unmonitored'=>    'نظارت نشده',
+    'Monitored only'=> 'فقط نظارت شده',
+    "There aren't records to show"=> "رکوردي براي نمايش وجود ندارد",
+    "Agent name" => "نام اپراتور",
+
+);
+
+?>

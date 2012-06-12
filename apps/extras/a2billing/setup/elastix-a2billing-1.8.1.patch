@@ -1,0 +1,48 @@
+diff -Naur a2billing.org/a2billing.conf a2billing/a2billing.conf
+--- a2billing.org/a2billing.conf	2011-05-31 14:39:39.000000000 -0500
++++ a2billing/a2billing.conf	2012-04-02 13:23:11.000000000 -0500
+@@ -8,13 +8,18 @@
+ [database]
+ hostname = localhost
+ ; port for postgres is 5432 by default
+-port = 
+-user = a2billing_dbuser
+-password = a2billing_dbpassword
+-dbname = a2billing_dbname
++port = 3306
++user = a2billinguser
++password = a2billing
++dbname = mya2billing
+ ; dbtype setting can either be mysql or postgres
+ dbtype = mysql
+ 
++[global]
++; MANAGER CONNECTION PARAMETERS
++manager_host = localhost
++manager_username = a2billinguser
++manager_secret = a2billing
+ 
+ ; config for the daemon process
+ [daemon-info]
+diff -Naur a2billing.org/admin/Public/phpconfig_init.php a2billing/admin/Public/phpconfig_init.php
+--- a2billing.org/admin/Public/phpconfig_init.php	2011-05-31 14:39:39.000000000 -0500
++++ a2billing/admin/Public/phpconfig_init.php	2012-04-02 13:24:24.000000000 -0500
+@@ -66,7 +66,7 @@
+ // Since login screen is still in the works, fake
+ // the user has logged in with success for the prototype.
+ // for write access $fakeuser must exist in $access_file
+-$fakeuser = "myasterisk";
++$fakeuser = "admin";
+ 
+ // conf file directory displayed by default
+ $default_conf_file_direcotry = AST_CONF_DIR;
+diff -Naur a2billing.org/extensions_a2billing.conf a2billing/extensions_a2billing.conf
+--- a2billing.org/extensions_a2billing.conf	1969-12-31 19:00:00.000000000 -0500
++++ a2billing/extensions_a2billing.conf	2012-04-02 13:23:11.000000000 -0500
+@@ -0,0 +1,6 @@
++[a2billing]
++exten => _X.,1,Answer
++exten => _X.,n,Wait(1)
++exten => _X.,n,DeadAGI(a2billing.php|1)
++exten => _X.,n,Hangup
++

@@ -1,0 +1,52 @@
+<?php
+global $arrLangModule;
+$arrLangModule = array(
+    "Time conecction of agents"  => "Time conecction of agents",
+    "Start Date"    => "Start Date",
+    "End Date"      => "End Date",
+    "Query"         => "Query",
+    "No.Agent"      => "No. Agent",
+    "Agent"         => "Agent",
+    "Queue"         => "Queue",
+    "Type"          => "Type",
+    "Column"        => "Column",
+    "Text"          => "Text",
+    "Error"         => "Error",
+    "Transfer"      => "Transfer",
+    "Duration"      => "Duration",
+    "Average"       => "Average",
+    "Total"         => "Total",
+    "Call longest"  => "Call longest",
+    "Calls answered" => "Calls answered",
+    "Error when connecting to database"    => "Error when connecting to database",
+    "Debe ingresar una fecha"   => "Debe ingresar una fecha",
+    "Debe ingresar una fecha valida"    => "Debe ingresar una fecha valida",
+
+
+    'Conecction Data'=>'Conecction Data',
+    'First Conecction'=>'First Conecction',
+    'Last Conecction'=>'Last Disconecction',
+    'Time Conecction'=>'Time Conecction',
+    'Count Conecction'=>'Count Conecction',
+    'Calls Entry'=>'Calls Entry',
+    'Reason No Ready'=>'Reason Not Ready',
+    'Break'=>'Break',
+    'Bathroom'=>'Bathroom',
+    'Call'=>'Call',
+    'Count Calls Entry'=>'Count Calls Entry',
+    'Calls/h'=>'Calls/h',
+    'Time Call Entry'=>'Time Call Entry',
+    'Average Calls Entry'=>'Average Calls Entry',
+
+    'Porcent compare whit time not ready'=> 'Percent compare whit time not ready',
+    'Count'=>'Count',
+    'Hour'=>'Hour',
+    'Monitored'=>    'Monitored',
+    'Unmonitored'=>    'Unmonitored',
+    'Monitored only'=> 'Monitored only',
+    "There aren't records to show"=> "There aren't records to show",
+    "Agent name" => "Agent name",
+
+);
+
+?>

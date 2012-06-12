@@ -1,0 +1,84 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Bruno Macias                                           |
+  | Email: bmacias@palosanto.com                                         |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2008/02/18 09:49:00 bmacias Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Accounts"=>"Cuentas",
+"Email Account List"=>"Lista de cuentas de Email",
+"Create Account"=>"Crear una nueva cuenta",
+"Select a domain"=>"Seleccione un dominio",
+"Email Address"=>"Dirección de correo electrónico",
+"Account Name"=>"Nombre de la cuenta",
+"Used Space"=>"Espacio Usado",
+"Options"=>"Opciones",
+"New Email Account"=>"Nueva cuenta de email",
+"Quota (Kb)"=>"Cuota (KB)",
+"The e-mail address already exists"=>"El e-mail ya existe",
+"View Account"=>"Ver cuenta",
+"Edit Account"=>"Editar cuenta",
+"Retype password" => "Reescribir Contraseña",
+"Domain" => "Dominio",
+"Show" => "Mostrar",
+"Error" => "Error",
+"EDITABLE" => "EDITABLE",
+"Error deleting user accounts from system"=>"Error al borrar cuenta de usuario del sistema",
+"Error deleting user accounts"=>"Error al borrar cuenta del usuario",
+"Error deleting record from table domain"=>"Error al grabar desde tabla domain",
+"You must select a domain to create an account" => "Usted debería seleccionar un dominio para crear una nueva cuenta de correo",
+"Could not query used disc space" => "Puede no haber espacio suficiente en disco",
+"The passwords are empty or don't match" => "Las contraseñas estan vacias o no coinciden",
+"The passwords don't match" => "Las contraseñas no coinciden",
+"Changes Applied successfully" => "Cambios aplicados con éxito",
+"Error appliying changes" => "Error aplicando cambios",
+"Account deleted successfully" => "Cuenta eliminada con éxito",
+"File Upload" => "Subir Archivo",
+"Account" => "Cuenta",
+"The format of the file must be csv (file.csv), like the following" => "El formato del archivo debe ser csv (archivo.csv), como el siguiente",
+"Username1,Password1,Quota1(Kb)" => "Usuario1,Contraseña1,Cuota1(KB)",
+"Username2,Password2,Quota2(Kb)" => "Usuario2,Contraseña2,Cuota2(KB)",
+"The value of Quota(Kb) must be a number, like 1000 or 2000, etc" => "El valor de Cuota(KB) debe ser un número, como 1000 o 2000, etc",
+"Error reading the file" => "Error al leer el archivo",
+"Possible file upload attack. The file must end in .csv" => "Posible ataque al cargar el archivo. El archivo debe terminar en .csv",
+"Wrong format for username" => "Formato para usuario es incorrecto",
+"The following accounts were created" => "Las siguientes cuentas fueron creadas",
+"The following accounts could not be created" => "Las siguientes cuentas no pudieron ser creadas",
+"Quota must be greater than 0" => "La cuota debe ser mayor a 0",
+"The quota was reduced to the maximum of 5242880KB, if you want to more than this, edit this account" => "La cuota fue reducida al valor máximo de 5242880KB, si usted desea más que eso, edite esta cuenta",
+"Export Accounts" => "Exportar Cuentas",
+"The file could not be opened" => "El archivo no pudo ser abierto",
+"At least three parameters are needed" => "Por lo menos tres parámetros son necesarios",
+"Error saving the account" => "Error al guardar la cuenta",
+"Edit quota" => "Editar cuota",
+"The following account does not exist" => "La siguiente cuenta no existe",
+"Edit quota to" => "Editar cuota a",
+"The passwords must not be empty" => "La contraseña no debe ser vacia"
+);
+?>

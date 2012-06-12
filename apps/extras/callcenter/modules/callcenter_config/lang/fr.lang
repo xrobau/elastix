@@ -1,0 +1,58 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+global $arrLangModule;
+$arrLangModule=array(  
+"Configuration" => "Configuration",
+"Password and confirmation do not match." => "Le mot de passe et la confirmation ne sont pas identiques.",
+"Could not save changes!" => "N'a pas pu enregistrer de changements!",
+"Could not commit changes!" => "N'a pas pu soumettre de changements!",
+"Asterisk Server" => "Serveur Asterisk",
+"Asterisk Login" => "Login Asterisk",
+"Asterisk Password" => "Mot de passe Asterisk",
+"Asterisk Password (confirm)" => "Confirmation du mot de passe Asterisk",
+"Short Call Threshold" => "Seuil d'appel court",
+"Answering delay" => "Dur&eacute;e de sonnerie",
+"Enable dialer debug" => "Validez le d&eacute;bogage du num&eacute;roteur",
+"Dump all received Asterisk events" => "Dump de tous les &eacute;v&eacute;nements Asterisk re&ccedil;us",
+"Running" => "En ex&eacute;cution",
+"Stopped" => "Stopp&eacute;",
+"Start" => "Demarrer",
+"Stop" => "Stoper",
+"Internal DB error" => "Erreur interne de la base de donn&eacute;es",
+"Dialer Status" => "&Eacute;tat du num&eacute;roteur",
+"Current Status" => "&Eacute;tat actuel",
+"Enable overcommit of outgoing calls" => "Autoriser le d&eacute;passement d'appels sortants",
+"AMI Session Duration" => "Dur&eacute;e de la session AMI. (0 pour une session permanente)",
+"Service percent" => "Pourcentage de service",
+
+);
+?>

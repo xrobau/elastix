@@ -1,0 +1,71 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.4-23                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2011-06-07 12:06:29 Eduardo Cueva ecueva@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Vacations" => "Vacations",
+"Email Address" => "Email Address",
+"Subject" => "Subject",
+"Body" => "Body",
+"Operation cannot be done. Please try Again." => "Operation cannot be done. Please try Again.",
+"Operation have been succesful." => "Operation have been succesful.",
+"Succesful" => "Succesful",
+"Error" => "Error",
+"Disable Message Vacations" => "Disable Message Vacations",
+"Enable Message Vacations" => "Enable Message Vacations",
+"Alert" => "Alert",
+"Cyrus Imap is down" => "Cyrus Imap is down",
+"Cyrus Imap is up" => "Cyrus Imap is up",
+"Error: Impossible remove " => "Error: Impossible remove ",
+"Error: Impossible upload " => "Error: Impossible upload ",
+"Error: Impossible activate " => "Error: Impossible activate ",
+"Email's Vacations have been enabled" => "Email's Vacations have been enabled",
+"Email's Vacations have been disabled" => "Email's Vacations have been disabled",
+"Choose other email account" => "Choose other email account",
+"User isn't allowed to view this content." => "User isn't allowed to view this content.",
+"Account" => "Account",
+"Status" => "Status",
+"Email is not correct. Please write the email assigned to your elastix account." => "Email is not correct. Please write the email assigned to your elastix account.",
+"Emails Account" => "Emails Account",
+"Vacations Activated" => "Vacations Activated",
+"Auto-Reply: Out of the office" => "Auto-Reply: Out of the office",
+"I will be out of the office until {END_DATE}.\n\n----\nBest Regards." => "I will be out of the office until {END_DATE}.\n\n----\nBest Regards.",
+"yes" => "yes",
+"no" => "no",
+"Please contact your administrator if your user does not have an email account otherwise add it to System->User management->Users" => "Please contact your administrator if your user does not have an email account otherwise add it to <a href='?menu=userlist'>System->User management->Users</a>",
+"Email is empty or is not correct. Please write the email account." => "Email is empty or is not correct. Please write the email account.",
+"Initial Date" => "Initial Date",
+"End Date" => "End Date",
+"TO" => "TO",
+"FROM" => "FROM",
+"Date" => "Date",
+"End date should be greater than the initial date" => "End date should be greater than the initial date",
+"day(s)" => "day(s)",
+"Period" => "Period",
+);
+?>

@@ -1,0 +1,20 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify"></p>
+        <!-- Form to add images -->
+        <!--<div><img src="../modules/{$node_id}/images/images.png" border="0"></div> -->
+	This module allows you to change the Database and Web Administration FreePBX Password.<br/><br/>
+        <img src="../modules/{$node_id}/images/view_change_password.png" border="0" width="523px" height="105px" ><br/><br/>
+	In Database and Web Administration FreePBX Password text field you must enter the new password.<br/>
+	In Password Confirmation text field you must enter again the new password.<br/>
+	Then click the “Save” button.<br/><br/>
+	Remember that the new password may only contain alphanumeric characters, spaces, or the following: .&amp;-@=_!&lt;&gt;.
+	<br /><br />
+	In Enable direct access allow to enable or disable the freePBX Non-Embedded. This solves some problems of security.
+    </body>
+</html>

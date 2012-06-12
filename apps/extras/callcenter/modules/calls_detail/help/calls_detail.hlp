@@ -1,0 +1,20 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opción "Calls Detail" nos muestra la 
+información en forma detallada de la llamadas
+recibidas(Inbound) y realizadas(Outbound) por medio del
+call center. Ingresando el rango de la fechas en la cual se
+desea ver el detalle de las llamadas, se especifica el
+Status de la llamada receptada o realizada, el tiempo de
+espera, la duración de la llamada, etc.
+</p>
+<div><img src="../modules/{$node_id}/images/calls_detail.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+</body>
+</html>

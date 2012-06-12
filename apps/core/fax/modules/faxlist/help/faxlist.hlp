@@ -1,0 +1,35 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>The option “Virtual Fax List” of the Menu “FAX” in Elastix lets us verify the list of all the virtual faxes, including the status of each one.</p>
+
+<div><img src="../modules/{$node_id}/images/fax_virtual_list.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>Also, clicking in the virtual fax's name displays it's information:</p>
+
+<div><img src="../modules/{$node_id}/images/fax_virtual_view.jpg" border="0"></div>
+<div>Figure 2</div>
+<br />
+
+<p>In the upper part, there are two buttons. The first button “Edit” lets us edit the data about the virtual fax.</p>
+
+<p>And the second button “Delete” lets us delete the virtual fax.</p>
+
+<p>If we proceed to edit, we’ll have the following:</p>
+
+<div><img src="../modules/{$node_id}/images/fax_virtual_edit.jpg" border="0"></div>
+<div>Figure 3</div>
+<br />
+
+<p>Once we modify the values, click on the “Apply Changes” button to save the changes or “Cancel” to return without saving the changes.</p>
+
+</body>
+</html>

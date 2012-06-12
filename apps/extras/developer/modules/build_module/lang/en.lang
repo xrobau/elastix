@@ -1,0 +1,98 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Adonis Figueroa                                        |
+  | Email: afigueroa@palosanto.com                                         |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.7 2008/06/11 17:30:00 afigueroa Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Build Module" => "Build Module",
+"Module Id" => "Module Id",
+"Module Level" => "Module Level",
+"Level 1 Parent Exists" => "Level 1 Parent Exists",
+"Level 2 Parent Exists" => "Level 2 Parent Exists",
+"Level 1 Parent Name" => "Level 1 Parent Name",
+"Level 2 Parent Name" => "Level 2 Parent Name",
+"Level 1 Parent Id" => "Level 1 Parent Id",
+"Level 2 Parent Id" => "Level 2 Parent Id",
+"Level 1 Parent" => "Level 1 Parent",
+"Level 2 Parent" => "Level 2 Parent",
+"Parent Name" => "Parent Name",
+"Yes" => "Yes",
+"No" => "No",
+"Level 2" => "Level 2",
+"Level 3" => "Level 3",
+"Module Id already exists" => "Module Id already exists",
+"Folders can't be created" => "Folders can't be created",
+"Folder already exists" => "Folder Id already exists",
+"Your Name" => "Your Name",
+"Filter Example" => "Filter Example",
+"Example" => "Example",
+"Module Type" => "Module Type",
+"Grid" => "Grid",
+"Form" => "Form",
+"The module was crated successfully" => "The module was crated successfully",
+"Group Permission"=>"Group Permission",
+"Save"=>"Save",
+"Module Name" => "Module Name",
+"Required field" => "Required field",
+"The following fields contain errors" => "The following fields contain errors",
+"Validation Error" => "Validation Error",
+"ERROR" => "ERROR",
+"General Information" => "General Information",
+"Location" => "Location",
+"Module Description" => "Module Description",
+"Module Description is empty" => "Module Description is empty",
+"LIST" => "List",
+"DATE" => "Date",
+"Type Label" => "Type Label",
+"Type Text" => "Type Text",
+"Type Select" => "Type Select",
+"Type Date" => "Type Date",
+"Type Text Area" => "Type Text Area",
+"Type CheckBox" => "Type CheckBox",
+"Type Radio" => "Type Radio",
+"Type Password" => "Type Password",
+"Type Hidden" => "Type Hidden",
+"Type File" => "Type File",
+"Your e-mail" => "Your e-mail",
+"Framed" => "Framed",
+"URL is empty" => "URL is empty",
+"Field Name" => "Field Name",
+"Type Field" => "Type Field",
+"Url" => "Url (Example: http://www.elastix.org or http://{IP_SERVER}/mail)",
+"Module Id is empty" => "Module Id is empty you must enter at least one alphanumeric character as module name",
+"Level 1 Parent Id is empty" => "Level 1 Parent Id is empty you must enter at least one alphanumeric character as level 1 parent name",
+"Level 2 Parent Id is empty" => "Level 2 Parent Id is empty you must enter at least one alphanumeric character as level 2 parent name",
+"Message" => "Message",
+"here" => "here",
+"If you are not redirected to your new module in a few seconds, you can click" => "If you are not redirected to your new module in a few seconds, you can click",
+"Example: http://www.elastix.org" => "Example: http://www.elastix.org",
+
+);
+?>

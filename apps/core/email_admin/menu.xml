@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <menulist>
+    <menuitem menuid="email_admin"    desc="Email"       parent=""            module="no"  link="" order="3"></menuitem>
+    <menuitem menuid="email_domains"  desc="Domains"     parent="email_admin" module="yes" link="" order="1">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="email_accounts" desc="Accounts"    parent="email_admin" module="yes" link="" order="2">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="email_relay"    desc="Relay"       parent="email_admin" module="yes" link="" order="3">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="antispam"       desc="Antispam"    parent="email_admin" module="yes" link="" order="5">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="remote_smtp"    desc="Remote SMTP" parent="email_admin" module="yes" link="" order="6">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="email_list"     desc="Email list"  parent="email_admin" module="yes" link="" order="7">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="email_stats"    desc="Email stats"  parent="email_admin" module="yes" link="" order="8">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>  
+        </permissions>
+    </menuitem>
+    <menuitem menuid="vacations"      desc="Vacations"  parent="email_admin" module="yes" link="" order="9">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+	    <group id="2" name="Operator" desc="Operator"></group>
+            <group id="3" name="extension" desc="extension user"></group>
+        </permissions>
+    </menuitem>
+  </menulist>
+</module>

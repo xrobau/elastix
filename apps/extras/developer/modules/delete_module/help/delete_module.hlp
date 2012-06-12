@@ -1,0 +1,16 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Delete Module" del módulo "Developer" en Elastix nos permite
+eliminar modulos en todos sus niveles. Primero tendra que eliminar los submodulos que existan
+en el modulo para poder eliminarlo por completo.<br/>
+</p>
+<div><img src="../modules/{$node_id}/images/delete_module.png" border="0"></div>
+<div>Figura 1</div><br/><br/>
+
+</body>
+</html>

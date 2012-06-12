@@ -1,0 +1,150 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+/*System Info*/
+"System Resources"=>"Recursos del Sistema",
+"CPU Info"=>"CPU",
+"Uptime"=>"Uptime",
+"CPU usage"=>"CPU usado",
+"Memory usage"=>"Memoria Utilizada",
+"Swap usage"=>"Swap Utilizado",
+"Hard Drives"=>"Discos Duros",
+"Partition Name"=>"Nombre de la partición",
+"Capacity"=>"Capacidad",
+"Usage"=>"Usado",
+"Mount point"=>"Punto de montaje",
+"No records found"=>"No se encontraron registros",
+"It was not possible to obtain information about the graph" =>"No fue posible obtener información acerca del gráfico",
+"% used of"=>"% usado de",
+"News"=>"News",
+"prev"=>"prev",
+"next"=>"next",
+"show_vertical"=>"show vertical scroller",
+"show_horizontal"=>"show horizontal scroller",
+"NoConnection"=>"Parece que no hay connecion a internet",
+"Performance Graphic"=>"Performance Graphic",
+"Processes Status"=>"Estado de Procesos",
+"Communication Activity"=>"Communication Activity",
+"Telephony Service"=>"Servidor Telefónico",
+"Instant Messaging Service"=>"Servidor de Mensajería Instantánea",
+"Fax Service"=>"Servidor de Fax",
+"Email Service"=>"Servidor de Correo",
+"Database Service"=>"Servidor de Base de Datos",
+"Web Server"=>"Servidor Web",
+"Elastix Call Center Service"=>"Servidor CallCenter Elastix",
+"Running"=>"Activo",
+"Not installed"=>"No instalado",
+"Not running"=>"Inactivo",
+"OK1" => "OK",
+"Shutdown" => "N/A",
+"IAXModem Service" => "IAXModem Service",
+/*copiado desde el dashboard*/
+"You haven't extension" => "Extension has not been assigned.",
+"Imap: Connection error" => "Imap: Connection error.",
+"You don't recibed emails" => "No emails received.",
+"You don't recibed faxes" => "No faxes received.",
+"Query error" => "Query error",
+"You don't recibed calls" => "No calls received.",
+"You don't recibed voicemails" => "No voicemails received.",
+"Unenabled to open file" => "Unabled to open file",
+"Dashboard" => "Dashboard",
+"Calls" => "Llamadas",
+"Em@ils" => "Em@ils",
+"Faxes" => "Faxes",
+"Voicem@ils" => "Voicem@ils",
+"answered" => "<font color='green'><b>Contestada</b></font>",
+"missed" => "<font color='red'><b>Perdida</b></font>",
+"unknow" => "<b>unknow</b>",
+"call record" => "{status} call on date {date} from number {source}",
+"call duration" => " and {time} secs. of duration.",
+"fax recived" => "Received fax {file} from {source} on date {date}.",
+"voicemail recived" => "Voicemail from {source} on date {date} and {duration} seconds of duration",
+"mail recived" => "{date} {source} '{subject}'",
+"Quota asigned" => "Quota asigneda:",
+"Quota Used" => "Quota useda:",
+"Quota free space" => "Quota espacio libre:",
+"Error at read yours calls." => "Failed to access call list.",
+"Error at read yours faxes." => "Failed to access fax list.",
+"Error at read yours voicemails." => "Failed to access voicemails list.",
+"Error at read yours mails." => "Failed to access voicemails list.",
+"Error at read status system." => "Failed to access status system.",
+"Error at read your calendar." => "Failed to access calendar list.",
+"You don't have events" => "There are no future events scheduled in the calendar",
+"You don't have a webmail account" => "An email account has not been associated with this user.",
+"Calendar" => "Calendar",
+"Expand" => "Expandir",
+"Collapse" => "Collapse",
+"Error when connecting to Asterisk Manager" => "Error al intentar conectarse a Asterisk Manager",
+"Total_calls" => "Total de llamadas",
+"internal_calls" => "Llamadas Internas",
+"external_calls" => "Llamadas Externas",
+"total_channels" => "Total de canales",
+"call" => "llamada",
+"calls" => "llamadas",
+"channels" => "canales",
+"Applet Admin" => "Administración de los Applet",
+"Applet" => "Applet",
+"Activated" => "Activado",
+"Queues_waiting" => "Llamadas en Cola",
+"Waiting" => "Esperando",
+"asterisk_connection" => "asterisk_connection",
+"sip_extensions" => "Extensiones SIP",
+"sip_trunks" => "Troncales SIP",
+"iax_extensions" => "Extensiones IAX",
+"iax_trunks" => "Troncales IAX",
+"Extensions" => "Extensiones",
+"Trunks" => "Troncales",
+"Trunks_register" => "Troncales registradas",
+"sip_trunks_reg" => "Troncales SIP registradas",
+"iax_trunks_reg" => "Troncales IAX registradas",
+"OK" => "Registrado",
+"NO_OK" => "No Registrado",
+"Network_traffic" => "Tráfico de la RED",
+"rx_bytes" => "bytes rx",
+"tx_bytes" => "bytes tx",
+"Telephony Hardware" => "Telephony Hardware",
+"Registered" => "Registrado",
+"No Registered" => "No Registrado",
+"Cards no found" => "Hardware de telefonía no ha sido encontrado",
+"Bytes" => "Bytes",
+"Unknown" => "Desconocido",
+"Loading" => "Cargando",
+"Could not get web server information. You may not have internet access or the web server is down" => "No se pudo obtener la información del servidor web. Puede que usted no tenga acceso a internet o el servidor web esté caído",
+"No News to display" => "No hay noticias para mostrar",
+"Nothing to show yet" => "Nada que mostrar todavía",
+"does not exist locally or password is incorrect" => "no existe localmente o la clave es incorrecta",
+"The following database could not be found" => "La siguiente base de datos no pudo ser encontrada",
+"Error, the following code does not exist" => "Error, el siguiente código no existe",
+'CPU Speed' => 'Velocidad CPU',
+'Start process' => 'Iniciar servicio',
+'Stop process' => 'Detener servicio',
+'Restart process' => 'Reiniciar servicio',
+);
+?>

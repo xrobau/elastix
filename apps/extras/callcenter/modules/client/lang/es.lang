@@ -1,0 +1,27 @@
+<?php
+global $arrLangModule;
+$arrLangModule=array(
+
+"client"=>"client",
+"fileCRM"=>"fileCRM",
+"Select file upload"=>"Elija el archivo a subir",
+"Result"=>"Resultado",
+"Load File"=>"Cargar Archivo",
+"Format File"=>"Formato del Archivo",
+"File"=>"Archivo",
+"Upload"=>"Subir",
+"Error"=>"Error",
+"Error while loading file"=>"Se presentó un error al cargar el archivo",
+'Invalid CSV File' => 'Archivo CSV inválido',
+'Invalid phone number'=>'Número telefónico inválido',
+'Line'=>'Línea',
+'Unsupported attribute'=>'Atributo no soportado',
+'Invalid Cedula/RUC'=>'Cédula/RUC Inválido',
+'Missing or empty name'=>'Nombre falta o está vacío',
+'Missing or empty surname'=>'Apellido falta o está vacío',
+'Download contacts'=>'Descargar contactos',
+'Inserted records'=>'Registros insertados',
+'Updated records'=>'Registros actualizados',
+'Detected charset'=>'Codificación detectada',
+);
+?>

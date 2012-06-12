@@ -1,0 +1,32 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>Within this option there are two sections:</p>
+
+<h3>Default Rate Configuration</h3>
+
+<p>The option “Default Rate Configuration” of the Menu “Billing” in Elastix lets us determine the cost per minute of the connection for the route by omission.</p>
+
+<div><img src="../modules/{$node_id}/images/default_rate_configuration.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<h3>Trunk Bill Configuration</h3>
+
+<p>The option “Trunk Configuration” of the Menu “Billing” in Elastix lets us determine which of the trunks will be used for obtaining the calls for the billing process.</p>
+
+<div><img src="../modules/{$node_id}/images/trunk_bill_configuration.jpg" border="0"></div>
+<div>Figure 2</div>
+<br />
+
+
+<p>The list shows all of the registered trunks; you should select the ones that will be used for billing and click on the “Billing Capable” button.</p>
+
+</body>
+</html>

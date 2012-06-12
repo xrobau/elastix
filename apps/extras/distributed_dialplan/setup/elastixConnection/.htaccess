@@ -1,0 +1,4 @@
+#deny all access
+deny from all
+allow from 192.168.1.236
+allow from 192.168.1.88

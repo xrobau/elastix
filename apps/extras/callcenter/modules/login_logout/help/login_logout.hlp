@@ -1,0 +1,21 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opción "Time Login-Logout" nos muestra la 
+información del tiempo en el cual un agente
+ha estado activo en la consola agente desde el momento
+de abrir su sesión hasta cerrarla, midiendo así la
+eficiencia del agente, contabilizando el tiempo de las
+llamadas contestadas sobre el tiempo q estuvo activo
+clasificada por agente o de manera detallada(se
+muestran todos los registros).
+</p>
+<div><img src="../modules/{$node_id}/images/time_li_lo.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+</body>
+</html>

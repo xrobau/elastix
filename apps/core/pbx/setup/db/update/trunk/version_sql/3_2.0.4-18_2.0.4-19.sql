@@ -1,0 +1,2 @@
+INSERT INTO provider (name,domain,type_trunk,description,orden) VALUES ('Vozelia','','SIP','trunk type SIP',9);
+INSERT INTO attribute (type,qualify,insecure,host,fromuser,fromdomain,dtmfmode,disallow,context,allow,trustrpid,sendrpid,canreinvite,id_provider) VALUES ('friend', 'yes', 'very', 'sip.vozelia.com', NULL, NULL, 'auto', 'all', 'from-pstn', 'alaw&ulaw&gsm', 'no', 'no', 'no', 10);

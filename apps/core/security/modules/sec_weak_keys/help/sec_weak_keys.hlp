@@ -1,0 +1,30 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">El módulo Weak Keys se encarga de mostrar en una tabla todos los dispositivos SIP o IAX2 registrados en el sistema, mostrando su extensión, una descripción y un mensaje que hace referencia a la clave de la extensión.</p>
+        <div><img src="../modules/{$node_id}/images/sec_weak_keys.png" border="0"></div>
+        <div>Figure 1</div>
+        <br />
+        <p align="Justify">Este módulo cuenta con una opción de filtrado por extensión que muestra los dispositivos cuya extensión empieza con el valor ingresado en el filtro.</p>
+        <div><img src="../modules/{$node_id}/images/new_Event1.png" border="0"></div>
+        <div>Figure 2</div>
+        <br />
+        <p align="Justify">También cuenta con opciones de exportación, para llevar los datos mostrados en la grilla a un archivo CSV, SPREAD SHEET o PDF.</p>
+        <div><img src="../modules/{$node_id}/images/new_Event2.png" border="0"></div>
+        <div>Figure 3</div>
+        <br />
+        <p align="Justify">Finalmente tenemos la opción de cambiar la clave de una extensión, para ello debemos darle click al link que dice Change Key (Cambiar Clave), el cual sólo aparecerá para las claves que tienen algún inconveniente, como lo mostrado en el mensaje.</p>
+        <div><img src="../modules/{$node_id}/images/new_Event3.png" border="0"></div>
+        <div>Figure 4</div>
+        <br />
+        <p align="Justify">Al dar click en el link nos aparecerá un formulario el cual cuenta con los siguientes campos: Extensión, que muestra la extensión del dispositivo señalado, es de sólo lectura por lo tanto no se le puede efectuar ningún cambio. Clave Actual, debemos ingresar la clave actual del dispositivo para poder cambiarla. Nueva Clave, que será el remplazo de la clave anterior, ésta debe contener sólo caracteres alfanuméricos, debe ser de 5 dígitos o más y no puede ser igual a la extensión. Y por último el campo Confirmación de la Nueva Clave, el cual debe ser igual a la Nueva Clave. Una vez ingresados los datos correctamente debemos dar click en el botón Save (Guardar) con lo cual la nueva clave se guardará en la base de datos y se escribirá en el archivo asterisk SIP o IAX dependiendo de a cual tecnología pertenezca.</p>
+        <div><img src="../modules/{$node_id}/images/new_Event4.png" border="0"></div>
+        <div>Figure 5</div>
+        <br />
+    </body>
+</html>
+

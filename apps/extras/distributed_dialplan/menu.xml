@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <menulist>
+    <menuitem menuid="distributed_dialplan" desc="Distributed DialPlan" parent="pbxconfig"            module="no"  link="" order="10"></menuitem>
+    <menuitem menuid="peers_information"    desc="Remote Servers"       parent="distributed_dialplan" module="yes" link="" order="101">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="password_connection"  desc="Server Key"    parent="distributed_dialplan" module="yes" link="" order="102">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+    <menuitem menuid="general_information"  desc="Company Information"  parent="distributed_dialplan" module="yes" link="" order="103">
+	<permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+  </menulist>
+</module>

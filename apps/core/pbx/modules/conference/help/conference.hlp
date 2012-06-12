@@ -1,0 +1,73 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>La opción "Conferencia" del Elastix nos permite Administrar varias conferencias.</p>
+
+<div><img src="../modules/{$node_id}/images/conference_report.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>Al ingresar a conferencia podremos observar todas las conferencias concurrentes. Para ver las conferencias pasadas o futuras seleccione esta opción en "Estado" y de click en "Mostrar". Además se provee de un filtro usado para los nombres de las conferencias.</p>
+
+<p>Para poder eliminar alguna o varias conferencias debemos seleccionarlas y dar click sobre el botón Eliminar.</p>
+
+<p>Si desea agregar una nueva conferencia de click sobre el botón "Nueva Conferencia".</p>
+
+<div><img src="../modules/{$node_id}/images/conference_new.jpg" border="0"></div>
+<div>Figure 2</div>
+<br />
+
+<p>Los campos requeridos para agregar una conferencia son:</p>
+
+<table class="inline">
+  <tr>
+    <th>Campo</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Nombre de la Conferencia</td><td>Necesario para identificar la conferencia.</td>
+  </tr>
+  <tr>
+    <td>Número de la conferencia</td><td>Se provee un número aleatorio para la conferencia usted puede cambiarlo si no está siendo usado por otra conferencia</td>
+  </tr>
+  <tr>
+    <td>Tiempo Inicio  (PST/PDT)</td><td></td>
+  </tr>
+  <tr>
+    <td>Máximo Participantes</td><td>No se podrán invitar más participantes una vez se completo el número máximo de participantes.</td>
+  </tr>
+</table>
+<br />
+
+<p>Para ver los detalles sobre una conferencia puede dar click sobre el nombre de la conferencia.</p>
+
+<div><img src="../modules/{$node_id}/images/conference_view.jpg" border="0"></div>
+<div>Figure 3</div>
+<br />
+
+<p>Si desea administrar una conferencia concurrente, de click sobre el enlace de participantes correspondiente a dicha conferencia.</p>
+
+<div><img src="../modules/{$node_id}/images/conference_callers.jpg" border="0"></div>
+<div>Figure 4</div>
+<br />
+
+<p>Para invitar a alguien a la conferencia debe escogerlo de la lista proporcionada (lista de extensiones disponibles) y dar click sobre el botón "Llamada a invitar", deberá esperar hasta que se conteste la llamada.</p>
+
+<p>Una vez haya invitado a alguien a la conferencia irán apareciendo en el reporte, si desea Silenciar a uno o varios invitados seleccionelos en la columna "Callado" y de click sobre este botón ("Callado").</p>
+
+<p>Además puede botar de la conferencia a uno o varios invitados seleccionándolos en la columna "Botar" y de click sobre este botón ("Botar").</p>
+
+<p>Si desea botar a todos los invitados de la conferencia de click sobre "Botar a Todos".</p>
+
+<p>Si alguien a quien invitó no se muestra en la lista de invitados, o alguien a quien botó aun se muestra, de click en el botón "Actualizar". Este botón también actualizará el tiempo que lleva cada invitado en la conferencia.</p>
+
+<p>Note que una vez de click sobre el botón "Callado", se actualizará el Estado del invitado, los estados posibles son: Muted (Callado), UnMuted (No Callado).</p>
+
+<p>Para regresar a la interfaz de administración de todas las conferencias de click en Cancelar.</p>
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+#!/usr/bin/php
+<?php
+/*
+  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: fwconfig.php,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+require_once 'Console/Getopt.php';
+
+// Parse command-line options
+$opt = Console_Getopt::getopt($argv, '', array(
+    'flush',  // Remove all firewall rules from iptables
+    'load',   // Load all firewall rules from database
+));
+if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
+//validateOptions($opt);
+foreach ($opt[0] as $option) switch ($option[0]) {
+case '--flush':
+    exit(action_flushFirewall($opt) ? 0 : 1);
+case '--load':
+    exit(action_loadFirewall($opt) ? 0 : 1);
+}
+error_exit("No action specified (--flush or --load)\n");
+
+function error_exit($sMsg, $errorcode = 1)
+{
+    fwrite(STDERR, $sMsg);
+    exit($errorcode);
+}
+
+// Flush all firewall rules and remove all chains.
+function action_flushFirewall($opt)
+{
+    file_put_contents("/etc/sysconfig/iptables",""); // Se blanque ese archivo para que no se vuelvan a cargar las reglas al reiniciar el servidor
+	$output = $ret = NULL;
+    foreach (array(
+        '/sbin/iptables -F',
+        '/sbin/iptables -X',
+        '/sbin/iptables -Z',
+        '/sbin/iptables -t nat -F',
+        ) as $cmd) {
+    	exec($cmd, $output, $ret);
+        if ($ret) return FALSE;
+    }
+    return TRUE;
+}
+
+// Load all the firewall rules from the database
+function action_loadFirewall($opt)
+{
+    $bExito = TRUE;
+    $elastixChains = array(
+        'INPUT'     =>  'ELASTIX_INPUT',
+        'OUTPUT'    =>  'ELASTIX_OUTPUT',
+        'FORWARD'   =>  'ELASTIX_FORWARD'
+    );
+    $rules = array();
+
+    try {
+        $conn = new PDO('sqlite:/var/www/db/iptables.db');
+
+        // Fix missing 'filter.state' field in some Elastix installations
+        $sth = $conn->query('SELECT * FROM filter LIMIT 1');
+        $rules = $sth->fetchAll(PDO::FETCH_ASSOC);
+        if (count($rules) > 0 && !array_key_exists('state', $rules[0])) {
+        	print "DEBUG: arreglando filter.state faltante...\n";
+            $conn->query('ALTER TABLE filter ADD COLUMN state varchar(50)');
+        }
+
+        // Read rule configuration from database
+        $sth = $conn->query(
+            'SELECT traffic, eth_in, eth_out, ip_source, ip_destiny, protocol, ' .
+                'sport, dport, target, state ' .
+            'FROM  filter WHERE activated = 1 ORDER BY rule_order');
+        $rules = $sth->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {            
+        $bExito = FALSE;
+        fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
+    }
+
+    // Flush all firewall rules
+    if ($bExito) {
+        $output = $ret = NULL;
+        foreach (array(
+            '/sbin/iptables -F',
+            '/sbin/iptables -X',
+            '/sbin/iptables -Z',
+            '/sbin/iptables -t nat -F',
+            ) as $cmd) {
+            exec($cmd, $output, $ret);
+            if ($ret) {
+                $bExito = FALSE;
+                break;
+            }
+        }
+    }
+
+    // Add ELASTIX_XXX chains to iptables configuration if not already present
+    if ($bExito) {
+    	$output = $ret = NULL;
+        exec('/sbin/iptables -L -n', $output, $ret);
+        if ($ret) {
+            $bExito = FALSE;	
+        } else {
+            $currentChains = array();
+            foreach ($output as $sLinea) {
+            	$regs = NULL;
+                if (preg_match('/^Chain (\S+)/', $sLinea, $regs))
+                    $currentChains[] = $regs[1];
+            }
+            foreach (array_diff($elastixChains, $currentChains) as $key => $sChain) {
+                exec("/sbin/iptables -N $sChain", $output, $ret);
+                if ($ret) { $bExito = FALSE; break; }
+                exec("/sbin/iptables -A $key -j $sChain", $output, $ret);
+                if ($ret) { $bExito = FALSE; break; }
+            }
+        }
+    }
+
+    // Add rules to ELASTIX_XXX chains
+    if ($bExito) foreach ($rules as $rule) {
+    	$commandParams = array(
+            '/sbin/iptables',
+            '-A '.$elastixChains[$rule['traffic']],
+        );
+        if ($rule['ip_destiny'] != '0.0.0.0/0' && $rule['ip_destiny'] != '')
+            $commandParams[] = "-d ".escapeshellarg($rule['ip_destiny']);
+        if ($rule['ip_source'] != '0.0.0.0/0' && $rule['ip_source'] != '')
+            $commandParams[] = "-s ".escapeshellarg($rule['ip_source']);
+        switch ($rule['protocol']) {
+        case 'TCP':
+        case 'UDP':
+            $commandParams[] = "-p ".escapeshellarg($rule['protocol']);
+            if($rule['sport'] != 'ANY' && $rule['sport'] != "" && !is_null($rule['sport'])){
+		$port = "";
+		try{
+		    $result = $conn->prepare("SELECT details FROM port WHERE id=?");
+		    $r = $result->execute(array($rule['sport']));
+		    if(!$r){
+			print("ERROR: failed to query firewall rules");
+			$bExito = false;
+			break 2;
+		    }
+		    $arrResult = array();
+		    if($result!=null){
+			while($row = $result->fetch(PDO::FETCH_OBJ)) {
+			    $arrResult[] = (array)$row;
+			}
+		    }
+		    else{
+			print("ERROR: failed to query firewall rules");
+			$bExito = false;
+			break 2;
+		    }
+		    if(isset($arrResult[0]["details"])){
+			$port = $arrResult[0]["details"];
+		    }
+		    else{
+			print("ERROR: some port was not found in database");
+			$bExito = false;
+			break 2;
+		    }
+		} catch (PDOException $e) {            
+		    fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
+		    $bExito = FALSE;
+		    break 2;
+		}
+                $commandParams[] = "--sport ".escapeshellarg($port);
+	    }
+            if($rule['dport'] != 'ANY' && $rule['dport'] != "" && !is_null($rule['dport'])){
+		$port = "";
+		try{
+		    $result = $conn->prepare("SELECT details FROM port WHERE id=?");
+		    $r = $result->execute(array($rule['dport']));
+		    if(!$r){
+			print("ERROR: failed to query firewall rules");
+			$bExito = false;
+			break 2;
+		    }
+		    $arrResult = array();
+		    if($result!=null){
+			while($row = $result->fetch(PDO::FETCH_OBJ)) {
+			    $arrResult[] = (array)$row;
+			}
+		    }
+		    else{
+			print("ERROR: failed to query firewall rules");
+			$bExito = false;
+			break 2;
+		    }
+		    if(isset($arrResult[0]["details"])){
+			$port = $arrResult[0]["details"];
+		    }
+		    else{
+			print("ERROR: some port was not found in database");
+			$bExito = false;
+			break 2;
+		    }
+		} catch (PDOException $e) {            
+		    fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
+		    $bExito = FALSE;
+		    break 2;
+		}
+                $commandParams[] = "--dport ".escapeshellarg($port);
+	    }
+            break;
+        case 'ICMP':
+            $commandParams[] = '-p icmp';
+            break;
+        case 'IP':
+            $commandParams[] = '-p ip';
+            break;
+        case 'STATE':
+            $commandParams[] = "-m state --state ".escapeshellarg($rule['state']);
+            break;
+        }
+        if ($rule['eth_in'] != 'ANY' && $rule['eth_in'] != '')
+            $commandParams[] = "-i ".escapeshellarg($rule['eth_in']);
+        if ($rule['eth_out'] != 'ANY' && $rule['eth_out'] != '')
+            $commandParams[] = "-o ".escapeshellarg($rule['eth_out']);
+        $commandParams[] = "-j ".escapeshellarg($rule['target']);
+        
+        $output = $ret = NULL;
+        exec(implode(' ', $commandParams), $output, $ret);
+        if ($ret) { $bExito = FALSE; break; }
+    }
+
+    // Save configuration to /etc/sysconfig/iptables
+    if ($bExito) {
+        $output = $ret = NULL;
+        exec('/sbin/iptables-save > /etc/sysconfig/iptables', $output, $ret);
+        if ($ret) $bExito = FALSE;
+    }
+
+    return $bExito;
+}
+?>

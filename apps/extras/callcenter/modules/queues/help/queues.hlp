@@ -1,0 +1,32 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<p>La opción "Ingoing Calls" del módulo "Call Center" en Elastix nos permite asignar aquellas colas que serán destinadas
+para recepción de llamadas en un call center, facilitando
+realizar un monitoreo de la llamadas recibidas por un
+agente, para determinar cuales se realizaron con éxito y
+cuales no lograron contestación.
+</p>
+
+
+<div><img src="../modules/{$node_id}/images/queue_list.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<h2> Select Queue</h2>
+<p>Esta opción nos permite seleccionar una "cola" de la central con la que se va
+a  trabajar, además de crear un "script" que será visualizado por el agente. 
+</p>
+<div><img src="../modules/{$node_id}/images/queue_select.jpg" border="0"></div>
+<div>Figura 2</div><br/><br/>
+
+<h2>View</h2>
+<p>Al dar click sobre "View" dentro de "Queue List", nos llevará a una pantalla donde se mostrará los datos de la cola. A la vez en esta pantalla usted podra "Editar","Desactivar" una cola.</p>
+<div><img src="../modules/{$node_id}/images/queue_view.jpg" border="0"></div>
+<div>Figura 3</div><br/><br/>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+0 * * * *   php /usr/share/a2billing/Cronjobs/a2billing_alarm.php
+0 12 * * *  php /usr/share/a2billing/Cronjobs/a2billing_archive_data_cront.php
+0 10 21 * * php /usr/share/a2billing/Cronjobs/a2billing_autorefill.php
+#Batch process at 00:20 each day
+20 0 * * *  php /usr/share/a2billing/Cronjobs/a2billing_batch_process.php
+#Bill DID usage at 00:00 each day
+0 0 * * *   php /usr/share/a2billing/Cronjobs/a2billing_bill_diduse.php
+#Generate Invoices at 6am everyday
+0 6 * * *   php /usr/share/a2billing/Cronjobs/a2billing_batch_billing.php
+#Check if balance below preset value, and email user if so.
+1 * * * *   php /usr/share/a2billing/Cronjobs/a2billing_notify_account.php
+#Charge subscriptions at 06:05 on the 1st of each month
+0 6 1 * *   php /usr/share/a2billing/Cronjobs/a2billing_subscription_fee.php
+#Update currencies at 01:00 each day
+0 1 * * *   php /usr/share/a2billing/Cronjobs/currencies_update_yahoo.php

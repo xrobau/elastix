@@ -1,0 +1,97 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.4-1                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2008-08-03 11:08:42 Andres Flores aflores@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Connection Request" => "Connection Request",
+"Host Remote" => "Remote Server",
+"Peers Information" => "Peers Information",
+"Delete" => "Delete",
+"Host Name" => "Host Name",
+"IP" => "IP",
+"MAC Address" => "MAC Address",
+"Local Status" => "Local Status",
+"Remote Status" => "Remote Status",
+"New Request" => "New Request",
+"View Peer" => "View Peer",
+"Edit Peer" => "Edit Peer",
+"MAC" => "MAC",
+"Model" => "Model",
+"Host" => "Host",
+"Inkey" => "Inkey",
+"Outkey" => "Outkey",
+"Required field" => "Required field",
+"Save" => "Save",
+"New Peer" => "New Peer",
+"Cancel" => "Cancel",
+"Validation Error" => "Validation Error",
+"Message sent" => "Message sent",
+"Message" => "Message",
+"Alert" => "Alert",
+"Your connection request has been received" => "Your connection request has been received",
+"The following fields contain errors" => "The following fields contain errors",
+"Are you sure you wish to delete peer (s)?" => "Are you sure you wish to delete peer (s)?",
+"Option" => "Option",
+"View" => "View",
+"Edit" => "Edit",
+"Comment" => "Comment",
+"Company" => "Company",
+"Apply Changes" => "Apply Changes",
+"Unabled write file" => "Unabled write file",
+"Unabled open file" => "Unabled open file",
+"Error to create file" => "Error to create file",
+"Disconnect" => "Disconnect",
+"Connect" => "Connect",
+"Accept" => "Accept",
+"Reject" => "Reject",
+"Request" => "Request",
+"Your connection has been established" => "Your connection has been established",
+"Currently there is a connection request" => "Currently there is a connection request",
+"Unable to establish connection with the host, it does not exist or is trying to connect himself" => "Unable to establish connection with the host, it does not exist or is trying to connect himself",
+"You must fill your information General before accepting the request" => "You must fill your information General before accepting the request",
+"accepted connection" => "accepted connection",
+"waiting response" => "waiting response",
+"disconnect" => "disconnected",
+"connect" => "connected",
+"request delete" => "request deleted",
+"request reject" => "request rejected",
+"Requesting connection" => "Requesting connection",
+"request accepted" => "request accepted",
+"connected" => "connected",
+"disconnected" => "disconnected",
+"connection deleted" => "connection deleted",
+"connection rejected" => "connection rejected",
+"Secret" => "Remote Server's Key",
+"Error" => "Error",
+"Secret incorrect" => "Secret incorrect. Please try again to write the correct secret keyword",
+"Remote Host Name" => "Remote Server",
+"Error trying to delete peer:" => "Error trying to delete peer:",
+"Error trying to delete parameter in database:" => "Error trying to delete parameter in database:",
+"Error trying to do a reject to:" => "Error trying to do a reject to:",
+);
+?>

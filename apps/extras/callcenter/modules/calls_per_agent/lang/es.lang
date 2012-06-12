@@ -1,0 +1,53 @@
+<?php
+global $arrLangModule;
+$arrLangModule = array(
+    "Calls per Agent"  => "Llamadas por Agente",
+    "Start Date"    => "Fecha Inicio",
+    "End Date"      => "Fecha Fin",
+    "Query"         => "Consultar",
+    "No.Agent"      => "No. Agente",
+    "Agent"         => "Agente",
+    "Queue"         => "Cola",
+    "Type"          => "Tipo",
+    "Column"        => "Columna",
+    "Text"          => "Texto",
+    "Error"         => "Error",
+    "Transfer"      => "Transferencia",
+    "Duration"      => "Duración",
+    "Average"       => "Promedio",
+    "Call longest"  => "Llamada más Larga",
+    "Calls answered" => "Llamadas Contestadas",
+    "Query"         => "Consultar",
+    "Error when connecting to database"    => "Error cuando se conectaba a la base de datos",
+    "Error when creating object paloSantoReportsBreak" => "Error al crear el objeto paloSantoReportsBreak",
+    "Debe ingresar una fecha"   => "Debe ingresar una fecha",
+    "Debe ingresar una fecha valida"    => "Debe ingresar una fecha valida",
+);
+/*
+
+$lang["List Break"]     => "Listado de Breaks";
+
+$lang["break"]          => "Tipo Break";
+$lang["time_init"]      => "Hora Inicio";
+$lang["time_end"]       => "Hora Fin";
+$lang["duration"]       => "Duraci&oacute;n";
+$lang["Name"]           => "Nombre";
+
+$lang["Name Agent"]     => "Nombre Agente";
+$lang["Break"]          => "Break";
+
+
+
+
+$lang["Error"]                                      => "Error";
+$lang["Error when connecting to database"]          => "Error cuando se conectaba a la base de datos";
+$lang["Error when creating object paloSantoReportsBreak"] => "Error al crear el objeto paloSantoReportsBreak";
+$lang["Error cargando listado de tipos de breaks"]  => "Error cargando listado de tipos de breaks";
+$lang["Error cargando listado de agentes"]          => "Error cargando listado de agentes";
+$lang["Error cargando listado de breaks tomados"]   => "Error cargando listado de breaks tomados";
+$lang["Debe ingresar una fecha"]                    => "Debe ingresar una fecha";
+$lang["Debe ingresar una fecha valida"]             => "Debe ingresar una fecha valida";
+
+
+*/
+?>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <menulist>
+    <menuitem menuid="ha"              desc="Automation"                     parent=""          module="no"  link=""      order="13"></menuitem>
+    <menuitem menuid="zminder"               desc="Surveillance"       parent="ha" module="no" link="zminder"      order="1">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+  </menulist>
+</module>
+

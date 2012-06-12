@@ -1,0 +1,55 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-58                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.1 2010-12-09 02:12:32 Eduardo Cueva ecueva@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Password Connection" => "Key del Servidor",
+"Keyword" => "Clave",
+"Emails" => "Email",
+"Send" => "Enviar",
+"Get my Secret Connection" => "Generar una Clave",
+"Message" => "Mensaje",
+"Secret Connection" => "Conexión secreta",
+"Notification" => "Notificación",
+"noResponseNotification" => "Esto es una notificacion y no deberia ser respondida",
+"copyrightNotification" => "Elastix esta bajo licencia GPL por PaloSanto Solutions",
+"invitation_share" => "Estoy deacuerdo de compartir mi plan de marcado con usted. Para acceder a mi plan de marcado es necesario que conozca mi clave secreta de conexión",
+"Dear User" => "Estimado Usuario",
+"secret" => "secreto",
+"steps" => "Usted deberia copia la clave secreta y pegarla en (Información de Peers - Nueva Conexión)",
+"sucessful_send" => "Mensaje enviado correctamente",
+"Message cannot be sent. Try again" => "Mensaje no pudo ser enviado. Por favor intente de nuevo",
+"I send you my 'secret connection', now you can send the request to share the dial plan." => "Le envío la Clave de mi servidor Elastix necesaria para empezar a compartir mi plan de marcado. Use esta Clave cuando me envíe la solicitud de conexión.",
+"Please first fill the form in <a href='?menu=general_information'>General Information</a>" => "Por favor primero llene el formulario en <a href='?menu=general_information'>Información General</a>",
+"Server Key"=>"Key del Servidor",
+"MESSAGE" => "MENSAJE",
+"This Key will be exclusively used for establishing connections with Remote Servers with the purpose of sharing the dialplan. Here you will be able to send this Key, via email, to the administrators of the Remote Servers you want to share your dialplan with." => "Este Key será utilizado exclusivamente para permitir establecer conexiones con Servidores Remotos con el objetivo de compartir el plan de marcado. Aquí podrá enviar vía email este Key a los administradores de los Servidores Remotos con los que quiere compartir su plan de marcado.",
+"NOTE:" => "NOTA:"
+);
+
+?>

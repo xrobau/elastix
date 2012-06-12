@@ -1,0 +1,28 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opción "Graphic Calls" nos nuestra la 
+información de las llamadas recibidas y
+realizadas por hora clasificadas por cola de forma gráfica.
+Se detalla el número de la llamadas realizadas en cada
+hora (24 horas) visualizándolo por cada una de las colas,
+además de q nos muestra el total de número de llamadas
+efectuadas en el rango determina por las fechas
+ingresadas.<br/><br/>
+Línea Azul. Llamadas Exitosas y Abandonadas<br/>
+Línea Roja. Llamadas exitosas<br/>
+Línea Amarilla. Llamadas Abandonadas<br/><br/>
+Eje X: Rango de Horas<br/>
+Eje Y: Número de Llamadas.
+
+
+</p>
+<div><img src="../modules/{$node_id}/images/call_x_hour_g.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+</body>
+</html>

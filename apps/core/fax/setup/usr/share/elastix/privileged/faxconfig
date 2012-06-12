@@ -1,0 +1,333 @@
+#!/usr/bin/php
+<?php
+/*
+  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: faxconfig.php,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+require_once 'Console/Getopt.php';
+
+define('CONFIGDIR_IAXMODEM', '/etc/iaxmodem');
+define('CONFIGDIR_HYLAFAX', '/var/spool/hylafax/etc');
+define('INITTAB_MARKER', "# Don't remove or modify this comment. The following block is for fax setup.");
+define('HYLAFAX_ALLOWED_HOSTS', 'hosts.hfaxd');
+
+// Parse command-line options
+$opt = Console_Getopt::getopt($argv, '', array(
+    'refresh',  // Refresh configuration from database
+    'getfaxhosts',  // Read allowed fax hosts from /var/spool/hylafax/etc/hosts.hfaxd
+    'setfaxhosts',  // Set allowed fax hosts in /var/spool/hylafax/etc/hosts.hfaxd
+    'faxmaster',    // Update /etc/postfix/virtual with FaxMaster from settings.db
+));
+if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
+//validateOptions($opt);
+foreach ($opt[0] as $option) switch ($option[0]) {
+case '--refresh':
+    exit(action_refreshConfiguration($opt) ? 0 : 1);
+case '--getfaxhosts':
+    exit(action_getFaxHosts($opt) ? 0 : 1);
+case '--setfaxhosts':
+    exit(action_setFaxHosts($opt) ? 0 : 1);
+case '--faxmaster':
+    exit(action_refreshFaxMaster($opt) ? 0 : 1);
+}
+error_exit("No action specified (--refresh)\n");
+
+function error_exit($sMsg, $errorcode = 1)
+{
+    fwrite(STDERR, $sMsg);
+    exit($errorcode);
+}
+
+/*
+ * This program operates on the assumption that the desired fax configuration
+ * has been written in /var/www/db/fax.db and the system needs to be configured
+ * to reflect the configuration in the database. In order to do this, the 
+ * program will just delete all configuration and create it anew. The port and
+ * device numbers are assumed to have been already assigned. The operations are
+ * as follows:
+ * 1) Read all the faxes to be configured from the database
+ * 2) Remove all files from iaxmodem configuration
+ * 3) Remove all files from hylafax configuration
+ * 4) Remove the configuration section from /etc/inittab
+ * 5) Add the updated configuration section to /etc/inittab
+ * 6) Overwrite /var/spool/hylafax/etc/FaxDispatch file with emails for each fax
+ * 7) Create all of the iaxmodem files
+ * 8) Create all of the hylafax files, taking care of uucp.uucp ownership
+ * 9) Restart init hylafax iaxmodem
+ * 
+ * No attempt is made to preserve custom fax ports or ttys.
+ */
+function action_refreshConfiguration($opt)
+{
+    $bExito = TRUE;
+
+    // Read all of the fax information
+    $faxData = array();
+    try {
+    	$conn = new PDO('sqlite:/var/www/db/fax.db');
+        
+        // Read all the fax configuration information
+        $sth = $conn->query(
+            'SELECT name, extension, secret, clid_name, clid_number, dev_id, '.
+                'date_creation, email, port, country_code, area_code '.
+            'FROM fax ORDER BY dev_id');
+        $recordset = $sth->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($recordset as $tupla) {
+            $faxData[(int)$tupla['dev_id']] = $tupla;
+        }
+    } catch (PDOException $e) {            
+        fprintf(STDERR, "ERR: failed to query fax configuration - %s\n", $e->getMessage());
+        return FALSE;
+    }
+
+    // Remove all configuration files
+    array_map(
+        'unlink', 
+        array_merge(
+            glob(CONFIGDIR_IAXMODEM.'/iaxmodem-cfg.ttyIAX*'), 
+            glob(CONFIGDIR_HYLAFAX.'/config.ttyIAX*')));
+
+    // Update the fax configuration in /etc/inittab
+    writeInittab($faxData);
+    
+    // Update /var/spool/hylafax/etc/FaxDispatch
+    writeFaxDispatch($faxData);
+
+    // Write all of the configuration files
+    foreach ($faxData as $tupla) {
+        writeIaxmodemConfig($tupla);
+        writeHylafaxConfig($tupla);
+    }
+
+    // Restart all relevant services
+    exec('/sbin/init q');
+    exec('/sbin/service iaxmodem restart > /dev/null 2>&1');
+    exec('/sbin/service hylafax restart > /dev/null 2>&1');
+
+    return $bExito;
+}
+
+function writeInittab($faxData)
+{
+    $sFaxesInittab = INITTAB_MARKER."\n";
+    foreach (array_keys($faxData) as $devId) {
+        /* Nota: El id de la línea del inittab, que se encuentra compuesto de 
+         * "fx$devIdHex" no puede ser de más de 4 caracteres. Es una limitante 
+         * del inittab. Esto quiere decir que despues de poner el prefijo fx 
+         * solo tenemos 2 caracteres más. Para aprovecharlos mejor usamos un 
+         * número en hexadecimal en lugar de decimal. Esto nos deja 255 (FF) 
+         * posibilidades o un número máximo de 255 faxes virtuales que se pueden
+         * crear.
+         */
+        $devIdHex = dechex($devId);
+        $sFaxesInittab .= "fx$devIdHex:2345:respawn:/usr/sbin/faxgetty ttyIAX$devId\n";
+    }    
+    $lineas = array();
+    $bInsertado = FALSE;
+    foreach (file('/etc/inittab') as $sLinea) {
+        // Remover todos los faxes anteriores
+        if (!$bInsertado && strpos($sLinea, INITTAB_MARKER) === 0) {
+            $bInsertado = TRUE;
+            $lineas[] = $sFaxesInittab;
+        } elseif (!preg_match('/^(iax|fx)[[:alnum:]]{1,2}:2345:respawn/', $sLinea)) {
+            $lineas[] = $sLinea;
+        }
+    }
+    if (!$bInsertado) $lineas[] = "\n$sFaxesInittab";
+    file_put_contents('/etc/inittab', $lineas);
+}
+
+function writeFaxDispatch($faxData)
+{
+    $sContenido =
+        "SENDTO=root;\n" .
+        "FILETYPE=pdf;\n" .
+        "\n" .
+        "case \"\$DEVICE\" in\n";
+    foreach ($faxData as $tupla) {
+        $sContenido .= "  ttyIAX".$tupla['dev_id'].") SENDTO=".$tupla['email'].";;\n";
+    }
+    $sContenido .= "esac\n";
+    $sRutaArchivo = '/var/spool/hylafax/etc/FaxDispatch';
+    file_put_contents($sRutaArchivo, $sContenido);
+    chown($sRutaArchivo, 'uucp'); chgrp($sRutaArchivo, 'uucp');
+    chmod($sRutaArchivo, 0644);
+}
+
+function writeIaxmodemConfig($tupla)
+{
+    /* iaxmodem configuration */
+    $sContenido = <<<IAXMODEM_CONFIG
+device          /dev/ttyIAX{$tupla['dev_id']}
+owner           uucp:uucp
+mode            660
+port            {$tupla['port']}
+refresh         300
+server          127.0.0.1
+peername        {$tupla['extension']}
+secret          {$tupla['secret']}
+cidname         {$tupla['clid_name']}
+cidnumber       {$tupla['clid_number']}
+codec           slinear
+
+IAXMODEM_CONFIG;
+    $sRutaArchivo = CONFIGDIR_IAXMODEM.'/iaxmodem-cfg.ttyIAX'.$tupla['dev_id'];
+    file_put_contents($sRutaArchivo, $sContenido);
+    chmod($sRutaArchivo, 0644);
+}
+
+function writeHylafaxConfig($tupla)
+{
+    /* hylafax configuration */
+    $sContenido = <<<HYLAFAX_CONFIG
+CountryCode:            {$tupla['country_code']}
+AreaCode:               {$tupla['area_code']}
+FAXNumber:              {$tupla['clid_number']}
+LongDistancePrefix:     1
+InternationalPrefix:    011
+DialStringRules:        etc/dialrules
+ServerTracing:          0xFFF
+SessionTracing:         0xFFF
+RecvFileMode:           0600
+LogFileMode:            0600
+DeviceMode:             0600
+RingsBeforeAnswer:      1
+SpeakerVolume:          off
+GettyArgs:              "-h %l dx_%s"
+LocalIdentifier:        "{$tupla['clid_name']}"
+TagLineFont:            etc/lutRS18.pcf
+TagLineFormat:          "From %%l|%c|Page %%P of %%T"
+MaxRecvPages:           200
+#
+#
+# Modem-related stuff: should reflect modem command interface
+# and hardware connection/cabling (e.g. flow control).
+#
+ModemType:              Class1          # use this to supply a hint
+
+#
+# Enabling this will use the hfaxd-protocol to set Caller*ID
+#
+#ModemSetOriginCmd:     AT+VSID="%s","%d"
+
+#
+# If "glare" during initialization becomes a problem then take
+# the modem off-hook during initialization, and then place it
+# back on-hook when done.
+#
+#ModemResetCmds:        "ATH1\\nAT+VCID=1"       # enables CallID display
+#ModemReadyCmds:        ATH0
+
+
+Class1AdaptRecvCmd:     AT+FAR=1
+Class1TMConnectDelay:   400             # counteract quick CONNECT response
+
+Class1RMQueryCmd:       "!24,48,72,96"  # enable this to disable V.17
+
+#
+# You'll likely want Caller*ID display (also displays DID) enabled.
+#
+ModemResetCmds:         AT+VCID=1       # enables CallID display
+
+#
+# If you are "missing" Caller*ID data on some calls (but not all)
+# and if you do not have adequate glare protection you may want to
+# not answer based on RINGs, but rather enable the CallIDAnswerLength
+# for NDID, disable AT+VCID=1 and do this:
+#
+#RingsBeforeAnswer: 0
+#ModemRingResponse: AT+VRID=1
+
+CallIDPattern:          "NMBR="
+CallIDPattern:          "NAME="
+CallIDPattern:          "ANID="
+CallIDPattern:          "NDID="
+#CallIDAnswerLength:    4
+# Uncomment these if you really want them, but you probably don't.
+#CallIDPattern:          "DATE="
+#CallIDPattern:          "TIME="
+FaxRcvdCmd:              bin/faxrcvd.php
+UseJobTSI:               true
+
+HYLAFAX_CONFIG;
+    $sRutaArchivo = CONFIGDIR_HYLAFAX.'/config.ttyIAX'.$tupla['dev_id'];
+    file_put_contents($sRutaArchivo, $sContenido);
+    chown($sRutaArchivo, 'uucp'); chgrp($sRutaArchivo, 'uucp');
+    chmod($sRutaArchivo, 0644);
+}
+
+/* Report the list of hosts that are allowed to send fax through this machine */
+function action_getFaxHosts($opt)
+{
+    return (readfile(CONFIGDIR_HYLAFAX.'/'.HYLAFAX_ALLOWED_HOSTS) !== FALSE);
+}
+
+/* Set the list of hosts that are allowed to send fax. */
+function action_setFaxHosts($opt)
+{
+    // These hosts are always required.
+    $listaHosts = array('localhost', '127.0.0.1');
+    
+    foreach ($opt[1] as $sNewHost) if (!in_array($sNewHost, $listaHosts)) {
+        if (!preg_match('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/', $sNewHost))
+            error_exit("Invalid host IP: $sNewHost\n");
+        $listaHosts[] = $sNewHost;
+    }
+    return (file_put_contents(CONFIGDIR_HYLAFAX.'/'.HYLAFAX_ALLOWED_HOSTS, implode("\n", $listaHosts)."\n") !== FALSE);
+}
+
+/* Refresh FaxMaster setting from /var/www/db/settings.db */
+function action_refreshFaxMaster($opt)
+{
+    // Read current value of faxmaster
+    try {
+        $conn = new PDO('sqlite:/var/www/db/settings.db');
+        
+        // Read all the fax configuration information
+        $sth = $conn->query('SELECT value FROM settings WHERE key = "fax_master"');
+        $sFaxMaster = $sth->fetchColumn();
+    } catch (PDOException $e) {            
+        fprintf(STDERR, "ERR: failed to query fax master - %s\n", $e->getMessage());
+        return FALSE;
+    }
+
+    // Add content to /etc/postfix/virtual
+    $lineas = array();
+    foreach (file('/etc/postfix/virtual') as $s) {
+        if (strpos($s, 'FaxMaster') !== 0) $lineas[] = $s;
+    }
+    if ($sFaxMaster !== FALSE) $lineas[] = "FaxMaster\t$sFaxMaster\n";
+    if (file_put_contents('/etc/postfix/virtual', $lineas) === FALSE)
+        return FALSE;
+    
+    // Update map
+    $retval = NULL;
+    system('/usr/sbin/postmap /etc/postfix/virtual', $retval);
+    return ($retval == 0);
+}
+?>

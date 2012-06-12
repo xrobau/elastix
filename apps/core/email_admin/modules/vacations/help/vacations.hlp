@@ -1,0 +1,20 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">The vacation module send automatic replies while you are not available to them.</p>
+	<p>This module can be use for example:</p>
+	<ul>
+	    <li>holiday</li>
+	    <li>lunch</li>
+	    <li>weekends</li>
+	</ul>
+	<br />
+        <div align="center"><img src="../modules/{$node_id}/images/ima1.png" border="0"></div>
+	<div align="center" style="font-weight: bolder; font-style: italic;">Figure 1</div>
+	<br/>
+    </body>
+</html>

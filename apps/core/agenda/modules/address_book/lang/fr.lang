@@ -1,0 +1,92 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+global $arrLangModule;
+$arrLangModule=array(  
+"New Contact" => "Nouveau contact",
+"Address Book" => "Carnet d'adresse",
+"Are you sure you wish to delete the contact." => "Êtes-vous sûr de vouloir supprimer le contact.",
+"First Name" => "Prénom",
+"Last Name" => "Nom",
+"Phone Number" => "Numéro de téléphone",
+"Extension" => "Numéro de Poste",
+"The call couldn't be realized" => "L'appel ne peut être réalisé.",
+"Internal" => "Interne",
+"External" => "Externe",
+"Call" => "Appel",
+"Phone Directory" => "Répertoire téléphonique",
+"CSV" => "CSV",
+"Download Address Book" => "Téléchargement du carnet d'adresse.",
+"Can't exist a Name empty. Line" => "Il ne peut exister de nom vide à la ligne",
+"Can't exist a Last Name empty. Line" => "Il ne peut exister de nom de famille vide à la ligne",
+"Can't exist a Phone Number empty. Line" => "Il ne peut exister de numéro de téléphone vide à la ligne",
+"Total contacts created" => "Total de contactes créés",
+"Contact Data already exists" => "Données du contat déjà existant",
+"Header File Address Book" => "L'en-tête du fichier doit être dans la première ligne et il doit avoir au moins trois colonnes: Nom, Prénom, Numéro de téléphone",
+"About Address Book" => "Si vous chargez un fichier de données de contacts déjà créé, ce contact ne sera pas utilisé",
+"Invalid file extension.- It must be csv" => "Extension fichier invalide.- Elle doit être en csv",
+"There aren't contacts" => "Il n'y a pas de contacts",
+"Address Book from CSV" => "Carnet d'adresse d'un fichier CSV",
+"Name" => "Nom",
+"Filter" => "Filtre",
+"Show" => "Afficher",
+"Email" => "Email",
+"File" => "Fichier",
+"Possible file upload attack. Filename" => "Attaque du fichier transmi possible. Nom de fichier",
+"Please read the lines in the footer" => "Veuillez lire les lignes dans le bas de page",
+"Verify the header" => "Vérifier l'entête",
+"At minimum there must be the columns" => "Au minimum il doit y avoir les colonnes",
+"Incomplete Columns" => "Colonnes Incomplètes",
+"The file is incorrect or empty" => "Le fichier est incorrect ou vide",
+"You don't have extension number associated with user" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
+"ERROR" => "ERREUR",
+"Transfer" => "Transfer",
+"The transfer couldn't be realized, maybe you don't have any conversation now." => "The transfer couldn't be realized, maybe you don't have any conversation now.",
+"Not_allowed_change" => "This changes disallowed for your user. This contact it not associated to your address book",
+"picture" => "Picture",
+"Address" => "Address",
+"Company" => "Company",
+"Notes" => "Notes",
+"Status" => "Status",
+"Private Contact" => "Private Contact",
+"Public Contact" => "Public Contact",
+"Invalid file extension.- It must be png or jpg or jpeg" => "Invalid file extension.- It must be png, jpg or jpeg without content special characters",
+"Validation Error" => "Validation Error",
+"Error to Upload" => "Error to Upload file",
+"Type Contact" => "Type Contact",
+"Internal Error" => "Please be sure if the parameters are corrects",
+"Not_allowed_contact" => "This contact don't exist in your Address Book",
+"Public editable" => "Public editable",
+"Public not editable" => "Public not editable",
+"Private" => "Private",
+"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension"
+);
+?>

@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/find /var/lib/asterisk/sounds/tts -type f -mtime +1 | /usr/bin/xargs /bin/rm -f >/dev/null 2>&1

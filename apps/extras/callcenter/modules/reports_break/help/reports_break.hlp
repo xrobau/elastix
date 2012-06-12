@@ -1,0 +1,20 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Reports Break" nos muestra la 
+información del tiempo en el cual un agente
+no ha estado receptando, ni realizando llamadas (Tiempo
+de Break), clasificándolos por los breaks ingresados en el
+administrador de break, calculando en tiempo total en el
+que un agente estuvo ausente de la sesión. Esta
+información está clasificada por agentes.
+
+</p>
+<div><img src="../modules/{$node_id}/images/break_report.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "FoneBridge" del módulo "Redfone" nos permite configurar
+los parametros esenciales para el funcionamiento de equipos "RedFone" el cual nos ayuda
+a redireccionar todas las comunicaciones y servicios a otra terminal si existe algun problema con el servidor principal(Clustering). Esto solo se aplica si utilizamos tarjetas T1 y E1 en nuestros equipos.
+</p>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Phone Brigde IP</td><td>Dirección IP del equipo Redfone</td>
+  </tr>
+  <tr>
+    <td>Server MAC</td><td>Direccción MAC del servidor principal</td>
+  </tr>
+  <tr>
+    <td>Port for TDMoE</td><td>Esta opcion nos permite escoger el puerto por el cual va a
+	trabajar TDMoE(Time-Division Multiplexing over Ethernet)</td>
+  </tr>
+  <tr>
+    <td>Timing Priority:</td><td>Esta opción nos permite especificar con que tipo de sincronizador
+	se va a operar.<br/><strong>By Span:</strong>Sincronizamos por medio de las tarjetas T1 ó
+	E1, especificamos  un orden<br/><strong>Internal:</strong>Sincronizamos con el procesador
+        del equipo Redfone.
+   </td>
+  </tr>
+  <tr>
+   <td>Span Configuration</td><td>Esta opción nos permite configurar las tarjetas(Span) y los 
+       paquetes con los que interactuan</td>
+  </tr>
+</table>
+<div><img src="../modules/{$node_id}/images/fonebridge.png" border="0"></div>
+<div>Figura 1</div><br/><br/>
+
+</body>
+</html>

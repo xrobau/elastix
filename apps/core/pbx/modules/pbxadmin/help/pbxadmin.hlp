@@ -1,0 +1,22 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The option “PBX Configuration” of the Menu “PBX” lets us achieve the configuration of Elastix.</p>
+
+<div><img src="../modules/{$node_id}/images/freepbx.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>In the left part, we can observe that we have different options for configuration.</p>
+
+<p>Elastix uses the free software FreePBX like a tool for administration of Asterisk; for more information check out the following link:</p>
+
+<p><a href="http://www.freepbx.org/support/documentation/module-documentation">http://www.freepbx.org/support/documentation/module-documentation</a></p>
+
+</body>
+</html>

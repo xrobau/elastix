@@ -1,0 +1,127 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+global $arrLangModule;
+$arrLangModule=array(  
+"Outgoing Campaigns" => "Campagnes Sortantes",
+"Campaigns" => "Campagnes",
+"Estado" => "&Eacute;tat",
+"New Campaign" => "Nouvelle Campagne",
+"Campaigns List" => "Liste des Campagnes",
+"View Campaign" => "Voir Campagne",
+"Create New Campaign" => "Créer une nouvelle campagne",
+"Name Campaign" => "Nom",
+"Start Date" => "Date de Début",
+"End Date" => "Date de Fin",
+"Start Time" => "Heure de Début",
+"End Time" => "Heure de Fin",
+"Retries" => "Tentatives",
+"Trunk" => "Trunk",
+"Queue" => "File",
+"Context" => "Contexte",
+"Script" => "Script",
+"Form" => "Formulaire",
+"Completed Calls" => "Appels Aboutis",
+"Average Time" => "Temps moyen",
+"File name" => "Nom fichier",
+"Unable to parse start date specification" => "Impossible d'analyser à partir de la date de début",
+"Unable to parse end date specification" => "Impossible d'analyser jusqu'à la date de fin",
+"Unable to parse start time specification" => "Impossible d'analyser à partir de l'heure de début",
+"Unable to parse end time specification" => "Impossible d'analyser jusqu'à l'heure de fin",
+"Campaign ID is not valid" => "L'ID de la Campagne est non valide",
+"Name Campaign can't be empty" => "Le Nom de la Campagne ne peut être vide",
+"Trunk can't be empty" => "Le Trunk ne peut être vide",
+"Context can't be empty" => "Le Contexte ne peut être vide",
+"Retries must be numeric" => "Les Essais doivent être numériques",
+"Queue can't be empty" => "La File ne peut être vide",
+"Invalid Start Date" => "Date de Dé Invalide",
+"Invalid End Date" => "Date de Fin Invalide",
+"Invalid Start Time" => "Heure de Début Invalide",
+"Invalid End Time" => "Heure de Fin Invalide",
+"Start Date must be greater than End Date" => "La Date de Début doit être plus grande que la Date de Fin",
+"Name Campaign already exists" => "Le Nom de Campagne existe déjà",
+"Invalid Campaign ID" => "ID Campagne Invalide",
+"Invalid CSV File" => "Fichier CSV Invalide",
+"Element without phone number" => "Elément sans N° de téléphone",
+"Edit Campaign" => "Editer Campagne",
+"Error when Activating the Campaign" => "Erreur en Activant la Campagne",
+"Error when eliminating the Campaign" => "Erreur en supprimant la Campagne",
+"Start Time must be greater than End Time" => "L'Heure de Début doit être plus grande que l'Heure de Fin",
+"Invalid number" => "N° Invalide",
+"Invalid CSV File Line" => "Ligne du Fichier CSV Invalide ",
+"CSV Data" => "Donnée CSV",
+"Phone Customer" => "Téléphone",
+"Name Customer" => "Nom Client",
+"Status Call" => "Etat de l'Appel",
+"Status" => "Etat",
+"Options" => "Options",
+"Success" => "Réussi",
+"Failure" => "Echoué",
+"ShortCall" => "Appel Court",
+"Error when deleting the Campaign" => "Erreur en supprimant la campagne",
+"This campaign have calls done" => "Cette campagne a des appels répondus",
+"Delete Error" => "Erreur Effacement",
+"There aren't form selected" => "Il n'y a pas de formulaire sélectionné",
+"To rapair is necesary delete agent from configuration file. Do you want to continue?" => "Pour réparer il est nécessaire d'effacer l'agent du fichier de configuration. Voulez vous continuer?",
+"To rapair is necesary add an agent in configuration file. Do you want to continue?" => "Pour réparer il est nécessaire d'ajouter un agent dans le fichier de configuration. Voulez vous continuer?",
+"Error when desactivating the Campaign" => "Erreur en désactivant la Campagne",
+"Desactivate" => "Désactiver",
+"Activate Error" => "Erreur d'Activation",
+"Desactivate Error" => "Erreur de Désactivation",
+"Queue must be numeric" => "La file doit être numérique",
+"Queue is being used, choose other one" => "La file est en cours d'utilisation, choisissez en une autre",
+"Address" => "Adresse",
+"Date & Time" => "Date & Heure",
+"Duration" => "Durée(Sec)",
+"Are you sure you wish to delete campaign?" => "Etes vous sûr de vouloir effacer la campagne?",
+"Finish" => "Terminées",
+"Active" => "Actives",
+"All" => "Toutes",
+"Inactive" => "Inactives",
+"Range Date" => "Période du",
+"Start" => "Début",
+"End" => "Fin",
+"Schedule per Day" => "Programmation du jour",
+"Start time" => "Heure de Début",
+"End time" => "Heure de Fin",
+"Max. used channels" => "Max. de canaux utilisés",
+"View" => "Vue",
+"Activate" => "Activer",
+"Campaign state" => "Etat de la Campagne",
+"With selection" => "Pour la Sélection",
+"Call File" => "Fichier d'appels",
+"By Dialplan" => "Par Plan de num",
+"Manage Trunks" => "Gérer les Trunks",
+"Manage Queues" => "Gérer les Queues",
+"Manage Forms" => "Gérer les Forms",
+
+);
+?>

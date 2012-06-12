@@ -1,0 +1,53 @@
+<?php
+global $arrLangModule;
+$arrLangModule = array(
+//     "Calls per Agent"  => "Llamadas por Agente",
+    "Time conecction of agents"  => "Tiempo de conexion de agentes",
+    "Start Date"    => "Fecha Inicio",
+    "End Date"      => "Fecha Fin",
+    "Query"         => "Consultar",
+    "No.Agent"      => "No. Agente",
+    "Agent"         => "Agente",
+    "Queue"         => "Cola",
+    "Type"          => "Tipo",
+    "Column"        => "Columna",
+    "Text"          => "Texto",
+    "Error"         => "Error",
+    "Transfer"      => "Transferencia",
+    "Duration"      => "Duración",
+    "Average"       => "Promedio",
+    "Call longest"  => "Llamada más Larga",
+    "Calls answered" => "Llamadas Contestadas",
+    "Query"         => "Consultar",
+    "Error when connecting to database"    => "Error cuando se conectaba a la base de datos",
+    "Error when creating object paloSantoReportsBreak" => "Error al crear el objeto paloSantoReportsBreak",
+    "Debe ingresar una fecha"   => "Debe ingresar una fecha",
+    "Debe ingresar una fecha valida"    => "Debe ingresar una fecha valida",
+
+
+    'Conecction Data'=>'Datos sobre la Conexion',
+    'First Conecction'=>'Primera Conexion',
+    'Last Conecction'=>'Ultima Desconexion',
+    'Time Conecction'=>'Tiempo de Conexion',
+    'Count Conecction'=>'Conteo de Conexiones',
+    'Calls Entry'=>'Llamadas Entrantes',
+    'Reason No Ready'=>'Motivos No Listo',
+    'Break'=>'Receso',
+    'Bathroom'=>'Banio',
+    'Call'=>'Llamada',
+    'Count Calls Entry'=>'Conteo llamadas entrantes',
+    'Calls/h'=>'Llamadas/h',
+    'Time Call Entry'=>'Tiempo Llamadas entrantes',
+    'Average Calls Entry'=>'Media Llamadas entrantes',
+
+    'Porcent compare whit time not ready'=> 'Porcentaje comparado con tiempo no listo',
+    'Count'=>'Conteo',
+    'Hour'=>'Hora',
+    'Monitored' => 'Monitoreadas',
+    'Unmonitored' => 'No Monitoreadas',
+    'Monitored only'=> 'Solo monitoredas',
+    "There aren't records to show"=> "No hay registros para mostrar",
+    "Agent name" => "Nombre Agente",
+);
+
+?>

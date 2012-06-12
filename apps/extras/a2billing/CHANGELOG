@@ -1,0 +1,44 @@
+%changelog
+* Mon Apr 02 2012 Bruno Macias <bmacias@palosanto.com> 1.9.4-3
+- UPDATED: script setup/changeencodepass.php was updated for support
+  change manager asterisk config username and password for a2billing
+  configure.
+
+* Mon Apr 02 2012 Bruno Macias <bmacias@palosanto.com> 1.9.4-2
+- FIXED: Bug config files additional_a2billing_xxx.conf were changed.
+  In this spec add noreplace option.
+- ADDED: Prereq freePBX, It is used by manager user "admin" for edit
+  config file additional_a2billing_xxx.conf.
+- ADDED: Pacth0 added, change user mya2billing to admin in config file.
+  variable fakeuser.
+
+* Fri Dec 02 2011 Eduardo Cueva <ecueva@palosanto.com> 1.9.4-1
+- CHANGED: In spec files changes to support updating of a2billing
+- UPDATED: In elastix-a2billing-1.8.1.patch add the port by default
+- UPDATED: Update a2billing to 1.9.4.
+
+* Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 1.8.1-17
+- CHANGED: In spec file changed Prereq elastix to
+  elastix-framework >= 2.2.0-18
+
+* Wed May 04 2011 Eduardo Cueva <ecueva@palosanto.com> 1.8.1-16
+- CHANGED: Changed file db.info the action installation_force by
+  ignore_backup
+
+* Sat Apr 02 2011 Eduardo Cueva <ecueva@palosanto.com> 1.8.1-15
+- FIXED: a2billing menus.xml, bad definition type menu a2b, it 
+  most be module. SVN Rev[2484]
+
+* Sat Apr 02 2011 Bruno Macias <bmacias@palosanto.com> 1.8.1-14
+- FIXED: a2billing - database, It isn't installed because logic part
+  when mysql service not run not defined.
+
+* Thu Mar 31 2011 Eduardo Cueva <ecueva@palosanto.com> 1.8.1-13beta
+- CHANGED: a2billing - database, Script sql of installation was
+  improved, the change was to define the correct user by
+  mya2billing db. SVN Rev[2476]
+
+
+* Mon Feb 14 2011 Eduardo Cueva <ecueva@palosanto.com> 1.8.1-12beta
+- CHANGED: In spec file using new format to elastix-dbprocess.
+- NEW:     Initial version

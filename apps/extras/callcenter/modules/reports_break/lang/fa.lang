@@ -1,0 +1,33 @@
+<?php
+global $arrLangModule; 
+ $arrLangModule = array(
+'List Break'     => "ليست تنفس",
+'agent'          => "اپراتور",
+'break'          => "نوع تنفس",
+'time_init'      => "زمان شروع",
+'time_end'       => "زمان پايان",
+'duration'       => "مدت",
+"Name"           => "نام",
+'Reports Break'  => "گزارشات تنفس",
+'Agent Name'     => "نام اپراتور",
+'Break'          => "تنفس",
+'query'          => "پيدا کردن",
+"Start Date"    => "تاريخ شروع",
+"End Date"      => "تاريخ پايان",
+'generate file'  => "توليد فايل",
+'Agent Number'   => "اپراتوري وجود ندارد",
+'Total'          => "کل",
+"Error"                                      => "خطا",
+"Warning"                                    => "هشدار",
+"Error when connecting to database"          => "خطا در هنگام اتصال به ديتابيس",
+"Error when creating object paloSantoReportsBreak" => "خطا در هنگام ايجاد گزارشات تنفس پالوسانتو",
+"Error cargando listado de tipos de breaks"  => "خطا در هنگام بارگذاري ليست انواع تنفس ها",
+"Error cargando listado de agentes"          => "خطا در هنگام بارگذاري ليست اپراتورها",
+"Error cargando listado de breaks tomados"   => "خطا در هنگام بارگذاري ليست تنفس هاي استفاده شده",
+"Debe ingresar una fecha"                    => "بايد تاريخ را وارد کنيد",
+"Debe ingresar una fecha valida"             => "بايد يک تاريخ معتبر وارد کنيد",
+"Validation Error"                           => "خطاي اعتبار",
+"The following fields contain errors"        => "فيلد هاي زير داراي خطا هستند",
+"No register break in database"              => "هيچ تنفسي در ديتابيس ثبت نشده",
+);
+?>

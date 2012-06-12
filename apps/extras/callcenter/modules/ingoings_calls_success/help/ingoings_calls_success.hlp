@@ -1,0 +1,19 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opción "Ingoing Calls Success" nos muestra la 
+información del número de llamadas recibidas,
+clasificadas por cola mostrando el número de llamadas
+Exitosas, abandonadas, fin de monitoreo, activas y
+tiempo de espera de la llamada receptada.
+
+</p>
+<div><img src="../modules/{$node_id}/images/call_list.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+</body>
+</html>

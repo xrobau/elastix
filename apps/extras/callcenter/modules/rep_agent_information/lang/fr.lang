@@ -1,0 +1,81 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciÃ³n: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+global $arrLangModule;
+$arrLangModule=array(  
+"Time conecction of agents" => "Temps de connexion agents.",
+"Start Date" => "Du",
+"End Date" => "Au",
+"Query" => "Requ&ecirc;te",
+"No.Agent" => "N&deg; d'Agent",
+"Agent" => "Agent",
+"Queue" => "File",
+"Type" => "Type",
+"Column" => "Colonne",
+"Text" => "Text",
+"Error" => "Erreur",
+"Transfer" => "Transfert",
+"Duration" => "Dur&eacute;e",
+"Average" => "Moyenne",
+"Total" => "Total",
+"Call longest" => "Appel trop long",
+"Calls answered" => "Appels répondus",
+"Error when connecting to database" => "Erreur lors de la connexion &agrave; la base de donn&eacute;e!",
+"Debe ingresar una fecha" => "Vour devez entrer une date",
+"Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
+"Conecction Data" => "Connexion de donn&eacute;es",
+"First Conecction" => "1&egrave;re Connecion",
+"Last Conecction" => "Derni&egravere D&eacute;connexion",
+"Time Conecction" => "Temps de connexion",
+"Count Conecction" => "Compteur de connexion",
+"Calls Entry" => "Appels entr&eacute;s",
+"Reason No Ready" => "Raison: Pas pr&ecirc;t.",
+"Break" => "Pause",
+"Bathroom" => "Salle de bains",
+"Call" => "Appel",
+"Count Calls Entry" => "Compteur appels entr&eacute;",
+"Calls/h" => "Appels/h",
+"Time Call Entry" => "Dur&eacute;e appels entr&eacute;s",
+"Average Calls Entry" => "Moyenne d'appels enntr&eacute;s",
+"Porcent compare whit time not ready" => "% compar&eacute avec le temps: non pr&ecric;t.",
+"Count" => "Compteur",
+"Hour" => "Heur",
+"Monitored" => "Contr&ocirc;l&eacute;",
+"Unmonitored" => "Non Contr&ocirc;l&eacute;",
+"Monitored only" => "Contr&ocirc;l&eacute; seulement",
+"There aren't records to show" => "Il n'y a pas d'enregistrement &agrave; afficher.!",
+"Agent name" => "Nom de l'agent",
+"Show" => "Afficher",
+"Database Error" => "Erreur de base de donn&eacute;es : ",
+"Invalid agent number" => "N&deg; d'agent invalide",
+
+);
+?>

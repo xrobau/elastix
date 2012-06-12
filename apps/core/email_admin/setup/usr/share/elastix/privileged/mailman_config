@@ -1,0 +1,224 @@
+#!/usr/bin/php
+<?php
+/*
+  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2003 Palosanto Solutions S. A.                    |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  +----------------------------------------------------------------------+
+  | Este archivo fuente está sujeto a las políticas de licenciamiento    |
+  | de Palosanto Solutions S. A. y no está disponible públicamente.      |
+  | El acceso a este documento está restringido según lo estipulado      |
+  | en los acuerdos de confidencialidad los cuales son parte de las      |
+  | políticas internas de Palosanto Solutions S. A.                      |
+  | Si Ud. está viendo este archivo y no tiene autorización explícita    |
+  | de hacerlo, comuníquese con nosotros, podría estar infringiendo      |
+  | la ley sin saberlo.                                                  |
+  +----------------------------------------------------------------------+
+  | Autores: Alberto Santos <asantos@palosanto.com>              |
+  +----------------------------------------------------------------------+
+  $Id: mailman_config.php,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+
+if(!isset($argv[1]))
+    exit(1);
+
+switch($argv[1]){
+    case "list_lists":
+	list_lists();
+	break;
+    case "newlist":
+	if(isset($argv[2]) && isset($argv[3]) && isset($argv[4])){
+	    if(isset($argv[5]))
+		$domain = $argv[5];
+	    else
+		$domain = null;
+	    newlist($argv[2],$argv[3],$argv[4],$domain);
+	}
+	else
+	    exit(1);
+	break;
+    case "virtual_aliases":
+	if(!isset($argv[2]) || !isset($argv[3]))
+	    exit(1);
+	create_virtual_aliases($argv[2],$argv[3]);
+	break;
+    case "add_members":
+	if(!isset($argv[2]) || !isset($argv[3]))
+	    exit(1);
+	add_members($argv[2],$argv[3]);
+	break;
+    case "remove_list":
+	if(!isset($argv[2]) || !isset($argv[3]))
+	    exit(1);
+	remove_list($argv[2],$argv[3]);
+	break;
+    case "remove_members":
+	if(!isset($argv[2]) || !isset($argv[3]))
+	    exit(1);
+	remove_members($argv[2],$argv[3]);
+	break;
+    default:
+	exit(1);
+	break;
+}
+
+function list_lists()
+{
+    exec("/usr/lib/mailman/bin/list_lists",$result,$status);
+    if($status == 0){
+	foreach($result as $value)
+	    print($value."\n");
+	exit(0);
+    }
+    else
+	exit(1);
+}
+
+function create_aliases($listName)
+{
+    $file = "/etc/aliases";
+    if(file_exists($file)){
+	$falias = fopen($file,'a');
+	$mailman_aliases = <<<ALIASES
+
+## lista de distribución $listName
+$listName:              "|/usr/lib/mailman/mail/mailman post $listName"
+$listName-admin:        "|/usr/lib/mailman/mail/mailman admin $listName"
+$listName-bounces:      "|/usr/lib/mailman/mail/mailman bounces $listName"
+$listName-confirm:      "|/usr/lib/mailman/mail/mailman confirm $listName"
+$listName-join:         "|/usr/lib/mailman/mail/mailman join $listName"
+$listName-leave:        "|/usr/lib/mailman/mail/mailman leave $listName"
+$listName-owner:        "|/usr/lib/mailman/mail/mailman owner $listName"
+$listName-request:      "|/usr/lib/mailman/mail/mailman request $listName"
+$listName-subscribe:    "|/usr/lib/mailman/mail/mailman subscribe $listName"
+$listName-unsubscribe:  "|/usr/lib/mailman/mail/mailman unsubscribe $listName"
+ALIASES;
+	fwrite($falias,$mailman_aliases);
+	fclose($falias);
+	exec("/usr/bin/newaliases");
+	exec("/sbin/service postfix reload > /dev/null 2>&1");
+	exec("/sbin/service mailman restart > /dev/null 2>&1");
+	exec("/sbin/chkconfig --level 2345 mailman on");
+	exit(0);
+    }
+    else
+	exit(1);
+}
+
+function newlist($listName,$emailAdmin,$password,$domain)
+{
+    $urlhost = "";
+    if(isset($domain))
+	$urlhost = "--urlhost='".escapeshellarg($domain)."' --emailhost='".escapeshellarg($domain)."'";
+    exec("/usr/lib/mailman/bin/newlist $urlhost ".escapeshellarg($listName)." ".escapeshellarg($emailAdmin)." ".escapeshellarg($password));
+    create_aliases($listName);
+}
+
+function create_virtual_aliases($listName,$domain)
+{
+    $file = "/etc/postfix/virtual";
+    if(file_exists($file)){
+	$falias = fopen($file,'a');
+	$virtual_alias = <<<ALIASES
+
+## lista de distribución $listName
+$listName@$domain              $listName
+$listName-admin@$domain        $listName-admin
+$listName-bounces@$domain      $listName-bounces
+$listName-confirm@$domain      $listName-confirm
+$listName-join@$domain         $listName-join
+$listName-leave@$domain        $listName-leave
+$listName-owner@$domain        $listName-owner
+$listName-request@$domain      $listName-request
+$listName-subscribe@$domain    $listName-subscribe
+$listName-unsubscribe@$domain  $listName-unsubscribe
+ALIASES;
+	fwrite($falias,$virtual_alias);
+	fclose($falias);
+	exec("/usr/sbin/postmap /etc/postfix/virtual");
+	exec("/sbin/service postfix reload > /dev/null 2>&1");
+	exec("/sbin/service mailman restart > /dev/null 2>&1");
+	exit(0);
+    }
+    else
+	exit(1);
+}
+
+function add_members($members,$listName)
+{
+    file_put_contents("/tmp/memberList",$members);
+    exec("/usr/lib/mailman/bin/add_members -r /tmp/memberList ".escapeshellarg($listName),$output,$status);
+    if($status == 0){
+	exec("/usr/sbin/postmap /etc/postfix/virtual");
+	exec("/sbin/service postfix reload > /dev/null 2>&1");
+	exec("/sbin/service mailman restart > /dev/null 2>&1");
+	unlink("/tmp/memberList");
+	exit(0);
+    }
+    else
+	exit(1);
+}
+
+function remove_list($listName,$domain)
+{
+    exec("/usr/lib/mailman/bin/rmlist -a ".escapeshellarg($listName),$output,$status);
+    if($status == 0){
+	if(file_exists("/etc/aliases") && file_exists("/etc/postfix/virtual")){
+	    $falias = file("/etc/aliases");
+	    $arrAlias = array();
+	    foreach($falias as $line){
+		if(!preg_match("/^## lista de distribución $listName$/",rtrim($line)) && 
+    !preg_match("/^$listName\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman post $listName\"$/",rtrim($line)) && !preg_match("/^$listName-admin\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman admin $listName\"$/",rtrim($line)) && !preg_match("/^$listName-bounces\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman bounces $listName\"$/",rtrim($line)) && !preg_match("/^$listName-confirm\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman confirm $listName\"$/",rtrim($line)) && !preg_match("/^$listName-join\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman join $listName\"$/",rtrim($line)) && !preg_match("/^$listName-leave\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman leave $listName\"$/",rtrim($line)) && !preg_match("/^$listName-owner\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman owner $listName\"$/",rtrim($line)) && !preg_match("/^$listName-request\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman request $listName\"$/",rtrim($line)) && !preg_match("/^$listName-subscribe\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman subscribe $listName\"$/",rtrim($line)) && !preg_match("/^$listName-unsubscribe\:[[:space:]]+\"\|\/usr\/lib\/mailman\/mail\/mailman unsubscribe $listName\"$/",rtrim($line)))
+		    $arrAlias[] = $line;
+	    }
+	    file_put_contents("/etc/aliases",implode("",$arrAlias));
+	    exec("/usr/bin/newaliases");
+
+	    $virtualAlias = file("/etc/postfix/virtual");
+	    $arrVirtualAlias = array();
+	    foreach($virtualAlias as $line){
+		if(!preg_match("/^## lista de distribución $listName$/",rtrim($line)) && 					  	   !preg_match("/^$listName@{$domain}[[:space:]]+$listName$/",rtrim($line)) && 
+		   !preg_match("/^$listName-admin@{$domain}[[:space:]]+$listName-admin$/",rtrim($line)) && 
+		   !preg_match("/^$listName-bounces@{$domain}[[:space:]]+$listName-bounces$/",rtrim($line)) && 
+		   !preg_match("/^$listName-confirm@{$domain}[[:space:]]+$listName-confirm$/",rtrim($line)) && 
+		   !preg_match("/^$listName-join@{$domain}[[:space:]]+$listName-join$/",rtrim($line)) && 
+		   !preg_match("/^$listName-leave@{$domain}[[:space:]]+$listName-leave$/",rtrim($line)) && 
+		   !preg_match("/^$listName-owner@{$domain}[[:space:]]+$listName-owner$/",rtrim($line)) && 
+		   !preg_match("/^$listName-request@{$domain}[[:space:]]+$listName-request$/",rtrim($line)) && 
+		   !preg_match("/^$listName-subscribe@{$domain}[[:space:]]+$listName-subscribe$/",rtrim($line)) && 
+		   !preg_match("/^$listName-unsubscribe@{$domain}[[:space:]]+$listName-unsubscribe$/",rtrim($line)))
+			$arrVirtualAlias[] = $line;
+	    }
+	    file_put_contents("/etc/postfix/virtual",implode("",$arrVirtualAlias));
+	    exec("/usr/sbin/postmap /etc/postfix/virtual");
+	    exec("/sbin/service postfix reload > /dev/null 2>&1");
+	    exec("/sbin/service mailman restart > /dev/null 2>&1");
+	    exit(0);
+	}
+	else
+	    exit(1);
+    }
+    else
+	exit(1);
+}
+
+function remove_members($members,$listName)
+{
+    file_put_contents("/tmp/memberList",$members);
+    exec("/usr/lib/mailman/bin/remove_members -f /tmp/memberList ".escapeshellarg($listName),$output,$status);
+    if($status == 0){
+	exec("/usr/sbin/postmap /etc/postfix/virtual");
+	exec("/sbin/service postfix reload > /dev/null 2>&1");
+	exec("/sbin/service mailman restart > /dev/null 2>&1");
+	unlink("/tmp/memberList");
+	exit(0);
+    }
+    else
+	exit(1);
+}
+?>

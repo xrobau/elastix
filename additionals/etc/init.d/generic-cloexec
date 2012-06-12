@@ -1,0 +1,5 @@
+#!/bin/bash
+
+SERVICE=$1
+shift 
+/usr/sbin/close-on-exec.pl /etc/init.d/$SERVICE $@

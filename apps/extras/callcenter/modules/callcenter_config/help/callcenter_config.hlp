@@ -1,0 +1,48 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opción "Configuration" nos permite configurar
+los parámetros de:
+</p>
+<h2> Asterisk</h2>
+<div><img src="../modules/{$node_id}/images/config_1.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<h2>Dialer Parameters</strong></h2>
+<p>Esta opción nos permite configurar el programa de marcado automático del CallCenter.
+</p>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Short Call Threshold</td><td>Es la duración mínima de una llamada válida. Si una llamada dura menos que esto, se considera una llamada corta y se la marca como fallida, aunque haya sido contestada.</td>
+  </tr>
+<tr>
+    <td>Answering delay</td><td>Es un parámetro del marcador predictivo el cual intenta colocar llamadas más allá de las llamadas posibles por la cantidad de agentes libres con la suposición de que en el intervalo 
+                               indicado por Answering delay , al menos una llamada será terminada por un agente, y el agente se quedará libre de contestar.</td>
+</tr>
+<tr>
+    <td>Enable dialer debug</td><td>Activa la emisión de mensajes en el archivo de log del dialer.</td>
+</tr>
+<tr>
+    <td>Dump all</td><td>Es un parámetro que hace que el dialer emita información sobre todos los eventos que recibe, no sólo de los eventos de interés para el dialer para su funcionamiento normal.</td>
+</tr>
+</table>
+<div><img src="../modules/{$node_id}/images/config_2.jpg" border="0"></div>
+<div>Figura 2</div><br/><br/>
+
+<h2>Dialer Status</h2>
+<p>Indica el estado actual del dialer, detenido o corriendo.<br/>
+El botón permite iniciar o parar el funcionamiento desde la interfaz web
+</p>
+<div><img src="../modules/{$node_id}/images/config_3.jpg" border="0"></div>
+<div>Figura 3</div><br/><br/>
+  
+
+</body>
+</html>

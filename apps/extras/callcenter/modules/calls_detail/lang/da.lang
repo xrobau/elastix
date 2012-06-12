@@ -1,0 +1,25 @@
+<?php
+global $arrLangModule;
+$arrLangModule = array(
+    "Calls Detail"  => "Calls Detail",
+    "Start Date"    => "Start Date",
+    "End Date"      => "End Date",
+    "Start Time"    => "Start Time",
+    "End Time"      => "End Time",
+    "Query"         => "Query",
+    "No.Agent"      => "No. Agent",
+    "Agent"         => "Agent",
+    "Queue"         => "Queue",
+    "Type"          => "Type",
+    "Phone"         => "Phone",
+    "Column"        => "Column",
+    "Text"          => "Text",
+    "Error"         => "Error",
+    "Transfer"      => "Transfer",
+    "Duration"      => "Duration",
+    "Error when connecting to database"    => "Error when connecting to database",
+    "Debe ingresar una fecha"   => "You should to enter any date",
+    "Debe ingresar una fecha valida"    => "You should to enter a valued date",
+);
+
+?>

@@ -1,0 +1,113 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.4-1                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2008-08-03 11:08:42 Andres Flores aflores@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Connection Request" => "Petición de Conexión",
+"Host Remote" => "Servidor Remoto",
+"Peers Information" => "Información de Peers",
+"Delete" => "Eliminar",
+"Host Name" => "Nombre del Servidor",
+"IP" => "IP",
+"MAC Address" => "Dirección MAC",
+"Local Status" => "Estado Local",
+"Remote Status" => "Estado Remoto",
+"New Request" => "Nueva Conexión",
+"View Remote Server" => "Ver Servidor Remoto",
+"Edit Peer" => "Editar Peer",
+"MAC" => "MAC",
+"Model" => "Modelo",
+"Host" => "Servidor Remoto",
+"Inkey" => "Clave remota",
+"Outkey" => "Clave local",
+"Required field" => "Campos obligatorios",
+"Save" => "Guardar",
+"New Peer" => "Nuevo Peer",
+"Cancel" => "Cancelar",
+"Validation Error" => "Error de validación",
+"Message sent" => "Mensaje enviado",
+"Message" => "Mensaje",
+"Alert" => "Alerta",
+"Your connection request has been received" => "La petición de conexión ha sido recibida",
+"The following fields contain errors" => "Los siguientes campos contienen errores",
+"Are you sure you wish to delete Connection (s)?" => "Estas seguro que deseas eliminar la(s) conexión (es)?",
+"Option" => "Opción",
+"View" => "Ver",
+"Edit" => "Editar",
+"Comment" => "Comentario",
+"Company" => "Compañia",
+"Apply Changes" => "Apply Changes",
+"Unabled write file" => "No se puede escribir en el archivo",
+"Unabled open file" => "No se puede abrir el archivo",
+"Error to create file" => "Error al crear el archivo",
+"Disconnect" => "Desconectar",
+"Connect" => "Conectar",
+"Accept" => "Aceptar",
+"Reject" => "Rechazar",
+"Request" => "Petición",
+"Your connection has been established" => "La conexión ha sido establecida",
+"Currently there is a connection request" => "Actualmente existe una petición de connección",
+"Unable to establish connection with the host, it does not exist or is trying to connect himself" => "Imposible establecer uan conexión con el servidor remoto, este no existe o esta intentando conectarse asi mismo",
+"You must fill your information General before accepting the request" => "Usted tiene que ingresar la información general antes de aceptar la petición de conexión",
+"accepted connection" => "conexión aceptada",
+"waiting response" => "Esperando respuesta",
+"disconnect" => "desconectar",
+"connect" => "conectar",
+"request delete" => "petición eliminada",
+"request reject" => "petición rechazada",
+"Requesting connection" => "Petición de Conexión",
+"request accepted" => "petición aceptada",
+"connected" => "conectado",
+"disconnected" => "desconectado",
+"Disconnected" => "Desconectado",
+"connection deleted" => "conexión eliminada",
+"connection rejected" => "conexión rechazada",
+"Secret" => "Clave Secreta del Host Remoto",
+"Error" => "Error",
+"Secret incorrect" => "Clave secreta incorrecta. Por favor vuelva a hacer la petición al servidor de destino",
+"Remote Host Name" => "Servidor Remoto",
+"Error trying to delete peer:" => "Error tratando de eliminar el peer:",
+"Error trying to delete parameter in database:" => "Error tratando de eliminar parametros en la base de datos:",
+"Error trying to do a reject to:" => "Error tratando de hacer un rechazo de conexió a:",
+"Remote Servers" => "Servidores Remotos", 
+"Remote Server" => "Servidor Remoto", 
+"Connection Status" => "Estado de Conexión",
+"Actions" => "Acciones",
+"Connected" => "Conectado",
+"Waiting Response..." => "Esperando Respuesta...",
+"Unknown" => "Desconocido",
+"Request Connection has been Rejected" => "La solicitu de conexión ha sido rechazada",
+"New Connection Request" => "Nueva Solicitud de Conexión",
+"Remote Server is requesting Connection..." => "Servidor Remoto está solicitando conexión",
+"Request Connection has been Deleted"=>"La solicitud de Conexión ha sido eliminada",
+"Connecting..."=>"Conectando...",
+"Request Connection has been Accepted" => "La solicitud de Conexión ha sido aceptada",
+"Requesting Connection to Remote Server..." => "Solicitado Conexión a Servidor Remoto...",
+"Back" => "Atrás",
+);
+?>

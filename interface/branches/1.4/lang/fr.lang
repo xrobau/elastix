@@ -1,0 +1,1050 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2008 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com 						                     |
+  |                                                                      |
+  | Translated by: Erwan DESVERGNES - SDCI                               |
+  | erwan.desvergnes@SDCI.fr                                             |
+  |   Revision 1.0-17 by Gregory BOUZINAC - GMixon                       | 
+  | greg@gmixon.com                                                      |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang,v 1.8 2008/05/20 00:36:42 bmacias Exp $ */
+global $arrLang;
+$arrLang=array(
+"System Resources"=>"Ressources syst&egrave;me",
+"CPU Info"=>"Info CPU",
+"Uptime"=>"Temps de fonctionnement",
+"CPU usage"=>"Utilisation CPU",
+"Memory usage"=>"Utilisation m&eacute;moire",
+"Swap usage"=>"Utilisation Swap",
+"Hard Drives"=>"Disque dur",
+"Partition Name"=>"Nom de la Partition",
+"Capacity"=>"Capacit&eacute;",
+"Usage"=>"Utilisation",
+"Mount point"=>"Point de montage",
+"Disk usage"=>"Utilisation disque",
+"Used space"=>"Espace utilisé",
+"Free space"=>"Espace libre",
+"No records found"=>"Aucun enregistrement trouvé",
+"Simultaneous calls, memory and CPU"=>"Appels simultanés, mémoire et CPU",
+"Sim. calls"=>"Appels Sim.",
+"CPU usage (%)"=>"Utilisation CPU (%)",
+"Mem. usage (MB)"=>"Utilisation Mem. (Mo)",
+"It was not possible to obtain information about the graph" =>"Impossible d'avoir des informations sur le graphique",
+"Network Parameters"=>"Param&egrave;tres r&eacute;seau",
+"Device"=>"P&eacute;riph&eacute;rique",
+"Type"=>"Type",
+"IP"=>"IP",
+"Mask"=>"Masque",
+"MAC Address"=>"Adresse MAC",
+"HW Info"=>"Info HW",
+"Status"=>"Statut",
+"Ethernet Interfaces List"=>"Liste des interfaces Ethernet",
+"Connected"=>"Connect&eacute;",
+"Not Connected"=>"Non connect&eacute;",
+"Edit Interface"=>"Modifier Interface",
+"Validation Error"=>"Erreur de validation",
+"The following fields contain errors"=>"Les champs suivants contiennent des erreurs",
+"Host"=>"H&ocirc;te",
+"Primary DNS"=>"DNS primaire",
+"Secondary DNS"=>"DNS secondaire",
+"Default Gateway"=>"Passerelle par d&eacute;faut",
+"IP Address"=>"Adresse IP",
+"Network Mask"=>"Masque de sous r&eacute;seau",
+"Interface Type"=>"Type Interface",
+"Save"=>"Sauver",
+"Edit Network Parameters"=>"Editer les param&egrave;tres r&eacute;seau",
+"Required field"=>"Champ requis",
+"Apply changes"=>"Appliquer les changements",
+"Are you sure you want to edit network parameters?"=>"Etes vous s&ucirc;r de vouloir modifier les param&egrave;tres r&eacute;
+seau ?",
+"Cancel"=>"Annuler",
+"Export"=>"Exporter",
+"Start"=>"D&eacute;but",
+"End"=>"Fin",
+"Next"=>"Suivant",
+"Previous"=>"Pr&eacute;c&eacute;dent",
+"Welcome to Elastix"=>"Bienvenue sur Elastix",
+"Please enter your username and password"=>"Veuillez entrer votre nom d'utilisateur et votre mot de passe",
+"Username"=>"Nom d'utilisateur",
+"Password"=>"Mot de passe",
+"Submit"=>"Envoyer",
+"Login page"=>"Page de connexion",
+"Create New User"=>"Cr&eacute;er un nouvel utilisateur",
+"Login"=>"Connexion",
+"Real Name"=>"Nom",
+"Group"=>"Groupe",
+"User List"=>"Liste des utilisateurs",
+"The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user."=>"L'utilisate
+ur Admin ne peut pas &ecirc;tre supprim&eacute; car c'est l'administrateur par d&eacute;faut de Elastix. Vous pouvez supprime
+r les autres",
+"New User"=>"Nouvel utilisateur",
+"The passwords are empty or don't match"=>"Les mots de passe sont vides ou diff&egrave;rent",
+"The group is wrong"=>"Le groupe est faux",
+"Edit User"=>"Editer utilisateur",
+"Name"=>"Nom",
+"Retype password"=>"Re-saisissez le mot de passe",
+"Are you sure you wish to continue?"=>"Etes vous s&ucirc;r de vouloir continuer ?",
+"Edit"=>"Editer",
+"Delete"=>"Supprimer",
+"Shutdown"=>"Arr&ecirc;t",
+"Accept"=>"Accepter",
+"Halt"=>"Eteindre", //shutdown mode
+"Reboot"=>"Red&eacute;marrer", //shutdown mode
+"Shutdown in progress"=>"Arr&ecirc;t en cours",
+"Your system in shutting down now. Please, try again later."=>"Op&eacute;ration en cours. Veuillez patienter.",
+"Apply"=>"Appliquer",
+"Resource"=>"Ressource",
+"Group Permission"=>"Permissions des Groupes",
+"Users"=>"Utilisateurs",
+"Show"=>"Afficher",
+"Virtual Fax List"=>"Liste des Fax virtuels",
+"Virtual Fax Name"=>"Nom du fax virtuel",
+"Fax Extension"=>"Extension de Fax",
+"Secret"=>"Mot de Passe",
+"Destination Email"=>"Email de destination",
+"Caller ID Name"=>"Nom d'identification de l'appelant",
+"Caller ID Number"=>"Num&eacute;ro d'identification de l'appelant",
+"New Virtual Fax"=>"Nouveau fax virtuel",
+"Edit Virtual Fax"=>"Editer fax virtuel",
+ 
+"View Virtual Fax"=>"Voir fax virtuel",
+"Start Date"=>"Date de d&eacute;but",
+"End Date"=>"Date de fin",
+"Field Name"=>"Nom du champ",
+"Field"=>"Champ",
+"CDR Report List"=>"Liste des rapports CDR",
+"Date"=>"Date",
+"Source"=>"Source",
+"Destination"=>"Destination",
+"Src. Channel"=>"Canal Src.",
+"Dst. Channel"=>"Canal Dst.",
+"Duration"=>"Dur&eacute;e",
+"Filter"=>"Filtre",
+"Simultaneous Channels (Total)"=>"Canaux simultanés (Total)",
+"Simultaneous Zap Channels"=>"Canaux Zap simultanés",
+"Simultaneous SIP Channels"=>"Canaux SIP simultanés",
+"Simultaneous IAX Channels"=>"Canaux IAX simultanés",
+"Simultaneous H323 Channels"=>"Canaux H323 simultanés",
+"Simultaneous Local Channels"=>"Canaux Locaux simultanés",
+"Total Channels"=>"Total canaux",
+"Zap Channels"=>"Canaux Zap",
+"SIP Channels"=>"Canaux SIP",
+"IAX Channels"=>"Canaux IAX",
+"H323 Channels"=>"Canaux H323",
+"Local Channels"=>"Canaux Locaux",
+"Outgoing Calls List"=>"Liste des appels sortants",
+"Incoming Calls List"=>"Liste des appels entrants",
+"Prefix"=>"Pr&eacute;fixe",
+"Rate"=>"Tarif",
+"Rate Offset"=>"Tarif de Connexion",
+"New Rate"=>"Nouveau tarif",
+"Edit Rate"=>"Editer Tarif",
+"View Rate"=>"Voir les tarifs",
+"View"=>"Voir",
+"Rates List"=>"Liste des tarifs",
+"Create New Rate"=>"Cr&eacute;er un nouveau tarif",
+"Channel"=>"Canal",
+"Billing Report"=>"Rapport de facturation",
+"Duration in seconds"=>"Dur&eacute;e en secondes",
+"Cost"=>"Co&ucirc;t",
+"Rate Applied"=>"Tarif appliqu&eacute;",
+"Criteria"=>"Crit&egrave;re",
+"Distribution by Time"=>"Distribution par temps",
+"Distribution by Number of Calls"=>"Distribution par nombre d'appels",
+"Distribution by Cost"=>"Distribution par coûts",
+"Minutes"=>"Minutes",
+"Number of Calls"=>"Nombre d'appels",
+"others"=>"autres",
+"Rate Name"=>"Nom du tarif",
+"default"=>"d&eacute;faut",
+"Date Range spans maximum number of days"=>"L'intervalle de temps d&eacute;passe le nombre de jours",
+"ERROR"=>"ERREUR",
+"Trunk Bill Configuration"=>"Configuration des troncs de facturation",
+"Billing Capable"=>"Facturation possible",
+"Trunk"=>"Tronc",
+"Values for trunks are invalid"=>"Valeurs pour tronc invalides",
+"Prefix can't be empty"=>"Le pr&eacute;fixe ne peut pas &ecirc;tre vide",
+"Username already exists"=>"Utilisateur existant",
+"On having checked user's existence"=>"Sur la v&eacute;rification de l'existence d'un utilisateur",
+"User ID is not numeric"=>"L'identifiant utilisateur n'est pas un nombre",
+"UserName can't be empty"=>"Le nom d'utilisateur ne peut pas &ecirc;tre vide",
+"User doesn't exist"=>"L'utilisateur n'existe pas",
+"Password is not a valid MD5 hash"=>"Le mot de passe n'est pas une information MD5 valide",
+"Group ID is not numeric"=>"L'identifiant groupe n'est pas un nombre",
+"Group doesn't exist"=>"Le groupe n'existe pas",
+"Action ID is not numeric"=>"L'identifiant action n'est pas un nombre",
+"Action Name can't be empty"=>"Un nom d'action ne peut pas &ecirc;tre vide",
+"Resource ID is not numeric"=>"L'identifiant ressource n'est pas un nombre",
+"Resource Name can't be empty"=>"Un nom de ressource ne peut pas &ecirc;tre vide",
+"Error when connecting to database"=>"Erreur de connexion &agrave; la base de donn&eacute;es",
+"Error when changing permissions of directory"=>"Erreur lors du changement de permissions du r&eacute;pertoire",
+"Error when reading system files"=>"Erreur lors de la lecture des fichiers syst&egrave;me",
+"Error when writing file"=>"Erreur lors de l'&eacute;criture du fichier",
+"File couldn't be renamed"=>"Le fichier ne peut pas &ecirc;tre renomm&eacute;",
+"It isn't possible to open file for reading"=>"Impossible d'ouvrir le fichier pour lecture",
+"It isn't possible to open file for writing"=>"Impossible d'ouvrir le fichier pour &eacute;criture",
+"Rate ID is not valid"=>"L'identifiant de tarif n'est pas valide",
+"Rate for prefix already exists"=>"Tarif pour pr&eacute;fixe d&eacute;j&agrave; existant",
+"Base directory doesn't exist"=>"La racine du r&eacute;pertoire n'existe pas",
+"You don't have permissions to read base directory"=>"Vous n'avez pas la permission de lire le r&eacute;pertoire racine",
+"Directory couldn't be opened"=>"Le r&eacute;pertoire ne peut pas &ecirc;tre ouvert",
+//menu
+"System"=>"Syst&egrave;me",
+"Operator Panel"=>"Panneau op&eacute;rateur",
+"Voicemails"=>"Messagerie vocale",
+"Fax"=>"Fax",
+"Reports"=>"Rapports",
+"Billing"=>"Facturation",
+"Extras"=>"Extras",
+"Downloads"=>"T&eacute;l&eacute;chargements",
+"Developer"=>"D&eacute;veloppeur",
+"System Info"=>"Info syst&egrave;me",
+"PBX Configuration"=>"Configuration PABX",
+"Network"=>"R&eacute;seau",
+"User Management"=>"Gestion des utilisateurs",
+"Flash Operator Panel"=>"Panneau Op&eacute;rateur Flash",
+"Asterisk Recording Interface"=>"Interface d'enregistrement d'Asterisk",
+"CDR Report"=>"Rapport CDR",
+"Account Code"=>"Code Compte",
+"Channels Usage"=>"Utilisation des canaux",
+"Outgoing Calls"=>"Appels sortants",
+"Incoming Calls"=>"Appels entrants",
+"Rates"=>"Tarifs",
+"Destination Distribution"=>"R&eacute;partition par destination",
+"Billing Setup"=>"Configuration de la facturation",
+"SugarCRM"=>"SugarCRM",
+"Calling Cards"=>"Carte d'appels",
+"Softphones"=>"Softphones",
+"Fax Utilities"=>"Utilitaires Fax",
+"Instant Messaging" => "Messagerie Instantan&eacute;e",
+"Menu Administrator"=>"Menu Administrateur",
+//
+"Channels Usage Report"=>"Rapports d'utilisation des canaux",
+"Default Rate Configuration" => "Configuration du tarif par d&eacute;faut",
+"Default Rate" => "Tarif par d&eacute;faut",
+"Default Rate Offset" => "Tarif de connexion par d&eacute;faut",
+"Cost for calls without assigned route"=>"Co&ucirc;t pour les appels sans route assign&eacute;e",
+"Value for rate is not valid" => "Valeur pour le tarif non valide",
+"Error when saving default rate"=>"Erreur pendant la sauvegarde du tarif par d&eacute;faut",
+"Coming soon"=>"A venir !",
+"This module will contains a list of menu items and a button to create a new menu"=>"Ce module contiendra une liste de champs
+ et de boutons pour cr&eacute;er un nouveau menu",
+"Language"=>"Langue",
+"Select language"=>"Langue du site",
+"Change"=>"Changer",
+"Continue"=>"Continuer",
+"You can't change language"=>"Vous ne pouvez pas changer la langue",
+"Logout"=>"D&eacute;connexion",
+ 
+ 
+//version 0.7
+"Email"=>"Email",
+"Domains"=>"Domaines",
+"Domain"=>"Domaine",
+"Domain name"=>"Nom de domaine",
+"Domain List"=>"Liste Domaine",
+"Number of Accounts"=>"Nombre de comptes",
+"Create Domain"=>"Cr&eacute;er un domaine",
+"New Domain"=>"Nouveau Domaine",
+"View Domain"=>"Voir Domaine",
+"Edit Domain"=>"Editer Domaine",
+"Accounts"=>"Comptes",
+"Email Account List"=>"Liste des comptes Email",
+"Create Account"=>"Cr&eacute;er un compte",
+"Select a domain"=>"S&eacute;lectionner un domaine",
+"Email Address"=>"Adresse Email",
+"Account Name"=>"Nom du compte",
+"Used Space"=>"Espace utilis&eacute;",
+"Options"=>"Options",
+"New Email Account"=>"Nouveau compte email",
+"Quota (Kb)"=>"Quota (Ko)",
+"The e-mail address already exists"=>"L'adresse email existe d&eacute;j&agrave;",
+"View Account"=>"Voir compte",
+"Edit Account"=>"Editer compte",
+"Error deleting user accounts from system"=>"Erreur pendant la suppression des comptes du syst&egrave;me",
+"Error deleting user accounts"=>"Erreur pendant la suppression des comptes",
+"Error deleting record from table domain"=>"Erreur lors de la suppression de l'enregistrement de la table des domaines",
+"main.cf file was updated successfully but when restarting the mail service failed"=>"le fichier main.cf a &eacute;t&eacute;
+mis &agrave; jour avec succ&egrave;s mais &eacute;chec du d&eacute;marrage du service mail",
+"Relay"=>"Relais",
+"message about email relay"=>"Ces r&eacute;seaux sont autoris&eacute;s &agrave; envoyer des mails &agrave; l'ext&eacute;rieur
+ <br> en utilisant le protocole SMTP.
+Vous devez ins&eacute;rer un r&eacute;seau par ligne et chaque r&eacute;seau <br>doit avoir le format
+<b>IP/MASQUE</b>.<br>Par exemple, pour autoriser le relais d'Asterisk vous devez ins&eacute;rer
+127.0.0.1/32. <br> Nous conseillons de conserver le r&eacute;seau 127.0.0.1/32 dans la configuration <br>car certains process
+us les utilisent.",
+"Networks which can RELAY"=>"R&eacute;seaux pouvant relayer",
+"Could not read the relay configuration."=>"Impossible de lire la configuration du relais.",
+"No network entered, you must keep at least the net 127.0.0.1/32"=>"Aucun r&eacute;seau entr&eacute;, vous devez garder au mo
+ins 127.0.0.1/32",
+"Configuration updated successfully"=>"Configuration mise &agrave; jour avec succ&egrave;s",
+"Write error when writing the new configuration."=>"Erreur durant l'&eacute;criture de la nouvelle configuration.",
+"Empty field"=>"Champ vide",
+"Bad Format"=>"Mauvais format",
+"No option was selected"=>"Aucune option s&eacute;lectionn&eacute;e",
+"Octets out of range"=>"Octets en dehors de la plage",
+"The account was created but could not add record for the e-mail in alias table"=>"Le compte a &eacute;t&eacute; cr&eacute;e
+mais impossible d'ajouter un enregistrement dans la table des alias email",
+"Could not query used disc space"=>"Impossible de demander l'espace disque utilis&eacute;",
+"Could not obtain used disc space"=>"Impossible de connaitre l'espace disque utilis&eacute;",
+"Size is not set"=>"La taille n'est pas d&eacute;finie",
+"Password could not be changed"=>"Le mot de passe n'a pas pu &ecirc;tre chang&eacute;",
+"Domain ID is not valid"=>"L'ID du domaine n'est pas valide",
+"Domain name already exists"=>"Le nom du domaine existe d&eacute;j&agrave;",
+"Username is not valid"=>"Le nom d'utilisateur n'est pas valide",
+"You must select a domain to create an account"=>"Vous devez s&eacute;lectionner un domaine pour cr&eacute;er un compte",
+"Webmail"=>"Webmail",
+"Fax Master" => "Fax Ma&icirc;tre",
+"Fax Master Configuration"=>"Configuration Fax Ma&icirc;tre",
+"Value for Fax Master is not valid"=>"La valeur pour le Fax Maitre n'est pas valide",
+"Fax Master Email" => "Email Fax Maitre",
+"Write the email address which will receive the notifications of received messages, errors and activity summary of the Fax Server"=>"Renseignez l'adresse email qui recevra les notifications des fax re&ccedil;us, des erreurs et le sommaire de l'activi
+t&eacute; du serveur de Fax",
+"Extension" => "Extension",
+"View User" => "Voir Utilisateur",
+"Campaigns"  =>  "Campagnes",
+"New Campaign"  =>  "Nouvelle Campagne",
+"Campaigns List"  =>  "Liste Campagnes",
+"Recordings" => "Enregistrements",
+"Voicemail"  =>  "Boite vocale",
+"CallerID"=>"ID Appelant",
+"Monitoring"  =>  "Surveillance",
+"Monitorig List" => "Liste Conversations",
+"Voicemail List" => "Liste Messages",
+"You don't have extension number associated with user" => "Vous n'avez aucun num&eacute;ro d'extension associ&eacute; &agrave
+; l'utilisateur",
+"Are you sure you wish to delete voicemails?" => "Etes vous s&ucirc;r de vouloir effacer les messages ?",
+"Date/Time"  =>  "Date/Temps",
+"Date and Time Configuration"  =>  "Configuration Date/Temps",
+"Current Datetime"  =>  "Date et temps actuels",
+"New Date"  =>  "Nouvelle Date",
+"New Time"  =>  "Nouveau Temps",
+"New Timezone"  =>  "Nouveau fuseau horaire",
+"The change of date and time can concern important  system processes."  =>  "Le changement de la date et du temps peuvent inf
+luencer sur d'important processus syst&egrave;me.",
+"File name"  =>  "Nom fichier",
+"Load Module"  =>  "Chargement Module",
+"Refresh"  =>  "Rafraichir",
+"Menu Location"  =>  "Emplacement Menu",
+"Module File"  =>  "Fichier du Module",
+"ID for new module (folder name)"  =>  "ID pour nouveau module (nom dossier)",
+"Module Name"  =>  "Nom Module",
+"Choose Menu"  =>  "Choisir Menu",
+"ID for new menu"  =>  "ID pour nouveau menu",
+"Menu Name"  =>  "Nom Menu",
+"Defined Menu"  =>  "Menu D&eacute;fini",
+"New Menu"  =>  "Nouveau Menu",
+"Invalid file extension.- It must be tar.gz / zip / tgz"  =>  "Extension fichier invalide.- Elle doit &ecirc;tre en tar.gz /
+zip / tgz",
+"Module sucessfully loaded"  =>  "Module correctement charg&eacute;",
+"Folder name doesn't exist in module file"  =>  "Dossier Nom inexistant dans le fichier de module",
+"Folder configs doesn't exist in module file"  =>  "Dossier configs inexistant dans le fichier de module",
+"Folder themes doesn't exist in module file"  =>  "Dossier th&egrave;mes inexistant dans le fichier de module",
+"File index.php doesn't exist in module file"  =>  "Fichier index.php inexistant dans le fichier de module",
+"File install.php doesn't exist in module file"  =>  "Fichier install.php inexistant dans le fichier de module",
+"Could not uncompress file"  =>  "Impossible de d&eacute;compresser le fichier",
+"install.php failed"  =>  "Echec install.php",
+ 
+"Fax Clients"=>"Clients Fax",
+"Clients allowed to send faxes"=>"Clients autoris&eacute;s &agrave; envoyer des fax",
+"No IP entered, you must keep at least the IP 127.0.0.1" =>"Aucune IP entr&eacute;e, vous devez garder au moins l'IP 127.0.0.
+1",
+"These IPs are allowed to send faxes through Elastix.  You must insert one IP per row.  We recommend keeping localhost and 127.0.0.1  in the configuration because some processes could need them."=>"Ces IPs sont autoris&eacute;es &agrave; envoyer des
+fax &agrave; travers Elastix.<br>
+Vous devez ins&eacute;rer une IP par ligne.  Nous recommandons de garder <br> localhost et 127.0.0.1 dans la  configuration c
+ar certains <br> processus les utilisent.",
+"Could not read the clients configuration."=>"Impossible de lire la configuration clients.",
+//Inicio: Modulo Asterisk-Cli
+"Asterisk-Cli"=>"Asterisk-Cli",
+"Command"=> "Commande",
+"Execute"=> "Ex&eacute;cuter",
+//Fin: Modulo Asterisk-Cli
+"Fax Visor" => "Visualisation Fax",      /*Bruno agrego modulo*/
+"Search"    => "Chercher",            /*Bruno agrego modulo*/
+"Company Name"    => "Nom Soci&eacute;t&eacute;",            /*Bruno agrego modulo*/
+"Company Fax"     => "Fax Soci&eacute;t&eacute;",            /*Bruno agrego modulo*/
+"Fax Date"        => "Date Fax",        /*Bruno agrego modulo*/
+"File"            => "Fichier",        /*Bruno agrego modulo*/
+"Fax Destiny"     => "Destination Fax", /*Bruno agrego modulo*/
+"No Data Found"   => "Aucune donn&eacute;e trouv&eacute;e", /*Bruno agrego modulo*/
+"Are you sure you wish to delete fax (es)?" => "Etes vous s&ucirc;r de vouloir effacer le(s) fax ?",
+"Unable to eliminate pdf file from the path." => "Impossible de supprimer le fichier pdf du dossier.",
+"Unable to eliminate pdf file from the database." => "Impossible de supprimer le fichier pdf de la base de donn&eacute;es.",
+ 
+"Backup"=>"Sauvegarde",
+"Process"=>"Ex&eacute;cuter",
+"Restore"=>"Restauration",
+"Elastix Database"=>"Base de donn&eacute;es Elastix",
+"Sounds"=>"Sons",
+"Configuration Files"=>"Fichiers de Configuration",
+"Monitors"=>"Surveillance",
+"tFTP"=>"tFTP",
+"Email Acccounts"=>"Comptes Email",
+"Choose an option to backup"=>"Choisissez une option de sauvegarde",
+"Could not generate backup file"=>"Impossible de cr&eacute;er le fichier de sauvegarde",
+"Backup Complete!"=>"Sauvegarde Termin&eacute;e !",
+"Choose an option to restore"=>"Choisissez une option de restauration",
+"Backup file path can't be empty"=>"Le chemin du fichier de sauvegarde ne peut pas &ecirc;tre vide",
+"File doesn't exist"=>"Fichier inexistant",
+"Restore Complete!"=>"Restauration Termin&eacute;e !",
+"Backup File Location"=>"Emplacement fichier de sauvegarde",
+"All options"=>"Tout",
+ 
+/* INICIO: File Editor */
+"Command"=> "Commande",
+"Execute"=> "Ex&eacute;cuter",
+"Result"=> "R&eacute;sultat",
+"File Editor"=> "Editeur Fichiers",
+"File List"=> "Liste Fichiers",
+"Back"=>"Retour",
+"Saved"=>"Sauver",
+"This file doesn't have permisses to read"=>"Ce fichier n'a pas les permissions de lecture",
+"This file doesn't have permisses to write"=>"Ce fichier n'a pas les permissions d'&eacute;criture",
+"The changes was saved in the file" => "Les changements ont &eacute;t&eacute; enregistr&eacute;s dans le fichier",
+"Doesn't have permisses to read"=>"n'a pas les permissions de lecture",
+"This is not a valid directory"=>"Ce n'est pas un r&eacute;pertoire valide",
+"Please write the file name" => "Veuillez &eacute;crire le nom du fichier",
+"New File" => "Nouveau Fichier",
+"File already exist" => "Le fichier existe d&eacute;j&agrave;",
+/* FIN: File Editor */
+ 
+"File installer.php doesn't exist in package" =>"Fichier installer.php inexistant dans le paquet",
+"File module.xml doesn't exist in package"=>"Fichier module.xml inexistant dans le paquet",
+ 
+ 
+ 
+// Elastix 0.9
+ 
+//Inicio SubModule Themes
+"Themes" => "Th&egrave;mes",
+"Change Theme" => "Changer Th&egrave;me",
+"Themes not Found" => "Th&egrave;mes non trouv&eacute;s",
+"The theme could not be updated" => "Le th&egrave;me n'a pas pu &ecirc;tre mis a jour",
+//Fin SubModule Themes
+ 
+/* Inicio Hardware Detection */
+"Hardware Detection" => "D&eacute;tection Mat&eacute;riel",
+/* Fin Hardware Detection */
+ 
+/* Modulo system.updates*/
+"Updates" => "Mises &agrave; jour",
+"Repositories" =>"Installateurs",
+"Package Name" => "Nom Paquet",
+"Package Info" => "Info Paquet",
+"Package Version" => "Version",
+"Package Installed" => "Install&eacute;",
+"Package Upgrade" => "Mettre &agrave; jour",
+"Package Delete" => "Effacer",
+"Package Release" => "Version",
+"Packages not Founds" => "Paquets non trouv&eacute;s",
+"All Package" => "Tous",
+"Packages" => "Paquets",
+"Package Noninstalled" => "Non install&eacute;",
+"Repositor not Found" => "Installateur non trouv&eacute;",
+"Package Search" => "Chercher",
+"Repositor Place" => "Emplacement Installateur",
+"Repositor Place" => "Emplacement Installateur",
+"Package Update" => "Mettre &agrave; jour Paquet",
+"Updating Packages" => "Mise &agrave; jour Paquets",
+"Satisfactory Update" => "Mise à jour effectuée",
+"Choice" => "Choix",
+"Updated" => "A jour",
+"Install" => "Installer",
+"Repositories Update" => "Mettre &agrave; jour Installateurs",
+"Updating Repositories" => "Mise &agrave; jour Installateurs",
+"Satisfactory Install" => "Installation effectu&eacute;e",
+"Installing Package" => "Installation Paquet",
+"Updating for dependencies" => "Mise &agrave; jour pour d&eacute;pendances",
+"Installing for dependencies" => "Installation pour dépendances",
+"Installing" => "Installation",
+"Total Packages" => "Paquets Totaux",
+"There is an action in process" => "Il y a une action en cours",
+ 
+/*Backup List*/
+"Backup/Restore" => "Sauvegarde/Restauration",
+"Backup List" => "Liste Sauvegardes",
+"Name Backup" => "Nom Sauvegarde",
+"Error when deleting backup file" => "Erreur lors de l'effacement du fichier de sauvegarde",
+"There are not backup file selected" => "Il n'y a aucun fichier de sauvegarde s&eacute;lectionn&eacute;",
+"Action" => "Action",
+"Folder backup doesn't exist"=>"Dossier de sauvegarde inexistant",
+ 
+/* inicio Cancelador de echo*/
+"Echo Canceller"=>"Annulation d'Echo",
+"Status"=>"Statut",
+"Could not get oslec info"=>"Impossible d'obtenir l'info oslec",
+"Active"=>"Actif",
+"Inactive"=>"Inactif",
+"Inactivate"=>"D&eacute;sactiver",
+"Activate"=>"Activer",
+"Info"=>"Info",
+/* fin Cancelador de echo*/
+ 
+/*Module IM*/
+"IM" => "IM",
+"OpenFire" => "OpenFire",
+"The service Openfire No running" => "Le service Openfire n'est pas actif actuellement. Si vous voulez l'activer veuillez ",
+"vTigerCRM" => "vTigerCRM",
+"The vTiger installation is almost done. To complete it please" => "L'installation de vTiger est presque termin&eacute;e. Pou
+r la finir veuillez ",
+"click here" => "cliquer ici",
+/* Preferences*/
+"Preferences" => "Pr&eacute;f&eacute;rences",
+ 
+/* Start About Elastix */
+"About Elastix"=>"A propos d'Elastix",
+"About Elastix Content"=>"Elastix a &eacute;t&eacute; cr&eacute;&eacute; dans le but de devenir un syst&egrave;me bas&eacute;
+ web fiable, facile &agrave; utiliser pour la gestion des communications VOIP. Ce logiciel open
+source qui a d&eacute;marr&eacute; en Equateur est devenu la solution de choix pour l'impl&eacute;mentation
+de Voix sur IP tout autour du globe.",
+"About Elastix Closed"=>"Fermer",
+/* End About Elastix */
+ 
+//Elastix 0.9.1
+/*Star module Template Email */
+"Template Email"=>"Gabarit Email",
+"Fax From"=>"Fax de",
+"Fax From Name"=>"Fax de (Nom)",
+"Fax Suject"=>"Sujet Fax",
+"Fax Content"=>"Contenu Fax",
+"Configuration Sending Fax Mail"=>"Configuration Email d'envoi de Fax",
+"Edit Parameters"=>"Editer Param&egrave;tres",
+/* End module Template Email */
+ 
+/*Start module Group List*/
+"Groups"=>"Groupes",
+"Group List"=>"Liste Groupes",
+"Description"=>"Description",
+"New Group"=>"Nouveau Groupe",
+"Create New Group"=>"Cr&eacute;er Nouveau Groupe",
+"View Group"=>"Voir Groupe",
+"Edit Group"=>"Editer Groupe",
+"The Group have users assigned. You can delete any group that does not have any users assigned in it."=>"Le Groupe poss&egrav
+e;de des utilisateurs assign&eacute;s. Vous pouvez effacer n'importe quel groupe n'ayant pas d'utilisateur assign&eacute;.",
+"The administrator group cannot be deleted because is the default Elastix Group. You can delete any other group."=>"Le groupe
+ administrateur ne peut pas &ecirc;tre effac&eacute; car celui ci est le groupe administrateur Elastix par d&eacute;faut. Vou
+s pouvez effacer n'importe quel autre groupe.",
+/*End module Group List*/
+ 
+/*Star module Monitoring*/
+"Time"=>"Temps",
+"Message"=>"Message",
+"Are you sure you wish to delete recordings?"=>"Etes vous s&ucirc;r de vouloir effacer les enregistrements ?",
+"Download"=>"T&eacute;l&eacute;charger",
+"Listen"=>"Ecouter",
+/*End module Monitoring*/
+ 
+//Elastix 1.0
+/*Start module DHCP Server */
+"DHCP Server" => "Serveur DHCP",
+"Update" => "Mettre &agrave; jour",
+"Service Start" => "D&eacute;marrage Service",
+"Service Stop" => "Arr&ecirc;t Service",
+"Start range of IPs" => "D&eacute;but de l'intervalle IP",
+"End range of IPs" => "Fin de l'intervalle IP",
+"DNS 1" => "DNS 1",
+"DNS 2" => "DNS 2",
+"WINS" => "WINS",
+"Gateway" => "Passerelle",
+"Optional" => "Optionnel",
+"Of 1 to 50000 Seconds" => "De 1 &agrave; 50000 Secondes",
+"Time of client refreshment" => "Dur&eacute;e du bail",
+"DHCP Configuration" => "Configuration DHCP",
+"Could not find IP range" => "Impossible de trouver l'intervalle IP",
+"DHCP configuration reading error: Verify that the DHCP service is installed and try again." => "Erreur de lecture de configu
+ration DHCP: V&eacute;rifiez que le service DHCP est install&eacute; et essayez de nouveau.",
+"Information DHCP" => "Information DHCP",
+"The Service dhcpd can't stop" => "Impossible d'arr&ecirc;ter le service dhcpd",
+"The Service dhcpd can't start" => "Impossible de d&eacute;marrer le service dhcpd",
+"The start IP is outside the LAN network" => "L'adresse IP de d&eacute;part est en dehors du r&eacute;seau local",
+"The final IP is outside the LAN network" => "L'adresse IP de fin est en dehors du r&eacute;seau local",
+"IP Range is invalid for available devices" => "L'intervalle IP est invalide pour les p&eacute;riph&eacute;riques disponibles
+",
+"Gateway is outside the LAN network" => "La passerelle est en dehors du r&eacute;seau local",
+"You can only choose between Enabled and Disabled" => "Vous pouvez choisir uniquement Activ&eacute; ou D&eacute;sactiv&eacute
+;",
+"Value outside the range (1-50000)" => "Valeur en dehors de l'intervalle (1-50000)",
+"Failed to update the file configuration" => "Echec de mise &agrave; jour du fichier de configuration",
+"The update was successful, but was unable to reestablish the permissions of the file dhcp.conf" => "La mise &agrave; jour a
+r&eacute;ussie mais impossible de r&eacute;tablir les permissions du fichier dhcp.conf",
+"Update Error" => "Erreur de Mise &agrave; jour",
+/*End module DHCP Server */
+ 
+/*Start module Endpoint Configuration*/
+"Endpoint Configuration" => "Configuration Terminal",
+"Endpoint Scan" => "Scanner Terminal",
+"Display Name" => "Afficher Nom",
+"MAC Adress" => "Adresse MAC",
+"Phone Type" => "Type T&eacute;l&eacute;phone",
+"IP Adress" => "Adresse IP",
+"Vendor" => "Vendeur",
+"User Extension" => "Extension Utilisateur",
+"Set" => "D&eacute;finir",
+"Unset" => "Effacer",
+"Are you sure you wish to unset endpoint(s)?" => "Etes vous s&ucirc;r de vouloir effacer le(s) terminal(aux) ?",
+"Are you sure you wish to set endpoint(s)?" => "Etes vous s&ucirc;r de vouloir d&eacute;finir le(s) terminal(aux) ?",
+"Configured without incident." => "Configur&eacute; sans incident.",
+"Not Set" => "Non D&eacute;fini",
+"Unable write the file" => "Impossible d'&eacute;crire le fichier",
+"Users" => "Utilisateurs",
+"User Name in Endpoint is" => "Le Nom d'Utilisateur dans le Terminal est",
+"And secrets no equals in FreePBX and Endpoint" => "Et les mots de passe ne concordent pas entre FreePBX et le Terminal",
+"Don't exist in FreePBX extension" => "N'existe pas dans l'extension FreePBX",
+"Don't exist in Endpoint extension" => "N'existe pas dans l'extension du Terminal",
+"UPDATE" => "METTRE A JOUR",
+"Unable delete the file" => "Impossible d'effacer le fichier",
+"Unselected" => "Non S&eacute;lectionn&eacute;",
+"No Models" => "Aucun Mod&egrave;le",
+"No Extensions" => "Aucune Extension",
+"Invalid Format in Parameter" => "Format Invalide dans Param&egrave;tre",
+"It can take several minutes, because your ip address has some devices, " => "It can take several minutes, because your ip address has some devices, ",
+"WARNING" => "WARNING",
+/*End module Endpoint Configuration*/
+ 
+/*Start module Call Center*/
+"Outgoing Campaigns" => "Campagnes Sortantes",
+"Agent Console" => "Console d'Agent",
+"Agents" => "Agents",
+"Break Administrator" => "Administrateur Pauses",
+"Ingoing Calls" => "Appels Entrants",
+"Client" => "Client",
+"Forms" => "Formulaires",
+"Form Designer" => "Cr&eacute;ateur Formulaire",
+"Form List" => "Liste Formulaires",
+"Reports Break" => "Rapports Pauses",
+"Calls Detail" => "D&eacute;tails Appels",
+"Calls per hour" => "Appels par heure",
+"Ingoing Calls Success" => "Appels Entrants R&eacute;pondus",
+"Calls per Agent" => "Appels par Agent",
+"Hold Time" => "Temps de Prise",
+"Login Logout" => "Connect&eacute; D&eacute;connect&eacute;",
+"Graphic Calls per hour" => "Graphique Appels par heure",
+/*End module Call Center*/
+ 
+/*Start module conference*/
+"Conference" => "Conf&eacute;rence",
+"State" => "Etat",
+"Past Conferences" => "Conf&eacute;rences Pass&eacute;es",
+"Current Conferences" => "Conf&eacute;rences Actuelles",
+"Future Conferences" => "Conf&eacute;rences Futures",
+"Conference #" => "Conf&eacute;rence No",
+"Conference Name" => "Nom Conf&eacute;rence",
+"Starts" => "D&eacute;but",
+"Ends" => "Fin",
+"Participants" => "Participants",
+"All" => "Tous",
+"New Conference" => "Nouvelle Conf&eacute;rence",
+"Conference Owner" => "Propri&eacute;taire Conf&eacute;rence",
+"Conference Number" => "Num&eacute;ro Conf&eacute;rence",
+"Moderator PIN" => "PIN Mod&eacute;rateur",
+"Moderator Options" => "Options Mod&eacute;rateur",
+"Announce" => "Annonce",
+"Record" => "Enregistrement",
+"User PIN" => "PIN Utilisateur",
+"Listen Only" => "Ecouter Seulement",
+"Wait for Leader" => "Attente Ma&icirc;tre",
+"User Options" => "Options Utilisateur",
+"Start Time (PST/PDT)" => "Heure D&eacute;but (PST/PDT)",
+"Duration (HH:MM)" => "Dur&eacute;e (HH:MM)",
+"Recurs" => "R&eacute;cursive",
+"Max Participants" => "Participants Max",
+"Reoccurs" => "R&eacute;cursive",
+"for" => "pour",
+"days" => "jours",
+"Daily" => "Quotidien",
+"Weekly" => "Hebdomadaire",
+"Bi-weekly" => "Bi-hebdomadaire",
+"Moderator and user PINs must not be equal" => "Les PINs mod&eacute;rateur et utilisateur ne doivent pas &ecirc;tre identique
+",
+"Are you sure you wish to delete conference (es)?" => "Etes vous s&ucirc; de vouloir effacer la(les) conf&eacute;rence (s)?",
+"Id" => "Id",
+"CallerId" => "Id Appelant",
+"Mode" => "Mode",
+"Mute" => "Sourdine",
+"Kick" => "Raccrocher",
+"Are you sure you wish to Mute caller (s)?" => "Etes vous s&ucirc;r de vouloir mettre en sourdine l'(les) appelant (s)?",
+"Are you sure you wish to Kick caller (s)?" => "Etes vous s&ucirc;r de vouloir raccrocher l'(les) appelant (s)?",
+"Muted" => "En Sourdine",
+"UnMuted" => "Sourdine Inactive",
+"Error when connecting to Asterisk Manager" => "Erreur en se connectant au Manager Asterisk",
+"The conference installation is almost done. To complete it please" => "L'installation de conf&eacute;rence est presque termi
+n&eacute;e. Pour la finir veuillez",
+"Kick All" => "Raccrocher Tous",
+"Invite Caller" => "Inviter Appelant",
+"The device wasn't write" => "Le p&eacute;riph&eacute;rique n'a pas &eacute;t&eacute; &eacute;crit",
+"The device must be numeric" => "Le p&eacute;riph&eacute;rique doit &ecirc;tre num&eacute;rique",
+"The device couldn't be added to the conference" => "Le p&eacute;riph&eacute;rique n'a pas pu &ecirc;tre ajout&eacute; &agrav
+e; la conf&eacute;rence",
+/*End module conference*/
+ 
+/*Extensions Batch*/
+"Extensions Batch" => "Batch Extensions",
+"Invalid file extension.- It must be csv" => "Extension fichier invalide.- Elle doit &ecirc;tre en csv",
+"Possible file upload attack. Filename" => "Attaque upload fichier possible. Nom de fichier",
+"Error" => "Erreur",
+"Error updating Sip" => "Erreur de mise &agrave; jour Sip",
+"Error updating Users" => "Erreur de mise &agrave; jour Utilisateurs",
+"Error updating Devices" => "Erreur de mise &agrave; jour P&eacute;riph&eacute;riques",
+"Error updating Voicemail" => "Erreur de mise &agrave; jour Boite vocale",
+"Error processing CallWaiting" => "Erreur d'ex&eacute;cution Appel en Attente",
+"Total extension updated" => "Toutes extensions mises &agrave; jour",
+"Error, extension" => "Erreur, extension",
+"repeat in lines" => "r&eacute;p&eacute;tition dans les lignes",
+"with" => "avec",
+"The file is incorrect or empty" => "Le fichier est incorrect ou vide",
+"Incomplete Columns" => "Colonnes Incompl&egrave;tes",
+"Verify the header" => "V&eacute;rifier l'ent&ecirc;te",
+"At minimum there must be the columns" => "Au minimum il doit y avoir les colonnes",
+"Can't exist a extension empty. Line" => "Ne peut exister une extension vide. Ligne",
+"Can't exist a secret empty. Line" => "Ne peut exister un mot de passe vide. Ligne",
+"Can't exist a display name empty. Line" => "Ne peut exister un nom vide. Ligne",
+"Please read the lines in the footer"=>"Veuillez lire les lignes dans le bas de page",
+"Header File Extensions Batch" => "L'ent&ecirc;te du fichier doit &ecirc;tre sur la premi&egrave;re ligne et il doit avoir au
+ minimum 3 colonnes: Nom Affich&eacute;, Extension Utilisateur, Mot de passe.",
+"About Update Extensions Batch" => "Si vous chargez un fichier avec des extensions d&eacute;j&agrave; cr&eacute;&eacute;es, c
+es extensions seront mises &agrave; jour.",
+"There aren't extensions" => "Il n'y a pas d'extension",
+"Download Extensions" => "T&eacute;l&eacute;charger Extensions",
+/*Extensions Batch*/
+ 
+/*File Editor*/
+"Permission denied" => "Permission refus&eacute;e",
+/*File Editor*/
+ 
+/*Sugarcrm*/
+"The SugarCRM installation is almost done. To complete it please" => "L'installation de SugarCRM est presque termin&eacute;e.
+ Pour la finir veuillez",
+/*Sugarcrm*/
+ 
+/*CDR Report*/
+"Are you sure you wish to delete CDR(s) Report(s)?" => "Etes vous s&ucirc;r de vouloir effacer le(s) Rapport(s) CDR?",
+/*CDR Report*/
+ 
+/*Grouplist*/
+"administrator" => "Administrateur",
+"operador" => "Op&eacute;rateur",
+"extension" => "Extension",
+"total access" => "Acc&egrave;s Total",
+"extension user" => "Utilisateur Extension",
+/*Grouplist*/
+ 
+/*Menu*/
+"Tools" => "Outils",
+/*Menu*/
+ 
+/*Backup/Restore*/
+"Are you sure you wish to delete backup (s)?" => "Etes vous s&ucirc;r de vouloir effacer la(les) sauvegarde (s)?",
+"Database" => "Base de donn&eacute;es",
+"PDF" => "PDF",
+"Endpoint" => "Terminal",
+"Asterisk" => "Asterisk",
+"All options (Fax)" => "Toutes les options (Fax)",
+"All options (Email)" => "Toutes les options (Email)",
+"All options (Endpoint)" => "Toutes les options (Terminal)",
+"All options (Asterisk)" => "Toutes les options (Asterisk)",
+"Zaptel Configuration" => "Configuration Zaptel",
+"Others" => "Autres",
+"All options (Others)" => "Toutes les options (Autres)",
+"SugarCRM Database" => "Base de donn&eacute;es SugarCRM",
+"VtigerCRM Database" => "Base de donn&eacute;es VtigerCRM",
+"A2billing Database" => "Base de donn&eacute;es A2billing",
+"Mysql Database" => "Base de donn&eacute;es Mysql",
+"Menus and Permissions" => "Menus et Permissions",
+"This process could take several minutes" => "Cette action peut prendre quelques minutes",
+"Mailbox" => "Boite Email",
+"(Heavy Content)" => "(Contenu lourd)",
+/*Backup/Restore*/
+ 
+"Country Code" => "Code Pays",
+"Area Code"=> "Code R&eacute;gion",
+ 
+ 
+/*Calendar*/
+"January" => "Janvier",
+"February" => "F&eacute;vrier",
+"March" => "Mars",
+"April" => "Avril",
+"May_" => "Mai",
+"June" => "Juin",
+"July" => "Juillet",
+"August" => "Ao&ucirc;t",
+"September" => "Septembre",
+"October" => "Octobre",
+"November" => "Novembre",
+"December" => "D&eacute;cembre",
+ 
+"Jan" => "Jan",
+"Feb" => "F&eacute;b",
+"Mar" => "Mar",
+"Apr" => "Avr",
+"May" => "Mai",
+"Jun" => "Juin",
+"Jul" => "Jui",
+"Aug" => "Aou",
+"Sep" => "Sep",
+"Oct" => "Oct",
+"Nov" => "Nov",
+"Dec" => "D&eacute;c",
+ 
+"Monday" => "Lundi",
+"Tuesday" => "Mardi",
+"Wednesday" => "Mercredi",
+"Thursday" => "Jeudi",
+"Friday" => "Vendredi",
+"Saturday" => "Samedi",
+"Sunday" => "Dimanche",
+ 
+"Normal" => "Normal",
+"Monthly" => "Mensuel",
+ 
+"Add Event" => "Ajouter un &eacute;v&eacute;nement",
+"Back to Calendar" => "Retour au Calendrier",
+"View Date" => "Afficher la Date",
+ 
+"next month" => "Mois suivant",
+"next year" => "Ann&eacute;e suivante",
+"last year" => "Ann&eacute;es pr&eacute;c&eacute;dante",
+"last month" => "Mois pr&eacute;c&eacute;dent",
+ 
+"Title" => "Titre",
+"Delete Selected" => "Effac&eacute; la s&eacute;lection",
+"(No subject)" => "(Pas de sujet)",
+"Modify" => "Modifier",
+"No events on this day" => "Pas d'&eacute;v&eacute;nement ce jour.",
+"year view not yet implemented" => "La vue annuelle n'est pas encore implement&eacute;e",
+"Software Error" => "Erreur Logiciel",
+"Message:" => "Message:",
+"Backtrace" => "Backtrace",
+"AM" => "AM",
+"PM" => "PM",
+"Error in get_events_by_date" => "Erreur dans get_events_by_date",
+"Error in get_event_by_id" => "Erreur dans get_event_by_id",
+"item doesn't exist!" => "L'&eacute;l&eacute;ment n'existe pas!",
+"Html is not a valid Html class" => "Html n'est pas une classe HTML valide",
+"Invalid class" => "Class invalide",
+"Error reading options" => "Erreur lors de la lecture des options",
+"Updated options" => "Mise &agrave; jour des options",
+ 
+"Error while removing an event" => "Erreur lors de la suppression d'un &eacute;v&eacute;nement",
+"Removed item" => "Point effac&eacute;",
+"Could not remove item" => "Impossible de supprimer l'&eacute;l&eacute;ment",
+"No items selected" => "Aucun &eacute;l&eacute;ment s&eacute;lectionn&eacute;",
+ 
+"Adding event to calendar" => "Ajouter un &eacute;v&eacute;nement au calendrier",
+"Date of event" => "Date de l'&eacute;v&eacute;nement",
+"Date multiple day event ends" => "Date o&ugrave; l'&eacute;v&eacute;ment se termine",
+"Event type" => "Type d'&eacute;v&eacute;nement",
+"Subject" => "Sujet",
+"chars max" => "Caract&egrave;res maximum",
+"Asterisk Call Me" => "Asterisk doit m'appeler",
+"Submit Event" => "Soumettre un &eacute;v&eacute;nement",
+ 
+"No day was given" => "Aucun jour n'a &eacute;t&eacute; donn&eacute;.",
+"No month was given" => "Aucun mois n'a &eacute;t&eacute; donn&eacute;.",
+"No year was given" => "Aucune ann&eacute;e n'a &eacute;t&eacute; donn&eacute;.",
+"No hour was given" => "Aucune heure n'a &eacute;t&eacute; donn&eacute;.",
+"No minute was given" => "Aucune minute n'a &eacute;t&eacute; donn&eacute;..",
+"No type of event was given" => "Aucun type d'&eacute;v&eacute;nement n'a &eacute;t&eacute; donn&eacute;.",
+"No end day was given" => "Aucune heure n'a &eacute;t&eacute; donn&eacute;.",
+"No end month was given" => "Aucune fin de mois n'a &eacute;t&eacute; donn&eacute;.",
+"No end year was given" => "Aucune fin d'ann&eacute;e n'a &eacute;t&eacute; donn&eacute;.",
+"Your subject was too long" => "Votre sujet est trop long",
+"characters max" => "Caract&egrave;res maximum",
+"The start of the event cannot be after the end of the event" => "Le d&eacute;but de l'&eacute;v&eacute;nement ne peut être sup&eacute;rieur &agrave; celui de la fin de l'&eacute;v&eacute;nement",
+"Error processing event" => "Erreur lors du traitement.",
+"No changes were made" => "Aucun changement n'a &eacute;t&eacute; fait",
+"Date updated" => "Date mise &agrave; jour",
+"Editing Event" => "Edition des &eacute;v&eacute;nements",
+"yes" => "Oui",
+"no" => "Non",
+ 
+"Ascending" => "Ascendant.",
+"Decending" => "Descendant.",
+"Invalid sort option" => "Option de tri invalde.",
+"Invalid order option" => "Ordre de tri invalide",
+"Encountered an error while searching" => "A rencontr&eacute; une erreur lors de la recherche.",
+"No events matched your search criteria" => "Aucun &eacute;v&eacute;nement correspondant &agrave; votre crit&egrave;re de recherche.",
+"Search Results" => "R&eacute;sultat de la recherche.",
+"Date Time" => "Date heure",
+"Phrase" => "Phrase",
+"From" => "De",
+"To" => "&agrave;",
+"Sort By" => "Tri par",
+"Order" => "Ordre",
+"Calendar" => "Calendrier",
+"Invalid action" => "Action invalide",
+"That year is too far in the past" => "Cette ann&eacute;e-l&agrave; remonte trop loin dans le pass&eacute;.",
+"That year is too far in the future" => "Cette ann&eacute;e-l&agrave; se projette trop loin dans l'avenir.",
+ 
+"To create new recordings click" => "Pour cr&eacute;er un nouvel enregistrement, cliquer",
+"Here" => "ici",
+ 
+"No Recording was given, if no exists you must first create a new recording" => "Aucun enregistrement n'a &eacute;t&eacute; donn&eacute;e. S'il n'en existe pas, vous devez d'abord cr&eacute;er un nouvel enregistrement",
+ 
+"Call to" => "Appeler le",
+"To add phone number from address book click" => "Pour ajouter un num&eacute;ro du carnet d'adresse, cliquer",
+/*Calendar*/
+ 
+/*Adress Book*/
+"New Contact"   => "Nouveau contact",
+"Address Book"  => "Carnet d'adresse",
+"Are you sure you wish to delete the contact." => "Êtes-vous s&ucirc;r de vouloir supprimer le contact.",
+"First Name"    => "Pr&eacute;nom",
+"Last Name" => "Nom",
+"Phone Number"  => "Num&eacute;ro de t&eacute;l&eacute;phone",
+"Extension" => "Num&eacute;ro de Poste",
+"The call couldn't be realized" => "L'appel ne peut être r&eacute;alis&eacute;.",
+"Internal" => "Interne",
+"External" => "Externe",
+"Call" => "Appel",
+"Phone Directory" => "R&eacute;pertoire t&eacute;l&eacute;phonique",
+"CSV" => "CSV",
+"Download Address Book" => "T&eacute;l&eacute;chargement du carnet d'adresse.",
+"Can't exist a Name empty. Line" => "Il ne peut exister de nom vide &agrave; la ligne",
+"Can't exist a Last Name empty. Line" => "Il ne peut exister de nom de famille vide &agrave; la ligne",
+"Can't exist a Phone Number empty. Line" => "Il ne peut exister de num&eacute;ro de t&eacute;l&eacute;phone vide &agrave; la ligne",
+"Total contacts created" => "Total de contactes cr&eacute;&eacute;s",
+"Contact Data already exists" => "Donn&eacute;es du contat d&eacute;j&agrave; existant",
+"Header File Address Book" => "L'en-tête du fichier doit être dans la premi&egrave;re ligne et il doit avoir au moins trois colonnes: Nom, Pr&eacute;nom, Num&eacute;ro de t&eacute;l&eacute;phone",
+"About Address Book" => "Si vous chargez un fichier de donn&eacute;es de contacts d&eacute;j&agrave; cr&eacute;&eacute;, ce contact ne sera pas utilis&eacute;",
+"There aren't contacts" => "Il n'y a pas de contacts",
+"Address Book from CSV" => "Carnet d'adresse d'un fichier CSV",
+/*Adress Book*/
+ 
+/*Dashboard*/
+"Dashboard" => "Tableau de bord",
+"You haven't extension" => "Vous n'avez pas d'extension.",
+"Imap: Connection error" => "Imap: Erreur de connexion.",
+"You don't recibed emails" => "Vous n'avez pas r&eacute;çu de courriel.",
+"You don't recibed faxes" => "Vous n'avez pas r&eacute;çu de fax.",
+"Query error" => "Erreur de requête.",
+"You don't recibed calls" => "Vous n'avez pas reçu d'appel.",
+"You don't recibed voicemails" => "Vous n'avez pas reçu de message vocal.",
+"Unenabled to open file" => "Impossible d'ouvrir le fichier",
+"User Info" => "Information utilisateur.",
+"Calls" => "Appels",
+"Em@ils" => "Courriels",
+"Faxes" => "Faxes",
+"Voicem@ils" => "Boîte vocales",
+"answered" => "<font color='green'><b>R&eacute;pondu</b></font>",
+"missed" => "<font color='red'><b>Manqu&eacute;</b></font>",
+"unknow" => "<b>Inconnu</b>",
+"call record" => "{status} appel reçu le {date} du num&eacute;ro {source}.",
+"call duration" => " et d'une dur&eacute;e de{time} .",
+"fax recived" => "Fax r&eacute;çu: {file} de {source}, le {date}.",
+"voicemail recived" => "Boïte vocale de {source}, r&eacute;çu le {date} et d'une dur&eacute;e de {duration} secondes.",
+"mail recived" => "{date} {source} '{subject}'",
+"Quota asigned" => "Quota attribu&eacute;:",
+"Quota Used" => "Quota utilis&eacute;:",
+"Quota free space" => "Quota d'espace libre:",
+"Error at read yours calls." => "Erreur &agrave; la lecture de vos appels",
+"Error at read yours faxes." => "Erreur &agrave; la lecture de vos faxes.",
+"Error at read yours voicemails." => "Erreur &agrave; la lecture de vos messages vocaux.",
+"Error at read yours mails." => "Erreur &agrave; la lecture de vos mails.",
+"Error at read status system." => "Erreur &agrave; la lecture du statut syst&egrave;me.",
+"Error at read your calendar." => "Erreur &agrave; la lecture de votre calendrier.",
+"You don't have events" => "Vous n'avez pas d'&eacute;v&eacute;nement.",
+"You don't have a webmail account" => "Vous n'avez pas de compte WebMail.",
+/*Dashboard*/
+ 
+/*********MISC*************/
+"Import File" => "Importation de fichier",
+"Summary Cost" => "Sommaire des co&ucirc;ts.",
+"operator" => "Op&ecute;rateur",
+"Upload" => "Envoyer",
+"File Upload" => "Fichier &agrave; envoyer",
+"The backup file would have a tar extension" => "Le fichier de sauvegarde doit avoir une extension .tar .",
+"Error copying the file" => "Erreur de copie de fichier",
+"The file was copied correctly" => "Le fichier a &eacute;t&eacute; copi&eacute; correctement",
+/*********MISC*************/
+ 
+/*USERLIST*/
+/* Additional strings for webmail auto-login extension */
+"Webmail User" => "Utililsateur Webmail",
+"Webmail Domain" => "Domaine Webmail",
+"Webmail Password" => "Mot de passe Webmail",
+"Retype Webmail password" => "Retapez le mot de passe Webmail",
+"Mail Profile" => "Profile du mail",
+/*USERLIST*/
+ 
+ 
+/*PBX Configuration*/
+"Option" => "Option",
+"Unembedded freePBX" => "FreePBX ind&eacute;pendant",
+"Basic" => "Simple",
+"Extensions" => "Extensions",
+"Feature Codes" => "Codes Fonctions",
+"General Settings" => "Param&egrave;tres G&eacute;n&eacute;raux",
+"Outbound Routes" => "Routes Sortantes",
+"Trunks" => "Troncs",
+"Inbound Call Control" => "Controle des Appels Entrants",
+"Inbound Routes" => "Routes Entrantes",
+"Announcements" => "Annonces",
+"Follow Me" => "Suivez-Moi",
+"IVR" => "SVI",
+"Misc Destinations" => "Autres Destinations",
+"Queues" => "Files d'Attente",
+"Ring Groups" => "Groupes Sonneries",
+"Time Conditions" => "Conditions de Temps",
+"Internal Options & Configuration" => "Configuration et Options Internes",
+"Conferences" => "Conf&eacute;rences",
+"Misc Applications" => "Autres Applications",
+"Music on Hold" => "Musique d'Attente",
+"PIN Sets" => "Param&egrave;tres PIN",
+"Paging and Intercom" => "Paging et Intercom",
+"Parking Lot" => "Parkage",
+"System Recordings" => "Enregistrements Syst&egrave;me",
+"Remote Access" => "Acc&egrave;s distant",
+"Callback" => "Rappels",
+"DISA" => "DISA",
+/*PBX Configuration*/
+ 
+/*New Module*/
+"Filter Example" => "Exemple de Filtre",
+"Example" => "Exemple",
+/*New Module*/
+ 
+/*RECORDINGS*/
+"Recordings" => "Enregistrements",
+"Record Name" => "Nom d'enregistrement",
+"Record" => "Enregistrement",
+"Insert the Recording Name" => "Ins&eacute;rez le nom d'enregistrement",
+"The recording couldn't be realized" => "L'enregistrement n'a pas pu &ecirc;tre effectu&eacute;",
+"The recording was saved" => "L'enregistement a &eacute;t&eacute; sauvegard&eacute;",
+"To continue: record a message then click on save" => "Pour continuer: enregistrer un message puis cliquez sur Sauvegarder",
+"Recording File" => "Enregistrement du fichier",
+"Destiny directory couldn't be created" => "Le r&eacute;pertoire de destination n'a pas pu &ecirc;tre cr&eacute;&eacute;",
+/*RECORDINGS*/
+ 
+/*ASTERIX LOG*/
+"offset" => "Offset",
+"Asterisk Logs" => "Traces Asterisk",
+/*ASTERIX LOG*/
+"in" => "Received", 
+"out" => "Sent", 
+"Type Fax" => "Type Fax",  
+);
+?>

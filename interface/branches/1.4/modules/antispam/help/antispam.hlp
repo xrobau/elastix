@@ -1,0 +1,14 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Antispam" del módulo "Email" nos permite configurar
+el nivel de aceptación de los correos, es decir que no sean "Spam"
+</p>
+<div><img src="../modules/{$node_id}/images/antispam.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+</body>
+</html>

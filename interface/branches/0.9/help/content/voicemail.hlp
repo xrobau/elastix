@@ -1,0 +1,28 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+
+<h1>Voicemails</h1>
+
+<p>The option “Voicemails” of the Menu “PBX” in Elastix lets us view a list with details of the voicemails for the extension of a connected user.</p>
+
+<div><img src="/images/help/pbx/voicemail.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>The report will change depending on the values of the filter:</p>
+
+<table class="inline">
+  <tr>
+    <td>Start Date</td><td>Start date for the selection of voicemails.</td>
+  </tr>
+  <tr>
+    <td>End Date</td><td>End date for the selection of voicemails.</td>
+  </tr>
+</table>
+
+</body>
+</html>

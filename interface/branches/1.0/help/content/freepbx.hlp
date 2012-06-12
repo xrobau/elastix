@@ -1,0 +1,10 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+<h1>PBX Configuration</h1>
+<p>The "PBX Configuration" is based on the FreePBX software. For more information, please visit the following link: <a href="http://www.aussievoip.com/wiki/freePBX">http://www.aussievoip.com/wiki/freePBX</a></p>
+</body>
+</html

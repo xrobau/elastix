@@ -1,0 +1,17 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+
+<h1>Channels Usage</h1>
+
+<p>The option “Channels Usage” of the Menu “Reports” in Elastix lets us view graphically the number of simultaneous calls for each channel.</p>
+
+<div><img src="/images/help/reports/channel_usage.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+</body>
+</html>

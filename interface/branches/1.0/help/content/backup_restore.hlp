@@ -1,0 +1,27 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+
+<h1>Backup/Restore</h1>
+
+<p>The Backup/Restore option in the System menu of Elastix allows you to back up and restore Elastix configuration data.</p>
+
+<div><img src="/images/help/system/backup_restore.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>In order to backup the Elastix configuration, just select the Process button from the available options.</p>
+
+<br />
+
+<div><img src="/images/help/system/backup_restore_2.jpg" border="0"></div>
+<div>Figure 2</div>
+<br />
+
+<p>In order to restore the Elastix configuration, just click on a file from the restore options listed.</p>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+<h1>Users</h1>
+
+<p>The option “Users” allows us to create and modify the users who will have access to the Elastix Web Interface.</p>
+
+<div><img src="/images/help/system/userlist.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>Un usuario deberá pertenecer a un Grupo, esto será indicado al crear un nuevo usuario, pero podrá ser movido de grupo por medio de la opción Editar.</p>
+
+</body>
+</html>

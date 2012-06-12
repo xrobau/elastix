@@ -1,0 +1,81 @@
+## allows using a different name for the library rather than libpri
+## if LIB_SUF is set in the environment/makefile params it will install
+## the headers under /usr/include/$(LIB_SUF)/libpri.h and call the library 
+## libpri-$(LIB_SUF).so.1
+
+diff -urNad libpri-1.2.3~/Makefile libpri-1.2.3/Makefile
+--- libpri-1.2.3~/Makefile	2006-04-30 15:17:47.000000000 +0000
++++ libpri-1.2.3/Makefile	2006-06-10 13:48:23.000000000 +0000
+@@ -32,14 +32,20 @@
+ OSARCH=$(shell uname -s)
+ PROC?=$(shell uname -m)
+ 
++ifdef LIB_SUF
++LIBNAME=pri-$(LIB_SUF)
++else
++LIBNAME=pri
++endif
+-STATIC_LIBRARY=libpri.a
+-DYNAMIC_LIBRARY=libpri.so.1.0
++STATIC_LIBRARY=lib$(LIBNAME).a
++DYNAMIC_LIBRARY=lib$(LIBNAME).so.1.0
+ STATIC_OBJS=copy_string.o pri.o q921.o prisched.o q931.o pri_facility.o
+ DYNAMIC_OBJS=copy_string.lo pri.lo q921.lo prisched.lo q931.lo pri_facility.lo
+ CFLAGS=-Wall -Werror -Wstrict-prototypes -Wmissing-prototypes -g $(ALERTING) $(LIBPRI_COUNTERS)
+ INSTALL_PREFIX=$(DESTDIR)
+ INSTALL_BASE=/usr
+-SOFLAGS = -Wl,-hlibpri.so.1.0
++INCLUDE_DIR=$(INSTALL_PREFIX)$(INSTALL_BASE)/include/$(LIB_SUF)
++SOFLAGS = -Wl,-hlib$(LIBNAME).so.1.0
+ LDCONFIG = /sbin/ldconfig
+ ifneq (,$(findstring X$(OSARCH)X, XLinuxX XGNU/kFreeBSDX))
+ LDCONFIG_FLAGS=-n
+@@ -55,7 +61,7 @@
+ CFLAGS += -DSOLARIS -I../zaptel-solaris
+ LDCONFIG = 
+ LDCONFIG_FLAGS = \# # Trick to comment out the period in the command below
+-SOSLINK = ln -sf libpri.so.1.0 libpri.so.1
++SOSLINK = ln -sf lib$(LIBNAME).so.1.0 lib$(LIBNAME).so.1
+ #INSTALL_PREFIX = /opt/asterisk  # Uncomment out to install in standard Solaris location for 3rd party code
+ endif
+ 
+@@ -82,29 +88,28 @@
+ 
+ install: $(STATIC_LIBRARY) $(DYNAMIC_LIBRARY)
+ 	mkdir -p $(INSTALL_PREFIX)$(INSTALL_BASE)/lib
+-	mkdir -p $(INSTALL_PREFIX)$(INSTALL_BASE)/include
++	mkdir -p $(INCLUDE_DIR)
++	install -m 644 libpri.h $(INCLUDE_DIR)
+ ifneq (${OSARCH},SunOS)
+-	install -m 644 libpri.h $(INSTALL_PREFIX)$(INSTALL_BASE)/include
+ 	install -m 755 $(DYNAMIC_LIBRARY) $(INSTALL_PREFIX)$(INSTALL_BASE)/lib
+ 	if [ -x /usr/sbin/sestatus ] && ( /usr/sbin/sestatus | grep "SELinux status:" | grep -q "enabled"); then /sbin/restorecon -v $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/$(DYNAMIC_LIBRARY); fi
+-	( cd $(INSTALL_PREFIX)$(INSTALL_BASE)/lib ; ln -sf libpri.so.1.0 libpri.so ; ln -sf libpri.so.1.0 libpri.so.1 )
++	( cd $(INSTALL_PREFIX)$(INSTALL_BASE)/lib ; ln -sf lib$(LIBNAME).so.1.0 lib$(LIBNAME).so ; ln -sf lib$(LIBNAME).so.1.0 lib$(LIBNAME).so.1 )
+ 	install -m 644 $(STATIC_LIBRARY) $(INSTALL_PREFIX)$(INSTALL_BASE)/lib
+-	if test $$(id -u) = 0; then $(LDCONFIG) $(LDCONFIG_FLAGS) $(INSTALL_PREFIX)$(INSTALL_BASE)/lib; fi
+ else
+ 	install -f $(INSTALL_PREFIX)$(INSTALL_BASE)/include -m 644 libpri.h
+ 	install -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib -m 755 $(DYNAMIC_LIBRARY)
+-	( cd $(INSTALL_PREFIX)$(INSTALL_BASE)/lib ; ln -sf libpri.so.1.0 libpri.so ; $(SOSLINK) )
++	( cd $(INSTALL_PREFIX)$(INSTALL_BASE)/lib ; ln -sf lib$(LIBNAME).so.1.0 lib$(LIBNAME).so ; $(SOSLINK) )
+ 	install -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib -m 644 $(STATIC_LIBRARY)
+ endif
+ 
+ uninstall:
+ 	@echo "Removing Libpri"
+-	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/libpri.so.1.0
+-	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/libpri.so.1
+-	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/libpri.so
+-	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/libpri.a
+-	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/include/libpri.h
+-
++	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/lib$(LIBNAME).so.1.0
++	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/lib$(LIBNAME).so.1
++	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/lib$(LIBNAME).so
++	rm -f $(INSTALL_PREFIX)$(INSTALL_BASE)/lib/lib$(LIBNAME).a
++	rm -f $(INCLUDE_DIR)/libpri.h
++  
+ pritest: pritest.o
+ 	$(CC) -o pritest pritest.o -L. -lpri -lzap $(CFLAGS)
+ 

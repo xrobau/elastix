@@ -1,0 +1,56 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The &quot;Rates&quot; option of the &quot;Billing&quot; menu allows us to display and configure the rates per minute that are used to bill for the calls</p>
+
+<div><img src="../modules/{$node_id}/images/billing_rates.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<h3>View, Edit and Delete</h3>
+
+<p>The link View will take us to a screen where we will see the rate details.</p>
+
+<div><img src="../modules/{$node_id}/images/billing_rates_view.jpg" border="0"></div>
+<div>Figure 2</div>
+<br />
+
+<p>To delete a rate, click on the “Delete” button.</p>
+
+<p>You can also modify the values of the rate by clicking on the “Edit” button. The only values that can change are: Name, Rate and Rate Offset.</p>
+
+<div><img src="../modules/{$node_id}/images/billing_rates_edit.jpg" border="0"></div>
+<div>Figure 3</div>
+<br />
+
+<h3>Create New Rate</h3>
+
+<p>To add a new rate, click on the “Create New Rate” button. A form will be shown in which you will input the following fields:</p>
+
+<div><img src="../modules/{$node_id}/images/billing_rates_new.jpg" border="0"></div>
+<div>Figure 4</div>
+<br />
+
+<table class="inline">
+	<tr>
+		<td>Prefix</td><td>The telephone prefix in which the rate will be applied.</td>
+	</tr>
+	<tr>
+		<td>Name</td><td>Name of the rate</td>
+
+	</tr>
+	<tr>
+		<td>Rate</td><td>Monetary value of the Rate per minute</td>
+	</tr>
+	<tr>
+		<td>Rate Offset</td><td>Value of the connection.</td>
+	</tr>
+
+</table>
+</body>
+</html>

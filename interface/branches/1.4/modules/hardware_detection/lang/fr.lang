@@ -1,0 +1,53 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+   Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                             |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on "AS IS"     |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Andrés Flores                                          |
+  | Email: aflores@palosanto.com                                         |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.7 2008/02/18 09:49:00 jvega Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Hardware Detection" => "D&eacute;tection Mat&eacute;riel",
+"Ports not Founds" => "Ports non trouv&eacute;s",
+"Card" => "Span",
+"Type port" => "Type",
+"No. Port" => "Port No",
+"(In Use)" => "Actif",
+"Hardware Detecting" => "D&eacute;tection Mat&eacute;riel",
+"Hardware Detect" => "D&eacute;tecter Nouveau Mat&eacute;riel",
+"Cards undetected on your system, press for detecting hardware detection." => "Aucune carte n'a &eacute;t&eacute; d&eacute;tect&eacute;e dans votre syst&egrave;me. Veuillez presser le bouton \"D&eacute;tecter Nouveau Mat&eacute;riel\" pour d&eacute;tecter un nouveau mat&eacute;riel.",
+"Information" => "Information",
+"Satisfactory Hardware Detection" => "Détection Effectuée",
+"Unknown" => "Inconnu",
+"Replace file zapata.conf" => "Remplacer fichier zapata.conf",
+"Unable to backup file zapata.conf by zapata.conf.replace_for_elastix" => "Impossible de sauvegarder le fichier  zapata.conf vers zapata.conf.replace_for_elastix",
+"Unable to replace file zapata.conf" => "Impossible de remplacer le fichier zapata.conf",
+"Detect Sangoma hardware" => "Detect Sangoma hardware",
+"Detect ISDN hardware" => "Detect ISDN hardware",
+
+);
+?>

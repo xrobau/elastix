@@ -1,0 +1,21 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+
+<h1>Repositories</h1>
+
+<p>The Repositories option in the Updates menu of Elastix allows you to
+choose repositories where to install or update packages from.</p>
+
+<div><img src="/images/help/system/repositories.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>In order to select or deselect a repository listed just click on the
+Choose field.</p>
+
+</body>
+</html>

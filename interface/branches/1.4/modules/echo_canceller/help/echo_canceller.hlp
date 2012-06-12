@@ -1,0 +1,20 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The Echo Canceller¨ menu option in Elastix allows you to enable and disable echo cancellation via software. It also shows the current state of this feature (Active or Inactive).</p>
+
+<div><img src="../modules/{$node_id}/images/echo_canceller.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>In order to enable echo cancellation just click on the Activate button. The state will change to show Active.</p>
+
+<p>In order to disable echo cancellation just click on the Deactivate button. The state will change to show Inactive.</p>
+
+</body>
+</html>

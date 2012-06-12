@@ -1,0 +1,12 @@
+--- zaptel.init	2007-05-31 16:44:17.000000000 -0500
++++ zaptel.init.new	2007-06-20 20:24:06.000000000 -0500
+@@ -36,7 +36,8 @@
+ 
+ if [ -z "${MODULES}" ]; then 
+ 	# Populate defaults if not present
+-	MODULES="tor2 wct4xxp wct1xxp wcte11xp wcfxo wctdm wctdm24xxp" 
++        # MODULES="tor2 wct4xxp wct1xxp wcte11xp wcfxo wctdm wctdm24xxp ystdm8xx ztdummy"
++        MODULES="ztdummy"
+ fi
+ 
+ RMODULES=""

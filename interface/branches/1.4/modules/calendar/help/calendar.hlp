@@ -1,0 +1,16 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The option “Calendar” allows us to create and modify events to reminder who will have access to the Elastix Web Interface.</p>
+
+<div><img src="../modules/{$node_id}/images/calendar.png" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+</body>
+</html>

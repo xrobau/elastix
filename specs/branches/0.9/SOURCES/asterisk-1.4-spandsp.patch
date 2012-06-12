@@ -1,0 +1,44 @@
+diff -urN asterisk-1.4.1-orig/build_tools/menuselect-deps.in asterisk-1.4.1/build_tools/menuselect-deps.in
+--- asterisk-1.4.1-orig/build_tools/menuselect-deps.in	2007-01-01 17:34:35.000000000 -0600
++++ asterisk-1.4.1/build_tools/menuselect-deps.in	2007-03-17 20:02:56.000000000 -0600
+@@ -20,6 +20,7 @@
+ PRI=@PBX_PRI@
+ QT=@PBX_QT@
+ RADIUS=@PBX_RADIUS@
++SPANDSP=1
+ SPEEX=@PBX_SPEEX@
+ SQLITE=@PBX_SQLITE@
+ SSL=@PBX_OPENSSL@
+diff -urN asterisk-1.4.1-orig/configure.ac asterisk-1.4.1/configure.ac
+--- asterisk-1.4.1-orig/configure.ac	2007-03-02 17:03:01.000000000 -0600
++++ asterisk-1.4.1/configure.ac	2007-03-17 20:04:00.000000000 -0600
+@@ -195,6 +195,7 @@
+ AST_EXT_LIB_SETUP([OPENH323], [OpenH323], [h323])
+ AST_EXT_LIB_SETUP([QT], [Qt], [qt])
+ AST_EXT_LIB_SETUP([RADIUS], [Radius Client], [radius])
++AST_EXT_LIB_SETUP([SPANDSP], [spandsp Library], [spandsp])
+ AST_EXT_LIB_SETUP([SPEEX], [Speex], [speex])
+ AST_EXT_LIB_SETUP([SQLITE], [SQLite], [sqlite])
+ AST_EXT_LIB_SETUP([SUPPSERV], [mISDN Supplemental Services], [suppserv])
+@@ -900,6 +901,8 @@
+ 
+ AST_EXT_LIB_CHECK([RADIUS], [radiusclient-ng], [rc_read_config], [radiusclient-ng.h])
+ 
++AST_EXT_LIB_CHECK([SPANDSP], [spandsp], [fax_init], [spandsp.h], [-ltiff])
++
+ AST_EXT_LIB_CHECK([SPEEX], [speex], [speex_encode], [speex/speex.h], [-lm])
+ 
+ AST_EXT_LIB_CHECK([SQLITE], [sqlite], [sqlite_exec], [sqlite.h])
+diff -urN asterisk-1.4.1-orig/makeopts.in asterisk-1.4.1/makeopts.in
+--- asterisk-1.4.1-orig/makeopts.in	2007-01-18 15:54:23.000000000 -0600
++++ asterisk-1.4.1/makeopts.in	2007-03-17 20:04:42.000000000 -0600
+@@ -132,6 +132,9 @@
+ RADIUS_INCLUDE=@RADIUS_INCLUDE@
+ RADIUS_LIB=@RADIUS_LIB@
+ 
++SPANDSP_INCLUDE=
++SPANDSP_LIB=-lspandsp
++
+ SPEEX_INCLUDE=@SPEEX_INCLUDE@
+ SPEEX_LIB=@SPEEX_LIB@
+ 

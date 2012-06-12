@@ -1,0 +1,23 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+<h1>Asterisk-Cli</h1>
+
+<p>The option “Asterisk-Cli” of the Menu “PBX” in Elastix lets us input Asterisk commands and execute them.</p>
+
+<div><img src="/images/help/pbx/asterisk_cli.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>To execute a command, input the same in Command and click on the “Execute” button.</p>
+
+<p>Example:</p>
+
+<p>* show channels<br>
+Shows whichever channel that is in use at the moment.</p>
+
+</body>
+</html>

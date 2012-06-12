@@ -1,0 +1,12 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/default/styles.css">
+  <link rel="stylesheet" href="/themes/default/help.css">
+</header>
+<body>
+<h1>Trunk Configuration</h1>
+<p>The &quot;Trunk Configuration&quot; option of the &quot;Billing&quot; menu allows us to determine which trunks will be used to get the calls for the billing process.</p>
+<img src="/images/help_bill_trunk_config_1.png">
+<p>The list displays all the registered trunks. You must select which ones will be used for billing and then click on the &quot;Billing Capable&quot; button.</p>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p>The “Billing Report” option of the Menu “Billing” in Elastix lets us view the details of the call with respect to cost and applied rate.</p>
+
+<div><img src="../modules/{$node_id}/images/billing_report.jpg" border="0"></div>
+<div>Figure 1</div>
+<br />
+
+<p>The report will change depending on the values of the filter:</p>
+
+<table class="inline">
+	<tr>
+		<td>Start Date:</td><td>The start date for the calls to be selected.</td>
+
+	</tr>
+	<tr>
+		<td>End Date:</td><td>The end date for the calls to be selected.</td>
+	</tr>
+	<tr>
+		<td>Field:</td><td>Additional fields for filtering: Source, Destination, Dst. Channel</td>
+
+	</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,14 @@
+[elastix]
+name=Elastix RPM Repository for CentOS 
+baseurl=http://repo.elastix.org/centos/$releasever/updates/RPMS/
+gpgcheck=0
+enabled=1
+exclude=elastix-mysqldbdata
+
+[elastix-beta]
+name=Elastix-Beta RPM Repository for CentOS
+baseurl=http://repo.elastix.org/centos/$releasever/updates/beta/RPMS/
+gpgcheck=0
+enabled=0
+exclude=elastix-mysqldbdata
+

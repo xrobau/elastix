@@ -1,1 +1,0 @@
-ALTER TABLE provider_account ADD COLUMN id_trunk INTEGER;

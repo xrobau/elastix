@@ -1,0 +1,13 @@
+diff -ruN asterisk-1.0.6.old/contrib/init.d/rc.redhat.asterisk asterisk-1.0.6/contrib/init.d/rc.redhat.asterisk
+--- asterisk-1.0.6.old/contrib/init.d/rc.redhat.asterisk	2005-03-10 16:00:07.000000000 +0100
++++ asterisk-1.0.6/contrib/init.d/rc.redhat.asterisk	2005-03-10 16:02:49.061514968 +0100
+@@ -62,6 +62,9 @@
+ stop() {
+ 	# Stop daemons.
+ 	echo -n $"Shutting down asterisk: "
++	for i in `ps -f -u asterisk | grep [m]pg123 | awk '{ print $2 }'`; do
++		kill -9 $i
++	done
+ 	killproc asterisk
+ 	RETVAL=$?
+ 	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/asterisk

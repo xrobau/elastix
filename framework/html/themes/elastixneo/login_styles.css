@@ -62,11 +62,6 @@ input.neo-login-input {
 	-webkit-border-radius: 4px;
 	border-radius: 4px;
 }
-input.neo-login-input:focus {
-	-webkit-box-shadow: 0px 0px 10px #ffffff;
-	-moz-box-shadow: 0px 0px 10px #ffffff;
-	box-shadow: 0px 0px 10px #ffffff;
-}  
 input.neo-login-submit {
 	width:120px;
 	height:34px;

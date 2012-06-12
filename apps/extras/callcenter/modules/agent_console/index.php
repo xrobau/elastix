@@ -148,7 +148,7 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
     // Acciones para mostrar el formulario, fuera de cualquier acción AJAX
     $smarty->assign(array(
         'FRAMEWORK_TIENE_TITULO_MODULO' => existeSoporteTituloFramework(),
-        'icon'                          => 'modules/'.$module_name.'/images/call_center.png',
+        'icon'                          => 'images/call.png',
         'title'                         =>  _tr('Agent Console'),
         'WELCOME_AGENT'         =>  _tr('Welcome to Agent Console'),
         'ENTER_USER_PASSWORD'   =>  _tr('Please select your agent number and your extension'),
@@ -225,7 +225,7 @@ function manejarLogin_doLogin()
         $oPaloConsola->desconectarTodo();
         $oPaloConsola = new PaloSantoConsola('Agent/'.$sAgente);
 
-        $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension);
+        $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension, $sAgente);
         switch ($estado['estadofinal']) {
         case 'error':
         case 'mismatch':
@@ -252,25 +252,6 @@ function manejarLogin_doLogin()
             $_SESSION['callcenter']['extension'] = $sExtension;
             $respuesta['status'] = TRUE;
             $respuesta['message'] = _tr('Logging agent in. Please wait...');
-            
-            if ($estado['estadofinal'] != 'logged-in') {
-                // Esperar hasta 1 segundo para evento de fallo de login.
-                $sEstado = $oPaloConsola->esperarResultadoLogin();
-                if ($sEstado == 'logged-in') {
-                    // El agente ha podido logonearse. Se procede a mostrar el formulario
-                    $_SESSION['callcenter']['estado_consola'] = 'logged-in';
-                } elseif ($sEstado == 'logged-out') {
-                    // El procedimiento de login ha fallado, sin causa conocida
-                    $_SESSION['callcenter'] = generarEstadoInicial();
-                    $respuesta['status'] = FALSE;
-                    $respuesta['message'] = _tr('Agent log-in failed!');
-                } elseif ($sEstado == 'error') {
-                    // Ocurre un error al consultar el estado del agente
-                    $_SESSION['callcenter'] = generarEstadoInicial();
-                    $respuesta['status'] = FALSE;
-                    $respuesta['message'] = _tr('Agent log-in failed!').' - '.$oPaloConsola->errMsg;
-                }
-            }
             break;
         }
     }
@@ -298,7 +279,7 @@ function manejarLogin_checkLogin()
     $oPaloConsola = new PaloSantoConsola('Agent/'.$sAgente);
 
     if ($bContinuar) {
-        $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension);
+        $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension, $sAgente);
         switch ($estado['estadofinal']) {
         case 'error':
         case 'mismatch':
@@ -362,6 +343,19 @@ function manejarLogin_checkLogin()
                 $respuesta['action'] = 'error';
                 $respuesta['message'] = _tr('Agent log-in terminated.');
                 $bContinuar = FALSE;
+            /*
+            } elseif ($sEstado == 'mismatch') {
+                // Reiniciar la sesión para poder modificar las variables
+                session_start();
+
+                // Otra extensión ya ocupa el login del agente indicado.
+                $_SESSION['callcenter']['estado_consola'] = 'logged-out';
+                $_SESSION['callcenter']['agente'] = NULL;
+                $_SESSION['callcenter']['extension'] = NULL;
+                $respuesta['action'] = 'error';
+                $respuesta['message'] = _tr('Specified agent already connected to extension');
+                $bContinuar = FALSE;
+            */
             } elseif ($sEstado == 'error') {
                 // Reiniciar la sesión para poder modificar las variables
                 session_start();
@@ -399,7 +393,7 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
     $sAgente = $_SESSION['callcenter']['agente'];
     $sExtension = $_SESSION['callcenter']['extension'];
     $oPaloConsola = new PaloSantoConsola('Agent/'.$sAgente);
-    $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension);
+    $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension, $sAgente);
     if ($estado['estadofinal'] != 'logged-in') {
         // Se marca el final de la sesión del agente en las tablas de auditoría
         $oPaloConsola->logoutAgente();
@@ -451,15 +445,12 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
 
 function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
-    $bInactivarBotonColgar = FALSE;
-    $bPuedeConfirmarContacto = FALSE;
-
     // Acciones para mostrar la pantalla principal, fuera de cualquier acción AJAX
     for ($i = 0; $i < 24; $i++) { $ii = sprintf('%02d', $i); $comboHora[$ii] = $ii; }
     for ($i = 0; $i < 60; $i++) { $ii = sprintf('%02d', $i); $comboMinuto[$ii] = $ii; }
     $smarty->assign(array(
         'FRAMEWORK_TIENE_TITULO_MODULO' => existeSoporteTituloFramework(),
-        'icon'                          => 'modules/'.$module_name.'/images/call_center.png',
+        'icon'                          => 'images/call.png',
         'title'                         =>  _tr('Agent Console').': '.
             $_SESSION['callcenter']['agente_nombre'],
         'BTN_COLGAR_LLAMADA'            =>  _tr('Hangup'),
@@ -467,17 +458,22 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         'BTN_VTIGERCRM'                 =>  _tr('VTiger CRM'),
         'BTN_FINALIZAR_LOGIN'           =>  _tr('End session'),
         'TITLE_BREAK_DIALOG'            =>  _tr('Select break type'),
+        'BTN_BREAK_COMMIT'              =>  _tr('Take Break'),
+        'BTN_BREAK_DISMISS'             =>  _tr('Dismiss'),
         'BTN_CONFIRMAR_CONTACTO'        =>  _tr('Confirm contact'),
         'LBL_CONTACTO_TELEFONO'         =>  _tr('Phone number'),
         'LBL_CONTACTO_SELECT'           =>  _tr('Contact'),
         'LBL_CONTACTO_NOMBRES'          =>  _tr('Names'),
+        'PUEDE_CONFIRMAR_CONTACTO'      =>  FALSE,
         'TEXTO_CONTACTO_NOMBRES'        =>  '',
         'TEXTO_CONTACTO_TELEFONO'       =>  '',
         'BTN_AGENDAR_LLAMADA'           =>  _tr('Schedule call'),
         'TITLE_TRANSFER_DIALOG'         =>  _tr('Select extension to transfer to'),
-        'LBL_TRANSFER_BLIND'            =>  _tr('Blind transfer'),
-        'LBL_TRANSFER_ATTENDED'         =>  _tr('Attended transfer'),
         'TITLE_SCHEDULE_CALL'           =>  _tr('Schedule call'),
+        'BTN_TRANSFER_COMMIT'           =>  _tr('Transfer'),
+        'BTN_TRANSFER_DISMISS'          =>  _tr('Dismiss'),
+        'BTN_SCHEDULE_COMMIT'           =>  _tr('Schedule'),
+        'BTN_SCHEDULE_DISMISS'          =>  _tr('Dismiss'),
         'LBL_SCHEDULE_CAMPAIGN_END'     =>  _tr('Call at end of campaign'),
         'LBL_SCHEDULE_BYDATE'           =>  _tr('Schedule at date'),
         'LBL_SCHEDULE_DATE_START'       =>  _tr('Start date'),
@@ -487,6 +483,7 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         'LBL_SCHEDULE_SAME_AGENT'       =>  _tr('Schedule to same agent'),
         'SCHEDULE_TIME_HH'              =>  $comboHora,
         'SCHEDULE_TIME_MM'              =>  $comboMinuto,
+        'MSG_SCHEDULE_CALL_ERROR_MISSING_DATE' => _tr('Start and end date are required for date scheduling.'),
         'TAB_LLAMADA_INFO'              =>  _tr('Call Information'),
         'TAB_LLAMADA_SCRIPT'            =>  _tr('Call Script'),
         'TAB_LLAMADA_FORM'              =>  _tr('Call Form'),
@@ -497,17 +494,15 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         'CONTENIDO_LLAMADA_FORMULARIO'  =>  '',
         'CALLINFO_CALLTYPE'             =>  '',
         'BTN_HOLD'                      =>  $estado['onhold'] ? _tr('End Hold') : _tr('Hold'),
+        
+        'STATE_ONHOLD'                  =>  $estado['onhold'],
+        'STATE_BREAK_ID'                =>  is_null($estado['pauseinfo']) ? $estado['pauseinfo']['pauseid'] : NULL,
+        // Usar CALLINFO_CALLTYPE
+        //'STATE_CALLTYPE'                =>  NULL,
+        'STATE_CAMPAIGN_ID'             =>  NULL,
+        'STATE_CALL_ID'                 =>  NULL,
     ));
-    $estadoInicial = array(
-        'onhold'        =>  $estado['onhold'],
-        'break_id'      =>  is_null($estado['pauseinfo']) ? NULL : $estado['pauseinfo']['pauseid'],
-        'calltype'      =>  NULL,
-        'campaign_id'   =>  NULL,
-        'callid'        =>  NULL,
-        'timer_seconds' =>  0,
-        'url'           =>  NULL,
-        'urlopentype'   =>  NULL,
-    );
+
 
     // Decidir estado del break a mostrar
     if (!is_null($estado['pauseinfo'])) {
@@ -526,8 +521,8 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
                 ($iDuracionPausa - ($iDuracionPausa % 3600)) / 3600, 
                 (($iDuracionPausa - ($iDuracionPausa % 60)) / 60) % 60, 
                 $iDuracionPausa % 60),
+            'TIMER_SECONDS'                 =>  $iDuracionPausa,
         ));
-        $estadoInicial['timer_seconds'] = $iDuracionPausa;
     } else {
         if (!is_null($_SESSION['callcenter']['break_iniciado'])) {
         	/* Si esta condición se cumple, entonces se ha perdido el evento 
@@ -577,8 +572,8 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         $iDuracionLlamada = time() - strtotime($estado['callinfo']['linkstart']);
   
         // Asignaciones independientes del tipo de llamada
-        $bInactivarBotonColgar = false; // Se usa para botón hangup y botón transfer
         $smarty->assign(array(
+            'INACTIVO_COLGAR_LLAMADA'       =>  false, // Se usa para botón hangup y botón transfer
             'CLASS_ESTADO_AGENTE_INICIAL'   =>  'elastix-callcenter-class-estado-activo',
             'TEXTO_ESTADO_AGENTE_INICIAL'   =>  _tr('Connected to call'),
             'TEXTO_CONTACTO_TELEFONO'       =>  $estado['callinfo']['callnumber'],
@@ -589,22 +584,15 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
                 ($iDuracionLlamada - ($iDuracionLlamada % 3600)) / 3600, 
                 (($iDuracionLlamada - ($iDuracionLlamada % 60)) / 60) % 60, 
                 $iDuracionLlamada % 60),
+            'TIMER_SECONDS'                 =>  $iDuracionLlamada,
             
             'CONTENIDO_LLAMADA_INFORMACION' =>  manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
             'CONTENIDO_LLAMADA_FORMULARIO'  =>  manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
             'CONTENIDO_LLAMADA_SCRIPT'      =>  $infoCampania['script'],
+            
+            'STATE_CAMPAIGN_ID'             =>  $estado['callinfo']['campaign_id'],
+            'STATE_CALL_ID'                 =>  $estado['callinfo']['callid'],
         ));
-        $estadoInicial['timer_seconds'] = $iDuracionLlamada;
-        $estadoInicial['calltype'] = $estado['callinfo']['calltype'];
-        $estadoInicial['campaign_id'] = $estado['callinfo']['campaign_id'];
-        $estadoInicial['callid'] = $estado['callinfo']['callid'];
-        $estadoInicial['urlopentype'] = isset($infoCampania['urlopentype']) ? $infoCampania['urlopentype'] : NULL;
-        $estadoInicial['url'] = is_null($estadoInicial['urlopentype']) 
-            ? NULL : construirUrlExterno($infoCampania['urltemplate'], $infoLlamada + array(
-            'callnumber'        =>  $estado['callinfo']['callnumber'],
-            'callid'            =>  $infoLlamada['call_id'],
-            'agent_number'      =>  $estado['callinfo']['agent_number'],
-            'remote_channel'    =>  $estado['callinfo']['remote_channel']));
         
         // Asignaciones específicas para llamadas entrantes
         if ($estado['callinfo']['calltype'] == 'incoming') {
@@ -631,8 +619,8 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
             }
             $smarty->assign(array(
                 'LISTA_CONTACTOS'           =>  $comboContactos,
+                'PUEDE_CONFIRMAR_CONTACTO'  =>  (count($comboContactos) > 1),
             ));
-            $bPuedeConfirmarContacto = (count($comboContactos) > 1);
         }
         
         // Asignaciones específicas para llamadas salientes
@@ -651,8 +639,8 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
             ));
         }
     } else {
-    	$bInactivarBotonColgar = true; // Se usa para botón hangup y botón transfer
-        $smarty->assign(array(
+    	$smarty->assign(array(
+            'INACTIVO_COLGAR_LLAMADA'       =>  true, // Se usa para botón hangup y botón transfer
             'CONTENIDO_LLAMADA_FORMULARIO'  =>  is_null($_SESSION['callcenter']['ultimo_calltype']) 
                 ? '' 
                 : manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, 
@@ -660,21 +648,8 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
                         $_SESSION['callcenter']['ultimo_campaignform']),
         ));
     }
-    $json = new Services_JSON();
+    
     $smarty->assign(array(
-        'APPLY_UI_STYLES'   =>  $json->encode(array(
-            'break_commit'              =>  _tr('Take Break'),
-            'break_dismiss'             =>  _tr('Dismiss'),
-            'transfer_commit'           =>  _tr('Transfer'),
-            'transfer_dismiss'          =>  _tr('Dismiss'),
-            'schedule_commit'           =>  _tr('Schedule'),
-            'schedule_dismiss'          =>  _tr('Dismiss'),
-            'external_url_tab'          =>  _tr('External site'),
-            'schedule_call_error_msg_missing_date' => _tr('Start and end date are required for date scheduling.'),
-            'no_call'                   =>  $bInactivarBotonColgar,
-            'can_confirm_contact'       =>  $bPuedeConfirmarContacto,
-            )),
-        'INITIAL_CLIENT_STATE'  =>  $json->encode($estadoInicial),
     ));
     return $smarty->fetch("$sDirLocalPlantillas/agent_console.tpl");
 }
@@ -841,7 +816,7 @@ function manejarSesionActiva_agentTransfer($oPaloConsola)
         $respuesta['action'] = 'error';
         $respuesta['message'] = _tr('Invalid or missing extension to transfer');
     } else {
-        $bExito = $oPaloConsola->transferirLlamada($sTransferExt, (getParameter('atxfer') == 'true'));
+        $bExito = $oPaloConsola->transferirLlamada($sTransferExt);
         if (!$bExito) {
             $respuesta['action'] = 'error';
             $respuesta['message'] = _tr('Error while transferring call').' - '.$oPaloConsola->errMsg;
@@ -886,22 +861,15 @@ function manejarSesionActiva_scheduleCall($oPaloConsola)
         'message'   =>  _tr('Call successfully scheduled'),
     );
 
-    $infoAgendar = getParameter('data');
-    foreach (array('schedule_new_phone', 'schedule_new_name', 
-        'schedule_use_daterange', 'schedule_use_sameagent', 
-        'schedule_date_start', 'schedule_date_end', 'schedule_time_start',
-        'schedule_time_end') as $k) 
-        if (!isset($infoAgendar[$k])) $infoAgendar[$k] = NULL;
-    
-    $schedule = ($infoAgendar['schedule_use_daterange'] == 'true') ? array(
-        'date_init' =>  $infoAgendar['schedule_date_start'],
-        'date_end'  =>  $infoAgendar['schedule_date_end'], 
-        'time_init' =>  $infoAgendar['schedule_time_start'],
-        'time_end'  =>  $infoAgendar['schedule_time_end'],
+    $schedule = (getParameter('schedule_use_daterange') == 'true') ? array(
+        'date_init' =>  getParameter('schedule_date_start'),
+        'date_end'  =>  getParameter('schedule_date_end'), 
+        'time_init' =>  getParameter('schedule_time_start'),
+        'time_end'  =>  getParameter('schedule_time_end'),
     ) : NULL;
-    $sameagent = ($infoAgendar['schedule_use_sameagent'] == 'true');
-    $newphone = $infoAgendar['schedule_new_phone'];
-    $newname = $infoAgendar['schedule_new_name'];
+    $sameagent = (getParameter('schedule_use_sameagent') == 'true');
+    $newphone = getParameter('schedule_new_phone');
+    $newname = getParameter('schedule_new_name');
     
     if (is_array($schedule) && ($schedule['date_init'] == '' || $schedule['date_end'] == '' ||
         $schedule['time_init'] == '' || $schedule['time_end'] == '')) {
@@ -961,297 +929,263 @@ function manejarSesionActiva_saveForms($oPaloConsola, $estado)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_checkStatus($module_name, $smarty, 
-    $sDirLocalPlantillas, $oPaloConsola, $estado)
+function manejarSesionActiva_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array();
 
-    ignore_user_abort(true);
-    set_time_limit(0);
-
-    $sNombrePausa = NULL;
-    $iDuracionLlamada = NULL;
-    $iDuracionPausa = $iDuracionPausaActual = NULL;
-    
     $estadoCliente = getParameter('clientstate');
-
-    // Validación del estado del cliente:
-    // onhold break_id calltype campaign_id callid
-    $estadoCliente['onhold'] = isset($estadoCliente['onhold']) 
-        ? ($estadoCliente['onhold'] == 'true') 
-        : false;
-    foreach (array('break_id', 'calltype', 'campaign_id', 'callid') as $k) {
-        if (!isset($estadoCliente[$k]) || $estadoCliente[$k] == 'null') 
-            $estadoCliente[$k] = NULL;
-    }
-    if (is_null($estadoCliente['calltype'])) {
-        $estadoCliente['campaign_id'] = $estadoCliente['callid'] = NULL;
-    } elseif (is_null($estadoCliente['callid'])) {
-        $estadoCliente['campaign_id'] = $estadoCliente['calltype'] = NULL;
-    } elseif (is_null($estadoCliente['campaign_id']) && $estadoCliente['calltype'] != 'incoming') {
-        $estadoCliente['calltype'] = $estadoCliente['callid'] = NULL;
-    }
-
-    // Modo a funcionar: Long-Polling, o Server-sent Events
-    $sModoEventos = getParameter('serverevents');
-    $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
-    if ($bSSE) {
-        Header('Content-Type: text/event-stream');
-        printflush("retry: 1\n");
-    } else {
-    	Header('Content-Type: application/json');
-    }
-
-    // Respuesta inmediata si el agente ya no está logoneado
     if ($estado['estadofinal'] != 'logged-in') {
         // Respuesta inmediata si el agente ya no está logoneado
-        jsonflush($bSSE, array(
+        $respuesta[] = array(
             'event' =>  'logged-out',
-        ));
-        return;
-    }
-	
-    // Verificación de la consistencia del estado de break
-    if (!is_null($estado['pauseinfo'])) {
-        $sNombrePausa = $estado['pauseinfo']['pausename'];
-        $iDuracionPausaActual = time() - strtotime($estado['pauseinfo']['pausestart']);
-        $iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
+        );
     } else {
-        /* Si esta condición se cumple, entonces se ha perdido el evento 
-         * pauseexit durante la espera en manejarSesionActiva_checkStatus().
-         * Se hace la suposición de que el refresco ocurre poco después de
-         * que termina el break, y que por lo tanto el error al usar time()
-         * como fin del break es pequeño. 
-         */
-        if (!is_null($_SESSION['callcenter']['break_iniciado'])) {
-           $_SESSION['callcenter']['break_acumulado'] += time() - strtotime($_SESSION['callcenter']['break_iniciado']);
+        $sNombrePausa = NULL;
+        $iDuracionLlamada = NULL;
+        $iDuracionPausa = $iDuracionPausaActual = NULL;
+        
+    	// Validación del estado del cliente
+        $estadoCliente['onhold'] = isset($estadoCliente['onhold']) 
+        	? ($estadoCliente['onhold'] == 'true') 
+        	: false;
+        foreach (array('break_id', 'calltype', 'campaign_id', 'callid') as $k) {
+            if (!isset($estadoCliente[$k]) || $estadoCliente[$k] == 'null') 
+            	$estadoCliente[$k] = NULL;
         }
-        $_SESSION['callcenter']['break_iniciado'] = NULL;
-    }
-    if (!is_null($estado['pauseinfo']) && 
-        (is_null($estadoCliente['break_id']) || $estadoCliente['break_id'] != $estado['pauseinfo']['pauseid'])) {
-        // La consola debe de entrar en break
-        $respuesta[] = construirRespuesta_breakenter($estado['pauseinfo']['pauseid']);
-    } elseif (!is_null($estadoCliente['break_id']) && is_null($estado['pauseinfo'])) {
-        // La consola debe de salir del break
-        $respuesta[] = construirRespuesta_breakexit();
-    }
+        if (is_null($estadoCliente['calltype'])) {
+        	$estadoCliente['campaign_id'] = $estadoCliente['callid'] = NULL;
+        } elseif (is_null($estadoCliente['callid'])) {
+        	$estadoCliente['campaign_id'] = $estadoCliente['calltype'] = NULL;
+        } elseif (is_null($estadoCliente['campaign_id']) && $estadoCliente['calltype'] != 'incoming') {
+            $estadoCliente['calltype'] = $estadoCliente['callid'] = NULL;
+        }
 
-    // Verificación de la consistencia del estado de hold
-    if (!$estadoCliente['onhold'] && $estado['onhold']) {
-        // La consola debe de entrar en hold
-        $respuesta[] = construirRespuesta_holdenter();
-    } elseif ($estadoCliente['onhold'] && !$estado['onhold']) {
-        // La consola debe de salir de hold
-        $respuesta[] = construirRespuesta_holdexit();
-    }
-    
-    if (!is_null($estado['callinfo'])) {
-        $iDuracionLlamada = time() - strtotime($estado['callinfo']['linkstart']);           
-    }
-    
-    // Verificación de atención a llamada
-    if (!is_null($estado['callinfo']) && 
-        (is_null($estadoCliente['calltype']) || 
-            $estadoCliente['calltype'] != $estado['callinfo']['calltype'] ||
-            $estadoCliente['campaign_id'] != $estado['callinfo']['campaign_id'] ||
-            $estadoCliente['callid'] != $estado['callinfo']['callid'])) {
-
-        // Información sobre la llamada conectada
-        $infoLlamada = $oPaloConsola->leerInfoLlamada(
-            $estado['callinfo']['calltype'],
-            $estado['callinfo']['campaign_id'],
-            $estado['callinfo']['callid']);
-
-        // Leer información del formulario de la campaña
-        if ($estado['callinfo']['calltype'] == 'incoming' && is_null($estado['callinfo']['campaign_id'])) {
-            $infoCampania['forms'] = NULL;
+        // Verificación de la consistencia del estado de break
+        if (!is_null($estado['pauseinfo'])) {
+            $sNombrePausa = $estado['pauseinfo']['pausename'];
+            $iDuracionPausaActual = time() - strtotime($estado['pauseinfo']['pausestart']);
+            $iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
         } else {
-            $infoCampania = $oPaloConsola->leerInfoCampania(
-                $estado['callinfo']['calltype'],
-                $estado['callinfo']['campaign_id']);
+            /* Si esta condición se cumple, entonces se ha perdido el evento 
+             * pauseexit durante la espera en manejarSesionActiva_checkStatus().
+             * Se hace la suposición de que el refresco ocurre poco después de
+             * que termina el break, y que por lo tanto el error al usar time()
+             * como fin del break es pequeño. 
+             */
+            if (!is_null($_SESSION['callcenter']['break_iniciado'])) {
+        	   $_SESSION['callcenter']['break_acumulado'] += time() - strtotime($_SESSION['callcenter']['break_iniciado']);
+            }
+            $_SESSION['callcenter']['break_iniciado'] = NULL;
+        }
+        if (!is_null($estado['pauseinfo']) && 
+        	(is_null($estadoCliente['break_id']) || $estadoCliente['break_id'] != $estado['pauseinfo']['pauseid'])) {
+        	// La consola debe de entrar en break
+            $respuesta[] = construirRespuesta_breakenter($estado['pauseinfo']['pauseid']);
+        } elseif (!is_null($estadoCliente['break_id']) && is_null($estado['pauseinfo'])) {
+        	// La consola debe de salir del break
+            $respuesta[] = construirRespuesta_breakexit();
         }
 
-        // Almacenar para regenerar formulario
-        $_SESSION['callcenter']['ultimo_calltype'] = $estado['callinfo']['calltype'];
-        $_SESSION['callcenter']['ultimo_callid'] = $estado['callinfo']['callid'];
-        $_SESSION['callcenter']['ultimo_callsurvey']['call_survey'] = $infoLlamada['call_survey'];
-        $_SESSION['callcenter']['ultimo_campaignform']['forms'] = $infoCampania['forms'];
-
-        $respuesta[] = construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas, 
-            $oPaloConsola, $estado['callinfo'], $infoLlamada, $infoCampania);
-    } elseif (!is_null($estadoCliente['calltype']) && is_null($estado['callinfo'])) {
-        // La consola dejó de atender una llamada
-        $respuesta[] = construirRespuesta_agentunlinked();
-    }
-
-    // Ciclo de verificación para Server-sent Events
-    $sAgente = 'Agent/'.$_SESSION['callcenter']['agente'];
-    $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
-    $bReinicioSesion = FALSE;
-    do {
-        $oPaloConsola->desconectarEspera();
+        // Verificación de la consistencia del estado de hold
+        if (!$estadoCliente['onhold'] && $estado['onhold']) {
+        	// La consola debe de entrar en hold
+            $respuesta[] = construirRespuesta_holdenter();
+        } elseif ($estadoCliente['onhold'] && !$estado['onhold']) {
+            // La consola debe de salir de hold
+            $respuesta[] = construirRespuesta_holdexit();
+        }
         
-        // Se inicia espera larga con el navegador...
-        session_commit();
-        $iTimestampInicio = time();
+        if (!is_null($estado['callinfo'])) {
+            $iDuracionLlamada = time() - strtotime($estado['callinfo']['linkstart']);        	
+        }
         
-        $respuestaEventos = array();
-    	
-        while (connection_status() == CONNECTION_NORMAL && 
-            count($respuestaEventos) <= 0 && count($respuesta) <= 0 
-            && time() - $iTimestampInicio <  $iTimeoutPoll) {
-            
-            $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
-            if (is_null($listaEventos)) {
-                // Ocurrió una excepción al esperar eventos
-                @session_start();
+        // Verificación de atención a llamada
+        if (!is_null($estado['callinfo']) && 
+        	(is_null($estadoCliente['calltype']) || 
+        		$estadoCliente['calltype'] != $estado['callinfo']['calltype'] ||
+        		$estadoCliente['campaign_id'] != $estado['callinfo']['campaign_id'] ||
+        		$estadoCliente['callid'] != $estado['callinfo']['callid'])) {
 
-                $respuesta[] = array(
-                    'event' =>  'logged-out',
-                );
+            // Información sobre la llamada conectada
+            $infoLlamada = $oPaloConsola->leerInfoLlamada(
+                $estado['callinfo']['calltype'],
+                $estado['callinfo']['campaign_id'],
+                $estado['callinfo']['callid']);
 
-                // Eliminar la información de login
-                $_SESSION['callcenter'] = generarEstadoInicial();
-                $bReinicioSesion = TRUE;
-                break;
+            // Leer información del formulario de la campaña
+            if ($estado['callinfo']['calltype'] == 'incoming' && is_null($estado['callinfo']['campaign_id'])) {
+                $infoCampania['forms'] = NULL;
+            } else {
+                $infoCampania = $oPaloConsola->leerInfoCampania(
+                    $estado['callinfo']['calltype'],
+                    $estado['callinfo']['campaign_id']);
             }
+
+            // Almacenar para regenerar formulario
+            $_SESSION['callcenter']['ultimo_calltype'] = $estado['callinfo']['calltype'];
+            $_SESSION['callcenter']['ultimo_callid'] = $estado['callinfo']['callid'];
+            $_SESSION['callcenter']['ultimo_callsurvey']['call_survey'] = $infoLlamada['call_survey'];
+            $_SESSION['callcenter']['ultimo_campaignform']['forms'] = $infoCampania['forms'];
+
+            $respuesta[] = construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas, $oPaloConsola, $estado['callinfo'], $infoLlamada);
+        } elseif (!is_null($estadoCliente['calltype']) && is_null($estado['callinfo'])) {
+        	// La consola dejó de atender una llamada
+            $respuesta[] = construirRespuesta_agentunlinked();
+        }
+
+        /* Si se llega a este punto, entonces el estado de la consola coincide 
+         * con las verificaciones inmediatas de los estados. Se espera a que 
+         * haya algún evento de cambio. */
+        if (count($respuesta) <= 0) {
+            $oPaloConsola->desconectarEspera();
+
+            $sAgente = 'Agent/'.$_SESSION['callcenter']['agente'];
+        	
+            // Se inicia espera larga con el navegador...
+            $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
+            session_commit();
+            set_time_limit(0);
+            $iTimestampInicio = time();
             
-            foreach ($listaEventos as $evento) 
-            if (isset($evento['agent_number']) && $evento['agent_number'] == $sAgente) 
-            switch ($evento['event']) {
-            case 'agentloggedout':
-                // Reiniciar la sesión para poder modificar las variables
-                @session_start();
-
-                $respuesta[] = array(
-                    'event' =>  'logged-out',
-                );
-
-                // Eliminar la información de login
-                $_SESSION['callcenter'] = generarEstadoInicial();
-                $bReinicioSesion = TRUE;
-                break;
-            case 'pausestart':
-                unset($respuestaEventos[$evento['pause_class']]);
-                switch ($evento['pause_class']) {
-                case 'break':
-                    if (is_null($estadoCliente['break_id']) ||
-                        $estadoCliente['break_id'] != $evento['pause_type']) {
-                        $sNombrePausa = $evento['pause_name'];
-                        $respuestaEventos['break'] = construirRespuesta_breakenter($evento['pause_type']);
-                    }
-                    @session_start();
-                    $iDuracionPausaActual = time() - strtotime($evento['pause_start']);
-                    $iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
-                    $_SESSION['callcenter']['break_iniciado'] = $evento['pause_start'];
-                    break;
-                case 'hold':
-                    if (!$estadoCliente['onhold']) {
-                        $respuestaEventos['hold'] = construirRespuesta_holdenter();
-                    }
-                    break;
-                }
-                break;
-            case 'pauseend':
-                unset($respuestaEventos[$evento['pause_class']]);
-                switch ($evento['pause_class']) {
-                case 'break':
-                    if (!is_null($estadoCliente['break_id'])) {
-                        $respuestaEventos['break'] = construirRespuesta_breakexit();
-                    }
-                    @session_start();
-                    $_SESSION['callcenter']['break_acumulado'] += $evento['pause_duration'];
-                    $_SESSION['callcenter']['break_iniciado'] = NULL;
-                    break;
-                case 'hold':
-                    if ($estadoCliente['onhold']) {
-                        $respuestaEventos['hold'] = construirRespuesta_holdexit();
-                    }
-                    break;
-                }
-                break;
-            case 'agentlinked':
-                unset($respuestaEventos['llamada']);
-                /* Actualizar la interfaz si entra una nueva llamada, o si 
-                 * la llamada activa anterior es reemplazada. */
-                if (is_null($estadoCliente['calltype']) || 
-                    $estadoCliente['calltype'] != $evento['call_type'] ||
-                    $estadoCliente['campaign_id'] != $evento['campaign_id'] ||
-                    $estadoCliente['callid'] != $evento['call_id']) {
-                    $nuevoEstado = array(
-                        'calltype'      =>  $evento['call_type'],
-                        'campaign_id'   =>  $evento['campaign_id'],
-                        'linkstart'     =>  $evento['datetime_linkstart'],
-                        'callid'        =>  $evento['call_id'],
-                        'callnumber'    =>  $evento['phone'],
+            $bReinicioSesion = FALSE;
+            $respuestaEventos = array();
+            while (count($respuestaEventos) <= 0 && count($respuesta) <= 0 
+            	&& time() - $iTimestampInicio <  $iTimeoutPoll) {
+                
+                $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
+                foreach ($listaEventos as $evento) 
+                if (isset($evento['agent_number']) && $evento['agent_number'] == $sAgente) 
+                switch ($evento['event']) {
+                case 'agentloggedout':
+                    // Reiniciar la sesión para poder modificar las variables
+                    session_start();
+    
+                    $respuesta[] = array(
+                        'event' =>  'logged-out',
                     );
-                    $iDuracionLlamada = time() - strtotime($nuevoEstado['linkstart']);
 
-                    // Leer información del formulario de la campaña
-                    if ($nuevoEstado['calltype'] == 'incoming' && is_null($nuevoEstado['campaign_id'])) {
-                        $infoCampania['forms'] = NULL;
-                    } else {
-                        $infoCampania = $oPaloConsola->leerInfoCampania(
-                            $nuevoEstado['calltype'],
-                            $nuevoEstado['campaign_id']);
+                    // Eliminar la información de login
+                    $_SESSION['callcenter'] = generarEstadoInicial();
+                    $bReinicioSesion = TRUE;
+                    break;
+                case 'pausestart':
+                    unset($respuestaEventos[$evento['pause_class']]);
+                    switch ($evento['pause_class']) {
+                    case 'break':
+                        if (is_null($estadoCliente['break_id']) ||
+                        	$estadoCliente['break_id'] != $evento['pause_type']) {
+                            $sNombrePausa = $evento['pause_name'];
+                            $respuestaEventos['break'] = construirRespuesta_breakenter($evento['pause_type']);
+                        }
+                        session_start();
+                        $iDuracionPausaActual = time() - strtotime($evento['pause_start']);
+                        $iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
+                        $_SESSION['callcenter']['break_iniciado'] = $evento['pause_start'];
+                        break;
+                    case 'hold':
+                        if (!$estadoCliente['onhold']) {
+                        	$respuestaEventos['hold'] = construirRespuesta_holdenter();
+                        }
+                        break;
                     }
+                    break;
+                case 'pauseend':
+                    unset($respuestaEventos[$evento['pause_class']]);
+                    switch ($evento['pause_class']) {
+                    case 'break':
+                        if (!is_null($estadoCliente['break_id'])) {
+                            $respuestaEventos['break'] = construirRespuesta_breakexit();
+                        }
+                        session_start();
+                        $_SESSION['callcenter']['break_acumulado'] += $evento['pause_duration'];
+                        $_SESSION['callcenter']['break_iniciado'] = NULL;
+                        break;
+                    case 'hold':
+                        if ($estadoCliente['onhold']) {
+                            $respuestaEventos['hold'] = construirRespuesta_holdexit();
+                        }
+                        break;
+                    }
+                    break;
+                case 'agentlinked':
+                    unset($respuestaEventos['llamada']);
+                    /* Actualizar la interfaz si entra una nueva llamada, o si 
+                     * la llamada activa anterior es reemplazada. */
+                    if (is_null($estadoCliente['calltype']) || 
+                    	$estadoCliente['calltype'] != $evento['call_type'] ||
+                    	$estadoCliente['campaign_id'] != $evento['campaign_id'] ||
+                    	$estadoCliente['callid'] != $evento['call_id']) {
+                        $nuevoEstado = array(
+                            'calltype'      =>  $evento['call_type'],
+                            'campaign_id'   =>  $evento['campaign_id'],
+                            'linkstart'     =>  $evento['datetime_linkstart'],
+                            'callid'        =>  $evento['call_id'],
+                            'callnumber'    =>  $evento['phone'],
+                        );
+                        $iDuracionLlamada = time() - strtotime($nuevoEstado['linkstart']);
+                        $respuestaEventos['llamada'] = construirRespuesta_agentlinked(
+                            $smarty, $sDirLocalPlantillas, $oPaloConsola, $nuevoEstado, $evento);
 
-                    // Almacenar para regenerar formulario
-                    @session_start();
-                    $_SESSION['callcenter']['ultimo_calltype'] = $nuevoEstado['calltype'];
-                    $_SESSION['callcenter']['ultimo_callid'] = $nuevoEstado['callid'];
-                    $_SESSION['callcenter']['ultimo_callsurvey']['call_survey'] = $evento['call_survey'];
-                    $_SESSION['callcenter']['ultimo_campaignform']['forms'] = $infoCampania['forms'];
+                        // Leer información del formulario de la campaña
+                        if ($nuevoEstado['calltype'] == 'incoming' && is_null($nuevoEstado['campaign_id'])) {
+                            $infoCampania['forms'] = NULL;
+                        } else {
+                            $infoCampania = $oPaloConsola->leerInfoCampania(
+                                $nuevoEstado['calltype'],
+                                $nuevoEstado['campaign_id']);
+                        }
 
-                    $respuestaEventos['llamada'] = construirRespuesta_agentlinked(
-                        $smarty, $sDirLocalPlantillas, $oPaloConsola, $nuevoEstado, 
-                        $evento, $infoCampania);
+                        // Almacenar para regenerar formulario
+                        session_start();
+                        $_SESSION['callcenter']['ultimo_calltype'] = $nuevoEstado['calltype'];
+                        $_SESSION['callcenter']['ultimo_callid'] = $nuevoEstado['callid'];
+                        $_SESSION['callcenter']['ultimo_callsurvey']['call_survey'] = $evento['call_survey'];
+                        $_SESSION['callcenter']['ultimo_campaignform']['forms'] = $infoCampania['forms'];
+                    }
+                    break;
+                case 'agentunlinked':
+                    unset($respuestaEventos['llamada']);
+                    if (!is_null($estadoCliente['calltype'])) {
+                    	$respuestaEventos['llamada'] = construirRespuesta_agentunlinked();
+                    }
+                    break;
                 }
-                break;
-            case 'agentunlinked':
-                unset($respuestaEventos['llamada']);
-                if (!is_null($estadoCliente['calltype'])) {
-                    $respuestaEventos['llamada'] = construirRespuesta_agentunlinked();
-                }
-                break;
             }
-        } // while(...)
 
-        // Sólo debe haber hasta un evento de llamada, de break, de hold 
-        if (isset($respuestaEventos['break'])) $respuesta[] = $respuestaEventos['break']; 
-        if (isset($respuestaEventos['hold'])) $respuesta[] = $respuestaEventos['hold']; 
-        if (isset($respuestaEventos['llamada'])) $respuesta[] = $respuestaEventos['llamada']; 
-
-        // Agregar los textos a cambiar en la interfaz
+            //if (!$bReinicioSesion) session_start();
+            
+            // Sólo debe haber hasta un evento de llamada, de break, de hold 
+            if (isset($respuestaEventos['break'])) $respuesta[] = $respuestaEventos['break']; 
+            if (isset($respuestaEventos['hold'])) $respuesta[] = $respuestaEventos['hold']; 
+            if (isset($respuestaEventos['llamada'])) $respuesta[] = $respuestaEventos['llamada']; 
+        }
+        
+        /*  
+         * La barra de color de la interfaz debe terminar en uno de tres estados:
+         * llamada, break, ocioso.
+         */
+        function describirEstadoBarra($estado)
+        {
+        	if (!is_null($estado['calltype']))
+                return 'llamada';
+            if (!is_null($estado['break_id']))
+                return 'break';
+            return 'ocioso';
+        }
         $sDescInicial = describirEstadoBarra($estadoCliente);
         $estadoFinal = $estadoCliente;
         foreach ($respuesta as $evento) switch ($evento['event']) {
-        case 'holdenter':
-            $estadoCliente['onhold'] = TRUE;
-            break;
-        case 'holdexit':
-            $estadoCliente['onhold'] = FALSE;
-            break;
         case 'breakenter': 
-            $estadoFinal['break_id'] = $evento['break_id'];
-            $estadoCliente['break_id'] = $evento['break_id'];
+            $estadoFinal['break_id'] = $evento['break_id']; 
             break;
         case 'breakexit':
             $estadoFinal['break_id'] = NULL;
-            $estadoCliente['break_id'] = NULL;
             break;
         case 'agentlinked':
             $estadoFinal['calltype'] = $evento['calltype'];
-            $estadoCliente['calltype'] = $evento['calltype'];
-            $estadoCliente['campaign_id'] = $evento['campaign_id'];
-            $estadoCliente['callid'] = $evento['callid'];
             break;
         case 'agentunlinked':
             $estadoFinal['calltype'] = NULL;
-            $estadoCliente['calltype'] = NULL;
-            $estadoCliente['campaign_id'] = NULL;
-            $estadoCliente['callid'] = NULL;
             break;
         }
         $sDescFinal = describirEstadoBarra($estadoFinal);
@@ -1273,42 +1207,11 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
             $respuesta[$iPosEvento]['timer_seconds'] = '';            
             break;
         }
-        
-        jsonflush($bSSE, $respuesta);
-        
-        $respuesta = array();
+    }
 
-    } while($bSSE && !$bReinicioSesion && connection_status() == CONNECTION_NORMAL);
-    $oPaloConsola->desconectarTodo();
-}
-
-function jsonflush($bSSE, $respuesta)
-{
     $json = new Services_JSON();
-    $r = $json->encode($respuesta);
-    if ($bSSE)
-        printflush("data: $r\n\n");
-    else printflush($r);
-}
-
-function printflush($s)
-{
-    print $s;
-    ob_flush();
-    flush();
-}
-
-/*  
- * La barra de color de la interfaz debe terminar en uno de tres estados:
- * llamada, break, ocioso.
- */
-function describirEstadoBarra($estado)
-{
-    if (!is_null($estado['calltype']))
-        return 'llamada';
-    if (!is_null($estado['break_id']))
-        return 'break';
-    return 'ocioso';
+    Header('Content-Type: application/json');
+    return $json->encode($respuesta);
 }
 
 function construirRespuesta_breakenter($pause_id)
@@ -1352,18 +1255,17 @@ function construirRespuesta_holdexit()
     );
 }
 
-function construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas, 
-    $oPaloConsola, $callinfo, $infoLlamada, &$infoCampania)
+function construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas, $oPaloConsola, $callinfo, $infoLlamada)
 {
-    foreach (array('calltype', 'campaign_id', 'callid', 'callnumber',
-        'agent_number', 'remote_channel') as $k) {
-        if (!isset($infoLlamada[$k]) && isset($callinfo[$k]))
-            $infoLlamada[$k] = $callinfo[$k];
-    }
+    if (!isset($infoLlamada['calltype'])) $infoLlamada['calltype'] = $callinfo['calltype'];
     if ($callinfo['calltype'] == 'incoming' && is_null($callinfo['campaign_id'])) {
         $infoCampania['queue'] = $infoLlamada['queue'];
         $infoCampania['script'] = $oPaloConsola->leerScriptCola($infoCampania['queue']);
         $infoCampania['forms'] = NULL;
+    } else {
+        $infoCampania = $oPaloConsola->leerInfoCampania(
+            $callinfo['calltype'],
+            $callinfo['campaign_id']);
     }
     if (is_null($infoCampania['script']) || $infoCampania['script'] == '')
         $infoCampania['script'] = _tr('(No script available)');
@@ -1382,14 +1284,8 @@ function construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas,
         'cronometro'            =>  sprintf('%02d:%02d:%02d', ($iDuracionLlamada - ($iDuracionLlamada % 3600)) / 3600, (($iDuracionLlamada - ($iDuracionLlamada % 60)) / 60) % 60, $iDuracionLlamada % 60),
         'llamada_informacion'   =>  manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
         'llamada_formulario'    =>  manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
-        'llamada_script'        =>  $infoCampania['script'],
-        'urlopentype'           =>  isset($infoCampania['urlopentype']) ? $infoCampania['urlopentype'] : NULL,
-        'url'                   =>  NULL,
+        'llamada_script'        =>  $infoCampania['script'],                 
     );
-    
-    if (isset($infoCampania['urltemplate']) && !is_null($infoCampania['urltemplate'])) {
-        $registroCambio['url'] = construirUrlExterno($infoCampania['urltemplate'], $infoLlamada);
-    }
     
     // Asignaciones específicas para llamadas entrantes
     if ($callinfo['calltype'] == 'incoming') {
@@ -1450,26 +1346,4 @@ function construirRespuesta_agentunlinked()
         'event'     =>  'agentunlinked',
     );	
 }
-
-function construirUrlExterno($s, $infoLlamada)
-{
-    $reemplazos = array(
-        '{__AGENT_NUMBER__}'    =>  (isset($infoLlamada['agent_number']) 
-                ? $infoLlamada['agent_number'] : ''),
-        '{__REMOTE_CHANNEL__}'  =>  (isset($infoLlamada['remote_channel']) 
-                ? $infoLlamada['remote_channel'] : ''),
-        '{__CALL_TYPE__}'       =>  $infoLlamada['calltype'],
-        '{__CAMPAIGN_ID__}'     =>  $infoLlamada['campaign_id'],
-        '{__CALL_ID__}'         =>  $infoLlamada['callid'],
-        '{__PHONE__}'           =>  $infoLlamada['callnumber'],
-    );
-    if (isset($infoLlamada['call_attributes'])) foreach ($infoLlamada['call_attributes'] as $tupla) {
-        $reemplazos['{'.$tupla['label'].'}'] = $tupla['value'];
-    }
-    foreach ($reemplazos as $k => $v) {
-        $s = str_replace($k, urlencode($v), $s);
-    }
-    return $s;
-}
-
 ?>

@@ -1,14 +1,19 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
     <tr class="letra12">
-        <td align="right" width="8%">{$date_from.LABEL}:&nbsp;</td>
-        <td align="left" width="13%">{$date_from.INPUT}</td>
-        <td align="right" width="7%">{$option_fil.LABEL}:&nbsp;</td>
-        <td align="left" width="22%">{$option_fil.INPUT}&nbsp;{$value_fil.INPUT}</td>
-        <td align="left"><input class="button" type="submit" name="show" value="{$SHOW}"></td>
+        <td width="10%">&nbsp;</td>
+        <td align="right" width="25%">{$date_from.LABEL}:</td>
+        <td align="left" width="17%">{$date_from.INPUT}</td>
+        <td align="right" width="8%">{$date_to.LABEL}:</td>
+        <td align="left">{$date_to.INPUT}</td>
+        <td>&nbsp;</td>
     </tr>
     <tr class="letra12">
-        <td align="right" width="5%">{$date_to.LABEL}:&nbsp;</td>
-        <td align="left">{$date_to.INPUT}</td>
+        <td>&nbsp;</td>
+        <td align="right">{$option_fil.LABEL}&nbsp;{$option_fil.INPUT}</td>
+        <td align="left">{$value_fil.INPUT}</td>
+        <td>&nbsp;</td>
+        <td align="left"><input class="button" type="submit" name="show" value="{$SHOW}"></td>
+        <td>&nbsp;</td>
     </tr>
 </table>
 

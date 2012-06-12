@@ -83,8 +83,5 @@ $arrLangModule=array(
 "Status" => "Status",
 "Obsolete" => "Obsolete",
 "Current" => "Current",
-"File was imported successful" => "File was imported successful",
-"Error rate name already exists in database or is duplicated in csv file" => "Error rate name already exists in database or is duplicated in csv file",
-"The prefix already exists with the same Trunk in database or is duplicated in csv file" => "The prefix already exists with the same Trunk in database or is duplicated in csv file",
 );
 ?>

@@ -2,41 +2,9 @@
 /*
     Genera la plantilla de configuración del terminal de Yealink
 */
-function PrincipalFileYealink($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer)
+function PrincipalFileYealink($DisplayName, $id_device, $secret, $ipAdressServer)
 {
-    $configNetwork = "";
-    $ByDHCP = existsValue($arrParameters,'By_DHCP',1); echo $ByDHCP;
-    $ByDHCP = ($ByDHCP == 1)?0:2; // 0 indica que es por DHCP y 2 por estatico
-print_r($arrParameters);
-    if($ByDHCP==2){
-        $configNetwork ="
-WANStaticIP       =".existsValue($arrParameters,'IP','')."
-WANSubnetMask     =".existsValue($arrParameters,'Mask','')."
-WANDefaultGateway =".existsValue($arrParameters,'GW','')."
-
-[ DNS ]
-path=/yealink/config/Network/Network.cfg
-PrimaryDNS   = ".existsValue($arrParameters,'DNS1','')."
-SecondaryDNS = ".existsValue($arrParameters,'DNS2','');
-   }
-
-# CONTENT
     $content="
-[ autop_mode ]
-path = /yealink/config/Setting/autop.cfg
-mode = 1
-
-[ WAN ]
-path=/yealink/config/Network/Network.cfg
-#WANType:0:DHCP,1:PPPoE,2:StaticIP
-WANType = $ByDHCP
-$configNetwork
-
-[ LAN ]
-path=/yealink/config/Network/Network.cfg
-#LANTYPE:0:Router, 1:Bridge
-LANTYPE = ".existsValue($arrParameters,'Bridge','1')."
-
 [ account ]
 path=/yealink/config/voip/sipAccount0.cfg
 Enable = 1
@@ -46,7 +14,14 @@ UserName = $id_device
 AuthName = $id_device
 password = $secret
 SIPServerHost = $ipAdressServer
-Expire = 60
+
+[ account ]
+path=/yealink/config/voip/sipAccount1.cfg
+Enable = 0
+
+[ account ]
+path=/yealink/config/voip/sipAccount2.cfg
+Enable = 0
 
 [ autoprovision ]
 path = /yealink/config/Setting/autop.cfg
@@ -54,76 +29,8 @@ server_type = tftp
 server_address = $ipAdressServer
 user =
 password =
-
-[ Time ] 
-path = /yealink/config/Setting/Setting.cfg 
-TimeZone = ".existsValue($arrParameters,'Time_Zone','-5')." 
-TimeServer1 = $ipAdressServer
-TimeServer2 = 0.pool.ntp.org 
-Interval = 300 
-SummerTime = 0
-
-[ PhoneSetting ]
-path = /yealink/config/Setting/Setting.cfg
-Manual_Time = 0
-
-
-[ Lang ]
-path = /yealink/config/Setting/Setting.cfg
-ActiveWebLanguage = Spanish
-
-
-[ ContactList ]
-path = /tmp/download.cfg
-server_address = $ipAdressServer/contactData1.xml
-
-[ RemotePhoneBook0 ]
-path = /yealink/config/Setting/Setting.cfg
-URL = tftp://$ipAdressServer/phonebook.xml
-Name = Directory
-
-[ memory11 ]
-path = /yealink/config/vpPhone/vpPhone.ini
-DKtype = 15
-Line = 1
-Value =  
-type = 
-
-[ memory12 ]
-path = /yealink/config/vpPhone/vpPhone.ini
-DKtype = 15 
-Line = 1
-Value =
-type = 
-
-[ memory13 ]
-path = /yealink/config/vpPhone/vpPhone.ini
-DKtype = 15
-Line = 1
-Value = 
-type = 
-
-[ memory14 ]
-path = /yealink/config/vpPhone/vpPhone.ini
-DKtype = 15
-Line = 1
-Value = 
-type = 
-
-[ memory15 ]
-path = /yealink/config/vpPhone/vpPhone.ini
-DKtype = 15
-Line =
-Value = 
-type = 
-
-[ memory16 ]
-path = /yealink/config/vpPhone/vpPhone.ini
-DKtype = 15
-Line = 1
-Value =
-type =
 ";
+
     return $content;
 }
 
@@ -751,15 +658,6 @@ type =
 TEMP;
 
     return $content;
-}
 
-function existsValue($arr, $key, $default)
-{
-    if(isset($arr[$key])){
-        $value = trim($arr[$key]);
-        if($value != "") return $value;
-        else return $default;
-    }
-    else return $default;
 }
 ?>

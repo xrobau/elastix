@@ -145,8 +145,8 @@ class paloSantoControlPanel {
                         'state' => $tmp[4],
                         'data' => $tmp[6],//para ver la troncal que es casi igual a tmp[11]
                         //'callerid' => $tmp[8],
-                        'time' => $this->Sec2HHMMSS($tmp[11]),
-                        'dstn' => $tmp[12],
+                        'time' => $this->Sec2HHMMSS($tmp[10]),
+                        'dstn' => $tmp[11],
                         'ext' => $tmp[2]
                         //'brigedto' => $tmp[12],
                     );
@@ -231,12 +231,11 @@ class paloSantoControlPanel {
         }
         $arrParkinglots = $this->getParkinglots();
         $arrParking = $this->getDataParkinglots();
-	$numslots = 0;
         foreach($arrParkinglots as $key => $value){
-	    if($value["keyword"] == "numslots")
-		$numslots = $value["data"];
-	    elseif($value["keyword"] == "parkext")
-		$parkext = $value["data"];
+        if($value["keyword"] == "numslots")
+            $numslots = $value["data"];
+        elseif($value["keyword"] == "parkext")
+            $parkext = $value["data"];
         }
         for($i=0;$i<$numslots;$i++){
             $time = " ";
@@ -707,7 +706,7 @@ class paloSantoControlPanel {
                 $xmlRecords .= "  <area_box>\n";
                 $xmlRecords .= "    <id>{$area_data['a.id']}</id>\n";
                 $xmlRecords .= "    <name>{$area_data['a.name']}</name>\n";
-                $xmlRecords .= "    <height>auto</height>\n";
+                $xmlRecords .= "    <height>{$area_data['a.height']}</height>\n";
                 $xmlRecords .= "    <width>{$area_data['a.width']}</width>\n";
                 $xmlRecords .= "    <color>{$area_data['a.color']}</color>\n";
                 //$xmlRecords .= "    <description>{$area_data['a.description']}</description>\n";
@@ -720,27 +719,14 @@ class paloSantoControlPanel {
     } 
 
     function getDesignArea() {
-        $query = "select a.id AS a_id, a.name AS a_name, a.height AS a_height, a.width AS a_width, a.description AS a_description, a.no_column AS a_no_column, a.color AS a_color, count(i.id_area) no_items from area a left join item_box i on a.id=i.id_area group by a.id;";
+        $query = "select a.id, a.name, a.height, a.width, a.description, a.no_column, a.color, count(i.id_area) no_items from area a left join item_box i on a.id=i.id_area group by a.id;";
         $result=$this->_DB2->fetchTable($query, true);
 
         if($result==FALSE){
             $this->errMsg = $this->_DB2->errMsg;
             return array();
         }
-        $r = array();
-        foreach ($result as $tupla) {
-            $r[] = array(
-                'a.id' => $tupla['a_id'],
-                'a.name' => $tupla['a_name'],
-                'a.height' => $tupla['a_height'],
-                'a.width' => $tupla['a_width'],
-                'a.description' => $tupla['a_description'],
-                'a.no_column' => $tupla['a_no_column'],
-                'a.color' => $tupla['a_color'],
-                'no_items' => $tupla['no_items'],
-            );
-        }
-        return $r;
+        return $result;
     }
 
     function updateDescriptionArea($description, $id_area){

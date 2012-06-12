@@ -25,13 +25,6 @@ var estadoCliente =
 var fechaInicio = null;
 var timer = null;
 
-// Objeto EventSource, si está soportado por el navegador
-var evtSource = null;
-
-// Copia del URL a cargar al agregar la nueva cejilla
-var externalurl = null;
-var externalurl_title = null;
-
 $(document).ready(function() {
 	$('#elastix-callcenter-error-message').hide();
 	$('#elastix-callcenter-info-message').hide();
@@ -45,15 +38,8 @@ $(document).ready(function() {
     $('#btn_agendar_llamada').button();
     $('#schedule_same_agent').button();
     $('#schedule_radio').buttonset();
-    $('#transfer_type_radio').buttonset();
     $('#schedule_date').hide();
-    $('#elastix-callcenter-cejillas-contenido').tabs({
-    	add:	function (event, ui) {
-    		if (externalurl != null)
-    			$(ui.panel).append("<iframe scrolling=\"auto\" height=\"450\" frameborder=\"0\" width=\"100%\" src=\"" + externalurl + "\" />");
-    		externalurl = null;
-    	}
-    });
+    $('#elastix-callcenter-cejillas-contenido').tabs();
     
     // Operaciones que deben de repetirse al obtener formulario vía AJAX
     apply_form_styles();
@@ -111,13 +97,6 @@ $(document).ready(function() {
     });
 });
 
-$(window).unload(function() {
-	if (evtSource != null) {
-		evtSource.close();
-		evtSource = null;
-	}
-});
-
 function apply_form_styles()
 {
     $('#elastix-callcenter-cejillas-formulario').tabs();
@@ -134,19 +113,18 @@ function apply_form_styles()
 }
 
 // Inicializar estado del cliente al refrescar la página
-function initialize_client_state(nuevoEstado)
+function initialize_client_state(onhold, break_id, calltype, campaign_id, callid, timer_seconds)
 {
-	estadoCliente.onhold = nuevoEstado.onhold;
-	estadoCliente.break_id = nuevoEstado.break_id;
-	estadoCliente.calltype = nuevoEstado.calltype;
-	estadoCliente.campaign_id = nuevoEstado.campaign_id;
-	estadoCliente.callid = nuevoEstado.callid;
+	estadoCliente.onhold = onhold;
+	estadoCliente.break_id = break_id;
+	estadoCliente.calltype = calltype;
+	estadoCliente.campaign_id = campaign_id;
+	estadoCliente.callid = callid;
 
-	// Lanzar el callback que actualiza el estado de la llamada
+    // Lanzar el callback que actualiza el estado de la llamada
     setTimeout(do_checkstatus, 1);
 
-    iniciar_cronometro(nuevoEstado.timer_seconds);
-    abrir_url_externo(nuevoEstado.urlopentype, nuevoEstado.url);
+    iniciar_cronometro(timer_seconds);
 }
 
 // Inicializar el cronómetro con el valor de segundos indicado
@@ -214,8 +192,8 @@ function apply_ui_styles(uidata)
     });
     $('#elastix-callcenter-seleccion-transfer').dialog({
         autoOpen: false,
-        width: 400,
-        height: 200,
+        width: 300,
+        height: 150,
         modal: true,
         buttons: [
             {
@@ -244,8 +222,6 @@ function apply_ui_styles(uidata)
             }
         ]
     });
-    
-    externalurl_title = uidata['external_url_tab'];
 }
 
 // El siguiente código se ejecutará cuando se presione el botón de login del agente
@@ -404,8 +380,7 @@ function do_transfer()
 		menu:		module_name, 
 		rawmode:	'yes',
 		action:		'transfer',
-		extension:	$('#transfer_extension').val(),
-		atxfer: 	$('#transfer_type_attended').attr('checked'),
+		extension:	$('#transfer_extension').val()
 	},
 	function (respuesta) {
         if (respuesta['action'] == 'error') {
@@ -497,154 +472,138 @@ function do_save_forms()
 
 function do_checkstatus()
 {
-	params = {
+	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
 		menu:		module_name, 
 		rawmode:	'yes',
 		action:		'checkStatus',
 		clientstate: estadoCliente
-	};
-	if (window.EventSource) {
-		params['serverevents'] = true;
-		evtSource = new EventSource('index.php?' + $.param(params));
-		evtSource.onmessage = function(event) {
-			manejarRespuestaStatus($.parseJSON(event.data));
-		}
-	} else {
-		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,
-		function (respuesta) {
-			manejarRespuestaStatus(respuesta);
-			
-			// Lanzar el método de inmediato
-			setTimeout(do_checkstatus, 1);
-		});
-	}
-}
-
-function manejarRespuestaStatus(respuesta)
-{
-	for (i in respuesta) {
-		if (respuesta[i].txt_estado_agente_inicial != null)
-			$('#elastix-callcenter-estado-agente-texto').text(respuesta[i].txt_estado_agente_inicial);
-		if (respuesta[i].class_estado_agente_inicial != null)
-			$('#elastix-callcenter-estado-agente')
-				.removeClass('elastix-callcenter-class-estado-ocioso')
-				.removeClass('elastix-callcenter-class-estado-break')
-				.removeClass('elastix-callcenter-class-estado-activo')
-				.addClass(respuesta[i].class_estado_agente_inicial);
-		if (respuesta[i].timer_seconds != null) {
-			if (respuesta[i].timer_seconds != '') {
-				iniciar_cronometro(respuesta[i].timer_seconds);
-			} else {
-				iniciar_cronometro(null);
-			}
-		}
-		
-		switch (respuesta[i].event) {
-		case 'logged-out':
-			// El refresco debería conducir a la página de login
-			window.open('index.php?menu=' + module_name, "_self");
-			return;
-		case 'breakenter':
-			// El agente ha entrado en break
-			estadoCliente.break_id = respuesta[i].break_id;
-			$('#btn_togglebreak')
-				.removeClass('elastix-callcenter-boton-break')
-				.addClass('elastix-callcenter-boton-unbreak')
-				.text(respuesta[i].txt_btn_break);
-			break;
-		case 'breakexit':
-			// El agente ha salido del break
-			estadoCliente.break_id = null;
-			$('#btn_togglebreak')
-				.removeClass('elastix-callcenter-boton-unbreak')
-				.addClass('elastix-callcenter-boton-break')
-				.text(respuesta[i].txt_btn_break);
-			break;
-		case 'holdenter':
-			estadoCliente.onhold = true;
-			// TODO
-			break;
-		case 'holdexit':
-			estadoCliente.onhold = false;
-			// TODO
-			break;
-		case 'agentlinked':
-			// El agente ha recibido una llamada
-			estadoCliente.calltype = respuesta[i].calltype;
-			estadoCliente.campaign_id = respuesta[i].campaign_id;
-			estadoCliente.callid = respuesta[i].callid;
-	        $('#btn_hangup').button('enable');
-	        $('#btn_transfer').button('enable');
-			$('#elastix-callcenter-cronometro').text(respuesta[i].cronometro);				
-			$('#elastix-callcenter-llamada-info')
-				.empty()
-				.append(respuesta[i].llamada_informacion);
-			$('#elastix-callcenter-llamada-script')
-				.empty()
-				.append(respuesta[i].llamada_script);
-			$('#elastix-callcenter-llamada-form')
-				.empty()
-				.append(respuesta[i].llamada_formulario);
-			$('#llamada_entrante_contacto_telefono, #llamada_saliente_contacto_telefono')
-				.text(respuesta[i].txt_contacto_telefono);
-			$('#schedule_new_phone').val(respuesta[i].txt_contacto_telefono);
-			
-			// Preparar y mostrar la barra correspondiente
-			$('#elastix-callcenter-cejillas-contenido')
-				.removeClass('elastix-callcenter-cejillas-contenido-barra-oculta')
-				.addClass('elastix-callcenter-cejillas-contenido-barra-visible');
-			if (respuesta[i].calltype == 'incoming') {
-				$('#elastix-callcenter-barra-llamada-saliente').hide();
-				$('#llamada_entrante_contacto_id').empty();
-				for (k in respuesta[i].lista_contactos) {
-					// El código comentado no funciona en IE6
-					/*
-					var option_contacto = document.createElement('option');
-					option_contacto.text = respuesta[i].lista_contactos[k];
-					option_contacto.value = k;
-					*/
-					option_contacto = '<option value="' + k + '">' + respuesta[i].lista_contactos[k] + '</option>';
-					$('#llamada_entrante_contacto_id').append($(option_contacto));
+	},
+	function (respuesta) {
+		for (i in respuesta) {
+			if (respuesta[i].txt_estado_agente_inicial != null)
+				$('#elastix-callcenter-estado-agente-texto').text(respuesta[i].txt_estado_agente_inicial);
+			if (respuesta[i].class_estado_agente_inicial != null)
+				$('#elastix-callcenter-estado-agente')
+					.removeClass('elastix-callcenter-class-estado-ocioso')
+					.removeClass('elastix-callcenter-class-estado-break')
+					.removeClass('elastix-callcenter-class-estado-activo')
+					.addClass(respuesta[i].class_estado_agente_inicial);
+			if (respuesta[i].timer_seconds != null) {
+				if (respuesta[i].timer_seconds != '') {
+					iniciar_cronometro(respuesta[i].timer_seconds);
+				} else {
+					iniciar_cronometro(null);
 				}
-				if (respuesta[i].puede_confirmar_contacto)
-					$('#btn_confirmar_contacto').button('enable');
-				else $('#btn_confirmar_contacto').button('disable');
-				$('#elastix-callcenter-barra-llamada-entrante').show();
-			} else if (respuesta[i].calltype == 'outgoing') {
-				$('#elastix-callcenter-barra-llamada-entrante').hide();
-				
-				$('#llamada_saliente_nombres').text(respuesta[i].txt_contacto_nombres);
-				$('#schedule_new_name').val(respuesta[i].txt_contacto_nombres);
-				$('#elastix-callcenter-barra-llamada-saliente').show();
 			}
-
-			apply_form_styles();
-			abrir_url_externo(respuesta[i].urlopentype, respuesta[i].url);
-			break;
-		case 'agentunlinked':
-	        // El agente se ha desconectado de la llamada
-			estadoCliente.calltype = null;
-			estadoCliente.campaign_id = null;
-			estadoCliente.callid = null;
 			
-			$('#btn_hangup').button('disable');
-	        $('#btn_transfer').button('disable');
-	        $('#elastix-callcenter-cronometro').text('00:00:00');
+			switch (respuesta[i].event) {
+			case 'logged-out':
+				// El refresco debería conducir a la página de login
+				window.open('index.php?menu=' + module_name, "_self");
+				return;
+			case 'breakenter':
+				// El agente ha entrado en break
+				estadoCliente.break_id = respuesta[i].break_id;
+				$('#btn_togglebreak')
+					.removeClass('elastix-callcenter-boton-break')
+					.addClass('elastix-callcenter-boton-unbreak')
+					.text(respuesta[i].txt_btn_break);
+				break;
+			case 'breakexit':
+				// El agente ha salido del break
+				estadoCliente.break_id = null;
+				$('#btn_togglebreak')
+					.removeClass('elastix-callcenter-boton-unbreak')
+					.addClass('elastix-callcenter-boton-break')
+					.text(respuesta[i].txt_btn_break);
+				break;
+			case 'holdenter':
+				// TODO
+				break;
+			case 'holdexit':
+				// TODO
+				break;
+			case 'agentlinked':
+				// El agente ha recibido una llamada
+				estadoCliente.calltype = respuesta[i].calltype;
+				estadoCliente.campaign_id = respuesta[i].campaign_id;
+				estadoCliente.callid = respuesta[i].callid;
+		        $('#btn_hangup').button('enable');
+		        $('#btn_transfer').button('enable');
+				$('#elastix-callcenter-cronometro').text(respuesta[i].cronometro);				
+				$('#elastix-callcenter-llamada-info')
+					.empty()
+					.append(respuesta[i].llamada_informacion);
+				$('#elastix-callcenter-llamada-script')
+					.empty()
+					.append(respuesta[i].llamada_script);
+				$('#elastix-callcenter-llamada-form')
+					.empty()
+					.append(respuesta[i].llamada_formulario);
+				$('#llamada_entrante_contacto_telefono, #llamada_saliente_contacto_telefono')
+					.text(respuesta[i].txt_contacto_telefono);
+				$('#schedule_new_phone').val(respuesta[i].txt_contacto_telefono);
+				
+				// Preparar y mostrar la barra correspondiente
+				$('#elastix-callcenter-cejillas-contenido')
+					.removeClass('elastix-callcenter-cejillas-contenido-barra-oculta')
+					.addClass('elastix-callcenter-cejillas-contenido-barra-visible');
+				if (respuesta[i].calltype == 'incoming') {
+					$('#elastix-callcenter-barra-llamada-saliente').hide();
+					$('#llamada_entrante_contacto_id').empty();
+					for (k in respuesta[i].lista_contactos) {
+						// El código comentado no funciona en IE6
+						/*
+						var option_contacto = document.createElement('option');
+						option_contacto.text = respuesta[i].lista_contactos[k];
+						option_contacto.value = k;
+						*/
+						option_contacto = '<option value="' + k + '">' + respuesta[i].lista_contactos[k] + '</option>';
+						$('#llamada_entrante_contacto_id').append($(option_contacto));
+					}
+					if (respuesta[i].puede_confirmar_contacto)
+						$('#btn_confirmar_contacto').button('enable');
+					else $('#btn_confirmar_contacto').button('disable');
+					$('#elastix-callcenter-barra-llamada-entrante').show();
+				} else if (respuesta[i].calltype == 'outgoing') {
+					$('#elastix-callcenter-barra-llamada-entrante').hide();
+					
+					$('#llamada_saliente_nombres').text(respuesta[i].txt_contacto_nombres);
+					$('#schedule_new_name').val(respuesta[i].txt_contacto_nombres);
+					$('#elastix-callcenter-barra-llamada-saliente').show();
+				}
 
-	        // Vaciar las áreas para la llamada
-			$('#elastix-callcenter-llamada-info').empty();
-			$('#elastix-callcenter-llamada-script').empty();
-			//$('#elastix-callcenter-llamada-form').empty();
-	        
-	        // Ocultar las barras
-	        $('#elastix-callcenter-barra-llamada-entrante').hide();
-	        $('#elastix-callcenter-barra-llamada-saliente').hide();
-			$('#elastix-callcenter-cejillas-contenido')
-				.removeClass('elastix-callcenter-cejillas-contenido-barra-visible')
-				.addClass('elastix-callcenter-cejillas-contenido-barra-oculta');
-			break;
+				apply_form_styles();
+				break;
+			case 'agentunlinked':
+		        // El agente se ha desconectado de la llamada
+				estadoCliente.calltype = null;
+				estadoCliente.campaign_id = null;
+				estadoCliente.callid = null;
+				
+				$('#btn_hangup').button('disable');
+		        $('#btn_transfer').button('disable');
+		        $('#elastix-callcenter-cronometro').text('00:00:00');
+
+		        // Vaciar las áreas para la llamada
+				$('#elastix-callcenter-llamada-info').empty();
+				$('#elastix-callcenter-llamada-script').empty();
+				//$('#elastix-callcenter-llamada-form').empty();
+		        
+		        // Ocultar las barras
+		        $('#elastix-callcenter-barra-llamada-entrante').hide();
+		        $('#elastix-callcenter-barra-llamada-saliente').hide();
+				$('#elastix-callcenter-cejillas-contenido')
+					.removeClass('elastix-callcenter-cejillas-contenido-barra-visible')
+					.addClass('elastix-callcenter-cejillas-contenido-barra-oculta');
+				break;
+			}
 		}
-	}
+
+		// Lanzar el método de inmediato
+		setTimeout(do_checkstatus, 1);
+	});
+
 }
 
 function mostrar_mensaje_info(s)
@@ -665,27 +624,4 @@ function mostrar_mensaje_error(s)
 			$('#elastix-callcenter-error-message').fadeOut();
 		}, 5000);
 	});
-}
-
-function abrir_url_externo(urlopentype, url)
-{
-	if (urlopentype != null) {
-		switch (urlopentype) {
-		case 'iframe':
-			externalurl = url;
-			$('#elastix-callcenter-cejillas-contenido').tabs('remove', 3);
-			$('#elastix-callcenter-cejillas-contenido').tabs('add', '#tabs-externalurl', externalurl_title);
-			break;
-		case 'jsonp':
-			$.ajax(url, {
-				dataType: 'jsonp',
-				context:	document,
-			});
-			break;
-		case 'window':
-		default:
-			window.open(url, '_blank');
-			break;
-		}
-	}
 }

@@ -92,7 +92,7 @@ function generateWav($smarty, $module_name, $local_templates_dir, $arrLang)
     }else{
         $smarty->assign("GENERATE", $arrLang["Generate"]);
         $smarty->assign("BACK", $arrLang["Back"]);
-        $smarty->assign("icon", "modules/$module_name/images/pbx_tools_text_to_wav.png");
+        $smarty->assign("icon", "images/list.png");
         $smarty->assign("FORMATO", getParameter('format'));	
         $smarty->assign("DOWNLOAD",$arrLang["Download File"]);
         $path = "var";
@@ -128,7 +128,7 @@ function form_TexttoWav($smarty, $module_name, $local_templates_dir, $arrLang)
     $oForm = new paloForm($smarty,$arrFormConference);
 
     $smarty->assign("GENERATE", $arrLang["Generate"]);
-    $smarty->assign("icon", "modules/$module_name/images/pbx_tools_text_to_wav.png");
+    $smarty->assign("icon", "images/list.png");
     $arrData['format'] = (getParameter("format"))?getParameter("format"):"wav";
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLang["Text to Wav"], $arrData);

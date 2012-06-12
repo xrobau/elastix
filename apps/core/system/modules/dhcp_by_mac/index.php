@@ -91,23 +91,7 @@ function reportDHCP_Configuration($smarty, $module_name, $local_templates_dir, &
     
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
-        $nameOpt = array(
-        "hostname" => _tr('Host Name'),
-        "ipaddress" => _tr('IP Address'),
-        "macaddress" => _tr('MAC Address'),
-                    );
-
-    if(isset($nameOpt[$filter_field])){
-        $valorFiltro = $nameOpt[$filter_field];
-    }else
-        $valorFiltro = "";
-
-    $oGrid->addFilterControl(_tr("Filter applied ")." ".$valorFiltro." = $filter_value", $_POST, array("filter_field" => "hostname","filter_value" => ""));
-
     $totalDHCP_Configuration = $pDHCP_Configuration->contarIpFijas($filter_field, $filter_value);
-
-    $oGrid->addNew("new_dhcpconft",_tr("Assign IP Address"));
-    $oGrid->deleteList("Are you sure you wish to delete the DHCP configuration.","delete_dhcpConf",_tr("Delete"));
 
     $limit  = 20;
     $total  = $totalDHCP_Configuration;
@@ -131,10 +115,10 @@ function reportDHCP_Configuration($smarty, $module_name, $local_templates_dir, &
         }
     }
 
-    $buttonDelete = "";
+    $buttonDelete = "<input type='submit' name='delete_dhcpConf' value='"._tr('Delete')."' class='button' onclick=\" return confirmSubmit('"._tr('Are you sure you wish to delete the DHCP configuration.')."');\" />";
 
     $arrGrid = array("title"    => _tr('Assign IP Address to Host'),
-                        "icon"     => "modules/$module_name/images/system_network_assign_ip_address.png",
+                        "icon"     => "images/list.png",
                         "width"    => "99%",
                         "start"    => ($total==0) ? 0 : $offset + 1,
                         "end"      => $end,
@@ -156,6 +140,7 @@ function reportDHCP_Configuration($smarty, $module_name, $local_templates_dir, &
     $arrFormFilterDHCP_Configuration = createFieldFilter();
     $oFilterForm = new paloForm($smarty, $arrFormFilterDHCP_Configuration);
     $smarty->assign("SHOW", _tr('Show'));
+    $smarty->assign("NEW_DHCPCONF", _tr('Assign IP Address'));
 
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
@@ -227,7 +212,7 @@ function viewFormDHCP_Configuration($smarty, $module_name, $local_templates_dir,
     $smarty->assign("EDIT", _tr('Edit'));
     $smarty->assign("CANCEL", _tr('Cancel'));
     $smarty->assign("REQUIRED_FIELD", _tr('Required field'));
-    $smarty->assign("icon", "modules/$module_name/images/system_network_assign_ip_address.png");
+    $smarty->assign("icon", "images/list.png");
     $smarty->assign("HOST_NAME", _tr('ex_hostname'));
     $smarty->assign("IP_ADDRESS", _tr('ex_ipaddress'));
     $smarty->assign("MAC_ADDRESS", _tr('ex_mac_address'));
@@ -249,7 +234,7 @@ function saveDHCP_Configuration($smarty, $module_name, $local_templates_dir, &$p
     $smarty->assign("SAVE", _tr('Save'));
     $smarty->assign("EDIT", _tr('Edit'));
     $smarty->assign("CANCEL", _tr('Cancel'));
-    $smarty->assign("icon", "modules/$module_name/images/system_network_assign_ip_address.png");
+    $smarty->assign("icon", "images/list.png");
     $smarty->assign("ID", getParameter('id'));
     
     if(!$oForm->validateForm($_POST)) {
@@ -289,7 +274,7 @@ function saveDHCP_Configuration($smarty, $module_name, $local_templates_dir, &$p
             $smarty->assign("REQUIRED_FIELD", _tr('Required field'));
             $smarty->assign("SAVE", _tr('Save'));
             $smarty->assign("CANCEL", _tr('Cancel'));
-            $smarty->assign("icon", "modules/$module_name/images/system_network_assign_ip_address.png");
+            $smarty->assign("icon", "images/list.png");
     
             $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr('Assign IP Address to Host'), $_POST);
             $contenidoModulo = "<form  method='POST' enctype='multipart/form-data' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

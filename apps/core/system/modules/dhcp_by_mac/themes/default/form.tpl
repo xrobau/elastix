@@ -16,22 +16,22 @@
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
         {/if}
-        {if $mode ne 'view'}<td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>{/if}
+        <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
     </tr>
 </table>
 <table class="tabForm" style="font-size: 16px;" width="100%" >
     <tr class="letra12">
-        <td align="left"><b>{$hostname.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</b></td>
+        <td align="left"><b>{$hostname.LABEL}: <span class="required">*</span></b></td>
         <td align="left">{$hostname.INPUT}&nbsp;&nbsp;{$HOST_NAME}</td>
     </tr>
 
     <tr class="letra12">
-        <td align="left"><b>{$ipaddress.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</b></td>
+        <td align="left"><b>{$ipaddress.LABEL}: <span class="required">*</span></b></td>
         <td align="left">{$ipaddress.INPUT}&nbsp;&nbsp;{$IP_ADDRESS}</td>
     </tr>
 
     <tr class="letra12">
-        <td align="left"><b>{$macaddress.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</b></td>
+        <td align="left"><b>{$macaddress.LABEL}: <span class="required">*</span></b></td>
         <td align="left">{$macaddress.INPUT}&nbsp;&nbsp;{$MAC_ADDRESS}</td>
     </tr>
 

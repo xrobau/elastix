@@ -35,13 +35,13 @@ $DocumentRoot = (isset($_SERVER['argv'][1]))?$_SERVER['argv'][1]:"/var/www/html"
 $DataBaseRoot = "/var/www/db";
 $tmpDir = '/tmp/new_module/pbx';  # in this folder the load module extract the package content
 
-if (!file_exists("$DataBaseRoot/endpoint.db")) {
+if(!file_exists("$DataBaseRoot/endpoint.db")){
     $cmd_mv    = "mv $tmpDir/setup/endpoint.db $DataBaseRoot/";
     $cmd_chown = "chown asterisk.asterisk $DataBaseRoot/endpoint.db";
     exec($cmd_mv);
     exec($cmd_chown);
 }
-if (!file_exists("$DataBaseRoot/control_panel_design.db")) {
+if(!file_exists("$DataBaseRoot/control_panel_design.db")){
     $cmd_mv    = "mv $tmpDir/setup/control_panel_design.db $DataBaseRoot/";
     $cmd_chown = "chown asterisk.asterisk $DataBaseRoot/control_panel_design.db";
     exec($cmd_mv);
@@ -49,30 +49,31 @@ if (!file_exists("$DataBaseRoot/control_panel_design.db")) {
 }
 
 createTrunkDB($DataBaseRoot);
-if (!file_exists("$DataBaseRoot/trunk.db")) {
-    if (file_exists("$tmpDir/setup/trunk.db")) {
-        $cmd_mv    = "mv $tmpDir/setup/trunk.db $DataBaseRoot/";
-        $cmd_chown = "chown asterisk.asterisk $DataBaseRoot/trunk.db";
-        exec($cmd_mv);
-        exec($cmd_chown);
-    } else {
-        $cmd_mv = "mv $DataBaseRoot/trunk-pbx.db $DataBaseRoot/trunk.db";
-        exec($cmd_mv);
+if(!file_exists("$DataBaseRoot/trunk.db")){
+    if(file_exists("$tmpDir/setup/trunk.db")){
+      $cmd_mv    = "mv $tmpDir/setup/trunk.db $DataBaseRoot/";
+      $cmd_chown = "chown asterisk.asterisk $DataBaseRoot/trunk.db";
+      exec($cmd_mv);
+      exec($cmd_chown);
+    }
+    else{
+      $cmd_mv = "mv $DataBaseRoot/trunk-pbx.db $DataBaseRoot/trunk.db";
+      exec($cmd_mv);
     }
 }
 
 
 // creacion de la tabla provider_account
 $provider_account = existDBTable("provider_account", "trunk.db", $DataBaseRoot);
-if ($provider_account['flagStatus']==0) {
+if($provider_account['flagStatus']==0){
     $arrConsole = $provider_account['arrConsole'];
     $exists = (isset($arrConsole) && isset($arrConsole[0]))?true:false;
 // antes verificar si hay datos en proveedores configurados sino existen solo se reemplaza la base
-    if (!$exists) {
+    if(!$exists){
         echo "Changing database trunk.db...\n";
         $pDB    = new paloDB("sqlite3:////var/www/db/trunk.db");
         $pDBNew = new paloDB("sqlite3:////var/www/db/trunk-pbx.db");
-        $pDBFreePBX = new paloDB(generarDSNSistema('asteriskuser', 'asterisk', '/var/www/html/'));
+	$pDBFreePBX = new paloDB(generarDSNSistema('asteriskuser', 'asterisk', '/var/www/html/'));
 
         $query  = "SELECT
                         t.name        AS account_name,
@@ -100,78 +101,73 @@ if ($provider_account['flagStatus']==0) {
                         t.id_provider = p.id AND 
                         a.id_trunk = t.id;";
         $result = $pDB->fetchTable($query, true);
-        if (isset($result) & $result != "") {
-            //recorriendo el $result
-            foreach($result as $key => $value) {
-                $data[0]  = $value['account_name'];
-                $data[1]  = $value['username'];
-                $data[2]  = $value['password'];
-        		$data[3]  = "";
-                $data[4]  = $value['type'];
-                $data[5]  = $value['qualify'];
-                $data[6]  = $value['insecure'];
-                $data[7]  = $value['host'];
-                $data[8]  = $value['fromuser'];
-                $data[9]  = $value['fromdomain'];
-                $data[10] = $value['dtmfmode'];
-                $data[11] = $value['disallow'];
-                $data[12] = $value['context'];
-                $data[13] = $value['allow'];
-                $data[14] = $value['trustrpid'];
-                $data[15] = $value['sendrpid'];
-                $data[16] = $value['canreinvite'];
-                $tech     = getTechnology($value['account_name'], $pDBNew);
-                $data[17] = $tech;
-                $data[18] = $value['id_provider'];
-                if ($value['username'] != "" && $value['password'] != "") {
-                    if ($value["account_name"] != "NuFone IAX") {
-                        echo "Inserting trunk $value[account_name]...\n";
-                        insertAccount($data, $pDBNew, $pDBFreePBX);
-                    }
-                    if (strtolower($tech) == "sip")
-                        echo "Deleting trunk $value[account_name] from file /etc/asterisk/sip_custom.conf...\n";
-                    else
-                        echo "Deleting trunk $value[account_name] from file /etc/asterisk/iax_custom.conf...\n";
-                    deleteInFileCustom($value["account_name"],$tech);
-                    if (strtolower($tech) == "sip")
-                        echo "Deleting register string of trunk $value[account_name] from file /etc/asterisk/sip_register_custom.conf...\n";
-                    else
-                        echo "Deleting register string of trunk $value[account_name] from file /etc/asterisk/iax_register_custom.conf...\n";
-                    deleteInFileRegister($value["username"],$value["password"],$value["host"],$tech);
+        if(isset($result) & $result != ""){
+                        //recorriendo el $result
+                        foreach($result as $key => $value)
+                        {
+                                $data[0]  = $value['account_name'];
+                                $data[1]  = $value['username'];
+                                $data[2]  = $value['password'];
+		                		$data[3]  = "";
+                                $data[4]  = $value['type'];
+                                $data[5]  = $value['qualify'];
+                                $data[6]  = $value['insecure'];
+                                $data[7]  = $value['host'];
+                                $data[8]  = $value['fromuser'];
+                                $data[9]  = $value['fromdomain'];
+                                $data[10] = $value['dtmfmode'];
+                                $data[11] = $value['disallow'];
+                                $data[12] = $value['context'];
+                                $data[13] = $value['allow'];
+                                $data[14] = $value['trustrpid'];
+                                $data[15] = $value['sendrpid'];
+                                $data[16] = $value['canreinvite'];
+                                $tech     = getTechnology($value['account_name'], $pDBNew);
+                                $data[17] = $tech;
+                                $data[18] = $value['id_provider'];
+                                if($value['username'] != "" && $value['password'] != ""){
+                                        if($value["account_name"] != "NuFone IAX"){
+                                            echo "Inserting trunk $value[account_name]...\n";
+                                            insertAccount($data, $pDBNew, $pDBFreePBX);
+                                        }
+                                        if(strtolower($tech) == "sip")
+                                            echo "Deleting trunk $value[account_name] from file /etc/asterisk/sip_custom.conf...\n";
+                                        else
+                                            echo "Deleting trunk $value[account_name] from file /etc/asterisk/iax_custom.conf...\n";
+                                        deleteInFileCustom($value["account_name"],$tech);
+                                        if(strtolower($tech) == "sip")
+                                            echo "Deleting register string of trunk $value[account_name] from file /etc/asterisk/sip_register_custom.conf...\n";
+                                        else
+                                            echo "Deleting register string of trunk $value[account_name] from file /etc/asterisk/iax_register_custom.conf...\n";
+                                        deleteInFileRegister($value["username"],$value["password"],$value["host"],$tech);
+                                }
+                        }
                 }
-            }
-        }
         // para la tabla trunk_bill
         $query  = "SELECT COUNT(*) AS size FROM trunk_bill;";
         $result = $pDB->getFirstRowQuery($query, true);
-        if ($result['size'] > 0) {
+        if($result['size'] > 0){
             $result2 = getTrunkBills($pDB);
-            foreach($result2 as $key2 => $value2) {
+            foreach($result2 as $key2 => $value2){
                 $trunkName = $value2['trunk'];
                 insertTrunlBill($trunkName, $pDBNew);
             }
         }
         exec("mv $DataBaseRoot/trunk.db $DataBaseRoot/trunk-old.db");
         exec("mv $DataBaseRoot/trunk-pbx.db $DataBaseRoot/trunk.db");
-
-    	$pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
-    	$arrAMP = $pConfig->leer_configuracion(false);
-    	$dsn_agi_manager['password'] = $arrAMP['AMPMGRPASS']['valor'];
-    	$dsn_agi_manager['host'] = $arrAMP['AMPDBHOST']['valor'];
-    	$dsn_agi_manager['user'] = $arrAMP['AMPMGRUSER']['valor'];
-    	$pConfig2 = new paloConfig($arrAMP['ASTETCDIR']['valor'], "asterisk.conf", "=", "[[:space:]]*=[[:space:]]*");
-    	$arrAST  = $pConfig2->leer_configuracion(false);
-        echo "Reloading asterisk...\n";
-    	do_reloadAll($dsn_agi_manager, $arrAST, $arrAMP, $pDBFreePBX);
+	$pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
+	$arrAMP = $pConfig->leer_configuracion(false);
+	$dsn_agi_manager['password'] = $arrAMP['AMPMGRPASS']['valor'];
+	$dsn_agi_manager['host'] = $arrAMP['AMPDBHOST']['valor'];
+	$dsn_agi_manager['user'] = $arrAMP['AMPMGRUSER']['valor'];
+	$pConfig2 = new paloConfig($arrAMP['ASTETCDIR']['valor'], "asterisk.conf", "=", "[[:space:]]*=[[:space:]]*");
+	$arrAST  = $pConfig2->leer_configuracion(false);
+    echo "Reloading asterisk...\n";
+	do_reloadAll($dsn_agi_manager, $arrAST, $arrAMP, $pDBFreePBX);
     }
     $result = existDBField("provider", "orden", "trunk.db", $DataBaseRoot);
-    if ($result['flagStatus']!=0)
+    if($result['flagStatus']!=0)
       doUpdatesTrunkDB($DataBaseRoot);
-}
-
-// Remove temporary file if not renamed
-if (file_exists("$DataBaseRoot/trunk-pbx.db")) {
-    unlink("$DataBaseRoot/trunk-pbx.db");
 }
 
 function createTrunkDB($DataBaseRoot)
@@ -254,19 +250,11 @@ CREATE TABLE provider_account
 );
 COMMIT;
 TEMP;
-    
-    // Undo previous leftover garbage
-    if (file_exists('/tmp/trunk_dump.sql')) unlink('/tmp/trunk_dump.sql');
-
-    $filename = tempnam('/tmp', 'elastix-pbx-installer-');
-    $dbname = "$DataBaseRoot/trunk-pbx.db";
-
-    // Undo previous leftover garbage
-    if (file_exists($dbname)) unlink($dbname);
-
-    file_put_contents($filename, $sql);
-    exec("sqlite3 $dbname '.read $filename'");
-    chown($dbname, 'asterisk'); chgrp($dbname, 'asterisk');
+    file_put_contents("/tmp/trunk_dump.sql",$sql);
+    $cmd_sqlite = "sqlite3 $DataBaseRoot/trunk-pbx.db '.read /tmp/trunk_dump.sql'";
+    exec($cmd_sqlite);
+    $cmd_chown = "chown asterisk.asterisk $DataBaseRoot/trunk-pbx.db";
+    exec($cmd_chown);
 }
 
 function doUpdatesTrunkDB($DataBaseRoot)
@@ -317,7 +305,7 @@ function insertAccount($data, &$pDB, &$pDBFreePBX)
     $pDB->beginTransaction();
     $pDBFreePBX->beginTransaction();
     $id_trunk = getIdNextTrunk($pDBFreePBX);
-    if (!saveTrunkFreePBX($data,$id_trunk,$pDBFreePBX)) {
+    if(!saveTrunkFreePBX($data,$id_trunk,$pDBFreePBX)){
 	$pDB->rollBack();
 	$pDBFreePBX->rollBack();
 	echo "Error during the copy of trunks\n";
@@ -325,7 +313,7 @@ function insertAccount($data, &$pDB, &$pDBFreePBX)
     }
     $query = "INSERT INTO provider_account(account_name,username,password,callerID,type,qualify,insecure,host,fromuser,fromdomain,dtmfmode,disallow,context,allow,trustrpid,sendrpid,canreinvite,type_trunk,id_provider,id_trunk) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
     $result = $pDB->genQuery($query, array_merge($data,array($id_trunk)));
-    if ($result==FALSE) {
+    if($result==FALSE){
 	$pDB->rollBack();
 	$pDBFreePBX->rollBack();
         return false;
@@ -340,7 +328,7 @@ function insertTrunlBill($trunkName, &$pDB)
     $data = array($trunkName);
     $query = "INSERT INTO trunk_bill(trunk) VALUES(?);";
     $result = $pDB->genQuery($query, $data);
-    if ($result==FALSE) {
+    if($result==FALSE){
         return false;
     }
     return true;
@@ -350,7 +338,7 @@ function getTrunkBills(&$pDB)
 {
     $query = "SELECT * FROM trunk_bill;";
     $result = $pDB->fetchTable($query,true);
-    if ($result==FALSE) {
+    if($result==FALSE){
         return false;
     }
     return $result;
@@ -359,12 +347,12 @@ function getTrunkBills(&$pDB)
 function getTechnology($account_name, &$pDB)
 {
     $account_name[0] = strtoupper($account_name[0]);
-    if ($account_name == "NuFone IAX")
+    if($account_name == "NuFone IAX")
         return "iax";
     $data   = array($account_name);
     $query  = "SELECT type_trunk FROM provider WHERE name = ?;";
     $result = $pDB->getFirstRowQuery($query,true,$data);
-    if ($result==FALSE) {
+    if($result==FALSE){
         return null;
     }
     return $result['type_trunk'];
@@ -372,7 +360,7 @@ function getTechnology($account_name, &$pDB)
 
 function saveTrunkFreePBX($data,$id,&$pDB)
 {
-    if (strtolower($data[17]) == "sip") {
+    if(strtolower($data[17]) == "sip"){
 	$tech = "sip";
 	$register = "$data[1]:$data[2]@$data[7]/$data[1]";
     }
@@ -384,16 +372,16 @@ function saveTrunkFreePBX($data,$id,&$pDB)
     $arrParam = array($id,$data[0],$tech,$data[0],$data[3]);
     $query = "insert into trunks (trunkid,name,tech,keepcid,channelid,disabled,usercontext,provider,outcid) values (?,?,?,'off',?,'off','','',?)";
     $result = $pDB->genQuery($query, $arrParam);
-    if ($result==FALSE) {
+    if($result==FALSE){
 	echo $pDB->errMsg."\n";
 	return false;
     }
     $arrDataTech = getDataTech($data);
     $query = "insert into $tech (id,keyword,data,flags) values (?,?,?,?)";
-    foreach($arrDataTech as $key => $value) {
+    foreach($arrDataTech as $key => $value){
 	$arrParam = array("tr-peer-$id",$key,$value['data'],$value['flag']);
 	$result = $pDB->genQuery($query, $arrParam);
-	if ($result==FALSE) {
+	if($result==FALSE){
 	    echo $pDB->errMsg."\n";
 	    return false;
 	}
@@ -401,7 +389,7 @@ function saveTrunkFreePBX($data,$id,&$pDB)
     $query = "insert into $tech (id,keyword,data,flags) values (?,?,?,0)";
     $arrParam = array("tr-reg-$id","register",$register);
     $result = $pDB->genQuery($query, $arrParam);
-    if ($result==FALSE) {
+    if($result==FALSE){
 	echo $pDB->errMsg."\n";
 	return false;
     }
@@ -412,7 +400,7 @@ function getIdNextTrunk(&$pDB)
 {
     $query = "select max(trunkid) as id from trunks";
     $result= $pDB->getFirstRowQuery($query,true);
-    if ($result==FALSE) {
+    if($result==FALSE){
 	echo $pDB->errMsg."\n";
 	return false;
     }
@@ -421,25 +409,25 @@ function getIdNextTrunk(&$pDB)
 
 function deleteInFileCustom($trunkName,$tech)
 {
-    if (strtolower($tech) == "sip")
+    if(strtolower($tech) == "sip")
         $file = "/etc/asterisk/sip_custom.conf";
     else
         $file = "/etc/asterisk/iax_custom.conf";
-    if (file_exists($file)) {
+    if(file_exists($file)){
         $file_sipCustom = file($file);
         $arrLines = array();
         $record = true;
         $trunkName = str_replace(" ","",$trunkName);
-        foreach($file_sipCustom as $line) {
-            if (preg_match("/^#include/",rtrim($line)))
+        foreach($file_sipCustom as $line){
+            if(preg_match("/^#include/",rtrim($line)))
                 $arrLines[] = $line;
-            elseif (preg_match("/^\[$trunkName\]$/",rtrim($line)))
+            elseif(preg_match("/^\[$trunkName\]$/",rtrim($line)))
                 $record = false;
-            elseif (preg_match("/^\[/",rtrim($line))) {
+            elseif(preg_match("/^\[/",rtrim($line))){
                 $record = true;
                 $arrLines[] = $line;
             }
-            elseif ($record)
+            elseif($record)
                 $arrLines[] = $line;
         }
         file_put_contents($file,implode("",$arrLines));
@@ -448,7 +436,7 @@ function deleteInFileCustom($trunkName,$tech)
 
 function deleteInFileRegister($user,$password,$host,$tech)
 {
-    if (strtolower($tech) == "sip") {
+    if(strtolower($tech) == "sip"){
         $arrFiles = array("/etc/asterisk/sip_registrations_custom.conf","/etc/asterisk/sip_registrations.conf");
         $register = "register=$user:$password@$host/$user";
     }
@@ -456,12 +444,12 @@ function deleteInFileRegister($user,$password,$host,$tech)
         $arrFiles = array("/etc/asterisk/iax_registrations_custom.conf","/etc/asterisk/iax_registrations.conf");
         $register = "register=$user:$password@$host";
     }
-    foreach($arrFiles as $file) {
-        if (file_exists($file)) {
+    foreach($arrFiles as $file){
+        if(file_exists($file)){
             $file_sipRegister = file($file);
             $arrLines = array();
-            foreach($file_sipRegister as $line) {
-                if (rtrim($line) != $register)
+            foreach($file_sipRegister as $line){
+                if(rtrim($line) != $register)
                     $arrLines[] = $line;
             }
             file_put_contents($file,implode("",$arrLines));
@@ -481,47 +469,47 @@ function getDataTech($data)
     $dataTech['secret']['flag'] = 5;
     $dataTech['type']['data'] = $data[4];
     $dataTech['type']['flag'] = 6;
-    if ($data[5] != "") {
+    if($data[5] != ""){
 	$dataTech['qualify']['data'] = $data[5];
 	$dataTech['qualify']['flag'] = 7;
     }
-    if ($data[6] != "") {
+    if($data[6] != ""){
 	$dataTech['insecure']['data'] = $data[6];
 	$dataTech['insecure']['flag'] = 8;
     }
-    if ($data[8] != "") {
+    if($data[8] != ""){
 	$dataTech['fromuser']['data'] = $data[8];
 	$dataTech['fromuser']['flag'] = 9;
     }
-    if ($data[9] != "") {
+    if($data[9] != ""){
 	$dataTech['fromdomain']['data'] = $data[9];
 	$dataTech['fromdomain']['flag'] = 10;
     }
-    if ($data[10] != "") {
+    if($data[10] != ""){
 	$dataTech['dtmfmode']['data'] = $data[10];
 	$dataTech['dtmfmode']['flag'] = 11;
     }
-    if ($data[11] != "") {
+    if($data[11] != ""){
 	$dataTech['disallow']['data'] = $data[11];
 	$dataTech['disallow']['flag'] = 12;
     }
-    if ($data[12] != "") {
+    if($data[12] != ""){
 	$dataTech['context']['data'] = $data[12];
 	$dataTech['context']['flag'] = 13;
     }
-    if ($data[13] != "") {
+    if($data[13] != ""){
 	$dataTech['allow']['data'] = $data[13];
 	$dataTech['allow']['flag'] = 14;
     }
-    if ($data[14] != "") {
+    if($data[14] != ""){
 	$dataTech['trustrpid']['data'] = $data[14];
 	$dataTech['trustrpid']['flag'] = 15;
     }
-    if ($data[15] != "") {
+    if($data[15] != ""){
 	$dataTech['sendrpid']['data'] = $data[15];
 	$dataTech['sendrpid']['flag'] = 16;
     }
-    if ($data[16] != "") {
+    if($data[16] != ""){
 	$dataTech['canreinvite']['data'] = $data[16];
 	$dataTech['canreinvite']['flag'] = 17;
     }
@@ -532,7 +520,7 @@ function do_reloadAll($data_connection, $arrAST, $arrAMP, &$pDB)
 {
     $bandera = true;
 
-    if (isset($arrAMP["PRE_RELOAD"]['valor']) && !empty($arrAMP['PRE_RELOAD']['valor'])) {
+    if (isset($arrAMP["PRE_RELOAD"]['valor']) && !empty($arrAMP['PRE_RELOAD']['valor'])){
 	exec( $arrAMP["PRE_RELOAD"]['valor']);
     }
 
@@ -552,7 +540,7 @@ function do_reloadAll($data_connection, $arrAST, $arrAMP, &$pDB)
 
     //store asterisk reloaded status
     $sql = "UPDATE admin SET value = 'false' WHERE variable = 'need_reload'";
-    if (!$pDB->genQuery($sql))
+    if(!$pDB->genQuery($sql))
     {
 	echo $pDB->errMsg."\n";
 	$bandera = false;
@@ -562,7 +550,7 @@ function do_reloadAll($data_connection, $arrAST, $arrAMP, &$pDB)
 	exec( $arrAMP["POST_RELOAD"]['valor']);
     }
 
-    if (!$bandera) return false;
+    if(!$bandera) return false;
     else return true;
 }
 

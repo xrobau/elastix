@@ -54,7 +54,7 @@ $arrLangModule=array(
 "Emails Account" => "Emails Account",
 "Vacations Activated" => "Vacations Activated",
 "Auto-Reply: Out of the office" => "Auto-Reply: Out of the office",
-"I will be out of the office until {END_DATE}.\n\n----\nBest Regards." => "I will be out of the office until {END_DATE}.\n\n----\nBest Regards.",
+"I am sorry I am currently out of the office until {END_DATE}.\n\n----\nBest Regards." => "I am sorry I am currently out of the office until {END_DATE}.\n\n----\nBest Regards.",
 "yes" => "yes",
 "no" => "no",
 "Please contact your administrator if your user does not have an email account otherwise add it to System->User management->Users" => "Please contact your administrator if your user does not have an email account otherwise add it to <a href='?menu=userlist'>System->User management->Users</a>",

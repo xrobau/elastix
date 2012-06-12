@@ -121,7 +121,5 @@ $arrLangModule=array(
 'Manage Trunks'=>'Manage Trunks',
 'Manage Queues'=>'Manage Queues',
 'Manage Forms'=>'Manage Forms',
-'External URLs' => 'External URLs',
-'Manage External URLs' => 'Manage External URLs',
 );
 ?>

@@ -1,6 +1,6 @@
 <?php
 
-function PrincipalFileAudioCodes($id_device, $secret, $arrParameters, $ipAdressServer, $model, $mac)
+function PrincipalFileAudioCodes($id_device, $secret, $ipAdressServer, $model, $mac)
 {
     $content = "provisioning/configuration/url=tftp://$ipAdressServer/$model"."_$mac.cfg
 voip/line/0/id=$id_device

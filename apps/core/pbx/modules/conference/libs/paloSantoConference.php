@@ -53,179 +53,99 @@ class paloSantoConference {
         }
     }
 
-    private function _queryBooking($sQueryFields, $date_start = '', $date_end = '', 
-        $field_name = '', $field_pattern = '', $conference_state = '')
+    function ObtainConferences($limit, $offset, $date_start="", $date_end="", $field_name="", $field_pattern="", $conference_state)
     {
-        // Parámetros base de la petición SQL
-        $sPeticionSQL = "SELECT $sQueryFields FROM booking";
-        $condicionWhere = array();
-        $paramWhere = array();
-        
-        // Fecha según el estado de la conferencia
-        if (!empty($date_start) && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $date_start)) {
-            $this->errMsg = _tr('Invalid date start');
-            return NULL;
-        }
-        if (!empty($date_end) && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $date_end)) {
-            $this->errMsg = _tr('Invalid date end');
-            return NULL;
-        }
-        switch ($conference_state) {
-        case 'Past_Conferences':
-            $condicionWhere[] = 'endTime <= ?';
-            $paramWhere[] = $date_end;
-            break;
-        case 'Future_Conferences':
-            $condicionWhere[] = 'startTime >= ?';
-            $paramWhere[] = $date_start;
-            break;
-        default:
-            $condicionWhere[] = 'startTime <= ?';
-            $paramWhere[] = $date_start;
-            $condicionWhere[] = 'endTime >= ?';
-            $paramWhere[] = $date_end;
-            break;
+        $query   = "SELECT roomNo, confDesc, startTime, endTime, maxUser, bookId, roomPass, confOwner, silPass, aFlags, uFlags FROM booking ";
+
+        $strWhere = "";
+        if($conference_state=='Past_Conferences') $strWhere .= "endTime<='$date_end'";
+        else if($conference_state=='Future_Conferences') $strWhere .= "startTime>='$date_start'";
+        else $strWhere .=  "startTime<='$date_start' AND endTime>='$date_end'";
+
+        if(!empty($field_name) and !empty($field_pattern)) $strWhere .= " AND $field_name like '%$field_pattern%' ";
+
+        // Clausula WHERE aqui
+        if(!empty($strWhere)) $query .= "WHERE $strWhere ";
+        //ORDER BY
+        $query .= " ORDER BY startTime ";
+        // Limit
+        if(!empty($limit)) {
+            $query  .= " LIMIT $limit OFFSET $offset";
         }
 
-        // Filtrado adicional por subcadena
-        if (!empty($field_name) and !empty($field_pattern)) {
-            if (!in_array($field_name, array('roomNo', 'roomPass', 'silPass',
-                'maxUser', 'status', 'confOwner', 'confDesc', 'aFlags', 'uFlags'))) {
-                $this->errMsg = _tr('Invalid text field');
-                return NULL;
-            }
-            $condicionWhere[] = "AND $field_name LIKE ?";
-            $paramWhere[] = "%$field_pattern%";
-        }
-        
-        // Armar SQL con WHERE
-        if (count($condicionWhere) > 0) {
-            $sPeticionSQL .= ' WHERE '.implode(' AND ', $condicionWhere);
-        }
-
-        return array($sPeticionSQL, $paramWhere);
-    }
-
-    function ObtainConferences($limit, $offset, $date_start = '', $date_end = '',
-        $field_name = '', $field_pattern = '', $conference_state = '')
-    {
-        list($sPeticionSQL, $paramWhere) = $this->_queryBooking(
-            'roomNo, confDesc, startTime, endTime, maxUser, bookId, roomPass, '.
-            'confOwner, silPass, aFlags, uFlags', $date_start, $date_end, 
-            $field_name, $field_pattern, $conference_state);
-        $sPeticionSQL .= ' ORDER BY startTime';
-        if (!empty($limit)) {
-        	$sPeticionSQL .= ' LIMIT ? OFFSET ?';
-            $paramWhere[] = $limit; $paramWhere[] = $offset;
-        }
-        $result = $this->_DB->fetchTable($sPeticionSQL, TRUE, $paramWhere);
-        if (!is_array($result)) {
-            $this->errMsg = $this->_DB->errMsg;
-        	$result = NULL;
-        }
+        $result=$this->_DB->fetchTable($query, true);
         return $result;
     }
 
     function ObtainConferenceData($bookId)
     {
-    	$sPeticionSQL =
-            'SELECT roomNo, confDesc, startTime, endTime, maxUser, bookId, '.
-                'roomPass, confOwner, silPass, aFlags, uFlags FROM booking '.
-            'WHERE bookId = ?';
-        $result = $this->_DB->getFirstRowQuery($sPeticionSQL, TRUE, array($bookId));
-        if (!is_array($result)) {
-            $this->errMsg = $this->_DB->errMsg;
-            $result = NULL;
-        }
+        $query   = "SELECT roomNo, confDesc, startTime, endTime, maxUser, bookId, roomPass, confOwner, silPass, aFlags, uFlags FROM booking ";
+
+        $strWhere = "bookId=$bookId";
+
+        // Clausula WHERE aqui
+        if(!empty($strWhere)) $query .= "WHERE $strWhere ";
+
+        $result=$this->_DB->getFirstRowQuery($query, true);
         return $result;
     }
 
-    function ObtainNumConferences($date_start = '', $date_end = '',
-        $field_name = '', $field_pattern = '', $conference_state = '')
+    function ObtainNumConferences($date_start="", $date_end="", $field_name="", $field_pattern="", $conference_state)
     {
-        list($sPeticionSQL, $paramWhere) = $this->_queryBooking(
-            'COUNT(*)', $date_start, $date_end, $field_name, $field_pattern,
-            $conference_state);
-        $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramWhere);
-        if (!is_array($result)) {
-            $this->errMsg = $this->_DB->errMsg;
-            $result = NULL;
-        }
+        $queryCount = "SELECT COUNT(*) FROM booking ";
+
+        $strWhere = "";
+        if($conference_state=='Past_Conferences') $strWhere .= "endTime<='$date_end'";
+        else if($conference_state=='Future_Conferences') $strWhere .= "startTime>='$date_start'";
+        else $strWhere .=  "startTime<='$date_start' AND endTime>='$date_end'";
+
+        if(!empty($field_name) and !empty($field_pattern)) $strWhere .= " AND $field_name like '%$field_pattern%' ";
+
+        // Clausula WHERE aqui
+        if(!empty($strWhere)) $queryCount .= " WHERE $strWhere";
+
+        $result = $this->_DB->getFirstRowQuery($queryCount);
+
         return $result;
     }
 
-    function CreateConference($sNombreConf, $sNumeroConf, $sFechaInicio, 
-        $iSegundosDuracion, $iMaxUsuarios, $opciones = NULL)
+    function AddConference($data)
     {
-    	if (!is_array($opciones)) $opciones = array();
-        $sPeticionSQL = 
-            'INSERT INTO booking (confDesc, confOwner, roomNo, silPass, aFlags, '.
-                'roomPass, uFlags, startTime, endTime, maxUser, clientId, '.
-                'status, sequenceNo, recurInterval) '.
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        $paramSQL = array(
-            $sNombreConf,
-            isset($opciones['confOwner']) ? $opciones['confOwner'] : '',
-            $sNumeroConf,
-            isset($opciones['silPass']) ? $opciones['silPass'] : '',
-            'asdA'.
-                ((isset($opciones['moderatorAnnounce']) && $opciones['moderatorAnnounce']) ? 'i' : '').
-                ((isset($opciones['moderatorRecord']) && $opciones['moderatorRecord']) ? 'r' : ''),
-            isset($opciones['roomPass']) ? $opciones['roomPass'] : '',
-            'd'.
-                ((isset($opciones['userAnnounce']) && $opciones['userAnnounce']) ? 'i' : '').
-                ((isset($opciones['userListenOnly']) && $opciones['userListenOnly']) ? 'm' : '').
-                ((isset($opciones['userWaitLeader']) && $opciones['userWaitLeader']) ? 'w' : ''),
-            $sFechaInicio,
-            date('Y-m-d H:i:s', strtotime($sFechaInicio) + $iSegundosDuracion),
-            $iMaxUsuarios,
-            0,      // clientId
-            'A',    // status
-            0,      // sequenceNo: Si se usa recurrencia debe autoincrementar
-            0,      // recurInterval: Si se usa recurrencia debe calcularse el tiempo
-        );
-        $result = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
-        if (!$result) {
-            $this->errMsg = $this->_DB->errMsg;
-        	return NULL;
-        }
-        return $this->_DB->getLastInsertId();
+        $queryInsert = $this->_DB->construirInsert('booking', $data);
+        $result = $this->_DB->genQuery($queryInsert);
+
+        return $result;
     }
 
     function ConferenceNumberExist($number)
     {
-        $result = $this->_DB->getFirstRowQuery(
-            'SELECT COUNT(*) FROM booking WHERE roomNo = ?', FALSE, 
-            array($number));
-        return (is_array($result) && $result[0] > 0);
+        $query = "SELECT COUNT(*) FROM booking WHERE roomNo=$number";
+        $result = $this->_DB->getFirstRowQuery($query);
+        if($result[0] > 0)
+            return true;
+        else return false;
     }
 
     function DeleteConference($BookId)
     {
-        return $this->_DB->genQuery(
-            'DELETE FROM booking WHERE bookId = ?', 
-            array($BookId));
+        $query = "DELETE FROM booking WHERE bookId=$BookId";
+        $result = $this->_DB->genQuery($query);
+        if($result[0] > 0)
+            return true;
+        else return false;
     }
 
     function ObtainCallers($data_connection, $room)
     {
-        // User #: 01         1064 device               Channel: SIP/1064-00000001     (unmonitored) 00:00:11
-        $regexp = '!^User #:[[:space:]]*([[:digit:]]+)[[:space:]]*([[:digit:]]+)[[:alnum:]| |<|>]*Channel: ([[:alnum:]|/|-]+)[[:space:]]*([[:alnum:]|\(|\)| ]+\))[[:space:]]*([[:digit:]|\:]+)$!i';
-        
         $command = "meetme list $room";
-        $arrResult = $this->AsteriskManager_Command($data_connection['host'],
-            $data_connection['user'], $data_connection['password'], $command);
+        $arrResult = $this->AsteriskManager_Command($data_connection['host'], $data_connection['user'], $data_connection['password'], $command);
 
         $arrCallers = array();
-        if(is_array($arrResult) && count($arrResult)>0) {
-            foreach($arrResult as $Key => $linea) {
-                if (preg_match($regexp, $linea, $arrReg)) {
-                    $arrCallers[] = array(
-                        'userId'    => $arrReg[1],
-                        'callerId'  => $arrReg[2],
-                        'mode'      => $arrReg[4],
-                        'duration'  => $arrReg[5]
-                    );
+        if(is_array($arrResult) && count($arrResult)>0){
+            foreach($arrResult as $Key => $linea){
+                if(eregi("^User #:[[:space:]]*([[:digit:]]+)[[:space:]]*([[:digit:]]+)[[:alnum:]| |<|>]*Channel: ([[:alnum:]|/|-]+)[[:space:]]*([[:alnum:]|\(|\)| ]+\))[[:space:]]*([[:digit:]|\:]+)$",$linea,$arrReg))
+                {
+                    $arrCallers[] = array('userId' => $arrReg[1], 'callerId' => $arrReg[2], 'mode' => $arrReg[4], 'duration' => $arrReg[5]);
                 }
             }
         }
@@ -239,23 +159,20 @@ class paloSantoConference {
         else
             $action = 'unmute';
         $command = "meetme $action $room $userId";
-        $arrResult = $this->AsteriskManager_Command($data_connection['host'],
-            $data_connection['user'], $data_connection['password'], $command);
+        $arrResult = $this->AsteriskManager_Command($data_connection['host'], $data_connection['user'], $data_connection['password'], $command);
     }
 
     function KickCaller($data_connection, $room, $userId)
     {
         $action = 'kick';
         $command = "meetme $action $room $userId";
-        $arrResult = $this->AsteriskManager_Command($data_connection['host'],
-            $data_connection['user'], $data_connection['password'], $command);
+        $arrResult = $this->AsteriskManager_Command($data_connection['host'], $data_connection['user'], $data_connection['password'], $command);
     }
 
     function KickAllCallers($data_connection, $room)
     {
         $command = "meetme kick $room all";
-        $arrResult = $this->AsteriskManager_Command($data_connection['host'],
-            $data_connection['user'], $data_connection['password'], $command);
+        $arrResult = $this->AsteriskManager_Command($data_connection['host'], $data_connection['user'], $data_connection['password'], $command);
     }
 
     function InviteCaller($data_connection, $room, $device, $callerId)
@@ -263,8 +180,7 @@ class paloSantoConference {
         $command_data['device'] = $device;
         $command_data['room'] = $room;
         $command_data['callerid'] = $callerId;
-        return $this->AsteriskManager_Originate($data_connection['host'],
-            $data_connection['user'], $data_connection['password'], $command_data);
+        return $this->AsteriskManager_Originate($data_connection['host'], $data_connection['user'], $data_connection['password'], $command_data);
     }
 
     function AsteriskManager_Command($host, $user, $password, $command) {
@@ -361,8 +277,8 @@ class paloSantoConference {
     //CB for fix issue - Phone number active
     function ConferenceNumberExistDateRange($number,$fecha_ini)
     {
-        $query = "SELECT COUNT(*) as NUM  FROM booking WHERE roomNo = ? AND endTime > ?";
-        $result = $this->_DB->getFirstRowQuery($query, FALSE, array($number, $fecha_ini));
+        $query = "SELECT COUNT(*) as NUM  FROM booking WHERE roomNo=$number AND endTime > '{$fecha_ini}'";
+        $result = $this->_DB->getFirstRowQuery($query);
         if($result[0] > 0)
             return true;
         else 

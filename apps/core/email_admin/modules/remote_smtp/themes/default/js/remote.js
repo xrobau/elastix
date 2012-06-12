@@ -21,9 +21,6 @@ $(document).ready(function(){
         }
     }).trigger("change");
 
-//	changeActivateDefault();
-//	setSelectedDomain();
-
     $('#SMTP_Server').change(function(){
         var server = $('#SMTP_Server option:selected').text();
         var example = "";
@@ -48,7 +45,6 @@ $(document).ready(function(){
 
 
 function setSelectedDomain(){
-	
     $('#SMTP_Server option').each(function(){
         var dominio = $('input[name=relayhost]').val();
         var relay   = $(this).text();
@@ -59,18 +55,21 @@ function setSelectedDomain(){
             server = "YAHOO";
         if(/smtp\.live\.com/.test(dominio))
             server = "HOTMAIL";
+
         if(relay==server){
             var example = "example@"+server.toLowerCase()+".com";
             $(this).attr("selected", "selected");
             $('#example').text(example);
-        }
+        }else{
+            $(this).removeAttr("selected");
+	}
     });
     
     var server = $('#SMTP_Server option:selected').val();
-	if(server=="custom")
-		$('.validpass').hide();
+    if(server=="custom")
+	$('.validpass').hide();
     else
-		$('.validpass').show();
+	$('.validpass').show();
     
 }
 

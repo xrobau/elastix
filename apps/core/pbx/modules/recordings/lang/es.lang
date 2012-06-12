@@ -46,6 +46,6 @@ $arrLangModule=array(
 "Possible file upload attack" => "Possible file upload attack",
 "contact_admin" => "No hay número de extensión asociado con el usuario actual. Por favor contáctese con el administrador para que le asigne una extensión",
 "You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup" => "Usted puede iniciar la grabación después de escuchar un pitido en su teléfono. Una vez que usted haya terminado la grabación, usted debe presionar la tecla # y luego colgar",
-"You do not need to add an extension to the record name" => "No es necesario agregar una extensión al nombre de la grabación"
+"You do not need to add an extension to the file name" => "No es necesario agregar una extensión al nombre de la grabación"
 );
 ?>

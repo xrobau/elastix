@@ -88,8 +88,6 @@ function form_Configuration(&$oDB, $smarty, $module_name, $local_templates_dir)
         'dialer.allevents' => 'dialer_allevents',
         'dialer.overcommit' => 'dialer_overcommit',
         'dialer.qos' => 'dialer_qos',
-        'dialer.predictivo' => 'dialer_predictivo',
-        'dialer.timeout_originate' => 'dialer_timeout_originate',
     );
     $valoresForm = array(
         'asterisk_asthost' => '127.0.0.1',
@@ -103,13 +101,10 @@ function form_Configuration(&$oDB, $smarty, $module_name, $local_templates_dir)
         'dialer_allevents' => 'off',
         'dialer_overcommit' => 'off',
         'dialer_qos' => '0.97',
-        'dialer_predictivo' => 'on',
-        'dialer_timeout_originate' => '0',
     );
     foreach ($camposConocidos as $dbfield => $formfield) {
         if (isset($listaConf[$dbfield])) {
-            if (in_array($dbfield, array('dialer.debug', 'dialer.allevents', 
-                'dialer.overcommit', 'dialer.predictivo')) )
+            if ($dbfield == 'dialer.debug' || $dbfield == 'dialer.allevents' || $dbfield == 'dialer.overcommit')
             {
                 $valoresForm[$formfield] = $listaConf[$dbfield] ? 'on' : 'off';
             } else $valoresForm[$formfield] = $listaConf[$dbfield];
@@ -123,8 +118,7 @@ function form_Configuration(&$oDB, $smarty, $module_name, $local_templates_dir)
             $_POST['asterisk_astpass_2'] = '';
         }
         foreach ($camposConocidos as $dbfield => $formfield) if (isset($_POST[$formfield])) {
-            if (in_array($dbfield, array('dialer.debug', 'dialer.allevents', 
-                'dialer.overcommit', 'dialer.predictivo')))
+            if ($dbfield == 'dialer.debug' || $dbfield == 'dialer.allevents' || $dbfield == 'dialer.overcommit')
             {
                $valoresForm[$formfield] = ($_POST[$formfield] == 'on') ? 'on' : 'off';
             } else $valoresForm[$formfield] = $_POST[$formfield];
@@ -166,8 +160,7 @@ function form_Configuration(&$oDB, $smarty, $module_name, $local_templates_dir)
                 foreach ($camposConocidos as $dbfield => $formfield) {
                     if ($dbfield == 'asterisk.astpass' && $_POST[$formfield] == '') continue;
                     
-                    if (in_array($dbfield, array('dialer.debug', 'dialer.allevents', 
-                            'dialer.overcommit', 'dialer.predictivo'))) {
+                    if ($dbfield == 'dialer.debug' || $dbfield == 'dialer.allevents' || $dbfield == 'dialer.overcommit') {
                         $config[$dbfield] = ($_POST[$formfield] == 'on') ? 1 : 0;
                     } else {
                         $config[$dbfield] = $_POST[$formfield];
@@ -313,22 +306,6 @@ function createFieldForm()
             'REQUIRED'                  =>  'yes',
             'INPUT_TYPE'                =>  'TEXT',
             'VALIDATION_TYPE'           =>  'float',
-            'INPUT_EXTRA_PARAM'         =>  '',
-            'VALIDATION_EXTRA_PARAM'    =>  '^[[:digit:]]+$',
-        ),
-        'dialer_predictivo'  =>      array(
-            'LABEL'                     =>  _tr('Enable predictive dialer behavior'),
-            'REQUIRED'                  =>  'yes',
-            'INPUT_TYPE'                =>  'CHECKBOX',
-            'VALIDATION_TYPE'           =>  'text',
-            'INPUT_EXTRA_PARAM'         =>  '',
-            'VALIDATION_EXTRA_PARAM'    =>  '',
-        ),
-        'dialer_timeout_originate'=> array(
-            'LABEL'                     =>  _tr('Per-call dial timeout'),
-            'REQUIRED'                  =>  'yes',
-            'INPUT_TYPE'                =>  'TEXT',
-            'VALIDATION_TYPE'           =>  'ereg',
             'INPUT_EXTRA_PARAM'         =>  '',
             'VALIDATION_EXTRA_PARAM'    =>  '^[[:digit:]]+$',
         ),

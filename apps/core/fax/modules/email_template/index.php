@@ -62,7 +62,7 @@ function _moduleContent($smarty, $module_name)
     $smarty->assign("SAVE", $arrLang["Save"]);
     $smarty->assign("EDIT", $arrLang["Edit"]);
     $smarty->assign("EDIT_PARAMETERS", $arrLang["Edit Parameters"]);
-    $smarty->assign("icon","/modules/$module_name/images/fax_email_template.png");
+    $smarty->assign("icon","/modules/$module_name/images/icon-email.png");
 
     $arrFaxConfig    = array("remite"        => array("LABEL"                 => $arrLang['Fax From'],
                                                      "REQUIRED"               => "yes",

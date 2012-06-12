@@ -69,11 +69,8 @@ function _moduleContent(&$smarty, $module_name)
         case "update_advanced_security_settings":
             $content = updateAdvancedSecuritySettings($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
-        case "update_status_fpbx_frontend":
+	case "update_status_fpbx_frontend":
             $content = updateStatusFreePBXFrontend($arrConf);
-            break;
-        case "update_status_anonymous_sip":
-            $content = updateStatusAnonymousSIP($arrConf);
             break;
         default: // view_form_advanced_security_settings
             $content = viewFormAdvancedSecuritySettings($smarty, $module_name, $local_templates_dir, $arrConf);
@@ -86,18 +83,22 @@ function viewFormAdvancedSecuritySettings($smarty, $module_name, $local_template
 {
     $pAdvancedSecuritySettings       = new paloSantoAdvancedSecuritySettings($arrConf);
     $value_fpbx_frontend             = $pAdvancedSecuritySettings->isActivatedFreePBXFrontend();
-    $value_anonymous_sip             = $pAdvancedSecuritySettings->isActivatedAnonymousSIP();
     $arrFormAdvancedSecuritySettings = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormAdvancedSecuritySettings);
 
+    //begin, Form data persistence to errors and other events.
+    $_DATA  = $_POST;
+    $id     = getParameter("id");
+    $smarty->assign("ID", $id); //persistence id with input hidden in tpl
+    //end, Form data persistence to errors and other events.
+    
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("subtittle1", _tr("Enable access"));
     $smarty->assign("subtittle2", _tr("Change Password"));
     $smarty->assign("value_fpbx_frontend", $value_fpbx_frontend);
-    $smarty->assign("value_anonymous_sip", $value_anonymous_sip);
-    $smarty->assign("icon", "modules/".$module_name."/images/security_advanced_settings.png");
+    $smarty->assign("icon", "modules/".$module_name."/images/password.png");
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Advanced Security Settings"), $_POST);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Advanced Security Settings"), $_DATA);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
     return $content;
 }
@@ -123,31 +124,6 @@ function updateStatusFreePBXFrontend($arrConf)
 	$arrData['message']       = _tr("Access direct to FreePBX has not been $word.");
     }
     $jsonObject->set_message($arrData);
-    Header('Content-Type: application/json');
-    return $jsonObject->createJSON();
-}
-
-function updateStatusAnonymousSIP($arrConf)
-{
-    $pAdvanceSecuritySettings = new paloSantoAdvancedSecuritySettings($arrConf);
-    $jsonObject               = new PaloSantoJSON();
-    $statusAnonymousSIP    = getParameter("new_status_anonymous_sip");
-    $result = $pAdvanceSecuritySettings->updateStatusAnonymousSIP($statusAnonymousSIP);
-    $arrData['result']       = $result;
-    $arrData['button_title'] = _tr("Dismiss");
-    if($statusAnonymousSIP == "1")
-        $word = "enabled";
-    else
-        $word = "disabled";
-    if($result){
-        $arrData['message_title'] = _tr("Information").":<br/>";
-        $arrData['message']       = _tr("Anonymous SIP calls are now $word.");
-    } else {
-        $arrData['message_title'] = _tr("Error").":<br/>";
-        $arrData['message']       = _tr("Anonymous SIP calls cannot be $word.");
-    }
-    $jsonObject->set_message($arrData);
-    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 
@@ -249,13 +225,6 @@ function createFieldForm()
 						"VALIDATION_TYPE"        => "text",
 						"VALIDATION_EXTRA_PARAM" => "",
 					       ),
-         "status_anonymous_sip"    => array ("LABEL"                  => _tr('Enable anonymous SIP calls'),
-                        "REQUIRED"               => "no",
-                        "INPUT_TYPE"             => "CHECKBOX",
-                        "INPUT_EXTRA_PARAM"      => "",
-                        "VALIDATION_TYPE"        => "text",
-                        "VALIDATION_EXTRA_PARAM" => "",
-                           ),
             "fpbx_password"	      => array ("LABEL"                  => _tr("Database and Web Administration FreePBX Password"),
 						"REQUIRED"               => "no",
 						"INPUT_TYPE"             => "PASSWORD",
@@ -280,8 +249,6 @@ function getAction()
         return "update_advanced_security_settings";
     if(getParameter("action")=="update_status_fpbx_frontend")
         return "update_status_fpbx_frontend";
-    if(getParameter("action")=="update_status_anonymous_sip")
-        return "update_status_anonymous_sip";
     else
         return "view_form";
 }

@@ -47,13 +47,13 @@
 	<td>{$extension.LABEL}:</td>
 	<td>{$extension.INPUT}</td>
       </tr>
-    </table>
- <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
-  <tr class="moduleTitle">
-   <td class="moduleTitle" valign="middle">{if $THEMENAME eq "elastixneo"}<span class="neo-module-name" style="background:none;"><img src="images/email.png" width="22" height="22" />&nbsp;&nbsp;{$title_webmail}</span>{else}{$title_webmail}{/if}</td>
-  </tr>
- </table>
-   <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
+</table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+<tr class="moduleTitle">
+  <td class="moduleTitle" valign="middle">{if $THEMENAME eq "elastixneo"}<span class="neo-module-name" style="background:none;"><img src="images/email.png" width="22" height="22" />&nbsp;&nbsp;{$title_webmail}</span>{else}{$title_webmail}{/if}</td>
+</tr>
+</table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
       <tr>
         <td width="20%">{$webmailuser.LABEL}: </td>
         <td width="30%">{$webmailuser.INPUT}</td>

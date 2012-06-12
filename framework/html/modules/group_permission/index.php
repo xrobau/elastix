@@ -315,17 +315,17 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
     }
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
-        $parameter_to_find = array();
+	$parameter_to_find = array();
     if($lang != "en"){
-            foreach($arrLang as $key=>$value){
+	    foreach($arrLang as $key=>$value){
             $langValue    = strtolower(trim($value));
             $filter_value = strtolower(trim($filter_resource));
             if($filter_value!=""){
                 if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
                     if(preg_match("/$filter_value/",$langValue))
-                                    $parameter_to_find[] = $key;
+			            $parameter_to_find[] = $key;
             }
-            }
+	    }
     }
 
     $parameter_to_find[] = $filter_resource;
@@ -347,9 +347,9 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
 
     $arrData = null;
     if(empty($parameter_to_find))
-                $arrResult = $pGroupPermission->ObtainResources($limit, $offset, $filter_resource);
-        else
-        $arrResult = $pGroupPermission->ObtainResources($limit, $offset, $parameter_to_find);
+		$arrResult = $pGroupPermission->ObtainResources($limit, $offset, $filter_resource);
+	else
+    	$arrResult = $pGroupPermission->ObtainResources($limit, $offset, $parameter_to_find);
 
     $url = array(
         'menu'              =>  $module_name,
@@ -365,10 +365,10 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
 
     if( is_array($arrResult) && $total > 0){
         foreach( $arrResult as $key => $resource ){
-            $disabled = "";
+            $disabled = ""; 
             if( ( $resource["name"] == 'usermgr'   || $resource["name"] == 'grouplist' || $resource["name"] == 'userlist'  ||
                   $resource["name"] == 'group_permission') & $isAdministrator ){
-                $disabled = "disabled='disabled'";
+                $disabled = "disabled='disabled'"; 
             }
 
             $checked0 = ""; $checked1 = ""; $checked2 = ""; $checked3 = ""; $checked4 = "";
@@ -406,7 +406,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
                         "url"      => $url,
                         "columns"  => array(0 => array("name"      => "<input class='button' type='submit' name='apply' value='{$arrLang['Apply']}' />",
                                                         "property1" => ""),
-                                            1 => array("name"      => $arrLang["Resource"],
+                                            1 => array("name"      => $arrLang["Resource"], 
                                                         "property1" => ""),
                                             /*2 => array("name"      => $arrLang["View"],
                                                         "property1" => ""),
@@ -426,9 +426,6 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
     $_POST["filter_group"] = $filter_group;
     $_POST["filter_resource"] = $filter_resource;
 
-    $nameGroup=$arrFormFilterGroupPermission["filter_group"]["INPUT_EXTRA_PARAM"][$filter_group];
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Group")." = $nameGroup", $_POST, array("filter_group" => 1),true);
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Resource")." = $filter_resource", $_POST, array("filter_resource" =>""));
     //ayuda para el pagineo -> estod datos son tomados en la function applyGroupPermission($smarty, $module_name, ......
     //ayuda a que despues de "aplicar" se quede en la misma pagina
     $smarty->assign("resource_apply", htmlspecialchars($filter_resource, ENT_COMPAT, 'UTF-8'));
@@ -515,7 +512,7 @@ function OrderGroupPermissions($arrPermisos)
     $arrArray = array();
 
     //Array ( [0] => Array ( [resource_id] => 2 [resource_name] => usermgr [action_name] => view )
-    //        [1] => Array ( [resource_id] => 2 [resource_name] => usermgr [action_name] => access )
+    //        [1] => Array ( [resource_id] => 2 [resource_name] => usermgr [action_name] => access ) 
     //        [2] => Array ( [resource_id] => 3 [resource_name] => grouplist [action_name] => access )
     // --> $arrPermisos
 
@@ -544,7 +541,7 @@ function OrderGroupPermissions($arrPermisos)
             $arrTemp["resource_id"] = $resource_id;
             $arrTemp["actions"] = $arrActions;
             $arrArray[ $resource_name ] = $arrTemp;
-
+            
             $resource_id = $data["resource_id"];
             $resource_name = $data["resource_name"];
             $arrActions = array();

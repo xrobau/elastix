@@ -34,8 +34,6 @@ include_once "libs/paloSantoDB.class.php";
 include_once "libs/paloSantoMenu.class.php";
 include_once("libs/paloSantoACL.class.php");// Don activate unless you know what you are doing. Too risky!
 
-load_default_timezone();
-
 $developerMode=false;
 
 session_name("elastixSession");
@@ -50,18 +48,18 @@ if(isset($_GET['logout']) && $_GET['logout']=='yes') {
     header("Location: index.php");
     exit;
 }
-
 //cargar el archivo de idioma
+//$lang=isset($arrConf['language'])?$arrConf['language']:"en";
+//include_once("lang/".$lang.".lang");
 load_language();
-$lang = get_language();
-if(file_exists("langmenus/$lang.lang")){
-    include_once "langmenus/$lang.lang";
-    global $arrLangMenu;
-    global $arrLang;
-    $arrLang = array_merge($arrLang,$arrLangMenu);
+
+$pDB = new paloDB($arrConf['elastix_dsn']['acl']);
+
+if(!empty($pDB->errMsg)) {
+    echo "ERROR DE DB: $pDB->errMsg <br>";
 }
 
-$pACL = new paloACL($arrConf['elastix_dsn']['acl']);
+$pACL = new paloACL($pDB);
 
 if(!empty($pACL->errMsg)) {
     echo "ERROR DE DB: $pACL->errMsg <br>";
@@ -99,25 +97,79 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
     }
 }
 
-// 2) Autentico usuario
-if (isset($_SESSION['elastix_user']) && 
-    isset($_SESSION['elastix_pass']) && 
-    $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass']) 
-    or $developerMode==true) {
-    
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
+$pDBMenu = new paloDB($arrConf['elastix_dsn']['menu']);
+$arrMenu = cargar_menu($pDBMenu);
+$pMenu = new paloMenu($pDBMenu);
 
+// 2) Autentico usuario
+if(isset($_SESSION['elastix_user']) && isset($_SESSION['elastix_pass']) && $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass']) or $developerMode==true) {
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
 
-    $arrMenuFiltered = $developerMode 
-        ? $pMenu->cargar_menu()
-        : $pMenu->filterAuthorizedMenus($idUser);
+    if(!isset($_SESSION['elastix_user_permission'])){
+        if($developerMode!=true) {
+            $arrMenuFiltered=array();
+            //- TODO: Mejorar el siguiente bloque. Seguro debe de haber una forma mas 
+            //-       eficiente de hacerlo
+            //- Primero me barro todos los submenus
+            $arrSubmenu=array();
+            foreach($arrMenu as $idMenu=>$arrMenuItem) {
+                if(!empty($arrMenuItem['IdParent'])) {
+                    if($pACL->isUserAuthorizedById($idUser, "access", $arrMenuItem['IdParent']) || empty($arrMenu[$arrMenuItem['IdParent']]['IdParent'])){
+			if ($pACL->isUserAuthorizedById($idUser, "access", $idMenu)) {
+			    $arrSubmenu[$idMenu] = $arrMenuItem;
+			    $arrMenuFiltered[$idMenu] = $arrMenuItem;
+			}
+		    }
+		    else{ // En caso de que no se tenga acceso al padre, entonces no se tendrá acceso a este menú ni a sus hijos
+			$childs = $pMenu->getChilds($idMenu);
+			if(is_array($childs) && count($childs)>0){
+			    foreach($childs as $child)
+				unset($arrMenuFiltered[$child['id']]);
+			}
+		    }
+                }
+            }
 
+	    // Ahora pregunto por los menus que tienen hijos, en caso de que no se tenga acceso a ningún hijo, entonces es innecesario mostrar la pestaña del padre
+	    foreach($arrMenuFiltered as $idMenu => $menuFiltered){
+		$childs = $pMenu->getChilds($idMenu);
+		if(is_array($childs) && count($childs)>0){
+		    $noActiveChilds = true;
+		    foreach($childs as $child){
+			if(array_key_exists($child['id'],$arrMenuFiltered)){
+			    $noActiveChilds = false;
+			    break;
+			}
+		    }
+		    if($noActiveChilds)
+			unset($arrMenuFiltered[$idMenu]);
+		}
+	    }
+
+            //- Ahora me barro el menu principal
+            foreach($arrMenu as $idMenu=>$arrMenuItem) {
+                if(empty($arrMenuItem['IdParent'])) {
+                    foreach($arrSubmenu as $idSubMenu=>$arrSubMenuItem) {
+                        if($arrSubMenuItem['IdParent']==$idMenu) {
+                            $arrMenuFiltered[$idMenu] = $arrMenuItem;
+                        }
+                    }
+                }
+            }
+        } else {    
+            $arrMenuFiltered = $arrMenu;
+        }
+        //Guardo en la session los menus q tiene con permisos el usuario logoneado, esto se implementó para mejorar 
+        //el proceso del httpd ya que consumia mucho recurso. Reportado por Ana Vivar <avivar@palosanto.com>
+        //Una vez q exista en la session solo se lo sacara de ahi y no se vovera a consultar a la base.
+        $_SESSION['elastix_user_permission']= $arrMenuFiltered;
+    }
     verifyTemplate_vm_email(); // para cambiar el template del email ue se envia al recibir un voicemail
+    $arrMenuFiltered = $_SESSION['elastix_user_permission'];
 
     //traducir el menu al idioma correspondiente
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
-        $arrMenuFiltered[$idMenu]['Name'] = _tr($arrMenuItem['Name']);
+        $arrMenuFiltered[$idMenu]['Name']=isset($arrLang[$arrMenuItem['Name']])?$arrLang[$arrMenuItem['Name']]:$arrMenuItem['Name'];
     }
     $oPn = new paloSantoNavigation($arrConf, $arrMenuFiltered, $smarty);
 
@@ -139,11 +191,11 @@ if (isset($_SESSION['elastix_user']) &&
     /*agregado para register*/
 	$menuColor = getMenuColorByMenu();
 
-    $smarty->assign("md_message_title", _tr('md_message_title'));
+    $smarty->assign("md_message_title",$arrLang['md_message_title']);
     $smarty->assign("currentyear",date("Y"));
 	if($arrConf['mainTheme']=="elastixwave" || $arrConf['mainTheme']=="elastixneo"){
-		$smarty->assign("ABOUT_ELASTIX2", _tr('About Elastix2'));
-    	$smarty->assign("HELP", _tr('HELP'));
+		$smarty->assign("ABOUT_ELASTIX2",$arrLang['About Elastix2']);
+    	$smarty->assign("HELP",$arrLang['HELP']);
         $smarty->assign("USER_LOGIN",$_SESSION['elastix_user']);
 		$smarty->assign("CHANGE_PASSWORD", _tr("Change Password"));
 		$smarty->assign("CURRENT_PASSWORD_ALERT", _tr("Please write your current password."));
@@ -156,31 +208,17 @@ if (isset($_SESSION['elastix_user']) &&
 		$smarty->assign("CHANGE_PASSWORD_BTN", _tr("Change"));
 		$smarty->assign("MENU_COLOR", $menuColor);
 		$smarty->assign("MODULES_SEARCH", _tr("Search modules"));
-		$smarty->assign("viewMenuTab", getStatusNeoTabToggle());
-		$smarty->assign("ADD_BOOKMARK", _tr("Add Bookmark"));
-		$smarty->assign("REMOVE_BOOKMARK", _tr("Remove Bookmark"));
-		$smarty->assign("ADDING_BOOKMARK", _tr("Adding Bookmark"));
-		$smarty->assign("REMOVING_BOOKMARK", _tr("Removing Bookmark"));
-		$smarty->assign("HIDING_IZQTAB", _tr("Hiding left panel"));
-		$smarty->assign("SHOWING_IZQTAB", _tr("Loading left panel"));
-		$smarty->assign("HIDE_IZQTAB", _tr("Hide left panel"));
-		$smarty->assign("SHOW_IZQTAB", _tr("Load left panel"));
 	}
 	else{
-		$smarty->assign("ABOUT_ELASTIX", _tr('About Elastix')." ".$arrConf['elastix_version']);
+		$smarty->assign("ABOUT_ELASTIX",$arrLang['About Elastix']." ".$arrConf['elastix_version']);
 	}
-    $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
-    $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
-    $smarty->assign("LOGOUT", _tr('Logout'));
-    $smarty->assign("VersionDetails", _tr('VersionDetails'));
-    $smarty->assign("VersionPackage", _tr('VersionPackage'));
-	$smarty->assign("textMode", _tr('textMode'));
-    $smarty->assign("htmlMode", _tr('htmlMode'));
-	$smarty->assign("AMOUNT_CHARACTERS", _tr("characters left"));
-	$smarty->assign("SAVE_NOTE", _tr("Save Note"));
-	$smarty->assign("MSG_SAVE_NOTE", _tr("Saving Note"));
-	$smarty->assign("MSG_GET_NOTE", _tr("Loading Note"));
-	$smarty->assign("LBL_NO_STICKY", _tr("Click here to leave a note."));
+    $smarty->assign("ABOUT_ELASTIX_CONTENT",$arrLang['About Elastix Content']);
+    $smarty->assign("ABOUT_CLOSED",$arrLang['About Elastix Closed']);
+    $smarty->assign("LOGOUT",$arrLang['Logout']);
+    $smarty->assign("VersionDetails",$arrLang['VersionDetails']);
+    $smarty->assign("VersionPackage",$arrLang['VersionPackage']);
+	$smarty->assign("textMode",$arrLang['textMode']);
+    $smarty->assign("htmlMode",$arrLang['htmlMode']);
     //$menu= (isset($_GET['menu']))?$_GET['menu']:'';
     if (isset($_POST['menu'])) $menu = $_POST['menu'];
     elseif (isset($_GET['menu'])) $menu=$_GET['menu'];
@@ -227,92 +265,10 @@ if (isset($_SESSION['elastix_user']) &&
 		return;
 	}
 
+
     // Inicializa el objeto palosanto navigation
     if (count($arrMenuFiltered)>0)
         $oPn->showMenu($menu);
-
-	$menuBookmark = $oPn->getFirstChildOfMainMenuByBookmark($_SESSION['menu']);
-	if(getParameter("action") == "addBookmark" || getParameter("action") == "deleteBookmark"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$id_menu = getParameter("id_menu");
-		$output = "";
-		if(isset($id_menu) && $id_menu !=""){
-			$output  = putMenuAsBookmark($id_menu);
-			$output["data"]["menu_url"] = $oPn->getFirstChildOfMainMenuByBookmark($_SESSION['menu']);
-		}else
-			$output = putMenuAsBookmark($menuBookmark);
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("true");
-		}else
-			$jsonObject->set_status("false");
-		$jsonObject->set_error($output['msg']);
-		$jsonObject->set_message($output['data']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
-	if(getParameter("action") == "save_sticky_note"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$description_note = getParameter("description");
-        $popup_note = getParameter("popup");    
-	    $output = saveStickyNote($menuBookmark, $description_note, $popup_note);
-	    if($output['status'] === TRUE){
-			$jsonObject->set_status("OK");
-		}else
-			$jsonObject->set_status("ERROR");
-		$jsonObject->set_error($output['msg']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
-	if(getParameter("action") == "get_sticky_note"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$output = getStickyNote($menuBookmark);
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("OK");
-		}else
-			$jsonObject->set_status("ERROR");
-		$jsonObject->set_error($output['msg']);
-		$jsonObject->set_message($output['data']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
-	if(menuIsBookmark($menuBookmark))
-		$smarty->assign("IMG_BOOKMARKS", "bookmarkon.png");
-	else
-		$smarty->assign("IMG_BOOKMARKS", "bookmark.png");
-
-
-	if(getParameter("action") == "saveNeoToggleTab"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$statusTab  = getParameter("statusTab");
-		$output = saveNeoToggleTabByUser($menuBookmark, $statusTab);
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("true");
-		}else
-			$jsonObject->set_status("false");
-		$jsonObject->set_error($output['msg']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
-	$statusStickyNote = getStickyNote($menuBookmark); // se obtiene si ese menu tiene una nota agregada
-	
-	if($statusStickyNote['status'] === TRUE){
-		if($statusStickyNote['data'] != ""){
-			$smarty->assign("STATUS_STICKY_NOTE", "true");
-            if($statusStickyNote['popup']==1)
-                $smarty->assign("AUTO_POPUP", "1");
-        }
-		else
-			$smarty->assign("STATUS_STICKY_NOTE", "false");
-	}else
-		$smarty->assign("STATUS_STICKY_NOTE", "false");
 
     // rawmode es un modo de operacion que pasa directamente a la pantalla la salida
     // del modulo. Esto es util en ciertos casos.
@@ -335,32 +291,21 @@ if (isset($_SESSION['elastix_user']) &&
                 $smarty->assign("MENU","No modules");
             }
         }
+
         $smarty->display("_common/index.tpl");
     }
 
 } else {
-	$rawmode = getParameter("rawmode");
-    if(isset($rawmode) && $rawmode=='yes'){
-        include_once "libs/paloSantoJSON.class.php";
-        $jsonObject = new PaloSantoJSON();
-        $jsonObject->set_status("ERROR_SESSION");
-        $jsonObject->set_error(_tr("Your session has expired. If you want to do a login please press the button 'Accept'."));
-        $jsonObject->set_message(null);
-        echo $jsonObject->createJSON();
-    }
-    else{
-		$oPn = new paloSantoNavigation($arrConf, array(), $smarty);
-		$oPn->putHEAD_JQUERY_HTML();
-		$smarty->assign("THEMENAME", $arrConf['mainTheme']);
-		$smarty->assign("currentyear",date("Y"));
-		$smarty->assign("PAGE_NAME", _tr('Login page'));
-		$smarty->assign("WELCOME", _tr('Welcome to Elastix'));
-		$smarty->assign("ENTER_USER_PASSWORD", _tr('Please enter your username and password'));
-		$smarty->assign("USERNAME", _tr('Username'));
-		$smarty->assign("PASSWORD", _tr('Password'));
-		$smarty->assign("SUBMIT", _tr('Submit'));
+    $smarty->assign("THEMENAME", $arrConf['mainTheme']);
+    $smarty->assign("currentyear",date("Y"));
+    $smarty->assign("PAGE_NAME",$arrLang['Login page']);
+    $smarty->assign("WELCOME",$arrLang['Welcome to Elastix']);
+    $smarty->assign("ENTER_USER_PASSWORD",$arrLang['Please enter your username and password']);
+    $smarty->assign("USERNAME",$arrLang['Username']);
+    $smarty->assign("PASSWORD",$arrLang['Password']);
+    $smarty->assign("SUBMIT",$arrLang['Submit']);
 
-		$smarty->display("_common/login.tpl");
-	}
+    $smarty->display("_common/login.tpl");
+
 }
 ?>

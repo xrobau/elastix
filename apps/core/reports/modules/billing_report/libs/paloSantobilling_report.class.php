@@ -96,8 +96,7 @@ class paloSantobilling_report {
 								ON 
 								c.calldate >= r.fecha_creacion AND
 								substr(c.dst,'',length(r.prefix)) = r.prefix AND
-								substr(c.dstchannel,'',length(r.trunk)) = r.trunk AND
-                                                                r.prefix <> ''  
+								substr(c.dstchannel,'',length(r.trunk)) = r.trunk 
 					WHERE c.disposition = '$disposition' AND 
 							c.calldate >= '$start_date' AND 
 							c.calldate <= '$end_date' 
@@ -164,8 +163,7 @@ class paloSantobilling_report {
 							ON 
 								c.calldate >= r.fecha_creacion AND
 								substr(c.dst,'',length(r.prefix)) = r.prefix AND
-								substr(c.dstchannel,'',length(r.trunk)) = r.trunk AND
-                                                                r.prefix <> '' 
+								substr(c.dstchannel,'',length(r.trunk)) = r.trunk
 					WHERE 
                         c.disposition = '$disposition' AND 
 						c.calldate >= '$start_date' AND 

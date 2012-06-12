@@ -82,7 +82,7 @@ class paloSantoAdvancedSecuritySettings{
       return $resultUpdateConfFiles;
     }
 
-    private function updateFreePBXPasswordAdmin($fpbx_password)
+    function updateFreePBXPasswordAdmin($fpbx_password)
     {
       $arrParam[] = $fpbx_password;
       $query = "UPDATE ampusers SET password_sha1=sha1(?) WHERE username = 'admin' ";
@@ -94,7 +94,7 @@ class paloSantoAdvancedSecuritySettings{
       return $result;
     }
     
-   private function createAsteriskUser($fpbx_password)
+   function createAsteriskUser($fpbx_password)
    {
         $query = "GRANT USAGE ON *.* TO 'asteriskuser'@'localhost' IDENTIFIED BY '$fpbx_password' ";
 
@@ -105,20 +105,24 @@ class paloSantoAdvancedSecuritySettings{
         return $result;
    }
     
-   private function updateConfFiles($fpbx_password,$arrConf){
-        $output = $retval = NULL;
-        exec('/usr/bin/elastix-helper setadminpwd '.escapeshellarg($fpbx_password).' 2>&1', 
-            $output, $retval);
-        $arrResult = array(
-            'result'            => ($retval == 0),
-            'arrUpdateFiles'    =>  array(),
-        );        
-        foreach ($output as $sLinea) {
-            $regs = NULL;
-            if (preg_match('/^CHANGED (.+)/', trim($sLinea), $regs))
-        	   $arrResult['arrUpdateFiles'][] = $regs[1]; 
-        }
-        return $arrResult;
+   function updateConfFiles($fpbx_password,$arrConf){
+      $arrUpdateFiles = null;
+      if(is_array($arrConf['arr_conf_file']) && count($arrConf['arr_conf_file']) > 0){
+	foreach($arrConf['arr_conf_file'] as $file){
+	    $conf_file      = new paloConfig($file['path'],$file['name']," = ","[[:space:]]*=[[:space:]]*");
+	    $param          = $file['pass_name'];
+	    $arr_reemplazos = array("$param" => $fpbx_password);
+	    $resultUpdate   = $conf_file->escribir_configuracion($arr_reemplazos);
+	    if($resultUpdate)
+		$arrUpdateFiles[] = $file['name'];
+	    else{
+	      $arrResult = array('result'=>false, 'arrUpdateFiles'=>$arrUpdateFiles);
+	      return $arrResult;
+	    }
+	}
+      }
+      $arrResult = array('result'=>true);
+      return $arrResult;
    }
 
    function updateStatusFreePBXFrontend($status_fpbx_frontend)
@@ -134,24 +138,8 @@ class paloSantoAdvancedSecuritySettings{
       return (get_key_settings($pDBSettings,"activatedFreePBX"));
    }
 
-    function isActivatedAnonymousSIP()
-    {
-        $bValorPrevio = TRUE;   // allowguest es yes hasta encontrar seteo
-        foreach (file('/etc/asterisk/sip_general_custom.conf') as $sLinea) {
-            $regs = NULL;
-            if (preg_match('/^allowguest\s*=\s*(\S+)$/', trim($sLinea), $regs)) {
-                $bValorPrevio = in_array(strtolower($regs[1]), array('yes', '1', 'true'));
-            }
-        }
-        return $bValorPrevio;
-    }
-    
-    function updateStatusAnonymousSIP($bNuevoEstado)
-    {
-    	$output = $retval = NULL;
-        exec('/usr/bin/elastix-helper anonymoussip '.($bNuevoEstado ? '--enable' : '--disable'),
-            $output, $retval);
-        return ($retval == 0);
-    }
 }
+
+
+
 ?>

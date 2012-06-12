@@ -82,13 +82,13 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
 
     // Función que rechaza los directorios punto y doble punto
     function _reject_dotdirs($s) { return !($s == '.' || $s == '..'); }
-    $listaArchivos = (file_exists($sDirectorio) && is_dir($sDirectorio))
+    $listaArchivos = (file_exists($sDirectorio) && is_dir($sDirectorio)) 
         ? array_filter(scandir($sDirectorio), '_reject_dotdirs')
         : NULL;
     if (!is_array($listaArchivos)) {
         $smarty->assign("msj_err", _tr('This is not a valid directory'));
     }
-
+    
     // Filtrar por la cadena indicada en el filtro
     $sSubStrArchivo = getParameter('file');
     if ($sSubStrArchivo != '') {
@@ -99,12 +99,12 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
         }
         $listaArchivos = $t;
     }
-
+    
     // Mapear de la lista de archivos al listado completo con URLs
     $arrData = array();
     foreach ($listaArchivos as $sArchivo) {
         $arrData[] = array(
-            sprintf('<a href="%s">%s</a>',
+            sprintf('<a href="%s">%s</a>', 
                 construirURL(array(
                     'menu'      =>  $module_name,
                     'action'    =>  'edit',
@@ -118,7 +118,48 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     ////PARA EL PAGINEO
     $total = count($arrData); $limit = 25; $offset = 0;
 
-    $oForm = new paloForm($smarty,
+    // Si se quiere avanzar a la sgte. pagina
+    if(isset($_GET['nav']) && $_GET['nav']=="end") {
+        // Mejorar el sgte. bloque.
+        if(($total%$limit)==0) {
+            $offset = $total - $limit;
+        } else {
+            $offset = $total - $total%$limit;
+        }
+    }
+
+    // Si se quiere avanzar a la sgte. pagina
+    if(isset($_GET['nav']) && $_GET['nav']=="next") {
+        $offset = $_GET['start'] + $limit - 1;
+    }
+
+    // Si se quiere retroceder
+    if(isset($_GET['nav']) && $_GET['nav']=="previous") {
+        $offset = $_GET['start'] - $limit - 1;
+    }
+
+    $inicio = ($total == 0) ? 0 : $offset + 1;
+    $fin = ($offset+$limit) <= $total ? $offset+$limit : $total;
+    $leng = $fin - $inicio;
+    
+    $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
+    $arrGrid = array(
+        "title"    => _tr("File Editor"),
+        "url"      => array('menu' => $module_name, 'file' => $sSubStrArchivo),
+        "icon"     => "images/kfaxview.png",
+        "width"    => "99%",
+        "start"    => $inicio,
+        "end"      => $fin,
+        "total"    => $total,
+        "columns"  => array(
+            0 => array("name"      => _tr("File List"),
+                        "property1" => ""),
+            1 => array("name"      => _tr("File Size"),
+                        "property1" => ""),
+            )
+    );
+
+    $oForm = new paloForm($smarty, 
         array(
             "file"  => array(
                 "LABEL"                  => _tr("File"),
@@ -133,37 +174,9 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     $smarty->assign("Filter", _tr('Filter'));
     $smarty->assign("NEW_FILE", _tr("New File"));
     $smarty->assign('url_new', construirURL(array('menu' => $module_name, 'action' => 'new')));
-    $oGrid = new paloSantoGrid($smarty);
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("File")." = ".$sSubStrArchivo, $_POST, array("file" => ""));
     $htmlFilter = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("File Editor"), $_POST);
 
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-
-    $offset = $oGrid->calculateOffset();
-
-    $inicio = ($total == 0) ? 0 : $offset + 1;
-    $fin = ($offset+$limit) <= $total ? $offset+$limit : $total;
-    $leng = $fin - $inicio;
-
-    $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
-    $arrGrid = array(
-        "title"    => _tr("File Editor"),
-        "url"      => array('menu' => $module_name, 'file' => $sSubStrArchivo),
-        "icon"     => "/modules/$module_name/images/pbx_tools_asterisk_file_editor.png",
-        "width"    => "99%",
-        "start"    => $inicio,
-        "end"      => $fin,
-        "total"    => $total,
-        "columns"  => array(
-            0 => array("name"      => _tr("File List"),
-                        "property1" => ""),
-            1 => array("name"      => _tr("File Size"),
-                        "property1" => ""),
-            )
-    );
-
-    $oGrid->addNew("?menu=$module_name&action=new",_tr("New File"),true);
+    $oGrid = new paloSantoGrid($smarty);
     $oGrid->showFilter($htmlFilter);
     return $oGrid->fetchGrid($arrGrid, $arrDatosGrid, $arrLang);
 }
@@ -181,7 +194,7 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
             $smarty->assign("mb_message", _tr("Asterisk has been reloaded"));
         }else{
             $smarty->assign("mb_title", "ERROR");
-            $smarty->assign("mb_message", _tr("Error when connecting to Asterisk Manager"));
+            $smarty->assign("mb_message", _tr("Error when connecting to Asterisk Manager")); 
         }
     }
 
@@ -193,9 +206,9 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
             } else {
                 $sNombreArchivo = basename($_POST['basename'].'.conf');
                 /* Los datos del archivo se envían desde el navegador con líneas
-                   separadas por CRLF que debe ser convertido a LF para estilo Unix
+                   separadas por CRLF que debe ser convertido a LF para estilo Unix 
                  */
-                if (file_put_contents($sDirectorio.$sNombreArchivo,
+                if (file_put_contents($sDirectorio.$sNombreArchivo, 
                         str_replace("\r\n", "\n", $_POST['content'])) === FALSE) {
                     $sMensajeStatus .= _tr("This file doesn't have permisses to write").'<br/>';
                 } else {
@@ -205,7 +218,7 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
         }
     } elseif ($sAccion == 'edit') {
         $sNombreArchivo = basename(getParameter('file'));
-        if (is_null($sNombreArchivo) ||
+        if (is_null($sNombreArchivo) || 
             !file_exists($sDirectorio.$sNombreArchivo)) {
             Header("Location: ?menu=$module_name");
             return '';
@@ -213,10 +226,10 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
 
         if (isset($_POST['Guardar'])) {
             /* Los datos del archivo se envían desde el navegador con líneas
-               separadas por CRLF que debe ser convertido a LF para estilo Unix
+               separadas por CRLF que debe ser convertido a LF para estilo Unix 
              */
-            if (!is_writable($sDirectorio.$sNombreArchivo) ||
-                file_put_contents($sDirectorio.$sNombreArchivo,
+            if (!is_writable($sDirectorio.$sNombreArchivo) || 
+                file_put_contents($sDirectorio.$sNombreArchivo, 
                     str_replace("\r\n", "\n", $_POST['content'])) === FALSE) {
                 $sMensajeStatus .= _tr("This file doesn't have permisses to write").'<br/>';
             } else {
@@ -269,7 +282,7 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
     return $oForm->fetchForm("$local_templates_dir/file_editor.tpl", _tr("File Editor"), $_POST);
 }
 
-function AsteriskManagerAPI($action, $parameters, $return_data=false)
+function AsteriskManagerAPI($action, $parameters, $return_data=false) 
 {
     $astman_host = "127.0.0.1";
     $astman_user = 'admin';

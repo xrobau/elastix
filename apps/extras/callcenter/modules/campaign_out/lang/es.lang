@@ -120,9 +120,5 @@ $arrLangModule = array(
 'Manage Trunks'=>'Administrar Troncales',
 'Manage Queues'=>'Administrar Colas',
 'Manage Forms'=>'Administrar Formularios',
-'External URLs' => 'URLs Externos',
-'Manage External URLs' => 'Administrar URLs Externos',
-'At least 1 used channel must be allowed.' => 'Se debe permitir el uso de al menos 1 canal.',
-'Campaign must allow at least one call retry' => 'Campaña debe permitir al menos un intento de llamada',
 );
 ?>

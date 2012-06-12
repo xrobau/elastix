@@ -100,7 +100,6 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oGrid->enableExport();   // enable csv export.
     $oGrid->pagingShow(true); // show paging section.
     $oGrid->setTitle(_tr("Weak Secrets"));
-    $oGrid->setIcon("modules/$module_name/images/security_weak_keys.png");
     $oGrid->setNameFile_Export(_tr("Weak Secrets"));
     if($oGrid->isExportAction()){
         $limit = $total;
@@ -142,10 +141,6 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oFilterForm = new paloForm($smarty, $arrFormFilterWeakKeys);
     $smarty->assign("SHOW", _tr("Show"));
 
-    $_POST["filter_field"]= $filter_field; 
-    $_POST["filter_value"]= $filter_value;
-
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Extension")." = ".$filter_value,$_POST, array("filter_field" => "extension","filter_value" => ""));
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
     $oGrid->showFilter(trim($htmlFilter));

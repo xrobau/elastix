@@ -4,7 +4,7 @@
 	<td width="4%" align="left" nowrap>{$date_start.INPUT}</td>
 	<td width="6%" align="right">{$date_end.LABEL}:</td>
 	<td width="4%" align="left" nowrap>{$date_end.INPUT}</td>
-	<td align="right">
+	<td width="20%" align="right">
 	{$filter_field.LABEL}:&nbsp;&nbsp;{$filter_field.INPUT}&nbsp;&nbsp;{$filter_value.INPUT}
 	  <select id="filter_value_userfield" name="filter_value_userfield" size="1" style="display:none">
                 <option value="incoming" {$SELECTED_1} >{$INCOMING}</option>

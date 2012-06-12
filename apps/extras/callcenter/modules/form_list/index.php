@@ -32,17 +32,25 @@ require_once "libs/paloSantoTrunk.class.php";
 include_once "libs/paloSantoGrid.class.php";
 require_once "libs/misc.lib.php";
 require_once "libs/xajax/xajax.inc.php";
-
-require_once "modules/agent_console/libs/elastix2.lib.php";
+//require "configs/db.conf.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
     //include module files
     require_once "modules/$module_name/configs/default.conf.php";
+
+    #incluir el archivo de idioma de acuerdo al que este seleccionado
+    #si el archivo de idioma no existe incluir el idioma por defecto
+    $lang=get_language();
+
+    $script_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_name/lang/$lang.lang";
+    if (file_exists("$script_dir/$lang_file"))
+        include_once($lang_file);
+    else
+        include_once("modules/$module_name/lang/en.lang");
+    global $arrLangModule;
     require_once "modules/$module_name/libs/paloSantoDataFormList.class.php";
-
-    load_language_module($module_name);
-
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConfig['templates_dir']))?$arrConfig['templates_dir']:'themes';
@@ -55,11 +63,15 @@ function _moduleContent(&$smarty, $module_name)
     <script type=\"text/javascript\" src=\"libs/js/jscalendar/lang/calendar-en.js\"></script>
     <script type=\"text/javascript\" src=\"libs/js/jscalendar/calendar-setup.js\"></script>";
     $smarty->assign("HEADER", $script);
-
+//     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+//     $smarty->assign("CANCEL", $arrLang["Cancel"]);
+//     $smarty->assign("APPLY_CHANGES", $arrLang["Apply changes"]);
+    
+//print_r($arrLangModule);
     //Definicion de campos
     $formCampos = array(
         'form_nombre'    =>    array(
-            "LABEL"                => _tr("Form Name"),
+            "LABEL"                => $arrLangModule["Form Name"],
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "TEXT",
             "INPUT_EXTRA_PARAM"      => array("size" => "40"),
@@ -67,7 +79,7 @@ function _moduleContent(&$smarty, $module_name)
             "VALIDATION_EXTRA_PARAM" => "",
         ),
         'form_description'    =>    array(
-            "LABEL"                => _tr("Form Description"),
+            "LABEL"                => $arrLangModule["Form Description"],
             "REQUIRED"               => "no",
             "INPUT_TYPE"             => "TEXTAREA",
             "INPUT_EXTRA_PARAM"      => "",
@@ -77,7 +89,7 @@ function _moduleContent(&$smarty, $module_name)
             "ROWS"                   => "2",
         ), 
     );
-    $smarty->assign("type",_tr('Type'));    
+    $smarty->assign("type",$arrLangModule['Type']);    
     $smarty->assign("select_type","type"); 
     $smarty->assign("option_type",
         array(
@@ -88,34 +100,34 @@ function _moduleContent(&$smarty, $module_name)
                     "DATE",
                     "TEXTAREA"),
         "NAME"  => array (
-                    _tr("Type Label"),
-                    _tr("Type Text"),
-                    _tr("Type List"),
-                    _tr("Type Date"),
-                    _tr("Type Text Area")),
+                    $arrLangModule["Type Label"],
+                    $arrLangModule["Type Text"],
+                    $arrLangModule["Type List"],
+                    $arrLangModule["Type Date"],
+                    $arrLangModule["Type Text Area"]),
         "SELECTED" => "Text",     
         )
     ); 
-    $smarty->assign("item_list",_tr('List Item'));    
+    $smarty->assign("item_list",$arrLangModule['List Item']);    
     $oForm = new paloForm($smarty, $formCampos);     
+// print_r($_SESSION['ayuda']);
+
 
     $pDB = new paloDB($arrConfig['cadena_dsn']);
     if (!is_object($pDB->conn) || $pDB->errMsg!="") {
-        $smarty->assign("mb_message", _tr("Error when connecting to database")." ".$pDB->errMsg);
+        $smarty->assign("mb_message", $arrLang["Error when connecting to database"]." ".$pDB->errMsg);
     }
     if (isset($_GET['id']) && isset($_GET['action']) && $_GET['action']=="preview") {
-        $contenidoModulo = preview_form($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm); 
+        $contenidoModulo = preview_form($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm,$arrLangModule); 
     } else {
-        $contenidoModulo = listadoForm($pDB, $smarty, $module_name, $local_templates_dir); 
+        $contenidoModulo = listadoForm($pDB, $smarty, $module_name, $local_templates_dir,$arrLangModule); 
     }
 
     return $contenidoModulo;
 }
 
 
-function preview_form($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm) {
-
-    $smarty->assign('FRAMEWORK_TIENE_TITULO_MODULO', existeSoporteTituloFramework());
+function preview_form($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm,$arrLangModule) {
 
     $oForm->setViewMode(); // Esto es para activar el modo "preview"
 
@@ -125,27 +137,30 @@ function preview_form($pDB, $smarty, $module_name, $local_templates_dir, $formCa
     $oDataForm = new paloSantoDataForm($pDB);
     $arrDataForm = $oDataForm->getFormularios($_GET['id']);
     $arrFieldForm = $oDataForm->obtener_campos_formulario($_GET['id']);
+    //echo $arrFieldForm;
    
     // Conversion de formato
     $arrTmp['form_nombre']       = $arrDataForm[0]['nombre'];
     $arrTmp['form_description']    = $arrDataForm[0]['descripcion'];  
-    $smarty->assign("title",_tr('Form'));
-    $smarty->assign("form_name_lbl", _tr('Form Name'));
-    $smarty->assign("form_description_lbl", _tr('Form Description'));
+    $smarty->assign("title",$arrLangModule['Form']);
+    $smarty->assign("form_name_lbl", $arrLangModule['Form Name']);
+    $smarty->assign("form_description_lbl", $arrLangModule['Form Description']);
     $smarty->assign("form_name_val", $arrTmp['form_nombre']);
     $smarty->assign("form_description_val", $arrTmp['form_description']);
     $smarty->assign("id_formulario_actual", $_GET['id']);
     $smarty->assign("style_field","style='display:none;'");
     $smarty->assign("formulario",$arrFieldForm);
  
-    $smarty->assign('icon', 'images/kfaxview.png');
-    $contenidoModulo=$oForm->fetchForm("$local_templates_dir/preview.tpl", _tr('Form'), $arrTmp); // hay que pasar el arreglo
+    //$html_campos = html_campos_formulario($arrFieldForm,false);
+    //$smarty->assign("solo_contenido_en_vista",$html_campos);
+    $contenidoModulo=$oForm->fetchForm("$local_templates_dir/preview.tpl", $arrLangModule['Form'], $arrTmp); // hay que pasar el arreglo
     return $contenidoModulo;
 }
 
-function listadoForm($pDB, $smarty, $module_name, $local_templates_dir) {
+function listadoForm($pDB, $smarty, $module_name, $local_templates_dir,$arrLangModule) {
 
-    global $arrLang;
+    //global $arrLang;
+    //global $arrLangModule;
 
     $oDataForm = new paloSantoDataForm($pDB);
     // preguntando por el estado del filtro
@@ -164,43 +179,43 @@ function listadoForm($pDB, $smarty, $module_name, $local_templates_dir) {
                 $DataForm['descripcion']="&nbsp;";
             $arrTmp[1] = $DataForm['descripcion'];
             if($DataForm['estatus']=='I'){
-                $arrTmp[2] = _tr('Inactive');
-                $arrTmp[3] = "&nbsp;<a href='?menu=$module_name&action=preview&id=".$DataForm['id']."'>"._tr('Preview')."</a>";
+                $arrTmp[2] = $arrLangModule['Inactive'];
+                $arrTmp[3] = "&nbsp;<a href='?menu=$module_name&action=preview&id=".$DataForm['id']."'>{$arrLangModule['Preview']}</a>";
             } else {
-                $arrTmp[2] = _tr('Active');
-                $arrTmp[3] = "&nbsp;<a href='?menu=$module_name&action=preview&id=".$DataForm['id']."'>"._tr('Preview')."</a>";
+                $arrTmp[2] = $arrLangModule['Active'];
+                $arrTmp[3] = "&nbsp;<a href='?menu=$module_name&action=preview&id=".$DataForm['id']."'>{$arrLangModule['Preview']}</a>";
             }
             $arrData[] = $arrTmp;
         }
     }
 
     $url = construirUrl(array('menu' => $module_name), array('nav', 'start'));
-    $arrGrid = array("title"    => _tr("Form List"),
+    $arrGrid = array("title"    => $arrLangModule["Form List"],
         "url"      => $url,
         "icon"     => "images/list.png",
         "width"    => "99%",
         "start"    => ($end==0) ? 0 : 1,
         "end"      => $end,
         "total"    => $end,
-        "columns"  => array(0 => array("name"      => _tr("Form Name"),
+        "columns"  => array(0 => array("name"      => $arrLangModule["Form Name"],
                                        "property1" => ""),
-                            1 => array("name"      => _tr("Form Description"), 
+                            1 => array("name"      => $arrLangModule["Form Description"], 
                                        "property1" => ""),
-                            2 => array("name"      => _tr("Status"), 
+                            2 => array("name"      => $arrLangModule["Status"], 
                                        "property1" => ""),
-                            3 => array("name"      => _tr("Options"), 
+                            3 => array("name"      => $arrLangModule["Options"], 
                                        "property1" => "")));
 
-    $estados = array("all"=>_tr("All"), "A"=>_tr("Active"), "I"=>_tr("Inactive"));
+    $estados = array("all"=>$arrLangModule["All"], "A"=>$arrLangModule["Active"], "I"=>$arrLangModule["Inactive"]);
     $combo_estados = "<select name='cbo_estado' id='cbo_estado' onChange='submit();'>".combo($estados,$_POST['cbo_estado'])."</select>";
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->showFilter(
               "<table width='100%' border='0'><tr>".
-              "<td>"._tr("Forms")."</td>".
-              "<td class='letra12' align='right'><b>"._tr("Status").":</b>&nbsp;$combo_estados</td>".
+              "<td>".$arrLangModule["Forms"]."</td>".
+              "<td class='letra12' align='right'><b>".$arrLangModule["Status"].":</b>&nbsp;$combo_estados</td>".
               "</tr></table>");
-
-    $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);
+//print_r($arrData);
+    $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLangModule);
     if (strpos($sContenido, '<form') === FALSE)
         $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
     return $sContenido;

@@ -104,7 +104,7 @@ function reportEmailList($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	$smarty->assign("mb_message",_tr("There is no domain created. To use this module you need at least one domain. You can create a domain in the module Email->Domains"));
     }
     else
-	$smarty->assign("VirtualDomains",1);
+	$smarty->assign("VirtualDomains",1);	
     $arrDominios    = array("all"=> _tr("All"));
     foreach($arrDomains as $domain) {
         $arrDominios[$domain[0]] = $domain[1];
@@ -122,8 +122,6 @@ function reportEmailList($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     else
 	$id_domain = "all";
 
-    $_POST["domain"]=$id_domain;
-
     $total = $pEmailList->getNumEmailList($id_domain);
     $limit  = 20;
     $oGrid->setLimit($limit);
@@ -132,16 +130,17 @@ function reportEmailList($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $oGrid->setIcon("/modules/$module_name/images/email.png");
     $oGrid->pagingShow(true); // show paging section.
     $offset = $oGrid->calculateOffset();
-    $url    = "?menu=$module_name&domain=$id_domain";
+    $url    = "?menu=$module_name&id_domain=$id_domain";
     $oGrid->setURL($url);
-	$button_eliminar="";
     $arrResult = $pEmailList->getEmailList($id_domain,$limit,$offset);
+    $button_eliminar = "<input class=\"button\" type=\"submit\" name=\"delete\" value=\""._tr("Delete")."\" ".
+                       " onclick=\" return confirmSubmit('"._tr("Are you sure you wish to delete the Email List(s).")."?');\" >";
     $arrColumns = array($button_eliminar,_tr("List name"),_tr("Membership"),_tr("Action"));
     $oGrid->setColumns($arrColumns);
     $arrData = null;
 
     if(is_array($arrResult) && $total>0){
-        foreach($arrResult as $key => $value){
+        foreach($arrResult as $key => $value){ 
 	    $arrTmp[0] = "<input type='checkbox' name='".$value['id']."' id='".$value['id']."'>";
 	    $domainName = $pEmailList->getDomainName($value['id_domain']);
 	    $arrTmp[1] = "<a href='?menu=$module_name&action=view_memberlist&id=".$value['id']."'>$value[listname]@$domainName</a>";
@@ -152,18 +151,13 @@ function reportEmailList($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     }
     $oGrid->setData($arrData);
     //begin section filter
-    //ya no se usa esa variable smarty
-    //$smarty->assign("NEW_EMAILLIST", _tr("New Email list"));
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Domain")." = ".$arrDominios[$id_domain], $_POST, array("domain" => "all"),true);
-    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
+    $smarty->assign("NEW_EMAILLIST", _tr("New Email list"));
 
+    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
-    $oGrid->addNew("new_emaillist",_tr("New Email list"));
-	$oGrid->deleteList(_tr("Are you sure you wish to delete the Email List(s)."),"delete",_tr("Delete"));
+
     $oGrid->showFilter(trim($htmlFilter));
-    $content = $oGrid->fetchGrid();
-    if (strpos($content, '<form') === FALSE)
-        $content = "<form  method='POST' style='margin-bottom:0;' action=$url>$content</form>";
+    $content = "<form  method='POST' style='margin-bottom:0;' action=$url>".$oGrid->fetchGrid()."</form>";
 
     //end grid parameters
 
@@ -265,7 +259,7 @@ function saveNewList($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 	    $smarty->assign("mb_title", _tr("Error"));
 	    $smarty->assign("mb_message", _tr("Could not create the list")." mailman");
 	    return reportEmailList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
-	}
+	}   
     }
 
     $pDB->beginTransaction();
@@ -289,7 +283,7 @@ function saveNewList($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 	$smarty->assign("mb_message", _tr("Could not create the list")." $namelist");
 	return reportEmailList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
     }
-
+    
     if(!$pEmaillist->mailmanCreateVirtualAliases($namelist,$domainName)){
 	$pDB->rollBack();
 	$smarty->assign("mb_title", _tr("Error"));
@@ -336,7 +330,7 @@ function saveNewMember($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $pEmaillist = new paloSantoEmaillist($pDB);
     $arrFormMemberlist = createFieldFormMember();
     $oForm = new paloForm($smarty,$arrFormMemberlist);
-
+   
     $emailMembers = getParameter("emailmembers");
     $id_list	  = getParameter("id_emaillist");
     if(!$oForm->validateForm($_POST)) {
@@ -356,7 +350,7 @@ function saveNewMember($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         $smarty->assign("mb_message", _tr("The List entered does not exist"));
 	return viewFormMemberList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
     }
-
+    
     $emailMembers = explode("\n",$emailMembers);
     $arrMembers = array();
     $arrErrorMembers = array();
@@ -520,7 +514,7 @@ function viewMemberList($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 {
     $pEmailList = new paloSantoEmailList($pDB);
     $id_list = getParameter("id");
-
+    
     if(!$pEmailList->listExistsbyId($id_list)){
 	$smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", _tr("The List entered does not exist"));
@@ -545,8 +539,8 @@ function viewMemberList($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oGrid->setIcon("/modules/$module_name/images/email.png");
     $oGrid->pagingShow(true);
     $offset = $oGrid->calculateOffset();
-	$url = "?menu=$module_name&action=view_memberlist&id=$id_list&filter_type=$field_type&filter_txt=$field_pattern";
-	    $oGrid->setURL($url);
+    $url = "?menu=$module_name&filter_type=$field_type&filter_txt=$field_pattern";
+    $oGrid->setURL($url);
 
     $arrColumns = array(_tr("Member name"),_tr("Member email"));
     $oGrid->setColumns($arrColumns);
@@ -565,26 +559,9 @@ function viewMemberList($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 
     $arrFormFilterMembers = createFieldFilterViewMembers();
     $oFilterForm = new paloForm($smarty, $arrFormFilterMembers);
-
-	$arrType = array("name" => _tr("Name"), "email" => _tr("Email"));
-
-	if(!is_null($field_type)){
-		$nameField = $arrType[$field_type];
-	}else{
-		$nameField = "";
-	}
-
-	$oGrid->customAction("return", _tr("Return"));
-	$oGrid->customAction("?menu=$module_name&action=export&id=$id_list&rawmode=yes",_tr("Export Members"),null,true);
-
-	//$arrFiltro = array("filter_type"=>$field_type,"filter_txt"=>$field_pattern);
-
-	$oGrid->addFilterControl(_tr("Filter applied: ").$nameField." = ".$field_pattern, $_POST, array("filter_type" => "name","filter_txt" => ""));
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/view_members.tpl","",$_POST);
     $oGrid->showFilter(trim($htmlFilter));
-    $content = $oGrid->fetchGrid();
-    if (strpos($content, '<form') === FALSE)
-        $content = "<form  method='POST' style='margin-bottom:0;' action=$url>$content</form>";
+    $content = "<form  method='POST' style='margin-bottom:0;' action=$url>".$oGrid->fetchGrid()."</form>";
     return $content;
 }
 
@@ -608,7 +585,7 @@ function exportMembers($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
     }
     else
 	$listName = "";
-
+    
     header("Pragma: public");
     header("Expires: 0");
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
@@ -733,8 +710,6 @@ function getAction()
 {
     if(getParameter("new_emaillist")) //Get parameter by POST (submit)
         return "new_emaillist";
-	elseif(getParameter("return"))
-		return "report";
     elseif(getParameter("save_newList"))
 	return "save_newList";
     elseif(getParameter("action") == "new_memberlist")

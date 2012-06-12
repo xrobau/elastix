@@ -94,9 +94,9 @@ class paloSantoCalendar {
 
         $result=$this->_DB->getFirstRowQuery($query,true);
 
-        if($result===FALSE){
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
-            return FALSE;
+            return null;
         }
         return $result;
     }
@@ -273,63 +273,38 @@ class paloSantoCalendar {
         }else return FALSE;
     }
 
-    function insertEvent($uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification, $endtime, $each_repeat,  $checkbox_days, $reminderTimer, $color, $returnId=false){
-	$time = time();
-        $data = array($uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification,$endtime,$each_repeat,$checkbox_days,$reminderTimer,$color,$time);
-        $query = "INSERT INTO events(uid,startdate,enddate,starttime,eventtype,subject,description,asterisk_call,recording,call_to,notification,emails_notification,endtime,each_repeat,days_repeat,reminderTimer,color,last_update) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    function insertEvent($uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification, $endtime, $each_repeat,  $checkbox_days, $reminderTimer, $color){
+        $data = array($uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification,$endtime,$each_repeat,$checkbox_days,$reminderTimer,$color);
+        $query = "INSERT INTO events(uid,startdate,enddate,starttime,eventtype,subject,description,asterisk_call,recording,call_to,notification,emails_notification,endtime,each_repeat,days_repeat,reminderTimer,color) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $result = $this->_DB->genQuery($query, $data);
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	$id = $this->getLastInsertIdEvent();
-	$result = $this->addHistory($id,$uid,"","event",$time,"create","An event was created: id=$id, uid=$uid, startdate=$startdate, enddate=$enddate, starttime=$starttime, eventtype=$eventtype, subject=$subject, description=$description, asterisk_call=$asterisk_call, recording=$recording, call_to=$call_to, notification=$notification, emails_notification=$email_notification, endtime=$endtime, each_repeat=$each_repeat, days_repeat=$checkbox_days, reminderTimer=$reminderTimer, color=$color");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
-	if($returnId)
-	    return $id;
-	else
-	    return true; 
+        return true; 
     }
 
-    function updateEvent($id_event,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification, $endtime ,$each_repeat,$checkbox_days,$reminderTimer, $color, $uid){
-	$time = time();
-        $data = array($startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification,$endtime,$each_repeat,$checkbox_days,$reminderTimer,$color,$time,$id_event);
-        $query = "UPDATE events SET  startdate=?,enddate=?,starttime=?,eventtype=?,subject=?,description=?,asterisk_call=?,recording=?,call_to=?,notification=?,emails_notification=?,endtime=?,each_repeat=?,days_repeat=?,reminderTimer=?,color=?,last_update=? WHERE id=?";
+    function updateEvent($id_event,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification, $endtime ,$each_repeat,$checkbox_days,$reminderTimer, $color){
+        $data = array($startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification,$endtime,$each_repeat,$checkbox_days,$reminderTimer,$color,$id_event);
+        $query = "UPDATE events SET  startdate=?,enddate=?,starttime=?,eventtype=?,subject=?,description=?,asterisk_call=?,recording=?,call_to=?,notification=?,emails_notification=?,endtime=?,each_repeat=?,days_repeat=?,reminderTimer=?,color=? WHERE id=?";
         
         $result = $this->_DB->genQuery($query, $data);
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-
-	$result = $this->addHistory($id_event,$uid,"","event",$time,"modify","An event was modified: id=$id_event, startdate=$startdate, enddate=$enddate, starttime=$starttime, eventtype=$eventtype, subject=$subject, description=$description, asterisk_call=$asterisk_call, recording=$recording, call_to=$call_to, notification=$notification, emails_notification=$email_notification, endtime=$endtime, each_repeat=$each_repeat, days_repeat=$checkbox_days, reminderTimer=$reminderTimer, color=$color");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
         return true; 
     }
 
     function updateDateEvent($id_event,$startdate,$enddate,$starttime,$endtime,$day_repeat){
-        $data = array($startdate, $enddate, $starttime, $endtime, $day_repeat, time(), $id_event);
-        $query = "UPDATE events SET  startdate=?,enddate=?,starttime=?,endtime=?,days_repeat=?,last_update=? WHERE id=?";
+        $data = array($startdate, $enddate, $starttime, $endtime, $day_repeat, $id_event);
+        $query = "UPDATE events SET  startdate=?,enddate=?,starttime=?,endtime=?,days_repeat=? WHERE id=?";
 
         $result = $this->_DB->genQuery($query, $data);
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-
-	$id_user = $this->getUserOfEvent($id_event);
-
-	$result = $this->addHistory($id_event,$id_user,"","event",$time,"modify","An event was modified: id=$id_event, startdate=$startdate, enddate=$enddate, starttime=$starttime, endtime=$endtime, days_repeat=$day_repeat");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
         return true; 
     }
 
@@ -341,12 +316,6 @@ class paloSantoCalendar {
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	$time = time();
-	$result = $this->addHistory($id_event,$id_user,"","event",$time,"delete","An event was deleted");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
         return true; 
     }
 
@@ -433,17 +402,6 @@ class paloSantoCalendar {
             return $result['name'];
         else
             return $username;
-    }
-
-    function getDescUsers($id_user,$db)
-    {
-        $query = "SELECT description FROM acl_user WHERE id=$id_user";
-    	$username1 = $_SESSION["elastix_user"];
-        $result = $db->getFirstRowQuery($query,true);
-        if($result != FALSE || $result != "")
-            return $result['description'];
-        else
-            return $username1;
     }
 
     function existPassword($pass){
@@ -556,298 +514,14 @@ class paloSantoCalendar {
 
     function festivalUp()
     {
-        exec("service festival status", $flag, $status);
-		sleep(3);
+        exec("ps aux | grep 'festival_server'", $flag, $status);
         if($status == 0){
-            return true;
+            if(count($flag) <= 1){
+                //exec("festival_server &", $flags, $status2);
+                return false;
+            }
         }
-        return false;
-    }
-
-    function addHistory($id_register,$id_user,$status,$type,$timestamp,$action,$description)
-    {
-	$query = "INSERT INTO history (id_register,id_user,status,type,timestamp,action,description) VALUES(?,?,?,?,?,?,?)";
-	$result = $this->_DB->genQuery($query,array($id_register,$id_user,$status,$type,$timestamp,$action,$description));
-	if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true; 
-    }
-
-    function getLastQueueid()
-    {
-	$query = "SELECT id FROM queues order by id desc";
-        $result = $this->_DB->fetchTable($query, TRUE);
-        if($result === FALSE || count($result) == 0)
-            return 0;
-        else{
-	    $idNumber = 0;
-	    foreach($result as $value){
-		$number = explode("-",$value["id"]);
-		if($number[2] > $idNumber)
-		    $idNumber = $number[2];
-	    }
-            return $idNumber;
-	}
-    }
-
-    function addQueue($data,$type,$user)
-    {
-	$id = $this->getLastQueueid();
-	$next = $id + 1;
-	$id = "queue-event-$next";
-	$query = "INSERT INTO queues (id,type,user,data,status) VALUES (?,?,?,?,'NEW')";
-	$result = $this->_DB->genQuery($query, array($id,$type,$user,$data));
-	if($result == FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $id;
-    }
-
-    function getDataTicket($ticket,$id_user)
-    {
-	$query = "SELECT * FROM queues WHERE id=? AND user=? AND type='event'";
-	$result = $this->_DB->getFirstRowQuery($query, TRUE, array($ticket,$id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return NULL;
-	}
-	elseif(count($result) == 0)
-	    return FALSE;
-	else
-	    return $result;
-    }
-
-    function removeQueue($ticket)
-    {
-	$query = "DELETE FROM queues WHERE id=?";
-	$result = $this->_DB->genQuery($query, array($ticket));
-	if($result == FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
-    }
-
-    function getUserEvents($id_user,$fields=NULL)
-    {
-	if(is_null($fields))
-	    $fields = "*";
-	$query = "SELECT $fields FROM events WHERE uid=?";
-	$result = $this->_DB->fetchTable($query, true, array($id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $result;
-    }
-
-    function getEventsAfterSync($last_sync,$events,$id_user,$dataResponse)
-    {
-	$query = "SELECT * FROM events WHERE last_update > ? AND uid=?";
-	$result = $this->_DB->fetchTable($query, true, array($last_sync,$id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else{
-	    $query = "SELECT * FROM history WHERE timestamp > ? AND action='delete' AND id_user=? AND type='event'";
-	    $deleted_events = $this->_DB->fetchTable($query, true, array($last_sync,$id_user));
-	    if($deleted_events === FALSE){
-		$this->errMsg = $this->_DB->errMsg;
-		return FALSE;
-	    }
-	    foreach($deleted_events as $key => $deleted){
-		$remove = FALSE;
-		foreach($events as $event){
-		    if($deleted["id_register"] == $event->id && $deleted["timestamp"] < $event->last_update){
-			$remove = TRUE;
-			break;
-		    }
-		}
-		if(!$remove){
-		  $next = count($result);
-		  $result[$next]["id"] = $deleted["id_register"];
-		  $result[$next]["delete"] = "yes";  
-		}
-	    }
-	    $arrEvents = array();
-	    foreach($result as $key => $value){
-		$remove = FALSE;
-		$isFromClient = FALSE;
-		if(is_array($dataResponse) && count($dataResponse) > 0){
-		    foreach($dataResponse as $data){
-			if($value["id"] == $data->id){
-			    $value["id_client"] = $data->id_client;
-			    $isFromClient = TRUE;
-			    break;
-			}   
-		    }
-		}
-		if(!$isFromClient){
-		    foreach($events as $event){
-			if(isset($event->id)){
-			    if($event->id == $value["id"]){
-				if(isset($event->id_client))
-				    $value["id_client"] = $event->id_client;
-				if(isset($event->uid))
-				    if($event->uid != $value["uid"])
-					break;
-				if(isset($event->startdate))
-				    if($event->startdate != $value["startdate"])
-					break;
-				if(isset($event->enddate))
-				    if($event->enddate != $value["enddate"])
-					break;
-				if(isset($event->starttime))
-				    if($event->starttime != $value["starttime"])
-					break;
-				if(isset($event->eventtype))
-				    if($event->eventtype != $value["eventtype"])
-					break;
-				if(isset($event->subject))
-				    if($event->subject != $value["subject"])
-					break;
-				if(isset($event->description))
-				    if($event->description != $value["description"])
-					break;
-				if(isset($event->asterisk_call))
-				    if($event->asterisk_call != $value["asterisk_call"])
-					break;
-				if(isset($event->recording))
-				    if($event->recording != $value["recording"])
-					break;
-				if(isset($event->call_to))
-				    if($event->call_to != $value["call_to"])
-					break;
-				if(isset($event->notification))
-				    if($event->notification != $value["notification"])
-					break;
-				if(isset($event->emails_notification))
-				    if($event->emails_notification != $value["emails_notification"])
-					break;
-				if(isset($event->endtime))
-				    if($event->endtime != $value["endtime"])
-					break;
-				if(isset($event->each_repeat))
-				    if($event->each_repeat != $value["each_repeat"])
-					break;
-				if(isset($event->days_repeat))
-				    if($event->days_repeat != $value["days_repeat"])
-					break;
-				if(isset($event->reminderTimer))
-				    if($event->reminderTimer != $value["reminderTimer"])
-					break;
-				if(isset($event->color))
-				    if($event->color != $value["color"])
-					break;
-				$remove = TRUE;
-			    }
-			}
-		    }
-		}
-		if(!$remove){
-		    $next = count($arrEvents);
-		    $arrEvents[$next] = $value;
-		    if(!isset($arrEvents[$next]["delete"]))
-			$arrEvents[$next]["delete"] = "no";
-		}
-	    }
-	    return $arrEvents;
-	}
-    }
-
-    function getUserOfEvent($id_event)
-    {
-	$query = "SELECT uid FROM events WHERE id=?";
-	$result = $this->_DB->getFirstRowQuery($query, TRUE, array($id_event));
-	if($result == FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return "";
-	}
-	else
-	    return $result["uid"];
-    }
-
-    function getUnsolvedQueues()
-    {
-	$query = "SELECT * FROM queues WHERE type='event' AND status='NEW'";
-	$result = $this->_DB->fetchTable($query, true);
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $result;
-    }
-
-    function changeStatusQueue($id,$status)
-    {
-	$query = "UPDATE queues SET status=? WHERE id=?";
-	$result = $this->_DB->genQuery($query,array($status,$id));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
-    }
-
-    function eventDeleted($id,$id_user)
-    {
-	$query = "SELECT * FROM history WHERE id_register=? AND type='event' AND action='delete' AND id_user=?";
-	$result = $this->_DB->getFirstRowQuery($query,TRUE,array($id,$id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $result;
-    }
-
-    function eventExists($id)
-    {
-	$query = "SELECT COUNT(*) FROM events WHERE id=?";
-	$result = $this->_DB->getFirstRowQuery($query,FALSE,array($id));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return NULL;
-	}
-	elseif(count($result) == 0)
-	    return FALSE;
-	else
-	    return TRUE;
-    }
-
-    function addEventWithId($id,$uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification, $endtime, $each_repeat,  $checkbox_days, $reminderTimer, $color)
-    {
-	$time = time();
-        $data = array($id,$uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification,$endtime,$each_repeat,$checkbox_days,$reminderTimer,$color,$time);
-	$query = "INSERT INTO events(id,uid,startdate,enddate,starttime,eventtype,subject,description,asterisk_call,recording,call_to,notification,emails_notification,endtime,each_repeat,days_repeat,reminderTimer,color,last_update) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-	$result = $this->_DB->genQuery($query,$data);
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
-    }
-
-    function setQueueDataResponse($id,$dataResponse)
-    {
-	$query = "UPDATE queues SET response_data=? WHERE id=?";
-	$result = $this->_DB->genQuery($query,array($dataResponse,$id));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
+        return true;
     }
 }
 ?>

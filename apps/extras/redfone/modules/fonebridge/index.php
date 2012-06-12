@@ -168,7 +168,8 @@ function configure_FoneBridge($smarty, $module_name, $local_templates_dir, $arrL
 function form_FoneBridge($smarty, $module_name, $local_templates_dir, $arrLang, $oForm, $arrLangModule)
 {
     $smarty->assign("CONFIGURE", $arrLangModule["Configure"]);
-    $smarty->assign("icon", "modules/$module_name/themes/default/fonebridge.png");
+    $smarty->assign("TITLE", $arrLangModule["FoneBridge"]);
+    $smarty->assign("ICON", "modules/$module_name/themes/default/fonebridge.png");
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
     $smarty->assign("general_settings", $arrLangModule["General Settings"]);
     $smarty->assign("status_label", $arrLang["Status"]);
@@ -199,11 +200,11 @@ function form_FoneBridge($smarty, $module_name, $local_templates_dir, $arrLang, 
     //if(count($arrValores)>0){
     if(count($_POST) == 0){
         Assign_Values($arrValores, $smarty); 
-        $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLangModule["FoneBridge"], $arrValores);
+        $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", "", $arrValores);
     }
     else{
         Assign_Values($_POST, $smarty);
-        $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLangModule["FoneBridge"], $_POST);
+        $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", "", $_POST);
     }
 
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

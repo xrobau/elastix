@@ -115,9 +115,5 @@ $arrLangModule = array(
 'First name' => 'First name',
 'Last name' => 'Last name',
 'National ID' => 'National ID',
-'External site' => 'External site',
-
-'Blind transfer' => 'Blind transfer',
-'Attended transfer' => 'Attended transfer',
 );
 ?>

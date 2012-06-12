@@ -503,9 +503,8 @@ cursor: pointer;
     width: 90%;
     display: block;
     font-family: verdana,arial,helvetica,sans-serif;
-    color: #666;
+    color: #2E6E9E;
     font-size: 13px;
-	font-weight: bold;
 }
 
 
@@ -525,6 +524,8 @@ cursor: pointer;
 /*para color picker*/
 
 
+
+
 #colorSelector {
 
     position: relative;
@@ -538,14 +539,21 @@ cursor: pointer;
 }
 
 #colorSelector div {
+
     position: absolute;
+
     top: 4px;
+
     left: 4px;
+
     width: 28px;
+
     height: 28px;
+
     background: url(../../../images/select2.png) center;
+
 }
-/*
+
 .colorpicker_hue div {
 
     background-image: url(../../../images/custom_indic.gif);
@@ -617,7 +625,7 @@ cursor: pointer;
 .colorpicker_current_color{
     display: none;
 }
-*/
+
 .spaceTD{
     height:30px;
 }
@@ -633,8 +641,8 @@ cursor: pointer;
 
 .counter{
     position: relative;
-    top: -4px;
-    right: 0px;
+    top: -3px;
+    right: 32px;
 }
 
 .countExceeded{
@@ -643,8 +651,4 @@ cursor: pointer;
 
 #ui-datepicker-div{
     display: none;
-}
-
-#table_box textarea {
-	resize: none;
 }

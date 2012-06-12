@@ -36,7 +36,6 @@ function _moduleContent(&$smarty, $module_name)
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoAsteriskLogs.class.php";
-    include_once "modules/$module_name/libs/LogParser_Full.class.php";
 
     // incluir el archivo de idioma de acuerdo al que este seleccionado
     // si el archivo de idioma no existe incluir el idioma por defecto
@@ -179,17 +178,8 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
     $iOffsetPrevio = $arrResult[$iPosPrevio]['offset'];
     $iOffsetSiguiente = $arrResult[$iPosSiguiente]['offset'];
 
-    $limit = $iNumLineasPorPagina;
-    $total = (int)($totalBytes / 128);
-
-
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-
-
     $offset = $iOffsetVerdadero;
-    $nav = getParameter('nav');
-    if ($nav) switch ($nav) {
+    if (isset($_GET['nav'])) switch ($_GET['nav']) {
     case 'start':
         $offset = 0;
         break;
@@ -208,31 +198,7 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
     case 'previous':
         $offset = $iOffsetPrevio;
         break;
-    case 'bypage':
-        $numPage = ($limit==0)?0:ceil($total / $limit);
-
-        $page  = getParameter("page");
-        if(preg_match("/[0-9]+/",$page)==0)// no es un número
-            $page = 1;
-
-        if( $page > $numPage) // se está solicitando una pagina mayor a las que existen
-            $page = $numPage;
-
-        $start = ( ( ($page - 1) * $limit ) + 1 ) - $limit;
-
-        if($start + $limit <= 1){
-            $offset = 0;
-            breaK;
-        }
-
-        $inicioBusqueda = ($page * $iEstimadoBytesPagina) - ($iEstimadoBytesPagina);
-        $arrResult =$pAsteriskLogs->ObtainAsteriskLogs(10 * $iEstimadoBytesPagina, $inicioBusqueda, $field_pattern);
-                $offset = $arrResult[0]['offset'];
-
-        $oGrid->setOffsetValue($offset);
-        break;
     }
-
 
     // Buscar la cadena de texto indicada, y modificar offset si se encuentra
     if (isset($_POST['searchnext'])  && $busqueda != '') {
@@ -282,54 +248,35 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
             $arrTmp[1] = $value['tipo'];
             $arrTmp[2] = $value['origen'];
             $arrTmp[3] = $value['linea'];
+
             $arrData[] = $arrTmp;
         }
     }
 
-    
+    $arrGrid = array("title"    => $arrLang["Asterisk Logs"],
+                        "url"      => $url,
+                        "icon"     => "images/list.png",
+                        "width"    => "99%",
+                        "start"    => ($totalBytes==0) ? 0 : 1 + (int)($offset / 128),
+                        "end"      => (int)($offset / 128) + $iNumLineasPorPagina,
+                        "total"    => (int)($totalBytes / 128),
+                        "columns"  => array(0 => array("name"      => $arrLang['Date'],
+                                                    "property1" => ""),
+
+                                            1 => array("name"      => $arrLang['Type'],
+                                                    "property1" => ""),
+                                            2 => array("name"      => $arrLang['Source'],
+                                                    "property1" => ""),
+                                            3 => array("name"      => $arrLang['Message'],
+                                                    "property1" => "")
+                                        )
+                    );
+
     $_POST['offset'] = $offset;
-
-    //$defaultEnd=end($comboFechas);
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Date")." = ".$_POST['filter'], $_POST, array('filter' => $listaFechas[count($listaFechas) - 1]),true);
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr('Search string')." = ".$busqueda, $_POST, array('busqueda' => ""));
-
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
     $oGrid->showFilter(trim($htmlFilter));
-    
-
-    $arrGrid = array("title"    => $arrLang["Asterisk Logs"],
-                    "url"      => $url,
-                    "icon"     => "/modules/$module_name/images/reports_asterisk_logs.png",
-                    "width"    => "99%",
-                    "start"    => ($totalBytes==0) ? 0 : 1 + (int)($offset / 128),
-                    "end"      => (int)($offset / 128) + $iNumLineasPorPagina,
-                    "total"    => (int)($totalBytes / 128),
-                    "columns"  => array(0 => array("name"      => $arrLang['Date'],
-                                                "property1" => ""),
-
-                                        1 => array("name"      => $arrLang['Type'],
-                                                "property1" => ""),
-                                        2 => array("name"      => $arrLang['Source'],
-                                                "property1" => ""),
-                                        3 => array("name"      => $arrLang['Message'],
-                                                "property1" => "")
-                                    )
-                );
-
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
 
-    /*$current_page=getParameter("page");
-    print($current_page);
-    $contenidoModulo .= "<script type='text/javascript'>
-        var offset = ".$offset.";
-        var limit = ".$limit.";
-        var current_page = ".$current_page.";
-                    alert(current_page);
-            var start = current_page * limit;
-            page = Math.floor(start / limit);
-        $('#pageup').val(page);
-        $('#pagedown').val(page);
-    </script>";*/
     return $contenidoModulo;
 }
 

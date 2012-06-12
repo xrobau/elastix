@@ -39,14 +39,12 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/libs/paloSantoRecordings.class.php";
     //include file language agree to elastix configuration
     //if file language not exists, then include language by default (en)
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-/*
     $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $lang_file="modules/$module_name/lang/$lang.lang";
     if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
     else include_once "modules/$module_name/lang/en.lang";
-*/
-    load_language_module($module_name);
+
 
     //global variables
     global $arrConf;

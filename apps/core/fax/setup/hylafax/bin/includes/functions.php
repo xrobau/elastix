@@ -167,32 +167,36 @@
             faxes_log ("enviar_mail_adjunto> Error al enviar el mail ".$titulo);
     }
 
-    function createFolder($number, $commID, $type)
-    {
-    	global $faxes_path;
-        
-        // Revisar si directorio base es escribible. Debería ser 775 asterisk.uucp
-        $sDirBase = ($type == 'in') ? "$faxes_path/recvd" : "$faxes_path/sent";
-        if (!is_writable($sDirBase)) {
-            faxes_log("createFolder > ruta $sDirBase no se puede escribir");
-            return NULL;
-        }
-        
-        // Ruta final se construye con la fecha del sistema
-        $fecha = getdate();
-        $sRutaFinal = "{$fecha['year']}/{$fecha['mon']}/{$fecha['mday']}/$number/$commID";
-        $umaskAnterior = umask(0);
-        $bExito = mkdir("$sDirBase/$sRutaFinal", 0777, TRUE);
-        umask($umaskAnterior);
-        if ($bExito) {
-            faxes_log("createFolder > ruta $sRutaFinal creada correctamente");
-        	return $sRutaFinal;
-        } else {
-            faxes_log("createFolder > ruta $sRutaFinal no puede crearse");
-        	return NULL;
-        }
-    }
-
+      function createFolder($number, $commID, $type)
+      {
+         $arrDate = getdate();
+         global $faxes_path;
+         $path = "";
+         $day = $arrDate['mday'];
+         $month = $arrDate['mon'];
+         $year = $arrDate['year'];
+         if($type == "in")
+           $path="recvd";
+         else
+           $path="sent";
+         exec("sudo chmod 777 $faxes_path/$path",$arrConsole,$flagStatus);
+         if($flagStatus == 0)
+         {
+           exec("mkdir -p $faxes_path/$path/$year/$month/$day/$number/$commID/",$arrConsole,$flagStatus2);
+           faxes_log("createFolder > Creando carpetas : $faxes_path/$path/$year/$month/$day/$number/$commID");           
+           if($flagStatus2 == 0){         
+              exec("sudo chmod 777  $faxes_path/$path/$year",$arrConsole,$flagStatus);
+              exec("sudo chmod 777  $faxes_path/$path/$year/$month",$arrConsole,$flagStatus);
+              exec("sudo chmod 777  $faxes_path/$path/$year/$month/$day",$arrConsole,$flagStatus);
+              exec("sudo chmod 777  $faxes_path/$path/$year/$month/$day/$number",$arrConsole,$flagStatus);
+              exec("sudo chmod 777  $faxes_path/$path/$year/$month/$day/$number/$commID",$arrConsole,$flagStatus);
+              faxes_log("sudo chmod 777  > carpetas : $faxes_path/$path/$year/$month/$day/$number/$commID status: $flagStatus");           
+             return $year.'/'.$month.'/'.$day.'/'.$number.'/'.$commID;
+           }else
+             return "Error MKDIR";
+         }else
+           return "Error CHMOD";
+      }
      //convierte de  ps a ps2  y de ps2 a pdf
      function ps2pdf($fileps, $pathDB, $i)
      {

@@ -1,4 +1,5 @@
 <?php
+    
     function getContent(&$smarty, $module_name, $withList)
     {
 	require_once "libs/misc.lib.php";
@@ -12,14 +13,6 @@
 	    $arrLangModule = array_merge($arrLangEn, $arrLangModule);
 	}
 	$skip_astman = NULL;
-
-    // En el FreePBX original, siempre se define display y setup en GET
-    if (!isset($_REQUEST['display'])) {
-    	$_REQUEST['display'] = 'extensions';
-        $_REQUEST['type'] = 'setup';
-        $_GET['display'] = 'extensions';
-        $_GET['type'] = 'setup';
-    }
 
 	/*interprete language to freepbx, todavia no funciona de todo bien :)
 	  en_US - English
@@ -49,7 +42,7 @@
     // Scripts adicionales que pueden ser necesarios
     $sScripts = '';
     foreach (array('admin/common/jquery.toggleval.3.0.js') as $sRuta) {
-        if (file_exists($sRuta))
+    	if (file_exists($sRuta))
             $sScripts .= "<script type='text/javascript' src='/$sRuta'></script>";
     }
 
@@ -80,7 +73,7 @@
 	$bodyParams = @$smarty->fetch("BODYPARAMS");
 	$bodyParams .= "onload='body_loaded();'";
 	$smarty->assign("BODYPARAMS", $bodyParams);
-
+	
 	$_SESSION["AMP_user"]=NULL;
 	/* benchmark */
 	function microtime_float() { list($usec,$sec) = explode(' ',microtime()); return ((float)$usec+(float)$sec); }
@@ -115,7 +108,6 @@
 	/*************************************************************/
 
 	// include base functions
-    global $amp_conf_defaults;
 	require_once('/var/www/html/admin/functions.inc.php');
 	require_once('/var/www/html/admin/common/php-asmanager.php');
 
@@ -135,11 +127,6 @@
 			unset( $astman );
 		}
 	}
-
-    if (!isset($astman) || is_null($astman)) {
-    	return _tr('Failed to connect to Asterisk Manager Interface').' - '.
-            "127.0.0.1:".$amp_conf["ASTMANAGERPORT"];
-    }
 
 	$GLOBALS['amp_conf'] = $amp_conf;
 	$GLOBALS['asterisk_conf']  = $asterisk_conf;
@@ -502,7 +489,7 @@
 	}
 
 	//$salida .= @ob_get_flush();
-	$htmlFPBX = @ob_get_contents();
+	$htmlFPBX .= @ob_get_contents();
 	ob_end_clean();
 
 	// Aqui reviso si hay modulos deshabilitados
@@ -568,7 +555,9 @@
 	    $smarty->assign("INFO", _tr("Warning: Updating FreePBX through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"."));
 	}
         $smarty->assign("htmlFPBX", $htmlFPBX);
-        $salida .= $smarty->fetch("$local_templates_dir/main.tpl");
-        return $salida;
+	$salida .= $smarty->fetch("$local_templates_dir/main.tpl");
+	return $salida;
+
     }
+
 ?>

@@ -1,8 +1,6 @@
 $(document).ready(function (){
-
-$(':checkbox').change(function() {
-  $("#start").val("0");
-  $(":checkbox").iButton({
+    $("#start").val("0");
+    $(":checkbox").iButton({
         labelOn: "On",
         labelOff: "Off",
         change: function ($input){
@@ -19,10 +17,10 @@ $(':checkbox').change(function() {
 		    arrAction["status"]  = festival_activate;
 		    request("index.php",arrAction,false,
 			function(arrData,statusResponse,error)
-			{
+			{   
 			    if(arrData["mb_title"] && arrData["mb_message"]){
 				$("#message_error").remove();
-				if(document.getElementById("neo-contentbox-maincolumn")){
+				if($(".neo-module-content")){
 				    var message= "<div class='div_msg_errors' id='message_error'>" +
 						      "<div style='float:left;'>" +
 							  "<b style='color:red;'>&nbsp;&nbsp;"+arrData['mb_title']+"</b>" +
@@ -34,17 +32,7 @@ $(':checkbox').change(function() {
 							  arrData['mb_message'] +
 						      "</div>" +
 						  "</div>";
-
 				    $(".neo-module-content:first").prepend(message);
-				}
-				else if(document.getElementById("elx-blackmin-content")){
-				    var message = "<div class='ui-state-highlight ui-corner-all'>" +
-						      "<p>" +
-							  "<span style='float: left; margin-right: 0.3em;' class='ui-icon ui-icon-info'></span>" +
-							  "<span id='elastix-callcenter-info-message-text'>"+ arrData['mb_title'] + arrData['mb_message'] +"</span>" +
-						      "</p>" +
-						  "</div>";
-				    $("#elx-blackmin-content").prepend(message);
 				}
 				else{
 				    var message= "<div style='background-color: rgb(255, 238, 255);' id='message_error'><table width='100%'><tr><td align='left'><b style='color:red;'>" +
@@ -59,7 +47,5 @@ $(':checkbox').change(function() {
 	    else
 	      $("#start").val("1");
         }
-});
-}).trigger("change");
-
+    }).trigger("change");
 });

@@ -33,6 +33,7 @@
 
 require_once 'libs/paloSantoDB.class.php';
 require_once 'ECCP.class.php';
+require_once '/opt/elastix/dialer/phpagi-asmanager-elastix.php';
 
 class PaloSantoConsola
 {
@@ -77,6 +78,16 @@ class PaloSantoConsola
             $this->_oDB_asterisk = $oDB;
             return $this->_oDB_asterisk;
             break;
+        case 'AMI':
+            if (!is_null($this->_astman)) return $this->_astman;
+            $oAst = new AGI_AsteriskManager();
+            $tuplaLogin = $this->_leerConfigManager();
+            if (!is_array($tuplaLogin)) die($this->_errMsg);
+            if (!$oAst->connect('127.0.0.1', $tuplaLogin[0], $tuplaLogin[1]))
+                die('(internal) Cannot connect to AMI');
+            $this->_astman = $oAst;
+            return $this->_astman;
+            break;
         case 'ECCP':
             if (!is_null($this->_eccp)) return $this->_eccp;
 
@@ -111,7 +122,7 @@ class PaloSantoConsola
                 /* Privilegio de localhost - se puede recuperar la clave del
                  * agente sin tener que pedirla explícitamente */                
                 $tupla = $dbConnCC->getFirstRowQuery(
-                    'SELECT eccp_password FROM agent WHERE number = ? AND estatus="A"', 
+                    'SELECT eccp_password FROM agent WHERE number = ?', 
                     FALSE, array($sAgentNumber));
                 if (!is_array($tupla))
                     throw new ECCPConnFailedException(_tr('Failed to retrieve agent password'));
@@ -360,7 +371,7 @@ LISTA_EXTENSIONES;
      * 
      * @return  string  Uno de logged-in logging logged-out mismatch error
      */
-    function estadoAgenteLogoneado($sExtension)
+    function estadoAgenteLogoneado($sExtension, $sAgente)
     {
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
@@ -376,14 +387,13 @@ LISTA_EXTENSIONES;
                 'channel'           =>  isset($connStatus->channel) ? (string)$connStatus->channel : NULL,
                 'extension'         =>  isset($connStatus->extension) ? (string)$connStatus->extension : NULL,
                 'onhold'            =>  isset($connStatus->onhold) ? ($connStatus->onhold == 1) : FALSE,
+                'remote_channel'    =>  isset($connStatus->remote_channel) ? (string)$connStatus->remote_channel : NULL,
                 'pauseinfo'         =>  isset($connStatus->pauseinfo) ? array(
                     'pauseid'       =>  (int)$connStatus->pauseinfo->pauseid,
                     'pausename'     =>  (string)$connStatus->pauseinfo->pausename,
                     'pausestart'    =>  (string)$connStatus->pauseinfo->pausestart,
                 ) : NULL,
                 'callinfo'          =>  isset($connStatus->callinfo) ? array(
-                    'agent_number'  =>  $this->_agent,
-                    'remote_channel'    =>  isset($connStatus->remote_channel) ? (string)$connStatus->remote_channel : NULL,
                     'calltype'      =>  (string)$connStatus->callinfo->calltype,
                     'campaign_id'   =>  isset($connStatus->callinfo->campaign_id) ? (int)$connStatus->callinfo->campaign_id : NULL,
                     'callid'        =>  (int)$connStatus->callinfo->callid,
@@ -528,13 +538,11 @@ LISTA_EXTENSIONES;
         }
     }
     
-    function transferirLlamada($sTransferExt, $bAtxfer = FALSE)
+    function transferirLlamada($sTransferExt)
     {
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $respuesta = $bAtxfer 
-                ? $oECCP->atxfercall($sTransferExt) 
-                : $oECCP->transfercall($sTransferExt);
+            $respuesta = $oECCP->transfercall($sTransferExt);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to transfer call').' - '.$this->_formatoErrorECCP($respuesta);
                 return FALSE;
@@ -591,9 +599,8 @@ LISTA_EXTENSIONES;
             }
             foreach (array('name', 'type', 'startdate', 'enddate', 
                 'working_time_starttime', 'working_time_endtime', 'queue', 
-                'retries', 'context', 'maxchan', 'status', 'script', 'forms',
-                'urltemplate', 'urlopentype') as $k)
-                if (!isset($reporte[$k]) || $reporte[$k] == '') $reporte[$k] = NULL;
+                'retries', 'context', 'maxchan', 'status', 'script', 'forms') as $k)
+                if (!isset($reporte[$k])) $reporte[$k] = NULL;
             return $reporte;
         } catch (Exception $e) {
             $this->errMsg = '(internal) getcampaigninfo: '.$e->getMessage();
@@ -792,7 +799,7 @@ LISTA_EXTENSIONES;
                     $evento['call_survey'] = isset($evt->call_survey) ? $this->_traducirCallSurvey($evt->call_survey) : NULL;
                     // Cae al siguiente caso
                 case 'agentunlinked':
-                    $evento['call_type'] = (string)$evt->calltype;
+                    $evento['call_type'] = (string)$evt->call_type;
                     $evento['campaign_id'] = isset($evt->campaign_id) ? (int)$evt->campaign_id : NULL;
                     $evento['call_id'] = (int)$evt->call_id;
                     $evento['phone'] = (string)$evt->phone;

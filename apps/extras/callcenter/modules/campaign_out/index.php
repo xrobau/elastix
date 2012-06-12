@@ -343,10 +343,6 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
         }
     }
 
-    $arrUrlsExternos = array(
-        ''  =>  _tr('(No external URL)'),
-    ) + $oCamp->getExternalUrls();
-
     // Cargar la información de todos los formularios creados y activos
     $oDataForm = new paloSantoDataForm($pDB); 
     $arrDataForm = $oDataForm->getFormularios(NULL,'A');
@@ -354,22 +350,21 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
     // Impedir mostrar el formulario si no se han definido colas o no
     // quedan colas libres para usar en campañas salientes.
     if (count($arrQueues) <= 0) {
-        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues, NULL, NULL, NULL);
+        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues, NULL, NULL);
         $oForm = new paloForm($smarty, $formCampos);
         $smarty->assign('no_queues', 1);
     } elseif (count($arrDataQueues) <= 0) {
-        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues, NULL, NULL, NULL);
+        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues, NULL, NULL);
         $oForm = new paloForm($smarty, $formCampos);
         $smarty->assign('no_outgoing_queues', 1);
     } elseif (count($arrDataForm) <= 0) {
-        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues, NULL, NULL, NULL);
+        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues, NULL, NULL);
         $oForm = new paloForm($smarty, $formCampos);
         $smarty->assign('no_forms', 1);
     } else {
         $smarty->assign('label_manage_trunks', _tr('Manage Trunks'));
         $smarty->assign('label_manage_queues', _tr('Manage Queues'));
         $smarty->assign('label_manage_forms',  _tr('Manage Forms'));
-        $smarty->assign('label_manage_external_url', _tr('Manage External URLs'));
         
         // Definición del formulario de nueva campaña
         $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
@@ -420,7 +415,6 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
             } else {
                 $values_form = explode(",", $_POST['values_form']);
             }
-            if (!isset($_POST['external_url']))        $_POST['external_url']        = $arrCampaign[0]['id_url'];
         }
 
         // rte_script es un HTML complejo que debe de construirse con Javascript.
@@ -435,8 +429,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
         }
 
         // Generación del objeto de formulario
-        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues,
-            $arrNoElegidos, $arrElegidos, $arrUrlsExternos);
+        $formCampos = getFormCampaign($arrDataTrunks, $arrDataQueues, $arrNoElegidos, $arrElegidos);
         $oForm = new paloForm($smarty, $formCampos);
         if (!is_null($id_campaign)) {
             $oForm->setEditMode();
@@ -464,11 +457,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                 $strErrorMsg .= "";
                 $smarty->assign("mb_message", $strErrorMsg);
             } elseif ($_POST['max_canales'] <= 0) { 
-                $smarty->assign("mb_title", _tr("Validation Error"));
-                $smarty->assign("mb_message", _tr('At least 1 used channel must be allowed.'));
-            } elseif ((int)$_POST['reintentos'] <= 0) { 
-                $smarty->assign("mb_title", _tr("Validation Error"));
-                $smarty->assign("mb_message", _tr('Campaign must allow at least one call retry'));
+                $smarty->assign("mb_message", 'At least 1 used channel must be allowed.');
             } else {
                 $time_ini = $_POST['hora_ini_HH'].":".$_POST['hora_ini_MM'];
                 $time_fin = $_POST['hora_fin_HH'].":".$_POST['hora_fin_MM'];
@@ -507,8 +496,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                                             $time_ini,
                                             $time_fin,
                                             $_POST['rte_script'],
-                                            $_POST['queue'],
-                                            ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
+                                            $_POST['queue']);
                             if (is_null($id_campaign)) $bExito = FALSE;
                         } elseif ($bDoUpdate) {
                             $bExito = $oCamp->updateCampaign(
@@ -523,8 +511,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                                             date('Y-m-d', $iFechaFin),
                                             $time_ini,
                                             $time_fin,
-                                            $_POST['rte_script'],
-                                            ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
+                                            $_POST['rte_script']);
                         }
                         
                         // Introducir o actualizar formularios
@@ -571,8 +558,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
     return $contenidoModulo;
 }
 
-function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm,
-    $arrSelectFormElegidos, $arrUrlsExternos)
+function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm, $arrSelectFormElegidos)
 {
     $horas = array();
     $i = 0;
@@ -716,8 +702,8 @@ function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm,
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "TEXT",
             "INPUT_EXTRA_PARAM"      => "",
-            "VALIDATION_TYPE"        => "",
-            "VALIDATION_EXTRA_PARAM" => ""
+            "VALIDATION_TYPE"        => "ereg",
+            "VALIDATION_EXTRA_PARAM" => "^[[:alpha:]-]+$"
         ),
         "queue" => array(
             "LABEL"                  => _tr("Queue"),
@@ -734,14 +720,6 @@ function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm,
             "INPUT_EXTRA_PARAM"      => "",
             "VALIDATION_TYPE"        => "text",
             "VALIDATION_EXTRA_PARAM" => ""
-        ),
-        'external_url'       => array(
-            "LABEL"                  => _tr("External URLs"),
-            "REQUIRED"               => "no",
-            "INPUT_TYPE"             => "SELECT",
-            "INPUT_EXTRA_PARAM"      => $arrUrlsExternos,
-            "VALIDATION_TYPE"        => "text",
-            "VALIDATION_EXTRA_PARAM" => "",
         ),
     );
 

@@ -51,224 +51,89 @@ class paloSantoLoadExtension {
         }
     }
 
-    function createTechDevices($Ext, $Secret, $VoiceMail, $Context, $Tech, $Disallow, $Allow, $Deny, $Permit, $Callgroup, $Pickupgroup, $Record_Incoming, $Record_Outgoing)
+    function createTechDevices($Ext, $Secret, $VoiceMail, $Context, $Tech)
     {
-       $this->_DB->beginTransaction();
-
         $VoiceMail = strtolower($VoiceMail);
 
-        if(preg_match("/^enable/",$VoiceMail))
+        if(eregi("^enable",$VoiceMail))
             $mailbox = "$Ext@default";
         else $mailbox = "$Ext@device";
-    
-        if($Tech == "iax2")
-        $Tech = "iax";
-
-        if($Tech == "sip"){
-            $sql = "select count(id) from iax where id='$Ext';";
-            $result = $this->_DB->getFirstRowQuery($sql);
-            if(is_array($result) && count($result)>0){
-                if($result[0]>0){
-                    $sql = "delete from iax where id='$Ext';";
-                    if(!$this->_DB->genQuery($sql))
-                    {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->rollBack();
-                        return false;
-                    }
-                }
-            }
-        }
-        elseif($Tech == "iax"){
-            $sql = "select count(id) from sip where id='$Ext';";
-            $result = $this->_DB->getFirstRowQuery($sql);
-            if(is_array($result) && count($result)>0){
-                if($result[0]>0){
-                    $sql = "delete from sip where id='$Ext';";
-                    if(!$this->_DB->genQuery($sql))
-                    {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->rollBack();
-                        return false;
-                    }
-                }
-            }
-        }
-        else{
-            $this->errMsg = "Invalid $Tech ";
-            $this->_DB->rollBack();
-            return false;
-        }
-
+	if($Tech == "iax2")
+	    $Tech = "iax";
         $sql = "select count(id) from $Tech where id='$Ext';";
         $result = $this->_DB->getFirstRowQuery($sql);
         if(is_array($result) && count($result)>0)
         {
             if($result[0]>0)
             {
-                $Deny = $this->validarIpMask($Deny);
-                if($Deny == false){
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                $Permit = $this->validarIpMask($Permit);
-                if($Permit == false){
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
                 $sql = "update $Tech set data = '$Secret'  where id='$Ext' and keyword='secret';";
                 if(!$this->_DB->genQuery($sql))
                 {
                     $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
                     return false;
                 }
                 $sql = "update $Tech set data = '$mailbox' where id='$Ext' and keyword='mailbox';";
                 if(!$this->_DB->genQuery($sql))
                 {
                     $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
                     return false;
                 }
                 $sql = "update $Tech set data = '$Context' where id='$Ext' and keyword='context';";
                 if(!$this->_DB->genQuery($sql))
                 {
                     $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
                     return false;
                 }
-                $sql = "update $Tech set data = '$Disallow' where id='$Ext' and keyword='disallow';";
-                if(!$this->_DB->genQuery($sql))
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                $sql = "update $Tech set data = '$Allow' where id='$Ext' and keyword='allow';";
-                if(!$this->_DB->genQuery($sql))
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                $sql = "update $Tech set data = '$Deny' where id='$Ext' and keyword='deny';";
-                if(!$this->_DB->genQuery($sql))
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                $sql = "update $Tech set data = '$Permit' where id='$Ext' and keyword='permit';";
-                if(!$this->_DB->genQuery($sql))
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                
-                $sql = "update $Tech set data = '$Record_Incoming' where id='$Ext' and keyword='record_in';";
-                if(!$this->_DB->genQuery($sql))
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                $sql = "update $Tech set data = '$Record_Outgoing' where id='$Ext' and keyword='record_out';";
-                if(!$this->_DB->genQuery($sql))
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
+            }else{
+		if($Tech == "iax")
+		    $values = ",('$Ext','dial','IAX2/$Ext')
+			       ,('$Ext','port','4569')
+			       ,('$Ext','requirecalltoken','')
+			       ,('$Ext','notransfer','yes')
+			       ,('$Ext','setvar','REALCALLERIDNUM=$Ext');";
+		else
+		    $values = ",('$Ext','dial','SIP/$Ext')
+			       ,('$Ext','pickupgroup','')
+			       ,('$Ext','callgroup','')
+			       ,('$Ext','port','5060')
+			       ,('$Ext','nat','yes')
+			       ,('$Ext','canreinvite','no')
+			       ,('$Ext','dtmfmode','rfc2833');";
+                $sql =
+                    "insert into $Tech (id,keyword,data) values
+                    ('$Ext','record_out','Adhoc'),
+                    ('$Ext','record_in','Adhoc'),
+                    ('$Ext','callerid','device <$Ext>'),
+                    ('$Ext','account','$Ext'),
+                    ('$Ext','mailbox','$mailbox'),
+                    ('$Ext','accountcode',''),
+                    ('$Ext','allow',''),
+                    ('$Ext','disallow',''),
+                    ('$Ext','qualify','yes'),
+                    ('$Ext','type','friend'),
+                    ('$Ext','host','dynamic'),
+                    ('$Ext','context','$Context'),
+                    ('$Ext','secret','$Secret')
+		    $values";
 
-                if($Tech == "sip"){
-                    $sql = "update $Tech set data = '$Callgroup' where id='$Ext' and keyword='callgroup';";
-                    if(!$this->_DB->genQuery($sql))
-                    {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->rollBack();
-                        return false;
-                    }
-                    $sql = "update $Tech set data = '$Pickupgroup' where id='$Ext' and keyword='pickupgroup';";
-                    if(!$this->_DB->genQuery($sql))
-                    {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->rollBack();
-                        return false;
-                    }
-                }         
+                if(!$this->_DB->genQuery($sql))
+                {
+                    $this->errMsg = $this->_DB->errMsg;
+                    return false;
+                }
             }
-            else{
-                $Deny = $this->validarIpMask($Deny);
-                if($Deny == false){
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                $Permit = $this->validarIpMask($Permit);
-                if($Permit == false){
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-
-                if($Tech == "iax")
-                    $values = ",('$Ext','dial','IAX2/$Ext')
-                        ,('$Ext','port','4569')
-                        ,('$Ext','requirecalltoken','')
-                        ,('$Ext','notransfer','yes')
-                        ,('$Ext','setvar','REALCALLERIDNUM=$Ext');";
-                else
-                    $values = ",('$Ext','dial','SIP/$Ext')
-                        ,('$Ext','pickupgroup','$Pickupgroup')
-                        ,('$Ext','callgroup','$Callgroup')
-                        ,('$Ext','port','5060')
-                        ,('$Ext','nat','yes')
-                        ,('$Ext','canreinvite','no')
-                        ,('$Ext','dtmfmode','rfc2833');";
-                    $sql =
-                            "insert into $Tech (id,keyword,data) values
-                            ('$Ext','record_out','$Record_Outgoing'),
-                            ('$Ext','record_in','$Record_Incoming'),
-                            ('$Ext','callerid','device <$Ext>'),
-                            ('$Ext','account','$Ext'),
-                            ('$Ext','mailbox','$mailbox'),
-                            ('$Ext','accountcode',''),
-                            ('$Ext','allow','$Allow'),
-                            ('$Ext','disallow','$Disallow'),
-                            ('$Ext','qualify','yes'),
-                            ('$Ext','type','friend'),
-                            ('$Ext','host','dynamic'),
-                            ('$Ext','context','$Context'),
-                            ('$Ext','secret','$Secret'),
-                            ('$Ext','deny','$Deny'),
-                            ('$Ext','permit','$Permit')
-                    $values";
-
-                        if(!$this->_DB->genQuery($sql))
-                        {
-                            $this->errMsg = $this->_DB->errMsg;
-                            $this->_DB->rollBack();
-                            return false;
-                        }
-            }
-            $this->_DB->commit();
-            return true;       
+            return true;
         }else{
             $this->errMsg = $this->_DB->errMsg;
-            $this->_DB->rollBack();
             return false;
         }
     }
 
-    function createUsers($Ext,$Name,$VoiceMail,$Direct_DID,$Outbound_CID, $Record_Incoming, $Record_Outgoing)
+    function createUsers($Ext,$Name,$VoiceMail,$Direct_DID,$Outbound_CID)
     {
-        $this->_DB->beginTransaction();
         $VoiceMail = strtolower($VoiceMail);
 
-        if(preg_match("/^enable/",$VoiceMail))
+        if(eregi("^enable",$VoiceMail))
             $voicemail = "default";
         else $voicemail = "novm";
 
@@ -279,7 +144,7 @@ class paloSantoLoadExtension {
             if($result[0]>0)
             {
                 $sql =
-                    "update users set name='$Name', voicemail='$voicemail',recording='out=$Record_Outgoing|in=$Record_Incoming', outboundcid='$Outbound_CID'
+                    "update users set name='$Name', voicemail='$voicemail', outboundcid='$Outbound_CID'
                      where extension='$Ext';";
             }else{
                 $sql =
@@ -287,20 +152,17 @@ class paloSantoLoadExtension {
                         extension,password,name,voicemail,ringtimer,noanswer,recording,outboundcid,
                         mohclass,sipname) 
                     values (
-                        '$Ext','','$Name','$voicemail',0,'','out=$Record_Outgoing|in=$Record_Incoming','$Outbound_CID',
+                        '$Ext','','$Name','$voicemail',0,'','out=Adhoc|in=Adhoc','$Outbound_CID',
                         'default','');";
             }
             if(!$this->_DB->genQuery($sql))
             {
                 $this->errMsg = $this->_DB->errMsg;
-                $this->_DB->rollBack();
                 return false;
             }
-            $this->_DB->commit();
             return true;
         }else{
             $this->errMsg = $this->_DB->errMsg;
-            $this->_DB->rollBack();
             return false;
         }
     }
@@ -311,9 +173,9 @@ class paloSantoLoadExtension {
         if($tech=='sip')
             $dial = "SIP/$Ext";
         else if($tech=='iax2' || $tech=="iax"){
-        $tech = "iax2";
-        $dial = "IAX2/$Ext";
-    }
+	    $tech = "iax2";
+	    $dial = "IAX2/$Ext";
+	}
         $sql = "select count(*) from devices where id='$Ext';";
         $result = $this->_DB->getFirstRowQuery($sql);
         if(is_array($result) && count($result)>0)
@@ -389,15 +251,15 @@ class paloSantoLoadExtension {
         }
     }
 
-    function processData($data, $path)
+    function processData($data)
     {
-    $arrExtensions = array();
-    if(is_array($data) && count($data)>0){
+	$arrExtensions = array();
+	if(is_array($data) && count($data)>0){
             //Call Waiting
             $arrCallWaiting = $this->databaseCallWaiting();
             foreach($arrCallWaiting as $key => $valor)
             {
-                if(preg_match("/^\/CW\/([[:alnum:]]*)[ |:]*([[:alnum:]]*)/", $valor, $arrResult))
+                if(eregi("^/CW/([[:alnum:]]*)[ |:]*([[:alnum:]]*)", $valor, $arrResult))
                 {
                     $arrCW[$arrResult[1]] = $arrResult[2];
                 }
@@ -421,7 +283,7 @@ class paloSantoLoadExtension {
                 if($grep != '' && $grep!=null)
                 {
                     $extension['voicemail'] = 'enabled';
-                    if(preg_match("/^{$extension['extension']} => ([[:alnum:]]*),[[:alnum:]| ]*,([[:alnum:]| |@|\.]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |=]*)attach=(yes|no)\|saycid=(yes|no)\|envelope=(yes|no)\|delete=(yes|no)/",$grep, $arrResult))
+                    if(eregi("^{$extension['extension']} => ([[:alnum:]]*),[[:alnum:]| ]*,([[:alnum:]| |@|\.]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |=]*)attach=(yes|no)\|saycid=(yes|no)\|envelope=(yes|no)\|delete=(yes|no)",$grep, $arrResult))
                     {
                         $extension['vm_secret'] = $arrResult[1];
                         $extension['email_address'] = $arrResult[2];
@@ -446,36 +308,22 @@ class paloSantoLoadExtension {
         $sql = "select * from
                     (select u.extension, u.name, u.outboundcid, d.tech from users u, devices d where u.extension=d.id) as r1,
                     (select data as secret, id from sip where keyword='secret') as r2,
-                    (select data as context, id from sip where keyword='context') as r3,
-                    (select data as callgroup, id from sip where keyword='callgroup') as r4,
-                    (select data as pickupgroup, id from sip where keyword='pickupgroup') as r5,
-                    (select data as disallow, id from sip where keyword='disallow') as r6,
-                    (select data as allow, id from sip where keyword='allow') as r7,
-                    (select data as deny, id from sip where keyword='deny') as r8,
-                    (select data as permit, id from sip where keyword='permit') as r9,
-                    (select data as record_in, id from sip where keyword='record_in') as r10,
-                    (select data as record_out, id from sip where keyword='record_out') as r11
-                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id and r1.extension=r8.id and r1.extension=r9.id and r1.extension=r10.id and r1.extension=r11.id);";
+                    (select data as context, id from sip where keyword='context') as r3
+                where (r1.extension=r2.id and r1.extension=r3.id);";
         $resultSIP = $this->_DB->fetchTable($sql, true);
 
-    $dataSIP = $this->processData($resultSIP,$path);
+	$dataSIP = $this->processData($resultSIP);
 
-    $sql = "select * from
+	$sql = "select * from
                     (select u.extension, u.name, u.outboundcid, d.tech from users u, devices d where u.extension=d.id) as r1,
                     (select data as secret, id from iax where keyword='secret') as r2,
-                    (select data as context, id from iax where keyword='context') as r3,
-                    (select data as disallow, id from iax where keyword='disallow') as r4,
-                    (select data as allow, id from iax where keyword='allow') as r5,
-                    (select data as deny, id from iax where keyword='deny') as r6,
-                    (select data as permit, id from iax where keyword='permit') as r7,
-                    (select data as record_in, id from iax where keyword='record_in') as r8,
-                    (select data as record_out, id from iax where keyword='record_out') as r9
-                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id and r1.extension=r8.id and r1.extension=r9.id);";
+                    (select data as context, id from iax where keyword='context') as r3
+                where (r1.extension=r2.id and r1.extension=r3.id);";
         $resultIAX = $this->_DB->fetchTable($sql, true);
         
-    $dataIAX = $this->processData($resultIAX,$path);
-    
-    return array_merge($dataSIP,$dataIAX);
+	$dataIAX = $this->processData($resultIAX);
+	
+	return array_merge($dataSIP,$dataIAX);
     }
 ////////////////////////////////////////////////////////////////////////////////////////////
     function writeFileVoiceMail($Ext,$Name,$VoiceMail,$VoiceMail_PW,$VM_Email_Address,
@@ -485,11 +333,7 @@ class paloSantoLoadExtension {
         $path = "/etc/asterisk/voicemail.conf";
         $VoiceMail = strtolower($VoiceMail);
 
-        // Only numeric voicemail password allowed (Elastix bug #1238)
-        if ($VoiceMail_PW != '' && !ctype_digit($VoiceMail_PW))
-            return false;
-
-        if(preg_match("/^enable/",$VoiceMail)){
+        if(eregi("^enable",$VoiceMail)){
             exec("sed -ie '/^$Ext =>/d' $path");
             if($VM_Options!="") $VM_Options .= "|";
             if($VM_EmailAttachment!='yes') $VM_EmailAttachment = 'no';
@@ -531,7 +375,7 @@ class paloSantoLoadExtension {
         if (!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin()))
             $this->errMsg = "Error connect AGI_AsteriskManager";
 
-        if (preg_match("/^enable/", $callwaiting)) {
+        if (eregi("^enable", $callwaiting)) {
             $r = $astman->command("database put CW $extension \"ENABLED\"");
             return (bool)strstr($r["data"], "success");
         } else {
@@ -600,10 +444,10 @@ class paloSantoLoadExtension {
         return false;
     }
 
-    function putDataBaseFamily($data_connection, $Ext, $tech, $Name, $VoiceMail, $Outbound_CID, $Record_Incoming, $Record_Outgoing)
+    function putDataBaseFamily($data_connection, $Ext, $tech, $Name, $VoiceMail, $Outbound_CID)
     {
-    if(preg_match("/^enable/",$VoiceMail))   
-            $voicemail = "default";      
+	if(eregi("^enable",$VoiceMail)) 	 
+            $voicemail = "default"; 	 
         else $voicemail = "novm";
 
         $tech = strtolower($tech);
@@ -619,7 +463,7 @@ class paloSantoLoadExtension {
                 "database put AMPUSER $Ext/noanswer",
                 "database put AMPUSER $Ext/outboundcid $Outbound_CID",
                 "database put AMPUSER $Ext/password",
-                "database put AMPUSER $Ext/recording  out=$Record_Outgoing|in=$Record_Incoming",
+                "database put AMPUSER $Ext/recording  out=Adhoc|in=Adhoc",
                 "database put AMPUSER $Ext/ringtimer 0",
                 "database put AMPUSER $Ext/voicemail $voicemail",
                 "database put DEVICE $Ext/default_user $Ext",
@@ -649,12 +493,12 @@ class paloSantoLoadExtension {
     function deleteTree($data_connection, $arrAST, $arrAMP, $arrExt)
     {
       global $arrLang;
-      $arrAMPUSER = array();
-      $arrDEVICE = array();
-      $arrCW = array();
-      $arrCF = array();
-      $arrCFB = array();
-      $arrCFU = array();
+	  $arrAMPUSER = array();
+	  $arrDEVICE = array();
+	  $arrCW = array();
+	  $arrCF = array();
+	  $arrCFB = array();
+	  $arrCFU = array();
 
       foreach($arrExt as $ext)
              $arrAMPUSER[] ="database deltree AMPUSER/{$ext['id']}";
@@ -720,7 +564,7 @@ class paloSantoLoadExtension {
         $querys = array();
 
         $querys[] = "DELETE s FROM sip s INNER JOIN devices d ON s.id=d.id and d.tech='sip'";
-    $querys[] = "DELETE i FROM iax i INNER JOIN devices d ON i.id=d.id and d.tech='iax2'";
+	$querys[] = "DELETE i FROM iax i INNER JOIN devices d ON i.id=d.id and d.tech='iax2'";
         $querys[] = "DELETE u FROM users u INNER JOIN devices d ON u.extension=d.id and (d.tech='sip' or d.tech='iax2')";
         $querys[] = "DELETE FROM devices WHERE tech='sip' or tech='iax2'";
         //$querys[] = "DELETE FROM iax";
@@ -731,45 +575,6 @@ class paloSantoLoadExtension {
                 return $this->_DB->errMsg;            
         }
         return true;
-    }
-
-    function validarIpMask($ipMask)
-    {
-        if ($ipMask == ""){
-            $ipMask = "0.0.0.0/0.0.0.0";
-        }
-        $array = explode("/", $ipMask, 2);
-        if(isset ($array[0]) && !isset($array[1]) ){
-            return false;
-        }
-        else{ 
-            $pattern = "/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/";
-            if ($array[0]=="0.0.0.0" && $array[1]=="0.0.0.0"){
-                $ipMask = "$array[0]/$array[1]";
-                return $ipMask;
-            }elseif ($array[0]=="0.0.0.0" && $array[1]!="0.0.0.0"){
-                if (preg_match($pattern,$array[1])){
-                    
-                    return false;
-                }
-            }elseif ($array[0]!="0.0.0.0" && $array[1]=="0.0.0.0"){
-                if (preg_match($pattern,$array[0])){
-                    $ipMask = "$array[0]/$array[1]";
-                    return $ipMask;
-                }
-            }
-            elseif ($array[0] == $array[1]){
-                if (preg_match($pattern,$array[0]) && preg_match($pattern,$array[1])){
-                    $ipMask = "$array[0]/$array[1]";
-                    return $ipMask;
-                }
-            }elseif($array[0]!="0.0.0.0" && $array[1]!="0.0.0.0"){
-                if (preg_match($pattern,$array[0]) && preg_match($pattern,$array[1])){
-                    $ipMask = "$array[0]/$array[1]";
-                    return $ipMask;
-                }
-            }
-        }
     }
 }
 ?>

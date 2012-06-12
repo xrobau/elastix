@@ -93,7 +93,7 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
         $smarty->assign("mb_message", $objAntispam->errMsg);
     }
 
-    if($status == "on"){
+    if($status == "active"){
         if($politica=="capturar_spam"){
             $objAntispam->uploadScriptSieve($pDB, $time_spam);
         }else{
@@ -108,7 +108,8 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
             $smarty->assign("mb_title", $arrLang["Message"]);
             $smarty->assign("mb_message", $arrLang["Successfully Activated Service Antispam"]);
         }
-    }else if($status == "off"){
+    }
+    else if($status == "disactive"){
         //$objAntispam->deleteScriptSieve($pDB);
         $isOk = $objAntispam->disactivateSpamFilter();
 
@@ -132,46 +133,32 @@ function formAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $ar
     $smarty->assign("LEGEND", $arrLang["Legend"]);
     $smarty->assign("UPDATE", $arrLang["Save"]);
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "modules/$module_name/images/email_antispam.png");
+    $smarty->assign("icon", "images/list.png");
 
 
     $objAntispam = new paloSantoAntispam($arrConfModule['path_postfix'], $arrConfModule['path_spamassassin'],$arrConfModule['file_master_cf'], $arrConfModule['file_local_cf']);
     $activated = $objAntispam->isActiveSpamFilter();
-    if($activated){
-        $arrData['status'] = "on";
-		$smarty->assign("statusSpam", "active");
-    }else{
-        $arrData['status'] = "off";
-		$smarty->assign("statusSpam", "desactive");
-	}
-
+    if($activated)
+        $arrData['status'] = "active";
+    else
+        $arrData['status'] = "disactive";
     exec("sudo -u root chown asterisk.asterisk /etc/cron.d/");
     if(is_file("/etc/cron.d/checkSpamFolder.cron"))
         $statusSieve = "on";
     else
         $statusSieve = "off";
-
     exec("sudo -u root chown root.root /etc/cron.d/");
 
     $val = $objAntispam->getTimeDeleteSpam();
     if($val != "")
         $arrData['time_spam'] = $val;
-	if($activated){
-		if($statusSieve=="on"){
-			$arrData['politica'] = 'capturar_spam';
-		}else
-			$arrData['politica'] = 'marcar_asusto';
-	}else{
-		$arrData['politica'] = 'marcar_asusto';
-		$statusSieve = "off";
-	}
-
 
     $smarty->assign("statusSieve", $statusSieve);
     $valueRequiredHits = $objAntispam->getValueRequiredHits();
     $arrData['levelNUM'] = $valueRequiredHits['level'];
     $arrData['header'] = $valueRequiredHits['header'];
     $smarty->assign("levelNUM", $arrData['levelNUM']);
+    $smarty->assign("statusSpam", $arrData['status']);
     $smarty->assign("level", $arrLang['Level']);
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLangModule["Antispam"], $arrData);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

@@ -31,7 +31,7 @@ $arrLangModule=array(
 "General Information" => "General Information",
 "Organization" => "Organization",
 "Department" => "Department",
-"Locality" => "Locality",
+"Locality" => "City",
 "State" => "State",
 "Country" => "Country",
 "Email" => "Email",
@@ -42,6 +42,5 @@ $arrLangModule=array(
 "The following fields contain errors" => "The following fields contain errors",
 "Information has been saved." => "Information has been saved.",
 "Error. Please try again." => "Error. Please try again.",
-"City" => "City",
 );
 ?>

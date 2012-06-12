@@ -204,7 +204,7 @@ function _moduleContent(&$smarty, $module_name)
     $smarty->assign('LISTA_ZONAS', $listaZonas);
     $smarty->assign('ZONA_ACTUAL', $sZonaActual);
     $smarty->assign("CURRENT_DATE",strftime("%d %b %Y",time()));
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_datetime.png");
+    $smarty->assign("icon","images/clock.gif");
 	$sContenido .= $oForm->fetchForm("$local_templates_dir/time.tpl", _tr('Date and Time Configuration'), $_POST);
 	return $sContenido;
 }

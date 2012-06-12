@@ -1,7 +1,7 @@
 Protocolo ECCP v0.1
 -------------------
-Revisión 5
-Estatus: Beta
+Revisión 4
+Estatus: Alfa
 
 Objetivo
 --------
@@ -587,11 +587,18 @@ Nota: no debe de confundirse este evento con el requerimiento loginagent.
 Elementos informativos:
 * agent: Agente que ha podido logonearse. Este identificador está de la forma 
   'Agent/9000'.
+* queues: Lista de colas a la que pertenece el agente. Este elemento contiene
+  múltiples elementos 'queue', que contienen cada uno una cola a la que 
+  pertenece el agente.
 
 Ejemplo:
 <event>
     <agentloggedin>
         <agent>Agent/9000</agent>
+        <queues>
+            <queue>8001</queue>
+            <queue>8000</queue>
+        </queues>
     </agentloggedin>
 </event>
 
@@ -606,11 +613,18 @@ Nota: no debe de confundirse este evento con el requerimiento logoutagent.
 Elementos informativos:
 * agent: Agente que ha sido deslogoneado. Este identificador está de la forma 
   'Agent/9000'.
+* queues: Lista de colas a la que pertenece el agente. Este elemento contiene
+  múltiples elementos 'queue', que contienen cada uno una cola a la que 
+  pertenece el agente.
 
 Ejemplo:
 <event>
     <agentloggedout>
         <agent>Agent/9000</agent>
+        <queues>
+            <queue>8001</queue>
+            <queue>8000</queue>
+        </queues>
     </agentloggedout>
 </event>
 
@@ -1209,24 +1223,6 @@ Respuesta:
   Si no aparece, las llamadas se generan a través del plan de marcado de FreePBX
 * status: Uno de los valores 'active', 'inactive', 'finished' (sólo campañas 
   salientes)
-* urltemplate: Si no está vacío, una plantilla para poder construir un URL a una
-  página Web que debe de cargarse cuando la llamada es conectada. La plantilla 
-  de URL puede contener identificadores con nombres entre llaves, como por ejemplo 
-  {HomeAddress}, los cuales deben de ser reemplazados con los verdaderos valores
-  escapados para cada llamada conectada. Los identificadores disponibles son los
-  nombres de los atributos de la llamada (con distinción de mayúsculas y 
-  minúsculas), además de los siguientes atributos por omisión de la llamada:
-  {__AGENT_NUMBER__} Identificador del canal de agente, por ejemplo Agent/9000
-  {__CALL_TYPE__} uno de los valores 'incoming', 'outgoing'
-  {__CAMPAIGN_ID__} ID interno de la campaña en curso
-  {__CALL_ID__} ID interno de la llamada actualmente conectada
-  {__PHONE__} Número marcado o Caller-ID de la llamada conectada
-  {__REMOTE_CHANNEL__} Identificador de canal de la llamada conectada
-* urlopentype: La manera recomendada de abrir el URL indicado por urltemplate:
-  window:   El URL debe de abrirse en una ventana nueva del navegador, o equivalente.
-  embedded: El URL debe de abrirse en un marco embebido dentro de la consola.
-  jsonp:    El URL debe interpretarse como código Javascript que debe de 
-            inyectarse en la consola Web.
 * script: Texto a usar como el guión de la campaña. NOTA: en la implementación
   actual, el texto almacenado se genera con un widget de edición que agrega
   estilos HTML/CSS en este campo. El cliente debe estar preparado para mostrar
@@ -1542,80 +1538,6 @@ En caso de campaña no encontrada:
     </getcampaignstatus_response>
 </response>
 
-
-Requerimiento "getcampaignqueuewait"
-
-Este requerimiento calcula un histograma de la cantidad de segundos que tarda
-una llamada en la campaña elegida desde que entra a la cola hasta que es 
-asignada a un agente. El histograma se calcula en intervalos de 5 segundos hasta
-30 segundos, más una categoría de llamadas atendidas luego de 30 segundos, y 
-además una cuenta de llamadas abandonadas.
-
-Atributos o argumentos:
-* campaign_type: Estilo de la campaña. Uno de los valores 'incoming','outgoing'
-* campaign_id: ID de la campaña. 
-
-Respuesta:
-* histogram: lista que contiene elementos "interval". Cada elemento interval
-  contiene los siguientes campos:
-  * lower: Valor inferior de tiempo de espera (inclusive) abarcado por intervalo
-  * upper: Valor superior de tiempo de espera (inclusive) abarcado por intervalo.
-    Para el último intervalo, se omite este elemento porque representa las 
-    llamadas iguales o mayores a 30 segundos.
-  * count: Número de llamadas que han caído dentro del intervalo
-* abandoned: Contiene el número de llamadas que fueron abandonadas, es decir, 
-  que entraron a la cola, pero terminaron antes de ser asignadas a un agente.
-
-Ejemplo:
-<request id="7">
-    <getcampaignqueuewait>
-        <campaign_type>incoming</campaign_type>
-        <campaign_id>1</campaign_id>
-    </getcampaignqueuewait>
-</request>
-
-Respuesta:
-<response id="3">
-    <getcampaignqueuewait_response>
-        <histogram>
-            <interval>
-                <lower>0</lower>
-                <upper>4</upper>
-                <count>86</count>
-            </interval>
-            <interval>
-                <lower>5</lower>
-                <upper>9</upper>
-                <count>0</count>
-            </interval>
-            <interval>
-                <lower>10</lower>
-                <upper>14</upper>
-                <count>1</count>
-            </interval>
-            <interval>
-                <lower>15</lower>
-                <upper>19</upper>
-                <count>2</count>
-            </interval>
-            <interval>
-                <lower>20</lower>
-                <upper>24</upper>
-                <count>1</count>
-            </interval>
-            <interval>
-                <lower>25</lower>
-                <upper>29</upper>
-                <count>2</count>
-            </interval>
-            <interval>
-                <lower>30</lower>
-                <count>3</count>
-            </interval>
-        </histogram>
-        <abandoned>6</abandoned>
-    </getcampaignqueuewait_response>
-</response>
 
 
 Requerimiento "getcallinfo"
@@ -2122,48 +2044,6 @@ Para agente no encontrado, o no logoneado vía ECCP:
     </transfercall_response>
 </response>
 
-Requerimiento "atxfercall"
-
-Este requerimiento se usa para transferir la llamada que atiende el agente, a
-otra extensión o a otro número externo, con confirmación del número transferido.
-Al momento de transferir la llamada, el agente se conecta con el número destino
-de la transferencia, y si el agente usa el requerimiento hangup para colgar,
-queda libre para recibir otra llamada. Actualmente no está soportada la 
-transferencia hacia otro agente de campaña, o hacia una cola de campañas.
-
-Atributos o argumentos:
-* agent_number: Agente que se va a pausar. Este identificador está de la forma 
-  'Agent/9000'.
-* agent_hash: Hash de autenticación para el agente.
-* extension:  Número de la extensión o número externo al cual mandar la llamada.
-
-Ejemplo:
-<request id="11">
-    <atxfercall>
-        <agent_number>Agent/9000</agent_number>
-        <agent_hash>XXXXXXXXXXXXXXXXXXXXXXXXX</agent_hash>
-        <extension>4321</extension>
-    </atxfercall>
-</request>
-
-Respuesta:
-Para caso de éxito:
-<response id="11">
-    <atxfercall_response>
-        <success/>
-    </atxfercall_response>
-</response>
-
-Para agente no encontrado, o no logoneado vía ECCP:
-<response id="11">
-    <atxfercall_response>
-        <failure>
-            <code>404</code>
-            <message>Agent not found or not logged in through ECCP</message>
-        </failure>
-    </atxfercall_response>
-</response>
-
 
 Requerimiento "pauseagent"
 
@@ -2504,50 +2384,4 @@ Para llamada agendada duplicada en misma fecha y hora y número telefónico
             <message>Found duplicate scheduled call</message>
         </failure>
     </schedulecall_response>
-</response>
-
-
-Requerimiento "getagentqueues"
-
-Este requerimiento lista las colas a las que está suscrito un agente. Esta 
-información era anteriormente reportada por los eventos agentloggedin y 
-agentloggedout pero fue extraída a un requerimiento separado por razones de 
-eficiencia de implementación
-
-Atributos o argumentos:
-* agent_number: Agente que se interroga. Este identificador está de la forma 
-  'Agent/9000'.
-
-Respuesta:
-* queues: Lista de colas a la que pertenece el agente. Este elemento contiene
-  múltiples elementos 'queue', que contienen cada uno una cola a la que 
-  pertenece el agente.
-
-Ejemplo:
-<request id="4">
-    <getagentqueues>
-        <agent_number>Agent/9000</agent_number>
-    </getagentqueues>
-</request>
-
-Respuesta:
-Para caso de éxito:
-
-<response id="4">
-    <getagentqueues_response>
-        <queues>
-            <queue>8001</queue>
-            <queue>8000</queue>
-        </queues>
-    </getagentqueues_response>
-</response>
-
-En caso de que no exista el agente:
-<response id="4">
-    <getagentqueues_response>
-        <failure>
-            <code>404</code>
-            <message>Specified agent not found</message>
-        </failure>
-    </getagentqueues_response>
 </response>

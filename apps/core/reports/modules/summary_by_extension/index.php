@@ -161,22 +161,25 @@ function reportReportCall($smarty, $module_name, $local_templates_dir, &$pDB_cdr
             $arrData[] = $arrTmp;
         }
     }
+
     $img = "<img src='images/flecha_$order_type.png' border='0' align='absmiddle'>";
+    $style_link_off = "style='text-decoration: none;color:black'";
+    $style_link_on  = "style='text-decoration: none;color:blue'";
 
-    $leyend_1 = "<a class='link_summary_off' href='$url&amp;order_by=1&amp;order_type=asc'>{$arrLang["Extension"]}</a>";
-    $leyend_2 = "<a class='link_summary_off' href='$url&amp;order_by=2&amp;order_type=asc'>{$arrLang["User name"]}</a>";
-    $leyend_3 = "<a class='link_summary_off' href='$url&amp;order_by=3&amp;order_type=asc'>{$arrLang["Num. Incoming Calls"]}</a>";
-    $leyend_4 = "<a class='link_summary_off' href='$url&amp;order_by=4&amp;order_type=asc'>{$arrLang["Num. Outgoing Calls"]}</a>";
-    $leyend_5 = "<a class='link_summary_off' href='$url&amp;order_by=5&amp;order_type=asc'>{$arrLang["Sec. Incoming Calls"]}</a>";
-    $leyend_6 = "<a class='link_summary_off' href='$url&amp;order_by=6&amp;order_type=asc'>{$arrLang["Sec. Outgoing Calls"]}</a>";
+    $leyend_1 = "<a $style_link_off href='$url&amp;order_by=1&amp;order_type=asc'>{$arrLang["Extension"]}</a>";
+    $leyend_2 = "<a $style_link_off href='$url&amp;order_by=2&amp;order_type=asc'>{$arrLang["User name"]}</a>";
+    $leyend_3 = "<a $style_link_off href='$url&amp;order_by=3&amp;order_type=asc'>{$arrLang["Num. Incoming Calls"]}</a>";
+    $leyend_4 = "<a $style_link_off href='$url&amp;order_by=4&amp;order_type=asc'>{$arrLang["Num. Outgoing Calls"]}</a>";
+    $leyend_5 = "<a $style_link_off href='$url&amp;order_by=5&amp;order_type=asc'>{$arrLang["Sec. Incoming Calls"]}</a>";
+    $leyend_6 = "<a $style_link_off href='$url&amp;order_by=6&amp;order_type=asc'>{$arrLang["Sec. Outgoing Calls"]}</a>";
 
 
-    if($order_by == 1)      $leyend_1 = "<a class='link_summary_on' href='$url&amp;order_by=1&amp;order_type=$order_type'>{$arrLang["Extension"]}&nbsp;$img</a>";  
-    else if($order_by == 2) $leyend_2 = "<a class='link_summary_on' href='$url&amp;order_by=2&amp;order_type=$order_type'>{$arrLang["User name"]}&nbsp;$img</a>";
-    else if($order_by == 3) $leyend_3 = "<a class='link_summary_on' href='$url&amp;order_by=3&amp;order_type=$order_type'>{$arrLang["Num. Incoming Calls"]}&nbsp;$img</a>";  
-    else if($order_by == 4) $leyend_4 = "<a class='link_summary_on' href='$url&amp;order_by=4&amp;order_type=$order_type'>{$arrLang["Num. Outgoing Calls"]}&nbsp;$img</a>";  
-    else if($order_by == 5) $leyend_5 = "<a class='link_summary_on' href='$url&amp;order_by=5&amp;order_type=$order_type'>{$arrLang["Sec. Incoming Calls"]}&nbsp;$img</a>";  
-    else if($order_by == 6) $leyend_6 = "<a class='link_summary_on' href='$url&amp;order_by=6&amp;order_type=$order_type'>{$arrLang["Sec. Outgoing Calls"]}&nbsp;$img</a>";  
+    if($order_by == 1)      $leyend_1 = "<a $style_link_on href='$url&amp;order_by=1&amp;order_type=$order_type'>{$arrLang["Extension"]}&nbsp;$img</a>";  
+    else if($order_by == 2) $leyend_2 = "<a $style_link_on href='$url&amp;order_by=2&amp;order_type=$order_type'>{$arrLang["User name"]}&nbsp;$img</a>";
+    else if($order_by == 3) $leyend_3 = "<a $style_link_on href='$url&amp;order_by=3&amp;order_type=$order_type'>{$arrLang["Num. Incoming Calls"]}&nbsp;$img</a>";  
+    else if($order_by == 4) $leyend_4 = "<a $style_link_on href='$url&amp;order_by=4&amp;order_type=$order_type'>{$arrLang["Num. Outgoing Calls"]}&nbsp;$img</a>";  
+    else if($order_by == 5) $leyend_5 = "<a $style_link_on href='$url&amp;order_by=5&amp;order_type=$order_type'>{$arrLang["Sec. Incoming Calls"]}&nbsp;$img</a>";  
+    else if($order_by == 6) $leyend_6 = "<a $style_link_on href='$url&amp;order_by=6&amp;order_type=$order_type'>{$arrLang["Sec. Outgoing Calls"]}&nbsp;$img</a>";  
     
     $arrGrid = 
         array("title"    => $arrLang["Summary by Extension"],
@@ -212,26 +215,6 @@ function reportReportCall($smarty, $module_name, $local_templates_dir, &$pDB_cdr
     $_POST['date_from'] = $date_from;
     $_POST['date_to']   = $date_to;
     $smarty->assign("SHOW", $arrLang["Show"]);
-
-    if($_POST["date_from"]==="")
-        $_POST["date_from"]  = " ";
-
-    if($_POST['date_to']==="")
-        $_POST['date_to']  = " ";
-
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Start Date")." = ".$date_from.", "._tr("End Date")." = ".
-    $date_to, $_POST, array("date_from" => date("d M Y"),"date_to" => date("d M Y")),true);
-
-    $valueType = "";
-    if(!is_null($type)){
-        if($type=="Ext")
-            $valueType=_tr("Extension");
-        else
-            $valueType=_tr("User");
-    }
-    $oGrid->addFilterControl(_tr("Filter applied: ").$valueType." = ".$value, $_POST, array("option_fil" => "Ext","value_fil" => ""));
-
-
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
 

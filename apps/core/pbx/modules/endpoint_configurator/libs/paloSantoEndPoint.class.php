@@ -291,107 +291,112 @@ class paloSantoEndPoint
 	return true;
     }
 
+
+    /*Nota: 
+      No hice de esta funcion en tres funciones ya que se podia dividir, 
+      porque ahorraba procesamiento al no recorrer de nuevo el arrego de 
+      endpoints en cada funcion nueva.
+    */
     /**
-     * Procedimiento que realiza mapeo de las IPs y MACs de los teléfonos en la
-     * red indicada, para preparar una lista con vendedores conocidos.
-     * 
-     * @param   string  $sNetMask       Especificación de red y máscara: a.b.c.d/ee
-     * @param   array   $vendors        Lista de vendedores por prefijo MAC
-     * @param   array   $prevEndpoints  Lista previa de endpoints
-     * @param   array   $pattonDevices  Lista de dispositivos Patton detectados
-     * @param   array   $KeyAsMAC       Indice del arreglo de salida como MAC 
-     * 
-     * @return  mixed   NULL en error, o lista de extensiones configurables 
-     */
-    function endpointMap($sNetMask, $vendors, $prevEndpoints, $pattonDevices, $KeyAsMAC=false)
+        input:
+            $network          : the red where go configure the endpoints
+            $arrVendor        : array of all the phones (vendor) than are suport for configuration
+            $arrEndpointsConf : array of the endpoints than are configuraded in the system.
+        output:
+            $map              : array with endpoints configurated and the that can be configure.
+    **/
+    function endpointMap($network,$arrVendor,$arrEndpointsConf,$pattonDevices)
     {
-        // Validación de parámetros
-    	if (!preg_match('|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$|', $sNetMask)) {
-            $this->errMsg = '(internal) invalid netmask';
-            return NULL;
-        }
-        if (!is_array($vendors) || count($vendors) < 0) {
-        	$this->errMsg = '(internal) invalid vendor list';
-            return NULL;
-        }
-        if (!is_array($prevEndpoints)) {
-            $this->errMsg = '(internal) invalid previous list';
-            return NULL;
-        }
-        
-        // Organizar vendedores por su MAC
-        $vendorByMac = array();
-        foreach ($vendors as $vendor) $vendorByMac[$vendor['mac']] = $vendor;
-        
-        // Organizar endpoints previos por su MAC
-        $prevEndpointByMac = array();
-        // mac_adress con una sola d
-        foreach ($prevEndpoints as $endpoint) $prevEndpointByMac[$endpoint['mac_adress']] = $endpoint;
-        
-        // Organizar dispositvos Patton por su IP
-        $pattonByIp = array();
-        // ip_adress con una sola d
-        foreach ($pattonDevices as $patton) $pattonByIp[$patton['ip_adress']] = $patton;
-        
-        // Ejecutar listado de MACs e IPs
-        $output = $retval = NULL;
-        exec('/usr/bin/elastix-helper listmacip '.$sNetMask, $output, $retval);
-        if ($retval != 0) {
-            $this->errMsg = 'Failed to map IPs';
-            return NULL;
-        }
-        $listaEndpoints = array();
-        foreach ($output as $linea) {
-            list($sEndpointMac, $sEndpointIP, $sDescVendor) = explode(' ', $linea, 3);
-            $sMacVendor = substr($sEndpointMac, 0, 8);
-            
-            if (isset($pattonByIp[$sEndpointIP])) {
-                // El endpoint listado es un Patton
-                $pattonByIp[$sEndpointIP]['mac_adress'] = $sEndpointMac;
-                $listaEndpoints[] = $pattonByIp[$sEndpointIP];
-            } elseif (isset($vendorByMac[$sMacVendor])) {
-                $endpoint = array(
-                    'ip_adress'     =>  $sEndpointIP,
-                    'mac_adress'    =>  $sEndpointMac,
-                    'desc_vendor'   =>  $sDescVendor,
-                    'mac_vendor'    =>  $sMacVendor,
-                    'name_vendor'   =>  $vendorByMac[$sMacVendor]['vendor'],
-                    'id_vendor'     =>  $vendorByMac[$sMacVendor]['id'],
-                    'id'            =>  '',
-                    'desc_device'   =>  '',
-                    'account'       =>  '',
-                    'model_no'      =>  '',
-                    'configurated'  =>  FALSE,
-                );
-                if (isset($prevEndpointByMac[$sEndpointMac])) {
-                    $endpoint['configurated'] = TRUE;
-                    $endpoint['model_no'] = $prevEndpointByMac[$sEndpointMac]['id_model'];
-                    $endpoint['desc_device'] = $prevEndpointByMac[$sEndpointMac]['desc_device'];
-                    $endpoint['account'] = $prevEndpointByMac[$sEndpointMac]['account'];
-                    $endpoint['id'] = $prevEndpointByMac[$sEndpointMac]['id'];
-                }
-                if($KeyAsMAC==true){
-                    $macTMP = strtolower($sEndpointMac);
-                    $macTMP = str_replace(":","",$macTMP);
-                    $listaEndpoints[$macTMP] = $endpoint;
-                }
-                else
-                    $listaEndpoints[] = $endpoint;
-            }
+        $map=array();
+        //PASO 0: VALIDACIONES DE LOS ARREGLOS
+        if(!is_array($arrVendor) || count($arrVendor) <= 0 || !is_array($arrEndpointsConf)){
+            $this->errMsg = "Function - endpointMap: Empty parameters.";
+            return $map;
         }
 
-        if (!function_exists('_paloSantoEndPoint_cmp_endpoints')) {
-            function _paloSantoEndPoint_cmp_endpoints(&$a, &$b)
-            {
-                $ip_a = explode('.', $a['ip_adress']);
-                $ip_b = explode('.', $b['ip_adress']);
-                if ($ip_a > $ip_b) return 1;
-                if ($ip_a < $ip_b) return -1;
-                return 0;
-            }
+        // PASO 1: OBTENGO TODOS LOS ENDPOINTS DE LA RED
+        exec('sudo nmap -sP -n '.$network, $arrConsole,$flagStatus);
+        if($flagStatus == 0){
+            $ok1 = false;
+            $ok2 = false;
+            foreach ($arrConsole as $key => $lineConsole) {
+                //PASO 2: PARSEO CADA LINEA Y DESCUBRO CADA ENDPOINT
+
+                //Host 192.168.1.232 appears to be up.
+                if (eregi("^Host ([\.|[:digit:]]*) ",$lineConsole,$arrReg)){
+                    $ipAdress   = $arrReg[1];
+                    $ok1 = true;
+                }
+                //MAC Address: 00:04:F2:12:CA:8A (Polycom)
+                if (eregi("^MAC Address: ([:|[:alnum:]]*) \((.*)\)$",$lineConsole,$arrReg)){
+                    $macAddress = $arrReg[1];
+                    $descVendor = $arrReg[2];
+                    $macVendor  = substr($macAddress,0,8);
+                    $ok2 = true;
+                }
+
+                //PASO 3: CONSTRUNCCION DEL ARREGLO MAP
+                if($ok1 && $ok2){// correcto se encontro un endpoint con sus datos completos
+                    if(is_array($arrVendor) && count($arrVendor)>0){ //filtro para solo devolver los map de los endpoints cuyos vendor (fabricantes) puede reconocer elastix.
+			foreach($pattonDevices as $key => $value){
+			    if($value["ip_adress"] == $ipAdress){
+				$value["mac_adress"] = $macAddress;
+				$map[] = $value;
+			    }
+			}
+                        foreach($arrVendor as $key => $vendor){
+                            //PASO 4: FILTRO SOLO LOS ENDPOINT CON VENDOR CONOCIDOS
+                            if($vendor['mac']==$macVendor){
+                                $tmpMap["ip_adress"]   = $ipAdress;
+                                $tmpMap["mac_adress"]  = $macAddress;
+                                $tmpMap["desc_vendor"] = $descVendor;
+                                $tmpMap["mac_vendor"]  = $macVendor;
+                                $tmpMap["name_vendor"] = $vendor['vendor'];
+                                $tmpMap["id_vendor"] = $vendor['id'];
+
+                                //PASO 5: LLENO LOS DATOS ADICIONALES SI ESTE ENDPOINT HA ESTADO CONFIGURADO SI NO LLENO DE VACIO
+                                $isConfigurated = false;
+                                if(is_array($arrEndpointsConf) && count($arrEndpointsConf)>0){
+                                    $isConfigurated = false;
+                                    foreach($arrEndpointsConf as $key => $endpointConf){
+                                        if($endpointConf['mac_adress'] == $macAddress){ //si el actual endpoint su mac_adress esta en la lista de configurados
+                                            $tmpMap["id"]          = $endpointConf['id'];
+                                            $tmpMap["desc_device"] = $endpointConf['desc_device'];
+                                            $tmpMap["account"]     = $endpointConf['account'];
+                                            $tmpMap["model_no"]    = $endpointConf['id_model'];
+                                            $tmpMap["configurated"]= true;
+                                            $isConfigurated = true;
+                                            break; //si ya lo encontre rompo el lazo
+                                        }
+                                    }
+                                }
+                                if(!$isConfigurated){ //si no esta configurado aun el endpoint lo lleno de vacio
+                                    $tmpMap["id"]   = "";
+                                    $tmpMap["desc_device"] = "";
+                                    $tmpMap["account"]     = "";
+                                    $tmpMap["model_no"]    = "";
+                                    $tmpMap["configurated"]= false;
+                                }
+                                $map[] = $tmpMap;
+                                break; //si ya lo encontre rompo el lazo
+                            }
+                        }
+                    }
+                    $ok1 = false;
+                    $ok2 = false;
+                }
+            }//end foreach main
         }
-        uasort($listaEndpoints, '_paloSantoEndPoint_cmp_endpoints');
-        return $listaEndpoints;
+        function _paloSantoEndPoint_cmp_endpoints(&$a, &$b)
+        {
+            $ip_a = explode('.', $a['ip_adress']);
+            $ip_b = explode('.', $b['ip_adress']);
+            if ($ip_a > $ip_b) return 1;
+            if ($ip_a < $ip_b) return -1;
+            return 0;
+        }
+        usort($map, '_paloSantoEndPoint_cmp_endpoints');
+        return $map;
     }
 
     function getDeviceFreePBX($all=false)
@@ -466,21 +471,7 @@ class paloSantoEndPoint
             $arrModels['no_model'] = "-- {$arrLang["No Models"]} --";
         }
         $pDB->disconnect(); 
-        return $arrModels;
-    }
-
-    function getModelByVendor($id_vendor, $name_model)
-    {
-        $pDB = $this->connectDataBase("sqlite","endpoint");
-        if($pDB==false)
-            return false;
-
-        $sqlPeticion = "select m.* from vendor v inner join model m on v.id=m.id_vendor where v.id =? and m.name=?;";
-        $result = $pDB->getFirstRowQuery($sqlPeticion,true,array($id_vendor,$name_model)); //se consulta a la base endpoints
-
-        if(is_array($result) && count($result)>0)
-            return $result;
-        else return false;
+	return $arrModels;
     }
 
     function getModelById($id_model)
@@ -581,11 +572,12 @@ class paloSantoEndPoint
 
     function setParameters($arrParameters, $mac_adress, $pDB)
     {
-        foreach($arrParameters as $key => $value){
+        foreach($arrParameters as $key => $value)
+        {
             $sqlPeticion = " select count(*) as exist from parameter where name='$key' and id_endpoint = (select id from endpoint where mac_adress = '$mac_adress');";
             $result = $pDB->getFirstRowQuery($sqlPeticion,true); //se consulta a la base
-
-            if(is_array($result) && count($result)>0 && $result['exist']==1){
+            if(is_array($result) && count($result)>0 && $result['exist']==1)
+            {
                 $sqlPeticion = "update parameter set 
                                   value   = '$value'
                                   where name='$key' and id_endpoint = (select id from endpoint where mac_adress = '$mac_adress');";
@@ -600,8 +592,9 @@ class paloSantoEndPoint
                 $pDB->disconnect();
                 return false;
             }
+
+            return true;
         }
-        return true;
     }
 
     /** Funcion que compara si hay incongruencia de informacion entre las bases asterisk(mysql) y endpoint(sqlite)
@@ -672,7 +665,6 @@ class paloSantoEndPoint
 
     function getExtension($ip)
     {
-	unset($_SESSION['endpoint_configurator']['extensions_registered'][$ip]);
 	//Search in sip extensions
         $parameters = array('Command'=>"sip show peers");
         $result = $this->AsteriskManagerAPI("Command",$parameters,true); 
@@ -682,7 +674,6 @@ class paloSantoEndPoint
             if(preg_match("/(\d+\/\d+)[[:space:]]*($ip)[[:space:]]*[[:alpha:]]*[[:space:]]*[[:alpha:]]*[[:space:]]*[[:alpha:]]{0,1}[[:space:]]*[[:digit:]]*[[:space:]]*([[:alpha:]]*)/",$line,$match)){
                 if($match[3] == "OK"){
                     $tmp = explode("/",$match[1]);
-		    $_SESSION['endpoint_configurator']['extensions_registered'][$ip][] = "SIP:$tmp[0]";
                     if($extension == "")
                         $extension = $tmp[0];
                     else
@@ -699,7 +690,6 @@ class paloSantoEndPoint
         foreach($data as $key => $line){
             if(preg_match("/(\d+)[[:space:]]*($ip)[[:space:]]*\([[:alpha:]]{1}\)[[:space:]]*[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+[[:space:]]*[[:digit:]]+[[:space:]]*([[:alpha:]]*)/",$line,$match)){
                 if($match[3] == "OK"){
-		    $_SESSION['endpoint_configurator']['extensions_registered'][$ip][] = "IAX2:$match[1]";
                     if($extension == "")
                         $extension = $match[1];
                     else

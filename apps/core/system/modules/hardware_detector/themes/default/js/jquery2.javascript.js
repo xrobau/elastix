@@ -2,14 +2,84 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-function saveEdit(){
-var module_name = $('#lblModule').val();
-        var urlImaLoading = "<img src='images/loading2.gif' height='30px' /><span style='font-size: 14px; position: relative; top: -10px; left: -5px; '>"+$('#lblSaving').val()+"</span>";
-	$('#cancel').attr('disabled','disabled');
-	$('#save_edit').attr('disabled','disabled');
-	$('.message').html(""); 	
-	$('.loading').html(urlImaLoading);        
-	var values           = getSelectEchoPort();
+$(document).ready(function(){
+    $(".move").draggable({
+        zIndex:     20,
+        ghosting:   false,
+        opacity:    0.7,
+        //handle: '#layer1_handle1'
+    });
+
+    $('a[id^=confSPAN]').click(function(e) {
+        var eje_x = ((screen.width)/2) - 250;
+        $('#boxConfSPANS').attr("style","display: block;");
+        $('#boxConfSPANS').css('top',e.pageY+"px");
+        $('#boxConfSPANS').css('left',eje_x+"px");
+        $('#fade_overlay').attr("style","display: block;");
+        $('#idCard').val("");
+        var url = "index.php";
+        var arrParams = new Array();
+        arrParams["menu"]	= $('#lblModule').val();
+        arrParams["action"] = "config_echo";
+        arrParams["cardId"] = $(this).attr('id');
+        arrParams["rawmode"] = "yes";
+        request(url,arrParams,false,
+            function(arrData,statusResponse,error)
+            {
+                var echoNames = arrData["type_echo_names"];
+                var PortsEcho = arrData["arrPortsEcho"];
+                var SpanNum   = arrData["card_id"];
+                var key       = "";
+                var key2      = "";
+                var lastKey2  = "";
+                var html      = "";
+                var noPorts   = $('#labelNoPorts').val();
+                $('#idCard').val(SpanNum);
+                if(PortsEcho.length <= 0){
+                    $('#port_desc').text(noPorts);
+                    $('.viewButton').attr("style","display: none;");
+                }else{
+                    var port_desc = $('#'+arrData["card_id"]).text();
+                    $('#port_desc').text(port_desc);
+                    $('.viewButton').attr("style","display: block;");
+                }
+                $('#config_echo_div').html("");
+                html += "<table align='center' width='80%'>";
+                for(key in PortsEcho){
+                    key2 = "";
+                    lastKey2 = "";
+                    html +=     "<tr><td align='center' style='padding: 5px;'><b>" + key + "</b> " + PortsEcho[key]['name_port'] + "</td>" +
+                                "<td align='center' style='padding: 5px;'><select id='typeecho_" + key + "' name='typeecho_" + key + "'>";
+                    for(key2 in echoNames){
+                        if(PortsEcho[key]['type_echo'] == key2){
+                            html +=      "<option value='" + key2 +"' selected='selected'>" + echoNames[key2] + "</option>";
+                            lastKey2 = key2;
+                        }else{
+                            html +=      "<option value='" + key2 +"'>" + echoNames[key2] + "</option>";
+                        }
+                    }
+                    html +=          "</select>" +
+                                     "<input type='hidden' value='" +lastKey2+ "' id='tmpTypeEcho" + key + "' name='tmpTypeEcho" + key + "' />" +
+                                "</td></tr>";
+                }
+                html += "</table>";
+                $('#config_echo_div').html(html);
+            }
+        );
+    });
+
+    $('.close_boxConfSPANS, #cancel').click(function(){
+        $('#fade_overlay').attr("style","display: none;");
+        $('#boxConfSPANS').attr("style","display: none;");
+        $('#boxSpanParameters').attr("style","display: none;");
+    });
+
+    $('#save_edit').click(function(){
+        // blocking screen
+        var module_name = $('#lblModule').val();
+        var urlImaLoading = "<h1><img src='modules/"+module_name+"/images/busy.gif' /> "+$('#lblSaving').val()+"...</h1>";
+        $.blockUI({ message: urlImaLoading });
+        var values           = getSelectEchoPort();
         var valuesActual     = getActualEchoPort();
         var url              = "index.php";
         var arrParams        = new Array();
@@ -22,162 +92,45 @@ var module_name = $('#lblModule').val();
             function(arrData,statusResponse,error)
             {
                 var message = arrData["msg"];
- 		$('.loading').html("");   
-		$('.message').html(message);  
-		$('#cancel').removeAttr('disabled');
-		$('#save_edit').removeAttr('disabled');
-           }
-        );
-}
-
-function saveSpan(){
-	 // blocking screen
-        var module_name = $('#lblModule').val();
-       var urlImaLoading = "<img src='images/loading2.gif' height='30px' /><span style='font-size: 14px; position: relative; top: -10px; left: -5px; '>"+$('#lblSaving').val()+"</span>";
-	$('.message').html(""); 
-        $('.loading').html(urlImaLoading);   
-	$('#cancel').attr('disabled','disabled');
-	$('#save_span').attr('disabled','disabled');
-        var url = "index.php";
-        var module_name = $('#lblModule').val();
-        var arrParams = new Array();
-        arrParams["menu"]	= module_name;
-        arrParams["action"] = "save_span";
-        arrParams["idSpan"]  = $('#idCard').val();
-        arrParams["rawmode"] = "yes";
-        
-        arrParams["tmsource"] = $('#tmsource').val();
-        arrParams["lnbuildout"] = $('#lnbuildout').val();
-        arrParams["framing"] = $('#framing').val();
-        arrParams["coding"] = $('#coding').val();
-        arrParams["media_pri"] = $('#media_pri').val();
-
-        request(url, arrParams, false, 
-        	function (arrData, statusResponse, error)
-        	{
-	            var message = arrData["msg"];
-	            // unblocking
-	            //$.unblockUI();
-	            //alert(message);
-	            if (arrData['reload']) {
-	            	location.reload();
-	            }
-		    $('.loading').html("");   
-		    $('.message').html(message);  
-		    $('#cancel').removeAttr('disabled');
-		    $('#save_span').removeAttr('disabled');	
-        	}
-        );
-
-}
-function param(id){
-$('#idCard').val("");
-        var url = "index.php";
-        var arrParams = new Array();
-        arrParams["menu"]	= $('#lblModule').val();
-        arrParams["action"] = "config_echo";
-        arrParams["cardId"] = id;
-        arrParams["rawmode"] = "yes";
-        request(url,arrParams,false,
-            function(arrData,statusResponse,error)
-            {
-                var echoNames = arrData["type_echo_names"];
-                var PortsEcho = arrData["arrPortsEcho"];
-                var SpanNum   = arrData["card_id"];
-                var key       = "";
-                var key2      = "";
-                var lastKey2  = "";
-                var html      = "";
-                var noPorts   = $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content #labelNoPorts').val();
-		
-                $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content #idCard').val(SpanNum);
-                if(PortsEcho.length <= 0){
-                    $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content #port_desc').text(noPorts);
-                    $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content .viewButton').attr("style","display: none;");
-                }else{
-                    var port_desc = $('#'+arrData["card_id"]).text();
-                    $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content #port_desc').text(port_desc);
-                    $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content .viewButton').attr("style","display: block; margin-top:10px;");
-                }
-		
-               // $('#config_echo_div').html("");
-                html += "<table align='center' width='100%' style='margin-left: -10px;'>";
-				
-				var i = 0;
-                for(key in PortsEcho){
-                    key2 = "";
-                    lastKey2 = "";
-					if((i % 2) == 0){
-						html += "<tr>";
-						html += "<td align='center' style='padding: 5px;'><b>" + key + "</b> " + PortsEcho[key]['name_port'] + "</td>" +
-								"<td align='center' style='padding: 5px;'><select id='typeecho_" + key + "' name='typeecho_" + key + "'>";
-						for(key2 in echoNames){
-							if(PortsEcho[key]['type_echo'] == key2){
-								html += "<option value='" + key2 +"' selected='selected'>" + echoNames[key2] + "</option>";
-								lastKey2 = key2;
-							}else{
-								html += "<option value='" + key2 +"'>" + echoNames[key2] + "</option>";
-							}
-						}
-						html += "</select>" +
-								"<input type='hidden' value='" +lastKey2+ "' id='tmpTypeEcho" + key + "' name='tmpTypeEcho" + key + "' />" +
-								"</td>";
-					}else{
-						html += "<td align='center' style='padding: 5px;'><b>" + key + "</b> " + PortsEcho[key]['name_port'] + "</td>" +
-								"<td align='center' style='padding: 5px;'><select id='typeecho_" + key + "' name='typeecho_" + key + "'>";
-						for(key2 in echoNames){
-							if(PortsEcho[key]['type_echo'] == key2){
-								html += "<option value='" + key2 +"' selected='selected'>" + echoNames[key2] + "</option>";
-								lastKey2 = key2;
-							}else{
-								html += "<option value='" + key2 +"'>" + echoNames[key2] + "</option>";
-							}
-						}
-						html += "</select>" +
-								"<input type='hidden' value='" +lastKey2+ "' id='tmpTypeEcho" + key + "' name='tmpTypeEcho" + key + "' />" +
-								"</td>";
-						html += "</tr>";
-					}
-					i++;
-                }
-		
-                if((i % 2) != 0){ // si el ultimo td es impar entonces solo tiene un td y no 2 en el tr
-					html += "<td colspan='2'></td>";
-					html += "</tr>";
-				}
-                html += "</table>";
-		
-                $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content #config_echo_div').html(html);
-		$('.neo-modal-elastix-popup-box').css('display',"block");
-		var alt= $('body .neo-modal-elastix-popup-box .neo-modal-elastix-popup-content #config_echo_div').height();
-		if (alt < 545){
-			var maskHeight = $(document).height();
-			var maskWidth = $(window).width();
-
-			var winH = $(window).height();
-			var winW = $(window).width();
-			var top = winH/2-alt/2;
-			
-			$('.neo-modal-elastix-popup-box').css('top',  top-50);
-			$('.neo-modal-elastix-popup-box').css('height',  alt+80);
-			$('.neo-modal-elastix-popup-content').css('bottom',  10);
-			if(i>=30)
-			  $('.neo-modal-elastix-popup-box .neo-modal-elastix-popup-content .viewButton').css('margin-top',  0);
-		}
+                // unblocking
+                $.unblockUI();
+                alert(message);
+                //$('#fade_overlay').attr("style","display: none;");
+                //$('#boxConfSPANS').attr("style","display: none;");
             }
         );
-}
+    });
 
-function paramSpan(id){
+    $("#fade_overlay").click(function(){
+        $("#boxRPM").attr("style","display: none;");
+        $("#fade_overlay").attr("style","display: none;");
+        $('#boxConfSPANS').attr("style","display: none;");
+        $('#boxSpanParameters').attr("style","display: none;");
+    });
 
-	$('#idCard').val("");
-        //$('#tmsource').val("Prueba");        
-	var url = "index.php";
+    $('#chkAdvance').change(function() {
+        var estado;
+        if($(this).is(":checked")){
+            $('#optionsAdvance').attr("style","visibility: visible;");
+        }else{
+            $('#optionsAdvance').attr("style","visibility: hidden;");
+        }
+    });
+
+    $('a[id^=paramSPAN]').click(function(e) {
+        var eje_x = ((screen.width)/2) - 250;
+        $('#boxSpanParameters').attr("style","display: block;");
+        $('#boxSpanParameters').css('top',e.pageY+"px");
+        $('#boxSpanParameters').css('left',eje_x+"px");
+        $('#fade_overlay').attr("style","display: block;");
+        $('#idCard').val("");
+
+        var url = "index.php";
         var module_name = $('#lblModule').val();
         var arrParams = new Array();
         arrParams["menu"]	= module_name;
         arrParams["action"] = "config_span";
-        arrParams["cardId"] = id;
+        arrParams["cardId"] = $(this).attr('id');
         arrParams["rawmode"] = "yes";
         request(url, arrParams, false,
         	function(arrData, statusResponse, error)
@@ -214,64 +167,46 @@ function paramSpan(id){
             		$('#media_pri').val(spaninfo["wanpipe_force_media"]);
         		} else {
         			$('#switch_pri_media').attr("style","display: none;");
-				$('.neo-modal-elastix-popup-box').css('height', 225);
         		}
-			
         	}
         );
-$('.tabForm').css("border",0);
-$('.tabForm').css("background-image","none");
-}
-
-$(document).ready(function(){
-    $(".move").draggable({
-        zIndex:     20,
-        ghosting:   false,
-        opacity:    0.7
     });
+    
+    $('#save_span').click(function(){
+        // blocking screen
+        var module_name = $('#lblModule').val();
+        var urlImaLoading = "<h1><img src='modules/"+module_name+"/images/busy.gif' /> "+$('#lblSaving').val()+"...</h1>";
+        $.blockUI({ message: urlImaLoading });
+        
+        var url = "index.php";
+        var module_name = $('#lblModule').val();
+        var arrParams = new Array();
+        arrParams["menu"]	= module_name;
+        arrParams["action"] = "save_span";
+        arrParams["idSpan"]  = $('#idCard').val();
+        arrParams["rawmode"] = "yes";
+        
+        arrParams["tmsource"] = $('#tmsource').val();
+        arrParams["lnbuildout"] = $('#lnbuildout').val();
+        arrParams["framing"] = $('#framing').val();
+        arrParams["coding"] = $('#coding').val();
+        arrParams["media_pri"] = $('#media_pri').val();
 
-    $('a[id^=confSPAN]').click(function(e) {
-
-	var arrAction = new Array();
-    	arrAction["action"]  = "config_echol";
-    	arrAction["rawmode"] = "yes";
-	var id = $(this).attr('id');
-    	request("index.php",arrAction,false,
-          function(arrData,statusResponse,error)
-          {
-  	      ShowModalPopUP(arrData['title'],300,800,arrData['html']);$('.neo-modal-elastix-popup-box').css('display',  "none");
-	      param(id);
-          }
-    );
-});
-
-    $('a[id^=paramSPAN]').click(function(e) {
-        var arrAction = new Array();
-    	arrAction["action"]  = "config_param";
-    	arrAction["rawmode"] = "yes";
-	var id = $(this).attr('id');
-	
-    	request("index.php",arrAction,false,
-          function(arrData,statusResponse,error)
-          {
-  	      ShowModalPopUP(arrData['title'],365,265,arrData['html']);
-	      paramSpan(id);
-          }
+        request(url, arrParams, false, 
+        	function (arrData, statusResponse, error)
+        	{
+	            var message = arrData["msg"];
+	            // unblocking
+	            $.unblockUI();
+	            alert(message);
+	            if (arrData['reload']) {
+	            	location.reload();
+	            }
+        	}
         );
     });
 
-  
-
-    $('#chkAdvance').change(function() {
-        var estado;
-        if($(this).is(":checked")){
-            $('#optionsAdvance').attr("style","visibility: visible;");
-        }else{
-            $('#optionsAdvance').attr("style","visibility: hidden;");
-        }
-    });
-
-   $('#editArea1').click(function() {
+    $('#editArea1').click(function() {
         $("#layer1").show(); 
     });
 
@@ -513,6 +448,7 @@ function saveSpanConfiguration(idSpan){
 
     return;
 }
+
 
 function controllerDisplayConfig(xhr)
 {

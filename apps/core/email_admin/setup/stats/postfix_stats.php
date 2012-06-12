@@ -2,28 +2,6 @@
 
 require_once "/var/www/html/libs/paloSantoDB.class.php";
 
-function load_default_timezone()
-{
-    $sDefaultTimezone = @date_default_timezone_get();
-    if ($sDefaultTimezone == 'UTC') {
-        $sDefaultTimezone = 'America/New_York';
-        if (file_exists('/etc/sysconfig/clock')) {
-            foreach (file('/etc/sysconfig/clock') as $s) {
-                $regs = NULL;
-                if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
-                    $sDefaultTimezone = $regs[1];
-                }
-            }
-        }
-    }
-    date_default_timezone_set($sDefaultTimezone);
-}
-
-// Para silenciar avisos de fecha/hora
-if (function_exists('date_default_timezone_get')) {
-    load_default_timezone();
-}
-
 $arrLogs = array(0=> "/var/log/maillog",
                  1=> "/var/log/maillog.1",
                  2=> "/var/log/maillog.2",

@@ -3,7 +3,7 @@
     PrincipalFileCisco nos retorna el contenido del archivo de configuracion de los EndPoint
     Cisco, para ello es necesario enviarle el DisplayName, id_device, secret, ipAdressServer
 */
-function PrincipalFileCisco($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $version)
+function PrincipalFileCisco($DisplayName, $id_device, $secret, $ipAdressServer, $version)
 {
     $content="# Cisco SIP Configuration
 

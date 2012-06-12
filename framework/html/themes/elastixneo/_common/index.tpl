@@ -10,13 +10,9 @@
 		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/header.css" />
 		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/content.css" />
 		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/applet.css" />
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/sticky_note.css" />
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/table.css" />
-
         <!--[if lte IE 8]><link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/ie.css" /><![endif]-->
 	{$HEADER_LIBS_JQUERY}
         <script type='text/javascript' src="libs/js/base.js"></script>
-	<script type='text/javascript' src="libs/js/sticky_note.js"></script>
         <script type='text/javascript' src="libs/js/iframe.js"></script>
         {$HEADER}
 	{$HEADER_MODULES}
@@ -26,15 +22,13 @@
 		{if !empty($mb_message)}
 		<br />
 	  	<div class="div_msg_errors" id="message_error">
-                    <div style="height:24px">
-                        <div class="div_msg_errors_title" style="padding-left:5px">
-                            <b style="color:red;">&nbsp;{$mb_title}</b>
-                        </div>
-                        <div class="div_msg_errors_dismiss">
-                            <input type="button" onclick="hide_message_error();" value="{$md_message_title}"/>
-                        </div>
+                    <div style="float:left;">
+                        <b style="color:red;">&nbsp;&nbsp;{$mb_title} </b>
                     </div>
-		    <div style="padding:2px 10px 2px 10px">
+                    <div style="text-align:right; padding:5px">
+                        <input type="button" onclick="hide_message_error();" value="{$md_message_title}"/>
+                    </div>
+		    <div style="position:relative; top:-12px; padding: 0px 5px">
 			{$mb_message}
 		    </div>
 		</div>
@@ -42,37 +36,10 @@
 				{$CONTENT}
 			</div>
 		    </div>
-			{if $isThirdLevel eq 'on'}
-				{if $viewMenuTab eq 'true'}
-		    <div id="neo-lengueta-minimized"></div>
-				{elseif $viewMenuTab eq 'false'}
-			<div id="neo-lengueta-minimized" class="neo-display-none"></div>
-				{else}
-			<div id="neo-lengueta-minimized" class="neo-display-none"></div>
-				{/if}
-			{else}
-			<div id="neo-lengueta-minimized"></div>
-			{/if}
+		    <div id="neo-lengueta-minimized" class="neo-display-none"></div>
 		</div>
 		<div align="center" id="neo-footerbox"> <!-- mostrando el footer -->
 			<a href="http://www.elastix.org" style="color: #444; text-decoration: none;" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank' style="color: #444; text-decoration: none;" >GPL</a> by <a href="http://www.palosanto.com" target='_blank' style="color: #444; text-decoration: none;">PaloSanto Solutions</a>. 2006 - {$currentyear}.
 		</div>
-		<div id="neo-sticky-note" class="neo-display-none">
-		  <div id="neo-sticky-note-text"></div>
-		  <div id="neo-sticky-note-text-edit" class="neo-display-none">
-			<textarea id="neo-sticky-note-textarea"></textarea>
-			<div id="neo-sticky-note-text-char-count"></div>
-			<input type="button" value="{$SAVE_NOTE}" class="neo-submit-button" id="neo-submit-button" onclick="send_sticky_note()" />
-			<div id="auto-popup">AutoPopUp <input type="checkbox" id="neo-sticky-note-auto-popup" value="1"></div>
-		  </div>
-		  <div id="neo-sticky-note-text-edit-delete"></div>
-		</div>
-		<!-- Neo Progress Bar -->
-		<div class="neo-modal-elastix-popup-box">
-			<div class="neo-modal-elastix-popup-title"></div>
-			<div class="neo-modal-elastix-popup-close"></div>
-			<div class="neo-modal-elastix-popup-content"></div>
-		</div>
-		<div class="neo-modal-elastix-popup-blockmask"></div>
     </body>
 </html>

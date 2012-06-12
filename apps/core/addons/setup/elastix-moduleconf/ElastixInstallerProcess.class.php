@@ -44,7 +44,6 @@ class ElastixInstallerProcess extends AbstractProcess
     private $_timestampUltimoUso = NULL;    // timestamp de la última vez que se requirió yum shell
 
     private $_customStatus = '';    // Estado arbitrario para compartir con interfaz web
-    private $_numAsignacionesCustom = 0;    // Número de veces que ha cambiado el estado arbitrario
 
     function inicioPostDemonio($infoConfig, &$oMainLog)
     {
@@ -73,7 +72,6 @@ class ElastixInstallerProcess extends AbstractProcess
             'status'    =>  'idle',
             'action'    =>  'none',
             'testonly'  =>  FALSE,
-            'autoconfirm'   =>  FALSE,
 
             'iniciales' =>  array(),
             'progreso'  =>  array(),
@@ -106,7 +104,7 @@ class ElastixInstallerProcess extends AbstractProcess
 	            2	=>	array('pipe', 'w'),
             );
             $this->_procPipes = NULL; $cwd = '/';
-            $this->_procYum = proc_open('/usr/sbin/close-on-exec.pl /usr/bin/yum -y shell', $descriptores, $this->_procPipes, $cwd);
+            $this->_procYum = proc_open('/usr/bin/yum -y shell', $descriptores, $this->_procPipes, $cwd);
             if (!is_resource($this->_procYum)) {
                 $this->oMainLog->output("ERR: no se puede iniciar instancia de yum shell");
                 $bContinuar = FALSE;
@@ -435,17 +433,11 @@ Interfaz simple de comandos vía socket:
         case 'add':
             $sTextoSalida = $this->_procesarAdd($listaComando);
             break;
-        case 'addconfirm':
-            $sTextoSalida = $this->_procesarAddConfirm($listaComando);
-            break;
         case 'testadd':
             $sTextoSalida = $this->_procesarTestAdd($listaComando);
             break;
         case 'remove':
             $sTextoSalida = $this->_procesarRemove($listaComando);
-            break;
-        case 'removeconfirm':
-            $sTextoSalida = $this->_procesarRemoveConfirm($listaComando);
             break;
         case 'clear':
             $sTextoSalida = $this->_procesarClear($listaComando);
@@ -455,9 +447,6 @@ Interfaz simple de comandos vía socket:
             break;
         case 'update':
             $sTextoSalida = $this->_procesarUpdate($listaComando);
-            break;
-        case 'updateconfirm':
-            $sTextoSalida = $this->_procesarUpdateConfirm($listaComando);
             break;
         case 'testupdate':
             $sTextoSalida = $this->_procesarTestUpdate($listaComando);
@@ -497,7 +486,6 @@ Interfaz simple de comandos vía socket:
 
         $sReporte .= "status ".$this->_estadoPaquete['status']."\n";
         $sReporte .= "action ".$this->_estadoPaquete['action']."\n"; // none confirm reporefresh depsolving downloading applying
-        $sReporte .= "custom ".$this->_numAsignacionesCustom."\n";
         foreach ($this->_estadoPaquete['progreso'] as $infoProgreso) {
             $sReporte .= 'package'.
                 ' '.$infoProgreso['pkgaction']. // pkgaction puede ser: install update remove
@@ -555,7 +543,7 @@ Installing for dependencies:
             } elseif ($bReporte) {
                 $regs = NULL;
                 $sLineaCompleta = ' '.$sLineaPrevia.$sLinea;
-                if (preg_match('/^\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+[kM]?/', $sLineaCompleta, $regs)) {
+                if (preg_match('/^\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+[kM]/', $sLineaCompleta, $regs)) {
                     $this->_estadoPaquete['progreso'][] = array(
                         'pkgaction' =>  $sOperacion,
                         'nombre'    =>  $regs[1],
@@ -747,14 +735,6 @@ Installing for dependencies:
         fwrite($this->_procPipes[0], $sComando);
         return "OK Processing\n";
     }
-    
-    private function _procesarAddConfirm(&$listaArgs)
-    {
-    	$r = $this->_procesarAdd($listaArgs);
-        if (substr($r, 0, 2) == 'OK')
-            $this->_estadoPaquete['autoconfirm'] = TRUE;
-        return $r;
-    }
 
     private function _procesarTestAdd(&$listaArgs)
     {
@@ -801,14 +781,6 @@ Installing for dependencies:
             return "ERR Unable to start Yum Shell\n";
         fwrite($this->_procPipes[0], $sComando);
         return "OK Processing\n";
-    }
-
-    private function _procesarUpdateConfirm(&$listaArgs)
-    {
-        $r = $this->_procesarUpdate($listaArgs);
-        if (substr($r, 0, 2) == 'OK')
-            $this->_estadoPaquete['autoconfirm'] = TRUE;
-        return $r;
     }
 
     private function _procesarTestUpdate(&$listaArgs)
@@ -881,8 +853,7 @@ Installing for dependencies:
         if ($this->_estadoPaquete['status'] != 'busy')
             return "ERR Nothing to cancel\n";
         if (!($this->_estadoPaquete['action'] == 'downloading' || 
-            $this->_estadoPaquete['action'] == 'reporefresh' ||
-            $this->_estadoPaquete['action'] == 'depsolving'))
+            $this->_estadoPaquete['action'] == 'reporefresh'))
             return "ERR Cannot cancel\n";
 
         // YUM requiere dos SIGINT para cancelar una descarga. El primero se 
@@ -910,7 +881,6 @@ Installing for dependencies:
         $this->_estadoPaquete['warning'] = array();
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['testonly'] = FALSE;
-        $this->_estadoPaquete['autoconfirm'] = FALSE;
 
         $sComando = "run\n";
         if (!$this->_asegurarYumShellIniciado())
@@ -922,11 +892,7 @@ Installing for dependencies:
 
     private function _procesarSetCustom(&$listaArgs)
     {
-        $sNuevoStatus = implode(' ', $listaArgs);
-        if ($this->_customStatus != $sNuevoStatus) {
-            $this->_customStatus = $sNuevoStatus;
-            $this->_numAsignacionesCustom++;
-        }
+        $this->_customStatus = implode(' ', $listaArgs);
         return "OK Stored\n";
     }
 
@@ -967,7 +933,6 @@ Installing for dependencies:
                 $pos = strpos($this->_sContenido, "Transaction Summary");
                 if ($pos !== FALSE) {
                     $this->_estadoPaquete['status'] = 'idle';
-                    $this->_estadoPaquete['action'] = 'none';
                     $lineas = explode("\n", $this->_sContenido);
                     $bReporteInstalado = FALSE;
                     foreach ($lineas as $sLinea) {
@@ -1016,14 +981,6 @@ Installing for dependencies:
                             $this->_estadoPaquete['action'] = 'confirm';
                             $this->_estadoPaquete['testonly'] = FALSE;
                             $this->_recogerPaquetesTransaccion();
-                            
-                            // Proceder directamente a operación en caso de autoconfirm
-                            if ($this->_estadoPaquete['autoconfirm'] &&
-                                $this->_estadoPaquete['status'] == 'idle' &&
-                                $this->_estadoPaquete['action'] == 'confirm') {
-                            	$dummy = NULL;
-                                $this->_procesarConfirm($dummy);
-                            }
                         }
                         
                     }
@@ -1436,14 +1393,5 @@ Installing for dependencies:
         fwrite($this->_procPipes[0], $sComando);
         return "OK Processing\n";
     }
-
-    private function _procesarRemoveConfirm(&$listaArgs)
-    {
-        $r = $this->_procesarRemove($listaArgs);
-        if (substr($r, 0, 2) == 'OK')
-            $this->_estadoPaquete['autoconfirm'] = TRUE;
-        return $r;
-    }
-
 }
 ?>

@@ -1,4 +1,7 @@
 <table width="99%" border="0" cellspacing="0" cellpadding="0" align="center">
+    <tr class="moduleTitle">
+        <td class="moduleTitle" valign="middle">&nbsp;&nbsp;<img src="{$ICON}" border="0" align="absmiddle">&nbsp;&nbsp;{$TITLE}</td>
+    </tr>
     <tr>
         <td>
             <table style="font-size: 16px;" width="100%" border="0" >

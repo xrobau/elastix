@@ -3,7 +3,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Form List"=>"Lista de Formularios",
 "Form Name" => "Nombre",
-"Form Description" => "Descripción",
+"Form Description" => "Descripci&oacute;n",
 "Status"=>"Estado",
 "Options"=>"Opciones",
 "List Item"=>"List Item",

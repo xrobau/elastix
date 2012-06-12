@@ -156,10 +156,7 @@ CREATE TABLE IF NOT EXISTS `campaign` (
   `desviacion` int(10) unsigned default NULL,
   `script` text NOT NULL,
   `estatus` varchar(1) NOT NULL default 'A',
-  `id_url`  int unsigned,
-  
-  PRIMARY KEY  (`id`),
-  FOREIGN KEY (id_url)  REFERENCES campaign_external_url(id)
+  PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Upgrade from old length, if it applies */
@@ -333,11 +330,9 @@ CREATE TABLE IF NOT EXISTS campaign_entry
     daytime_end         time    NOT NULL,
     estatus             varchar(1)  NOT NULL DEFAULT 'A',
     script              text    NOT NULL,
-    id_url              int unsigned,
 
     FOREIGN KEY (id_queue_call_entry) REFERENCES queue_call_entry(id),
-    FOREIGN KEY (id_form) REFERENCES form(id),
-    FOREIGN KEY (id_url)  REFERENCES campaign_external_url(id)
+    FOREIGN KEY (id_form) REFERENCES form(id)
 ) ENGINE=InnoDB;
 
 /*
@@ -427,20 +422,6 @@ CREATE TABLE IF NOT EXISTS `eccp_authorized_clients` (
     `md5_password` varchar(32) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Table structure for table `campaign_external_url`
---
-CREATE TABLE IF NOT EXISTS `campaign_external_url` (
-    `id` int(10) unsigned NOT NULL auto_increment,
-    `urltemplate`   varchar(250)    NOT NULL,
-    `description`   varchar(64)     NOT NULL,
-    `active`        boolean         NOT NULL    DEFAULT 1,
-    `opentype`      varchar(16)     NOT NULL    DEFAULT 'window', /* window iframe jsonp */
-    
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 /* Procedimiento que agrega soporte para DNC (DO NOT CALL) y quita la columna agent.queue */
 DELIMITER ++ ;
@@ -688,48 +669,6 @@ DELIMITER ; ++
 
 CALL temp_agent_eccp_password_2011_02_14();
 DROP PROCEDURE IF EXISTS temp_agent_eccp_password_2011_02_14;
-
-/* Procedimiento para agregar columna que apunta a URL externo opcional */
-DELIMITER ++ ;
-
-DROP PROCEDURE IF EXISTS temp_campaign_external_url_2012_01_23 ++
-CREATE PROCEDURE temp_campaign_external_url_2012_01_23 ()
-    READS SQL DATA
-    MODIFIES SQL DATA
-BEGIN
-    DECLARE l_existe_columna tinyint(1);
-    
-    SET l_existe_columna = 0;
-
-    /* Verificar existencia de columna campaign.id_url que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'campaign' 
-        AND COLUMN_NAME = 'id_url';
-    IF l_existe_columna = 0 THEN
-        ALTER TABLE campaign
-            ADD COLUMN id_url int unsigned,
-            ADD FOREIGN KEY (id_url) REFERENCES campaign_external_url (id);
-    END IF;
-
-    /* Verificar existencia de columna campaign_entry.id_url que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'campaign_entry' 
-        AND COLUMN_NAME = 'id_url';
-    IF l_existe_columna = 0 THEN
-        ALTER TABLE campaign_entry
-            ADD COLUMN id_url int unsigned,
-            ADD FOREIGN KEY (id_url) REFERENCES campaign_external_url (id);
-    END IF;
-END;
-++
-DELIMITER ; ++
-
-CALL temp_campaign_external_url_2012_01_23();
-DROP PROCEDURE IF EXISTS temp_campaign_external_url_2012_01_23;
 
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;

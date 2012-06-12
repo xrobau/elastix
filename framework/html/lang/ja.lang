@@ -91,7 +91,6 @@ $arrLang=array(
 "Bad Format"=>"不正なフォーマット",
 "No option was selected"=>"オプション未選択",
 "Octets out of range"=>"ビット数範囲外",
-"Undefined validation type" => "Undefined validation type",
 
 //version 0.8
 //user
@@ -184,9 +183,5 @@ $arrLang=array(
 "You are not authorized to access to this page" => "You are not authorized to access to this page",
 "You need administrator privileges" => "You need administrator privileges",
 "Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

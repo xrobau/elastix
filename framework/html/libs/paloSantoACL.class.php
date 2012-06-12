@@ -95,113 +95,6 @@ class paloACL {
     }
 
     /**
-     * Procedimiento para obtener el listado de los usuarios existentes en los ACL. Se
-     * especifica un limite y un offset para obtener la data paginada.
-     *
-     * @param int   $limit    Si != NULL, indica el número de maximo de registros a devolver por consulta
-     * @param int   $offset   Si != NULL, indica el principio o desde donde parte la consulta
-     *
-     * @return array    Listado de usuarios en el siguiente formato, o FALSE en caso de error:
-     *  array(
-     *      array(id, name, description),
-     *      ...
-     *  )
-     */
-    function getUsersPaging($limit = NULL, $offset = NULL)
-    {
-        $arr_result = FALSE;
-        if (!is_null($limit) && !preg_match('/^[[:digit:]]+$/', "$limit")) {
-            $this->errMsg = "Limit is not numeric";
-            return FALSE;
-        }
-        if (!is_null($offset) && !preg_match('/^[[:digit:]]+$/', "$offset")) {
-            $this->errMsg = "Offset is not numeric";
-            return FALSE;
-        }
-
-        $this->errMsg = "";
-        $sPeticionSQL = "SELECT id, name, description,extension FROM acl_user limit $limit offset $offset";
-
-        $arr_result = $this->_DB->fetchTable($sPeticionSQL);
-        if (!is_array($arr_result)) {
-            $arr_result = FALSE;
-            $this->errMsg = $this->_DB->errMsg;
-        }
-        return $arr_result;
-    }
-
-    /**
-     * Procedimiento para obtener el listado de los grupos existentes en los ACL. Se
-     * especifica un limite y un offset para obtener la data paginada.
-     *
-     * @param int   $limit    Si != NULL, indica el número de maximo de registros a devolver por consulta
-     * @param int   $offset   Si != NULL, indica el principio o desde donde parte la consulta
-     *
-     * @return array    Listado de usuarios en el siguiente formato, o FALSE en caso de error:
-     *  array(
-     *      array(id, name, description),
-     *      ...
-     *  )
-     */
-    function getGroupsPaging($limit = NULL, $offset = NULL)
-    {
-        $arr_result = FALSE;
-        if (!is_null($limit) && !preg_match('/^[[:digit:]]+$/', "$limit")) {
-            $this->errMsg = "Limit is not numeric";
-            return FALSE;
-        }
-        if (!is_null($offset) && !preg_match('/^[[:digit:]]+$/', "$offset")) {
-            $this->errMsg = "Offset is not numeric";
-            return FALSE;
-        }
-        $this->errMsg = "";
-        $sPeticionSQL = "SELECT id, name, description FROM acl_group limit $limit offset $offset";
-
-        $arr_result = $this->_DB->fetchTable($sPeticionSQL);
-        if (!is_array($arr_result)) {
-            $arr_result = FALSE;
-            $this->errMsg = $this->_DB->errMsg;
-        }
-        return $arr_result;
-    }
-
-    /**
-     * Procedimiento para obtener la cantidad de usuarios existentes en los ACL.
-     *
-     * @return int    Cantidad de usuarios existentes, o NULL en caso de error:
-     */
-    function getNumUsers()
-    {
-        $this->errMsg = "";
-        $sPeticionSQL = "SELECT count(*) cnt FROM acl_user";
-
-        $data = $this->_DB->getFirstRowQuery($sPeticionSQL,true);
-        if (!is_array($data) || count($data) <= 0) {
-            $this->errMsg = $this->_DB->errMsg;
-            return NULL;
-        }
-        return $data['cnt'];
-    }
-
-    /**
-     * Procedimiento para obtener la cantidad de grupos existentes en los ACL.
-     *
-     * @return int    Cantidad de usuarios existentes, o NULL en caso de error:
-     */
-    function getNumGroups()
-    {
-        $this->errMsg = "";
-        $sPeticionSQL = "SELECT count(*) cnt FROM acl_group";
-
-        $data = $this->_DB->getFirstRowQuery($sPeticionSQL,true);
-        if (!is_array($data) || count($data) <= 0) {
-            $this->errMsg = $this->_DB->errMsg;
-            return NULL;
-        }
-        return $data['cnt'];
-    }
-
-    /**
      * Procedimiento para crear un nuevo usuario con hash MD5 de la clave ya proporcionada.
      *
      * @param string    $username       Login del usuario a crear
@@ -966,12 +859,12 @@ class paloACL {
     function getUserExtension($username)
     {
         $extension = null;
-        if (is_null($username)) {
+        if (!is_null($username) && !preg_match('/^[[:alnum:]]+$/', "$username")) {
             $this->errMsg = "Username is not valid";
         } else {
             $this->errMsg = "";
-            $sPeticionSQL = "SELECT extension FROM acl_user WHERE name = ?";
-            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, array($username));
+            $sPeticionSQL = "SELECT extension FROM acl_user WHERE name = '$username'";
+            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE);
             if ($result && is_array($result) && count($result)>0) {
                 $extension = $result[0];
             }else $this->errMsg = $this->_DB->errMsg;

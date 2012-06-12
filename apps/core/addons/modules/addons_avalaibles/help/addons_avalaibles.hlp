@@ -1,0 +1,32 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">
+        	Here you can download and/or buy addons that will allow you to extend Elastix's functionalities.
+        </p>
+        <p>The next list show the meaning of each number on the Figure 1:</p>
+        <ul style="list-style: decimal;">
+        	<li><b>Search: </b>To search addons by name.</li>
+        	<li>
+        		<b>Type of Addons: </b>To search addons by filter:
+        		<ul>
+        			<li><b>All:</b> All addons.</li>
+        			<li><b>Commercial: </b>Commercial Addons.</li>
+        			<li><b>NonCommercial: </b>NonCommercial Addons.</li>
+        		</ul>
+        	</li>
+        	<li><b>Install Button: </b>Allow to install a addon.</li>
+        	<li><b>Upgrade Button: </b>Allow to update a addon to the last version.</li>
+        	<li><b>Try it Button: </b>Allow to install a addon but in demo version. This option is only for commercial Addons</li>
+        	<li><b>Buy Button: </b>Option to buy a addon.</li>
+        	<li><b>Uninstall Button: </b>Allow to uninstall a addon.</li>
+        </ul>
+        <!-- Form to add images -->
+        <div><img src="../modules/{$node_id}/images/addons_img.png" border="0"></div>
+		<div align="center"><b>Figure 1</b></div>
+    </body>
+</html>

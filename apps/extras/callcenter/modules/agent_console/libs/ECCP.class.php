@@ -425,17 +425,6 @@ class ECCP
         return $xml_response->transfercall_response;
     }
 
-    public function atxfercall($extension)
-    {
-        $xml_request = new SimpleXMLElement("<request />");
-        $xml_cmdRequest = $xml_request->addChild('atxfercall');
-        $xml_cmdRequest->addChild('agent_number', $this->_agentNumber);
-        $xml_cmdRequest->addChild('agent_hash', $this->agentHash($this->_agentNumber, $this->_agentPass));
-        $xml_cmdRequest->addChild('extension', str_replace('&', '&amp;', $extension));
-        $xml_response = $this->send_request($xml_request);
-        return $xml_response->atxfercall_response;
-    }
-
     public function getcampaignstatus($campaign_type, $campaign_id)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -525,25 +514,5 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getcampaignlist_response;
     }
-
-    public function getcampaignqueuewait($campaign_type, $campaign_id)
-    {
-        $xml_request = new SimpleXMLElement("<request />");
-        $xml_cmdRequest = $xml_request->addChild('getcampaignqueuewait');
-        $xml_cmdRequest->addChild('campaign_type', str_replace('&', '&amp;', $campaign_type));
-        $xml_cmdRequest->addChild('campaign_id', str_replace('&', '&amp;', $campaign_id));
-        $xml_response = $this->send_request($xml_request);
-        return $xml_response->getcampaignqueuewait_response;
-    }
-
-    public function getagentqueues($sAgentNumber = NULL)
-    {
-        $xml_request = new SimpleXMLElement("<request />");
-        $xml_cmdRequest = $xml_request->addChild('getagentqueues');
-        $xml_cmdRequest->addChild('agent_number', is_null($sAgentNumber) ? $this->_agentNumber : $sAgentNumber);
-        $xml_response = $this->send_request($xml_request);
-        return $xml_response->getagentqueues_response;
-    }
-    
 }
 ?>

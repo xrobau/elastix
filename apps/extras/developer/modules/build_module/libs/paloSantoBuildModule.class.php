@@ -52,8 +52,8 @@ class paloSantoBuildModule {
 
     function Existe_Id_Module($id_module)
     {
-        $query = "SELECT count(*) FROM menu WHERE id=?";
-        $result = $this->_DB->getFirstRowQuery($query,false,array($id_module));
+        $query = "SELECT count(*) FROM menu WHERE id='$id_module'";
+        $result = $this->_DB->getFirstRowQuery($query);
         if($result[0] > 0)
             return true;
         else return false;
@@ -67,8 +67,8 @@ class paloSantoBuildModule {
         else
            $type = "framed";
                    
-        $query = "INSERT INTO menu values(?,?,?,?,?,'')";
-        $result = $this->_DB->genQuery($query,array($id_module,$parent,$url,$module_name,$type));
+        $query = "INSERT INTO menu values('$id_module', '$parent', '$url', '$module_name', '$type','')";
+        $result = $this->_DB->genQuery($query);
         if($result)
             return true;
         else{
@@ -79,8 +79,8 @@ class paloSantoBuildModule {
 
     function Insertar_Resource($id_module, $module_name)
     {
-        $query = "Insert into  acl_resource (name, description) values(?,?)";
-        $result = $this->_DB->genQuery($query,array($id_module,$module_name));
+        $query = "Insert into  acl_resource (name, description) values('$id_module', '$module_name');";
+        $result = $this->_DB->genQuery($query);
         if($result)
         {
             $result = $this->_DB->getLastInsertId();
@@ -97,8 +97,8 @@ class paloSantoBuildModule {
         $error = false;
         foreach($selected_gp as $value)
         {
-            $query = "Insert into acl_group_permission (id_action, id_group, id_resource) values(1,?,?)";
-            $result = $this->_DB->genQuery($query,array($value,$id_resource));
+            $query = "Insert into acl_group_permission (id_action, id_group, id_resource) values(1, $value, $id_resource);";
+            $result = $this->_DB->genQuery($query);
             if(!$result)
             {
                 $error = true;
@@ -196,14 +196,10 @@ class paloSantoBuildModule {
         $content = fread($gestor, filesize($file));
 
         if(is_array($arrForm) && count($arrForm) >0){
-	    $lang_module_name = str_replace('"','\"',$new_module_name);
-	    $lang_module_name = str_replace('$','\$',$lang_module_name);
-            $tmpLanguage = "\"$lang_module_name\" => \"$lang_module_name\",";
+            $tmpLanguage = "\"$new_module_name\" => \"$new_module_name\",";
             foreach($arrForm as $key => $names){
                 $arrName = explode("/",$names);
-		$translation = str_replace('"','\"',$arrName[0]);
-		$translation = str_replace('$','\$',$translation);
-                $tmpLanguage .= "\n\"$translation\" => \"$translation\",";
+                $tmpLanguage .= "\n\"$arrName[0]\" => \"$arrName[0]\",";
             }
         }
         $content = str_replace("{LANG_CONTENT}",$tmpLanguage, $content);
@@ -217,9 +213,7 @@ class paloSantoBuildModule {
 
     function Create_Module_Class_File($new_module_name, $new_id_module, $your_name, $ruta, $elastix_Version, $arrLang, $this_module_name, $email_module)
     {
-	$name_class = preg_replace("/\W/","_",$new_module_name);
-	$name_class = preg_replace("/_+/","_",$name_class);
-	$name_class = preg_replace("/_$/","",$name_class);
+        $name_class = str_replace(" ", "", $new_module_name);
         $filename = "paloSanto$name_class.class.php";
         $date = date('Y-m-d h:m:s');
 
@@ -255,11 +249,7 @@ class paloSantoBuildModule {
 
     function Create_Index_File($new_module_name, $new_id_module, $your_name, $ruta, $elastix_Version, $arrLang, $type, $this_module_name,$arrForm, $email_module)
     {
-        $name_class = preg_replace("/\W/","_",$new_module_name);
-	$name_class = preg_replace("/_+/","_",$name_class);
-	$name_class = preg_replace("/_$/","",$name_class);
-	$translateModuleName = str_replace('"','\"',$new_module_name);
-	$translateModuleName = str_replace('$','\$',$translateModuleName);
+        $name_class = str_replace(" ", "", $new_module_name);
         $filename = "index.php";
         $date = date('Y-m-d h:m:s');
         $field = array();
@@ -295,16 +285,12 @@ class paloSantoBuildModule {
             if(is_array($arrForm) && count($arrForm)>0){
                 foreach($arrForm as $key => $column){
                     //Para crear las lineas de los datos rows en el grid.
-                    $tmpNameColumn = preg_replace("/\W/","_",strtolower($column));
-		    $tmpNameColumn = preg_replace("/_+/","_",$tmpNameColumn);
-		    $tmpNameColumn = preg_replace("/_$/","",$tmpNameColumn);
-		    $translateColumn = str_replace('"','\"',$column);
-		    $translateColumn = str_replace('$','\$',$translateColumn);
+                    $tmpNameColumn = str_replace(" ","_",strtolower($column));
                     $blockRows .= "\n\t    \$arrTmp[$key] = \$value['$tmpNameColumn'];";
                     //Para crear las lineas de las columnas en el grid.
-                    $blockColumns .= "_tr(\"$translateColumn\"),";
+                    $blockColumns .= "_tr(\"$column\"),";
                     //Para crear las lineas del arreglo para el fitrado o busqueda.
-                    $blockFilters .= "\n\t    \"$tmpNameColumn\" => _tr(\"$translateColumn\"),";
+                    $blockFilters .= "\n\t    \"$tmpNameColumn\" => _tr(\"$column\"),";
                 }
                 $content = str_replace("{ARR_DATA_ROWS}",$blockRows,$content);
                 $content = str_replace("{ARR_NAME_COLUMNS}",$blockColumns,$content);
@@ -314,7 +300,6 @@ class paloSantoBuildModule {
              if(is_array($arrForm) && count($arrForm) >0){
                     foreach($arrForm as $key => $value){
                         $field = explode("/",$value);
-			$field[1] = rtrim($field[1]);
                         if(file_exists("$ruta/$this_module_name/libs/sources/fields_form/$field[1].s")){
                             $file_form = "$ruta/$this_module_name/libs/sources/fields_form/$field[1].s";
                                 if (!$gestor_form = fopen($file_form, 'r')) {
@@ -322,14 +307,10 @@ class paloSantoBuildModule {
                                     return false;
                                 }
                                 $content_file = fread($gestor_form, filesize($file_form));
-				$tmpfield = str_replace('"','\"',$field[0]);
-				$tmpfield = str_replace('$','\$',$tmpfield);
-				$tmpNameField =  preg_replace("/\W/","_",strtolower(trim($field[0])));
-				$tmpNameField =  preg_replace("/_+/","_",$tmpNameField);
-				$tmpNameField =  preg_replace("/_$/","",$tmpNameField);
-                                $content_file = str_replace("{LABEL_FIELD}", $tmpfield, $content_file);
-                                $content_file = str_replace("{NAME_FIELD}", $tmpNameField, $content_file);
+                                $content_file = str_replace("{LABEL_FIELD}", $field[0], $content_file);
+                                $content_file = str_replace("{NAME_FIELD}", str_replace(" ","_",strtolower(trim($field[0]))), $content_file);
                                 $content_form .= $content_file;
+
                                 fclose($gestor_form);
                             }
                     }
@@ -339,7 +320,7 @@ class paloSantoBuildModule {
 
 
         $content = str_replace("{NAME_CLASS}", "$name_class", $content);
-        $content = str_replace("{NEW_MODULE_NAME}", "$translateModuleName", $content);
+        $content = str_replace("{NEW_MODULE_NAME}", "$new_module_name", $content);
 
         fclose($gestor);
 
@@ -375,12 +356,9 @@ class paloSantoBuildModule {
                             $this->errMsg = $arrLang["It isn't possible to open file FORM for reading"]. ": $file";
                             return false;
                         }
-			$tmpFieldLabel = preg_replace("/\W/","_",strtolower(trim($field[0])));
-			$tmpFieldLabel = preg_replace("/_+/","_",$tmpFieldLabel);
-			$tmpFieldLabel = preg_replace("/_$/","",$tmpFieldLabel);
                         $content_file = fread($gestor_form, filesize($file_form));
-                        $content_file = str_replace("{FIELD_LABEL}", $tmpFieldLabel, $content_file);
-			$content_form .= $content_file;
+                        $content_file = str_replace("{FIELD_LABEL}", str_replace(" ","_",strtolower(trim($field[0]))), $content_file);
+						$content_form .= $content_file;
                         fclose($gestor_form);
                     }
                 }

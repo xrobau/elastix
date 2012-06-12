@@ -32,13 +32,20 @@ require_once "libs/paloSantoDB.class.php";
 require_once "libs/paloSantoGrid.class.php";
 require_once "libs/misc.lib.php";
 
-require_once "modules/agent_console/libs/elastix2.lib.php";
+if (!function_exists('_tr')) {
+    function _tr($s)
+    {
+        global $arrLang;
+        return isset($arrLang[$s]) ? $arrLang[$s] : $s;
+    }
+}
 
 function _moduleContent(&$smarty, $module_name)
 {  
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoReportsBreak.class.php";
 
+    global $arrLang;
     global $arrConf;
     $arrConf = array_merge($arrConf,$arrConfModule);
     // Obtengo la ruta del template a utilizar para generar el filtro.
@@ -46,7 +53,19 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    load_language_module($module_name);
+    // Obtengo el idioma actual utilizado en la aplicacion.
+    $Language = get_language();
+    // Include language file for EN, then for local, and merge the two.
+    $arrLangModule = NULL;
+    include_once("modules/$module_name/lang/en.lang");
+    $arrLangModule_file="modules/$module_name/lang/$Language.lang";
+    if (file_exists("$base_dir/$arrLangModule_file")) {
+        $arrLanEN = $arrLangModule;
+        include_once($arrLangModule_file);
+        $arrLangModule = array_merge($arrLanEN, $arrLangModule);
+    }
+    $arrLang = array_merge($arrLang, $arrLangModule);
+
 
     // Abrir conexión a la base de datos
     $pDB = new paloDB($arrConf['dsn_conn_database']);
@@ -69,13 +88,13 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         default:
-            $content = reportReportsBreak($smarty, $module_name, $local_templates_dir, $pDB);
+            $content = reportReportsBreak($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLangModule, $arrLang);
             break;
     }
     return $content;
 }
 
-function reportReportsBreak($smarty, $module_name, $local_templates_dir, &$pDB)
+function reportReportsBreak($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLangModule, $arrLang)
 {
     // Obtener rango de fechas de consulta. Si no existe, se asume día de hoy
     $sFechaInicio = date('d M Y');
@@ -217,7 +236,7 @@ function reportReportsBreak($smarty, $module_name, $local_templates_dir, &$pDB)
         }
         if ($bExportando)
             return $oGrid->fetchGridCSV($arrGrid, $arrData);
-        $sContenido = $oGrid->fetchGrid($arrGrid, $arrData);
+        $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);
         if (strpos($sContenido, '<form') === FALSE)
             $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
         return $sContenido;

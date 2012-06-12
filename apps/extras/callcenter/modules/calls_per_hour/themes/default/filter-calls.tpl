@@ -1,4 +1,7 @@
     <table width='100%' border='0'>
+        <tr>
+            <td align='left'>
+                <table>
                 <tr>
                     <td class='letra12'>{$fecha_ini.LABEL}<span  class='required'>*</span></td>
                     <td>{$fecha_ini.INPUT}</td>
@@ -16,5 +19,8 @@
                     <td>{$queue.INPUT}</td>
                     <td class='letra12'>&nbsp;</td>
                 </tr>
+                </table>
+            </td>
+        </tr>
     </table>
 

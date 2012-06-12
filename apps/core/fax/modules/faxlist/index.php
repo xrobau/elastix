@@ -70,33 +70,14 @@ function _moduleContent($smarty, $module_name)
 
 function listFax($smarty, $module_name, $local_templates_dir)
 {
-    $limit = 30;
-    $oFax  = new paloFax();
-    $total = $oFax->getTotalFax();
-
-    $oGrid = new paloSantoGrid($smarty);
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-    $oGrid->pagingShow(true);
-    $oGrid->setURL("?menu=faxlist");
-    $oGrid->setTitle(_tr("Virtual Fax List"));
-    $oGrid->setIcon("/modules/$module_name/images/fax_virtual_fax_list.png");
-
-    $arrColumns = array(
-        _tr("Virtual Fax Name"),
-        _tr("Fax Extension"),
-        _tr("Secret"),
-        _tr("Destination Email"),
-        _tr("Caller ID Name"),
-        _tr("Caller ID Number"),
-        _tr("Status"));
-    $oGrid->setColumns($arrColumns);
-    $offset = $oGrid->calculateOffset();
-
-    $arrFax       = $oFax->getFaxList($offset,$limit);
-    $arrFaxStatus = $oFax->getFaxStatus();
-
+    global $arrLang;
     $arrData = array();
+    $oFax    = new paloFax();
+    $arrFax  = $oFax->getFaxList();
+
+    $end = count($arrFax);
+    $arrFaxStatus = $oFax->getFaxStatus();
+ 
     foreach($arrFax as $fax) {
         $arrTmp    = array();
         $arrTmp[0] = "&nbsp;<a href='?menu=faxnew&action=view&id=".$fax['id']."'>".$fax['name']."</a>";
@@ -113,8 +94,30 @@ function listFax($smarty, $module_name, $local_templates_dir)
     $session['faxlist']['faxListStatus'] = $arrData;
     putSession($session);
 
-    $oGrid->setData($arrData);
-    return $oGrid->fetchGrid();
+    $arrGrid = array("title"    => $arrLang["Virtual Fax List"],
+                     "icon"     => "/modules/$module_name/images/kfaxview.png",
+                     "width"    => "99%",
+                     "start"    => ($end==0) ? 0 : 1,
+                     "end"      => $end,
+                     "total"    => $end,
+                     "columns"  => array(0 => array("name"      => $arrLang["Virtual Fax Name"],
+                                                    "property1" => ""),
+                                         1 => array("name"      => $arrLang["Fax Extension"], 
+                                                    "property1" => ""),
+                                         2 => array("name"      => $arrLang["Secret"],
+                                                    "property1" => ""),
+                                         3 => array("name"      => $arrLang["Destination Email"],
+                                                    "property1" => ""),
+                                         4 => array("name"      => $arrLang["Caller ID Name"],
+                                                    "property1" => ""),
+                                         5 => array("name"      => $arrLang["Caller ID Number"],
+                                                    "property1" => ""),
+                                         6 => array("name"      => $arrLang["Status"],
+                                                    "property1" => "")
+                                        )
+                    );
+    $oGrid = new paloSantoGrid($smarty);
+    return $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
 }
 
 function checkFaxStatus($function, $smarty, $module_name, $local_templates_dir, $arrConf, $arrLang)

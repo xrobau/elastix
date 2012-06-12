@@ -61,7 +61,7 @@ function _moduleContent(&$smarty, $module_name)
     //conexion resource
     $pDB    = new paloDB($arrConf['dsn_conn_database']);
     $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
-
+    
     //actions
     $action = getAction();
     $content = "";
@@ -102,7 +102,7 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
 
     //$_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:date("d M Y");
     //$_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
-
+    
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $idUserInt = $pACL->getIdUser($userAccount);
 
@@ -114,7 +114,7 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
 	$email = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
     }
 
-    if(isset($email) && $email!="" && preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
+    if(isset($email) && $email!="" && preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){	    
 	$_DATA['email'] = $email;
 	$rowsVacations = $pVacations->getMessageVacationByUser($email);
 	if(isset($rowsVacations) && $rowsVacations!=""){
@@ -125,7 +125,7 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
 	    $id = $rowsVacations['id'];
 	}else{
 	    $_DATA['subject'] = isset($_POST['subject'])?$_POST['subject']:_tr("Auto-Reply: Out of the office");
-	    $_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
+	    $_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I am sorry I am currently out of the office until {END_DATE}.\n\n----\nBest Regards.");
 	    $_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:date("d M Y");
 	    $_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
 	}
@@ -137,7 +137,7 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
 	$_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:date("d M Y");
 	$_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
 	$_DATA['subject'] = isset($_POST['subject'])?$_POST['subject']:_tr("Auto-Reply: Out of the office");
-	$_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
+	$_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I am sorry I am currently out of the office until {END_DATE}.\n\n----\nBest Regards.");
     }
     $smarty->assign("ID", $id); //persistence id with input hidden in tpl
 
@@ -311,7 +311,7 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
     $ini_date   = getParameter("ini_date");
     $end_date   = getParameter("end_date");
     $result     = "";
-
+    
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $idUserInt = $pACL->getIdUser($userAccount);
     $emails = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
@@ -471,7 +471,7 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
 		      $value['subject'] = _tr("Auto-Reply: Out of the office");
 
 		  if(!isset($value['body']) || $value['body'] == "")
-		      $value['body'] = _tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
+		      $value['body'] = _tr("I am sorry I am currently out of the office until {END_DATE}.\n\n----\nBest Regards.");
 
 		  $value['ini_date'] = isset($value['ini_date'])?$value['ini_date']:date("d M Y");
 		  $value['end_date'] = isset($value['end_date'])?$value['end_date']:date("d M Y");
@@ -498,18 +498,6 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
 	  $oFilterForm = new paloForm($smarty, $arrFormFilter);
 	  $smarty->assign("SHOW", $arrLang["Show"]);
 
-		$arrFilter = array(
-		"username" => $arrLang["Account"],
-		"vacation" => $arrLang["Vacations Activated"],
-				);
-
-	  if(!is_null($filter_field)){
-		$nameField = $arrFilter[$filter_field];
-	  }else{
-        $nameField = "";
-	  }
-
-	  $oGrid->addFilterControl(_tr("Filter applied: ").$nameField." = ".$filter_value, $_POST, array("filter_field" => "username" ,"filter_value" => ""));
 	  $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filterEmailGrid.tpl","",$_POST);
 	  //end section filter
 

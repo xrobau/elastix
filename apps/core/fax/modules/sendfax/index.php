@@ -121,7 +121,7 @@ function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $smarty->assign("EDIT", $arrLang["Edit"]);
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "/modules/$module_name/images/fax_virtual_fax_send_fax.png");
+    $smarty->assign("icon", "/modules/faxnew/images/kfaxview.png");
     //News
     $smarty->assign("file_upload", $arrLang["File Upload"]);
     $smarty->assign("text_area", $arrLang["Text Information"]);
@@ -178,7 +178,7 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
                 // Validation of type file
                 $ext = explode(".",$_FILES['file_record']['name']);
                 $size_ext = count($ext) - 1;
-				if(strtolower($ext[$size_ext])!="pdf" && $ext[$size_ext]!="tiff" && strtolower($ext[$size_ext])!="tif" && strtolower($ext[$size_ext])!="txt"){
+                if($ext[$size_ext]!="pdf" && $ext[$size_ext]!="tiff" && $ext[$size_ext]!="txt"){
                     $smarty->assign("mb_title", $arrLang["Validation Error"]);
                     $smarty->assign("mb_message", $arrLang["Wrong type of file"]);
                     return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
@@ -207,11 +207,9 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     
         $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
         exec("rm -rf $ruta_archivo");
-        $smarty->assign("SEND_FAX_SUCCESS",_tr('Fax has been sent correctly'));
-        $smarty->assign("SENDING_FAX",_tr('Sending Fax...'));
-          //Notification Sucessfull
-        //$smarty->assign("mb_title", $arrLang["Notification Sucessfull"].": ");
-        //$smarty->assign("mb_message", $arrLang["Fax has been sent correctly"]);
+        //Notification Sucessfull
+        $smarty->assign("mb_title", $arrLang["Notification Sucessfull"].": ");
+        $smarty->assign("mb_message", $arrLang["Fax has been sent correctly"]);
         return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
         //done by Ivette
     }

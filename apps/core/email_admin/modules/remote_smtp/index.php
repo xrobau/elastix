@@ -91,7 +91,6 @@ function viewFormEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, 
     }
     else{
         $_DATA['status'] = "off";
-		$_DATA['SMTP_Server'] = "custom";
     }
 
     $smarty->assign("CONFIGURATION_UPDATE",$arrLang['Save']);
@@ -158,9 +157,7 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
 
         $tls_enabled  = ($arrData['autentification']=="on")?true:false;
         $auth_enabled = ($arrData['user']!="" && $arrData['password']!="");
-        $isOK = ($arrData['status'] == 'on') 
-            ? $pEmailRelay->checkSMTP($arrData['relayhost'] , $arrData['port'], $arrData['user'], $arrData['password'], $auth_enabled, $tls_enabled)
-            : true;
+        $isOK = $pEmailRelay->checkSMTP($arrData['relayhost'] , $arrData['port'], $arrData['user'], $arrData['password'], $auth_enabled, $tls_enabled);
 
         if(is_array($isOK)){ //hay errores al tratar de verificar datos
             $errors = $isOK["ERROR"];

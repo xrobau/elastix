@@ -273,7 +273,7 @@ function new_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pDB
     $smarty->assign("SAVE", $arrLang["Save"]);
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("title", $arrLang["Address Book"]);
-    $smarty->assign("icon", "modules/$module_name/images/address_book.png");
+    $smarty->assign("icon", "images/list.png");
 
     $smarty->assign("new_contact", $arrLang["New Contact"]);
     $smarty->assign("address_from_csv", $arrLang["Address Book from CSV"]);
@@ -319,13 +319,12 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
     $id_user      = $pACL->getIdUser($user);
     $extension	  = $pACL->getUserExtension($user);
     if(is_null($extension) || $extension==""){
-	if($pACL->isUserAdministratorGroup($user)){
-            $smarty->assign("mb_title", _tr("MESSAGE"));
+	if($pACL->isUserAdministratorGroup($user))
 	    $smarty->assign("mb_message", "<b>".$arrLang["You don't have extension number associated with user"]."</b>");
-	}else
+	else
 	    $smarty->assign("mb_message", "<b>".$arrLang["contact_admin"]."</b>");
     }
-    if(getParameter('select_directory_type') != null && getParameter('select_directory_type')=='external')
+    if(getParametro('select_directory_type') != null && getParametro('select_directory_type')=='external')
     {
         $smarty->assign("external_sel",'selected=selected');
         $directory_type = 'external';
@@ -334,8 +333,6 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
         $smarty->assign("internal_sel",'selected=selected');
         $directory_type = 'internal';
     }
-    $_POST['select_directory_type'] = $directory_type;
-    
 
     $arrComboElements = array(  "name"        =>$arrLang["Name"],
                                 "telefono"    =>$arrLang["Phone Number"]);
@@ -371,29 +368,20 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
 
     $field   = NULL;
     $pattern = NULL;
-    $namePattern = NULL;
     $allowSelection = array("name", "telefono", "last_name");
-    if(isset($_POST['field']) and isset($_POST['pattern']) and ($_POST['pattern']!="")){
+    if(isset($_POST['field']) and isset($_POST['pattern'])){
         $field      = $_POST['field'];
         if (!in_array($field, $allowSelection))
             $field = "name";
-        $pattern    = "%$_POST[pattern]%";
-        $namePattern = $_POST['pattern'];
-        $nameField=$arrComboElements[$field];
+        $pattern    = $pDB->DBCAMPO('%'.$_POST['pattern'].'%');
     }
 
-    $arrFilter = array("select_directory_type"=>$directory_type,"field"=>$field,"pattern" =>$namePattern);
-
     $startDate = $endDate = date("Y-m-d H:i:s");
-    $oGrid  = new paloSantoGrid($smarty);
 
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Phone Directory")." =  $directory_type ", $arrFilter, array("select_directory_type" => "internal"),true);
-    $oGrid->addFilterControl(_tr("Filter applied ").$field." = $namePattern", $arrFilter, array("field" => "name","pattern" => ""));
-
-    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter_adress_book.tpl", "", $arrFilter);
+    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter_adress_book.tpl", "", $_POST);
 
     if($directory_type=='external')
-        $total = $padress_book->getAddressBook($id_user, NULL,NULL,$field,$pattern,TRUE);
+        $total = $padress_book->getAddressBook(NULL,NULL,$field,$pattern,TRUE,$id_user);
     else
         $total = $padress_book->getDeviceFreePBX($dsnAsterisk, NULL,NULL,$field,$pattern,TRUE);
 
@@ -402,19 +390,15 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
     $limit  = 20;
     $total  = $total_datos;
 
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-
-    $offset = $oGrid->calculateOffset();
-
-    $inicio = ($total == 0) ? 0 : $offset + 1;
+    $oGrid  = new paloSantoGrid($smarty);
+    $offset = $oGrid->getOffSet($limit,$total,(isset($_GET['nav']))?$_GET['nav']:NULL,(isset($_GET['start']))?$_GET['start']:NULL);
 
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
 
     //Fin Paginacion
 
     if($directory_type=='external')
-        $arrResult = $padress_book->getAddressBook($id_user, $limit, $offset, $field, $pattern, FALSE);
+        $arrResult = $padress_book->getAddressBook($limit, $offset, $field, $pattern, FALSE, $id_user);
     else
         $arrResult = $padress_book->getDeviceFreePBX($dsnAsterisk, $limit,$offset,$field,$pattern);
 
@@ -470,9 +454,8 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
         }
     }
     if($directory_type=='external'){
-	$name = "";
         $picture = $arrLang["picture"];
-        $oGrid->deleteList(_tr("Are you sure you wish to delete the contact."),"delete",_tr("Delete"));
+        $name = "<input type='submit' name='delete' value='{$arrLang["Delete"]}' class='button' onclick=\" return confirmSubmit('{$arrLang["Are you sure you wish to delete the contact."]}');\" />";
     }
     else {
         $name = "";
@@ -481,9 +464,9 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
 
     $arrGrid = array(   "title"    => $arrLang["Address Book"],
                         "url"      => array('menu' => $module_name, 'filter' => $pattern, 'select_directory_type' => $directory_type),
-                        "icon"     => "modules/$module_name/images/address_book.png",
+                        "icon"     => "images/list.png",
                         "width"    => "99%",
-                        "start"    => $inicio,
+                        "start"    => ($total==0) ? 0 : $offset + 1,
                         "end"      => $end,
                         "total"    => $total,
                         "columns"  => array(0 => array("name"      => $name,
@@ -504,7 +487,7 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
                                                     "property1" => "")
                                         )
                     );
-    $oGrid->addNew("new",_tr("New Contact"));
+
     $oGrid->showFilter(trim($htmlFilter));
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
     return $contenidoModulo;
@@ -1021,32 +1004,42 @@ function transferCALL($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2,
 
 function getAction()
 {
-    if(getParameter("edit"))
+    if(getParametro("edit"))
         return "edit"; 
-    else if(getParameter("commit"))
+    else if(getParametro("commit"))
         return "commit";
-    else if(getParameter("show"))
+    else if(getParametro("show"))
         return "show";
-    else if(getParameter("delete"))
+    else if(getParametro("delete"))
         return "delete";
-    else if(getParameter("new"))
+    else if(getParametro("new"))
         return "new";
-    else if(getParameter("save"))
+    else if(getParametro("save"))
         return "save";
-    else if(getParameter("delete"))
+    else if(getParametro("delete"))
         return "delete";
-    else if(getParameter("action")=="show")
+    else if(getParametro("action")=="show")
         return "show";
-    else if(getParameter("action")=="download_csv")
+    else if(getParametro("action")=="download_csv")
         return "download_csv";
-    else if(getParameter("action")=="call2phone")
+    else if(getParametro("action")=="call2phone")
         return "call2phone";
-    else if(getParameter("action")=="transfer_call")
+    else if(getParametro("action")=="transfer_call")
         return "transfer_call";
-    else if(getParameter("action")=="getImage")
+    else if(getParametro("action")=="getImage")
         return "getImage";
     else
         return "report";
+}
+
+function getParametro($parametro)
+{
+    if(isset($_POST[$parametro]))
+        return $_POST[$parametro];
+    else if(isset($_GET[$parametro]))
+        return $_GET[$parametro];
+    else
+        return null;
 }
 
 function download_address_book($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $arrLang, $arrConf, $dsn_agi_manager, $dsnAsterisk)
@@ -1060,8 +1053,8 @@ function download_address_book($smarty, $module_name, $local_templates_dir, $pDB
 
 function getImageContact($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $arrLang, $arrConf, $dsn_agi_manager, $dsnAsterisk)
 {
-    $contact_id = getParameter('idPhoto'); 
-    $thumbnail  = getParameter("thumbnail");
+    $contact_id = getParametro('idPhoto'); 
+    $thumbnail  = getParametro("thumbnail");
     $pACL       = new paloACL($pDB_2);
     $id_user    = $pACL->getIdUser($_SESSION["elastix_user"]);
     $ruta_destino = "/var/www/address_book_images";
@@ -1104,7 +1097,7 @@ function backup_contacts($pDB, $pDB_2, $arrLang)
     $fields = "name, last_name, telefono, email";
     $pACL         = new paloACL($pDB_2);
     $id_user      = $pACL->getIdUser($_SESSION["elastix_user"]);
-    $arrResult = $pAdressBook->getAddressBookByCsv($id_user, null, null, $fields, null, null);
+    $arrResult = $pAdressBook->getAddressBookByCsv(null, null, $fields, null, null, $id_user);
 
     if(!$arrResult)
     {

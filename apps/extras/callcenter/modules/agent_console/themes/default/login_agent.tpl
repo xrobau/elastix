@@ -41,7 +41,7 @@
 {elseif $NO_AGENTS}
 <p><h4 align="center">{$LABEL_NOAGENTS}</h4></p>
 {else}
-<form method="POST"  action="index.php?menu={$MODULE_NAME}" onsubmit="do_login(); return false;">
+<form method="POST"  action="index.php?menu={$MODULE_NAME}">
 
 <p>&nbsp;</p>
 <p>&nbsp;</p>
@@ -106,7 +106,7 @@
 
 {if $REANUDAR_VERIFICACION}
 <script type="text/javascript">
-do_checklogin();
+checkLogin();
 </script>
 {/if}
 {/if}

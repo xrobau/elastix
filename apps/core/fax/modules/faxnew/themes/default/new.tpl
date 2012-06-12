@@ -19,7 +19,7 @@
                 <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
             {/if}
         </tr>
-        </table>
+    </table>
     </td>
     </tr>
     <tr>

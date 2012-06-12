@@ -52,7 +52,7 @@ class paloSantoNavigation {
     }
 
 
-    function getArrParentIds($idMenuSelected)
+    function getArrParentIds($idMenuSelected)  
     {
         $idMenuActual = $this->getIdParentMenu($idMenuSelected);
         $limite=10;
@@ -62,7 +62,7 @@ class paloSantoNavigation {
                 break;
             } else {
                 $arrIdParentMenus[]=$idMenuActual;
-                $idMenuActual=$this->getIdParentMenu($idMenuActual);
+                $idMenuActual=$this->getIdParentMenu($idMenuActual);    
             }
             if($i==$limite) {
                 // Si llego hasta aqui, probablemente no encontre el menu raiz
@@ -71,7 +71,7 @@ class paloSantoNavigation {
         }
 
        $arrResult=array_reverse($arrIdParentMenus);
-       return $arrResult;
+       return $arrResult; 
     }
 
     function getArrChildrenIds($idMenuSelected)
@@ -81,7 +81,7 @@ class paloSantoNavigation {
         $idSubMenu=$this->getIdFirstSubMenu($idMenuSelected);
         for($i=1; $i<=$limite; $i++) {
             if($idSubMenu==false) {
-                break;
+                break;  
             } else {
                 $arrResult[]=$idSubMenu;
                 $idSubMenu=$this->getIdFirstSubMenu($idSubMenu);
@@ -95,12 +95,11 @@ class paloSantoNavigation {
     function showMenu($idMenuSelected)
     {
         $arrIds=array();
-		$isThirdLevel = "off";////////////////////////////////////////////////////////
         // Valido el menu que se paso como argumento
         if(!empty($idMenuSelected) and $this->isValidMenu($idMenuSelected)) {
 
             // Debo encontrar entonces sus menus padres y sus menus hijos
-
+    
             // Encuentro todos los menus padres
             $arrIdParentMenus=$this->getArrParentIds($idMenuSelected);
             if(is_array($arrIdParentMenus)) {
@@ -109,8 +108,8 @@ class paloSantoNavigation {
 
             // Le sumo el menu actual
             $arrIds[]=$idMenuSelected;
-
-            // Encuentro los menus hijos.
+    
+            // Encuentro los menus hijos. 
             $arrIdChildrenMenus=$this->getArrChildrenIds($idMenuSelected);
 
             if(is_array($arrIdChildrenMenus)) {
@@ -118,11 +117,11 @@ class paloSantoNavigation {
                     $arrIds[]=$elemento;
                 }
             }
-
-            //print_r($arrIds);
+   
+            //print_r($arrIds); 
             // En este punto $arrIds deberia contener los Ids activos de cada menu para los n niveles
             // Como por ahora manejamos hasta 3 niveles unicamente voy a mapear los 3 primeros elementos
-
+           
             $currMainMenu=NULL;
             $currSubMenu =NULL;
             $currSubMenu2=NULL;
@@ -186,41 +185,18 @@ class paloSantoNavigation {
 				$i++;
 			}
 			$arrMainMenu = array_merge($mainMenues, $secondMenues);
-			if(!isset($_SESSION['menu']) || $_SESSION['menu'] == "")
-				$_SESSION['menu'] = $currMainMenu;
-
-			$arrParentMenuId = $this->getIdParentMenu($_SESSION['menu']);
-			$menuBookmark = $_SESSION['menu'];
-			if($arrParentMenuId == ""){ // no tiene padre entonces es un menu de 1 nivel
-				$menuBookmark = $this->getIdFirstSubMenu($_SESSION['menu']);
-				$salRes = $this->getIdFirstSubMenu($menuBookmark);
-				if($salRes !== FALSE)
-					$menuBookmark = $salRes;
-			}else{ // tiene padre entonces puede ser un menu de 2 o 3 nivel
-				// se pregunta si tiene un primer hijo
-				$salRes = $this->getIdFirstSubMenu($_SESSION['menu']);
-				if($salRes !== FALSE){ // si no tiene un hijo entonces es de 2 nivel
-					$menuBookmark = $salRes;
-				}else{ // es de 3 nivel
-					$menuBookmark = $_SESSION['menu'];
-				}
-			}
-			putMenuAsHistory($menuBookmark);
-			$this->smarty->assign("SHORTCUT",$this->loadShortcut($currMainMenu));///////////////////////////
 		}
 		/************* para elastixneo**********/
 
         $this->smarty->assign("arrMainMenu", $arrMainMenu);
 
         // Get the submenu
-        $arrSubMenu = $this->getArrSubMenu($currMainMenu);
+        $arrSubMenu = $this->getArrSubMenu($currMainMenu); 
         $this->smarty->assign("arrSubMenu", $arrSubMenu);
 
         // Get the 3th level menu
-        $arrSubMenu2 = $this->getArrSubMenu($currSubMenu);
+        $arrSubMenu2 = $this->getArrSubMenu($currSubMenu); 
         $this->smarty->assign("arrSubMenu2", $arrSubMenu2);
-		if(is_array($arrSubMenu2) && !empty($arrSubMenu2))////////////////////////////////////////////
-			$isThirdLevel = "on";//////////////////////////////////////////////
 
         $arrSubMenuByParents = $this->getArrSubMenuByParents($currMainMenu); // added by eduardo
         $this->smarty->assign("arrSubMenuByParents", $arrSubMenuByParents);   // added by eduardo
@@ -231,7 +207,6 @@ class paloSantoNavigation {
         $this->smarty->assign("nameMainMenuSelected", $arrMainMenu[$currMainMenu]['Name']);
         $this->smarty->assign("nameSubMenuSelected",  $arrSubMenu[$currSubMenu]['Name']);
         $this->smarty->assign("nameSubMenu2Selected",  $arrSubMenu2[$currSubMenu2]['Name']);
-		$this->smarty->assign("isThirdLevel", $isThirdLevel);//////////////////////////////////////////////////////////
 
 	if(isset($_GET) && count($_GET) == 1 && isset($_GET['menu'])){
 	  $navigation  = $arrMainMenu[$currMainMenu]['Name']." >> ".$arrSubMenu[$currSubMenu]['Name'];
@@ -254,7 +229,7 @@ class paloSantoNavigation {
                 $idSub = $valorSub['id'];
                 //ALL: with this function getArrSubMenu our can to add the third level.
                 $arrTmp2 =$this->getArrSubMenu($idSub);
-                if($arrTmp2)$valorSub['Name'] = $valorSub['Name'].'...';
+                if($arrTmp2)$valorSub['Name'] = $valorSub['Name'].'...'; 
                 $arrMenuTotal[$idMenu] .= "<tr><td>";
                 $arrMenuTotal[$idMenu] .= "<a href=\"index.php?menu={$valorSub['id']}\">{$valorSub['Name']}</a>";
                 $arrMenuTotal[$idMenu] .= "</td></tr>";
@@ -270,10 +245,7 @@ class paloSantoNavigation {
     function getIdParentMenu($id)
     {
         // verificar que $this->arrMenu[$id] exista
-		if(isset($this->arrMenu[$id]))
-			return $this->arrMenu[$id]['IdParent'];
-		else
-			return NULL;
+        return $this->arrMenu[$id]['IdParent'];
     }
 
     function isValidMenu($id)
@@ -347,15 +319,30 @@ class paloSantoNavigation {
             return $this->includeModule($ultimoMenu);
         }
         else {
+/*
+            $retVar .= "<iframe id=\"myframe\" src=\"" . $this->arrMenu[$this->currSubMenu]['Link'] . "\" scrolling=\"no\" marginwidth=\"0\" ";
+            $retVar .= " marginheight=\"0\" ";
+            $retVar .= " frameborder=\"0\" vspace=\"0\" hspace=\"0\" style=\"overflow:visible; width:100%; display:none\"></iframe>";
+*/
+/*
+            $retVar  = "<iframe marginwidth=\"0\" marginheight=\"0\" style=\"border: 1px solid rgb(200, 200, 200); background-color: rgb(255, 255, 255);";
+            $retVar .= "\" src=\"" . $this->arrMenu[$this->currSubMenu]['Link'] . "\" name=\"myframe\" id=\"myframe\" frameborder=\"0\"";
+            $retVar .= " width=\"100%\"></iframe>";
+*/ 
+            /*Version 0.9 agregado variable $ip*/
+            $name_server = $this->obtenerNameServer();	
+            $ip_server   = $this->obtenerIpServer("eth0");
+            if($ip_server==null)
+                $ip_server="127.0.0.1";
 			$title = $bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2]['Name']:$this->arrMenu[$this->currSubMenu]['Name'];
 			$this->smarty->assign("title",$title);
 			$link=$bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2]['Link']:$this->arrMenu[$this->currSubMenu]['Link'];
-            $link = str_replace("{NAME_SERVER}", $_SERVER['SERVER_NAME'], $link);
-            $link = str_replace("{IP_SERVER}", $_SERVER['SERVER_ADDR'], $link);
+            $link = str_replace("{NAME_SERVER}",$name_server,$link);
+            $link = str_replace("{IP_SERVER}",$ip_server,$link);
 
             $retVar  = "<iframe marginwidth=\"0\" marginheight=\"0\" class=\"frameModule\"";
             $retVar .= "\" src=\"" . $link . "\" name=\"myframe\" id=\"myframe\" frameborder=\"0\"";
-            $retVar .= " width=\"100%\" onLoad=\"calcHeight();\"></iframe>";
+            $retVar .= " width=\"100%\" onLoad=\"calcHeight();\"></iframe>"; 
         }
         return $retVar;
     }
@@ -375,18 +362,36 @@ class paloSantoNavigation {
         }
     }
 
+    function obtenerIpServer($eth)
+    {
+        exec("which ifconfig 2>/dev/null||echo /sbin/ifconfig",$arrSalidaIfConfig,$flagSalidaIfConfig);
+        if($flagSalidaIfConfig==0 && is_array($arrSalidaIfConfig)  && count($arrSalidaIfConfig)>0){
+            exec("$arrSalidaIfConfig[0] $eth|gawk '/inet addr/{print $2}'|gawk -F: '{print $2}'",$arrSalidaIpServer,$flagSalidaIpServer);
+            if($flagSalidaIpServer==0 && is_array($arrSalidaIpServer)  && count($arrSalidaIpServer)>0){
+                return $arrSalidaIpServer[0];
+            }
+            return false;
+        }
+        return false;
+    }
+
+    function obtenerNameServer()
+    {
+        return $_SERVER['SERVER_NAME']; 
+    }
+
     /**
     *
     * Description:
     *   This function put the tags css and js per each module and the libs of the framework
     *
-    * Example:
-    *   $array = putHEAD_MODULE_HTML('calendar');
+    * Example: 
+    *   $array = obtainFiles('calendar');
     *
-    * Developer:
+    * Developer: 
     *   Eduardo Cueva
     *
-    * e-mail:
+    * e-mail: 
     *   ecueva@palosanto.com
     */
     function putHEAD_MODULE_HTML($menuLibs)  // add by eduardo
@@ -398,7 +403,7 @@ class paloSantoNavigation {
         $directory = "$documentRoot/modules/".$menuLibs;
         $HEADER_MODULES = "";
         if(is_dir($directory)){
-            // FIXED: The theme default shouldn't be static.
+            // FIXED: The theme default shouldn't be static. 
             $directoryScrips = "$documentRoot/modules/$menuLibs/themes/default/js/";
             $directoryCss = "$documentRoot/modules/$menuLibs/themes/default/css/";
             if(is_dir($directoryScrips)){
@@ -424,7 +429,7 @@ class paloSantoNavigation {
         $this->smarty->assign("HEADER_MODULES",$HEADER_MODULES);
     }
 
-    function putHEAD_JQUERY_HTML()
+    function putHEAD_JQUERY_HTML()   
     {
         $documentRoot = $_SERVER["DOCUMENT_ROOT"];
         // include file of framework
@@ -464,87 +469,22 @@ class paloSantoNavigation {
     * Description:
     *   This function Obtain all name files into of a directory where $type is the extension of the file
     *
-    * Example:
+    * Example: 
     *   $array = obtainFiles('/var/www/html/modules/calendar/themes/default/js/','js');
     *
-    * Developer:
+    * Developer: 
     *   Eduardo Cueva
     *
-    * e-mail:
+    * e-mail: 
     *   ecueva@palosanto.com
     */
     function obtainFiles($dir,$type){
-		$files =  glob($dir."/{*.$type}",GLOB_BRACE);
-		$names ="";
-		foreach ($files as $ima)
-			$names[]=array_pop(explode("/",$ima));
-		if(!$names) return false;
-		return $names;
+            $files =  glob($dir."/{*.$type}",GLOB_BRACE);
+            $names ="";
+            foreach ($files as $ima)
+                $names[]=array_pop(explode("/",$ima));
+            if(!$names) return false;
+            return $names;
     }
-
-	function loadShortcut()
-	{
-		include_once "libs/paloSantoACL.class.php";
-		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
-		$pACL = new paloACL($pdbACL);
-		$uid = $pACL->getIdUser($user);
-		$htmlData = "";
-		$menu = "";
-		if($uid===FALSE)
-			$htmlData = "";
-		else{
-			$bookmarks = "SELECT aus.id AS id, ar.description AS name, ar.id AS id_menu, ar.name AS namemenu FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
-			$history   = "SELECT aus.id AS id, ar.description AS name, ar.id AS id_menu, ar.name AS namemenu FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'history' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
-
-			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
-			if ($arr_result1 !== FALSE && count($arr_result1) > 0) {
-				$htmlData .= "<div id='neo-bookmarkID' class='neo-historybox-tabon'>"._tr("Bookmarks")."</div>";
-				$cont = 1;
-				foreach($arr_result1 as $key => $value){
-					if($cont < count($arr_result1))
-						$htmlData .= "<div class='neo-historybox-tab' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['namemenu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-					else
-						$htmlData .= "<div class='neo-historybox-tabmid' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['namemenu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-					$cont++;
-				}
-			}else{
-				$htmlData .= "<div id='neo-bookmarkID' class='neo-historybox-tabon' style='display: none'>"._tr("Bookmarks")."</div>";
-			}
-
-			$arr_result2 = $pdbACL->fetchTable($history, TRUE, array($uid));
-			if ($arr_result2 !== FALSE && count($arr_result2) > 0) {
-				$htmlData .= "<div id='neo-historyID' class='neo-historybox-tabon'>"._tr("History")."</div>";
-				foreach($arr_result2 as $key2 => $value2){
-					$htmlData .= "<div class='neo-historybox-tab'><a href='index.php?menu=".$value2['namemenu']."' >"._tr($value2['name'])."</a></div>";
-				}
-			}else{
-				$htmlData .= "<div id='neo-historyID' class='neo-historybox-tabon'>"._tr("History")."</div>";
-			}
-		}
-		return $htmlData;
-	}
-
-	function getFirstChildOfMainMenuByBookmark($menu_session)
-	{
-		$arrParentMenuId = $this->getIdParentMenu($menu_session);
-		$menuBookmark = $menu_session;
-		if($arrParentMenuId == "" || !isset($arrParentMenuId)){ // no tiene padre entonces es un menu de 1 nivel
-			$menuBookmark = $this->getIdFirstSubMenu($menu_session);
-			$salRes = $this->getIdFirstSubMenu($menuBookmark);
-			if($salRes !== FALSE)
-				$menuBookmark = $salRes;
-		}else{ // tiene padre entonces puede ser un menu de 2 o 3 nivel
-			// se pregunta si tiene un primer hijo
-			$salRes = $this->getIdFirstSubMenu($menu_session);
-			if($salRes !== FALSE){ // si no tiene un hijo entonces es de 2 nivel
-				$menuBookmark = $salRes;
-			}else{ // es de 3 nivel
-				$menuBookmark = $menu_session;
-			}
-		}
-		return $menuBookmark;
-	}
 }
 ?>

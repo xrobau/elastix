@@ -1,1 +1,1 @@
---DROP DATABASE mya2billing;
+DROP DATABASE mya2billing;

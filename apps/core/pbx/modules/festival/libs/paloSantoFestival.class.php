@@ -44,22 +44,86 @@ class paloSantoFestival{
         $this->errMsg = "";
     }
 
+     /**
+     * Function that verifies if the file /usr/share/festival/festival.scm is correctly configurated
+     *
+     * @return  boolean   true if the file if the file is correctly configurated, false if not
+     */
+    function isConfigurationFileCorrect()
+    {
+        $path = "/usr/share/festival/festival.scm";
+        if(file_exists($path)){
+            $defineTemplate = <<<TEMP
+(define (tts_textasterisk string mode)
+"(tts_textasterisk STRING MODE)
+Apply tts to STRING. This function is specifically designed for
+use in server mode so a single function call may synthesize the
+string.
+This function name may be added to the server safe functions."
+   (let ((wholeutt (utt.synth (eval (list 'Utterance 'Text string)))))
+      (utt.wave.resample wholeutt 8000)
+      (utt.wave.rescale wholeutt 5)
+      (utt.send.wave.client wholeutt)))
+TEMP;
+            $fileString = file_get_contents($path);
+            if(strstr($fileString,$defineTemplate))
+                return true;
+            else
+                return false;
+        }
+        else{
+            $this->errMsg = _tr("File could not be found in the following path").": $path";
+            return false;
+        }
+    }
+
+    /**
+     * Function that writes the necessary configuration in file /usr/share/festival/festival.scm in order to festival works
+     *
+     * @return  boolean   true if the file was correctly configurated, false if not
+     */
+    function setConfigurationFile()
+    {
+        $path = "/usr/share/festival/festival.scm";
+        exec("sudo -u root chown asterisk.asterisk $path");
+        $file = fopen($path,'a');
+        $result = true;
+        if($file){
+            fwrite($file,"\n");
+            $defineTemplate = <<<TEMP
+(define (tts_textasterisk string mode)
+"(tts_textasterisk STRING MODE)
+Apply tts to STRING. This function is specifically designed for
+use in server mode so a single function call may synthesize the
+string.
+This function name may be added to the server safe functions."
+   (let ((wholeutt (utt.synth (eval (list 'Utterance 'Text string)))))
+      (utt.wave.resample wholeutt 8000)
+      (utt.wave.rescale wholeutt 5)
+      (utt.send.wave.client wholeutt)))
+TEMP;
+            $result = fwrite($file,$defineTemplate);
+            fclose($file);
+        }
+        exec("sudo -u root chown root.root $path");
+        if(!$file || $result === false){
+            $this->errMsg = _tr("Could not write the configuration on file").": $path";
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Function that activates the festival service
      *
-     * @return  int   0 if festival was activated, 1 if festival.scm was modified
-     *                before activation, -1 on error.
+     * @return  boolean   true if the festival service is correctly activated, false if not
      */
     function activateFestival()
     {
-        $output = $retval = NULL;
-        exec('/usr/bin/elastix-helper festival --enable 2>&1', $output, $retval);
-        if ($retval != 0) {
-            $this->errMsg = implode(' ', $output);
-            return -1;
-        }
-        if (count($output) > 0 && strpos($output[0], 'Modified') !== FALSE) return 1;
-        return 0;        
+        exec("sudo /sbin/service generic-cloexec festival restart",$result,$status);
+        if($status==0)
+            return true;
+        return false;
     }
 
     /**
@@ -69,9 +133,10 @@ class paloSantoFestival{
      */
     function deactivateFestival()
     {
-        $output = $retval = NULL;
-        exec('/usr/bin/elastix-helper festival --disable', $output, $retval);
-        return ($retval == 0);        
+        exec("sudo /sbin/service generic-cloexec festival stop",$result,$status);
+        if($status==0)
+            return true;
+        return false;
     }
 
     /**
@@ -81,14 +146,16 @@ class paloSantoFestival{
      */
     function isFestivalActivated()
     {
-        // Se requiere usar pidof directamente en lugar de service festival status
-        // https://bugzilla.redhat.com/show_bug.cgi?id=684881
-        $output = $retval = NULL;
-        exec('/sbin/pidof -o $$ -o $PPID -o %PPID -x festival', $output, $retval);
-        foreach ($output as $linea) {
-        	if (preg_match('/\d+/', $linea)) return TRUE;
+        exec("sudo /sbin/service generic-cloexec festival status",$result,$status);
+        if($status == 0){
+            if(preg_match("/pid/",$result[0]))
+                return true;
+            return false;
         }
-        return FALSE;
+        else{
+            $this->errMsg = _tr("Error determining status of festival");
+            return false;
+        }
     }
 
     /**

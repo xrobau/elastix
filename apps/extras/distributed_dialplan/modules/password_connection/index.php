@@ -113,11 +113,9 @@ function viewFormPasswordConnection($smarty, $module_name, $local_templates_dir,
     $smarty->assign("EDIT", $arrLang["Edit"]);
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "images/list.png");
+    $smarty->assign("IMG", "images/list.png");
     $smarty->assign("GET_PASS", $arrLang["Get my Secret Connection"]);
     $smarty->assign("message", $arrLang["Message"]);
-    $smarty->assign("title_note", _tr("NOTE:"));
-    $smarty->assign("note", _tr("This Key will be exclusively used for establishing connections with Remote Servers with the purpose of sharing the dialplan. Here you will be able to send this Key, via email, to the administrators of the Remote Servers you want to share your dialplan with."));
     if(!$pPasswordConnection->statusGeneralRegistration())
 	$smarty->assign("mb_message", _tr("Please first fill the form in <a href='?menu=general_information'>General Information</a>"));
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["Password Connection"], $_DATA);
@@ -227,7 +225,6 @@ function sendEmail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
                     $mail->Send();
                 }
             }
-            $smarty->assign("mb_title", _tr('MESSAGE').":");
             $smarty->assign("mb_message", $arrLang['sucessful_send']);
             $_POST = "";
             $content = viewFormPasswordConnection($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);

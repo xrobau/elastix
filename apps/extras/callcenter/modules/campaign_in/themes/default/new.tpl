@@ -103,13 +103,6 @@ var rte_script = new richTextEditor('rte_script');
             {/if}
             </td>
 	  </tr>
-      <tr  height='30'>
-        <td align='right'>{$external_url.LABEL}:<br><br>
-        <a href="?menu=external_url">
-        <b>{$label_manage_external_url}</b></a><br><hr>
-        </td>
-        <td valign="top" colspan='2'>{$external_url.INPUT}{if $label_manage_external_url}&nbsp;{/if}</td>
-      </tr>
       <tr height='30'>
 		<td align='right'>{$queue.LABEL}: <span  class="required">*</span><br><br>
 		<a href="?menu=pbxconfig&amp;display=queues">

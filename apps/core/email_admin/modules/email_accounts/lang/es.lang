@@ -75,10 +75,6 @@ $arrLangModule=array(
 "Export Accounts" => "Exportar Cuentas",
 "The file could not be opened" => "El archivo no pudo ser abierto",
 "At least three parameters are needed" => "Por lo menos tres parámetros son necesarios",
-"Error saving the account" => "Error al guardar la cuenta",
-"Edit quota" => "Editar cuota",
-"The following account does not exist" => "La siguiente cuenta no existe",
-"Edit quota to" => "Editar cuota a",
-"The passwords must not be empty" => "La contraseña no debe ser vacia"
+"Error saving the account" => "Error al guardar la cuenta"
 );
 ?>

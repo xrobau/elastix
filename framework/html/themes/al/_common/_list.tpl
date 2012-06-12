@@ -1,79 +1,12 @@
 <form  method="POST" style="margin-bottom:0;" action="{$url}">
     <table width="{$width}" align="center" border="0" cellpadding="0" cellspacing="0">
-      {if !empty($arrActions) || !empty($contentFilter)}
-        <tr>
-            <td>
-                <table cellpadding="0" cellspacing="0" border="0" class="filterForm" width="100%">
-                  {if !empty($arrActions)}
-                    <tr>
-                      <td style="padding:0px;">
-                        {foreach from=$arrActions key=k item=accion name=actions}
-                            {if $smarty.foreach.actions.first}
-                                {assign var="clase" value="table-header-row-filter-first"}
-                            {else}
-                                {assign var="clase" value="table-header-row-filter"}
-                            {/if}
-
-                            {if $accion.type eq 'link'}
-                                <a href="{$accion.task}" class="table-action" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} >
-                                    <div class="{$clase}" >
-                                        {if !empty($accion.icon)}
-                                            <img border="0" src="{$accion.icon}" align="absmiddle"  />&nbsp;
-                                        {/if}
-                                        {$accion.alt}
-                                    </div>
-                                </a>
-                            {elseif $accion.type eq 'button'}
-                                <div class="{$clase}">
-                                    {if !empty($accion.icon)}
-                                        <img border="0" src="{$accion.icon}" align="absmiddle"  />
-                                    {/if}
-                                    <input type="button" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="table-action" />
-                                </div> 
-                            {elseif $accion.type eq 'submit'}
-                                <div class="{$clase}">
-                                    {if !empty($accion.icon)}
-                                        <img border="0" src="{$accion.icon}" align="absmiddle"  />
-                                    {/if}
-                                    <input type="submit" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="table-action" />
-                                </div>                 
-                            {elseif $accion.type eq 'text'}
-                                <div class="{$clase}" style="cursor:default">                    
-                                    <input type="text"   id="{$accion.name}" name="{$accion.name}" value="{$accion.value}" {if !empty($accion.onkeypress)} onkeypress="{$accion.onkeypress}" {/if} style="height:22px" />
-                                    <input type="submit" name="{$accion.task}" value="{$accion.alt}" class="table-action" />
-                                </div>                 
-                            {elseif $accion.type eq 'combo'}
-                                <div class="{$clase}" style="cursor:default">
-                                    <select name="{$accion.name}" id="{$accion.name}" {if !empty($accion.onchange)} onchange="{$accion.onchange}" {/if}>
-                                        {if !empty($accion.selected)}
-                                            {html_options options=$accion.arrOptions selected=$accion.selected}
-                                        {else}
-                                            {html_options options=$accion.arrOptions}
-                                        {/if}
-                                    </select>
-                                    {if !empty($accion.task)} 
-                                        <input type="submit" name="{$accion.task}" value="{$accion.alt}" class="table-action" />
-                                    {/if}
-                                </div> 
-                            {elseif $accion.type eq 'html'}
-                                <div class="{$clase}">
-                                    {$accion.html}
-                                </div>
-                            {/if}
-                        {/foreach}
-                      </td>
-                    </tr>
-                  {/if}
-                  {if !empty($contentFilter)}
-                    <tr>
-                        <td>{$contentFilter}</td>
-                    </tr>
-                  {/if}
-                </table>
-            </td>
-        </tr>
-      {/if}
-     <tr>
+    {if !empty($contentFilter)}
+    <tr>
+        <td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="filterForm"><tr><td>{$contentFilter}</td></tr></table>
+        </td>
+    </tr>
+    {/if}
+    <tr>
         <td>
         <table class="table_data" align="center" cellspacing="0" cellpadding="0" width="100%">
             <tr class="table_navigation_row">
@@ -125,9 +58,9 @@
             </td>
             </tr>
             <tr class="table_title_row">
-                {section name=columnNum loop=$numColumns start=0 step=1}
-                    <td class="table_title_row">{$header[$smarty.section.columnNum.index].name}&nbsp;</td>
-                {/section}
+            {section name=columnNum loop=$numColumns start=0 step=1}
+            <td class="table_title_row">{$header[$smarty.section.columnNum.index].name}&nbsp;</td>
+            {/section}
             </tr>
             {foreach from=$arrData key=k item=data name=filas}
                 {if $data.ctrl eq 'separator_line'}

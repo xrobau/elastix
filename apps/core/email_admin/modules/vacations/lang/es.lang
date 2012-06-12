@@ -54,7 +54,7 @@ $arrLangModule=array(
 "Emails Account" => "Cuentas de Emails",
 "Vacations Activated" => "Vacaciones Activada",
 "Auto-Reply: Out of the office" => "Auto-Respuesta: Fuera de la Oficina",
-"I will be out of the office until {END_DATE}.\n\n----\nBest Regards." => "Estaré fuera de la oficina hasta {END_DATE}.\n\n----\nSaludos.",
+"I am sorry I am currently out of the office until {END_DATE}.\n\n----\nBest Regards." => "Lo siento en estos momentos me encuentro fuera de la oficina hasta {END_DATE}.\n\n----\nSaludos.",
 "yes" => "si",
 "no" => "no",
 "Please contact your administrator if your user does not have an email account otherwise add it to System->User management->Users" => "Por favor comuniquese con su administrador si no posee una cuenta de correo caso contrario agregela en <a href='?menu=userlist'>System->User management->Users</a>",

@@ -27,8 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoRules.class.php,v 1.2 2010-12-20 03:09:47 Alberto Santos asantos@palosanto.com Exp $ */
 
-require_once "libs/paloSantoNetwork.class.php";
-
+require_once "libs/paloSantoConfig.class.php";
 class paloSantoRules {
     var $_DB;       // Reference to the active DB
     var $errMsg;    // Variable where the errors are stored
@@ -301,8 +300,6 @@ class paloSantoRules {
      */
     function obtener_nombres_interfases_red() 
     {
-        $pNet = new paloNetwork();
-
         //Se buscan las descripciones en la base de datos
         $arr_datos=array();
         $arr_descrip=array();
@@ -314,7 +311,7 @@ class paloSantoRules {
                 $arr_descrip[$fila['dev']]=array("nombre"=>$fila['nombre'],"descripcion"=>$fila['descripcion']);
         }
         
-        $arr_interfases=$pNet->obtener_interfases_red();    
+        $arr_interfases=$this->obtener_interfases_red();    
         foreach($arr_interfases as $dev=>$datos){
             if(array_key_exists($dev,$arr_descrip))
                 //$arr_datos[$dev]=$arr_descrip[$dev]['nombre']." - ".$datos['Name'];
@@ -324,6 +321,106 @@ class paloSantoRules {
         }
                 
         return $arr_datos;                                 
+    }
+
+    /**
+     * Function that returns the network interfaces in the system
+     *
+     * @return array      Array with the interfaces
+     */
+    private function obtener_interfases_red()
+    {
+        $str = shell_exec("/sbin/ifconfig");
+    
+        $arrIfconfig = explode("\n", $str);
+    
+        $arrModelosInterfasesRed = $this->obtener_modelos_interfases_red();
+    
+        foreach($arrIfconfig as $lineaIfconfig) {
+    
+            unset($arrReg);
+    
+            if(ereg("^eth(([[:digit:]]{1,3})(:([[:digit:]]{1,3}))?)[[:space:]]+", $lineaIfconfig, $arrReg)) {
+                $interfaseActual = "eth" . $arrReg[1];
+                $nombreInterfase = "Ethernet $arrReg[2]";
+                if(!empty($arrReg[3])) {
+                    $nombreInterfase .= " Alias $arrReg[4]";
+                } else if(isset($arrModelosInterfasesRed[$interfaseActual])) {
+                    $arrIf[$interfaseActual]["HW_info"] = $arrModelosInterfasesRed[$interfaseActual];        
+                }
+                $arrIf[$interfaseActual]["Name"] = $nombreInterfase;
+            }
+    
+            if(ereg("^(lo)[[:space:]]+", $lineaIfconfig, $arrReg)) {
+                    $interfaseActual = $arrReg[1];
+                    $arrIf[$interfaseActual]["Name"] = "Loopback";
+            }
+    
+            // debo tambien poder determinar cuando se termina una segmento de interfase
+            // no solo cuando comienza como se hace en los dos parrafos anteriores
+        
+            if(ereg("HWaddr ([ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2}:" .
+                    "[ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2})", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["HWaddr"] = $arrReg[1];
+            }
+    
+            if(ereg("^[[:space:]]+inet addr:([[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3})",
+            $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["Inet Addr"] = $arrReg[1];
+            }
+    
+            if(ereg("[[:space:]]+Mask:([[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3})$",
+            $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["Mask"] = $arrReg[1];
+            }
+    
+            // TODO: El siguiente patron de matching es muy simple, cambiar
+            if(ereg(" RUNNING ", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["Running"] = "Yes";
+            }
+    
+            if(ereg("^[[:space:]]+RX packets:([[:digit:]]{1,20})", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["RX packets"] = $arrReg[1];
+            }
+    
+            if(ereg("^[[:space:]]+RX bytes:([[:digit:]]{1,20})", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["RX bytes"] = $arrReg[1];
+            }
+    
+            if(ereg("^[[:space:]]+TX packets:([[:digit:]]{1,20})", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["TX packets"] = $arrReg[1];
+            }
+    
+            if(ereg("[[:space:]]+TX bytes:([[:digit:]]{1,20})", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["TX bytes"] = $arrReg[1];
+            }
+    
+        }
+        
+        return $arrIf;
+    }
+
+    /**
+     * Function that returns the model of the network interfaces in the system
+     *
+     * @return array      Array with the model of the interfaces
+     */
+    private function obtener_modelos_interfases_red()
+    {
+        $arrSalida=array();
+        $str = shell_exec("/bin/dmesg");
+    
+        $arrLineasDmesg = explode("\n", $str);
+    
+        foreach($arrLineasDmesg as $lineaDmesg) {
+            //if(ereg("^(eth[[:digit:]]{1,3})", $lineaDmesg, $arrReg)) {
+            //    echo $lineaDmesg;
+            //}
+            if(ereg("^(eth[[:digit:]]{1,3}):[[:space:]]+(.*)$", $lineaDmesg, $arrReg) and ereg(" at ", $lineaDmesg)) {
+                $arrSalida[$arrReg[1]] = $arrReg[2];
+            }
+        }
+        return $arrSalida;
     }
 
     /**
@@ -384,6 +481,82 @@ class paloSantoRules {
         return true;
     }
 */
+    /**
+     * Function that converts a decimal number in a binary number of 8 digits ( 10 = 00001010)
+     *
+     * @param integer    $octeto         Number to be converted to binary
+     *
+     * @return string    A string with the equivalent in binary of the given number
+     */ 
+    private function bitstr_8($octeto)
+    {
+        $octeto = ((int)$octeto) & 0x000000FF;
+        $lista_bits = array_fill(0, 8, "0");
+        for ($i = 0; $i < 8; $i++)
+        {
+            $mascara = 0x80 >> $i;
+            if ($octeto & $mascara) $lista_bits[$i] = "1";
+        }
+        return implode("", $lista_bits);
+    }
+
+    /**
+     * Function that returns the network address of the given ip for the given mask 
+     *
+     * @param string     $ip         ip address
+     * @param string     $mask       mask of the ip address (in decimal format)    
+     *
+     * @return string    String with the network address
+     */ 
+    function getNetAdress($ip,$mask)
+    {
+        $octetos_ip = explode(".",$ip);
+        for($k=0;$k<$mask;$k++)
+            $octetos_mask[$k] = "1";
+        $res = 32 - $k;
+        for($k=0;$k<$res;$k++)
+            $octetos_mask[] = "0";
+        $k = 0;
+        for($i=0;$i<4;$i++){
+            $binary_octeto_ip = $this->bitstr_8($octetos_ip[$i]);
+            for($j=0;$j<8;$j++){
+                if($binary_octeto_ip[$j] && $octetos_mask[$k])
+                    $netAddress_binary[] = "1";
+                else
+                    $netAddress_binary[] = "0";
+                $k++;
+            }
+        }
+       $netAddress_decimal = $this->binaryOctetos_to_decimalOctetos($netAddress_binary);
+       return $netAddress_decimal; 
+    }
+
+    /**
+     * Function that converts an ip address in binary format to decimal format 
+     *
+     * @param string     $binary         ip address in binary format 
+     *
+     * @return string    String with ip address in decimal format
+     */     
+    private function binaryOctetos_to_decimalOctetos($binary)
+    {
+        $k=0;
+        $decimalOctetos="";
+        for($i=0;$i<4;$i++){
+            $sum = 128;
+            $result = 0;
+            for($j=0;$j<8;$j++){
+                if($binary[$k])
+                    $result = $result + $sum;
+                $k++;
+                $sum = $sum/2;
+            }
+            $decimalOctetos.=$result;
+            if($i!=3)
+                $decimalOctetos.=".";
+        }
+        return $decimalOctetos;
+    }
 
     /**
      * Function that sets a new order for an especific rule 

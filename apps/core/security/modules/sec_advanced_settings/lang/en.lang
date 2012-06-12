@@ -51,11 +51,6 @@ $arrLangModule=array(
 "Unauthorized"                                     => "Unauthorized",
 "You are not authorized to access this page."      => "You are not authorized to access this page.",
 "Enable direct access (Non-embedded) to FreePBX in \"Security >> Advanced Security Settings\" menu." 
-						   => "Enable direct access (Non-embedded) to FreePBX in \"Security >> Advanced Security Settings\" menu.",
-'Enable anonymous SIP calls' => 'Enable anonymous SIP calls',
-'Anonymous SIP calls are now enabled.' => 'Anonymous SIP calls are now enabled',
-'Anonymous SIP calls are now disabled.' => 'Anonymous SIP calls are now disabled',
-'Anonymous SIP calls cannot be enabled.' => 'Anonymous SIP calls cannot be enabled.',
-'Anonymous SIP calls cannot be disabled.' => 'Anonymous SIP calls cannot be disabled.',
+						   => "Enable direct access (Non-embedded) to FreePBX in \"Security >> Advanced Security Settings\" menu."
 );
 ?>

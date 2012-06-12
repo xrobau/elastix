@@ -28,25 +28,14 @@
   +----------------------------------------------------------------------+
   $Id: dialerd,v 1.2 2008/09/08 18:29:36 alex Exp $ */
 declare(ticks=1);
-ini_set('memory_limit', -1);        // Permitir al programa usar toda la memoria que necesite
 ini_set('display_errors', 0);       // Impedir que los errores de STDERR se copien en STDOUT
-ini_set('error_reporting', E_ALL & ~E_STRICT);  // Mostrar advertencias además de errores
+ini_set('error_reporting', E_ALL);  // Mostrar advertencias además de errores
 
 // Agregar directorio de script a la lista de rutas a buscar para require()
 ini_set('include_path', dirname($argv[0]).":".ini_get('include_path'));
 
-// Auto-cargado de las clases en base al nombre de archivo
-function __autoload($sNombreClase) {
-    $sNombreBase = $sNombreClase.'.class.php';
-    foreach (explode(':', ini_get('include_path')) as $sDirInclude) {
-        if (file_exists($sDirInclude.'/'.$sNombreBase)) {
-            require_once($sNombreBase);
-            return;
-        }
-    }
-}
-
 require_once('Console/Getopt.php');     // Parseo de opciones de línea de comando
+require_once('AppLogger.class.php');    // Log del demonio
 
 $gsNombreSignal = NULL; // Número de la señal atrapada
 $goAppLog = NULL;
@@ -64,25 +53,8 @@ if (PEAR::isError($opt)) {
 $iRes = main($opt,
     'Marcador predictivo en PHP',
     'dialerd',
-    'HubProcess');
+    'DialerProcess');
 exit($iRes);
-
-function load_default_timezone()
-{
-    $sDefaultTimezone = @date_default_timezone_get();
-    if ($sDefaultTimezone == 'UTC') {
-        $sDefaultTimezone = 'America/New_York';
-        if (file_exists('/etc/sysconfig/clock')) {
-            foreach (file('/etc/sysconfig/clock') as $s) {
-                $regs = NULL;
-                if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
-                    $sDefaultTimezone = $regs[1];
-                }
-            }
-        }
-    }
-    date_default_timezone_set($sDefaultTimezone);
-}
 
 // Punto de entrada del programa demonio (plantilla)
 function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
@@ -93,7 +65,7 @@ function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
 
     // Para silenciar avisos de fecha/hora
     if (function_exists('date_default_timezone_get')) {
-        load_default_timezone();
+        date_default_timezone_set(date_default_timezone_get());
     }
 
     // Esta es la tabla de procesos a monitorear
@@ -122,9 +94,7 @@ function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
     // Intentar cargar el archivo de configuración
     $infoConfig = parse_ini_file($sArchivoConfig, TRUE);
     if (count($infoConfig) == 0) {
-        if (function_exists('error_get_last')) 
-            $e = error_get_last();
-        else $e = array('message' => 'Failed to open file, error_get_last() not available.');
+        $e = error_get_last();
         die("Could not load configuration file: $e[message]\n");
     }
     if (!isset($infoConfig['basedir'])) $infoConfig['basedir'] = $sRutaTrabajo;
@@ -174,7 +144,7 @@ $sBannerLog
     Powered by Palosanto Solutions
 
       Please report bugs/issues at:
-        http://bugs.elastix.org/
+        a_villacis@palosanto.com
 ----------------------------------------
 BANNEREND;
         $oMainLog->output($sBanner);
@@ -297,7 +267,7 @@ function finalizarInstanciaPrevia($sNombrePID)
         $regs = NULL;
         $contenido = file($sNombrePID);
         if (!is_array($contenido)) die("Unable to open PID file '$sNombrePID'\n");
-        if (count($contenido) > 0 && preg_match('/^(\d+)/', $contenido[0], $regs)) {
+        if (count($contenido) > 0 && ereg('^([[:digit:]]+)', $contenido[0], $regs)) {
             $iPid = $regs[1];
             if (posix_kill($iPid, 0)) {
                 /* El siguiente método es específico de Linux y no funcionará 
@@ -361,6 +331,9 @@ function iniciarTarea($sNombreDemonio, $sNombreTarea, $infoConfig, &$oMainLog)
 
     set_error_handler('daemonErrorHandler');
 
+    // Intentar cargar el archivo que define la tarea
+    require_once("$sNombreTarea.class.php");
+
     // Verificar que el nombre de la clase que implementa el proceso es válido
     if (!class_exists($sNombreTarea)) {
         $oMainLog->output("FATAL: (internal) Invalid process classname '$sNombreTarea'");
@@ -419,14 +392,10 @@ function iniciarTarea($sNombreDemonio, $sNombreTarea, $infoConfig, &$oMainLog)
                     	$bContinuar = FALSE;
                     } elseif ($gsNombreSignal == SIGHUP) {
                     	$oMainLog->output("PID = ".posix_getpid().", process received signal $gsNombreSignal, switching logs...");
-                        if (method_exists($oProceso, 'propagarSIGHUP')) {
-                           $oMainLog->output("PID = ".posix_getpid().", process has handler for SIGHUP, calling...");
-                           $oProceso->propagarSIGHUP();
-                        }
                     	$oMainLog->reopen();
                     	$oMainLog->output("PID = ".posix_getpid().", process received signal $gsNombreSignal, using new log.");
-                        $gsNombreSignal = NULL;
                     }
+                   	$gsNombreSignal = NULL;
                 }
             }
 

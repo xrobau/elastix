@@ -34,8 +34,6 @@ require_once("$root/modules/address_book/libs/paloSantoAdressBook.class.php");
 require_once("$root/modules/address_book/configs/default.conf.php");
 require_once("$root/libs/paloSantoACL.class.php");
 require_once("$root/libs/paloSantoDB.class.php");
-require_once("$root/libs/JSON.php");
-require_once("$root/libs/paloSantoLongPoll.class.php");
 
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
     require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
@@ -43,7 +41,7 @@ if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 
 $arrConf = array_merge($arrConf,$arrConfModule);
 
-class core_AddressBook extends LongPoll
+class core_AddressBook
 {
     /**
      * Description error message
@@ -81,13 +79,6 @@ class core_AddressBook extends LongPoll
     private $_dbCache;
 
     /**
-     * String with the id of a queue
-     *
-     * @var string
-     */
-    private $_ticket;
-
-    /**
      * Constructor
      *
      */
@@ -96,10 +87,8 @@ class core_AddressBook extends LongPoll
         $this->_id_user = NULL;
         $this->_pACL = NULL;
         $this->errMsg = NULL;
-	$this->_ticket = NULL;
         $this->_dbCache = array();
         $this->_astDSN = generarDSNSistema('asteriskuser', 'asterisk', $_SERVER['DOCUMENT_ROOT'].'/');
-	parent::__construct();
     }
 
     /**
@@ -292,7 +281,7 @@ class core_AddressBook extends LongPoll
      * @param   integer   $limit              (Optional) limit records or all if omitted
      * @return  array     Array with the information of the contact list (address book).
      */
-    function listAddressBook($addressBookType, $offset, $limit, $id_contact=NULL)
+    function listAddressBook($addressBookType, $offset, $limit)
     {
         global $arrConf;
 
@@ -316,18 +305,11 @@ class core_AddressBook extends LongPoll
         $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
 
         $addressBook = new paloAdressBook($dbAddressBook);
+
         switch ($addressBookType) {
         case 'internal':
             // Contar número de elementos de la agenda interna
-	    if(isset($id_contact)){
-		$field_name = "telefono";
-		$field_pattern = $id_contact;
-	    }
-	    else{
-		$field_name = NULL;
-		$field_pattern = NULL;
-	    }
-            $rs = $addressBook->getDeviceFreePBX($this->_astDSN, NULL, NULL, $field_name, $field_pattern, TRUE);
+            $rs = $addressBook->getDeviceFreePBX($this->_astDSN, NULL, NULL, NULL, NULL, TRUE);
             if (!is_array($rs)) {
                 $this->errMsg["fc"] = 'DBERROR';
                 $this->errMsg["fm"] = 'Database operation failed';
@@ -339,7 +321,7 @@ class core_AddressBook extends LongPoll
             if (!isset($limit)) $limit = $iNumTotal;
 
             // Recuperar la agenda interna
-            $agendaInterna = $addressBook->getDeviceFreePBX($this->_astDSN, $limit, $offset, $field_name, $field_pattern);
+            $agendaInterna = $addressBook->getDeviceFreePBX($this->_astDSN, $limit, $offset);
             if (!is_array($agendaInterna)) {
                 $this->errMsg["fc"] = 'DBERROR';
                 $this->errMsg["fm"] = 'Database operation failed';
@@ -349,12 +331,12 @@ class core_AddressBook extends LongPoll
             }
             $listaEmails = $addressBook->getMailsFromVoicemail();
             foreach ($agendaInterna as $tuplaAgenda) {
-		$extension[] = array(
-		    'id'    =>  $tuplaAgenda['id'],
-		    'phone' =>  $tuplaAgenda['id'],
-		    'name'  =>  $tuplaAgenda['description'],
-		    'email' =>  ((isset($listaEmails[$tuplaAgenda['id']]) && trim($listaEmails[$tuplaAgenda['id']]) != '') ? $listaEmails[$tuplaAgenda['id']] : NULL),
-		);
+                $extension[] = array(
+                    'id'    =>  $tuplaAgenda['id'],
+                    'phone' =>  $tuplaAgenda['id'],
+                    'name'  =>  $tuplaAgenda['description'],
+                    'email' =>  ((isset($listaEmails[$tuplaAgenda['id']]) && trim($listaEmails[$tuplaAgenda['id']]) != '') ? $listaEmails[$tuplaAgenda['id']] : NULL),
+                );
             }
             break;
         case 'external':
@@ -366,18 +348,10 @@ class core_AddressBook extends LongPoll
              * diseño de la función getAddressBook, se requiere poner un filtro 
              * de mentira, porque de lo contrario, la función ignora id_user, y
              * devuelve los contactos de todos los usuarios. */ 
-	    if(isset($id_contact)){
-		$field_name = "id";
-		$field_pattern = $id_contact;
-	    }
-	    else{
-		$field_name = "name";
-		$field_pattern = "%%";
-	    }
             $rs = $addressBook->getAddressBook(
-                $id_user, NULL, NULL, 
-                $field_name, $field_pattern,
-                TRUE);
+                NULL, NULL, 
+                'name', "'%%'",
+                TRUE, $id_user);
 
             if (!is_array($rs)) {
                 $this->errMsg["fc"] = 'DBERROR';
@@ -394,9 +368,9 @@ class core_AddressBook extends LongPoll
              * de lo contrario, la función ignora id_user, y devuelve los 
              * contactos de todos los usuarios. */ 
             $agendaExterna = $addressBook->getAddressBook(
-                $id_user, $limit, $offset, 
-                $field_name, $field_pattern, 
-                FALSE);
+                $limit, $offset, 
+                'name', "'%%'", 
+                FALSE, $id_user);
             if (!is_array($agendaExterna)) {
                 $this->errMsg["fc"] = 'DBERROR';
                 $this->errMsg["fm"] = 'Database operation failed';
@@ -405,15 +379,14 @@ class core_AddressBook extends LongPoll
                 return false;
             }
             foreach ($agendaExterna as $tuplaAgenda) {
-		$extension[] = array(
-		    'id'            =>  $tuplaAgenda['id'],
-		    'phone'         =>  $tuplaAgenda['telefono'],
-		    'name'          =>  $tuplaAgenda['name'].' '.$tuplaAgenda['last_name'],
-		    'first_name'    =>  $tuplaAgenda['name'],
-		    'last_name'     =>  $tuplaAgenda['last_name'],
-		    'email'         =>  (trim($tuplaAgenda['email']) == '' ? NULL : $tuplaAgenda['email']),
-		    'shared'	    =>  ($tuplaAgenda["status"] == 'isPrivate') ? "no" : "yes",
-		);
+                $extension[] = array(
+                    'id'            =>  $tuplaAgenda['id'],
+                    'phone'         =>  $tuplaAgenda['telefono'],
+                    'name'          =>  $tuplaAgenda['name'].' '.$tuplaAgenda['last_name'],
+                    'first_name'    =>  $tuplaAgenda['name'],
+                    'last_name'     =>  $tuplaAgenda['last_name'],
+                    'email'         =>  (trim($tuplaAgenda['email']) == '' ? NULL : $tuplaAgenda['email']),
+                );
             }
             break;
         }
@@ -432,7 +405,7 @@ class core_AddressBook extends LongPoll
      * @param   string    $email            (Optional) Email of the new contact
      * @return  boolean   True if the contact was successfully added, or false if an error exists
      */
-    function addAddressBookContact($phone, $first_name, $last_name, $email, $getIdInserted=FALSE)
+    function addAddressBookContact($phone, $first_name, $last_name, $email)
     {
         global $arrConf;
 
@@ -471,66 +444,6 @@ class core_AddressBook extends LongPoll
         );
         $result = $addressBook->addContact($data);
         if (!$result) {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to write data to external phonebook - '.$addressBook->_DB->errMsg;
-            $this->errMsg["cn"] = get_class($addressBook);
-            return false;
-        }
-	if($getIdInserted)
-	    return $dbAddressBook->getLastInsertId();
-	else
-	    return true;
-    }
-
-    function updateContact($id, $phone, $first_name, $last_name, $email)
-    {
-	global $arrConf;
-
-        if (!$this->_checkUserAuthorized('address_book')) return false;
-
-        $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
-        $addressBook = new paloAdressBook($dbAddressBook);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-	$contactData = $addressBook->contactData($id,$id_user);
-	if(!is_array($contactData) || count($contactData) == 0){
-	    $this->errMsg["fc"] = 'PARAMERROR';
-            $this->errMsg["fm"] = 'Invalid id contact';
-            $this->errMsg["fd"] = 'Contact do not exist';
-            $this->errMsg["cn"] = get_class($this);
-            return false;
-	}
-
-	if (isset($phone) && !preg_match('/^\d+$/', $phone)) {
-            $this->errMsg["fc"] = 'PARAMERROR';
-            $this->errMsg["fm"] = 'Invalid format';
-            $this->errMsg["fd"] = 'Invalid phone, must be numeric string';
-            $this->errMsg["cn"] = get_class($this);
-            return false;
-        }
-
-	$first_name = (isset($first_name))?$first_name:$contactData["name"];
-	$last_name = (isset($last_name))?$last_name:$contactData["last_name"];
-	$phone = (isset($phone))?$phone:$contactData["telefono"];
-	$email = (isset($email))?$email:$contactData["email"];
-	$data = array(
-            $first_name,
-            $last_name,
-            $phone,
-            $email,
-            $id_user,
-            $contactData["picture"],   // picture
-            $contactData["address"],   // address
-            $contactData["company"],   // company
-            $contactData["notes"],   // notes
-            $contactData["status"],    // status
-        );
-	$result = $addressBook->updateContact($data,$id);
-	if (!$result) {
             $this->errMsg["fc"] = 'DBERROR';
             $this->errMsg["fm"] = 'Database operation failed';
             $this->errMsg["fd"] = 'Unable to write data to external phonebook - '.$addressBook->_DB->errMsg;
@@ -594,336 +507,6 @@ class core_AddressBook extends LongPoll
             unlink('/var/www/address_book_images/'.$tupla['picture']);
         }
         return true;
-    }
-
-    public function getContactImage($id, $thumbnail)
-    {
-	global $arrConf;
-
-        if (!$this->_checkUserAuthorized('address_book')) return false;
-
-        $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
-        $addressBook = new paloAdressBook($dbAddressBook);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-        // Validar que el ID está presente y es numérico
-        if (!isset($id) || !preg_match('/^\d+$/', $id)) {
-            $this->errMsg["fc"] = 'PARAMERROR';
-            $this->errMsg["fm"] = 'Invalid format';
-            $this->errMsg["fd"] = 'Invalid ID, must be positive integer';
-            $this->errMsg["cn"] = get_class($this);
-            return false;
-        }
-
-        // Verificar si el contacto existe y pertenece al usuario logoneado
-        $tupla = $addressBook->contactData($id, $id_user);
-	if (!is_array($tupla)) {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to read data from external phonebook - '.$addressBook->_DB->errMsg;
-            $this->errMsg["cn"] = get_class($addressBook);
-            return false;
-        }
-
-	$ruta_destino = "/var/www/address_book_images";
-	$arrIm = explode(".",$tupla['picture']);
-	$typeImage = $arrIm[count($arrIm)-1];
-	if($thumbnail=="yes"){
-	    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user_Thumbnail.png";
-	    $image = $ruta_destino."/".$id."_Thumbnail.$typeImage";
-	}
-	else{
-	    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user.png";
-	    $image = $ruta_destino."/".$tupla['picture'];
-	}
-	if(is_file($image)){
-	    if(strtolower($typeImage) == "png"){
-		Header("Content-type: image/png"); 
-		$im = imagecreatefromPng($image); 
-		ImagePng($im); // Mostramos la imagen 
-		ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen 
-	    }else{
-		Header("Content-type: image/jpeg"); 
-		$im = imagecreatefromJpeg($image); 
-		ImageJpeg($im); // Mostramos la imagen 
-		ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen 
-	    }
-	}else{
-	    Header("Content-type: image/png"); 
-	    $image = file_get_contents($imgDefault); 
-	    return $image;
-	}
-    }
-
-    /**
-     * This function creates a queue for the differential sync
-     *
-     * @param   string   $data      String containing the JSON data to be sync   
-     *
-     * @return  mixed    returns the ticket of the queue, or false if an error exists
-     */
-    public function contactDifferentialSync($data)
-    {
-        global $arrConf;
-
-        if (!$this->_checkUserAuthorized('address_book')) return false;
-
-        $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
-        $addressBook = new paloAdressBook($dbAddressBook);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-       
-        $result = $addressBook->addQueue($data,"contact",$id_user);
-        if (!$result) {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to write data - '.$addressBook->_DB->errMsg;
-            $this->errMsg["cn"] = get_class($addressBook);
-            return false;
-        }
-	else
-	    return $result;
-    }
-
-    /**
-     * This function gets the status of a queue and returns the data to be sync in the client.
-     * Uses the long poll method
-     *
-     * @param   string   $ticket     Ticket of the queue   
-     *
-     * @return  mixed    returns an array with the data to be sync, or an array with an informative
-     *                   message if the timeout has been reached and the queue is still unsolved,
-     *			 or false if an error exists
-     */
-    public function getStatusQueue($ticket)
-    {
-        if (!$this->_checkUserAuthorized('address_book')) return false;
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-	$this->_ticket = $ticket;
-
-	// Se llama al método definido en la clase LongPoll. Para establecer una conexión permanente con el cliente
-	$data = $this->run();
-	if(is_null($data)){
-	    $result["status"] = "The ticket is still in the queue";
-	    return $result;
-	}
-	elseif($data === false)
-	    return false;
-	else
-	    return $data;
-    }
-
-    /**
-     * This function gets all the contacts of the authenticated user in the server
-     *
-     * @return  mixed    returns an array with all the contacts, or false if an error exists
-     */
-    public function getFullSync()
-    {
-	global $arrConf;
-
-        if (!$this->_checkUserAuthorized('address_book')) return false;
-
-        $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
-        $addressBook = new paloAdressBook($dbAddressBook);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-	$contacts = $addressBook->getUserContacts($id_user);
-	if($contacts === FALSE){
-	    $this->errMsg["fc"] = 'DBERROR';
-	    $this->errMsg["fm"] = 'Database operation failed';
-	    $this->errMsg["fd"] = 'Unable to get data - '.$addressBook->_DB->errMsg;
-	    $this->errMsg["cn"] = get_class($addressBook);
-	    return false;
-	}
-	else{
-	    $result["last_sync"] = time();
-	    //TODO: Este work around habrá que quitarlo cuando se cambie en la base el campo "telefono" por "phone"
-	    foreach($contacts as $key => $value){
-		$contacts[$key]["phone"] = $value["telefono"];
-		unset($contacts[$key]["telefono"]);
-	    }
-	    $result["contacts"] = $contacts;
-	    return $result;
-	}
-    }
-
-    /**
-     * This function gets the md5 hash for the data verification integrity of all the contacts
-     *
-     * @param   string   $fields      String containing the JSON of the fields to be verified    
-     *
-     * @return  mixed    returns an array with the hash, or false if an error exists
-     */
-    public function getHash($fields)
-    {
-	global $arrConf;
-
-        if (!$this->_checkUserAuthorized('address_book')) return false;
-
-        $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
-        $addressBook = new paloAdressBook($dbAddressBook);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-	$json = new Services_JSON();
-	$fields = $json->decode($fields);
-
-	if(is_array($fields)){
-	    //Se eliminan valores repetidos
-	    $fields = array_unique($fields);
-	    $key = array_search("id",$fields); // Se elimina el campo id en caso de que lo envie el cliente
-	    if($key !== FALSE)
-		unset($fields[$key]);
-	}
-
-	if(!is_array($fields) || count($fields) == 0 ){
-	    $this->errMsg["fc"] = 'PARAMERROR';
-	    $this->errMsg["fm"] = 'Wrong parameter';
-	    $this->errMsg["fd"] = "The parameter \"fields\" must be an array json serialized and must contain at least one value different than \"id\".";
-	    $this->errMsg["cn"] = get_class($this);
-	    return false;
-	}
-
-	//TODO: Este arreglo contiene los campos de la tabla "contact", quiza se deba buscar una manera más eficiente de protegerse contra inyección de sql
-	$arrFields = array("id","name","last_name","telefono","extension","email","iduser","picture","address","company","notes","status","last_update");
-	$counter = 1;
-	$queryFields = "id,";
-	foreach($fields as $value){
-	    if(!in_array($value,$arrFields)){
-		$result["error"] = "Some field/s do not exist in the server";
-		return $result;
-	    }
-	    if($counter == count($fields))
-		$queryFields .= $value;
-	    else
-		$queryFields .= $value.",";
-	    $counter++;
-	}
-	$result = $addressBook->getUserContacts($id_user,$queryFields);
-	if($result === FALSE){
-	    $this->errMsg["fc"] = 'DBERROR';
-	    $this->errMsg["fm"] = 'Database operation failed';
-	    $this->errMsg["fd"] = 'Unable to get data - '.$addressBook->_DB->errMsg;
-	    $this->errMsg["cn"] = get_class($addressBook);
-	    return false;
-	}
-	$contacts_json = $json->encode($result);
-	$hash = md5($contacts_json);
-	$response["hash"] = $hash;
-	return $response;
-    }
-
-    /**
-     * This function query the status of the ticket of a queue, if it is unsolved returns NULL,
-     * but if it is solved it will get the data to be sync in the client. 
-     *
-     * @return  mixed    returns an array with the data to be sync in the client, or NULL it the ticket
-     *			 is unsolved or false if an error exists
-     */
-    protected function getData()
-    {
-	global $arrConf;
-
-	$dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
-        $addressBook = new paloAdressBook($dbAddressBook);
-
-	$data_ticket = $addressBook->getDataTicket($this->_ticket,$this->_id_user);
-	if(is_null($data_ticket)){
-	    $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to write data - '.$addressBook->_DB->errMsg;
-            $this->errMsg["cn"] = get_class($addressBook);
-            return false;
-	}
-	elseif(!$data_ticket){
-	    $this->errMsg["fc"] = 'PARAMERROR';
-            $this->errMsg["fm"] = 'Wrong ticket';
-            $this->errMsg["fd"] = "The ticket {$this->_ticket} does not exist or does not belong to you";
-            $this->errMsg["cn"] = get_class($addressBook);
-            return false;
-	}
-	else{
-	    if($data_ticket["status"] != "OK")
-		return null;
-	    else{
-		$result["status"] = "OK";
-		$json = new Services_JSON();
-		$data = $json->decode($data_ticket["data"]);
-		if(!isset($data->last_sync) || !isset($data->contacts)){
-		    $remove_queue = $addressBook->removeQueue($this->_ticket);
-		    if($remove_queue === false){
-			$this->errMsg["fc"] = 'DBERROR';
-			$this->errMsg["fm"] = 'Database operation failed';
-			$this->errMsg["fd"] = 'Unable to delete data - '.$addressBook->_DB->errMsg;
-			$this->errMsg["cn"] = get_class($addressBook);
-			return false;
-		    }
-		    $this->errMsg["fc"] = 'PARAMERROR';
-		    $this->errMsg["fm"] = 'Wrong data';
-		    $this->errMsg["fd"] = "The data of the ticket {$this->_ticket} is wrong or corrupted. This data has to be a JSON string containing the keywords \"last_sync\" and \"contacts\". The ticket will be deleted";
-		    $this->errMsg["cn"] = get_class($addressBook);
-		    return false;
-		}
-		if(!is_array($data->contacts)){
-		    $remove_queue = $addressBook->removeQueue($this->_ticket);
-		    if($remove_queue === false){
-			$this->errMsg["fc"] = 'DBERROR';
-			$this->errMsg["fm"] = 'Database operation failed';
-			$this->errMsg["fd"] = 'Unable to delete data - '.$addressBook->_DB->errMsg;
-			$this->errMsg["cn"] = get_class($addressBook);
-			return false;
-		    }
-		    $this->errMsg["fc"] = 'PARAMERROR';
-		    $this->errMsg["fm"] = 'Wrong data';
-		    $this->errMsg["fd"] = "The data of the contacts in ticket {$this->_ticket} is wrong or corrupted. It has to be an array. The ticket will be deleted";
-		    $this->errMsg["cn"] = get_class($addressBook);
-		    return false;
-		}
-		$last_sync = $data->last_sync;
-		if(isset($data_ticket["response_data"]) && !empty($data_ticket["response_data"]))
-		    $response_data = $json->decode($data_ticket["response_data"]);
-		else
-		    $response_data = array();
-		$contacts = $addressBook->getContactsAfterSync($last_sync,$data->contacts,$this->_id_user,$response_data);
-		if($contacts === false){
-		    $this->errMsg["fc"] = 'DBERROR';
-		    $this->errMsg["fm"] = 'Database operation failed';
-		    $this->errMsg["fd"] = 'Unable to get data - '.$addressBook->_DB->errMsg;
-		    $this->errMsg["cn"] = get_class($addressBook);
-		    return false;
-		}
-		else{
-		    $remove_queue = $addressBook->removeQueue($this->_ticket);
-		    if($remove_queue === false){
-			$this->errMsg["fc"] = 'DBERROR';
-			$this->errMsg["fm"] = 'Database operation failed';
-			$this->errMsg["fd"] = 'Unable to delete data - '.$addressBook->_DB->errMsg;
-			$this->errMsg["cn"] = get_class($addressBook);
-			return false;
-		    }
-		    else{
-			$result["last_sync"] = time();
-			$result["contacts"] = $contacts;
-			return $result;
-		    }
-		}
-	    }
-	}
     }
 
     /**

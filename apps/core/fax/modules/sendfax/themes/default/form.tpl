@@ -1,4 +1,3 @@
-
 <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
     <tr class="letra12">
         {if $mode eq 'input'}
@@ -6,7 +5,6 @@
             <input class="button" type="submit" name="save_new" value="{$SEND}">&nbsp;&nbsp;
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
-	<td align="center"><div id="statusFax" style="font-size:13px;color:red;"></div><div id="success_fax" style="display:none; color: blue; text-transform:uppercase;">{$SEND_FAX_SUCCESS}</div><div id="sending_fax" style="display:block; color: red;">{$SENDING_FAX}</div></td>
         {elseif $mode eq 'view'}
         <td align="left">
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
@@ -49,7 +47,7 @@
     <tr class="letra12" id='upload_option'>
         <td align="left"><b>{$record_Label}</b></td>
         <td align="left">
-            <input name="file_record" id="file_record" type="file" value="{$file_record_name}" size='30' />&nbsp;&nbsp;<span style='font-size: 11px; margin-left:15px;'><b>{$type_files}</b>pdf, tiff, txt</span>
+            <input name="file_record" id="file_record" type="file" value="{$file_record_name}" size='30' />&nbsp;&nbsp;<span style='font-size: 11px;'><b>{$type_files}</b>pdf, tiff, txt</span>
         </td>
     </tr>
 

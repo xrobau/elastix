@@ -3,7 +3,7 @@
     PrincipalFileAastra nos retorna el contenido del archivo de configuracion de los EndPoint
     Aastra, para ello es necesario enviarle el DisplayName, id_device, secret, ipAdressServer
 */
-function PrincipalFileAastra($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer)
+function PrincipalFileAastra($DisplayName, $id_device, $secret, $ipAdressServer)
 {
     $content="#aastra default config file
 time server disabled: 0

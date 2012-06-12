@@ -50,14 +50,8 @@ class paloSantoSendFax {
     }
 
     /*HERE YOUR FUNCTIONS*/
-    function sendFax($faxexten, $destine, $data)
-    {
-        $faxhost = escapeshellarg("$faxexten@127.0.0.1");
-        $destine = escapeshellarg($destine);
-        $data = escapeshellarg($data);
-        $output = $retval = NULL;
-        exec("sendfax -D -h $faxhost -n -d $destine $data", $output, $retval);
-        return ($retval == 0);
+    function sendFax($faxexten, $destine, $data){
+        exec("sendfax -h $faxexten@127.0.0.1 -n -d $destine $data");
     }
 }
 ?>

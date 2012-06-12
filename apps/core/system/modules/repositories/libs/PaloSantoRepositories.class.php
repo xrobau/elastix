@@ -155,14 +155,5 @@ class PaloSantoRepositories
         else
             return '?';
     }
-
-    function obtenerArquitectura()
-    {
-        exec("uname -m",$arquitectura,$flag);
-        if($flag==0)
-            return $arquitectura[0];
-        else
-            return '?';
-    }
 }
 ?>

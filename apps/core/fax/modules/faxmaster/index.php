@@ -68,7 +68,7 @@ function _moduleContent(&$smarty, $module_name)
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^[a-zA-Z0-9_.\-]+@[a-zA-Z0-9_.\-]+\.[a-zA-Z0-9_.\-]+$"),
+                                                    "VALIDATION_EXTRA_PARAM" => "^[a-zA-Z0-9_\-\.]+@[a-zA-Z0-9_\-]+\.[a-zA-Z0-9\-\.]+$"),
                      );
 
 
@@ -78,8 +78,8 @@ function _moduleContent(&$smarty, $module_name)
     $arrDefault['fax_master']=get_key_settings($pDBSetting,"fax_master");
     $smarty->assign("FAXMASTER_MSG", $arrLang["Write the email address which will receive the notifications of received messages, errors and activity summary of the Fax Server"]);
 
-    $smarty->assign("icon", "/modules/$module_name/images/fax_fax_master.png"); 
-    $smarty->assign("APPLY_CHANGES", $arrLang["Save"]);
+    
+    $smarty->assign("APPLY_CHANGES", $arrLang["Apply changes"]);
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
     $strReturn = $oForm->fetchForm("$local_templates_dir/fax_master.tpl", $arrLang["Fax Master Configuration"], $arrDefault);
 
@@ -110,7 +110,7 @@ function _moduleContent(&$smarty, $module_name)
             $smarty->assign("mb_title", $arrLang["Validation Error"]);
             $smarty->assign("mb_message", $mensaje);
 
-            $smarty->assign("APPLY_CHANGES", $arrLang["Save"]);
+            $smarty->assign("APPLY_CHANGES", $arrLang["Apply changes"]);
             $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
             $strReturn = $oForm->fetchForm("$local_templates_dir/fax_master.tpl", $arrLang["Fax Master Configuration"], $arrDefault);
         }
@@ -119,11 +119,36 @@ function _moduleContent(&$smarty, $module_name)
     return $strReturn;
 }
 
-function modificar_archivos_mail($email, &$error)
-{
-    $output = $retval = NULL;
-    exec('/usr/bin/elastix-helper faxconfig --faxmaster 2>&1', $output, $retval);
-    if (is_array($output)) $error = implode('<br/>', $output);
-    return ($retval == 0);
+
+
+
+function modificar_archivos_mail($email,&$error){
+    include_once("libs/paloSantoConfig.class.php");
+    global $arrLang;
+    $bValido=TRUE;
+
+
+$conf_file=new paloConfig("/etc/postfix","virtual","\t","[[:space:]]*\t[[:space:]]*");
+$contenido=$conf_file->leer_configuracion();
+$arr_reemplazos=array('FaxMaster'=>$email);
+$bool=$conf_file->escribir_configuracion($arr_reemplazos);
+
+   if($bool){
+       //Se debe hacer postmap
+     exec("sudo -u root postmap /etc/postfix/virtual",$output);
+    if(is_array($output) && count($output)>0){
+         foreach($output as $linea)
+            $error.=$linea."<br>";
+    }
+    if($error!="")
+        return FALSE;
+    else
+        return TRUE;
+   }  
+
+
+
+return $bValido;
+
 }
 ?>

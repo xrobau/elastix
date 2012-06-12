@@ -66,7 +66,7 @@ function _moduleContent(&$smarty, $module_name)
     $errMsg = "";
     $contenidoModulo = "";
     $arrData = array();
-
+    
 
     $virtual_postfix = FALSE; // indica si se debe escribir el archivo /etc/postfix/virtual
 
@@ -97,18 +97,9 @@ function _moduleContent(&$smarty, $module_name)
 	case "export":
 	    $content = exportAccounts($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
 	    break;
-	case "viewFormEditQuota":
-	    $content = viewFormEditQuota($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-	    break;
-	case "edit_quota":
-	    $content = edit_quota($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-	    break;
-	case "reconstruir":
-		$content = reconstruir_mailBox($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-	    break;
-	default:
-		$content = viewFormAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-		break;
+        default:
+            $content = viewFormAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            break;
     }
 
     return $content;
@@ -120,17 +111,12 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $pEmail = new paloEmail($pDB);
     $oGrid = new paloSantoGrid($smarty);
     $id_domain=0;
-
-    /*if (isset($_POST['domain'])) $id_domain=$_POST['domain'];
-    if (isset($_GET['id_domain'])) $id_domain=$_GET['id_domain'];*/
-    if(isset($_POST['domain']) || isset($_GET['domain'])){
-        $id_domain=getParameter('domain');
-        if($id_domain==null)
-            $id_domain=0;
-    }
+    
+    if (isset($_POST['domain'])) $id_domain=$_POST['domain'];
+    if (isset($_GET['id_domain'])) $id_domain=$_GET['id_domain'];
 
     $_POST['domain']=$id_domain;
-
+    
     $arrDominios    = array("0"=>'-- '.$arrLang["Select a domain"].' --');
 
     $arrDomains = $pEmail->getDomains();
@@ -139,33 +125,29 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     }
 
     $arrFormElements = createFieldFormAccount($arrLang, $arrDominios);
-
+    
     $oFilterForm = new paloForm($smarty, $arrFormElements);
     $smarty->assign("SHOW", $arrLang["Show"]);
     $smarty->assign("CREATE_ACCOUNT", $arrLang["Create Account"]);
-
+    
 
 
    // $oGrid->pagingShow(true);
     $url = array("menu" => $module_name);
-    if($id_domain == 0)
-       $url = array("menu" => $module_name);
-    else
-       $url = array("menu" => $module_name, "domain" => $id_domain);
     $oGrid->setURL($url);
     $oGrid->setTitle(_tr("Email Account List"));
 
+    //$total = 0;
+    //$limit  = 20;
+    //$oGrid->setLimit($limit);
+    // $oGrid->setTotal($total);
+    //$offset = $oGrid->calculateOffset();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     $arrData = array();
 
-	$pACL = new paloACL(new paloDB($arrConf['elastix_dsn']['acl']));
-	$userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $isAdministrator = $pACL->isUserAdministratorGroup($userAccount);
-
-	$reconstruir = _tr("Reconstruct");
-
+    $end=0;
     if ($id_domain>0){
 	$arrAccounts = $pEmail->getAccountsByDomain($id_domain);
 //username, password, id_domain, quota
@@ -175,74 +157,35 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	foreach($arrAccounts as $account) {
 	    $arrTmp    = array();
 	    $username=$account[0];
-	    $arrTmp[0] = "&nbsp;<a href='?menu=$module_name&action=view&username=$username'>$username</a>";
-	    $arrTmp[1] = obtener_quota_usuario($username,$module_name,$arrLang,$id_domain);
-		if($isAdministrator)
-			$arrTmp[2] = "&nbsp;<a href='?menu=$module_name&action=reconstruir&username=$username&domain=$id_domain'>$reconstruir</a>";
+	    /*$arrAlias=$pEmail->getAliasAccount($username);
+	    $direcciones='';
+	    if(is_array($arrAlias) && count($arrAlias)>0){
+		foreach($arrAlias as $fila){
+		    $direcciones.=(empty($direcciones))?'':'<br>';
+		    $direcciones.=$fila['1'];
+		}
+	    }
+	    $id_domain=$account[2];
+	    $arrTmp[0]=$direcciones;*/
+	    $arrTmp[0] = "&nbsp;<a href='?menu=email_accounts&action=view&username=$username'>$username</a>";
+	    $arrTmp[1] = obtener_quota_usuario($username);
 	    $link_agregar_direccion="<a href='?action=add_address&id_domain=$id_domain&username=$username'>Add Address</a>";
 	    $link_modificar_direccion="<a href='?action=edit_addresses&id_domain=$id_domain&username=$username'>Addresses</a>";
 	    //$arrTmp[3]=$link_agregar_direccion."&nbsp;&nbsp; ".$link_modificar_direccion;
 	    $arrData[] = $arrTmp;
 	}
     }
-
-    $total = count($arrData); $limit = 20;
-
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-    $offset = $oGrid->calculateOffset();
-
-    $inicio = ($total == 0) ? 0 : $offset + 1;
-    $fin = ($offset+$limit) <= $total ? $offset+$limit : $total;
-    $leng = $fin - $inicio;
-
-    $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
-
     $smarty->assign("id_domain",$id_domain);
     $smarty->assign("LINK", "?menu=$module_name&action=export&domain=$id_domain&rawmode=yes");
     $smarty->assign("EXPORT", _tr("Export Accounts"));
 
-    if($isAdministrator)
-		$oGrid->setColumns(array(_tr("Account Name"),_tr("Used Space"),_tr("Reconstruct MailBox")));
-	else
-		$oGrid->setColumns(array(_tr("Account Name"),_tr("Used Space")));
-
-    $arrGrid = array(
-        "width"    => "99%",
-        "start"    => $inicio,
-        "end"      => $fin,
-        "total"    => $total,
-            );
-
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Domain")." = ".$arrDominios[$id_domain], $_POST, array("domain" => 0));
+    $oGrid->setData($arrData);
+    $arrColumns = array(_tr("Account Name"),_tr("Used Space"),);
+    $oGrid->setColumns($arrColumns);
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/accounts_filter.tpl", "", $_POST);
-    $oGrid->addNew("submit_create_account",_tr("Create Account"));
     $oGrid->showFilter(trim($htmlFilter));
-    $content = $oGrid->fetchGrid($arrGrid,$arrDatosGrid,$arrLang);
+    $content = $oGrid->fetchGrid();
     return $content;
-}
-
-function reconstruir_mailBox($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
-{
-	$pACL = new paloACL(new paloDB($arrConf['elastix_dsn']['acl']));
-	$pEmail = new paloEmail($pDB);
-
-	$userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $isAdmisnistrator = $pACL->isUserAdministratorGroup($userAccount);
-
-    if($isAdmisnistrator){
-		if($pEmail->resconstruirMailBox(getParameter("username"))){
-			$smarty->assign("mb_title", _tr('MESSAGE').":");
-			$smarty->assign("mb_message", _tr("The MailBox was reconstructed succefully"));
-		}else{
-			$smarty->assign("mb_title", _tr('ERROR').":");
-			$smarty->assign("mb_message",_tr("The MailBox couldn't be reconstructed.\n".$pEmail->errMsg));
-		}
-	}
-
-    unset($_GET['action']);
-
-	return viewFormAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
 }
 
 function viewDetailAccount($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
@@ -299,13 +242,8 @@ function viewDetailAccount($smarty, $module_name, $local_templates_dir, &$pDB, $
 	$arrAccount = $pEmail->getAccount($userName);
 	//username, password, id_domain, quota
 	$arrTmp['username']  = $arrAccount[0][0];
-	if($oForm->modo == "view"){
-		$arrTmp['password1'] = "****";
-		$arrTmp['password2'] = "****";
-	}else{
-		$arrTmp['password1'] = "";
-		$arrTmp['password2'] = "";
-	}
+	$arrTmp['password1'] = "";
+	$arrTmp['password2'] = "";
 	$arrTmp['quota']     = isset($quota)?$quota:$arrAccount[0][3];
 	$id_domain           = $arrAccount[0][2];
 	$smarty->assign("username", $userName);
@@ -433,7 +371,7 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
     $arrFormElements = createFieldFormNewAccount($arrLang);
     $noCambioPass = FALSE;
     $oForm = new paloForm($smarty, $arrFormElements);
-
+    
     $password1   = getParameter("password1");
     $password2   = getParameter("password2");
     $id_domain   = getParameter("id_domain");
@@ -464,7 +402,7 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
 	    $smarty->assign("mb_message", $strErrorMsg);
 	}
 	$content = false;
-    }elseif(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*$/",$address) && isset($address) && $address!=""){
+    }elseif(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*$/",$address) && isset($address) && $address!=""){ 
 	if(!$isFromFile){
 	    $smarty->assign("mb_title", $arrLang["Validation Error"]);
 	    $smarty->assign("mb_message", $arrLang["Wrong format for username"]);
@@ -481,46 +419,34 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
 	if($noCambioPass) $password1 = $password2 = '';
 	if($password1 != $password2) {
 	    // Error claves
+	    if(!$isFromFile){
 		$smarty->assign("mb_title", $arrLang["Error"]);
 		$smarty->assign("mb_message", $arrLang["The passwords don't match"]);
-		
+	    }
 	    $content = false;
 	}else{
 	    $pDB->beginTransaction();
-	    if(getParameter("save")){
-			if($password1==""){
-				if(!$isFromFile){
-					$smarty->assign("mb_title", _tr("Error"));
-					$smarty->assign("mb_message", _tr("The passwords must not be empty"));
-					$smarty->assign("id_domain", $id_domain);
-					$smarty->assign("username", $userName);
-					$smarty->assign("old_quota", getParameter("quota"));
-					$smarty->assign("account_name_label", $arrLang['Account Name']);
-				}
-				return false;
-			}else
-				$bExito = create_email_account($pDB,$domain_name,$error);
-	    }else
-			$bExito = edit_email_account($pDB,$error);
+	    if(getParameter("save"))
+		$bExito = create_email_account($pDB,$domain_name,$error);
+	    else
+		$bExito = edit_email_account($pDB,$error);
 	    if (!$bExito || ($bExito && !empty($error))){
-			if(!$isFromFile){
-				$smarty->assign("mb_title", _tr('ERROR').":");
-				$smarty->assign("mb_message", _tr("Error applying changes").". ".$error);}
-			$pDB->rollBack();
-			$configPostfix2 = isPostfixToElastix2();// in misc.lib.php
-			if($configPostfix2)
-				$username=$_POST['address'].'@'.$domain_name;
-			else
-				$username=$_POST['address'].'.'.$domain_name;
-			$pEmail->eliminar_cuenta($pDB,$username,"",false);
-			$content = false;
+		if(!$isFromFile)
+		    $smarty->assign("mb_message", _tr("Error applying changes").". ".$error);
+		$pDB->rollBack();
+		$configPostfix2 = isPostfixToElastix2();// in misc.lib.php
+		if($configPostfix2)
+		    $username=$_POST['address'].'@'.$domain_name;
+		else
+		    $username=$_POST['address'].'.'.$domain_name;
+		$pEmail->eliminar_cuenta($pDB,$username,"",false);
+		$content = false;
 	    }
 	    else{
-			$pDB->commit();
-			if(!$isFromFile){
-				$smarty->assign("mb_title", _tr('MESSAGE').":");
-				$smarty->assign("mb_message", _tr("Changes Applied successfully"));}
-			$content = true;
+		$pDB->commit();
+		if(!$isFromFile)
+		    $smarty->assign("mb_message", _tr("Changes Applied successfully"));
+		$content = true;
 	    }
 	}
 	/////////////////////////////////
@@ -533,88 +459,6 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
 	$smarty->assign("account_name_label", $arrLang['Account Name']);
     }
     return $content;
-}
-
-function viewFormEditQuota($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
-{
-    $pEmail = new paloEmail($pDB);
-    $username = getParameter("username");
-    $quota    = getParameter("quota");
-    if(!$pEmail->accountExists($username)){
-	$smarty->assign("mb_title", $arrLang["ERROR"]);
-        $smarty->assign("mb_message", $arrLang["The following account does not exist"].": $username");
-	return viewFormAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-    }
-    $arrFormElements = createFieldFormEditQuota($arrLang);
-    $oForm = new paloForm($smarty, $arrFormElements);
-    $arrAccount = $pEmail->getAccount($username);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("username", $username);
-    $smarty->assign("old_quota", $arrAccount[0][3]);
-    $smarty->assign("icon", "images/list.png");
-
-	$id_domain=getParameter('domain');
-	if($id_domain==null)
-		$id_domain=0;
-	$smarty->assign('domain', $id_domain);
-
-    $_POST["quota"] = (isset($quota))?$quota:$arrAccount[0][3];
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/edit_quota.tpl", _tr("Edit quota to").": $username", $_POST);
-    $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
-    return $content;
-}
-
-function edit_quota($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
-{
-    $pEmail = new paloEmail($pDB);
-    $username = getParameter("username");
-    $quota    = getParameter("quota");
-    $old_quota = getParameter("old_quota");
-    if(!$pEmail->accountExists($username)){
-	$smarty->assign("mb_title", $arrLang["ERROR"]);
-        $smarty->assign("mb_message", $arrLang["The following account does not exist"].": $username");
-	return viewFormAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-    }
-    $arrFormElements = createFieldFormEditQuota($arrLang);
-    $oForm = new paloForm($smarty, $arrFormElements);
-    if(!$oForm->validateForm($_POST)) {
-        // Falla la validación básica del formulario
-        $strErrorMsg = "<b>".$arrLang['The following fields contain errors'].":</b><br/>";
-        $arrErrores = $oForm->arrErroresValidacion;
-        if(is_array($arrErrores) && count($arrErrores) > 0){
-            foreach($arrErrores as $k=>$v) {
-                $strErrorMsg .= "$k: [$v[mensaje]] <br /> ";
-            }
-        }
-	$smarty->assign("mb_title", $arrLang["Validation Error"]);
-        $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormEditQuota($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-    }
-    $bExito=TRUE;
-    $error = "";
-    if($old_quota!=$quota){
-        $cyr_conn = new cyradm;
-        $cyr_conn->imap_login();
-        $bContinuar=$cyr_conn->setmbquota("user" . "/".$username, $quota);
-        if ($bContinuar){
-           //actualizar en la base de datos
-            $bExito=$pEmail->updateAccount($username, $quota);
-            if (!$bExito){
-                $error=(isset($arrLang[$pEmail->errMsg]))?$arrLang[$pEmail->errMsg]:$pEmail->errMsg;
-                $bExito=FALSE;
-            }
-        }else{
-            $error=$cyr_conn->getMessage();
-            $bExito=FALSE;
-        }
-    }
-    if(!$bExito){
-	$smarty->assign("mb_title", $arrLang["ERROR"]);
-        $smarty->assign("mb_message", $arrLang["Error applying changes"].". $error");
-    }else
-        $smarty->assign("mb_message", $arrLang["Changes Applied successfully"]);
-    return viewFormAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
 }
 
 function exportAccounts($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
@@ -686,7 +530,6 @@ function create_email_account($pDB,$domain_name,&$errMsg)
     // -- creo el mailbox para la cuenta (si hay error deshacer lo realizado)
     $username = "";
     $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
-
 
     if($configPostfix2)
         $username=$_POST['address'].'@'.$domain_name;
@@ -779,13 +622,13 @@ function crear_mailbox_usuario($db,$email,$username,&$error_msg){
 }
 
 
-function obtener_quota_usuario($username,$module_name,$arrLang,$id_domain)
+function obtener_quota_usuario($username)
 {
     global $CYRUS;
     global $arrLang;
     $cyr_conn = new cyradm;
     $cyr_conn->imap_login();
-    $edit_quota = $arrLang["Edit quota"];
+
     $quota = $cyr_conn->getquota("user/" . $username);
     $tamano_usado=$arrLang["Could not query used disc space"];
     if(is_array($quota) && count($quota)>0){
@@ -794,8 +637,8 @@ function obtener_quota_usuario($username,$module_name,$arrLang,$id_domain)
             $q_total = $quota['qmax'];
             if (! $q_total == 0){
                 $q_percent = number_format((100*$q_used/$q_total),2);
-                $tamano_usado="$quota[used] KB / <a href='?menu=$module_name&action=viewFormEditQuota&username=$username&domain=$id_domain' title='$edit_quota'>$quota[qmax] KB</a> ($q_percent%)";
-            }
+                $tamano_usado="$quota[used] KB / $quota[qmax] KB ($q_percent%)";
+            } 
             else {
                 $tamano_usado=$arrLang["Could not obtain used disc space"];
             }
@@ -807,7 +650,7 @@ function obtener_quota_usuario($username,$module_name,$arrLang,$id_domain)
 }
 
 
-function edit_email_account($pDB,&$error)
+function edit_email_account($pDB,$error)
 {
     global $CYRUS;
     global $arrLang;
@@ -861,30 +704,16 @@ function createFieldFormNewAccount($arrLang)
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                              "password1"   => array("LABEL"                  => $arrLang["Password"],
-                                                    "REQUIRED"               => "no",
+                                                    "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "PASSWORD",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                              "password2"   => array("LABEL"                  => $arrLang["Retype password"],
-                                                    "REQUIRED"               => "no",
+                                                    "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "PASSWORD",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                         );
-
-    return $arrFields;
-}
-
-function createFieldFormEditQuota($arrLang)
-{
-    $arrFields = array(
-                             "quota"   => array("LABEL"                  => $arrLang["Quota (Kb)"],
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => "",
-                                                    "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                          );
 
@@ -919,16 +748,10 @@ function getAction()
         return "apply_changes";
     else if(getParameter("cancel"))
         return "report";
-    else if(getParameter("edit_quota"))
-	return "edit_quota";
     else if(getParameter("action")=="view") //Get parameter by GET (command pattern, links)
         return "view";
     else if(getParameter("action")=="export")
-		return "export";
-    else if(getParameter("action")=="viewFormEditQuota")
-		return "viewFormEditQuota";
-	else if(getParameter("action")=="reconstruir")
-		return "reconstruir";
+	return "export";
     else
         return "report";
 }

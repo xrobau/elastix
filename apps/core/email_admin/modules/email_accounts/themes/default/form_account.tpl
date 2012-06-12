@@ -17,7 +17,7 @@
 	  <input class="button" type="submit" name="cancel" value="{$CANCEL}"></td>
           {/if}    
 	{if $mode ne 'view'}
-	    <td id="required_field" align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
+	    <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
 	{/if}
      </tr>
    </table>
@@ -56,8 +56,8 @@
       </tr>
 
       <tr id="save_by_file" {$DISPLAY_FILE_UPLOAD}>
-	  <td align="left" width='13%'><b>{$file_Label}</b></td>
-	  <td align="left" width='37%'>
+	  <td align="left" width='13%'><b>{$file_Label}</b> {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+	  <td align="left">
 	      <input name="file_accounts" id="file_accounts" type="file" value="{$file_accounts_name}" size='30' />
 	  </td>
 	  <td align="left" width="55%"><i>{$INFO}</i></td>

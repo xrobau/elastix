@@ -114,36 +114,6 @@ class paloSantoRegistration {
         return TRUE;
     }
 
-    function createTableRegister()
-    {
-	$query = "CREATE TABLE register(
-	id 		integer 	primary key,
-	contact_name 	varchar(25),
-	email 		varchar(25),
-	phone 		varchar(20),
-	company 	varchar(25),
-	address 	varchar(100),
-	city 		varchar(25),
-	country 	varchar(25),
-	idPartner	varchar(25)
-)";
-	return $this->_DB->genExec($query);
-    }
-
-    function tableRegisterExists()
-    {  
-	$query = "SELECT * FROM register";
-	$result = $this->_DB->genQuery($query);
-	if($result === false){
-	    if(preg_match("/No such table/i",$this->_DB->errMsg))
-		return false;
-	    else
-		return true;
-	}
-	else
-	  return true;
-    }
-
     function sendDataWebService($data)
     {
         ini_set("soap.wsdl_cache_enabled", "0");

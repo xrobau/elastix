@@ -7,7 +7,6 @@
         <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/header.css" />
         <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/content.css" />
         <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/applet.css" />
-        <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/table.css" />
         {/if}
         {$HEADER_LIBS_JQUERY}
 	{$HEADER_MODULES}

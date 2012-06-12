@@ -71,7 +71,6 @@ $arrLang=array(
 "Bad Format" => "Неправилен Формат",
 "No option was selected" => "Не е избрана опция",
 "Octets out of range" => "Не е в допустимите граници",
-"Undefined validation type" => "Undefined validation type",
 "Choose Menu" => "Избери Меню",
 "ID for new menu" => "ID за новото меню",
 "Menu Name" => "Име на Менюто",
@@ -190,9 +189,5 @@ $arrLang=array(
 "You are not authorized to access to this page" => "You are not authorized to access to this page",
 "You need administrator privileges" => "You need administrator privileges",
 "Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

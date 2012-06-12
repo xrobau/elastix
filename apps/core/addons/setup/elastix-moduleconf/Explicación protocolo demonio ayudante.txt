@@ -13,16 +13,7 @@ Los comandos definidos hasta ahora son:
        update nombredepaquete( nombredepaquete2)
        cancel
        quit
-       exit
-       testadd
-       testupdate
-       yumoutput
-       yumerror
-       getcustom
-       setcustom
-       addconfirm
-       updateconfirm
-       removeconfirm
+       exit     
 
 Tanto el comando como el nombre de paquete (si es requerido) son sensibles a mayúsculas y minúsculas.
 
@@ -140,25 +131,4 @@ OK Cancelled
 Comando 'exit':
 Comando 'quit':
 Finaliza la sesión del cliente con el demonio ayudante. Cualquier transacción que se haya resuelto o empezado a realizar sigue en progreso luego de que se ha terminado la conexión. 
-
-Comando 'yumoutput':
-Visualiza una copia de la salida estándar de YUM para la transacción en curso, o para la última transacción terminada.
-
-Comando 'yumerror':
-Visualiza una copia de los mensajes de errores YUM para la transacción en curso, o para la última transacción terminada.
-
-Comando 'setcustom':
-Permite almacenar un texto arbitrario que representa un estado compartido. Este comando está destinado para uso interno del módulo de Addons. El texto almacenado es inmediatamente visible a todas las demás conexiones con el comando 'getcustom', y persiste hasta finalizar el programa.
-
-Comando 'getcustom':
-Permite recuperar un texto previamente almacenado con 'setcustom'. Este comando está destinado para uso interno del módulo de Addons.
-
-Comando 'addconfirm':
-Este comando es idéntico al comando 'add', excepto que en caso de éxito, luego de llegar al estado 'confirm', continúa inmediatamente a descargar e instalar los paquetes en la transacción, sin esperar al comando 'confirm'.
-
-Comando 'updateconfirm':
-Este comando es idéntico al comando 'update', excepto que en caso de éxito, luego de llegar al estado 'confirm', continúa inmediatamente a descargar e instalar los paquetes en la transacción, sin esperar al comando 'confirm'.
-
-Comando 'removeconfirm':
-Este comando es idéntico al comando 'remove', excepto que en caso de éxito, luego de llegar al estado 'confirm', continúa inmediatamente a descargar e instalar los paquetes en la transacción, sin esperar al comando 'confirm'.
 

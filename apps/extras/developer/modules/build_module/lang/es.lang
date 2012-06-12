@@ -31,7 +31,7 @@
   $Id: en.lang,v 1.7 2008/06/11 17:30:00 afigueroa Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Build Module" => "Constructor de Módulos",
+"Build Module" => "Constructor de  Módulos",
 "Module Id" => "Id del Módulo",
 "Module Level" => "Nivel del Módulo", 
 "Level 1 Parent Exists" => "Existe Padre Nivel 1?",
@@ -83,15 +83,9 @@ $arrLangModule=array(
 "Your e-mail" => "Tu correo",
 "Framed" => "Enmarcado",
 "URL is empty" => "URL esta vacía",
+"http" => "https://",
 "Field Name" => "Nombre del Campo",
 "Type Field" => "Tipo de Campo",
-"Url" => "Url (Ejemplo: http://www.elastix.org o http://{IP_SERVER}/mail)",
-"Module Id is empty" => "Id del módulo está vacío debe ingresar al menos un caracter alfanumérico como nombre del módulo",
-"Level 1 Parent Id is empty" => "Id Padre Nivel 1 está vacío debe ingresar al menos un caracter alfanumérico como Id padre nivel 1",
-"Level 2 Parent Id is empty" => "Id Padre Nivel 2 está vacío debe ingresar al menos un caracter alfanumérico como Id padre nivel 2",
-"Message" => "Mensaje",
-"here" => "aquí",
-"If you are not redirected to your new module in a few seconds, you can click" => "Si usted no es redireccionado a su nuevo módulo en unos segundos, usted puede hacer click",
-"Example: http://www.elastix.org" => "Ejemplo: http://www.elastix.org",
+"Url" => "Url",
 );
 ?>

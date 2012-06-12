@@ -80,7 +80,6 @@ function _moduleContent(&$smarty, $module_name)
 
     //Sirve para todos los casos
     $smarty->assign("MODULE_NAME", $module_name);
-    $smarty->assign("icon","modules/$module_name/images/pbx_batch_of_extensions.png");
     $smarty->assign("SAVE", $arrLang["Save"]);
     $smarty->assign("DOWNLOAD", $arrLang["Download Extensions"]);
     $smarty->assign("label_file", $arrLang["File"]);
@@ -122,18 +121,18 @@ function delete_all_extention(&$smarty, $module_name, $local_templates_dir, $arr
     foreach($arrData as $key => $value)
       $arrExtension[] = $value;
     if($oPalo->deleteTree($data_connection, $arrAST, $arrAMP, $arrExtension)){
-        if($oPalo->deleteAllExtension())
+		if($oPalo->deleteAllExtension())
         {
-            if($oPalo->do_reloadAll($data_connection, $arrAST, $arrAMP))
+			if($oPalo->do_reloadAll($data_connection, $arrAST, $arrAMP))
             {
-                $smarty->assign("mb_title", $arrLang["Message"]);
+            	$smarty->assign("mb_title", $arrLang["Message"]);
                 $smarty->assign("mb_message", $arrLang["All extensions deletes"]);
             }else{
                 $smarty->assign("mb_title", $arrLang["Error"]);
                 $smarty->assign("mb_message", $arrLang["Unable to reload the changes"]);
             }
         }else{
-            $smarty->assign("mb_title", $arrLang["Error"]);
+			$smarty->assign("mb_title", $arrLang["Error"]);
             $smarty->assign("mb_message", $arrLang["Could not delete the database"]);
         }
     }else{
@@ -161,7 +160,7 @@ function load_extension($smarty, $module_name, $local_templates_dir, $arrLang, $
     $bMostrarError = false;
 
     //valido el tipo de archivo
-    if (!preg_match('/.csv$/', $_FILES['userfile']['name'])) {
+    if (!eregi('.csv$', $_FILES['userfile']['name'])) {
         $smarty->assign("mb_title", $arrLang["Validation Error"]);
         $smarty->assign("mb_message", $arrLang["Invalid file extension.- It must be csv"]);
     }else {
@@ -190,14 +189,13 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
         return;
     }
 
-    $hArchivo = fopen($ruta_archivo, 'r+');
+    $hArchivo = fopen($ruta_archivo, 'rt');
     $cont = 0;
     $pLoadExtension = new paloSantoLoadExtension($pDB);
 
     if($hArchivo) {
         //Linea 1 header ignorada
         $tupla = fgetcsv($hArchivo, 4096, ",");
-        $prueba = count ($tupla);
         //Desde linea 2 son datos
         while ($tupla = fgetcsv($hArchivo, 4096, ",")) {
             if(is_array($tupla) && count($tupla)>=3)
@@ -212,36 +210,26 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
                 $VoiceMail_PW       = isset($arrayColumnas[7]) ?$tupla[$arrayColumnas[7]]:"";
                 $VM_Email_Address   = isset($arrayColumnas[8]) ?$tupla[$arrayColumnas[8]]:"";
                 $VM_Pager_Email_Addr= isset($arrayColumnas[9]) ?$tupla[$arrayColumnas[9]]:"";
-                $VM_Options         = isset($arrayColumnas[10])?$tupla[$arrayColumnas[10]]:"";
+                $VM_Options         = isset($arrayColumnas[10]) ?$tupla[$arrayColumnas[10]]:"";
                 $VM_EmailAttachment = isset($arrayColumnas[11])?$tupla[$arrayColumnas[11]]:"";
                 $VM_Play_CID        = isset($arrayColumnas[12])?$tupla[$arrayColumnas[12]]:"";
                 $VM_Play_Envelope   = isset($arrayColumnas[13])?$tupla[$arrayColumnas[13]]:"";
                 $VM_Delete_Vmail    = isset($arrayColumnas[14])?$tupla[$arrayColumnas[14]]:"";
                 $Context            = isset($arrayColumnas[15])?$tupla[$arrayColumnas[15]]:"from-internal";
-                $Tech               = strtolower($tupla[$arrayColumnas[16]]);
-                $Callgroup          = isset($arrayColumnas[17])?$tupla[$arrayColumnas[17]]:"";
-                $Pickupgroup        = isset($arrayColumnas[18])?$tupla[$arrayColumnas[18]]:"";
-                $Disallow           = isset($arrayColumnas[19])?$tupla[$arrayColumnas[19]]:"";
-                $Allow              = isset($arrayColumnas[20])?$tupla[$arrayColumnas[20]]:"";
-                $Deny               = isset($arrayColumnas[21])?$tupla[$arrayColumnas[21]]:"";
-                $Permit             = isset($arrayColumnas[22])?$tupla[$arrayColumnas[22]]:"";
-                $Record_Incoming    = isset($arrayColumnas[23])?$tupla[$arrayColumnas[23]]:"";
-                $Record_Outgoing    = isset($arrayColumnas[24])?$tupla[$arrayColumnas[24]]:"";
-                
+		$Tech               = strtolower($tupla[$arrayColumnas[16]]);
 //////////////////////////////////////////////////////////////////////////////////
                 // validando para que coja las comillas
-                $Outbound_CID = preg_replace('/“/', "\"", $Outbound_CID);
-                $Outbound_CID = preg_replace('/”/', "\"", $Outbound_CID);
-
+                $Outbound_CID = ereg_replace('“', "\"", $Outbound_CID);
+                $Outbound_CID = ereg_replace('”', "\"", $Outbound_CID);
 //////////////////////////////////////////////////////////////////////////////////
-                //Paso 1: creando en la tabla sip - iax 
-                if(!$pLoadExtension->createTechDevices($Ext,$Secret,$VoiceMail,$Context,$Tech, $Disallow, $Allow, $Deny, $Permit, $Callgroup, $Pickupgroup, $Record_Incoming, $Record_Outgoing))
+                //Paso 1: creando en la tabla sip
+                if(!$pLoadExtension->createTechDevices($Ext,$Secret,$VoiceMail,$Context,$Tech))
                 {
                     $Messages .= "Ext: $Ext - ". $arrLang["Error updating Tech"].": ".$pLoadExtension->errMsg."<br />";
                 }else{
                     
                     //Paso 2: creando en la tabla users
-                    if(!$pLoadExtension->createUsers($Ext,$Name,$VoiceMail,$Direct_DID,$Outbound_CID, $Record_Incoming, $Record_Outgoing))
+                    if(!$pLoadExtension->createUsers($Ext,$Name,$VoiceMail,$Direct_DID,$Outbound_CID))
                         $Messages .= "Ext: $Ext - ". $arrLang["Error updating Users"].": ".$pLoadExtension->errMsg."<br />";
                     
                     //Paso 3: creando en la tabla devices
@@ -260,20 +248,19 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
                     if(!$pLoadExtension->processCallWaiting($Call_Waiting,$Ext))
                         $Messages .= "Ext: $Ext - ". $arrLang["Error processing CallWaiting"]."<br />";
 
-                    $outboundcid = preg_replace("/\"/", "'", $Outbound_CID);
-                    $outboundcid = preg_replace("/\"/", "'", $outboundcid);
-                    $outboundcid = preg_replace("/ /", "", $outboundcid);
-                    if(!$pLoadExtension->putDataBaseFamily($data_connection, $Ext, $Tech, $Name, $VoiceMail, $outboundcid , $Record_Incoming, $Record_Outgoing))
+                    $outboundcid = ereg_replace("\"", "'", $Outbound_CID);
+                    $outboundcid = ereg_replace("\"", "'", $outboundcid);
+                    $outboundcid = ereg_replace(" ", "", $outboundcid);
+                    if(!$pLoadExtension->putDataBaseFamily($data_connection, $Ext, $Tech, $Name, $VoiceMail, $outboundcid))
                         $Messages .= "Ext: $Ext - ". $arrLang["Error processing Database Family"]."<br />";
                     $cont++;
                 }
-                    
                 ////////////////////////////////////////////////////////////////////////
                 //Paso 7: Escribiendo en tabla incoming
-        if($Direct_DID !== ""){
-            if(!$pLoadExtension->createDirect_DID($Ext,$Direct_DID))
-            $Messages .= "Ext: $Ext - ". $arrLang["Error to insert or update Direct DID"]."<br />";
-        }
+		if($Direct_DID !== ""){
+		    if(!$pLoadExtension->createDirect_DID($Ext,$Direct_DID))
+			$Messages .= "Ext: $Ext - ". $arrLang["Error to insert or update Direct DID"]."<br />";
+		}
                 /////////////////////////////////////////////////////////////////////////
             }
         }
@@ -288,46 +275,34 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
 }
 
 function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
-    $hArchivo = fopen($sFilePath, 'r+');
+    $hArchivo = fopen($sFilePath, 'rt');
     $cont = 0;
     $ColName = -1;
 
     //Paso 1: Obtener Cabeceras (Minimas las cabeceras: Display Name, User Extension, Secret)
     if ($hArchivo) {
         $tupla = fgetcsv($hArchivo, 4096, ",");
-        //print_r ($tupla);
-        //$prueba = count ($tupla);
-        //var_dump ($prueba);
         if(count($tupla)>=4)
         {
             for($i=0; $i<count($tupla); $i++)
             {
-                if($tupla[$i] == 'Display Name')                $arrayColumnas[0] = $i;
-                else if($tupla[$i] == 'User Extension')         $arrayColumnas[1] = $i;
-                else if($tupla[$i] == 'Direct DID')             $arrayColumnas[2] = $i;
-                else if($tupla[$i] == 'Outbound CID')           $arrayColumnas[3] = $i;
-                else if($tupla[$i] == 'Call Waiting')           $arrayColumnas[4] = $i;
-                else if($tupla[$i] == 'Secret')                 $arrayColumnas[5] = $i;
-                else if($tupla[$i] == 'Voicemail Status')       $arrayColumnas[6] = $i;
-                else if($tupla[$i] == 'Voicemail Password')     $arrayColumnas[7] = $i;
-                else if($tupla[$i] == 'VM Email Address')       $arrayColumnas[8] = $i;
+                if($tupla[$i] == 'Display Name')            $arrayColumnas[0] = $i;
+                else if($tupla[$i] == 'User Extension')     $arrayColumnas[1] = $i;
+                else if($tupla[$i] == 'Direct DID')         $arrayColumnas[2] = $i;
+                else if($tupla[$i] == 'Outbound CID')       $arrayColumnas[3] = $i;
+                else if($tupla[$i] == 'Call Waiting')       $arrayColumnas[4] = $i;
+                else if($tupla[$i] == 'Secret')             $arrayColumnas[5] = $i;
+                else if($tupla[$i] == 'Voicemail Status')   $arrayColumnas[6] = $i;
+                else if($tupla[$i] == 'Voicemail Password') $arrayColumnas[7] = $i;
+                else if($tupla[$i] == 'VM Email Address')   $arrayColumnas[8] = $i;
                 else if($tupla[$i] == 'VM Pager Email Address') $arrayColumnas[9] = $i;
-                else if($tupla[$i] == 'VM Options')             $arrayColumnas[10] = $i;
-                else if($tupla[$i] == 'VM Email Attachment')    $arrayColumnas[11] = $i;
-                else if($tupla[$i] == 'VM Play CID')            $arrayColumnas[12] = $i;
-                else if($tupla[$i] == 'VM Play Envelope')       $arrayColumnas[13] = $i;
-                else if($tupla[$i] == 'VM Delete Vmail')        $arrayColumnas[14] = $i;
-                else if($tupla[$i] == 'Context')                $arrayColumnas[15] = $i;
-                else if($tupla[$i] == 'Tech')                   $arrayColumnas[16] = $i;
-                else if($tupla[$i] == 'Callgroup')              $arrayColumnas[17] = $i;
-                else if($tupla[$i] == 'Pickupgroup')            $arrayColumnas[18] = $i;
-                else if($tupla[$i] == 'Disallow')               $arrayColumnas[19] = $i;
-                else if($tupla[$i] == 'Allow')                  $arrayColumnas[20] = $i;
-                else if($tupla[$i] == 'Deny')                   $arrayColumnas[21] = $i;
-                else if($tupla[$i] == 'Permit')                 $arrayColumnas[22] = $i;
-                else if($tupla[$i] == 'Record Incoming')        $arrayColumnas[23] = $i;
-                else if($tupla[$i] == 'Record Outgoing')        $arrayColumnas[24] = $i;
-                
+                else if($tupla[$i] == 'VM Options')         $arrayColumnas[10] = $i;
+                else if($tupla[$i] == 'VM Email Attachment')$arrayColumnas[11] = $i;
+                else if($tupla[$i] == 'VM Play CID')        $arrayColumnas[12] = $i;
+                else if($tupla[$i] == 'VM Play Envelope')   $arrayColumnas[13] = $i;
+                else if($tupla[$i] == 'VM Delete Vmail')    $arrayColumnas[14] = $i;
+                else if($tupla[$i] == 'Context')            $arrayColumnas[15] = $i;
+		else if($tupla[$i] == 'Tech')               $arrayColumnas[16] = $i;
             }  
             if(isset($arrayColumnas[0]) && isset($arrayColumnas[1]) && isset($arrayColumnas[5]) && isset($arrayColumnas[16]))
             {
@@ -341,19 +316,19 @@ function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
                             $arrExt[] = array("ext" => $Ext);
                         else return $arrLang["Can't exist a extension empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
 
-                        $Secret = $tupla[$arrayColumnas[5]];
+                        $Secret       = $tupla[$arrayColumnas[5]];
                         if($Secret == '')
                             return $arrLang["Can't exist a secret empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
 
-                        $Display = $tupla[$arrayColumnas[0]];
+                        $Display      = $tupla[$arrayColumnas[0]];
                         if($Display == '')
                             return $arrLang["Can't exist a display name empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
 
-                        $Tech = $tupla[$arrayColumnas[16]];
+			$Tech         = $tupla[$arrayColumnas[16]];
                         if($Tech == '')
                             return $arrLang["Can't exist a technology empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
-            else
-                $arrTech[] = strtolower($Tech);
+			else
+			    $arrTech[] = strtolower($Tech);
                     }
                     $count++;
                 }
@@ -366,7 +341,7 @@ function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
                                 return "{$arrLang["Error, extension"]} ".$values1['ext']." {$arrLang["repeat in lines"]} ".($key1 + 2)." {$arrLang["with"]} ".($key2 + 2);
                             }
                         }
-                        if( $arrTech[$key1]!="sip" && $arrTech[$key1]!="iax" && $arrTech[$key1]!="iax2" ){
+			if( $arrTech[$key1]!="sip" && $arrTech[$key1]!="iax" && $arrTech[$key1]!="iax2" ){
                             return "{$arrLang["Error, extension"]} ".$values1['ext']." {$arrLang["has a wrong tech in line"]} ".($key1 + 2).". {$arrLang["Tech must be sip or iax"]}";
                         }
                     }
@@ -431,39 +406,29 @@ function backup_extensions($pDB)
 
     if(!$arrResult){
 
-    $csv .= "\"Display Name\",\"User Extension\",\"Direct DID\",\"Outbound CID\",\"Call Waiting\",".
+	$csv .= "\"Display Name\",\"User Extension\",\"Direct DID\",\"Outbound CID\",\"Call Waiting\",".
                 "\"Secret\",\"Voicemail Status\",\"Voicemail Password\",\"VM Email Address\",".
                 "\"VM Pager Email Address\",\"VM Options\",\"VM Email Attachment\",".
-                "\"VM Play CID\",\"VM Play Envelope\",\"VM Delete Vmail\",\"Context\",\"Tech\",".
-                "\"Callgroup\",\"Pickupgroup\",\"Disallow\",\"Allow\",\"Deny\",\"Permit\",".
-                "\"Record Incoming\",\"Record Outgoing\"\n";
+                "\"VM Play CID\",\"VM Play Envelope\",\"VM Delete Vmail\",\"Context\",\"Tech\"\n";
     }else{
         //cabecera
         $csv .= "\"Display Name\",\"User Extension\",\"Direct DID\",\"Outbound CID\",\"Call Waiting\",".
                 "\"Secret\",\"Voicemail Status\",\"Voicemail Password\",\"VM Email Address\",".
                 "\"VM Pager Email Address\",\"VM Options\",\"VM Email Attachment\",".
-                "\"VM Play CID\",\"VM Play Envelope\",\"VM Delete Vmail\",\"Context\",\"Tech\",".
-                "\"Callgroup\",\"Pickupgroup\",\"Disallow\",\"Allow\",\"Deny\",\"Permit\",".
-                "\"Record Incoming\",\"Record Outgoing\"\n";
+                "\"VM Play CID\",\"VM Play Envelope\",\"VM Delete Vmail\",\"Context\",\"Tech\"\n";
         foreach($arrResult as $key => $extension)
         {
 
 //////////////////////////////////////////////////////////////////////////////////
         // validando para que coja las comillas
-            $extension['outboundcid'] = preg_replace("/\"/",'“',$extension['outboundcid']);
-            $extension['outboundcid'] = preg_replace("/\"/",'”', $extension['outboundcid']);
-
-            if (!isset($extension['callgroup'])) $extension['callgroup']= "";
-            if (!isset($extension['pickupgroup'])) $extension['pickupgroup']= "";
-
+            $extension['outboundcid'] = ereg_replace("\"",'“',$extension['outboundcid']);
+            $extension['outboundcid'] = ereg_replace("\"",'”', $extension['outboundcid']);
 //////////////////////////////////////////////////////////////////////////////////
             $csv .= "\"{$extension['name']}\",\"{$extension['extension']}\",\"{$extension['directdid']}\",\"{$extension['outboundcid']}\",".
                     "\"{$extension['callwaiting']}\",\"{$extension['secret']}\",\"{$extension['voicemail']}\",".
                     "\"{$extension['vm_secret']}\",\"{$extension['email_address']}\",\"{$extension['pager_email_address']}\",".
                     "\"{$extension['vm_options']}\",\"{$extension['email_attachment']}\",\"{$extension['play_cid']}\",".
-                    "\"{$extension['play_envelope']}\",\"{$extension['delete_vmail']}\",\"{$extension['context']}\",\"{$extension['tech']}\",".
-                    "\"{$extension['callgroup']}\",\"{$extension['pickupgroup']}\",\"{$extension['disallow']}\",\"{$extension['allow']}\",".
-                    "\"{$extension['deny']}\",\"{$extension['permit']}\",\"{$extension['record_in']}\",\"{$extension['record_out']}\"".
+                    "\"{$extension['play_envelope']}\",\"{$extension['delete_vmail']}\",\"{$extension['context']}\",\"{$extension['tech']}\"".
                     "\n";
         }
     }

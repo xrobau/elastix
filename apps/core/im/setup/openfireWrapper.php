@@ -29,31 +29,7 @@
 
 include_once("libs/misc.lib.php");
 include_once("configs/default.conf.php");
-include_once("libs/paloSantoACL.class.php");
-include_once("libs/paloSantoDB.class.php");
 load_language();
-
-session_name("elastixSession");
-session_start();
-$pDB  = new paloDB($arrConf["elastix_dsn"]["acl"]);
-$pACL = new paloACL($pDB);
-if(isset($_SESSION["elastix_user"]))
-    $elastix_user = $_SESSION["elastix_user"];
-else
-    $elastix_user = "";
-session_commit();
-if(!$pACL->isUserAdministratorGroup($elastix_user)){
-    $advice = _tr("Unauthorized");
-    $msg1 = _tr("You are not authorized to access to this page");
-    $msg2 = _tr("You need administrator privileges");
-    $template['content']['theme'] = $arrConf['mainTheme'];
-    $template['content']['title'] = _tr("Elastix Authentication");
-    $template['content']['msg']   =  "<br /><b style='font-size:1.5em;'>$advice</b> <p>$msg1<br/>$msg2</p>";
-    extract($template);
-    if(file_exists("elastix_warning_authentication.php"))
-        include("elastix_warning_authentication.php");
-    exit;
-}
 
 $style = "<style type='text/css'>
                 .moduleTitle {
@@ -88,8 +64,6 @@ foreach($arrSalida as $linea) { //obtengo el estado de openfire
     }
 }
 
-$ip = (isset($_GET['IP']))?$_GET['IP']:$_SERVER["SERVER_ADDR"];
-$port = (isset($_GET['PORT']))?$_GET['PORT']:"9090";
 //PASO 2
 if($statusOpenfire == 'off' && isset($_GET['accion']) && $_GET['accion']=='activar') { //no activo openfire y decide activarlo
     exec("sudo /sbin/chkconfig --level 2345 openfire on",$arrSalida, $var);
@@ -97,7 +71,7 @@ if($statusOpenfire == 'off' && isset($_GET['accion']) && $_GET['accion']=='activ
         exec("sudo /sbin/service generic-cloexec openfire start",$arrSalida,$var);
         if($var==0){
             sleep(10);
-            header("Location: http://".$ip.":".$port);
+            header("Location: http://".$_GET['IP'].":".$_GET['PORT']);
         }
         else{
             echo $tabla_ini.$arrLang['ERROR'].$tabla_fin;
@@ -108,9 +82,9 @@ if($statusOpenfire == 'off' && isset($_GET['accion']) && $_GET['accion']=='activ
     }
 }
 else if($statusOpenfire == 'off') { 
-    echo $tabla_ini.$arrLang['The service Openfire No running']."<a href='openfireWrapper.php?IP=$ip&PORT=$port&accion=activar'>".$arrLang['click here']."</a>".$tabla_fin;
+    echo $tabla_ini.$arrLang['The service Openfire No running']."<a href='openfireWrapper.php?IP={$_GET['IP']}&PORT={$_GET['PORT']}&accion=activar'>".$arrLang['click here']."</a>".$tabla_fin;
 }
 else{ //esta activo openfire
-    header("Location: http://".$ip.":".$port);
+    header("Location: http://".$_GET['IP'].":".$_GET['PORT']);
 }
 ?>

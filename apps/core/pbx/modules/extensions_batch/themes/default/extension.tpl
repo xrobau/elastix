@@ -15,7 +15,7 @@
                 <tr>
                     <td width="22%" align="right">{$label_file}:</td>
                     <td width="30%"><input type='file' id='userfile' name='userfile'></td>
-                    <td width="30%" align='center'><a class="link1" href="?menu={$MODULE_NAME}&amp;accion=download_csv&amp;rawmode=yes">{$DOWNLOAD}</a></td>
+                    <td width="30%"><a href="?menu={$MODULE_NAME}&amp;accion=download_csv&amp;rawmode=yes" name="link_download">{$DOWNLOAD}</a></td>
                     <td align="center">{$DELETE_ALL}</td>
                 </tr> 
             </table>

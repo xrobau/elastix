@@ -100,7 +100,7 @@ div.neo-cmenutableft {
 }
 .neo-second-showbox-menu {
 	position:absolute;
-	right: -107px;
+	right: -105px;
 	top:39px;
 	width: 113px;
 	padding: 2px 8px 8px 8px;
@@ -108,7 +108,6 @@ div.neo-cmenutableft {
 	-moz-border-radius: 0px 6px 6px 0px;
 	-webkit-border-radius: 0px 6px 6px 0px;
 	border-radius: 0px 6px 6px 0px;
-	border-top: 1px solid #666;
 	border-bottom: 1px solid #666;
 	border-right: 1px solid #999;
 	border-left: 1px solid #999;
@@ -158,7 +157,7 @@ div.neo-cmenutableft {
 }
 div.neo-tabh {
 	position: relative;
-	min-width: 90px;
+	width: 90px;
 	height:22px;
 	padding:8px 5px 2px 5px;
 	float: left;
@@ -179,7 +178,7 @@ div.neo-tabh a{
 }
 div.neo-tabh-rend {
 	position: relative;
-	min-width: 22px;
+	width: 22px;
 	height:32px;
 	padding:8px 0px 0px 0px;
 	float: left;
@@ -262,7 +261,7 @@ div.neo-tabh-lend3 a{
 }
 div.neo-tabhon {
 	position: relative;
-	min-width: 90px;
+	width: 90px;
 	height:28px;
 	padding:14px 5px 2px 5px;
 	float: left;
@@ -272,7 +271,7 @@ div.neo-tabhon {
 	border-radius: 6px 6px 0px 0px;
 	border-left: 1px solid #bbb;
 	border-right: 1px solid #999;
-	background-color: #454545;
+	background-color: #0E3463;
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
 	color: #eee;
 	text-align:center;
@@ -299,26 +298,16 @@ div.neo-tabhon a {
 	bottom: 0px;
 	width: 1280px;
 	height: 34px;
-	background-color:#454545;
+	background-color:#0E3463;
 	background-image:url(images/men2bg.png);
-	overflow: hidden; 
-}
-#neo-smenubox-innerdiv {
-	position:absolute;
-	top:0px;
-	left:0px;
-	padding:0px;
-	margin:0px;
-	border:0px;
-	height:34px;
 }
 div.neo-tabv {
 	position: relative;
-	min-width: 108px;
+	width: 120px;
 	height:22px;
 	float: left;
 	margin: 6px 0px 5px 0px;
-	padding: 2px 8px 0px 8px;
+	padding: 2px 2px 0px 2px;
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
 	color: #eee;
 	text-align:center;
@@ -333,7 +322,7 @@ div.neo-tabv a{
 }
 div.neo-tabvon {
 	position: relative;
-	min-width: 120px;
+	width: 120px;
 	height:22px;
 	float: left;
 	margin: 6px 0px 5px 0px;
@@ -348,19 +337,4 @@ div.neo-tabvon a{
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
 	color: #eee;
 	text-shadow: 1px 1px #333;
-}
-#neo-smenubox-arrow-more {
-	position:absolute;
-	width:40px;
-	height:21px;
-	background:url(images/bg_buttons_scroll.png) repeat-x;
-	right:0px;
-	top:0px;
-	margin: 5px 0px 2px 0px;
-	padding: 4px 4px 0px 6px;
-}
-img.neo-smenubox-arrow-more-right{
-	position:relative;
-	top:0px;
-	float:right;
 }

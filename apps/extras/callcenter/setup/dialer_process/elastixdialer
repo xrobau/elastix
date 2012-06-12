@@ -26,7 +26,7 @@ DIR_TRABAJO=/opt/elastix/dialer
 USUARIO=asterisk
 
 # Los siguientes parametros son normalmente derivados de los dos primeros
-SERVICE_LOCK="/var/lock/subsys/elastixdialer"
+SERVICE_LOCK="/var/lock/subsys/$DAEMON"
 PIDFILE_USER="$DIR_TRABAJO/$DAEMON.pid"
 PIDFILE_SYSTEM="/var/run/$DAEMON.pid"
 
@@ -43,7 +43,7 @@ start() {
 
 stop () {
     echo -n $"Stopping $PROGRAMA: "
-    killproc $DAEMON -TERM
+    killproc $DAEMON
     RETVAL=$?
     echo
     if [ $RETVAL = 0 ] ; then

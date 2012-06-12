@@ -143,7 +143,6 @@ function newLanguage($smarty,$module_name, $local_templates_dir, $arrLang, $arrL
     $smarty->assign("new_language", $arrLangModule["New Language"]);
     $smarty->assign("new_traslate", $arrLangModule["New Traslate"]);
     $smarty->assign("new_language_ej", $arrLangModule["Ej: For English: en.lang"]);
-    $smarty->assign("icon","images/list.png");
 
     $tmpLangEnglish   = getParameter('lang_english');
     $tmpLangTranslate = getParameter('lang_traslate');
@@ -215,6 +214,7 @@ function showLanguages($smarty, $module_name, $local_templates_dir, $arrLang, $a
 
     $oFilterForm = new paloForm($smarty, $arrFormElements);
     $smarty->assign("SHOW", $arrLang["Show"]);
+    $smarty->assign("NEW", $arrLangModule["Add"]);
     $smarty->assign("SAVE_ALL", "Save All");
 
     $module   = getParameter("module");
@@ -228,19 +228,6 @@ function showLanguages($smarty, $module_name, $local_templates_dir, $arrLang, $a
 
     $_POST["module"] = $module;
     $_POST["language"] = $language;
-
-    $oGrid  = new paloSantoGrid($smarty);
-
-    if(!is_null($module) && !is_null($language)){
-        $nameModule = $arrFormElements["module"]["INPUT_EXTRA_PARAM"][$module];
-        $valueLanguage = $arrFormElements["language"]["INPUT_EXTRA_PARAM"][$language];
-    }else{
-        $nameModule = "";
-        $valueLanguage = "";
-    }
-
-    $oGrid->addFilterControl(_tr("Filter applied: ").$nameModule." = ".$valueLanguage,$_POST, array("module" => null,"language" => null));
-
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
 
     $pLanguages = new paloSantoLanguageAdmin();
@@ -250,8 +237,7 @@ function showLanguages($smarty, $module_name, $local_templates_dir, $arrLang, $a
     $total_datos = $pLanguages->ObtainNumLanguages($module, $language);
     $total  = $total_datos;
 
-    $oGrid->addNew("new",_tr("Add"));
-	$oGrid->customAction("save_all",_tr("Save All"));
+    $oGrid  = new paloSantoGrid($smarty);
 
     $offset = $oGrid->getOffSet($limit,$total,$action,$start);
 

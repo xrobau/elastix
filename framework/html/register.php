@@ -32,9 +32,6 @@ include_once "configs/default.conf.php";
 include_once "libs/paloSantoNavigation.class.php"; 
 include_once "libs/paloSantoDB.class.php";
 include_once("libs/paloSantoACL.class.php");// Don activate unless you know what you are doing. Too risky!
-
-load_default_timezone();
-
 require_once("modules/$module/index.php");
 $developerMode=false;
 
@@ -80,12 +77,12 @@ if(isset($_SESSION['elastix_user']) && isset($_SESSION['elastix_pass']) && $pACL
 } else {
     $smarty->assign("THEMENAME", $arrConf['mainTheme']);
     $smarty->assign("currentyear",date("Y"));
-    $smarty->assign("PAGE_NAME", _tr('Login page'));
-    $smarty->assign("WELCOME", _tr('Welcome to Elastix'));
-    $smarty->assign("ENTER_USER_PASSWORD", _tr('Please enter your username and password'));
-    $smarty->assign("USERNAME", _tr('Username'));
-    $smarty->assign("PASSWORD", _tr('Password'));
-    $smarty->assign("SUBMIT", _tr('Submit'));
+    $smarty->assign("PAGE_NAME",$arrLang['Login page']);
+    $smarty->assign("WELCOME",$arrLang['Welcome to Elastix']);
+    $smarty->assign("ENTER_USER_PASSWORD",$arrLang['Please enter your username and password']);
+    $smarty->assign("USERNAME",$arrLang['Username']);
+    $smarty->assign("PASSWORD",$arrLang['Password']);
+    $smarty->assign("SUBMIT",$arrLang['Submit']);
     $smarty->display("_common/login.tpl");
 }
 ?>

@@ -97,7 +97,6 @@ $arrLang=array(
 "Bad Format"=>"Neispravan format",
 "No option was selected"=>"Niti jedna mogućnost nije odabrana",
 "Octets out of range"=>"Oktet izlazi iz opsega",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 /*version 0.8*/
@@ -189,9 +188,5 @@ $arrLang=array(
 "You are not authorized to access to this page" => "You are not authorized to access to this page",
 "You need administrator privileges" => "You need administrator privileges",
 "Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

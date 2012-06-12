@@ -313,7 +313,7 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $arrLang,
     else
 	$smarty->assign("ruta_img",  "<tr class='letra12'><td align='center'><td></tr>");
 
-    $smarty->assign("icon","modules/$module_name/images/reports_graphic_reports.png");
+    $smarty->assign("icon","images/list.png");
     $htmlForm = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", $arrLangModule["Graphic Report"], $_POST);
 
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

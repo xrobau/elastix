@@ -62,7 +62,5 @@ $arrLangModule=array(
 "Search" => "Buscar",
 "Name" => "Nombre",
 "Status" => "Estado",
-"The repositories are not up to date. Click on the"=>"Los repositorios no estan actualizados. De click en el boton",
-"button to list all available packages."=>"para listar todos los paquetes disponibles",
 );
 ?>

@@ -2,7 +2,7 @@
 /*
     The function creates content of phone specific settings file for SNOM 3XX. 
 */
-function PrincipalFileSnom($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer)
+function PrincipalFileSnom($DisplayName, $id_device, $secret, $ipAdressServer)
 {
     $content="
             <html>

@@ -55,7 +55,7 @@
             <group id="3" name="extension" desc="extension user"></group>
         </permissions>
     </menuitem>
-    <menuitem menuid="userlist"             desc="Users"              parent="usermgr"     module="yes" link="" order="41">
+    <menuitem menuid="userlist"             desc="Users"              parent="usermgr"     module="yes" link="" order="42">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
             <group id="2" name="Operator" desc="Operator"></group>

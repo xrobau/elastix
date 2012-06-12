@@ -28,8 +28,7 @@
   $Id: packages.php $ */
 
 include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoForm.class.php";
-include_once "libs/paloSantoJSON.class.php";
+include_once "libs/xajax/xajax.inc.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -57,18 +56,12 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    $action = getParameter("action");
-    switch($action){
-        case "updateRepositories":
-            $contenidoModulo = actualizarRepositorios();
-            break;
-        case "install":
-            $contenidoModulo = installPaquete($paquete);
-            break;
-        default:
-            $contenidoModulo = listPackages($smarty, $module_name, $local_templates_dir,$arrConf);
-            break;
-    }
+    $xajax = new xajax();
+    $xajax->registerFunction("actualizarRepositorios");
+    $xajax->registerFunction("installPaquete");
+    $xajax->processRequests();
+    $contenidoModulo  = $xajax->printJavascript("libs/xajax/");
+    $contenidoModulo .= listPackages($smarty, $module_name, $local_templates_dir,$arrConf);
 
     return $contenidoModulo;
 }
@@ -78,29 +71,24 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
     global $arrLang;
     $oPackages = new PaloSantoPackages();
 
-    $submitInstalado = getParameter('submitInstalado');
-    $nombre_paquete = getParameter('nombre_paquete');
+    $submitInstalado = getParametro('submitInstalado');
+    $nombre_paquete = getParametro('nombre_paquete');
 
     $total_paquetes = $oPackages->ObtenerTotalPaquetes($submitInstalado, $arrConf['ruta_yum'], $nombre_paquete);
 
-// Pagination
     $limit = 50;
     $total = $total_paquetes;
     $oGrid = new paloSantoGrid($smarty);
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-    $offset = $oGrid->calculateOffset();
-    $end    = $oGrid->getEnd();
+    $offset = $oGrid->getOffSet($limit,$total,(isset($_GET['nav']))?$_GET['nav']:NULL,(isset($_GET['start']))?$_GET['start']:NULL);
+    $end   = ($offset+$limit)<=$total ? $offset+$limit : $total;
 
-	$actualizar=false;
-	//print($arrConf['ruta_yum']);
+
     if($submitInstalado =='all'){
-        $arrPaquetes = $oPackages->getAllPackages($arrConf['ruta_yum'],$nombre_paquete, $offset, $limit, $total,$actualizar);
-		$arrPaquetes = $oPackages->getDataPagination($arrPaquetes,$limit,$offset);
+        $arrPaquetes = $oPackages->getAllPackages($arrConf['ruta_yum'],$nombre_paquete);
+	$arrPaquetes = $oPackages->getDataPagination($arrPaquetes,$limit,$offset);
     }
     else{  //si no hay post por default los instalados
         $arrPaquetes = $oPackages->getPackagesInstalados($arrConf['ruta_yum'],$nombre_paquete, $offset, $limit, $total);
-		$arrPaquetes = $oPackages->getDataPagination($arrPaquetes,$limit,$offset);
     }
 
 
@@ -109,7 +97,6 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
         'submitInstalado'   =>  $submitInstalado,
         'nombre_paquete'    =>  $nombre_paquete,
     );
-
     $arrData = array();
     if (is_array($arrPaquetes)) {
         for($i=0;$i<count($arrPaquetes);$i++){
@@ -130,7 +117,7 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
         }
     }
     $arrGrid = array("title"    => $arrLang["Packages"],
-        "icon"     => "/modules/$module_name/images/system_updates_packages.png",
+        "icon"     => "images/list.png",
         "width"    => "99%",
         "start"    => ($total==0) ? 0 : $offset + 1,
         "end"      => $end,
@@ -138,103 +125,81 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
         "url"      => $url,
         "columns"  => array(0 => array("name"      => $arrLang["Package Name"],
                                        "property1" => ""),
-                            1 => array("name"      => $arrLang["Package Info"],
+                            1 => array("name"      => $arrLang["Package Info"], 
                                        "property1" => ""),
-                            2 => array("name"      => $arrLang["Package Version"],
+                            2 => array("name"      => $arrLang["Package Version"], 
                                        "property1" => ""),
-                            3 => array("name"      => $arrLang["Package Release"],
+                            3 => array("name"      => $arrLang["Package Release"], 
                                        "property1" => ""),
-                            4 => array("name"      => $arrLang["Repositor Place"],
+                            4 => array("name"      => $arrLang["Repositor Place"], 
                                        "property1" => ""),
-                            5 => array("name"     => $arrLang["Status"],
+                            5 => array("name"     => $arrLang["Status"], 
                                        "property1" => ""),
-                            6 => array("name"      => $arrLang["Package Delete"],
+                            6 => array("name"      => $arrLang["Package Delete"], 
                                        "property1" => ""),));
 
     /*Inicion Parte del Filtro*/
-    $arrFilter = filterField();
-    $oFilterForm = new paloForm($smarty, $arrFilter);
-
-    if(getParameter('submitInstalado')=='all'){
-        $arrFilter["submitInstalado"] = 'all';
-        $tipoPaquete = _tr('All Package');
-    }else{
-        $arrFilter["submitInstalado"] = 'installed';
-        $tipoPaquete = _tr('Package Installed');
-    }
-    $arrFilter["nombre_paquete"] = $nombre_paquete;
+    $opcion1 = $opcion2= "";
+    if(getParametro('submitInstalado')=='all')
+        $opcion1 = "selected='selected'";
+    else if(getParametro('submitInstalado')=='installed')
+        $opcion2 = "selected='selected'";
 
     $smarty->assign("module_name",$module_name);
     $smarty->assign("RepositoriesUpdate",$arrLang['Repositories Update']);
-    //$smarty->assign("Name",$arrLang['Name']);
-
-    //$smarty->assign("nombre_paquete",htmlentities($nombre_paquete, ENT_QUOTES, 'UTF-8'));
+    $smarty->assign("Name",$arrLang['Name']);
+    $smarty->assign("nombre_paquete",htmlentities($nombre_paquete, ENT_QUOTES, 'UTF-8'));
     $smarty->assign("Search",$arrLang['Search']);
-   // $smarty->assign("Status",$arrLang['Status']);
-   // $smarty->assign("opcion2",$opcion2);
-   // $smarty->assign("opcion1",$opcion1);
-   // $smarty->assign("PackageInstalled",$arrLang['Package Installed']);
-   // $smarty->assign("AllPackage",$arrLang['All Package']);
+    $smarty->assign("Status",$arrLang['Status']);
+    $smarty->assign("opcion2",$opcion2);
+    $smarty->assign("opcion1",$opcion1);
+    $smarty->assign("PackageInstalled",$arrLang['Package Installed']);
+    $smarty->assign("AllPackage",$arrLang['All Package']);
     $smarty->assign("UpdatingRepositories",$arrLang['Updating Repositories']);
     $smarty->assign("InstallPackage",$arrLang['Installing Package']);
     $smarty->assign("accionEnProceso",$arrLang['There is an action in process']);
-
-	if($actualizar){
-		$smarty->assign("mb_title",_tr("Message"));
-		$smarty->assign("mb_message",_tr("The repositories are not up to date. Click on the")." <b>\""._tr('Repositories Update')."\"</b> "._tr("button to list all available packages."));
-	}
-
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." =  $tipoPaquete", $arrFilter, array("submitInstalado" => "installed"),true);
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Name")." = $nombre_paquete", $arrFilter, array("nombre_paquete" => ""));
-
-    $oGrid->addButtonAction("update_repositorios",_tr('Repositories Update'),null,'mostrarReloj()');
-
-    $contenidoFiltro =$oFilterForm->fetchForm("$local_templates_dir/new.tpl","",$arrFilter);
+    $contenidoFiltro = $smarty->fetch("file:$local_templates_dir/new.tpl");
     $oGrid->showFilter($contenidoFiltro);
     /*Fin Parte del Filtro*/
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
     return $contenidoModulo;
 }
 
-function filterField(){
-    $arrPackages = array("all"=>_tr('All Package'),"installed"=>_tr('Package Installed'));
-
-    $arrFilter = array(
-            "nombre_paquete" => array( "LABEL"                  => _tr("Name"),
-                                        "REQUIRED"               => "no",
-                                        "INPUT_TYPE"             => "TEXT",
-                                        "INPUT_EXTRA_PARAM"      => "",
-                                        "VALIDATION_TYPE"        => "text",
-                                        "VALIDATION_EXTRA_PARAM" => ""),
-            "submitInstalado"   => array("LABEL"                  => _tr("Status"),
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "SELECT",
-                                            "INPUT_EXTRA_PARAM"      => $arrPackages,
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => "",
-                                            "ONCHANGE"               => "javascript:submit()"),
-                        );
-    return $arrFilter;
+function getParametro($parametro)
+{
+    if(isset($_POST[$parametro]))
+        return $_POST[$parametro];
+    else if(isset($_GET[$parametro]))
+        return $_GET[$parametro];
+    else
+        return null;
 }
 
 function actualizarRepositorios()
 {
+    global $arrLang;
+    $respuesta = new xajaxResponse();
     $oPackages = new PaloSantoPackages();
     $resultado = $oPackages->checkUpdate();
-
-    $jsonObject = new PaloSantoJSON();
-    $jsonObject->set_status($resultado);
-    return $jsonObject->createJSON();
+    $respuesta->addAlert($resultado);
+    $respuesta->addAssign("relojArena","innerHTML","");
+    $respuesta->addAssign("nombre_paquete","value","");
+    $respuesta->addAssign("estaus_reloj","value","apagado");
+    $respuesta->addScript("document.getElementById('form_packages').submit();\n");
+    return $respuesta;
 }
 
-function installPaquete()
+function installPaquete($paquete)
 {
+    global $arrLang;
+    $respuesta = new xajaxResponse();
     $oPackages = new PaloSantoPackages();
-    $paquete = getParameter("paquete");
     $resultado = $oPackages->installPackage($paquete);
-
-    $jsonObject = new PaloSantoJSON();
-    $jsonObject->set_status($resultado);
-    return $jsonObject->createJSON();
+    $respuesta->addAlert($resultado);
+    $respuesta->addAssign("relojArena","innerHTML","");
+    $respuesta->addAssign("nombre_paquete","value","");
+    $respuesta->addAssign("estaus_reloj","value","apagado");
+    $respuesta->addScript("document.getElementById('form_packages').submit();\n");
+    return $respuesta;
 }
 ?>

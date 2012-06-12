@@ -132,7 +132,7 @@ class paloSantoIncomingCampaign
 SELECT ce.id, ce.name, qce.queue, ce.datetime_init, ce.datetime_end, 
     ce.daytime_init, ce.daytime_end, ce.script, 
     COUNT(call_entry.id) AS num_completadas, NULL as promedio, ce.estatus,
-    ce.id_form, ce.id_url 
+    ce.id_form 
 FROM (campaign_entry ce, queue_call_entry qce) 
 LEFT JOIN (call_entry) ON (ce.id = call_entry.id_campaign) 
 WHERE $sWhere GROUP BY ce.id ORDER BY ce.datetime_init, ce.daytime_init
@@ -166,7 +166,7 @@ SQL_CAMPANIAS;
      * @return  int    El ID de la campaña recién creada, o NULL en caso de error
      */
     function createEmptyCampaign($sNombre, $sQueue, $sFechaInicial, $sFechaFinal,
-        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL, $id_url = NULL)
+        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL)
     {
         $sNombre = trim($sNombre);
         $sQueue = trim($sQueue);
@@ -184,7 +184,7 @@ SQL_CAMPANIAS;
             $this->errMsg = _tr('Queue cannot be empty');//'Número de cola no puede estar vacío';
             return NULL;
         }
-        if (!ctype_digit("$sQueue")) {
+        if (!ctype_digit($sQueue)) {
             $this->errMsg = _tr('Queue must be numeric');//'Número de cola debe de ser numérico y entero';
             return NULL;
         }
@@ -212,12 +212,8 @@ SQL_CAMPANIAS;
             $this->errMsg = _tr('Start Time must be greater than End Time');//'Hora de inicio debe ser anterior a la hora final';
             return NULL;
         }
-        if (!is_null($id_form) && !ctype_digit("$id_form")) {
+        if (!is_null($id_form) && !ctype_digit($id_form)) {
             $this->errMsg = _tr('Form ID is not numeric');
-            return NULL;
-        }
-        if (!is_null($id_url) && !ctype_digit("$id_url")) {
-            $this->errMsg = _tr('URL ID is not numeric');
             return NULL;
         }
 
@@ -245,10 +241,10 @@ SQL_CAMPANIAS;
         $sPeticionSQL = 
             'INSERT INTO campaign_entry (name, id_queue_call_entry, '.
                 'id_form, datetime_init, datetime_end, daytime_init, '.
-                'daytime_end, estatus, script, id_url) '.
-            'VALUES (?, ?, ?, ?, ?, ?, ?, "A", ?, ?)';
+                'daytime_end, estatus, script) '.
+            'VALUES (?, ?, ?, ?, ?, ?, ?, "A", ?)';
         $paramSQL = array($sNombre, $idQueue, $id_form, $sFechaInicial,
-            $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $id_url);
+            $sFechaFinal, $sHoraInicio, $sHoraFinal, $script);
 
         $result = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
         if (!$result) {
@@ -319,24 +315,8 @@ SQL_CAMPANIAS;
         return $salida;
     }
 
-    function getExternalUrls()
-    {
-        $sPeticionSQL = 'SELECT id, description FROM campaign_external_url WHERE active = 1';
-        $tupla = $this->_DB->fetchTable($sPeticionSQL);
-        if (!is_array($tupla)) {
-            $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            return null;
-        } else {
-            $salida = array();
-            foreach($tupla as $key => $value){
-                $salida[$value[0]] = $value[1];
-            }
-            return $salida;
-        }
-    }
-
     function updateCampaign($idCampaign, $sNombre, $sQueue, $sFechaInicial, $sFechaFinal,
-        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL, $id_url = NULL)
+        $sHoraInicio, $sHoraFinal, $script, $id_form = NULL)
     {
         $sNombre = trim($sNombre);
         $sQueue = trim($sQueue);
@@ -346,7 +326,7 @@ SQL_CAMPANIAS;
         $sHoraFinal = trim($sHoraFinal);
         $script = trim($script);
 
-        if (!ctype_digit("$idCampaign")) {
+        if (!ctype_digit($idCampaign)) {
         	$this->errMsg = _tr('(internal) Invalid campaign ID');
             return false;
         }
@@ -358,7 +338,7 @@ SQL_CAMPANIAS;
             $this->errMsg = _tr('Queue cannot be empty');//'Número de cola no puede estar vacío';
             return false;
         }
-        if (!ctype_digit("$sQueue")) {
+        if (!ctype_digit($sQueue)) {
             $this->errMsg = _tr('Queue must be numeric');//'Número de cola debe de ser numérico y entero';
             return false;
         }
@@ -386,12 +366,8 @@ SQL_CAMPANIAS;
             $this->errMsg = _tr('Start Time must be greater than End Time');//'Hora de inicio debe ser anterior a la hora final';
             return false;
         }
-        if (!is_null($id_form) && !ctype_digit("$id_form")) {
+        if (!is_null($id_form) && !ctype_digit($id_form)) {
             $this->errMsg = _tr('Form ID is not numeric');
-            return false;
-        }
-        if (!is_null($id_url) && !ctype_digit("$id_url")) {
-            $this->errMsg = _tr('URL ID is not numeric');
             return false;
         }
 
@@ -419,10 +395,10 @@ SQL_CAMPANIAS;
         $sPeticionSQL = 
             'UPDATE campaign_entry SET name = ?, id_queue_call_entry = ?, '.
                 'id_form = ?, datetime_init = ?, datetime_end = ?, '.
-                'daytime_init = ?, daytime_end = ?, script = ?, id_url = ? '.
+                'daytime_init = ?, daytime_end = ?, script = ? '.
             'WHERE id = ?';
         $paramSQL = array($sNombre, $idQueue, $id_form, $sFechaInicial,
-            $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $id_url, $idCampaign);
+            $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $idCampaign);
         $result = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
         if (!$result) {
             $this->errMsg = $this->_DB->errMsg;

@@ -92,7 +92,6 @@
         else
 	    return false ;
     }
-
     function popUp(path,width_value,height_value)
     {
         var features = 'width='+width_value+',height='+height_value+',resizable=no,scrollbars=yes,toolbar=no,location=no,menubar=no,status=no';
@@ -111,7 +110,7 @@ function request(url,arrParams, recursive, callback)
     callback           = callback  || null;
     recursive          = recursive || null;
 
-     // Comienza petición por ajax
+    // Comienza petición por ajax
     $.post(url,
         queryString,
         function(dataResponse){
@@ -119,14 +118,6 @@ function request(url,arrParams, recursive, callback)
             var statusResponse = dataResponse.statusResponse;
             var error          = dataResponse.error;
             var stop_recursive = false;
-
-			if(statusResponse == "ERROR_SESSION"){
-				$.unblockUI();
-				var r = confirm(error);
-				if (r==true)
-				  location.href = 'index.php';
-				return;
-			}
 
             if(callback)
                 stop_recursive = callback(message,statusResponse,error);
@@ -177,77 +168,36 @@ function hide_message_error(){
     document.getElementById("message_error").style.display = 'none';
 }
 
-var modal_elastix_popup_shown = false;
-
-function ShowModalPopUP(title, width, height, html){
-
-    $('.neo-modal-elastix-popup-content').html(html);
-    $('.neo-modal-elastix-popup-title').text(title);
-
-    var maskHeight = $(document).height();
-    var maskWidth = $(window).width();
-
-    $('.neo-modal-elastix-popup-blockmask').css({'width':maskWidth,'height':maskHeight});
-
-    $('.neo-modal-elastix-popup-blockmask').fadeIn(600);
-    $('.neo-modal-elastix-popup-blockmask').fadeTo("fast",0.8);
-
-    var winH = $(window).height();
-    var winW = $(window).width();
-  
-    var top = winH/2-height/2;
-    if(top<0){
-	top=10;
-        $('.neo-modal-elastix-popup-box').css({'height':"auto", 'bottom':10});
-	$('.neo-modal-elastix-popup-content').css({'overflow-y':"auto", 'overflow-x':"visible", 'bottom':20, 'position': "absolute", 'top':40, 'width':"93%"});
-	
-    }else{
-    	$('.neo-modal-elastix-popup-box').height(height);
-    }
-    $('.neo-modal-elastix-popup-box').width(width);
-    $('.neo-modal-elastix-popup-box').css('top',  top);
-    $('.neo-modal-elastix-popup-box').css('left', winW/2-width/2);
-    $('.neo-modal-elastix-popup-box').fadeIn(2000);
-
-    modal_elastix_popup_shown = true;
-
-    $('.neo-modal-elastix-popup-close').click(function() {
-        hideModalPopUP();
-    });
-}
-
-function hideModalPopUP()
-{
-    $('.neo-modal-elastix-popup-box').fadeOut(10);
-    $('.neo-modal-elastix-popup-blockmask').fadeOut(20);
-    $('.neo-modal-elastix-popup-content').html("");
-
-    modal_elastix_popup_shown = false;
-}
-
-function showPopupElastix(id, title, width, height){
+function showPopupElastix(id,titles,widths,heights){
+    //var arrAction              = new Array();
+    //arrAction["action"]        = "registration";
+    //arrAction["rawmode"]       = "yes";
     var arrAction = "action=registration&rawmode=yes";
     $.post("register.php",arrAction,
         function(arrData,statusResponse,error)
         {
-            ShowModalPopUP(title,width,height,arrData);
-            getDataWebServer();
+            jBoxPopupAero(id ,titles, widths, heights, arrData);
         }
     );
 }
 
-function mostrar()
-{
-    var arrAction = new Array();
-    arrAction["action"]  = "showAboutAs";
-    arrAction["rawmode"] = "yes";
+function jBoxPopupAero(id ,titulo, ancho, alto, html){
+    var div = "<div id='"+id+"' style='position: absolute;'></div>";
+    $('#PopupElastix').append(div);
+    $('body').data(id , null);
+    $("#"+id).html(html);
 
-    request("register.php",arrAction,false,
-        function(arrData,statusResponse,error)
-        {
-            ShowModalPopUP(arrData['title'],380,100,arrData['html']);
-        }
-    );
+    $("#"+id).AeroWindow({
+        WindowTitle:          titulo,
+        //WindowDesktopIconFile:
+        WindowDesktopIcon:    false,
+        WindowPositionTop:    'center',
+        WindowPositionLeft:   'center',
+        WindowWidth:          ancho,
+        WindowHeight:         alto,
+        WindowAnimation:      'easeOutCubic'
+    });
+    getDataWebServer();
 }
 
 function registration(){
@@ -297,29 +247,27 @@ function registration(){
     if(error)
         alert(txtError);
     else{
-	$('#tdButtons').hide();
-        $('#tdloaWeb').show();
+		$('#tdButtons').hide();
+        $('#tdloaWeb').attr("style", "padding-left: 5px; display: block;");
         var arrAction = "action=saveregister&contactNameReg="+contactName+"&emailReg="+email+"&phoneReg="+phone+"&companyReg="+company+"&addressReg="+address+"&cityReg="+city+"&countryReg="+country+"&idPartnerReg="+idPartner+"&rawmode=yes";
         $.post("register.php",arrAction,
             function(arrData,statusResponse,error)
             {
-                var response = JSONRPMtoString(arrData);
-                var registerText   = $('#lblRegisterCm').val();
-                var registeredText = $('#lblRegisteredCm').val();
+				var response = JSONRPMtoString(arrData);
+				var registerText   = $('#lblRegisterCm').val();
+				var registeredText = $('#lblRegisteredCm').val();
                 alert(response["message"]);
-                if(response["statusResponse"]=="TRUE"){
-                        $('#registrar').hide();
-                        $('.register_link').css('color','#008800');
-                        $('.register_link').text(registeredText);
-                        getElastixKey();
-                        $('#tdButtons').show();
-                        $('#tdloaWeb').hide();
-                }else{
-                        $('.register_link').css('color','#FF0000');
-                        $('.register_link').text(registerText);
-                        $('#tdloaWeb').hide();
-                        $('#tdButtons').show();
-                }
+				if(response["statusResponse"]=="TRUE"){
+					$('#registrar').hide();
+					$('.register_link').css('color','#008800');
+					$('.register_link').text(registeredText);
+					getElastixKey();
+				}else{
+					$('#tdButtons').show();
+					$('.register_link').css('color','#FF0000');
+					$('.register_link').text(registerText);
+					$('#tdloaWeb').attr("style", "padding-left: 5px; display: none;");
+				}
             }
         );
     }
@@ -394,15 +342,13 @@ function getElastixKey(){
     $.post("index.php",arrAction,
 	function(arrData,statusResponse,error)
 	{
-	    var serverKey = arrData["server_key"];
+	    var message = JSONRPMtoString(arrData);
+	    var serverKey = message["serverKey"];
 	    if(serverKey && serverKey != ""){
-		hideModalPopUP();
-		var callback = $('#callback').val();
-		if(callback && callback !=""){
-		    if(callback=="do_checkDependencies")
-		      do_checkDependencies(serverKey);
-		    else if(callback=="do_iniciarInstallUpdate")
-		      do_iniciarInstallUpdate();
+		var link = $('#link_tmp').val();
+		if(link && link !=""){
+		    link += serverKey;
+		    window.open(link);
 		}
 	    }
 	}
@@ -410,32 +356,44 @@ function getElastixKey(){
 }
 
 function setAdminPassword(){
-    var title = $('#lblChangePass').val();
-    var lblCurrentPass = $('#lblCurrentPass').val();
-    var lblNewPass = $('#lblNewPass').val();
-    var lblRetypeNewPass = $('#lblRetypePass').val();
-    var btnChange = $('#btnChagePass').val();
-    var height = 160;
-    var width = 380;
-    var html =
-        "<table class='tabForm' style='font-size: 16px;' width='100%' >" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblCurrentPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass' name='curr_pass' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblNewPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass_new' name='curr_pass_new' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblRetypeNewPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass_renew' name='curr_pass_renew' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='center'  colspan='2'><input type='button' id='sendChanPass' name='sendChanPss' value='"+btnChange+"' onclick='saveNewPasswordElastix()' /></td>" +
-            "</tr>" +
-        "</table>";
-    ShowModalPopUP(title,width,height,html);
+    var id = "changePasswordAdmin";
+	var titles = $('#lblChangePass').val();
+	var lblCurrentPass = $('#lblCurrentPass').val();
+	var lblNewPass = $('#lblNewPass').val();
+	var lblRetypeNewPass = $('#lblRetypePass').val();
+	var btnChange = $('#btnChagePass').val();
+	var heights = 200;
+	var widths = 400;
+	var arrData =
+"<div style='margin: 0px auto;'>"+
+  "<div style= 'position: relative; width: 375px; float: left; margin-top: 0px; margin-right: 10px; margin-bottom: 10px; margin-left: 15px;'>"+
+	  "<div class='neo-module-title'>" +
+		  "<div class='neo-module-name-left'></div>" +
+		  "<span class='neo-module-name'>"+titles+"</span>" +
+		  "<div class='neo-module-name-right'></div>" +
+	  "</div>"+
+	  "<div class='neo-module-content'>" +
+		  "<table class='tabForm' style='font-size: 16px;' width='100%' >" +
+			"<tr class='letra12'>" +
+			  "<td align='left'><b>"+lblCurrentPass+"</b></td>" +
+			  "<td align='left'><input type='password' id='curr_pass' name='curr_pass' value='' /></td>" +
+			"</tr>" +
+			"<tr class='letra12'>" +
+			  "<td align='left'><b>"+lblNewPass+"</b></td>" +
+			  "<td align='left'><input type='password' id='curr_pass_new' name='curr_pass_new' value='' /></td>" +
+			"</tr>" +
+			"<tr class='letra12'>" +
+			  "<td align='left'><b>"+lblRetypeNewPass+"</b></td>" +
+			  "<td align='left'><input type='password' id='curr_pass_renew' name='curr_pass_renew' value='' /></td>" +
+			"</tr>" +
+			"<tr class='letra12'>" +
+			  "<td align='center'  colspan='2'><input type='button' id='sendChanPass' name='sendChanPss' value='"+btnChange+"' onclick='saveNewPasswordElastix()' /></td>" +
+			"</tr>" +
+		  "</table>" +
+	  "</div>" +
+  "</div>" +
+"</div>";
+    jBoxPopupAero(id ,titles, widths, heights, arrData);
 }
 
 function saveNewPasswordElastix(){
@@ -471,195 +429,42 @@ function saveNewPasswordElastix(){
 				alert(error);
 			else{
 				alert(error);
-				hideModalPopUP();
+				$('#changePasswordAdmin').remove();
 			}
 		}
 	);
 }
 
-function addBookmark(){
-	var arrAction = new Array();
-	arrAction["action"]  = "addBookmark";
-	arrAction["rawmode"] = "yes";
-	var srcimg = $('#neo-logobox').find('img:first').attr("src");
-	var theme = srcimg.split("/",2);
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_addingBookmark').val()+"</span></div></div>";
-	var imgBookmark = $("#togglebookmark").attr('src');
-	if(/bookmarkon.png/.test(imgBookmark))
-		urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
-	$.blockUI({ message: urlImaLoading });
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-			$.unblockUI();
-		    if(statusResponse == "false"){
-				var source_img = $('#neo-logobox').find('img:first').attr("src");
-				var themeName = source_img.split("/",2);
-				var imgBookmark = $("#togglebookmark").attr('src');
-				if(/bookmarkon.png/.test(imgBookmark)) {
-				  var labeli = $("#toolTip_addBookmark").val();
-				  $("#togglebookmark").attr('title', labeli);
-				  $("#togglebookmark").attr('src',"themes/"+themeName[1]+"/images/bookmark.png");
-				} else {
-				  var labeli = $("#toolTip_removeBookmark").val();
-				  $("#togglebookmark").attr('title', labeli);
-				  $("#togglebookmark").attr('src',"themes/"+themeName[1]+"/images/bookmarkon.png");
-				}
-				alert(error);
-			}else{
-				var action = arrData['action'];
-				var menu   = arrData['menu'];
-				var idmenu = arrData['idmenu'];
-				var namemenu = arrData['menu_session'];
-				if(action == "add"){
-					var labeli = $("#toolTip_removeBookmark").val();
-					$("#togglebookmark").attr('title', labeli);
-					var link = "<div class='neo-historybox-tab' id='menu"+idmenu+"' onMouseOut='removeNeoDisplayOnMouseOut(this);' onMouseOver='removeNeoDisplayOnMouseOver(this);'><a href='index.php?menu="+namemenu+"' >"+menu+"</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-					if($('div[id^=menu]').length == 0){
-						$('#neo-bookmarkID').attr("style","");
-						link = "<div class='neo-historybox-tabmid' id='menu"+idmenu+"' onMouseOut='removeNeoDisplayOnMouseOut(this);' onMouseOver='removeNeoDisplayOnMouseOver(this);'><a href='index.php?menu="+namemenu+"' >"+menu+"</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-						//$('#neo-historybox').find("br").remove();
-					}
-					$('#neo-bookmarkID').after(link);
-				}
-				if(action == "delete"){
-					var labeli = $("#toolTip_addBookmark").val();
-					$("#togglebookmark").attr('title', labeli);
-					// el anterior debe tener la clase neo-historybox-tabmid
-					$('#menu'+idmenu).remove();
-					if($('div[id^=menu]').length == 0){
-						//$('#neo-bookmarkID').after("<br />");
-						$('#neo-bookmarkID').attr("style","display:none;");
-					}else{
-						$('div[id^=menu]').each(function(indice,valor){
-							var tam = $('div[id^=menu]').length;
-							if(indice == (tam - 1)){
-								$(this).removeClass('neo-historybox-tab');
-								$(this).addClass('neo-historybox-tabmid');
+$(document).ready(function(){
+    //***Para los módulos con filtro se llama a la función pressKey
+    if(document.getElementById("filter_value"))
+	document.onkeypress = keyPressed;
+    //*****************************************/
+    $(".close_image_box").click(function(){
+            $("#boxRPM").attr("style","display: none;");
+            $("#fade_overlay").attr("style","display: none;");
+        });
 
-							}
-						});
-
-					}
-				}
-			}
-		}
-	);
-}
-
-function deleteBookmarkByEquis(ref){
-    // obteniendo el id del menu.
-    var linkMenu = $(ref).parent().children(':first-child').attr('href');
-	var arrLinkMenu = linkMenu.split("menu=",2);
-	var id_menu = arrLinkMenu[1];
-	var arrAction = new Array();
-	arrAction["action"]  = "deleteBookmark";
-	arrAction["rawmode"] = "yes";
-	arrAction["id_menu"] = id_menu;
-	var srcimg = $('#neo-logobox').find('img:first').attr("src");
-	var theme = srcimg.split("/",2);
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
-	$.blockUI({ message: urlImaLoading });
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-			$.unblockUI();
-			var source_img = $('#neo-logobox').find('img:first').attr("src");
-			var menu_actual = arrData['menu_url'];
-		    if(statusResponse == "false"){
-				var menuchanged = arrData['menu_session'];
-				var source_img = $('#neo-logobox').find('img:first').attr("src");
-				var themeName = source_img.split("/",2);
-				alert(error);
-			}else{
-				var action = arrData['action'];
-				var menu   = arrData['menu'];
-				var idmenu = arrData['idmenu'];
-				var namemenu = arrData['menu_session'];
-
-				if(action == "delete"){
-					var imgBookmark = $("#togglebookmark").attr('src');
-					// solo hacer esto si el menu actual es el que se esta eliminando
-					if(namemenu == menu_actual){
-						var themeName = source_img.split("/",2);
-						var labeli = $("#toolTip_addBookmark").val();
-						$("#togglebookmark").attr('title', labeli);
-						$("#togglebookmark").attr('src',"themes/"+themeName[1]+"/images/bookmark.png");
-					}
-
-					var labeli = $("#toolTip_addBookmark").val();
-					$("#togglebookmark").attr('title', labeli);
-					// el anterior debe tener la clase neo-historybox-tabmid
-					$('#menu'+idmenu).remove();
-					if($('div[id^=menu]').length == 0){
-						//$('#neo-bookmarkID').after("<br />");
-						$('#neo-bookmarkID').attr("style","display:none;");
-					}else{
-						$('div[id^=menu]').each(function(indice,valor){
-							var tam = $('div[id^=menu]').length;
-							if(indice == (tam - 1)){
-								$(this).removeClass('neo-historybox-tab');
-								$(this).addClass('neo-historybox-tabmid');
-							}
-						});
-
-					}
-				}
-			}
-		}
-	);
-}
-
-function saveToggleTab(){
-	var arrAction = new Array();
-	arrAction["action"]  = "saveNeoToggleTab";
-	if($('#neo-lengueta-minimized').hasClass('neo-display-none'))
-		arrAction["statusTab"]  = "true";
-	else
-		arrAction["statusTab"]  = "false";
-	arrAction["rawmode"] = "yes";
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-			/*$.unblockUI();*/
-			if(statusResponse == "false"){
-				if(!$('#neo-lengueta-minimized').hasClass('neo-display-none')){
-					  $("#neo-contentbox-leftcolumn").removeClass("neo-contentbox-leftcolumn-minimized");
-					  $("#neo-contentbox-maincolumn").css("width", "1025px");
-					  $("#neo-contentbox-leftcolumn").data("neo-contentbox-leftcolum-status", "visible");
-					  $("#neo-lengueta-minimized").addClass("neo-display-none");
-					  if($('#toggleleftcolumn')){
-						  var labeli = $('#toolTip_hideTab').val();
-						  $('#toggleleftcolumn').attr('title',labeli);
-						  $('#toggleleftcolumn').attr('src',"images/expand.png");
-
-					  }
-					}else{
-					  $("#neo-contentbox-leftcolumn").addClass("neo-contentbox-leftcolumn-minimized");
-					  $("#neo-contentbox-maincolumn").css("width", "1245px");
-					  $("#neo-contentbox-leftcolumn").data("neo-contentbox-leftcolum-status", "hidden");
-					  $("#neo-lengueta-minimized").removeClass("neo-display-none");
-					  if($('#toggleleftcolumn')){
-						  var labeli = $('#toolTip_showTab').val();
-						  $('#toggleleftcolumn').attr('title',labeli);
-						  $('#toggleleftcolumn').attr('src',"images/expandOut.png");
-					  }
-					}
-				alert(error);
-			}
-		}
-	);
-}
-
-
-//***Genera la Tabla de los Detalles de la Versión
-function loadDetails(){
+    $("#viewDetailsRPMs").click(function(){
+        $("#changeMode").attr("style", "visibility: hidden;");
+        $("#boxRPM").attr("style","display: block;");
+        $("#fade_overlay").attr("style","display: block;");
+        $("#loadingRPM").attr("style","display: block;");
+        $("#tdTa").attr("style","display: none;");
+        $("#tdRpm").attr("style","display: block;");
+        $("#tableRMP").html("");
+        $("#tdTa").val("");
+        var lbltextMode = $("#lblTextMode").val();
+        $("#changeMode").text("("+lbltextMode+")");
+        $("#txtMode").val("");
         var order = "action=versionRPM&rawmode=yes";
         $.post("index.php", order, function(theResponse){
-            $("#loadingRPM").hide();
-            $("#changeMode").show();
+            $("#loadingRPM").attr("style","display: none;");
+            $("#boxRPM").attr("style","display: block;");
+            $("#fade_overlay").attr("style","display: block;");
+            $("#changeMode").attr("style", "visibility: visible;");
             var message = JSONRPMtoString(theResponse);
-            var html = "";
+            var html = ""; 
             var html2 = "";
             var key = "";
             var key2 = "";
@@ -667,8 +472,7 @@ function loadDetails(){
             var i = 0;
             var cont = 0;
             for(key in message){
-                html += "<table  width='96%' border='0' cellspacing='0' cellpadding='0' style='border:1px solid #999'>"+
-                           "<tr class='letra12'>" +
+                html += "<tr class='letra12'>" +
                             "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Name</b></td>" +
                             "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Package Name</b></td>" +
                             "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Version</b></td>" +
@@ -708,79 +512,33 @@ function loadDetails(){
 
             }
             cont = cont + 2;
-            html +="</table>";
-	    
             $("#txtMode").attr("rows", cont);
             $("#tableRMP").html(html);
-	    $("#changeMode").show();
             $("#txtMode").val(html2);
-            $("#tableRMP").css("border-style", "none");	
-            
         });
-}
-
-
-//***Cambia de (Texto->Html)(Html->Texto)
-function changeMode(){	
-        var viewTbRpm = $(".tdRpm").attr("style");
-        if(viewTbRpm == "display: block;"){
-            //change lbltextMode
-            var lblhtmlMode = $("#lblHtmlMode").val();
-            $("#changeMode").text("("+lblhtmlMode+")");
-
-            $(".tdRpm").attr("style","display: none;");
-            $("#tdTa").attr("style","display: block;");
-		
-        }else{
-            //change lblHtmlMode
-            var lbltextMode = $("#lblTextMode").val();
-            $("#changeMode").text("("+lbltextMode+")");
-            $(".tdRpm").attr("style","display: block;");
-            $("#tdTa").attr("style","display: none;");
-            $("#txtMode").css("height","auto");
-        }
-}
-
-//***POPUP VERSION
-function showVersion(){
-	var arrAction = new Array();
-        arrAction["action"]  = "showRPMS_Version";
-        arrAction["rawmode"] = "yes";
-
-        request("register.php",arrAction,false,
-            function(arrData,statusResponse,error)
-            {
-	        ShowModalPopUP(arrData['title'],380,800,arrData['html']);  
-		loadDetails();
-            }
-        );
-       
-	$("#loadingRPM").show();
-        $("#tdTa").hide();
-        $(".tdRpm").show();
-        $("#tdTa").val("");
-        var lbltextMode = $("#lblTextMode").val();
-        $("#changeMode").text("("+lbltextMode+")");
-        $("#txtMode").val("");
-        
-}
-
-
-$(document).ready(function(){
-    //***Para los módulos con filtro se llama a la función pressKey
-    if(document.getElementById("filter_value") || document.getElementById("pageup") || document.getElementById("neo-sticky-note-textarea"))
-	document.onkeypress = keyPressed;
-    //*****************************************/
-    $(".close_image_box").click(function(){
-            $("#boxRPM").attr("style","display: none;");
-            $("#fade_overlay").attr("style","display: none;");
-        });
-  
-    $("#viewDetailsRPMs").click(function(){ showVersion(); });
+    });
 
     $("#fade_overlay").click(function(){
         $("#boxRPM").attr("style","display: none;");
         $("#fade_overlay").attr("style","display: none;");
+    });
+
+    $("#changeMode").click(function(){
+        var viewTbRpm = $("#tdRpm").attr("style");
+        if(viewTbRpm == "display: block;"){
+            //change lbltextMode
+            var lblhtmlMode = $("#lblHtmlMode").val();
+            $("#changeMode").text("("+lblhtmlMode+")");
+            
+            $("#tdRpm").attr("style","display: none;");
+            $("#tdTa").attr("style","display: block;");
+        }else{
+            //change lblHtmlMode
+            var lbltextMode = $("#lblTextMode").val();
+            $("#changeMode").text("("+lbltextMode+")");
+            $("#tdRpm").attr("style","display: block;");
+            $("#tdTa").attr("style","display: none;");
+        }
     });
 
 	$( "#search_module_elastix" )
@@ -867,7 +625,7 @@ $(document).ready(function(){
 				return false;
 			}
 	});
-
+		
 });
 
 //Si se presiona enter se hace un submit al formulario para que se aplica el filtro
@@ -877,16 +635,13 @@ function keyPressed(e)
     if (window.event) keycode = window.event.keyCode;
     else if (e) keycode = e.which;
     else return true;
-        
-    if (!$("textarea").is(":focus") && !$("#neo-submit-button").is(":focus")) {
-	  if(keycode == 13){
-		$("form").submit();
-		return false;
-	  }
+    if(keycode == 13){
+	$("form").submit();
+	return false;
     }
 }
 
-// implement JSON.parse de-serialization
+// implement JSON.parse de-serialization  
 function JSONRPMtoString(str) {
 	if (str === "") str = '""';
 	eval("var p=" + str + ";");
@@ -910,5 +665,6 @@ function changeColorMenu()
 				alert(error);
 		}
 	);
-
+	
 }
+

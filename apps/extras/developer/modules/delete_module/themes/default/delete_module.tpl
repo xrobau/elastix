@@ -1,6 +1,10 @@
 <div id='error' name='error'></div>
 <div>
 <table width="99%" border="0" cellspacing="0" cellpadding="4" align="center">
+    <tr class="moduleTitle">
+        <td class="moduleTitle" valign="middle">&nbsp;&nbsp;<img src="images/conference.png" border="0" align="absmiddle">&nbsp;&nbsp;{$TITLE}</td>
+        <td></td>
+    </tr>
     <tr>
         <td align="left">
             <input class="button" type="submit" name="delete" value="{$DELETE}" onclick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
@@ -36,7 +40,7 @@
     <tr class="letra12" id="level_3">
     </tr>
 </table>
-</div>
+
 {literal}
 <script type="text/javascript">
     function mostrar_menu()

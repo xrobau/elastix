@@ -381,30 +381,6 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
     $oGrid->setData($arrData);
     //begin section filter
     $arrFormFilterbilling_report = createFieldFilter($arrLang);
-
-    if($_POST['date_start']==="")
-        $_POST['date_start']  = " ";
-
-    if($_POST['date_end']==="")
-        $_POST['date_end']  = " ";
-
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Start Date")." = ".$_POST['date_start'].", "._tr("End Date")." = ".
-    $_POST['date_end'], $_POST, array('date_start' => date("d M Y"),'date_end' => date("d M Y")),true);
-
-    if(!is_null($filter_field)){
-         $valueFilterField = $arrFormFilterbilling_report['filter_field']["INPUT_EXTRA_PARAM"][$filter_field];
-    }else{
-         $valueFilterField = "";
-    }
-
-    if(!is_null($filter_field)){
-        if($filter_field=="duration"){
-            $oGrid->addFilterControl(_tr("Filter applied: ").$valueFilterField." = ".$_POST['horas']."H:".$_POST['minutos']."M:".$_POST['segundos']."S",$_POST, array('filter_field' => "dst",'horas' => "","minutos" => "","segundos" => ""));
-        }else{
-            $oGrid->addFilterControl(_tr("Filter applied: ").$valueFilterField." = ".$filter_value,$_POST, array('filter_field' => "src",'filter_value' => ""));
-        }
-    }
-
     $oFilterForm = new paloForm($smarty, $arrFormFilterbilling_report);
     $smarty->assign("SHOW", _tr("Show"));
 
@@ -455,14 +431,14 @@ function getRate($arr_ratesTmp, $arrRateValue)
 
 function createFieldFilter($arrLang){
     $arrFilter = array(
-        "rate_applied"  => _tr("Rate Applied"),
-        "duration"      => _tr("Duration"),
-	    "rate_value"    => _tr("Rate Value"),
-	    "src"           => _tr("Source"),
-	    "dst"           => _tr("Destination"),
-	    "dstchannel"    => _tr("Dst. Channel"),
+        "rate_applied"  => $arrLang["Rate Applied"],
+        "duration"      => $arrLang["Duration"],
+	    "rate_value"    => $arrLang["Rate Value"],
+	    "src"           => $arrLang["Source"],
+	    "dst"           => $arrLang["Destination"],
+	    "dstchannel"    => $arrLang["Dst. Channel"],
 	    //"cost"          => $arrLang["Cost"],
-        "accountcode"   => _tr("Account Code"),
+        "accountcode"   => $arrLang["Account Code"],
                     );
 
     $arrFormElements = array(
@@ -478,13 +454,13 @@ function createFieldFilter($arrLang){
                                     "INPUT_EXTRA_PARAM"      => "",
                                     "VALIDATION_TYPE"        => "text",
                                     "VALIDATION_EXTRA_PARAM" => ""),
-            "date_start"  => array("LABEL"                  => _tr("Start Date"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "DATE",
-                                                    "INPUT_EXTRA_PARAM"      => "",
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}$"),
-            "date_end"    => array("LABEL"                  => _tr("End Date"),
+				"date_start"  => array("LABEL"                  => _tr("Start Date"),
+									"REQUIRED"               => "yes",
+									"INPUT_TYPE"             => "DATE",
+									"INPUT_EXTRA_PARAM"      => "",
+									"VALIDATION_TYPE"        => "ereg",
+									"VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}$"),
+				"date_end"    => array("LABEL"                  => _tr("End Date"),
                                    "REQUIRED"               => "yes",
                                    "INPUT_TYPE"             => "DATE",
                                    "INPUT_EXTRA_PARAM"      => "",

@@ -93,4 +93,4 @@ CREATE TABLE `user` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
 
 -- Create user db
-GRANT SELECT, UPDATE, INSERT, DELETE ON `meetme`.* to asteriskuser@localhost;
+GRANT SELECT, UPDATE, INSERT, DELETE ON `meetme`.* to asteriskuser@localhost IDENTIFIED BY 'eLaStIx.asteriskuser.2oo7';

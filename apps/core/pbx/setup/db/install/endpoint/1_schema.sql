@@ -56,6 +56,12 @@ INSERT INTO "model" VALUES(46, '6731i', '6731i', 1);
 INSERT INTO "model" VALUES(47, '6755i', '6755i', 1);
 INSERT INTO "model" VALUES(48, 'GXP2020', 'GXP2020', 3);
 INSERT INTO "model" VALUES(49, '300', '300', 7);
+INSERT INTO "model" VALUES(50, 'BT200', 'BT200', 3);
+INSERT INTO "model" VALUES(51, 'GXP280', 'GXP280', 3);
+INSERT INTO "model" VALUES(52, 'GXV3140', 'GXV3140', 3);
+INSERT INTO "model" VALUES(53, 'GXP2120', 'GXP2120', 3);
+INSERT INTO "model" VALUES(54, 'AT 620R', 'AT 620R', 10);
+INSERT INTO "model" VALUES(55, 'GXV3175', 'GXV3175', 3);
 CREATE TABLE parameter
 (
        id          integer         primary key,

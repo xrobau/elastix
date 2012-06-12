@@ -120,7 +120,5 @@ $arrLangModule = array(
 'Manage Trunks'=>'Administrar Troncales',
 'Manage Queues'=>'Administrar Colas',
 'Manage Forms'=>'Administrar Formularios',
-'External URLs' => 'URLs Externos',
-'Manage External URLs' => 'Administrar URLs Externos',
 );
 ?>

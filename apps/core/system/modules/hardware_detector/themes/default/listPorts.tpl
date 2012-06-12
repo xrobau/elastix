@@ -88,7 +88,7 @@
                                             <div>{$SET_PARAMETERS_PORTS}.</div>
                                             <div align="center"><a id="confSPAN{$data.DESC.ID}" class="confSPAN">{$Configuration_Span}</a></div>
                                             {if $data.DESC.MEDIA eq "PRI"}
-                                            <div align="center"><a id="paramSPAN{$data.DESC.ID}"   class="confSPAN">{$Parameters_Span}</a></div>
+                                            <div align="center"><a id="paramSPAN{$data.DESC.ID}" class="confSPAN">{$Parameters_Span}</a></div>
                                             {/if}
                                         </div>
                                     </td>
@@ -107,7 +107,7 @@
                                                                         <td>
                                                                             <table style='border:1px #CCCCCC solid;padding:1px;background-color:white;' border='0' callpadding='0' cellspacing='0' onMouseOver="this.style.backgroundColor='#f2f2f2';" onMouseOut="this.style.backgroundColor='#ffffff';">
                                                                                 <tr><td  align='center' style='font-size:11px;background-image:url(modules/hardware_detector/images/{$puerto.ESTADO_DAHDI});height:64px;width:68px;background-repeat:no-repeat;vertical-align:top'><p><br />{$puerto.TIPO}<br />{$puerto.LOCALIDAD} </p></td></tr>
-                                                                                <tr><td  align='center' style='width:68px;height:28px;font-size:11px;color:{$puerto.ESTADO_ASTERISK_COLOR}'>{$puerto.ESTADO_ASTERISK}</td></tr>
+                                                                                <tr><td  align='center' style='height:28px;font-size:11px;color:{$puerto.ESTADO_ASTERISK_COLOR}'>{$puerto.ESTADO_ASTERISK}</td></tr>
                                                                             </table>
                                                                         </td>
                                                                 {if ($cnt+1)%12==0}
@@ -213,11 +213,177 @@
 </div>
 {counter}
 {/foreach}
+*}
 
-{* Valor compartido entre configurador de eco y de span <input type="hidden" name="idCard" id="idCard" value="" />*}
+{* Valor compartido entre configurador de eco y de span *}
+<input type="hidden" name="idCard" id="idCard" value="" />
 
+{* El siguiente DIV contiene el formulario que muestra la configuración del 
+   cancelador de eco para el span elegido. Está permitido modificar el 
+   cancelador de eco de múltiples canales a la vez en el mismo span. *}
+<div id="boxConfSPANS" class="boxConfSPANS" style="display: none;">
+    <div class="popup">
+        <table width="100%">
+            <tr>
+                <td class="tl"/>
+                <td class="b"/>
+                <td class="tr"/>
+            </tr>
+            <tr>
+                <td class="b"/>
+                <td class="body">
+                    <div class="content_boxConfSPANS">
+                        <div id="table_boxConfSPANS">
+                           <table width="100%" border="1" cellspacing="0" cellpadding="4" align="center">
+                                <tr class="moduleTitle">
+                                    <td class="moduleTitle">&nbsp;&nbsp;{$Configuration_Span} </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table id="tableConfSPANS" width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+                                            <tr>
+                                                <td>
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+                                                        <tr class="letra12 viewButton" style="display: none;">
+                                                            <td align="center" style="padding: 5px 5px 5px 5px;">
+                                                                <input class="button" type="button" id="save_edit" name="save_edit" value="{$SAVE}" />&nbsp;&nbsp;
+                                                                <input class="button" type="button" id="cancel" name="cancel" value="{$CANCEL}" />
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table class="tabForm" style="font-size: 16px;" border="0" width="100%" >
+                                                        <tr>
+                                                            <td align="center">
+                                                                <label id="port_desc">{$CARD} # {$ID}: {$TIPO} {$ADICIONAL}</label>
+                                                                <div id="config_echo_div">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <a class="closeConfSPANS">
+                            <img src="themes/{$THEMENAME}/images/closelabel.gif" title="close" class="close_boxConfSPANS" />
+                        </a>
+                    </div>
+                </td>
+                <td class="b"/>
+            </tr>
+            <tr>
+                <td class="bl"/>
+                <td class="b"/>
+                <td class="br"/>
+            </tr>
+        </table>
+    </div>
+</div>
+{* El siguiente DIV contiene el formulario que muestra la configuración de los 
+   parámetros del span digital. Para las tarjetas digitales Sangoma, también
+   permite elegir si la troncal es un medio T1 (por omisión) o E1. *}
+<div id="boxSpanParameters" class="boxConfSPANS" style="display: none;">
+    <div class="popup">
+        <table width="100%">
+            <tr>
+                <td class="tl"/>
+                <td class="b"/>
+                <td class="tr"/>
+            </tr>
+            <tr>
+                <td class="b"/>
+                <td class="body">
+                    <div class="content_boxConfSPANS">
+                        <div id="table_boxConfSPANS">
+                           <table width="100%" border="1" cellspacing="0" cellpadding="4" align="center">
+                                <tr class="moduleTitle">
+                                    <td class="moduleTitle">&nbsp;&nbsp;{$Parameters_Span} </td>
+                                </tr>
+                                <tr>
+                                    <td>
 
+                                        <table id="tableConfSPANS" width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+                                            <tr>
+                                                <td>
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
+                                                        <tr class="letra12 viewButton" style="display: none;">
+                                                            <td align="center" style="padding: 5px 5px 5px 5px;">
+                                                                <input class="button" type="button" id="save_span" name="save_span" value="{$SAVE}" />&nbsp;&nbsp;
+                                                                <input class="button" type="button" id="cancel" name="cancel" value="{$CANCEL}" />
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <table class="tabForm" style="font-size: 16px;" border="0" width="100%" >
+                                                        <tr>
+                                                            <td align="center">
+                                                                <label id="port_desc_span">{$CARD} # {$ID}: {$TIPO} {$ADICIONAL}</label>
+                                                                <div id="config_span_div">
+                                                                    <table align="center" width="80%">
+                <tr>
+                    <td><label style='font-size: 11px'>{$Timing_source}:</label></td>
+                    <td><input type="text" size="3" class="input" id="tmsource" name="tmsource" title="{$Timing_source_title|escape:html}" /></td>
+                </tr>
+                <tr>
+                    <td><label style='font-size: 11px'>{$Line_build_out}:</label></td>
+                    <td><select id='lnbuildout' name='lnbuildout'>
+                    {html_options options=$type_lnbuildout}
+                    </select></td>
+                </tr>
+                <tr>
+                    <td><label style='font-size: 11px'>{$Framing}:</label></td>
+                    <td><select id='framing' name='framing'>
+                    {html_options options=$type_framing}
+                    </select></td>
+                </tr>
+                <tr>
+                    <td><label style='font-size: 11px'>{$Coding}:</label></td>
+                    <td><select id='coding' name='coding'>
+                    {html_options options=$type_coding}
+                    </select></td>
+                </tr>
+                <tr id="switch_pri_media">
+                    <td><label style='font-size: 11px'>{$Media}:</label></td>
+                    <td><select id='media_pri' name='media_pri'>
+                    {html_options options=$type_media}
+                    </select></td>
+                </tr>
+                                                                        
+                                                                    </table>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
 
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="footer">
+                        <a class="closeConfSPANS">
+                            <img src="themes/{$THEMENAME}/images/closelabel.gif" title="close" class="close_boxConfSPANS" />
+                        </a>
+                    </div>
+                </td>
+                <td class="b"/>
+            </tr>
+            <tr>
+                <td class="bl"/>
+                <td class="b"/>
+                <td class="br"/>
+            </tr>
+        </table>
+    </div>
+</div>
 <input class="button" type="hidden" id="labelNoPorts" name="labelNoPorts" value="{$NoPorts}" />
 <input class="button" type="hidden" name="lblLoading" value="{$LBL_LOADING}" id="lblLoading">
 <input class="button" type="hidden" name="lblLoading" value="{$LBL_SAVING}"  id="lblSaving">

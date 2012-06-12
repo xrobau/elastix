@@ -80,7 +80,7 @@ function viewForm{NAME_CLASS}($smarty, $module_name, $local_templates_dir, &$pDB
     $smarty->assign("EDIT", _tr("Edit"));
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    $smarty->assign("icon", "images/list.png");
+    $smarty->assign("IMG", "images/list.png");
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("{NEW_MODULE_NAME}"), $_DATA);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

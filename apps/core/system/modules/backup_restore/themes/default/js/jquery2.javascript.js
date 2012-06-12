@@ -14,11 +14,11 @@ var module_name = "backup_restore";
 $(document).ready((function() {
 
     $("ul.droptrue").sortable({
-        connectWith: 'ul'
+        connectWith: 'ul',
     });
 
     $("ul.droptrue2").sortable({
-        connectWith: 'ul'
+        connectWith: 'ul',
     });
 
     $("ul.droptrue").droppable({

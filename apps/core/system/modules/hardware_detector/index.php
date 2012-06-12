@@ -26,13 +26,8 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   */
+
 include_once "libs/paloSantoJSON.class.php";
-include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoForm.class.php";
-include_once "libs/paloSantoACL.class.php";
-
-
-
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -62,17 +57,11 @@ function _moduleContent(&$smarty, $module_name)
     $content = "";
 
     switch($action){
-        case "config_echol":
-            $content = viewFormConfEchoCard($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // para configurar echo canceler
-            break;
         case "config_echo":
-            $content = viewFormConfEchoCardParam($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // para configurar echo canceler
+            $content = viewFormConfEchoCard($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // para configurar echo canceler
             break;
         case 'config_span':
             $content = viewFormConfSpan($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // para configurar span
-            break;
-        case 'config_param':
-            $content = viewFormConfSpanParam($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // para configurar span
             break;
         case "save_new":
             $content = saveNewConfEchoCard($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // save conf echo canceler
@@ -135,7 +124,6 @@ function listPorts($smarty, $module_name, $local_templates_dir, $pDB) {
     $smarty->assign("NoPorts",_tr("No Ports availables"));
     $smarty->assign("LBL_LOADING",_tr("Loading SPAN"));
     $smarty->assign("LBL_SAVING",_tr("Saving configuration"));
-    $smarty->assign("LBL_SAVED",_tr("Saved"));
     $smarty->assign("HARDWARE_CONTROL",_tr("Hardware Control"));
     $smarty->assign("CHANNELS_EMPTY",_tr("Channel Empty"));
     $smarty->assign("Media",_tr("ISDN PRI Media Type"));
@@ -160,7 +148,7 @@ function listPorts($smarty, $module_name, $local_templates_dir, $pDB) {
         $smarty->assign("CARDS_NOT_FOUNDS",$oPortsDetails->errMsg);
     }
     $arrGrid = array("title"    => _tr('Hardware Detector'),
-            "icon"     => "modules/$module_name/images/system_hardware_detector.png",
+            "icon"     => "modules/$module_name/images/pci.png",
             "width"    => "100%"
             );
     $contenidoModulo .= llenarTpl($local_templates_dir,$smarty,$arrGrid, $arrPortsDetails, $arrMisdnInfo);    
@@ -236,12 +224,8 @@ function hardwareDetect($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 }
 
 
-function viewFormConfEchoCardParam($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
+function viewFormConfEchoCard($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
-
-    $oForm = new paloForm($smarty,array());
-  
-    $smarty->assign("CARD",_tr('Card'));    
     $oPortsDetails = new PaloSantoHardwareDetection();
     $pconfEcho     = new paloSantoConfEcho($pDB);
     $card_id       = getParameter("cardId");
@@ -258,7 +242,7 @@ function viewFormConfEchoCardParam($smarty, $module_name, $local_templates_dir, 
         $smarty->assign("arrPortsEcho", $arrPortsEcho);
         $i=1;
     }
-  
+
     $msgResponse['type_echo_names'] = array(
                               'none'  => 'none',
                               'OSLEC' => 'OSLEC',
@@ -274,57 +258,6 @@ function viewFormConfEchoCardParam($smarty, $module_name, $local_templates_dir, 
     return $jsonObject->createJSON();
 
 }
-
-function viewFormConfEchoCard($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
-{
-     
-    $oForm = new paloForm($smarty,array());
-    $smarty->assign("SAVE", _tr("Save"));
-    $smarty->assign("CANCEL", _tr("Cancel"));
-    $smarty->assign("CARD",_tr('Card'));
-   
-    $jsonObject   = new PaloSantoJSON();
-
-    $response['html']  = $oForm->fetchForm("$local_templates_dir/_hdetector.tpl","", "");
-    $response['title'] = _tr('Configuration of Span');
-
-    $jsonObject->set_message($response);
-    return $jsonObject->createJSON();
-
-}
-function viewFormConfSpanParam($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
-{
-    
-    $oForm = new paloForm($smarty,array());
-    $smarty->assign("SAVE", _tr("Save"));
-    $smarty->assign("CANCEL", _tr("Cancel"));
-    $smarty->assign("CARD",_tr('Card'));
-    $smarty->assign('Timing_source_title', _tr("Enter 0 if this port provides a master clock, or nonzero priority for clock source"));
-    $smarty->assign("Timing_source", _tr("Timing source"));
-    $smarty->assign("Line_build_out", _tr("Line build out"));
-    $smarty->assign("Framing", _tr("Framing"));
-    $smarty->assign("Coding", _tr("Coding")); 
-    $smarty->assign("Media",_tr("ISDN PRI Media Type"));
-    $smarty->assign('type_lnbuildout', array(
-                              '0' => _tr('0 db (CSU) / 0-133 feet (DSX-1)'),
-                              '1' => _tr('133-266 feet (DSX-1)'),
-                              '2' => _tr('266-399 feet (DSX-1)'),
-                              '3' => _tr('399-533 feet (DSX-1)'),
-                              '4' => _tr('533-655 feet (DSX-1)'),
-                              '5' => _tr('-7.5db (CSU)'),
-                              '6' => _tr('-15db (CSU)'),
-                              '7' => _tr('-22.5db (CSU)')));
-     $smarty->assign('type_media', array(
-                              'T1' => _tr('T1: 24 channels, USA'),
-                              'E1' => _tr('E1: 31 channels, Europe')));
-    $jsonObject   = new PaloSantoJSON();
-
-    $response['html']  = $oForm->fetchForm("$local_templates_dir/_parameters.tpl","", "");
-    $response['title'] = _tr('Span Parameters');
-
-    $jsonObject->set_message($response);
-    return $jsonObject->createJSON();
-} 
 
 function viewFormConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
@@ -416,7 +349,7 @@ function saveNewConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         'wanpipe_force_media'   =>  getParameter('media_pri'),
     );
     $response = array(
-        'msg'   =>  _tr('Saved'),
+        'msg'   =>  _tr('Saving configuration'),
         'reload'    =>  FALSE,
     );
     $oPortsDetails = new PaloSantoHardwareDetection();
@@ -550,10 +483,6 @@ function getAction()
         return "view_form";
     else if(getParameter("action")=="config_echo")
         return "config_echo";
-    else if(getParameter("action")=="config_echol")
-        return "config_echol";
-    else if(getParameter("action")=="config_param")
-        return "config_param";
     else if(getParameter("action")=="config_span")
         return "config_span";
     else if(getParameter("action")=="setConfig")

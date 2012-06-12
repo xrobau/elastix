@@ -34,48 +34,28 @@
 $discosFisicos = array();
 $devDiscos = array();
 $listaDiscos = glob('/dev/[sh]d*');
-sort($listaDiscos);
 if (is_array($listaDiscos)) foreach ($listaDiscos as $sDisco) {
-    
-    // hdparm -i no funciona en particiones
-    $regs = NULL;
-    if (preg_match('|^(/dev/.+?)(\d+)$|', $sDisco, $regs)) {
-        // este dispositivo es una partición
-    
-        $sDiscoPart = $regs[1];
-        $sNumPart = $regs[2];
-        if (isset($devDiscos[$sDiscoPart]))
-            $devDiscos[$sDisco] = $devDiscos[$sDiscoPart];
-    } else {
-        // este dispositivo es un disco entero
-    
-        $output = NULL;
-        exec("/sbin/hdparm -i $sDisco", $output);
-        foreach ($output as $s) {
-            $s = trim($s);
-            $regs = NULL;
+    $output = NULL;
+    exec("/sbin/hdparm -I $sDisco", $output);
+    foreach ($output as $s) {
+        $s = trim($s);
+        $regs = NULL;
+        if (preg_match('/Model Number:\s*(\S.+\S)\s*$/', $s, $regs)) {
+            $sModelo = $regs[1];
+            print "$sDisco $sModelo\n";
+            $devDiscos[$sDisco] = $sModelo;
             
-            // Model=VBOX HARDDISK, FwRev=1.0, SerialNo=VBeb45216e-cf79c7a3
-            if (preg_match('/Model=\s*(.+), FwRev/', $s, $regs)) {
-                $sModelo = $regs[1];
-                $devDiscos[$sDisco] = $sModelo;
+            // stat() no me da la información de dev mayor/menor
+            $output2 = NULL;
+            exec("/usr/bin/stat $sDisco", $output2);
+            foreach ($output2 as $p) {
+                $p = trim($p);
+                $regs = NULL;
+                if (preg_match('/Device type:\s*(\d+,\d+)/', $p, $regs)) {
+                    $discosFisicos[str_replace(' ', '', $regs[1])] = $sModelo;
+                }
             }
-        }
-    }
-    
-    if (isset($devDiscos[$sDisco])) {
-        print "$sDisco {$devDiscos[$sDisco]}\n";
-
-        // stat() no me da la información de dev mayor/menor
-        $output2 = NULL;
-        exec("/usr/bin/stat $sDisco", $output2);
-        foreach ($output2 as $p) {
-            $p = trim($p);
-            $regs = NULL;
-            if (preg_match('/Device type:\s*([0-9a-fA-F]+,[0-9a-fA-F]+)/', $p, $regs)) {
-                list($iMajor, $iMinor) = sscanf($regs[1], '%x,%x');
-                $discosFisicos["$iMajor,$iMinor"] = $sModelo;
-            }
+            break;
         }
     }
 }

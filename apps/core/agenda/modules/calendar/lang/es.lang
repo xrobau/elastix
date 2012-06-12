@@ -81,7 +81,7 @@ $arrLangModule=array(
 "error_ext" => "Usuario no tiene extensión asignada. Por favor cree un extensión en <a href='?menu=userlist'>Modulo Lista de usuarios</a>",
 "error_call_to" => "Por favor llene el campo <b><i>llamar a</i></b>",
 "user_list" => "Modulo Lista de Usuarios",
-"email_no_valid" => "Email no valido. \nEj: \"nombre\" <dd@ejemplo.com>, \"nombre2\" <ff@ejemplo.com>",
+"email_no_valid" => "Email no valido",
 "call_to_error" => "Por favor llene correctamente el número a llamar para el recordatorio",
 "error_notification_emails" => "Por Favor llene los emails a notificar de este evento",
 "error_description" => "Por Favor llene alguna descripción acerca de este eveno",

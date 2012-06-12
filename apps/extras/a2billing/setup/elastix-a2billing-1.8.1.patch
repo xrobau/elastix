@@ -1,15 +1,13 @@
 diff -Naur a2billing.org/a2billing.conf a2billing/a2billing.conf
---- a2billing.org/a2billing.conf	2011-05-31 14:39:39.000000000 -0500
-+++ a2billing/a2billing.conf	2012-04-02 13:23:11.000000000 -0500
-@@ -8,13 +8,18 @@
- [database]
+--- a2billing.org/a2billing.conf	2010-05-05 11:02:17.000000000 -0500
++++ a2billing/a2billing.conf	2010-10-04 19:25:53.000000000 -0500
+@@ -9,12 +9,17 @@
  hostname = localhost
  ; port for postgres is 5432 by default
--port = 
+ port = 
 -user = a2billing_dbuser
 -password = a2billing_dbpassword
 -dbname = a2billing_dbname
-+port = 3306
 +user = a2billinguser
 +password = a2billing
 +dbname = mya2billing
@@ -24,25 +22,23 @@ diff -Naur a2billing.org/a2billing.conf a2billing/a2billing.conf
  
  ; config for the daemon process
  [daemon-info]
-diff -Naur a2billing.org/admin/Public/phpconfig_init.php a2billing/admin/Public/phpconfig_init.php
---- a2billing.org/admin/Public/phpconfig_init.php	2011-05-31 14:39:39.000000000 -0500
-+++ a2billing/admin/Public/phpconfig_init.php	2012-04-02 13:24:24.000000000 -0500
-@@ -66,7 +66,7 @@
- // Since login screen is still in the works, fake
- // the user has logged in with success for the prototype.
- // for write access $fakeuser must exist in $access_file
--$fakeuser = "myasterisk";
-+$fakeuser = "admin";
- 
- // conf file directory displayed by default
- $default_conf_file_direcotry = AST_CONF_DIR;
 diff -Naur a2billing.org/extensions_a2billing.conf a2billing/extensions_a2billing.conf
 --- a2billing.org/extensions_a2billing.conf	1969-12-31 19:00:00.000000000 -0500
-+++ a2billing/extensions_a2billing.conf	2012-04-02 13:23:11.000000000 -0500
++++ a2billing/extensions_a2billing.conf	2010-10-04 19:13:05.000000000 -0500
 @@ -0,0 +1,6 @@
 +[a2billing]
 +exten => _X.,1,Answer
 +exten => _X.,n,Wait(1)
 +exten => _X.,n,DeadAGI(a2billing.php|1)
 +exten => _X.,n,Hangup
++
+diff -Naur a2billing.org/DataBase/mysql-5.x/UPDATE-a2billing-v1.3.4-to-v1.4.0.sql a2billing/DataBase/mysql-5.x/UPDATE-a2billing-v1.3.4-to-v1.4.0.sql
+--- a2billing.org/DataBase/mysql-5.x/UPDATE-a2billing-v1.3.4-to-v1.4.0.sql  2010-05-05 11:03:17.000000000 -0500
++++ a2billing/DataBase/mysql-5.x/UPDATE-a2billing-v1.3.4-to-v1.4.0.sql  2010-10-15 11:27:56.000000000 -0500
+@@ -1044,7 +1044,7 @@
+ ALTER TABLE cc_ui_authen CHANGE password pwd_encoded VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL;
+ 
+ -- CHANGE SECURITY ABOUT PASSWORD : All password will be changed to "changepassword"
+-UPDATE cc_ui_authen SET pwd_encoded = '410fc6268dd3332226de95e42d9efa4046c5463769d7493b85e65cfa5c26362dc2455cc23c0bc5831deb008def4ab11a9eaa9b76ba3f377da134f39ec60dd758';
++
 +

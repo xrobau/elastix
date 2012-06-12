@@ -37,7 +37,28 @@ class paloNetwork
         $this->errMsg = "";
     }
 
-    private static function obtener_tipo_interfase($if)
+    function obtener_modelos_interfases_red()
+    {
+    
+        $arrSalida=array();
+        $str = shell_exec("/bin/dmesg");
+    
+        $arrLineasDmesg = explode("\n", $str);
+    
+        foreach($arrLineasDmesg as $lineaDmesg) {
+            //if(ereg("^(eth[[:digit:]]{1,3})", $lineaDmesg, $arrReg)) {
+            //    echo $lineaDmesg;
+            //}
+            if(preg_match("/^(eth[[:digit:]]{1,3}):[[:space:]]+(.*)$/", $lineaDmesg, $arrReg) and preg_match("/ at /", $lineaDmesg)) {
+                $arrSalida[$arrReg[1]] = $arrReg[2];
+            }
+        }
+    
+        return $arrSalida;
+    
+    }
+   
+    function obtener_tipo_interfase($if)
     {
         $filePattern = "/etc/sysconfig/network-scripts/ifcfg-";
         $fileIf      = $filePattern . $if;
@@ -63,192 +84,101 @@ class paloNetwork
         return $type;
     }
  
-    /**
-     * Procedimiento para obtener información sobre las interfases de red del
-     * sistema. Actualmente se listan las interfases de tipo Ethernet y las
-     * localhost. Para cada interfaz de red se crea una entrada cuya clave es
-     * el nombre de la interfaz, y el valor es un arreglo con los siguientes
-     * elementos:
-     *  Name        : 'Ethernet' o 'Loopback'. Si se identifica la interfaz 
-     *                como un alias de otra interfaz, se la marca como 
-     *                Ethernet X Alias Y
-     *  Type        : Tipo de configuración de red: static dhcp ...
-     *  HW_info     : Información de hardware sobre la interfaz. Sólo para Ethernet.
-     *  HWaddr      : MAC de la interfaz Ethernet
-     *  Inet Addr   : IPv4 asignada a la interfaz de red
-     *  Mask        : Máscara IPv4 asignada a la intefaz de red
-     *  Running     : 'Yes' si la interfaz está activa
-     *  RX packets  : Número de paquetes recibidos
-     *  RX bytes    : Número de bytes recibidos
-     *  TX packets  : Número de paquetes enviados
-     *  TX bytes    : Número de bytes enviados
-     * 
-     * @return array    Lista de interfases de red
-     */
-    static function obtener_interfases_red()
+    function obtener_interfases_red()
     {
-    	$interfases = array();
-        
-        // Se listan todas las interfases físicas, y se toman loopback y ether
-        /*
-        [root@elx2 net]# ip link show
-        1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue 
-            link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-        2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast qlen 1000
-            link/ether 08:00:27:2b:f0:14 brd ff:ff:ff:ff:ff:ff
-        3: sit0: <NOARP> mtu 1480 qdisc noop 
-            link/sit 0.0.0.0 brd 0.0.0.0
-         */
-        $output = NULL;
-        exec('/sbin/ip link show', $output);
-        $if_actual = NULL;  // La interfaz que se examina
-        $if_flags = NULL;
-        foreach ($output as $s) {
-        	$regs = NULL;
-            if (preg_match('/^\d+:\s+(\w+):\s*<(.*)>/', $s, $regs)) {
-            	$if_actual = $regs[1];
-                $if_flags = explode(',', $regs[2]);
-            } elseif (preg_match('!\s*link/(loopback|ether) ([[:xdigit:]]{2}(:[[:xdigit:]]{2}){5})!', $s, $regs)) {
-            	$interfases[$if_actual] = array(
-                    'Name'          =>  (($regs[1] == 'ether') ? 'Ethernet' : 'Loopback'),
-                    'Link'          =>  $regs[1],
-                    'Type'          =>  NULL,
-                    'HW_info'       =>  NULL,
-                    'HWaddr'        =>  $regs[2],
-                    'Inet Addr'     =>  NULL,
-                    'Mask'          =>  NULL,
-                    'Running'       =>  in_array('UP', $if_flags) ? 'Yes' : NULL,
-                    'RX packets'    =>  0,
-                    'RX bytes'      =>  0,
-                    'TX packets'    =>  0,
-                    'TX bytes'      =>  0,
-                );
-                if ($regs[1] == 'ether') {
-                    if (preg_match('/^eth(\d+)$/', $if_actual, $regs)) {
-                    	$interfases[$if_actual]['Name'] = 'Ethernet '.$regs[1];
-                    } else {
-                    	$interfases[$if_actual]['Name'] .= $if_actual;
-                    }
-                }
-            }
-        }
-        
-        /* Para cada interfaz física, se leen las estadísticas de bytes y 
-         * paquetes transmitidos y recibidos, así como el controlador del
-         * dispositivo de red. */
-        foreach (array_keys($interfases) as $if_actual) {
-        	$fuentes = array(
-                'RX packets'    =>  "/sys/class/net/$if_actual/statistics/rx_packets",
-                'RX bytes'      =>  "/sys/class/net/$if_actual/statistics/rx_bytes",
-                'TX packets'    =>  "/sys/class/net/$if_actual/statistics/tx_packets",
-                'TX bytes'      =>  "/sys/class/net/$if_actual/statistics/tx_bytes",
-            );
-            foreach ($fuentes as $k => $p) {
-            	if (file_exists($p))
-                    $interfases[$if_actual][$k] = trim(file_get_contents($p));
-            }
-            
-            // Nombre del controlador del dispositivo de red
-            if (file_exists("/sys/class/net/$if_actual/device/driver")) {
-            	$interfases[$if_actual]['HW_info'] = basename(readlink("/sys/class/net/$if_actual/device/driver"));
-            }
-        }
-
-        /* Para cada interfaz física, se listan sus IPs. La que tiene la 
-           interfaz sin adornos es la IP de la interfaz. Otras IPs definen
-           alias de la interfaz. */ 
-        /*
-        [root@elx2 net]# ip addr show dev eth0
-        2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast qlen 1000
-            link/ether 08:00:27:2b:f0:14 brd ff:ff:ff:ff:ff:ff
-            inet 192.168.5.193/16 brd 192.168.255.255 scope global eth0
-            inet 192.168.6.1/24 brd 192.168.6.255 scope global eth0:0
-            inet6 fe80::a00:27ff:fe2b:f014/64 scope link 
-               valid_lft forever preferred_lft forever
-        [root@elx2 net]# ip addr show dev lo
-        1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue 
-            link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-            inet 127.0.0.1/8 scope host lo
-            inet6 ::1/128 scope host 
-               valid_lft forever preferred_lft forever
-         */        
-        foreach (array_keys($interfases) as $if_actual) {
-        	$output = NULL;
-            exec('/sbin/ip addr show dev '.$if_actual, $output);
-            foreach ($output as $s) {
-            	if (preg_match('|\s*inet (\d+\.\d+\.\d+.\d+)/(\d+).+\s((\w+)(:(\d+))?)\s*$|', trim($s), $regs)) {
-            		// Calcular IP de máscara a partir de número de bits
-                    $iMaskBits = $regs[2];
-                    $iMask = (0xFFFFFFFF << (32 - $iMaskBits)) & 0xFFFFFFFF;
-                    $sMaskIP = implode('.', array(
-                        ($iMask >> 24) & 0xFF,
-                        ($iMask >> 16) & 0xFF,
-                        ($iMask >>  8) & 0xFF,
-                        ($iMask      ) & 0xFF,
-                    ));
-                    
-                    // Verificar si es IP de interfaz o de alias
-                    if ($regs[3] == $if_actual) {
-                    	$interfases[$if_actual]['Inet Addr'] = $regs[1];
-                        $interfases[$if_actual]['Mask'] = $sMaskIP;
-                    } else {
-                    	$if_alias = $regs[3];
-                        $if_orig = $regs[4];
-                        $if_aliasnum = $regs[6];
-                        $interfases[$if_alias] = array(
-                            'Name'          =>  $interfases[$if_orig]['Name'].' Alias '.$if_aliasnum,
-                            'Type'          =>  NULL,
-                            'HWaddr'        =>  $interfases[$if_orig]['HWaddr'],
-                            'Inet Addr'     =>  $regs[1],
-                            'Mask'          =>  $sMaskIP,
-                            'Running'       =>  $interfases[$if_orig]['Running'],
-                        );
-                    }
-            	}
-            }
-        }
-        
-        // Tipo de interfaz de red configurada en /etc/sysconfig/network-scripts/
-        foreach (array_keys($interfases) as $if_actual) {
-        	$interfases[$if_actual]['Type'] = self::obtener_tipo_interfase($if_actual);
-        }
-
-        return $interfases;
-    }
+    	$str = shell_exec("/sbin/ifconfig");
+ 
+        $arrIfconfig = explode("\n", $str);
     
+        $arrModelosInterfasesRed = $this->obtener_modelos_interfases_red();
+ 
+        foreach($arrIfconfig as $lineaIfconfig) {
+    
+            unset($arrReg);
+    
+            if(preg_match("/^eth(([[:digit:]]{1,3})(:([[:digit:]]{1,3}))?)[[:space:]]+/", $lineaIfconfig, $arrReg)) {
+                $interfaseActual = "eth" . $arrReg[1];
+                $nombreInterfase = "Ethernet $arrReg[2]";
+                if(!empty($arrReg[3])) {
+                    $nombreInterfase .= " Alias $arrReg[4]";
+                } else if(isset($arrModelosInterfasesRed[$interfaseActual])) {
+                    $arrIf[$interfaseActual]["HW_info"] = $arrModelosInterfasesRed[$interfaseActual];        
+                }
+                $arrIf[$interfaseActual]["Name"] = $nombreInterfase;
+                $arrIf[$interfaseActual]["Type"] = $this->obtener_tipo_interfase($interfaseActual);
+            }
+    
+            if(preg_match("/^(lo)[[:space:]]+/", $lineaIfconfig, $arrReg)) {
+                    $interfaseActual = $arrReg[1];
+                    $arrIf[$interfaseActual]["Name"] = "Loopback";
+            }
+    
+            // debo tambien poder determinar cuando se termina una segmento de interfase
+            // no solo cuando comienza como se hace en los dos parrafos anteriores
+    	
+            if(preg_match("/HWaddr ([ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2}:" .
+                    "[ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2}:[ABCDEF[:digit:]]{2})/", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["HWaddr"] = $arrReg[1];
+            }
+    
+            if(preg_match("/^[[:space:]]+inet addr:([[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3})/",
+            $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["Inet Addr"] = $arrReg[1];
+            }
+    
+            if(preg_match("/[[:space:]]+Mask:([[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3})$/",
+            $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["Mask"] = $arrReg[1];
+            }
+    
+            // TODO: El siguiente patron de matching es muy simple, cambiar
+            if(preg_match("/ RUNNING /", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["Running"] = "Yes";
+            }
+    
+            if(preg_match("/^[[:space:]]+RX packets:([[:digit:]]{1,20})/", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["RX packets"] = $arrReg[1];
+            }
+    
+            if(preg_match("/^[[:space:]]+RX bytes:([[:digit:]]{1,20})/", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["RX bytes"] = $arrReg[1];
+            }
+    
+            if(preg_match("/^[[:space:]]+TX packets:([[:digit:]]{1,20})/", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["TX packets"] = $arrReg[1];
+            }
+    
+            if(preg_match("/[[:space:]]+TX bytes:([[:digit:]]{1,20})/", $lineaIfconfig, $arrReg)) {
+                    $arrIf[$interfaseActual]["TX bytes"] = $arrReg[1];
+            }
+    
+    	}
+        
+        return $arrIf;
+    } 
+
     // Es decir que no se incluye "lo" ni interfases virtuales
-    static function obtener_interfases_red_fisicas()
+    function obtener_interfases_red_fisicas()
     {
         $arrInterfasesRedPreliminar=array();
-        $arrInterfasesRedPreliminar=self::obtener_interfases_red();
+        $arrInterfasesRedPreliminar=$this->obtener_interfases_red();
+        // TODO: Validar si $arrInterfasesRedPreliminar es un arreglo
     
         // Selecciono solo las interfases de red fisicas
         $arrInterfasesRed=array();
         foreach($arrInterfasesRedPreliminar as $nombreReal => $arrData) {
-            if (isset($arrData['Link']) && $arrData['Link'] == 'ether')
+        if(preg_match("/^eth[[:digit:]]{1,3}$/", $nombreReal)) {
                 $arrInterfasesRed[$nombreReal]=$arrData;
+            }
         }
-
+    
         return $arrInterfasesRed;
     }
 
-    /**
-     * Procedimiento para interrogar la configuración general de red del 
-     * sistema. 
-     * 
-     * @return array arreglo con los siguientes valores:
-     *      dns:        arreglo con 0 o más DNS asignados
-     *      host:       nombre de host para el sistema
-     *      gateway:    El gateway predeterminado asignado para el sistema
-     */
-    static function obtener_configuracion_red()
+    function obtener_configuracion_red()
     {
         $archivoResolv = "/etc/resolv.conf";
-        $arrResult = array(
-            'dns'       =>  array(),
-            'host'      =>  NULL,
-            'gateway'   =>  NULL,
-        );
+        $arrResult = array();
 
         //- Obtengo los dnss
         if($fh=fopen($archivoResolv, "r")) {
@@ -264,7 +194,6 @@ class paloNetwork
         }
 
         //- Obtengo el hostname
-        $arrOutput = NULL;
         exec("/bin/hostname", $arrOutput);
         $arrResult['host'] = $arrOutput[0];
 
@@ -340,51 +269,6 @@ class paloNetwork
             return FALSE;
         }
         return TRUE;
-    }
-
-    /**
-     * Compute IPv4 network address given IPv4 host address and bits in netmask. 
-     * Function that returns the network address of the given ip for the given mask 
-     *
-     * @param string     $ip         IPv4 host address in dotted-quad format
-     * @param string     $mask       Number of bits in network mask    
-     *
-     * @return string    Computed IPv4 network address
-     */ 
-    static function getNetAdress($ip, $mask)
-    {
-        $octetos_ip = explode('.', $ip);
-        $octetos_net = array(0, 0, 0, 0);
-        if ($mask <= 0 || $mask > 32) return NULL;
-        for ($k = 0; $k < 4 && $mask; $k++) {
-        	$octetmask = ($mask >= 8) ? 8 : $mask;
-            $mask -= $octetmask;
-            $octetos_net[$k] = (int)$octetos_ip[$k] & ((0xFF << (8 - $octetmask)) & 0xFF);
-        }        
-        return implode('.', $octetos_net);
-    }
-
-    /**
-     * Count the number of bits set in a network mask and returns the count:
-     * 255.255.128.0 => 17 
-     * This assumes the network mask is well formed.
-     * 
-     * @param string    $mask   IP mask in dotted-quad format
-     * 
-     * @return int      Number of bits set in the mask
-     */
-    static function maskToDecimalFormat($mask)
-    {
-        $mask = explode(".", $mask);
-        $decimal = 0;
-        foreach($mask as $octeto) {
-            $octeto = (int)$octeto & 0xFF;
-            while (($octeto & 0x80) != 0) {
-                $octeto = ($octeto << 1) & 0xFF;
-            	$decimal++;
-            }            
-        }
-        return $decimal;
     }
 }
 ?>

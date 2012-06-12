@@ -27,12 +27,10 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1 2008-08-03 11:08:42 Andres Flores aflores@palosanto.com Exp $ */
 //include elastix framework
-include_once "libs/paloSantoJSON.class.php";
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoNetwork.class.php";
 include_once "libs/paloSantoConfig.class.php";
-include_once "libs/paloSantoACL.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -119,22 +117,13 @@ function _moduleContent(&$smarty, $module_name)
             break;      
         case "accept_request":
             $content = AcceptPeerRequest($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager);
-            $content = connectPeersInformation($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager); 
             break;
         case "reject_request":
             $content = rejectPeerRequest($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager);
             break;
-        case "status":
-            $content = status($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
-            break; 
-        case "disconnected":
-            $content = disconnectPeersInformation($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager); 
-            break;
         default:
             $content = reportPeersInformation($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager);
             break;
-
-        
     }
     return $content;
 }
@@ -142,10 +131,9 @@ function _moduleContent(&$smarty, $module_name)
 function disconnectPeersInformation($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager){
 
    $pPeersInformation = new paloSantoPeersInformation($pDB);
-    //$peerId  = $_POST['peerId'];
-    $peerId  = getParameter('peerId');   
-    $result = $pPeersInformation->StatusDisconnect($peerId);
-  
+   $peerId  = $_POST['peerId'];
+   $result = $pPeersInformation->StatusDisconnect($peerId);
+
     $local_ip = isset($_SERVER['SERVER_ADDR'])?$_SERVER['SERVER_ADDR']:"";//ip local
     $action = 6;
 
@@ -160,23 +148,12 @@ function disconnectPeersInformation($smarty, $module_name, $local_templates_dir,
 
 }
 
-
 function AcceptPeerRequest($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager)
 {
-   $pPeersInformation = new paloSantoPeersInformation($pDB);
    $root_certicate = "/var/lib/asterisk/keys"; 
-   //$peerId  = $_POST['peerId'];
-   $peerId  = getParameter('peerId'); 
-   $dataPeer = $pPeersInformation->ObtainPeersDataById($peerId);
-   $ip_ask = $dataPeer['host'];
-   $mac = $dataPeer['mac'];
-
-   //$mac = $_POST['peerMac'];
-
- 
-   //  
-  // $ip_ask = $_POST['ipAsk']; 
-   
+   $mac = $_POST['peerMac'];
+   $peerId  = $_POST['peerId'];
+   $ip_ask = $_POST['ipAsk']; 
    $company = "";
    $comment = $arrLang["accepted connection"];
    $local_key = "";
@@ -280,7 +257,7 @@ function createHeaderHttp($ip_remote, $file_remote, $dataLenght)
 function connectPeersInformation($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager){
 
    $pPeersInformation = new paloSantoPeersInformation($pDB);
-   $peerId  = getParameter('peerId');
+   $peerId  = $_GET['peerId'];
    $result = $pPeersInformation->StatusConnect($peerId);
 
     $local_ip = isset($_SERVER['SERVER_ADDR'])?$_SERVER['SERVER_ADDR']:"";//ip local
@@ -349,9 +326,8 @@ function viewPeersInformation($smarty, $module_name, $local_templates_dir, $pDB,
     $smarty->assign("DISCONNECT", $arrLang["Disconnect"]);
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "images/list.png");
+    $smarty->assign("IMG", "images/list.png");
     $smarty->assign("peerId", $idPeer);
-    $smarty->assign("BACK", _tr("Back"));
 
     $arrDataPeer = $pPeersInformation->ObtainPeersDataById($idPeer);
     $arrData['mac']     = $arrDataPeer['mac'];
@@ -361,7 +337,7 @@ function viewPeersInformation($smarty, $module_name, $local_templates_dir, $pDB,
     $arrData['outkey']  = $arrDataPeer['outkey'];
     $arrData['comment'] = $arrDataPeer['comment'];
     $arrData['company'] = $arrDataPeer['company'];
-    if($arrDataPeer['status'] == "Requesting connection" || $arrDataPeer['status'] == "disconnected" || $arrDataPeer['status'] == "request accepted")
+    if($arrDataPeer['status'] == "Requesting connection" || $arrDataPeer['status'] == "disconnect" || $arrDataPeer['status'] == "request accepted")
        $accept = "no";
 
     $smarty->assign("OPCION",$accept);
@@ -369,117 +345,10 @@ function viewPeersInformation($smarty, $module_name, $local_templates_dir, $pDB,
     $smarty->assign("ipAsk", $arrData['host']);
 
     $oForm->setViewMode();
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/view_peer.tpl",_tr("View Remote Server"), $arrData);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/view_peer.tpl",$arrLang["View Peer"], $arrData);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $contenidoModulo;
-
-}
-
-function status($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
-{
-    $pPeersInformation = new paloSantoPeersInformation($pDB);
-    $dataPeer = $pPeersInformation->ObtainPeersDataById(getParameter('conId'));
-    //$ip_ask = $dataPeer['host'];
-    $status = $dataPeer['status'];
-    $his_status = $dataPeer['his_status'];
-    $company = $dataPeer['company'];
-    $cia="<strong>("._tr("Unknown").")</strong>";
-    $color="black";
-    $view="<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=1'>"._tr('View')."</a>&nbsp;&nbsp;";
-    $con=0;
-    if($status == "request reject"){
-        $status="Request Connection has been Rejected";
-        $color="red";
-        $view="";
-    }    
-
-    if($status == "Requesting connection"){
-        $status="<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=2'>"._tr("New Connection Request")."</a>";
-        $color="blue";
-        //$linkToConnect ="<a href='#' onclick='reject(".$dataPeer['id'].")'>"._tr('Reject')."</a>";        
-        $linkToConnect ="<a href='?menu=$module_name&action=request_reject&peerId=".$dataPeer['id']."'>"._tr('Reject')."</a>";        
-        //$view="<a href='?menu=$module_name&action=request_accept&peerId=".$dataPeer['id']."'>"._tr('Accept')."</a>&nbsp;&nbsp;".$linkToConnect;
-        $view="<a href='#' onclick='accept(".$dataPeer['id'].")'>"._tr('Accept')."</a>&nbsp;&nbsp;".$linkToConnect;
-   
-    }
-    
-     
-     if($status != "request accepted"&&$status != "waiting response"){
-       $cia="<strong>".$company."</strong>";
-    }
-    if($status == "waiting response"){
-        $status=_tr("Waiting Response...");
-        $color="red";
-        $view="";
-        
-    }   
-    if($status == "request accepted"||$status=="connected"){
-       $color="green";
-    }
-
-    if($status == "request accepted" || $status == "disconnected"){
-        //$linkToConnect = "<a href='?menu=$module_name&action=connect&peerId=".$dataPeer['id']."'>"._tr('Connect')."</a>";
-        $linkToConnect = "<a href='#' onclick='connect(".$dataPeer['id'].")'>"._tr('Connect')."</a>";        
-        $view = "<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=1'>"._tr('View')."</a>&nbsp;&nbsp;".$linkToConnect;
-    } 
-    if($status == "connected" && $his_status=="disconnected"){   
-        $linkToConnect = "<a href='#' onclick='disconnect(".$dataPeer['id'].")'>"._tr('Disconnect')."</a>";        
-        //$linkToConnect = "<a href='?menu=$module_name&action=disconnected&peerId=".$dataPeer['id']."'>"._tr('Disconnect')."</a>";
-        $view = "<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=1'>"._tr('View')."</a>&nbsp;&nbsp;".$linkToConnect;
-        $status=_tr("Requesting Connection to Remote Server..."); 
-        $color="blue";
-    }
-    elseif($status == "connected" && $his_status=="connected"){
-        $linkToConnect = "<a href='#' onclick='disconnect(".$dataPeer['id'].")'>"._tr('Disconnect')."</a>";
-        //$linkToConnect = "<a href='?menu=$module_name&action=disconnected&peerId=".$dataPeer['id']."'>"._tr('Disconnect')."</a>";
-        $view = "<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=1'>"._tr('View')."</a>&nbsp;&nbsp;".$linkToConnect;
-        $status=_tr("Connected");
-        $color="green"; 
-    }
-    elseif($status == "disconnected" && $his_status=="connected"){
-        $status=_tr("Remote Server is requesting Connection..."); 
-        $color="red";
-    }
-    elseif($status == "disconnected" && $his_status=="disconnected"){
-        $status=_tr("Disconnected"); 
-        //$linkToConnect = "<a href='?menu=$module_name&action=connect&peerId=".$dataPeer['id']."'>"._tr('Connect')."</a>";
-        $linkToConnect = "<a href='#' onclick='connect(".$dataPeer['id'].")'>"._tr('Connect')."</a>";
-        $view = "<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=1'>"._tr('View')."</a>&nbsp;&nbsp;".$linkToConnect;
-    }
-    elseif($his_status=="connection deleted"){
-        $view="";
-        $status=_tr("Request Connection has been Deleted");
-        $color="red"; 
-    }
-    elseif($status == "request accepted" && $his_status == "connected"){
-        $con=1; // Si la solicitud es aceptada, se conecta automaticamente.
-        $status=_tr("Connecting..."); 
-        $color="blue";
-    }
-    elseif($status == "connected" || $his_status == "request accepted"){
-        $status=_tr("Connecting...  "); 
-        $view="<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=1'>"._tr('View')."</a>&nbsp;&nbsp;";
-        $color="blue";
-    }
-    
-    elseif($status == "request accepted" && $his_status == "disconnected"){
-        $status=_tr("Request Connection has been Accepted"); 
-        $color="blue";
-    }
-       
-    $id = $dataPeer['id'];
-    $oForm = new paloForm($smarty,array());
-    $jsonObject = new PaloSantoJSON();
-   
-    $msgResponse['status'] = $status;
-    $msgResponse['color'] = $color;
-    $msgResponse['id'] = $id;
-    $msgResponse['view'] = $view;
-    $msgResponse['con'] = $con;
-    $msgResponse['cia'] = $cia;
-    $jsonObject->set_message($msgResponse);
-    return $jsonObject->createJSON();
 
 }
 
@@ -490,14 +359,11 @@ function reportPeersInformation($smarty, $module_name, $local_templates_dir, &$p
     $action = getParameter("nav");
     $start  = getParameter("start");
 
-    
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
     $totalPeersInformation = $pPeersInformation->ObtainNumPeersInformation();
     $linkToConnect = "";
-    $smarty->assign("NEW", $arrLang["New Request"]);
-    $smarty->assign("New", _tr("New Request"));
-    
+
     $limit  = 20;
     $total  = $totalPeersInformation;
     $oGrid->setLimit($limit);
@@ -517,9 +383,7 @@ function reportPeersInformation($smarty, $module_name, $local_templates_dir, &$p
 
     if(is_array($arrResult) && $total>0){
         $status = "";
-        $i=0;
         foreach($arrResult as $key => $value){
-     
             if($value['status'] == "disconnected")
                $status = $arrLang["disconnected"];
             else if($value['status'] == "connected")
@@ -554,44 +418,42 @@ function reportPeersInformation($smarty, $module_name, $local_templates_dir, &$p
             else if($value['his_status'] == "connection rejected")
                $his_status = $arrLang["connection rejected"];
 
-            $arrTmp[0] = "<div class='resp' id=".$value['id']."><input type='checkbox' name='peer_{$value['id']}'  /></div>";
-            $arrTmp[1] = $value['host']."<div id='cia".$value['id']."'></div>";
-            
+            $arrTmp[0] = "<input type='checkbox' name='peer_{$value['id']}'  />";
+            $arrTmp[1] = $value['host'];
             if($value['status'] == "disconnected" || $value['status'] == "request accepted")
                 $linkToConnect = "<a href='?menu=$module_name&action=connect&peerId=".$value['id']."'>{$arrLang['Connect']}</a>";
             else
                  $linkToConnect = "";
             if($value['status'] == "Requesting connection")
-                 $arrTmp[2] = "<div id='status".$value['id']."'><a href='?menu=$module_name&action=view&peerId=".$value['id']."&opcion=2'><img src='images/loading.gif' height='20px' /></a></div>";
+                 $arrTmp[2] = "<a href='?menu=$module_name&action=view&peerId=".$value['id']."&opcion=2'>$status</a>";
             else if($value['status'] == "request accepted" || $value['status'] == "connect")
-                        $arrTmp[2] = "<div id='status".$value['id']."' style='color:green; '><img src='images/loading.gif' height='20px' /></div>";
+                        $arrTmp[2] = "<span style='color:green;'>".$status."</span>";
             else if($value['status'] == "waiting response" || $value['status'] == "request reject" || $value['status'] == "request delete")
-                       $arrTmp[2] = "<div id='status".$value['id']."' style='color:red; '><img src='images/loading.gif' height='20px' /></div>";
+                       $arrTmp[2] = "<span style='color:red;'>".$status."</span>";
             else
-                $arrTmp[2] = "<div  id='status".$value['id']."'><img src='images/loading.gif' height='20px' /></div>";
+                $arrTmp[2] = $status;
             if($value['status'] =="waiting response" || $value['status'] == "request reject" || $value['status'] == "request delete")
-                $arrTmp[3] = "<div id='option".$value['id']."' ></div>";
+                $arrTmp[4] = "";
             else
-                $arrTmp[3] = "<div id='option".$value['id']."'><a href='?menu=$module_name&action=view&peerId=".$value['id']."&opcion=1'>{$arrLang['View']}</a>&nbsp;&nbsp;".$linkToConnect."</div>";
-           /* if($value['status'] == "request accepted")
-                $arrTmp[3] = "<div id='his_status".$value['id']."' style='color:red;'>".$his_status."</div>";
-            else{  
-              if ($status == "disconnected" && $his_status == "disconnected")
-                  $arrTmp[3] = "<div id='his_status".$value['id']."' style='color:red;'>".$his_status."</div>";
-              else{ 
-                if($status == "disconnected" && $his_status == "waiting response")
-                   $arrTmp[3] = "<div id='his_status".$value['id']."' style='color:red;'>".$his_status."</div>";
-                else
-                   $arrTmp[3] = "<div id='his_status".$value['id']."' style='color:red;'>".$his_status."</div>";
-              }
-            }*/
-            $arrData[] = $arrTmp;$i++;
+                       $arrTmp[4] = "<a href='?menu=$module_name&action=view&peerId=".$value['id']."&opcion=1'>{$arrLang['View']}</a>&nbsp;&nbsp;".$linkToConnect;
+                if($value['status'] == "request accepted")
+                    $arrTmp[3] = "<span style='color:red;'>".$arrLang['disconnected']."</span>";
+                else{  if ($status == "disconnected" && $his_status == "disconnected")
+                            $arrTmp[3] = "<span style='color:red;'>".$arrLang['disconnected']."</span>";
+                       else{ 
+                            if($status == "disconnected" && $his_status == "waiting response")
+                                $arrTmp[3] = "<span style='color:red;'>".$arrLang['disconnected']."</span>";
+                            else
+                                $arrTmp[3] = "<span style='color:red;'>".$his_status."</span>";
+                       }
+                    }
+            $arrData[] = $arrTmp;
         }
 
     }
 
 
-    $arrGrid = array("title"    => _tr("Remote Servers"),
+    $arrGrid = array("title"    => $arrLang["Peers Information"],
                         "icon"     => "images/list.png",
                         "width"    => "99%",
                         "start"    => ($total==0) ? 0 : $offset + 1,
@@ -599,36 +461,33 @@ function reportPeersInformation($smarty, $module_name, $local_templates_dir, &$p
                         "total"    => $total,
                         "url"      => $url,
                         "columns"  => array(
-            0 => array("name"      => "<input type='checkbox' class='checkall'>",
+            0 => array("name"      => "<input type='submit' name='delete_peer' value='{$arrLang["Delete"]}' class='button' onclick=\" return confirmSubmit('{$arrLang["Are you sure you wish to delete peer (s)?"]}');\" />",
                                                     "property1" => ""),
-            1 => array("name"      =>_tr("Remote Server"),
+            1 => array("name"      => $arrLang["Remote Host Name"],
                                                     "property1" => ""),
-            2 => array("name"      =>_tr("Connection Status"),
+            2 => array("name"      => $arrLang["Local Status"],
                                                     "property1" => ""),
-            3 => array("name"      => _tr("Actions"),
+                        3 => array("name"      => $arrLang["Remote Status"],
+                                                    "property1" => ""),
+            4 => array("name"      => $arrLang["Option"],
                                                     "property1" => ""),
                                         )
                     );
 
-
     //begin section filter
     $oFilterForm = new paloForm($smarty, array());
     $smarty->assign("SHOW", $arrLang["Show"]);
-     
+    $smarty->assign("NEW", $arrLang["New Request"]);
+
     //if there is not general information or public and private keys
     $band = $_SESSION['exitsKey'];
-    if($band == true){
-        $oGrid->deleteList($msg=_tr("Are you sure you wish to delete Connection (s)?"), $task="delete_peer", $alt=_tr("Delete Selected"),$asLink=false);
-        $oGrid->addNew($task="new_request", $alt=_tr("New Request"));
-    }
-    else{
-        $smarty->assign("mb_title", _tr('MESSAGE').":");
-	$smarty->assign("mb_message",_tr("You should register the <a href='?menu=general_information'>General Information</a>."));
-    }    
-    
+    if($band == true)
+        $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
+    else
+        $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter2.tpl","",$_POST);
     //end section filter
 
-    //$oGrid->showFilter(trim($htmlFilter));
+    $oGrid->showFilter(trim($htmlFilter));
 
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
     //end grid parameters
@@ -639,18 +498,15 @@ function reportPeersInformation($smarty, $module_name, $local_templates_dir, &$p
     return $contenidoModulo;
 }
 
-
 function rejectPeerRequest($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $dsn_agi_manager)
 {
-    //$idPeer = $_POST['peerId']; //id del peer de quien voy a eliminar
-    $idPeer  = getParameter('peerId');    
-   
-   //$ip_ask = $_POST['ipAsk'];  //ip de quien voy a eliminar
+    $idPeer = $_POST['peerId']; //id del peer de quien voy a eliminar
+    $ip_ask = $_POST['ipAsk'];  //ip de quien voy a eliminar
     $local_ip = isset($_SERVER['SERVER_ADDR'])?$_SERVER['SERVER_ADDR']:"";//ip local
     $action = 3; 
     $pPeersInformation = new paloSantoPeersInformation($pDB);
     $dataPeer = $pPeersInformation->ObtainPeersDataById($idPeer);
-    $ip_ask = $dataPeer['host'];
+    //$ip_ask = $dataPeer['host'];
     $mac_ask = $dataPeer['mac'];
     $reject = socketReject($ip_ask, $local_ip, $action);
     if(ereg( "^BEGIN[[:space:]](.*)[[:space:]]END", $reject, $regs ))
@@ -799,7 +655,7 @@ function sendConnectionRequest($smarty, $module_name, $local_templates_dir, $pDB
 
         $smarty->assign("Request", $arrLang["Request"]);
         $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-        $smarty->assign("icon", "images/list.png");
+        $smarty->assign("IMG", "images/list.png");
 
         if(!$oForm->validateForm($_POST)){
             $smarty->assign("mb_title", $arrLang["Validation Error"]);
@@ -867,7 +723,7 @@ function formRequest($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
     $smarty->assign("Request", $arrLang["Request"]);
     $smarty->assign("Cancel", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "images/list.png");
+    $smarty->assign("IMG", "images/list.png");
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/request.tpl",$arrLang["Connection Request"], $_POST);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
@@ -892,11 +748,8 @@ function addPeerRequest($smarty, $pDB, $arrLang, $macCertificate)
 
 function createFieldForm($arrLang)
 {
-    
-    
     $arrFields = array(
-                                        
-             "mac"   => array(      "LABEL"                  => $arrLang["MAC"],
+            "mac"   => array(      "LABEL"                  => $arrLang["MAC"],
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -986,8 +839,8 @@ function getAction()
         return "request";
     else if(getParameter("delete_peer"))
         return "delete_peer";
-    else if(getParameter("disconnect")){
-        return "disconnect";}
+    else if(getParameter("disconnect"))
+        return "disconnect";
     else if(getParameter("accept_request"))
         return "accept_request";
     else if(getParameter("reject_request"))
@@ -998,14 +851,6 @@ function getAction()
         return "view";
     else if(getParameter("action")=="connect")
         return "connect";
-    else if(getParameter("action")=="status")
-        return "status";
-    else if(getParameter("action")=="disconnected")
-        return "disconnected";
-    else if(getParameter("action")=="request_accept")
-        return "accept_request";
-    else if(getParameter("action")=="request_reject")
-        return "reject_request";
     else
         return "report";
 }

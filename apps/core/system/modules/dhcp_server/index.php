@@ -79,7 +79,7 @@ function _moduleContent(&$smarty, $module_name)
     $smarty->assign("WINS", $arrLang["WINS"]);
     $smarty->assign("GATEWAY", $arrLang["Gateway"]);
     $smarty->assign("OPTIONAL", $arrLang["Optional"]);
-    $smarty->assign("icon", "modules/$module_name/images/system_network_dhcp_server.png");
+    $smarty->assign("icon", "modules/$module_name/images/network.png");
     $smarty->assign("OF_1_TO_50000_SECONDS", $arrLang["Of 1 to 50000 Seconds"]);
 
     if(isset($_POST["in_iniciar"])) $accion ="service_start";

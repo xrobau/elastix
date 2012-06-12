@@ -85,9 +85,8 @@ function _moduleContent(&$smarty, $module_name)
     $inicio= $fin = $total = 0;
     $extension = $pACL->getUserExtension($_SESSION['elastix_user']); $ext = $extension;
     $esAdministrador = $pACL->isUserAdministratorGroup($_SESSION['elastix_user']);
-    $bandCustom = true;
     if(is_null($ext) || $ext==""){
-	$bandCustom = false;
+	$smarty->assign("DISABLED","DISABLED");
 	if(!$esAdministrador){
 	    $smarty->assign("mb_message", "<b>".$arrLang["contact_admin"]."</b>");
 	    return "";
@@ -97,24 +96,21 @@ function _moduleContent(&$smarty, $module_name)
         $extension = "[[:digit:]]+";
 
     $smarty->assign("menu","voicemail");
-    $smarty->assign("Filter",$arrLang['Show']);
+    $smarty->assign("Filter",$arrLang['Filter']);
+    $smarty->assign("CONFIG",$arrLang["Configuration"]);
     //formulario para el filtro
     $arrFormElements = createFieldFormVoiceList($arrLang);
     $oFilterForm = new paloForm($smarty, $arrFormElements);
         // Por omision las fechas toman el sgte. valor (la fecha de hoy)
     $date_start = date("Y-m-d")." 00:00:00"; 
     $date_end   = date("Y-m-d")." 23:59:59";
-    $dateStartFilter = getParameter('date_start');
-    $dateEndFilter = getParameter('date_end');
-    $report = false;
-
 
     if( getParameter('filter') ){
         if($oFilterForm->validateForm($_POST)) {
             // Exito, puedo procesar los datos ahora.
-            $date_start = translateDate($dateStartFilter)." 00:00:00";
-            $date_end   = translateDate($dateEndFilter)." 23:59:59";
-            $arrFilterExtraVars = array("date_start" => $dateStartFilter, "date_end" => $dateEndFilter);
+            $date_start = translateDate($_POST['date_start'])." 00:00:00"; 
+            $date_end   = translateDate($_POST['date_end'])." 23:59:59";
+            $arrFilterExtraVars = array("date_start" => $_POST['date_start'], "date_end" => $_POST['date_end'] );
         } else {
             // Error
             $smarty->assign("mb_title", $arrLang["Validation Error"]);
@@ -126,35 +122,16 @@ function _moduleContent(&$smarty, $module_name)
             $strErrorMsg .= "";
             $smarty->assign("mb_message", $strErrorMsg);
         }
-        if($dateStartFilter==""){
-            $dateStartFilter = " ";
-        }
-        if($dateEndFilter==""){
-            $dateEndFilter= " ";
-        }
-        //se añade control a los filtros
-        $report = true;
-        $arrDate = array('date_start'=>$dateStartFilter,'date_end'=>$dateEndFilter);
         $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-    } else if (isset($dateStartFilter) AND isset($dateEndFilter)) {
-        $report = true;
-        $date_start = translateDate($dateStartFilter) . " 00:00:00";
-        $date_end   = translateDate($dateEndFilter) . " 23:59:59";
+    } else if (isset($_GET['date_start']) AND isset($_GET['date_end'])) {
+        $date_start = translateDate($_GET['date_start']) . " 00:00:00";
+        $date_end   = translateDate($_GET['date_end']) . " 23:59:59";
 
-        $arrDate = array('date_start'=>$dateStartFilter,'date_end'=>$dateEndFilter);
-        $arrFilterExtraVars = array("date_start" => $dateStartFilter, "date_end" => $dateEndFilter);
+        $arrFilterExtraVars = array("date_start" => $_GET['date_start'], "date_end" => $_GET['date_end']);
         $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_GET);
     } else {
-        $report = true;
-        //se añade control a los filtros
-        $arrDate = array('date_start'=>date("d M Y"),'date_end'=>date("d M Y"));
         $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", 
         array('date_start' => date("d M Y"), 'date_end' => date("d M Y")));
-    }
-
-    $oGrid  = new paloSantoGrid($smarty);
-    if($report){
-        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Start Date")." = ".$arrDate['date_start'].", "._tr("End Date")." = ".$arrDate['date_end'], $arrDate, array('date_start' => date("d M Y"),'date_end' => date("d M Y")),true);
     }
 
     if( getParameter('submit_eliminar') ) {
@@ -203,28 +180,10 @@ function _moduleContent(&$smarty, $module_name)
             if (!is_file($voicemailPath)) { 
                 die("<b>404 ".$arrLang["no_file"]."</b>");
             }
-           $sContenido="";
-
-			$name = basename($voicemailPath);
-			$format=substr(strtolower($name), -3);
-			 // This will set the Content-Type to the appropriate setting for the file
-            $ctype ='';
-            switch( $format ) {
-
-                case "mp3": $ctype="audio/mpeg"; break;
-                case "wav": $ctype="audio/x-wav"; break;
-                case "Wav": $ctype="audio/x-wav"; break;
-                case "WAV": $ctype="audio/x-wav"; break;
-                case "gsm": $ctype="audio/x-gsm"; break;
-                // not downloadable
-                default: die("<b>404 ".$arrLang["no_file"]."</b>"); break ;
-            }
-
-			if($sContenido == "")
-                $session_id = session_id();
+            $sContenido="";
 
             $sContenido=<<<contenido
-                    <embed src='index.php?menu=$module_name&action=download&ext=$ext&name=$file&rawmode=yes&elastixSession=$session_id' width=300, height=20 autoplay=true loop=false type="$ctype"></embed><br>
+                    <embed src='index.php?menu=$module_name&action=download&ext=$ext&name=$file&rawmode=yes' width=300, height=20 autoplay=true loop=false></embed><br>
 contenido;
 
             $smarty->assign("CONTENT", $sContenido);
@@ -394,10 +353,8 @@ contenido;
         $limit  = 15;
         $total  = count($arrData);
 
-        $oGrid->setLimit($limit);
-        $oGrid->setTotal($total);
-
-        $offset = $oGrid->calculateOffset();
+        $oGrid  = new paloSantoGrid($smarty);
+        $offset = $oGrid->getOffSet($limit,$total,(isset($_GET['nav']))?$_GET['nav']:NULL,(isset($_GET['start']))?$_GET['start']:NULL);
 
         $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
 
@@ -415,12 +372,12 @@ contenido;
 
     $arrGrid = array("title"   => $arrLang["Voicemail List"],
                      "url"     => $url,
-                     "icon"    => "/modules/$module_name/images/pbx_voicemail.png",
+                     "icon"    => "images/record.png",
                      "width"   => "99%",
                      "start"   => ($total==0) ? 0 : $offset + 1,
                      "end"     => $end,
                      "total"   => $total,
-                     "columns" => array(0 => array("name"      => "",
+                     "columns" => array(0 => array("name"      => "<input type='submit' onClick=\"return confirmSubmit('{$arrLang["Are you sure you wish to delete voicemails?"]}');\" name='submit_eliminar' value='{$arrLang["Delete"]}' class='button' />",
                                                    "property1" => ""),
                                         1 => array("name"      => $arrLang["Date"],
                                                    "property1" => ""),
@@ -437,13 +394,11 @@ contenido;
                                         )
                     );
 
-    if($bandCustom == true)
-	$oGrid->customAction("config",_tr("Configuration"));
-    $oGrid->deleteList(_tr("Are you sure you wish to delete voicemails?"),"submit_eliminar",_tr("Delete"));
+    $contenidoModulo  = "<form style='margin-bottom:0;' method='POST' action='?menu=$module_name'>";
+    $oGrid = new paloSantoGrid($smarty);
     $oGrid->showFilter($htmlFilter);
-    $contenidoModulo  = $oGrid->fetchGrid($arrGrid, $arrVoiceData,$arrLang);
-    if (strpos($contenidoModulo, '<form') === FALSE)
-    $contenidoModulo  = "<form style='margin-bottom:0;' method='POST' action='?menu=$module_name'>$contenidoModulo</form>";
+    $contenidoModulo  .= $oGrid->fetchGrid($arrGrid, $arrVoiceData,$arrLang);
+    $contenidoModulo .= "</form>";
     return $contenidoModulo;
 }
 

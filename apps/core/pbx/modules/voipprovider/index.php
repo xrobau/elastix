@@ -453,12 +453,10 @@ function reportVoIPProvider($smarty, $module_name, $local_templates_dir, &$pDB, 
     $filter_field = getParameter("filter_field");
     $filter_value = getParameter("filter_value");
     $filter_valueTMP = $filter_value;
-    $filterValue = "";
     $allowSelection = array("provider", "account_name");
     if(isset($filter_value) & $filter_value !=""){
         if(!in_array($filter_field, $allowSelection))
             $filter_field = "provider";
-        $filterValue = $filter_value;
         $filter_value    = $pDB->DBCAMPO('%'.$filter_value.'%');
     }
 
@@ -475,8 +473,6 @@ function reportVoIPProvider($smarty, $module_name, $local_templates_dir, &$pDB, 
     $oGrid->setTitle(_tr("VoIP Provider"));
     $oGrid->setNameFile_Export("VoIP_Provider");
     $oGrid->setURL($url);
-    $oGrid->addNew("new_account",_tr("New Account"));
-    $oGrid->deleteList("Are you sure you wish to delete the accounts selected.?","delete",_tr("Delete"));
 
     $totalVoipProviders = $pVoIPProvider->getNumVoIPProvider($filter_field, $filter_value);
 
@@ -535,7 +531,8 @@ function reportVoIPProvider($smarty, $module_name, $local_templates_dir, &$pDB, 
             }
         }
 
-        $arrColumns  = array("", _tr("Account Name"), _tr("VoIP Provider"), _tr("Outbound CallerID"), _tr("Type Trunk"), _tr("Status"), _tr("Edit"));
+        $arrColumns  = array("<input type='submit' name='delete' value='"._tr("Delete")."' class='button' onclick=\" return confirmSubmit('"._tr("Are you sure you wish to delete the accounts selected.")."');\" />",
+                             _tr("Account Name"), _tr("VoIP Provider"), _tr("Outbound CallerID"), _tr("Type Trunk"), _tr("Status"), _tr("Edit"));
     }
 
     $oGrid->setColumns($arrColumns);
@@ -545,14 +542,9 @@ function reportVoIPProvider($smarty, $module_name, $local_templates_dir, &$pDB, 
     $arrFormFilterprueba = createFieldFilter();
     $oFilterForm = new paloForm($smarty, $arrFormFilterprueba);
     $smarty->assign("SHOW", _tr("Show"));
+    $smarty->assign("NEW_ACCOUNT", _tr("New Account"));
     $smarty->assign("Module_name", $module_name);
-    if(!is_null($filter_field)){
-        $valueFilterField = $arrFormFilterprueba["filter_field"]["INPUT_EXTRA_PARAM"][$filter_field];
-    }else{
-        $valueFilterField = "";
-    }
 
-    $oGrid->addFilterControl(_tr("Filter applied: ")."$valueFilterField = $filterValue", $_POST, array("filter_field" => "", "filter_value"=>""));
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
 

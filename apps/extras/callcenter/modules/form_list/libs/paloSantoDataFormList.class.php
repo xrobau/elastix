@@ -37,6 +37,8 @@ class paloSantoDataForm
     var $rutaDB;
     function paloSantoDataForm($pDB)
     {
+        global $arrLang;
+        //$this->rutaDB = "/var/www/db/campaign.db";
         // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
             $this->_db =& $pDB;
@@ -57,6 +59,8 @@ class paloSantoDataForm
 
     function getFormularios($id_formulario = NULL,$estatus='all')
     {
+        global $arrLang;
+
         $arr_result = FALSE;
         
         $where = "";
@@ -70,7 +74,7 @@ class paloSantoDataForm
             $where .= " and f.id = $id_formulario";
 
         if (!is_null($id_formulario) && !ereg('^[[:digit:]]+$', "$id_formulario")) {
-            $this->errMsg = _tr("Form ID is not valid");
+            $this->errMsg = $arrLang["Form ID is not valid"];
         } 
         else {
             $this->errMsg = "";
@@ -89,6 +93,7 @@ class paloSantoDataForm
     function obtener_campos_formulario($id_formulario,$id_campo=NULL)
     {
         $respuesta = new xajaxResponse();
+        global $arrLangModule;
         $smarty = $this->getSmarty();
         $errMsg=""; 
         $sqliteError='';
@@ -120,13 +125,14 @@ class paloSantoDataForm
                 $codigo_js .= $funcion_js;
                 //echo $codigo_js;
                 $smarty->assign("FORMULARIO", $data_field);
-                $smarty->assign("formularios", _tr("Form"));
+                $smarty->assign("formularios", $arrLangModule["Form"]);
                 $mostrar_template=true;
             }
             if ($mostrar_template) $template = "formulario.tpl";
             else $template = "vacio.tpl";
         }else{
-            //$smarty->assign("no_definidos_formularios",_tr('Forms Nondefined'));
+            global $arrLang;
+            //$smarty->assign("no_definidos_formularios",$arrLangModule['Forms Nondefined']);
             $template = "vacio.tpl";
         }
         if (isset($codigo_js) && trim($codigo_js)!="") {
@@ -213,5 +219,125 @@ class paloSantoDataForm
     }
 
 }
+
+
+/*---------------------------------codigo no usado -----------------------*/
+/*
+function crea_objeto(&$smarty, $field, $prefijo_objeto, &$funcion_js) {
+        $tipo_objeto = $field["tipo"];
+        $input="";
+        switch ($tipo_objeto) {
+            case "LIST":
+                $listado = explode(",",$field["value_field"]);
+                $input = "";
+                $selected="";
+                foreach($listado as $key=>$item) {
+                    //if ($field["value_data"] == $item) $selected = "selected";
+                    //else $selected="";
+                    if($item!="") $input .= "<option value='$item'>$item</option>";
+                }
+                if ($input!="") {
+                    $input = "<select name='$prefijo_objeto"."$field[id_field]' id='$prefijo_objeto"."$field[id_field]' class='SELECT'>$input</select>";
+                }
+            break;
+            case "DATE":
+                //require_once("libs/js/jscalendar/calendar.php");
+                    $input = $this->calendario("txt_".$field['id_field'],"btn_".$field['id_field']);
+
+
+                        $time = false;
+                        $format = '%d %b %Y';
+                        $timeformat = '12';
+                      
+                        $oCal = new DHTML_Calendar("/libs/js/jscalendar/", "en", "calendar-win2k-2", $time);
+                        $smarty->assign("HEADER", $oCal->load_files());
+
+                        $strInput = $oCal->make_input_field(
+                                        array('firstDay'       => 1, // show Monday first
+                                              'showsTime'      => true,
+                                              'showOthers'     => true,
+                                              'ifFormat'       => $format,
+                                              'timeFormat'     => $timeformat),
+                                        // field attributes go here
+                                        array('style'          => 'width: 10em; color: #840; background-color: #fafafa; ' .
+                                                                   'border: 1px solid #999999; text-align: center',
+                                              'name'        => $field["id_field"],
+                                              //'value'       => strftime('%d %b %Y', strtotime('now'))));
+                                              'value'       => $arrPreFilledValues[$varName]));
+//echo "<br>";
+//echo $strInput;
+//echo "<br>";
+                        //echo "hola".$strInput."fin";
+                $input=$strInput;
+                $input = '<input style="width: 10em; color: #840; background-color: #fafafa; border: 1px solid #999999; text-align: center" name="'.$prefijo_objeto.$field["id_field"].'" value="" id="'.$prefijo_objeto.$field["id_field"].'" type="text" />
+                <a href="#" id="calendar_'.$prefijo_objeto.$field["id_field"].'">
+                <img align="middle" border="0" src="/libs/js/jscalendar/img.gif" alt="" />
+                </a>';
+    
+                $funcion_js = 'Calendar.setup({"ifFormat":"%d %b %Y","daFormat":"%Y/%m/%d","firstDay":1,"showsTime":true,"showOthers":true,"timeFormat":12,"inputField":"'.$prefijo_objeto.$field['id_field'].'","button":"calendar_'.$prefijo_objeto.$field['id_field'].'"});';
+    
+            break;
+            case "TEXTAREA":
+                $input = "<textarea name='$prefijo_objeto"."$field[id_field]' id='$prefijo_objeto"."$field[id_field]' rows='3' cols='50'></textarea>";
+            break;
+            case "LABEL":
+                $input = "<label class='style_label'>$field[etiqueta]</label>";
+            break;
+            default:
+                $input = "<input type='text' name='$prefijo_objeto"."$field[id_field]' id='$prefijo_objeto"."$field[id_field]' value='' class='INPUT'>";
+        }
+
+        return $input;
+    }
+*/
+/*
+function html_campos_formulario($arr_campos,$edit=true)
+    { 
+        global $arrLang;
+        global $arrLangModule;
+        $self=dirname($_SERVER['SCRIPT_NAME']);
+        if($self=="/")
+        $self="";
+        $msm_confimacion = $arrLang['Are you sure you wish to continue?'];
+        $nodoTablaInicio = "<table border='0' cellspacing='0' cellpadding='0' width='100%' align='center'>
+                                <tr class='table_title_row'>";
+        if($edit)
+            $nodoTablaInicio .= "   <td class='table_title_row' width='40'><input type='button' name='delete_field' id='delete_field' onclick='"."if(confirmSubmit(\"$msm_confimacion\"))eliminar_campo();"."' value='".$arrLang['Delete']."' /></td> ";
+        $nodoTablaInicio .= "       <td class='table_title_row' width='50'>".$arrLangModule['Order']."</td>
+                                    <td class='table_title_row'>".$arrLangModule['Field Name']."</td>
+                                    <td class='table_title_row'>".$arrLang['Type']."</td>
+                                    <td class='table_title_row'>".$arrLangModule['Values Field']."</td>";
+        if($edit)
+            $nodoTablaInicio .= "       <td class='table_title_row'>".$arrLang['Options']."</td> 
+                                </tr>\n";
+        $nodoTablaFin    = "</table>";
+        $nodoContenido ="";
+    
+        if(is_array($arr_campos)&& count($arr_campos)>0){
+            foreach($arr_campos as $key => $field) {
+                $nodoContenido .= "<tr style='background-color: rgb(255, 255, 255);' onmouseover="."this.style.backgroundColor='#f2f2f2';"." onmouseout="."this.style.backgroundColor='#ffffff';".">\n";
+                if($edit)
+                    $nodoContenido .= ETQUETA" <td class='table_data'><center><input type='checkbox' id='field-".$field['id']."' name='field_chk' /></center></td>\n";
+                $nodoContenido .= " <td class='table_data'>".$field['orden']."</td>\n";
+                $nodoContenido .= " <td class='table_data'>".$field['etiqueta']."</td>\n";
+                $nodoContenido .= " <td class='table_data'>".$arrLangModule[$field['tipo']]."</td>\n";
+                if($field['value']=="")
+                    $value = "&nbsp;";
+                else $value = $field['value'];
+                $nodoContenido .= " <td class='table_data'>".$value."</td>\n";
+                if($edit)
+                    $nodoContenido .= " <td class='table_data'><a href='javascript:void(0);' onclick='editar_campo(".$field['id'].")'>".$arrLang['Edit']."</a></td>\n";
+                $nodoContenido .= "</tr>\n";
+            }
+        }
+        else{
+            $nodoContenido .= "<tr><td colspan='6'><center>".$arrLang['No Data Found']."</center></td></tr>";
+        }
+        return $nodoTablaInicio.$nodoContenido.$nodoTablaFin;
+    }
+
+
+*/
+
 
 ?>

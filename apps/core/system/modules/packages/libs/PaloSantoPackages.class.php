@@ -39,7 +39,7 @@ class PaloSantoPackages
     }
 
     /**
-     * Procedimiento para obtener el listado de los paquetes instaldos en el sistema.
+     * Procedimiento para obtener el listado de los paquetes instaldos en el sistema. 
      * @param  string   $filtro    Si !="" buscar los paquetes con el nombre que se pasa
      *
      * @return array    Listado de paquetes, o FALSE en caso de error:
@@ -49,7 +49,7 @@ class PaloSantoPackages
         global $arrLang;
         unset($respuesta);
         $paquetes = array();
-        $filtroGrep = "";
+        $filtroGrep = ""; 
 	    if($filtro!="")
 	        $filtroGrep = "| grep $filtro";
         $comando = "rpm -qa --queryformat '%{NAME}|%{SUMMARY}|%{VERSION}|%{RELEASE}\n' $filtroGrep";
@@ -64,38 +64,33 @@ class PaloSantoPackages
 		}
             }
          }
-         else
+         else 
              $this->errMsg = $arrLang["Packages not Founds"];
-        //return $this->getDataPagination($paquetes,$limit,$offset);
-		return $paquetes;
+        return $this->getDataPagination($paquetes,$limit,$offset);
     }
 
-    function getAllPackages($ruta,$filtro="", $offset, $limit, $total, &$actualizar)
+    function getAllPackages($ruta,$filtro="")
     {
-		$valorfiltro="";
         if($filtro!="")
-            $valorfiltro = " where name like '%$filtro%'";
+            $filtro = " where name like '%$filtro%'";
 
-        $arr_repositorios = $this->getRepositorios($ruta);
-        $arrRepositoriosPaquetes = array();
+        $arr_repositorios = $this->getRepositorios($ruta); 
+        $arrRepositoriosPaquetes = array(); 
         if (is_array($arr_repositorios) && count($arr_repositorios) > 0) {
             foreach($arr_repositorios as $key => $repositorio){
-                $arr_paquetes = $this->getPaquetesDelRepositorio($ruta,$repositorio,$valorfiltro);
+                $arr_paquetes = $this->getPaquetesDelRepositorio($ruta,$repositorio,$filtro);
                 //$arrRepositoriosPaquetes[$repositorio] = $arr_paquetes;
                 if(is_array($arr_paquetes) && count($arr_paquetes) > 0)
                      $arrRepositoriosPaquetes = array_merge($arrRepositoriosPaquetes,$arr_paquetes);
             }
-        } else {
-			$actualizar = true;
-			$arrRepositoriosPaquetes = $this->getPackagesInstalados($ruta,$filtro, $offset, $limit, $total);
         }
         return $arrRepositoriosPaquetes;
     }
 
     /**
-     * Procedimiento para obtener el listado de los repositorios
+     * Procedimiento para obtener el listado de los repositorios 
      *
-     * @return array    Listado de los repositorios
+     * @return array    Listado de los repositorios 
      */
     function getRepositorios($dir='/var/cache/yum/')
     {
@@ -105,12 +100,12 @@ class PaloSantoPackages
         $arr_respuesta = array();
 
         if (is_array($arr_repositorios) && count($arr_repositorios) > 0) {
-            foreach($arr_repositorios as $key => $repositorio){
+            foreach($arr_repositorios as $key => $repositorio){ 
                 if(is_dir($dir.$repositorio) && $repositorio!="." && $repositorio!="..")
                     $arr_respuesta[$repositorio] = $repositorio;
             }
-        }
-        else
+        } 
+        else 
             $this->errMsg = $arrLang["Repositor not Found"];
         return $arr_respuesta;
     }
@@ -120,7 +115,7 @@ class PaloSantoPackages
 	$cadena_dsn = null;
         if(file_exists($ruta.$repositorio."/primary.xml.gz.sqlite")){
             $cadena_dsn = "sqlite3:///$ruta"."$repositorio"."/primary.xml.gz.sqlite";
-	}
+	} 
 	elseif($repositorio == "epel"){
 	    $database = glob($ruta."epel/*-primary.sqlite");
 	    if(isset($database[0]))
@@ -179,11 +174,11 @@ class PaloSantoPackages
             }
             return "No info yet";
         }
-        else{
+        else{ 
             $this->errMsg = $arrLang["Repositor not Found"];
             return "No info yet";
         }
-    }
+    } 
 
     function checkUpdate()
     {
@@ -202,7 +197,7 @@ class PaloSantoPackages
                 return $arrLang["Satisfactory Update"];
             else //por si acaso se presenta algo desconocido
                 return "";
-        }
+        } 
     }
 
     function installPackage($package)
@@ -214,7 +209,7 @@ class PaloSantoPackages
         $paquetesIntall = false;
         $paquetesIntallDependen = false;
         $paquetesUpdateDependen = false;
-         if(is_array($respuesta)){
+         if(is_array($respuesta)){ 
             foreach($respuesta as $key => $linea){
                 if(!ereg("[[:space:]]{1,}",$linea)){
                     $paquetesIntall = false;
@@ -237,21 +232,21 @@ class PaloSantoPackages
                 }
                 //Llenado de datos
                 else if($paquetesIntall){
-                    $terminado['Installing'][] = $linea;
+                    $terminado['Installing'][] = $linea; 
                 }
                 else if($paquetesIntallDependen){
                     $terminado['Installing for dependencies'][] = $linea;
-                }
+                } 
                 else if($paquetesUpdateDependen){
                     $terminado['Updating for dependencies'][] = $linea;
-                }
+                } 
                 //4 fin
                 else if(ereg("^Transaction Summary",$linea)){
                     // Procesamiento de los datos recolectados
                     return $this->procesarDatos($terminado);
                 }
             }return $arrLang['ERROR']; //error
-        }
+        } 
     }
 
     function procesarDatos($datos)
@@ -297,11 +292,10 @@ class PaloSantoPackages
 
     function ObtenerTotalPaquetes($submitInstalado, $ruta, $filtro)
     {
-		$total = 0;
         if($submitInstalado == "all")
         {
-			if($filtro != "")
-				$filtro = " where name like '%$filtro%'";
+	    if($filtro != "")
+	      $filtro = " where name like '%$filtro%'";
             $total = 0;
             $arr_repositorios = $this->getRepositorios($ruta);
             if (is_array($arr_repositorios) && count($arr_repositorios) > 0) {
@@ -311,17 +305,17 @@ class PaloSantoPackages
 			$total += $arr_paquetes[0]['total'];
                 }
             }
+            return $total;
         }
-		if($total==0){
-			if($filtro != "")
-			$comando="rpm -qa --queryformat '%{NAME}\n' | grep $filtro | grep -c .";
-			else
-			$comando="rpm -qa | grep -c .";
-				exec($comando,$output,$retval);
-				if ($retval!=0) return 0;
-				$total = $output[0];
+        else{
+	    if($filtro != "")
+	      $comando="rpm -qa --queryformat '%{NAME}\n' | grep $filtro | grep -c .";
+	    else
+	      $comando="rpm -qa | grep -c .";
+            exec($comando,$output,$retval);
+            if ($retval!=0) return 0;
+            return $output[0];
         }
-		return $total;
     }
 
     function getDataPagination($arrData,$limit,$offset)

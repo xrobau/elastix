@@ -126,7 +126,6 @@ function viewFormControlPanel($smarty, $module_name, $local_templates_dir, &$pDB
         putSession($session);
     }
     $smarty->assign("module_name",$module_name);
-    $smarty->assign("icon", "/modules/$module_name/images/pbx_operator_panel.png");
     $smarty->assign("arrDevicesExten", isset($arrDevices[1])?$arrDevices[1]:null);
     $smarty->assign("arrDevicesArea1", isset($arrDevices[2])?$arrDevices[2]:null);
     $smarty->assign("arrDevicesArea2", isset($arrDevices[3])?$arrDevices[3]:null);
@@ -619,7 +618,7 @@ function saveresizeAction(&$pDB1, &$pDB2)
     $width   =  getParameter('width');
 
     if($width>747)
-        $num=4;
+        $num=3;
     elseif($width>559 && $width<748)
         $num=3;
     elseif($width>370 && $width<560)

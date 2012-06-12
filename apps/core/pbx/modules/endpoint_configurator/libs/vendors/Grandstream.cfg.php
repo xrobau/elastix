@@ -3,7 +3,7 @@
     PrincipalFileGrandstream nos retorna el contenido del archivo de configuracion de los EndPoint
     Grandstream, para ello es necesario enviarle el DisplayName, id_device, secret, ipAdressServer
 */
-function PrincipalFileGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model)
+function PrincipalFileGrandstream($DisplayName, $id_device, $secret, $ipAdressServer, $model)
 {
     if($model == "GXV3140"){
             $content="

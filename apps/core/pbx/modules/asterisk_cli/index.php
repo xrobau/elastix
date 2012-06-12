@@ -34,7 +34,7 @@ function _moduleContent(&$smarty, $module_name)
     $smarty->assign("command", $arrLang["Command"]);
     $smarty->assign("txtCommand" , htmlspecialchars($txtCommand));
     $smarty->assign("execute", $arrLang["Execute"]);
-    $smarty->assign("icon","modules/$module_name/images/pbx_tools_asterisk_cli.png");
+    $smarty->assign("icon","images/kfaxview.png");
 
     $result = "";
     if (!isBlank($txtCommand)) {

@@ -16,6 +16,9 @@
           <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
 	  <input class="button" type="submit" name="cancel" value="{$CANCEL}"></td>
           {/if}
+	{if $mode ne 'view'}
+	    <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
+	{/if}
      </tr>
    </table>
   </td>
@@ -24,12 +27,12 @@
   <td>
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
       <tr>
-	<td width="8%"><b>{$domain_name.LABEL}: </b></td>
+	<td width="15%">{$domain_name.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
 	<td width="35%">{$domain_name.INPUT}</td>
       </tr>
     </table>
-  </td>
-</tr>
+    </td>
+  </tr>
 </table>
 <input type="hidden" name="id_domain" value="{$id_domain}">
 </form>

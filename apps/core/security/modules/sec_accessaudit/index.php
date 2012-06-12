@@ -96,7 +96,6 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
 
     $oGrid  = new paloSantoGrid($smarty);
     $oGrid->setTitle(_tr("Audit"));
-    $oGrid->setIcon("modules/$module_name/images/security_audit.png");
     $oGrid->pagingShow(true); // show paging section.
     $oGrid->enableExport();   // enable export.
     $oGrid->setNameFile_Export(_tr("Access audit"));
@@ -116,16 +115,16 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     if (isset($_GET['filter']) && isset($_POST['filter']) && $_GET['filter'] != $_POST['filter'])
         $iOffsetVerdadero = 0;
 
-    /* Para ubicarse en la página, se obtiene la región 5 páginas estimadas hacia delante y
+    /* Para ubicarse en la página, se obtiene la región 5 páginas estimadas hacia delante y 
        5 páginas estimadas hacia atrás desde el offset indicado.
      */
     $inicioRango = $iOffsetVerdadero - 5 * $iEstimadoBytesPagina;
     if ($inicioRango < 0) $inicioRango = 0;
     if($isExport)
-        $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern, NULL, $isExport);
+	$arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern, NULL, $isExport);
     else
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
-
+	$arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
+    
     /* Localizar la línea del offset verdadero, así como los offsets de las páginas previa y siguiente */
     for ($iPos = 0; $iPos < count($arrResult); $iPos++) {
         if ($arrResult[$iPos]['offset'] >= $iOffsetVerdadero) break;
@@ -138,11 +137,8 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     $iOffsetPrevio    = $arrResult[$iPosPrevio]['offset'];
     $iOffsetSiguiente = $arrResult[$iPosSiguiente]['offset'];
 
-    $limit=30;
-    $total=(int)($totalBytes / 128);
     $offset = $iOffsetVerdadero;
-    $nav = getParameter('nav');
-    if ($nav) switch ($nav) {
+    if (isset($_GET['nav'])) switch ($_GET['nav']) {
     case 'start':
         $offset = 0;
         break;
@@ -150,11 +146,11 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
         /* Caso especial: se debe tomar la última sección del log */
         $inicioRango = $totalBytes - 5 * $iEstimadoBytesPagina;
         if ($inicioRango < 0) $inicioRango = 0;
-        if($isExport)
-            $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern,
-            (($busqueda != '') ? $busqueda : NULL), $isExport);
-        else
-            $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
+	if($isExport)
+	    $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern,
+	    (($busqueda != '') ? $busqueda : NULL), $isExport);
+	else
+	    $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
         if (count($arrResult) <= $iNumLineasPorPagina)
             $offset = $arrResult[0]['offset'];
         else $offset = $arrResult[count($arrResult) - $iNumLineasPorPagina]['offset'];
@@ -164,39 +160,6 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
         break;
     case 'previous':
         $offset = $iOffsetPrevio;
-        break;
-        case 'bypage':
-        $numPage = ($limit==0)?0:ceil($total / $limit);
-
-        $page  = getParameter("page");
-        if(preg_match("/[0-9]+/",$page)==0)// no es un número
-            $page = 1;
-
-        if( $page > $numPage) // se está solicitando una pagina mayor a las que existen
-            $page = $numPage;
-
-        $start = ( ( ($page - 1) * $limit ) + 1 ) - $limit;
-
-        //$accion = "next";
-        if($start + $limit <= 1){
-            break;
-        }
-
-        /*$inicioRango = $page * $iEstimadoBytesPagina;
-
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
-        $offset = $arrResult[0]['offset'];
-
-        $oGrid->setOffsetValue($offset);
-
-        $oGrid->setEnd(((int)($offset / 128) + $iNumLineasPorPagina) <= $oGrid->getTotal() ? (int)($offset / 128) + $iNumLineasPorPagina : $oGrid->getTotal());
-
-        $oGrid->setStart(($oGrid->getTotal()==0) ? 0 : (1 + (int)($offset / 128)));*/
-        $inicioBusqueda = ($page * $iEstimadoBytesPagina) - ($iEstimadoBytesPagina);
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioBusqueda, $field_pattern, NULL, $isExport);
-                $offset = $arrResult[0]['offset'];
-
-        $oGrid->setOffsetValue($offset);
         break;
     }
 
@@ -214,7 +177,7 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
             // Si el offset anterior indicado es idéntico al offset recién encontrado
             // y la cadena de búsqueda es también idéntica, se asume que se ha
             // pedido una búsqueda de la siguiente ocurrencia.
-            if (!is_null($sUltimaBusqueda) && !is_null($iUltimoOffset) &&
+            if (!is_null($sUltimaBusqueda) && !is_null($iUltimoOffset) && 
                 $offset == $iUltimoOffset && $sUltimaBusqueda == $busqueda) {
                 $pAccessLogs->astLog->posicionarMensaje($field_pattern, $offset);
                 $pAccessLogs->astLog->siguienteMensaje(); // Sólo para ignorar primera ocurrencia
@@ -235,13 +198,13 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     //Fin Paginacion
 
     if($isExport)
-        $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern,
+	$arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern,
         (($busqueda != '') ? $busqueda : NULL), $isExport);
     else
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $offset, $field_pattern,
+	$arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $offset, $field_pattern,
         (($busqueda != '') ? $busqueda : NULL), $isExport);
     if(!$isExport)
-        $arrResult = array_slice($arrResult, 0, $iNumLineasPorPagina);
+	$arrResult = array_slice($arrResult, 0, $iNumLineasPorPagina);
 
     $arrData = null;
     if(is_array($arrResult) && $totalBytes>0){
@@ -264,15 +227,10 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     $e = ($t <= $e)?$t:$e;
     $oGrid->setEnd($e+1);
     $oGrid->setTotal($t+1);
-    $oGrid->setLimit(30);
 
     $_POST['offset'] = $offset;
 
     $smarty->assign("SHOW", _tr("Show"));
-
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Date")." = ".$_POST['filter'], $_POST, array('filter' => $listaFechas[count($listaFechas) - 1]),true);
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr('Search string')." = ".$busqueda, $_POST, array('busqueda' => ""));
-
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
     $oGrid->showFilter(trim($htmlFilter));
     return $oGrid->fetchGrid();

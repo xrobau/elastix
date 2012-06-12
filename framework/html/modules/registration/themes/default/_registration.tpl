@@ -1,12 +1,12 @@
 <link href="modules/{$module_name}/themes/default/css/styles.css" rel="stylesheet" />
 <div id="moduleContainer">
-    <div id="moduleTitle" valign="middle" align="left"><span style="font-size: 15px; color: #666; font-weight: bold;">&nbsp;&nbsp;&nbsp;{$registration}</span></div>
+    <div id="moduleTitle" valign="middle" align="left"><span style="font-size: 15px; color: #E35332; font-weight: bold;">&nbsp;&nbsp;&nbsp;{$registration}</span></div>
 
-    <div id="formContainer" style="border: 1px solid #666; padding: 5px; margin: 10px 10px 0px; font-size: 12px; font-family:
+    <div id="formContainer" style="border: 2px solid #E35332; padding: 5px; margin: 10px 10px 0px; font-size: 12px; font-family:
 Verdana,Arial,Helvetica,sans-serif;">
         <div align="center">{$alert_message}</div>
     </div>
-    <div style="border: 1px solid #666; padding: 5px; margin: 10px 10px 0px; font-size: 12px; font-family: Verdana,Arial,Helvetica,sans-serif;">
+    <div style="border: 2px solid #E35332; padding: 5px; margin: 10px 10px 0px; font-size: 12px; font-family: Verdana,Arial,Helvetica,sans-serif;">
 	<div id="msnTextErr" align="center" style="{$displayError}" >{$errorMsg}</div>
 	<table style="text-indent: 5px; padding: 3px; margin: 10px 10px 2px 10px;" height="215" width="98%" align="center" border="0" cellpadding="0" cellspacing="0">
 	    <tbody>
@@ -117,7 +117,12 @@ Verdana,Arial,Helvetica,sans-serif;">
 						<input type="button" value="{$Activate_registration}" name="btnAct" id="btnAct" onclick="registration();" />
 					    </div>
 					</td>
-					{/if}				
+					{/if}
+					<td>
+					    <div id="noAsk" style="cursor: pointer; text-align: center; font-size: 10px; margin: 0px; padding: 3px 0px 3px 0px;" align="right">
+						<input type="button" class="win-close-btn"  name="btnNoAsk" id="btnNoAsk" value="{$Cancel}" />
+					    </div>
+					</td>
 				    </tr>
 				</tbody>
 			    </table>

@@ -1,4 +1,8 @@
 <table width="99%" border="0" cellspacing="0" cellpadding="4" align="center">
+    <tr class="moduleTitle">
+        <td colspan="2" class="moduleTitle" valign="middle">&nbsp;&nbsp;<img src="images/list.png" border="0" align="absmiddle">&nbsp;&nbsp;{$title}</td>
+        <td></td>
+    </tr>
     <tr>
         <td align="left" width="10%"><input class="button" type="submit" name="save" value="{$SAVE}" type="submit"></td>
         <td align="left"><input class="button" type="submit" name="cancel" value="{$CANCEL}" type="submit"></td>

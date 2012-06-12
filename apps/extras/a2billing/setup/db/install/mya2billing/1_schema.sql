@@ -1543,7 +1543,7 @@ CREATE TABLE cc_alarm (
     name 									TEXT NOT NULL,
     periode 								INT NOT NULL DEFAULT 1,
     type 									INT NOT NULL DEFAULT 1,
-    `maxvalue` 								FLOAT NOT NULL,
+    maxvalue 								FLOAT NOT NULL,
     minvalue 								FLOAT NOT NULL DEFAULT -1,
     id_trunk 								INT ,
     status 									INT NOT NULL DEFAULT 0,

@@ -95,7 +95,6 @@ $arrLang=array(
 "Bad Format"=>"Bad Format",
 "No option was selected"=>"No option was selected",
 "Octets out of range"=>"Octets out of range",
-"Undefined validation type" => "Undefined validation type",
 
 /*version 0.8*/
 /*start user*/
@@ -177,9 +176,5 @@ implementations of Voice over IP around the globe.",
 "You are not authorized to access to this page" => "You are not authorized to access to this page",
 "You need administrator privileges" => "You need administrator privileges",
 "Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

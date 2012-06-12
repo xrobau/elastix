@@ -92,6 +92,7 @@ function reportAgentsMonitoring($smarty, $module_name, $local_templates_dir, &$p
 
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
+//     $totalAgentsMonitoring = $pAgentsMonitoring->ObtainNumAgentsMonitoring($filter_field, $filter_value);
 
 
 //     $total  = $totalAgentsMonitoring;

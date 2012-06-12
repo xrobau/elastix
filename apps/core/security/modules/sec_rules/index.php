@@ -32,7 +32,6 @@ include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoDB.class.php";
 include_once "modules/sec_ports/libs/paloSantoPortService.class.php";
 include_once "libs/paloSantoJSON.class.php";
-require_once "libs/paloSantoNetwork.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -53,7 +52,7 @@ function _moduleContent(&$smarty, $module_name)
     global $arrConfModule;
     global $arrLang;
     global $arrLangModule;
-
+    
     $arrConf = array_merge($arrConf,$arrConfModule);
     $arrLang = array_merge($arrLang,$arrLangModule);
 
@@ -101,12 +100,13 @@ function _moduleContent(&$smarty, $module_name)
 
 function newRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrValues, $action="")
 {
+    $pRules = new paloSantoRules($pDB);
     $arrFormRules = createFieldForm($pDB,$arrValues);
     $oForm = new paloForm($smarty,$arrFormRules);
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    $smarty->assign("icon", "modules/$module_name/images/security_firewall_rules.png");
+    $smarty->assign("icon", "modules/$module_name/images/firewall.png");
     $traffic = isset($arrValues['id_traffic']) ? $arrValues['id_traffic'] : "";
     $select_traffic_1 = ($traffic == "INPUT"  ) ? "selected" : "";
     $select_traffic_2 = ($traffic == "OUTPUT" ) ? "selected" : "";
@@ -196,7 +196,7 @@ function createFieldForm($pDB,$arrValues = array())
     foreach($Ports as $key => $value){
         $arrPort[$value['id']] = $value['name'];
     }
-    $arrIP['ANY'] = _tr('ANY');
+    $arrIP['ANY'] = _tr('ANY');    
     foreach($protocol_number as $key => $value){
         $arrIP[$value['id']] = $value['name'];
     }
@@ -327,7 +327,7 @@ function createFieldForm($pDB,$arrValues = array())
                                          "VALIDATION_EXTRA_PARAM" => "",
                                          "EDITABLE"               => "yes",
                                             )
-
+            
             );
     return $arrFields;
 }
@@ -346,7 +346,7 @@ function saveRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
         $state = "edit";
     //************************************************************************************************************
     //** TRAFFIC **
-    //************************************************************************************************************
+    //************************************************************************************************************ 
     $arrValues['traffic'] = getParameter("id_traffic");
     if( $arrValues['traffic'] == "INPUT" ){
         $arrValues['interface_in'] = getParameter("interface_in");
@@ -381,7 +381,7 @@ function saveRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
     $arrValues['mask_source'] = getParameter("mask_source");
     $arrValues['ip_destin'] = getParameter("ip_destin");
     $arrValues['mask_destin'] = getParameter("mask_destin");
-
+    
     //************************************************************************************************************
     //** PROTOCOL **
     //************************************************************************************************************
@@ -502,14 +502,13 @@ function saveRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
         return newRules($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrValues, $state);
     }
     $arrValues['mask_source'] = ($arrValues['ip_source'] == "0.0.0.0") ? "0" : $arrValues['mask_source'];
-    $arrValues['mask_destin'] = ($arrValues['ip_destin'] == "0.0.0.0") ? "0" : $arrValues['mask_destin'];
-    $pNet = new paloNetwork();
+    $arrValues['mask_destin'] = ($arrValues['ip_destin'] == "0.0.0.0") ? "0" : $arrValues['mask_destin'];  
     $oPalo = new paloSantoRules($pDB);
     if($arrValues['ip_source'] != "0.0.0.0" && $arrValues['mask_source'] != "" && $arrValues['ip_source'] != ""){
-        $arrValues['ip_source'] = $pNet->getNetAdress($arrValues['ip_source'],$arrValues['mask_source']);
+        $arrValues['ip_source'] = $oPalo->getNetAdress($arrValues['ip_source'],$arrValues['mask_source']);
     }
     if($arrValues['ip_destin'] != "0.0.0.0" && $arrValues['mask_destin'] != "" && $arrValues['ip_destin'] != ""){
-        $arrValues['ip_destin'] = $pNet->getNetAdress($arrValues['ip_destin'],$arrValues['mask_destin']);
+        $arrValues['ip_destin'] = $oPalo->getNetAdress($arrValues['ip_destin'],$arrValues['mask_destin']);
     }
     if($id == ""){
         if( $oPalo->saveRule( $arrValues ) == true )
@@ -586,7 +585,7 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $oGrid->setTitle(_tr("FireWall Rules"));
-    $oGrid->setIcon("/modules/$module_name/images/security_firewall_rules.png");
+    $oGrid->setIcon("/modules/$module_name/images/firewall.png");
     $oGrid->pagingShow(true);
     $offset = $oGrid->calculateOffset();
     $url    = "?menu=$module_name";
@@ -603,25 +602,20 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     }elseif($accion == "previous"){
 	$start = $start - 2*$limit;
     }
-
+    $button_eliminar = "<input class=\"button\" type=\"submit\" name=\"delete\" value=\""._tr("Delete")."\" ".
+                       " onclick=\"return confirmSubmit('"._tr("Are you sure you wish to delete the Rule")."?');\" >";
     if($first_time)
         $arrColumns = array("",_tr("Order"),_tr("Traffic"),_tr("Target"),_tr("Interface"),_tr("IP Source"),_tr("IP Destiny"),_tr("Protocol"),_tr("Details"));
-    else{
-	$oGrid->deleteList("Are you sure you wish to delete the Rule?","delete",_tr("Delete"));
-        $arrColumns = array("",_tr("Order"),_tr("Traffic"),_tr("Target"),_tr("Interface"),_tr("IP Source"),_tr("IP Destiny"),_tr("Protocol"),_tr("Details"),"","");
-    }
+    else
+        $arrColumns = array($button_eliminar,_tr("Order"),_tr("Traffic"),_tr("Target"),_tr("Interface"),_tr("IP Source"),_tr("IP Destiny"),_tr("Protocol"),_tr("Details"),"","");
     $oGrid->setColumns($arrColumns);
     if(is_array($arrResult) && $total>0){
         foreach($arrResult as $key => $value){
-            if(!$first_time){
+            if(!$first_time)
                 $arrTmp[0] = "<input type='checkbox' name='id_".$value['id']."' />";
-            $arrTmp[1] = "<div id='div_$value[id]' style='width: 22px; font-size: 14pt;color:#E35332;float:left;text-align:right'>$value[rule_order] </div>";}
-            if(!$first_time){
-				//if($offset!=0)
-					$arrTmp[1].="<a href='javascript:void(0);' class='up' id='rulerup_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/up.gif' border=0 title='"._tr('Up')."' /></a>"."<a href='javascript:void(0);' class='down' id='rulerdown_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/down.gif' border=0 title='"._tr('Down')."' /></a>";
-				/*else
-					$arrTmp[1].="<a href='?menu=$module_name&action=$changeOrder&id=$value[id]&order=$value[rule_order]&direction=up;' class='up' id='rulerup_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/up.gif' border=0 title='"._tr('Up')."' /></a>"."<a href='javascript:void(0);' class='down' id='rulerdown_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/down.gif' border=0 title='"._tr('Down')."' /></a>";*/
-			}
+            $arrTmp[1] = "<div id='div_$value[id]' style='width: 22px; font-size: 14pt;color:#E35332;float:left;text-align:right'>$value[rule_order] </div>";
+            if(!$first_time)
+                $arrTmp[1].="<a href='javascript:void(0);' class='up' id='rulerup_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/up.gif' border=0 title='"._tr('Up')."'</a>"."<a href='javascript:void(0);' class='down' id='rulerdown_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/down.gif' border=0 title='"._tr('Down')."'</a>";
             if($value['traffic'] == "INPUT"){
                 $image = "modules/$module_name/images/fw_input.gif";
                 $title = _tr("INPUT");
@@ -679,7 +673,7 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
                 $arrTmp[8] = $value['state'];
             else
                 $arrTmp[8] = "";
-            if(!$first_time){
+            if(!$first_time){            
                 if($value['activated'] == 1){
                     $image = "modules/$module_name/images/foco_on.gif";
                     $activated = "Desactivate";
@@ -688,11 +682,11 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
                     $image = "modules/$module_name/images/foco_off.gif";
                     $activated = "Activate";
                 }
-
-				if($offset!=0)
-					$arrTmp[9] = "<a href='?menu=$module_name&action=".$activated."&id=".$value['id']."&nav=next&start=$start'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
-				else
-					$arrTmp[9] = "<a href='?menu=$module_name&action=".$activated."&id=".$value['id']."'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
+		
+		if($offset!=0)
+		    $arrTmp[9] = "<a href='?menu=$module_name&action=".$activated."&id=".$value['id']."&nav=next&start=$start'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
+		else
+		    $arrTmp[9] = "<a href='?menu=$module_name&action=".$activated."&id=".$value['id']."'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
                 $arrTmp[10] = "<a href='?menu=$module_name&action=edit&id=".$value['id']."'>"."<img src='modules/$module_name/images/edit.gif' border=0 title='"._tr('Edit')."'</a>";
             }
             $arrData[] = $arrTmp;
@@ -701,21 +695,19 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 
     }
     $oGrid->setData($arrData);
-    //$smarty->assign("desactivate", _tr("Desactivate FireWall"));
+    $smarty->assign("new", _tr("New Rule"));
+    $smarty->assign("desactivate", _tr("Desactivate FireWall"));
     if($first_time){
-        $smarty->assign("mb_message", "<b>"._tr("The firewall is totally desactivated. It is recommended to activate the firewall rules")."</b>");
-        $smarty->assign("mb_title",_tr("WARNING"));
         $mensaje = _tr("The firewall is totally desactivated. It is recommended to activate the firewall rules");
         $mensaje2 = _tr("Activate FireWall");
-        $oGrid->customAction("exec",$mensaje2);
+        $smarty->assign("DISPLAY_BUTTON", "display:none;");
     }
     else{
-        $oGrid->customAction("desactivate",_tr("Desactivate FireWall"));
-        $oGrid->addNew("new",_tr("New Rule"));
         $mensaje = _tr("You have made changes to the definition of firewall rules, for this to take effect in the system press the next button");
         $mensaje2 = _tr("Save Changes");
+        $smarty->assign("DISPLAY_BUTTON", "");
     }
-
+    $smarty->assign("exec", $mensaje2);
     if($pRules->isExecutedInSystem()){
         $smarty->assign("BORDER", "");
         $smarty->assign("DISPLAY", "display:none;");
@@ -725,20 +717,11 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         $smarty->assign("BORDER", "border:1px solid; color:#AAAAAA");
         $smarty->assign("DISPLAY", "");
     }
+    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
+    //end section filter
 
-    $smarty->assign("exec", $mensaje2);
-        if(!$first_time){
-        if(!$pRules->isExecutedInSystem()){
-        $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message", $mensaje." &nbsp;&nbsp;&nbsp;<form  method='POST' style='margin-bottom:0;' action='?menu_sec_rules'><input class='button' type='submit' name='exec' value='$mensaje2'></form>");}}
-
-    $contenidoModulo = $oGrid->fetchGrid();
-
-	if($arrConf["mainTheme"]=="elastixneo"){
-		$contenidoModulo = "<div id='msg_status' class='mensajeStatus'></div>".$contenidoModulo;
-	}
-    if (strpos($contenidoModulo, '<form') === FALSE)
-        $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=$url>$contenidoModulo</form>";
+    $oGrid->showFilter(trim($htmlFilter));
+    $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=$url>".$oGrid->fetchGrid()."</form>";
     //end grid parameters
 
     return $contenidoModulo;
@@ -757,7 +740,7 @@ function execRules($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
         $message = _tr("The firewall has been activated");
     else
         $message = _tr("The rules have been executed in the system");
-    $smarty->assign("mb_title", _tr("MESSAGE"));
+    $smarty->assign("mb_title", "MESSAGE");
     $smarty->assign("mb_message", $message);
     $pRules->updateExecutedInSystem();
     $pRules->noMoreFirstTime();
@@ -773,7 +756,7 @@ function deleteFilter($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
             $ID = substr($key, 3);
             $ID = str_replace("_",".",$ID);
             $pRules->deleteRule($ID);
-
+         
         }
     }
     $content = reportRules($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
@@ -784,7 +767,7 @@ function getPorts($pDB)
 {
     $jsonObject = new PaloSantoJSON();
     $oPort = new paloSantoPortService($pDB);
-
+    
     $protocol = getParameter("protocol");
     if($protocol == "TCP")
         $Ports = $oPort->getTCPortNumbers();
@@ -797,7 +780,6 @@ function getPorts($pDB)
     $jsonObject->set_message($arrPort);
     return $jsonObject->createJSON();
 }
-
 
 function change($pDB)
 {
@@ -815,18 +797,15 @@ function change($pDB)
         $Exito1 = $pRules->updateOrder($actual_id,$neighbor_order);
         $Exito2 = $pRules->updateOrder($neighbor_id,$actual_order);
         if($pRules->isFirstTime()){
-			$mensaje = _tr("The firewall is totally desactivated. It is recommended to activate the firewall rules");
-            $smarty->assign("mb_message", "<b>"._tr("The firewall is totally desactivated. It is recommended to activate the firewall rules")."</b>");
-            $smarty->assign("mb_title",_tr("WARNING"));
-			$mensaje2 = _tr("Activate FireWall");
-            $oGrid->customAction("exec",$mensaje2);
+            $mensaje = _tr("The firewall is totally desactivated. It is recommended to activate the firewall rules");
+            $mensaje2 = _tr("Activate FireWall");
         }
         else{
-			$mensaje2 = _tr("Save Changes");
             $mensaje = _tr("You have made changes to the definition of firewall rules, for this to take effect in the system press the next button");
+            $mensaje2 = _tr("Save Changes");
         }
         if($Exito1 && $Exito2)
-            $jsonObject->set_status(_tr("Successful Change").":$mensaje:$mensaje2:"._tr("Dismiss").":"._tr("MESSAGE"));
+            $jsonObject->set_status(_tr("Successful Change").":$mensaje:$mensaje2"); 
         else
             $jsonObject->set_error($pRules->errMsg);
     }else
@@ -845,14 +824,14 @@ function changeOtherPage($pDB, $module_name)
     $actual_order = $tmp[2];
     $correct = false;
     if($direction == "up"){
-		if($actual_order != 1){
-			$correct = true;
-			$rule = $pRules->getPreviousRule($actual_order);
-		}
+	if($actual_order != 1){
+	    $correct = true;
+	    $rule = $pRules->getPreviousRule($actual_order);
+	}
     }else{
-		$rule = $pRules->getNextRule($actual_order);
-		if(count($rule)!=0)
-			$correct = true;
+	$rule = $pRules->getNextRule($actual_order);
+	if(count($rule)!=0)
+	    $correct = true;
     }
     if($correct){
 	if(is_array($rule)){
@@ -861,7 +840,7 @@ function changeOtherPage($pDB, $module_name)
 	    $mensaje = _tr("You have made changes to the definition of firewall rules, for this to take effect in the system press the next button");
             $mensaje2 = _tr("Save Changes");
 	    if($Exito1 && $Exito2){
-		$jsonObject->set_status(_tr("Successful Change").":$mensaje:$mensaje2:"._tr("Dismiss").":"._tr("MESSAGE"));
+		$jsonObject->set_status(_tr("Successful Change").":$mensaje:$mensaje2");
 		$arrayResult["id"] = $rule["id"];
 		if($rule['traffic'] == "INPUT"){
 		    $arrayResult["traffic"]["image"] = "modules/$module_name/images/fw_input.gif";
@@ -893,28 +872,20 @@ function changeOtherPage($pDB, $module_name)
 		    $arrayResult["details"] = _tr("Type").": $rule[icmp_type]";
 		else if($rule['protocol'] == "IP")
 		    $arrayResult["details"] = _tr("Number Protocol IP").": $rule[number_ip]";
-		else if($rule['protocol'] == "TCP" || $rule['protocol'] == "UDP"){
-			if($rule['sport'] != "" && $rule["sport"] != "ANY")
-				$sportName = $pRules->getProtocolName($rule["sport"]);
-			else
-				$sportName = $rule["sport"];
-			if($rule["dport"] != "" && $rule["dport"] != "ANY")
-				$dportName = $pRules->getProtocolName($rule["dport"]);
-			else
-				$dportName = $rule["dport"];
-		    $arrayResult["details"] = _tr("Source Port").": $sportName"."<br />"._tr("Destiny Port").": $dportName";
-		}else if($rule['protocol'] == "STATE")
+		else if($rule['protocol'] == "TCP" || $rule['protocol'] == "UDP")
+		    $arrayResult["details"] = _tr("Source Port").": $rule[sport]"."<br />"._tr("Destiny Port").": $rule[dport]";
+		else if($rule['protocol'] == "STATE")
 		    $arrayResult["details"] = $rule['state'];
 		else
 		    $arrayResult["details"] = "";
 		if($rule['activated'] == 1){
-			$image = "modules/$module_name/images/foco_on.gif";
-			$activated = "Desactivate";
-		}
-		else{
-			$image = "modules/$module_name/images/foco_off.gif";
-			$activated = "Activate";
-		}
+                    $image = "modules/$module_name/images/foco_on.gif";
+                    $activated = "Desactivate";
+                }
+                else{
+                    $image = "modules/$module_name/images/foco_off.gif";
+                    $activated = "Activate";
+                }
 		$arrayResult["activate"] =  "<a href='?menu=$module_name&action=".$activated."&id=".$rule['id']."'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
 		$arrayResult["edit"] = "<a href='?menu=$module_name&action=edit&id=".$rule['id']."'>"."<img src='modules/$module_name/images/edit.gif' border=0 title='"._tr('Edit')."'</a>";
 		$jsonObject->set_message($arrayResult);
@@ -926,7 +897,7 @@ function changeOtherPage($pDB, $module_name)
 	    $jsonObject->set_error($pRules->errMsg);
     }
     else
-		$jsonObject->set_status(_tr("Invalid Action"));
+	$jsonObject->set_status(_tr("Invalid Action"));
     return $jsonObject->createJSON();
 }
 

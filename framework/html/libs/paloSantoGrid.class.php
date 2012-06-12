@@ -32,25 +32,23 @@ require_once "{$arrConf['basePath']}/libs/paloSantoPDF.class.php";
 
 class paloSantoGrid {
 
-    private $title;
-    private $icon;
-    private $width;
-    private $enableExport;
-    private $limit;
-    private $total;
-    private $offset;
-    private $start;
-    private $end;
-    private $tplFile;
-    private $pagingShow;
-    private $nameFile_Export;
-    private $arrHeaders;
-    private $arrData;
-    private $url;
-    private $arrActions;
-    private $arrControlFilters;
+    var $title;
+    var $icon;
+    var $width;
+    var $enableExport;
+    var $limit;
+    var $total;
+    var $offset;
+    var $start;
+    var $end;
+    var $tplFile;
+    var $pagingShow;
+    var $nameFile_Export;
+    var $arrHeaders;
+    var $arrData;
+    var $url;
 
-    public function paloSantoGrid($smarty)
+    function paloSantoGrid($smarty)
     {
         $this->title  = "";
         $this->icon   = "images/list.png";
@@ -68,150 +66,6 @@ class paloSantoGrid {
         $this->arrHeaders = array();
         $this->arrData    = array();
         $this->url        = "";
-
-        $this->arrActions = array();
-        $this->arrFiltersControl = array();
-    }
-
-    public function addFilterControl($msg, &$arrData, $arrFilter = array(), $always_activated=false)
-    {
-        if (!empty($msg)) $msg = htmlentities($msg, ENT_COMPAT, 'UTF-8');
-
-		$defaultFiler = "yes";
-        if((is_array($arrFilter) && count($arrFilter)>0)){
-            $name_delete_filters = getParameter('name_delete_filters');
-            $keys = array_keys($arrFilter);
-            $first = $keys[0];
-
-            $name_delete_filters = explode(",",$name_delete_filters);
-            if(in_array($first, $name_delete_filters)){ //accion eliminar
-                foreach($arrFilter as $name => $value){
-                    $arrData[$name] = $value;
-                }
-                if($always_activated){ // a pesar de que fue eliminado el filtro, se desea que el control siga visible.
-                    $this->arrFiltersControl[] = array("msg" => $msg, "filters" => implode(",",$keys), "defaultFilter" => "yes");
-				}
-            }
-            else{
-                $filter_apply = true;
-                foreach($arrFilter as $name => $value){
-                    $val = (isset($arrData[$name]) && !empty($arrData[$name]))?$arrData[$name]:null;
-                    if($val===null){
-                        $filter_apply = false;
-                        break;
-                    }
-					//esto se hace para poder saber si el fitro aplicado corresponde al valor por default del filtro
-					if($always_activated){
-						if($val!=$arrFilter[$name]){
-							$defaultFiler = "no";
-						}
-					}else
-						$defaultFiler = "no";
-                }
-                if($filter_apply){ //solo si todos estan seteados o tiene un value asociado (!=null)
-                    $this->arrFiltersControl[] = array("msg" => $msg, "filters" => implode(",",$keys), "defaultFilter" => $defaultFiler);
-				}
-            }
-        }
-        else{
-            echo "Invalid format for variable \$arrFilter.";
-        }
-    }
-
-    public function addNew($task="add", $alt="New Row", $asLink=false)
-    {
-        $type = ($asLink)?"link":"submit";
-        $this->addAction($task,$alt,"images/plus2.png",$type);
-    }
-
-    public function customAction($task="task", $alt="Custom Action", $img="",  $asLink=false)
-    {
-        $type = ($asLink)?"link":"submit";
-        $this->addAction($task,$alt,$img,$type);
-    }
-
-    public function deleteList($msg="" , $task="remove", $alt="Delete Selected",  $asLink=false)
-    {
-        $type    = ($asLink)?"link":"submit";
-        $onclick = "return confirmSubmit('"._tr($msg)."')";
-        $this->addAction($task,$alt,"images/delete5.png",$type,$onclick);
-    }
-
-    public function addLinkAction($href="action=add", $alt="New Row", $icon=null, $onclick=null)
-    {
-        $this->addAction($href,$alt,$icon,"link",$onclick);
-    }
-
-    public function addSubmitAction($task="add", $alt="New Row", $icon=null, $onclick=null)
-    {
-        $this->addAction($task,$alt,$icon,"submit",$onclick);
-    }
-
-    public function addButtonAction($name="add", $alt="New Row", $icon=null, $onclick="javascript:click()")
-    {
-        $this->addAction($name,$alt,$icon,"button",$onclick);
-    }
-
-    public function addInputTextAction($name_input="add", $label="New Row", $value_input="", $task="add", $onkeypress_text=null)
-    {
-        $newAction['type']  = "text";
-        $newAction['name']  = $name_input;
-        $newAction['alt']   = $label;
-        $newAction['value'] = $value_input;
-        $newAction['onkeypress'] = empty($onkeypress_text)?null:$onkeypress_text;
-        $newAction['task']    = empty($task)?"add":$task;
-
-        $this->arrActions[] = $newAction;
-    }
-
-    public function addComboAction($name_select="cmb", $label="New Row", $data=array(), $selected=null, $task="add", $onchange_select=null)
-    {
-        $newAction['type'] = "combo";
-        $newAction['name'] = $name_select;
-        $newAction['alt']  = $label;
-        $newAction['arrOptions'] = empty($data)?array():$data;
-        $newAction['selected']   = empty($selected)?null:$selected;
-        $newAction['onchange']   = empty($onchange_select)?null:$onchange_select;
-        $newAction['task']    = empty($task)?"add":$task;
-
-        $this->arrActions[] = $newAction;
-    }
-
-    public function addHTMLAction($html)
-    {
-        $this->addAction($html,null,null,"html",null);
-    }
-
-    private function addAction($task, $alt, $icon, $type="submit", $event=null)
-    {
-        $newAction = array();
-
-        switch($type){
-            case 'link':
-            case 'button':
-            case 'submit':
-                $newAction = array(
-                    'type' => $type,
-                    'task' => $task,
-                    'alt'  => $alt,
-                    'icon' => $icon,
-                    'onclick' => empty($event)?null:$event);
-                break;
-            case 'html':
-                $newAction = array(
-                    'type' => $type,
-                    'html' => $task);
-                break;
-            default:
-                $newAction = array(
-                    'type' => "submit",
-                    'task' => $task,
-                    'alt'  => $alt,
-                    'icon' => $icon);
-                break;
-        }
-
-        $this->arrActions[] = $newAction;
     }
 
     function pagingShow($show)
@@ -257,7 +111,7 @@ class paloSantoGrid {
     function setURL($arrURL)
     {
         if (is_array($arrURL))
-            $this->url = construirURL($arrURL, array('nav', 'start', 'logout','name_delete_filters'));
+            $this->url = construirURL($arrURL, array('nav', 'start', 'logout'));
         else
             $this->url = $arrURL;
     }
@@ -310,7 +164,7 @@ class paloSantoGrid {
 
         if(isset($arrGrid['url'])) {
             if (is_array($arrGrid['url']))
-                $this->url = construirURL($arrGrid['url'], array('nav', 'start', 'logout','name_delete_filters'));
+                $this->url = construirURL($arrGrid['url'], array('nav', 'start', 'logout'));
             else
                 $this->url = $arrGrid["url"];
         }
@@ -364,7 +218,7 @@ class paloSantoGrid {
     {
         $pdf= new paloPDF();
         $pdf->setOrientation("L");
-        $pdf->setFormat("A3");
+        $pdf->setFormat("A3");            
         //$pdf->setLogoHeader("themes/elastixwave/images/logo_elastix.gif");
         $pdf->setColorHeader(array(5,68,132));
         $pdf->setColorHeaderTable(array(227,83,50));
@@ -401,9 +255,6 @@ class paloSantoGrid {
     {
         $this->smarty->assign("pagingShow",$this->pagingShow);
 
-        $this->smarty->assign("arrActions",$this->arrActions);
-        $this->smarty->assign("arrFiltersControl",$this->arrFiltersControl);
-
         $this->smarty->assign("title", $this->getTitle());
         $this->smarty->assign("icon",  $this->getIcon());
         $this->smarty->assign("width", $this->getWidth());
@@ -412,72 +263,33 @@ class paloSantoGrid {
         $this->smarty->assign("end",   $this->end);
         $this->smarty->assign("total", $this->total);
 
-        $numPage = ($this->limit==0)?0:ceil($this->total / $this->limit);
-        $this->smarty->assign("numPage",$numPage);
-
-        $currentPage = ($this->limit==0 || $this->start==0)?0:(floor($this->start / $this->limit) + 1);
-        $this->smarty->assign("currentPage",$currentPage);
-
         if(!empty($this->url))
             $this->smarty->assign("url",   $this->url);
 
         $numColumns = count($this->getColumns());
-        $numData    = count($this->getData());
         $this->smarty->assign("numColumns", $numColumns);
         $this->smarty->assign("header",     $this->getColumns());
         $this->smarty->assign("arrData",    $this->getData());
-        $this->smarty->assign("numData",    $numData);
 
         $this->smarty->assign("enableExport", $this->enableExport);
 
         //dar el valor a las etiquetas segun el idioma
-        $etiquetas = array('Export','Start','Previous','Next','End','Page','of','records');
+        $etiquetas = array('Export','Start','Previous','Next','End');
         foreach ($etiquetas as $etiqueta)
             $this->smarty->assign("lbl$etiqueta", _tr($etiqueta));
-
-        $this->smarty->assign("NO_DATA_FOUND"     , _tr("No records match the filter criteria"));
-        $this->smarty->assign("FILTER_GRID_SHOW"  , _tr("Show Filter"));
-        $this->smarty->assign("FILTER_GRID_HIDE"  , _tr("Hide Filter"));
-        $this->smarty->assign("MORE_OPTIONS"      , _tr("More Options"));
-        $this->smarty->assign("DOWNLOAD_GRID"     , _tr("Download"));
 
         return $this->smarty->fetch($this->tplFile);
     }
 
-    function showFilter($htmlFilter,$as_options=false)
+    function showFilter($htmlFilter)
     {
-        if($as_options)
-            $this->smarty->assign("AS_OPTION", 1);
-        else
-            $this->smarty->assign("AS_OPTION", 0);
-
         $this->smarty->assign("contentFilter", $htmlFilter);
     }
 
     function calculatePagination()
     {
         $accion = getParameter("nav");
-
-        if($accion == "bypage"){
-            $numPage = ($this->getLimit()==0)?0:ceil($this->getTotal() / $this->getLimit());
-
-            $page  = getParameter("page");
-            if(preg_match("/[0-9]+/",$page)==0)// no es un número
-                $page = 1;
-
-            if( $page > $numPage) // se está solicitando una pagina mayor a las que existen
-                $page = $numPage;
-
-            $start = ( ( ($page - 1) * $this->getLimit() ) + 1 ) - $this->getLimit();
-
-            $accion = "next";
-            if($start + $this->getLimit() <= 1){
-                $accion = null;
-                $start = null;
-            }
-        }
-        else
-            $start  = getParameter("start");
+        $start  = getParameter("start");
 
         $this->setOffsetValue($this->getOffSet($this->getLimit(),$this->getTotal(),$accion,$start));
         $this->setEnd(($this->getOffsetValue() + $this->getLimit()) <= $this->getTotal() ? $this->getOffsetValue() + $this->getLimit() : $this->getTotal());
@@ -501,9 +313,9 @@ class paloSantoGrid {
             $offset = $start - $limit - 1;
         }
         else if(isset($accion) && $accion=="end") {
-            if(($total%$limit)==0)
+            if(($total%$limit)==0) 
                 $offset = $total - $limit;
-            else
+            else 
                 $offset = $total - $total%$limit;
         }
         else if(isset($accion) && $accion=="start") {

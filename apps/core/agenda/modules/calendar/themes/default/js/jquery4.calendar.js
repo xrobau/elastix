@@ -56,7 +56,7 @@ $(document).ready(function() {
 	module: module_name,
 	owner: true, // para cuando son usuarios elastix
 	//uid: $('#id').val(),
-	events: "index.php?menu="+module_name+"&action=get_data&rawmode=yes"
+	events: "index.php?menu="+module_name+"&action=get_data&rawmode=yes",
 	/*events: [
 		{
 			title: 'All Day Event',

@@ -88,7 +88,7 @@ function showApplets_Admin()
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("Applet", $arrLang["Applet"]);
     $smarty->assign("Activated", $arrLang["Activated"]);
-    $smarty->assign("icon", "modules/$module_name/images/system_dashboard_applet_admin.png");
+    $smarty->assign("icon", "images/list.png");
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);

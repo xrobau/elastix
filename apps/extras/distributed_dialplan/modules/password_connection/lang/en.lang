@@ -44,7 +44,7 @@ $arrLangModule=array(
 "steps" => "You must copy the secret keywork and paste in (Peers Information - New Request)",
 "sucessful_send" => "Secret sent correctly",
 "Message cannot be sent. Try again" => "Message cannot be sent. Try again",
-"I send you my 'secret connection', now you can send the request to share the dial plan." => "I am sending you my Elastix Server's Key needed to start sharing my dial plan. Use this Key when sending me the connection request.",
+"I send you my 'secret connection', now you can send the request to share the dial plan." => "I am sending you my Elastix Server's Key needed to start sharing the dial plan. Use this Key when sending me the connection request.",
 "Please first fill the form in <a href='?menu=general_information'>General Information</a>" => "Please first fill the form in <a href='?menu=general_information'>General Information</a>",
 );
 ?>

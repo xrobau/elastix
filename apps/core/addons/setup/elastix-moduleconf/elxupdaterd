@@ -29,7 +29,7 @@
   $Id: dialerd,v 1.2 2008/09/08 18:29:36 alex Exp $ */
 declare(ticks=1);
 ini_set('display_errors', 0);       // Impedir que los errores de STDERR se copien en STDOUT
-ini_set('error_reporting', E_ALL & ~E_STRICT);  // Mostrar advertencias además de errores
+ini_set('error_reporting', E_ALL);  // Mostrar advertencias además de errores
 
 // Agregar directorio de script a la lista de rutas a buscar para require()
 ini_set('include_path', dirname($argv[0]).":".ini_get('include_path'));
@@ -56,23 +56,6 @@ $iRes = main($opt,
     'ElastixInstallerProcess');
 exit($iRes);
 
-function load_default_timezone()
-{
-    $sDefaultTimezone = @date_default_timezone_get();
-    if ($sDefaultTimezone == 'UTC') {
-        $sDefaultTimezone = 'America/New_York';
-        if (file_exists('/etc/sysconfig/clock')) {
-            foreach (file('/etc/sysconfig/clock') as $s) {
-                $regs = NULL;
-                if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
-                    $sDefaultTimezone = $regs[1];
-                }
-            }
-        }
-    }
-    date_default_timezone_set($sDefaultTimezone);
-}
-
 // Punto de entrada del programa demonio (plantilla)
 function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
 {
@@ -82,7 +65,7 @@ function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
 
     // Para silenciar avisos de fecha/hora
     if (function_exists('date_default_timezone_get')) {
-        load_default_timezone();
+        date_default_timezone_set(date_default_timezone_get());
     }
 
     // Esta es la tabla de procesos a monitorear
@@ -283,7 +266,7 @@ function finalizarInstanciaPrevia($sNombrePID)
         $regs = NULL;
         $contenido = file($sNombrePID);
         if (!is_array($contenido)) die("Unable to open PID file '$sNombrePID'\n");
-        if (count($contenido) > 0 && preg_match('/^(\d+)/', $contenido[0], $regs)) {
+        if (count($contenido) > 0 && ereg('^([[:digit:]]+)', $contenido[0], $regs)) {
             $iPid = $regs[1];
             if (posix_kill($iPid, 0)) {
                 /* El siguiente método es específico de Linux y no funcionará 

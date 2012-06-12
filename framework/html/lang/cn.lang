@@ -90,7 +90,6 @@ $arrLang=array(
 "Bad Format"=>"格式错误",
 "No option was selected"=>"没有选中任何选项",
 "Octets out of range"=>"八位数超过范围",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 //version 0.8
@@ -184,9 +183,5 @@ implementations of Voice over IP around the globe.",
 "You are not authorized to access to this page" => "You are not authorized to access to this page",
 "You need administrator privileges" => "You need administrator privileges",
 "Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

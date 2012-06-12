@@ -104,9 +104,6 @@ class paloSantoDhcpClienList {
         
         while($line = fgets($fp, filesize($FILE)))
         {
-            // Saltarse los comentarios
-            if (preg_match('/^\s*#/', $line)) continue;
-
 	        if(eregi("lease", $line)) {
 		        if(ereg("([0-9.]+)", $line, $arrReg)){
 		            //$data[$count]['iphost'] = $pDB->DBCAMPO($arrReg[1]);

@@ -27,13 +27,15 @@
   +----------------------------------------------------------------------+
   $Id: DialerConn.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 
+require_once ('DialerConn.class.php');
+
 if(!class_exists('AGI')) {
     require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpagi.php');
 }
 
 define('AMI_PORT', 5038);
 
-class AMIClientConn extends MultiplexConn
+class AMIClientConn extends DialerConn
 {
     private $oLogger;
     private $server;
@@ -52,7 +54,7 @@ class AMIClientConn extends MultiplexConn
     function AMIClientConn($dialSrv, $oMainLog)
     {
         $this->oLogger = $oMainLog;
-        $this->multiplexSrv = $dialSrv;
+        $this->dialSrv = $dialSrv;
     }
     
     // Datos a mandar a escribir apenas se inicia la conexión
@@ -71,11 +73,8 @@ class AMIClientConn extends MultiplexConn
          * guarda individualmente. */ 
         foreach ($listaPaquetes as $paquete) {
         	if (isset($paquete['Event'])) {
-                $e = strtolower($paquete['Event']);
-                if (isset($this->event_handlers[$e]) || isset($this->event_handlers['*'])) {
-                    $paquete['local_timestamp_received'] = microtime(TRUE);
-                    $this->_listaEventos[] = $paquete;
-                }
+                $paquete['local_timestamp_received'] = time();
+                $this->_listaEventos[] = $paquete;                
             } elseif (isset($paquete['Response'])) {
             	if (!is_null($this->_response)) {
             		$this->oLogger->output("ERR: segundo Response sobreescribe primer Response no procesado: ".
@@ -194,7 +193,7 @@ class AMIClientConn extends MultiplexConn
             $req = "Action: $action\r\n";
             foreach($parameters as $var => $val) $req .= "$var: $val\r\n";
             $req .= "\r\n";
-            $this->multiplexSrv->encolarDatosEscribir($this->sKey, $req);
+            $this->dialSrv->encolarDatosEscribir($this->sKey, $req);
             return $this->wait_response();
         } else return NULL;
     }
@@ -203,7 +202,7 @@ class AMIClientConn extends MultiplexConn
     private function wait_response()
     {
         while (!is_null($this->sKey) && is_null($this->_response)) {
-            if (!$this->multiplexSrv->procesarActividad()) {
+            if (!$this->dialSrv->procesarActividad()) {
                 usleep(100000);
             }
         }
@@ -248,7 +247,7 @@ class AMIClientConn extends MultiplexConn
         //$this->oLogger->output("DEBUG: cabecera recibida es: $str");
         
         // Registrar el socket con el objeto de conexiones
-        $this->multiplexSrv->agregarNuevaConexion($this, $hConn);
+        $this->dialSrv->agregarDialerConn($this, $hConn);
 
         // Iniciar login con Asterisk
         $res = $this->send_request('login', array('Username'=>$username, 'Secret'=>$secret));
@@ -263,7 +262,7 @@ class AMIClientConn extends MultiplexConn
     function disconnect()
     {
         $this->logoff();
-        $this->multiplexSrv->marcarCerrado($this->sKey);
+        $this->dialSrv->marcarCerrado($this->sKey);
     }
 
     function finalizarConexion()
@@ -291,19 +290,6 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('AbsoluteTimeout', array('Channel'=>$channel, 'Timeout'=>$timeout));
     }
 
-    /**
-     * Initiate an attended transfer
-     * 
-     * @param string $channel The transferer channel's name
-     * @param string $exten The extension to transfer to
-     * @param string $context The context to transfer to
-     * @param string $priority The priority to transfer to
-     */
-    function Atxfer($channel, $exten, $context, $priority)
-    {
-      return $this->send_request('Atxfer', array('Channel'=>$channel, 'Exten'=>$exten, 'Priority'=>$priority, 'Context'=>$context));
-    }
-
    /**
     * Change monitoring filename of a channel
     *
@@ -313,7 +299,7 @@ class AMIClientConn extends MultiplexConn
     */
     function ChangeMonitor($channel, $file)
     {
-      return $this->send_request('ChangeMonitor', array('Channel'=>$channel, 'File'=>$file));
+      return $this->send_request('ChangeMontior', array('Channel'=>$channel, 'File'=>$file));
     }
 
    /**
@@ -829,13 +815,6 @@ class AMIClientConn extends MultiplexConn
       }
       $this->event_handlers[$event] = $callback;
       return true;
-    }
-
-    function remove_event_handler($event)
-    {
-    	if (isset($this->event_handlers[$event])) {
-    		unset($this->event_handlers[$event]);
-    	}
     }
 
    /**

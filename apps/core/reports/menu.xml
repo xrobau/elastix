@@ -52,12 +52,7 @@
             <group id="1" name="administrator" desc="total access"></group>
         </permissions>
     </menuitem>
-    <menuitem menuid="summary_by_extension" desc="Summary"   parent="reports" module="yes" link="" order="6">
-        <permissions>
-            <group id="1" name="administrator" desc="total access"></group>
-        </permissions>
-    </menuitem>
-    <menuitem menuid="missed_calls" desc="Missed Calls"      parent="reports" module="yes" link="" order="7">
+    <menuitem menuid="summary_by_extension" desc="Summary"      parent="reports" module="yes" link="" order="6">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
         </permissions>

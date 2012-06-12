@@ -37,11 +37,10 @@ require_once(ROOT."/modules/calendar/libs/paloSantoCalendar.class.php");
 require_once(ROOT."/modules/calendar/configs/default.conf.php");
 require_once(ROOT."/libs/paloSantoACL.class.php");
 require_once(ROOT."/libs/paloSantoDB.class.php");
-require_once(ROOT."/libs/paloSantoLongPoll.class.php");
 
 $arrConf = array_merge($arrConf,$arrConfModule);
 
-class core_Calendar extends LongPoll
+class core_Calendar
 {
     /**
      * Description error message
@@ -72,13 +71,6 @@ class core_Calendar extends LongPoll
     private $_pACL;
 
     /**
-     * String with the id of a queue
-     *
-     * @var string
-     */
-    private $_ticket;
-
-    /**
      * Constructor
      *
      */
@@ -86,10 +78,8 @@ class core_Calendar extends LongPoll
     {
         $this->_dbCache = array();
         $this->_id_user = NULL;
-	$this->_ticket  = NULL;
         $this->errMsg   = NULL;
         $this->_pACL    = NULL;
-	parent::__construct();
     }
 
     /**
@@ -553,15 +543,6 @@ CONTENIDO_ARCHIVO_AUDIO;
 
         return $extension;        
     }
-
-    private function _rechazar_correo_vacio($email)
-    {
-        if(preg_match("/^<?[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+>?$/",trim($email)))
-            return TRUE;
-        else
-            return FALSE;
-    }
-
 /*
     public function getFunction()
     {
@@ -842,24 +823,19 @@ CONTENIDO_ARCHIVO_AUDIO;
      *                                                           event.
      *                   or false if an error exists
      */
-    function listCalendarEvents($startdate, $enddate=NULL, $id_event = NULL)
+    function listCalendarEvents($startdate, $enddate)
     {
         global $arrConf;
 
         if (!$this->_checkUserAuthorized('calendar')) return false;
 
         // Validación de fechas
-	if(is_null($id_event)){
-	    $sFechaInicio = $this->_checkDateFormat(isset($startdate) ? $startdate : NULL);
-	    if (is_null($sFechaInicio)) return false;
-	    if(isset($enddate)){
-		$sFechaFinal  = $this->_checkDateFormat($enddate);
-		if (is_null($sFechaFinal)) return false;
-		if ($sFechaFinal < $sFechaInicio) {
-		    $t = $sFechaFinal; $sFechaFinal = $sFechaInicio; $sFechaInicio = $t;
-		}
-	    }
-	}
+        $sFechaInicio = $this->_checkDateFormat(isset($startdate) ? $startdate : NULL);
+        $sFechaFinal  = $this->_checkDateFormat(isset($enddate) ? $enddate : NULL);
+        if (is_null($sFechaInicio) || is_null($sFechaFinal)) return false;
+        if ($sFechaFinal < $sFechaInicio) {
+            $t = $sFechaFinal; $sFechaFinal = $sFechaInicio; $sFechaInicio = $t;
+        }
 
         // Identificar el usuario para averiguar el ID de usuario en calendario
         $id_user = $this->_leerIdUser();
@@ -867,34 +843,15 @@ CONTENIDO_ARCHIVO_AUDIO;
         // Base de datos del calendario
         $pDB_calendar = $this->_getDB($arrConf['dsn_conn_database']);
 
-	if(isset($id_event)){
-	    $arrParam = array($id_user, $id_event);
-	    $sql = <<<LEER_EVENTOS
-SELECT * FROM events
-WHERE uid = ? AND id = ?
-LEER_EVENTOS;
-	}
-	elseif(isset($enddate)){
-	    $arrParam = array($sFechaFinal, $sFechaInicio, $id_user);
-	    $sql = <<<LEER_EVENTOS
+        $sql = <<<LEER_EVENTOS
 SELECT * FROM events
 WHERE   ? >= strftime('%Y-%m-%d', startdate)
     AND ? <= strftime('%Y-%m-%d', enddate)
     AND uid = ?
 ORDER BY starttime
 LEER_EVENTOS;
-	}
-	else{  // Se devuelven todos los eventos cuyo fecha de inicio es mayor o igual a la fecha inicio pasada como parámetro
-	    $arrParam = array($sFechaInicio, $id_user);
-	    $sql = <<<LEER_EVENTOS
-SELECT * FROM events
-WHERE   ? <= strftime('%Y-%m-%d', startdate)
-    AND uid = ?
-ORDER BY starttime
-LEER_EVENTOS;
-	}
-        
-        $recordset = $pDB_calendar->fetchTable($sql, TRUE, $arrParam);
+        $recordset = $pDB_calendar->fetchTable($sql, TRUE, 
+            array($sFechaFinal, $sFechaInicio, $id_user));
         if (!is_array($recordset)) {
             $this->errMsg["fc"] = 'DBERROR';
             $this->errMsg["fm"] = 'Database operation failed';
@@ -911,8 +868,8 @@ LEER_EVENTOS;
                 // Las siguientes 3 son fechas
                 'startdate'     =>  date(SOAP_DATE_FORMAT, strtotime($tupla['startdate'])),
                 'enddate'       =>  date(SOAP_DATE_FORMAT, strtotime($tupla['enddate'])),
-                'starttime'     =>  $tupla['starttime'],
-                'endtime'       =>  $tupla['endtime'],
+                'starttime'     =>  date(SOAP_DATETIME_FORMAT, strtotime($tupla['starttime'])),
+                'endtime'       =>  date(SOAP_DATETIME_FORMAT, strtotime($tupla['starttime'])),
 
                 'subject'       =>  $tupla['subject'],
                 'description'   =>  $tupla['description'],
@@ -948,7 +905,7 @@ LEER_EVENTOS;
      * @param   string    $color                     (Optional) Color for the event
      * @return  boolean   True if the event was successfully created, or false if an error exists
      */
-    function addCalendarEvent($startdate,$enddate,$subject,$description,$asterisk_call,$recording,$call_to,$reminder_timer,$emails_notification, $color, $getIdInserted=FALSE)
+    function addCalendarEvent($startdate,$enddate,$subject,$description,$asterisk_call,$recording,$call_to,$reminder_timer,$emails_notification, $color)
     {
         global $arrConf;
 
@@ -1058,8 +1015,7 @@ LEER_EVENTOS;
 
         $color = isset($color)? $color : "#3366CC";
         /* Insertar el registro del nuevo evento. */
-	$dbCalendar = $this->_getDB($arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($dbCalendar);
+        $pCalendar = new paloSantoCalendar($this->_getDB($arrConf['dsn_conn_database']));
         $r = $pCalendar->insertEvent(
             $id_user,
             substr($sFechaInicio, 0, 10),   // asume yyyy-mm-dd al inicio
@@ -1098,10 +1054,7 @@ LEER_EVENTOS;
         if (count($emails_notification) > 0) {
             $this->_enviarCorreosNotificacionEvento($idEvento, $sFechaInicio, $sFechaFinal, $subject, $emails_notification, $description, 'New_Event');
         }
-        if($getIdInserted)
-	    return $dbCalendar->getLastInsertId();
-	else
-	    return true;
+        return true; 
     }
 
     /**
@@ -1173,269 +1126,6 @@ LEER_EVENTOS;
             return false;
         }
         return true;
-    }
-
-    /**
-     * This function creates a queue for the differential sync
-     *
-     * @param   string   $data      String containing the JSON data to be sync   
-     *
-     * @return  mixed    returns the ticket of the queue, or false if an error exists
-     */
-    public function eventDifferentialSync($data)
-    {
-        global $arrConf;
-
-        if (!$this->_checkUserAuthorized('calendar')) return false;
-
-        $dbCalendar = $this->_getDB($arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($dbCalendar);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-       
-        $result = $pCalendar->addQueue($data,"event",$id_user);
-        if (!$result) {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to write data - '.$pCalendar->_DB->errMsg;
-            $this->errMsg["cn"] = get_class($pCalendar);
-            return false;
-        }
-	else
-	    return $result;
-    }
-
-    /**
-     * This function gets the status of a queue and returns the data to be sync in the client.
-     * Uses the long poll method
-     *
-     * @param   string   $ticket     Ticket of the queue   
-     *
-     * @return  mixed    returns an array with the data to be sync, or an array with an informative
-     *                   message if the timeout has been reached and the queue is still unsolved,
-     *			 or false if an error exists
-     */
-    public function getStatusQueue($ticket)
-    {
-        if (!$this->_checkUserAuthorized('calendar')) return false;
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-	$this->_ticket = $ticket;
-
-	// Se llama al método definido en la clase LongPoll. Para establecer una conexión permanente con el cliente
-	$data = $this->run();
-	if(is_null($data)){
-	    $result["status"] = "The ticket is still in the queue";
-	    return $result;
-	}
-	elseif($data === false)
-	    return false;
-	else
-	    return $data;
-    }
-
-    /**
-     * This function gets all the events of the authenticated user in the server
-     *
-     * @return  mixed    returns an array with all the events, or false if an error exists
-     */
-    public function getFullSync()
-    {
-	global $arrConf;
-
-        if (!$this->_checkUserAuthorized('calendar')) return false;
-
-        $dbCalendar = $this->_getDB($arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($dbCalendar);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-	$events = $pCalendar->getUserEvents($id_user);
-	if($events === FALSE){
-	    $this->errMsg["fc"] = 'DBERROR';
-	    $this->errMsg["fm"] = 'Database operation failed';
-	    $this->errMsg["fd"] = 'Unable to get data - '.$pCalendar->_DB->errMsg;
-	    $this->errMsg["cn"] = get_class($pCalendar);
-	    return false;
-	}
-	else{
-	    $result["last_sync"] = time();
-	    $result["events"] = $events;
-	    return $result;
-	}
-    }
-
-    /**
-     * This function gets the md5 hash for the data verification integrity of all the events
-     *
-     * @param   string   $fields      String containing the JSON of the fields to be verified    
-     *
-     * @return  mixed    returns an array with the hash, or false if an error exists
-     */
-    public function getHash($fields)
-    {
-	global $arrConf;
-
-        if (!$this->_checkUserAuthorized('calendar')) return false;
-
-        $dbCalendar = $this->_getDB($arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($dbCalendar);
-
-        // Obtener el ID del usuario logoneado
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-
-	$json = new Services_JSON();
-	$fields = $json->decode($fields);
-
-	if(is_array($fields)){
-	    //Se eliminan valores repetidos
-	    $fields = array_unique($fields);
-	    $key = array_search("id",$fields); // Se elimina el campo id en caso de que lo envie el cliente
-	    if($key !== FALSE)
-		unset($fields[$key]);
-	}
-
-	if(!is_array($fields) || count($fields) == 0){
-	    $this->errMsg["fc"] = 'PARAMERROR';
-	    $this->errMsg["fm"] = 'Wrong parameter';
-	    $this->errMsg["fd"] = "The parameter \"fields\" must be an array json serialized and must contain at least one value different than \"id\".";
-	    $this->errMsg["cn"] = get_class($this);
-	    return false;
-	}
-
-	//TODO: Este arreglo contiene los campos de la tabla "events", quiza se deba buscar una manera más eficiente de protegerse contra inyección de sql
-	$arrFields = array("id","uid","startdate","enddate","starttime","eventtype","subject","description","asterisk_call","recording","call_to","notification","emails_notification","endtime","each_repeat","days_repeat","reminderTimer","color","last_update");
-	$counter = 1;
-	$queryFields = "id,";
-	foreach($fields as $value){
-	    if(!in_array($value,$arrFields)){
-		$result["error"] = "Some field/s do not exist in the server";
-		return $result;
-	    }
-	    if($counter == count($fields))
-		$queryFields .= $value;
-	    else
-		$queryFields .= $value.",";
-	    $counter++;
-	}
-	$result = $pCalendar->getUserEvents($id_user,$queryFields);
-	if($result === FALSE){
-	    $this->errMsg["fc"] = 'DBERROR';
-	    $this->errMsg["fm"] = 'Database operation failed';
-	    $this->errMsg["fd"] = 'Unable to get data - '.$pCalendar->_DB->errMsg;
-	    $this->errMsg["cn"] = get_class($pCalendar);
-	    return false;
-	}
-	$contacts_json = $json->encode($result);
-	$hash = md5($contacts_json);
-	$response["hash"] = $hash;
-	return $response;
-    }
-
-    /**
-     * This function query the status of the ticket of a queue, if it is unsolved returns NULL,
-     * but if it is solved it will get the data to be sync in the client. 
-     *
-     * @return  mixed    returns an array with the data to be sync in the client, or NULL it the ticket
-     *			 is unsolved or false if an error exists
-     */
-    protected function getData()
-    {
-	global $arrConf;
-
-	$dbCalendar = $this->_getDB($arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($dbCalendar);
-
-	$data_ticket = $pCalendar->getDataTicket($this->_ticket,$this->_id_user);
-	if(is_null($data_ticket)){
-	    $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to write data - '.$pCalendar->_DB->errMsg;
-            $this->errMsg["cn"] = get_class($pCalendar);
-            return false;
-	}
-	elseif(!$data_ticket){
-	    $this->errMsg["fc"] = 'PARAMERROR';
-            $this->errMsg["fm"] = 'Wrong ticket';
-            $this->errMsg["fd"] = "The ticket {$this->_ticket} does not exist or does not belong to you";
-            $this->errMsg["cn"] = get_class($pCalendar);
-            return false;
-	}
-	else{
-	    if($data_ticket["status"] != "OK")
-		return null;
-	    else{
-		$result["status"] = "OK";
-		$json = new Services_JSON();
-		$data = $json->decode($data_ticket["data"]);
-		if(!isset($data->last_sync) || !isset($data->events)){
-		    $remove_queue = $pCalendar->removeQueue($this->_ticket);
-		    if($remove_queue === false){
-			$this->errMsg["fc"] = 'DBERROR';
-			$this->errMsg["fm"] = 'Database operation failed';
-			$this->errMsg["fd"] = 'Unable to delete data - '.$pCalendar->_DB->errMsg;
-			$this->errMsg["cn"] = get_class($pCalendar);
-			return false;
-		    }
-		    $this->errMsg["fc"] = 'PARAMERROR';
-		    $this->errMsg["fm"] = 'Wrong data';
-		    $this->errMsg["fd"] = "The data of the ticket {$this->_ticket} is wrong or corrupted. This data has to be a JSON string containing the keywords \"last_sync\" and \"contacts\". The ticket will be deleted";
-		    $this->errMsg["cn"] = get_class($pCalendar);
-		    return false;
-		}
-		if(!is_array($data->events)){
-		    $remove_queue = $pCalendar->removeQueue($this->_ticket);
-		    if($remove_queue === false){
-			$this->errMsg["fc"] = 'DBERROR';
-			$this->errMsg["fm"] = 'Database operation failed';
-			$this->errMsg["fd"] = 'Unable to delete data - '.$pCalendar->_DB->errMsg;
-			$this->errMsg["cn"] = get_class($pCalendar);
-			return false;
-		    }
-		    $this->errMsg["fc"] = 'PARAMERROR';
-		    $this->errMsg["fm"] = 'Wrong data';
-		    $this->errMsg["fd"] = "The data of the contacts in ticket {$this->_ticket} is wrong or corrupted. It has to be an array. The ticket will be deleted";
-		    $this->errMsg["cn"] = get_class($pCalendar);
-		    return false;
-		}
-		$last_sync = $data->last_sync;
-		if(isset($data_ticket["response_data"]) && !empty($data_ticket["response_data"]))
-		    $response_data = $json->decode($data_ticket["response_data"]);
-		else
-		    $response_data = array();
-		$events = $pCalendar->getEventsAfterSync($last_sync,$data->events,$this->_id_user,$response_data);
-		if($events === false){
-		    $this->errMsg["fc"] = 'DBERROR';
-		    $this->errMsg["fm"] = 'Database operation failed';
-		    $this->errMsg["fd"] = 'Unable to get data - '.$pCalendar->_DB->errMsg;
-		    $this->errMsg["cn"] = get_class($pCalendar);
-		    return false;
-		}
-		else{
-		    $remove_queue = $pCalendar->removeQueue($this->_ticket);
-		    if($remove_queue === false){
-			$this->errMsg["fc"] = 'DBERROR';
-			$this->errMsg["fm"] = 'Database operation failed';
-			$this->errMsg["fd"] = 'Unable to delete data - '.$pCalendar->_DB->errMsg;
-			$this->errMsg["cn"] = get_class($pCalendar);
-			return false;
-		    }
-		    else{
-			$result["last_sync"] = time();
-			$result["events"] = $events;
-			return $result;
-		    }
-		}
-	    }
-	}
     }
 
     /**

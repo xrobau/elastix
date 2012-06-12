@@ -1,14 +1,3 @@
-{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *} 
-{if $AUTO_POPUP eq '1'}
-   {literal}
-   	<script type='text/javascript'>
- 	$('.togglestickynote').ready(function(e) {
-            $("#neo-sticky-note-auto-popup").attr('checked', true);
-	    note();
-	});
-	</script>
-   {/literal}
-{/if}
 <div id="fullMenu">
   <table cellspacing=0 cellpadding=0 width="100%" border=0>
     <tr>
@@ -64,7 +53,7 @@
                     </table> 
                 </div>
             </td>
-	    <td class="menuaftertab" align="right"><span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupElastix('registrar','{$Register}',538,400)">{$Registered}</a></span>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+	    <td class="menuaftertab" align="right"><span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupElastix('registrar','{$Register}',538,370)">{$Registered}</a></span>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td class="menuaftertab" width="40%" align="right">&nbsp;<a class="logout" id="viewDetailsRPMs">{$VersionDetails}</a></td>
             <td class="menuaftertab" width="40%" align="right">&nbsp;<a href="javascript:mostrar();">{$ABOUT_ELASTIX}</a></td>
             <td class="menuaftertab" width="20%" align="right">&nbsp;<a href="index.php?logout=yes">{$LOGOUT}</a></td>
@@ -89,9 +78,7 @@
                 </tr>
               </table>
             </td>
-            <td align="right" valign="middle">
-				<img src="themes/{$THEMENAME}/images/tab_notes.png" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" border="0" />&nbsp;
-				<a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')"><img
+            <td align="right" valign="middle"><a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')"><img
                 src="themes/{$THEMENAME}/images/help_top.gif" border="0"></a>&nbsp;&nbsp;<a href="javascript:changeMenu()"><img
                 src="themes/{$THEMENAME}/images/arrow_top.gif" border="0"></a>&nbsp;&nbsp;</td>
           </tr>
@@ -106,8 +93,6 @@
     <tr>
       <td><img src="images/logo_elastix_new_mini.png" border="0"></td>
       <td align="right" class="letra_gris" valign="middle">{$nameMainMenuSelected} &rarr; {$nameSubMenuSelected} {if !empty($idSubMenu2Selected)} &rarr; {$nameSubMenu2Selected} {/if}
-		  &nbsp;&nbsp;<img src="themes/{$THEMENAME}/images/tab_notes_bottom.png" alt="tabnotes" id="togglestickynote2"  class="togglestickynote" style="cursor: pointer;" border="0"
-          align="absmiddle" />
           &nbsp;&nbsp;<a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')"><img src="themes/{$THEMENAME}/images/help_bottom.gif" border="0" 
           align="absmiddle"></a>
           &nbsp;&nbsp;<a href="javascript:changeMenu()"><img src="themes/{$THEMENAME}/images/arrow_bottom.gif" border="0" align="absmiddle"></a>&nbsp;&nbsp;
@@ -116,7 +101,7 @@
   </table>
 </div>
 
-<!--<div id="boxRPM" style="display:none;">
+<div id="boxRPM" style="display:none;">
     <div class="popup">
         <table>
             <tr>
@@ -173,8 +158,7 @@
             </tr>
         </table>
     </div>
-</div>-->
-<div id="fade_overlay" class="black_overlay"></div>
+</div><div id="fade_overlay" class="black_overlay"></div>
 
 <table width="100%" cellpadding="0" cellspacing="0" height="100%">
   <tr>
@@ -249,8 +233,3 @@ function mostrar_Menu(element)
 <input type="hidden" id="lblHtmlMode" value="{$htmlMode}" />
 <input type="hidden" id="lblRegisterCm"   value="{$lblRegisterCm}" />
 <input type="hidden" id="lblRegisteredCm" value="{$lblRegisteredCm}" />
-<input type="hidden" id="amount_char_label" value="{$AMOUNT_CHARACTERS}" />
-<input type="hidden" id="save_note_label" value="{$MSG_SAVE_NOTE}" />
-<input type="hidden" id="get_note_label" value="{$MSG_GET_NOTE}" />
-<input type="hidden" id="elastix_theme_name" value="{$THEMENAME}" />
-<input type="hidden" id="lbl_no_description" value="{$LBL_NO_STICKY}" />

@@ -80,7 +80,6 @@ $arrLang=array(
 "Bad Format" => "Mauvais format",
 "No option was selected" => "Aucune option sélectionnée",
 "Octets out of range" => "Octets en dehors de la plage",
-"Undefined validation type" => "Undefined validation type",
 "View User" => "Voir Utilisateur",
 "Date/Time" => "Date & Heure",
 "Load Module" => "Chargement de Modules",
@@ -232,9 +231,5 @@ En Wav",
 "You are not authorized to access to this page" => "You are not authorized to access to this page",
 "You need administrator privileges" => "You need administrator privileges",
 "Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

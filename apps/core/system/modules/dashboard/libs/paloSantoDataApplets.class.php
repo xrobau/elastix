@@ -74,7 +74,7 @@ class paloSantoDataApplets
             $sPorcentajeLibre = number_format($iPorcentajeLibre, 0);
 
             // Intentar determinar el modelo del disco que contiene la partición
-            $sModelo = isset($hdmodel[$particion['fichero']]) ? $hdmodel[$particion['fichero']] : 'N/A';
+            $sModelo = isset($hdmodel[$particion['fichero']]) ? $hdmodel[$particion['fichero']] : 'N/A';            
             $content .= <<<PLANTILLA_DISCO
 <div>
     $sEnlaceImagen
@@ -128,11 +128,11 @@ PLANTILLA_DISCO;
         $output = NULL;
         exec('/usr/bin/elastix-helper dirspacereport', $output);
         foreach ($output as $s) {
-                $s = trim($s); $l = explode(' ', $s);
+        	$s = trim($s); $l = explode(' ', $s);
             if (count($l) > 1 && isset($listaReporteDir[$l[0]]))
                 $listaReporteDir[$l[0]]['use'] = $l[1];
         }
-
+        
         // Datos extra de directorios seleccionados
         $content .= <<<PLANTILLA_DIRECTORIOS
 <div class="neo-divisor"></div>
@@ -153,15 +153,14 @@ PLANTILLA_DIRECTORIOS;
 
     function getDataApplet_News()
     {
-        define('MAGPIE_CACHE_DIR', '/tmp/rss-cache');
         $infoRSS = @fetch_rss($this->arrConf['dir_RSS']);
         $sMensaje = magpie_error();
         if (preg_match("/HTTP Error: connection failed/", $sMensaje)) {
-                return _tr('Could not get web server information. You may not have internet access or the web server is down');
+        	return _tr('Could not get web server information. You may not have internet access or the web server is down');
         }
         $sContentList = '<div class="neo-applet-news-row">'._tr('No News to display').'</div>';
         if (!empty($infoRSS) && is_array($infoRSS->items) && count($infoRSS->items) > 0) {
-                $sContentList = '';
+        	$sContentList = '';
             $sPlantilla = <<<PLANTILLA_RSS_ROW
 <div class="neo-applet-news-row">
     <span class="neo-applet-news-row-date">%s</span>
@@ -172,13 +171,13 @@ PLANTILLA_DIRECTORIOS;
 </div>
 PLANTILLA_RSS_ROW;
             for ($i = 0; $i < 7 && $i < count($infoRSS->items); $i++) {
-                $sContentList .= sprintf($sPlantilla,
+                $sContentList .= sprintf($sPlantilla, 
                     date('Y.m.d', $infoRSS->items[$i]['date_timestamp']),
-                    rawurlencode('http://www.elastix.org'),
-                    rawurlencode(utf8_encode($infoRSS->items[$i]['title'])),
-                    rawurlencode($infoRSS->items[$i]['link']),
+                    urlencode('http://www.elastix.org'),
+                    urlencode($infoRSS->items[$i]['title']),
+                    urlencode($infoRSS->items[$i]['link']),
                     $infoRSS->items[$i]['link'],
-					htmlentities($infoRSS->items[$i]['title'], ENT_COMPAT));
+                    htmlentities($infoRSS->items[$i]['title'], ENT_COMPAT, 'UTF-8'));
             }
         }
         return $sContentList;
@@ -203,7 +202,7 @@ PLANTILLA_RSS_ROW;
 <img id="neo-applet-processes-processing" src="modules/{$this->module_name}/images/loading.gif" style="display: none;" alt="" />
 </div>
 PLANTILLA_POSICIONABLE;
-
+        
         $listaIconos = array(
             'Asterisk'  =>  'icon_pbx.png',
             'OpenFire'  =>  'icon_im.png',
@@ -218,10 +217,10 @@ PLANTILLA_POSICIONABLE;
 <div class="neo-applet-processes-row">
     <div class="neo-applet-processes-row-icon"><img src="modules/dashboard/images/%s" width="32" height="28" alt="%s" /></div>
     <div class="neo-applet-processes-row-name">%s</div>
-    <div class="neo-applet-processes-row-menu">
+    <div class="neo-applet-processes-row-menu"> 
         <input type="hidden" name="key-servicio" id="key-servicio" value="%s" />
         <input type="hidden" name="status-servicio" id="status-servicio" value="%s" />
-        <img src="modules/dashboard/images/%s" width="15" height="15" alt="menu" />
+        <img src="modules/dashboard/images/icon_arrowdown.png" width="15" height="15" alt="menu" />
     </div>
     <div class="neo-applet-processes-row-status-msg" style="color: %s">%s</div>
     <div class="neo-applet-processes-row-status-icon"></div></div>
@@ -248,7 +247,6 @@ PLANTILLA_PROCESS_ROW;
                 _tr($infoServicio['name_service']),
                 $sServicio,
                 $infoServicio['status_service'],
-                (in_array($infoServicio['status_service'], array('OK', 'Shutdown'))) ? 'icon_arrowdown.png' : 'icon_arrowdown-disabled.png',
                 $sColorStatus,
                 strtoupper($sDescStatus));
         }
@@ -305,46 +303,46 @@ PLANTILLA_PROCESS_ROW;
         foreach($queues as $key=>$value){
             $totalQueues += $value;
         }
-
+        
     //     if($total == 1)  $total = $total." ".$arrLang['call'];
     //   else   $total = $total." ".$arrLang['calls'];
-
-        if($internal == 1) $internal = $internal;
-        else   $internal = $internal;
-
-        if($external == 1) $external = $external;
-        else   $external = $external;
-
+    
+        if($internal == 1) $internal = $internal." "._tr('call');
+        else   $internal = $internal." "._tr('calls');
+    
+        if($external == 1) $external = $external." "._tr('call');
+        else   $external = $external." "._tr('calls');
+    
         if($channel == 1)  $channel = $channel." "._tr('channel');
         else   $channel = $channel." "._tr('channels');
-
+    
     //// asterisk connection
         $sip_Ext_ok  = $connections['sip']['ext']['ok'];
         $sip_Ext_nok = $connections['sip']['ext']['no_ok'];
         $total_sip_Ext = $sip_Ext_ok + $sip_Ext_nok;
-
+    
         $sip_trunk_ok  = $connections['sip']['trunk']['ok'];
         $sip_trunk_nok = $connections['sip']['trunk']['no_ok'];
         $sip_trunk_unk = $connections['sip']['trunk']['unknown'];
         $total_sip_trunk = $sip_trunk_ok + $sip_trunk_nok + $sip_trunk_unk;
-
+    
         //$sip_trunk_reg_ok = $connections['sip']['trunk_registry']['ok'];
         //$sip_trunk_reg_nok= $connections['sip']['trunk_registry']['no_ok'];
         //$total_sip_trunk_reg = $sip_trunk_reg_ok + $sip_trunk_reg_nok;
-
+    
         $iax_Ext_ok  = $connections['iax']['ext']['ok'];
         $iax_Ext_nok = $connections['iax']['ext']['no_ok'];
         $total_iax_Ext = $iax_Ext_ok + $iax_Ext_nok;
-
+    
         $iax_trunk_ok  = $connections['iax']['trunk']['ok'];
         $iax_trunk_nok = $connections['iax']['trunk']['no_ok'];
         $iax_trunk_unk = $connections['iax']['trunk']['unknown'];
         $total_iax_trunk = $iax_trunk_ok + $iax_trunk_nok + $iax_trunk_unk;
-
+    
         //$iax_trunk_reg_ok = $connections['iax']['trunk_registry']['ok'];
         //$iax_trunk_reg_nok= $connections['iax']['trunk_registry']['no_ok'];
         //$total_iax_trunk_reg = $iax_trunk_reg_ok + $iax_trunk_reg_nok;
-
+    
         $total_trunks_ok  = $sip_trunk_ok  + $iax_trunk_ok;
         $total_trunks_nok = $sip_trunk_nok + $iax_trunk_nok;
         $total_trunks_unk = $sip_trunk_unk + $iax_trunk_unk;
@@ -363,8 +361,8 @@ PLANTILLA_PROCESS_ROW;
                                 <b>"._tr('Total_calls').": </b>
                             </div>
                             <div align='left' class='detailText'>
-                                "._tr('Calls')." <b>($total)</b> :
-                                <font color='green'>($internal "._tr('internal_calls').")</font> <font color='red'> ($external "  ._tr('external_calls').")</font>
+                                <font color='blue'>"._tr('calls')."</font><b>($total)</b>
+                                <font color='green'>"._tr('internal_calls')."</font> <b>(".$internal.")</b> <font color='red'>"._tr('external_calls')."</font> <b>(".$external.")</b>
                             </div>
                             <div class='typeActivity'>
                                 <b>"._tr('total_channels').": </b>
@@ -388,65 +386,118 @@ PLANTILLA_PROCESS_ROW;
 
     function getDataApplet_SystemResources()
     {
+		/*include("libs/pChart/libs/pData.class");
+		include("libs/pChart/libs/pChart.class");
+		include("libs/pChart/libs/MyHorBar.class.php");*/
+
+
         $oPalo = new paloSantoSysInfo();
         $arrSysInfo = $oPalo->getSysInfo();
-
+        //CPU INFO    $arrSysInfo['CpuVendor'] 
         $cpu_info = $arrSysInfo['CpuModel'];
-
+    
         //CPU USAGE
-        $cpu_usage = $this->genericImage('rbgauge', array('percent' => $arrSysInfo['CpuUsage'], 'size' => '140,140'), null, null);
-                $inf1 = number_format($arrSysInfo['CpuUsage'] * 100.0, 1);
-
+        $cpu_usage = $this->getImage_CPU_Usage("140,140");//$this->module_name,
+		$inf1 = number_format($arrSysInfo['CpuUsage'] * 100.0, 1);
+        //$inf1 = number_format($arrSysInfo['CpuUsage']*100, 2)._tr('% used of')." ".number_format($arrSysInfo['CpuMHz'], 2)." MHz";
+        //$cpu_usage =  $img."&nbsp;&nbsp;&nbsp;".$inf;
+    
         //MEMORY USAGE
-        $fraction_mem_used = ($arrSysInfo['MemTotal'] - $arrSysInfo['MemFree'] - $arrSysInfo['Cached'] - $arrSysInfo['MemBuffers']) / $arrSysInfo['MemTotal'];
-        $mem_usage_val  = number_format(100.0 * $fraction_mem_used, 1);
-        $mem_usage = $this->genericImage('rbgauge', array('percent' => $fraction_mem_used, 'size' => '140,140'), null, null);
-        $inf2 = number_format($arrSysInfo['MemTotal']/1024, 2)." Mb";
-
+        $mem_usage_val  = number_format(100.0 * ($arrSysInfo['MemTotal'] - $arrSysInfo['MemFree'] - $arrSysInfo['Cached'] - $arrSysInfo['MemBuffers'])/$arrSysInfo['MemTotal'], 1);
+        $mem_usage = $this->getImage_MEM_Usage("140,140");
+		$inf2 = number_format($arrSysInfo['MemTotal']/1024, 2)." Mb";
+        
+        //$inf2 = number_format($mem_usage_val*100, 2)._tr('% used of')." ".number_format($arrSysInfo['MemTotal']/1024, 2)." Mb";
+        //$mem_usage = $img."&nbsp;&nbsp;&nbsp;".$inf;
+    
         //SWAP USAGE
-        $fraction_swap_used = ($arrSysInfo['SwapTotal'] - $arrSysInfo['SwapFree']) / $arrSysInfo['SwapTotal'];
-        $swap_usage_val = number_format(100.0 * $fraction_swap_used, 1);
-        $swap_usage = $this->genericImage('rbgauge', array('percent' => $fraction_swap_used, 'size' => '140,140'), null, null);
-        $inf3 = number_format($arrSysInfo['SwapTotal']/1024, 2)." Mb";
-
+        $swap_usage_val = number_format(100.0 * ($arrSysInfo['SwapTotal'] - $arrSysInfo['SwapFree'])/$arrSysInfo['SwapTotal'], 1);
+        $swap_usage = $this->getImage_Swap_Usage("140,140");
+		$inf3 = number_format($arrSysInfo['SwapTotal']/1024, 2)." Mb";
+        //$inf3 = number_format($swap_usage_val, 2)." ".number_format($arrSysInfo['SwapTotal']/1024, 2)." Mb";
+        //$swap_usage = $img."&nbsp;&nbsp;&nbsp;".$inf;
+    
         //UPTIME
         $uptime = $arrSysInfo['SysUptime'];
 
         // CPU SPEED
         $speed = number_format($arrSysInfo['CpuMHz'], 2)." MHz";
 
-        $html ="<div style='height:165px; position:relative; text-align:center;'>
-                          <div style='width:155px; float:left; position: relative;'>
-                                $cpu_usage
-                                <div class=\"neo-applet-sys-gauge-percent\">$inf1%</div><div>"._tr('CPU')."</div>
-                          </div>
-                          <div style='width:154px; float:left; position: relative;'>
-                                $mem_usage
-                                <div class=\"neo-applet-sys-gauge-percent\">$mem_usage_val%</div><div>"._tr('RAM')."</div>
-                          </div>
-                          <div style='width:155px; float:right; position: relative;'>
-                                $swap_usage
-                          <div class=\"neo-applet-sys-gauge-percent\">$swap_usage_val%</div><div>"._tr('SWAP')."</div>
-                          </div>
-                        </div>
-                        <div class='neo-divisor'></div>
-                        <div class=neo-applet-tline>
-                          <div class='neo-applet-titem'><strong>"._tr('CPU Info').":</strong></div>
-                          <div class='neo-applet-tdesc'>$cpu_info</div>
-                        </div>
-                        <div class=neo-applet-tline>
-                          <div class='neo-applet-titem'><strong>"._tr('Uptime').":</strong></div>
-                          <div class='neo-applet-tdesc'>$uptime</div>
-                        </div>
-                        <div class='neo-applet-tline'>
-                          <div class='neo-applet-titem'><strong>"._tr('CPU Speed').":</strong></div>
-                          <div class='neo-applet-tdesc'>$speed</div>
-                        </div>
-                        <div class='neo-applet-tline'>
-                          <div class='neo-applet-titem'><strong>"._tr('Memory usage').":</strong></div>
-                          <div class='neo-applet-tdesc'>RAM: $inf2 SWAP: $inf3</div>
-                        </div>";
-        return $html;
+/*
+		// Dataset definition
+		$DataSet = new pData;
+		$DataSet->AddPoint(array(1,2),"Serie1");
+		$DataSet->AddPoint(array(2,3),"Serie2");
+		$DataSet->AddPoint(array(3,4),"Serie3");
+		$DataSet->AddAllSeries();
+		$DataSet->SetAbsciseLabelSerie();
+		$DataSet->SetSerieName("January","Serie1");
+		$DataSet->SetSerieName("February","Serie2");
+		$DataSet->SetSerieName("March","Serie3");
+
+		// Initialise the graph
+		//$Test = new pChart(300,100);
+		$Test = new MyHorBar(400,200);
+		$Test->setFontProperties("Fonts/tahoma.ttf",8);
+		$Test->setGraphArea(5,5,350,250);
+		$Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
+		$Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
+		//$Test->drawGraphArea(255,255,255,TRUE);
+		//$Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2,TRUE);
+		$Test->drawHorScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2,TRUE);
+		$Test->drawHorGrid(10,TRUE,230,230,230,50);
+		$Test->drawGrid(4,TRUE,230,230,230,50);
+
+		// Draw the 0 line
+		$Test->setFontProperties("Fonts/tahoma.ttf",6);
+		$Test->drawTreshold(0,143,55,72,TRUE,TRUE);
+
+		// Draw the bar graph
+		//$Test->drawBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),TRUE);
+        // Draw the bar graph
+        $Test->drawHorBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),FALSE);
+		// Finish the graph
+		$Test->setFontProperties("Fonts/tahoma.ttf",8);
+		$Test->drawLegend(596,150,$DataSet->GetDataDescription(),255,255,255);
+		$Test->setFontProperties("Fonts/tahoma.ttf",10);
+		$Test->drawTitle(50,22,"Prueba 1",50,50,50,585);
+
+		$Test->Render($_SERVER['DOCUMENT_ROOT']."/libs/pChart/tmp/pruebaIMG.png");
+*/
+
+		$html ="<div style='height:165px; position:relative; text-align:center;'>
+				  <div style='width:155px; float:left; position: relative;'>
+					$cpu_usage
+					<div class=\"neo-applet-sys-gauge-percent\">$inf1%</div><div>"._tr('CPU')."</div>
+				  </div>
+				  <div style='width:154px; float:left; position: relative;'>
+					$mem_usage
+					<div class=\"neo-applet-sys-gauge-percent\">$mem_usage_val%</div><div>"._tr('RAM')."</div>
+				  </div>
+				  <div style='width:155px; float:right; position: relative;'>
+					$swap_usage
+				  <div class=\"neo-applet-sys-gauge-percent\">$swap_usage_val%</div><div>"._tr('SWAP')."</div>
+				  </div>
+				</div>
+				<div class='neo-divisor'></div>
+				<div class=neo-applet-tline>
+				  <div class='neo-applet-titem'><strong>"._tr('CPU Info').":</strong></div>
+				  <div class='neo-applet-tdesc'>$cpu_info</div>
+				</div>
+				<div class=neo-applet-tline>
+				  <div class='neo-applet-titem'><strong>"._tr('Uptime').":</strong></div>
+				  <div class='neo-applet-tdesc'>$uptime</div>
+				</div>
+				<div class='neo-applet-tline'>
+				  <div class='neo-applet-titem'><strong>"._tr('CPU Speed').":</strong></div>
+				  <div class='neo-applet-tdesc'>$speed</div>
+				</div>
+				<div class='neo-applet-tline'>
+				  <div class='neo-applet-titem'><strong>"._tr('Memory usage').":</strong></div>
+				  <div class='neo-applet-tdesc'>RAM: $inf2 SWAP: $inf3</div>
+				</div>";
+		return $html;
+
     }
 
     function getDataApplet_Faxes()
@@ -469,7 +520,7 @@ PLANTILLA_PROCESS_ROW;
 
     function getDataApplet_System()
     {
-        global $arrConf;
+	global $arrConf;
         $systemStatus=_tr("Error at read status system.");
 
         $pDB2 = $this->conectionAsteriskCDR();
@@ -478,22 +529,22 @@ PLANTILLA_PROCESS_ROW;
             $arrData     = $objUserInfo->getDataUserLogon($_SESSION["elastix_user"]);
 
             if(is_array($arrData) && count($arrData)>0){
-                if(isset($arrData['login']) && $arrData['login'] != "" && isset($arrData['domain']) && $arrData['domain'] != ""){
-                    $email     = "{$arrData['login']}@{$arrData['domain']}";
-                    if(file_exists("$arrConf[elastix_dbdir]/email.db")){
-                        $pDBemail = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/email.db");
-                        $passw     = isset($arrData['password'])?$arrData['password']:"";
-                        if($this->emailExists($email,$pDBemail) && $this->isPasswordCorrect($email,$passw,$pDBemail)){
-                            $systemStatus= $objUserInfo->getSystemStatus($email,$passw);
-                        }
-                        else
-                            $systemStatus = "$email "._tr("does not exist locally or password is incorrect");
-                    }
-                    else
-                        $systemStatus = _tr("The following database could not be found").": $arrConf[elastix_dbdir]/email.db";
-                }
-                else
-                    $systemStatus = _tr("You don't have a webmail account");
+		if(isset($arrData['login']) && $arrData['login'] != "" && isset($arrData['domain']) && $arrData['domain'] != ""){
+		    $email     = "{$arrData['login']}@{$arrData['domain']}";
+		    if(file_exists("$arrConf[elastix_dbdir]/email.db")){
+			$pDBemail = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/email.db");
+			$passw     = isset($arrData['password'])?$arrData['password']:"";
+			if($this->emailExists($email,$pDBemail) && $this->isPasswordCorrect($email,$passw,$pDBemail)){	    
+			    $systemStatus= $objUserInfo->getSystemStatus($email,$passw);
+			}
+			else
+			    $systemStatus = "$email "._tr("does not exist locally or password is incorrect");
+		    }
+		    else
+			$systemStatus = _tr("The following database could not be found").": $arrConf[elastix_dbdir]/email.db";
+		}
+		else
+		    $systemStatus = _tr("You don't have a webmail account");
             }
         }
         return $systemStatus;
@@ -534,31 +585,31 @@ PLANTILLA_PROCESS_ROW;
 
     function getDataApplet_Emails()
     {
-        global $arrConf;
+	global $arrConf;
         $mails =_tr("Error at read yours mails.");
         $pDB2 = $this->conectionAsteriskCDR();
-
+	
         if($pDB2){
             $objUserInfo = new paloSantoDashboard($pDB2);
             $arrData     = $objUserInfo->getDataUserLogon($_SESSION["elastix_user"]);
             if(is_array($arrData) && count($arrData)>0){
-                if(isset($arrData['login']) && $arrData['login'] != "" && isset($arrData['domain']) && $arrData['domain'] != ""){
-                    $email     = "{$arrData['login']}@{$arrData['domain']}";
-                    if(file_exists("$arrConf[elastix_dbdir]/email.db")){
-                          $pDBemail = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/email.db");
-                          $passw    = isset($arrData['password'])?$arrData['password']:"";
-                          if($this->emailExists($email,$pDBemail) && $this->isPasswordCorrect($email,$passw,$pDBemail)){
-                              $numRegs   = 8;
-                              $mails     = @$objUserInfo->getMails($email,$passw,$numRegs);
-                          }
-                          else
-                              $mails = "$email "._tr("does not exist locally or password is incorrect");
-                    }
-                    else
-                        $mails = _tr("The following database could not be found").": $arrConf[elastix_dbdir]/email.db";
-                }
-                else
-                    $mails = _tr("You don't have a webmail account");
+		if(isset($arrData['login']) && $arrData['login'] != "" && isset($arrData['domain']) && $arrData['domain'] != ""){
+		    $email     = "{$arrData['login']}@{$arrData['domain']}";
+		    if(file_exists("$arrConf[elastix_dbdir]/email.db")){
+			  $pDBemail = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/email.db");
+			  $passw    = isset($arrData['password'])?$arrData['password']:"";
+			  if($this->emailExists($email,$pDBemail) && $this->isPasswordCorrect($email,$passw,$pDBemail)){	      
+			      $numRegs   = 8;
+			      $mails     = @$objUserInfo->getMails($email,$passw,$numRegs);
+			  }
+			  else
+			      $mails = "$email "._tr("does not exist locally or password is incorrect");
+		    }
+		    else
+			$mails = _tr("The following database could not be found").": $arrConf[elastix_dbdir]/email.db";
+		}
+		else
+		    $mails = _tr("You don't have a webmail account");
             }
         }
         return $mails;
@@ -566,30 +617,30 @@ PLANTILLA_PROCESS_ROW;
 
     function emailExists($email,&$pDB)
     {
-        $query = "select count(*) from accountuser where username=?";
-        $result = $pDB->getFirstRowQuery($query,false,array($email));
-        if($result==FALSE){
+	$query = "select count(*) from accountuser where username=?";
+	$result = $pDB->getFirstRowQuery($query,false,array($email));
+	if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
         if($result[0] > 0)
-            return true;
-        else
-            return false;
+	    return true;
+	else
+	    return false;
     }
-
+  
     function isPasswordCorrect($email,$password,&$pDB)
     {
-        $query = "select password from accountuser where username=?";
-        $result = $pDB->getFirstRowQuery($query,true,array($email));
-        if($result===FALSE){
+	$query = "select password from accountuser where username=?";
+	$result = $pDB->getFirstRowQuery($query,true,array($email));
+	if($result===FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-        if($password == $result["password"])
-            return true;
-        else
-            return false;
+	if($password == $result["password"])
+	    return true;
+	else
+	    return false;
     }
 
     function getDataApplet_Voicemails()
@@ -646,6 +697,14 @@ PLANTILLA_PROCESS_ROW;
                );
    }
 
+    function getImage_CPU_Usage($value = null)
+    {
+		if(isset($value))
+			return $this->genericImage("ObtenerInfo_CPU_Usage", array('size' => $value), NULL, NULL);
+		else
+			return $this->genericImage("ObtenerInfo_CPU_Usage");
+    }
+
     function getImage_Disc_Usage($value)
     {
         return $this->genericImage("ObtenerInfo_Particion", array('percent' => $value), 140, NULL);
@@ -656,12 +715,28 @@ PLANTILLA_PROCESS_ROW;
         return $this->genericImage("CallsMemoryCPU");
     }
 
+    function getImage_MEM_Usage($value = null)
+    {
+		if(isset($value)){
+			return $this->genericImage("ObtenerInfo_MemUsage", array('size' => $value), null, null);
+		}else
+			return $this->genericImage("ObtenerInfo_MemUsage");
+    }
+
+    function getImage_Swap_Usage($value = null)
+    {
+		if(isset($value))
+			return $this->genericImage("ObtenerInfo_SwapUsage", array('size' => $value), null, null);
+		else
+			return $this->genericImage("ObtenerInfo_SwapUsage");
+    }
+
     function conectionAsteriskCDR()
     {
         $dsnAsteriskCDR = generarDSNSistema("asteriskuser","asteriskcdrdb");
         $pDB = new paloDB($dsnAsteriskCDR);
 
-        if(!empty($pDB->errMsg))
+        if(!empty($pDB->errMsg)) 
             return false;
         else
             return $pDB;

@@ -49,6 +49,26 @@ class paloSantoAgentsMonitoring {
         }
     }
 
+    /*HERE YOUR FUNCTIONS*/
+
+    function ObtainNumAgentsMonitoring($filter_field, $filter_value)
+    {
+        //Here your implementation
+        $where = "";
+        if(isset($filter_field) & $filter_field !="")
+            $where = "where $filter_field like '$filter_value%'";
+
+        $query   = "SELECT COUNT(*) FROM table $where";
+
+        $result=$this->_DB->getFirstRowQuery($query);
+
+        if($result==FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return 0;
+        }
+        return $result[0];
+    }
+
     function ObtainAgentsMonitoring($limit, $offset, $arrLang, $filter_field, $filter_value)
     {
 
@@ -209,8 +229,6 @@ class paloSantoAgentsMonitoring {
                 if (isset($calls_no_terminadas[$id_queue_agent])) {
                     $hora1 = explode(":",$data_calls["total_talk_time"]);
                     $hora2 = explode(":",$calls_no_terminadas[$id_queue_agent]["total_talk_time"]);
-                    if (count($hora1) <= 3) $hora1 = array(0, 0, 0);
-                    if (count($hora2) <= 3) $hora2 = array(0, 0, 0);
                     $sum_hora = date("H:i:s", mktime ($hora1[0]+$hora2[0],$hora1[1]+$hora2[1],$hora1[2]+$hora2[2],6,14,2005));
                     $data_calls["total_talk_time"] = $sum_hora;//." - ".$data_calls["total_talk_time"]." - ".$calls_no_terminadas[$data_calls["id_agent"]]["total_talk_time"];
                 }
@@ -224,11 +242,10 @@ class paloSantoAgentsMonitoring {
         // En este foreach se recorre el $result_audit, para hacer un merge con el arreglo calls y dejar como id del arreglo el id del agente. ESto es con el fin de unir toda la informaci� 
         if (is_array($result_audit)) {
             foreach($result_audit as $key=>$data_audit){
+
                 if (isset($audit_no_terminado[$data_audit["id_agent"]])) {
                     $arr_hora1 = explode(":",$audit_no_terminado[$data_audit["id_agent"]]["total_login_time"]);
-                    if ($data_audit["total_login_time"] != '')
-                        $arr_hora2 = explode(":",$data_audit["total_login_time"]);
-                    else $arr_hora2 = array(0, 0, 0);
+                    $arr_hora2 = explode(":",$data_audit["total_login_time"]);
                     if (is_array($arr_hora1) && count($arr_hora1)==3) {
                         $hora["hora"] = $arr_hora1[0] + $arr_hora2[0];
                         $hora["min"] = $arr_hora1[1] + $arr_hora2[1];
@@ -413,7 +430,7 @@ echo "</pre>";*/
                                     }
                                     // si el la hora de login (estatus2) 
 
-                                    if (isset($result_estatus["tiempo_ready"]) && $result_estatus["tiempo_ready"]<$result_estatus2["tiempo_ready_ini"]) {
+                                    if ($result_estatus["tiempo_ready"]!="" && $result_estatus["tiempo_ready"]<$result_estatus2["tiempo_ready_ini"]) {
                                         $estado["time_current_status"] = $result_estatus["tiempo_ready"];
                                     } else {
                                         $estado["time_current_status"] = $result_estatus2["tiempo_ready_ini"];

@@ -94,16 +94,6 @@ class Installer
         return true;
     }
 
-    function updateResourceMembership($oACL,$arrTmp, $arrGroup=array()){
-        $oACL->_DB->beginTransaction();
-        $bExito = $oACL->createResource($arrTmp['menuid'], $arrTmp['tag']);
-        if ($bExito){
-			$oACL->_DB->commit();
-        }else
-            $oACL->_DB->rollBack();
-        $this->_errMsg = $oACL->errMsg;
-        return $bExito;
-    }
 
 /*****************************************************************************************************/
 

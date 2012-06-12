@@ -60,9 +60,6 @@ function _moduleContent(&$smarty, $module_name)
 
     //conexion resource
     $pDB = new paloDB($arrConf['dsn_conn_database']);
-
- 
-
     $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
 // dos bases de datos setting.db and register.db
     //actions
@@ -76,12 +73,6 @@ function _moduleContent(&$smarty, $module_name)
 	case "getDataRegisterServer":
 	    $content = getDataRegistration($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL);
 	    break;
-        case "showAboutAs":
-            $content = showFormAboutAs($smarty, $module_name, $local_templates_dir, $arrConf);
-            break;
-        case "showRPMS_Version":
-            $content = showFormRPMS_Version($smarty, $module_name, $local_templates_dir, $arrConf);
-            break;
         default: // view_form
             $content = viewFormRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL);
             break;
@@ -89,46 +80,7 @@ function _moduleContent(&$smarty, $module_name)
     return $content;
 }
 
-function showFormAboutAs($smarty, $module_name, $local_templates_dir, $arrConf)
-{
-    $oForm = new paloForm($smarty,array());
-    
-    $smarty->assign("ABOUT_ELASTIX",  _tr('About Elastix')." ".$arrConf['elastix_version']);
-    $smarty->assign("ABOUT_ELASTIX2", _tr('About Elastix2'));
-    $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
-    $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
-
-    $jsonObject   = new PaloSantoJSON();
-
-    $response['html']  = $oForm->fetchForm("$local_templates_dir/_aboutas.tpl","", "");
-    $response['title'] = _tr('About Elastix')." ".$arrConf['elastix_version'];
-
-    if($arrConf['mainTheme']=="elastixwave" || $arrConf['mainTheme']=="elastixneo")
-        $response['title'] = _tr('About Elastix2');
-
-    $jsonObject->set_message($response);
-    return $jsonObject->createJSON();
-}
-
-function showFormRPMS_Version($smarty, $module_name, $local_templates_dir, $arrConf)
-{
-    $oForm = new paloForm($smarty,array());
-    
-    $smarty->assign("VersionDetails", _tr('VersionDetails'));
-    $smarty->assign("VersionPackage", _tr('VersionPackage'));
-    $smarty->assign("textMode", _tr('textMode'));
-    $smarty->assign("htmlMode", _tr('htmlMode'));
-
-    $jsonObject   = new PaloSantoJSON();
-
-    $response['html']  = $oForm->fetchForm("$local_templates_dir/_rpms_version.tpl","", "");
-    $response['title'] = _tr('VersionPackage');
-
-    $jsonObject->set_message($response);
-    return $jsonObject->createJSON();
-}
-
-function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang,&$pDBACL)
+function viewFormRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL)
 {
     $pRegister = new paloSantoRegistration($pDB);
     $pACL = new paloACL($pDBACL);
@@ -170,7 +122,7 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
 
 
 // primero se guarda de manera local y luego se llama al webservice donde envia los datos a almacenar y responde con un valor si se almaceno correctamente
-function saveRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang,&$pDBACL)
+function saveRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL)
 {
     $pRegister    = new paloSantoRegistration($pDB);
     $jsonObject   = new PaloSantoJSON();
@@ -214,68 +166,58 @@ function saveRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
     /*if($idPartner == "")
         return "fieldsNoComplete";*/
-    
-    // Verifico si la tabla register.db existe
-    $table_created = true;
-    if(!$pRegister->tableRegisterExists()){
-	if(!$pRegister->createTableRegister())
-	    $table_created = false;
-    }
-    if($table_created){
-	// primero se debe verificar si ya existe algo enla base, si existe entonces es una actualizacion si no es una insercion
-	$DATA = $pRegister->getDataRegister();
-	$pDB->beginTransaction();
-	$address = (isset($address) & $address !="")?$address:"";
-	$idPartner = (isset($idPartner) & $idPartner !="")?$idPartner:"";
-	if(isset($DATA) & $DATA != ""){ // actualizacion
-	    $data = array($contact_name, $email, $phone, $company, $address, $city, $country, $idPartner, "1");
-	    $status = $pRegister->updateDataRegister($data);
-	}else{ // insercion
-	    $data = array($contact_name, $email, $phone, $company, $address, $city, $country, $idPartner);
-	    $status = $pRegister->insertDataRegister($data);
-	}
 
-	if($status){
-		    $rsa_key = "";
-		    if(!is_file("/etc/elastix.key")){
-			    // saving to web service
-			    $rsa_key = file_get_contents('/etc/ssh/ssh_host_rsa_key.pub');
-		    }else{
-			    $rsa_key = file_get_contents("/etc/elastix.key");
-		    }
-		    $rsa_key = trim($rsa_key);
-		    $datas = array($contact_name, $email, $phone, $company, $address, $city, $country, $idPartner, $rsa_key);
-		    $band = $pRegister->sendDataWebService($datas);
-		    if($band==null){
-			    $pDB->rollBack();
-			    $msgResponse['status']  = "FALSE";
-			    $msgResponse['response'] = _tr("Impossible connect to Elastix Web services. Please check your internet connection.");
-		    }elseif($band==="FALSE"){
-			    $pDB->rollBack();
-			    $msgResponse['status']  = "FALSE";
-			    $msgResponse['response'] = _tr("Your information cannot be saved. Please try again.");
-		    }else{
-                $h = popen('/usr/bin/elastix-helper elastixkey', 'w');
-                fwrite($h, $band);
-                pclose($h);
-			    $pDB->commit();
-			    $msgResponse['status']  = "TRUE";
-			    $msgResponse['response'] = _tr("Your information has been saved.");
-		    }
-	}else{
-		    $msgResponse['status']  = "FALSE";
-		$msgResponse['response'] = _tr("There are some problem with the local database. Information cannot be saved in database.");
-	}
-    }else{
-	$msgResponse['status']  = "FALSE";
-	$msgResponse['response'] = _tr("The table register does not exist and could not be created");
+    // primero se debe verificar si ya existe algo enla base, si existe entonces es una actualizacion si no es una insercion
+    $DATA = $pRegister->getDataRegister();
+    $pDB->beginTransaction();
+    $address = (isset($address) & $address !="")?$address:"";
+    $idPartner = (isset($idPartner) & $idPartner !="")?$idPartner:"";
+    if(isset($DATA) & $DATA != ""){ // actualizacion
+        $data = array($contact_name, $email, $phone, $company, $address, $city, $country, $idPartner, "1");
+        $status = $pRegister->updateDataRegister($data);
+    }else{ // insercion
+        $data = array($contact_name, $email, $phone, $company, $address, $city, $country, $idPartner);
+        $status = $pRegister->insertDataRegister($data);
     }
-    $jsonObject->set_status($msgResponse['status']);
-    $jsonObject->set_message($msgResponse['response']);
-    return $jsonObject->createJSON();
+       // return $pRegister->errMsg;
+    if($status){
+		$rsa_key = "";
+		if(!is_file("/etc/elastix.key")){
+			// saving to web service
+			$rsa_key = file_get_contents('/etc/ssh/ssh_host_rsa_key.pub');
+		}else{
+			$rsa_key = file_get_contents("/etc/elastix.key");
+		}
+		$rsa_key = trim($rsa_key);
+		$datas = array($contact_name, $email, $phone, $company, $address, $city, $country, $idPartner, $rsa_key);
+		$band = $pRegister->sendDataWebService($datas);
+		if($band==null){
+			$pDB->rollBack();
+			$msgResponse['status']  = "FALSE";
+			$msgResponse['response'] = _tr("Impossible connect to Elastix Web services. Please check your internet connection.");
+		}elseif($band==="FALSE"){
+			$pDB->rollBack();
+			$msgResponse['status']  = "FALSE";
+			$msgResponse['response'] = _tr("Your information cannot be saved. Please try again.");
+		}else{
+			exec("sudo -u root chown asterisk.asterisk /etc");
+			file_put_contents('/etc/elastix.key', $band);
+			chmod("/etc/elastix.key",0600);
+			exec("sudo -u root chown root.root /etc");
+			$pDB->commit();
+			$msgResponse['status']  = "TRUE";
+			$msgResponse['response'] = _tr("Your information has been saved.");
+		}
+    }else{
+		$msgResponse['status']  = "FALSE";
+	    $msgResponse['response'] = _tr("There are some problem with the local database. Information cannot be saved in database.");
+    }
+	$jsonObject->set_status($msgResponse['status']);
+	$jsonObject->set_message($msgResponse['response']);
+	return $jsonObject->createJSON();
 }
 
-function getDataRegistration($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang,&$pDBACL)
+function getDataRegistration($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL)
 {
     $pRegister   = new paloSantoRegistration($pDB);
     $jsonObject   = new PaloSantoJSON();
@@ -651,10 +593,6 @@ function getAction()
         return "save";
     else if(getParameter("action")=="getDataRegisterServer")
         return "getDataRegisterServer";
-    else if(getParameter("action")=="showAboutAs")
-        return "showAboutAs";
-    else if(getParameter("action")=="showRPMS_Version")
-        return "showRPMS_Version";
     else
         return "report"; //cancel
 }

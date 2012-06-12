@@ -1,0 +1,121 @@
+.loading {
+    position: relative;
+    top: 10px;
+    left: 253px;
+}
+
+.linkText {
+    position: relative;
+    top: 10%;
+    left: 30%;
+}
+
+.redirect{
+    position: relative;
+    top: 10%;
+    left: 30%;
+}
+
+.text_alert {
+    color:#FF0000;
+    font-weight:bold;
+    font-size:12px;
+    cursor: pointer;
+}
+
+.text_downloading {
+    color:#FF7F00;
+    font-weight:bold;
+    font-size:12px;
+}
+
+.text_install {
+    color:#228B22;
+    font-weight:bold;
+    font-size:12px;
+}
+
+.text_starting {
+    color:#617298;
+    font-weight:bold;
+    font-size:12px;
+}
+.RpmImg{
+   padding: 0px 25px 0px 25px;
+}
+
+.title_package {
+    font-size: 17px;
+}
+
+.title_version {
+    font-size: 17px;
+}
+
+.contentStyle {
+    font-size: 13px;
+}
+
+.backgroundTable {
+/*    background-image: url(../../../images/fondo.png);
+    background-repeat: repeat-x;*/
+}
+
+.divTD {
+    padding-left: 0px;
+}
+
+/*Nuevos estilos agregado 10/5/2011 ecueva*/
+
+.table_navigation_row_up_addon{
+    background-color: #F6F6F6;
+    border-bottom-color: #AAAAAA;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    color: #335588;
+    font-family: verdana,arial,helvetica,sans-serif;
+    font-size: 9px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+}
+
+.table_navigation_row_down_addon{
+    background-color: #F6F6F6;
+    border-bottom-color: #AAAAAA;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-top-color: #AAAAAA;
+    border-top-style: solid;
+    border-top-width: 1px;
+    color: #335588;
+    font-family: verdana,arial,helvetica,sans-serif;
+    font-size: 9px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+}
+
+.updateAddon{
+	cursor: pointer;	
+}
+
+.table_dataAddonTitle{
+    border-bottom-color: #EEEEEE;
+    border-bottom-style: solid;
+    border-bottom-width: 8px;
+    border-top: 8px #EEEEEE solid;
+    color: #E35332;
+    font-family: verdana,arial,helvetica,sans-serif;
+    font-size: 11pt;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+    font-weight: bolder;
+    height: 45px;
+}
+
+/*Nuevos estilos agregado 10/5/2011 ecueva*/

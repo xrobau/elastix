@@ -92,9 +92,6 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $field_pattern = getParameter("filter_txt");
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
-    $oGrid->addNew("new",_tr("Define Port"));
-    $oGrid->deleteList("Are you sure you wish to delete the port(s).?","delete",_tr("Delete"));
-
     $totalPuertos = $pPuertos->ObtainNumPuertos($field_type, $field_pattern);
 
     $limit  = 20;
@@ -102,7 +99,6 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $oGrid->setTitle(_tr("Define Ports"));
-    $oGrid->setIcon("modules/$module_name/images/security_define_ports.png");
     $oGrid->pagingShow(true);
     $offset = $oGrid->calculateOffset();
     /*$url = array(
@@ -116,7 +112,8 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 
     $arrData = null;
     $arrResult = $pPuertos->ObtainPuertos($limit, $offset, $field_type, $field_pattern);
-    $button_eliminar = "";
+    $button_eliminar = "<input class=\"button\" type=\"submit\" name=\"delete\" value=\""._tr("Delete")."\" ".
+                       " onclick=\" return confirmSubmit('"._tr("Are you sure you wish to delete the port(s).")."?');\" >";
     $arrColumns = array($button_eliminar,_tr("Name"),_tr("Protocol"),_tr("Details"),_tr("Option"));
     $oGrid->setColumns($arrColumns);
     if( is_array($arrResult) && $total>0 ){
@@ -141,26 +138,14 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     //begin section filter
     $arrFormFilterPuertos = createFieldForm();
     $oFilterForm = new paloForm($smarty, $arrFormFilterPuertos);
+    $smarty->assign("New", _tr("Define Port"));
     $smarty->assign("SHOW", _tr("Show"));
-
-    $_POST["filter_type"]  = $field_type;
-    $_POST["filter_txt"] = $field_pattern;
-
-    if(is_null($field_type) || $field_type==""){
-        $nameFieldType = "";
-    }else{
-        $nameFieldType = $arrFormFilterPuertos["filter_type"]["INPUT_EXTRA_PARAM"][$field_type];
-    }
-
-    $oGrid->addFilterControl(_tr("Filter applied: ").$nameFieldType." = ".$field_pattern,$_POST, array("filter_type" => "name","filter_txt" => "x"));
 
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
 
     $oGrid->showFilter(trim($htmlFilter));
-    $contenidoModulo = $oGrid->fetchGrid();
-    if (strpos($contenidoModulo, '<form') === FALSE)
-        $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=$url>$contenidoModulo</form>";
+    $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=$url>".$oGrid->fetchGrid()."</form>";
     //end grid parameters
 
     return $contenidoModulo;

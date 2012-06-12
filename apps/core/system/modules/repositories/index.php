@@ -28,14 +28,13 @@
   $Id: repositories.php $ */
 
 include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoForm.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
     require_once "modules/$module_name/libs/PaloSantoRepositories.class.php";
-
+    
     $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $lang_file="modules/$module_name/lang/$lang.lang";
@@ -78,79 +77,59 @@ function listRepositories($smarty, $module_name, $local_templates_dir,$arrConf) 
     $option["main"]   = "";
     $option["others"] = "";
     $option["all"]    = "";
-
+    if(isset($typeRepository)){
+	$option[$typeRepository] = "selected";
+    }
+    else
+	$typeRepository = "main";
     $arrRepositorios = $oRepositories->getRepositorios($arrConf['ruta_repos'],$typeRepository,$arrConf["main_repos"]);
-    $limit  = 40;
-    $total  = count($arrRepositorios);
+    $limit  = 50;
+    $total  = count($arrRepositorios); 
     $oGrid  = new paloSantoGrid($smarty);
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-    $offset = $oGrid->calculateOffset();
-    $end    = $oGrid->getEnd();
+    $offset = $oGrid->getOffSet($limit,$total,(isset($_GET['nav']))?$_GET['nav']:NULL,(isset($_GET['start']))?$_GET['start']:NULL);
+    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
     $arrData = array();
     $version = $oRepositories->obtenerVersionDistro();
-    $arch = $oRepositories->obtenerArquitectura();
- //   print($arch);
     if (is_array($arrRepositorios)) {
         for($i=$offset;$i<$end;$i++){
             $activo = "";
             if($arrRepositorios[$i]['activo'])
                 $activo="checked='checked'";
              $arrData[] = array(
-                            "<input $activo name='repo-".$arrRepositorios[$i]['id']."' type='checkbox' id='repo-$i' />",$valor = str_replace(array("\$releasever","\$basearch"),array($version,$arch),$arrRepositorios[$i]['name']),);
+                            "<input $activo name='repo-".$arrRepositorios[$i]['id']."' type='checkbox' id='repo-$i' />",
+                            str_replace("\$releasever",$version,$arrRepositorios[$i]['name']),);
         }
     }
 
-    if(isset($typeRepository)){
-        $oGrid->setURL("?menu=$module_name&typeRepository=$typeRepository");
-        $_POST["typeRepository"]=$typeRepository;
-    }else{
-        $oGrid->setURL("?menu=$module_name");
-        $_POST["typeRepository"]="main";
-    }
-
     $arrGrid = array("title"    => $arrLang["Repositories"],
-        "icon"     => "modules/repositories/images/system_updates_repositories.png",
+        "url"      => array('menu' => $module_name),
+        "icon"     => "modules/repositories/images/list.png",
         "width"    => "99%",
         "start"    => ($total==0) ? 0 : $offset + 1,
         "end"      => $end,
         "total"    => $total,
         "columns"  => array(0 => array("name"      => $arrLang["Active"],
                                        "property1" => ""),
-                            1 => array("name"      => $arrLang["Name"],
+                            1 => array("name"      => $arrLang["Name"], 
                                        "property1" => "")));
 
-    $oGrid->customAction('submit_aceptar',_tr('Save/Update'));
-    $oGrid->addButtonAction("default",_tr('Default'),null,"defaultValues($total,'$version','$arch')");
-    $FilterForm = new paloForm($smarty,createFilter());
-
-    $arrOpt = array("main"=>_tr('Main'),"others"=>_tr('Others'),"all"=>_tr('All'));
-    if(isset($arrOpt[$typeRepository])){
-        $valorfiltro = $arrOpt[$typeRepository];
-    }else
-        $valorfiltro = _tr('Main');
-
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Repo")." = ".$valorfiltro, $_POST, array("typeRepository" => "main"),true);
-
-    $htmlFilter = $FilterForm->fetchForm("$local_templates_dir/new.tpl","",$_POST);
-    $oGrid->showFilter($htmlFilter);
-
+    $oGrid->showFilter( "
+      <table border='0' cellpadding='0' callspacing='0' width='100%' height='44'> 
+	   <tr class='letra12'>
+		<td>
+		      <input type='submit' name='submit_aceptar' value='{$arrLang['Save/Update']}' class='button' /> &nbsp;&nbsp;&nbsp;
+		      <input type='button' name='default' value='{$arrLang['Default']}' class='button' onclick='defaultValues($total)' />
+		</td>
+		<td width='200'>Repo:&nbsp;&nbsp;
+		    <select name='typeRepository' onchange='javascript:submit();'> 
+			  <option value='main' {$option['main']}>{$arrLang['Main']}</option>
+			  <option value='others' {$option['others']}>{$arrLang['Others']}</option>
+			  <option value='all' {$option['all']}>{$arrLang['All']}</option>
+		    </select>&nbsp; &nbsp;
+		 </td>
+	    </tr> 
+       </table>");
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
     return $contenidoModulo;
 }
-
-function createFilter(){
-    $arrOpt = array("main"=>_tr('Main'),"others"=>_tr('Others'),"all"=>_tr('All'));
-        $arrFields = array(
-            "typeRepository"   => array(      "LABEL"                  => _tr("Repo"),
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "SELECT",
-                                            "INPUT_EXTRA_PARAM"      => $arrOpt,
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => "",
-                                            "ONCHANGE"               => "javascript:submit()"),
-            );
-        return $arrFields;
-}
 ?>
-

@@ -74,8 +74,7 @@ function _moduleContent(&$smarty, $module_name)
 
     // Definición del formulario de nueva campaña
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("CHANGE", $arrLang["Save"]);
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
+    $smarty->assign("CHANGE", $arrLang["Change"]);
 
     $oThemes = new PaloSantoThemes($pDB); 
     $arr_themes = $oThemes->getThemes("$base_dir/themes/");
@@ -106,7 +105,6 @@ function changeTheme($pDB, $smarty, $module_name, $local_templates_dir, $formCam
     $oThemes = new PaloSantoThemes($pDB); 
     $tema_actual = $oThemes->getThemeActual(); 
     $arrTmp['themes']   = $tema_actual;
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
     $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Change Theme"],$arrTmp);
     return $contenidoModulo;
 }
@@ -143,7 +141,7 @@ function updateTheme($pDB, $smarty, $module_name, $local_templates_dir, $formCam
             $smarty->assign("mb_message", $oThemes->errMsg);
         } 
     }
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
+
     $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Change Theme"],$_POST);
     return $contenidoModulo;
 }

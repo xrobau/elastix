@@ -137,19 +137,11 @@
 </div>{* elastix-callcenter-seleccion-break *}
 <div id="elastix-callcenter-seleccion-transfer" title="{$TITLE_TRANSFER_DIALOG}">
     <form>
-        <div style="display: table; width: 100%">
-            <div style="display: table-row;">
-	        <input 
-	            name="transfer_extension"
-	            id="transfer_extension"
-	            class="ui-widget-content ui-corner-all" 
-	            style="width: 100%" />
-	        </div>
-	        <div align="center" id="transfer_type_radio" style="display: table-row; width: 100%">
-	            <input type="radio" id="transfer_type_blind" name="transfer_type" value="blind" checked="checked"/><label for="transfer_type_blind">{$LBL_TRANSFER_BLIND}</label>
-	            <input type="radio" id="transfer_type_attended" name="transfer_type" value="attended" /><label for="transfer_type_attended">{$LBL_TRANSFER_ATTENDED}</label>
-	        </div>
-        </div>
+        <input 
+            name="transfer_extension"
+            id="transfer_extension"
+            class="ui-widget-content ui-corner-all" 
+            style="width: 100%" />
     </form>
 </div>{* elastix-callcenter-seleccion-transfer *}
 <div id="elastix-callcenter-agendar-llamada" title="{$TITLE_SCHEDULE_CALL}">
@@ -233,10 +225,29 @@
 <script type="text/javascript">
 // Aplicar temas de jQueryUI a diversos elementos
 $(function() {
+    apply_ui_styles({
 {/literal}
-    apply_ui_styles({$APPLY_UI_STYLES});
-    initialize_client_state({$INITIAL_CLIENT_STATE});
+        break_commit:       "{$BTN_BREAK_COMMIT}",
+        break_dismiss:      "{$BTN_BREAK_DISMISS}",
+        transfer_commit:    "{$BTN_TRANSFER_COMMIT}",
+        transfer_dismiss:   "{$BTN_TRANSFER_DISMISS}",
+        schedule_commit:    "{$BTN_SCHEDULE_COMMIT}",
+        schedule_dismiss:   "{$BTN_SCHEDULE_DISMISS}",
+        schedule_call_error_msg_missing_date: "{$MSG_SCHEDULE_CALL_ERROR_MISSING_DATE}",
+        no_call:        {if $INACTIVO_COLGAR_LLAMADA}true{else}false{/if},
+        can_confirm_contact: {if $PUEDE_CONFIRMAR_CONTACTO}true{else}false{/if}        
 {literal}
+    });
+    initialize_client_state(
+{/literal}
+        {if $STATE_ONHOLD}true{else}false{/if},
+        {if $STATE_BREAK_ID}{$STATE_BREAK_ID}{else}null{/if},
+        {if $CALLINFO_CALLTYPE != ''}"{$CALLINFO_CALLTYPE}"{else}null{/if},
+        {if $STATE_CAMPAIGN_ID}{$STATE_CAMPAIGN_ID}{else}null{/if},
+        {if $STATE_CALL_ID}{$STATE_CALL_ID}{else}null{/if},
+        {if $TIMER_SECONDS}{$TIMER_SECONDS}{else}null{/if}
+{literal}
+    );
 });
 </script>
 {/literal}

@@ -29,7 +29,7 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Endpoint Configurator" => "Configurador de Endpoint",
-"Discover Endpoints in this Network" => "Descubrir Endpoints en esta Red",
+"Discover Endpoints in this Network" => "Descubrir Endpoints en esta Network",
 "Display Name" => "Ver Nombre",
 "MAC Adress" => "Direccion MAC",
 "Phone Type" => "Modelo",

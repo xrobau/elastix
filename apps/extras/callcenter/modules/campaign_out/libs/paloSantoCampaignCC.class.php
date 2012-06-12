@@ -91,7 +91,7 @@ class paloSantoCampaignCC
                 $where =  $where." ".(is_null($id_campaign) ? '' : " and id = $id_campaign");
             }
             $this->errMsg = "";
-            $sPeticionSQL = "SELECT id, name, trunk, context, queue, datetime_init, datetime_end, daytime_init, daytime_end, script, retries, promedio, num_completadas, estatus, max_canales, id_url FROM campaign ".$where;
+            $sPeticionSQL = "SELECT id, name, trunk, context, queue, datetime_init, datetime_end, daytime_init, daytime_end, script, retries, promedio, num_completadas, estatus, max_canales FROM campaign ".$where;
             $sPeticionSQL .=" ORDER BY datetime_init, daytime_init";
             if (!is_null($limit)) {
                 $sPeticionSQL .= " LIMIT $limit OFFSET $offset";
@@ -125,8 +125,7 @@ class paloSantoCampaignCC
      * @return  int    El ID de la campaña recién creada, o NULL en caso de error
      */
     function createEmptyCampaign($sNombre, $iMaxCanales, $iRetries, $sTrunk, $sContext, $sQueue, 
-        $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $combo,
-        $id_url)
+        $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $combo)
     {
         $id_campaign = NULL;
         $bExito = FALSE;
@@ -192,8 +191,6 @@ class paloSantoCampaignCC
             $this->errMsg = _tr("Start Time must be greater than End Time");//'Hora de inicio debe ser anterior a la hora final';
    	} elseif ($error_cola==1){
 	     $this->errMsg =  _tr("Queue is being used, choose other one");//La cola ya está siendo usada, escoja otra
-        } elseif (!is_null($id_url) && !ereg('^[[:digit:]]+$', $id_url)) {
-            $this->errMsg = _tr('(internal) Invalid URL ID');
 	}
 	else {
                 // Verificar que el nombre de la campaña es único
@@ -217,7 +214,6 @@ class paloSantoCampaignCC
                             "daytime_init"       =>  paloDB::DBCAMPO($sHoraInicio),
                             "daytime_end"       =>  paloDB::DBCAMPO($sHoraFinal),
                             "script"       =>  paloDB::DBCAMPO($script),
-                            "id_url"        =>  (is_null($id_url) ? NULL : paloDB::DBCAMPO($id_url)),
                         )
                     );
 
@@ -303,32 +299,17 @@ class paloSantoCampaignCC
     {
         $sPeticionSQL = "SELECT id_form FROM campaign_form WHERE id_campaign = $id_campania";
         $tupla =& $this->_DB->fetchTable($sPeticionSQL);
-        if (!is_array($tupla)) {
-            $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            return null;
-        } else {
-            $salida = array();
-            foreach($tupla as $key => $value){
-                $salida[] = $value[0];
-            }
-            return $salida;
-        }
-    }
-
-    function getExternalUrls()
-    {
-    	$sPeticionSQL = 'SELECT id, description FROM campaign_external_url WHERE active = 1';
-        $tupla = $this->_DB->fetchTable($sPeticionSQL);
-        if (!is_array($tupla)) {
-            $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            return null;
-        } else {
-            $salida = array();
-            foreach($tupla as $key => $value){
-                $salida[$value[0]] = $value[1];
-            }
-            return $salida;
-        }
+                if (!is_array($tupla)) {
+                        $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
+                        return null;
+                } 
+                else {
+                    $salida = array();
+                    foreach($tupla as $key => $value){
+                        $salida[] = $value[0];
+                    }
+                    return $salida;
+                }
     }
 
 	/**
@@ -554,7 +535,7 @@ class paloSantoCampaignCC
      * @return  int    El ID de la campaña recién creada, o NULL en caso de error
      */
     function updateCampaign($idCampaign,$sNombre, $iMaxCanales, $iRetries, $sTrunk, $sContext, $sQueue, 
-        $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $id_url)
+        $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script)
     {
 
         $bExito = FALSE;
@@ -593,8 +574,6 @@ class paloSantoCampaignCC
             $this->errMsg = _tr("Invalid End Time");//'Hora de final no es válida (se espera hh:mm)';
         } elseif (strcmp($sFechaInicial,$sFechaFinal)==0 && strcmp ($sHoraInicio,$sHoraFinal)>=0) {
             $this->errMsg = _tr("Start Time must be greater than End Time");//'Hora de inicio debe ser anterior a la hora final';
-        } elseif (!is_null($id_url) && !ereg('^[[:digit:]]+$', $id_url)) {
-            $this->errMsg = _tr('(internal) Invalid URL ID');
         } else {
 
             // Construir y ejecutar la orden de update SQL
@@ -612,7 +591,6 @@ class paloSantoCampaignCC
                     "daytime_init"  =>  paloDB::DBCAMPO($sHoraInicio),
                     "daytime_end"   =>  paloDB::DBCAMPO($sHoraFinal),
                     "script"        =>  paloDB::DBCAMPO($script),
-                    "id_url"        =>  (is_null($id_url) ? NULL : paloDB::DBCAMPO($id_url)),
                 ),
                 " id=$idCampaign "
             );
@@ -798,9 +776,7 @@ SELECT
     a.number            AS number,
     c.start_time        AS fecha_hora,
     c.duration          AS duracion,
-    c.uniqueid          AS uniqueid,
-    c.failure_cause     AS failure_cause,
-    c.failure_cause_txt AS failure_cause_txt
+    c.uniqueid          AS uniqueid
 FROM calls c
 LEFT JOIN agent a 
     ON c.id_agent = a.id
@@ -827,8 +803,6 @@ SQL_LLAMADAS;
                     _tr('Date & Time'),
                     _tr('Duration'),
                     'Uniqueid',
-                    _tr('Failure Code'),
-                    _tr('Failure Cause'),
                 ),
                 'DATA'  =>  $datosTelefonos,
             ),

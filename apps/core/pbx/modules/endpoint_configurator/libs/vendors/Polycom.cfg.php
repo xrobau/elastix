@@ -15,7 +15,7 @@ function HeaderFilePolycom($MACfile)
     PrincipalFilePolycom nos retorna el contenido del archivo de configuracion de los EndPoint
     Polycom, para ello es necesario enviarle el DisplayName, Address y AuthPassword.
 */
-function PrincipalFilePolycom($DisplayName, $id_device, $secret, $arrParameters)
+function PrincipalFilePolycom($DisplayName, $id_device, $secret)
 {
     $content="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
 <reginfo>

@@ -73,11 +73,7 @@ class SOAP_Fax extends core_Fax
      */
     public function listFaxDocs($request)
     {
-        $return = parent::listFaxDocs(
-            empty($request->date) ? NULL : $request->date,
-            empty($request->direction) ? NULL : $request->direction,
-            empty($request->offset) ? NULL : $request->offset,
-            empty($request->limit) ? NULL : $request->limit);
+        $return = parent::listFaxDocs($request->date,$request->direction,$request->offset,$request->limit);
         if(!$return){
             $eMSG = parent::getError();
             $this->objSOAPServer->fault($eMSG['fc'],$eMSG['fm'],$eMSG['cn'],$eMSG['fd'],'fault');
@@ -95,7 +91,7 @@ class SOAP_Fax extends core_Fax
      */
     public function delFaxDoc($request)
     {
-        $return = parent::delFaxDoc(empty($request->id) ? NULL : $request->id);
+        $return = parent::delFaxDoc($request->id);
         if(!$return){
             $eMSG = parent::getError();
             $this->objSOAPServer->fault($eMSG['fc'],$eMSG['fm'],$eMSG['cn'],$eMSG['fd'],'fault');

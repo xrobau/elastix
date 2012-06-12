@@ -360,21 +360,43 @@ class core_Fax
         }
         $id = (int)$id;
 
-        // Borrar el registro y el documento de fax, dado su ID
+        /* No existe un método que borre la información de fax, dado su ID. Por
+         * lo tanto, se debe consultar el ID, averiguar el nombre de archivo,
+         * ASUMIR que el nombre de archivo no colisiona con algún otro nombre,
+         * y usar la función de borrado que toma como identificador el nombre
+         * de archivo. */ 
         $oFax = new paloFaxVisor();
-        $bExito = $oFax->deleteInfoFax($id);
-        if (!$bExito) {
+        $infoFax = $oFax->obtener_fax($id);
+        if (count($infoFax) == 0 && $infoFax->errMsg != '') {
+            $this->errMsg["fc"] = 'DBERROR';
             $this->errMsg["fm"] = 'Database operation failed';
+            $this->errMsg["fd"] = 'Unable to read fax information - '.$oFax->errMsg;
             $this->errMsg["cn"] = get_class($oFax);
-            if ($oFax->errMsg != '') {
-                $this->errMsg["fc"] = 'DBERROR';
-                $this->errMsg["fd"] = 'Unable to delete fax information - '.$oFax->errMsg;
-            } else {
-                $this->errMsg["fc"] = 'INTERNALERROR';
-                $this->errMsg["fd"] = 'Unable to delete fax document';
-            }
+            return false;
         }
-        return $bExito;
+        $sNombrePDF = $infoFax['pdf_file'];
+        $sRutaPDF = $infoFax['faxpath'];
+        $oFax->_db->conn->beginTransaction();
+        if ($oFax->deleteInfoFaxFromDB($sNombrePDF)) {
+            if (!$oFax->deleteInfoFaxFromPathFile($sRutaPDF)) {
+                $oFax->_db->conn->rollback();
+                $this->errMsg["fc"] = 'INTERNALERROR';
+                $this->errMsg["fm"] = 'Database operation failed';
+                $this->errMsg["fd"] = 'Unable to delete fax document';
+                $this->errMsg["cn"] = get_class($oFax);
+                return false;
+            } else {
+                $oFax->_db->conn->commit();
+            }
+        } else {
+            $oFax->_db->conn->rollback();
+            $this->errMsg["fc"] = 'DBERROR';
+            $this->errMsg["fm"] = 'Database operation failed';
+            $this->errMsg["fd"] = 'Unable to delete fax information - '.$oFax->errMsg;
+            $this->errMsg["cn"] = get_class($oFax);
+            return false;
+        }
+        return true;
     }
 
     /**

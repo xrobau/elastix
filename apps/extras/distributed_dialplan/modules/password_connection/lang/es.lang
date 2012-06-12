@@ -28,11 +28,11 @@
   $Id: es.lang,v 1.1 2010-12-09 02:12:32 Eduardo Cueva ecueva@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Password Connection" => "Key del Servidor",
+"Password Connection" => "Contraseña de Conexión",
 "Keyword" => "Clave",
 "Emails" => "Email",
 "Send" => "Enviar",
-"Get my Secret Connection" => "Generar una Clave",
+"Get my Secret Connection" => "Obtener clave de conexión",
 "Message" => "Mensaje",
 "Secret Connection" => "Conexión secreta",
 "Notification" => "Notificación",
@@ -44,12 +44,7 @@ $arrLangModule=array(
 "steps" => "Usted deberia copia la clave secreta y pegarla en (Información de Peers - Nueva Conexión)",
 "sucessful_send" => "Mensaje enviado correctamente",
 "Message cannot be sent. Try again" => "Mensaje no pudo ser enviado. Por favor intente de nuevo",
-"I send you my 'secret connection', now you can send the request to share the dial plan." => "Le envío la Clave de mi servidor Elastix necesaria para empezar a compartir mi plan de marcado. Use esta Clave cuando me envíe la solicitud de conexión.",
+"I send you my 'secret connection', now you can send the request to share the dial plan." => "Le envío la Clave de mi servidor Elastix necesaria para empezar a compartir el plan de marcado. Use esta Clave cuando me envíe la solicitud de conexión.",
 "Please first fill the form in <a href='?menu=general_information'>General Information</a>" => "Por favor primero llene el formulario en <a href='?menu=general_information'>Información General</a>",
-"Server Key"=>"Key del Servidor",
-"MESSAGE" => "MENSAJE",
-"This Key will be exclusively used for establishing connections with Remote Servers with the purpose of sharing the dialplan. Here you will be able to send this Key, via email, to the administrators of the Remote Servers you want to share your dialplan with." => "Este Key será utilizado exclusivamente para permitir establecer conexiones con Servidores Remotos con el objetivo de compartir el plan de marcado. Aquí podrá enviar vía email este Key a los administradores de los Servidores Remotos con los que quiere compartir su plan de marcado.",
-"NOTE:" => "NOTA:"
 );
-
 ?>

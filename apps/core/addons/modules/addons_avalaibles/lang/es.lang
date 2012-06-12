@@ -1,0 +1,103 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-15                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.1 2010-03-08 12:03:02 Bruno Macias bomv.27@gmail.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Availables" => "Addons",
+"Name" => "Nombre",
+"Version" => "Versión",
+"Release" => "Release",
+"Option" => "Opción",
+"Developed By" => "Desarrollado Por",
+"Install" => "Instalar",
+"Search" => "Buscar",
+"view_details" => "Ver Detalles",
+"error_downloading" => "Error en la descarga",
+"process_installing" => "Un addon está siendo instalado.",
+"process_removing" => "Un addon está siendo removido.",
+"process_updating" => "Un addon está siendo actualizado.",
+"addons_installed" => "Addon instalado",
+"error_start_install" => "Error al instalar el addon",
+"error_start_remove" => "Error al remover el addon",
+"error_start_update" => "Error al actualizar el addon",
+"installing" => "Instalando",
+"downloading" => "Empezando la instalación",
+"depsolving" => "Resolviendo Dependencias",
+"reporefresh" => "Descargando lista de paquetes",
+"Ok" => "OK",
+"Loading" => "Cargando",
+"Starting" => "Descargando...",
+"The system can not connect to the Web Service resource. Please check your Internet connection." => "El sistema no puede conectarse al Web Service. Por favor revise su conexión de Internet.",
+"There is a facility that awaits confirmation to install NAME, the user who initiated the installation was" => "El proceso de instalación de NAME está esperando confirmación. EL usuario que inició la instalación fue",
+"updating_repo" => "Actualizando REPO",
+"Status" => "Estado",
+"Installed" => "Instalado",
+"Buy" => "Comprar Licencia",
+"no_process" => "Ningún proceso de instalación está siendo ejecutado",
+"process_installed" => "process_installed",
+"Actual Progress" => "Progreso actual",
+"Total Progress" => "Progreso total",
+"Percent_loaded" => "Porcentaje cargado",
+"Uninstall" => "Desinstalar",
+"Removing" => "Removiendo...",
+"Installing" => "Instalando...",
+"Updates" => "Actualizaciones",
+"Downloaded" => "Descargado",
+"name" => "Nombre",
+"action" => "Acción",
+"of" => "de",
+"status" => "Estado",
+"downloaded" => "Descargado",
+"installed" => "Instalado",
+"removing" => "Removiendo",
+"removed" => "Removido",
+"waiting" => "Esperando",
+"process_installed" => "process_installed",
+"version" => "Versión",
+"release" => "Release",
+"developed_by" => "Desarrollado Por",
+"Show" => "Mostrar",
+"Options" => "Opciones",
+"Delete" => "Eliminar",
+"Update" => "Actualizar",
+"no_daemon" => "El daemon elastix-updaterd está desactivado",
+"All" => "Todos",
+"Installed" => "Instalado",
+"No Installed" => "No Instalado",
+"Please need to enable Centos repo, Elastix, Extra or others for the proper functioning, Detail of errors: " => "Por favor habilitar Centos, Elastix, Extra u otro repositorio para un correcto funcionamiento.<br /><b>Detailles de errores:</b> ",
+"Current version" => "Versión instalada",
+"Upgrade version" => "Versión disponible",
+"Upgrade" => "Actualizar",
+"Try it" => "Instalar Demo",
+"Error(Details)" => "Error(Detalles)",
+"ErrorToOperation" => "Lo sentimos, Existe una operación",
+"on" => "sobre",
+"Initializing Download" => "Inicializando Descarga",
+"Remaining Time:" => "Tiempo Restante:",
+);
+?> 

@@ -181,8 +181,7 @@ function _moduleContent(&$smarty, $module_name)
     
     
     $arrGrid = array("title"    => $arrLang["Trunk Bill Configuration"],
-                     "icon"     => "/modules/$module_name/images/reports_billing_setup.png",
-		     "width"    => "99%",
+                     "width"    => "99%",
                      "start"    => ($end==0) ? 0 : 1,
                      "end"      => $end,
                      "total"    => $end,
@@ -194,12 +193,11 @@ function _moduleContent(&$smarty, $module_name)
                     );
     
     $oGrid = new paloSantoGrid($smarty);
-    $oGrid->pagingShow(false);
-    $oGrid->customAction('submit_bill_trunks',_tr('Billing Capable'));
-    $trunk_config = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    if (strpos($trunk_config, '<form') === FALSE)
-        $trunk_config =
-            "<form style='margin-bottom:0;' method='POST' action='?menu=billing_setup'>$trunk_config</form>";
+    $oGrid->showFilter(
+        "<input type='submit' name='submit_bill_trunks' value='{$arrLang['Billing Capable']}' class='button'>");
+    $trunk_config=
+        "<form style='margin-bottom:0;' method='POST' action='?menu=billing_setup'>" .
+        $oGrid->fetchGrid($arrGrid, $arrData,$arrLang)."</form>";
    //mostrar los dos formularios
     $contenido.=$strReturn.$trunk_config;
     return $contenido;

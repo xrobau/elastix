@@ -48,7 +48,7 @@ function _moduleContent(&$smarty, $module_name) {
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    $smarty->assign("icon","modules/$module_name/images/system_shutdown.png");
+    $smarty->assign("icon","modules/$module_name/images/shutdown.png");
     $smarty->assign("title",$arrLang["Shutdown"]);
     if(isset($_POST['submit_accept'])) {
         $smarty->assign("SHUTDOWN_PROGRESS", $arrLang["Shutdown in progress"]);

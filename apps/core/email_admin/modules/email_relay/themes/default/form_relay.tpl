@@ -1,5 +1,9 @@
 <form method='POST' action="?menu=email_relay">
- <table width="99%" border="0" cellspacing="0" cellpadding="0" align="center"  class="tabForm">
+<table width="99%" border="0" cellspacing="0" cellpadding="0" align="center">
+<tr>
+  <td>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
+
   <tr>
     <td><i>{$EMAIL_RELAY_MSG}</i></td>
     <td>
@@ -13,4 +17,7 @@
     </td>
   </tr>
  </table>
+    </td>
+  </tr>
+</table>
 </form>

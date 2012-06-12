@@ -28,11 +28,11 @@
   $Id: en.lang,v 1.1 2008-12-20 04:12:14 Andres Flores aflores@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Company Information" => "Información de la Compañía",
+"General Information" => "Información General",
 "Organization" => "Organización",
 "Department" => "Departamento",
 "Locality" => "Ciudad",
-"State/Province" => "Estado/Provincia",
+"State" => "Provincia",
 "Country" => "País",
 "Email" => "Correo",
 "Phone" => "Teléfono",
@@ -42,7 +42,5 @@ $arrLangModule=array(
 "The following fields contain errors" => "Los siguientes campos contienen errores",
 "Information has been saved." => "Información has sido almacenada.",
 "Error. Please try again." => "Error. Por favor vuelva a intentar realizar la operación.",
-"MESSAGE" => "MENSAJE",
-"City" => "Ciudad",
 );
 ?>

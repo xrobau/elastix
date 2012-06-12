@@ -99,7 +99,7 @@ function uploadGeneralInformation($smarty, $module_name, $local_templates_dir, $
         }
         $strErrorMsg .= "";
         $smarty->assign("mb_message", $strErrorMsg);
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Company Information"), $_POST);
+        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["General Information"], $_POST);
 
    }else{
         $upload = $_POST['command'];
@@ -115,21 +115,17 @@ function uploadGeneralInformation($smarty, $module_name, $local_templates_dir, $
        if($upload == "1"){
             $result = $pElastixConnection->uploadInformation('general', $data);
             if(!$result){
-                $smarty->assign("mb_title", _tr('ERROR').":");
                 $smarty->assign("mb_message", _tr("Error. Please try again."));
 		return formGeneralInformation($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-            }else{
-                $smarty->assign("mb_title", _tr('MESSAGE').":");
-		        $smarty->assign("mb_message", _tr("Information has been saved."));}
+            }else
+		$smarty->assign("mb_message", _tr("Information has been saved."));
        }else{
             $result = $pElastixConnection->addInformation($data);
             if(!$result){
-                $smarty->assign("mb_title", _tr('ERROR').":");
-		        $smarty->assign("mb_message", _tr("Error. Please try again."));
+		$smarty->assign("mb_message", _tr("Error. Please try again."));
                 return formGeneralInformation($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-	        }else{
-                $smarty->assign("mb_title", _tr('MESSAGE').":");
-		        $smarty->assign("mb_message", _tr("Information has been saved."));}
+	    }else
+		$smarty->assign("mb_message", _tr("Information has been saved."));
        }
        $serverIp = $_SERVER['SERVER_ADDR'];
        $arrEths = $pNet->obtener_interfases_red_fisicas();
@@ -160,7 +156,7 @@ function formGeneralInformation($smarty, $module_name, $local_templates_dir, &$p
 
     $smarty->assign("UPLOAD", $arrLang["Save"]);
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "images/list.png");
+    $smarty->assign("IMG", "images/list.png");
     $command = "0";
     $arrData = array();//array que se envia al $htmlForm para que muestre siempre los datos
     $datos = array();//array que usuamos para definir si le enviamos $_POST o $arrData a $htmlForm
@@ -183,7 +179,7 @@ function formGeneralInformation($smarty, $module_name, $local_templates_dir, &$p
         $datos = $_POST;
 
     $smarty->assign("command", $command);
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Company Information"), $datos);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["General Information"], $datos);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $contenidoModulo;
@@ -208,14 +204,14 @@ function createFieldForm($arrLang)
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "locality"   => array(      "LABEL"                  => _tr("City"),
+            "locality"   => array(      "LABEL"                  => $arrLang["Locality"],
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "state"   => array(      "LABEL"                  => _tr("State/Province"),
+            "state"   => array(      "LABEL"                  => $arrLang["State"],
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",

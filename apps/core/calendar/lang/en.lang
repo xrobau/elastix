@@ -1,0 +1,157 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Bruno Macias                                           |
+  | Email: bmacias@palosanto.com                                         |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.7 2008/02/18 09:49:00 bmacias Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Country Code" => "Country Code",
+"Area Code"=> "Area Code",
+"January" => "January",
+"February" => "February",
+"March" => "March",
+"April" => "April",
+"May_" => "May",
+"June" => "June",
+"July" => "July",
+"August" => "August",
+"September" => "September",
+"October" => "October",
+"November" => "November",
+"December" => "December",
+"Jan" => "Jan",
+"Feb" => "Feb",
+"Mar" => "Mar",
+"Apr" => "Apr",
+"May" => "May",
+"Jun" => "Jun",
+"Jul" => "Jul",
+"Aug" => "Aug",
+"Sep" => "Sep",
+"Oct" => "Oct",
+"Nov" => "Nov",
+"Dec" => "Dec",
+"Monday" => "Monday",
+"Tuesday" => "Tuesday",
+"Wednesday" => "Wednesday",
+"Thursday" => "Thursday",
+"Friday" => "Friday",
+"Saturday" => "Saturday",
+"Sunday" => "Sunday",
+"Normal" => "Normal",
+"Monthly" => "Monthly",
+"Add Event" => "Add Event",
+"Back to Calendar" => "Back to Calendar",
+"View Date" => "View Date",
+"next month" => "next month",
+"next year" => "next year",
+"last year" => "last year",
+"last month" => "last month",
+"Title" => "Title",
+"Delete Selected" => "Delete Selected",
+"(No subject)" => "(No subject)",
+"Modify" => "Modify",
+"No events on this day" => "No events on this day",
+"year view not yet implemented" => "year view not yet implemented",
+"Software Error" => "Software Error",
+"Message:" => "Message:",
+"Backtrace" => "Backtrace",
+"AM" => "AM",
+"PM" => "PM",
+"Error in get_events_by_date" => "Error in get_events_by_date",
+"Error in get_event_by_id" => "Error in get_event_by_id",
+"item doesn't exist!" => "item doesn't exist!",
+"Html is not a valid Html class" => "Html is not a valid Html class",
+"Invalid class" => "Invalid class",
+"Error reading options" => "Error reading options",
+"Updated options" => "Updated options",
+"Error while removing an event" => "Error while removing an event",
+"Removed item" => "Removed item",
+"Could not remove item" => "Could not remove item",
+"No items selected" => "No items selected",
+"Adding event to calendar" => "Adding event to calendar",
+"Date of event" => "Date of event",
+"Date multiple day event ends" => "Date multiple day event ends",
+"Event type" => "Event type",
+"Subject" => "Subject",
+"chars max" => "chars max",
+"Asterisk Call Me" => "Asterisk Call Me",
+"Submit Event" => "Submit Event",
+"No day was given" => "No day was given",
+"No month was given" => "No month was given",
+"No year was given" => "No year was given",
+"No hour was given" => "No hour was given",
+"No minute was given" => "No minute was given",
+"No type of event was given" => "No type of event was given",
+"No end day was given" => "No end day was given",
+"No end month was given" => "No end month was given",
+"No end year was given" => "No end year was given",
+"Your subject was too long" => "Your subject was too long",
+"characters max" => "characters max",
+"The start of the event cannot be after the end of the event" => "The start of the event cannot be after the end of the event",
+"Error processing event" => "Error processing event",
+"No changes were made" => "No changes were made",
+"Date updated" => "Date updated",
+"Editing Event" => "Editing Event",
+"yes" => "yes",
+"no" => "no",
+"Ascending" => "Ascending",
+"Decending" => "Decending",
+"Invalid sort option" => "Invalid sort option",
+"Invalid order option" => "Invalid order option",
+"Encountered an error while searching" => "Encountered an error while searching",
+"No events matched your search criteria" => "No events matched your search criteria",
+"Search Results" => "Search Results",
+"Date Time" => "Date Time",
+"Phrase" => "Phrase",
+"From" => "From",
+"To" => "To",
+"Sort By" => "Sort By",
+"Order" => "Order",
+"Calendar" => "Calendar",
+"Invalid action" => "Invalid action",
+"That year is too far in the past" => "That year is too far in the past",
+"That year is too far in the future" => "That year is too far in the future",
+"To create new recordings click" => "To create new recordings click",
+"Here" => "Here",
+"No Recording was given, if no exists you must first create a new recording" => "No Recording was given, if no exists you must first create a new recording",
+"Call to" => "Call to",
+"To add phone number from address book click" => "To add phone number from address book click",
+"Weekly" => "Weekly",
+"Search" => "Search",
+"Time" => "Time",
+"Description" => "Description",
+"Date" => "Date",
+"Recordings" => "Recordings",
+"Error" => "Error",
+"Start Date" => "Start Date",
+"Validation Error" => "Validation Error",
+"Can not create called file" => "Can not create called file",
+);
+?>

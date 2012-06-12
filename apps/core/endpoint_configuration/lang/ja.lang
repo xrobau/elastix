@@ -1,0 +1,71 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+ Codificacion: UTF-8
+ +----------------------------------------------------------------------+
+ | Elastix version 1.0 |
+ | http://www.elastix.org |
+ +----------------------------------------------------------------------+
+ | Copyright (c) 2006 Palosanto Solutions S. A. |
+ +----------------------------------------------------------------------+
+ | Cdla. Nueva Kennedy Calle E 222 y 9na. Este |
+ | Telfs. 2283-268, 2294-440, 2284-356 |
+ | Guayaquil - Ecuador |
+ | http://www.palosanto.com |
+ +----------------------------------------------------------------------+
+ | The contents of this file are subject to the General Public License |
+ | (GPL) Version 2 (the "License"); you may not use this file except in |
+ | compliance with the License. You may obtain a copy of the License at |
+ | http://www.opensource.org/licenses/gpl-license.php |
+ | |
+ | Software distributed under the License is distributed on an "AS IS" |
+ | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See |
+ | the License for the specific language governing rights and |
+ | limitations under the License. |
+ +----------------------------------------------------------------------+
+ | The Original Code is: Elastix Open Source. |
+ | The Initial Developer of the Original Code is PaloSanto Solutions |
+ | |
+ | Translate bye: Tomoaki Tanaka  |
+ | ganymean@gmail.com |
+ +----------------------------------------------------------------------+
+ $Id: ja.lang,v 1.6 2008/05/18 20:00:00 ganymean Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Endpoint Configurator" => "電話機設定",
+"Discover Endpoints in this Network" => "電話機スキャン",
+"Display Name" => "表示名",
+"MAC Adress" => "MACアドレス",
+"Phone Type" => "電話機種別",
+"IP Adress" => "IPアドレス",
+"Vendor" => "ベンダー",
+"User Extension" => "内線番号",
+"Set" => "設定",
+"Unset" => "解除",
+"Are you sure you wish to unset endpoint(s)?" => "電話機設定を本当に解除しますか？",
+"Are you sure you wish to set endpoint(s)?" => "電話機設定を本当に設定しますか？",
+"Configured without incident." => "電話機設定が完了しました",
+"Not Set" => "設定しない",
+"Unable write the file" => "ファイル書込ができません",
+"Users" => "利用ユーザ",
+"User Name in Endpoint is" => "電話機ユーザ：",
+"And secrets no equals in FreePBX and Endpoint" => "FreePBXと電話機のパスワードが一致していません",
+"Don't exist in FreePBX extension" => "FreePBX内線一覧に存在しません",
+"Don't exist in Endpoint extension" => "電話機内線一覧に存在しません",
+"UPDATE" => "更新",
+"Unable delete the file" => "ファイル削除ができません",
+"Unselected" => "未選択",
+"No Models" => "電話機なし",
+"No Extensions" => "内線なし",
+"Invalid Format in Parameter" => "設定内容に間違いがあります",
+"It can take several minutes, because your ip address has some devices, " => "It can take several minutes, because your ip address has some devices, ",
+"WARNING" => "WARNING",
+"Status" => "状態",
+"ERROR" => "エラー",
+"Current Extension" => "Current Extension",
+"Not Registered" => "Not Registered",
+"MESSAGE" => "MESSAGE",
+"The Extension(s) parameters have been saved. Each checked phone will be configured with the new parameters once it has finished rebooting" => "The Extension(s) parameters have been saved. Each checked phone will be configured with the new parameters once it has finished rebooting",
+"Select a model" => "Select a model",
+"Not Applicable" => "Not Applicable"
+);
+?>

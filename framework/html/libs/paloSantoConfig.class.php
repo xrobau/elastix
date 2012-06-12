@@ -436,6 +436,7 @@ class paloConfig
 	private function privado_set_valor(&$lista, $clave, $valor, $saltar = 0)
 	{
 	    $posicion = $this->privado_indice_clave($lista, $clave, $saltar);
+
 		if (is_null($posicion)) {
 			$tupla["clave"] = $clave;
 			$tupla["valor"] = $valor;

@@ -37,10 +37,6 @@ $arrConf['elastix_dsn'] = array(
                             );
 $arrConf['basePath'] = '/var/www/html';
 $arrConf['theme'] = 'default'; //theme personal para los modulos esencialmente
-
-// Verifico si las bases del framework están, debido a la migración de dichas bases como archivos .db a archivos .sql
-checkFrameworkDatabases($arrConf['elastix_dbdir']);
-
 $arrConf['mainTheme'] = load_theme($arrConf['basePath']."/"); //theme para la parte plantilla principal del elastix (se usa para la inclusion de los css)
 $arrConf['elastix_version'] = load_version_elastix($arrConf['basePath']."/"); //la version y le release  del sistema elastix
 $arrConf['defaultMenu'] = 'config';

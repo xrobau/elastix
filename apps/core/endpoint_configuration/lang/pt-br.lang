@@ -1,0 +1,72 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  |                                                                      |
+  | Translate bye: Erwan DESVERGNES - SDCI                               |
+  | erwan.desvergnes@SDCI.fr                                             |
+  |                                                                      |                                               |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: br.lang,v 1.6 2007/09/05 00:36:42 afigueroa Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Endpoint Configurator" => "Configuração de Endpoint",
+"Discover Endpoints in this Network" => "Discover Endpoints in this Network",
+"Display Name" => "Nome de Exibição",
+"MAC Adress" => "Endereço MAC",
+"Phone Type" => "Model",
+"IP Adress" => "Endereço IP",
+"Vendor" => "Fabricante",
+"User Extension" => "Ramal do Usuário",
+"Set" => "Definido",
+"Unset" => "Não definido",
+"Are you sure you wish to unset endpoint(s)?" => "Are you sure you wish to unset endpoint(s)?",
+"Are you sure you wish to set endpoint(s)?" => "Are you sure you wish to set endpoint(s)?",
+"Configured without incident." => "Configurado sem apresentar problemas.",
+"Not Set" => "Não definido",
+"Unable write the file" => "Não foi possível escrever o arquivo",
+"Users" => "Usuários",
+"User Name in Endpoint is" => "Nome do usuário nesse Endpoint é",
+"And secrets no equals in FreePBX and Endpoint" => "A as senhas não são iguais no FreePBX e no Endpoint",
+"Don't exist in FreePBX extension" => "Não existe no FreePBX",
+"Don't exist in Endpoint extension" => "Não existe no Endpoint",
+"UPDATE" => "Atualizar",
+"Unable delete the file" => "Não foi possível apagar o arquivo",
+"Unselected" => "Não selecionado",
+"No Models" => "Sem modelos",
+"No Extensions" => "Sem extensões",
+"Invalid Format in Parameter" => "Formato inválido no parâmetro",
+"It can take several minutes, because your ip address has some devices, " => "It can take several minutes, because your ip address has some devices, ",
+"WARNING" => "WARNING",
+"Status" => "Status",
+"ERROR" => "ERRO",
+"Current Extension" => "Current Extension",
+"Not Registered" => "Not Registered",
+"MESSAGE" => "MESSAGE",
+"The Extension(s) parameters have been saved. Each checked phone will be configured with the new parameters once it has finished rebooting" => "The Extension(s) parameters have been saved. Each checked phone will be configured with the new parameters once it has finished rebooting",
+"Select a model" => "Select a model",
+"Not Applicable" => "Not Applicable"
+);
+?>

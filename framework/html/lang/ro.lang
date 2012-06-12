@@ -97,7 +97,6 @@ $arrLang=array(
 "Bad Format"=>"Bad Format",
 "No option was selected"=>"No option was selected",
 "Octets out of range"=>"Octets out of range",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 /*version 0.8*/
@@ -136,8 +135,6 @@ $arrLang=array(
 "IM" => "IM",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "Serviciul Openfire nu este activ. Pentru activare va rog ",
-"Webmin" => "Webmin",
-"The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
 
 /*vTigerCRM*/
 "vTigerCRM" => "vTigerCRM",
@@ -153,8 +150,6 @@ $arrLang=array(
 
 /* Start About Elastix */
 "About Elastix"=>"Despre Elastix",
-"About Elastix2"=>"About us",
-"HELP"=>"Help",
 "About Elastix Content"=>"Elastix a fost creat cu premizele de a deveni un sistem stabil, usor de folosit, bazat pe web, pentru managementul comunicatiilor de voce pe suport IP. Aceasta implementare open source inceputa in Ecuador a devenit o solutie aleasa pentru voip in intreaga lume.",
 "About Elastix Closed"=>"Inchide",
 /* End About Elastix */
@@ -177,21 +172,6 @@ $arrLang=array(
 "Title" => "Title",
 "Search" => "Search",
 "Show"   => "Show",
-'md_message_title' => 'Dismiss',
 "ERROR" => "Error",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

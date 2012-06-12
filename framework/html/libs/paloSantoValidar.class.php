@@ -31,7 +31,6 @@ define("PALOVALIDAR_MSG_ERROR_1",$arrLang["Empty field"]);
 define("PALOVALIDAR_MSG_ERROR_2",$arrLang["Bad Format"]);
 define("PALOVALIDAR_MSG_ERROR_3",$arrLang["No option was selected"]);
 define("PALOVALIDAR_MSG_ERROR_4",$arrLang["Octets out of range"]);
-define("PALOVALIDAR_MSG_ERROR_5",$arrLang["Undefined validation type"]);
 
 class PaloValidar 
 {
@@ -64,8 +63,7 @@ class PaloValidar
                     $return = true;
                 }
                 break;
-            case "text": 
-            case "":
+            case "text":
                 if($this->estaVacio($variable)) {
                     if($nombre_variable!="just_test") {
                         $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_1;
@@ -307,7 +305,6 @@ class PaloValidar
                 }
                 break;
             default:
-                $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_5;
         }
         return $return;
     }

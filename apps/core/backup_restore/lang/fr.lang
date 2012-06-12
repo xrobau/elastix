@@ -1,0 +1,100 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2008 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com 						                     |
+  |                                                                      |
+  | Translated by: Erwan DESVERGNES - SDCI                               |
+  | erwan.desvergnes@SDCI.fr                                             |
+  |   Revision 1.0-17 by Gregory BOUZINAC - GMixon                       | 
+  | greg@gmixon.com                                                      |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang,v 1.8 2008/05/20 00:36:42 bmacias Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Are you sure you wish to delete backup (s)?" => "Etes vous sûr de vouloir effacer la(les) sauvegarde (s)?",
+"Database" => "Base de données",
+"PDF" => "PDF",
+"Endpoint" => "Terminal",
+"Asterisk" => "Asterisk",
+"All options (Fax)" => "Toutes les options (Fax)",
+"All options (Email)" => "Toutes les options (Email)",
+"All options (Endpoint)" => "Toutes les options (Terminal)",
+"All options (Asterisk)" => "Toutes les options (Asterisk)",
+"DAHDI Configuration" => "Configuration DAHDI",
+"Others" => "Autres",
+"All options (Others)" => "Toutes les options (Autres)",
+"SugarCRM Database" => "Base de données SugarCRM",
+"VtigerCRM Database" => "Base de données VtigerCRM",
+"A2billing Database" => "Base de données A2billing",
+"Mysql Database" => "Base de données Mysql",
+"Menus and Permissions" => "Menus et Permissions",
+"This process could take several minutes" => "Cette action peut prendre quelques minutes",
+"Mailbox" => "Boite Email",
+"(Heavy Content)" => "(Contenu lourd)",
+"Upload" => "Envoyer",
+"File Upload" => "Fichier à envoyer",
+"The backup file would have a tar extension" => "Le fichier de sauvegarde doit avoir une extension .tar .",
+"Error copying the file" => "Erreur de copie de fichier",
+"The file was copied correctly" => "Le fichier a été copié correctement",
+"Backup" => "Faire une sauvegarde...",
+"Process" => "Exécuter",
+"Restore" => "Restauration",
+"Elastix Database" => "Base de données Elastix",
+"Sounds" => "Sons",
+"Configuration Files" => "Fichiers de Configuration",
+"Monitors" => "Surveillance",
+"tFTP" => "tFTP",
+"Email Acccounts" => "Comptes Email",
+"Choose an option to backup" => "Choisissez une option de sauvegarde",
+"Could not generate backup file" => "Impossible de créer le fichier de sauvegarde",
+"Backup Complete!" => "Sauvegarde Terminée !",
+"Choose an option to restore" => "Choisissez une option de restauration",
+"Backup file path can't be empty" => "Le chemin du fichier de sauvegarde ne peut pas être vide",
+"File doesn't exist" => "Fichier inexistant",
+"Restore Complete!" => "Restauration Terminée !",
+"Backup File Location" => "Emplacement fichier de sauvegarde",
+"Select All options" => "Sélectionner toutes les options.",
+"Backup/Restore" => "Sauvegarde/Restauration",
+"Backup List" => "Liste Sauvegardes",
+"Name Backup" => "Nom Sauvegarde",
+"Error when deleting backup file" => "Erreur lors de l'effacement du fichier de sauvegarde",
+"There are not backup file selected" => "Il n'y a aucun fichier de sauvegarde sélectionné",
+"Action" => "Action",
+"Folder backup doesn't exist" => "Dossier de sauvegarde inexistant",
+"Flash Operator Panel Config Files" => "Fichiers de configuration FOP",
+"Date" => "Date",
+"Voicemails" => "Messagerie vocale",
+"Fax" => "Fax",
+"Email" => "Email",
+"Dahdi Configuration" => "Dahdi Configuration",
+"Cancel" => "Annuler",
+"Select all in this section" => "Sélectionner tout",
+"MOH" => "Music d'attente",
+"Others new" => "Autres Suite",
+"Calendar  Database" => "Base de données Calandrier",
+"Address Book Database" => "Base de données Carnet d'adresses",
+"Conference  Database" => "Base de données Conference",
+);
+?>

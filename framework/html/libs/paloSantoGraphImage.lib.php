@@ -163,7 +163,7 @@ if( sizeof($result) != 0 )
                             }
                         }
                     }
-                    else if( $G_TYPE == 'plot3d' || $G_TYPE == 'plot3d2' )
+                    else if( $G_TYPE == 'plot3d' )
                     {
                         if( $key == 'VALUES' )
                         {
@@ -179,7 +179,7 @@ if( sizeof($result) != 0 )
                             }
                         }
                     }
-                    else if( $G_TYPE == 'bar' || $G_TYPE == 'gauge')
+                    else if( $G_TYPE == 'bar' )
                     {
                         if( $key == 'VALUES' )
                             foreach( $values as $x => $y )
@@ -286,83 +286,6 @@ if( sizeof($G_YDATAS) >= 1 )
 
         $graph->Stroke();
     }
-	else if( $G_TYPE == 'plot3d2' )
-	{
-        if (!function_exists('displayGraph_draw_pie3d')) {
-            function displayGraph_draw_pie3d($canvasx, $ydata, $arrcolor) {
-                $canvasy = $canvasx;
-                $escala = $canvasx / 320.0;
-                $iAnchoPastel = 256 * $escala; $iAltoPastel = 155 * $escala;
-                $iPosCentroX = 141 * $escala; $iPosCentroY = 91 * $escala;
-
-                $thumb = imagecreatetruecolor($canvasx * 284/320, $canvasy * 250/320);
-                $transparent = imagecolorallocatealpha($thumb, 200, 200, 200, 127);
-                imagefill($thumb, 0, 0, $transparent);
-
-                // Asignar colores de imagen
-                $imgcolor = array();
-                foreach ($arrcolor as $i => $sHtmlColor) {
-                	$r = $g = $b = 0;
-                    sscanf($sHtmlColor, "#%02x%02x%02x", $r, $g, $b);
-                    $imgcolor[$i] = imagecolorallocate($thumb, $r, $g, $b);
-                }
-
-                $colorTexto = imagecolorallocate($thumb, 0, 0, 0);
-
-                // Mostrar el gráfico de pastel
-                if (!function_exists('displayGraph_pie')) {
-                    function displayGraph_pie($thumb, $x, $y, $w, $h, $ydata, $G_ARR_COLOR, $colorTexto)
-                    {
-                        $iTotal = array_sum($ydata);
-                        $iFraccion = 0;
-                        $etiquetas = array();
-                        for ($i = 0; $i < count($ydata); $i++) {
-                            if ($ydata[$i] >= $iTotal) {
-                                imagefilledellipse($thumb, $x, $y, $w, $h,
-                                    $G_ARR_COLOR[$i]);
-                            } else {
-                                $degInicio = 360 - 45 - (int)(360.0 * ($iFraccion + $ydata[$i]) / $iTotal);
-                                $degFinal = 360 - 45 - (int)(360.0 * $iFraccion / $iTotal);
-                                imagefilledarc($thumb, $x, $y, $w, $h,
-                                    $degInicio, $degFinal,
-                                    $G_ARR_COLOR[$i],
-                                    IMG_ARC_PIE);
-                            }
-                            $iFraccion += $ydata[$i];
-
-                            $degMitad = ($degInicio + $degFinal) / 2;
-                            $iPosTextoX = $x + 0.5 * ($w / 2.0) * cos(deg2rad($degMitad));
-                            $iPosTextoY = $y + 0.5 * ($h / 2.0) * sin(deg2rad($degMitad));
-                            $etiquetas[] = array($iPosTextoX, $iPosTextoY, sprintf('%.1f %%', 100.0 * $ydata[$i] / $iTotal));
-                        }
-/*
-                        if (!is_null($colorTexto)) {
-                            for ($i = 0; $i < count($ydata); $i++)
-                                imagestring($thumb, 5, $etiquetas[$i][0], $etiquetas[$i][1], $etiquetas[$i][2], $colorTexto);
-                        }
-*/                        
-                    }
-                }
-                for ($i = (int)(60  * $escala); $i > 0; $i--) {
-                    displayGraph_pie($thumb, $iPosCentroX, $iPosCentroY + $i,
-                        $iAnchoPastel, $iAltoPastel, $ydata, $imgcolor, NULL);
-                }
-                displayGraph_pie($thumb, $iPosCentroX, $iPosCentroY,
-                    $iAnchoPastel, $iAltoPastel, $ydata, $imgcolor, $colorTexto);
-
-                imagealphablending($thumb, true);
-                imagesavealpha($thumb, true);
-
-                $source2 = imagecreatefrompng("images/pie_alpha.png");
-                imagealphablending($source2, true);
-                imagecopyresampled($thumb, $source2, 0, 0, 0, 0, 290 * $escala, 294 * $escala, 290, 294);
-
-                header("Content-Type: image/png");
-                imagepng($thumb);
-            }
-        }
-        displayGraph_draw_pie3d($G_SIZE[0], $G_YDATAS[0], $G_ARR_COLOR);
-	}
     else if( $G_TYPE == 'barplot' )
     {
         $graph = new Graph($G_SIZE[0], $G_SIZE[1], "auto");
@@ -479,59 +402,6 @@ if( sizeof($G_YDATAS) >= 1 )
             $g->img->Line($coor_x, $coor_y+$i+1, $coor_x+$ancho-$valor-1, $coor_y+$i+1);
         }
         $g->Stroke();
-    }
-    else if ($G_TYPE == 'gauge')
-    {
-    	if (!function_exists('displayGraph_draw_gauge')) {
-    		function displayGraph_draw_gauge($canvasx, $percent) {
-                $escala = $canvasx / 320.0;
-                $thumb = imagecreatetruecolor($canvasx * 284/320, $canvasx * 284/320);
-            
-                if ($percent > 100) $percent = 100.0;
-                if ($percent < 0) $percent = 0.0;
-                $angle = -135.0 + 270 * $percent / 100.0;   
-            
-                // COLORES
-                $blanco = imagecolorallocate($thumb,255,255,255);
-                $dred = imagecolorallocate($thumb,180,0,0);
-                $lred = imagecolorallocate($thumb,100,0,0);
-            
-                $transparent = imagecolorallocatealpha($thumb, 200, 200, 200, 127);
-                imagefill($thumb, 0, 0, $transparent);
-            
-                imagealphablending($thumb, true);
-                imagesavealpha($thumb, true);  
-            
-                $source = imagecreatefrompng("images/gauge_base.png");
-                imagealphablending($source, true);
-                imagecopyresampled($thumb, $source, 0, 0, 0, 0, 285 * $escala, 285 * $escala, 285, 285);
-            
-                $radius = 100 * $escala;
-                $radius_min = 12 * $escala;
-                $centrox = 142 * $escala; $centroy = 141 * $escala;
-                $x1 = $centrox + sin(deg2rad($angle)) * $radius; // x coord farest
-                $x2 = $centrox + sin(deg2rad($angle-90)) * $radius_min;
-                $x3 = $centrox + sin(deg2rad($angle+90)) * $radius_min;
-            
-                $y1 = $centroy - cos(deg2rad($angle)) * $radius;
-                $y2 = $centroy - cos(deg2rad($angle-90)) * $radius_min;
-                $y3 = $centroy - cos(deg2rad($angle+90)) * $radius_min;
-            
-                $arrTriangle1 = array($centrox, $centroy, $x1, $y1, $x2, $y2);
-                $arrTriangle2 = array($centrox, $centroy, $x1, $y1, $x3, $y3);
-            
-                imagefilledpolygon($thumb, $arrTriangle1, 3, $lred);
-                imagefilledpolygon($thumb, $arrTriangle2, 3, $dred);
-            
-                $source2 = imagecreatefrompng("images/gauge_center.png");
-                imagealphablending($source2, true);
-                imagecopyresampled($thumb, $source2, 121 * $escala, 120 * $escala, 0, 0, 44 * $escala, 44 * $escala, 44, 44);
-
-                header("Content-Type: image/png");
-                imagepng($thumb);
-    		}
-    	}
-        displayGraph_draw_gauge($G_SIZE[0], $G_YDATAS[0] * 100.0);
     }
     else if( $G_TYPE == 'bar2' )
     {

@@ -74,8 +74,7 @@ function _moduleContent(&$smarty, $module_name)
 
     // Definición del formulario de nueva campaña
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("CHANGE", $arrLang["Save"]);
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
+    $smarty->assign("CHANGE", $arrLang["Change"]);
 
     $oThemes = new PaloSantoThemes($pDB); 
     $arr_themes = $oThemes->getThemes("$base_dir/themes/");
@@ -106,7 +105,6 @@ function changeTheme($pDB, $smarty, $module_name, $local_templates_dir, $formCam
     $oThemes = new PaloSantoThemes($pDB); 
     $tema_actual = $oThemes->getThemeActual(); 
     $arrTmp['themes']   = $tema_actual;
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
     $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Change Theme"],$arrTmp);
     return $contenidoModulo;
 }
@@ -130,20 +128,14 @@ function updateTheme($pDB, $smarty, $module_name, $local_templates_dir, $formCam
         $exito   = $oThemes->updateTheme($_POST['themes']);
 
         if ($exito) {
-            if($oThemes->smartyRefresh($_SERVER['DOCUMENT_ROOT'])){
-		header("Location: ?menu=$module_name");
-		die();
-	    }
-	    else{
-		$smarty->assign("mb_title", $arrLang["ERROR"]);
-		$smarty->assign("mb_message", $arrLang["The smarty cache could not be deleted"]);
-	    }
+            $oThemes->smartyRefresh($_SERVER['DOCUMENT_ROOT']);
+            header("Location: ?menu=$module_name");
         } else {
             $smarty->assign("mb_title", $arrLang["Validation Error"]);
-            $smarty->assign("mb_message", $oThemes->errMsg);
+            $smarty->assign("mb_message", $oBreak->errMsg);
         } 
     }
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
+
     $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Change Theme"],$_POST);
     return $contenidoModulo;
 }

@@ -1,5 +1,8 @@
 <form method="POST" action="?menu=grouplist">
 <table width="99%" border="0" cellspacing="0" cellpadding="0" align="center">
+<tr class="moduleTitle">
+  <td class="moduleTitle" valign="middle">&nbsp;&nbsp;<img src="images/user.png" border="0" align="absmiddle">&nbsp;&nbsp;{$title}</td>
+</tr>
 <tr>
   <td>
     <table width="100%" cellpadding="4" cellspacing="0" border="0">
@@ -15,7 +18,7 @@
           <input class="button" type="submit" name="edit" value="{$EDIT}">
           <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')"></td>
           {/if}
-        {if $mode ne 'view'}<td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>{/if}
+        <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
      </tr>
    </table>
   </td>
@@ -24,12 +27,12 @@
   <td>
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
       <tr>
-	<td>{$group.LABEL}:{if $mode ne 'view'} <span  class="required">*</span>{/if}</td>
+	<td>{$group.LABEL}: <span  class="required">*</span></td>
 	<td>{$group.INPUT}</td>
         <td width="50%"></td>
       </tr>
       <tr>
-	<td>{$description.LABEL}:{if $mode ne 'view'} <span  class="required">*</span>{/if}</td>
+	<td>{$description.LABEL}: <span  class="required">*</span></td>
 	<td>{$description.INPUT}</td>
         <td width="50%"></td>
       </tr>

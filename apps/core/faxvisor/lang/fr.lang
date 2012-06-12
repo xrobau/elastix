@@ -1,0 +1,54 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2008 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com 						                     |
+  |                                                                      |
+  | Translated by: Erwan DESVERGNES - SDCI                               |
+  | erwan.desvergnes@SDCI.fr                                             |
+  |   Revision 1.0-17 by Gregory BOUZINAC - GMixon                       | 
+  | greg@gmixon.com                                                      |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang,v 1.8 2008/05/20 00:36:42 bmacias Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Fax Visor" => "Visualiseur de Fax",
+"Search" => "Chercher",
+"Company Name" => "Par Nom de Société",
+"Company Fax" => "Fax par Société",
+"Fax Date" => "Fax par Date",
+"File" => "Fichier",
+"Fax Destiny" => "Fax par destination",
+"No Data Found" => "Aucune donnée trouvée",
+"Are you sure you wish to delete fax (es)?" => "Etes vous sûr de vouloir effacer le(s) fax ?",
+"Unable to eliminate pdf file from the path." => "Impossible de supprimer le fichier pdf du dossier.",
+"Unable to eliminate pdf file from the database." => "Impossible de supprimer le fichier pdf de la base de données.",
+"Type Fax" => "Type de Fax",
+"All" => "Tous",
+"in" => "Reçus",
+"out" => "Emis",
+"ERROR" => "Erreur",
+"Type" => "Type",
+);
+?>

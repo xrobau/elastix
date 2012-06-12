@@ -106,7 +106,6 @@ $arrLang=array(
 "Bad Format"=>"Format incorrecte",
 "No option was selected"=>"Cap Opció seleccionada",
 "Octets out of range"=>"Octets fora de rang",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 /*version 0.8*/
@@ -141,8 +140,6 @@ $arrLang=array(
 "IM" => "IM",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "El servei Openfire no està actiu.",
-"Webmin" => "Webmin",
-"The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
 
 /*vTigerCRM*/
 "vTigerCRM" => "vTigerCRM",
@@ -158,8 +155,6 @@ $arrLang=array(
 
 /* Start About Elastix */
 "About Elastix"=>"Sobre Elastix",
-"About Elastix2"=>"About us",
-"HELP"=>"Help",
 "About Elastix Content"=>"Elastix va ser creat sota la premisa de ser un sistema d'us per
 comunicacions basades en IP que sigui accesible des del Web, confiable y
 fàcil d'usar. Aquest software de còdi obert iniciat a l'Ecuador s'ha
@@ -176,21 +171,6 @@ a tot el mon.",
 "Title" => "Title",
 "Search" => "Search",
 "Show"   => "Show",
-'md_message_title' => 'Dismiss',
 "ERROR" => "Error",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

@@ -1,0 +1,71 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Bruno Macias                                           |
+  | Email: bmacias@palosanto.com                                         |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.7 2008/02/18 09:49:00 bmacias Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Endpoint Configurator" => "Endpoint Configuration",
+"Discover Endpoints in this Network" => "Discover Endpoints in this Network",
+"Display Name" => "Display Name",
+"MAC Adress" => "MAC Address",
+"Phone Type" => "Model",
+"IP Adress" => "IP Address",
+"Vendor" => "Vendor",
+"User Extension" => "Extension to assign",
+"Set" => "Set",
+"Unset" => "Unset",
+"Are you sure you wish to unset endpoint(s)?" => "Are you sure you wish to unset endpoint(s)?",
+"Are you sure you wish to set endpoint(s)?" => "Are you sure you wish to set endpoint(s)?",
+"Configured without incident." => "Configured without incident.",
+"Not Set" => "Not Set",
+"Unable write the file" => "Unable write the file",
+"Users" => "Users",
+"User Name in Endpoint is" => "User Name in Endpoint is",
+"And secrets no equals in FreePBX and Endpoint" => "And secrets no equals in FreePBX and Endpoint",
+"Don't exist in FreePBX extension" => "Don't exist in FreePBX extension",
+"Don't exist in Endpoint extension" => "Don't exist in Endpoint extension",
+"UPDATE" => "UPDATE",
+"Unable delete the file" => "Unable delete the file",
+"Unselected" => "Unselected",
+"No Models" => "No Models",
+"No Extensions" => "No Extensions",
+"Invalid Format in Parameter" => "Invalid Format in Parameter",
+"It can take several minutes, because your ip address has some devices, " => "It can take several minutes, because your ip address has some devices, ",
+"WARNING" => "WARNING",
+"Status"=>"Status",
+"ERROR" => "ERROR",
+"Current Extension" => "Current Extension",
+"Not Registered" => "Not Registered",
+"MESSAGE" => "MESSAGE",
+"The Extension(s) parameters have been saved. Each checked phone will be configured with the new parameters once it has finished rebooting" => "The Extension(s) parameters have been saved. Each checked phone will be configured with the new parameters once it has finished rebooting",
+"Select a model" => "Select a model",
+"Not Applicable" => "Not Applicable"
+);
+?>

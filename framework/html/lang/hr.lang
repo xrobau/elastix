@@ -97,7 +97,6 @@ $arrLang=array(
 "Bad Format"=>"Neispravan format",
 "No option was selected"=>"Niti jedna mogućnost nije odabrana",
 "Octets out of range"=>"Oktet izlazi iz opsega",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 /*version 0.8*/
@@ -137,8 +136,6 @@ $arrLang=array(
 "IM" => "IM",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "Openfire servis nije aktivan.",
-"Webmin" => "Webmin",
-"The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
 
 /*vTigerCRM*/
 "vTigerCRM" => "vTigerCRM",
@@ -154,8 +151,6 @@ $arrLang=array(
 
 /* Start About Elastix */
 "About Elastix"=>"O Elastix-u",
-"About Elastix2"=>"About us",
-"HELP"=>"Help",
 "About Elastix Content"=>"Elastix je kreiran pod pretpostavkom postajanja  pouzdanim, jednostavnim za uporabu, web-zasnovanim sustavom za upravljanje komunikacijom preko IP. Ovaj softver otvorenog koda je nastao u Ekvadoru i postao je izabrano rješenje za primjenu VoIP-a na cijeloj zemaljskoj kugli.",
 "About Elastix Closed"=>"Zatvori",
 /* End About Elastix */
@@ -177,21 +172,6 @@ $arrLang=array(
 "Title" => "Title",
 "Search" => "Search",
 "Show"   => "Show",
-'md_message_title' => 'Dismiss',
 "ERROR" => "Error",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

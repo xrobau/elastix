@@ -91,7 +91,6 @@ $arrLang=array(
 "Bad Format"=>"不正なフォーマット",
 "No option was selected"=>"オプション未選択",
 "Octets out of range"=>"ビット数範囲外",
-"Undefined validation type" => "Undefined validation type",
 
 //version 0.8
 //user
@@ -129,9 +128,6 @@ $arrLang=array(
 "IM" => "インスタントメッセージ",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "現在、Openfireは動作していません。",
-"Webmin" => "Webmin",
-"The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
-
 
 /*vTigerCRM*/
 "vTigerCRM" => "vTigerCRM",
@@ -147,8 +143,6 @@ $arrLang=array(
 
 /* Start About Elastix */
 "About Elastix" => "Elastixについて",
-"About Elastix2"=>"About us",
-"HELP"=>"Help",
 "About Elastix Content" => "Elastixは、IPコミュニケーション管理のための信頼でき、使いやすい、
 ウェブベースシステムを目指して開発されました。エクアドルで始まったこのオープンソース
 ソフトウェアは、世界中におけるVoIP実装ソリューションに選択されつつあります。",
@@ -172,21 +166,6 @@ $arrLang=array(
 "Title" => "Title",
 "Search" => "Search",
 "Show"   => "Show",
-'md_message_title' => 'Dismiss',
 "ERROR" => "Error",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

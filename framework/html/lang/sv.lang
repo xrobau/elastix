@@ -92,7 +92,6 @@ $arrLang=array(
 "Bad Format"=>"Dåligt format",
 "No option was selected"=>"Du har inte valt något val",
 "Octets out of range"=>"Okteter utom räckvidd",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 /*version 0.8*/
@@ -129,8 +128,6 @@ $arrLang=array(
 "IM" => "IM",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "Openfire tjänsten aktiv för tillfället. Om du vill aktivera det vänligen ",
-"Webmin" => "Webmin",
-"The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
 
 /*vTigerCRM*/
 "vTigerCRM" => "vTigerCRM",
@@ -146,8 +143,6 @@ $arrLang=array(
 
 /* Start About Elastix */
 "About Elastix"=>"Om Elastix",
-"About Elastix2"=>"About us",
-"HELP"=>"Help",
 "About Elastix Content"=>"Elastix skapades under premisserna för att bli ett pålitligt, enkelt att använda web-baserat system,för hantering av kommunikation över IP. Detta Open source programvara startades i Ekuador, och har blivit en lösning för implentering av Röst över IP(VoIP) runt världen.",
 "About Elastix Closed"=>"Avsluta",
 /* End About Elastix */
@@ -169,21 +164,6 @@ $arrLang=array(
 "Title" => "Title",
 "Search" => "Search",
 "Show"   => "Show",
-'md_message_title' => 'Dismiss',
 "ERROR" => "Error",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

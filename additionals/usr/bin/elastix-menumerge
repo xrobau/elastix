@@ -77,23 +77,10 @@ if(isset($_SERVER['argv'][1])){
                     $newMenu["tag"]=$menuitem['desc'];
                     $newMenu["link"]=$menuitem['link'];
                     $newMenu["order"]=$menuitem['order'];
-                    $newPermission = array();
-                    $newPermission = $menuitem['groups'];
-
+                    
                     $oInstaller->addMenu($oMenu,$newMenu);
                     if($newMenu['parent']!="") //agregar los permisos
-                        $oInstaller->addResourceMembership($oACL,$newMenu,$newPermission);
-                }else{// si ya existe solo se debe actualizar el Parent, tag, link y order
-                    echo "Updating: $idmenu found\n";
-                    $newMenu["menuid"]=$idmenu;
-                    $newMenu["module"]=$menuitem['module'];
-                    $newMenu["parent"]=$menuitem['parent'];
-                    $newMenu["tag"]=$menuitem['desc'];
-                    $newMenu["link"]=$menuitem['link'];
-                    $newMenu["order"]=$menuitem['order'];
-                    $oInstaller->UpdateMenu($oMenu,$newMenu);
-					if($newMenu['parent']!="") //agregar los permisos
-                        $oInstaller->updateResourceMembership($oACL,$newMenu);
+                        $oInstaller->addResourceMembership($oACL,$newMenu);
                 }
             }
             else{

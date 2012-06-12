@@ -34,6 +34,5 @@ global $arrLangModule;
 $arrLangModule=array(
 "Themes not Found" => "Téma nem található",
 "The theme could not be updated" => "A téma nem fissíthető",
-"The smarty cache could not be deleted" => "The smarty cache could not be deleted"
 );
 ?>

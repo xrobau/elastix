@@ -25,11 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   |                                                                      |
-  | Translate by: Farhad Kouhfallah                                      |
-  | Email: farhad@cytco.net                                              |
+  | Translate by: Haamed Kouhfallah                                      |
+  | Email: haamed@cytco.net                                              |
   |                                                                      |
   +----------------------------------------------------------------------+
-  $Id: fa.lang,v 2.0 2008/04/21 10:11:44 bmacias@palosanto.com Exp $ */
+  $Id: fa.lang,v 1.2 2008/04/21 10:11:44 bmacias@palosanto.com Exp $ */
 global $arrLang;
 $arrLang=array(
 /*System Info*/
@@ -40,55 +40,59 @@ $arrLang=array(
 "Sim. calls" => "مکالمات همزمان",
 "CPU usage (%)" => "میزان استفاده از پردازنده (%)",
 "Mem. usage (MB)" => "میزان استفاده از حافظه (%)",
+
+
 "Export" => "خروجی گرفتن",
 "Start" => "شروع",
 "End" => "پایان",
 "Next" => "بعدی",
 "Previous" => "قبلی",
 
-"Group" => "گروه",
-"administrator" => "مدير سيستم",
-"operator" => "اپراتور",
-"extension" => "شماره داخلي",
 
-
-"Group List" => "لیست گروه",
-"User List" => "لیست کاربران",
-"Logout" => "خروج",
-"Change" => "تغيير",
-"Title" => "عنوان",
-"Language"=>"زبان",
-"Load Module" => "بارگزاري ماژول",
-
-"Required field" => "فيلد مورد نياز",
+"Validation Error" => "اعتبار تایید نشد",
+"The following fields contain errors" => "فیلد زیر دارای خطا است",
+"Save" => "ذخیره",
+"Required field" => "فیلد مورد نیاز",
+"Apply changes" => "تغییرات را ثبت کن",
 "Cancel" => "انصراف",
-"Apply changes" => "ثبت تغييرات",
-"Save" => "ذخيره",
-"Edit" => "ويرايش",
-"Delete" => "حذف",
-"Are you sure you wish to continue?" => "آيا مطمئن به ادامه هستيد؟",
-"The following fields contain errors" => "اين فيلدها داراري خطا هستند",
-"Validation Error" => "خطاي اعتبار",
 
 /*Login to Elastix*/
-"Welcome to Elastix"=>"به سرور ارتباطي سيتکو خوش آمديد",
-"Please enter your username and password"=>"لطفا شناسه کاربري و رمز عبور خود را وارد نماييد",
-"Username"=>"شناسه کاربري",
-"Password"=>"رمز عبور",
-"Submit"=>"ثبت",
-"Login page"=>"صفحه ورود",
+"Welcome to Elastix" => "به سیستم تلفنی شرکت سیتکو خوش آمدید ",
+"Please enter your username and password" => "شناسه کاربری و رمز عبور خود را وارد کنید",
+"Username" => "شناسه کاربری",
+"Password" => "رمز عبور",
+"Submit" => "ثبت کردن",
+"Login page" => "صفحه ورودی",
 /*end Login to Elastix*/
 
+/*start User Management*/
+"Group" => "گروه",
+"User List" => "لیست کاربران",
+"The group is wrong" => "گروه اشتباه است",
 
 
+
+"Are you sure you wish to continue?" => "آیا مطمئن به ادامه هستید؟",
+"Edit" => "ویرایش",
+"Delete" => "حذف",
+"Accept" => "قبول",
+"Group Permission" => "مجوزهای گروه",
+"Users" => "کاربران",
+"Directory couldn't be opened" => "دایرکتوری باز نمی شود",
+/*end User Management*/
 
 /*start menu*/
-"System"=>"سيستم",
-"System Info"=>"اطلاعات سيستم",
-"User Management"=>"مديريت کاربران",
-"Menu Administrator"=>"منوي مديريت",
-"Group Permission" => "مجوزهاي گروه",
+"System" => "سیستم",
+"System Info" => "مشخصات سیستم",
+"User Management" => "مدیریت کاربران",
+"Menu Administrator" => "منوی مدیر",
 /*end menu*/
+
+/*Start Language*/
+"Language" => "زبان",
+"Change" => "تغییر دادن",
+"Logout" => "خروج",
+/*end  Language*/
 
 /*version 0.7*/
 /*start paloSantoValidar.class.php*/
@@ -97,7 +101,6 @@ $arrLang=array(
 "Bad Format" => "قالب اشتباه",
 "No option was selected" => "گزینه ای انتخاب نشد",
 "Octets out of range" => "هشتایی خارج از محدوده",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 /*version 0.8*/
@@ -110,6 +113,7 @@ $arrLang=array(
 /*end system - date/time*/
 
 /*load module*/
+"Load Module" => "بارگزاری ماژول",
 "ID for new module (folder name)" => "شناسه کاربری برای ماژول جدید (نام پوشه)",
 "Choose Menu" => "منو را انتخاب کنید",
 "ID for new menu" => "شناسه کاربری برای منوی جدید",
@@ -121,23 +125,20 @@ $arrLang=array(
 "Folder configs doesn't exist in module file" => "پوشه configs در فایل ماژول وجود ندارد",
 "Folder themes doesn't exist in module file" => "پوشه themes در فایل ماژول وجود ندارد",
 "File index.php doesn't exist in module file" => "فایل index.php در فایل ماژول وجود ندارد",
-"File install.php doesn't exist in module file" => "فايل install.php در فايل ماژول وجود ندارد",
 /*end load module*/
 
-// Elastix 0.9 
 /*Start SubModule Themes*/
-"Themes" =>"پوسته ها",
+"Themes" => "پوسته",
 "Change Theme" => "تغییر پوسته",
 /*end SubModule Themes*/
 
 /*Module IM*/
 "IM" => "پیام فوری",
 "OpenFire" => "سرور پیام فوری",
-"The service Openfire No running" => "در حال حاضر سرویس پيام فوري فعال نیست در صورت تمایل برای فعال سازی لطفا",
-"Webmin" => "پنل سيستم عامل",
-"The service Webmin No running" => "سرويس پنل سيستم عامل فعال نيست. براي فعال سازي لطفا",
+"The service Openfire No running" => "در حال حاضر سرویس Openfire فعال نیست در صورت تمایل برای فعال سازی لطفا",
+
 /*vTigerCRM*/
-"vTigerCRM" => "ارتباط با مشتري وي تايگر",
+"vTigerCRM" => "برنامه ارتباط با مشتری",
 "The vTiger installation is almost done. To complete it please" => "نصب برنامه ارتباط با مشتری در حال اتمام است لطفا برای اتمام",
 "click here" => "اینجا را کلیک کنید",
 
@@ -149,127 +150,29 @@ $arrLang=array(
 "Preferences" => "تنظیمات",
 
 /* Start About Elastix */
-"About Elastix" => "درباره سيتکو",
-"About Elastix2"=>"درباره ما",
-"HELP"=>"Help",
-"About Elastix Content" => "این سیستم جامع ارتباطی بر اساس قابلیت اطمینان بالا، کاربری آسان و مدیریت تحت وب طراحی شده و با زبان پارسی و پشتیبانی کامل شرکت سیتکو ارائه می گردد - انجمن و مقالات voip-iran.com ",
+"About Elastix" => "درباره شرکت سیتکو",
+"About Elastix Content" => "این نرم افزار براساس قابلیت اطمینان بالا، کاربری آسان و سیستم مدیریت تحت وب، ایجاد شده است و با زبان فارسی و پشتیبانی کامل توسط شرکت سیتکو (ارتباط تلفن کوروش) در ایران وخاورمیانه ارائه می گردد.",
 "About Elastix Closed" => "پنجره را ببند",
 /* end  About Elastix */
 
-"Search" => "جستجو",
-"Show"   => "نمايش",
-'View' => 'مشاهده',
-'Status' => 'وضعيت',
-'Type' => 'نوع',
-'Active' => 'فعال',
-'Filter' => 'فيلتر',
-'md_message_title' => 'انفصال',
-"ERROR" => "خطا",
-
-/*missing  strings  - persian - */
-"Agenda" => "برنامه کاري",
-"Email" => "ايميل",
-"Fax" => "فکس",
-"PBX" => "مرکز تلفن",
-"Reports" => "گزارشات",
-"Extras" => "برنامه هاي جانبي",
-"Call Center" => "مرکز تماس",
-"Addons" => "افزونه ها",
-"Dashboard" => "داشبرد",
-"Network" => "شبکه",
-"Shutdown" => "راه اندازي",
-"Hardware Detector" => "يافتن سخت افزار",
-"Updates" => "به روزآوري",
-"Backup/Restore" => "پشتيبان گيري",
-"Calendar" => "تقويم",
-"Address Book" => "دفترچه تلفن",
-"Recordings" => "ضبط فايل صوتي",
-"Network Parameters" => "تنظيمات شبکه",
-"DHCP Server" => "سرور DHCP",
-"DHCP Client List" => "ليست کلاينت ها",
-"Assign IP Address to Host" => "اختصاص آدرس IP به ميزبان",
+//Elastix 0.9.1
+/*Start module Group List*/
 "Groups" => "گروه ها",
-"Users" => "کاربران",
-"Packages" => "بسته ها",
-"Repositories" => "مخازن",
-"Currency" => "پول رايج",
-"Dashboard Applet Admin" => "مديريت داشبرد",
-"Domains" => "دامنه ها",
-"Accounts" => "حساب ها",
-"Relay" => "رله",
-"Webmail" => "ايميل تحت وب",
-"Antispam" => "ضد هرزنامه",
-"Remote SMTP" => "SMTP خارجي",
-"Email list" => "ليست ايميل",
-"Virtual Fax" => "فکس مجازي",
-"Fax Master" => "فکس اصلي",
-"Fax Clients" => "کاربران فکس",
-"Fax Viewer" => "مشاهده فکس",
-"Email Template" => "قالب ايميل",
-"Virtual Fax List" => "ليست فکس مجازي",
-"New Virtual Fax" => "فکس مجازي جديد",
-"Send Fax" => "ارسال فکس",
-"PBX Configuration" => "تنظيمات",
-"Operator Panel" => "پنل اپراتور",
-"Voicemail" => "صندوق صوتي",
-"Monitoring" => "مکالمات ضبط شده",
-"Endpoint Configurator" => "تنظيم گوشي ها",
-"Conference" => "کنفرانس",
-"Batch of Extensions" => "ليست کامل داخلي ها",
-"Tools" => "ابزار",
-"Flash Operator Panel" => "پنل اپراتور فلش",
-"VoIP Provider" => "سرويس دهندگان VoIP",
-"My Extension" => "داخلي من",
-"Asterisk-Cli" => "خط فرمان استريسک",
-"Asterisk File Editor" => "ويرايشگر فايل",
-"Text to Wav" => "تبديل متن به صدا",
-"CDR Report" => "ريز مکالمات",
-"Channels Usage" => "استفاده کانال ها",
-"Billing" => "صورت حساب",
-"Asterisk Logs" => "گزارشات استريسک",
-"Graphic Report" => "گزارش گرافيکي",
-"Summary by Extension" => "گزارش خلاصه بر اساس داخلي",
-"Calling Cards" => "کارت هاي تلفن",
-"Downloads" => "دانلودها",
-"Agent Console" => "کنسول اپراتور",
-"Outgoing Calls" => "تماس هاي خروجي",
-"Ingoing Calls" => "تماس هاي ورودي",
-"Agents" => "اپراتورها",
-"Breaks" => "تنفس ها",
-"Forms" => "فرم ها",
-"Configuration" => "تنظيمات",
-"Campaigns" => "تماس هاي تبليغاتي",
-"Do not Call List" => "ليست عدم تماس",
-"Queues" => "صف ها",
-"Clients" => "کلاينت ها",
-"Form Designer" => "طراحي فرم",
-"Form Preview" => "پيش مشاهده فرم",
-"Reports Break" => "گزارشات تنفس",
-"Calls Detail" => "جزييات تماس",
-"Calls per hour" => "تماس ها در ساعت",
-"Calls per Agent" => "تماس هاي هر اپراتور",
-"Hold Time" => "زمان انتظار",
-"Login Logout" => "ورود خروج",
-"Ingoing Calls Success" => "تماس هاي ورودي موفق",
-"Graphic Calls per hour" => "نمودار گرافيکي تماس ها در ساعت",
-"Agent Information" => "زمان اتصال اپراتورها",
-"Agents Monitoring" => "گزارش اپراتورها",
-"Trunks used per hour" => "زمان استفاده از ترانک ها در ساعت",
-"Agents connection time" => "زمان اتصال اپراتورها",
-"Incoming calls monitoring" => "گزارش تماس هاي ورودي",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
+"Group List" => "لیست گروه",
+/*end module Group List*/
+
+/** Elastix 1.0 **/
+/*Start UserList*/
+"administrator" => "مدیر",
+"operator" => "اپراتور",
+"extension" => "داخلی",
+"total access" => "دسترسی کامل",
+"extension user" => "داخلی کاربر",
+"No Extension" => "ﺏﺩﻮﻧ ﺩﺎﺨﻟی",
+/*end UserList*/
+"Title" => "Title",
+"Search" => "Search",
+"Show"   => "Show",
+"ERROR" => "Error",
 );
 ?>

@@ -1,5 +1,0 @@
-[mya2billing]
-ignore_backup = no
-engine = mysql
-path   = /var/lib/mysql
-deletable = yes

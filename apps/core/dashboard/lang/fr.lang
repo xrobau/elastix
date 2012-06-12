@@ -1,0 +1,70 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2008 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com 						                     |
+  |                                                                      |
+  | Translated by: Erwan DESVERGNES - SDCI                               |
+  | erwan.desvergnes@SDCI.fr                                             |
+  |   Revision 1.0-17 by Gregory BOUZINAC - GMixon                       | 
+  | greg@gmixon.com                                                      |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang,v 1.8 2009/03/11 00:36:42 aflores Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"You haven't extension" => "Vous n'avez pas d'extension.",
+"Imap: Connection error" => "Imap: Erreur de connexion.",
+"You don't recibed emails" => "Vous n'avez pas réçu de courriel.",
+"You don't recibed faxes" => "Vous n'avez pas réçu de fax.",
+"Query error" => "Erreur de requête.",
+"You don't recibed calls" => "Vous n'avez pas reçu d'appel.",
+"You don't recibed voicemails" => "Vous n'avez pas reçu de message vocal.",
+"Unenabled to open file" => "Impossible d'ouvrir le fichier",
+"Dashboard" => "Tableau de bord",
+"Calls" => "Appels",
+"Em@ils" => "Courriels",
+"Faxes" => "Faxes",
+"Voicem@ils" => "Boîte vocales",
+"answered" => "<font color='green'><b>Répondu</b></font>",
+"missed" => "<font color='red'><b>Manqué</b></font>",
+"unknow" => "<b>Inconnu</b>",
+"call record" => "{status} appel reçu le {date} du numéro {source}.",
+"call duration" => " et d'une durée de{time} .",
+"fax recived" => "Fax réçu: {file} de {source}, le {date}.",
+"voicemail recived" => "Boïte vocale de {source}, réçu le {date} et d'une durée de {duration} secondes.",
+"mail recived" => "{date} {source} '{subject}'",
+"Quota asigned" => "Quota attribué:",
+"Quota Used" => "Quota utilisé:",
+"Quota free space" => "Quota d'espace libre:",
+"Error at read yours calls." => "Erreur à la lecture de vos appels",
+"Error at read yours faxes." => "Erreur à la lecture de vos faxes.",
+"Error at read yours voicemails." => "Erreur à la lecture de vos messages vocaux.",
+"Error at read yours mails." => "Erreur à la lecture de vos mails.",
+"Error at read status system." => "Erreur à la lecture du statut système.",
+"Error at read your calendar." => "Erreur à la lecture de votre calendrier.",
+"You don't have events" => "Vous n'avez pas d'événement.",
+"You don't have a webmail account" => "Vous n'avez pas de compte WebMail.",
+"Calendar" => "Calendrier",
+);
+?>

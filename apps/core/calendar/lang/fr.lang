@@ -1,0 +1,176 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2008 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com 						                     |
+  |                                                                      |
+  | Translated by: Erwan DESVERGNES - SDCI                               |
+  | erwan.desvergnes@SDCI.fr                                             |
+  |   Revision 1.0-17 by Gregory BOUZINAC - GMixon                       | 
+  | greg@gmixon.com                                                      |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang,v 1.8 2008/05/20 00:36:42 bmacias Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Country Code" => "Code Pays",
+"Area Code" => "Code Région",
+"January" => "Janvier",
+"February" => "Février",
+"March" => "Mars",
+"April" => "Avril",
+"May_" => "Mai",
+"June" => "Juin",
+"July" => "Juillet",
+"August" => "Août",
+"September" => "Septembre",
+"October" => "Octobre",
+"November" => "Novembre",
+"December" => "Décembre",
+"Jan" => "Jan",
+"Feb" => "Féb",
+"Mar" => "Mar",
+"Apr" => "Avr",
+"May" => "Mai",
+"Jun" => "Juin",
+"Jul" => "Jui",
+"Aug" => "Aou",
+"Sep" => "Sep",
+"Oct" => "Oct",
+"Nov" => "Nov",
+"Dec" => "Déc",
+"Monday" => "Lundi",
+"Tuesday" => "Mardi",
+"Wednesday" => "Mercredi",
+"Thursday" => "Jeudi",
+"Friday" => "Vendredi",
+"Saturday" => "Samedi",
+"Sunday" => "Dimanche",
+"Normal" => "Normal",
+"Monthly" => "Mensuel",
+"Add Event" => "Ajouter un événement",
+"Back to Calendar" => "Retour au Calendrier",
+"View Date" => "Afficher la Date",
+"next month" => "Mois suivant",
+"next year" => "Année suivante",
+"last year" => "Années précédante",
+"last month" => "Mois précédent",
+"Title" => "Titre",
+"Delete Selected" => "Effacé la sélection",
+"(No subject)" => "(Pas de sujet)",
+"Modify" => "Modifier",
+"No events on this day" => "Pas d'événement ce jour.",
+"year view not yet implemented" => "La vue annuelle n'est pas encore implementée",
+"Software Error" => "Erreur Logiciel",
+"Message:" => "Message:",
+"Backtrace" => "Backtrace",
+"AM" => "AM",
+"PM" => "PM",
+"Error in get_events_by_date" => "Erreur dans get_events_by_date",
+"Error in get_event_by_id" => "Erreur dans get_event_by_id",
+"item doesn't exist!" => "L'élément n'existe pas!",
+"Html is not a valid Html class" => "Html n'est pas une classe HTML valide",
+"Invalid class" => "Class invalide",
+"Error reading options" => "Erreur lors de la lecture des options",
+"Updated options" => "Mise à jour des options",
+"Error while removing an event" => "Erreur lors de la suppression d'un événement",
+"Removed item" => "Point effacé",
+"Could not remove item" => "Impossible de supprimer l'élément",
+"No items selected" => "Aucun élément sélectionné",
+"Adding event to calendar" => "Ajouter un événement au calendrier",
+"Date of event" => "Date de l'événement",
+"Date multiple day event ends" => "Date où l'évément se termine",
+"Event type" => "Type d'événement",
+"Subject" => "Sujet",
+"chars max" => "Caractères maximum",
+"Asterisk Call Me" => "Asterisk doit m'appeler",
+"Submit Event" => "Soumettre un événement",
+"No day was given" => "Aucun jour n'a été donné.",
+"No month was given" => "Aucun mois n'a été donné.",
+"No year was given" => "Aucune année n'a été donné.",
+"No hour was given" => "Aucune heure n'a été donné.",
+"No minute was given" => "Aucune minute n'a été donné..",
+"No type of event was given" => "Aucun type d'événement n'a été donné.",
+"No end day was given" => "Aucune heure n'a été donné.",
+"No end month was given" => "Aucune fin de mois n'a été donné.",
+"No end year was given" => "Aucune fin d'année n'a été donné.",
+"Your subject was too long" => "Votre sujet est trop long",
+"characters max" => "Caractères maximum",
+"The start of the event cannot be after the end of the event" => "Le début de l'événement ne peut être supérieur à celui de la fin de l'événement",
+"Error processing event" => "Erreur lors du traitement.",
+"No changes were made" => "Aucun changement n'a été fait",
+"Date updated" => "Date mise à jour",
+"Editing Event" => "Edition des événements",
+"yes" => "Oui",
+"no" => "Non",
+"Ascending" => "Ascendant.",
+"Decending" => "Descendant.",
+"Invalid sort option" => "Option de tri invalde.",
+"Invalid order option" => "Ordre de tri invalide",
+"Encountered an error while searching" => "A rencontré une erreur lors de la recherche.",
+"No events matched your search criteria" => "Aucun événement correspondant à votre critère de recherche.",
+"Search Results" => "Résultat de la recherche.",
+"Date Time" => "Date heure",
+"Phrase" => "Phrase",
+"From" => "De",
+"To" => "à",
+"Sort By" => "Tri par",
+"Order" => "Ordre",
+"Calendar" => "Calendrier",
+"Invalid action" => "Action invalide",
+"That year is too far in the past" => "Cette année-là remonte trop loin dans le passé.",
+"no" => "Non",
+"Ascending" => "Ascendant.",
+"Decending" => "Descendant.",
+"Invalid sort option" => "Option de tri invalde.",
+"Invalid order option" => "Ordre de tri invalide",
+"Encountered an error while searching" => "A rencontré une erreur lors de la recherche.",
+"No events matched your search criteria" => "Aucun événement correspondant à votre critère de recherche.",
+"Search Results" => "Résultat de la recherche.",
+"Date Time" => "Date heure",
+"Phrase" => "Phrase",
+"From" => "De",
+"To" => "à",
+"Sort By" => "Tri par",
+"Order" => "Ordre",
+"Calendar" => "Calendrier",
+"Invalid action" => "Action invalide",
+"That year is too far in the past" => "Cette année-là remonte trop loin dans le passé.",
+"That year is too far in the future" => "Cette année-là se projette trop loin dans l'avenir.",
+"To create new recordings click" => "Pour créer un nouvel enregistrement, cliquer",
+"Here" => "ici",
+"No Recording was given, if no exists you must first create a new recording" => "Aucun enregistrement n'a été donnée. S'il n'en existe pas, vous devez d'abord créer un nouvel enregistrement",
+"Call to" => "Appeler le",
+"To add phone number from address book click" => "Pour ajouter un numéro du carnet d'adresse, cliquer",
+"Weekly" => "Hebdomadaire",
+"Search" => "Chercher",
+"Time" => "Temps",
+"Description" => "Description",
+"Date" => "Date",
+"Recordings" => "Enregistrements",
+"Error" => "Erreur",
+"Start Date" => "Date de début",
+"Validation Error" => "Erreur de validation",
+"Can not create called file" => "Ne peut pas créer l'appelé",
+);
+?>

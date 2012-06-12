@@ -1,0 +1,39 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opción "Address Book" del menú "Agenda" en Elastix nos permite tener una visualización del directorio telefónico de todas las extensiones que existan dentro(Internal) y fuera(External) de la central con la característica que además nos permite realizar la llamada con tan solo dar click
+ en el icono del telefono en la columna "Call". Cabe recalcar que el usuario debe estar obligatoriamente registrado y asignado a una extensión  (módulo System/UserManagement/Users) si deseamos el óptimo funcionamiento caso contrario no podrá 
+ejecutar la acción de llamar "Call".</p>
+
+<div><img src="../modules/{$node_id}/images/address1.jpg" border="0"></div>
+<div>Figura 1</div><br/>
+
+<p>Como podrán observar en la Figura 2 cuando nosotros escogemos la opcion de filtrado "External" nos presenta un listado de nombres con sus respectivos numeros telefónicos ya sean estos fijos
+o móviles, ademas nos permite la eliminación del mismo ya que estos fueron creados por la opción "New Contact" del módulo "Agenda",no es el caso con el listado interno(Internal) que fueron creados por el módulo "Users" del submenu "UserManagement" en el menú "System".
+</p>
+
+<div><img src="../modules/{$node_id}/images/address2.jpg" border="0"></div>
+<div>Figura 2</div>
+<br />
+<p>La opción "New Contact" del modulo "Address Book", nos permite el ingreso de nuevos contactos externos a la central es decir que no posean una extension dentro de la organización. Como podrán observar el ingreso de la información es campo a campo(Figura 3). </p>
+
+<div><img src="../modules/{$node_id}/images/address3.jpg" border="0"></div>
+<div>Figura 3</div>
+<br />
+
+<p>Si el proceso de ingresar la información campo a campo le parece poco productivo el módulo "Address Book" nos permite importar un archivo .CSV que contenga la informacioń detallada de sus contactos en tres columnas con el siguiente formato: Nombre,Apellido,Número Telefónico. Además tambień nos permite descargar el directorio telefónico existente con solo dar click en el enlace "Download Address book". </p>
+
+<div><img src="../modules/{$node_id}/images/address4.jpg" border="0"></div>
+<div>Figura 4</div>
+<br />
+
+
+
+</body>
+</html>

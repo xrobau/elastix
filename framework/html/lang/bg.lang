@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version: 1.6                                           |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -28,7 +28,7 @@
   | Translate by:Chavdar Iliev                                             |
   | Email: chavdar_75@yahoo.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
+  $Id: bg.lang, October 25, 2010, 6:10 pm kleber andres loayza Exp $ */
 global $arrLang;
 $arrLang=array(  
 "Disk usage" => "Disk usage",
@@ -71,7 +71,6 @@ $arrLang=array(
 "Bad Format" => "Неправилен Формат",
 "No option was selected" => "Не е избрана опция",
 "Octets out of range" => "Не е в допустимите граници",
-"Undefined validation type" => "Undefined validation type",
 "Choose Menu" => "Избери Меню",
 "ID for new menu" => "ID за новото меню",
 "Menu Name" => "Име на Менюто",
@@ -175,24 +174,6 @@ $arrLang=array(
 "View User" => "View User",
 "Change Theme" => "Change Theme",
 "ERROR" => "Error",
-"Webmin" => "Webmin",
-"The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
-"About Elastix2" => "About us",
-"HELP" => "Help",
-"md_message_title" => "Dismiss",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
+
 );
 ?>

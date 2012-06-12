@@ -1,0 +1,65 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"You haven't extension" => "Usted no tiene extension.",
+"Imap: Connection error" => "Imap: Error de conexion.",
+"You don't recibed emails" => "Usted no ha recibido emails.",
+"You don't recibed faxes" => "Usted no ha recibido faxes.",
+"Query error" => "Error en consulta.",
+"You don't recibed calls" => "Usted no ha recibido llamadas.",
+"You don't recibed voicemails" => "Usted no ha recibido mensajes de voz.",
+"Unenabled to open file" => "No es posible abrir el archivo.",
+"Dashboard" => "Dashboard",
+"Calls" => "Llamadas",
+"Em@ils" => "Em@ils",
+"Faxes" => "Faxes",
+"Voicem@ils" => "Voicem@ils",
+"answered" => "<font color='green'><b>contestada</b></font>",
+"missed" => "<font color='red'><b>perdida</b></font>",
+"unknow" => "desconocido",
+"call record" => "Llamada {status} con fecha {date} del numero {source}",
+"call duration" => " y {time} segs. de duracion.",
+"fax recived" => "Fax recibido {file} de {source} con fecha {date}.",
+"voicemail recived" => "Mensaje de voz recibido desde {source} con fecha {date} y dura {duration} segundos",
+"mail recived" => "{date} {source} '{subject}'",
+"Quota asigned" => "Espacio de mail asignada:",
+"Quota Used" => "Espacio de mail usada:",
+"Quota free space" => "Espacio de mail libre:",
+"Error at read yours calls." => "Error al leer tus llamadas.",
+"Error at read yours faxes." => "Error al leer tus faxes.",
+"Error at read yours voicemails." => "Error al leer tus correos de voz.",
+"Error at read yours mails." => "Error al leer tus correos.",
+"Error at read status system." => "Error al leer el estado de tu sistema.",
+"Error at read your calendar." => "Error al leer tu calendario.",
+"You don't have events" => "No hay futuros eventos programados en el calendario",
+"You don't have a webmail account" => "Una cuenta no ha sido asociada con este usuario.",
+"Calendar" => "Calendario",
+);
+?>

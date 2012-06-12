@@ -33,7 +33,6 @@ include_once("../libs/paloSantoDB.class.php");
 include_once("../libs/paloSantoACL.class.php");
 include_once("../libs/misc.lib.php");
 include_once("../configs/default.conf.php");
-include_once("../libs/paloSantoMenu.class.php");
 
 session_name("elastixSession");
 session_start();
@@ -43,8 +42,7 @@ global $arrConf;
 $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
 
 $pDBMenu = new paloDB($arrConf['elastix_dsn']['menu']);
-$pMenu = new paloMenu($pDBMenu);
-$arrMenu = $pMenu->cargar_menu();
+$arrMenu = cargar_menu($pDBMenu) ;
 
 if(!empty($pDB->errMsg)) {
     echo "ERROR DE DB: $pDB->errMsg <br>";

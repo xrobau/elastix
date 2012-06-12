@@ -34,6 +34,5 @@ global $arrLangModule;
 $arrLangModule=array(
 "Themes not Found" => "Tema não encontrado",
 "The theme could not be updated" => "O tema não pode ser atualizado",
-"The smarty cache could not be deleted" => "The smarty cache could not be deleted"
 );
 ?>

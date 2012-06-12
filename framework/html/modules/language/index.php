@@ -112,10 +112,10 @@ function _moduleContent(&$smarty, $module_name)
         else
              $msgError=$arrLang["You can't change language"].'.-'.$arrLang["ERROR"].":".$pDB->errMsg;
        // $arrDefaultRate['language']="es";
-        $smarty->assign("CAMBIAR", $arrLang["Save"]);
+        $smarty->assign("CAMBIAR", $arrLang["Change"]);
         $smarty->assign("MSG_ERROR",$msgError);
         $smarty->assign("conectiondb",$conexionDB);
-	$smarty->assign("icon","modules/$module_name/images/system_preferencies_language.png");
+
         $contenido = $oForm->fetchForm("$local_templates_dir/language.tpl", $arrLang["Language"], $arrDefaultRate);
     }
     return $contenido;

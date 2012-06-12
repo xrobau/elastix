@@ -97,7 +97,6 @@ $arrLang=array(
 "Bad Format" => "Foremato Errato",
 "No option was selected" => "Nessuna opzione è stata selezionata",
 "Octets out of range" => "Ottetto fuori dai limiti",
-"Undefined validation type" => "Undefined validation type",
 /*end paloSantoValidar.class.php*/
 
 /*version 0.8*/
@@ -134,8 +133,6 @@ $arrLang=array(
 "IM" => "Messaggi Istantanei",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "Il servizio Openfire non è attivo, premere per attivare",
-"Webmin" => "Webmin",
-"The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
 
 /*vTigerCRM*/
 "vTigerCRM" => "vTigerCRM",
@@ -151,8 +148,6 @@ $arrLang=array(
 
 /* Start About Elastix */
 "About Elastix" => "Riguardo Elastix",
-"About Elastix2"=>"About us",
-"HELP"=>"Help",
 "About Elastix Content" => "Elastix è stato creato sotto la premessa di essere un Sistema di comunicazione Voice over IP basato su Web stabile e semplice da usare. Questo software open source è nato in Equador ed è diventato la soluzione di scelta per implementazioni di Voice over IP in tutto il mondo.",
 "About Elastix Closed" => "Chiuso",
 /* end About Elastix */
@@ -173,21 +168,6 @@ $arrLang=array(
 "Title" => "Title",
 "Search" => "Search",
 "Show"   => "Show",
-'md_message_title' => 'Dismiss',
 "ERROR" => "Error",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
-"Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
 );
 ?>

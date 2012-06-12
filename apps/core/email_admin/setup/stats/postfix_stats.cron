@@ -1,1 +1,0 @@
-01 * * * * root /usr/bin/php -q /usr/local/elastix/postfix_stats.php

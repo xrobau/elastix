@@ -1,0 +1,178 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Haamed Kouhfallah                                      |
+  | Email: haamed@cytco.net                                              |                                                                    |
+  +----------------------------------------------------------------------+
+   $Id: fa.lang,v 1.2 2008/04/21 10:11:44 bmacias@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Country Code" => "کد کشور",
+"Area Code" => "کد منطقه",
+"January" => "ژانویه",
+"February" => "فوریه",
+"March" => "مارس",
+"April" => "آوریل",
+"May_" => "می",
+"June" => "ژوئن",
+"July" => "جولای",
+"August" => "آگوست",
+"September" => "سپتامبر",
+"October" => "آکتبر",
+"November" => "نوامبر",
+"December" => "دسامبر",
+"Jan" => "ژانویه",
+"Feb" => "فوریه",
+"Mar" => "مارس",
+"Apr" => "آوریل",
+"May" => "می",
+"Jun" => "ژوئن",
+"Jul" => "جولای",
+"Aug" => "آگوست",
+"Sep" => "سپتامبر",
+"Oct" => "اکتبر",
+"Nov" => "نوامبر",
+"Dec" => "دسامبر",
+"Monday" => "دوشنبه",
+"Tuesday" => "سه شنبه",
+"Wednesday" => "چهارشنبه",
+"Thursday" => "پنجشنبه",
+"Friday" => "جمعه",
+"Saturday" => "شنبه",
+"Sunday" => "یک شنبه ",
+"Normal" => "معمولی",
+"Monthly" => "ماهانه",
+"Add Event" => "افزودن رویداد",
+"Back to Calendar" => "بازگت به تقویم",
+"View Date" => " مشاهده تاریخ",
+"next month" => "ماه بعد",
+"next year" => "سال بعد",
+"last year" => "سال قبل",
+"last month" => "ماه قبل",
+"Title" => "عنوان",
+"Delete Selected" => "حذف انتخاب شده ها",
+"(No subject)" => "(بدون عنوان)",
+"Modify" => "تغییر",
+"No events on this day" => "هیچ رویدادی در این روز وجود ندارد",
+"year view not yet implemented" => "مشاهده سال هنوز اجرا نشده",
+"Software Error" => "خطای نرم افزاری ",
+"Message:" => "پیام:",
+"Backtrace" => "مسیر اشکال زدایی",
+"AM" => "صبح",
+"PM" => "بعدازظهر",
+"Error in get_events_by_date" => "خطا در دیدن رویدادها بر طبق تاریخ",
+"Error in get_event_by_id" => "خطا در دیدن رویداها بر طبق شناسه ",
+"item doesn't exist!" => "این ایتم وجود ندارد!",
+"Html is not a valid Html class" => "کلاس HTML معتبر نیست",
+"Invalid class" => "کلاس نامعتبر",
+"Error reading options" => "خطا در خواندن گزینه ها",
+"Updated options" => "گزینه های به روز شده",
+"Error while removing an event" => "خطا به هنگام حذف یک رویداد ",
+"Removed item" => "آیتم حذف شد",
+"Could not remove item" => "Could not remove item",
+"No items selected" => "آیتمی انتخاب نشده است",
+"Adding event to calendar" => "افزودن رویداد به تقویم",
+"Date of event" => "تاریخ رویداد",
+"Date multiple day event ends" => " تاریخی که چندین رویداد در آن تمام می شود",
+"Event type" => "نوع رویداد",
+"Subject" => "موضوع",
+"chars max" => " حداکثر کاراکترها",
+"Asterisk Call Me" => "با من تماس بگیر",
+"Submit Event" => "درج رویداد",
+"No day was given" => "روز معین نشده است",
+"No month was given" => " ماه معین نشده است",
+"No year was given" => " سال معین نشده است",
+"No hour was given" => " ساعت معین نشده است",
+"No minute was given" => "دقیقه معین نشده است",
+"No type of event was given" => "نوع رویداد معین نشده است",
+"No end day was given" => "روز پایانی مشخص نشده است",
+"No end month was given" => " ماه پایانی مشخص نشده است",
+"No end year was given" => "سال پایانی مشخص نشده است",
+"Your subject was too long" => " موضوع شما خیلی طولانی مدت است",
+"characters max" => "حداکثر کاراکترها ",
+"The start of the event cannot be after the end of the event" => "شروع رویداد نمی تواند بعد از پایان آن باشد",
+"Error processing event" => "خطا در بررسی رویداد",
+"No changes were made" => " هیچ تغییری صورت نگرفت",
+"Date updated" => "تاریخ به روز شد",
+"Editing Event" => "ویرایش رویداد",
+"yes" => "بله",
+"no" => "خیر",
+"Ascending" => "صعودی",
+"Decending" => "نزولی",
+"Invalid sort option" => "مرتب سازی نامعتبر",
+"Invalid order option" => "گزینه مرتب سازی نامعتبر",
+"Encountered an error while searching" => "خطا به هنگام جستجو",
+"No events matched your search criteria" => "هیج رویدادی با معیارهای جستجوی شما مطابقت ندارد",
+"Search Results" => "نتایج جستجو",
+"Date Time" => "زمان تاریخ ",
+"Phrase" => "عبارت",
+"From" => "از",
+"To" => "به",
+"Sort By" => "مرتب سازی بر اساس",
+"Order" => "دستور",
+"Calendar" => "تقویم",
+"Invalid action" => "عمل نامعتبر",
+"That year is too far in the past" => " آن سال در گذشته خیلی دور بوده است",
+"That year is too far in the future" => "آن سال در گذشته خیلی دور است",
+"To create new recordings click" => "برای ایجاد فایل صوتی جدید ",
+"yes" => "بله",
+"no" => "خیر",
+"Ascending" => "صعودی",
+"Decending" => "نزولی",
+"Invalid sort option" => "مرتب سازی نامعتبر",
+"Invalid order option" => "گزینه مرتب سازی نامعتبر",
+"Encountered an error while searching" => "خطا به هنگام جستجو",
+"No events matched your search criteria" => "هیج رویدادی با معیارهای جستجوی شما مطابقت ندارد",
+"Search Results" => "نتایج جستجو",
+"Date Time" => "زمان تاریخ ",
+"Phrase" => "عبارت",
+"From" => "از",
+"To" => "به",
+"Sort By" => "مرتب سازی بر اساس",
+"Order" => "دستور",
+"Calendar" => "تقویم",
+"Invalid action" => "عمل نامعتبر",
+"That year is too far in the past" => " آن سال در گذشته خیلی دور بوده است",
+"That year is too far in the future" => "آن سال در گذشته خیلی دور است",
+"To create new recordings click" => "برای ایجاد فایل صوتی جدید ",
+"Here" => "اینجا را کلیک کنید",
+"No Recording was given, if no exists you must first create a new recording" => "هیچ فایل صوتی ضبط نشده است. در این صورت شما 
+باید ابتدا یک فایل صوتی جدید ایجاد کنید",
+"Call to" => "تماس با",
+"To add phone number from address book click" => "برای افزودن شماره از دفترچه تلفن کلیک کنید",
+"Weekly" => "هفتگی",
+"Search" => "جستجو",
+"Time" => "زمان",
+"Description" => "توصیف",
+"Date" => "تاریخ",
+"Recordings" => "ضبط فایل صوتی",
+"Error" => "خطا",
+"Start Date" => "تاریخ شروع",
+"Validation Error" => "اعتبار تایید نشد",
+"Can not create called file" => "Can not create called",
+);
+?>

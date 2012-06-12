@@ -238,4 +238,31 @@ if [ $existeMenuEmail -eq 1 ]; then
     sqlite3  $pathDB/menu.db "update menu set idParent='email_admin' where idParent='email';"
     echo "End step 16, Menu email was changed to email_admin."
 fi
+
+#paso 17: Se añade menu Security
+sqlite3  $pathDB/menu.db "select count(*) from menu where id='security'" &>/dev/null
+existeMenuSecurity=$?
+if [ $existeMenuSecurity -eq 0 ]; then
+	sqlite3 $pathDB/menu.db "insert into menu (id,Name) values ('security','Security');"
+	echo "End step 17, Added menu Security."
+fi
+
+#paso 18: Se añade menu Advanced Security Settings
+sqlite3  $pathDB/menu.db "select count(*) from menu where id='sec_advanced_settings'" &>/dev/null
+existeMenuSecAdvancedSettings=$?
+if [ $existeMenuSecAdvancedSettings -eq 0 ]; then
+	sqlite3 $pathDB/menu.db "insert into menu (id,IdParent,Name,Type) values ('sec_advanced_settings','security','Advanced Security Settings','module');"
+	sqlite3 $pathDB/acl.db "insert into acl_resource (name,description) values ('sec_advanced_settings','Advanced Security Settings');"
+	sqlite3 $pathDB/acl.db "insert into acl_group_permission (id_action,id_group,id_resource) values (1,1,(select id from acl_resource where name='sec_advanced_settings'));"
+	echo "End step 18, Added menu Advanced Security Settings."
+fi
+
+#paso 19: Se añade columna a hardware_detector
+sqlite3  $pathDB/hardware_detector.db "ALTER TABLE span_parameter ADD COLUMN wanpipe_force_media varchar(8);" &>/dev/null  
+existeColumnType=$?
+if [ $existeColumnType -ne 0 ]; then
+    echo "End step 15, Column wanpipe_force_media in database hardware_detector.db exists."
+else
+    echo "End step 15, Column wanpipe_force_media in database hardware_detector.db added."
+fi
 ################## End Administration Menus and permission ##########################

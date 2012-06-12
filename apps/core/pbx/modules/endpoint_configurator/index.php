@@ -543,14 +543,14 @@ function createStatus($type,$text)
 
 function network()
 {
-    $ip=$_SERVER['SERVER_ADDR'];
+    $ip = $_SERVER['SERVER_ADDR'];
     $total = subMask($ip);
     return paloNetwork::getNetAdress($ip, $total)."/".$total;    
 }
 
 function subMask($ip)
 {
-    $output = NULL;
+	$output = NULL;
     exec('/sbin/ip addr', $output);
     /*
     [root@picosam ~]# ip addr show
@@ -567,9 +567,9 @@ function subMask($ip)
      */
     foreach ($output as $s) {
         $regs = NULL;
-        if (preg_match('|inet (\d+.\d+.\d+.\d+)/(\d+)|', $s, $regs)) {
-            if ($regs[1] == $ip) return (int)$regs[2];
-        }
+    	if (preg_match('|inet (\d+.\d+.\d+.\d+)/(\d+)|', $s, $regs)) {
+    		if ($regs[1] == $ip) return (int)$regs[2];
+    	}
     }
     return 32;  // No se pudo encontrar máscara de la red
 }

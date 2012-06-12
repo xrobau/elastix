@@ -178,7 +178,7 @@ $(document).ready(function(){
 				return false;
 			}
 		}
-        //hideModalPopUP();
+       // hideModalPopUP();
        /* var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#lblSending').val()+"</span></div></div>";
         $.blockUI({ message: urlImaLoading });*/
         return true;

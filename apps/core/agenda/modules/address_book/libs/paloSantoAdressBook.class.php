@@ -64,7 +64,7 @@ class paloAdressBook {
 This function obtain all records in the table, but, if the param $count is passed as true the function only return
 a array with the field "total" containing the total of records.
 */
-    function getAddressBook($iduser, $limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL, $count=FALSE)
+    function getAddressBook($limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL, $count=FALSE, $iduser=NULL)
     {
 	//Defining the fields to get. If the param $count is true, then we will get the result of the sql function count(), else, we will get all fields in the table.
 	$fields=($count)?"count(id) as total":"*";
@@ -77,22 +77,16 @@ a array with the field "total" containing the total of records.
 	    if(!in_array($field_name,$arrFilters))
 		$field_name = "id";
 	    $arrParams[] = $field_pattern;
-            $strWhere .= "($field_name like ? ";
-	    if($field_name=="telefono"){
-		$strWhere .= " or extension like ?) ";
-		$arrParams[] = $field_pattern;
-	    }
-	    else
-		$strWhere .= ") ";
-	    $strWhere .= "and (iduser=? or status='isPublic') ";
 	    $arrParams[] = $iduser;
+            $strWhere .= " $field_name like ? and (iduser=? or status='isPublic') ";
+	    if($field_name=="telefono"){
+		$strWhere .= " or extension like ? and (iduser=? or status='isPublic') ";
+		$arrParams[] = $field_pattern;
+		$arrParams[] = $iduser;
+	    }
 	}
         // Clausula WHERE aqui
         if(!empty($strWhere)) $query .= "WHERE $strWhere ";
-	else{
-	    $query .= "WHERE iduser=? or status='isPublic'";
-	    $arrParams[] = $iduser;
-	}
         //else   $query .= "WHERE $strWhere";
         //ORDER BY
         $query .= " ORDER BY last_name, name";
@@ -112,7 +106,7 @@ a array with the field "total" containing the total of records.
         return $result;
     }
 
-    function getAddressBookByCsv($iduser, $limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL, $count=FALSE)
+    function getAddressBookByCsv($limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL, $count=FALSE, $iduser=NULL)
     {
 	//Defining the fields to get. If the param $count is true, then we will get the result of the sql function count(), else, we will get all fields in the table.
 	$fields=($count)?"count(id) as total":"*";
@@ -172,49 +166,25 @@ a array with the field "total" containing the total of records.
         //if(!empty($strWhere)) $query .= "WHERE $strWhere ";
 
         $result=$this->_DB->getFirstRowQuery($query, true, $params);
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
+        if(!$result && $result==null && count($result) < 1)
             return false;
-	}
-	else
-	    return $result;
+        return $result;
     }
 
-    function addContact($data,$returnId=false)
+    function addContact($data)
     {
         //$queryInsert = $this->_DB->construirInsert('contact', $data);
-	$data[] = time();
-        $queryInsert = "insert into contact(name,last_name,telefono,email,iduser,picture,address,company,notes,status,last_update) values(?,?,?,?,?,?,?,?,?,?,?)";
+        $queryInsert = "insert into contact(name,last_name,telefono,email,iduser,picture,address,company,notes,status) values(?,?,?,?,?,?,?,?,?,?)";
         $result = $this->_DB->genQuery($queryInsert, $data);
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
-	$id = $this->getLastInsertId();
-	$result = $this->addHistory($id,$data[4],$data[9],"contact",$data[10],"create","A contact was created: id=$id, name=$data[0], last_name=$data[1], telefono=$data[2], email=$data[3], iduser=$data[4], picture=$data[5], address=$data[6], company=$data[7], notes=$data[8], status=$data[9]");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
-	if($returnId)
-	    return $id;
-	else
-	    return $result;
+
+        return $result;
     }
 
     function addContactCsv($data)
     {
         //$queryInsert = $this->_DB->construirInsert('contact', $data);
-	$data[] = time();
-        $queryInsert = "insert into contact(name,last_name,telefono,email,iduser,address,company,status,last_update) values(?,?,?,?,?,?,?,?,?)";
+        $queryInsert = "insert into contact(name,last_name,telefono,email,iduser,address,company,status) values(?,?,?,?,?,?,?,?)";
         $result = $this->_DB->genQuery($queryInsert, $data);
-	
-	$id = $this->getLastInsertId();
-	$result = $this->addHistory($id,$data[4],$data[7],"contact",$data[8],"create","A contact was created: id=$id, name=$data[0], last_name=$data[1], telefono=$data[2], email=$data[3], iduser=$data[4], address=$data[5], company=$data[6], status=$data[7]");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
 
         return $result;
     }
@@ -223,16 +193,9 @@ a array with the field "total" containing the total of records.
     {
         //$queryUpdate = $this->_DB->construirUpdate('contact', $data,$where);
 //        die($queryUpdate);
-	$time = time();
-        $queryUpdate = "update contact set name=?, last_name=?, telefono=?, email=?, iduser=?, picture=?, address=?, company=?, notes=?, status=?, last_update='$time'  where id=?";
+        $queryUpdate = "update contact set name=?, last_name=?, telefono=?, email=?, iduser=?, picture=?, address=?, company=?, notes=?, status=?  where id=?";
 	$data[] = $id;
         $result = $this->_DB->genQuery($queryUpdate, $data);
-
-	$result = $this->addHistory($id,$data[4],$data[9],"contact",$time,"modify","A contact was modified: id=$id, name=$data[0], last_name=$data[1], telefono=$data[2], email=$data[3], iduser=$data[4], picture=$data[5], address=$data[6], company=$data[7], notes=$data[8], status=$data[9]");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
 
         return $result;
     }
@@ -251,18 +214,11 @@ a array with the field "total" containing the total of records.
 
     function deleteContact($id, $id_user)
     {
-	$status = $this->getStatus($id,$id_user);
         $params = array($id, $id_user);
         $query = "DELETE FROM contact WHERE id=? and iduser=?";
         $result = $this->_DB->genQuery($query, $params);
         if($result[0] > 0)
             return true;
-	$time = time();
-	$result = $this->addHistory($id,$id_user,$status,"contact",$time,"delete","A contact was deleted");
-	if($result==FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-            return false;
-	}
         else return false;
     }
 
@@ -432,278 +388,5 @@ a array with the field "total" containing the total of records.
         return $result;
     }
 
-    function getLastInsertId(){
-        $query = "SELECT id FROM contact order by id desc";
-        $result = $this->_DB->getFirstRowQuery($query, TRUE);
-        if($result != FALSE || $result != "")
-            return $result['id'];
-        else
-            return false;
-    }
-
-    function addHistory($id_register,$id_user,$status,$type,$timestamp,$action,$description)
-    {
-	$query = "INSERT INTO history (id_register,id_user,status,type,timestamp,action,description) VALUES(?,?,?,?,?,?,?)";
-	$result = $this->_DB->genQuery($query,array($id_register,$id_user,$status,$type,$timestamp,$action,$description));
-	if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true; 
-    }
-    
-    function getLastQueueid()
-    {
-	$query = "SELECT id FROM queues order by id desc";
-        $result = $this->_DB->fetchTable($query, TRUE);
-        if($result === FALSE || count($result) == 0)
-            return 0;
-        else{
-	    $idNumber = 0;
-	    foreach($result as $value){
-		$number = explode("-",$value["id"]);
-		if($number[2] > $idNumber)
-		    $idNumber = $number[2];
-	    }
-            return $idNumber;
-	}
-    }
-
-    function addQueue($data,$type,$user)
-    {
-	$id = $this->getLastQueueid();
-	$next = $id + 1;
-	$id = "queue-contact-$next";
-	$query = "INSERT INTO queues (id,type,user,data,status) VALUES (?,?,?,?,'NEW')";
-	$result = $this->_DB->genQuery($query, array($id,$type,$user,$data));
-	if($result == FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $id;
-    }
-
-    function getDataTicket($ticket,$id_user)
-    {
-	$query = "SELECT * FROM queues WHERE id=? AND user=? AND type='contact'";
-	$result = $this->_DB->getFirstRowQuery($query, TRUE, array($ticket,$id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return NULL;
-	}
-	elseif(count($result) == 0)
-	    return FALSE;
-	else
-	    return $result;
-    }
-
-    function getContactsAfterSync($last_sync,$contacts,$id_user,$dataResponse)
-    {
-	$query = "SELECT * FROM contact WHERE last_update > ? AND (iduser=? OR status='isPublic')";
-	$result = $this->_DB->fetchTable($query, true, array($last_sync,$id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else{
-	    $query = "SELECT * FROM history WHERE timestamp > ? AND action='delete' AND (id_user=? OR status='isPublic') AND type='contact'";
-	    $deleted_contacts = $this->_DB->fetchTable($query, true, array($last_sync,$id_user));
-	    if($deleted_contacts === FALSE){
-		$this->errMsg = $this->_DB->errMsg;
-		return FALSE;
-	    }
-	    foreach($deleted_contacts as $key => $deleted){
-		$remove = FALSE;
-		foreach($contacts as $contact){
-		    if($deleted["id_register"] == $contact->id && $deleted["timestamp"] < $contact->last_update){
-			$remove = TRUE;
-			break;
-		    }
-		}
-		if(!$remove){
-		  $next = count($result);
-		  $result[$next]["id"] = $deleted["id_register"];
-		  $result[$next]["delete"] = "yes";  
-		}
-	    }
-	    $arrContacts = array();
-	    foreach($result as $key => $value){
-		$remove = FALSE;
-		$isFromClient = FALSE;
-		if(is_array($dataResponse) && count($dataResponse) > 0){
-		    foreach($dataResponse as $data){
-			if($value["id"] == $data->id){
-			    $value["id_client"] = $data->id_client;
-			    $isFromClient = TRUE;
-			    break;
-			}   
-		    }
-		}
-		if(!$isFromClient){
-		    foreach($contacts as $contact){
-			if(isset($contact->id)){
-			    if($contact->id == $value["id"]){
-				if(isset($contact->id_client))
-				    $value["id_client"] = $contact->id_client;
-				if(isset($contact->name))
-				    if($contact->name != $value["name"])
-					break;
-				if(isset($contact->last_name))
-				    if($contact->last_name != $value["last_name"])
-					break;
-				if(isset($contact->telefono))
-				    if($contact->telefono != $value["telefono"])
-					break;
-				if(isset($contact->extension))
-				    if($contact->extension != $value["extension"])
-					break;
-				if(isset($contact->email))
-				    if($contact->email != $value["email"])
-					break;
-				if(isset($contact->picture))
-				    if($contact->picture != $value["picture"])
-					break;
-				if(isset($contact->address))
-				    if($contact->address != $value["address"])
-					break;
-				if(isset($contact->notes))
-				    if($contact->notes != $value["notes"])
-					break;
-				if(isset($contact->company))
-				    if($contact->company != $value["company"])
-					break;
-				if(isset($contact->status))
-				    if($contact->status != $value["status"])
-					break;
-				$remove = TRUE;
-			    }
-			}
-		    }
-		}
-		if(!$remove){
-		    $next = count($arrContacts);
-		    $arrContacts[$next] = $value;
-		    if(!isset($arrContacts[$next]["delete"]))
-			$arrContacts[$next]["delete"] = "no";
-		}
-	    }
-	    return $arrContacts;
-	}
-    }
-
-    function removeQueue($ticket)
-    {
-	$query = "DELETE FROM queues WHERE id=?";
-	$result = $this->_DB->genQuery($query, array($ticket));
-	if($result == FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
-    }
-
-    function getStatus($id,$id_user)
-    {
-	$query = "SELECT status FROM contact WHERE id=? AND iduser=?";
-	$result = $this->_DB->getFirstRowQuery($query,TRUE,array($id,$id_user));
-	if($result == FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return "";
-	}
-	else
-	    return $result["status"];
-    }
-
-    function getUserContacts($id_user,$fields=NULL)
-    {
-	if(is_null($fields))
-	    $fields = "*";
-	$query = "SELECT $fields FROM contact WHERE iduser=? OR status='isPublic'";
-	$result = $this->_DB->fetchTable($query, true, array($id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $result;
-    }
-
-    function getUnsolvedQueues()
-    {
-	$query = "SELECT * FROM queues WHERE type='contact' AND status='NEW'";
-	$result = $this->_DB->fetchTable($query, true);
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $result;
-    }
-
-    function changeStatusQueue($id,$status)
-    {
-	$query = "UPDATE queues SET status=? WHERE id=?";
-	$result = $this->_DB->genQuery($query,array($status,$id));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
-    }
-
-    function contactDeleted($id,$id_user)
-    {
-	$query = "SELECT * FROM history WHERE id_register=? AND type='contact' AND action='delete' AND id_user=?";
-	$result = $this->_DB->getFirstRowQuery($query,TRUE,array($id,$id_user));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return $result;
-    }
-
-    function contactExists($id)
-    {
-	$query = "SELECT COUNT(*) FROM contact WHERE id=?";
-	$result = $this->_DB->getFirstRowQuery($query,FALSE,array($id));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return NULL;
-	}
-	elseif(count($result) == 0)
-	    return FALSE;
-	else
-	    return TRUE;
-    }
-
-    function addContactWithId($id,$data)
-    {
-	$data[] = time();
-	$data[] = $id;
-	$query = "insert into contact(name,last_name,telefono,email,iduser,picture,address,company,notes,status,last_update,id) values(?,?,?,?,?,?,?,?,?,?,?,?)";
-	$result = $this->_DB->genQuery($query,$data);
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
-    }
-
-    function setQueueDataResponse($id,$dataResponse)
-    {
-	$query = "UPDATE queues SET response_data=? WHERE id=?";
-	$result = $this->_DB->genQuery($query,array($dataResponse,$id));
-	if($result === FALSE){
-	    $this->errMsg = $this->_DB->errMsg;
-	    return FALSE;
-	}
-	else
-	    return TRUE;
-    }
 }
 ?>

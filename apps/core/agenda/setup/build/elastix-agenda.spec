@@ -29,13 +29,6 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # Additional (module-specific) files that can be handled by RPM
-
-mkdir -p $RPM_BUILD_ROOT/opt/elastix/
-mv setup/elastix-synchronizer $RPM_BUILD_ROOT/opt/elastix/
-mkdir -p $RPM_BUILD_ROOT/etc/init.d/
-mv $RPM_BUILD_ROOT/opt/elastix/elastix-synchronizer/elastix-synchronizerd $RPM_BUILD_ROOT/etc/init.d/
-chmod +x $RPM_BUILD_ROOT/etc/init.d/elastix-synchronizerd
-
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
 #mv setup/dialer
 
@@ -82,8 +75,6 @@ if [ $1 -eq 1 ]; then #install
     elastix-dbprocess "install" "$pathModule/setup/db"
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
-    # restart daemon
-    /sbin/service elastix-synchronizerd restart
 fi
 
 # The installer script expects to be in /tmp/new_module
@@ -93,9 +84,6 @@ chown -R asterisk.asterisk /tmp/new_module/%{modname}
 
 php /tmp/new_module/%{modname}/setup/installer.php
 rm -rf /tmp/new_module
-
-chkconfig --add elastix-synchronizerd
-chkconfig --level 2345 elastix-synchronizerd on
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -117,25 +105,8 @@ fi
 /var/lib/asterisk/sounds/custom
 /var/lib/asterisk/sounds/custom/calendarEvent.gsm
 /var/lib/asterisk/sounds/custom/*
-/opt/elastix/elastix-synchronizer/*
-/etc/init.d/elastix-synchronizerd
 
 %changelog
-#Se debe poner como prerequisito la version del framework nueva que se genere
-* Fri Jun 08 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: modules agenda, the daemon elastix-synchronizerd
-  does not need root privileges. Changing to asterisk user privileges
-  SVN Rev[3976]
-- ADDED: module agenda, added a new daemon called elastix-synchronizerd
-  which handle the contacts and events synchronization
-  SVN Rev[3975]
-- ADDED: module calendar, added new rest resources for events
-  synchronization and data integrity verification
-  SVN Rev[3973]
-- ADDED: modules address_book, added new rest resources for 
-  synchronitation and data verification integrity
-  SVN Rev[3972]
-
 * Mon May 28 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7
 - FIXED: Module - Agenda/Calendar: Fixed bug 1266. In firefox and IE
   don't working action to add or edit event in the calendar. Now this

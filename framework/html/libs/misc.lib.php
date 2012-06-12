@@ -550,16 +550,16 @@ function obtenerDetallesRPMS()
     exec($comando1, $output1, $retval);
     $label = NULL;
     foreach ($output1 as $s) {
-        if (substr($s, 0, 3) == 'RPM') {
+    	if (substr($s, 0, 3) == 'RPM') {
             $arrPro[$label = substr($s, 4)] = array();
-        } else {
+    	} else {
             $regs = NULL;
             if (preg_match('/package (.+) is not installed/', $s, $regs)) {
                 $arrPro[$label][] = array($regs[1], '(not installed)', ' ');
             } else {
                 $arrPro[$label][] = explode(' ', $s);
             }
-        }
+    	}
     }
     return $arrPro;
 }

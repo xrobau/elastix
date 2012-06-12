@@ -306,12 +306,6 @@ rm -rf $RPM_BUILD_ROOT
   environment, prevents error messages from appearing on stderr.
 - FIXED: Framework: teach version display to deal with some missing packages
 
-* Fri Jun 08 2012 Alberto Santos <asantos@palosanto.com>
-- ADDED: framework databases, added a new database called elastix.db
-  SVN Rev[3982]
-- NEW: framework class that applies the method of Long Poll
-  SVN Rev[3970]
-
 * Wed Jun 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: probe CPU load the proper way, by reading /proc/stat twice
   and subtracting values. Fixes Elastix bug #1043.

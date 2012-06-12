@@ -388,7 +388,7 @@ function saveEvent($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
             if(getParameter("save_edit")){ // si se va modificar un evento existente
                 $dataUp = $pCalendar->getEventById($id, $uid);
                 if($dataUp!="" && isset($dataUp))
-                    $val = $pCalendar->updateEvent($id,$start,$end,$starttime,$event_type,$event,$description,$asterisk_calls,$recording,$call_to,$notification,$notification_email,$endtime,$each_repeat,$checkbox_days, $remainerTime, $color, $uid);
+                    $val = $pCalendar->updateEvent($id,$start,$end,$starttime,$event_type,$event,$description,$asterisk_calls,$recording,$call_to,$notification,$notification_email,$endtime,$each_repeat,$checkbox_days, $remainerTime, $color);
                 else    $val = false;
                 if($val == true){
                     if($notification_email != "")

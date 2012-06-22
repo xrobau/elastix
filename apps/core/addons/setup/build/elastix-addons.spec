@@ -103,11 +103,15 @@ fi
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /opt/elastix/elastix-updater/*
-/etc/init.d/elastix-updaterd
 %defattr(-, root, root)
+/etc/init.d/elastix-updaterd
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Jun 15 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Explicitly return exit code in startup script
+- CHANGED: /etc/init.d/elastix-updaterd should be owned by root, not asterisk.
+
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Elastix Updater: remove lone call to deprecated ereg().
 

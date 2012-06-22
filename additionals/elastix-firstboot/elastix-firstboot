@@ -1,0 +1,298 @@
+#!/bin/bash
+#
+# elastix-firstboot	This shell script sets up the various MySQL databases for the 
+#                       modules that need an initialized database to work. Other tasks
+#                       to be performed on first boot should be placed here.
+#
+# chkconfig: - 66 36
+# description:	Elastix setup for first boot.
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# extract value of a MySQL option from config files
+# Usage: get_mysql_option SECTION VARNAME DEFAULT
+# result is returned in $result
+# We use my_print_defaults which prints all options from multiple files,
+# with the more specific ones later; hence take the last match.
+get_mysql_option(){
+	result=`/usr/bin/my_print_defaults "$1" | sed -n "s/^--$2=//p" | tail -n 1`
+	if [ -z "$result" ]; then
+	    # not found, use default
+	    result="$3"
+	fi
+}
+
+# Se intenta prender mysql en caso de que esté apagado
+/sbin/service mysqld status > /dev/null 2>&1
+if [ ! "$?" == "0" ] ; then
+    /sbin/service mysqld start > /dev/null 2>&1
+fi
+
+get_mysql_option mysqld datadir "/var/lib/mysql"
+datadir="$result"
+get_mysql_option mysqld socket "$datadir/mysql.sock"
+socketfile="$result"
+get_mysql_option mysqld_safe log-error "/var/log/mysqld.log"
+errlogfile="$result"
+get_mysql_option mysqld_safe pid-file "/var/run/mysqld/mysqld.pid"
+mypidfile="$result"
+
+BACKTITLE="Elastix password configuration"
+PASSWD_PATH="/etc/elastix.conf"
+OPTFILE="/tmp/option.$$"
+
+elastix_mysql_init(){
+	# Check if process has been already done
+	FIRSTBOOT=0
+	if [ ! -e $PASSWD_PATH ] ; then
+		# Prompt for the MySQL password for this system
+		FIRSTBOOT=1
+		elastix_prompt_mysql_passwd
+		ret=$?
+		if [ $ret -ne 0 ] ; then
+	    	return $ret
+		fi
+	else
+	    echo "Password configuration already present."
+	fi
+
+	# Read the MySQL root password for this system
+	elastix_root_password=`grep mysqlrootpwd= /etc/elastix.conf | sed 's/^mysqlrootpwd=//'`
+
+	# The scripts placed in /var/spool/elastix-mysqldbscripts should be executed now.
+	ret=0
+	for dbscript in /var/spool/elastix-mysqldbscripts/*.sql ; do
+		if [ -e $dbscript ]; then
+			echo "Applying MySQL script $dbscript ..."
+			mysql -u root "-p$elastix_root_password" < $dbscript
+			ret=$?
+		fi
+                if [ $ret -ne 0 ] ; then
+                        # TODO: When exists a sql error on some script, the second process for web passwors isn't showed.
+            		return $ret
+		else
+			# Remove just-executed script
+			rm -f $dbscript
+       	        fi
+	done
+
+	if [ $FIRSTBOOT -ne 0 ] ; then
+		# Prompt for web passwords on first boot
+		elastix_prompt_web_passwd
+		ret=$?
+	fi
+
+	return $ret
+}
+
+elastix_prompt_mysql_passwd(){
+	DIALOG_PURPOSE="The Elastix system uses the open-source database engine MySQL for storage \
+of important telephony information. In order to protect your data, a master password must \
+be set up for the database.\n\n\
+This screen will now ask for a password for the 'root' account of MySQL.\n\n"
+	
+	# Read and set new MySQL root password
+	while [ "$MYSQL_PASSWD1" == "" ] ; do
+	    MYSQL_PASSWD1=""
+	    MYSQL_PASSWD2=""
+	    while [ "$MYSQL_PASSWD1" == "" ] ; do
+	        dialog --output-fd 3 --backtitle "$BACKTITLE (Screen 1 of 4)" --insecure --passwordbox "$DIALOG_PURPOSE Please enter your new MySQL root password:" 16 70 3>$OPTFILE
+	        MYSQL_PASSWD1=`cat $OPTFILE`
+	        if [ "$MYSQL_PASSWD1" == "" ] ; then
+	            dialog --backtitle "$BACKTITLE" --msgbox "MySQL root password must be nonempty." 7 40
+		else
+			if cat $OPTFILE | perl -ne 'exit(1) if /^([a-zA-Z0-9 .&-@=_!<>]+)$/; exit(0);' ; then
+				dialog --backtitle "$BACKTITLE" --msgbox "Admin password may only contain alphanumeric characters, spaces, or the following: .&-@=_!<>]." 7 40
+				MYSQL_PASSWD1=""
+			fi
+	        fi
+	    done
+	    while [ "$MYSQL_PASSWD2" == "" ] ; do
+	        dialog --output-fd 3 --backtitle "$BACKTITLE (Screen 2 of 4)" --insecure --passwordbox "Please (re)confirm your new MySQL root password:" 10 70 3>$OPTFILE
+	        MYSQL_PASSWD2=`cat $OPTFILE`
+	    done
+	    if [ "$MYSQL_PASSWD1" != "$MYSQL_PASSWD2" ] ; then
+	        dialog --backtitle "$BACKTITLE" --msgbox "Password and confirmation do not match!" 7 40
+	        MYSQL_PASSWD1=""
+	        MYSQL_PASSWD2=""
+	    fi
+	done
+	rm -f $OPTFILE	
+	if ! /usr/bin/mysqladmin -u root password "$MYSQL_PASSWD1" ; then
+	    echo "Unable to set root password for MySQL - password already set or server not running!"
+	    return 1
+	fi
+	
+	echo "UPDATE mysql.user SET Password=PASSWORD('$MYSQL_PASSWD1') WHERE User='root';" | mysql -u root "-p$MYSQL_PASSWD1"
+	ret=$?
+	if [ $? -ne 0 ]; then
+	    echo "Unable to set root password (2) for MySQL - password already set or server not running!"
+	    return 1
+	fi
+	echo "FLUSH PRIVILEGES;" | mysql -u root "-p$MYSQL_PASSWD1"
+	echo "mysqlrootpwd=$MYSQL_PASSWD1" > $PASSWD_PATH
+	
+	# ****Add the user cyrus with the command saslpasswd2 ***************
+	echo "$MYSQL_PASSWD1" | /usr/sbin/saslpasswd2 -c cyrus -u example.com
+	ret=$?
+	if [ $? -ne 0 ]; then
+		echo "Unable to set cyrus password for cyrus admin!"
+	    return 1
+	fi
+
+        #TODO: Se define a localhost primero (temporal), para evitar conflicto con autenticación del cyradm -u cyrus localhost
+	sed -ie '/127.0.0.1/s/[\t| ]localhost[^\.]/ /g'  /etc/hosts  # busca el patron 127.0.0.1 y reemplaza [\t| ]localhost[^\.] por " "
+	sed -ie 's/127.0.0.1/127.0.0.1\tlocalhost/'  /etc/hosts      # reemplaza 127.0.0.1 por 127.0.0.1\tlocalhost
+
+
+	# Cambiar permisos del archivo /etc/sasldb2 a 644 
+	chmod 644 /etc/sasldb2
+	echo "cyrususerpwd=$MYSQL_PASSWD1" >> $PASSWD_PATH
+	# *******************************************************************
+	
+	chmod 600 $PASSWD_PATH
+	chown asterisk.asterisk $PASSWD_PATH
+}
+
+elastix_prompt_web_passwd() {
+	DIALOG_PURPOSE="Several Elastix components have administrative interfaces that can be used \
+through the Web. A web login password must be set for these components in order to prevent \
+unauthorized access to these administration interfaces.\n\n\
+This screen will now ask for a password for user 'admin' that will be used for: Elastix Web Login, FreePBX, VTiger, A2Billing and FOP.\n\n"
+	
+	MYSQL_PASSWD1=`grep mysqlrootpwd= /etc/elastix.conf | sed 's/^mysqlrootpwd=//'`
+
+	# Read and set new FreePBX admin password. This procedure works with FreePBX 2.7.0
+	# This password will also be used for Elastix login, VTiger and A2Billing
+	while [ "$FREEPBX_PASSWD1" == "" ] ; do
+	    FREEPBX_PASSWD1=""
+	    FREEPBX_PASSWD2=""
+	    while [ "$FREEPBX_PASSWD1" == "" ] ; do
+	        dialog --output-fd 3 --backtitle "$BACKTITLE (Screen 3 of 4)" --insecure --passwordbox "$DIALOG_PURPOSE Please enter your new password for 'admin':" 16 70 3>$OPTFILE
+	        FREEPBX_PASSWD1=`cat $OPTFILE`
+	        if [ "$FREEPBX_PASSWD1" == "" ] ; then
+	            dialog --backtitle "$BACKTITLE" --msgbox "Admin password must be nonempty." 7 40
+		else 
+			if cat $OPTFILE | perl -ne 'exit(1) if /^([a-zA-Z0-9 .&-@=_!<>]+)$/; exit(0);' ; then
+				dialog --backtitle "$BACKTITLE" --msgbox "Admin password may only contain alphanumeric characters, spaces, or the following: .&-@=_!<>]." 7 40
+				FREEPBX_PASSWD1=""
+			fi
+	        fi
+	    done
+	    while [ "$FREEPBX_PASSWD2" == "" ] ; do
+	        dialog --output-fd 3 --backtitle "$BACKTITLE (Screen 4 of 4)" --insecure --passwordbox "Please (re)confirm your new password for 'admin':" 10 70 3>$OPTFILE
+	        FREEPBX_PASSWD2=`cat $OPTFILE`
+	    done
+	    if [ "$FREEPBX_PASSWD1" != "$FREEPBX_PASSWD2" ] ; then
+	        dialog --backtitle "$BACKTITLE" --msgbox "Password and confirmation do not match!" 7 40
+	        FREEPBX_PASSWD1=""
+	        FREEPBX_PASSWD2=""
+	    fi
+	done
+	rm -f $OPTFILE
+	
+	echo "UPDATE asterisk.ampusers SET password_sha1=sha1('$FREEPBX_PASSWD1') WHERE username = 'admin';" | mysql -u root "-p$MYSQL_PASSWD1"
+	ret=$?
+	if [ $? -ne 0 ]; then
+	    echo "Unable to set admin password for FreePBX !"
+	    return 1
+	fi
+	
+	# Use the same password for freePBX login and for updating /etc/amportal.conf
+	echo "GRANT USAGE ON *.* TO 'asteriskuser'@'localhost' IDENTIFIED BY '$FREEPBX_PASSWD1'" | mysql -u root "-p$MYSQL_PASSWD1"
+	ret=$?
+	if [ $? -ne 0 ]; then
+	    echo "Unable to set database password for FreePBX !"
+	    return 1
+	fi
+	FREEPBX_PASSWD_ESC=`echo $FREEPBX_PASSWD1 | sed "s/&/\\\\\\&/g"`
+	cat /etc/amportal.conf | sed "s/AMPDBPASS=eLaStIx.asteriskuser.2oo7/AMPDBPASS=$FREEPBX_PASSWD_ESC/" > /tmp/amportal.conf.tmp
+	mv /tmp/amportal.conf.tmp /etc/amportal.conf
+        cat /etc/amportal.conf | sed "s/AMPMGRPASS=elastix456/AMPMGRPASS=$FREEPBX_PASSWD_ESC/" > /tmp/amportal.conf.tmp
+        mv /tmp/amportal.conf.tmp /etc/amportal.conf
+	cat /etc/amportal.conf | sed "s/FOPPASSWORD=eLaStIx.2oo7/FOPPASSWORD=$FREEPBX_PASSWD_ESC/" > /tmp/amportal.conf.tmp
+	mv /tmp/amportal.conf.tmp /etc/amportal.conf
+	cat /etc/amportal.conf | sed "s/ARI_ADMIN_PASSWORD=ari_password/ARI_ADMIN_PASSWORD=$FREEPBX_PASSWD_ESC/" > /tmp/amportal.conf.tmp
+        mv /tmp/amportal.conf.tmp /etc/amportal.conf
+	cat /etc/asterisk/res_mysql.conf | sed "s/dbpass = eLaStIx.asteriskuser.2oo7/dbpass = $FREEPBX_PASSWD_ESC/" > /tmp/res_mysql.conf.tmp
+	mv /tmp/res_mysql.conf.tmp /etc/asterisk/res_mysql.conf
+	cat /etc/asterisk/cbmysql.conf | sed "s/password=eLaStIx.asteriskuser.2oo7/password=$FREEPBX_PASSWD_ESC/" > /tmp/cbmysql.conf.tmp
+	mv /tmp/cbmysql.conf.tmp /etc/asterisk/cbmysql.conf
+	cat /etc/asterisk/cdr_mysql.conf | sed "s/password = eLaStIx.asteriskuser.2oo7/password = $FREEPBX_PASSWD_ESC/" > /tmp/cdr_mysql.conf.tmp
+	mv /tmp/cdr_mysql.conf.tmp /etc/asterisk/cdr_mysql.conf
+        cat /etc/asterisk/manager.conf | sed "s/secret = elastix456/secret = $FREEPBX_PASSWD_ESC/" > /tmp/manager.conf.tmp
+        mv /tmp/manager.conf.tmp /etc/asterisk/manager.conf
+	for i in /etc/amportal.conf /etc/asterisk/res_mysql.conf /etc/asterisk/cbmysql.conf /etc/asterisk/cdr_mysql.conf ; do
+	    chown asterisk.asterisk $i
+	    chmod 644 $i
+	done
+
+        # Set amiadminpwd in /etc/elastix.conf
+        echo "amiadminpwd=$FREEPBX_PASSWD_ESC" >> $PASSWD_PATH
+
+	# Set password for Elastix login. Requires sed, md5sum, sqlite3.
+	MD5HASH=`echo -n "$FREEPBX_PASSWD1" | md5sum | sed 's/^\(.\{32\}\)  -/\1/'`
+	sqlite3 /var/www/db/acl.db "UPDATE acl_user SET md5_password = '$MD5HASH' WHERE name = 'admin'"
+	
+	# Set password for A2Billing
+        WHIRLPOOL=`php -r "echo hash('whirlpool','$FREEPBX_PASSWD1');"`
+        echo "UPDATE mya2billing.cc_ui_authen SET pwd_encoded='$WHIRLPOOL' WHERE login='admin';" | mysql -u root "-p$MYSQL_PASSWD1"
+	#echo "UPDATE mya2billing.cc_ui_authen SET password = '$FREEPBX_PASSWD1' WHERE login = 'admin';" | mysql -u root -p$MYSQL_PASSWD1
+	ret=$?
+	if [ $? -ne 0 ]; then
+	    echo "Unable to set admin password for A2Billing !"
+	    return 1
+	fi
+	
+	# Remove redundant root login from A2Billing
+	# echo "DELETE FROM mya2billing.cc_ui_authen WHERE login = 'root';" | mysql -u root -p$MYSQL_PASSWD1
+	
+	# Set password for VTiger. This assumes the vtigercrm510 database is already created. 
+	# This procedure works for VTigerCRM 5.1.0
+	echo "UPDATE vtigercrm510.vtiger_users SET user_password = ENCRYPT('$FREEPBX_PASSWD1', CONCAT('\$1\$', SUBSTRING('admin' FROM 1 FOR 2), '\$')), user_hash = md5('$FREEPBX_PASSWD1') WHERE user_name = 'admin'" | mysql -u root "-p$MYSQL_PASSWD1"
+	ret=$?
+	if [ $? -ne 0 ]; then
+	    echo "Unable to set admin password for VTiger !"
+	    return 1
+	fi
+	return 0
+}
+
+start(){
+	ret=0
+
+	# Perform all tasks that require a running MySQL database
+        MYSQLPID=`cat "$mypidfile"  2>/dev/null `
+        if [ -n "$MYSQLPID" ]; then
+		elastix_mysql_init
+		ret=$?	
+	else
+		echo "No running MySQL server has been found."
+		ret=1
+	fi
+
+	return $ret
+}
+
+stop(){
+	return 0
+}
+
+# See how we were called.
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop}"
+    exit 1
+esac
+
+exit $?

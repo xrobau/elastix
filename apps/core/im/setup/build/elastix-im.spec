@@ -12,6 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.2.0-18
 Requires: yum
+Requires: openfire
 
 %description
 Elastix IM
@@ -62,6 +63,9 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Bring openfire dependency here, removed from elastix-system.
+
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-2
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-18

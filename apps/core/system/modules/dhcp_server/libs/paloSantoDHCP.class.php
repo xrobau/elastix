@@ -32,12 +32,11 @@ include_once("libs/paloSantoDB.class.php");
 /* Clase que implementa DHCP Server */
 class PaloSantoDHCP
 {
-    var $_DB; // instancia de la clase paloDB
+    private $_DB; // instancia de la clase paloDB
     var $errMsg;
-    var $pathFileConfDHCP;
+
     function PaloSantoDHCP(&$pDB)
     {
-        $this->pathFileConfDHCP = "/etc/dhcpd.conf";
         // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
             $this->_DB =& $pDB;
@@ -61,11 +60,10 @@ class PaloSantoDHCP
 
         // Trato de abrir el archivo de configuracion de dhcp
         $arrConfigurationDHCP = NULL;
-        if($fh = @fopen("/etc/dhcpd.conf", "r")) {
-            $arrDirectivasEncontradas = array();
-            $arrConfigurationDHCP = array();
-    
-            while($linea_archivo = fgets($fh, 4096)) {
+        $output = $ret = NULL;
+        exec('/usr/bin/elastix-helper dhcpconfig --dumpconfig', $output, $ret);
+        if ($ret == 0) {
+            foreach ($output as $linea_archivo) {
                 // RANGO DE IPS
                 $patron = "^[[:space:]]*range dynamic-bootp[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]+([[:digit:]]{1,3})\." .
@@ -172,17 +170,9 @@ class PaloSantoDHCP
 
     function getStatusServiceDHCP()
     {
-        //VERIFICACION DE QUE EL PROCESO dhcpd ESTA EJECUTANDOSE
-        //Por ahora voy a basarme en si el archivo /var/run/dhcpd.pid existe
-        //y voy a suponer que si EXISTE el servicio esta corriendo, caso contrario NO.
-
-        //vemos si se esta ejecutando el servicio dhcp
-        $out=`/sbin/service dhcpd status`;
-
-        if(file_exists("/var/run/dhcpd.pid") && eregi("pid",$out))
-            return "active"; 
-        else
-            return "desactive";
+        $output = $ret = NULL;
+        exec('/sbin/service dhcpd status > /dev/null 2>&1', $output, $ret);
+        return ($ret == 0) ? 'active' : 'desactive';
     }
 
     function startServiceDHCP()

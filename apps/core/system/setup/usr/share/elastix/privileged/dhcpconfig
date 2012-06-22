@@ -31,8 +31,11 @@
 */
 require_once 'Console/Getopt.php';
 
+load_default_timezone();
+
 // Parse command-line options
 $opt = Console_Getopt::getopt($argv, '', array(
+    'dumpconfig', // Dump DHCP configuration
     'refresh',  // Rewrites /etc/dhcpd.conf from current config and network.db
     'config',   // Configurate DHCP options
     'start',    // Start DHCP service and mark as autostart
@@ -51,6 +54,8 @@ $opt = Console_Getopt::getopt($argv, '', array(
 if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
 validateOptions($opt);
 foreach ($opt[0] as $option) switch ($option[0]) {
+case '--dumpconfig':
+    exit(action_dumpconfig($opt) ? 0 : 1);
 case '--refresh':
     exit(action_refresh($opt) ? 0 : 1);
 case '--config':
@@ -66,6 +71,23 @@ function error_exit($sMsg, $errorcode = 1)
 {
     fwrite(STDERR, $sMsg);
     exit($errorcode);
+}
+
+function load_default_timezone()
+{
+    $sDefaultTimezone = @date_default_timezone_get();
+    if ($sDefaultTimezone == 'UTC') {
+        $sDefaultTimezone = 'America/New_York';
+        if (file_exists('/etc/sysconfig/clock')) {
+            foreach (file('/etc/sysconfig/clock') as $s) {
+                $regs = NULL;
+                if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
+                    $sDefaultTimezone = $regs[1];
+                }
+            }
+        }
+    }
+    date_default_timezone_set($sDefaultTimezone);
 }
 
 // Parse and validate known command-line options
@@ -88,6 +110,20 @@ function validateOptions($opt)
         for ($i = 1; $i <= 4; $i++) if ($regs[$i] > 255)
             error_exit('Option '.$option[0].": Invalid IP address\n");
         break;
+    }
+}
+
+// Dump configuration
+function action_dumpconfig($opt)
+{
+    if (file_exists('/etc/dhcp/dhcpd.conf')) {
+        readfile('/etc/dhcp/dhcpd.conf');
+        return TRUE;
+    } elseif (file_exists('/etc/dhcpd.conf')) {
+        readfile('/etc/dhcpd.conf');
+        return TRUE;
+    } else {
+        return FALSE;
     }
 }
 
@@ -261,12 +297,16 @@ $sConfigIPs_inside
 }
 $sConfigIPs_outside
 PLANTILLA_DHCP;
-            file_put_contents('/etc/dhcpd.conf', $sPlantilla);
+            if (file_exists('/etc/dhcp/dhcpd.conf')) {
+                file_put_contents('/etc/dhcp/dhcpd.conf', $sPlantilla);
+            } else {
+                file_put_contents('/etc/dhcpd.conf', $sPlantilla);
+            }
         }
     }
 
     // Restart dhcp service for changes to take effect
-    if ($bExito && file_exists('/var/run/dhcpd.pid')) {
+    if ($bExito && is_dhcp_active()) {
         $output = $ret = NULL;
         exec('/sbin/service dhcpd restart', $output, $ret);
         $bExito = ($ret == 0);
@@ -280,22 +320,36 @@ function listIpAddresses()
 {
     $iflist = array(); $if = NULL;
     $output = NULL;
-    exec('/sbin/ifconfig', $output);
-	foreach ($output as $s) {
+    exec('/sbin/ip addr show', $output);
+    $bIsEther = FALSE;
+    $ip = NULL;
+    foreach ($output as $s) {
         $regs = NULL;
-		if (preg_match('/^(eth\d+)\s+/', $s, $regs)) {
-			$if = $regs[1];
-		} elseif (preg_match('/\s+inet addr:(\S+)\s+Bcast:(\S+)\s+Mask:(\S+)/', $s, $regs)) {
-			if (!is_null($if) && !isset($iflist[$if])) { 
+        if (preg_match('/^\d+:\s+(\w+):\s*<(.*)>/', $s, $regs)) {
+            $if = $regs[1];
+            $bIsEther = FALSE;
+        } elseif (strpos($s, 'link/ether') !== FALSE) {
+            $bIsEther = TRUE;
+        } elseif (preg_match('|\s*inet (\d+\.\d+\.\d+.\d+)/(\d+) brd (\d+\.\d+\.\d+.\d+).+\s((\w+)(:(\d+))?)\s*$|', trim($s), $regs)) {
+            // Calcular IP de máscara a partir de número de bits
+            $iMaskBits = $regs[2];
+            $iMask = (0xFFFFFFFF << (32 - $iMaskBits)) & 0xFFFFFFFF;
+            $sMaskIP = implode('.', array(
+                ($iMask >> 24) & 0xFF,
+                ($iMask >> 16) & 0xFF,
+                ($iMask >>  8) & 0xFF,
+                ($iMask      ) & 0xFF,
+            ));
+            if (!is_null($if) && !isset($iflist[$if])) { 
                 $iflist[$if] = array(
                     'ipaddr'    =>  $regs[1],
-                    'broadcast' =>  $regs[2],
-                    'netmask'   =>  $regs[3],
-                    'network'   =>  construir_ip_red($regs[1], $regs[3]),
+                    'broadcast' =>  $regs[3],
+                    'netmask'   =>  $sMaskIP,
+                    'network'   =>  construir_ip_red($regs[1], $sMaskIP),
                 );
             }
-		}
-	}
+        }
+    }
     return $iflist;
 }
 
@@ -311,7 +365,7 @@ function construir_ip_red($ip, $mascara)
 function action_start($opt)
 {
     $output = $ret = NULL;
-	if (!file_exists('/var/run/dhcpd.pid')) {
+	if (!is_dhcp_active()) {
 		exec('/sbin/service dhcpd start', $output, $ret);
         if ($ret != 0) return FALSE;
 	}
@@ -323,11 +377,19 @@ function action_start($opt)
 function action_stop($opt)
 {
     $output = $ret = NULL;
-    if (file_exists('/var/run/dhcpd.pid')) {
+    if (is_dhcp_active()) {
         exec('/sbin/service dhcpd stop', $output, $ret);
         if ($ret != 0) return FALSE;
     }
     exec('/sbin/chkconfig --level 235 dhcpd off', $output, $ret);
+    return ($ret == 0);
+}
+
+// Check whether DHCP is running
+function is_dhcp_active()
+{
+    $output = $ret = NULL;
+    exec('/sbin/service dhcpd status > /dev/null 2>&1', $output, $ret);
     return ($ret == 0);
 }
 

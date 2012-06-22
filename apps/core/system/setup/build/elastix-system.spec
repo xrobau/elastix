@@ -13,7 +13,7 @@ BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-9
 Prereq: elastix-fax >= 2.2.0-4 
 Prereq: php-soap
-Prereq: openfire, wanpipe-util >= 3.4.1-4, dahdi
+Prereq: dahdi
 Conflicts: elastix-agenda < 2.2.0-1
 
 %description
@@ -128,8 +128,24 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
-* Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Remove openfire dependency, moved to elastix-im.
+- Remove wanpipe-util dependency. The hardware_detector script is supposed to
+  detect that wanpipe-util is installed and disable Sangoma detection if not.
+
+* Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: DHCP Server: Several fixes for Fedora 17 compatibility:
+  1) dhcpconfig need to explicitly load the default timezone for PHP
+  2) dhcpd.conf is at a different place in Fedora and access is denied to 
+     asterisk by default, so a new privileged action dumpconfig was created
+  3) Be aware of location change between CentOS and Fedora 17 when writing
+     configuration file
+  4) In Fedora 17, dhcpd no longer writes a pidfile, so running status must be
+     queried with service dhcpd status
+  5) Use ip addr show instead of ifconfig because of output format change
 - CHANGED: PaloSantoNetwork: make some functions static
+
+* Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: PaloSantoNetwork: rewrite network parameter query to stop using 
   ifconfig which changed output format between CentOS and Fedora 17. Add
   documentation on the output format of network query methods.

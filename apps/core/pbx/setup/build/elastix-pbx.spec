@@ -14,7 +14,7 @@ Prereq: elastix-framework >= 2.3.0-9
 Prereq: elastix-my_extension >= 2.0.4-5
 Prereq: freePBX >= 2.8.1-12
 Prereq: elastix-system >= 2.2.0-18
-Prereq: openfire, tftp-server, vsftpd
+Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
 Requires: festival >= 1.95
 
@@ -87,7 +87,7 @@ mv setup/etc/xinetd.d/tftp                     $RPM_BUILD_ROOT/usr/share/elastix
 
 # ** files tftpboot for endpoints configurator ** #
 unzip setup/tftpboot/P0S3-08-8-00.zip  -d     $RPM_BUILD_ROOT/tftpboot/
-mv setup/tftpboot/GS_CFG_GEN.tar.gz           $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+#mv setup/tftpboot/GS_CFG_GEN.tar.gz           $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 #tar -xvzf $RPM_BUILD_DIR/elastix/additionals/tftpboot/GS_CFG_GEN.tar.gz -C $RPM_BUILD_ROOT/tftpboot/ # Da algunos mensajes de warning, esto se puede obviar.
 mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
 
@@ -119,11 +119,11 @@ fi
 
 %post
 # Unpack tarball with binary files.
-tar -xvzf /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/GS_CFG_GEN.tar.gz -C /tftpboot
+#tar -xvzf /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/GS_CFG_GEN.tar.gz -C /tftpboot
 # Replace path java for script encode.sh
 #sed -i -e "s,JAVA_HOME=[0-9a-zA-Z._-/]*,JAVA_HOME=/opt/openfire/jre,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-sed -i -e "s,JAVA_HOME=/usr/java/j2sdk1.4.2_07,JAVA_HOME=/opt/openfire/jre,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-sed -i -e "s,GAPSLITE_HOME=/usr/local/src/GS_CFG_GEN,GAPSLITE_HOME=/tftpboot/GS_CFG_GEN,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
+#sed -i -e "s,JAVA_HOME=/usr/java/j2sdk1.4.2_07,JAVA_HOME=/opt/openfire/jre,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
+#sed -i -e "s,GAPSLITE_HOME=/usr/local/src/GS_CFG_GEN,GAPSLITE_HOME=/tftpboot/GS_CFG_GEN,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
 
 # Tareas de TFTP
 chmod 777 /tftpboot/
@@ -294,6 +294,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jun 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: Reimplement Grandstream configuration encoder
+  as a pure PHP method. This allows the package to drop the Java-based encoder,
+  which in turn allows the package to drop the openfire dependency.
+- CHANGED: Endpoint Configurator: modify listmacip so that it can stream output
+  from nmap as it is generated.
+
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: Properly figure out network mask for local 
   network instead of hardcoding a /24 network mask.

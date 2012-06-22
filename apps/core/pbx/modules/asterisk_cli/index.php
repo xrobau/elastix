@@ -1,4 +1,4 @@
-<?
+<?php
 require_once "libs/paloSantoForm.class.php";
 
 function _moduleContent(&$smarty, $module_name)

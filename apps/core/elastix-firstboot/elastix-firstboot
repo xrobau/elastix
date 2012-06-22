@@ -13,34 +13,6 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-# extract value of a MySQL option from config files
-# Usage: get_mysql_option SECTION VARNAME DEFAULT
-# result is returned in $result
-# We use my_print_defaults which prints all options from multiple files,
-# with the more specific ones later; hence take the last match.
-get_mysql_option(){
-	result=`/usr/bin/my_print_defaults "$1" | sed -n "s/^--$2=//p" | tail -n 1`
-	if [ -z "$result" ]; then
-	    # not found, use default
-	    result="$3"
-	fi
-}
-
-# Se intenta prender mysql en caso de que esté apagado
-/sbin/service mysqld status > /dev/null 2>&1
-if [ ! "$?" == "0" ] ; then
-    /sbin/service mysqld start > /dev/null 2>&1
-fi
-
-get_mysql_option mysqld datadir "/var/lib/mysql"
-datadir="$result"
-get_mysql_option mysqld socket "$datadir/mysql.sock"
-socketfile="$result"
-get_mysql_option mysqld_safe log-error "/var/log/mysqld.log"
-errlogfile="$result"
-get_mysql_option mysqld_safe pid-file "/var/run/mysqld/mysqld.pid"
-mypidfile="$result"
-
 # Currently this is dead code
 elastix_activate_firewall(){
 	salida=1
@@ -66,15 +38,8 @@ elastix_activate_firewall(){
 start() {
 	ret=0
 
-	# Perform all tasks that require a running MySQL database
-	MYSQLPID=`cat "$mypidfile"  2>/dev/null `
-	if [ -n "$MYSQLPID" ]; then
-		/usr/bin/elastix-admin-passwords --init
-		ret=$?
-	else
-		echo "No running MySQL server has been found."
-		ret=1
-	fi
+	/usr/bin/elastix-admin-passwords --init
+	ret=$?
 
     [ $ret -eq 0 -a -d /var/lock/subsys ] && touch /var/lock/subsys/elastix-firstboot
 	return $ret

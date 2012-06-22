@@ -102,6 +102,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Optimization: do not attempt to start mysql unconditionally. It 
+  should be started only when a database configuration is required. Also, since
+  elastix-admin-passwords starts mysql if required, there is no need to start
+  it on the init script too.
+
 * Mon May 07 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7
 - CHANGED: Changed in specfile, updated release to 7
 

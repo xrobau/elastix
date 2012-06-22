@@ -175,14 +175,8 @@ class PaloSantoFileEndPoint
 
             case 'Grandstream':
                 $contentFileGrandstream = PrincipalFileGrandstream($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['model']);
-                if($this->createFileConf($this->directory, "gxp".$ArrayData['data']['filename'], $contentFileGrandstream)) {
-                    //ex: . /tftpboot/GS_CFG_GEN/bin/encode.sh 000945531b3b /tftpboot/gxp_config_1.1.6.46.template.cfg /tftpboot/cfg000945531b3b
-                    exec("/tftpboot/GS_CFG_GEN/bin/encode.sh {$ArrayData['data']['filename']} /tftpboot/gxp{$ArrayData['data']['filename']} /tftpboot/cfg{$ArrayData['data']['filename']}",$arrConsole,$flagStatus);
-                    if($flagStatus == 0)
-                        $return = true;
-                }
-                else $return = false;
-
+                $sConfigBin = grandstream_codificar_config($ArrayData['data']['filename'], $contentFileGrandstream);
+                $return = $this->createFileConf($this->directory, "cfg{$ArrayData['data']['filename']}", $sConfigBin);
                 break;
 
             case 'Zultys':

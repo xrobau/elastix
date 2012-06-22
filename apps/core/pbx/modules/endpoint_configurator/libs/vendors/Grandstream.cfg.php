@@ -132,4 +132,49 @@ P8 = 1
 TEMP;
     return $content;
 }
+
+/**
+ * Procedimiento para codificar la configuración en formato INI en el formato
+ * binario que espera el teléfono Grandstream. Este procedimiento reemplaza a
+ * la llamada al programa externo GS_CFG_GEN/bin/encode.sh.
+ * 
+ * @param   string  $sMac MAC del teléfono Grandstream en formato aabbccddeeff
+ * @param   string  $sTxtConfig Bloque de configuración en formato INI
+ * 
+ * @return  string  Bloque binario codificado listo para escribir al archivo
+ */
+function grandstream_codificar_config($sMAC, $sTxtConfig)
+{
+    $sBloqueConfig = '';
+
+    // Validar y codificar la MAC del teléfono
+    if (!preg_match('/^[[:xdigit:]]{12}$/', $sMAC)) return FALSE;
+
+    // Parsear y codificar las variables de configuración
+    $params = array();
+    foreach (preg_split("/(\x0d|\x0a)+/", $sTxtConfig) as $s) {
+        $s = trim($s);
+        if (strpos($s, '#') === 0) continue;
+        $regs = NULL;
+        if (preg_match('/^(\w+)\s*=\s*(.*)$/', $s, $regs))
+            $params[] = $regs[1].'='.rawurlencode($regs[2]);
+    }
+    $params[] = 'gnkey=0b82';
+    $sPayload = implode('&', $params);
+    if (strlen($sPayload) & 1) $sPayload .= "\x00";
+    //if (strlen($sPayload) & 3) $sPayload .= "\x00\x00";
+    
+    // Calcular longitud del bloque en words, más el checksum
+    $iLongitud = 8 + strlen($sPayload) / 2;
+    $sPayload = pack('NxxH*', $iLongitud, $sMAC)."\x0d\x0a\x0d\x0a".$sPayload;
+    $iChecksum = 0x10000 - (array_sum(unpack('n*', $sPayload)) & 0xFFFF);
+
+    $sPayload[4] = chr(($iChecksum >> 8) & 0xFF);
+    $sPayload[5] = chr(($iChecksum     ) & 0xFF);
+
+    if ((array_sum(unpack("n*", $sPayload)) & 0xFFFF) != 0) 
+        die('Suma de verificación inválida');
+    return $sPayload;
+}
+
 ?>

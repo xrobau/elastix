@@ -114,7 +114,11 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
         $offset = $oGrid->calculateOffset();
         $bExportation = false;
     }
-    $url    = "?menu=$module_name&filter_field=$filter_field&filter_value=$filter_value";
+    $url = array(
+        'menu'          =>  $module_name,
+        'filter_field'  =>  $filter_field,
+        'filter_value'  =>  $filter_value,
+    );
     $oGrid -> setURL($url);
     $arrResult =$pWeakKeys->getWeakKeys($limit,$offset,$filter_field,$filter_value);
     $arrData = null;

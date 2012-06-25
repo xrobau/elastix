@@ -294,6 +294,9 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Conference: Remove XSS vulnerability.
+
 * Tue Jun 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: Reimplement Grandstream configuration encoder
   as a pure PHP method. This allows the package to drop the Java-based encoder,

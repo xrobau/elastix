@@ -607,12 +607,15 @@ function show_callers($smarty, $module_name, $local_templates_dir, $pDB, $arrLan
 
     $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
 
-    $url_room= "&accion=show_callers&roomNo=".$_GET['roomNo'];
-
+    $url = array(
+        'menu'      =>  $module_name,
+        'accion'    =>  'show_callers',
+        'roomNo'    =>  $_GET['roomNo'],
+    );    
 
     $arrGrid = array("title"    => $arrLang["Conference"],
                         "icon"     => "/modules/$module_name/images/pbx_conference.png",
-                        "url"      => "?menu=$module_name$url_room",
+                        "url"      => $url,
                         "width"    => "99%",
                         "start"    => $inicio,
                         "end"      => $fin,
@@ -653,8 +656,6 @@ function show_callers($smarty, $module_name, $local_templates_dir, $pDB, $arrLan
     $oGrid->showFilter(trim($htmlFilter),true);
 
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrDatosGrid,$arrLang);
-    //$contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name$url_room'>".$oGrid->fetchGrid($arrGrid, $arrDatosGrid,$arrLang)."</form>";
-
     return $contenidoModulo;
 }
 

@@ -209,6 +209,9 @@ class paloSantoConference {
 
     function ObtainCallers($data_connection, $room)
     {
+        $arrCallers = array();
+        if (!ctype_digit($room)) return $arrCallers;
+
         // User #: 01         1064 device               Channel: SIP/1064-00000001     (unmonitored) 00:00:11
         $regexp = '!^User #:[[:space:]]*([[:digit:]]+)[[:space:]]*([[:digit:]]+)[[:alnum:]| |<|>]*Channel: ([[:alnum:]|/|-]+)[[:space:]]*([[:alnum:]|\(|\)| ]+\))[[:space:]]*([[:digit:]|\:]+)$!i';
         
@@ -216,7 +219,6 @@ class paloSantoConference {
         $arrResult = $this->AsteriskManager_Command($data_connection['host'],
             $data_connection['user'], $data_connection['password'], $command);
 
-        $arrCallers = array();
         if(is_array($arrResult) && count($arrResult)>0) {
             foreach($arrResult as $Key => $linea) {
                 if (preg_match($regexp, $linea, $arrReg)) {

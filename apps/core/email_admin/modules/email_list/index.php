@@ -132,7 +132,7 @@ function reportEmailList($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $oGrid->setIcon("/modules/$module_name/images/email.png");
     $oGrid->pagingShow(true); // show paging section.
     $offset = $oGrid->calculateOffset();
-    $url    = "?menu=$module_name&domain=$id_domain";
+    $url = array('menu' => $module_name, 'domain' => $id_domain);
     $oGrid->setURL($url);
 	$button_eliminar="";
     $arrResult = $pEmailList->getEmailList($id_domain,$limit,$offset);
@@ -163,7 +163,7 @@ function reportEmailList($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $oGrid->showFilter(trim($htmlFilter));
     $content = $oGrid->fetchGrid();
     if (strpos($content, '<form') === FALSE)
-        $content = "<form  method='POST' style='margin-bottom:0;' action=$url>$content</form>";
+        $content = "<form  method='POST' style='margin-bottom:0;' action=".construirURL($url).">$content</form>";
 
     //end grid parameters
 
@@ -545,8 +545,14 @@ function viewMemberList($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oGrid->setIcon("/modules/$module_name/images/email.png");
     $oGrid->pagingShow(true);
     $offset = $oGrid->calculateOffset();
-	$url = "?menu=$module_name&action=view_memberlist&id=$id_list&filter_type=$field_type&filter_txt=$field_pattern";
-	    $oGrid->setURL($url);
+    $url = array(
+        'menu'          => $module_name,
+        'action'        =>  'view_memberlist',
+        'id'            =>  $id_list,
+        'filter_type'   =>  $field_type,
+        'filter_txt'    =>  $field_pattern
+    );
+    $oGrid->setURL($url);
 
     $arrColumns = array(_tr("Member name"),_tr("Member email"));
     $oGrid->setColumns($arrColumns);
@@ -584,7 +590,7 @@ function viewMemberList($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oGrid->showFilter(trim($htmlFilter));
     $content = $oGrid->fetchGrid();
     if (strpos($content, '<form') === FALSE)
-        $content = "<form  method='POST' style='margin-bottom:0;' action=$url>$content</form>";
+        $content = "<form  method='POST' style='margin-bottom:0;' action=".construirURL($url).">$content</form>";
     return $content;
 }
 

@@ -190,6 +190,9 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email List: Fix XSS vulnerability.
+
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Remote SMTP: only check authentication on activation, not deactivation.
 

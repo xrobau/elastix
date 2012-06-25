@@ -105,13 +105,11 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $oGrid->setIcon("modules/$module_name/images/security_define_ports.png");
     $oGrid->pagingShow(true);
     $offset = $oGrid->calculateOffset();
-    /*$url = array(
-            "menu"         =>  $module_name,
-            "filter_type"  =>  $field_type,
-            "filter_txt"   =>  $field_pattern
-            ); */
-    
-    $url = "?menu=$module_name&filter_type=$field_type&filter_txt=$field_pattern";
+    $url = array(
+        "menu"         =>  $module_name,
+        "filter_type"  =>  $field_type,
+        "filter_txt"   =>  $field_pattern
+    );
     $oGrid->setURL($url);
 
     $arrData = null;

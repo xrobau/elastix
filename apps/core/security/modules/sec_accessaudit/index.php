@@ -228,9 +228,14 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
         }
     }
 
-    $url = "?menu=$module_name&filter=$field_pattern&offset=$offset&busqueda=$busqueda&ultima_busqueda=".
-        (isset($_POST['ultima_busqueda']) ? $_POST['ultima_busqueda'] : '')."&ultimo_offset=&".
-        (isset($_POST['ultimo_offset']) ? $_POST['ultimo_offset'] : '');
+    $url = array(
+        'menu'              =>  $module_name,
+        'filter'            =>  $field_pattern,
+        'offset'            =>  $offset,
+        'busqueda'          =>  $busqueda,
+        'ultima_busqueda'   =>  (isset($_POST['ultima_busqueda']) ? $_POST['ultima_busqueda'] : ''),
+        'ultimo_offset'     =>  (isset($_POST['ultimo_offset']) ? $_POST['ultimo_offset'] : ''),
+    );
     $oGrid->setURL($url);
     //Fin Paginacion
 

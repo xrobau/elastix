@@ -95,6 +95,9 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Define Ports, Audit, Weak Keys: Remove XSS vulnerability.
+
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Sec_Rules: Remove code that was copypasted from paloSantoNetwork, and
   reference the source directly. This allows the module to work properly with

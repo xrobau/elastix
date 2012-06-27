@@ -752,6 +752,43 @@ TEMP;
 
     return $content;
 }
+function PrincipalFileYealinkVP530($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer)
+{
+    $content= <<<TEMP
+﻿#!version:1.0.0.1
+
+##File header "#!version:1.0.0.1" can not be edited or deleted.##
+
+#######################################################################################
+##                           Account1 Settings                                       ##                                                                          
+#######################################################################################
+
+#Enable or disable the account1, 0-Disabled (default), 1-Enabled;
+account.1.enable = 1
+
+#Configure the label displayed on the LCD screen for account1.
+account.1.label = $DisplayName
+
+#Configure the display name of account1.
+account.1.display_name = $DisplayName
+
+#Configure the username and password for register authentication.
+account.1.auth_name = $id_device
+account.1.password = $secret
+
+#Configure the register user name.
+account.1.user_name = $id_device
+
+#Configure the SIP server address.
+account.1.sip_server_host = $ipAdressServer 
+#Specify the port for the SIP server. The default value is 5060.
+account.1.sip_server_port = 5060
+auto_provision.server.url = tftp://$ipAdressServer:69
+
+TEMP;
+
+    return $content;
+}
 
 function existsValue($arr, $key, $default)
 {

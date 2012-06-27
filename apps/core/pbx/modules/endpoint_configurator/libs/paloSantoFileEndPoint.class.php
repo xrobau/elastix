@@ -201,18 +201,23 @@ class PaloSantoFileEndPoint
             break;
 
             case 'Yealink':
-               if($ArrayData['data']['model'] == "SIP-T20/T20P" || $ArrayData['data']['model'] == "SIP-T22/T22P" || $ArrayData['data']['model'] == "SIP-T26/T26P" || $ArrayData['data']['model'] == "SIP-T28/T28P" ){
+               if($ArrayData['data']['model']== "VP530"){
+                     $contentFileYealink =PrincipalFileYealinkVP530($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
+               }
+
+               if($ArrayData['data']['model'] == "SIP-T20/T20P" || $ArrayData['data']['model'] == "SIP-T22/T22P" || $ArrayData['data']['model'] == "SIP-T26/T26P" || $ArrayData['data']['model'] == "SIP-T28/T28P"){
                     $contentFileYealink =PrincipalFileYealink($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
-                        if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileYealink)){
-                            $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
-                            $result      = $this->AsteriskManagerAPI('Command',$parameters);
-                            if($result===false)
-                                $return = false;
-                            else 
-                                $return = true;
-                        }
-                        else $return = false;
-                }
+               }
+               if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileYealink)){
+                  $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
+                  $result      = $this->AsteriskManagerAPI('Command',$parameters);
+                  if($result===false)
+                     $return = false;
+                  else
+                     $return = true;
+                  }
+               else $return = false;
+
                 break;
 
             case 'LG-ERICSSON':

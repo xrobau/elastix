@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -95,14 +95,20 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Define Ports, Audit, Weak Keys: Remove XSS vulnerability.
+  SVN Rev[4010]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Sec_Rules: Remove code that was copypasted from paloSantoNetwork, and
   reference the source directly. This allows the module to work properly with
   the fixes made for Fedora 17. Also, remove an unneeded reference to 
   paloSantoConfig. 
+  SVN Rev[3996]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-5
 - CHANGED: Security - Build/elastix-security.spec: update specfile with latest

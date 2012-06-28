@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -108,16 +108,23 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
-* Fri Jun 15 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Jun 27 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-5
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Changed release in specfile
+
+* Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Explicitly return exit code in startup script
 - CHANGED: /etc/init.d/elastix-updaterd should be owned by root, not asterisk.
+  SVN Rev[4005]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Elastix Updater: remove lone call to deprecated ereg().
+  SVN Rev[3977]
 
 * Mon Jun 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Elastix Updater: remove E_STRICT from error_reporting to silence
   warning messages at daemon startup in Fedora 17.
+  SVN Rev[3957]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest

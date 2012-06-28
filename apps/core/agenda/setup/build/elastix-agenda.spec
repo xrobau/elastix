@@ -107,6 +107,9 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Remove stray print_r()
+
 * Mon May 28 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7
 - FIXED: Module - Agenda/Calendar: Fixed bug 1266. In firefox and IE
   don't working action to add or edit event in the calendar. Now this

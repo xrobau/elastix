@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 10
+Release: 11
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -294,11 +294,26 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: Remove stray print_r.
+  SVN Rev[4018]
+  
+* Wed Jun 27 2012 German Macas <gmacas@palosanto.com>
+- CHANGED : modules - endpoint_configurator: Add function and sql statement to 
+  set the new model Yealink VP530 from Endpoint Configurator.
+  SVN Rev[4014]
+
+* Tue Jun 26 2012 Sergio Broncano <sbroncano@palosanto.com>
+- ADDED: Module endpoints_batch, copy from trunk revision
+  SVN Rev[4013]
 
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Conference: Remove XSS vulnerability.
+  SVN Rev[4012]
 
 * Tue Jun 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: Reimplement Grandstream configuration encoder
@@ -306,21 +321,38 @@ fi
   which in turn allows the package to drop the openfire dependency.
 - CHANGED: Endpoint Configurator: modify listmacip so that it can stream output
   from nmap as it is generated.
+  SVN Rev[4009]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: Properly figure out network mask for local 
-  network instead of hardcoding a /24 network mask.
+  network instead of hardcoding a /24 network mask. SVN Rev[3993]
 - FIXED: Endpoint Configurator: Relax pattern matching in listmacip script to
   account for differences in output format in nmap from CentOS to Fedora 17.
+  SVN Rev[3992]
 - FIXED: Endpoint Configurator: Use ip addr show instead of ifconfig to get
   size of network mask for endpoint scan. Required for compatibility with 
   Fedora 17.
+  SVN Rev[3989]
+
+* Mon Jun 11 2012 Sergio Broncano <sbroncano@palosanto.com>
+- ADD: MODULE endpoints_batch, Parent menu is created second level called "Endpoints". 
+  with their respective classification Batch of Extensions, Endpoint Configurator become 
+  the third-level menu, menu is also added a third level called Batch Enpoints enabling 
+  mass configuration enpoints so fast, taking as input: subnet where the endpoints are 
+  connected and a file (. csv) file that contains configuration parameters such as 
+  (Vendor, Model, MAC, Ext, IP, Mask, GW, DNS1, DNS2, Bridge, Time Zone).
+  SVN Rev[3985]
+
+* Thu Jun 7 2012 Alberto Santos <asantos@palosanto.com>
+- NEW: new rest resource in pbxadmin to make calls.
+  SVN Rev[3971]
 
 * Tue Jun 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: installer.php: stop leaving temporary file /tmp/trunk_dump.sql around 
   after install or update.
 - FIXED: installer.php: stop leaving temporary file /var/www/db/trunk-pbx.db
-  around on most install/update scenarios. 
+  around on most install/update scenarios.
+  SVN Rev[3959] 
 
 * Mon Jun 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-10
 - FIXED: Changed specfile so that several files are explicitly set as 

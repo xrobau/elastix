@@ -1258,7 +1258,6 @@ class paloACL {
         $result = $this->_DB->fetchTable($query, true);
         if( $result == false ) {
             $this->errMsg = $this->_DB->errMsg;
-            print_r($this->errMsg);
             return array();
         }
 

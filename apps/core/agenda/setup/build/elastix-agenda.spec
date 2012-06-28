@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -107,8 +107,34 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
-* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Remove stray print_r()
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- CHANGED: Agenda - build/elastix-agenda.spec: Changed specfile, updated with 
+  the latest information.
+  SVN Rev[3981]
+
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- CHANGED: modules agenda, the daemon elastix-synchronizerd does not need root
+  privileges. Changing to asterisk user privileges.
+  SVN Rev[3976]
+
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module agenda, added a new daemon called elastix-synchronizerd which
+  handle the contacts and events synchronization.
+  SVN Rev[3975]
+
+* Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module calendar, added new rest resources for events synchronization 
+  and data integrity verification.
+  SVN Rev[3973]
+
+* Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: modules address_book, added new rest resources for synchronitation 
+  and data verification integrity.
+  SVN Rev[3972]
 
 * Mon May 28 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7
 - FIXED: Module - Agenda/Calendar: Fixed bug 1266. In firefox and IE

@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -188,16 +188,19 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
-* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Remove stray print_r.
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-5
+- CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Wed May 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Modules - Fax Viewer: relax unnecessarily-restrictive validation type
   on "Company Fax" filter option. Fixes Elastix bug #1281. SVN Rev[3946]
+  SVN Rev[3946]
 
 * Mon May 28 2012 German Macas <gmacas@palosanto.com> 2.3.0-4
 - CHANGED: modules - sendfax: Add messages of sending fax process with ajax 
-  on Send Fax application form. SVN Rev[3937]
+  on Send Fax application form.
+  SVN Rev[3937]
 
 * Wed May 02 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-3
 - FIXED: Modules - faxlist: Duplicate name column "Name Caller ID" was fixed.

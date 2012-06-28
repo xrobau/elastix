@@ -122,6 +122,9 @@ fi
 
 %changelog
 #Se debe poner como prerequisito la version del framework nueva que se genere
+* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Remove stray print_r()
+
 * Fri Jun 08 2012 Alberto Santos <asantos@palosanto.com>
 - CHANGED: modules agenda, the daemon elastix-synchronizerd
   does not need root privileges. Changing to asterisk user privileges

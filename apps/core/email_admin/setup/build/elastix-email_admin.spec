@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -190,14 +190,26 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email List: Fix XSS vulnerability.
+  SVN REV[4011]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Remote SMTP: only check authentication on activation, not deactivation.
+  SVN REV[3987]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Postfix Stats: the cron job should explicitly set the default timezone.
+  SVN REV[3966]
+
+* Fri Apr 13 2012 Luis Abarca <labarca@palosanto.com>
+- ADDED: Build - SPEC's: The spec files were added to the corresponding modules 
+  and the framework.
+  SVN REV[3849]
 
 * Mon Apr 02 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-6
 - CHANGED: Email_Admin - Remote_Smtp: Changed in index.php and remote.js to 

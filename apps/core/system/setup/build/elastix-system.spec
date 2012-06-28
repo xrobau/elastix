@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -128,10 +128,15 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Remove openfire dependency, moved to elastix-im.
 - Remove wanpipe-util dependency. The hardware_detector script is supposed to
   detect that wanpipe-util is installed and disable Sangoma detection if not.
+  SVN Rev[4008]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: DHCP Server: Several fixes for Fedora 17 compatibility:
@@ -143,17 +148,21 @@ fi
   4) In Fedora 17, dhcpd no longer writes a pidfile, so running status must be
      queried with service dhcpd status
   5) Use ip addr show instead of ifconfig because of output format change
+  SVN Rev[4008]
 - CHANGED: PaloSantoNetwork: make some functions static
+  SVN Rev[3995]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: PaloSantoNetwork: rewrite network parameter query to stop using 
   ifconfig which changed output format between CentOS and Fedora 17. Add
   documentation on the output format of network query methods.
+  SVN Rev[3984]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: PaloSantoNetwork: mark some methods as private
 - CHANGED: PaloSantoNetwork: more efficient implementation for IP manipulation 
   methods.
+  SVN Rev[3974]
 
 * Wed Jun 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: Reorganize some of the code for system status. Before this
@@ -165,12 +174,14 @@ fi
   system probes. It also allows to remove some now-dead code. Additionally the 
   paloSantoSysInfo class was changed to only do the system probe on an explicit
   call, instead of every time an object is built.
+  SVN Rev[3961]
 
 * Fri Jun 01 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: rework service state query so that it works in both CentOS
   and Fedora. In particular, Fedora denies access to /var/run/asterisk/httpd.pid
   from asterisk user, so httpd needs to be queried by command name, not pid.
   Also, query uses filesystem functions instead of external commands - faster.
+  SVN Rev[3955]
 
 * Mon May 07 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-9
 - UPDATED: Specfile was updated to release 9

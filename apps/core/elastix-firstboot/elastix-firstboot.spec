@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 2.3.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,14 +102,20 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Optimization: do not attempt to start mysql unconditionally. It 
   should be started only when a database configuration is required. Also, since
   elastix-admin-passwords starts mysql if required, there is no need to start
   it on the init script too.
+  SVN Rev[4006]
 
 * Mon May 07 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7
-- CHANGED: Changed in specfile, updated release to 7
+- CHANGED: Changed in specfile, updated release to 7.
+  SVN Rev[3934]
 
 * Fri May 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Rewrite the password assignment as a PHP script. This allows the use

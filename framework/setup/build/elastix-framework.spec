@@ -295,6 +295,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: remove stray print_r().
+
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use SERVER_ADDR instead of ifconfig for querying IP of 
   request in iframe module display.

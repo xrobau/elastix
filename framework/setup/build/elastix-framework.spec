@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.3.0
-Release: 11
+Release: 12
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -295,25 +295,36 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
-* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Framework: remove stray print_r().
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+- CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use SERVER_ADDR instead of ifconfig for querying IP of 
-  request in iframe module display.
+  request in iframe module display. SVN Rev[3994]
 - FIXED: Framework: use ip addr show instead of ifconfig to get assigned IP 
-  address. Required for compatibility with Fedora 17.
+  address. Required for compatibility with Fedora 17. SVN Rev[3991]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: replace TERM=dumb with TERM=xterm in elastix-helper 
-  environment, prevents error messages from appearing on stderr.
+  environment, prevents error messages from appearing on stderr. SVN Rev[3988]
 - FIXED: Framework: teach version display to deal with some missing packages
+  SVN Rev[3986]
+
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: framework databases, added a new database called elastix.db.
+  SVN Rev[3982]
+
+* Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
+- NEW: framework class that applies the method of Long Poll.
+  SVN Rev[3970]
 
 * Wed Jun 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: probe CPU load the proper way, by reading /proc/stat twice
   and subtracting values. Fixes Elastix bug #1043.
 - FIXED: Framework: use Processor entry in /proc/cpuinfo if present. Allows 
   presenting a decent "CPU" entry in dashboard on ARM systems.
+  SVN Rev[3963]
 
 * Thu May 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Only overwrite /etc/yum.repos.d/CentOS-Base.repo if this file already

@@ -7,7 +7,6 @@ function PrincipalFileYealink($DisplayName, $id_device, $secret, $arrParameters,
     $configNetwork = "";
     $ByDHCP = existsValue($arrParameters,'By_DHCP',1); echo $ByDHCP;
     $ByDHCP = ($ByDHCP == 1)?0:2; // 0 indica que es por DHCP y 2 por estatico
-print_r($arrParameters);
     if($ByDHCP==2){
         $configNetwork ="
 WANStaticIP       =".existsValue($arrParameters,'IP','')."

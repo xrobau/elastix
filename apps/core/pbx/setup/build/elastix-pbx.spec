@@ -294,6 +294,9 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: Remove stray print_r.
+
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Conference: Remove XSS vulnerability.
 

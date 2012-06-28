@@ -188,6 +188,9 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Remove stray print_r.
+
 * Wed May 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Modules - Fax Viewer: relax unnecessarily-restrictive validation type
   on "Company Fax" filter option. Fixes Elastix bug #1281. SVN Rev[3946]

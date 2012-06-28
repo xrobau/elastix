@@ -144,7 +144,7 @@ function applyChnageParameterFaxMail($smarty, $module_name, $local_templates_dir
         $contenidoModulo = $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", $arrLang["Configuration Sending Fax Mail"], $_POST);
     } 
     else {
-        $oFax    = new paloFax(); print_r($_POST);
+        $oFax    = new paloFax();
         if($oFax->setConfigurationSendingFaxMail($_POST['remite'],$_POST['remitente'],$_POST['subject'],$_POST['content'])){
             header("Location: ?menu=$module_name");
         }

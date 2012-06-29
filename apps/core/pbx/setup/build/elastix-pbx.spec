@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 11
+Release: 12
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -294,9 +294,18 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Fri Jun 29 2012 German Macas <gmacas@palosanto.com>
+- ADDED: module - endpoints_batch: image file_csv.jpg for help of module.
+  SVN Rev[4029]
+
 * Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4025]
 
 * Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: Remove stray print_r.

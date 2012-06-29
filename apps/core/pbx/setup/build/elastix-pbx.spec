@@ -294,7 +294,7 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
-* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+* Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
 

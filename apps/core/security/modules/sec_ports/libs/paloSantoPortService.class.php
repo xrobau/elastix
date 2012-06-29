@@ -388,20 +388,25 @@ class paloSantoPortService {
 
     function isPortInService($id, &$port)
     {
-	$query = "SELECT COUNT(*) FROM filter WHERE sport=? OR dport=? OR icmp_type=? OR number_ip=?";
-	$result=$this->_DB->getFirstRowQuery($query,false,array($id,$id,$id,$id));
+        $query = "SELECT COUNT(*) FROM filter WHERE sport=? OR dport=? OR icmp_type=? OR number_ip=?";
+        $result = $this->_DB->getFirstRowQuery($query,false,array($id,$id,$id,$id));
 
-        if($result===FALSE){
+        if ($result===FALSE) {
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-        if($result[0] > 0){
-	    $data = $this->loadPuerto($id);
-	    $port = $data;
-	    return true;
-	}
-	else
-	    return false;
+        if ($result[0] > 0) {
+            // Verificar si el puerto se usa en regla de portknocking
+            $result = $this->_DB->getFirstRowQuery(
+                'SELECT COUNT(*) FROM portknock_user_auth WHERE id_port = ?', 
+                FALSE, array($id));
+            if ($result===FALSE) {
+                $this->errMsg = $this->_DB->errMsg;
+                return false;
+            }
+            return ($result[0] > 0);
+        } else
+            return false;
     }
 }
 ?>

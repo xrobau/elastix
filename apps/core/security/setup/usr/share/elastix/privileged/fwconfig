@@ -55,14 +55,14 @@ function error_exit($sMsg, $errorcode = 1)
 function action_flushFirewall($opt)
 {
     file_put_contents("/etc/sysconfig/iptables",""); // Se blanque ese archivo para que no se vuelvan a cargar las reglas al reiniciar el servidor
-	$output = $ret = NULL;
+	$ret = NULL;
     foreach (array(
         '/sbin/iptables -F',
         '/sbin/iptables -X',
         '/sbin/iptables -Z',
         '/sbin/iptables -t nat -F',
         ) as $cmd) {
-    	exec($cmd, $output, $ret);
+        system($cmd, $ret);
         if ($ret) return FALSE;
     }
     return TRUE;
@@ -72,6 +72,7 @@ function action_flushFirewall($opt)
 function action_loadFirewall($opt)
 {
     $bExito = TRUE;
+    $bFirewallActivo = FALSE;
     $elastixChains = array(
         'INPUT'     =>  'ELASTIX_INPUT',
         'OUTPUT'    =>  'ELASTIX_OUTPUT',
@@ -86,16 +87,74 @@ function action_loadFirewall($opt)
         $sth = $conn->query('SELECT * FROM filter LIMIT 1');
         $rules = $sth->fetchAll(PDO::FETCH_ASSOC);
         if (count($rules) > 0 && !array_key_exists('state', $rules[0])) {
-        	print "DEBUG: arreglando filter.state faltante...\n";
+        	fputs(STDERR, "DEBUG: arreglando filter.state faltante...\n");
             $conn->query('ALTER TABLE filter ADD COLUMN state varchar(50)');
         }
 
-        // Read rule configuration from database
-        $sth = $conn->query(
-            'SELECT traffic, eth_in, eth_out, ip_source, ip_destiny, protocol, ' .
-                'sport, dport, target, state ' .
-            'FROM  filter WHERE activated = 1 ORDER BY rule_order');
-        $rules = $sth->fetchAll(PDO::FETCH_ASSOC);
+        $rules = array();
+
+        // Is the firewall active?
+        $sth = $conn->query('SELECT first_time FROM tmp_execute');
+        foreach ($sth->fetchAll(PDO::FETCH_COLUMN) as $first_time) {
+            $bFirewallActivo = ($first_time == 0);
+        }
+
+        if ($bFirewallActivo) {
+            // Read port-knocking configuration
+            $sPeticionPK = <<<PETICION_PK
+SELECT "INPUT" AS traffic,
+    portknock_user_current_rule.eth_in AS eth_in,
+    "" AS eth_out,
+    portknock_user_current_rule.ip_source AS ip_source,
+    "0.0.0.0/0" AS ip_destiny,
+    port.protocol AS protocol,
+    "ANY" AS sport,
+    portknock_user_auth.id_port AS dport,
+    "ACCEPT" AS target,
+    "" AS state
+FROM port, portknock_user_auth, portknock_user_current_rule
+WHERE port.id = portknock_user_auth.id_port AND portknock_user_auth.id = portknock_user_current_rule.id_portknock_auth
+PETICION_PK;
+            $sth = $conn->query($sPeticionPK);
+            $rules = array_merge($rules, $sth->fetchAll(PDO::FETCH_ASSOC));
+    
+            // Read port-knocking deny rules
+            // TODO: agregar estado RELATED antes de DROP
+            $sth = $conn->query('SELECT eth_in FROM portknock_eth');
+            foreach ($sth->fetchAll(PDO::FETCH_COLUMN) as $eth_in) {
+                $rules[] = array(
+                    'traffic'       =>  'INPUT',
+                    'eth_in'        =>  $eth_in,
+                    'eth_out'       =>  '',
+                    'ip_source'     =>  '0.0.0.0/0',
+                    'ip_destiny'    =>  '0.0.0.0/0',
+                    'protocol'      =>  'STATE',
+                    'sport'         =>  '',
+                    'dport'         =>  '',
+                    'target'        =>  'ACCEPT',
+                    'state'         =>  'Established,Related',
+                );
+                $rules[] = array(
+                    'traffic'       =>  'INPUT',
+                    'eth_in'        =>  $eth_in,
+                    'eth_out'       =>  '',
+                    'ip_source'     =>  '0.0.0.0/0',
+                    'ip_destiny'    =>  '0.0.0.0/0',
+                    'protocol'      =>  'ALL',
+                    'sport'         =>  '',
+                    'dport'         =>  '',
+                    'target'        =>  'REJECT',
+                    'state'         =>  '',
+                );
+            }
+    
+            // Read rule configuration from database
+            $sth = $conn->query(
+                'SELECT traffic, eth_in, eth_out, ip_source, ip_destiny, protocol, ' .
+                    'sport, dport, target, state ' .
+                'FROM  filter WHERE activated = 1 ORDER BY rule_order');
+            $rules = array_merge($rules, $sth->fetchAll(PDO::FETCH_ASSOC));
+        }
     } catch (PDOException $e) {            
         $bExito = FALSE;
         fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
@@ -103,14 +162,14 @@ function action_loadFirewall($opt)
 
     // Flush all firewall rules
     if ($bExito) {
-        $output = $ret = NULL;
+        $ret = NULL;
         foreach (array(
             '/sbin/iptables -F',
             '/sbin/iptables -X',
             '/sbin/iptables -Z',
             '/sbin/iptables -t nat -F',
             ) as $cmd) {
-            exec($cmd, $output, $ret);
+            system($cmd, $ret);
             if ($ret) {
                 $bExito = FALSE;
                 break;
@@ -119,9 +178,9 @@ function action_loadFirewall($opt)
     }
 
     // Add ELASTIX_XXX chains to iptables configuration if not already present
-    if ($bExito) {
+    if ($bExito && $bFirewallActivo) {
     	$output = $ret = NULL;
-        exec('/sbin/iptables -L -n', $output, $ret);
+    	exec('/sbin/iptables -L -n', $output, $ret);
         if ($ret) {
             $bExito = FALSE;	
         } else {
@@ -132,16 +191,16 @@ function action_loadFirewall($opt)
                     $currentChains[] = $regs[1];
             }
             foreach (array_diff($elastixChains, $currentChains) as $key => $sChain) {
-                exec("/sbin/iptables -N $sChain", $output, $ret);
+                system("/sbin/iptables -N $sChain", $ret);
                 if ($ret) { $bExito = FALSE; break; }
-                exec("/sbin/iptables -A $key -j $sChain", $output, $ret);
+                system("/sbin/iptables -A $key -j $sChain", $ret);
                 if ($ret) { $bExito = FALSE; break; }
             }
         }
     }
 
     // Add rules to ELASTIX_XXX chains
-    if ($bExito) foreach ($rules as $rule) {
+    if ($bExito && $bFirewallActivo) foreach ($rules as $rule) {
     	$commandParams = array(
             '/sbin/iptables',
             '-A '.$elastixChains[$rule['traffic']],
@@ -154,78 +213,74 @@ function action_loadFirewall($opt)
         case 'TCP':
         case 'UDP':
             $commandParams[] = "-p ".escapeshellarg($rule['protocol']);
-            if($rule['sport'] != 'ANY' && $rule['sport'] != "" && !is_null($rule['sport'])){
-		$port = "";
-		try{
-		    $result = $conn->prepare("SELECT details FROM port WHERE id=?");
-		    $r = $result->execute(array($rule['sport']));
-		    if(!$r){
-			print("ERROR: failed to query firewall rules");
-			$bExito = false;
-			break 2;
-		    }
-		    $arrResult = array();
-		    if($result!=null){
-			while($row = $result->fetch(PDO::FETCH_OBJ)) {
-			    $arrResult[] = (array)$row;
-			}
-		    }
-		    else{
-			print("ERROR: failed to query firewall rules");
-			$bExito = false;
-			break 2;
-		    }
-		    if(isset($arrResult[0]["details"])){
-			$port = $arrResult[0]["details"];
-		    }
-		    else{
-			print("ERROR: some port was not found in database");
-			$bExito = false;
-			break 2;
-		    }
-		} catch (PDOException $e) {            
-		    fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
-		    $bExito = FALSE;
-		    break 2;
-		}
+            if ($rule['sport'] != 'ANY' && $rule['sport'] != "" && !is_null($rule['sport'])) {
+                $port = "";
+                try{
+                    $result = $conn->prepare("SELECT details FROM port WHERE id=?");
+                    $r = $result->execute(array($rule['sport']));
+                    if (!$r) {
+                        fputs(STDERR, "ERROR: failed to query firewall rules\n");
+                        $bExito = false;
+                        break 2;
+                    }
+                    $arrResult = array();
+                    if ($result!=null) {
+                        while($row = $result->fetch(PDO::FETCH_OBJ)) {
+                            $arrResult[] = (array)$row;
+                        }
+                    } else {
+                    	fputs(STDERR, "ERROR: failed to query firewall rules\n");
+                    	$bExito = false;
+                    	break 2;
+                    }
+                    if(isset($arrResult[0]["details"])) {
+                        $port = $arrResult[0]["details"];
+                    } else {
+                        fputs(STDERR, "ERROR: some port was not found in database\n");
+                        $bExito = false;
+                        break 2;
+                    }
+                } catch (PDOException $e) {            
+                    fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
+                    $bExito = FALSE;
+                    break 2;
+                }
                 $commandParams[] = "--sport ".escapeshellarg($port);
-	    }
-            if($rule['dport'] != 'ANY' && $rule['dport'] != "" && !is_null($rule['dport'])){
-		$port = "";
-		try{
-		    $result = $conn->prepare("SELECT details FROM port WHERE id=?");
-		    $r = $result->execute(array($rule['dport']));
-		    if(!$r){
-			print("ERROR: failed to query firewall rules");
-			$bExito = false;
-			break 2;
-		    }
-		    $arrResult = array();
-		    if($result!=null){
-			while($row = $result->fetch(PDO::FETCH_OBJ)) {
-			    $arrResult[] = (array)$row;
-			}
-		    }
-		    else{
-			print("ERROR: failed to query firewall rules");
-			$bExito = false;
-			break 2;
-		    }
-		    if(isset($arrResult[0]["details"])){
-			$port = $arrResult[0]["details"];
-		    }
-		    else{
-			print("ERROR: some port was not found in database");
-			$bExito = false;
-			break 2;
-		    }
-		} catch (PDOException $e) {            
-		    fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
-		    $bExito = FALSE;
-		    break 2;
-		}
+            }
+            if ($rule['dport'] != 'ANY' && $rule['dport'] != "" && !is_null($rule['dport'])) {
+                $port = "";
+                try{
+                    $result = $conn->prepare("SELECT details FROM port WHERE id=?");
+                    $r = $result->execute(array($rule['dport']));
+                    if (!$r) {
+                        fputs(STDERR, "ERROR: failed to query firewall rules\n");
+                        $bExito = false;
+                        break 2;
+                    }
+                    $arrResult = array();
+                    if ($result!=null) {
+                        while($row = $result->fetch(PDO::FETCH_OBJ)) {
+                            $arrResult[] = (array)$row;
+                        }
+                    } else {
+                        fputs(STDERR, "ERROR: failed to query firewall rules\n");
+                        $bExito = false;
+                        break 2;
+                    }
+                    if (isset($arrResult[0]["details"])) {
+                        $port = $arrResult[0]["details"];
+                    } else {
+                        fputs(STDERR, "ERROR: some port was not found in database\n");
+                        $bExito = false;
+                        break 2;
+                    }
+                } catch (PDOException $e) {            
+                    fprintf(STDERR, "ERR: failed to query firewall rules - %s\n", $e->getMessage());
+                    $bExito = FALSE;
+                    break 2;
+                }
                 $commandParams[] = "--dport ".escapeshellarg($port);
-	    }
+            }
             break;
         case 'ICMP':
             $commandParams[] = '-p icmp';
@@ -243,15 +298,15 @@ function action_loadFirewall($opt)
             $commandParams[] = "-o ".escapeshellarg($rule['eth_out']);
         $commandParams[] = "-j ".escapeshellarg($rule['target']);
         
-        $output = $ret = NULL;
-        exec(implode(' ', $commandParams), $output, $ret);
+        $ret = NULL;
+        system(implode(' ', $commandParams), $ret);
         if ($ret) { $bExito = FALSE; break; }
     }
 
     // Save configuration to /etc/sysconfig/iptables
     if ($bExito) {
         $output = $ret = NULL;
-        exec('/sbin/iptables-save > /etc/sysconfig/iptables', $output, $ret);
+        system('/sbin/iptables-save > /etc/sysconfig/iptables', $ret);
         if ($ret) $bExito = FALSE;
     }
 

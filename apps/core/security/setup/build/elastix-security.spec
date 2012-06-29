@@ -14,6 +14,8 @@ Prereq: elastix-framework >= 2.3.0-5
 Prereq: freePBX >= 2.8.1-2
 Prereq: iptables
 Requires: elastix-system
+Requires: php-mcrypt
+Requires: elastix-portknock
 
 %description
 Elastix Security
@@ -25,31 +27,46 @@ Elastix Security
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/
-mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mv modules/ $RPM_BUILD_ROOT/var/www/html/
-mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
+mkdir -p    $RPM_BUILD_ROOT%{_localstatedir}/www/html/
+mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
+mv modules/ $RPM_BUILD_ROOT%{_localstatedir}/www/html/
+mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
 
 chmod +x setup/updateDatabase
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
-mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
+mv setup/   $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
+mv menu.xml $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
+
+# Crontab for portknock authorization cleanup
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
+cp setup/etc/cron.d/elastix-portknock.cron $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
+chmod 644 $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/elastix-portknock.cron
+
+# Startup service for portknock
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/
+cp setup/etc/rc.d/init.d/elastix-portknock $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/
+chmod 755 $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/elastix-portknock
+
+# Portknock-related utilities
+mkdir -p $RPM_BUILD_ROOT%{_bindir}/
+cp setup/usr/bin/elastix-portknock* $RPM_BUILD_ROOT%{_bindir}/
+chmod 755 $RPM_BUILD_ROOT%{_bindir}/elastix-portknock*
 
 %pre
-mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-touch /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/preversion_%{modname}.info
+mkdir -p %{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
+touch %{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/preversion_%{modname}.info
 if [ $1 -eq 2 ]; then
-    rpm -q --queryformat='%{VERSION}-%{RELEASE}' %{name} > /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/preversion_%{modname}.info
+    rpm -q --queryformat='%{VERSION}-%{RELEASE}' %{name} > %{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/preversion_%{modname}.info
 fi
 
 %post
-pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
+pathModule="%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}"
 
 # Run installer script to fix up ACLs and add module to Elastix menus.
 elastix-menumerge $pathModule/menu.xml
-pathSQLiteDB="/var/www/db"
+pathSQLiteDB="%{_localstatedir}/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
 
@@ -71,13 +88,17 @@ chown -R asterisk.asterisk /tmp/new_module/%{modname}
 php /tmp/new_module/%{modname}/setup/installer.php
 rm -rf /tmp/new_module
 
-/usr/share/elastix/privileged/anonymoussip --conddisable
+%{_datadir}/elastix/privileged/anonymoussip --conddisable
+
+# Install elastix-portknock as a service
+chkconfig --add elastix-portknock
+chkconfig --level 2345 elastix-portknock on
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %preun
-pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
+pathModule="%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}"
 
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Security menus"
@@ -90,11 +111,24 @@ fi
 %files
 %defattr(-, asterisk, asterisk)
 %{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
-%defattr(-, root, root)
-/usr/share/elastix/privileged/*
+%{_datadir}/elastix/module_installer/*
+%defattr(644, root, root)
+%{_sysconfdir}/cron.d/elastix-portknock.cron
+%defattr(0755, root, root)
+%{_datadir}/elastix/privileged/*
+%{_sysconfdir}/rc.d/init.d/elastix-portknock
+%{_bindir}/elastix-portknock-cleanup
+%{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Jun 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Implement Port Knocking support. This includes:
+  - Two new modules: PortKnocking Interfaces, PortKnocking Users
+  - New service elastix-portknock, requires package elastix-portknock
+  - New dependency on php-mcrypt
+  - New crontab job for authorization cleanup
+  SVN Rev[4031]
+
 * Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Changed release in specfile.

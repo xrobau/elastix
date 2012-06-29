@@ -747,20 +747,21 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 function execRules($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
 {
     $pRules = new paloSantoRules($pDB);
+    $bFirstTime = $pRules->isFirstTime(); 
+    $pRules->noMoreFirstTime();
     if (!$pRules->activateRules()) {
         $smarty->assign("mb_title", "ERROR");
         $smarty->assign("mb_message", _tr("Error during execution of rules"));
         if ($pRules->errMsg != '') $smarty->assign("mb_message", $pRules->errMsg);
         return reportRules($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
     }
-    if($pRules->isFirstTime())
+    if ($bFirstTime)
         $message = _tr("The firewall has been activated");
     else
         $message = _tr("The rules have been executed in the system");
     $smarty->assign("mb_title", _tr("MESSAGE"));
     $smarty->assign("mb_message", $message);
     $pRules->updateExecutedInSystem();
-    $pRules->noMoreFirstTime();
     return reportRules($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 }
 

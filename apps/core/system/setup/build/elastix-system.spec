@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 10
+Release: 11
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -129,12 +129,18 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri Jun 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Add Requires: dhcp to specfile
+  SVN Rev[4030]
 
 * Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4028]
 
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Remove openfire dependency, moved to elastix-im.

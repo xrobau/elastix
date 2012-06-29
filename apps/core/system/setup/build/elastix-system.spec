@@ -15,6 +15,7 @@ Prereq: elastix-fax >= 2.2.0-4
 Prereq: php-soap
 Prereq: dahdi
 Conflicts: elastix-agenda < 2.2.0-1
+Requires: dhcp
 
 %description
 Elastix Module System
@@ -128,6 +129,9 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jun 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Add Requires: dhcp to specfile
+
 * Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

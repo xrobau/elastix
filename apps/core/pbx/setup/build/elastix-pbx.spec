@@ -294,6 +294,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jul 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Batch: Properly figure out network mask for local network 
+  instead of hardcoding a /24 network mask. SVN Rev[4037]
+
 * Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.

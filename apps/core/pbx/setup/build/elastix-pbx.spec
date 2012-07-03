@@ -294,6 +294,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jul 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Batch: Properly figure out network mask for local network 
+  instead of hardcoding a /24 network mask. SVN Rev[4037]
+
 * Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: Remove stray print_r.
 

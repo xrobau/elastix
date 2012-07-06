@@ -83,6 +83,7 @@ $arrLang=array(
 "System Info"=>"Información del Sistema",
 "User Management"=>"Administrar Usuarios",
 "Users"=>"Usuarios",
+"Organization"=>"Organizacion",
 "Menu Administrator"=>"Administrador de Menú",
 /*end menu*/
 
@@ -248,6 +249,30 @@ $arrLang=array(
 "Hide Filter" => "Ocultar Filtro",
 "More Options" => "Más Opciones",
 "Filter applied: " => "Filtro aplicado: ",
-"Filter applied " => "Filtro aplicado: "
+"Filter applied " => "Filtro aplicado: ",
+"Organization ID must be numeric" => "ID de la organizacion debe ser numerico. ",
+"Organization doesn't exist" => "Organizacion no existe. ",
+"User ID is not valid" => "ID de usuario no es valido. ",
+"User doesn't exist" => "Usuario no existe. ",
+"User ID must be numeric" => "ID de usuario debe ser numerico. ",
+"Username is not valid" => "Username no es valido. ",
+"Username can't be empty" => "Username no puede ser vacio. ",
+"Username already exists" => "Username ya existe. ",
+"Can't get extension user" => "No se puede obtener extension del usuario. ",
+"User doesn't have a associated extension" => "Usuario no tiene extension asociada. ",
+"Limit must be numeric" => "Limit debe ser numerico. ",
+"Offset must be numeric" => "Offset debe ser numerico. ",
+"Grout ID is not valid" => "ID de grupo no es valido. ",
+"Group dosen't exist" => "Grupo no existe. ",
+"Password is not a valid MD5 hash" => "Contraseña no es un valido MD5 hash. ",
+"Resource Name can't be empty" => "Nombre del recurso no puede ser vacio. ",
+"Menu already exists" => "Menu ya existe. ",
+"Doesn't exist resource with id=" => "No existe recurso con id=",
+"Doesn't exist organization with id=" => "No existe organizacion con id=",
+"Doesn't exist group with id=" => "No existe grupo con id=",
+"Organization doesn't have priviled to access resource " => "Organizacion no tiene privilegios para acceder al recurso ",
+"Error has ocurred to delete permission" => "Error ha ocurrido al borrar el permiso. ",
+"Problem setting globals variables" => "Un error ha ocurrido al configurar las variables globales en asterisk. ",
+"Coulnd't be created new dialplan" => "El nuevo plan de marcado no pudo ser creado. "
 );
 ?>

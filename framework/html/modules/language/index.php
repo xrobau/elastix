@@ -53,6 +53,11 @@ function _moduleContent(&$smarty, $module_name)
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+
+	$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/elastix.db");
+    $pACL = new paloACL($pdbACL);
+	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    $uid = $pACL->getIdUser($user);
     
     $error_msg='';
     $msgError='';
@@ -89,28 +94,28 @@ function _moduleContent(&$smarty, $module_name)
                                                "VALIDATION_TYPE"        => "text",
                                                "VALIDATION_EXTRA_PARAM" => ""),);
         $oForm = new paloForm($smarty, $arrForm);
-        $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-        if(empty($pDB->errMsg)) {
+        if(empty($pACL->errMsg)) {
             $conexionDB=TRUE;
-
         if(isset($_POST['save_language'])) {
         //guardar el nuevo valor
             $lang = $_POST['language'];
-            
-            $bExito=set_key_settings($pDB,'language',$lang);
+            if($uid!==false)
+				$bExito=$pACL->setUserProp($uid,'language',$lang,"system");
+			else
+				$bExito=false;
         //redirigir a la pagina nuevamente
-            if ($bExito)
+            if ($bExito){
             header("Location: index.php?menu=language");
-            else
+            }else
                $smarty->assign("mb_message", "Error");
         }
     //obtener el valor de la tarifa por defecto
-            $defLang=get_key_settings($pDB,'language');
-            if (empty($defLang)) $defLang="en";
+            $defLang=$pACL->getUserProp($uid,'language');
+            if (empty($defLang) || $defLang===false) $defLang="en";
             $arrDefaultRate['language']=$defLang;
         }
         else
-             $msgError=$arrLang["You can't change language"].'.-'.$arrLang["ERROR"].":".$pDB->errMsg;
+             $msgError=$arrLang["You can't change language"].'.-'.$arrLang["ERROR"].":".$pACL->errMsg;
        // $arrDefaultRate['language']="es";
         $smarty->assign("CAMBIAR", $arrLang["Save"]);
         $smarty->assign("MSG_ERROR",$msgError);

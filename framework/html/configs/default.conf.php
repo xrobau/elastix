@@ -30,9 +30,8 @@
 global $arrConf;
 $arrConf['elastix_dbdir'] = '/var/www/db';
 $arrConf['elastix_dsn'] = array(
-                                "acl"       =>  "sqlite3:///$arrConf[elastix_dbdir]/acl.db",
-                                "settings"  =>  "sqlite3:///$arrConf[elastix_dbdir]/settings.db",
-                                "menu"      =>  "sqlite3:///$arrConf[elastix_dbdir]/menu.db",
+                                "elastix"   =>  "sqlite3:///$arrConf[elastix_dbdir]/elastix.db",
+								"acl"       =>  "sqlite3:///$arrConf[elastix_dbdir]/elastix.db", //se lo deja por compatibilidad
                                 "samples"   =>  "sqlite3:///$arrConf[elastix_dbdir]/samples.db",
                             );
 $arrConf['basePath'] = '/var/www/html';
@@ -41,7 +40,6 @@ $arrConf['theme'] = 'default'; //theme personal para los modulos esencialmente
 // Verifico si las bases del framework están, debido a la migración de dichas bases como archivos .db a archivos .sql
 checkFrameworkDatabases($arrConf['elastix_dbdir']);
 
-$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/"); //theme para la parte plantilla principal del elastix (se usa para la inclusion de los css)
 $arrConf['elastix_version'] = load_version_elastix($arrConf['basePath']."/"); //la version y le release  del sistema elastix
 $arrConf['defaultMenu'] = 'config';
 $arrConf['language'] = 'en';

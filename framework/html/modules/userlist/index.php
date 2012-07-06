@@ -26,12 +26,15 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
+include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
     include_once("libs/paloSantoDB.class.php");
     include_once("libs/paloSantoConfig.class.php");
     include_once("libs/paloSantoGrid.class.php");
+	include_once "libs/paloSantoForm.class.php";
+	include_once "libs/paloSantoOrganization.class.php";
     include_once("libs/paloSantoACL.class.php");
     include_once "modules/$module_name/configs/default.conf.php";
     
@@ -50,375 +53,1109 @@ function _moduleContent(&$smarty, $module_name)
     global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
     $arrLang = array_merge($arrLang,$arrLangModule);
-    
-    //conexion acl.db
-    $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
 
-    //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+	 //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    
+    //conexion acl.db
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+	$pACL = new paloACL($pDB);
 
-    $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
-    $arrConfig = $pConfig->leer_configuracion(false);
+	 //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
+	 //y borrar usuarios de todas las organizaciones
+     //los usuarios de tipo administrador estan en la capacidad crear usuarios solo de sus organizaciones
+    $userLevel1 = "";
+    $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 
-    $dsn = $arrConfig['AMPDBENGINE']['valor'] . "://" . $arrConfig['AMPDBUSER']['valor'] . ":" . $arrConfig['AMPDBPASS']['valor'] . "@" . $arrConfig['AMPDBHOST']['valor'] . "/asterisk";
-    $pDBa     = new paloDB($dsn);
+	//verificar que tipo de usurio es: superadmin, admin o other
+	if($userAccount!=""){
+		$idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
+		if($pACL->isUserSuperAdmin($userAccount)){
+			$userLevel1 = "superadmin";
+		}else{
+			if($pACL->isUserAdministratorGroup($userAccount))
+				$userLevel1 = "admin";
+			else
+				$userLevel1 = "other";
+		}
+	}else
+		$idOrganization="Error";
 
-////////////////////
+	$action = getAction();
+    $content = "";
 
-    if(!empty($pDB->errMsg)) {
-        echo "ERROR DE DB: $pDB->errMsg <br>";
+	 switch($action){
+        case "new_user":
+            $content = viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+        case "view":
+            $content = viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+        case "view_edit":
+            $content = viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+        case "save_new":
+            $content = saveNewUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+        case "save_edit":
+            $content = saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+        case "delete":
+            $content = deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+		case "getGroups":
+            $content = getGroups($pDB);
+            break;
+		case "getImage":
+            $content = getImage($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userLevel1, $idOrganization);
+            break;
+		case "reloadAasterisk":
+			$content = reloadAasterisk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userLevel1, $idOrganization);
+            break;
+        default: // report
+            $content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+    }
+    return $content;
+
+}
+
+function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, $showmessage=false,$organization_reload="")
+{
+	$pACL = new paloACL($pDB);
+	$pORGZ = new paloSantoOrganization($pDB);
+
+	$idOrgFil=getParameter("idOrganization");
+	if(!isset($idOrgFil)){
+		$idOrgFil=0;
+		$url = "?menu=$module_name";
+	}else{
+		$url = "?menu=$module_name&idOrganization=$idOrgFil";
+	}
+
+	$total=0;
+    if($userLevel1=="superadmin"){
+		if($idOrgFil!=0)
+			$total=$pACL->getNumUsers($idOrgFil);
+		else
+			$total=$pACL->getNumUsers();
+    }elseif($userLevel1=="admin"){
+        $total=$pACL->getNumUsers($idOrganization);;
+	}else
+		$total=1;
+
+	if($total===false){
+		$total=0;
+	}
+
+	$limit=20;
+
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+
+    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+	
+	$arrGrid = array("title"    => _tr('User List'),
+				"icon"     => "images/user.png",	
+                "url"      => $url,
+                "width"    => "99%",
+                "start"    => ($total==0) ? 0 : $offset + 1,
+                "end"      => $end,
+                "total"    => $total,
+                'columns'   =>  array(
+                    array("name"      => _tr("Ursername"),),
+                    array("name"      => _tr("Organization"),),
+                    array("name"      => _tr("Name"),),
+                    array("name"      => _tr("Group"),),
+                    array("name"      => _tr("Extension")." / "._tr("Fax Extension"),)
+                    ),
+                );
+
+	$arrUsers=array();
+	$arrData = array();
+	if($userLevel1=="superadmin"){
+		if($idOrgFil!=0)
+			$arrUsers = $pACL->getUsersPaging($limit, $offset, $idOrgFil);
+		else
+			$arrUsers = $pACL->getUsersPaging($limit, $offset);
+    }elseif($userLevel1=="admin"){
+        $arrUsers = $pACL->getUsersPaging($limit, $offset, $idOrganization);
+	}else{
+		$idUser=$pACL->getIdUser($userAccount);
+		$arrUsers = $pACL->getUsers($idUser, $idOrganization, $limit, $offset);
+	}
+
+	IF($arrUsers===false){
+		$smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr($pACL->errMsg));
+	}
+	//si es un usuario solo se ve a si mismo
+	//si es un administrador ve a todo los usuarios de
+    foreach($arrUsers as $user) {
+		$arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=$user[0]'>".$user[1]."</a>";
+		$arrOgz=$pORGZ->getOrganizationById($user[4]);
+		$arrTmp[1] = $arrOgz["name"];
+		$arrTmp[2] = $user[2];
+		$gpTmp = $pACL->getGroupNameByid($user[7]);
+		$arrTmp[3]=$gpTmp==("superadmin")?_tr("NONE"):$gpTmp;
+		if(!isset($user[5]) || $user[5]==""){
+			$ext=_tr("Not assigned");
+		}else{
+			$ext=$user[5];
+		}
+		if(!isset($user[6]) || $user[6]==""){
+			$faxExt=_tr("Not assigned");
+		}else{
+			$faxExt=$user[6];
+		}
+		$arrTmp[4] = $ext." / ".$faxExt;
+		$arrData[] = $arrTmp;
+		$typeUser = "other";
+		$end++;
     }
 
-    $arrData = array();
-    $pACL = new paloACL($pDB);
-    if(!empty($pACL->errMsg)) {
-        echo "ERROR DE ACL: $pACL->errMsg <br>";
+	if($pORGZ->getNumOrganization() > 1){
+		if(!($userLevel1 == "other"))
+			$oGrid->addNew("create_user",_tr("Create New User"));
+
+		if($userLevel1 == "superadmin"){
+			$arrOrgz=array(0=>"all");
+			foreach(($pORGZ->getOrganization()) as $value){
+				if($value["id"]!=1)
+					$arrOrgz[$value["id"]]=$value["name"];
+			}
+			$arrFormElements = createFieldFilter($arrOrgz);
+			$oFilterForm = new paloForm($smarty, $arrFormElements);
+			$_POST["idOrganization"]=$idOrgFil;
+			$oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$idOrgFil], $_POST, array("idOrganization" => 0),true);
+			$htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+			$oGrid->showFilter(trim($htmlFilter));
+		}
+	}else{
+		$smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create new user"));
+	}
+
+	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+	if($showmessage)
+		$contenidoModulo = "<div id='msg_status' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$organization_reload'/>"._tr("Click here to reload asterisk")."</a></div>".$contenidoModulo;
+    return $contenidoModulo;
+}
+
+function viewFormUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+	$pACL = new paloACL($pDB);
+	$pORGZ = new paloSantoOrganization($pDB);
+	$arrFill=array();
+	$action = getParameter("action");
+
+	$arrOrgz=array(0=>"Select one Organization");
+	if($userLevel1=="superadmin"){
+		$orgTmp=$pORGZ->getOrganization("","","","");
+	}else{
+		$orgTmp=$pORGZ->getOrganization("","","id",$idOrganization);
+	}
+
+	if($orgTmp===false){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}elseif(count($orgTmp)==0){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("You need yo have at least one organization created before you can create a user"));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}else{
+		if(($action=="new_user" || $action=="save_new")&& count($orgTmp)<=1){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create new user"));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}
+		foreach($orgTmp as $value){
+			$arrOrgz[$value["id"]]=$value["name"];
+		}
+		$smarty->assign("ORGANIZATION",$orgTmp[0]["name"]);
+	}
+	
+
+	$idUser=getParameter("id");
+
+	$arrFill=$_POST;
+
+	if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
+		if(!isset($idUser)){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr("Invalid User"));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}else{
+			if($userLevel1=="superadmin"){
+				$arrUsers = $pACL->getUsers($idUser);
+			}else if($userLevel1=="admin"){
+				$arrUsers = $pACL->getUsers($idUser, $idOrganization, null, null);
+			}else{
+				$idUser=$pACL->getIdUser($userAccount);
+				$arrUsers = $pACL->getUsers($idUser, $idOrganization, null, null);
+			}
+		}
+		
+		if($arrUsers===false){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr($pACL->errMsg));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}else if(count($arrUsers)==0){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr("User doesn't exist"));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}else{
+			$picture = $pACL->getUserPicture($idUser);
+			if($picture!==false){
+				$smarty->assign("ShowImg",1);
+			}
+			foreach($arrUsers as $value){
+				$arrFill["username"]=$value[1];
+				$arrFill["name"]=$value[2];
+				$arrFill["password1"]="";
+				$arrFill["password2"]="";
+				$arrFill["organization"]=$value[4];
+				$arrFill["group"]=$value[7];
+				$extu=isset($value[5])?$value[5]:_tr("Not assigned yet");
+				$extf=isset($value[6])?$value[6]:_tr("Not assigned yet");
+				$arrFill["extension"]=$extu;
+				$arrFill["fax_extension"]=$extf;
+			}
+			$smarty->assign("ORGANIZATION",$arrOrgz[$arrFill["organization"]]);
+			$smarty->assign("USERNAME",$arrFill["username"]);
+			$nGroup=$pACL->getGroupNameByid($arrFill["group"]);
+			if($nGroup=="superadmin");
+				$nGroup=_tr("NONE");
+			$smarty->assign("GROUP",$nGroup);
+			$_POST["organization"]=$arrFill["organization"];
+			//ahora obtenemos las propiedades del usuario
+			$arrFill["country_code"]=$pACL->getUserProp($idUser,"country_code");
+			$arrFill["area_code"]=$pACL->getUserProp($idUser,"area_code");
+			$arrFill["clid_number"]=$pACL->getUserProp($idUser,"clid_number");
+			$arrFill["clid_name"]=$pACL->getUserProp($idUser,"clid_name");
+			$arrFill["email_quota"]=$pACL->getUserProp($idUser,"email_quota");
+			if($idUser=="1")
+				$arrFill["email_contact"]=$pACL->getUserProp($idUser,"email_contact");
+			$smarty->assign("EMAILQOUTA",$arrFill["email_quota"]);
+			$smarty->assign("EXTENSION",$extu);
+			$smarty->assign("FAX_EXTENSION",$extf);
+			if(getParameter("save_edit")){
+				$arrFill=$_POST;
+			}
+		}
+	}
+
+
+	$idOrgSel=getParameter("organization");
+	if(!isset($idOrgSel)){
+		if($userLevel1!="superadmin"){
+			$idOrgSel=$idOrganization;
+		}else
+			$idOrgSel=0;
+	}
+
+	if($idOrgSel==0){
+		$arrGrupos=array();
+	}else{
+		$temp = $pACL->getGroupsPaging(null,null,$idOrgSel);
+		if($temp===false){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr($pACL->errMsg));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}
+		foreach($temp as $value){
+			$arrGrupos[$value[0]]=$value[1];
+		}
+	}
+
+	if(getParameter("create_user")){
+		$arrFill["country_code"]=$pORGZ->getOrganizationProp($idOrgSel,"country_code");
+		$arrFill["area_code"]=$pORGZ->getOrganizationProp($idOrgSel,"area_code");
+		$arrFill["email_quota"]=$pORGZ->getOrganizationProp($idOrgSel,"email_quota");
+	}
+
+	$arrOrgCombo=array();
+	foreach($arrOrgz as $key => $value){
+		if($key!="1")
+			$arrOrgCombo[$key]=$value;
+	}
+
+	$arrFormOrgz = createFieldForm($arrGrupos,$arrOrgCombo);
+    $oForm = new paloForm($smarty,$arrFormOrgz);
+
+	$smarty->assign("HEIGHT","310px");
+	$smarty->assign("MARGIN_PIC",'style="margin-top: 40px;"');
+	$smarty->assign("MARGIN_TAB","");
+
+	if($action=="view"){
+		$smarty->assign("HEIGHT","220px");
+        $smarty->assign("MARGIN_PIC","");
+		$smarty->assign("MARGIN_TAB","margin-top: 10px;");
+        $oForm->setViewMode();
+		$arrFill["password1"]="*****";
+		$arrFill["password2"]="*****";
+		$smarty->assign("HEIGHT","220px");
+    }else if($action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
+        $oForm->setEditMode();
     }
 
+	$smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("DELETE", _tr("Delete"));
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
+    $smarty->assign("icon","images/user.png");
+	$smarty->assign("FAX_SETTINGS",_tr("Fax Settings"));
+	$smarty->assign("EMAIL_SETTINGS",_tr("Email Settings"));
+	$smarty->assign("MODULE_NAME",$module_name);
+	$smarty->assign("userLevel", $userLevel1);
+	$smarty->assign("id_user", $idUser);
+	if(isset($arrUsers[0][1]))
+		$smarty->assign("isSuperAdmin",$pACL->isUserSuperAdmin($arrUsers[0][1]));
+	else
+		$smarty->assign("isSuperAdmin",FALSE);
+
+	$htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("User"), $arrFill);
+	$content = "<form  method='POST' enctype='multipart/form-data' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
+
+    return $content;
+}
+
+function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+	$pACL = new paloACL($pDB);
+	$pORGZ = new paloSantoOrganization($pDB);
+	$exito = false;
+	$errorImg="";
+	$renameFile="";
+
+	if($pORGZ->getNumOrganization() <=1){
+		$smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create user"));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+
+	if($userLevel1=="other"){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+
+	$arrOrgz=array(0=>"Select one Organization");
+	if($userLevel1=="superadmin"){
+		$orgTmp=$pORGZ->getOrganization("","","","");
+	}else{
+		$orgTmp=$pORGZ->getOrganization("","","id",$idOrganization);
+	}
+
+	if($orgTmp===false){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}elseif(count($orgTmp)==0){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("You need yo have at least one organization created before you can create a user"));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}else{
+		foreach($orgTmp as $value){
+			$arrOrgz[$value["id"]]=$value["name"];
+		}
+	}
+
+	$idOrgSel=getParameter("organization");
+
+	if($userLevel1!="superadmin"){
+		$idOrgSel=$idOrganization;
+	}else{
+		if(!isset($idOrgSel)){
+			$idOrgSel=0;
+		}
+	}
+
+	if($idOrgSel==0){
+		$arrGrupos=array();
+	}else{
+		$temp = $pACL->getGroups(null,$idOrgSel);
+		if($temp===false){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr($pACL->errMsg));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}
+		foreach($temp as $value){
+			$arrGrupos[$value[0]]=$value[1];
+		}
+	}
 
 
-    $sQuery="select extension from users order by extension;";
-    $arrayResult = $pDBa->fetchTable($sQuery,true);
-    if (!$arrayResult){
-        $error = $pDBa->errMsg;
-    }else{
-        if (is_array($arrayResult) && count($arrayResult)>0) {
-            //$arrData[$item["null"]] = "No extension";
-            foreach($arrayResult as $item) {
-                $arrData[$item["extension"]] = $item["extension"];
-            }
+	$arrFormOrgz = createFieldForm($arrGrupos,$arrOrgz);
+    $oForm = new paloForm($smarty,$arrFormOrgz);
+
+
+	if(!$oForm->validateForm($_POST)){
+        // Validation basic, not empty and VALIDATION_TYPE
+        $smarty->assign("mb_title", _tr("Validation Error"));
+        $arrErrores = $oForm->arrErroresValidacion;
+        $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
+        if(is_array($arrErrores) && count($arrErrores) > 0){
+            foreach($arrErrores as $k=>$v)
+                $strErrorMsg .= "$k, ";
         }
+        $smarty->assign("mb_message", $strErrorMsg);
+        return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }else{
+		$password1=getParameter("password1");
+		$password2=getParameter("password2");
+		$organization=getParameter("organization");
+		if($password1==""){
+			$error=_tr("Password can not be empty");
+		}else if($password1!=$password2){
+			$error=_tr("Passwords don't match");
+		}else{
+			$continuar=true;
+			if($userLevel1=="superadmin"){
+				if($organization==0 || $organization==1){
+					$error=_tr("You must select a organization");
+					$continuar=false;
+				}else
+					$idOrganization=$organization;
+			}
+			if($continuar){
+				$renameFile="";
+				//esta seccion es solo si el usuario quiere subir una imagen a su cuenta
+				$pictureUpload = $_FILES['picture']['name'];
+				if(isset($pictureUpload) && $pictureUpload != ""){
+					$idImg=date("Ymdhis");
+					if(!uploadImage($idImg,$renameFile,$errorImg)){
+						$smarty->assign("mb_title", _tr("ERROR"));
+						$smarty->assign("mb_message",$errorImg);
+						return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+					}
+				}
+
+				$username=getParameter("username");
+				$name=getParameter("name");
+				$idGrupo=getParameter("group");
+				$extension=getParameter("extension");
+				$fax_extension=getParameter("fax_extension");
+				$md5password=md5($password1);
+				$countryCode=getParameter("country_code");
+				$areaCode=getParameter("area_code");
+				$clidNumber=getParameter("clid_number");
+				$cldiName=getParameter("clid_name");
+				$quota=getParameter("quota");
+				$exito=$pORGZ->createUserOrganization($idOrganization, $username, $name, $md5password, $password1, $idGrupo, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $quota, $lastid);
+				$error=$pORGZ->errMsg;
+			}
+		}
+	}
+
+	if($exito){
+		//el archivo que se subio anteriormente cambia de nomber y ahora usa es idUser.ext
+		//tambien ahi que actualizar la infomacion de la imagen en la base de datos
+		if($renameFile!=""){
+			$filename=basename($renameFile);
+			$ext=explode(".",$filename);
+			$picture=$lastid.".".$ext[count($ext)-1];
+			if($pACL->setUserPicture($lastid,$picture))
+				rename($renameFile,"/var/www/users_images/$picture");
+			else
+				unlink($renameFile);
+		}
+		$smarty->assign("mb_title", _tr("MESSAGE"));
+		$smarty->assign("mb_message",_tr("User has been created successfully"));
+		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, true,$idOrganization);
+	}else{
+		if($renameFile!=""){
+			unlink($renameFile);
+		}
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",$error);
+		$content = viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+	return $content;
+}
+
+
+function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+	$pACL = new paloACL($pDB);
+	$pORGZ = new paloSantoOrganization($pDB);
+	$exito = false;
+	$idUser=getParameter("id");
+	$errorImg="";
+	$renameFile="";
+	$reAsterisk=false;
+
+
+	//un usuario que no es administrador no puede editar la informacion de otro usuario
+	if($userLevel1=="other"){
+		$id=$pACL->getIdUser($userAccount);
+		if($idUser!=$id){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr("You are not authorized to edit that information"));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}
+	}
+
+	//obtenemos la informacion del usuario por el id dado, sino existe el usuario mostramos un mensaje de error
+	if(!isset($idUser)){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr("Invalid User"));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}else{
+		if($userLevel1=="superadmin"){
+			$arrUsers = $pACL->getUsers($idUser);
+		}elseif($userLevel1=="admin"){
+			$arrUsers = $pACL->getUsers($idUser, $idOrganization);
+		}else{
+			$idUser=$pACL->getIdUser($userAccount);
+			$arrUsers = $pACL->getUsers($idUser, $idOrganization);
+		}
+	}
+
+	if($arrUsers===false){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr($pACL->errMsg));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}else if(count($arrUsers)==0){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("User doesn't exist"));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}else{
+		$idOrgz=$arrUsers[0][4]; //una vez creado un usuario este no se puede cambiar de organizacion
+		$arrOrgz=array();
+		$temp = $pACL->getGroupsPaging(null,null,$idOrgz);
+		if($temp===false){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr($pACL->errMsg));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}
+		foreach($temp as $value){
+			$arrGrupos[$value[0]]=$value[1];
+		}
+
+		$arrFormOrgz = createFieldForm($arrGrupos,$arrOrgz);
+		$oForm = new paloForm($smarty,$arrFormOrgz);
+
+		if(!$oForm->validateForm($_POST)){
+			// Validation basic, not empty and VALIDATION_TYPE
+			$smarty->assign("mb_title", _tr("Validation Error"));
+			$arrErrores = $oForm->arrErroresValidacion;
+			$strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
+			if(is_array($arrErrores) && count($arrErrores) > 0){
+				foreach($arrErrores as $k=>$v)
+					$strErrorMsg .= "$k, ";
+			}
+			$smarty->assign("mb_message", $strErrorMsg);
+			return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}else{
+			$password1=getParameter("password1");
+			$password2=getParameter("password2");
+			$quota=getParameter("email_quota");
+			$countryCode=getParameter("country_code");
+			$areaCode=getParameter("area_code");
+			$idGrupo=getParameter("group");
+			$extension=getParameter("extension");
+			$fax_extension=getParameter("fax_extension");
+			$name=getParameter("name");
+			$md5password=md5($password1);
+
+			if($userLevel1=="other"){
+				$extension=$arrUsers[0][5];
+				$fax_extension=$arrUsers[0][6];
+				$quota=$pACL->getUserProp($idUser,"email_quota");
+				$idGrupo=$arrUsers[0][7];
+			}
+
+			if($pACL->isUserSuperAdmin($arrUsers[0][1])){
+				$idGrupo=$arrUsers[0][7];
+				$email_contact=getParameter("email_contact");
+				$exito=$pORGZ->updateUserSuperAdmin($idUser, $name, $md5password, $password1, $email_contact, $userLevel1);
+				$error=$pORGZ->errMsg;
+			}else{
+				if($password1!=$password2){
+					$error=_tr("Passwords don't match");
+				}elseif(!isset($quota) || $quota==""){
+					$error=_tr("Qouta must not be empty");
+				}elseif(!isset($countryCode) || $countryCode==""){
+					$error=_tr("Country Code must not be empty");
+				}elseif(!isset($areaCode) || $areaCode==""){
+					$error=_tr("Area Code must not be empty");
+				}else{
+					//esta seccion es solo si el usuario quiere subir una imagen a su cuenta
+					$pictureUpload = $_FILES['picture']['name'];
+					if(isset($pictureUpload) && $pictureUpload != ""){
+						$idImg=date("Ymdhis");
+						if(!uploadImage($idImg,$renameFile,$errorImg)){
+							$smarty->assign("mb_title", _tr("ERROR"));
+							$smarty->assign("mb_message",$errorImg);
+							return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+						}
+					}
+					$clidNumber=getParameter("clid_number");
+					$cldiName=getParameter("clid_name");
+					$quota=getParameter("email_quota");
+					$exito=$pORGZ->updateUserOrganization($idUser, $name, $md5password, $password1, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $idGrupo, $quota, $userLevel1, $reAsterisk);
+					$error=$pORGZ->errMsg;
+				}
+			}
+		}
+	}
+
+	if($exito){
+		//el archivo que se subio anteriormente cambia de nomber y ahora usa es idUser.ext
+		//tambien ahi que actualizar la infomacion de la imagen en la base de datos
+		if($renameFile!=""){
+			$filename=basename($renameFile);
+			$ext=explode(".",$filename);
+			$picture=$idUser.".".$ext[count($ext)-1];
+			if($pACL->setUserPicture($idUser,$picture))
+				rename($renameFile,"/var/www/users_images/$picture");
+			else
+				unlink($renameFile);
+		}
+		$smarty->assign("mb_title", _tr("MESSAGE"));
+		$smarty->assign("mb_message",_tr("User has been edited successfully"));
+		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, $reAsterisk,$pACL->getIdOrganizationUser($idUser));
+	}else{
+		if($renameFile!=""){
+			unlink($renameFile);
+		}
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",$error);
+		$content = viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+	return $content;
+}
+
+function deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+	$pACL = new paloACL($pDB);
+	$pORGZ = new paloSantoOrganization($pDB);
+	$idUser=getParameter("id");
+	if($userLevel1=="other"){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+
+	$idOrgReload=$pACL->getIdOrganizationUser($idUser);
+
+	if($userLevel1=="superadmin"){
+		if($idUser==1){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr("The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user."));
+			return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		}else{
+			$exito=$pORGZ->deleteUserOrganization($idUser);
+		}
+	}
+	else if($userLevel1=="admin"){
+		if($pACL->userBellowOrganization($idUser,$idOrganization)){
+			$exito=$pORGZ->deleteUserOrganization($idUser);
+		}else{
+			$pORGZ->errMsg=$pACL->errMsg;
+		}
+	}
+
+	if($exito){
+		$smarty->assign("mb_title", _tr("MESSAGE"));
+		$smarty->assign("mb_message",_tr("The user was deleted successfully"));
+		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, true,$idOrgReload);
+	}else{
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
+		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+
+	return $content;
+}
+
+function getGroups(&$pDB){
+	$pACL = new paloACL($pDB);
+	$pORGZ = new paloSantoOrganization($pDB);
+	$jsonObject = new PaloSantoJSON();
+	$idOrgSel = getParameter("idOrganization");
+	$arrGrupos = array();
+	if($idOrgSel==0){
+		$arrGrupos=array();
+	}else{
+		$arrGrupos[0]=array("country_code",$pORGZ->getOrganizationProp($idOrgSel,"country_code"));
+		$arrGrupos[1]=array("area_code",$pORGZ->getOrganizationProp($idOrgSel,"area_code"));
+		$arrGrupos[2]=array("email_quota",$pORGZ->getOrganizationProp($idOrgSel,"email_quota"));
+		$temp = $pACL->getGroupsPaging(null,null,$idOrgSel);
+		if($temp===false){
+			$jsonObject->set_error(_tr($pACL->errMsg));
+		}else{
+			$i=3;
+			foreach($temp as $value){
+				$arrGrupos[$i]=array($value[0],$value[1]);
+				$i++;
+			}
+		}
+	}
+	$jsonObject->set_message($arrGrupos);
+    return $jsonObject->createJSON();
+}
+
+function getImage($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization)
+{
+    $pACL       = new paloACL($pDB);
+    $ruta_destino = "/var/www/users_images";
+    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/$module_name/images/Icon-user.png";
+    $id_user="";
+
+	if($userLevel1=="superadmin"){
+		$id_user = getParameter("ID");
+	}else if($userLevel1=="admin"){
+		$idTemp = getParameter("ID");
+		if($pACL->userBellowOrganization($idTemp,$idOrganization)){
+			$id_user=$idTemp;
+		}
+	}else{
+		$id_user=$pACL->getIdUser($userAccount);
+	}
+
+	$picture = $pACL->getUserPicture($id_user);
+    $image = $ruta_destino."/".$picture[0];
+	$arrIm = explode(".",$picture[0]);
+    $typeImage = $arrIm[count($arrIm)-1];
+
+    // Creamos la imagen a partir de un fichero existente
+    if(is_file($image) && $picture!==false){
+        if(strtolower($typeImage) == "png"){
+            Header("Content-type: image/png");
+            $im = imagecreatefromPng($image);
+            ImagePng($im); // Mostramos la imagen
+            ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen
+        }else{
+            Header("Content-type: image/jpeg");
+            $im = imagecreatefromJpeg($image);
+            ImageJpeg($im); // Mostramos la imagen
+            ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen
+        }
+    }else{
+        Header("Content-type: image/png");
+        $im = file_get_contents($imgDefault);
+        echo $im;
+    }
+	/*echo("hola");
+	echo("<script type='text/javascript'>\n var ancho; ancho=$('#image img').width(); alert(ancho);\n </script>");*/
+    return;
+}
+
+function redimensionarImagen($ruta1,$ruta2,$ancho,$alto)
+{
+
+    # se obtene la dimension y tipo de imagen
+    $datos=getimagesize($ruta1);
+
+    if(!$datos)
+        return false;
+
+    $ancho_orig = $datos[0]; # Anchura de la imagen original
+    $alto_orig = $datos[1];    # Altura de la imagen original
+    $tipo = $datos[2];
+    $img = "";
+    if ($tipo==1){ # GIF
+        if (function_exists("imagecreatefromgif"))
+            $img = imagecreatefromgif($ruta1);
+        else
+            return false;
+    }
+    else if ($tipo==2){ # JPG
+        if (function_exists("imagecreatefromjpeg"))
+            $img = imagecreatefromjpeg($ruta1);
+        else
+            return false;
+    }
+    else if ($tipo==3){ # PNG
+        if (function_exists("imagecreatefrompng"))
+            $img = imagecreatefrompng($ruta1);
+        else
+            return false;
     }
 
-    $arrGruposACL=$pACL->getGroups();
-    for($i=0; $i<count($arrGruposACL); $i++)
-    {
-        if($arrGruposACL[$i][1]=='administrator')
-            $arrGruposACL[$i][1] = $arrLang['administrator'];
-        else if($arrGruposACL[$i][1]=='operator')
-            $arrGruposACL[$i][1] = $arrLang['operator'];
-        else if($arrGruposACL[$i][1]=='extension')
-            $arrGruposACL[$i][1] = $arrLang['extension'];
-
-        $arrGrupos[$arrGruposACL[$i][0]] = $arrGruposACL[$i][1];
+    $anchoTmp = imagesx($img);
+    $altoTmp = imagesy($img);
+    if(($ancho > $anchoTmp || $alto > $altoTmp)){
+        ImageDestroy($img);
+        return true;
     }
 
-    $arrFormElements = array("description" => array("LABEL"                  => "{$arrLang['Name']} {$arrLang['(Ex. John Doe)']}",
-                                                    "REQUIRED"               => "yes",
+    # Se calculan las nuevas dimensiones de la imagen
+    if ($ancho_orig>$alto_orig){
+        $ancho_dest=$ancho;
+        $alto_dest=($ancho_dest/$ancho_orig)*$alto_orig;
+    }else{
+        $alto_dest=$alto;
+        $ancho_dest=($alto_dest/$alto_orig)*$ancho_orig;
+    }
+
+    // imagecreatetruecolor, solo estan en G.D. 2.0.1 con PHP 4.0.6+
+    $img2=@imagecreatetruecolor($ancho_dest,$alto_dest) or $img2=imagecreate($ancho_dest,$alto_dest);
+
+    // Redimensionar
+    // imagecopyresampled, solo estan en G.D. 2.0.1 con PHP 4.0.6+
+    @imagecopyresampled($img2,$img,0,0,0,0,$ancho_dest,$alto_dest,$ancho_orig,$alto_orig) or imagecopyresized($img2,$img,0,0,0,0,$ancho_dest,$alto_dest,$ancho_orig,$alto_orig);
+
+    // Crear fichero nuevo, según extensión.
+    if ($tipo==1) // GIF
+    if (function_exists("imagegif"))
+        imagegif($img2, $ruta2);
+    else
+        return false;
+
+    if ($tipo==2) // JPG
+    if (function_exists("imagejpeg"))
+        imagejpeg($img2, $ruta2);
+    else
+        return false;
+
+    if ($tipo==3)  // PNG
+    if (function_exists("imagepng"))
+        imagepng($img2, $ruta2);
+    else
+        return false;
+
+    return true;
+}
+
+function uploadImage($idImg,&$fileUpload,&$error){
+	$pictureUpload = $_FILES['picture']['name'];
+	$file_upload = "";
+	$ruta_destino = "/var/www/users_images";
+	$Exito=false;
+
+	//valido el tipo de archivo
+		// \w cualquier caracter, letra o guion bajo
+		// \s cualquier espacio en blanco
+		if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(png|PNG|JPG|jpg|JPEG|jpeg)$/",$pictureUpload)) {
+			$error=_tr("Invalid file extension.- It must be png or jpg or jpeg");
+		}else {
+			if(is_uploaded_file($_FILES['picture']['tmp_name'])) {
+				$file_upload = basename($_FILES['picture']['tmp_name']); // verificando que solo tenga la ruta al archivo
+				$file_name = basename("/tmp/".$_FILES['picture']['name']);
+				$ruta_archivo = "/tmp/$file_upload";
+				$arrIm = explode(".",$pictureUpload);
+				$renameFile = "$ruta_destino/$idImg.".$arrIm[count($arrIm)-1];
+				$file_upload = $idImg.".".$arrIm[count($arrIm)-1];
+				$filesize = $_FILES['picture']['size'];
+				$filetype = $_FILES['picture']['type'];
+
+				$sizeImgUp=getimagesize($ruta_archivo);
+				if(!$sizeImgUp){
+					$error=_tr("Possible file upload attack. Filename")." : ". $pictureUpload;
+				}
+				//realizar acciones
+				if(!rename($ruta_archivo, $renameFile)){
+					$error=_("Error to Upload")." : ". $pictureUpload;
+				}else{ //redimensiono la imagen
+					$ancho = 240;
+					$alto = 200;
+					if(is_file($renameFile)){
+						if(!redimensionarImagen($renameFile,$renameFile,$ancho,$alto)){
+							$error=_tr("Possible file upload attack. Filename")." : ". $pictureUpload;
+						}else
+							$Exito=true;
+					}
+				}
+			}else {
+				$error=_tr("Possible file upload attack. Filename")." : ". $pictureUpload;
+			}
+		}
+	if($Exito){
+		$fileUpload=$renameFile;
+	}else{
+		$fileUpload="";
+	}
+	return $Exito;
+}
+
+function createFieldForm($arrGrupos,$arrOrgz)
+{
+    $arrFormElements = array("name" => array("LABEL"                  => _tr('Name').'(Ex. John Doe)',
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => "",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "name"       => array("LABEL"                   => $arrLang["Login"],
+							"username"       => array("LABEL"                => _tr("Username"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => "",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => "",
                                                     "EDITABLE"               => "no"),
-                             "password1"   => array("LABEL"                  => $arrLang["Password"],
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "PASSWORD",
-                                                    "INPUT_EXTRA_PARAM"      => "",
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                             "password2"   => array("LABEL"                  => $arrLang["Retype password"],
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "PASSWORD",
-                                                    "INPUT_EXTRA_PARAM"      => "",
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                             "group"       => array("LABEL"                  => $arrLang["Group"],
+                             "password1"   => array("LABEL"                  => _tr("Password"),
                                                     "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "PASSWORD",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                             "password2"   => array("LABEL"                  => _tr("Retype password"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "PASSWORD",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+							 "organization"       => array("LABEL"           => _tr("Organizatiion"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrOrgz,
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => "",
+													"ONCHANGE"	       => "select_organization();"),
+                             "group"       => array("LABEL"                  => _tr("Group"),
+                                                    "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrGrupos,
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "extension"   => array("LABEL"                   => _tr("Extension"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+							"fax_extension"   => array("LABEL"               => _tr("Fax Extension"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+							"country_code"   => array("LABEL"               => _tr("Country Code"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+							"area_code"   => array("LABEL"               => _tr("Area Code"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+							"clid_name"   => array("LABEL"               => _tr("Clid Name"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "extension"   => array("LABEL"                  => $arrLang["Extension"],
+							"clid_number" => array("LABEL"               => _tr("Clid Number"),
                                                     "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrData,
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "")
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+							"email_quota" => array("LABEL"               => _tr("Email Qouta")." (MB)",
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+							"email_contact"   => array( "LABEL"                  => _tr("Email Contact"),
+													"REQUIRED"               => "yes",
+													"INPUT_TYPE"             => "TEXT",
+													"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+													"VALIDATION_TYPE"        => "email",
+													"VALIDATION_EXTRA_PARAM" => ""
+													),
+							"picture"  	 => array("LABEL"                  => _tr("Picture"),
+													"REQUIRED"               => "no",
+													"INPUT_TYPE"             => "FILE",
+													"INPUT_EXTRA_PARAM"      => array("id" => "picture"),
+													"VALIDATION_TYPE"        => "text",
+													"VALIDATION_EXTRA_PARAM" => ""),
     );
-
-
-    $contenidoModulo="";
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("APPLY_CHANGES", $arrLang["Apply changes"]);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("DELETE", $arrLang["Delete"]);
-    $smarty->assign("CONFIRM_CONTINUE", $arrLang["Are you sure you wish to continue?"]);
-    if(isset($_POST['submit_create_user'])) {
-        // Implementar
-        include_once("libs/paloSantoForm.class.php");
-        $arrFillUser['description'] = '';
-        $arrFillUser['name']        = '';
-        $arrFillUser['group']       = '';
-        $arrFillUser['extension']   = '';
-        $arrFillUser['password1']   = '';
-        $arrFillUser['password2']   = '';
-        $oForm = new paloForm($smarty, $arrFormElements);
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New User"],$arrFillUser);
-
-    } else if(isset($_POST['edit'])) {
-
-        // Tengo que recuperar la data del usuario
-        $pACL = new paloACL($pDB);
-
-        $arrUser = $pACL->getUsers($_POST['id_user']);
-
-        $arrFillUser['name'] = $arrUser[0][1];
-        $arrFillUser['description'] = $arrUser[0][2];
-
-        // Lleno el grupo
-        $arrMembership  = $pACL->getMembership($_POST['id_user']);
-        $id_group="";
-        if(is_array($arrMembership)) {
-            foreach($arrMembership as $groupName=>$groupId) {
-                $id_group =  $groupId;
-                // Asumo que cada usuario solo puede pertenecer a un grupo
-                break;
-            }
-        }
-        $arrFillUser['group'] = $id_group;
-        $arrFillUser['extension'] = $arrUser[0][3];
-
-        // Implementar
-        include_once("libs/paloSantoForm.class.php");
-        $arrFormElements['password1']['REQUIRED']='no';
-        $arrFormElements['password2']['REQUIRED']='no';
-        $oForm = new paloForm($smarty, $arrFormElements);
-
-        $oForm->setEditMode();
-        $smarty->assign("id_user", $_POST['id_user']);
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", "{$arrLang['Edit User']} \"" . $arrFillUser['name'] . "\"", $arrFillUser);
-
-    } else if(isset($_POST['submit_save_user'])) {
-
-        include_once("libs/paloSantoForm.class.php");
-
-        $oForm = new paloForm($smarty, $arrFormElements);
-
-        if($oForm->validateForm($_POST)) {
-            // Exito, puedo procesar los datos ahora.
-            $pACL = new paloACL($pDB);
-
-            if(empty($_POST['password1']) or ($_POST['password1']!=$_POST['password2'])) {
-                // Error claves
-                $smarty->assign("mb_message", $arrLang["The passwords are empty or don't match"]);
-                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New User"], $_POST);
-            } else {
-
-                // Creo al usuario
-                $md5_password = md5($_POST['password1']);
-                $pACL->createUser($_POST['name'], $_POST['description'], $md5_password,$_POST['extension']);
-                // Creo la membresia
-                $idUser = $pACL->getIdUser($_POST['name']);
-                $pACL->addToGroup($idUser, $_POST['group']);
-
-                if(!empty($pACL->errMsg)) {
-                    // Ocurrio algun error aqui
-                    $smarty->assign("mb_message", "ERROR: $pACL->errMsg");
-                    $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New User"], $_POST);
-                } else {
-                    header("Location: ?menu=userlist");
-                }
-            }
-        } else {
-            // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
-            $arrErrores=$oForm->arrErroresValidacion;
-            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
-            foreach($arrErrores as $k=>$v) {
-                $strErrorMsg .= "$k, ";
-            }
-            $strErrorMsg .= "";
-            $smarty->assign("mb_message", $strErrorMsg);
-            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New User"], $_POST);
-        }
-
-    } else if(isset($_POST['submit_apply_changes'])) {
-
-        $arrUser = $pACL->getUsers($_POST['id_user']);
-        $username = $arrUser[0][1];
-        $description = $arrUser[0][2]; 
-        $arrFormElements['password1']['REQUIRED']='no';
-        $arrFormElements['password2']['REQUIRED']='no';
-        include_once("libs/paloSantoForm.class.php");
-
-        $oForm = new paloForm($smarty, $arrFormElements);
-
-        $oForm->setEditMode();
-        if($oForm->validateForm($_POST)) {
-
-            if(!empty($_POST['password1']) && ($_POST['password1']!=$_POST['password2'])) {
-                // Error claves
-                $smarty->assign("mb_title", $arrLang["Validation Error"]);
-                $smarty->assign("mb_message", $arrLang["The passwords are empty or don't match"]);
-                $smarty->assign("id_user", $_POST['id_user']);
-                $arrFillUser['description'] = $_POST['description'];
-                $arrFillUser['name']        = $username;
-                $arrFillUser['group']       = $_POST['group'];
-                $arrFillUser['extension']   = isset($_POST['extension'])?$_POST['extension']:"";
-        
-                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Edit User"], $arrFillUser);
-            } else {
-
-                // Exito, puedo procesar los datos ahora.
-                $pACL = new paloACL($pDB);
-
-                // Lleno el grupo
-                $arrMembership  = $pACL->getMembership($_POST['id_user']);
-                $id_group="";
-                if(is_array($arrMembership)) {
-                    foreach($arrMembership as $groupName=>$groupId) {
-                        $id_group =  $groupId;
-                        // Asumo que cada usuario solo puede pertenecer a un grupo
-                        break;
-                    }
-                }
-
-                // El usuario trato de cambiar de grupo
-                if($id_group!=$_POST['group']) {
-                    $pACL->delFromGroup($_POST['id_user'], $id_group);
-                    $pACL->addToGroup($_POST['id_user'], $_POST['group']);
-                }
-
-                //- La updateUser no es la adecuada porque pide el username. Deberia
-                //- hacer una que no pida username en la proxima version
-                $_POST['extension'] = isset($_POST['extension'])?$_POST['extension']:"";
-                $pACL->updateUser($_POST['id_user'], $username, $_POST['description'],$_POST['extension']);
-                //si se ha puesto algo en passwor se actualiza el password
-                if (!empty($_POST['password1']))
-                    $pACL->changePassword($_POST['id_user'], md5($_POST['password1']));
-    
-                header("Location: ?menu=userlist");
-            }
-
-        } else {
-            // Manejo de Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
-            $arrErrores=$oForm->arrErroresValidacion;
-            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
-            foreach($arrErrores as $k=>$v) {
-                $strErrorMsg .= "$k, ";
-            }
-            $strErrorMsg .= "";
-            $smarty->assign("mb_message", $strErrorMsg);
-
-            $arrFillUser['description'] = $_POST['description'];
-            $arrFillUser['name']        = $username;
-            $arrFillUser['group']       = $_POST['group'];
-            $arrFillUser['extension']   = $_POST['extension'];      
-            $smarty->assign("id_user", $_POST['id_user']);
-            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Edit User"], $arrFillUser);
-            /////////////////////////////////
-        }
-
-    } else if(isset($_GET['action']) && $_GET['action']=="view") {
-
-        include_once("libs/paloSantoForm.class.php");
-
-        $oForm = new paloForm($smarty, $arrFormElements);
-
-        //- TODO: Tengo que validar que el id sea valido, si no es valido muestro un mensaje de error
-
-        $oForm->setViewMode(); // Esto es para activar el modo "preview"
-        $arrUser = $pACL->getUsers($_GET['id']);
-
-        // Conversion de formato
-        $arrTmp['name']        = $arrUser[0][1];
-        $arrTmp['description'] = $arrUser[0][2];
-        $arrTmp['password1'] = "****";
-        $arrTmp['password2'] = "****";
-        $arrTmp['extension'] = $arrUser[0][3];
-        //- TODO: Falta llenar el grupo
-        $arrMembership  = $pACL->getMembership($_GET['id']);
-        $id_group="";
-        if(is_array($arrMembership)) {
-            foreach($arrMembership as $groupName=>$groupId) {
-                $id_group =  $groupId;
-                // Asumo que cada usuario solo puede pertenecer a un grupo
-                break;
-            }
-        }
-        $arrTmp['group'] = $id_group;
-
-        $smarty->assign("id_user", $_GET['id']);
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["View User"], $arrTmp); // hay que pasar el arreglo
-
-    } else {
-
-        if (isset($_POST['delete'])) {
-           //- TODO: Validar el id de user
-            if(isset($_POST['id_user']) && $_POST['id_user']=='1') {
-                // No se puede elimiar al usuario admin
-                $smarty->assign("mb_message", $arrLang["The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user."]);
-            } else {
-                $pACL->deleteUser($_POST['id_user']);
-            }
-        }
-
-        $arrUsers = $pACL->getUsers();
-
-        $end = count($arrUsers);
-        $arrData = array();
-        foreach($arrUsers as $user) {
-            $arrMembership  = $pACL->getMembership($user[0]);
-
-            $group="";
-            if(is_array($arrMembership)) {
-                foreach($arrMembership as $groupName=>$groupId) {
-                    if($groupName == 'administrator')
-                        $groupName = $arrLang['administrator'];
-                    else if($groupName == 'operator')
-                        $groupName = $arrLang['operator'];
-                    else if($groupName == 'extension')
-                        $groupName = $arrLang['extension'];
-
-                    $group .= ucfirst($groupName) . " ";
-                }
-            }
-
-            $arrTmp    = array();
-            //$arrTmp[0] = "&nbsp;<a href='?menu=usernew&action=view&id=" . $user['id'] . "'>" . $user['name'] . "</a>";
-            //$arrTmp[1] = $user['description'];
-            $arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=" . $user[0] . "'>" . $user[1] . "</a>";
-            $arrTmp[1] = $user[2];
-            $arrTmp[2] = $group;
-            $arrTmp[3] = is_null($user[3])?"No Extension":$user[3];
-            $arrData[] = $arrTmp;
-
-        }
-
-        $arrGrid = array("title"    => $arrLang["User List"],
-                         "icon"     => "/modules/userlist/images/system_users.png",
-                         "width"    => "99%",
-                         "start"    => ($end==0) ? 0 : 1,
-                         "end"      => $end,
-                         "total"    => $end,
-                         "columns"  => array(0 => array("name"      => $arrLang["Login"],
-                                                        "property1" => ""),
-                                             1 => array("name"      => $arrLang["Real Name"], 
-                                                        "property1" => ""),
-                                             2 => array("name"      => $arrLang["Group"], 
-                                                        "property1" => ""),
-                                             3 => array("name"      => $arrLang["Extension"], 
-                                                        "property1" => "")
-                                            )
-                        );
-
-        $oGrid = new paloSantoGrid($smarty);
-        $oGrid->showFilter("<form style='margin-bottom:0;' method='POST' action='?menu=userlist'>" .
-                           "<input type='submit' name='submit_create_user' value='{$arrLang['Create New User']}' class='button'></form>");
-        $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    }
-
-    return $contenidoModulo;
+	return $arrFormElements;
 }
+
+function createFieldFilter($arrOrgz)
+{
+    $arrFields = array(
+		"idOrganization"  => array("LABEL"                  => _tr("Organization"),
+				      "REQUIRED"               => "no",
+				      "INPUT_TYPE"             => "SELECT",
+				      "INPUT_EXTRA_PARAM"      => $arrOrgz,
+				      "VALIDATION_TYPE"        => "numeric",
+				      "VALIDATION_EXTRA_PARAM" => "",
+				      "ONCHANGE"	       => "javascript:submit();"),
+		);
+    return $arrFields;
+}
+
+
+function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization){
+	$pACL = new paloACL($pDB);
+	$showMsg=false;
+	$continue=false;
+
+	if($userLevel1=="other"){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+	}
+
+	if($userLevel1=="superadmin"){
+		$idOrganization = getParameter("organization_id");
+	}
+
+	$query="select domain from organization where id=?";
+	$result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
+	if($result===false){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
+		$showMsg=true;
+	}elseif(count($result)==0){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. "));
+		$showMsg=true;
+	}else{
+		$domain=$result[0];
+		$continue=true;
+	}
+
+	if($continue){
+		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pACL->_DB);
+		if($pAstConf->generateDialplan($domain)===false){
+			$smarty->assign("mb_title", _tr("ERROR"));
+			$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);
+			$showMsg=true;
+		}else{
+			$smarty->assign("mb_title", _tr("MESSAGE"));
+			$smarty->assign("mb_message",_tr("Asterisk was reloaded correctly. "));
+		}
+	}
+
+	return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$showMsg,$idOrganization);
+}
+
+function getAction(){
+    if(getParameter("create_user"))
+        return "new_user";
+    else if(getParameter("save_new")) //Get parameter by POST (submit)
+        return "save_new";
+    else if(getParameter("save_edit"))
+        return "save_edit";
+    else if(getParameter("edit"))
+        return "view_edit";
+    else if(getParameter("delete"))
+        return "delete";
+    else if(getParameter("action")=="view")      //Get parameter by GET (command pattern, links)
+        return "view";
+    else if(getParameter("action")=="view_edit")
+        return "view_edit";
+	else if(getParameter("action")=="get_groups")
+		return "getGroups";
+	else if(getParameter("action")=="getImage")
+		return "getImage";
+	else if(getParameter("action")=="reloadAsterisk")
+		return "reloadAasterisk";
+    else
+        return "report"; //cancel
+}
+
 ?>

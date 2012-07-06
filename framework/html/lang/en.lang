@@ -88,6 +88,7 @@ $arrLang=array(
 "System Info"=>"System Info",
 "User Management"=>"User Management",
 "Users"=>"Users",
+"Organization"=>"Organization", 
 "Menu Administrator"=>"Menu Administrator",
 "Group Permission" => "Group Permissions",
 /*end menu*/
@@ -236,6 +237,32 @@ $arrLang=array(
 "Hide Filter" => "Hide Filter",
 "More Options" => "More Options",
 "Filter applied: " => "Filter applied: ",
-"Filter applied " => "Filter applied: "
+"Filter applied " => "Filter applied: ",
+//paloSantoACL
+"Organization ID must be numeric" => "Organization ID must be numeric. ",
+"Organization doesn't exist" => "Organization doesn't exist. ",
+"User ID is not valid" => "User ID is not valid. ",
+"User doesn't exist" => "User doesn't exist. ",
+"User ID must be numeric" => "User ID must be numeric. ",
+"Username is not valid" => "Username is not valid. ",
+"Username can't be empty" => "Username can not be empty. ",
+"Username is not valid" => "Username is not valid. ",
+"Username already exists" => "Username already exists. ",
+"Can't get extension user" => "Can't get extension user. ",
+"User doesn't have a associated extension" => "User doesn't have a associated extension. ",
+"Limit must be numeric" => "Limit must be numeric. ",
+"Offset must be numeric" => "Offset must be numeric. ",
+"Grout ID is not valid" => "Grout ID is not valid. ",
+"Group dosen't exist" => "Group dosen't exist. ",
+"Password is not a valid MD5 hash" => "Password is not a valid MD5 hash. ",
+"Resource Name can't be empty" => "Resource Name can't be empty. ",
+"Menu already exists" => "Menu already exists. ",
+"Doesn't exist resource with id=" => "Doesn't exist resource with id=",
+"Doesn't exist organization with id=" => "Doesn't exist organization with id=",
+"Doesn't exist group with id=" => "Doesn't exist group with id=", 
+"Organization doesn't have priviled to access resource " => "Organization doesn't have priviled to access resource ", 
+"Error has ocurred to delete permission" => "Error has ocurred to delete permission. ",
+"Problem setting globals variables" => "A error have ocurred confugurating globals variables in asterisk. ",
+"Coulnd't be created new dialplan" => "Coulnd't be created new dialplan. " 
 );
 ?>

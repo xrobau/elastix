@@ -1,10 +1,4 @@
-[acl]
-ignore_backup = no
-engine = sqlite3
-path = /var/www/db
-deletable = yes
-
-[menu]
+[elastix]
 ignore_backup = no
 engine = sqlite3
 path = /var/www/db
@@ -22,14 +16,8 @@ engine = sqlite3
 path = /var/www/db
 deletable = yes
 
-[settings]
+[elx_pbx]
 ignore_backup = no
-engine = sqlite3
-path = /var/www/db
-deletable = yes
-
-[elastix]
-ignore_backup = no
-engine = sqlite3
-path = /var/www/db
+engine = mysql
+path = /var/lib/mysql
 deletable = yes

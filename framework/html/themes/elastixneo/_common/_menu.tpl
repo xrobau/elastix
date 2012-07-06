@@ -13,8 +13,10 @@
 <div id="PopupElastix" style="position: absolute; top: 0px; left: 0px;"></div>
 
 {literal}
+
 <script type='text/javascript'>
 //<![CDATA[
+
 function mostrar_Menu(element)
 {
     var subMenu;
@@ -406,19 +408,19 @@ function oneClickEvent()
 	<div id="neo-mmenubox"> <!-- mostrando contenido del menu principal -->
 	  {foreach from=$arrMainMenu key=idMenu item=menu name=menuMain}
 		{if $idMenu eq $idMainMenuSelected && $smarty.foreach.menuMain.iteration lt 8}
-		  <div class="neo-tabhon"><a class='menutable2' href="index.php?menu={$idMenu}">{$menu.Name}</a></div>
+		  <div class="neo-tabhon"><a class='menutable2' href="index.php?menu={$idMenu}">{$menu.description}</a></div>
 		{elseif $smarty.foreach.menuMain.first}
-		  <div class="neo-tabh-lend2"><a class="menutable" href="index.php?menu={$idMenu}">{$menu.Name}</a></div>
+		  <div class="neo-tabh-lend2"><a class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></div>
 		{elseif $smarty.foreach.menuMain.iteration lt 8 && $smarty.foreach.menuMain.last}
-		  <div class="neo-tabh-lend3"><a class="menutable" href="index.php?menu={$idMenu}">{$menu.Name}</a></div>
+		  <div class="neo-tabh-lend3"><a class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></div>
 		{elseif $smarty.foreach.menuMain.iteration lt 8}
-		  <div class="neo-tabh"><a class="menutable" href="index.php?menu={$idMenu}">{$menu.Name}</a></div>
+		  <div class="neo-tabh"><a class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></div>
 		{elseif $smarty.foreach.menuMain.iteration eq 8}
 		  <div class="neo-tabh-rend"><img src="themes/{$THEMENAME}/images/arrowdown.png" width="17" height="15" alt="arrowdown" /></div>
 		  <div id="neo-second-showbox-menu" class="neo-second-showbox-menu neo-display-none">
-			<p><a class="menutable" href="index.php?menu={$idMenu}">{$menu.Name}</a></p>
+			<p><a class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></p>
 		{elseif $smarty.foreach.menuMain.iteration ge 8}
-			<p><a class="menutable" href="index.php?menu={$idMenu}">{$menu.Name}</a></p>
+			<p><a class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></p>
 		{/if}
         {if $smarty.foreach.menuMain.iteration ge 8 && $smarty.foreach.menuMain.last}
            </div>
@@ -430,9 +432,9 @@ function oneClickEvent()
 	  <div id="neo-smenubox-innerdiv">
 		{foreach from=$arrSubMenuByParents key=idSubMenu item=subMenu}
 		  {if $idSubMenu eq $idSubMenuSelected}
-			<div class="neo-tabvon"><a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.Name}</a></div>
+			<div class="neo-tabvon"><a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.description}</a></div>
 		  {else}
-			<div class="neo-tabv"><a href="index.php?menu={$idSubMenu}">{$subMenu.Name}</a></div>
+			<div class="neo-tabv"><a href="index.php?menu={$idSubMenu}">{$subMenu.description}</a></div>
 		  {/if}
 		{/foreach}
 	  </div>
@@ -477,9 +479,9 @@ function oneClickEvent()
 		<div id="neo-3menubox">  <!-- mostrando contenido del menu tercer nivel -->
 			{foreach from=$arrSubMenu2 key=idSubMenu2 item=subMenu2}
 			  {if $idSubMenu2 eq $idSubMenu2Selected}
-				<div class="neo-3mtabon"><a href="index.php?menu={$idSubMenu2}" style="text-decoration: none;">{$subMenu2.Name}</a></div>
+				<div class="neo-3mtabon"><a href="index.php?menu={$idSubMenu2}" style="text-decoration: none;">{$subMenu2.description}</a></div>
 			  {else}
-				<div class="neo-3mtab"><a href="index.php?menu={$idSubMenu2}" style="text-decoration: none;">{$subMenu2.Name}</a></div>
+				<div class="neo-3mtab"><a href="index.php?menu={$idSubMenu2}" style="text-decoration: none;">{$subMenu2.description}</a></div>
 			  {/if}
 			{/foreach}
 		</div>
@@ -517,7 +519,7 @@ function oneClickEvent()
 		  {else}
 		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
+	      <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
 	      <img src="images/icon-help.png" width="24" height="24" alt="help" title="{$HELP}" class="neo-picker" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
 	      <div class="neo-module-content">
 	{else}
@@ -544,7 +546,7 @@ function oneClickEvent()
 		  {else}
 		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
+	      <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
 	      <img src="images/icon-help.png" width="24" height="24" alt="help" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
 	 <div class="neo-module-content">
 	{/if}

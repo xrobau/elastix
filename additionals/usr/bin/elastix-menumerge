@@ -50,13 +50,12 @@ require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoModuloXML.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoInstaller.class.php");
 
-$pDB = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/menu.db");
-$pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/acl.db");
+$pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/elastix.db");
 
 if(!empty($pDB->errMsg)) echo "ERROR DE DB: {$pDB->errMsg}\n";
 if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
 
-$oMenu = new paloMenu($pDB);
+$oMenu = new paloMenu($pDBACL);
 $oACL = new paloACL($pDBACL);
 $oInstaller = new Installer();
 
@@ -66,12 +65,12 @@ if(isset($_SERVER['argv'][1])){
 
     if(count($oModuloXML->_arbolMenu)>0){
         foreach ($oModuloXML->_arbolMenu as $menuitem){
-            $idmenu=$menuitem['menuid'];
-            echo "Menu: $idmenu found\n";
-            if(!empty($idmenu)){
-                //buscar si ya existe ese menu
-                if(!$oMenu->existeMenu($idmenu)){
-                    $newMenu["menuid"]=$idmenu;
+            $mName=$menuitem['mName'];
+            echo "Menu: $mName found\n";
+            if(!empty($mName)){
+                //buscar si ya existe ese menu - Si no existe se lo crea
+                if(!$oACL->getIdResource($mName)){
+                    $newMenu["mName"]=$mName;
                     $newMenu["module"]=$menuitem['module'];
                     $newMenu["parent"]=$menuitem['parent'];
                     $newMenu["tag"]=$menuitem['desc'];
@@ -80,20 +79,19 @@ if(isset($_SERVER['argv'][1])){
                     $newPermission = array();
                     $newPermission = $menuitem['groups'];
 
-                    $oInstaller->addMenu($oMenu,$newMenu);
-                    if($newMenu['parent']!="") //agregar los permisos
-                        $oInstaller->addResourceMembership($oACL,$newMenu,$newPermission);
+					//se debe crear el nuevo recurso dentro de acl_resource
+					//esto incluye los campos usados para crear los menus de elastix
+                    if($newMenu['parent']!="") 
+                        $oInstaller->addResource($oACL,$newMenu,$newPermission);
                 }else{// si ya existe solo se debe actualizar el Parent, tag, link y order
-                    echo "Updating: $idmenu found\n";
-                    $newMenu["menuid"]=$idmenu;
+                    echo "Updating: $mName found\n";
+                    $newMenu["mName"]=$mName;
                     $newMenu["module"]=$menuitem['module'];
                     $newMenu["parent"]=$menuitem['parent'];
                     $newMenu["tag"]=$menuitem['desc'];
                     $newMenu["link"]=$menuitem['link'];
                     $newMenu["order"]=$menuitem['order'];
                     $oInstaller->UpdateMenu($oMenu,$newMenu);
-					if($newMenu['parent']!="") //agregar los permisos
-                        $oInstaller->updateResourceMembership($oACL,$newMenu);
                 }
             }
             else{

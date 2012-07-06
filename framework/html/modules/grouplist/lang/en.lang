@@ -39,5 +39,10 @@ $arrLangModule=array(
 "Create New Group" => "Create New Group",
 "View Group" => "View Group",
 "Group List" => "Group List",
+//desde aqui lo nuevo
+"Group can't be empty" => "Group can't be empty. ",
+"Group already exists" => "Group already exists. ",
+"Group ID must be numeric" => "Group ID must be numeric. ",
+"You can not delete this group. You must delete all users belong this group before to delete the group" => "You can not delete this group. You must delete all users belong this group before to delete the group. "
 );
 ?>

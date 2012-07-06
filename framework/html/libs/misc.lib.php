@@ -239,6 +239,7 @@ function translateDate($dateOrig)
         return false;
     }
 }
+
 function get_key_settings($pDB,$key)
 {
     $r = $pDB->getFirstRowQuery(
@@ -246,6 +247,7 @@ function get_key_settings($pDB,$key)
         FALSE, array($key));
     return ($r && count($r) > 0) ? $r[0] : '';
 }
+
 function set_key_settings($pDB,$key,$value)
 {
     // Verificar si existe el valor de configuración
@@ -268,7 +270,7 @@ function load_version_elastix($ruta_base='')
     include_once $ruta_base."libs/paloSantoDB.class.php";
 
     //conectarse a la base de settings para obtener la version y release del sistema elastix
-    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
     if(empty($pDB->errMsg)) {
         $theme=get_key_settings($pDB,'elastix_version_release');
     }
@@ -285,18 +287,69 @@ function load_theme($ruta_base='')
     require_once $ruta_base."configs/default.conf.php";
     global $arrConf;
     include_once $ruta_base."libs/paloSantoDB.class.php";
+	$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+	//print_r($arrConf);
+	if(empty($pDB->errMsg)) {
+        if($user==""){
+			$theme=getOrganizationProp(1,'theme',$pDB);
+		}else{
+			$theme=getUserProp($user,'theme',$pDB);
+		}
+    }
 
-    //conectarse a la base de settings para obtener el thema actual
-    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-    if(empty($pDB->errMsg)) {
-        $theme=get_key_settings($pDB,'theme');
-    }
     //si no se encuentra setear el tema por default
-    if (empty($theme)){
-        set_key_settings($pDB,'theme','default');
-        return "default";
-    }
-    else return $theme;
+    if (empty($theme) || $theme==false){
+		print("them empty ");
+		if($user!=""){
+			setUserProp($user,'theme',"elastixneo","system",$pDB);}
+        return "elastixneo";
+    }else{
+		return $theme;
+	}
+}
+
+
+function update_theme()
+{
+	//actualizo el tema personalizado del usuario
+	global $arrConf;
+	$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/");
+	$documentRoot = $arrConf['basePath'];
+	exec("rm -rf $documentRoot/var/templates_c/*",$arrConsole,$flagStatus);
+	//STEP 2: Update menus elastix permission.
+	if(isset($_SESSION['elastix_user_permission']))
+		unset($_SESSION['elastix_user_permission']);
+}
+
+function getUserProp($username,$key,&$pdB){
+	$bQuery = "select value from user_properties where id_user=(Select id from acl_user where username=?) and property=?";
+	$bResult=$pdB->getFirstRowQuery($bQuery,false, array($username,$key));
+	if($bResult==false){
+		return false;
+	}else{
+		return $bResult[0];
+	}
+}
+
+function getOrganizationProp($id,$key,&$pDB){
+	$bQuery = "select value from organization_properties where id_organization=? and key=?";
+	$bResult=$pDB->getFirstRowQuery($bQuery,false, array($id,$key));
+	if($bResult==false){
+		return false;
+	}else{
+		return $bResult[0];
+	}
+}
+
+function setUserProp($username,$key,$value,$category="",&$pDB){
+	$query="INSERT INTO user_properties values ((Select id from acl_user where username=?),?,?,?)";
+	$arrParams=array($username,$key,$value,$category);
+	$result=$pDB->genQuery($query, $arrParams);
+	if($result==false){
+		return false;
+	}else
+		return true;
 }
 
 function load_language($ruta_base='')
@@ -343,13 +396,22 @@ function get_language($ruta_base='')
     global $arrConf;
     $lang="";
 
-    //conectarse a la base de settings para obtener el idioma actual
-    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-    if(empty($pDB->errMsg)) {
-        $lang=get_key_settings($pDB,'language');
+	$pdB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pdB);
+	$pOrgz =new paloSantoOrganization($pdB);
+	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    $uid = $pACL->getIdUser($user);
+
+	if(empty($pDB->errMsg)) {
+        if($uid===false){
+			$lang=$pOrgz->getOrganizationProp(1,'language');
+		}else{
+			$lang=$pACL->getUserProp($uid,'language');
+		}
     }
+
     //si no se encuentra tomar del archivo de configuracion
-    if (empty($lang)) $lang=isset($arrConf['language'])?$arrConf['language']:"en";
+    if (empty($lang) || $lang===false) $lang=isset($arrConf['language'])?$arrConf['language']:"en";
 
     //verificar que exista en el arreglo de idiomas, sino por defecto en
     if (!array_key_exists($lang,$languages)) $lang="en";
@@ -477,10 +539,10 @@ function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
         else return 'eLaStIx.2oo7'; // Compatibility for updates where /etc/elastix.conf is not available
         break;
     case 'asteriskuser':
-        $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
+        $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
         $listaParam = $pConfig->leer_configuracion(FALSE);
-        if (isset($listaParam['AMPDBPASS']))
-            return $listaParam['AMPDBPASS'];
+        if (isset($listaParam['DBUSER']))
+            return $listaParam['DBPASSWORD'];
         break;
     }
     return NULL;
@@ -525,12 +587,12 @@ function generarDSNSistema($sNombreUsuario, $sNombreDB, $ruta_base='')
         if (is_null($sClave)) return NULL;
         return 'mysql://root:'.$sClave.'@localhost/'.$sNombreDB;
     case 'asteriskuser':
-        $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
+        $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
         $listaParam = $pConfig->leer_configuracion(FALSE);
-        return $listaParam['AMPDBENGINE']['valor']."://".
-               $listaParam['AMPDBUSER']['valor']. ":".
-               $listaParam['AMPDBPASS']['valor']. "@".
-               $listaParam['AMPDBHOST']['valor']. "/".$sNombreDB;
+        return "mysql://".
+               $listaParam['DBUSER']['valor']. ":".
+               $listaParam['DBPASSWORD']['valor']. "@".
+               $listaParam['DBHOST']['valor']. "/".$sNombreDB;
     }
     return NULL;
 }
@@ -580,11 +642,11 @@ function isPostfixToElastix2(){
     return $band;
 }
 
-// Esta función revisa las bases de datos del framework (acl.db, menu.db, register.db, settings.db, samples.db) en caso de que no existan y se encuentre su equivalente pero con extensión .rpmsave entonces se las renombra.
+// Esta función revisa las bases de datos del framework (elastix.db, register.db, samples.db) en caso de que no existan y se encuentre su equivalente pero con extensión .rpmsave entonces se las renombra.
 // Esto se lo hace exclusivamente debido a la migración de las bases de datos .db del framework a archivos .sql ya que el último rpm generado que contenía las bases como .db las renombra a .rpmsave
 function checkFrameworkDatabases($dbdir)
 {
-    $arrFrameWorkDatabases = array("acl.db","menu.db","register.db","samples.db","settings.db");
+    $arrFrameWorkDatabases = array("elastix.db","register.db","samples.db");
     foreach($arrFrameWorkDatabases as $database){
         if(!file_exists("$dbdir/$database") || filesize("$dbdir/$database")==0){
             if(file_exists("$dbdir/$database.rpmsave"))
@@ -663,7 +725,7 @@ function setUserPassword()
 
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     global $arrConf;
-    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
 	if($uid===FALSE)
@@ -687,6 +749,7 @@ function setUserPassword()
 	return $arrResult;
 }
 
+//pendiente
 function searchModulesByName()
 {
 	include_once "libs/JSON.php";
@@ -702,12 +765,12 @@ function searchModulesByName()
 
 	// obteniendo los id de los menus permitidos
     global $arrConf;
-    $pACL = new paloACL($arrConf['elastix_dsn']['acl']);
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
+    $pACL = new paloACL($arrConf['elastix_dsn']['elastix']);
+    $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
     $arrSessionPermissions = $pMenu->filterAuthorizedMenus($pACL->getIdUser($_SESSION['elastix_user']));
 	$arrIdMenues = array();
 	foreach($arrSessionPermissions as $key => $value){
-		$arrIdMenues[] = $value['id']; // id, IdParent, Link, Name, Type, order_no, HasChild
+		$arrIdMenues[] = $value['id']; // id, IdParent, Link,  Type, order_no, HasChild
 	}
 
 	$parameter_to_find = array(); // arreglo con los valores del name dada la busqueda
@@ -728,53 +791,41 @@ function searchModulesByName()
 
 	// buscando en la base de datos acl.db tabla acl_resource con el campo description
 	if(empty($parameter_to_find))
-		$arrResult = $pGroupPermission->ObtainResources(25, 0, $name);
+		$arrResult = $pACL->getListResources(25, 0, $name);
 	else
-    	$arrResult = $pGroupPermission->ObtainResources(25, 0, $parameter_to_find);
+    	$arrResult = $pACL->getListResources(25, 0, $parameter_to_find);
 
 	foreach($arrResult as $key2 => $value2){
 		// leyendo el resultado del query
-		if(in_array($value2["name"], $arrIdMenues)){
+		if(in_array($value2["id"], $arrIdMenues)){
 			$arrMenu['caption'] = _tr($value2["description"]);
-			$arrMenu['value']   = $value2["name"];
+			$arrMenu['value']   = $value2["id"];
 			$result[] = $arrMenu;
 		}
 	}
 
 	header('Content-Type: application/json');
 	return $json->encode($result);
-
 }
+
 
 function getMenuColorByMenu()
 {
 	include_once "libs/paloSantoACL.class.php";
 	global $arrConf;
-    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pdbACL);
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $uid = $pACL->getIdUser($user);
 	$color = "#454545";
-	$id_profile = "";
-	$sPeticionID = "SELECT id_profile FROM acl_user_profile WHERE id_user = ?";
-	$tupla = $pdbACL->getFirstRowQuery($sPeticionID, FALSE, array($uid));
-	if ($tupla === FALSE) {
+	$sPeticionPropiedades = "SELECT property, value FROM user_properties WHERE id_user = ? AND property = ?";
+	$tabla = $pdbACL->getFirstRowQuery($sPeticionPropiedades, FALSE, array($uid,"menuColor"));
+	if ($tabla === FALSE) {
 		$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-	} elseif (count($tupla) == 0) {
-		$id_profile = NULL;
 	} else {
-		$id_profile = $tupla[0];
-	}
-	if(isset($id_profile) && $id_profile != ""){
-		$sPeticionPropiedades = "SELECT property, value FROM acl_profile_properties WHERE id_profile = ? AND property = ?";
-		$tabla = $pdbACL->getFirstRowQuery($sPeticionPropiedades, FALSE, array($id_profile,"menuColor"));
-		if ($tabla === FALSE) {
-		  $arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-		} else {
-			if(count($tabla) > 0)
-				if($tabla[0] == "menuColor")
-					$color = $tabla[1];
-		}
+		if(count($tabla) > 0)
+			if($tabla[0] == "menuColor")
+				$color = $tabla[1];
 	}
 	return $color;
 }
@@ -793,63 +844,19 @@ function changeMenuColorByUser()
 
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     global $arrConf;
-    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
 
 	if($uid===FALSE)
         $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
 	else{
-		//si el usuario no tiene un color establecido entonces se crea el nuevo registro caso contrario se lo inserta
-		//obteniendo el id profile del usuario
-
-		$id_profile = "";
-		$sPeticionID = "SELECT id_profile FROM acl_user_profile WHERE id_user = ?";
-		$tupla = $pdbACL->getFirstRowQuery($sPeticionID, FALSE, array($uid));
-		if ($tupla === FALSE) {
-			$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-			return $arrResult;
-		} elseif (count($tupla) == 0) {
-			$id_profile = NULL;
-		} else {
-			$id_profile = $tupla[0];
-		}
-
-		if (is_null($id_profile) || $id_profile == "") {
-			// Crear el nuevo perfil para el usuario indicado...
-			$sPeticionNuevoPerfil = 'INSERT INTO acl_user_profile (id_user, id_resource, profile) VALUES (?, ?, ?)';
-			$r = $pdbACL->genQuery($sPeticionNuevoPerfil, array($uid, "19", "default"));
-			if (!$r) {
-				$arrResult['msg'] = _tr("ERROR DE DB: ").$pDB->errMsg;
-			}
-			$id_profile = $pdbACL->getLastInsertId();
-		}
-		if(isset($id_profile) && $id_profile != ""){
-		  $sPeticionPropiedades = "SELECT property, value FROM acl_profile_properties WHERE id_profile = ?";
-		  $existColor = false;
-		  $tabla = $pdbACL->fetchTable($sPeticionPropiedades, FALSE, array($id_profile));
-		  if ($tabla === FALSE) {
-			$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-		  } else {
-			foreach ($tabla as $tupla) {
-				if($tupla[0] == "menuColor")
-				  $existColor = true;
-			}
-			if ($existColor) {
-				$sPeticionSQL = 'UPDATE acl_profile_properties SET value = ? WHERE id_profile = ? AND property = ?';
-				$params = array($color, $id_profile, "menuColor");
-			} else {
-				$sPeticionSQL = 'INSERT INTO acl_profile_properties (id_profile, property, value) VALUES (?, ?, ?)';
-				$params = array($id_profile, "menuColor", $color);
-			}
-			$r = $pdbACL->genQuery($sPeticionSQL, $params);
-			if (!$r) {
-				$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-			}else{
-				$arrResult['status'] = TRUE;
-				$arrResult['msg'] = _tr("OK");
-			}
-		  }
+		//si el usuario no tiene un color establecido entonces se crea el nuevo registro caso contrario se lo actualiza
+		if(!$pACL->setUserProp($uid,"menuColor",$color,"profile")){
+			$arrResult['msg'] = _tr("ERROR DE DB: ").$pACL->errMsg;
+		}else{
+			$arrResult['status'] = TRUE;
+			$arrResult['msg'] = _tr("OK");
 		}
 	}
 	return $arrResult;
@@ -862,14 +869,14 @@ function putMenuAsHistory($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
 			//verificar de que ya no este en la base de datos
-			$id_resource = $pACL->getResourceId($menu);
+			//$id_resource = $pACL->getIdResource($menu);
 			$exist = false;
-			$history = "SELECT aus.id AS id, ar.id AS id_menu, ar.name AS name, ar.description AS description FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'history' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
+			$history = "SELECT aus.id AS id, ar.id AS id_menu, ar.description AS description FROM user_shortcut aus, acl_resource ar WHERE id_user = ? AND aus.type = 'history' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
 			
 			$arr_result1 = $pdbACL->fetchTable($history, TRUE, array($uid));
 			if($arr_result1 !== FALSE){
@@ -879,7 +886,7 @@ function putMenuAsHistory($menu)
 				foreach($arr_result1 as $key => $value){
 					$arrNew[] = $value;
 					$arrIDS[] = $value['id'];
-					if($value['name'] == $menu){
+					if($value['id_menu'] == $menu){
 						$exist = true;
 						if($i==0) return true;
 					}
@@ -887,8 +894,8 @@ function putMenuAsHistory($menu)
 				}
 				if(!$exist && count($arr_result1) <= 4){
 					$pdbACL->beginTransaction();
-					$query = "INSERT INTO acl_user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
-					$r = $pdbACL->genQuery($query, array($uid, $id_resource, "history"));
+					$query = "INSERT INTO user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
+					$r = $pdbACL->genQuery($query, array($uid, $menu, "history"));
 					if(!$r){
 						$pdbACL->rollBack();
 						return false;
@@ -900,7 +907,7 @@ function putMenuAsHistory($menu)
 					$pdbACL->beginTransaction();
 					$success = true;
 					$tmp = "";
-					$query = "UPDATE acl_user_shortcut SET id_resource = ? WHERE id_user = ? AND id = ? AND type = ?";
+					$query = "UPDATE user_shortcut SET id_resource = ? WHERE id_user = ? AND id = ? AND type = ?";
 					for($i=0; $i<count($arrIDS); $i++){
 						$id = $arrIDS[$i];
 						$id_menu = $arrNew[$i]["id_menu"];
@@ -908,10 +915,10 @@ function putMenuAsHistory($menu)
 						$r = true;
 						if($i==0){
 							$tmp = $id_menu;
-							$r = $pdbACL->genQuery($query, array($id_resource, $uid, $id, "history"));
+							$r = $pdbACL->genQuery($query, array($menu, $uid, $id, "history"));
 						}else{
-							if($id_menu != $id_resource){
-								if($tmp != $id_resource && $tmp != ""){
+							if($id_menu != $menu){
+								if($tmp != $menu && $tmp != ""){
 									$r = $pdbACL->genQuery($query, array($tmp, $uid, $id, "history"));
 									$tmp = $id_menu;
 								}else
@@ -944,36 +951,36 @@ function putMenuAsBookmark($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
-			$id_resource = $pACL->getResourceId($menu);
-			$resource = $pACL->getResources($id_resource);
+			//$id_resource = $pACL->getIdResource($menu);
+			$resource = $pACL->getResources($menu);
 			$exist = false;
-			$bookmarks = "SELECT aus.id AS id, ar.id AS id_menu, ar.name AS name, ar.description AS description FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
+			$bookmarks = "SELECT aus.id AS id, ar.id AS id_menu,  ar.description AS description FROM user_shortcut aus, acl_resource ar WHERE id_user = ? AND aus.type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
 			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
 			if($arr_result1 !== FALSE){
 				$i = 0;
 				$arrIDS = array();
 				foreach($arr_result1 as $key => $value){
-					if($value['id_menu'] == $id_resource)
+					if($value['id_menu'] == $menu)
 						$exist = true;
 				}
 				if($exist){
 					$pdbACL->beginTransaction();
-					$query = "DELETE FROM acl_user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
-					$r = $pdbACL->genQuery($query, array($uid, $id_resource, "bookmark"));
+					$query = "DELETE FROM user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
+					$r = $pdbACL->genQuery($query, array($uid, $menu, "bookmark"));
 					if(!$r){
 						$pdbACL->rollBack();
 						$arrResult['status'] = FALSE;
-						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource, "menu_session" => $menu);
+						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][1]), "idmenu" => $menu, "menu_session" => $menu);
 						$arrResult['msg'] = _tr("Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error: ").$pdbACL->errMsg;
 						return $arrResult;
 					}else{
 						$pdbACL->commit();
 						$arrResult['status'] = TRUE;
-						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu);
+						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][1]), "idmenu" => $menu,  "menu_session" => $menu);
 						$arrResult['msg'] = _tr("Bookmark has been removed.");
 						return $arrResult;
 					}
@@ -983,17 +990,17 @@ function putMenuAsBookmark($menu)
 					$arrResult['msg'] = _tr("The bookmark maximum is 5. Please uncheck one in order to add this bookmark");
 				}else{
 					$pdbACL->beginTransaction();
-					$query = "INSERT INTO acl_user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
-					$r = $pdbACL->genQuery($query, array($uid, $id_resource, "bookmark"));
+					$query = "INSERT INTO user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
+					$r = $pdbACL->genQuery($query, array($uid, $menu, "bookmark"));
 					if(!$r){
 						$pdbACL->rollBack();
 						$arrResult['status'] = FALSE;
-						$arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu );
+						$arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][1]), "idmenu" => $menu,  "menu_session" => $menu );
 						$arrResult['msg'] = _tr("Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error: ").$pdbACL->errMsg;
 					}else{
 						$pdbACL->commit();
 						$arrResult['status'] = TRUE;
-					    $arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu );
+					    $arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][1]), "idmenu" => $menu,  "menu_session" => $menu );
 						$arrResult['msg'] = _tr("Bookmark has been added.");
 						return $arrResult;
 					}
@@ -1010,13 +1017,13 @@ function menuIsBookmark($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
-			$id_resource = $pACL->getResourceId($menu);
-			$bookmarks = "SELECT id FROM acl_user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
-			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid,$id_resource,"bookmark"));
+			//$id_resource = $pACL->getIdResource($menu);
+			$bookmarks = "SELECT id FROM user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
+			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid,$menu,"bookmark"));
 			if($arr_result1 !== FALSE){
 				if(count($arr_result1) > 0)
 					return true;
@@ -1037,19 +1044,19 @@ function saveNeoToggleTabByUser($menu, $action_status)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
 			$exist = false;
-			$togglesTabs = "SELECT * FROM acl_user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
+			$togglesTabs = "SELECT * FROM user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
 			$arr_result1 = $pdbACL->getFirstRowQuery($togglesTabs, TRUE, array($uid));
 			if($arr_result1 !== FALSE && count($arr_result1) > 0)
 				$exist = true;
 
 			if($exist){
 				$pdbACL->beginTransaction();
-				$query = "UPDATE acl_user_shortcut SET description = ? WHERE id_user = ? AND type = ?";
+				$query = "UPDATE user_shortcut SET description = ? WHERE id_user = ? AND type = ?";
 				$r = $pdbACL->genQuery($query, array($action_status, $uid, "NeoToggleTab"));
 				if(!$r){
 					$pdbACL->rollBack();
@@ -1064,8 +1071,8 @@ function saveNeoToggleTabByUser($menu, $action_status)
 				}
 			}else{
 				$pdbACL->beginTransaction();
-				$query = "INSERT INTO acl_user_shortcut(id_user, id_resource, type, description) VALUES(?, ?, ?, ?)";
-				$r = $pdbACL->genQuery($query, array($uid, $uid, "NeoToggleTab", $action_status));
+				$query = "INSERT INTO user_shortcut(id_user, id_resource, type, description) VALUES(?, ?, ?, ?)";
+				$r = $pdbACL->genQuery($query, array($uid, $menu, "NeoToggleTab", $action_status));
 				if(!$r){
 					$pdbACL->rollBack();
 					$arrResult['status'] = FALSE;
@@ -1089,10 +1096,10 @@ function getStatusNeoTabToggle()
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 	global $arrConf;
 	$exist = false;
-	$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+	$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pdbACL);
 	$uid = $pACL->getIdUser($user);
-	$togglesTabs = "SELECT * FROM acl_user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
+	$togglesTabs = "SELECT * FROM user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
 	$arr_result1 = $pdbACL->getFirstRowQuery($togglesTabs, TRUE, array($uid));
 	if($arr_result1 !== FALSE && count($arr_result1) > 0)
 		$exist = true;
@@ -1120,15 +1127,15 @@ function getStickyNote($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
-		$id_resource = $pACL->getResourceId($menu);
+		//$id_resource = $pACL->getIdResource($menu);
 		$uid = $pACL->getIdUser($user);
 		$date_edit = date("Y-m-d h:i:s");
 		if($uid!==FALSE){
 			$exist = false;
 			$query = "SELECT * FROM sticky_note WHERE id_user = ? AND id_resource = ?";
-			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $id_resource));
+			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $menu));
 			if($arr_result1 !== FALSE && count($arr_result1) > 0)
 				$exist = true;
 
@@ -1167,22 +1174,22 @@ function saveStickyNote($menu, $description, $popup)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
-		$id_resource = $pACL->getResourceId($menu);
+		//$id_resource = $pACL->getIdResource($menu);
 		$uid = $pACL->getIdUser($user);
 		$date_edit = date("Y-m-d h:i:s");
 		if($uid!==FALSE){
 			$exist = false;
 			$query = "SELECT * FROM sticky_note WHERE id_user = ? AND id_resource = ?";
-			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $id_resource));
+			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $menu));
 			if($arr_result1 !== FALSE && count($arr_result1) > 0)
 				$exist = true;
 
 			if($exist){
 				$pdbACL->beginTransaction();
 				$query = "UPDATE sticky_note SET description = ?, date_edit = ?, auto_popup = ? WHERE id_user = ? AND id_resource = ?";
-				$r = $pdbACL->genQuery($query, array($description, $date_edit, $popup, $uid, $id_resource));
+				$r = $pdbACL->genQuery($query, array($description, $date_edit, $popup, $uid, $menu));
 				if(!$r){
 					$pdbACL->rollBack();
 					$arrResult['status'] = FALSE;
@@ -1197,7 +1204,7 @@ function saveStickyNote($menu, $description, $popup)
 			}else{
 				$pdbACL->beginTransaction();
 				$query = "INSERT INTO sticky_note(id_user, id_resource, date_edit, description, auto_popup) VALUES(?, ?, ?, ?, ?)";
-				$r = $pdbACL->genQuery($query, array($uid, $id_resource, $date_edit, $description, $popup));
+				$r = $pdbACL->genQuery($query, array($uid, $menu, $date_edit, $description, $popup));
 				if(!$r){
 					$pdbACL->rollBack();
 					$arrResult['status'] = FALSE;
@@ -1233,4 +1240,25 @@ function load_default_timezone()
     date_default_timezone_set($sDefaultTimezone);
 }
 
+//funcion que crea una conexion a asterisk manager
+function AsteriskManagerConnect(&$error) {
+	global $arrConf;
+	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
+	require_once $arrConf['basePath'].'/libs/paloSantoConfig.class.php';
+
+	$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
+	$arrConfig = $pConfig->leer_configuracion(false);
+
+	$password = $arrConfig['MGPASSWORD']['valor'];
+	$host = $arrConfig['DBHOST']['valor'];
+	$user = $arrConfig['MGUSER']['valor'];;
+	$astman = new AGI_AsteriskManager();
+
+	if (!$astman->connect("$host", "$user" , "$password")) {
+		$error = _tr("Error when connecting to Asterisk Manager");
+	} else{
+		return $astman;
+	}
+	return false;
+}
 ?>

@@ -83,7 +83,7 @@ class ModuloXML
             }
 
             $menu[] = array(
-                            'menuid'    => $attID,
+                            'mName'    => $attID,
                             'desc'      => $attDesc,
                             'parent'    => $attParent,
                             'module'    => $attModule,

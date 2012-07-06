@@ -75,8 +75,7 @@ class paloSantoGrid {
 
     public function addFilterControl($msg, &$arrData, $arrFilter = array(), $always_activated=false)
     {
-        if (!empty($msg)) $msg = htmlentities($msg, ENT_COMPAT, 'UTF-8');
-
+		if (!empty($msg)) $msg = htmlentities($msg, ENT_COMPAT, 'UTF-8');
 		$defaultFiler = "yes";
         if((is_array($arrFilter) && count($arrFilter)>0)){
             $name_delete_filters = getParameter('name_delete_filters');
@@ -95,7 +94,7 @@ class paloSantoGrid {
             else{
                 $filter_apply = true;
                 foreach($arrFilter as $name => $value){
-                    $val = (isset($arrData[$name]) && !empty($arrData[$name]))?$arrData[$name]:null;
+                    $val = (isset($arrData[$name]) && !$this->isEmpty($arrData[$name]))?$arrData[$name]:null;
                     if($val===null){
                         $filter_apply = false;
                         break;
@@ -117,6 +116,16 @@ class paloSantoGrid {
             echo "Invalid format for variable \$arrFilter.";
         }
     }
+
+	public function isEmpty($var){
+		if(!is_null($var)){
+			if($var===false || $var==="" || (is_array($var) && count($var)==0)){
+				return true;
+			}
+		}else
+			return true;
+		return false;
+	}
 
     public function addNew($task="add", $alt="New Row", $asLink=false)
     {

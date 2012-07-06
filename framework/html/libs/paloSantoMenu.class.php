@@ -61,7 +61,8 @@ class paloMenu {
     {
        //leer el contenido de la tabla menu y devolver un arreglo con la estructura
         $menu = array ();
-        $query="Select m1.*, (Select count(*) from menu m2 where m2.IdParent=m1.id) as HasChild from menu m1 order by order_no asc;";
+        $query="Select m1.id, m1.IdParent, m1.Link, m1.description, m1.Type, m1.order_no,".
+               "(Select count(*) from acl_resource m2 where m2.IdParent=m1.id) as HasChild from acl_resource m1 order by order_no asc;";
         $oRecordset = $this->_DB->fetchTable($query, true);
         if ($oRecordset){
             foreach($oRecordset as $key => $value)
@@ -79,39 +80,23 @@ class paloMenu {
     {
     	global $arrConf;
 
-        // Adjuntar base de datos de ACL para acelerar búsqueda
-        $bExito = $this->_DB->genQuery('ATTACH DATABASE ? AS acl', 
-            array(str_replace('sqlite3:////', '/', $arrConf['elastix_dsn']['acl'])));
-        if (!$bExito) {
-            $this->errMsg = $this->_DB->errMsg;
-            return NULL;
-        }
-
-        // Obtener todos los módulos autorizados
-        $sPeticionSQL = <<<INFO_AUTH_MODULO
-SELECT id, IdParent, Link, Name, Type, order_no
-FROM menu, (
-    SELECT acl_resource.name AS acl_resource_name, acl_group.name AS acl_name
-    FROM acl_membership, acl_group, acl_group_permission, acl_resource
-    WHERE acl_membership.id_user = ?
-        AND acl_membership.id_group = acl_group.id 
-        AND acl_group.id = acl_group_permission.id_group 
-        AND acl_group_permission.id_resource = acl_resource.id 
-    UNION
-    SELECT acl_resource.name AS acl_resource_name, acl_user.name AS acl_name
-    FROM acl_user, acl_user_permission, acl_resource
-    WHERE acl_user_permission.id_user = ?
-        AND acl_user_permission.id_resource = acl_resource.id 
-)
-WHERE acl_resource_name = id ORDER BY order_no;
+	// Obtener todos los módulos autorizados
+       $sPeticionSQL = <<<INFO_AUTH_MODULO
+SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no
+       FROM acl_resource ar where id in (
+	   SELECT ogr.id_resource From organization_resource as ogr
+			JOIN group_resource as gr on ogr.id=gr.id_org_resource
+			where gr.id_group=(Select u.id_group from acl_user as u where u.id=?) )
+	   ORDER BY order_no;
 INFO_AUTH_MODULO;
         $arrMenuFiltered = array();
-        $r = $this->_DB->fetchTable($sPeticionSQL, TRUE, array($idUser, $idUser));
+
+        $r = $this->_DB->fetchTable($sPeticionSQL, TRUE, array($idUser));
         if (!is_array($r)) {
             $this->errMsg = $this->_DB->errMsg;
         	return NULL;
         }
-        $this->_DB->genQuery('DETACH DATABASE acl');
+
         foreach ($r as $tupla) {
         	$tupla['HasChild'] = FALSE;
             $arrMenuFiltered[$tupla['id']] = $tupla;
@@ -119,8 +104,8 @@ INFO_AUTH_MODULO;
 
         // Leer los menús de primer nivel
         $r = $this->_DB->fetchTable(
-            'SELECT id, IdParent, Link, Name, Type, order_no, 1 AS HasChild '.
-            'FROM menu WHERE IdParent = "" ORDER BY order_no', TRUE);
+            'SELECT id, IdParent, Link, description, Type, order_no, 1 AS HasChild '.
+            'FROM acl_resource WHERE IdParent = "" ORDER BY order_no', TRUE);
         if (!is_array($r)) {
             $this->errMsg = $this->_DB->errMsg;
             return NULL;
@@ -162,7 +147,7 @@ INFO_AUTH_MODULO;
     {
         $this->errMsg = "";
         $listaMenus = array();
-	$sQuery = "SELECT Id, Name FROM menu WHERE IdParent=''";
+	$sQuery = "SELECT id, description FROM acl_resource WHERE IdParent=''";
 	$arrMenus = $this->_DB->fetchTable($sQuery);
         if (is_array($arrMenus)) {
 	   foreach ($arrMenus as $menu)
@@ -177,86 +162,26 @@ INFO_AUTH_MODULO;
 
     }
 
-    /**
-     * Procedimiento para crear un nuevo menu 
-     *
-     * @param string    $id       
-     * @param string    $name   
-     * @param string    $id_parent       
-     * @param string    $type         
-     * @param string    $link  
-     * @param string    $order
-     *
-     * @return bool     VERDADERO si el menu se crea correctamente, FALSO en error
-     */
-
-    function createMenu($id,$name, $id_parent, $type='module', $link='', $order=-1)
-    {
-        $bExito = FALSE;
-        if ($id == "" && $name == "") {
-            $this->errMsg = "ID and module name can't be empty";
-        } else {
-            //verificar que no exista el mismo menu
-            $sPeticionSQL = "SELECT id FROM menu ".
-                " WHERE id = '$id' AND Name='$name' AND IdParent='$id_parent'";
-            $arr_result =& $this->_DB->fetchTable($sPeticionSQL);
-            if (is_array($arr_result) && count($arr_result)>0) {
-                $bExito = FALSE;
-                $this->errMsg = "Menu already exists";
-            }else{
-		if($order!=-1){
-                  $sPeticionSQL = paloDB::construirInsert("menu",
-                    array(
-                        "id"        =>  paloDB::DBCAMPO($id),
-                        "Name"      =>  paloDB::DBCAMPO($name),
-                        "Type"      =>  paloDB::DBCAMPO($type),
-                        "Link"      =>  paloDB::DBCAMPO($link),
-                        "IdParent"  =>  paloDB::DBCAMPO($id_parent),
-                        "order_no"  =>  paloDB::DBCAMPO($order),
-                      )
-                    );
-
-                }
-                else{
-                  $sPeticionSQL = paloDB::construirInsert("menu",
-                    array(
-                        "id"        =>  paloDB::DBCAMPO($id),
-                        "Name"      =>  paloDB::DBCAMPO($name),
-                        "Type"      =>  paloDB::DBCAMPO($type),
-                        "Link"      =>  paloDB::DBCAMPO($link),
-                        "IdParent"  =>  paloDB::DBCAMPO($id_parent),
-                      )
-                    );
-                }
-
-                if ($this->_DB->genQuery($sPeticionSQL)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                }
-            }
-        }
-
-        return $bExito;
-    }
     
     /*********************************************************************************************/
-    function updateItemMenu($id, $name, $id_parent, $type='module', $link='', $order=-1){
+    function updateItemMenu($name, $description, $id_parent, $type='module', $link='', $order=-1){
         $bExito = FALSE;
-        if ($id == "" && $name == "") {
-            $this->errMsg = "ID and module name can't be empty";
+        if ($name == "" && $description == "") {
+            $this->errMsg = "Name and description module can't be empty";
         }else{
             $query = "";
             if($order != -1){
-                $query = "UPDATE menu SET ".
-                    "Name='$name', IdParent='$id_parent', Link='$link', Type='$type', order_no='$order'".
-                    " WHERE id = '$id'";
+                $query = "UPDATE acl_resource SET ".
+                    "description=?, IdParent=?, Link=?, Type=?, order_no=?".
+                    " WHERE id=?";
+				$arrayParam=array($id_parent,$link,$type,$order,$name);
             }else{
-                $query = "UPDATE menu SET ".
-                    "Name='$name', IdParent='$id_parent', Link='$link', Type='$type'".
-                    " WHERE id = '$id'";
+                $query = "UPDATE acl_resource SET ".
+                    "description=?, IdParent=?, Link=?, Type=?".
+                    " WHERE id=?";
+				$arrayParam=array($id_parent,$link,$type,$name);
             }
-            $result=$this->_DB->genQuery($query);
+            $result=$this->_DB->genQuery($query,$arrayParam);
             if($result==FALSE){
                 $this->errMsg = $this->_DB->errMsg;
                 return 0;
@@ -266,21 +191,6 @@ INFO_AUTH_MODULO;
     }
 
 
-
-/**********************************************************************************************/
-
-    function existeMenu($id_menu){
-        $bExiste=false;
-            //verificar que no exista el mismo menu
-        $sPeticionSQL = "SELECT id FROM menu WHERE id = '$id_menu'";
-        $arr_result =& $this->_DB->getFirstRowQuery($sPeticionSQL);
-        if (count($arr_result)>0)
-        {
-            $bExiste=true;
-        }
-        return $bExiste;
-    }
-
  /**
      * This function is for obtaining all the submenu from menu 
      *
@@ -289,8 +199,8 @@ INFO_AUTH_MODULO;
      * @return array    $result      An array of children or submenu where the father or main menu is $menu_name
      */
    function getChilds($menu_name){
-        $query   = "SELECT * FROM menu where IdParent='$menu_name'";
-        $result=$this->_DB->fetchTable($query, true);
+        $query   = "SELECT id, IdParent, Link, description, Type, order_no FROM acl_resource where IdParent=?";
+        $result=$this->_DB->fetchTable($query, true, array($menu_name));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return 0;
@@ -298,23 +208,6 @@ INFO_AUTH_MODULO;
         return $result;
    }
 
- /**
-     * This function delete a specific menu from database 
-     *
-     * @param string    $menu_name   The name of the main menu or menu father       
-     *  
-     * @return int      An integer where such integer let us know if the menu was or not was removed from database
-     */
-
-    function deleteChilds($menu_name){
-        $query   = "DELETE FROM menu where Id='$menu_name'";
-        $result=$this->_DB->genQuery($query);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return 1;
-    }
 
 /**
      * This function is a recursive function. The input is the name of main menu or father menu which will be removed from database with all children and the children of its children 
@@ -324,15 +217,17 @@ INFO_AUTH_MODULO;
      *  
      * @return $menu_name   The menu which will be removed
      */
-
-    function deleteFather($menu_name,&$acl){
-        $childs = $this->getChilds($menu_name);
+    function deleteFather($name){
+		$pACL = new paloACL($this->_DB);
+        $childs = $this->getChilds($name);
         if(!$childs){
-            $id_resource = $acl->getIdResource($menu_name); // get id Resource
-            $ok1 = $acl->deleteIdGroupPermission($id_resource); // remove group permission
-            $ok2 = $acl->deleteIdResource($id_resource); // remove resource
-            $ok3 = $this->deleteChilds($menu_name); // remove child
-            return ($ok1 and $ok2 and $ok3);
+			//$id_resource = $pACL->getIdResource($name); // get id Resource
+			if($pACL->deleteResource($name))
+				return true;
+			else{
+				$this->errMsg=$pACL->errMsg;
+				return false;
+			}
         }
         else{
             foreach($childs as $key => $value){
@@ -340,11 +235,13 @@ INFO_AUTH_MODULO;
                 if(!$ok) return false;
             }
 
-            $id_resource = $acl->getIdResource($menu_name); // get id Resource
-            $ok1 = $acl->deleteIdGroupPermission($id_resource); // remove group permission
-            $ok2 = $acl->deleteIdResource($id_resource); // remove resource
-            $ok3 = $this->deleteChilds($menu_name); // remove child*/
-            return ($ok1 and $ok2 and $ok3);
+            //$id_resource = $pACL->getIdResource($name); // get id Resource
+			if($pACL->deleteResource($name))
+				return true;
+			else{
+				$this->errMsg=$pACL->errMsg;
+				return false;
+			}
         }
     }
 }

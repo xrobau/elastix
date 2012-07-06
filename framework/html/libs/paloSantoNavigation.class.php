@@ -39,7 +39,7 @@ class paloSantoNavigation {
 
     function paloSantoNavigation($arrConf, $arrMenu, &$smarty)
     {
-        // El defaultManu deberia ser el primer submenu
+        // El defaultMenu deberia ser el primer submenu
         foreach($arrMenu as $idMenu=>$arrMenuItem) {
             if(empty($arrMenuItem['IdParent'])) {
                 $this->defaultMenu = $idMenu;
@@ -155,10 +155,11 @@ class paloSantoNavigation {
         $this->currSubMenu2 = $currSubMenu2;
         $this->currSubMenuByParents  = $currSubMenuByParents;
 
-
+		//print_r($arrIds);
 
         // Get the main menu
         $arrMainMenu = $this->getArrSubMenu("");
+		//print_r($arrMainMenu);
 
 		/************* para elastixneo**********/
 		// modificando las posiciones de los menus para el thema elastixNeo
@@ -211,11 +212,9 @@ class paloSantoNavigation {
 		/************* para elastixneo**********/
 
         $this->smarty->assign("arrMainMenu", $arrMainMenu);
-
         // Get the submenu
         $arrSubMenu = $this->getArrSubMenu($currMainMenu);
         $this->smarty->assign("arrSubMenu", $arrSubMenu);
-
         // Get the 3th level menu
         $arrSubMenu2 = $this->getArrSubMenu($currSubMenu);
         $this->smarty->assign("arrSubMenu2", $arrSubMenu2);
@@ -228,14 +227,14 @@ class paloSantoNavigation {
         $this->smarty->assign("idMainMenuSelected",   $currMainMenu);
         $this->smarty->assign("idSubMenuSelected",    $currSubMenu);
         $this->smarty->assign("idSubMenu2Selected",    $currSubMenu2);
-        $this->smarty->assign("nameMainMenuSelected", $arrMainMenu[$currMainMenu]['Name']);
-        $this->smarty->assign("nameSubMenuSelected",  $arrSubMenu[$currSubMenu]['Name']);
-        $this->smarty->assign("nameSubMenu2Selected",  $arrSubMenu2[$currSubMenu2]['Name']);
+        $this->smarty->assign("nameMainMenuSelected", $arrMainMenu[$currMainMenu]['description']);
+        $this->smarty->assign("nameSubMenuSelected",  $arrSubMenu[$currSubMenu]['description']);
+        $this->smarty->assign("nameSubMenu2Selected",  $arrSubMenu2[$currSubMenu2]['description']);
 		$this->smarty->assign("isThirdLevel", $isThirdLevel);//////////////////////////////////////////////////////////
 
 	if(isset($_GET) && count($_GET) == 1 && isset($_GET['menu'])){
-	  $navigation  = $arrMainMenu[$currMainMenu]['Name']." >> ".$arrSubMenu[$currSubMenu]['Name'];
-	  $navigation .= isset($arrSubMenu2[$currSubMenu2])?" >> ".$arrSubMenu2[$currSubMenu2]['Name']:"";
+	  $navigation  = $arrMainMenu[$currMainMenu]['description']." >> ".$arrSubMenu[$currSubMenu]['description'];
+	  $navigation .= isset($arrSubMenu2[$currSubMenu2])?" >> ".$arrSubMenu2[$currSubMenu2]['description']:"";
 
 	  $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"unknown";
 	  writeLOG("audit.log","NAVIGATION $user: User $user visited \"{$navigation}\" from $_SERVER[REMOTE_ADDR].");
@@ -254,15 +253,14 @@ class paloSantoNavigation {
                 $idSub = $valorSub['id'];
                 //ALL: with this function getArrSubMenu our can to add the third level.
                 $arrTmp2 =$this->getArrSubMenu($idSub);
-                if($arrTmp2)$valorSub['Name'] = $valorSub['Name'].'...';
+                if($arrTmp2)$valorSub['description'] = $valorSub['description'].'...';
                 $arrMenuTotal[$idMenu] .= "<tr><td>";
-                $arrMenuTotal[$idMenu] .= "<a href=\"index.php?menu={$valorSub['id']}\">{$valorSub['Name']}</a>";
+                $arrMenuTotal[$idMenu] .= "<a href=\"index.php?menu={$valorSub['id']}\">{$valorSub['description']}</a>";
                 $arrMenuTotal[$idMenu] .= "</td></tr>";
             }
             $this->smarty->assign("arrMenuTotal", $arrMenuTotal);
         }
         /*************** Submenus para template elastix wine ********************/
-
         //return $this->smarty->fetch("_common/_menu.tpl");
     }
 
@@ -306,7 +304,7 @@ class paloSantoNavigation {
 						$img = "<img alt='' src='images/miniArrowDown.png' align='absmiddle' style='border:0;'/>";
 					else
 						$img = "";
-                    $element['Name'] = $element['Name']." ".$img;
+                    $element['description'] = $element['description']." ".$img;
                     $arrSubMenu[$id] = $element;
                 }else{
                     $arrSubMenu[$id] = $element;
@@ -347,12 +345,11 @@ class paloSantoNavigation {
             return $this->includeModule($ultimoMenu);
         }
         else {
-			$title = $bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2]['Name']:$this->arrMenu[$this->currSubMenu]['Name'];
+			$title = $bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2]['description']:$this->arrMenu[$this->currSubMenu]['description'];
 			$this->smarty->assign("title",$title);
 			$link=$bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2]['Link']:$this->arrMenu[$this->currSubMenu]['Link'];
             $link = str_replace("{NAME_SERVER}", $_SERVER['SERVER_NAME'], $link);
             $link = str_replace("{IP_SERVER}", $_SERVER['SERVER_ADDR'], $link);
-
             $retVar  = "<iframe marginwidth=\"0\" marginheight=\"0\" class=\"frameModule\"";
             $retVar .= "\" src=\"" . $link . "\" name=\"myframe\" id=\"myframe\" frameborder=\"0\"";
             $retVar .= " width=\"100%\" onLoad=\"calcHeight();\"></iframe>";
@@ -373,6 +370,11 @@ class paloSantoNavigation {
         } else {
             return "Error: The module <b>modules/$module/index.php</b> could not be found<br>";
         }
+    }
+
+    function obtenerNameServer()
+    {
+        return $_SERVER['SERVER_NAME'];
     }
 
     /**
@@ -487,7 +489,7 @@ class paloSantoNavigation {
 		include_once "libs/paloSantoACL.class.php";
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		$htmlData = "";
@@ -495,8 +497,8 @@ class paloSantoNavigation {
 		if($uid===FALSE)
 			$htmlData = "";
 		else{
-			$bookmarks = "SELECT aus.id AS id, ar.description AS name, ar.id AS id_menu, ar.name AS namemenu FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
-			$history   = "SELECT aus.id AS id, ar.description AS name, ar.id AS id_menu, ar.name AS namemenu FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'history' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
+			$bookmarks = "SELECT us.id AS id, ar.description AS name, ar.id AS id_menu FROM user_shortcut us, acl_resource ar WHERE id_user = ? AND us.type = 'bookmark' AND ar.id = us.id_resource ORDER BY us.id DESC";
+			$history   = "SELECT us.id AS id, ar.description AS name, ar.id AS id_menu FROM user_shortcut us, acl_resource ar WHERE id_user = ? AND us.type = 'history' AND ar.id = us.id_resource ORDER BY us.id DESC";
 
 			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
 			if ($arr_result1 !== FALSE && count($arr_result1) > 0) {
@@ -504,9 +506,9 @@ class paloSantoNavigation {
 				$cont = 1;
 				foreach($arr_result1 as $key => $value){
 					if($cont < count($arr_result1))
-						$htmlData .= "<div class='neo-historybox-tab' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['namemenu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
+						$htmlData .= "<div class='neo-historybox-tab' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['id_menu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
 					else
-						$htmlData .= "<div class='neo-historybox-tabmid' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['namemenu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
+						$htmlData .= "<div class='neo-historybox-tabmid' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['id_menu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
 					$cont++;
 				}
 			}else{
@@ -517,7 +519,7 @@ class paloSantoNavigation {
 			if ($arr_result2 !== FALSE && count($arr_result2) > 0) {
 				$htmlData .= "<div id='neo-historyID' class='neo-historybox-tabon'>"._tr("History")."</div>";
 				foreach($arr_result2 as $key2 => $value2){
-					$htmlData .= "<div class='neo-historybox-tab'><a href='index.php?menu=".$value2['namemenu']."' >"._tr($value2['name'])."</a></div>";
+					$htmlData .= "<div class='neo-historybox-tab'><a href='index.php?menu=".$value2['id_menu']."' >"._tr($value2['name'])."</a></div>";
 				}
 			}else{
 				$htmlData .= "<div id='neo-historyID' class='neo-historybox-tabon'>"._tr("History")."</div>";

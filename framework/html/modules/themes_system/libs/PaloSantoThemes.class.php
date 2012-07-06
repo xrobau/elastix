@@ -28,8 +28,7 @@
   $Id: new_themes.php $ */
 
 global $arrConf;
-require_once "{$arrConf['basePath']}/libs/paloSantoDB.class.php";
-require_once "{$arrConf['basePath']}/libs/paloSantoInstaller.class.php";
+require_once "libs/paloSantoInstaller.class.php";
 
 /* Clase que implementa themes */
 class PaloSantoThemes
@@ -63,11 +62,9 @@ class PaloSantoThemes
      */
     function getThemes($dir='')
     {
-        global $arrLang;
-
         if($dir == ''){
             global $arrConf;
-            $dir = $arrConf['basePath'];
+            $dir = $arrConf['basePath'];;
         }
         $arr_themes  = scandir($dir);
         $arr_respuesta = array();
@@ -79,7 +76,7 @@ class PaloSantoThemes
             }
         } 
         else 
-            $this->errMsg = $arrLang["Themes not Found"];
+            $this->errMsg = _tr("Themes not Found");
         return $arr_respuesta;
     }
 
@@ -88,10 +85,11 @@ class PaloSantoThemes
      *
      * @return string    nombre del tema actual si lo encontro, vacio si no 
      */
-    function getThemeActual()
+    function getThemeActual($uid)
     {
-        $resultado = get_key_settings($this->_DB,'theme');
-        return $resultado;
+		$pACL = new paloACL($this->_DB);
+        $theme=$pACL->getUserProp($uid,'theme');
+        return $theme;
     }
 
     /**
@@ -101,14 +99,13 @@ class PaloSantoThemes
      * 
      * @return  bool    true or false si actualizo o no
      */
-    function updateTheme($sTheme)
+    function updateTheme($sTheme,$uid)
     {
-        global $arrLang;
-
-        if(set_key_settings($this->_DB,'theme',$sTheme))
+		$pACL = new paloACL($this->_DB);
+        if($pACL->setUserProp($uid,'theme',$sTheme,"system"))
             return true;
         else{
-            $this->errMsg = $arrLang['The theme could not be updated'];
+            $this->errMsg = _tr('The theme could not be updated');
             return false;
         }
     } 

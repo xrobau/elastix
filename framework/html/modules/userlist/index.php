@@ -57,7 +57,7 @@ function _moduleContent(&$smarty, $module_name)
 	 //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
+
     //conexion acl.db
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pDB);
@@ -121,7 +121,7 @@ function _moduleContent(&$smarty, $module_name)
 
 }
 
-function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, $showmessage=false,$organization_reload="")
+function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization)
 {
 	$pACL = new paloACL($pDB);
 	$pORGZ = new paloSantoOrganization($pDB);
@@ -240,9 +240,39 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
 	}
 
 	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
-	if($showmessage)
-		$contenidoModulo = "<div id='msg_status' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$organization_reload'/>"._tr("Click here to reload asterisk")."</a></div>".$contenidoModulo;
+	$mensaje=showMessageReload($module_name, $pDB, $userLevel1, $userAccount, $idOrganization);
+	$contenidoModulo = $mensaje.$contenidoModulo;
     return $contenidoModulo;
+}
+
+function showMessageReload($module_name, &$pDB, $userLevel1, $userAccount, $idOrganization){
+	$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+	$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
+	$params=array();
+	$msgs="";
+
+	$query = "SELECT domain, id from organization";
+	//si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de mnarcada
+	if($userLevel1!="superadmin"){
+		$query .= " where id=?";
+		$params[]=$idOrganization;
+	}
+
+	$mensaje=_tr("Click here to reload dialplan");
+	$result=$pDB->fetchTable($query,false,$params);
+	if(is_array($result)){
+		foreach($result as $value){
+			if($value[1]!=1){
+				$showmessage=$pAstConf->getReloadDialplan($value[0]);
+				if($showmessage=="yes"){
+					if($userLevel1=="superadmin")
+						$append =" $value[0]";
+					$msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/>".$mensaje.$append."</a></div>";
+				}
+			}
+		}
+	}
+	return $msgs;
 }
 
 function viewFormUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
@@ -567,7 +597,12 @@ function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 		}
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("User has been created successfully"));
-		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, true,$idOrganization);
+		//mostramos el mensaje para crear los archivos de ocnfiguracion
+		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
+		$orgTmp2=$pORGZ->getOrganization("","","id",$idOrganization);
+		$pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
+		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		if($renameFile!=""){
 			unlink($renameFile);
@@ -719,7 +754,14 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
 		}
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("User has been edited successfully"));
-		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, $reAsterisk,$pACL->getIdOrganizationUser($idUser));
+		if($reAsterisk){
+			//mostramos el mensaje para crear los archivos de ocnfiguracion
+			$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+			$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
+			$orgTmp2=$pORGZ->getOrganization("","","id",$pACL->getIdOrganizationUser($idUser));
+			$pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
+		}
+		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		if($renameFile!=""){
 			unlink($renameFile);
@@ -763,7 +805,12 @@ function deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
 	if($exito){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("The user was deleted successfully"));
-		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, true,$idOrgReload);
+		//mostramos el mensaje para crear los archivos de ocnfiguracion
+		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
+		$orgTmp2=$pORGZ->getOrganization("","","id",$idOrgReload);
+		$pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
+		$content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
@@ -1102,6 +1149,10 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 		$idOrganization = getParameter("organization_id");
 	}
 
+	if($idOrganization==1){
+		return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+
 	$query="select domain from organization where id=?";
 	$result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
 	if($result===false){
@@ -1121,16 +1172,18 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
 		$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pACL->_DB);
 		if($pAstConf->generateDialplan($domain)===false){
+			$pAstConf->setReloadDialplan($domain,true);
 			$smarty->assign("mb_title", _tr("ERROR"));
 			$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);
 			$showMsg=true;
 		}else{
+			$pAstConf->setReloadDialplan($domain);
 			$smarty->assign("mb_title", _tr("MESSAGE"));
 			$smarty->assign("mb_message",_tr("Asterisk was reloaded correctly. "));
 		}
 	}
 
-	return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$showMsg,$idOrganization);
+	return reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 }
 
 function getAction(){

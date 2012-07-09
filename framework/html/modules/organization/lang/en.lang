@@ -60,7 +60,7 @@ $arrLangModule=array(
 "Invalid Action" => "Invalid Action. ",
 "Error refreshing configuration" => "Error refreshing Fax configurations. ",
 "Domain name already exists" => "Domain name already exists. ",
-"Domain must no be empty" => "Domain must no be empty. "
+"Domain must no be empty" => "Domain must no be empty. ",
 //crear plan de marcado
 "Couldn't be opened for reading file" => "Couldn't be opened for reading file",
 "File extensions_generic.conf doesn't exist, new fiel couldn't be created" => "File extensions_generic.conf doesn't exist, new fiel couldn't be created. ",

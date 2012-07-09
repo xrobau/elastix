@@ -1261,4 +1261,42 @@ function AsteriskManagerConnect(&$error) {
 	}
 	return false;
 }
+
+/**
+ funcion que sirve para comprobar las credenciales de usuario
+ identificar si es usuario superadmin, admin o other
+ identificar a que organizacion pertenece
+ @return
+	Array => ( userAccount => (UserName or ""),
+			   id_organization => (ID_ORG or false),
+			   userlevel => (superadmin,admin or other),
+				)
+*/
+function getUserCredentials() {
+	$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+	$pACL = new paloACL($pdbACL);
+
+	$userLevel1 = "other";
+    $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+
+	//verificar que tipo de usurio es: superadmin, admin o other
+	if($userAccount!=""){
+		$idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
+		if($pACL->isUserSuperAdmin($userAccount)){
+			$userLevel1 = "superadmin";
+		}else{
+			if($pACL->isUserAdministratorGroup($userAccount))
+				$userLevel1 = "admin";
+			else
+				$userLevel1 = "other";
+		}
+	}else
+		$idOrganization=false;
+
+	if($idOrganization==false){
+		header("Location: index.php");
+	}
+
+	return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1);
+}
 ?>

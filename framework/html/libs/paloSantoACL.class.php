@@ -221,7 +221,7 @@ class paloACL {
 			$paging = "limit $limit offset $offset";
 		}
 
-		if(!is_null($id_organization) && !preg_match('/^[[:digit:]]+$/', "$offset")){
+		if(!is_null($id_organization) && !preg_match('/^[[:digit:]]+$/', "$id_organization")){
             $this->errMsg = _tr("Organization ID must be numeric");
             return FALSE;
 		}elseif(!is_null($id_organization)){
@@ -529,7 +529,8 @@ class paloACL {
         $result = $this->_DB->getFirstRowQuery($sPeticionSQL,false,array($username));
 		if (is_array($result) && count($result)>0) {
             $idUser = $result[0];
-        }else $this->errMsg = $this->_DB->errMsg;
+        }else
+			$this->errMsg = $this->_DB->errMsg;
         return $idUser;
     }
 
@@ -825,11 +826,21 @@ INFO_AUTH_MODULO;
 					}
 				}
 			}
-			
-            $sql = "SELECT username FROM acl_user WHERE username = ? AND md5_password = ? AND estado!='inactive'";
-            $arr = $this->_DB->fetchTable($sql,false,array($user,$pass));
+
+			//comprobamos que el usuario exista, que la clave de login del usuario sea la correcta y que se encuentre relacionado
+			//con una organizacion
+            $sql = "SELECT id FROM acl_user WHERE username = ? AND md5_password = ? AND estado!='inactive'";
+            $arr = $this->_DB->getFirstRowQuery($sql,false,array($user,$pass));
             if (is_array($arr)) {
-                return (count($arr) > 0);
+                if(count($arr) > 0){
+					$idOrganization = $this->getIdOrganizationUser($arr[0]);
+					if($idOrganization==false)
+						return false;
+					else
+						return true;
+				 }else{
+					return FALSE;
+				 }
             } else {
                 $this->errMsg = $this->_DB->errMsg;
                 return FALSE;
@@ -874,9 +885,6 @@ INFO_AUTH_MODULO;
 		}
 		$arrGroup=$this->getMembership($idUser);
 		if(is_array($arrGroup) && count($arrGroup)>0){
-			foreach($arrGroup as $value){
-				$id_group=$value;
-			}
 			$sql="Select g.id_organization from acl_group as g join acl_user as u on u.id_group=g.id where u.id=?";
 			$result = $this->_DB->getFirstRowQuery($sql,true,array($idUser));
 			if (is_array($result)) {

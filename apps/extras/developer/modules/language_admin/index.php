@@ -299,7 +299,7 @@ function saveAll($smarty, $module_name, $local_templates_dir, $arrLang, $arrLang
         if( substr($key,0,5) == "lang_" )
             $arrayLangTrasl[substr($key,5)] = $value;
     }
-print_r($_POST);
+
     $bandera = $oPalo->saveAll($arrayLangTrasl, $module, $language);
 
     if( !$bandera ){

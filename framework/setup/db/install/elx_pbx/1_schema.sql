@@ -5,6 +5,12 @@ CREATE TABLE IF NOT EXISTS `globals` (
   PRIMARY KEY  (`organization_domain`,`variable`)
 ) ENGINE = INNODB;
 
+CREATE TABLE IF NOT EXISTS `reload_dialplan` (
+  `organization_domain` varchar(50) NOT NULL,
+  `show_msg` enum('yes','no') NOT NULL default 'no',
+  PRIMARY KEY  (`organization_domain`)
+) ENGINE = INNODB;
+
 CREATE TABLE IF NOT EXISTS `sip_general` (
 	  `organization_domain` varchar(50) NOT NULL,
       `port` int(5) DEFAULT NULL,

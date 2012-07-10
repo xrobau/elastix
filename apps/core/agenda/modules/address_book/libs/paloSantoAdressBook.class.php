@@ -582,7 +582,29 @@ a array with the field "total" containing the total of records.
 		    }
 		}
 		if(!$remove){
+		    if($isFromClient)
+                        $value["new"] = "no";
+                    else{ // Se verifica si es un registro nuevo para el cliente
+                        $query = "SELECT COUNT(*) FROM history WHERE type='contact' AND action='create' AND id_register=? AND (id_user=? OR status='isPublic') AND timestamp > ?";
+                        $created = $this->_DB->getFirstRowQuery($query,FALSE,array($value["id"],$id_user,$last_sync));
+                        if($created === FALSE){
+                            $this->errMsg = $this->_DB->errMsg;
+                            return FALSE;
+                        }
+                        if($created[0] == 0)
+                            $value["new"] = "no";
+                        else
+                            $value["new"] = "yes";
+                    }
+
 		    $next = count($arrContacts);
+
+	 	    //TODO: Esto se debe eliminar al corregir en la base cambiando el campo telefono por phone
+                    if(isset($value["telefono"])){
+                        $value["phone"] = $value["telefono"];
+                        unset($value["telefono"]);
+                    }
+		
 		    $arrContacts[$next] = $value;
 		    if(!isset($arrContacts[$next]["delete"]))
 			$arrContacts[$next]["delete"] = "no";
@@ -674,7 +696,7 @@ a array with the field "total" containing the total of records.
 	    $this->errMsg = $this->_DB->errMsg;
 	    return NULL;
 	}
-	elseif(count($result) == 0)
+	elseif($result[0] == 0)
 	    return FALSE;
 	else
 	    return TRUE;

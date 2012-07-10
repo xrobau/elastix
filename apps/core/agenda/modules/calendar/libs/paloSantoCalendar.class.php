@@ -90,9 +90,9 @@ class paloSantoCalendar {
 
     function getEventById($id, $id_user)
     {
-        $query = "SELECT * FROM events WHERE id=$id and uid=$id_user";
+        $query = "SELECT * FROM events WHERE id=? and uid=?";
 
-        $result=$this->_DB->getFirstRowQuery($query,true);
+        $result=$this->_DB->getFirstRowQuery($query,true,array($id,$id_user));
 
         if($result===FALSE){
             $this->errMsg = $this->_DB->errMsg;
@@ -187,9 +187,9 @@ class paloSantoCalendar {
             ."FROM 
                 events\n"
             ."WHERE 
-                id = '$id'\n"
-                ."AND uid=$uid";
-        $result = $this->_DB->getFirstRowQuery($query, true);
+                id = ?\n"
+                ."AND uid=?";
+        $result = $this->_DB->getFirstRowQuery($query, true, array($id,$uid));
         if($result == FALSE) {
             $this->errMsg = $this->_DB->errMsg;
             return array();
@@ -212,9 +212,9 @@ class paloSantoCalendar {
     }
 
     function obtainExtension($db,$id){
-        $query = "SELECT extension FROM acl_user WHERE id=$id";
+        $query = "SELECT extension FROM acl_user WHERE id=?";
 
-        $result = $db->getFirstRowQuery($query,true);
+        $result = $db->getFirstRowQuery($query,true,array($id));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return null;
@@ -265,8 +265,8 @@ class paloSantoCalendar {
     
             $pDB = new paloDB($dsnAsterisk);
     
-            $query = "SELECT dial, description, id FROM devices WHERE id=$extension";
-            $result = $pDB->getFirstRowQuery($query, TRUE);
+            $query = "SELECT dial, description, id FROM devices WHERE id=?";
+            $result = $pDB->getFirstRowQuery($query, TRUE, array($extension));
             if($result != FALSE)
                 return $result;
             else return FALSE;
@@ -375,9 +375,9 @@ class paloSantoCalendar {
     }
 
     function getEventByDate($startdate, $enddate, $uid){
-        $query = "SELECT * FROM events WHERE uid = $uid AND ((startdate <= '$startdate' AND enddate >= '$enddate') OR (startdate >= '$startdate' AND enddate <= '$enddate') OR (startdate <= '$startdate' AND enddate >= '$startdate') OR (startdate >= '$startdate' AND enddate >= '$enddate'))";
+        $query = "SELECT * FROM events WHERE uid = ? AND ((startdate <= ? AND enddate >= ?) OR (startdate >= ? AND enddate <= ?) OR (startdate <= ? AND enddate >= ?) OR (startdate >= ? AND enddate >= ?))";
 
-        $result = $this->_DB->fetchTable($query,true);
+        $result = $this->_DB->fetchTable($query,true,array($uid,$startdate,$enddate,$startdate,$enddate,$startdate,$startdate,$startdate,$enddate));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return null;
@@ -405,8 +405,8 @@ class paloSantoCalendar {
     }
 
     function getAllEventsByUid($uid){
-        $query = "SELECT * FROM events WHERE uid = $uid";
-        $result = $this->_DB->fetchTable($query,true);
+        $query = "SELECT * FROM events WHERE uid = ?";
+        $result = $this->_DB->fetchTable($query,true,array($uid));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return null;
@@ -415,8 +415,8 @@ class paloSantoCalendar {
     }
 
     function getEventIdByUid($uid, $idEvent){
-        $query = "SELECT * FROM events WHERE uid = $uid and id=$idEvent";
-        $result = $this->_DB->fetchTable($query,true);
+        $query = "SELECT * FROM events WHERE uid = ? and id=?";
+        $result = $this->_DB->fetchTable($query,true,array($uid,$idEvent));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return null;
@@ -426,9 +426,9 @@ class paloSantoCalendar {
 
     function getNameUsers($id_user,$db)
     {
-        $query = "SELECT name FROM acl_user WHERE id=$id_user";
+        $query = "SELECT name FROM acl_user WHERE id=?";
     	$username = $_SESSION["elastix_user"];
-        $result = $db->getFirstRowQuery($query,true);
+        $result = $db->getFirstRowQuery($query,true,array($id_user));
         if($result != FALSE || $result != "")
             return $result['name'];
         else
@@ -437,9 +437,9 @@ class paloSantoCalendar {
 
     function getDescUsers($id_user,$db)
     {
-        $query = "SELECT description FROM acl_user WHERE id=$id_user";
+        $query = "SELECT description FROM acl_user WHERE id=?";
     	$username1 = $_SESSION["elastix_user"];
-        $result = $db->getFirstRowQuery($query,true);
+        $result = $db->getFirstRowQuery($query,true,array($id_user));
         if($result != FALSE || $result != "")
             return $result['description'];
         else
@@ -447,8 +447,8 @@ class paloSantoCalendar {
     }
 
     function existPassword($pass){
-        $query = "SELECT password FROM share_calendar WHERE password = '$pass'";
-        $result = $this->_DB->getFirstRowQuery($query,true);
+        $query = "SELECT password FROM share_calendar WHERE password = ?";
+        $result = $this->_DB->getFirstRowQuery($query,true,array($pass));
         if($result==FALSE || $result==null || $result==""){
             $this->errMsg = $this->_DB->errMsg;
             return false; //no existe
@@ -457,9 +457,9 @@ class paloSantoCalendar {
     }
 
     function createShareCalendar($uid_from, $user, $password){
-        $query = "INSERT INTO share_calendar(uid_from,uid_to,user,password,confirm) VALUES('$uid_from','','$user','$password','FALSE')";
+        $query = "INSERT INTO share_calendar(uid_from,uid_to,user,password,confirm) VALUES(?,'',?,?,'FALSE')";
 
-        $result = $this->_DB->genQuery($query);
+        $result = $this->_DB->genQuery($query,array($uid_from,$user,$password));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
@@ -468,8 +468,8 @@ class paloSantoCalendar {
     }
 
     function getUidFrom($userEXT,$passEXT){
-        $query = "SELECT uid_from FROM share_calendar WHERE user='$userEXT' and password='$passEXT'";
-        $result = $this->_DB->getFirstRowQuery($query,true);
+        $query = "SELECT uid_from FROM share_calendar WHERE user=? and password=?";
+        $result = $this->_DB->getFirstRowQuery($query,true,array($userEXT,$passEXT));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
@@ -752,6 +752,21 @@ class paloSantoCalendar {
 		    }
 		}
 		if(!$remove){
+		    if($isFromClient)
+                        $value["new"] = "no";
+                    else{ // Se verifica si es un registro nuevo para el cliente
+                        $query = "SELECT COUNT(*) FROM history WHERE type='event' AND action='create' AND id_register=? AND id_user=? AND timestamp > ?";
+                        $created = $this->_DB->getFirstRowQuery($query,FALSE,array($value["id"],$id_user,$last_sync));
+                        if($created === FALSE){
+                            $this->errMsg = $this->_DB->errMsg;
+                            return FALSE;
+                        }
+                        if($created[0] == 0)
+                            $value["new"] = "no";
+                        else
+                            $value["new"] = "yes";
+                    }
+
 		    $next = count($arrEvents);
 		    $arrEvents[$next] = $value;
 		    if(!isset($arrEvents[$next]["delete"]))
@@ -818,7 +833,7 @@ class paloSantoCalendar {
 	    $this->errMsg = $this->_DB->errMsg;
 	    return NULL;
 	}
-	elseif(count($result) == 0)
+	elseif($result[0] == 0)
 	    return FALSE;
 	else
 	    return TRUE;

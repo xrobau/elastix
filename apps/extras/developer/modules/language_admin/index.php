@@ -267,14 +267,15 @@ function showLanguages($smarty, $module_name, $local_templates_dir, $arrLang, $a
 
     $arrLangMod = $pLanguages->obtainLanguages($limit, $offset, $module, $language);
     $arrData = array();
-
+    $counter = 1;
     if(is_array($arrLangMod) && count($arrLangMod)>0)
         foreach($arrLangMod as $key => $value){
             $tmpKey = htmlspecialchars($key);
             $tmpValue = htmlspecialchars($value);
 
             $arrTmp[0]  = $tmpKey;
-            $arrTmp[1]  = "<input class='table_data' style='width:450px' type='text' name=\"lang_$tmpKey\" id=\"lang_$tmpKey\" value=\"$tmpValue\" />";
+            $arrTmp[1]  = "<input class='table_data' style='width:450px' type='text' name=\"langvalue_$counter\" id=\"langvalue_$counter\" value=\"$tmpValue\" /><input type='hidden' name='langkey_$counter' id='langkey_$counter' value='$tmpKey'>";
+	    $counter++;
             $arrData[] = $arrTmp;
         }
     $oGrid->setData($arrData);
@@ -296,8 +297,14 @@ function saveAll($smarty, $module_name, $local_templates_dir, $arrLang, $arrLang
 
     foreach($_POST as $key => $value)
     {
-        if( substr($key,0,5) == "lang_" )
-            $arrayLangTrasl[substr($key,5)] = $value;
+        if( substr($key,0,8) == "langkey_" ){
+	    $number = explode("_",$key);
+	    if(isset($_POST["langvalue_$number[1]"]))
+		$translation = $_POST["langvalue_$number[1]"];
+	    else
+		$translation = "";
+            $arrayLangTrasl[$value] = $translation;
+	}
     }
 
     $bandera = $oPalo->saveAll($arrayLangTrasl, $module, $language);

@@ -245,7 +245,7 @@ class EventsSynchronizer extends AbstractProcess
 	    $event["each_repeat"] 	  = "";
 	    $event["days_repeat"] 	  = "";
 	    $event["reminderTimer"] 	  = "";
-	    $event["color"] 		  = "";
+	    $event["color"] 		  = "#3366CC";
 	    return $event;
 	}
     }

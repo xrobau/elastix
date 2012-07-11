@@ -248,7 +248,14 @@ class ContactsSynchronizer extends AbstractProcess
 	$updateData = array();
 	$updateData[] = (isset($syncContact->name)) ? $syncContact->name : $contact["name"];
 	$updateData[] = (isset($syncContact->last_name)) ? $syncContact->last_name : $contact["last_name"];
-	$updateData[] = (isset($syncContact->telefono)) ? $syncContact->telefono : $contact["telefono"];
+	if(isset($syncContact->telefono))
+		$updateData[] = $syncContact->telefono;
+	else{
+		if(isset($syncContact->phone))
+			$updateData[] = $syncContact->phone;
+		else
+			$contact["telefono"];
+	}
 	$updateData[] = (isset($syncContact->email)) ? $syncContact->email : $contact["email"];
 	$updateData[] = $user;
 	$updateData[] = (isset($syncContact->picture)) ? $syncContact->picture : $contact["picture"];

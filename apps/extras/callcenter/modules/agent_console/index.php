@@ -841,7 +841,7 @@ function manejarSesionActiva_agentTransfer($oPaloConsola)
         $respuesta['action'] = 'error';
         $respuesta['message'] = _tr('Invalid or missing extension to transfer');
     } else {
-        $bExito = $oPaloConsola->transferirLlamada($sTransferExt, (getParameter('atxfer') == 'true'));
+        $bExito = $oPaloConsola->transferirLlamada($sTransferExt, (getParameter('atxfer') == 'checked'));
         if (!$bExito) {
             $respuesta['action'] = 'error';
             $respuesta['message'] = _tr('Error while transferring call').' - '.$oPaloConsola->errMsg;

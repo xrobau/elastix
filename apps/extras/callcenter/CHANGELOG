@@ -1,3 +1,5 @@
+* Agent Console: fix incorrect check for atxfer parameter in call transfer.
+  This should allow attended transfer to work from the web console.
 * Dialer: remove last call to deprecated ereg(). 
 * Agent Console: add onsubmit handling to login form so that pressing ENTER
   also starts login process.

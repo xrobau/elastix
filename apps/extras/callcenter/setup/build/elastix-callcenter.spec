@@ -98,6 +98,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Jul 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix incorrect check for atxfer parameter in call 
+  transfer. This should allow attended transfer to work from the web console.
+
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - CHANGED: Dialer: remove last call to deprecated ereg().
 

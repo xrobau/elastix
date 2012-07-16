@@ -129,6 +129,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jul 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Server (dhcpconfig): Define and use DHCP option 150 that allows
+  Cisco phones to find the integrated TFTP server.
+  SVN Rev 4062
+
 * Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

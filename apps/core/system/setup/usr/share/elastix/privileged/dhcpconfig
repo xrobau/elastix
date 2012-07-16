@@ -278,6 +278,8 @@ function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
 ddns-update-style interim;
 ignore client-updates;
 
+option option-150 code 150 = ip-address;
+
 subnet $sNetwork netmask $sNetmask {
 $sConfigGateway
 
@@ -289,6 +291,8 @@ $sConfigDNS
 	option ntp-servers		$sIpAddress;
 	option tftp-server-name		"tftp://$sIpAddress";
 $sConfigWINS
+
+	option option-150		$sIpAddress;
 
 	range dynamic-bootp $sIpStart $sIpEnd;
 	default-lease-time $iLeaseTime;

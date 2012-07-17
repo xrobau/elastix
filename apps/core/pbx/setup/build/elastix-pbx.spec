@@ -294,6 +294,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: for Cisco phones, syncinfo.xml must contain 
+  <SYNCINFO> and </SYNCINFO> tags, else Cisco phone will not reboot.
+  SVN Rev[4065]
+
 * Tue Jul 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Batch: Properly figure out network mask for local network 
   instead of hardcoding a /24 network mask. SVN Rev[4037]

@@ -130,6 +130,12 @@ fi
 
 %changelog
 * Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Server (dhcpconfig): restrict DHCP option 160 to MAC addresses
+  of Polycom phones. This prevents a conflict with LG-ERICSSON phones which also
+  request option 160 but use it for a different purpose.
+  SVN Rev[4066]
+
+* Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): Define and use DHCP option 160 that allows
   Polycom phones to find and use the integrated TFTP server instead of the
   factory-default of FTP. Also make the options names a bit more readable.

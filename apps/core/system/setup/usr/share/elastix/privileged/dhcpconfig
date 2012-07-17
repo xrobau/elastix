@@ -278,7 +278,11 @@ function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
 ddns-update-style interim;
 ignore client-updates;
 
-option option-150 code 150 = ip-address;
+# The following option tells Cisco phones the address of the TFTP server
+option cisco-tftp-server code 150 = ip-address;
+
+# The following option tells Polycom phones the URL of the boot server
+option polycom-boot-server code 160 = string;
 
 subnet $sNetwork netmask $sNetmask {
 $sConfigGateway
@@ -289,10 +293,11 @@ $sConfigGateway
 $sConfigDNS
 	option time-offset		$sTimezoneOffset; # $sTimezoneName
 	option ntp-servers		$sIpAddress;
-	option tftp-server-name		"tftp://$sIpAddress";
+	option tftp-server-name		"$sIpAddress";
 $sConfigWINS
 
-	option option-150		$sIpAddress;
+	option cisco-tftp-server	$sIpAddress;
+	option polycom-boot-server	"tftp://$sIpAddress";
 
 	range dynamic-bootp $sIpStart $sIpEnd;
 	default-lease-time $iLeaseTime;

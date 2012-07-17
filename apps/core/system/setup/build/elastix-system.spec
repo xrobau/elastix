@@ -129,10 +129,16 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Server (dhcpconfig): Define and use DHCP option 160 that allows
+  Polycom phones to find and use the integrated TFTP server instead of the
+  factory-default of FTP. Also make the options names a bit more readable.
+  SVN Rev[4064]
+
 * Mon Jul 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): Define and use DHCP option 150 that allows
   Cisco phones to find the integrated TFTP server.
-  SVN Rev 4062
+  SVN Rev[4063]
 
 * Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest

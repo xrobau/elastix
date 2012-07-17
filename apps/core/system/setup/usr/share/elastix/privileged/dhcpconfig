@@ -297,7 +297,10 @@ $sConfigDNS
 $sConfigWINS
 
 	option cisco-tftp-server	$sIpAddress;
-	option polycom-boot-server	"tftp://$sIpAddress";
+	class "polycom-phones" {
+		match if substring(hardware,1,3) = 00:04:f2;
+		option polycom-boot-server	"tftp://$sIpAddress";
+	}
 
 	range dynamic-bootp $sIpStart $sIpEnd;
 	default-lease-time $iLeaseTime;

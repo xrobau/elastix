@@ -294,6 +294,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jul 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Endpoint Configurator: add SQL for vendor, MAC and model for Zultys.
+  MAC range taken from http://www.base64online.com/mac_address.php?mac=00:0B:EA
+
 * Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: for Cisco phones, syncinfo.xml must contain 
   <SYNCINFO> and </SYNCINFO> tags, else Cisco phone will not reboot.

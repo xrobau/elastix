@@ -371,9 +371,8 @@ class paloSip extends paloAsteriskDB {
 			return $arrResult; 
 	}
 
-	//TODO:
 	function setParameter($device,$parameter,$value){
-		$query="UPDATE sip set ?=? where name=?";
+		$query="UPDATE sip set $parameter=? where name=?";
 		if($this->executeQuery($query,array($parameter,$value,$device))){
 			return true;
 		}
@@ -535,8 +534,8 @@ class paloIax extends paloAsteriskDB {
 
 	//TODO:
 	function setParameter($device,$parameter,$value){
-		$query="UPDATE iax set ?=? where name=?";
-		if($this->executeQuery($query,array($parameter,$value,$device))){
+		$query="UPDATE iax set $parameter=? where name=?";
+		if($this->executeQuery($query,array($value,$device))){
 			return true;
 		}
 		return false;
@@ -848,8 +847,6 @@ class paloDevice{
 				}
 			}
 
-
-			
 			if($arrProp['create_vm']=="yes"){
 				$arrProp['mailbox']=$arrProp['name']."@".$this->code."-".$pVM->context;
 				$arrProp["voicemail_context"]=$this->code."-".$pVM->context;
@@ -911,6 +908,39 @@ class paloDevice{
 		
 	}
 
+	function createFaxExtension($arrProp){
+		$type="iax2";
+		if(!$this->existExtension($arrProp['name'],$type)){
+			$device=$this->code."_".$arrProp['name'];
+			$arrProp['dial'] = strtoupper($type)."/".$device;
+			$arrProp['organization_domain']=$this->domain;
+			if(isset($arrProp['rt'])){
+				if(!preg_match("/^[[:digit:]]+$/",$arrProp['rt']) && !($arrProp['rt']>0 && $arrProp['rt']<60))
+					$arrProp['rt']=0;
+				else
+					$arrProp['rt']=$arrProp['rt'];
+			}else
+				$arrProp['rt']=0;
+
+			$this->tecnologia->setGroupProp($arrProp,$this->domain);
+			if($this->tecnologia->insertDB($this->code)==false){
+				$this->errMsg="Error setting parameter $type device ".$this->tecnologia->errMsg;
+				return false;
+			}
+
+			$exito=$this->insertFaxExtensionDB($this->domain,$type,$arrProp['dial'],$arrProp['name'],$device,$arrProp['rt'],$this->tecnologia->context,$arrProp['fullname'],$arrProp['cid_number']);
+			if($exito){
+				return true;
+			}else{
+				$this->errMsg="Problem when trying insert data in table extensions. ".$this->errMsg;
+				return false;
+			}
+		}else{
+			$this->errMsg="This number extension already exists .".$this->errMsg;
+			return false;
+		}
+	}
+
 	//en la tabla debe haber un unico numero de de extension por dominio
 	private function insertExtensionDB($domain,$tech,$dial,$exten,$device,$rt,$record_in,$record_out,$context,$voicemail,$outboundcid,$alias,$mohclass,$noanswer)
 	{
@@ -919,6 +949,16 @@ class paloDevice{
 		if($result==false)
 			$this->errMsg="Couldn't be saved parameters in table extensions ".$this->tecnologia->errMsg;
 		return $result; 
+	}
+
+	//en la tabla debe haber un unico numero de de extension por dominio
+	private function insertFaxExtensionDB($domain,$tech,$dial,$exten,$device,$rt,$context,$callerIDname,$callerIDnumber)
+	{
+		$query="INSERT INTO fax (organization_domain,tech,dial,exten,device,rt,context,callerid_name,callerid_number) values (?,?,?,?,?,?,?,?,?)";
+		$result=$this->tecnologia->executeQuery($query,array($domain,$tech,$dial,$exten,$device,$rt,$context,$callerIDname,$callerIDnumber));
+		if($result==false)
+			$this->errMsg="Couldn't be saved parameters in table extensions ".$this->tecnologia->errMsg;
+		return $result;
 	}
 
 	private function insertDeviceASTDB($arrProp)
@@ -1055,6 +1095,12 @@ class paloDevice{
 		if($result[0]!=0)
 			$exito=true;
 
+		//validamos que el patron de marcado no esta siendo usado para una extension de fax
+		$query="SELECT count(id) from extension where exten=? and organization_domain=?";
+		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$this->domain));
+		if($result[0]!=0)
+			$exito=true;
+
 		//validamos que no exista el peer
 		if($tech=="iax2")
 			$this->tecnologia=new paloIax($this->tecnologia->_DB);
@@ -1093,6 +1139,31 @@ class paloDevice{
 					return false;
 				}
 			}
+
+			if(!$this->tecnologia->setSecret($result["device"],$password,$this->domain)){
+				$this->errMsg=$this->tecnologia->errMsg;
+				return false;
+			}else{
+				return true;
+			}
+		}
+	}
+
+	function changePasswordFaxExtension($password,$exten){
+		$query="SELECT tech, device from fax where exten=? and organization_domain=?";
+		$result=$this->tecnologia->getFirstResultQuery($query,array($exten,$this->domain),true,"Don't exist Fax extension");
+		//verifico que exista el dispositivo al que se le quiere cambiar el password y que el mismo
+		//este asociado a una extension
+
+		if($result==false){
+			//hubo problemas al hacer la consulta
+			$this->errMsg=$this->tecnologia->errMsg;
+			return false;
+		}else{
+			if($result["tech"]=="iax2")
+				$this->tecnologia=new paloIax($this->tecnologia->_DB);
+			else
+				$this->tecnologia=new paloSip($this->tecnologia->_DB);
 
 			if(!$this->tecnologia->setSecret($result["device"],$password,$this->domain)){
 				$this->errMsg=$this->tecnologia->errMsg;
@@ -1149,14 +1220,41 @@ class paloDevice{
 				foreach($value as $family => $valor){
 					$arrFamily=explode("/",$family);
 					$astMang->database_put($arrFamily[1],implode("/",array_slice($arrFamily,2)),"\"$valor\"");
-					/*if(strtoupper($result["Response"]) == "ERROR"){
-						$this->errMsg = _tr("Extension in ASTDB couldn't be restored. ").$this->errMsg;
-						$exito=false;
-					}*/
 				}
 			}
 		}
 		return $exito;
+	}
+
+	function deleteFaxExtension($extension){
+		$tech="iax2";
+		$query="Select id, organization_domain, exten, device from fax where exten=? and organization_domain=?";
+		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$this->domain),true,"Don't fax exist extension $extension. ");
+		if($result==false && $this->tecnologia->errMsg!="Don't exist fax extension $extension. "){
+			$this->errMsg="Fax extension can't be deleted. ".$this->tecnologia->errMsg;
+			return false;
+		}else{
+			$device=$result["device"];
+			$this->tecnologia=new paloIax($this->tecnologia->_DB);
+			if($this->tecnologia->deletefromDB($device)==false)
+				return false;
+
+			$dquery="delete from fax where device=? and tech=? and organization_domain=?";
+			$exito=$this->tecnologia->executeQuery($dquery,array($device,$tech,$this->domain));
+			if(!$exito){
+				$this->errMsg="Extension can't be deleted. ".$this->tecnologia->errMsg;
+				return false;
+			}
+
+			$errorM="";
+			$astMang=AsteriskManagerConnect($errorM);
+			if($astMang==false){
+				$this->errMsg=$errorM;
+				return false;
+			}else
+				$result=$astMang->prunePeer($tech,$device);
+		}
+		return true;
 	}
 
 	//funcion que se encarga de borrar una extension
@@ -1249,13 +1347,13 @@ class paloDevice{
 					if($voicemail != "novm") {
 						$arrExtensionLocal[] = new paloExtensions($exten,new ext_goto('1','vmret'));
 						$arrExtensionLocal[] = new paloExtensions($exten,new ext_hint($exten,$this->domain),"hint");
-						$arrExtensionLocal[] = new paloExtensions('${'.$this->code.'_VM_PREFIX}'.$exten,new ext_macro($this->code.'-vm',$voicemail.',DIRECTDIAL,${IVR_RETVM}'));
+						$arrExtensionLocal[] = new paloExtensions('${'.$this->code.'_VM_PREFIX}'.$exten,new ext_macro($this->code.'-vm',$voicemail.',DIRECTDIAL,${IVR_RETVM}'),1);
 						$arrExtensionLocal[] = new paloExtensions('${'.$this->code.'_VM_PREFIX}'.$exten,new ext_goto('1','vmret'));
-						$arrExtensionLocal[] = new paloExtensions("vmb".$exten,new ext_macro($this->code.'-vm',$voicemail.',BUSY,${IVR_RETVM}'));
+						$arrExtensionLocal[] = new paloExtensions("vmb".$exten,new ext_macro($this->code.'-vm',$voicemail.',BUSY,${IVR_RETVM}'),1);
 						$arrExtensionLocal[] = new paloExtensions("vmb".$exten,new ext_goto('1','vmret'));
-						$arrExtensionLocal[] = new paloExtensions('vmu'.$exten,new ext_macro($this->code.'-vm',$voicemail.',NOANSWER,${IVR_RETVM}'));
+						$arrExtensionLocal[] = new paloExtensions('vmu'.$exten,new ext_macro($this->code.'-vm',$voicemail.',NOANSWER,${IVR_RETVM}'),1);
 						$arrExtensionLocal[] = new paloExtensions('vmu'.$exten,new ext_goto('1','vmret'));
-						$arrExtensionLocal[] = new paloExtensions('vms'.$exten,new ext_macro($this->code.'-vm',$voicemail.',NOMESSAGE,${IVR_RETVM}'));
+						$arrExtensionLocal[] = new paloExtensions('vms'.$exten,new ext_macro($this->code.'-vm',$voicemail.',NOMESSAGE,${IVR_RETVM}'),1);
 						$arrExtensionLocal[] = new paloExtensions('vms'.$exten,new ext_goto('1','vmret'));
 					} else {
 						$arrExtensionLocal[] = new paloExtensions($exten,new ext_goto('1','return','${IVR_CONTEXT}'));
@@ -1280,9 +1378,9 @@ class paloDevice{
 			}
 			$arrExtensionLocal[] = new paloExtensions("vmret",new ext_gotoIf('"${IVR_RETVM}" = "RETURN" & "${IVR_CONTEXT}" != ""',"playret"),1);
 			$arrExtensionLocal[] = new paloExtensions("vmret",new ext_hangup());
-			$arrExtensionLocal[] = new paloExtensions("vmret",new ext_playback("exited-vm-will-be-transfered&silence/1","n","playret"));
+			$arrExtensionLocal[] = new paloExtensions("vmret",new ext_playback("exited-vm-will-be-transfered&silence/1"),"n","playret");
 			$arrExtensionLocal[] = new paloExtensions("vmret",new ext_goto("1","return",'${IVR_CONTEXT}'));
-			$arrExtensionLocal[] = new paloExtensions("h",new ext_macro($this->code."-hangupcall",""));
+			$arrExtensionLocal[] = new paloExtensions("h",new ext_macro($this->code."-hangupcall",""),1);
 		}
 
 		$contextoLocal=new paloContexto($this->code,"ext-local");
@@ -1300,6 +1398,40 @@ class paloDevice{
 			$contextofromIvr->arrExtensions=$arrExtensionIvr;
 
 		$arrContext=array($contextoLocal,$contextofromIvr);
+		return $arrContext; 
+	}
+
+	function createDialPlanFaxExtension(){
+		$arrExtensionFax=array();
+		$query="Select * from fax where organization_domain=?";
+		$result=$this->tecnologia->getResultQuery($query,array($this->domain),true,"Don't exist faxs extensions for this domain");
+		if($result==false && $this->tecnologia->errMsg!="Don't exist faxs extensions for this domain"){
+			$this->errMsg=_tr("Error creating dialplan for faxs extensions").$this->tecnologia->errMsg;
+			return false;
+		}else{
+			if(is_array($result)){
+				foreach($result as $value){
+					$exten=$value["exten"];
+					$arrExtensionFax[] = new paloExtensions($exten,new ext_noop('Receiving Fax for: '.$value["callerid_name"].' ('.$value["callerid_number"].'), From: ${CALLERID(all)}'),1);
+					if($value["rt"]!=0 && isset($value["rt"])){
+						$arrExtensionFax[] = new paloExtensions($exten,new ext_setvar("RT",$value["rt"]));
+					}
+					$arrExtensionFax[] = new paloExtensions($exten,new ext_setvar("DSTRING",$value["dial"]));
+					$arrExtensionFax[] = new paloExtensions($exten,new ext_goto("1","s",$this->code."-ext-fax"));
+				}
+				$arrExtensionFax[] = new paloExtensions("s",new ext_dial('${DSTRING},${RT}'),1,"receivefax");
+				$arrExtensionFax[] = new paloExtensions("h",new ext_macro($this->code."-hangupcall",""),1);
+			}
+		}
+
+		$contextoFax=new paloContexto($this->code,"ext-fax");
+		if($contextoFax===false){
+			$this->errMsg=$contextoFax->errMsg;
+			return false;
+		}else
+			$contextoFax->arrExtensions=$arrExtensionFax;
+
+		$arrContext=array($contextoFax);
 		return $arrContext; 
 	}
 
@@ -1549,8 +1681,5 @@ class paloTrunks extends paloAsteriskDB{
 		//escribir las globales de cada truncal
 		//si se le setea un patron de marcado a la truncal entonces escribir el contexto sub-flp-idtrunk para dicha truncal
 	}
-
-
-	
 }
 ?>

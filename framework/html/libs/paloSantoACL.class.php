@@ -494,6 +494,7 @@ class paloACL {
         } else {
             $this->errMsg = "";
 			$listaSQL = array(
+				"DELETE FROM fax_docs WHERE id_user = ?",
                 "DELETE FROM user_properties WHERE id_user = ?",
                 "DELETE FROM user_shortcut WHERE id_user = ?",
 				"DELETE FROM sticky_note WHERE id_user = ?",

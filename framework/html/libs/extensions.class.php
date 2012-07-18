@@ -16,7 +16,7 @@
 //
 //    Copyright (C) 2004 Coalescent Systems Inc. (info@coalescentsystems.ca)
 //
-include_once "libs/paloSantoAsteriskConfig.class.php";
+include_once "libs/misc.lib.php";
 
 class extension {
 	var $data;
@@ -92,13 +92,19 @@ class ext_gosubif extends extension {
 class ext_hint extends extension {
 	var $exten;
 	var $domain;
+	var $code;
 
 	function ext_hint($exten,$domino) {
+		global $arrConf;
 		if($this->isEmpty($exten) || $this->isEmpty($domino)){
-			$this->error="Number extension or code can't be empty";
+			$this->error="Number extension and domain can't be empty";
 		}else{
 			$this->exten=$exten;
 			$this->domain=$domino;
+			$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+			$query="SELECT code from organization where domain=?";
+			$result = $pDB->getFirstRowQuery($query, false, array($this->domain));
+			$this->code=$result[0];
 		}
 	}
 
@@ -110,28 +116,30 @@ class ext_hint extends extension {
 	}
 
 	function get_hint(){
-		// We should always check the AMPUSER in case they logged into a device
+		// We should always check the EXTUSER in case they logged into a device
 		// but we will fall back to the old methond if $astman not open although
 		// I'm pretty sure everything else will puke anyhow if not running
 		//
-
-		$pDB=new paloDB(generarDSNSistema("root", "ast_realtime"));
-		//$pAstConfig=new paloSantoASteriskConfig(new paloDB(generarDSNSistema("root", "ast_realtime")));
-		//$astman=$pAstConfig->AsteriskManagerConnect();
-		/*if ($astman!=false) {
+		$error="";
+		$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$astman=AsteriskManagerConnect($error);
+		if($astman!=false){
 			//se obtine los dispositivos a los cuales la extension esta asociada
-			$device=$astman->database_get("EXTUSER",$this->code"/".$this->exten."/device");
+			$device=$astman->database_get("EXTUSER",$this->code."/".$this->exten."/device");
 			$device_arr = explode('&',$device);
-			$sql = "SELECT dial from extension where exten=? where organization_domain=? and name in ('".implode("','",$device_arr)."')";
-		} else {*/
+			$query = "SELECT DISTINCT dial from extension where organization_domain=? and device in ('".implode("','",$device_arr)."')";
+			$arrayParam=array($this->domain);
+		} else {
 			$query = "SELECT dial from extension where exten=? and organization_domain=?";
-			$results = $pDB->getFirstRowQuery($query, false, array($this->exten,$this->domain));
-		//}
+			$arrayParam=array($this->exten,$this->domain);
+		}
+
+		$results = $pDB->fetchTable($query, false, $arrayParam);
 
 		//create an array of strings
 		if (is_array($results)){
 			foreach ($results as $result) {
-				$dial[] = str_replace('ZAP', 'DAHDI', $result);
+				$dial[] = str_replace('ZAP', 'DAHDI', $result[0]);
 			}
 		}
 
@@ -139,6 +147,8 @@ class ext_hint extends extension {
 		if (isset($dial) && is_array($dial)){
 			$hint = implode($dial,"&");
 		} else {
+			$query = "SELECT dial from extension where exten=? and organization_domain=?";
+			$results = $pDB->getFirstRowQuery($query, false, array($this->exten,$this->domain));
 			if (isset($results[0])) {
 				$hint = $results[0];
 			} else {

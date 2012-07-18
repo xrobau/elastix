@@ -1273,12 +1273,12 @@ function AsteriskManagerConnect(&$error) {
 				)
 */
 function getUserCredentials() {
+	global $arrConf;
 	$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pdbACL);
 
 	$userLevel1 = "other";
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-
 	//verificar que tipo de usurio es: superadmin, admin o other
 	if($userAccount!=""){
 		$idOrganization = $pACL->getIdOrganizationUserByName($userAccount);

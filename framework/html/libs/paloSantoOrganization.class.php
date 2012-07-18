@@ -466,9 +466,15 @@ class paloSantoOrganization{
 										$pAstConf->_DB->rollBAck();
 										$pAstConf->delete_dialplanfiles($domain);
 									}else{
-										$flag=true;
-										$this->_DB->commit();
-										$pAstConf->_DB->commit();
+										if(!$this->createFolderFaxOrg($domain)){
+											$this->_DB->rollBAck();
+											$pAstConf->_DB->rollBAck();
+											$pAstConf->delete_dialplanfiles($domain);
+										}else{
+											$flag=true;
+											$this->_DB->commit();
+											$pAstConf->_DB->commit();
+										}
 									}
 								}else{
 									$error=_tr("Errors trying created dialplan for new organization").$pAstConf->errMsg;
@@ -497,6 +503,17 @@ class paloSantoOrganization{
         return $flag;
     }
 
+
+	private function createFolderFaxOrg($domain){
+        $sComando = '/usr/bin/elastix-helper faxconfig createDirFax '.$domain.'  2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = implode('', $output);
+            return FALSE;
+        }
+        return TRUE;
+	}
 
     //a una entidad no se le puede editar el dominio
     function setOrganization($id,$name,$country,$city,$address,$country_code,$area_code,$quota,$email_contact)
@@ -656,7 +673,7 @@ class paloSantoOrganization{
 		return $arrOpt;
 	}
 
-	function setParameterFaxExtension($domain,$type,$exten,$secret,$clid_name,$clid_number)
+	function setParameterFaxExtension($domain,$type,$exten,$secret,$clid_name,$clid_number,$port=null)
 	{
 		$pDevice=new paloDevice($domain,$type,$pDB2);
 		if($pDevice->errMsg!=""){
@@ -666,11 +683,13 @@ class paloSantoOrganization{
 
 		$arrProp=array();
 		$arrProp["name"]=$exten;
-		$arrProp["host"]="127.0.0.1";
+		$arrProp["defaultip"]="127.0.0.1";
 		$arrProp['secret']= $secret;
 		$arrProp["create_vm"]= "no";
 		$arrProp["fullname"]=$clid_name;
 		$arrProp["cid_number"]=$clid_number;
+		if(!is_null($port))
+			$arrProp["port"]=$port;
 
 		$result=$pDevice->tecnologia->getDefaultSettings($domain);
 		$arrOpt=array_merge($result,$arrProp);
@@ -790,33 +809,45 @@ class paloSantoOrganization{
 					}
 				}
 
-				//creamos la extension del usuario
-				$pDB2->beginTransaction();
-				$arrProp=$this->setParameterUserExtension($arrOrgz["domain"],"sip",$extension,$password,$name,$username);
-				if($arrProp==false){
-					$error=$this->errMsg;
+				//encontrar el puerto que va a ser usado por el iaxmodem
+				//se lo hace aqui para poder setear 'port' en el peer iax
+				//para que al momento de reiniciar el servicio iaxmodem el iaxmodem creado sea capaz
+				//de registrarse dentro de asterisk
+				$nextPort=$pFax->getNextAvailablePort();
+				if($nextPort==false){
+					$error=$pFax->errMsg;
 					$this->_DB->rollBack();
 					$continuar=false;
-				}else{
-					if($pDevice->createNewDevice($arrProp,"sip")==false){
-						$error=$pDevice->errMsg;
-						$pDB2->rollBack();
-						$this->_DB->rollBack();
-						$continuar=false;
-					}	
 				}
 
+				$pDB2->beginTransaction();
 				//creamos la extension iax para el fax del usuario
 				if($continuar){
-					$arrPropFax=$this->setParameterFaxExtension($arrOrgz["domain"],"iax2",$fax_extension,$md5password,$cldiName,$clidNumber);
+					$arrPropFax=$this->setParameterFaxExtension($arrOrgz["domain"],"iax2",$fax_extension,$md5password,$cldiName,$clidNumber,$nextPort);
+					if($arrPropFax==false){
+						$error=$this->errMsg;
+						$this->_DB->rollBack();
+						$continuar=false;
+					}else{
+						if($pDevice->createFaxExtension($arrPropFax,"iax2")==false){
+							$error=$pDevice->errMsg;
+							$pDB2->rollBack();
+							$this->_DB->rollBack();
+							$continuar=false;
+						}
+					}
+				}
+
+				if($continuar){
+					//creamos la extension del usuario
+					$arrProp=$this->setParameterUserExtension($arrOrgz["domain"],"sip",$extension,$password,$name,$username);
 					if($arrProp==false){
 						$error=$this->errMsg;
 						$pDB2->rollBack();
 						$this->_DB->rollBack();
-						$pDevice->deleteAstDBExt($extension,$org_extension,"sip");
 						$continuar=false;
 					}else{
-						if($pDevice->createNewDevice($arrPropFax,"iax2")==false){
+						if($pDevice->createNewDevice($arrProp,"sip")==false){
 							$error=$pDevice->errMsg;
 							$pDB2->rollBack();
 							$this->_DB->rollBack();
@@ -828,27 +859,23 @@ class paloSantoOrganization{
 
 				//una vez setado todos los parametros en la table user_properties creamos el fax y el email del usuario
 				if($continuar){
-					if($pFax->createFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$org_fax_extension,$md5password,$username)){//si se crea exitosamente el fax creamos el email
+					if($pFax->createFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$org_fax_extension,$md5password,$username,$nextPort)){//si se crea exitosamente el fax creamos el email
 						if($pEmail->create_email_account($username,$password,$idOrganization,$quota*1024,true)){
 							$Exito=true;
 							$this->_DB->commit();
 							$pDB2->commit();
-							$port=$pACL->getUserProp($idUser,"port");
-							if($port!=false)
-								$pDevice->tecnologia->setParameter($org_fax_extension,"port",$port);
+							$pFax->restartService();
 						}else{
 							$error=_tr("Error trying create email_account").$pEmail->errMsg;
 							$devId=$pACL->getUserProp($idUser,"dev_id");
 							$this->_DB->rollBack();
 							$pDevice->deleteAstDBExt($extension,$org_extension,"sip");
-							$pDevice->deleteAstDBExt($fax_extension,$org_fax_extension,"iax2");
 							$pDB2->rollBack();
 							$pFax->deleteFax($devId);
 						}
 					}else{
 						$error=_tr("Error trying create new fax").$pFax->errMsg;
 						$pDevice->deleteAstDBExt($extension,$org_extension,"sip");
-						$pDevice->deleteAstDBExt($fax_extension,$org_fax_extension,"iax2");
 						$pDB2->rollBack();
 						$this->_DB->rollBack();
 					}
@@ -921,6 +948,7 @@ class paloSantoOrganization{
 		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
 		$arrBackup=array();
 		$editFax=false;
+		$faxProperties=array();
 		
 		$arrUser=$pACL->getUsers($idUser);
 		if($arrUser===false || count($arrUser)==0 || !isset($idUser)){
@@ -946,20 +974,6 @@ class paloSantoOrganization{
 
 		if($name=="")
 			$name=$username;
-
-		if(isset($clidNumber) && $clidNumber!=""){
-			$faxProperties["clid_number"] =$clidNumber;
-		}else{
-			$faxProperties["clid_number"] = $fax_extension;
-			$clidNumber=$fax_extension;
-		}
-
-		if(isset($cldiName) && $cldiName!=""){
-			$faxProperties["clid_name"] =$cldiName;
-		}else{
-			$faxProperties["clid_name"] =$name;
-			$cldiName=$name;
-		}
 
 		$pDB2->beginTransaction();
 		if($userLevel1=="other"){
@@ -989,6 +1003,31 @@ class paloSantoOrganization{
 				}else
 					$cFExten=true;
 			}
+
+			//para cambiar al usuario de extension o faxextension es necesario que se haya llenado el campo password para
+			//poder crear las extensiones con la clave correcta
+			if($cExten || $cFExten){
+				if(is_null($md5password) || $md5password=="" || is_null($password1) || $password1==""){
+					$this->errMsg=_tr("Need assign password");
+					return false;
+				}
+			}
+		}
+
+		if(isset($clidNumber) && $clidNumber!=""){
+			$faxProperties["clid_number"] =$clidNumber;
+			$cFExten=true;
+		}else{
+			$faxProperties["clid_number"] = $fax_extension;
+			$clidNumber=$fax_extension;
+		}
+
+		if(isset($cldiName) && $cldiName!=""){
+			$faxProperties["clid_name"] =$cldiName;
+			$cFExten=true;
+		}else{
+			$faxProperties["clid_name"] =$name;
+			$cldiName=$name;
 		}
 
 		$this->_DB->beginTransaction();
@@ -1002,11 +1041,10 @@ class paloSantoOrganization{
 				$org_countryCode=$pACL->getUserProp($idUser,"country_code");
 				$org_cldiName=$pACL->getUserProp($idUser,"clid_name");
 
-				$faxProperties=array();
 				//seteamos los registros en la tabla user_properties orrespondientes a la categoria fax
 				$faxProperties["country_code"] =$countryCode;
 				$faxProperties["area_code"] =$areaCode;
-
+				
 				foreach($faxProperties as $key => $value){
 					if(!$pACL->setUserProp($idUser,$key,$value,"fax")){
 						$error= "Error setting $key in table user_properties. ".$pACL->errMsg;
@@ -1021,20 +1059,21 @@ class paloSantoOrganization{
 				if(isset($quota) && $quota!="" && $continuar){
 					if($pEmail->updateQuota($old_quota,$quota,$username)){
 						if(!$pACL->setUserProp($idUser,"email_quota",$quota,"email")){
-							$error= _tr("Error setting parameters faxs").$pACL->errMsg;
+							$error= _tr("Error setting email quota").$pACL->errMsg;
 							$pEmail->updateQuota($quota,$old_quota);
 							$this->_DB->rollBack();
 							$continuar=false;
 						}
 					}else{
-						$error= _tr("Error setting quota").$pEmail->errMsg;
+						$error= _tr("Error setting email quota").$pEmail->errMsg;
 						$this->_DB->rollBack();
 						$continuar=false;
 					}
 				}
 
 				if($continuar && $userLevel1!="other"){
-					$modificarExts=$this->modificarExtensionsUsuario($cExten,$cFExten,$pDB2,$arrOrgz["domain"],$oldExten,$oldFaxExten,$extension,$fax_extension,$password1,$md5password,$name,$username,$cldiName,$clidNumber,$arrBackup);
+					$port=$pACL->getUserProp($idUser,"port");
+					$modificarExts=$this->modificarExtensionsUsuario($cExten,$cFExten,$pDB2,$arrOrgz["domain"],$oldExten,$oldFaxExten,$extension,$fax_extension,$password1,$md5password,$name,$username,$cldiName,$clidNumber,$port,$arrBackup);
 
 					if($modificarExts==false){
 						$error=_tr("Couldn't updated user extensions").$this->errMsg;
@@ -1046,9 +1085,16 @@ class paloSantoOrganization{
 				if($password1!=="" && $continuar){
 					if($pACL->changePassword($idUser,$md5password)){
 						//en caso que no se hayan modificado las extensiones del usuario entonces es necesario actualizar los password de los canales sip, iax y del voicemail
-						if(!$cExten || !$cFExten){
-							if(!$pDevice->changePasswordExtension($password1,$extension) || !$pDevice->changePasswordExtension($md5password,$fax_extension)){
-								$this->errMsg=_tr("Password couldn't be updated").$pDevice->errMsg;
+						if(!$cExten){
+							if(!$pDevice->changePasswordExtension($password1,$extension)){
+								$this->errMsg=_tr("Extension password couldn't be updated").$pDevice->errMsg;
+								$continuar=false;
+							}
+						}
+
+						if(!$cFExten && $continuar){
+							if(!$pDevice->changePasswordFaxExtension($md5password,$fax_extension)){
+								$this->errMsg=_tr("Fax Extension password couldn't be updated").$pDevice->errMsg;
 								$continuar=false;
 							}
 						}
@@ -1071,7 +1117,7 @@ class paloSantoOrganization{
 					}
 				}else{
 					if($continuar){
-						if(!$pFax->editFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$arrOrgz["code"]."_".$fax_extension,$md5password,$username)){
+						if(!$pFax->editFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$arrOrgz["code"]."_".$fax_extension,$arrUser[0][3],$username)){
 							$continuar=false;
 							$error=_tr("Error Updating fax configuration").$pFax->errMsg;
 						}
@@ -1082,6 +1128,7 @@ class paloSantoOrganization{
 					$Exito=true;
 					$this->_DB->commit();
 					$pDB2->commit();
+					$pFax->restartService();
 				}else{
 					$this->_DB->rollBack();
 					$pDB2->rollBack();
@@ -1089,7 +1136,7 @@ class paloSantoOrganization{
 						$pFax->editFax($idUser,$org_countryCode,$org_areaCode,$org_cldiName,$org_clidNumber,$arrOrgz["code"]."_".$arrUser[0][6],$arrUser[0][3],$username);
 					}
 					if($cExten==true){
-						$pDevice->deleteAstDBExt($extension,$arrExtUser["device"],$arrExtUser["tech"]);
+						$pDevice->deleteAstDBExt($extension,$arrOrgz["code"]."_".$extension,$arrExtUser["tech"]);
 						$pDevice->restoreBackupAstDBEXT($arrBackup);
 					}
 				}
@@ -1111,7 +1158,7 @@ class paloSantoOrganization{
 		return $Exito;
 	}
 
-	private function modificarExtensionsUsuario(&$EXTEN,&$FEXTEN,&$pDB2,$domain,$oldExten,$oldFaxExten,$extension,$fax_extension,$password,$md5password,$name,$username,$cldiName,$clidNumber,&$arrBackup){
+	private function modificarExtensionsUsuario(&$EXTEN,&$FEXTEN,&$pDB2,$domain,$oldExten,$oldFaxExten,$extension,$fax_extension,$password,$md5password,$name,$username,$cldiName,$clidNumber,$port,&$arrBackup){
 		$continuar=true;
 		$pDevice=new paloDevice($domain,"sip",$pDB2);
 		$error="";
@@ -1123,20 +1170,20 @@ class paloSantoOrganization{
 
 
 		//creamos la extension iax para el fax del usuario
-		if($continuar && $FEXTEN){
-			if(!$pDevice->deleteExtension($oldFaxExten,"iax2")){
+		if($FEXTEN){
+			if(!$pDevice->deleteFaxExtension($oldFaxExten,"iax2")){
 				$this->errMsg=_tr("Old Fax extension can't be deleted").$pDevice->errMsg;
 				return false;
 			}
 			//borramos el channel del fax anterior anterior
-			$arrPropFax=$this->setParameterFaxExtension($domain,"iax2",$fax_extension,$md5password,$cldiName,$clidNumber);
+			$arrPropFax=$this->setParameterFaxExtension($domain,"iax2",$fax_extension,$md5password,$cldiName,$clidNumber,$port);
 			if($arrPropFax==false){
 				$error=$this->errMsg;
-				$continuar=false;
+				return false;
 			}else{
-				if($pDevice->createNewDevice($arrPropFax,"iax2")==false){
+				if($pDevice->createFaxExtension($arrPropFax,"iax2")==false){
 					$error=$pDevice->errMsg;
-					$continuar=false;
+					return false;
 				}
 			}
 		}
@@ -1197,6 +1244,7 @@ class paloSantoOrganization{
 		}
 
 		$devId=$pACL->getUserProp($idUser,"dev_id");
+		$port=$pACL->getUserProp($idUser,"port");
 		$countryCode=$pACL->getUserProp($idUser,"country_code");
 		$areaCode=$pACL->getUserProp($idUser,"area_code");
 		$cldiName=$pACL->getUserProp($idUser,"clid_name");
@@ -1221,9 +1269,8 @@ class paloSantoOrganization{
 		//tomamos un backup de las extensiones que se van a eliminar de la base astDB por si algo sale mal
 		//y ahi que restaurar la extension
 		$arrExt=$pDevice->backupAstDBEXT($arrUser[0][5]);
-		$arrFaxExt=$pDevice->backupAstDBEXT($arrUser[0][6]);
 		if($pACL->deleteUser($idUser)){
-			if($pDevice->deleteExtension($arrUser[0][5],"sip") && $pDevice->deleteExtension($arrUser[0][6],"iax2")){
+			if($pDevice->deleteExtension($arrUser[0][5],"sip") && $pDevice->deleteFaxExtension($arrUser[0][6])){
 				if($pFax->deleteFax($devId)){
 					if($pEmail->eliminar_cuenta($arrUser[0][1])){
 						if(isset($picture[0]))
@@ -1231,25 +1278,23 @@ class paloSantoOrganization{
 						$Exito=true;
 						$pDB2->commit();
 						$this->_DB->commit();
+						$pFax->restartService();
 					}else{
-						$pFax->createFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$arrUser[0][6],$arrUser[0][3],$arrUser[0][1]);
-						$this->errMsg=_tr("Email Account cannot be deleted").$pEmail->errMsg;
 						$pDevice->restoreBackupAstDBEXT($arrExt);
-						$pDevice->restoreBackupAstDBEXT($arrFaxExt);
 						$pDB2->rollBack();
 						$this->_DB->rollBack();
+						$pFax->createFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$arrUser[0][6],$arrUser[0][3],$arrUser[0][1],$port,$devId);
+						$this->errMsg=_tr("Email Account cannot be deleted").$pEmail->errMsg;
 					}
 				}else{
 					$this->errMsg=_tr("Fax cannot be deleted").$pFax->errMsg;
 					$pDevice->restoreBackupAstDBEXT($arrExt);
-					$pDevice->restoreBackupAstDBEXT($arrFaxExt);
 					$pDB2->rollBack();
 					$this->_DB->rollBack();
 				}
 			}else{
 				$this->errMsg=_tr("User Extension can't be deleted").$pDevice->errMsg;
 				$pDevice->restoreBackupAstDBEXT($arrExt);
-				$pDevice->restoreBackupAstDBEXT($arrFaxExt);
 				$pDB2->rollBack();
 				$this->_DB->rollBack();
 			}

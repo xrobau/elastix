@@ -596,7 +596,7 @@ class paloSantoASteriskConfig{
 	function setReloadDialplan($domain,$reload=false){
 		//obtenemos el dominio de la organizacion para verificar que esta exista
 		$query="SELECT id from organization where domain=?";
-		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($org_id));
+		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
 		if($result===false){
 			$this->errMsg = $this->_DBSQLite->errMsg;
 			return false;
@@ -614,19 +614,19 @@ class paloSantoASteriskConfig{
 			}
 		}
 
-		$status=($reload)?"yes":"no";
 
+		$status=($reload==true)?"yes":"no";
 		$query="SELECT show_msg from reload_dialplan where organization_domain=?";
 		$estado=$this->_DB->getFirstRowQuery($query, false, array($domain));
 		if($estado===false){
 			$this->errMsg = $this->_DB->errMsg;
 			return false;
 		}else{
-			if(is_array($estado))
-				$query="Insert into reload_dialplan (show_msg,organization_domain) values(?,?)";
-			else
+			if(is_array($estado) && count($estado)>0)
 				$query="UPDATE reload_dialplan SET show_msg=? where organization_domain=?";
-			$res=$this->_DB->genQuery($qInsert,array($status,$domain));
+			else
+				$query="Insert into reload_dialplan (show_msg,organization_domain) values(?,?)";
+			$res=$this->_DB->genQuery($query,array($status,$domain));
 			if($res==false)
 				$this->errMsg = $this->_DB->errMsg;
 			return $res;
@@ -647,7 +647,7 @@ class paloSantoASteriskConfig{
 		}
 
 		$query="SELECT show_msg from reload_dialplan where organization_domain=?";
-		$estado=$this->_DB->getFirstRowQuery($query, false, array($result[0]));
+		$estado=$this->_DB->getFirstRowQuery($query, false, array($domain));
 		if($estado==false){
 			$this->errMsg = $this->_DB->errMsg;
 			return false;
@@ -680,6 +680,15 @@ class paloSantoASteriskConfig{
 			return false;
 		}else
 			$arrContext=array_merge($arrContext,$arrContextExtLocal);
+
+		//genero el plan de marcado de los faxes
+		$arrContextExtFax=$pDevice->createDialPlanFaxExtension();
+		if($arrContextExtFax===false){
+			$this->errMsg="Coulnd't create new dialplan. ".$pDevice->errMsg;
+			return false;
+		}else
+			$arrContext=array_merge($arrContext,$arrContextExtFax);
+
 
 		//genero plan de marcado relacionado con los irvs
 
@@ -727,7 +736,8 @@ class paloSantoASteriskConfig{
 		}
 
 		$arrInclude=array();
-		$arrInclude[]="ext-local";
+		$arrInclude[]="ext-local\n";
+		$arrInclude[]="ext-fax\n";
 		
 		$context=new paloContexto($code[0],"from-internal-additional");
 		$context->arrInclude=$arrInclude;
@@ -832,7 +842,7 @@ class paloExtensions{
 	}
 	
 	function validatePriority($prioridad){
-		if(!isset($prioridad) || $prioridad=="" || $this->priority=="n")
+		if(!isset($prioridad) || $prioridad=="" ||$prioridad=="n")
 			return "n";
 		elseif(strtolower($prioridad)==("hint"))
 			return strtolower($prioridad);
@@ -848,7 +858,7 @@ class paloExtensions{
 		elseif(preg_match("/^\+[[:digit:]]+$/",$label))
 			return $label;
 		else
-			return "($label)";
+			return '('.$label.')';
 	}
 
 	//recibe un objeto de tipo extension

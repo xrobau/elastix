@@ -413,6 +413,21 @@ CREATE TABLE IF NOT EXISTS `extension` (
       INDEX organization_domain (organization_domain)
 )ENGINE = INNODB;
 
+CREATE TABLE IF NOT EXISTS `fax` (
+	  `id` int(11) NOT NULL AUTO_INCREMENT,
+	  `organization_domain` varchar(50) NOT NULL,
+	  `context` varchar(40) NOT NULL,
+      `exten` int(20) NOT NULL,
+      `tech` varchar(20) NOT NULL,
+	  `dial` varchar(40) DEFAULT NULL,
+	  `device` varchar(40) DEFAULT NULL,
+      `rt` varchar(20) DEFAULT NULL,
+      `callerid_name` varchar(20) DEFAULT NULL,
+      `callerid_number` varchar(40) DEFAULT NULL,
+      PRIMARY KEY (`id`),
+      INDEX organization_domain (organization_domain)
+)ENGINE = INNODB;
+
 CREATE TABLE IF NOT EXISTS `trunks` (
   `organization_domain` varchar(50) NOT NULL,
   `trunkid` int(11) NOT NULL AUTO_INCREMENT,

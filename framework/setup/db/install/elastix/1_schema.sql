@@ -166,6 +166,23 @@ CREATE TABLE settings
        PRIMARY KEY (property)
 );
 
+CREATE TABLE fax_docs
+(
+        id             integer          PRIMARY KEY,
+        pdf_file       varchar(255)     NOT NULL DEFAULT '',
+        modemdev       varchar(255)     NOT NULL DEFAULT '',
+        status         varchar(255)     NOT NULL DEFAULT '',
+        commID         varchar(255)     NOT NULL DEFAULT '',
+        errormsg       varchar(255)     NOT NULL DEFAULT '',
+        company_name   varchar(255)     NOT NULL DEFAULT '',
+        company_fax    varchar(255)     NOT NULL DEFAULT '',
+        date           timestamp        NOT NULL,
+        type           varchar(3)       default 'in',
+        faxpath        varchar(255)     default '',
+        id_user        integer          not null,
+        FOREIGN KEY    (id_user) REFERENCES acl_user(id)
+);
+
 
 INSERT INTO "settings" VALUES('elastix_version_release', '2.3.0-6');
 
@@ -382,7 +399,6 @@ INSERT INTO "group_resource" VALUES(51, 0, 51);
 INSERT INTO "group_resource" VALUES(52, 0, 52);
 INSERT INTO "group_resource" VALUES(54, 0, 54);
 INSERT INTO "group_resource" VALUES(55, 0, 55);
-INSERT INTO "group_resource" VALUES(56, 0, 56);
 INSERT INTO "group_resource" VALUES(57, 0, 57);
 INSERT INTO "group_resource" VALUES(58, 0, 58);
 INSERT INTO "group_resource" VALUES(59, 0, 59);

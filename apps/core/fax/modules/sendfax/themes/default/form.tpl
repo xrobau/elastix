@@ -23,7 +23,11 @@
 <table class="tabForm" style="font-size: 16px;" width="100%" >
     <tr class="letra12">
         <td align="left" width="180"><b>{$from.LABEL}: <span  class="required">*</span></b></td>
-        <td>{$from.INPUT}</td>
+		{if !$isOther }
+			<td>{$FAX_USER}</td>
+		{else}
+			<td>{$from.INPUT}</td>
+		{/if}
     </tr>
 
     <tr class="letra12">

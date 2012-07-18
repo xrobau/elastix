@@ -28,7 +28,7 @@
   $Id: paloSantoFaxVisor.class.php,v 1.1.1.1 2008/12/09 18:00:00 aflores Exp $ */
 
 /*-
-CREATE TABLE info_fax_recvq
+CREATE TABLE fax_docs
 (
     id           INTEGER  PRIMARY KEY,
     pdf_file    varchar(255)   NOT NULL DEFAULT '',
@@ -38,9 +38,9 @@ CREATE TABLE info_fax_recvq
     errormsg     varchar(255)   NOT NULL DEFAULT '',
     company_name varchar(255)   NOT NULL DEFAULT '',
     company_fax  varchar(255)   NOT NULL DEFAULT '',
-    fax_destiny_id       INTEGER NOT NULL DEFAULT 0,
+    id_user      INTEGER NOT NULL DEFAULT 0,
     date     timestamp  NOT NULL ,
-    FOREIGN KEY (fax_destiny_id)   REFERENCES fax(id)
+    FOREIGN KEY (id_user)   REFERENCES acl_user(id)
 );
 */
 
@@ -54,7 +54,7 @@ class paloFaxVisor
         global $arrConf;
         
         //instanciar clase paloDB
-        $pDB = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/fax.db");
+        $pDB = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/elastix.db");
     	if (!empty($pDB->errMsg)) {
             $this->errMsg = $pDB->errMsg;
     	} else{
@@ -62,8 +62,16 @@ class paloFaxVisor
     	}
     }
 
-    function obtener_faxes($company_name, $company_fax, $fecha_fax, $offset, $cantidad, $type)
+    function obtener_faxes($idOrg, $company_name, $company_fax, $fecha_fax, $offset, $cantidad, $type)
     {
+		$listaWhere = "";
+		$paramSQL = array();
+
+		if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
+			$this->errMsg = _tr("Organization ID is not valid");
+			return false;
+		}
+
         if (empty($company_name)) $company_name = NULL;
         if (empty($company_fax)) $company_fax = NULL;
         if (empty($fecha_fax)) $fecha_fax = NULL;
@@ -82,31 +90,30 @@ class paloFaxVisor
         }
         
         $sPeticionSQL = 
-            'SELECT r.id, r.pdf_file, r.modemdev, r.commID, r.errormsg, '.
-                'r.company_name, r.company_fax, r.fax_destiny_id, r.date, '.
-                'r.type, r.faxpath, f.name destiny_name, f.extension destiny_fax '.
-            'FROM info_fax_recvq r, fax f '.
-            'WHERE ';
-        $listaWhere = array('f.id = r.fax_destiny_id');
-        $paramSQL = array();
+            'SELECT f.id, f.pdf_file, f.modemdev, f.commID, f.errormsg, '.
+                'f.company_name, f.company_fax, f.date, '.
+                'f.type, f.faxpath, u.name destiny_name, u.fax_extension destiny_fax '.
+            'FROM fax_docs f join acl_user u on f.id_user = u.id WHERE u.id_group in (SELECT id from acl_group where id_organization=?)';
+
+		$paramSQL[]=$idOrg;
         if (!is_null($company_name)) {
-        	$listaWhere[] = 'company_name LIKE ?';
+        	$listaWhere .= ' and f.company_name LIKE ?';
             $paramSQL[] = "%$company_name%";
         }
         if (!is_null($company_fax)) {
-            $listaWhere[] = 'company_fax LIKE ?';
+            $listaWhere .= ' and f.company_fax LIKE ?';
             $paramSQL[] = "%$company_fax%";
         }
         if (!is_null($fecha_fax)) {
-            $listaWhere[] = 'date BETWEEN ? AND ?';
+            $listaWhere .= ' and f.date BETWEEN ? AND ?';
             $paramSQL[] = "$fecha_fax 00:00:00";
             $paramSQL[] = "$fecha_fax 23:59:59";
         }
         if (!is_null($type)) {
-        	$listaWhere[] = 'type = ?';
+        	$listaWhere .= ' and f.type = ?';
             $paramSQL[] = $type;
         }
-        $sPeticionSQL .= implode(' AND ', $listaWhere).' ORDER BY r.id desc LIMIT ? OFFSET ?';
+        $sPeticionSQL .= $listaWhere.' ORDER BY f.id desc LIMIT ? OFFSET ?';
         $paramSQL[] = $cantidad; $paramSQL[] = $offset;
         
         $arrReturn = $this->_db->fetchTable($sPeticionSQL, TRUE, $paramSQL);
@@ -117,20 +124,16 @@ class paloFaxVisor
         return $arrReturn;
     }
 
-    function obtener_fax($idFax)
+    function obtener_cantidad_faxes($idOrg, $company_name, $company_fax, $fecha_fax, $type)
     {
-        $arrReturn = $this->_db->getFirstRowQuery(
-            'SELECT * FROM info_fax_recvq WHERE id = ?', 
-            TRUE, array($idFax));
-        if ($arrReturn == FALSE){
-            $this->errMsg = $this->_db->errMsg;
-            return array();
-        }
-        return $arrReturn;
-    }
+		$listaWhere = "";
+		$paramSQL = array();
 
-    function obtener_cantidad_faxes($company_name, $company_fax, $fecha_fax, $type)
-    {
+		if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
+			$this->errMsg = _tr("Organization ID is not valid");
+			return false;
+		}
+
         if (empty($company_name)) $company_name = NULL;
         if (empty($company_fax)) $company_fax = NULL;
         if (empty($fecha_fax)) $fecha_fax = NULL;
@@ -144,27 +147,28 @@ class paloFaxVisor
             if (!in_array($type, array('in', 'out'))) $type = NULL;
         }
 
-        $sPeticionSQL = 'SELECT COUNT(*) cantidad FROM info_fax_recvq';
-        $listaWhere = array();
-        $paramSQL = array();
+        $sPeticionSQL = 'SELECT COUNT(*) cantidad FROM fax_docs f join acl_user u on f.id_user = u.id WHERE u.id_group in (SELECT id from acl_group where id_organization=?)';
+       
+        $paramSQL[] = $idOrg;
         if (!is_null($company_name)) {
-            $listaWhere[] = 'company_name LIKE ?';
+            $listaWhere .= ' and company_name LIKE ?';
             $paramSQL[] = "%$company_name%";
         }
         if (!is_null($company_fax)) {
-            $listaWhere[] = 'company_fax LIKE ?';
+            $listaWhere .= ' and company_fax LIKE ?';
             $paramSQL[] = "%$company_fax%";
         }
         if (!is_null($fecha_fax)) {
-            $listaWhere[] = 'date BETWEEN ? AND ?';
+            $listaWhere .= ' and date BETWEEN ? AND ?';
             $paramSQL[] = "$fecha_fax 00:00:00";
             $paramSQL[] = "$fecha_fax 23:59:59";
         }
         if (!is_null($type)) {
-            $listaWhere[] = 'type = ?';
+            $listaWhere .= ' and type = ?';
             $paramSQL[] = $type;
         }
-        if (count($listaWhere) > 0) $sPeticionSQL .= ' WHERE '.implode(' AND ', $listaWhere);
+
+		$sPeticionSQL .= $listaWhere;
         
         $arrReturn = $this->_db->getFirstRowQuery($sPeticionSQL, TRUE, $paramSQL);
 
@@ -178,7 +182,7 @@ class paloFaxVisor
     function updateInfoFaxFromDB($idFax, $company_name, $company_fax)
     {
         if (!$this->_db->genQuery(
-            'UPDATE info_fax_recvq SET company_name = ?, company_fax = ? WHERE id = ?', 
+            'UPDATE fax_docs SET company_name = ?, company_fax = ? WHERE id = ?',
             array($company_name, $company_fax, $idFax))) {
             $this->errMsg = $this->_db->errMsg;
             return false;
@@ -186,20 +190,38 @@ class paloFaxVisor
         return true;
     }
 
-    function deleteInfoFax($idFax)
+    function obtener_fax($idFax){
+        $arrReturn = $this->_db->getFirstRowQuery(
+            'SELECT * FROM fax_docs WHERE id = ?',
+            TRUE, array($idFax));
+        if ($arrReturn == FALSE){
+            $this->errMsg = $this->_db->errMsg;
+            return array();
+        }
+        return $arrReturn;
+	}
+
+    function deleteInfoFax($idFax,$idOrg)
     {
         $this->errMsg = '';
         $bExito = TRUE;
-        
+
+		if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
+			$this->errMsg = _tr("Organization ID is not valid");
+			return false;
+		}
+
         // Leer la información del fax
         $infoFax = $this->obtener_fax($idFax);
         if (count($infoFax) == 0) return ($this->errMsg == '');
 
+		//comprobamos que el fax le pertenezca a la misma organizacion que el usuario
+
         // Borrar la información y el documento asociado
         $this->_db->conn->beginTransaction();
         $bExito = $this->_db->genQuery(
-            'DELETE FROM info_fax_recvq WHERE id = ?',
-            array($infoFax['id']));
+            'DELETE from fax_docs WHERE id=? and id_user in (SELECT u.id from acl_group g join acl_user u on u.id_group=g.id where id_organization=?)',
+            array($infoFax['id'],$idOrg));
         if (!$bExito) $this->errMsg = $this->_db->errMsg;
         if ($bExito) {
             $file = "/var/www/faxes/{$infoFax['faxpath']}/fax.pdf";
@@ -210,5 +232,18 @@ class paloFaxVisor
         else $this->_db->conn->rollback();
         return $bExito;
     }
+
+	function fax_bellowOrganization($idFax,$idOrg){
+		$query='SELECT 1 from fax_docs WHERE id=? and id_user in (SELECT u.id from acl_group g join acl_user u on u.id_group=g.id where id_organization=?)';
+		$result = $this->_db->genQuery($query,array($idFax,$idOrg));
+		if($result===false){
+			$this->errMsg = $this->_db->errMsg;
+		}elseif(count($result)==0){
+			$this->errMsg = _tr("Fax doesn't exist");
+		}else{
+			return true;
+		}
+		return false;
+	}
 }
 ?>

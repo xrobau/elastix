@@ -1,5 +1,5 @@
 <?php	
-$dsn = "sqlite:////var/www/db/fax.db";
+$dsn = "sqlite:////var/www/db/elastix.db";
 
 try{
     $db_object = new PDO($dsn);

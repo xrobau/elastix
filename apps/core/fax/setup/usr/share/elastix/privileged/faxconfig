@@ -76,11 +76,19 @@ switch($argv[1]){
 		break;
 	case 'faxmaster':
 		break;
+	case 'createDirFax':
+		if(isset($argv[2])){
+			createDirFax($argv[2]);
+		}else
+			error_exit("Missing arguments",1);
+		break;
+	case 'restartService':
+		restartService();
+		break;
 	default:
 		error_exit("No action specified \n");
 		break;
 }
-
 
 function error_exit($sMsg, $errorcode = 1)
 {
@@ -143,13 +151,14 @@ function newFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,$
 	writeIaxmodemConfig($faxData);
 	writeHylafaxConfig($faxData);
 
+    return $bExito;
+}
 
-    // Restart all relevant services
+function restartService(){
+	// Restart all relevant services
     exec('/sbin/init q');
     exec('/sbin/service iaxmodem restart > /dev/null 2>&1');
     exec('/sbin/service hylafax restart > /dev/null 2>&1');
-
-    return $bExito;
 }
 
 function deleteFax($dev_id){
@@ -170,11 +179,6 @@ function deleteFax($dev_id){
 
 	 // Update /var/spool/hylafax/etc/FaxDispatch
     deleteFaxDispatch($dev_id);
-
-	// Restart all relevant services
-    exec('/sbin/init q');
-    exec('/sbin/service iaxmodem restart > /dev/null 2>&1');
-    exec('/sbin/service hylafax restart > /dev/null 2>&1');
 
     return $bExito;
 }
@@ -210,12 +214,6 @@ function editFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,
   // Write file configuration for new fax
 	writeIaxmodemConfig($faxData);
 	writeHylafaxConfig($faxData);
-
-
-	// Restart all relevant services
-    exec('/sbin/init q');
-    exec('/sbin/service iaxmodem restart > /dev/null 2>&1');
-    exec('/sbin/service hylafax restart > /dev/null 2>&1');
 
     return $bExito;
 }
@@ -442,6 +440,50 @@ function action_refreshFaxMaster($opt)
     $retval = NULL;
     system('/usr/sbin/postmap /etc/postfix/virtual', $retval);
     return ($retval == 0);
+}
+
+function createDirFax($domain){
+	$path="/var/www/faxes";
+	$exito=true;
+	$arrDir=array("$path/$domain","$path/$domain/sent","$path/$domain/recvd");
+
+	if(!is_dir($path)){
+		if(mkdir($path)){
+			exec("chown asterisk.asterisk $path",$output,$retval);
+			exec("chmod 755 $path",$output,$retval);
+		}else{
+			fprintf(STDERR, "ERR: failed to create fax directory");
+			return false;
+		}
+	}
+
+	if(is_dir("$path/$domain")){
+		$date=date("YMd_His");
+		rename("$path/$domain","$path/$domain"."_".$date);
+	}
+
+	foreach($arrDir as $dir){
+		if(mkdir($dir)){
+			exec("chown asterisk.uucp $dir ",$output,$retval);
+			exec("chmod 775 $dir",$output,$retval);
+		}else{
+			fprintf(STDERR, "ERR: failed to create fax directory - %s\n", $output[0]);
+			$exito=false;
+			break;
+		}
+	}
+
+	if(!$exito){
+		if(is_dir("$path/$domain"))
+			rmdir("$path/$domain");
+		if(is_dir("$path/$domain/sent"))
+			rmdir("$path/$domain/sent");
+		if(is_dir("$path/$domain/recvd"))
+			rmdir("$path/$domain/recvd");
+		return false;
+	}else{
+		return true;
+	}
 }
 
 ?>

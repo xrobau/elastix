@@ -20,11 +20,12 @@
 	     $commID = getCommID($arrReg[1]);
 	     $company_name = getNameCompany($arrReg[1]);
 	     $number = getNumberCompany($arrReg[1]);
-	     $modemdev = obtener_modem_destiny($number);
-	     faxes_log("Informacion > Obteniendo datos commID:$commID, company_name:$company_name, number:$number, modemdev:$modemdev");
-             $pathDB = createFolder($number, $commID, 'out');
+	     $modemdev = getModemCompany($arrReg[1]);
+	     $domain = obtenerDomain($modemdev);
+	     faxes_log("Informacion > Obteniendo datos commID:$commID, company_name:$company_name, number:$number, modemdev:$modemdev, domain: $domain");
+             $pathDB = createFolder($number, $commID, 'out', $domain);
              faxes_log("createFolder > Creando carpetas para alojar el archivo fax.pdf: $pathDB");
-             $file = getTotalFiles($arrReg[1], $pathDB); // retorna el nombre de un unico archivo asi se 1 o mas adjuntados   
+             $file = getTotalFiles($arrReg[1], $pathDB, $domain); // retorna el nombre de un unico archivo asi se 1 o mas adjuntados
              faxes_log("getTotalFiles > Obtiene el nombre del archivo, ya sea .ps .tif o .pdf el cual se va a mostrar en el modulo y adjuntado en el mail: $file");
              //Esto es en el caso de que solo se adjunta un docxx.tif entonces la validacion del
              //str_replace no funciona ya que al no poder reemplazar ps x pdf devuelve
@@ -37,8 +38,8 @@
                 $tmp_file = str_replace("ps","pdf",$file);
 
              if(!existeFile($arrReg[1])){
-		  fax_info_insert ($tmp_file,$modemdev,$commID,"",$company_name,$number,'out',"sent/$pathDB");	
-                  faxes_log ("notify  > fax .pdf  en la ruta $faxes_path/sent/$pathDB y se grabo en la BD.");                  
+				fax_info_insert($tmp_file,$modemdev,$commID,"",$company_name,$number,'out',"$domain/sent/$pathDB");
+                  faxes_log ("notify  > fax .pdf  en la ruta $faxes_path/$domain/sent/$pathDB y se grabo en la BD.");                  
              }
 
 	     /**********************************************
@@ -51,7 +52,7 @@
             $contenido    = $arrConfig['content'];
             $remite       = $arrConfig['remite'];
             $remitente    = $arrConfig['remitente'];
-            $archivo      = "$faxes_path/sent/$pathDB/fax.pdf";
+            $archivo      = "$faxes_path/$domain/sent/$pathDB/fax.pdf";
             $archivo_name = $tmp_file;
 
             print_r($arrConfig);
@@ -67,14 +68,19 @@ function getCommID($file)
 {
 	return trim(`grep '^commid' /var/spool/hylafax/doneq/$file | cut -b 8-100`);
 }
-
 function getNumberCompany($file)
 {
         return trim(`grep '^number' /var/spool/hylafax/doneq/$file | cut -b 8-100`);
 }
-
-
-function getTotalFiles($file, $path)
+function getModemCompany($file)
+{
+        return trim(`grep '^modem' /var/spool/hylafax/doneq/$file | cut -b 7-100`);
+}
+function getNameCompany($file)
+{
+        return trim(`grep '^sender' /var/spool/hylafax/doneq/$file | cut -b 8-100`);
+}
+function getTotalFiles($file, $path, $domain)
 {
     $list_final = "";    
     $line = `grep '^!' /var/spool/hylafax/doneq/$file`;
@@ -91,17 +97,17 @@ function getTotalFiles($file, $path)
     faxes_log("ps2pdf - tiff2pdf - pdf2pdf function > Procesamiento de  cada tipo de archivo encontrado");
     for ($i = 0 ; $i < count($arrFiles2Convert); $i++){        
         if(eregi("(doc[[:digit:]]+.ps)",$arrFiles2Convert[$i], $arrReg)){
-            $list_final .= ps2pdf($arrReg[1], $path,$i) ;
+            $list_final .= ps2pdf($arrReg[1], $path,$i, $domain) ;
         }else if(eregi("(doc[[:digit:]]+.tif)",$arrFiles2Convert[$i], $arrReg)){
-            $list_final .= tiff2pdf($arrReg[1], $path, $i);
+            $list_final .= tiff2pdf($arrReg[1], $path, $i, $domain);
         }else if(eregi("(doc[[:digit:]]+.pdf)",$arrFiles2Convert[$i], $arrReg)){
-            $list_final .= pdf2pdf($arrReg[1], $path, $i);
+            $list_final .= pdf2pdf($arrReg[1], $path, $i, $domain);
         }
     }
 
     //Una vez transformado los archivos a sus respectivos formato .pdf, procedemos a unificarlos en uno solo llamado fax.pdf
     //list_pdf contiene /ruta/file0.pdf /ruta/file1.pdf ....  separados por un espacio en blanco    
-    finalPdf($list_final, $path);
+    finalPdf($list_final, $path, $domain);
     faxes_log("finalPdf > Lista Final de archivos a convertir : $list_final");
     //siempre el elemento 0 va a estar ocupado,es decir en el caso de que sea un unico 
     //archivo entonces este 'nombre' estara en la posicion 0, en el caso
@@ -110,29 +116,9 @@ function getTotalFiles($file, $path)
     //referencia a los 3 -->> doc20.pdf por ende este estara en la posicion 0 tambien
     return isset($arrFiles2Convert[0])?$arrFiles2Convert[0]:"";
 }
-/*
-function getPdfDocument($file)
-{
-        $line = `grep '^!pdf' /var/spool/hylafax/doneq/$file`;
-        if(eregi("docq/(doc[[:digit:]]+.pdf)",$line,$arrReg))
-                return trim($arrReg[1]);
-        else return "";
-}
-
-function getTiffDocument($file)
-{
-	$line = `grep '^!tiff' /var/spool/hylafax/doneq/$file`;
-        if(eregi("docq/(doc[[:digit:]]+.tif)",$line,$arrReg))
-                return trim($arrReg[1]);
-        else return "";
-}*/
-function getNameCompany($file)
-{
-        return trim(`grep '^sender' /var/spool/hylafax/doneq/$file | cut -b 8-100`);
-}
 function existeFile($file)
 {
-	$existe = `sqlite3 /var/www/db/fax.db "select count(*) existe from info_fax_recvq where pdf_file='$file'"`;
+	$existe = `sqlite3 /var/www/db/elastix.db "select count(*) existe from fax_docs where pdf_file='$file'"`;
 	if($existe > 0) return true;
 	else return false;
 }

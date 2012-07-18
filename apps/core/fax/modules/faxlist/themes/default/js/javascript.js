@@ -12,7 +12,6 @@ function checkFaxStatus()
     arrAction["action"]  = "checkFaxStatus";
     arrAction["menu"]    = "faxlist";
     arrAction["rawmode"] = "yes";
-
     request("index.php",arrAction,true,
             function(arrData,statusResponse,error)
             {
@@ -21,8 +20,9 @@ function checkFaxStatus()
                     for(key in arrData["faxes"]){
                         $('td[class*=table_data]').each(function(){
                             var field = $(this).text();
-                            if(field==key)
-                                $(this).parent().children(':nth-child(7)').text(arrData["faxes"][key]);
+                            if(field==key){
+                                $(this).parent().children(':nth-child(5)').text(arrData["faxes"][key]);
+							}
                         });
                     }
                 }

@@ -63,12 +63,13 @@ class paloFax {
         }
     }
 
-    function createFax($idUser,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email)
+    function createFax($idUser,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email, $nextPort, $devId=null)
     {
 		$pACL=new paloACL($this->_DB);
-        // 1) Averiguar el numero de dispositivo que se puede usar y el numero de puerto
-        $devId = $this->getNewDevID();
-        $nextPort=$this->_getNextAvailablePort(); 
+        // 1) Averiguar el numero de dispositivo que se puede usar
+		if(is_null($devId))
+			$devId = $this->getNewDevID();
+
 		// 2) seteo la propiedades de fax que corresponde a port y dev_id. Esatas propiedades de setean en
 		//user_properties
 		$arrayProp = array("port"=>$nextPort,"dev_id"=>$devId);
@@ -95,25 +96,36 @@ class paloFax {
     }
 
 	//esta funcion se utiliza para obetener todos los faxes configurados en el sistema
-    function getFaxList($idOrganization=null, $offset=null, $limit=null)
+    function getFaxList($idOrganization=null,$idUser=null, $offset=null, $limit=null)
     {
         $OFFSET = $LIMIT = "";
         if($offset!=null) $OFFSET = "OFFSET $offset";
         if($limit!=null) $LIMIT = "LIMIT $limit";
 		$param=array();
 		$where="";
+		$whereU="";
+
+		if(isset($idUser)){
+			if(preg_match("/^[[:digit:]]+$/","$idUser")){
+				$whereU=" and id=?";
+				$param[]=$idUser;
+			}else{
+				$this->errMsg = _tr("User ID is not valid");
+				return false;
+			}
+		}
 
 		if(isset($idOrganization)){
 			if(preg_match("/^[[:digit:]]+$/","$idOrganization")){
 				$where="where ag.id_organization=?";
-				$param[0]=$idOrganization;
+				$param[]=$idOrganization;
 			}else{
 				$this->errMsg = _tr("Organization ID is not valid");
 				return false;
 			}
 		}
 
-		$query = "SELECT id, fax_extension as extension, username as email from acl_user JOIN user_properties on id=id_user where property='dev_id' INTERSECT select au.id, au.fax_extension as extension, au.username as email from acl_user as au JOIN acl_group ag on ag.id=au.id_group $where $LIMIT $OFFSET";
+		$query = "SELECT id, fax_extension as extension, username as email from acl_user JOIN user_properties on id=id_user where property='dev_id' $whereU INTERSECT select au.id, au.fax_extension as extension, au.username as email from acl_user as au JOIN acl_group ag on ag.id=au.id_group $where $LIMIT $OFFSET";
 
 		$arrReturn = $this->_DB->fetchTable($query, true, $param);
 		$arrtmp=$arrReturn;
@@ -237,34 +249,6 @@ class paloFax {
 		}
 		return false;
 	}
-    // Esta funcion compara los archivos de configuracion de iaxmodem y hylafax
-    // y sugiere un ID entero que puede usarse.
-    // TODO: Debo hacer mejor manejo de errores
-    private function _getNextAvailableDevId()
-    {
-        $arrConfIaxmodem = $this->_getConfigFiles($this->dirIaxmodemConf, "iaxmodem-cfg.ttyIAX");
-        $arrConfHylafax  = $this->_getConfigFiles($this->dirHylafaxConf, "config.ttyIAX");
-
-        if(is_array($arrConfIaxmodem) and is_array($arrConfHylafax)) {
-            $arrIds = array_merge($arrConfIaxmodem, $arrConfHylafax);
-            sort($arrIds);
-
-            $lastId = 0;
-            $id = 0;
-            foreach($arrIds as $id) {
-                $incremento = $id - $lastId;
-                //Si hubo salto >1 significa q hay al menos un eliminado => retornar ese hueco
-                if($incremento>1)
-                    return $lastId+1;
-
-                $lastId = $id;
-            }
-            //Si no hubo hueco retorna el ultimo +1
-            return $id+1;
-        } else {
-            return 0;
-        }
-    }
    
 
     private function _getConfigFiles($folder, $filePrefix)
@@ -289,7 +273,7 @@ class paloFax {
 
     // TODO: Por ahora busco siempre el puerto mayor pero tambien tengo que
     //       buscar si existen huecos.
-    private function _getNextAvailablePort()
+    function getNextAvailablePort()
     {
         $arrPorts=array();
 
@@ -329,6 +313,7 @@ class paloFax {
 
             return $puertoDisponible;
         } else {
+			$this->errMsg = _tr("Don't exist directory iaxmodem");
             return false;
         }
     }
@@ -353,7 +338,7 @@ class paloFax {
     {
 		$arrayProp = array("fax_subject","fax_content");
 		$pACL = new paloACL($this->_DB);
-		$query="select name, username from acl_user where id=?";
+		$query="select name as remitente, username as remite from acl_user where id=?";
         $arrReturn = $this->_DB->getFirstRowQuery($query,true,array($id_user));
         if($arrReturn === FALSE) {
             $this->errMsg = $this->_DB->errMsg;
@@ -373,7 +358,7 @@ class paloFax {
 
 	//se actualiza los campos en user_properties con key fax_subject y fax_content pertenecientes
 	//a la categoria fax_content
-	//los campos amterioeres llamados remite y remitente se obtienen de los campos name y username de
+	//los campos anterioeres llamados remite y remitente se obtienen de los campos name y username de
 	//la tabla acl_usr
     function setConfigurationSendingFaxMail($id_user, $subject, $content)
     {
@@ -446,5 +431,16 @@ class paloFax {
         }
         return TRUE;
     }
+
+	function restartService(){
+		$sComando ='/usr/bin/elastix-helper faxconfig restartService  2>&1';
+		$output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = implode('', $output);
+            return FALSE;
+        }
+        return TRUE;
+	}
 }
 ?>

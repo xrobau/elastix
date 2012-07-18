@@ -46,18 +46,24 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
+	//conexion resource
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+
+	//obtenemos las credenciales del usuario
+	$arrCredentials=getUserCredentials();
+
     switch (getAction()) {
     case 'edit':
-        return actualizarFax($smarty, $module_name, $local_templates_dir);
+        return actualizarFax($smarty, $module_name, $local_templates_dir,$arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
     case 'download_faxFile':
-        return download_faxFile();
+        return download_faxFile($arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
     case 'report':
     default:
-        return listarFaxes($smarty, $module_name, $local_templates_dir);
+        return listarFaxes($smarty, $module_name, $local_templates_dir,$arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
     }
 }
 
-function listarFaxes(&$smarty, $module_name, $local_templates_dir)
+function listarFaxes(&$smarty, $module_name, $local_templates_dir,$userLevel,$userAccount,$id_organization)
 {
     $smarty->assign(array(
         'SEARCH'    =>  _tr('Search'),
@@ -110,7 +116,7 @@ function listarFaxes(&$smarty, $module_name, $local_templates_dir)
         is_array($_POST['faxes']) && count($_POST['faxes']) > 0) {
         $msgError = NULL;
         foreach ($_POST['faxes'] as $idFax) {
-            if (!$oFax->deleteInfoFax($idFax)) {
+            if (!$oFax->deleteInfoFax($idFax,$id_organization)) {
             	if ($oFax->errMsg = '')
                     $msgError = _tr('Unable to eliminate pdf file from the path.');
                 else $msgError = _tr('Unable to eliminate pdf file from the database.').' - '.$oFax->errMsg;
@@ -131,7 +137,7 @@ function listarFaxes(&$smarty, $module_name, $local_templates_dir)
     $oGrid->setURL($url);
 	
     $arrData = NULL;
-    $total = $oFax->obtener_cantidad_faxes($paramFiltro['name_company'],
+    $total = $oFax->obtener_cantidad_faxes($id_organization,$paramFiltro['name_company'],
         $paramFiltro['fax_company'], $paramFiltro['date_fax'],
         $paramFiltro['filter']);
     $limit = 20;
@@ -139,7 +145,7 @@ function listarFaxes(&$smarty, $module_name, $local_templates_dir)
     $oGrid->setTotal($total);
 
     $offset = $oGrid->calculateOffset();
-    $arrResult = $oFax->obtener_faxes($paramFiltro['name_company'],
+    $arrResult = $oFax->obtener_faxes($id_organization,$paramFiltro['name_company'],
         $paramFiltro['fax_company'], $paramFiltro['date_fax'], $offset, $limit,
         $paramFiltro['filter']);
 
@@ -184,7 +190,7 @@ function listarFaxes(&$smarty, $module_name, $local_templates_dir)
     return $oGrid->fetchGrid();
 }
 
-function actualizarFax($smarty, $module_name, $local_templates_dir)
+function actualizarFax($smarty, $module_name, $local_templates_dir,$userLevel,$userAccount,$id_organization)
 {
     $smarty->assign(array(
         'CANCEL'            =>  _tr('Cancel'),
@@ -196,20 +202,29 @@ function actualizarFax($smarty, $module_name, $local_templates_dir)
         header("Location: ?menu=$module_name");
     	return;
     }
+
+	$oFax = new paloFaxVisor();
     $smarty->assign("id_fax", $idFax);
 
-    $oFax = new paloFaxVisor();
     if (isset($_POST['save'])) {
         if(empty($_POST['name_company']) || empty($_POST['fax_company'])) {
-            $smarty->assign("mb_title", _tr('ERROR').":");
+            $smarty->assign("mb_title", _tr('ERROR'));
             $smarty->assign("mb_message", _tr('ERROR'));
-        } elseif (!$oFax->updateInfoFaxFromDB($idFax, $_POST['name_company'], $_POST['fax_company'])) {
-            $smarty->assign("mb_title", _tr('ERROR').":");
-            $smarty->assign("mb_message", _tr('ERROR'));
-        } else {
-            header("Location: ?menu=$module_name");
-        	return;
-        }
+        }else{
+			if($oFax->fax_bellowOrganization($idFax,$id_organization)){
+				if (!$oFax->updateInfoFaxFromDB($idFax, $_POST['name_company'], $_POST['fax_company'])) {
+					$smarty->assign("mb_title", _tr('ERROR'));
+					$smarty->assign("mb_message", _tr($oFax->errMsg));
+				}else{
+					$smarty->assign("mb_title", _tr('MESSAGE'));
+					$smarty->assign("mb_message", _tr("Changes were applied successfully"));
+					return listarFaxes($smarty, $module_name, $local_templates_dir,$userLevel,$userAccount,$id_organization);
+				}
+			}else{
+				$smarty->assign("mb_title", _tr('ERROR').":");
+				$smarty->assign("mb_message", _tr($oFax->errMsg));
+			}
+        } 
     }    
 
     $arrDataFax = $oFax->obtener_fax($idFax);
@@ -256,14 +271,22 @@ function getFormElements()
     );
 }
 
-function download_faxFile()
+function download_faxFile($userLevel,$userAccount,$id_organization)
 {
+	global $arrConf;
+	$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+	$pACL = new paloACL($pDB);
     $oFax       = new paloFaxVisor(); 
     $idFax      = getParameter("id");
     $arrFax     = $oFax->obtener_fax($idFax);
-    $dir_backup = "/var/www/faxes";
+	$dir_backup = "/var/www/faxes";
     $file_path  = $arrFax['faxpath']."/fax.pdf";
     $file_name  = $arrFax['pdf_file'];
+
+	if(!$pACL->userBellowOrganization($arrFax["id_user"],$id_organization)){
+		header('HTTP/1.1 404 Not Found');
+        return "File $file_path not found!";
+	}
     
     if (!file_exists("$dir_backup/$file_path")) {
     	header('HTTP/1.1 404 Not Found');

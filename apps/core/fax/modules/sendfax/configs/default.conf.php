@@ -31,6 +31,6 @@
 
     $arrConfModule['module_name']       = 'sendfax';
     $arrConfModule['templates_dir']     = 'themes';
-    $arrConfModule['dsn_conn_database'] = "sqlite3:///$arrConf[elastix_dbdir]/fax.db";
+    $arrConfModule['dsn_conn_database'] = "sqlite3:///$arrConf[elastix_dbdir]/elastix.db";
     //ex2: $arrConfModule['dsn_conn_database'] = "mysql://user:password@ip_host_sever_mysql/base_name";
 ?>

@@ -5,20 +5,29 @@
             return basename($ruta);
     }	
 
+	//pendiente - En que archivo se va a almacenar aahora los logs???
 	function faxes_log ($text, $echo = false) {
-        global $db_object;
-		$db_object->query ("INSERT INTO SysLog (logtext,logdate) VALUES ('$text',datetime('now','localtime'))");
+		$date=date("YMd_His");
+		exec("echo '$date - $text' >> /var/spool/hylafax/hylafax_log");
 		if ($echo) echo "$text\n";
 	}
 
     function fax_info_insert ($tiff_file,$modemdev,$commID,$errormsg,$company_name,$company_number,$tipo,$faxpath) {
         global $db_object;
-             
-        $id_destiny=obtener_id_destiny($modemdev);
-        if($id_destiny != -1)
-        {
-            $db_object->query("INSERT INTO info_fax_recvq (pdf_file,modemdev,commID,errormsg,company_name,company_fax,fax_destiny_id,date,type,faxpath) ". 
-                              "VALUES ('$tiff_file','$modemdev','$commID','$errormsg','$company_name','$company_number',$id_destiny,datetime('now','localtime'),'$tipo','$faxpath')");
+        $id_user=obtener_id_destiny($modemdev);
+        if($id_user != -1){
+			$query="INSERT INTO fax_docs (pdf_file,modemdev,commID,company_name,company_fax,id_user,date,type,faxpath) VALUES ('$tiff_file','$modemdev','$commID','$company_name','$company_number',$id_user,datetime('now','localtime'),'$tipo','$faxpath')";
+			try{
+				$result=$db_object->query("INSERT INTO fax_docs (pdf_file,modemdev,commID,errormsg,company_name,company_fax,id_user,date,type,faxpath) VALUES  ('$tiff_file','$modemdev','$commID','$errormsg','$company_name','$company_number',$id_user,datetime('now','localtime'),'$tipo','$faxpath')");
+				if(!$result){
+					faxes_log("Error query");
+					faxes_log(print_r($db_object->errorInfo(),1));
+				}
+				faxes_log($query);
+			}catch(PDOException $e){
+				faxes_log("PROBLEMA DE CONEXION");
+				faxes_log($e->getMessage());
+			}
         }
         else{
             faxes_log("Error al Obtener id de destino");
@@ -28,73 +37,88 @@
 	function obtener_id_destiny($modemdev)
 	{
 		global $db_object;
-                $id = 1;
-                $dev_id = str_replace("ttyIAX","",$modemdev);
-		$sql= "select id from fax where dev_id=$dev_id";
+                $id = 0;
+        $dev_id = str_replace("ttyIAX","",$modemdev);
+		$sql= "select id_user from user_properties where property='dev_id' and value='$dev_id'";
 		$recordset =& $db_object->query($sql);
-        	while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){ 
-			$id = $tupla->id;
+		while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){ 
+			$id = $tupla->id_user;
 		}
 		return $id;
 	}
 
+	/*//revisar se necesita id de la organizacion a la que pertenece el usuario
 	function obtener_modem_destiny($extension)
-        {
-                global $db_object;
-                $dev_id = 1;
-                /*$sql= "select dev_id from fax where extension='$extension'";
-                $recordset =& $db_object->query($sql);
-        	while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){
-                        $dev_id = $tupla->dev_id;
-                }*/
-		$sql="select dev_id from fax where id=1";
-                $recordset =& $db_object->query($sql);
-                while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){
-                        $dev_id = $tupla->dev_id;
-                }
+	{
+			global $db_object;
+			$dev_id = 1;
+	$sql="select up.value from user_properties up join acl_user au on up.id_user=au.id where up.property='dev_id' and au.fax_extension=$extension";
+			$recordset =& $db_object->query($sql);
+			while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){
+					$dev_id = $tupla->value;
+			}
+			return "ttyIAX$dev_id";
+	}*/
 
-                return "ttyIAX$dev_id";
-        }
+	function obtenerDomain($modemdev){
+		global $db_object;
+			   $domain = "";
+		$dev_id = str_replace("ttyIAX","",$modemdev);
+		$sql="select o.domain from organization o join acl_group g on o.id=g.id_organization where g.id=(SELECT au.id_group from acl_user au join user_properties up on up.id_user=au.id where up.property='dev_id' and up.value='$dev_id')";
+		$recordset =& $db_object->query($sql);
+		while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){
+			$domain = $tupla->domain;
+		}
+		return $domain;
+	}
 
     
     function obtener_mail_destiny($modemdev)
 	{
 		global $db_object;
-                $id = "";
+                $username = "";
                 $dev_id = str_replace("ttyIAX","",$modemdev);
-		$sql= "select email from fax where dev_id=$dev_id";
+		$sql= "select au.username from acl_user au join user_properties up on au.id=up.id_user where up.property='dev_id' and up.value='$dev_id'";
 		$recordset = $db_object->query($sql);
         while($tupla = $recordset->fetch(PDO::FETCH_OBJ))
-        		$id = $tupla->email;
-		return $id;
+        		$username = $tupla->username;
+		return $username;
 	}
 
-    function getConfigurationSendingFaxMail($namePDF,$companyNameFrom,$companyNumberFrom)
+    function getConfigurationSendingFaxMail($modemdev,$namePDF,$companyNameFrom,$companyNumberFrom)
 	{
 		global $db_object;
+		$idUser=obtener_id_destiny($modemdev);
         $arrData['remite']="elastix@example.com";
         $arrData['remitente']="Fax Elastix";
         $arrData['subject']="Fax $namePDF";
         $arrData['content']="Fax $namePDF of $companyNameFrom - $companyNumberFrom";
         $id_pdf = explode(".",$namePDF);
-        $sql  = "SELECT remite,remitente,subject,content ".
-                "FROM configuration_fax_mail ".
-                "WHERE id=1";
-        $recordset = $db_object->query($sql);
-        while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){
-            $arrData['remite']    = utf8_decode($tupla->remite);
-            $arrData['remitente'] = utf8_decode($tupla->remitente);
+		if($idUser!=0 && $idUser!=-1){
+			//obtenemos el subject y el content del Faxmail
+			foreach(array("fax_subject","fax_content") as $property){
+				$sql  = "SELECT value from user_properties where property=$property and id_user=$idUser";
+				$recordset = $db_object->query($sql);
+				while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){
+					$arrData['subject'] = $tupla->subject;
+					$arrData['subject'] = str_replace("{NAME_PDF}",$id_pdf[0],$arrData['subject']);
+					$arrData['subject'] = str_replace("{COMPANY_NAME_FROM}",$companyNameFrom,$arrData['subject']);
+					$arrData['subject'] = utf8_decode(str_replace("{COMPANY_NUMBER_FROM}",$companyNumberFrom,$arrData['subject']));
 
-            $arrData['subject'] = $tupla->subject;
-            $arrData['subject'] = str_replace("{NAME_PDF}",$id_pdf[0],$arrData['subject']);
-            $arrData['subject'] = str_replace("{COMPANY_NAME_FROM}",$companyNameFrom,$arrData['subject']);
-            $arrData['subject'] = utf8_decode(str_replace("{COMPANY_NUMBER_FROM}",$companyNumberFrom,$arrData['subject']));
-
-            $arrData['content'] = $tupla->content;
-            $arrData['content'] = str_replace("{NAME_PDF}",$id_pdf[0],$arrData['content']);
-            $arrData['content'] = str_replace("{COMPANY_NAME_FROM}",$companyNameFrom,$arrData['content']);
-            $arrData['content'] = utf8_decode(str_replace("{COMPANY_NUMBER_FROM}",$companyNumberFrom,$arrData['content']));
-        }
+					$arrData['content'] = $tupla->content;
+					$arrData['content'] = str_replace("{NAME_PDF}",$id_pdf[0],$arrData['content']);
+					$arrData['content'] = str_replace("{COMPANY_NAME_FROM}",$companyNameFrom,$arrData['content']);
+					$arrData['content'] = utf8_decode(str_replace("{COMPANY_NUMBER_FROM}",$companyNumberFrom,$arrData['content']));
+				}
+			}
+			//obtenemos el remite y el remitente
+			$sql  = "SELECT name,username FROM acl_user WHERE id=$idUser";
+			$recordset = $db_object->query($sql);
+			while($tupla = $recordset->fetch(PDO::FETCH_OBJ)){
+				$arrData['remite']    = utf8_decode($tupla->username);
+				$arrData['remitente'] = utf8_decode($tupla->name);
+			}
+		}
 		return $arrData;
 	}
 
@@ -167,12 +191,12 @@
             faxes_log ("enviar_mail_adjunto> Error al enviar el mail ".$titulo);
     }
 
-    function createFolder($number, $commID, $type)
+    function createFolder($number, $commID, $type, $domain)
     {
     	global $faxes_path;
         
         // Revisar si directorio base es escribible. Debería ser 775 asterisk.uucp
-        $sDirBase = ($type == 'in') ? "$faxes_path/recvd" : "$faxes_path/sent";
+        $sDirBase = ($type == 'in') ? "$faxes_path/$domain/recvd" : "$faxes_path/$domain/sent";
         if (!is_writable($sDirBase)) {
             faxes_log("createFolder > ruta $sDirBase no se puede escribir");
             return NULL;
@@ -194,7 +218,7 @@
     }
 
      //convierte de  ps a ps2  y de ps2 a pdf
-     function ps2pdf($fileps, $pathDB, $i)
+     function ps2pdf($fileps, $pathDB, $i, $domain)
      {
         global $faxes_path;
         $list_pdf = "";
@@ -202,45 +226,45 @@
         $tmp_file = basename($fileps, ".ps");
         exec("eps2eps $path/$fileps $path/$tmp_file.ps2",$arrConsole,$flagStatus);
         faxes_log( "eps2eps > Transformando de .ps a .ps2 : $path/$fileps $path/$tmp_file.ps2");        
-        exec("ps2pdfwr $path/$tmp_file.ps2 $faxes_path/sent/$pathDB/fax$i.pdf",$arrConsole,$flagStatus2);
+        exec("ps2pdfwr $path/$tmp_file.ps2 $faxes_path/$domain/sent/$pathDB/fax$i.pdf",$arrConsole,$flagStatus2);
         faxes_log("ps2pdfwr > Transformando de .ps2 a .pdf : $path/$tmp_file.ps2 $faxes_path/sent/$pathDB/fax$i.pdf");
-        chmod("$faxes_path/sent/$pathDB/fax$i.pdf",0666);
-        faxes_log("chmod > $faxes_path/sent/$pathDB/fax$i.pdf , 0666");
-        $list_pdf .= "$faxes_path/sent/$pathDB/fax$i.pdf"." ";
+        chmod("$faxes_path/$domain/sent/$pathDB/fax$i.pdf",0666);
+        faxes_log("chmod > $faxes_path/$domain/sent/$pathDB/fax$i.pdf , 0666");
+        $list_pdf .= "$faxes_path/$domain/sent/$pathDB/fax$i.pdf"." ";
         faxes_log ("list_pdf > Lista de archivo(s) .pdf de origen (.ps) que van a ser combinados: $list_pdf");
         if(deletePS2FileFromDocq($tmp_file))
             faxes_log("deletePS2FileFromDocq > Eliminando archivos temporales .ps2 desde docq/");
         return $list_pdf;
     }
     //convierte de tif a pdf
-    function tiff2pdf($tiff_file, $pathDB, $i)
+    function tiff2pdf($tiff_file, $pathDB, $i, $domain)
     {
         global $faxes_path;
         $list_pdf = "";
         $path = "/var/spool/hylafax/docq";
         $tmp_file=basename($tiff_file,".tif");        
         //tiff2pdf -o docq/fax3.pdf docq/doc29.tif        
-        exec("tiff2pdf -o $faxes_path/sent/$pathDB/fax$i.pdf $path/$tmp_file.tif",$arrConsole,$flagStatus2);
-        faxes_log("tiff2pdf -o > Tranformando a fax$i.pdf desde $path/$tmp_file.tif  en la ruta $faxes_path/sent/$pathDB");        
-        chmod("$faxes_path/sent/$pathDB/fax$i.pdf",0666);
+        exec("tiff2pdf -o $faxes_path/$domain/sent/$pathDB/fax$i.pdf $path/$tmp_file.tif",$arrConsole,$flagStatus2);
+        faxes_log("tiff2pdf -o > Tranformando a fax$i.pdf desde $path/$tmp_file.tif  en la ruta $faxes_path/$domain/sent/$pathDB");        
+        chmod("$faxes_path/$domain/sent/$pathDB/fax$i.pdf",0666);
         faxes_log("chmod > $faxes_path/sent/$pathDB/fax$i.pdf,0666");
-        $list_pdf .= "$faxes_path/sent/$pathDB/fax$i.pdf"." ";
+        $list_pdf .= "$faxes_path/$domain/sent/$pathDB/fax$i.pdf"." ";
         faxes_log ("list_pdf > Lista de archivo(s) .pdf de origen (.tif) que van a ser combinados: $list_pdf");        
         return  $list_pdf;
     }
     
-    function tiff2pdf_RCVD($tiff_file, $pathDB)
+    function tiff2pdf_RCVD($tiff_file, $pathDB, $domain)
     {
         global $faxes_path;
         $list_pdf = "";
         $path = "/var/spool/hylafax/recvq";
         $tmp_file=basename($tiff_file,".tif");
         //tiff2pdf -o docq/fax3.pdf docq/doc29.tif        
-        exec("tiff2pdf -o $faxes_path/recvd/$pathDB/fax.pdf $path/$tmp_file.tif",$arrConsole,$flagStatus2);
-        faxes_log("tiff2pdf -o > Tranformando a fax.pdf desde $path/$tmp_file.tif  en la ruta $faxes_path/recvd/$pathDB");
-        chmod("$faxes_path/recvd/$pathDB/fax.pdf",0666);
-        faxes_log("chmod > $faxes_path/recvd/$pathDB/fax.pdf,0666");
-        $list_pdf .= "$faxes_path/recvd/$pathDB/fax.pdf"." ";
+        exec("tiff2pdf -o $faxes_path/$domain/recvd/$pathDB/fax.pdf $path/$tmp_file.tif",$arrConsole,$flagStatus2);
+        faxes_log("tiff2pdf -o > Tranformando a fax.pdf desde $path/$tmp_file.tif  en la ruta $faxes_path/$domain/recvd/$pathDB");
+        chmod("$faxes_path/$domain/recvd/$pathDB/fax.pdf",0666);
+        faxes_log("chmod > $faxes_path/$domain/recvd/$pathDB/fax.pdf,0666");
+        $list_pdf .= "$faxes_path/$domain/recvd/$pathDB/fax.pdf"." ";
         faxes_log ("list_pdf > Lista de archivo(s) .pdf de origen (.tif) que van a ser combinados: $list_pdf");
         return  $list_pdf;
     }
@@ -255,22 +279,22 @@
               return true;
     }
    //copia archivos pdf desde docq/ hacia faxes/2009/xxx/xxx/xxx/9999999/
-   function pdf2pdf($pdf_file, $pathDB, $i)//puede cambiar de nombre ya que esta funcion solo copia los pdf adjuntos en la ruta correcta
+   function pdf2pdf($pdf_file, $pathDB, $i, $domain)//puede cambiar de nombre ya que esta funcion solo copia los pdf adjuntos en la ruta correcta
    {   
         global $faxes_path;
         $list_pdf = "";
         $path = "/var/spool/hylafax/docq";        
-        copy("$path/$pdf_file", "$faxes_path/sent/$pathDB/fax$i.pdf");
+        copy("$path/$pdf_file", "$faxes_path/$domain/sent/$pathDB/fax$i.pdf");
         faxes_log("copiando $path/$pdf_file");
-        chmod("$faxes_path/sent/$pathDB/fax$i.pdf",0666);
-        $list_pdf .= "$faxes_path/sent/$pathDB/fax$i.pdf"." ";
+        chmod("$faxes_path/$domain/sent/$pathDB/fax$i.pdf",0666);
+        $list_pdf .= "$faxes_path/$domain/sent/$pathDB/fax$i.pdf"." ";
         faxes_log ("list_pdf > Lista de archivo(s) .pdf de origen (.pdf) que van a ser combinados: $list_pdf");
         exec("rm -rf $path/$pdf_file");
         faxes_log("rm -rf > Una vez copiado se remueven los archivos pdf de la ruta $path");
         return  $list_pdf;   
    }
     //combina los archivos en un solo pdf llamado fax.pdf
-    function finalPdf($files_attach, $path)
+    function finalPdf($files_attach, $path, $domain)
     {
         global $GSCMD, $GS, $faxes_path;
         // create the final PDF
@@ -280,7 +304,7 @@
 		
 		if (count($cnt) > 1) {		// if multiple PDFs, combine them
 			faxes_log("convert final > convirtiendo....");
-			$cmd = sprintf($GSCMD, "$faxes_path/sent/$path/fax.pdf", $files_attach);
+			$cmd = sprintf($GSCMD, "$faxes_path/$domain/sent/$path/fax.pdf", $files_attach);
                         faxes_log("command > $cmd");
 		        system($cmd, $retval);
                         exec("rm -rf $faxes_path/sent/$path/fax[0-9]*.pdf");
@@ -288,7 +312,7 @@
 		        return 0;
 			
 		}else {			
-			copy($files_attach, "$faxes_path/sent/$path/fax.pdf");
+			copy($files_attach, "$faxes_path/$domain/sent/$path/fax.pdf");
                         faxes_log("copy >  en el caso que sea un solo archivo .pdf el adjunto");
                         exec("rm -rf $files_attach");
                         faxes_log("rm -rf > Eliminando archivo:  $files_attach");

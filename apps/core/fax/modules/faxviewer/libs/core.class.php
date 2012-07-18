@@ -230,7 +230,7 @@ class core_Fax
     {
         $pACL = $this->_getACL();        
         $id_user = $this->_leerIdUser();
-        if (!$pACL->isUserAuthorizedById($id_user, "access", $sModuleName)) {
+        if (!$pACL->isUserAuthorizedById($id_user, $sModuleName)) {
             $this->errMsg["fc"] = 'UNAUTHORIZED';
             $this->errMsg["fm"] = 'Not authorized for this module: '.$sModuleName;
             $this->errMsg["fd"] = 'Your user login is not authorized for this functionality. Please contact your system administrator.';
@@ -279,9 +279,13 @@ class core_Fax
             return false;
         }
 
+		//obtenemos las credenciales del usuario
+		$arrCredentials=getUserCredentials();
+
         // Cuenta de registros que cumplen con las condiciones
         $oFax = new paloFaxVisor();
-        $iNumFaxes = $oFax->obtener_cantidad_faxes(
+		getTotalFax($idOrganization=null)
+        $iNumFaxes = $oFax->obtener_cantidad_faxes($arrCredentials["id_organization"],
             '', // company_name
             '', // company_fax
             (is_null($sFecha) ? '' : $sFecha), 
@@ -303,7 +307,7 @@ class core_Fax
             if (isset($offset) && !isset($limit)) {
                 $limit = $infoFax['totalfaxcount']; 
             }
-            $listaTmpFax = $oFax->obtener_faxes(
+            $listaTmpFax = $oFax->obtener_faxes($arrCredentials["id_organization"],
                 '', // company_name
                 '', // company_fax
                 (is_null($sFecha) ? '' : $sFecha),
@@ -360,9 +364,12 @@ class core_Fax
         }
         $id = (int)$id;
 
+		//obtenemos las credenciales del usuario
+		$arrCredentials=getUserCredentials();
+
         // Borrar el registro y el documento de fax, dado su ID
         $oFax = new paloFaxVisor();
-        $bExito = $oFax->deleteInfoFax($id);
+        $bExito = $oFax->deleteInfoFax($id,$arrCredentials["id_organization"]);
         if (!$bExito) {
             $this->errMsg["fm"] = 'Database operation failed';
             $this->errMsg["cn"] = get_class($oFax);

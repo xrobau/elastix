@@ -98,6 +98,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix incorrect check for schedule_use_daterange and
+  schedule_use_sameagent flags in call scheduling.
+
 * Thu Jul 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fix incorrect check for atxfer parameter in call 
   transfer. This should allow attended transfer to work from the web console.

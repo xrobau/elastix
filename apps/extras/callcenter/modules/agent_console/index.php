@@ -893,13 +893,13 @@ function manejarSesionActiva_scheduleCall($oPaloConsola)
         'schedule_time_end') as $k) 
         if (!isset($infoAgendar[$k])) $infoAgendar[$k] = NULL;
     
-    $schedule = ($infoAgendar['schedule_use_daterange'] == 'true') ? array(
+    $schedule = ($infoAgendar['schedule_use_daterange'] == 'checked') ? array(
         'date_init' =>  $infoAgendar['schedule_date_start'],
         'date_end'  =>  $infoAgendar['schedule_date_end'], 
         'time_init' =>  $infoAgendar['schedule_time_start'],
         'time_end'  =>  $infoAgendar['schedule_time_end'],
     ) : NULL;
-    $sameagent = ($infoAgendar['schedule_use_sameagent'] == 'true');
+    $sameagent = ($infoAgendar['schedule_use_sameagent'] == 'checked');
     $newphone = $infoAgendar['schedule_new_phone'];
     $newname = $infoAgendar['schedule_new_name'];
     

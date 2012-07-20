@@ -543,7 +543,7 @@ function createStatus($type,$text)
 
 function network()
 {
-    $ip=$_SERVER['SERVER_ADDR'];
+    $ip = $_SERVER['SERVER_ADDR'];
     $total = subMask($ip);
     return paloNetwork::getNetAdress($ip, $total)."/".$total;    
 }

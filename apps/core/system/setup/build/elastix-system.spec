@@ -129,6 +129,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Server (dhcpconfig): implement new option --phonesonly. If 
+  specified, the DHCP server will be configured to answer only to MAC addresses
+  from known phone vendor prefixes. This potentially enables the Elastix DHCP
+  server and another DHCP server to coexist in the same LAN.
+
 * Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): restrict DHCP option 160 to MAC addresses
   of Polycom phones. This prevents a conflict with LG-ERICSSON phones which also

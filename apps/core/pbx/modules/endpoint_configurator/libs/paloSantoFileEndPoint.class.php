@@ -220,6 +220,21 @@ class PaloSantoFileEndPoint
 
                 break;
 
+	     case 'Xorcom':
+               if($ArrayData['data']['model'] == "XP0120P" || $ArrayData['data']['model'] == "XP0100P"){
+                   $contentFileXorcom =PrincipalFileXorcom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$this->ipAdressServer);
+                        if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileXorcom)){
+                            $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
+                            $result      = $this->AsteriskManagerAPI('Command',$parameters);
+                            if(!$result)
+                                $return = false;
+                            $return = true;
+                        }
+                        $return = false;
+                }
+                break;
+
+
             case 'LG-ERICSSON':
                 if($ArrayData['data']['model'] == "IP8802A"){
                     $contentFileLG_Ericsson = PrincipalFileLG_IP8802A($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'], $this->ipAdressServer);
@@ -370,6 +385,11 @@ class PaloSantoFileEndPoint
             case 'LG-ERICSSON':
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['filename']);
             break;
+	    
+            case 'Xorcom':
+                return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
+            break;
+
         }
     }
 
@@ -483,6 +503,14 @@ class PaloSantoFileEndPoint
                 $this->createFileConf($this->directory, "l000000000000", $contentFileLG_Ericsson);
                 return true;
                 break;
+
+	    case 'Xorcom':
+                $contentFileXorcom = templatesFileXorcom($this->ipAdressServer);
+                $this->createFileConf($this->directory, "y000000000010.cfg", $contentFileXorcom);
+                $this->createFileConf($this->directory, "y000000000011.cfg", $contentFileXorcom);
+                return true;
+                break;
+
         }
     }
 
@@ -581,6 +609,10 @@ class PaloSantoFileEndPoint
 
             case 'LG-ERICSSON':
                 break;
+
+	    case 'Xorcom':
+                break;
+
         }
 
         return $arrParametersOld;

@@ -1,0 +1,2 @@
+<?xml version="1.0" standalone="yes"?>
+<APPLICATION APP_FILE_PATH="sip.ld" CONFIG_FILES="{$CONFIG_FILENAME}, server.cfg, sip.cfg" MISC_FILES="" LOG_FILE_DIRECTORY="/polycom/logs/" OVERRIDES_DIRECTORY="/polycom/overrides/" CONTACTS_DIRECTORY="/polycom/contacts/"/>

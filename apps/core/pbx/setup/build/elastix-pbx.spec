@@ -294,6 +294,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Endpoint Configurator: add new command-line utility.
+  This new utility runs from /usr/bin/elastix-endpoint-configure. The program
+  aims to introduce a new architecture for endpoint configuration, with better
+  encapsulation of vendor-specific operations, and with an emphasis on parallel
+  configuration of multiple endpoints for speed. The ultimate goal is to enable 
+  the quick configuration of hundreds of phones at once.
+
 * Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: for Cisco phones, syncinfo.xml must contain 
   <SYNCINFO> and </SYNCINFO> tags, else Cisco phone will not reboot.

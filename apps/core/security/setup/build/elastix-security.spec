@@ -121,6 +121,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Jul 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Port Knocking: trim padding of null bytes from end of plaintext.
+  SVN Rev[4079]
+
 * Fri Jun 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Implement Port Knocking support. This includes:
   - Two new modules: PortKnocking Interfaces, PortKnocking Users

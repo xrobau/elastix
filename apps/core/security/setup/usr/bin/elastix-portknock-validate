@@ -87,8 +87,8 @@ try {
 if (is_null($md5_password)) exit(5);
 
 // Desencriptación y validación de payload
-$sPlaintext = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $md5_password, $sPayload, 
-    MCRYPT_MODE_CBC, md5($md5_password));
+$sPlaintext = trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $md5_password, $sPayload, 
+    MCRYPT_MODE_CBC, md5($md5_password)), "\0");
 $params = explode(':', $sPlaintext);
 if (count($params) != 3 || !ctype_digit($params[0]) || $ipFuente != $params[1]) exit(6);
 $ports = explode(',', $params[2]);

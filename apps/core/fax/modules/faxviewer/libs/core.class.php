@@ -284,7 +284,6 @@ class core_Fax
 
         // Cuenta de registros que cumplen con las condiciones
         $oFax = new paloFaxVisor();
-		getTotalFax($idOrganization=null)
         $iNumFaxes = $oFax->obtener_cantidad_faxes($arrCredentials["id_organization"],
             '', // company_name
             '', // company_fax

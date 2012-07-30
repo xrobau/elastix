@@ -63,25 +63,12 @@ function _moduleContent(&$smarty, $module_name)
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pDB);
 
-	 //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
-	 //y borrar usuarios de todas las organizaciones
-     //los usuarios de tipo administrador estan en la capacidad crear usuarios solo de sus organizaciones
-    $userLevel1 = "";
-    $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-
 	//verificar que tipo de usurio es: superadmin, admin o other
-	if($userAccount!=""){
-		$idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
-		if($pACL->isUserSuperAdmin($userAccount)){
-			$userLevel1 = "superadmin";
-		}else{
-			if($pACL->isUserAdministratorGroup($userAccount))
-				$userLevel1 = "admin";
-			else
-				$userLevel1 = "other";
-		}
-	}else
-		$idOrganization="Error";
+	$arrCredentiasls=getUserCredentials();
+	$userLevel1=$arrCredentiasls["userlevel"];
+	$userAccount=$arrCredentiasls["userAccount"];
+	$idOrganization=$arrCredentiasls["id_organization"];
+
     //actions
     $accion = getAction();
     $content = "";
@@ -100,7 +87,7 @@ function _moduleContent(&$smarty, $module_name)
 function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization,$lang,$arrLang)
 {
     $pACL = new paloACL($pDB);
-
+	$pORGZ = new paloSantoOrganization($pDB);
     $filter_resource = getParameter("resource_apply");
     $limit = getParameter("limit_apply");
     $offset = getParameter("offset_apply");

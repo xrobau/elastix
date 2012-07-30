@@ -79,17 +79,18 @@
 	  <tr>
 		<td style="padding-left: 5px;" colspan="4"><b>{$FAX_SETTINGS}</b></td>
 	  </tr>
-      <tr>
-		<td nowrap>{$country_code.LABEL}: </td>
-		<td >{$country_code.INPUT}</td>
-		<td>{$clid_name.LABEL}:</td>
-		<td nowrap>{$clid_name.INPUT}</td>
 	  <tr>
-		<td nowrap>{$area_code.LABEL}: </td>
-		<td>{$area_code.INPUT}</td>
+		<td nowrap>{$clid_name.LABEL}:</td>
+		<td>{$clid_name.INPUT}</td>
 		<td nowrap>{$clid_number.LABEL}:</td>
 		<td>{$clid_number.INPUT}</td>
       </tr>
+      <tr>
+		<td nowrap>{$country_code.LABEL}: </td>
+		<td >{$country_code.INPUT}</td>
+		<td nowrap>{$area_code.LABEL}: </td>
+		<td>{$area_code.INPUT}</td>
+	  </tr>
 	  <tr>
 		<td style="padding-left: 5px;" colspan="4"><b>{$EMAIL_SETTINGS}</b></td>
 	  </tr>

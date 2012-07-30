@@ -65,7 +65,6 @@ function _moduleContent(&$smarty, $module_name)
 
 	 //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de dar 
 	 //y eliminar permisos de recursos a las organizaciones
-
 	$arrCredentiasls=getUserCredentials();
 	$userLevel1=$arrCredentiasls["userlevel"];
 	$userAccount=$arrCredentiasls["userAccount"];

@@ -57,7 +57,7 @@ $arrLangModule=array(
 "Error getting settings from fax extension user" => "Error getting settings from fax extension user. ",
 "Extension and Fax Extension can not be equal" => "Extension and Fax Extension can not be equal. ",
 "Error setting parameters faxs" => "Error setting faxs parameters. ",
-"Error setting quota" => "Error setting quota. ",
+"Error setting email quota" => "Error setting email quota. ",
 "Property quota is not set" => "Property quota is not set. ",
 "Error setting user properties" => "Error setting user properties. ",
 "Error trying create email_account" => "Error trying create email_account. ",
@@ -78,6 +78,7 @@ $arrLangModule=array(
 "Email Account cannot be deleted" => "Email Account couldn't be deleted. ",
 "Fax cannot be deleted" => "Fax couldn't be deleted. ",
 "User Extension can't be deleted" => "User Extension couldn't be deleted. ",
-"Don't exist user in elastix system" => "Don't exist user in elastix system. "
+"Don't exist user in elastix system" => "Don't exist user in elastix system. ",
+"Need assign password" => "It is necessary you set a password if you wish assign to the user a new extension or fax extension. "
 );
 ?>

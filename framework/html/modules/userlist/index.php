@@ -265,9 +265,8 @@ function showMessageReload($module_name, &$pDB, $userLevel1, $userAccount, $idOr
 			if($value[1]!=1){
 				$showmessage=$pAstConf->getReloadDialplan($value[0]);
 				if($showmessage=="yes"){
-					if($userLevel1=="superadmin")
-						$append =" $value[0]";
-					$msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/>".$mensaje.$append."</a></div>";
+					$append=($userLevel1=="superadmin")?" $value[0]":"";
+					$msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/><b>".$mensaje.$append."</b></a></div>";
 				}
 			}
 		}
@@ -1210,5 +1209,4 @@ function getAction(){
     else
         return "report"; //cancel
 }
-
 ?>

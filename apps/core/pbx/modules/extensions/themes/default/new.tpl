@@ -1,0 +1,367 @@
+<div>
+    <table width="100%" cellpadding="4" cellspacing="0" border="0">
+      <tr>
+        <td align="left">
+          {if $mode eq 'input'}
+          <input class="button" type="submit" name="save_new" value="{$SAVE}" >
+          {elseif $mode eq 'edit'}
+          <input class="button" type="submit" name="save_edit" value="{$APPLY_CHANGES}" >
+          {elseif $userLevel eq 'admin' || $userLevel eq 'superadmin'}
+          <input class="button" type="submit" name="edit" value="{$EDIT}">
+          <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
+          {else}
+          <input class="button" type="submit" name="edit" value="{$EDIT}">
+          {/if}
+		  <input class="button" type="submit" name="cancel" value="{$CANCEL}"></td>
+		{if $mode ne 'view'}
+		<td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
+		{/if}
+     </tr>
+   </table>
+</div>
+<div id="errorExt"  style="padding-left: 5px;">
+	<p><b>{$ERROREXT}</b></p>
+</div>
+<div id="extension" style="padding-left: 8px;">
+	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm extension">
+      <tr class="extension">
+		<td width="15%" nowrap>{$technology.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		{if $mode eq 'edit'}
+			<td width="31%">{$TECHNOLOGY}</td>
+		{else}
+			<td width="31%">{$technology.INPUT}</td>
+		{/if}
+		{if $isSuperAdmin}
+            <td width="21%" nowrap>{$domain_org.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+			{if $mode eq 'edit'}
+				<td >{$ORGANIZATION}</td>
+			{else}
+				<td >{$domain_org.INPUT}</td>
+			{/if}
+        {/if}
+      </tr>
+      <tr class="extension">
+		<td width="15%" nowrap>{$exten.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		{if $mode eq 'edit'}
+			<td width="31%">{$EXTEN}</td>
+		{else}
+			<td width="31%">{$exten.INPUT}</td>
+		{/if}
+		<td width="21%" nowrap>{$secret.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
+		<td>{$secret.INPUT}</td>
+      </tr>
+	  <tr>
+        <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$EXT_OPTIONS}</td>
+	  </tr>
+	  <tr class="extension">
+		<td nowrap>{$clid_name.LABEL}:</td>
+		<td>{$clid_name.INPUT}</td>
+		<td nowrap>{$clid_number.LABEL}:</td>
+		<td>{$clid_number.INPUT}</td>
+      </tr>
+	  <tr class="extension">
+		<td nowrap>{$out_clid.LABEL}: </td>
+		<td>{$out_clid.INPUT}</td>
+		<td nowrap>{$language.LABEL}: </td>
+		<td>{$language.INPUT}</td>
+      </tr>
+	  <tr class="extension">
+		<td nowrap>{$ring_timer.LABEL}: </td>
+		<td>{$ring_timer.INPUT}</td>
+		<td nowrap>{$call_waiting.LABEL}: </td>
+		<td>{$call_waiting.INPUT}</td>
+      </tr>
+		<tr class="extension">
+		<td nowrap>{$screen.LABEL}: </td>
+		<td>{$screen.INPUT}</td>
+	  </tr>
+	  <tr>
+        <td class="extension" style="font-weight: bold;" colspan=4>{$REC_OPTIONS}</td>
+	  </tr>
+      <tr class="extension">
+		<td nowrap>{$record_in.LABEL}: </td>
+		<td>{$record_in.INPUT}</td>
+		<td nowrap>{$record_out.LABEL}: </td>
+		<td>{$record_out.INPUT}</td>
+      </tr>
+	  <tr>
+        <td class="extension" style="font-weight: bold;" colspan=4>{$DICT_OPTIONS}</td>
+	  </tr>
+	  <tr class="extension">
+		<td nowrap>{$dictate.LABEL}: </td>
+		<td>{$dictate.INPUT}</td>
+		<td nowrap>{$dictformat.LABEL}: </td>
+		<td>{$dictformat.INPUT}</td>
+      </tr>
+      <tr class="extension">
+		<td nowrap>{$dictemail.LABEL}: </td>
+		<td>{$dictemail.INPUT}</td>
+      </tr>
+    </table>
+</div>
+{if $mode eq 'edit'}
+{if $isIax}
+<div id="iax_settings" style="padding-left: 8px;">
+	<table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
+		<tr>
+			<td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4><b>{$DEV_OPTIONS}</b></td>
+		</tr>
+		<tr class="iax_settings">
+			<td width="15%" nowrap>{$context.LABEL}:</td>
+			<td width="31%">{$context.INPUT}</td>
+			<td width="21%" nowrap>{$transfer.LABEL}:</td>
+			<td>{$transfer.INPUT}</td>
+		</tr>
+		<tr class="iax_settings">
+			<td nowrap>{$host.LABEL}:</td>
+			<td>{$host.INPUT}</td>
+			<td nowrap>{$type.LABEL}:</td>
+			<td>{$type.INPUT}</td>
+		</tr>
+		<tr class="iax_settings">
+			<td nowrap>{$qualify.LABEL}:</td>
+			<td>{$qualify.INPUT}</td>
+			<td nowrap>{$port.LABEL}:</td>
+			<td>{$port.INPUT}</td>
+		</tr>
+		<tr class="iax_settings">
+			<td width="15%" nowrap>{$disallow.LABEL}:</td>
+			<td width="31%">{$disallow.INPUT}</td>
+			<td width="21%" nowrap>{$allow.LABEL}:</td>
+			<td>{$allow.INPUT}</td>
+		</tr>
+		<tr class="iax_settings">
+			<td nowrap>{$accountcode.LABEL}:</td>
+			<td>{$accountcode.INPUT}</td>
+			<td nowrap>{$requierecalltoken.LABEL}:</td>
+			<td>{$requierecalltoken.INPUT}</td>
+		</tr>
+		<tr class="iax_settings">
+			<td width="15%" nowrap>{$deny.LABEL}:</td>
+			<td width="31%">{$deny.INPUT}</td>
+			<td width="21%" nowrap>{$permit.LABEL}:</td>
+			<td>{$permit.INPUT}</td>
+		</tr>
+		<tr>
+			<td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$username.LABEL}:</td>
+			<td>{$username.INPUT}</td>
+			<td nowrap>{$amaflags.LABEL}:</td>
+			<td>{$amaflags.INPUT}</td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$defaultip.LABEL}:</td>
+			<td>{$defaultip.INPUT}</td>
+			<td nowrap>{$mask.LABEL}:</td>
+			<td>{$mask.INPUT}</td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$mohinterpret.LABEL}:</td>
+			<td>{$mohinterpret.INPUT}</td>
+			<td nowrap>{$mohsuggest.LABEL}:</td>
+			<td>{$mohsuggest.INPUT}</td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$jitterbuffer.LABEL}:</td>
+			<td>{$jitterbuffer.INPUT}</td>
+			<td nowrap>{$forcejitterbuffer.LABEL}:</td>
+			<td>{$forcejitterbuffer.INPUT}</td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$codecpriority.LABEL}:</td>
+			<td>{$codecpriority.INPUT}</td>
+			<td nowrap>{$qualifysmoothing.LABEL}:</td>
+			<td>{$qualifysmoothing.INPUT}</td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$qualifyfreqok.LABEL}:</td>
+			<td>{$qualifyfreqok.INPUT}</td>
+			<td nowrap>{$qualifyfreqnotok.LABEL}:</td>
+			<td>{$qualifyfreqnotok.INPUT}</td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$encryption.LABEL}:</td>
+			<td>{$encryption.INPUT}</td>
+			<td nowrap>{$timezone.LABEL}:</td>
+			<td>{$timezone.INPUT}</td>
+		</tr>
+		<tr class="iax_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$sendani.LABEL}:</td>
+			<td>{$sendani.INPUT}</td>
+			<td nowrap>{$adsi.LABEL}:</td>
+			<td>{$adsi.INPUT}</td>
+		</tr>
+	</table>
+</div>
+{else}
+<div id="sip_settings" style="padding-left: 8px;">
+	<table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
+		<tr>
+			<td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4><b>{$DEV_OPTIONS}</b></td>
+		</tr>
+		<tr class="sip_settings">
+			<td width="15%" nowrap>{$context.LABEL}: </td>
+			<td width="31%">{$context.INPUT}</td>
+			<td width="21%" nowrap>{$dtmfmode.LABEL}: </td>
+			<td >{$dtmfmode.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$host.LABEL}: </td>
+			<td>{$host.INPUT}</td>
+			<td nowrap>{$type.LABEL}: </td>
+			<td>{$type.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$port.LABEL}: </td>
+			<td>{$port.INPUT}</td>
+			<td nowrap>{$qualify.LABEL}: </td>
+			<td>{$qualify.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$nat.LABEL}: </td>
+			<td>{$nat.INPUT}</td>
+			<td nowrap>{$accountcode.LABEL}: </td>
+			<td>{$accountcode.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$disallow.LABEL}: </td>
+			<td>{$disallow.INPUT}</td>
+			<td nowrap>{$allow.LABEL}: </td>
+			<td>{$allow.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$canreinvite.LABEL}: </td>
+			<td>{$canreinvite.INPUT}</td>
+			<td nowrap>{$allowtransfer.LABEL}: </td>
+			<td>{$allowtransfer.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$callgroup.LABEL}: </td>
+			<td>{$callgroup.INPUT}</td>
+			<td nowrap>{$pickupgroup.LABEL}: </td>
+			<td>{$pickupgroup.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$deny.LABEL}: </td>
+			<td>{$deny.INPUT}</td>
+			<td nowrap>{$permit.LABEL}: </td>
+			<td>{$permit.INPUT}</td>
+		</tr>
+		<tr class="sip_settings">
+			<td nowrap>{$mailbox.LABEL}: </td>
+			<td>{$mailbox.INPUT}</td>
+			<td nowrap>{$vmexten.LABEL}: </td>
+			<td>{$vmexten.INPUT}</td>
+		</tr>
+		<tr>
+			<td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$username.LABEL}: </td>
+			<td>{$username.INPUT}</td>
+			<td nowrap>{$amaflags.LABEL}: </td>
+			<td>{$amaflags.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$defaultuser.LABEL}: </td>
+			<td>{$defaultuser.INPUT}</td>
+			<td nowrap>{$defaultip.LABEL}: </td>
+			<td>{$defaultip.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$mohinterpret.LABEL}:</td>
+			<td>{$mohinterpret.INPUT}</td>
+			<td nowrap>{$mohsuggest.LABEL}:</td>
+			<td>{$mohsuggest.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$useragent.LABEL}:</td>
+			<td>{$useragent.INPUT}</td>
+			<td nowrap>{$directmedia.LABEL}:</td>
+			<td>{$directmedia.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$callcounter.LABEL}: </td>
+			<td>{$callcounter.INPUT}</td>
+			<td nowrap>{$busylevel.LABEL}: </td>
+			<td>{$busylevel.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$videosupport.LABEL}:</td>
+			<td>{$videosupport.INPUT}</td>
+			<td nowrap>{$maxcallbitrate.LABEL}:</td>
+			<td>{$maxcallbitrate.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$qualifyfreq.LABEL}:</td>
+			<td>{$qualifyfreq.INPUT}</td>
+			<td nowrap>{$rtptimeout.LABEL}:</td>
+			<td>{$rtptimeout.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$rtpholdtimeout.LABEL}:</td>
+			<td>{$rtpholdtimeout.INPUT}</td>
+			<td nowrap>{$rtpkeepalive.LABEL}:</td>
+			<td>{$rtpkeepalive.INPUT}</td>
+		</tr>
+		<tr class="sip_settings show_more" {$SHOW_MORE}>
+			<td nowrap>{$progressinband.LABEL}:</td>
+			<td>{$progressinband.INPUT}</td>
+			<td nowrap>{$g726nonstandard.LABEL}:</td>
+			<td>{$g726nonstandard.INPUT}</td>
+		</tr>
+		</table>
+</div>
+{/if}
+{/if}
+<div id="voicemail" {$DIV_VM}>
+	<table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
+	<tr>
+        <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4><b>{$VM_OPTIONS}</b></td>
+	</tr>
+	{if $mode ne 'view'}
+	<tr>
+        <td style="padding-left: 12px;" colspan=4><input id="create_vm" type="checkbox" class="create_vm" name="create_vm" {$CHECKED} {$VALVM}/>{$CREATE_VM}</td>
+	</tr>
+	{/if}
+	<tr class="voicemail" {$DISPLAY_VM}>
+		<td width="15%" nowrap>{$vmpassword.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		<td width="31%">{$vmpassword.INPUT}</td>
+		<td width="21%" nowrap>{$vmemail.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		<td>{$vmemail.INPUT}</td>
+	</tr>
+	<tr class="voicemail" {$DISPLAY_VM}>
+		<td nowrap>{$vmattach.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		<td>{$vmattach.INPUT}</td>
+		<td nowrap>{$vmsaycid.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		<td>{$vmsaycid.INPUT}</td>
+	</tr>
+	<tr class="voicemail" {$DISPLAY_VM}>
+		<td nowrap>{$vmenvelope.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		<td>{$vmenvelope.INPUT}</td>
+		<td nowrap>{$vmdelete.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		<td>{$vmdelete.INPUT}</td>
+	</tr>
+	<tr class="voicemail" {$DISPLAY_VM}>
+		<td nowrap>{$vmcontext.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+		<td>{$vmcontext.INPUT}</td>
+	</tr>
+	</table>
+	<table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
+	<tr class="voicemail" {$DISPLAY_VM}>
+		<td width="15%" nowrap>{$vmoptions.LABEL}: </td> <td colspan=3>{$vmoptions.INPUT}</td>
+	</tr>
+	</table>
+</div>
+<input type="hidden" name="id_exten" value="{$id_exten}">
+<input type="hidden" name="mostra_adv" id="mostra_adv" value="{$mostra_adv}">
+
+{literal}
+<style type="text/css">
+.extension td, .voicemail td, .sip_settings td, .iax_settings td{
+	padding-left: 12px;
+}
+</style>
+{/literal}

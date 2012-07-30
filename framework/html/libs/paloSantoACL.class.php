@@ -149,7 +149,7 @@ class paloACL {
 	*/
 	function getExtUser($id_user){
 		$arr_result2=array();
-		$pDB2=new paloDB(generarDSNSistema("root", "ast_realtime"));
+		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
 		if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
             $this->errMsg = _tr("User ID must be numeric");
 		}else{
@@ -160,9 +160,9 @@ class paloACL {
 			}elseif(count($arr_result)==0) {
 				$this->errMsg = _tr("User doesn't have a associated extension");
 			}else{
-				$query2="SELECT exten, organization_domain, tech, dial, voicemail, device FROM extension where exten=? and organization_domain=?";
+				$query2="SELECT id, exten, organization_domain, tech, dial, voicemail, device FROM extension where exten=? and  organization_domain=?";
 				$arr_result2 = $pDB2->getFirstRowQuery($query2,true,array($arr_result[0],$arr_result[1]));
-				if (!is_array($arr_result2) || count($arr_result2)) {
+				if (!is_array($arr_result2) || count($arr_result2)==0) {
 					$this->errMsg = _tr("Can't get extension user").$pDB2->errMsg;
 				}
 				return $arr_result2;

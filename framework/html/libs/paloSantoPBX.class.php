@@ -36,7 +36,7 @@ include_once $arrConf['basePath']."/libs/extensions.class.php";
 include_once $arrConf['basePath']."/libs/misc.lib.php";
 
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
-require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
+	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
 
 class paloAsteriskDB {
@@ -99,40 +99,53 @@ class paloAsteriskDB {
 			return false;
 		}elseif($result==false){
 			$this->errMsg = $noexits;
-			return false;
+			return $result;
 		}else{
 			return $result;
 		}
 	}
 
-	//esto es para los numeros de extensiones internas
-	function validateName($deviceName)
+
+	function getCodeByDomain($domain){
+		global $arrConf;
+		$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+		$query="SELECT code from organization where domain=?";
+		$result=$pDB->getFirstRowQuery($query,true,array($domain));
+		if($result===false)
+			$this->errMsg=$pDB->errMsg;
+		elseif(count($result)==0)
+			$this->errMsg=_tr("Organization doesn't exist");
+		return $result;
+	}
+
+	//revisar que no exista dentro de la organizacion otra extension con el mismo numero
+	function existExtension($extension,$domain)
 	{
-		if(preg_match("/^(organization[[:digit:]]{3}){1}_[[:digit:]]+$/", $deviceName)){
-			return true;
+		$exist=true;
+		//validamos que el patron de marcado no sea usado como extension
+		$query="SELECT count(id) from extension where exten=? and organization_domain=?";
+		$result=$this->getFirstResultQuery($query,array($extension,$domain));
+		if($result[0]!=0){
+			$this->errMsg=_tr("Already exits a extension with same pattern");
 		}else{
-			return false;
+			//validamos que el patron de marcado no esta siendo usado para una extension de fax
+			$query="SELECT count(id) from fax where exten=? and organization_domain=?";
+			$result=$this->getFirstResultQuery($query,array($extension,$domain));
+			if($result[0]!=0){
+				$this->errMsg=_tr("Already exits a fax extension with same pattern");
+			}else{
+				//validamos que la extension no este siendo usado por los features code
+				$query="SELECT 1 from features_code where code=? or default_code=? and organization_domain=?";
+				$result=$this->getFirstResultQuery($query,array($extension,$extension,$domain));
+				if(count($result)>0 || $result===false){
+					$this->errMsg=_tr("Already exits a feature code with same pattern");
+				}else{
+					$exist=false;
+				}
+			}
 		}
+		return $exist;
 	}
-
-	function prunePeer($device,$tech){
-		if(!$this->validateName($device))
-		{
-			$this->errMsg=_tr("Invalid device name");
-			return false;
-		}
-
-		$errorM="";
-		$astMang=AsteriskManagerConnect($errorM);
-		if($astMang==false){
-			$this->errMsg=$errorM;
-			return false;
-		}else{ //borro las propiedades dentro de la base ASTDB de asterisk
-			$result=$astMang->prunePeer($tech,$device);
-		}
-		return true;
-	}
-
 }
 
 class paloSip extends paloAsteriskDB {
@@ -225,6 +238,7 @@ class paloSip extends paloAsteriskDB {
 	public $rtpkeepalive;
 	public $call_limit; //nombre del campo en la tabla call-limit
 	public $g726nonstandard;
+	public $canreinvite; 
 	public $organization_domain;
 
 	function paloSip(&$pDB)
@@ -249,8 +263,7 @@ class paloSip extends paloAsteriskDB {
 			$query="Select count(name) from sip where name=?";
 			$arrayParam=array($deviceName);
 			$result=$this->getFirstResultQuery($query,$arrayParam);
-			if($result[0]==0)
-			{
+			if($result[0]==0){
 				return false;
 			}else
 				$this->errMsg="Already exist a sip peer with same name";
@@ -274,9 +287,17 @@ class paloSip extends paloAsteriskDB {
 		}
 	}
 
-	function insertDB($code)
+	function insertDB()
 	{
-		//valido que no exista otro dispositivo sip creado con el mismo nombre
+		//valido que el dispositivo tenga seteado el parametro organization_domain y que este exista como dominio de algunaç
+		//organizacion
+		$result=$this->getCodeByDomain($this->organization_domain);
+		if($result==false){
+			$this->errMsg =_tr("Can't create the sip device").$this->errMsg;
+			return false;
+		}
+		$code=$result["code"];
+		//valido que no exista otro dispositivo sip creado con el mismo nombre y que los cambios obligatorios esten seteados
 		if(!isset($this->name) || !isset($this->md5secret) || !isset($this->context)){
 			$this->errMsg="Field name, secret, context can't be empty";
 		}elseif(!$this->existPeer($code."_".$this->name)){
@@ -286,7 +307,7 @@ class paloSip extends paloAsteriskDB {
 			$i=0;
 			$arrPropertyes=get_object_vars($this);
 			foreach($arrPropertyes as $key => $value){
-				if(isset($value) && $key!="_DB" && $key!="errMsg" && $key!="dsn"){
+				if(isset($value) && $key!="_DB" && $key!="errMsg" && $key!="dsn" && $value!="noset"){
 					switch ($key){
 						case "session_timers":
 							$Prop .="session-timers,";
@@ -371,6 +392,64 @@ class paloSip extends paloAsteriskDB {
 			return $arrResult; 
 	}
 
+	function updateParameters($arrProp){
+		$arrQuery=array();
+		$arrParam=array();
+		$result=$this->getCodeByDomain($arrProp["organization_domain"]);
+		if($result==false){
+			$this->errMsg =_tr("Can't create the sip device").$this->errMsg;
+			return false;
+		}
+		$code=$result["code"];
+		if($this->existPeer($code."_".$arrProp["name"])){
+			foreach($arrProp as $name => $value){
+				if(property_exists($this,$name)){
+					if(isset($value)){
+						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="dsn" && $name!="organization_domain"){
+							if($value=="" || $value=="noset"){
+								$value=NULL;
+							}
+							switch ($name){
+								case "session_timers":
+									$arrQuery[]="$name=?";
+									break;
+								case "session_expires":
+									$arrQuery[]="$name=?";
+									break;
+								case "session_minse":
+									$arrQuery[]="$name=?";
+									break;
+								case "session_refresher":
+									$arrQuery[]="$name=?";
+									break;
+								case "call-limit":
+									$arrQuery[]="$name=?";
+									break;
+								case "context":
+									$arrQuery[]="$name=?";
+									$value = $code."-".$value;
+									break;
+								default:
+									$arrQuery[]="$name=?";
+									break;
+							}
+							$arrParam[]=$value;
+						}
+					}
+				}
+			}
+			if(count($arrQuery)>0){
+				$query ="Update sip set ".implode(",",$arrQuery);
+				$query .=" where name=? and organization_domain=?";
+				$arrParam[]=$code."_".$arrProp["name"];
+				$arrParam[]=$arrProp["organization_domain"];
+				return $this->executeQuery($query,$arrParam);
+			}else
+				return true;
+		}else
+			return false;
+	}
+
 	function setParameter($device,$parameter,$value){
 		$query="UPDATE sip set $parameter=? where name=?";
 		if($this->executeQuery($query,array($parameter,$value,$device))){
@@ -395,6 +474,33 @@ class paloSip extends paloAsteriskDB {
 		}
 	}
 
+	//esto es para los numeros de extensiones internas
+	function validateName($deviceName)
+	{
+		if(preg_match("/^(organization[[:digit:]]{3}){1}_[[:digit:]]+$/", $deviceName)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	function prunePeer($device,$tech){
+		if(!$this->validateName($device))
+		{
+			$this->errMsg=_tr("Invalid device name");
+			return false;
+		}
+
+		$errorM="";
+		$astMang=AsteriskManagerConnect($errorM);
+		if($astMang==false){
+			$this->errMsg=$errorM;
+			return false;
+		}else{ //borro las propiedades dentro de la base ASTDB de asterisk
+			$result=$astMang->prunePeer($tech,$device);
+		}
+		return true;
+	}
 }
 
 
@@ -497,8 +603,16 @@ class paloIax extends paloAsteriskDB {
 		return $secret;
 	}
 
-	function insertDB($code)
+	function insertDB()
 	{
+		//valido que el dispositivo tenga seteado el parametro organization_domain y que este exista como dominio de algunaç
+		//organizacion
+		$result=$this->getCodeByDomain($this->organization_domain);
+		if($result==false){
+			$this->errMsg =_tr("Can't create the iax device").$this->errMsg;
+			return false;
+		}
+		$code=$result["code"];
 		//valido que no exista otro dispositivo iax creado con el mismo nombre
 		if(!isset($this->name) || !isset($this->secret) || !isset($this->context)){
 			$this->errMsg="Field name, secret, context can't be empty";
@@ -509,7 +623,7 @@ class paloIax extends paloAsteriskDB {
 			$i=0;
 			$arrPropertyes=get_object_vars($this);
 			foreach($arrPropertyes as $key => $value){
-				if(isset($value) && $key!="_DB" && $key!="errMsg" && $key!="dsn"){
+				if(isset($value) && $key!="_DB" && $key!="errMsg" && $key!="dsn" && $value!="noset"){
 					if($key=="context")
 						$value = $code."-".$value;
 					if($key=="name")
@@ -532,7 +646,68 @@ class paloIax extends paloAsteriskDB {
 		return false;
 	}
 
-	//TODO:
+	function deletefromDB($deviceName)
+	{
+		$query="delete from iax where name=?";
+		if($this->executeQuery($query,array($deviceName))){
+			return true;
+		}else
+			return false;
+	}
+
+	function getDefaultSettings($domain)
+	{
+		$query="SELECT * from iax_general where organization_domain=?";
+		$arrResult=$this->getFirstResultQuery($query,array($domain),true,"Don't exist registers.");
+		if($arrResult==false)
+			return array();
+		else
+			return $arrResult;
+	}
+
+	function updateParameters($arrProp){
+		$arrQuery=array();
+		$arrParam=array();
+		$result=$this->getCodeByDomain($arrProp["organization_domain"]);
+		if($result==false){
+			$this->errMsg =_tr("Can't create the iax device").$this->errMsg;
+			return false;
+		}
+		$code=$result["code"];
+		if($this->existPeer($code."_".$arrProp["name"])){
+			foreach($arrProp as $name => $value){
+				if(property_exists($this,$name)){
+					if(isset($value)){
+						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="dsn" && $name!="organization_domain"){
+							if($value=="" || $value=="noset"){
+								$value=NULL;
+							}
+							switch ($name){
+								case "context":
+									$arrQuery[]="$name=?";
+									$value = $code."-".$value;
+									break;
+								default:
+									$arrQuery[]="$name=?";
+									break;
+							}
+							$arrParam[]=$value;
+						}
+					}
+				}
+			}
+			if(count($arrQuery)>0){
+				$query ="Update iax set ".implode(",",$arrQuery);
+				$query .=" where name=? and organization_domain=?";
+				$arrParam[]=$code."_".$arrProp["name"];
+				$arrParam[]=$arrProp["organization_domain"];
+				return $this->executeQuery($query,$arrParam);
+			}else
+				return true;
+		}else
+			return false;
+	}
+
 	function setParameter($device,$parameter,$value){
 		$query="UPDATE iax set $parameter=? where name=?";
 		if($this->executeQuery($query,array($value,$device))){
@@ -540,6 +715,7 @@ class paloIax extends paloAsteriskDB {
 		}
 		return false;
 	}
+
 
 	function setGroupProp($arrProp,$domain)
 	{
@@ -560,27 +736,9 @@ class paloIax extends paloAsteriskDB {
 		}
 	}
 
-	function deletefromDB($deviceName)
-	{
-		$query="delete from iax where name=?";
-		if($this->executeQuery($query,array($deviceName))){
-			return true;
-		}else
-			return false;
-	}
-
-	function getDefaultSettings($domain)
-	{
-		$query="SELECT * from iax_general where organization_domain=?";
-		$arrResult=$this->getFirstResultQuery($query,array($domain),true,"Don't exist registers.");
-		if($arrResult==false)
-			return array();
-		else
-			return $arrResult;
-	}
-
 	//TODO: Ver la forma de autentificar iax usando md5
-	// mandar el password codificado usando md5
+	// por ahora mandamos el password codificado usando md5 en el caso de que se use dispositivo iax para crear
+	// los peers usados en los faxes
 	function setSecret($device,$secret,$organization){
 		$query="update iax set secret=? where name=? and organization_domain=?";
 		$secret=md5($secret);
@@ -593,6 +751,33 @@ class paloIax extends paloAsteriskDB {
 		}
 	}
 
+	//esto es para los numeros de extensiones internas
+	function validateName($deviceName)
+	{
+		if(preg_match("/^(organization[[:digit:]]{3}){1}_[[:digit:]]+$/", $deviceName)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	function prunePeer($device,$tech){
+		if(!$this->validateName($device))
+		{
+			$this->errMsg=_tr("Invalid device name");
+			return false;
+		}
+
+		$errorM="";
+		$astMang=AsteriskManagerConnect($errorM);
+		if($astMang==false){
+			$this->errMsg=$errorM;
+			return false;
+		}else{ //borro las propiedades dentro de la base ASTDB de asterisk
+			$result=$astMang->prunePeer($tech,$device);
+		}
+		return true;
+	}
 }
 
 
@@ -645,29 +830,35 @@ class paloVoicemail extends paloAsteriskDB{
 		}
 	}
 
-	function createVoicemail($code)
+	function createVoicemail()
 	{
-		//valido que no exista otro dispositivo iax creado con el mismo nombre
+		$result=$this->getCodeByDomain($this->organization_domain);
+		if($result==false){
+			$this->errMsg =_tr("Can't create the voicemiail").$this->errMsg;
+			return false;
+		}
+		$code=$result["code"];
+		//valido que no exista otro mailbox creado con el mismo numero
 		if(!isset($this->mailbox) || !isset($this->password) || !isset($this->context)){
 			$this->errMsg="Field Mailbox, Voicemail Password, Voicemail Context , can't be empty";
-		}else{
+		}elseif(!$this->existVoicemail($this->mailbox,$this->organization_domain)){
 			$arrValues=array();
 			$question="(";
 			$Prop="(";
 			$i=0;
 			$arrPropertyes=get_object_vars($this);
 			foreach($arrPropertyes as $key => $value){
-				if(isset($value) && $key!="_DB" && $key!="errMsg"){
-					if($key=="callback" || $key=="dialout" || $key=="exitcontext" || $key=="context")
-						$value = $code."-".$value;
-					$Prop .=$key.",";
-					$arrValues[$i]=$value;
-					$question .="?,";
-					$i++;
+				if(isset($value)){
+					if($key!="_DB" && $key!="errMsg" && $key!="dsn" && $value!="noset"){
+						if($key=="callback" || $key=="dialout" || $key=="exitcontext" || $key=="context")
+							$value = $code."-".$value;
+						$Prop .=$key.",";
+						$arrValues[$i]=$value;
+						$question .="?,";
+						$i++;
+					}
 				}
 			}
-			
-
 			$question=substr($question,0,-1).")";
 			$Prop=substr($Prop,0,-1).")";
 
@@ -679,19 +870,94 @@ class paloVoicemail extends paloAsteriskDB{
 		return false;
 	}
 
-	//TODO:
-	function editVoicemail()
+	function deletefromDB($vm,$domain)
 	{
-		
-	}
-
-	function deletefromDB($vm,$context)
-	{
-		$query="delete from voicemail where mailbox=? and context=?";
-		if($this->executeQuery($query,array($vm,$context))){
+		$query="delete from voicemail where mailbox=? and organization_domain=?";
+		if($this->executeQuery($query,array($vm,$domain))){
 			return true;
 		}else
 			return false;
+	}
+
+	function existVoicemail($vm,$domain)
+	{
+		$query="select count(mailbox) from voicemail where mailbox=? and organization_domain=?";
+		$result=$this->getFirstResultQuery($query,array($vm,$domain),false);
+		if($result==false){
+			return true;
+		}else{
+			if($result[0]!=0){
+				$this->errMsg=_tr("Mailbox already exist");
+				return true;
+			}
+			return false;
+		}
+	}
+
+	function updateParameters($arrProp){
+		$arrQuery=array();
+		$arrParam=array();
+		$result=$this->getCodeByDomain($arrProp["organization_domain"]);
+		if($result==false){
+			$this->errMsg =_tr("Can't create the voicemail").$this->errMsg;
+			return false;
+		}
+		$code=$result["code"];
+		$context="$code-".$this->context;
+		if($this->existVoicemail($arrProp["mailbox"],$arrProp["organization_domain"])){
+			foreach($arrProp as $name => $value){
+				if(property_exists($this,$name)){
+					if(isset($value)){
+						if($name!="mailbox" && $name!="_DB" && $name!="errMsg" && $name!="dsn" && $name!="organization_domain"){
+							if($value=="" || $value=="noset"){
+								$value=NULL;
+							}
+							switch ($name){
+								case "context":
+									$arrQuery[]="$name=?";
+									$value = $code."-".$value;
+									break;
+								case "callback":
+									$arrQuery[]="$name=?";
+									$value = $code."-".$value;
+									break;
+								case "dialout":
+									$arrQuery[]="$name=?";
+									$value = $code."-".$value;
+									break;
+								case "exitcontext":
+									$arrQuery[]="$name=?";
+									$value = $code."-".$value;
+									break;
+								default:
+									$arrQuery[]="$name=?";
+									break;
+							}
+							$arrParam[]=$value;
+						}
+					}
+				}
+			}
+			if(count($arrQuery)>0){
+				$query ="Update voicemail set ".implode(",",$arrQuery);
+				$query .=" where mailbox=? and organization_domain=?";
+				$arrParam[]=$arrProp["mailbox"];
+				$arrParam[]=$arrProp["organization_domain"];
+				return $this->executeQuery($query,$arrParam);
+			}else
+				return true;
+		}else
+			return false;
+	}
+
+	function getDefaultSettings($domain)
+	{
+		$query="SELECT * from voicemail_general where organization_domain=?";
+		$arrResult=$this->getFirstResultQuery($query,array($domain),true,"Don't exist registers.");
+		if($arrResult==false)
+			return array();
+		else
+			return $arrResult;
 	}
 
 	function setVoicemailProp($arrProp,$domain)
@@ -713,16 +979,6 @@ class paloVoicemail extends paloAsteriskDB{
 		}
 	}
 
-	function getDefaultSettings($domain)
-	{
-		$query="SELECT * from voicemail_general where organization_domain=?";
-		$arrResult=$this->getFirstResultQuery($query,array($domain),true,"Don't exist registers.");
-		if($arrResult==false)
-			return array();
-		else
-			return $arrResult;
-	}
-
 	//TODO: el password del voicemail es el numero de voicemail -- esto para que la clave del usuario no este
 	// en texto plano aqui- POSIBLE HUECO DE SEGURIDAD
 	function setPassword($mailbox,$password,$organization){
@@ -741,30 +997,32 @@ class paloVoicemail extends paloAsteriskDB{
 class paloDevice{
 	public $tecnologia;
 	protected $domain;
-	protected $code="";
+	protected $code;
 	public $errMsg;
 
 	function paloDevice($domain,$type,&$pDB2)
 	{
-		require_once("libs/paloSantoOrganization.class.php");
 		if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
 			$this->errMsg="Invalid domain format";
-		}
+		}else{
+			$this->domain=$domain;
 
-		$this->domain=$domain;
-		$pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
-		$pOrgz=new paloSantoOrganization($pDB);
-		$resCode=$pOrgz->getOrganizationCode($domain);
-		$this->code=$resCode["code"];
+			if($type=="sip"){
+				$this->tecnologia=new paloSip($pDB2);
+				$this->errMsg=$this->tecnologia->errMsg;
+			}elseif($type=="iax2"){
+				$this->tecnologia=new paloIax($pDB2);
+				$this->errMsg=$this->tecnologia->errMsg;
+			}else{
+				$this->errMsg="Invalid technology name";
+			}
 
-		if($type=="sip")
-			$this->tecnologia=new paloSip($pDB2);
-		elseif($type=="iax2")
-			$this->tecnologia=new paloIax($pDB2);
-		elseif($type=="dadhi")
-			$this->tecnologia=new paloDadhi($pDB2);
-		else{
-			$this->errMsg="Invalid technology name";
+			$result=$this->tecnologia->getCodeByDomain($domain);
+			if($result==false){
+				$this->errMsg .=_tr("Can't create a new instace of paloDevice").$this->tecnologia->errMsg;
+			}else{
+				$this->code=$result["code"];
+			}
 		}
 	}
 
@@ -772,6 +1030,16 @@ class paloDevice{
 		return $this->code;
 	}
 
+	function getDomain(){
+		return $this->domain;
+	}
+
+	function validatePaloDevice(){
+		//validamos que la instancia de paloDevice que se esta usando haya sido creda correctamente
+		if(is_null($this->code) || is_null($this->tecnologia) || is_null($this->domain))
+			return false;
+		return true;
+	}
 
 	/**
 		funcion utilizada para crear una nueva extension en asterisk
@@ -780,6 +1048,9 @@ class paloDevice{
 	*/
 	function createNewDevice($arrProp,$type)
 	{
+		if(!$this->validatePaloDevice())
+			return false;
+
 		$device=$this->code."_".$arrProp['name'];
 		if(!$this->existExtension($arrProp['name'],$type)){//se verifica que no exista otra extension y dispositivo igual
 														   //tambien se setea la tecnologia adecuada dentro de esta funcion
@@ -797,28 +1068,12 @@ class paloDevice{
 			}
 
 			$arrProp['organization_domain']=$this->domain;
-			//validamos ip de campos permit y deny
-			/*$arrProp['permit'] = ($arrProp['permit'] == "" || !isset($arrProp['permit']))? "0.0.0.0/0.0.0.0" : $arrProp['permit'];
-			$arrProp['deny'] = ($arrProp['deny'] == "" || !isset($arrProp['deny']))? "0.0.0.0/0.0.0.0" : $arrProp['deny'];
-			print($arrProp['permit']);
-			print($arrProp['deny']);
-			$permit = explode(".",$arrProp['permit']);
-			$deny = explode(".",$arrProp['deny']);
-			if(count($permit)!=4 || count($deny)!=4){
-				$this->errMsg="Invalid value for ip in field permit o deny";
-				return false;
-			}else{
-				foreach(array_merge($permit,$deny) as $value){
-					if($value>255 || $value<0)
-						$this->errMsg="Invalid value for ip in field permit o deny";
-						return false;
-				}
-			}*/
 
 			//seteamos el callerid del equipo
 			$arrProp['callerid']="device <".$arrProp['name'].">";
 
 			if($arrProp['create_vm']=="yes"){
+				$arrVoicemail['organization_domain']=$this->domain;
 				$arrVoicemail["context"] = isset($arrProp["vmcontext"])?$arrProp["vmcontext"]:null;
 				$arrVoicemail["mailbox"] = isset($arrProp['name'])?$arrProp["name"]:null;
 				$arrVoicemail["password"] = isset($arrProp["vmpassword"])?$arrProp["vmpassword"]:null;
@@ -827,9 +1082,9 @@ class paloDevice{
 				$arrVoicemail["saycid"] = isset($arrProp["vmsaycid"])?$arrProp["vmsaycid"]:null;
 				$arrVoicemail["envelope"] = isset($arrProp["vmenvelope"])?$arrProp["vmenvelope"]:null;
 				$arrVoicemail["deletevoicemail"] = isset($arrProp["vmdelete"])?$arrProp["vmdelete"]:null;
+				$arrVoicemail["fullname"] = isset($arrProp["fullname"])?$arrProp["fullname"]:$arrProp['name'];
 				//leer las caractirsiticas que el usuario puede poner en vmoptions, estas deben estar separadas por un " | "
-				if(isset($arrProp['vmoptions']))
-				{
+				if(isset($arrProp['vmoptions'])){
 					$arrTemp=explode("|",$arrProp['vmoptions']);
 					foreach($arrTemp as $value){
 						$arrVmOpt=explode("=",$value);
@@ -841,7 +1096,7 @@ class paloDevice{
 				//mandar a crear el voicemail
 				$pVM=new paloVoicemail($this->tecnologia->_DB);
 				$pVM->setVoicemailProp($arrVoicemail,$this->domain);
-				if($pVM->createVoicemail($this->code)==false){
+				if($pVM->createVoicemail()==false){
 					$this->errMsg="Error setting parameter voicemail ".$pVM->errMsg;
 					return false;
 				}
@@ -855,7 +1110,7 @@ class paloDevice{
 
 			//mandar a crear el dispositivo usando realtime
 			$this->tecnologia->setGroupProp($arrProp,$this->domain);
-			if($this->tecnologia->insertDB($this->code)==false){
+			if($this->tecnologia->insertDB()==false){
 				$this->errMsg="Error setting parameter $type device ".$this->tecnologia->errMsg;
 				return false;
 			}
@@ -882,14 +1137,15 @@ class paloDevice{
 			//validamos los recording
 			switch(strtolower($arrProp["record_out"])){
 				case "always":
-					$arrProp["record_in"]="always";
+					$arrProp["record_out"]="always";
 				case "never":
-					$arrProp["record_in"]="never";
+					$arrProp["record_out"]="never";
 				default:
-					$arrProp["record_in"]="on_demand";
+					$arrProp["record_out"]="on_demand";
 			}
 
-			$exito=$this->insertExtensionDB($this->domain,$type,$arrProp['dial'],$arrProp['name'],$device,$arrProp['rt'],$arrProp['record_in'],$arrProp['record_out'],$this->tecnologia->context,$arrProp["voicemail_context"],"","","","");
+			$outClid=isset($arrProp['out_clid'])?$arrProp['out_clid']:"";
+			$exito=$this->insertExtensionDB($this->domain,$type,$arrProp['dial'],$arrProp['name'],$device,$arrProp['rt'],$arrProp['record_in'],$arrProp['record_out'],$this->tecnologia->context,$arrProp["voicemail_context"],$outClid,"","","");
 			if($exito){
 				if($this->insertDeviceASTDB($arrProp))
 					return true;
@@ -905,10 +1161,13 @@ class paloDevice{
 			$this->errMsg="This number extension already exists .".$this->errMsg;
 			return false;
 		}
-		
 	}
 
 	function createFaxExtension($arrProp){
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return false;
+
 		$type="iax2";
 		if(!$this->existExtension($arrProp['name'],$type)){
 			$device=$this->code."_".$arrProp['name'];
@@ -923,7 +1182,7 @@ class paloDevice{
 				$arrProp['rt']=0;
 
 			$this->tecnologia->setGroupProp($arrProp,$this->domain);
-			if($this->tecnologia->insertDB($this->code)==false){
+			if($this->tecnologia->insertDB()==false){
 				$this->errMsg="Error setting parameter $type device ".$this->tecnologia->errMsg;
 				return false;
 			}
@@ -947,7 +1206,7 @@ class paloDevice{
 		$query="INSERT INTO extension (organization_domain,tech,dial,exten,device,rt,record_in,record_out,context,voicemail,outboundcid,alias,mohclass,noanswer) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		$result=$this->tecnologia->executeQuery($query,array($domain,$tech,$dial,$exten,$device,$rt,$record_in,$record_out,$context,$voicemail,$outboundcid,$alias,$mohclass,$noanswer));
 		if($result==false)
-			$this->errMsg="Couldn't be saved parameters in table extensions ".$this->tecnologia->errMsg;
+			$this->errMsg=$this->tecnologia->errMsg;
 		return $result; 
 	}
 
@@ -957,12 +1216,16 @@ class paloDevice{
 		$query="INSERT INTO fax (organization_domain,tech,dial,exten,device,rt,context,callerid_name,callerid_number) values (?,?,?,?,?,?,?,?,?)";
 		$result=$this->tecnologia->executeQuery($query,array($domain,$tech,$dial,$exten,$device,$rt,$context,$callerIDname,$callerIDnumber));
 		if($result==false)
-			$this->errMsg="Couldn't be saved parameters in table extensions ".$this->tecnologia->errMsg;
+			$this->errMsg=$this->tecnologia->errMsg;
 		return $result;
 	}
 
 	private function insertDeviceASTDB($arrProp)
 	{
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return false;
+
 		if(!preg_match("/^organization[[:digit:]]{3}$/", $this->code)){
 			$this->errMsg="Invalid code format";
 			return false;
@@ -989,12 +1252,9 @@ class paloDevice{
 
 		$arrSetting["language"]=isset($arrProp["language"])?$arrProp["language"]:"\"\"";
 		$arrSetting["noanswer"]=isset($arrProp["noanswer"])?$arrProp["noanswer"]:"\"\"";
-		$arrSetting["outboundcid"]=isset($arrProp["outboundcid"])?$arrProp["outboundcid"]:"\"\"";
+		$arrSetting["outboundcid"]=isset($arrProp["out_clid"])?$arrProp["out_clid"]:"\"\"";
 		$arrSetting["password"]=isset($arrProp["password"])?$arrProp["password"]:"\"\"";
-
-
 		$arrSetting["ringtimer"]=$arrProp['rt'];
-
 		$arrSetting["voicemail"]=$arrProp["voicemail_context"];
 
 		switch(strtolower($arrProp["record_in"])){
@@ -1032,11 +1292,9 @@ class paloDevice{
 			foreach($arrSetting as $key => $value){
 				$result=$astMang->database_put($familia,$key,$value);
 				if(strtoupper($result["Response"]) == "ERROR"){
-					$this->errMsg = _tr("Couldn't be inserted data in ASTDB");
 					$error=true;
 					break;
 				}
-				$arrInsert[$key]=$value;
 			}
 		}
 
@@ -1047,37 +1305,221 @@ class paloDevice{
 		foreach($arrKey as $key => $value){
 			$result=$astMang->database_put($family,$key,$value);
 			if(strtoupper($result["Response"]) == "ERROR"){
-				$this->errMsg = _tr("Couldn't be inserted data in ASTDB");
 				$error=true;
 				break;
 			}
-			$arrInsert[$key]=$value;
 		}
 
 		//si se habilito el callwaiting ingresa ese dato a la base ASTDB
 		if(isset($arrProp['callwaiting'])){
 			if($arrProp['callwaiting']=="yes")
-				$result=$astMang->database_put("CW/$code/",$arrProp['name'],"ENABLED");
+				$result=$astMang->database_put("CW/$code",$arrProp['name'],"ENABLED");
 			else
-				$result=$astMang->database_del("CW/$code/",$arrProp['name']);
+				$result=$astMang->database_del("CW/$code",$arrProp['name']);
 		}else
-			$result=$astMang->database_del("CW/$code/",$arrProp['name']);
+			$result=$astMang->database_del("CW/$code",$arrProp['name']);
+		if(strtoupper($result["Response"]) == "ERROR"){
+			$error=true;
+		}
+
+		//si tiene activado el screen de llamadas
+		if(isset($arrProp['screen'])){
+			switch($arrProp['screen']){
+				case "memory":
+					$result=$astMang->database_put("EXTUSER/$code/".$arrProp['name'],"screen","memory");
+					break;
+				case "nomemory":
+					$result=$astMang->database_put("EXTUSER/$code/".$arrProp['name'],"screen","nomemory");
+					break;
+				default:
+					$result=$astMang->database_del("EXTUSER/$code/".$arrProp['name'],"screen");
+					break;
+			}
+		}
+		if(strtoupper($result["Response"]) == "ERROR"){
+			$error=true;
+		}
+		
+		//si se activo el servicio de dictation
+		if(isset($arrProp['dictate'])){
+			if($arrProp['dictate']=="yes"){
+				$result=$astMang->database_put("EXTUSER/$code/".$arrProp['name']."/dictate","enabled","enabled");
+				switch($arrProp['dictformat']){
+					case "gsm":
+						$astMang->database_put("EXTUSER/$code/".$arrProp['name']."/dictate","format","gsm");
+						break;
+					case "wav":
+						$astMang->database_put("EXTUSER/$code/".$arrProp['name']."/dictate","format","wav");
+						break;
+					default:
+						$astMang->database_put("EXTUSER/$code/".$arrProp['name']."/dictate","format","ogg");
+						break;
+				}
+				if(isset($arrProp['dictemail'])){
+					$astMang->database_put("EXTUSER/$code/".$arrProp['name']."/dictate","email",$arrProp['dictemail']);
+				}
+			}
+		}
+		if(strtoupper($result["Response"]) == "ERROR")
+			$error=true;
 
 		//si hubo algun error eliminar los datos que fueron insertados antes del error
 		if($error){
-			foreach($arrInsert as $key => $value){
-				$result=$astMang->database_del($familia,$key);
-			}
+			$this->errMsg = _tr("Couldn't be inserted data in ASTDB");
+			$result=$astMang->database_delTree("EXTUSER/".$this->code."/".$arrProp['name']);
+			$result=$astMang->database_delTree("DEVICE/".$this->code."/".$code."_".$arrProp['name']);
+			$result=$astMang->database_del("CW",$this->code."/".$arrProp['name']);
 			return false;
 		}else
 			return true;
-		//TODO: FALTA REVISAR SERVICIO DE DICTATION
+	}
+
+	function editDevice($arrProp,$tech){
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return false;
+
+		$device=$this->code."_".$arrProp['name'];
+		$exten=$arrProp['name'];
+		if($this->existExtension($exten,$tech)){
+			//si ingreso un nuevo secrte lo actualizamos
+			if(isset($arrProp['secret']) && $arrProp['secret']!=""){
+				if($tech=="sip"){
+					$arrProp['md5secret']=$this->tecnologia->hashMd5Secret($device,$arrProp['secret']);
+					$arrProp['secret']=null;
+				}
+			}
+
+			$arrProp['organization_domain']=$this->domain;
+
+			//verificar si existe un voicemail para la extension
+			// 1- Si existe y $arrProp['create_vm']=="yes" => editarlo
+			// 2- Si existe y $arrProp['create_vm']=="no" => borrarlo
+			// 3- Si no existe y $arrProp['create_vm']=="yes" => crearlo
+			$exitoVM=true;
+			$pVM=new paloVoicemail($this->tecnologia->_DB);
+			$existVM=$pVM->existVoicemail($arrProp['name'],$this->domain);
+			if($arrProp['create_vm']=="yes"){
+				$arrVoicemail['organization_domain']=$this->domain;
+				$arrVoicemail["context"] = isset($arrProp["vmcontext"])?$arrProp["vmcontext"]:null;
+				$arrVoicemail["mailbox"] = isset($arrProp['name'])?$arrProp["name"]:null;
+				$arrVoicemail["password"] = isset($arrProp["vmpassword"])?$arrProp["vmpassword"]:null;
+				$arrVoicemail["email"] = isset($arrProp["vmemail"])?$arrProp["vmemail"]:null;
+				$arrVoicemail["attach"] = isset($arrProp["vmattach"])?$arrProp["vmattach"]:null;
+				$arrVoicemail["saycid"] = isset($arrProp["vmsaycid"])?$arrProp["vmsaycid"]:null;
+				$arrVoicemail["envelope"] = isset($arrProp["vmenvelope"])?$arrProp["vmenvelope"]:null;
+				$arrVoicemail["deletevoicemail"] = isset($arrProp["vmdelete"])?$arrProp["vmdelete"]:null;
+				$arrVoicemail["fullname"] = isset($arrProp["fullname"])?$arrProp["fullname"]:$arrProp['name'];
+				//leer las caractirsiticas que el usuario puede poner en vmoptions, estas deben estar separadas por un " | "
+				if(isset($arrProp['vmoptions'])){
+					$arrTemp=explode("|",$arrProp['vmoptions']);
+					print_r($arrTemp);
+					foreach($arrTemp as $value){
+						$arrVmOpt=explode("=",$value);
+						if(count($arrVmOpt)==2)
+							$arrVoicemail[$arrVmOpt[0]]=$arrVmOpt[1];
+					}
+				}
+
+				if($existVM){
+					$exitoVM=$pVM->updateParameters($arrVoicemail);
+				}else{
+					$pVM->setVoicemailProp($arrVoicemail,$this->domain);
+					$exitoVM=$pVM->createVoicemail();
+				}
+			}else{
+				if($existVM){
+					$exitoVM=$pVM->deletefromDB($arrProp['name'],$this->domain);
+				}
+			}
+
+			if(!$exitoVM){
+				$this->errMsg=_tr("Error setting voicemail parameters").$pVM->errMsg;
+				return false;
+			}
+
+			if($arrProp['create_vm']=="yes"){
+				$arrProp['mailbox']=$arrProp['name']."@".$this->code."-".$arrVoicemail["context"];
+				$arrProp["voicemail_context"]=$this->code."-".$arrVoicemail["context"];
+			}else
+				$arrProp["voicemail_context"]="novm";
+
+			//actualizamos el dispositivo
+			if($this->tecnologia->updateParameters($arrProp)==false){
+				$this->errMsg="Error setting parameter $type device ".$this->tecnologia->errMsg;
+				return false;
+			}
+
+			//guardar los setting en la tabla extensions; para despues con esta informacion procede a crear las extensiones de tipo local en el plan de marcado
+			if(isset($arrProp['rt'])){
+				if(!preg_match("/^[[:digit:]]+$/",$arrProp['rt']) && !($arrProp['rt']>0 && $arrProp['rt']<60))
+					$arrProp['rt']=0;
+				else
+					$arrProp['rt']=$arrProp['rt'];
+			}else
+				$arrProp['rt']=0;
+
+			//validamos los recording
+			switch(strtolower($arrProp["record_in"])){
+				case "always":
+					$arrProp["record_in"]="always";
+					break;
+				case "never":
+					$arrProp["record_in"]="never";
+					break;
+				default:
+					$arrProp["record_in"]="on_demand";
+					break;
+			}
+
+			//validamos los recording
+			switch(strtolower($arrProp["record_out"])){
+				case "always":
+					$arrProp["record_out"]="always";
+					break;
+				case "never":
+					$arrProp["record_out"]="never";
+					break;
+				default:
+					$arrProp["record_out"]="on_demand";
+					break;
+			}
+
+			$outClid=isset($arrProp['out_clid'])?$arrProp['out_clid']:"";
+			$exito=$this->editExtensionDB($this->domain,$arrProp['name'],$arrProp['rt'],$arrProp['record_in'],$arrProp['record_out'], $arrProp['context'],$arrProp["voicemail_context"],$outClid,"","","");
+			if($exito){
+				if($this->insertDeviceASTDB($arrProp))
+					return true;
+				else{
+					$this->errMsg="Extension couldn't be updated .".$this->errMsg;
+					return false;
+				}
+			}else{
+				$this->errMsg="Problem when trying updated data in extensions table. ".$this->errMsg;
+				return false;
+			}
+		}else{
+			$this->errMsg=_tr("Extensions doesn't exist").$this->errMsg;
+			return false;
+		}
+	}
+
+	function editExtensionDB($domain,$exten,$rt,$record_in,$record_out,$context,$voicemail,$outboundcid,$alias,$mohclass,$noanswer){
+		$query="UPDATE extension SET rt=?, record_in=?, record_out=?, context=?, voicemail=?, outboundcid=?, alias=?, mohclass=?, noanswer=? where exten=? and organization_domain=?";
+		$result=$this->tecnologia->executeQuery($query,array($rt,$record_in,$record_out,$context,$voicemail,$outboundcid,$alias,$mohclass,$noanswer,$exten,$domain));
+		if($result==false)
+			$this->errMsg=$this->tecnologia->errMsg;
+		return $result; 
 	}
 
 	//revisar que no exista dentro de la organizacion otra extension con el mismo numero
 	function existExtension($extension,$tech)
 	{
-		$exito=false;
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
+		$exist=true;
 		if(!preg_match("/^[[:alnum:]]+$/", $extension)){
 			$this->errMsg="Invalid extension format";
 			return true;
@@ -1089,33 +1531,35 @@ class paloDevice{
 		$device=$this->code."_$extension";
 
 		//validamos que el patron de marcado no sea usado como extension
-		$query="SELECT count(id) from extension where exten=? and organization_domain=?";
-		//print_r($this->tecnologia);
-		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$this->domain));
-		if($result[0]!=0)
-			$exito=true;
+		$exist=$this->tecnologia->existExtension($extension,$this->domain);
+		if(!$exist){
+			$continuar=true;
+			//validamos que no exista el peer
+			if($tech=="iax2")
+				$this->tecnologia=new paloIax($this->tecnologia->_DB);
+			elseif($tech=="sip")
+				$this->tecnologia=new paloSip($this->tecnologia->_DB);
+			else{
+				$this->errMsg=_tr("Invalid Technology");
+				$continuar=false;
+			}
 
-		//validamos que el patron de marcado no esta siendo usado para una extension de fax
-		$query="SELECT count(id) from extension where exten=? and organization_domain=?";
-		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$this->domain));
-		if($result[0]!=0)
-			$exito=true;
-
-		//validamos que no exista el peer
-		if($tech=="iax2")
-			$this->tecnologia=new paloIax($this->tecnologia->_DB);
-		else
-			$this->tecnologia=new paloSip($this->tecnologia->_DB);
-
-		if($this->tecnologia->existPeer($device))
-			$exito=true;
-
-		$this->errMsg=$this->tecnologia->errMsg;
-		return $exito;
+			if($continuar){
+				if(!$this->tecnologia->existPeer($device))
+					$exist=false;
+				$this->errMsg .=$this->tecnologia->errMsg;
+			}
+		}
+		return $exist;
 	}
 
 	//recibe el dispositivo asociado a la extension
 	function changePasswordExtension($password,$exten){
+		//validamos que la organizacion exista
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$query="SELECT tech, device, voicemail from extension where exten=? and organization_domain=?";
 		$result=$this->tecnologia->getFirstResultQuery($query,array($exten,$this->domain),true,"Don't exist extension");
 		//verifico que exista el dispositivo al que se le quiere cambiar le password y que el mismo
@@ -1150,6 +1594,11 @@ class paloDevice{
 	}
 
 	function changePasswordFaxExtension($password,$exten){
+		//validamos que la organizacion exista
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$query="SELECT tech, device from fax where exten=? and organization_domain=?";
 		$result=$this->tecnologia->getFirstResultQuery($query,array($exten,$this->domain),true,"Don't exist Fax extension");
 		//verifico que exista el dispositivo al que se le quiere cambiar el password y que el mismo
@@ -1176,6 +1625,11 @@ class paloDevice{
 
 	//vuelve a reconstruir las desde los datos anteriores contenidos en astDB
 	function backupAstDBEXT($exten){
+		//validamos que la organizacion exista
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$exito=true;
 		if(!isset($exten) || $exten==""){
 			$this->errMsg="Invalid extension backup. ".$this->errMsg;
@@ -1202,6 +1656,11 @@ class paloDevice{
 
 	//TODO: hacer validaciones de los elementos que se van a insertar en la base astDB
 	function restoreBackupAstDBEXT($arrBackup){
+		//validamos que la organizacion exista
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$exito=false;
 		if(!isset($arrBackup["exten"]) || $arrBackup["exten"]==""){
 			$this->errMsg="Invalid extension to restore. ".$this->errMsg;
@@ -1227,6 +1686,10 @@ class paloDevice{
 	}
 
 	function deleteFaxExtension($extension){
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$tech="iax2";
 		$query="Select id, organization_domain, exten, device from fax where exten=? and organization_domain=?";
 		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$this->domain),true,"Don't fax exist extension $extension. ");
@@ -1264,6 +1727,10 @@ class paloDevice{
 	// 4. Despues de ello se debe mandar a recargar el plan de marcado para que los cambios tengan efecto
     //    dentro de asterisk
 	function deleteExtension($extension,$tech){
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$query="Select id, organization_domain, exten, device, tech, voicemail from extension where exten=? and tech=? and organization_domain=?";
 		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$tech,$this->domain),true,"Don't exist extension $extension. ");
 		if($result==false && $this->tecnologia->errMsg!="Don't exist extension $extension. "){
@@ -1274,7 +1741,7 @@ class paloDevice{
 				//se borra el voicemail asociado a la extension
 				if(isset($result["voicemail"]) && $result["voicemail"]!="novm"){
 					$pVoicemail= new paloVoicemail($this->tecnologia->_DB);
-					$dvoicemial=$pVoicemail->deletefromDB($result["exten"],$result["voicemail"]);
+					$dvoicemial=$pVoicemail->deletefromDB($result["exten"],$this->domain);
 				}
 				$device=$result["device"];
 
@@ -1301,6 +1768,10 @@ class paloDevice{
 	}
 
 	function deleteAstDBExt($exten,$device,$tech){
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$errorM="";
 		$astMang=AsteriskManagerConnect($errorM);
 		if($astMang==false){
@@ -1314,12 +1785,18 @@ class paloDevice{
 			$result=$astMang->database_del("CFU",$this->code."/".$exten);
 			$result=$astMang->database_del("CFB",$this->code."/".$exten);
 			$result=$astMang->database_del("CF",$this->code."/".$exten);
+			$result=$astMang->database_del("Cw",$this->code."/".$exten);
 			$result=$astMang->prunePeer($tech,$device);
 		}
 		return true;
 	}
 
+
 	function createDialPlanLocalExtension(){
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$arrExtensionLocal=array();
 		$arrExtensionIvr=array();
 		$arrContext=array();
@@ -1402,6 +1879,10 @@ class paloDevice{
 	}
 
 	function createDialPlanFaxExtension(){
+		//validamos que la instacia del objeto haya sido creada correctamente
+		if(!$this->validatePaloDevice())
+			return true;
+
 		$arrExtensionFax=array();
 		$query="Select * from fax where organization_domain=?";
 		$result=$this->tecnologia->getResultQuery($query,array($this->domain),true,"Don't exist faxs extensions for this domain");
@@ -1682,4 +2163,5 @@ class paloTrunks extends paloAsteriskDB{
 		//si se le setea un patron de marcado a la truncal entonces escribir el contexto sub-flp-idtrunk para dicha truncal
 	}
 }
+
 ?>

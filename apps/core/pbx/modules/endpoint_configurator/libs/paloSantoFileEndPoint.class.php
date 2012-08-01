@@ -30,7 +30,7 @@
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
-
+include_once("paloSantoEndPoint.class.php");
 class PaloSantoFileEndPoint
 {
     var $directory;
@@ -219,8 +219,8 @@ class PaloSantoFileEndPoint
                else $return = false;
 
                 break;
-
-	     case 'Xorcom':
+		
+	    case 'Xorcom':
                if($ArrayData['data']['model'] == "XP0120P" || $ArrayData['data']['model'] == "XP0100P"){
                    $contentFileXorcom =PrincipalFileXorcom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$this->ipAdressServer);
                         if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileXorcom)){
@@ -233,16 +233,16 @@ class PaloSantoFileEndPoint
                         $return = false;
                 }
                 break;
-
+                
 
             case 'LG-ERICSSON':
                 if($ArrayData['data']['model'] == "IP8802A"){
                     $contentFileLG_Ericsson = PrincipalFileLG_IP8802A($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'], $this->ipAdressServer);
                     if($this->createFileConf($this->directory, $ArrayData['data']['filename'], $contentFileLG_Ericsson)){
-                        $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
-                            $result      = $this->AsteriskManagerAPI('Command',$parameters);
-                            if($result===false)
-                                $return = false;
+		$parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
+		    $result      = $this->AsteriskManagerAPI('Command',$parameters);
+		    if($result===false)
+			$return = false;
                             else $return = true;
                     }
                     else $return = false;
@@ -285,6 +285,193 @@ class PaloSantoFileEndPoint
 	else
 	    return $result;
     }
+   
+    function getSangomaModel($ip,$mac,$dsnAsterisk,$dsnSqlite,$sw)
+    {
+       $paloEndpoint = new PaloSantoEndpoint($dsnAsterisk, $dsnSqlite);
+       $credential = $paloEndpoint->getPassword($mac);
+       $user=$credential["user"];
+       $password=$credential["password"];
+
+        $result="";
+        if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+        {
+            $this->read($fsock,$sw);
+            fputs($fsock, "$user\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$password\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "SHOW VERSION\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "\r");
+            $result = $this->read($fsock,$sw);
+            fputs($fsock, "exit\r");
+            $posi = strpos($result, "Hardware Platform : ");
+	    $posf = stripos($result, "Serial");
+            $cad1 = explode("Hardware Platform : ", $result);
+            $cad2 = explode("Serial",$cad1[1]); 
+            //$cadena = substr($result, $posi+20,$posf);
+
+	    //$posfin = stripos($cadena, "Serial");	
+            //$rcadena = substr($cadena, 0,$posfin);
+            return $cad2[0];  
+        }
+        else{
+            return $result="";
+        }
+    }
+
+    function setSangomaProvisioningTftp($ip,$ip_provision,$mac,$dsnAsterisk,$dsnSqlite,$sw)
+    {
+       $paloEndpoint = new PaloSantoEndpoint($dsnAsterisk, $dsnSqlite);
+       $credential = $paloEndpoint->getPassword($mac);
+       $user=$credential["user"];
+       $password=$credential["password"];
+
+        $result="";
+        if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+        {
+            $this->read($fsock,$sw);
+            fputs($fsock, "$user\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$password\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "set .tftp.ip=$ip_provision\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "set .lan.file_transfer_method=TFTP");
+            $this->read($fsock,$sw);
+            fputs($fsock, "exit\r");
+            return true;
+        }
+        else{
+            return $false;
+        }
+    }
+
+
+    function getSangomaPorts($ip,$mac,$dsnAsterisk,$dsnSqlite,$sw)
+    {
+       $paloEndpoint = new PaloSantoEndpoint($dsnAsterisk, $dsnSqlite);
+
+        $credential = $paloEndpoint->getPassword($mac);
+        $user=$credential["user"];
+        $password=$credential["password"];
+
+        $result="";
+	$arrPorts= null;
+        
+        if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+        {
+            $this->read($fsock,$sw);
+            fputs($fsock, "$user\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$password\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "SHOW PORTS\r");
+            $result = $this->read($fsock,$sw);
+            fputs($fsock, "exit\r");
+            $posi = strpos($result, "POTS");
+            $posf = stripos($result, "\n\n");
+            $nfxs=0;
+            $nfxo=0;
+            $cadena = explode("POTS port", $result);
+ 	    $nports = count($cadena)-1;
+	    for($i=1;$i<count($cadena);$i++){
+ 	     	  $fxo = stripos($cadena[$i], "FXO"); 
+                if($fxo===false)
+                   $nfxs++;
+                else
+                   $nfxo++;
+		  
+	    }
+            $arrPorts['fxs']=$nfxs;
+	    $arrPorts['fxo']=$nfxo;		
+            $arrPorts['ports']=$nports;
+            $posfin = stripos($cadena, "Serial");
+            $rcadena = substr($cadena, 0,$posfin);
+            return $arrPorts;
+        }
+        else{
+            return $arrPorts=null;
+        }
+    }
+
+       
+    function buildSangomaConfFile($arrData,$tone_set,$dsnAsterisk, $dsnSqlite)
+    {
+       include_once "vendors/Sangoma.cfg.php";
+       $mac=$arrData["mac"];
+       $this->setSangomaProvisioningTftp($arrData["ip_address"],$arrData["pbx_address"],$mac,$dsnAsterisk,$dsnSqlite,2);
+       $config = getSangomaConfiguration($arrData,$tone_set);
+       if(!$this->createFileConf($this->directory,"config.txt",$config))
+           return false;
+       $arrCommands = getSangomaCommands($arrData,$this->ipAdressServer);
+       $result = $this->configSangomaTelnet($arrData["ip_address"],$arrData["telnet_username"],$arrData["telnet_password"],2);
+       
+        if(!$result === true){
+                return false;
+        }
+        else
+            return $result;
+    }
+
+    /*
+    function changePasswordSangoma($ip,$user,$last_password,$new_password,$sw)
+    {
+        if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+        {
+            fputs($fsock, "$user\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$last_password\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "password\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$user\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$new_password\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$new_password\r");
+            $this->read($fsock,$sw);
+            $result = $this->read($fsock,$sw);
+            fputs($fsock, "exit\r");
+            return true;
+        }
+        else{
+            $this->errMsg = _tr("Unable to telnet to ").$ip;
+            return false;
+        }
+    }
+*/
+
+    function configSangomaTelnet($ip,$user,$password,$sw)
+    {
+        if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+        {
+            fputs($fsock, "$user\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "$password\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "get tftp:config.txt\r");
+	    $this->read($fsock,$sw);
+            fputs($fsock, "apply\r");
+	    $this->read($fsock,$sw);
+            fputs($fsock, "save\r");
+            $this->read($fsock,$sw);
+            fputs($fsock, "reboot system\r");
+	    $result = $this->read($fsock,$sw);
+            if(preg_match("/Authentication failed/",$result)){
+                $this->errMsg = _tr("The username or password are incorrect");
+                return null;
+            }
+            else
+                return true;
+        }
+        else{
+            $this->errMsg = _tr("Unable to telnet to ").$ip;
+            return false;
+        }
+    }
+ 
 
     function checkTelnetCredentials($ip,$user,$password,$sw)
     {
@@ -385,8 +572,8 @@ class PaloSantoFileEndPoint
             case 'LG-ERICSSON':
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['filename']);
             break;
-	    
-            case 'Xorcom':
+
+	    case 'Xorcom':
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
             break;
 
@@ -508,9 +695,9 @@ class PaloSantoFileEndPoint
                 $contentFileXorcom = templatesFileXorcom($this->ipAdressServer);
                 $this->createFileConf($this->directory, "y000000000010.cfg", $contentFileXorcom);
                 $this->createFileConf($this->directory, "y000000000011.cfg", $contentFileXorcom);
-                return true;
+                return true; 
                 break;
-
+	   		
         }
     }
 
@@ -610,7 +797,7 @@ class PaloSantoFileEndPoint
             case 'LG-ERICSSON':
                 break;
 
-	    case 'Xorcom':
+            case 'Xorcom':
                 break;
 
         }

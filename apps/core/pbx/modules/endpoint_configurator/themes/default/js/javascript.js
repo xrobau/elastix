@@ -85,7 +85,7 @@ $('.checkall').click(function () {
 	});
 
 
-
+    $("#localization_data").css("display","none");
 });
 
 $(document).ready(function() {
@@ -96,6 +96,16 @@ $(document).ready(function() {
 
 	 changeInput(param);
 	});
+
+   /*     if($("input[name='analog_trunk_lines']").val()!="")
+		$("input[name='analog_trunk_lines']").prop('disabled', true);
+
+         if($("input[name='analog_extension_lines']").val()!="")
+                $("input[name='analog_extension_lines']").prop('disabled', true);
+      */
+   //      $("input[name='telnet_username']").prop('disabled', true);
+       
+
 });
 /*
 

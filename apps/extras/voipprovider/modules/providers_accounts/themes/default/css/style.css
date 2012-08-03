@@ -1,0 +1,35 @@
+#header_detail {
+    width:310px;
+    height:200px;
+    margin:20px 20px 0px 20px;
+}
+
+#detail {
+    float: left;
+    width:40%;
+    height:400px;
+    margin:20px 20px 0px 0px;
+}
+
+#title {
+    color: black;
+    font-size: 14px;
+}
+
+.fielform  {
+    border-color:#9C9C9C;
+    border-width:thin;
+    color:black;
+    font-family:Verdana,Arial,Helvetica,sans-serif;
+    font-size:12px;
+    height:auto;
+    position:relative;
+    width:330px;
+}
+
+.sombreado {
+    color:#000000;
+    font-family:Verdana;
+    font-size:12px;
+    font-weight:bold;
+}

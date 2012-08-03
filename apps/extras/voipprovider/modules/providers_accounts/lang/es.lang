@@ -1,0 +1,78 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.5.2-2                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2009-09-29 05:09:50 Oscar Navarrete onavarrete@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"VoIP Provider" => "Provedor VoIP",
+"Username" => "Username",
+"Secret" => "Secret",
+"Configuration" => "Configuration",
+"Type" => "Type",
+"Qualify" => "Qualify",
+"Insecure" => "Insecure",
+"Host" => "Host",
+"Fromuser" => "Fromuser",
+"Fromdomain" => "Fromdomain",
+"Dtmfmode" => "Dtmfmode",
+"Disallow" => "Disallow",
+"Context" => "Context",
+"Allow" => "Allow",
+"Trustrpid" => "Trustrpid",
+"Sendrpid" => "Sendrpid",
+"Canreinvite" => "Canreinvite",
+"none" => "none",
+"General_Setting" => "General Setting",
+"PEER_Details" => "PEER Setting",
+"Please select a type of VoIp Provider" => "Por favor seleccione un tipo de provedor",
+"Some or someone necesary fields are empty please check and complete" => "Algunos campos son necesarios. Por favor revise y complete",
+"Delete" => "Eliminar",
+"Account Name" => "Nombre de la Cuenta",
+"Edit" => "Editar",
+"New Account" => "Nueva Cuenta",
+"Custom" => "Custom",
+"yes" => "si",
+"no" => "no",
+"Technology" => "Tecnologia",
+"Internal Error" => "Error Interno. Intente de nuevo",
+"Type Trunk" => "Tipo de Troncal",
+"Are you sure you wish to delete the accounts selected." => "Esta seguro que desea eliminar la cuentas seleccionadas.",
+"User is not allowed to do this operation" => "Su usuario no esta permitido hacer esta transacción",
+"Status" => "Estado",
+"ERROR" => "ERROR",
+"Enable" => "Habilitar",
+"Disable" => "Desabilitar",
+"Outbound CallerID" => "CallerID de salida",
+"Advanced" => "Avanzado",
+"The account was created successfully" => "La cuenta fue creada exitosamente",
+"Error when connecting to Asterisk Manager" => "Error al conectarse con Asterisk Manager",
+"The account was edited successfully" => "La cuenta fue editada exitosamente",
+"The account was deleted successfully" => "La cuenta fue eliminada exitosamente",
+"The account was activate successfully" => "La cuenta fue activada exitosamente",
+"The account was desactivate successfully" => "La cuenta fue desactivada exitosamente"
+);
+?>

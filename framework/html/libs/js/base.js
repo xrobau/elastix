@@ -871,6 +871,12 @@ $(document).ready(function(){
 			}
 	});
       
+      var menu = getParameterByName("menu");
+      if(menu=="a2b"){
+         $('#myframe').load(function() {
+              $(".topmenu-right-button a",myframe.document).attr("target","_self");
+         });
+      }
 
 });
 
@@ -914,5 +920,12 @@ function changeColorMenu()
 				alert(error);
 		}
 	);
+
+}
+//Capturar el valor del parametro dado del url
+function getParameterByName(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)')
+                    .exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 
 }

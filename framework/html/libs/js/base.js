@@ -187,8 +187,8 @@ function ShowModalPopUP(title, width, height, html){
     var maskHeight = $(document).height();
     var maskWidth = $(window).width();
 
-    $('.neo-modal-elastix-popup-blockmask').css({'width':maskWidth,'height':maskHeight});
-
+    $('.neo-modal-elastix-popup-blockmask').css({'width':"100%",'height':"100%"});
+    $('.neo-modal-elastix-popup-blockmask').css('padding',  "100%");
     $('.neo-modal-elastix-popup-blockmask').fadeIn(600);
     $('.neo-modal-elastix-popup-blockmask').fadeTo("fast",0.8);
 
@@ -204,6 +204,7 @@ function ShowModalPopUP(title, width, height, html){
     }else{
     	$('.neo-modal-elastix-popup-box').height(height);
     }
+    $('.neo-modal-elastix-popup-box').css('position', "absolute");
     $('.neo-modal-elastix-popup-box').width(width);
     $('.neo-modal-elastix-popup-box').css('top',  top);
     $('.neo-modal-elastix-popup-box').css('left', winW/2-width/2);
@@ -214,6 +215,8 @@ function ShowModalPopUP(title, width, height, html){
     $('.neo-modal-elastix-popup-close').click(function() {
         hideModalPopUP();
     });
+
+
 }
 
 function hideModalPopUP()
@@ -867,6 +870,7 @@ $(document).ready(function(){
 				return false;
 			}
 	});
+      
 
 });
 

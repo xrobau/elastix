@@ -8,7 +8,7 @@
     </tr>
     <tr>
         <td>
-        <a href="{$url_back}" style="text-decoration: none;"><b>&laquo;&nbsp;{$LABEL_BACK}</b></a>
+        <a href="{$url_back}&file={$search}" style="text-decoration: none;"><b>&laquo;&nbsp;{$LABEL_BACK}</b></a>
         <b>{$basename.LABEL}:</b>&nbsp;{$basename.INPUT}{$LABEL_COMPLETADO}&nbsp;&nbsp;
         <input type="submit" class="button" name="Guardar" value="{$LABEL_SAVE}" />&nbsp;&nbsp;
         <input type="submit" class="button" name="Reload"  value="{$RELOAD_ASTERISK}" />

@@ -99,7 +99,6 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
         }
         $listaArchivos = $t;
     }
-
     // Mapear de la lista de archivos al listado completo con URLs
     $arrData = array();
     foreach ($listaArchivos as $sArchivo) {
@@ -109,6 +108,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
                     'menu'      =>  $module_name,
                     'action'    =>  'edit',
                     'file'      =>  $sArchivo,
+		    'search'	=>  $sSubStrArchivo,
                 )),
                 htmlentities($sArchivo, ENT_COMPAT, 'UTF-8')),
             filesize($sDirectorio.$sArchivo),
@@ -146,10 +146,11 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     $fin = ($offset+$limit) <= $total ? $offset+$limit : $total;
     $leng = $fin - $inicio;
 
+    
     $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
     $arrGrid = array(
         "title"    => _tr("File Editor"),
-        "url"      => array('menu' => $module_name, 'file' => $sSubStrArchivo),
+        "url"      => array('menu' => $module_name, 'file' => $sSubStrArchivo ),
         "icon"     => "/modules/$module_name/images/pbx_tools_asterisk_file_editor.png",
         "width"    => "99%",
         "start"    => $inicio,
@@ -162,7 +163,6 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
                         "property1" => ""),
             )
     );
-
     $oGrid->addNew("?menu=$module_name&action=new",_tr("New File"),true);
     $oGrid->showFilter($htmlFilter);
     return $oGrid->fetchGrid($arrGrid, $arrDatosGrid, $arrLang);
@@ -259,13 +259,16 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
         )
     );
     $oForm->setEditMode();
+
     $smarty->assign('url_edit', construirURL(array('menu' => $module_name, 'action' => $sAccion, 'file' => $sNombreArchivo)));
     $smarty->assign('url_back', construirURL(array('menu' => $module_name), array('action', 'file')));
+    $smarty->assign('search',getParameter('search'));
     $smarty->assign('LABEL_SAVE', _tr('Save'));
     $smarty->assign('RELOAD_ASTERISK', _tr('Reload Asterisk'));
     $smarty->assign('LABEL_BACK', _tr('Back'));
     $smarty->assign('msg_status', $sMensajeStatus);
     $smarty->assign('icon',"images/user.png");
+    
     return $oForm->fetchForm("$local_templates_dir/file_editor.tpl", _tr("File Editor"), $_POST);
 }
 

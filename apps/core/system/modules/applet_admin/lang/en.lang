@@ -31,6 +31,7 @@ $arrLangModule=array(
 "Dashboard Applet Admin" => "Dashboard Applet Admin",
 "Applet" => "Applet",
 "Activated" => "Activated",
-"You must have at least one applet activated" => "You must have at least one applet activated"
+"You must have at least one applet activated" => "You must have at least one applet activated",
+"Check All" => "Select/Unselect All",
 );
 ?>

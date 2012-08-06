@@ -235,7 +235,8 @@ $(document).ready(function(){
 	var arrAction = new Array();
     	arrAction["action"]  = "config_echol";
     	arrAction["rawmode"] = "yes";
-	var id = $(this).attr('id');
+	arrAction["menu"]       = $('#lblModule').val();
+        var id = $(this).attr('id');
     	request("index.php",arrAction,false,
           function(arrData,statusResponse,error)
           {
@@ -249,8 +250,8 @@ $(document).ready(function(){
         var arrAction = new Array();
     	arrAction["action"]  = "config_param";
     	arrAction["rawmode"] = "yes";
+        arrAction["menu"]       = $('#lblModule').val();
 	var id = $(this).attr('id');
-	
     	request("index.php",arrAction,false,
           function(arrData,statusResponse,error)
           {

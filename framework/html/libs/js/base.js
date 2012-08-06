@@ -872,7 +872,8 @@ $(document).ready(function(){
 	});
       
       var menu = getParameterByName("menu");
-      if(menu=="a2b"){
+      var lblmenu = menu.split("_");    
+      if(lblmenu["0"]=="a2b"){
          $('#myframe').load(function() {
               $(".topmenu-right-button a",myframe.document).attr("target","_self");
          });

@@ -38,7 +38,15 @@
 <img src="images/loading.gif" />
 </div>
 </div>
-
+     <div id="footer" style="background: url(../../../images/addons_header_row_bg.png) repeat-x top; width: 100%; height:40px;"  >
+     <div class="neo-addons-header-row-navigation">
+        <img id="imgPrimeroFooter" style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-first.gif" width="16" height="16" alt='{$lblStart}' align='absmiddle' />
+        <img id="imgAnteriorFooter"  style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-previous.gif" width="16" height="16" alt='{$lblPrevious}' align='absmiddle' />
+        ({$showing} <span id="addonlist_start_range_footer">?</span> - <span id="addonlist_end_range_footer">?</span> {$of} <span id="addonlist_total_footer">?</span>)
+        <img id="imgSiguienteFooter" style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-next.gif" width="16" height="16" alt='{$lblNext}' align='absmiddle' />
+        <img id="imgFinalFooter" style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-last.gif" width="16" height="16" alt='{$lblEnd}' align='absmiddle' />
+    </div>
+    </div>
 <!-- Neo Progress Bar -->
 <div class="neo-modal-box">
   <div id="container">

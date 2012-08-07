@@ -28,19 +28,19 @@ var estadoCliente =
 };
 
 $(document).ready(function() {
-	$('#imgPrimero').click(function () {
+	$('#imgPrimero, #imgPrimeroFooter').click(function () {
 		if (addonlist_offset != null && addonlist_offset > 0)
 			do_listarAddons(0);
-	});
-	$('#imgAnterior').click(function () {
+        });
+	$('#imgAnterior, #imgAnteriorFooter').click(function () {
 		if (addonlist_offset != null && addonlist_offset >= addonlist_limit)
 			do_listarAddons(addonlist_offset - addonlist_limit);
 	});
-	$('#imgSiguiente').click(function () {
+	$('#imgSiguiente, #imgSiguienteFooter').click(function () {
 		if (addonlist_offset != null && addonlist_offset + addonlist_limit < addonlist_total)
 			do_listarAddons(addonlist_offset + addonlist_limit);
 	});
-	$('#imgFinal').click(function () {
+	$('#imgFinal, #imgFinalFooter').click(function () {
 		if (addonlist_offset != null) {
 			var offsetfinal = addonlist_total - (addonlist_total % addonlist_limit);
 			if (offsetfinal == addonlist_total)
@@ -49,6 +49,8 @@ $(document).ready(function() {
 				do_listarAddons(offsetfinal);
 		}
 	});
+        $('.neo-module-content').css("padding-bottom","0px");
+        $('#addonlist').css("border-bottom","1px solid #CCC");
 	
 	do_listarAddons(null);
 });
@@ -66,6 +68,7 @@ $(document).ready(function() {
 function do_listarAddons(list_offset)
 {
 	loadingAddons();
+        $('#addonlist').css("border-bottom","1px solid #CCC");
 	var filter_by = $('#filter_by').val();
 	var filter_nameRpm = $('#filter_namerpm').val();
 	addonlist_offset = null;
@@ -100,34 +103,34 @@ function do_listarAddons(list_offset)
 			addonlist_total = respuesta['total'];
 			// se coloca opacidad en la botones de pagineo en caso de ser necesario
 			if (addonlist_offset == null || addonlist_offset <= 0)
-			      $('#imgPrimero').css('opacity',0.3);
+			      $('#imgPrimero, #imgPrimeroFooter').css({'opacity':0.3,'cursor':"auto"});
 			else
-			      $('#imgPrimero').css('opacity','');
+			      $('#imgPrimero, #imgPrimeroFooter').css({'opacity':'','cursor':"pointer"});
 			if (addonlist_offset == null || addonlist_offset < addonlist_limit)
-			      $('#imgAnterior').css('opacity',0.3);
+			      $('#imgAnterior, #imgAnteriorFooter').css({'opacity':0.3,'cursor':"auto"});
 			else
-			      $('#imgAnterior').css('opacity','');
+			      $('#imgAnterior, #imgAnteriorFooter').css({'opacity':'','cursor':"pointer"});
 			if (addonlist_offset == null || addonlist_offset + addonlist_limit >= addonlist_total)
-			      $('#imgSiguiente').css('opacity',0.3);
+			      $('#imgSiguiente, #imgSiguienteFooter').css({'opacity':0.3,'cursor':"auto"});
 			else
-			      $('#imgSiguiente').css('opacity','');
+			      $('#imgSiguiente, #imgSiguienteFooter').css({'opacity':'','cursor':"pointer"});
 			if (addonlist_offset != null){
 			      var offsetfinal = addonlist_total - (addonlist_total % addonlist_limit);
 			      if (offsetfinal == addonlist_total)
 				      offsetfinal -= addonlist_limit;
 			      if (offsetfinal <= addonlist_offset)
-				      $('#imgFinal').css('opacity',0.3);
+				      $('#imgFinal, #imgFinalFooter').css({'opacity':0.3,'cursor':"auto"});
 			      else
-				      $('#imgFinal').css('opacity','');
+				      $('#imgFinal, #imgFinalFooter').css({'opacity':'','cursor':"pointer"});
 			}
 			else
-			       $('#imgFinal').css('opacity',0.3);
+			       $('#imgFinal, #imgFinalFooter').css({'opacity':0.3,'cursor':"auto"});
 			if(addonlist_total == 0)
-			    $('#addonlist_start_range').text(0);
+			    $('#addonlist_start_range, #addonlist_start_range_footer').text(0);
 			else
-			    $('#addonlist_start_range').text(addonlist_offset + 1);
-			$('#addonlist_total').text(addonlist_total);
-			$('#addonlist_end_range').text(
+			    $('#addonlist_start_range, #addonlist_start_range_footer').text(addonlist_offset + 1);
+			$('#addonlist_total, #addonlist_total_footer').text(addonlist_total);
+			$('#addonlist_end_range, #addonlist_end_range_footer').text(
 					(addonlist_offset + addonlist_limit >= addonlist_total) 
 					? addonlist_total 
 					: addonlist_offset + addonlist_limit);
@@ -166,6 +169,7 @@ function do_listarAddons(list_offset)
 			});
 			// Iniciar la revisión del status de la instalación
 			do_checkStatus();
+                        $('#addonlist').css("border-bottom","0px");
 		}
 	});
 }

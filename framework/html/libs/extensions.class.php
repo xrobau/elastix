@@ -89,77 +89,6 @@ class ext_gosubif extends extension {
 	}
 }
 
-class ext_hint extends extension {
-	var $exten;
-	var $domain;
-	var $code;
-
-	function ext_hint($exten,$domino) {
-		global $arrConf;
-		if($this->isEmpty($exten) || $this->isEmpty($domino)){
-			$this->error="Number extension and domain can't be empty";
-		}else{
-			$this->exten=$exten;
-			$this->domain=$domino;
-			$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-			$query="SELECT code from organization where domain=?";
-			$result = $pDB->getFirstRowQuery($query, false, array($this->domain));
-			$this->code=$result[0];
-		}
-	}
-
-	function output() {
-		if($this->error!="")
-			return "";
-		else
-			return $this->get_hint()."&Custom:DND".$this->exten;
-	}
-
-	function get_hint(){
-		// We should always check the EXTUSER in case they logged into a device
-		// but we will fall back to the old methond if $astman not open although
-		// I'm pretty sure everything else will puke anyhow if not running
-		//
-		$error="";
-		$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
-		$astman=AsteriskManagerConnect($error);
-		if($astman!=false){
-			//se obtine los dispositivos a los cuales la extension esta asociada
-			$device=$astman->database_get("EXTUSER",$this->code."/".$this->exten."/device");
-			$device_arr = explode('&',$device);
-			$query = "SELECT DISTINCT dial from extension where organization_domain=? and device in ('".implode("','",$device_arr)."')";
-			$arrayParam=array($this->domain);
-		} else {
-			$query = "SELECT dial from extension where exten=? and organization_domain=?";
-			$arrayParam=array($this->exten,$this->domain);
-		}
-
-		$results = $pDB->fetchTable($query, false, $arrayParam);
-
-		//create an array of strings
-		if (is_array($results)){
-			foreach ($results as $result) {
-				$dial[] = str_replace('ZAP', 'DAHDI', $result[0]);
-			}
-		}
-
-		//create a string with & delimiter
-		if (isset($dial) && is_array($dial)){
-			$hint = implode($dial,"&");
-		} else {
-			$query = "SELECT dial from extension where exten=? and organization_domain=?";
-			$results = $pDB->getFirstRowQuery($query, false, array($this->exten,$this->domain));
-			if (isset($results[0])) {
-				$hint = $results[0];
-			} else {
-				$hint = "";
-			}
-		}
-
-		return $hint;
-	}
-}
-
 class ext_goto extends extension {
 	var $pri;
 	var $ext;
@@ -206,14 +135,7 @@ class ext_gotoiftime extends extension {
 	var $true_priority;
 	var $condition;
 	function ext_gotoiftime($condition, $true_priority) {
-	    global $version;
-	    if (version_compare($version, "1.6", "ge")) {
-		//change from '|' to ','
 		$this->condition = str_replace("|", ",", $condition);
-		    }
-		else {
-		    $this->condition = $condition;
-		    }
 		$this->true_priority = $true_priority;
 	}
 	function output() {
@@ -402,16 +324,10 @@ class ext_execif {
 	}
 
 	function output() {
-		global $version;
-
-		if (version_compare($version, "1.6", "ge")) {
-			if ($app_false != '')
-				return "ExecIf({$this->expr}?{$this->app_true}({$this->data_true}):{$this->app_false}({$this->data_false}))";
-			else
-				return "ExecIf({$this->expr}?{$this->app_true}({$this->data_true}))";
-		} else {
-			return "ExecIf({$this->expr},{$this->app_true},{$this->data_true})";
-		}
+		if ($this->app_false != '')
+			return "ExecIf({$this->expr}?{$this->app_true}({$this->data_true}):{$this->app_false}({$this->data_false}))";
+		else
+			return "ExecIf({$this->expr}?{$this->app_true}({$this->data_true}))";
 	}
 }
 
@@ -423,13 +339,7 @@ class ext_setcidname extends extension {
 
 class ext_setcallerpres extends extension {
 	function output() {
-		global $version;
-
-		if (version_compare($version, "1.6", "lt")) {
-			return "SetCallerPres({$this->data})";
-		} else {
-			return "Set(CALLERPRES()={$this->data})";
-		}
+		return "Set(CALLERPRES()={$this->data})";
 	}
 }
 
@@ -661,13 +571,7 @@ class ext_deadagi extends extension {
 }
 class ext_dbdel extends extension {
         function output() {
-            global $version; // Asterisk Version
-            if (version_compare($version, "1.4", "ge")) {
-                return 'Noop(Deleting: '.$this->data.' ${DB_DELETE('.$this->data.')})';
-                }
-            else {
-                return "dbDel(".$this->data.")";
-                }
+			return 'Noop(Deleting: '.$this->data.' ${DB_DELETE('.$this->data.')})';
         }
 }
 class ext_dbdeltree extends extension {
@@ -706,16 +610,13 @@ class ext_vm extends extension {
 		return "VoiceMail(".$this->data.")";
 	}
 }
+
 class ext_vmexists extends extension {
 	function output() {
-		global $version; // Asterisk Version
-		if (version_compare($version, "1.6", ">=")) {
-      return 'Set(VMBOXEXISTSSTATUS=${IF(${MAILBOX_EXISTS('.$this->data.')}?SUCCESS:FAILED)})';
-    } else {
 		  return "MailBoxExists(".$this->data.")";
     }
-	}
 }
+
 class ext_saydigits extends extension {
 	function output() {
 		return "SayDigits(".$this->data.")";
@@ -723,15 +624,10 @@ class ext_saydigits extends extension {
 }
 class ext_sayunixtime extends extension {
 	function output() {
-		global $version; // Asterisk Version
-		if (version_compare($version, "1.6", ">=")) {
 			// SayUnixTime in 1.6 and greater does NOT require slashes. If they're
 			// supplied, strip them out.
 			$fixed = str_replace("\\", "", $this->data);
 			return "SayUnixTime($fixed)";
-		} else {
-			return "SayUnixTime(".$this->data.")";
-		}
 	}
 }
 class ext_echo extends extension {
@@ -742,15 +638,9 @@ class ext_echo extends extension {
 // Thanks to agillis for the suggestion of the nvfaxdetect option
 class ext_nvfaxdetect extends extension {
 	function output() {
-	global $version; // Asterisk Version
-	    if (version_compare($version, "1.6", "ge")) {
 		// change from '|' to ','
 		$astdelimeter = str_replace("|", ",", $this->data);
 		return "NVFaxDetect($astdelimeter)";
-		}
-	    else {
-		return "NVFaxDetect(".$this->data.")";
-		}
 	}
 }
 class ext_receivefax extends extension {
@@ -833,13 +723,7 @@ class ext_dpickup extends extension {
 }
 class ext_lookupcidname extends extension {
 	function output() {
-		global $version;
-
-		if (version_compare($version, "1.6", "ge")) {
-			return 'ExecIf($["${DB(cidname/${CALLERID(num)})}" != ""]?Set(CALLERID(name)=${DB(cidname/${CALLERID(num)})}))';
-		} else {
-			return "LookupCIDName";
-		}
+		return 'ExecIf($["${DB(cidname/${CALLERID(num)})}" != ""]?Set(CALLERID(name)=${DB(cidname/${CALLERID(num)})}))';
 	}
 }
 
@@ -1038,13 +922,7 @@ class ext_chanisavail extends extension {
 
 class ext_setlanguage extends extension {
 	function output() {
-		global $version;
-
-		if (version_compare($version, "1.4", "ge")) {
-			return "Set(CHANNEL(language)={$this->data})";
-		} else {
-			return "Set(LANGUAGE()={$this->data})";
-		}
+		return "Set(CHANNEL(language)={$this->data})";
 	}
 }
 
@@ -1208,6 +1086,108 @@ class ext_progress extends extension {
 	}
 }
 
+
+//hasta aqui lo implementado por freepbx
+class ext_hint extends extension {
+	public $exten;
+	public $domain;
+	public $code;
+
+	function ext_hint($exten,$domino) {
+		global $arrConf;
+		if($this->isEmpty($exten) || $this->isEmpty($domino)){
+			$this->error="Number extension and domain can't be empty";
+		}else{
+			$this->exten=$exten;
+			$this->domain=$domino;
+			$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+			$query="SELECT code from organization where domain=?";
+			$result = $pDB->getFirstRowQuery($query, false, array($this->domain));
+			$this->code=$result[0];
+		}
+	}
+
+	function output() {
+		if($this->error!="")
+			return "";
+		else
+			return $this->get_hint()."&Custom:DND".$this->exten;
+	}
+
+	function get_hint(){
+		// We should always check the EXTUSER in case they logged into a device
+		// but we will fall back to the old methond if $astman not open although
+		// I'm pretty sure everything else will puke anyhow if not running
+		//
+		$error="";
+		$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$astman=AsteriskManagerConnect($error);
+		if($astman!=false){
+			//se obtine los dispositivos a los cuales la extension esta asociada
+			$device=$astman->database_get("EXTUSER",$this->code."/".$this->exten."/device");
+			$device_arr = explode('&',$device);
+			$query = "SELECT DISTINCT dial from extension where organization_domain=? and device in ('".implode("','",$device_arr)."')";
+			$arrayParam=array($this->domain);
+		} else {
+			$query = "SELECT dial from extension where exten=? and organization_domain=?";
+			$arrayParam=array($this->exten,$this->domain);
+		}
+
+		$results = $pDB->fetchTable($query, false, $arrayParam);
+
+		//create an array of strings
+		if (is_array($results)){
+			foreach ($results as $result) {
+				$dial[] = str_replace('ZAP', 'DAHDI', $result[0]);
+			}
+		}
+
+		//create a string with & delimiter
+		if (isset($dial) && is_array($dial)){
+			$hint = implode($dial,"&");
+		} else {
+			$query = "SELECT dial from extension where exten=? and organization_domain=?";
+			$results = $pDB->getFirstRowQuery($query, false, array($this->exten,$this->domain));
+			if (isset($results[0])) {
+				$hint = $results[0];
+			} else {
+				$hint = "";
+			}
+		}
+
+		return $hint;
+	}
+}
+
+class ext_directory extends extension{
+	public $context;
+	public $dial_context;
+	public $options;
+
+	function ext_directory($context,$dial_context,$options) {
+		if(empty($context)){
+			$this->error="vm-context can't be empty can't be empty";
+		}else{
+			$this->context=$context;
+			if(empty($dial_context))
+				$this->dial_context="default";
+			else
+				$this->dial_context=$dial_context;
+
+			if(empty($options))
+				$this->options="";
+			else
+				$this->options=",".$options;
+		}
+	}
+
+	function output() {
+		if($this->error)
+			return "Noop(".$this->error.")";
+		else
+			return "Directory(".$this->context.",".$this->dial_context.$this->options.")";
+	}
+}
 /* example usage
 $ext = new extensions;
 

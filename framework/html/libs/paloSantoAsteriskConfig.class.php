@@ -36,6 +36,7 @@ global $arrConf;
 include_once $arrConf['basePath']."/libs/paloSantoConfig.class.php";
 include_once $arrConf['basePath']."/libs/paloSantoPBX.class.php";
 include_once $arrConf['basePath']."/libs/misc.lib.php";
+include_once $arrConf['basePath']."/modules/features_code/libs/paloSantoFeaturesCode.class.php";
 
 class paloSantoASteriskConfig{
     public $errMsg;
@@ -78,25 +79,31 @@ class paloSantoASteriskConfig{
         }
 	}
 
+	function getCodeByDomain($domain){
+		$query="SELECT code from organization where domain=?";
+		$result=$this->_DBSQLite->getFirstRowQuery($query,true,array($domain));
+		if($result===false)
+			$this->errMsg=$pDB->errMsg;
+		elseif(count($result)==0)
+			$this->errMsg=_tr("Organization doesn't exist");
+		return $result;
+	}
+
 	/**
 	*Funcion que escribe el archivo extensions_domain.conf de cada organizacion
 	*a partir de un archivo generico
 	*/
-	private function writeExtensionsDomain_conf($orgzDomain, $orgzCode)
+	private function writeExtensionsDomain_conf($orgzDomain)
 	{
 		global $arrConf;
 		global $arrConfModule;
 		$EXITO=false;
 
-		$queryCode="SELECT 1 from organization where domain=? and code=?";
-		$code=$this->_DBSQLite->getFirstRowQuery($queryCode, false, array($orgzDomain, $orgzCode));
-		if($code===false){
-			$this->errMsg = $this->_DBSQLite->errMsg;
+		$result=$this->getCodeByDomain($orgzDomain);
+		if($result==false)
 			return false;
-		}elseif(count($code)==0){
-			$this->errMsg = _tr("Organization doesn't exist");
-			return false;
-		}
+		else
+			$orgzCode=$result["code"];
 
 		$fsource="/var/www/elastixdir/asteriskconf/generic_extensions.conf";
 		$extFile="/etc/asterisk/organizations/extensions_$orgzDomain.conf";
@@ -138,8 +145,8 @@ class paloSantoASteriskConfig{
 	}
 
 	private function createAsteriskDirectory($orgzDomain){
-		$queryCode="SELECT 1 from organization where domain=?";
-		$result=$this->_DBSQLite->getFirstRowQuery($queryCode, false, array($orgzDomain));
+		$query="SELECT 1 from organization where domain=?";
+		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain));
 		if($result===false){
 			$this->errMsg = $this->_DBSQLite->errMsg;
 			return false;
@@ -162,9 +169,7 @@ class paloSantoASteriskConfig{
 		foreach($arrDir as $value){
 			if($exito){
 				if(!is_dir("$value/$orgzDomain")){
-					$exito=mkdir("$value/$orgzDomain","0777");
-				}else{
-					chmod("$value/$orgzDomain","0777");
+					$exito=mkdir("$value/$orgzDomain");
 				}
 
 				if(!$exito || !chown("$value/$orgzDomain","asterisk"))
@@ -172,6 +177,7 @@ class paloSantoASteriskConfig{
 
 				if(!$exito || !chgrp("$value/$orgzDomain","asterisk"))
 					$exito=false;
+
 			}else
 				break;
 		}
@@ -241,7 +247,7 @@ class paloSantoASteriskConfig{
 		}else{
 			if($this->includeInExtensions_conf()!==false){
 				$arrayFile=array("extensions_$orgzDomain.conf","extensions_additionals_$orgzDomain.conf","extensions_custom_$orgzDomain.conf","extensions_globals_$orgzDomain.conf");
-				foreach($arrayFile as $file);
+				foreach($arrayFile as $file)
 					unlink($path.$file);
 				$sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
 				$output = $ret = NULL;
@@ -257,37 +263,41 @@ class paloSantoASteriskConfig{
 	//Si se falla la momento de crear los archivos, ahi que deshacer los cambios desde donde se llame a esta funcion
 	function createOrganizationAsterisk($domain){
 		//obtenemos el codigo de la organizacion y de esa manera validamos que la organizacion exista
-		$queryCode="SELECT code from organization where domain=?";
-		$code=$this->_DBSQLite->getFirstRowQuery($queryCode, false, array($domain));
-		if($code===false){
+		$query="SELECT 1 from organization where domain=?";
+		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
+		if($result===false){
 			$this->errMsg = $this->_DBSQLite->errMsg;
 			return false;
-		}elseif(count($code)==0){
-			$this->errMsg = _tr("Invalid organization");
+		}elseif(count($result)==0){
+			$this->errMsg = _tr("Organization doesn't exist");
 			return false;
 		}
+		$pFC=new paloFeatureCodePBX($this->_DB,$domain);
 
 		// 1.-Seateamos las configuracions generales para la organizacion en la base de datos
-		//	  (sip_general,iax_general,voicemail_general,globals)
+		//	  (sip_general,iax_general,voicemail_general,globals,features_codes)
 		// 2.-Creamos dentro de asterisk directorios que van a ser usados por la organizacion
 		// 3.-Creamos los archivos de configuracion de asterisk para dicha organizacion
 		//	  (extensions_dominio.conf,extensions_additionals_dominio.conf,extensions_custom_dominio.conf,extensions_globals_dominio.conf)
 		// 4.-Inclumos los archivos recien creados en con la sentencias include dentro del archivo
         //    extensions.conf y extensions_globals.conf
 		if($this->setGeneralSettingFirstTime($domain)){
-			if($this->createAsteriskDirectory($domain)){
-				if($this->createExtensionGlobalsDomain($domain) &&  $this->writeExtensionsDomain_conf($domain, $code[0]) && $this->setReloadDialplan($domain)){
-					if($this->createExtensionsGlobals()!==false && $this->includeInExtensions_conf()!==false){
-						$sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
-						$output = $ret = NULL;
-						exec($sComando, $output, $ret);
-						return true;
+			if($pFC->insertPaloFeatureDB()){
+				if($this->createAsteriskDirectory($domain)){
+					if($this->createExtensionGlobalsDomain($domain) &&  $this->writeExtensionsDomain_conf($domain) && $this->setReloadDialplan($domain)){
+						if($this->createExtensionsGlobals()!==false && $this->includeInExtensions_conf()!==false){
+							$sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
+							$output = $ret = NULL;
+							exec($sComando, $output, $ret);
+							return true;
+						}else{
+							$this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
 					}else{
 						$this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
 				}else{
-					$this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
-			}else{
-				$this->errMsg=_tr("Error trying created directories inside asterisk");}
+					$this->errMsg=_tr("Error trying created directories inside asterisk");}
+			}else
+				$this->errMsg=_tr("Error trying set Features Codes").$pFC->errMsg;
 		}else{
 			$this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
 
@@ -306,8 +316,8 @@ class paloSantoASteriskConfig{
         //organization_domian
 		$arrNoOrgDomain=array("trunk_dialpatterns");
 
-		//obtenemos una lista de las tablas dentro de la base ast_realtime
-		$queryShow="show tables from ast_realtime";
+		//obtenemos una lista de las tablas dentro de la base elx_pbx
+		$queryShow="show tables from elx_pbx";
 		$result=$this->_DB->fetchTable($queryShow);
 		if($result===false){
 			$this->errMsg = $this->_DB->errMsg;
@@ -356,6 +366,7 @@ class paloSantoASteriskConfig{
 			$result=$astMang->database_delTree("CFU/".$code);
 			$result=$astMang->database_delTree("CFB/".$code);
 			$result=$astMang->database_delTree("CF/".$code);
+			$result=$astMang->database_delTree("CW/".$code);
 			$result=$astMang->database_delTree("BLACKLIST/".$code);
 		}
 	
@@ -671,25 +682,30 @@ class paloSantoASteriskConfig{
 		$file="extensions_additionals_$domain.conf";
 
 		$arrContext=array();
+		$arrFromInt=array();
 
 		//genero el plan de marcado relacionado con las extension internas
 		$pDevice=new paloDevice($domain,"sip",$this->_DB);
-		$arrContextExtLocal=$pDevice->createDialPlanLocalExtension();
-		if($arrContextExtLocal===false){
-			$this->errMsg="Coulnd't create new dialplan. ".$pDevice->errMsg;
-			return false;
-		}else
+		$arrContextExtLocal=$pDevice->createDialPlanLocalExtension($arrFromInt);
+		if($arrContextExtLocal===false || !is_array($arrContextExtLocal))
+			$this->errMsg .=$pDevice->errMsg;
+		else
 			$arrContext=array_merge($arrContext,$arrContextExtLocal);
 
 		//genero el plan de marcado de los faxes
-		$arrContextExtFax=$pDevice->createDialPlanFaxExtension();
-		if($arrContextExtFax===false){
-			$this->errMsg="Coulnd't create new dialplan. ".$pDevice->errMsg;
-			return false;
-		}else
+		$arrContextExtFax=$pDevice->createDialPlanFaxExtension($arrFromInt);
+		if($arrContextExtFax===false || !is_array($arrContextExtFax))
+			$this->errMsg .=$pDevice->errMsg;
+		else
 			$arrContext=array_merge($arrContext,$arrContextExtFax);
 
-
+		//genero el plan marcado relacionado con los features codes
+		$pFC=new paloFeatureCodePBX($this->_DB,$domain);
+		$arrContextFeaturesCode=$pFC->createDialPlanFeaturesCode($arrFromInt);
+		if($arrContextFeaturesCode===false || !is_array($arrContextFeaturesCode))
+			$this->errMsg .=$pFC->errMsg;
+		else
+			$arrContext=array_merge($arrContext,$arrContextFeaturesCode);
 		//genero plan de marcado relacionado con los irvs
 
 		//genero plan de marcado relacionado con la ringgroups
@@ -701,17 +717,24 @@ class paloSantoASteriskConfig{
 		//genero plan de marcado relacionado con las aplicacion (features code)
 
 		//incluimos los contestos dentro de from-internal-additional
-		$arrAdditional=$this->createFromInternalContext($domain);
-		if($arrAdditional===false){
-			$this->errMsg=_tr("Coulnd't be created new dialplan").$this->errMsg;
-			return false;
-		}else
-			$arrContext=array_merge($arrContext,$arrAdditional);
+		$fromInternal=new paloContexto($code[0],"from-internal-additional");
+		$fromInternal->arrInclude=$arrFromInt;
+		$fromInternal->arrExtensions=array(new paloExtensions("h",new ext_hangup(),"1"));
+		$arrContext[]=$fromInternal;
 
 		$contenido="";
+
 		foreach($arrContext as $value){
-			$contenido .=$value->stringContexto($value->arrInclude,$value->arrExtensions);
+			if(isset($value)){
+				if(empty($value->errMsg) && is_object($value)){
+					$contenido .=$value->stringContexto($value->arrInclude,$value->arrExtensions);
+				}else{
+					$this->errMsg .=$value->errMsg."\n";
+				}
+			}
 		}
+
+		//print_r($arrContext);
 
 		if(file_put_contents("/etc/asterisk/organizations/$file",$contenido)===false){
 			$this->errMsg=_tr("Couldn't be written file")." /etc/asterisk/organizations/$file";
@@ -722,27 +745,6 @@ class paloSantoASteriskConfig{
 			exec($sComando, $output, $ret);
 			return true;
 		}
-	}
-
-	private function createFromInternalContext($domain){
-		$queryCode="SELECT code from organization where domain=?";
-		$code=$this->_DBSQLite->getFirstRowQuery($queryCode, false, array($domain));
-		if($code===false){
-			$this->errMsg = $this->_DBSQLite->errMsg;
-			return false;
-		}elseif(count($code)==0){
-			$this->errMsg = _tr("Organization doesn't exist");
-			return false;
-		}
-
-		$arrInclude=array();
-		$arrInclude[]="ext-local\n";
-		$arrInclude[]="ext-fax\n";
-		
-		$context=new paloContexto($code[0],"from-internal-additional");
-		$context->arrInclude=$arrInclude;
-
-		return array($context);
 	}
 
 }
@@ -790,19 +792,19 @@ class paloContexto{
 		$contexto .="include =>".substr($this->name,1,-1)."-custom\n";
 		if(isset($arrInclude)){
 			foreach($arrInclude as $value){
-				if(preg_match("/^[A-Za-z0-9\-_]+$/",$value) || strlen($value)>55){
+				if(preg_match("/^[A-Za-z0-9\-_]+$/",$value) || strlen($value)>62){
 					if(substr($this->name,0,6)=="macro-")
-						$contexto .="include =>macro-".$this->code."-".substr($value,6);
+						$contexto .="include =>macro-".$this->code."-".substr($value,6)."\n";
 					else
-						$contexto .="include =>".$this->code."-".$value;
+						$contexto .="include =>".$this->code."-".$value."\n";
 				}else{
 					$this->errMsg=_tr("Context names cannot contain special characters and have a maximum length of 62 characters");
-					return false;
+					return "";
 				}
 			}
 		}
 
-		if(isset($arrExtensions)){
+		if(is_array($arrExtensions)){
 			foreach($arrExtensions as $extension){
 				if(!is_null($extension) && is_object($extension))
 					$contexto .=$extension->data."\n";

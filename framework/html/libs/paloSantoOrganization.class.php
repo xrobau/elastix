@@ -31,6 +31,7 @@
     include_once "libs/paloSantoFax.class.php";
 	include_once "libs/paloSantoAsteriskConfig.class.php";
 	include_once "libs/paloSantoPBX.class.php";
+	
 class paloSantoOrganization{
     var $_DB;
     var $errMsg;
@@ -653,7 +654,7 @@ class paloSantoOrganization{
     }
 
 
-	function setParameterUserExtension($domain,$type,$exten,$secret,$fullname,$email)
+	function setParameterUserExtension($domain,$type,$exten,$secret,$fullname,$email,&$pDB2)
 	{
 		$pDevice=new paloDevice($domain,$type,$pDB2);
 		if($pDevice->errMsg!=""){
@@ -673,7 +674,7 @@ class paloSantoOrganization{
 		return $arrOpt;
 	}
 
-	function setParameterFaxExtension($domain,$type,$exten,$secret,$clid_name,$clid_number,$port=null)
+	function setParameterFaxExtension($domain,$type,$exten,$secret,$clid_name,$clid_number,$port=null,&$pDB2)
 	{
 		$pDevice=new paloDevice($domain,$type,$pDB2);
 		if($pDevice->errMsg!=""){
@@ -823,7 +824,7 @@ class paloSantoOrganization{
 				$pDB2->beginTransaction();
 				//creamos la extension iax para el fax del usuario
 				if($continuar){
-					$arrPropFax=$this->setParameterFaxExtension($arrOrgz["domain"],"iax2",$fax_extension,$md5password,$cldiName,$clidNumber,$nextPort);
+					$arrPropFax=$this->setParameterFaxExtension($arrOrgz["domain"],"iax2",$fax_extension,$md5password,$cldiName,$clidNumber,$nextPort,$pDB2);
 					if($arrPropFax==false){
 						$error=$this->errMsg;
 						$this->_DB->rollBack();
@@ -840,7 +841,7 @@ class paloSantoOrganization{
 
 				if($continuar){
 					//creamos la extension del usuario
-					$arrProp=$this->setParameterUserExtension($arrOrgz["domain"],"sip",$extension,$password,$name,$username);
+					$arrProp=$this->setParameterUserExtension($arrOrgz["domain"],"sip",$extension,$password,$name,$username,$pDB2);
 					if($arrProp==false){
 						$error=$this->errMsg;
 						$pDB2->rollBack();
@@ -1176,7 +1177,7 @@ class paloSantoOrganization{
 				return false;
 			}
 			//borramos el channel del fax anterior anterior
-			$arrPropFax=$this->setParameterFaxExtension($domain,"iax2",$fax_extension,$md5password,$cldiName,$clidNumber,$port);
+			$arrPropFax=$this->setParameterFaxExtension($domain,"iax2",$fax_extension,$md5password,$cldiName,$clidNumber,$port,$pDB2);
 			if($arrPropFax==false){
 				$error=$this->errMsg;
 				return false;
@@ -1198,7 +1199,7 @@ class paloSantoOrganization{
 			}
 
 			//creamos una nueva para el usuario
-			$arrProp=$this->setParameterUserExtension($domain,"sip",$extension,$password,$name,$username);
+			$arrProp=$this->setParameterUserExtension($domain,"sip",$extension,$password,$name,$username,$pDB2);
 			if($arrProp==false){
 				$error=$this->errMsg;
 				$continuar=false;

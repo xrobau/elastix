@@ -25,7 +25,7 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: {FILE_NAME},v 1.1 {DATE} {YOUR_NAME} {YOUR_EMAIL} Exp $ */
+  $Id: paloSantoPBX.class.php,v 1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
 
 global $arrConf;
 
@@ -42,30 +42,24 @@ if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 class paloAsteriskDB {
 	public $_DB;
 	public $errMsg;
-	public $dsn;
 
-	function paloAsteriskDB(&$pDB)
+	function __construct(&$pDB)
     {
 		if (is_object($pDB)) {
             $this->_DB =& $pDB;
             $this->errMsg = $this->_DB->errMsg;
         }else{
-			$this->setdsn();
-			$pDB = new paloDB($this->dsn);
-			if(!empty($pDB->errMsg)) {
-				$this->errMsg = $pDB->errMsg;
-			} else{
-			$this->_DB = $pDB;
-			}
+			$dsn = (string)$pDB;
+            $this->_DB = new paloDB($dsn);
+
+            if (!$this->_DB->connStatus) {
+                $this->errMsg = $this->_DB->errMsg;
+                // debo llenar alguna variable de error
+            } else {
+                // debo llenar alguna variable de error
+            }
 		}
     }
-
-	function setdsn()
-	{
-		$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
-		$arrConfig = $pConfig->leer_configuracion(false);
-		$this->dsn = "mysql://" . $arrConfig['DBUSER']['valor'] . ":" . $arrConfig['DBPASSWORD']['valor'] . "@" . $arrConfig['DBHOST']['valor'] . "/".$arrConfig['DBNAME']['valor'];
-	}
 
 	function executeQuery($query,$arrayParam)
 	{
@@ -85,10 +79,8 @@ class paloAsteriskDB {
 			return false;
 		}elseif($result==false){
 			$this->errMsg = $noexits;
-			return false;
-		}else{
-			return $result;
 		}
+		return $result;
 	}
 
 	function getFirstResultQuery($query,$arrayParam,$assoc=false,$noexits="Don't exist registers.")
@@ -99,10 +91,8 @@ class paloAsteriskDB {
 			return false;
 		}elseif($result==false){
 			$this->errMsg = $noexits;
-			return $result;
-		}else{
-			return $result;
 		}
+		return $result;
 	}
 
 
@@ -146,6 +136,24 @@ class paloAsteriskDB {
 		}
 		return $exist;
 	}
+
+	//por el momento solo se pueden crear dispositivos de tipos sip e iax, no son soportadas
+	//otras tecnologias
+	function getAllDevice($domain,$tech=null){
+		$where="";
+		$arrParam=array($domain);
+		if(!empty($tech)){
+			$where=" and tech=?";
+			if(strtolower($tech)=="iax")
+				$arrParam[]="iax2";
+			else
+				$arrParam[]=strtolower($tech);
+		}
+		$query="SELECT dial, device, exten from extension where organization_domain=? $where";
+		$result=$this->getResultQuery($query,$arrParam,true,"Don't exist any devices created");
+		return $result;
+	}
+
 }
 
 class paloSip extends paloAsteriskDB {
@@ -243,18 +251,7 @@ class paloSip extends paloAsteriskDB {
 
 	function paloSip(&$pDB)
 	{
-		if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        }else{
-			$this->setdsn();
-			$pDB = new paloDB($this->dsn);
-			if(!empty($pDB->errMsg)) {
-				$this->errMsg = $this->_DB->errMsg;
-			} else{
-				$this->_DB = $pDB;
-			}
-		}
+		parent::__construct($pDB);
 	}
 
 	function existPeer($deviceName)
@@ -307,7 +304,7 @@ class paloSip extends paloAsteriskDB {
 			$i=0;
 			$arrPropertyes=get_object_vars($this);
 			foreach($arrPropertyes as $key => $value){
-				if(isset($value) && $key!="_DB" && $key!="errMsg" && $key!="dsn" && $value!="noset"){
+				if(isset($value) && $key!="_DB" && $key!="errMsg" && $value!="noset"){
 					switch ($key){
 						case "session_timers":
 							$Prop .="session-timers,";
@@ -405,7 +402,7 @@ class paloSip extends paloAsteriskDB {
 			foreach($arrProp as $name => $value){
 				if(property_exists($this,$name)){
 					if(isset($value)){
-						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="dsn" && $name!="organization_domain"){
+						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
 							if($value=="" || $value=="noset"){
 								$value=NULL;
 							}
@@ -557,18 +554,7 @@ class paloIax extends paloAsteriskDB {
 
 	function paloIax(&$pDB)
 	{
-		if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        }else{
-			$this->setdsn();
-			$pDB = new paloDB($this->dsn);
-			if(!empty($pDB->errMsg)) {
-				$this->errMsg = $this->_DB->errMsg;
-			} else{
-				$this->_DB = $pDB;
-			}
-		}
+		parent::__construct($pDB);
 	}
 
 	function existPeer($deviceName)
@@ -623,7 +609,7 @@ class paloIax extends paloAsteriskDB {
 			$i=0;
 			$arrPropertyes=get_object_vars($this);
 			foreach($arrPropertyes as $key => $value){
-				if(isset($value) && $key!="_DB" && $key!="errMsg" && $key!="dsn" && $value!="noset"){
+				if(isset($value) && $key!="_DB" && $key!="errMsg" && $value!="noset"){
 					if($key=="context")
 						$value = $code."-".$value;
 					if($key=="name")
@@ -678,7 +664,7 @@ class paloIax extends paloAsteriskDB {
 			foreach($arrProp as $name => $value){
 				if(property_exists($this,$name)){
 					if(isset($value)){
-						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="dsn" && $name!="organization_domain"){
+						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
 							if($value=="" || $value=="noset"){
 								$value=NULL;
 							}
@@ -816,18 +802,7 @@ class paloVoicemail extends paloAsteriskDB{
 
 	function paloVoicemail(&$pDB)
 	{
-		if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        }else{
-			$this->setdsn();
-			$pDB = new paloDB($this->dsn);
-			if(!empty($pDB->errMsg)) {
-				$this->errMsg = $this->_DB->errMsg;
-			} else{
-				$this->_DB = $pDB;
-			}
-		}
+		parent::__construct($pDB);
 	}
 
 	function createVoicemail()
@@ -849,7 +824,7 @@ class paloVoicemail extends paloAsteriskDB{
 			$arrPropertyes=get_object_vars($this);
 			foreach($arrPropertyes as $key => $value){
 				if(isset($value)){
-					if($key!="_DB" && $key!="errMsg" && $key!="dsn" && $value!="noset"){
+					if($key!="_DB" && $key!="errMsg" && $value!="noset"){
 						if($key=="callback" || $key=="dialout" || $key=="exitcontext" || $key=="context")
 							$value = $code."-".$value;
 						$Prop .=$key.",";
@@ -908,7 +883,7 @@ class paloVoicemail extends paloAsteriskDB{
 			foreach($arrProp as $name => $value){
 				if(property_exists($this,$name)){
 					if(isset($value)){
-						if($name!="mailbox" && $name!="_DB" && $name!="errMsg" && $name!="dsn" && $name!="organization_domain"){
+						if($name!="mailbox" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
 							if($value=="" || $value=="noset"){
 								$value=NULL;
 							}
@@ -1413,7 +1388,6 @@ class paloDevice{
 				//leer las caractirsiticas que el usuario puede poner en vmoptions, estas deben estar separadas por un " | "
 				if(isset($arrProp['vmoptions'])){
 					$arrTemp=explode("|",$arrProp['vmoptions']);
-					print_r($arrTemp);
 					foreach($arrTemp as $value){
 						$arrVmOpt=explode("=",$value);
 						if(count($arrVmOpt)==2)
@@ -1549,6 +1523,8 @@ class paloDevice{
 					$exist=false;
 				$this->errMsg .=$this->tecnologia->errMsg;
 			}
+		}else{
+			$this->errMsg=$this->tecnologia->errMsg;
 		}
 		return $exist;
 	}
@@ -1792,10 +1768,10 @@ class paloDevice{
 	}
 
 
-	function createDialPlanLocalExtension(){
+	function createDialPlanLocalExtension(&$arrFromInt){
 		//validamos que la instacia del objeto haya sido creada correctamente
 		if(!$this->validatePaloDevice())
-			return true;
+			return false;
 
 		$arrExtensionLocal=array();
 		$arrExtensionIvr=array();
@@ -1803,7 +1779,7 @@ class paloDevice{
 
 		$query="Select * from extension where organization_domain=?";
 		$result=$this->tecnologia->getResultQuery($query,array($this->domain),true,"Don't exist extensions for this domain");
-		if($result==false && $this->tecnologia->errMsg!="Don't exist extensions for this domain"){
+		if($result===false){
 			$this->errMsg="Error creating dialplan for locals extensions. ".$this->tecnologia->errMsg; 
 			return false;
 		}else{
@@ -1862,15 +1838,16 @@ class paloDevice{
 
 		$contextoLocal=new paloContexto($this->code,"ext-local");
 		if($contextoLocal===false){
-			$this->errMsg=$contextoLocal->errMsg;
-			return false;
-		}else
+			$contextoLocal->errMsg="ext-local. Error: ".$contextoLocal->errMsg;
+		}else{
 			$contextoLocal->arrExtensions=$arrExtensionLocal;
+			$arrFromInt[]="ext-local";//se hace la inclusion del contexto creado en el arreglo de from internal additional
+											   //de la organizacion
+		}
 
 		$contextofromIvr=new paloContexto($this->code,"from-did-direct-ivr");
 		if($contextofromIvr===false){
-			$this->errMsg=$contextofromIvr->errMsg;
-			return false;
+			$contextofromIvr->errMsg="from-did-direct-ivr. Error: ".$contextofromIvr->errMsg;
 		}else
 			$contextofromIvr->arrExtensions=$arrExtensionIvr;
 
@@ -1878,15 +1855,15 @@ class paloDevice{
 		return $arrContext; 
 	}
 
-	function createDialPlanFaxExtension(){
+	function createDialPlanFaxExtension(&$arrFromInt){
 		//validamos que la instacia del objeto haya sido creada correctamente
 		if(!$this->validatePaloDevice())
-			return true;
+			return false;
 
 		$arrExtensionFax=array();
 		$query="Select * from fax where organization_domain=?";
 		$result=$this->tecnologia->getResultQuery($query,array($this->domain),true,"Don't exist faxs extensions for this domain");
-		if($result==false && $this->tecnologia->errMsg!="Don't exist faxs extensions for this domain"){
+		if($result===false){
 			$this->errMsg=_tr("Error creating dialplan for faxs extensions").$this->tecnologia->errMsg;
 			return false;
 		}else{
@@ -1907,15 +1884,16 @@ class paloDevice{
 
 		$contextoFax=new paloContexto($this->code,"ext-fax");
 		if($contextoFax===false){
-			$this->errMsg=$contextoFax->errMsg;
-			return false;
-		}else
+			$contextoFax->errMsg="ext-fax. Error: ".$contextoFax->errMsg;
+		}else{
 			$contextoFax->arrExtensions=$arrExtensionFax;
+			$arrFromInt[]="ext-fax";//se hace la inclusion del contexto creado en el arreglo de from internal additional
+											   //de la organizacion
+		}
 
 		$arrContext=array($contextoFax);
 		return $arrContext; 
 	}
-
 }
 
 
@@ -1929,24 +1907,16 @@ class paloTrunks extends paloAsteriskDB{
 	function paloTrunk($domain,&$pDB2){
 		if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
 			$this->errMsg="Invalid domain format";
-		}
+		}else{
+			$this->domain=$domain;
 
-		$this->domain=$domain;
-		$pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
-		$pOrgz=new paloSantoOrganization($pDB);
-		$resCode=$pOrgz->getOrganizationCode($domain);
-		$this->code=$resCode["code"];
+			parent::__construct($pDB);
 
-		if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        }else{
-			$this->setdsn();
-			$pDB = new paloDB($this->dsn);
-			if(!empty($pDB->errMsg)) {
-				$this->errMsg = $this->_DB->errMsg;
-			} else{
-				$this->_DB = $pDB;
+			$result=$this->getCodeByDomain($domain);
+			if($result==false){
+				$this->errMsg .=_tr("Can't create a new instace of paloTrunk").$this->errMsg;
+			}else{
+				$this->code=$result["code"];
 			}
 		}
 	}

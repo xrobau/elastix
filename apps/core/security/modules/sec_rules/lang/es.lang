@@ -99,6 +99,9 @@ $arrLangModule=array(
 "Related" => "Relacionado",
 "You have to select at least one state" => "Debe seleccionar al menos un estado",
 "Details" => "Detalles",
-"MESSAGE"=>"MENSAJE"
+"MESSAGE"=>"MENSAJE",
+"IP DETAILS"=>"DETALLES DE LA IP",
+"PROTOCOL DETAILS"=>"DETALLES DEL PROTOCOLO",
+"ACTION DETAIL"=>"DETALLE DE LA ACCIÓN"
 );
 ?>

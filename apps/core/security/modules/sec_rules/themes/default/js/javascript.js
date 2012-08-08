@@ -3,7 +3,7 @@ var changeRule = false;
 $(document).ready(function(){
     showElementByTraffic();
     showElementByProtocol();
-
+    $('.fielform').css("border-color","#FFF");
     $('#id_protocol').change(function(){
         var valor = $('#id_protocol option:selected').val();
         var arrAction              = new Array();

@@ -5,10 +5,11 @@
     </tr>
 </table>
 
-<div class="tabForm" style="font-size: 16px; height: 350px" width="100%">
+<div class="tabForm" style="font-size: 16px; height: auto" width="100%">
 <br />
-    <div id="ip_detail" >
-        <fieldset class="fielform">
+    <div id="ip_detail" style="float: left; margin-right: 20%; z-index: 20;" >
+        <fieldset class="fielform" style="margin-left: 50%;">
+        <legend><strong>{$ip_detail}</strong></legend>
         <table style="font-size: 16px;" width="100%" cellspacing="0" cellpadding="8">
             <!--*****************************************-->
             <tr class="letra12">
@@ -35,8 +36,9 @@
         </fieldset>
     </div>
 <br />
-    <div id="protocol_detail">
-        <fieldset class="fielform">
+    <div id="protocol_detail" style="margin-top:-19px">
+        <fieldset class="fielform" style="margin-left: 50%;">
+        <legend><strong>{$protocol_detail}</strong></legend>
         <table style="font-size: 16px;" width="100%" cellspacing="0" cellpadding="8">
             <!--*****************************************-->
             <tr class="letra12">
@@ -73,6 +75,7 @@
 <br />
     <div id="action_detail" >
         <fieldset class="fielform">
+        <legend><strong>{$action_detail}</strong></legend>
         <table style="font-size: 16px;" width="100%" cellspacing="0" cellpadding="8">
             <!--*****************************************-->
            <tr class="letra12" id="id_target">

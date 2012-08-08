@@ -118,7 +118,8 @@ function newRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
             "<option value='OUTPUT'  $select_traffic_2>"._tr("OUTPUT")."</option>".
             "<option value='FORWARD' $select_traffic_3>"._tr("FORWARD")."</option>".
         "</select>";
-
+    $smarty->assign("action_detail", _tr("ACTION DETAIL"));
+    $smarty->assign("ip_detail", _tr("IP DETAILS"));
     $smarty->assign("traffic_html", $traffic_html);
     $smarty->assign("traffic_label", _tr("Traffic"));
     //************************************************************************
@@ -157,7 +158,7 @@ function newRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
 
     $smarty->assign("protocol_html", $protocol_html);
     $smarty->assign("protocol_label", _tr("Protocol"));
-
+    $smarty->assign("protocol_detail", _tr("PROTOCOL DETAILS"));
     //************************************************************************
     $arrValues['ip_source'] = (isset($arrValues['ip_source'])) ? $arrValues['ip_source'] : "0.0.0.0";
     $arrValues['mask_source'] = (isset($arrValues['mask_source'])) ? $arrValues['mask_source'] : "24";

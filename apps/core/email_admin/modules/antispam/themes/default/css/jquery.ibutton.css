@@ -37,7 +37,7 @@
   top: 0;
   left: 0;
   width: 0;
-  background: transparent url(../../../images/ibutton-slider-default.png) no-repeat scroll 0 -27px;
+  background: transparent url(../../../images/ibutton-slider-default.png) no-repeat scroll 0 -108px;
   z-index: 3;
   padding-left: 3px;
 	/* set default width based on ON/OFF labels */
@@ -48,14 +48,14 @@
   height: 100%;
   width: 100%;
   padding-right: 3px;
-  background: transparent url(../../../images/ibutton-slider-default.png) no-repeat scroll 100% -27px;
+  background: transparent url(../../../images/ibutton-slider-default.png) no-repeat scroll 100% -108px;
   z-index: 3; 
 }
 
 .ibutton-handle-middle {
   height: 100%;
   width: 100%;
-  background: transparent url(../../../images/ibutton-slider-default.png) no-repeat scroll 50% -27px;
+  background: transparent url(../../../images/ibutton-slider-default.png) no-repeat scroll 50% -108px;
   z-index: 3; 
 }
 
@@ -193,3 +193,4 @@ div.ibutton-label-off span {
 .ibutton-disabled div.ibutton-label-off {
 	color: #cbcbcb;
 }
+

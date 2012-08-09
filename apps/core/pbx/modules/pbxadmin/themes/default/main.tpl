@@ -38,7 +38,7 @@
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=callback"  >{$Callback}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=disa"  >{$DISA}</a></li>
     <li>{$Option}</li>
-    <li><a href="/admin/"  class="info" target="_blank">{$Unembedded_freePBX} <span style='margin-left:2.9cm; margin-top:-2.8cm; width:303px'>{$INFO}</span></a></li>
+    <li><a href="/admin/"  class="info" target="_blank">{$Unembedded_freePBX} <span style='margin-left:0.2cm; margin-top:-1.8cm; width:303px'>{$INFO}</span></a></li>
 </ul></div></div></td>
 <td valign="top">{$htmlFPBX}</td>
 </tr>

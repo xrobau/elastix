@@ -841,7 +841,7 @@ function manejarSesionActiva_agentTransfer($oPaloConsola)
         $respuesta['action'] = 'error';
         $respuesta['message'] = _tr('Invalid or missing extension to transfer');
     } else {
-        $bExito = $oPaloConsola->transferirLlamada($sTransferExt, (getParameter('atxfer') == 'true'));
+        $bExito = $oPaloConsola->transferirLlamada($sTransferExt, in_array(getParameter('atxfer'), array('true', 'checked')));
         if (!$bExito) {
             $respuesta['action'] = 'error';
             $respuesta['message'] = _tr('Error while transferring call').' - '.$oPaloConsola->errMsg;
@@ -893,13 +893,13 @@ function manejarSesionActiva_scheduleCall($oPaloConsola)
         'schedule_time_end') as $k) 
         if (!isset($infoAgendar[$k])) $infoAgendar[$k] = NULL;
     
-    $schedule = ($infoAgendar['schedule_use_daterange'] == 'true') ? array(
+    $schedule = in_array($infoAgendar['schedule_use_daterange'], array('true', 'checked')) ? array(
         'date_init' =>  $infoAgendar['schedule_date_start'],
         'date_end'  =>  $infoAgendar['schedule_date_end'], 
         'time_init' =>  $infoAgendar['schedule_time_start'],
         'time_end'  =>  $infoAgendar['schedule_time_end'],
     ) : NULL;
-    $sameagent = ($infoAgendar['schedule_use_sameagent'] == 'true');
+    $sameagent = in_array($infoAgendar['schedule_use_sameagent'], array('true', 'checked'));
     $newphone = $infoAgendar['schedule_new_phone'];
     $newname = $infoAgendar['schedule_new_name'];
     

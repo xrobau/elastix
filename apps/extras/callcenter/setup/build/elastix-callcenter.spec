@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 3.alpha
+Release: 4.alpha
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -98,7 +98,7 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-4.alpha
 - FIXED: Agent Console: fix incorrect check for schedule_use_daterange and
   schedule_use_sameagent flags in call scheduling.
 

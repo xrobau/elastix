@@ -70,6 +70,7 @@ class PaloSantoPackages
 		return $paquetes;
     }
 
+
     function getAllPackages($ruta,$filtro="", $offset, $limit, $total, &$actualizar)
     {
 		$valorfiltro="";
@@ -193,7 +194,7 @@ class PaloSantoPackages
         if(is_array($respuesta)){
             foreach($respuesta as $key => $linea){
                 //Es algo no muy concreto si hay alguna manera de saber las posibles salidas hay que cambiar esta condicion para buscar el error
-                if(ereg("(\[Errno [[:digit:]]{1,}\])",$linea,$reg))
+                if(preg_match("/(\[Errno [[:digit:]]{1,}\])/",$linea,$reg))
                     return $linea;
             }
             if($retorno==1) //Error debido a los repositorios de elastix
@@ -216,22 +217,22 @@ class PaloSantoPackages
         $paquetesUpdateDependen = false;
          if(is_array($respuesta)){
             foreach($respuesta as $key => $linea){
-                if(!ereg("[[:space:]]{1,}",$linea)){
+                if(!preg_match("/[[:space:]]{1,}/",$linea)){
                     $paquetesIntall = false;
                     $paquetesIntallDependen = false;
                     $paquetesUpdateDependen = false;
                 }
                 // 1 paquetes a instalar
-                if(ereg("^Installing:",$linea)){
+                if(preg_match("/^Installing:/",$linea)){
                     $paquetesIntall = true;
                 }
                 //2 paquetes a instalar por dependencias
-                else if(ereg("^Installing for dependencies:",$linea)){
+                else if(preg_match("/^Installing for dependencies:/",$linea)){
                     $paquetesIntallDependen = true;
                     $paquetesIntall = false;
                 }
                 //3 paquetes a actualizar por dependencias
-                else if(ereg("^Updating for dependencies:",$linea)){
+                else if(preg_match("/^Updating for dependencies:/",$linea)){
                     $paquetesUpdateDependen = true;
                     $paquetesIntallDependen = false;
                 }
@@ -246,7 +247,7 @@ class PaloSantoPackages
                     $terminado['Updating for dependencies'][] = $linea;
                 }
                 //4 fin
-                else if(ereg("^Transaction Summary",$linea)){
+                else if(preg_match("/^Transaction Summary/",$linea)){
                     // Procesamiento de los datos recolectados
                     return $this->procesarDatos($terminado);
                 }
@@ -264,7 +265,7 @@ class PaloSantoPackages
             $respuesta .= $arrLang['Installing']."\n";
             for($i=0; $i<count($datos['Installing']); $i++){
                 $linea = trim($datos['Installing'][$i]);
-                if(ereg("^([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([\.[:digit:]]+[[:space:]]+[[:alpha:]]{1})", $linea, $arrReg)) {
+                if(preg_match("/^([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([\.[:digit:]]+[[:space:]]+[[:alpha:]]{1})/", $linea, $arrReg)) {
                     $respuesta .= ($i+1)." .- ".trim($arrReg[1])." -- ".trim($arrReg[3])."\n";
                 }
             }
@@ -275,7 +276,7 @@ class PaloSantoPackages
             $respuesta .= $arrLang['Installing for dependencies']."\n";
             for($i=0; $i<count($datos['Installing for dependencies']); $i++){
                 $linea = trim($datos['Installing for dependencies'][$i]);
-                if(ereg("^([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([\.[:digit:]]+[[:space:]]+[[:alpha:]]{1})", $linea, $arrReg)) {
+                if(preg_match("/^([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([\.[:digit:]]+[[:space:]]+[[:alpha:]]{1})/", $linea, $arrReg)) {
                     $respuesta .= ($i+1)." .- ".trim($arrReg[1])." -- ".trim($arrReg[3])."\n";
                 }
             }
@@ -286,7 +287,7 @@ class PaloSantoPackages
             $respuesta .= $arrLang['Updating for dependencies']."\n";
             for($i=0; $i<count($datos['Updating for dependencies']); $i++){
                 $linea = trim($datos['Updating for dependencies'][$i]);
-                if(ereg("^([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([\.[:digit:]]+[[:space:]]+[[:alpha:]]{1})", $linea, $arrReg)) {
+                if(preg_match("/^([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([\.[:digit:]]+[[:space:]]+[[:alpha:]]{1})/", $linea, $arrReg)) {
                     $respuesta .= ($i+1)." .- ".trim($arrReg[1])." -- ".trim($arrReg[3])."\n";
                 }
             }
@@ -294,6 +295,49 @@ class PaloSantoPackages
         $respuesta .= $arrLang['Total Packages']." = $total";
         return $respuesta;
     }
+
+function uninstallPackage($package)
+{
+        global $arrLang;
+        exec("sudo yum remove -y $package",$respuesta,$retorno);
+        $indiceInicial = $indiceFinal = 0;
+        $terminado = array();
+        $paquetesUnintall = false;
+        $paquetesIntallDependen = false;
+        $paquetesUpdateDependen = false;
+        $valor ="";
+	$total=0;
+        if(is_array($respuesta)){
+         $valor .= _tr("Package(s) Uninstalled").":\n\n"; 
+            foreach($respuesta as $key => $linea){
+                if(!preg_match("/[[:space:]]{1,}/",$linea)){
+                    $paquetesIntall = false;
+                    $paquetesIntallDependen = false;
+                    $paquetesUpdateDependen = false;
+                }
+                // 1 paquetes a instalar
+                if(preg_match("/^Complete!/",$linea)){
+                    $paquetesUnintall = true;
+		    $valor .= "\nTotal: ".$total." "._tr("Packages uninstalled");
+                    $valor .= "\n\n". _tr("Completed!");
+		    return $valor;
+                }
+                if(preg_match("/Erasing/",$linea)){
+	            $paquetesUnintall = true;
+                    $rep =  preg_split("/[\s]*[ ][\s]*/", $linea);
+                    
+                    $valor .= $rep[4]." ".$rep[3]."\n";
+                    
+	            $total++;
+                    
+         	}
+                //2 paquetes a instalar por dependencias
+            }
+            $valor = _tr("Error");
+            return $valor;
+         }
+
+}
 
     function ObtenerTotalPaquetes($submitInstalado, $ruta, $filtro)
     {

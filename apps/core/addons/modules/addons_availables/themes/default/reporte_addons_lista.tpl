@@ -26,7 +26,7 @@
             {/if}
         {else}
         {if $data.can_update}
-            <div class="neo-addons-row-button-install-left">{$UPDATE}</div>
+            <div class="neo-addons-row-button-install-left tooltipInfo">{$UPDATE}{if !empty($data.upgrade_info)}<span>{$data.upgrade_info}</span>{/if}</div>
             <div class="neo-addons-row-button-install-right"><img src="modules/{$module_name}/images/addons_icon_update.png" width="20" height="17" alt="Update" /></div>
         {/if}
 	<input type="hidden" id="{$data.name_rpm}_installed" value="yes"/>

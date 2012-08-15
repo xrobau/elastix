@@ -403,3 +403,50 @@ div.neo-module-content {
     background:url(../../../images/bookmarks_equis.png) no-repeat;
     cursor: pointer;
 }
+
+/* ESTILO PARA TOOLTIP INFOR*/
+a.tooltipInfo {
+    position: relative; /* es la posicion normal */
+    text-decoration: none ; /* forzar sin subrayado */
+}
+
+div.tooltipInfo:hover {
+    z-index:998; /* va a estar por encima de todo */
+}
+
+div.tooltipInfo span {
+    display: none; /* el elemento va a estar oculto */
+    z-index:6000;
+}
+
+div.tooltipInfo:hover span{
+    display: block; /* se fuerza a mostrar el bloque */
+    position: absolute; /* se fuerza a que se ubique en un lugar de la pantalla */
+    text-align: justify;
+    top:-10px;
+    left: -220px;
+    width:200px; /* el ancho por defecto que va a tener */
+    height:auto;
+    max-height: 145px;
+    padding:10px; /* la separacion entre el contenido y los bordes */
+    background-color: #FFF; /* el color de fondo por defecto */
+    border: 1px solid gray;
+
+    -moz-border-radius:12px;
+    -webkit-border-radius:12px;
+    border-radius:12px;
+    -moz-box-shadow: 2px 2px 3px gray;
+    -webkit-box-shadow: 2px 2px 3px gray;
+    box-shadow: 2px 2px 3px gray;
+
+    text-shadow: none;
+    font: 11px Verdana,Arial,Helvetica,sans-serif;
+    color: #000;
+    overflow-y: auto;
+}
+
+.upgrade_info{
+    margin-left: -20px;
+    margin-right: 5px;
+    line-height: 15px;
+}

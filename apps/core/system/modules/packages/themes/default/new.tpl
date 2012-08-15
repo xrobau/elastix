@@ -3,7 +3,7 @@
             <td width='70%'>{$nombre_paquete.LABEL} &nbsp; {$nombre_paquete.INPUT}
                 <input type='submit' class='button' id="submit_nombre" name='submit_nombre' value='{$Search}' />
             </td>
-            <td rowspan='2' id='relojArena'>
+            <td rowspan='2' id='relojArena' style="text-align:center;">
             </td>
         </tr>
         <tr class="letra12">
@@ -18,7 +18,7 @@
        var estatus = $("#estaus_reloj").val();
        if(estatus=='apagado'){
             $("#estaus_reloj").val('prendido');
-            $("#relojArena").html("<img src='modules/packages/images/hourglass.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$UpdatingRepositories}{literal}...</font>");
+            $("#relojArena").html("<img src='modules/packages/images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$UpdatingRepositories}{literal}...</font>");
             $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
             $("#neo-tabla-header-row-filter-1").click();
 		var arrAction                = new Array();
@@ -35,12 +35,13 @@
         }
         else alert("{/literal}{$accionEnProceso}{literal}");
     }
-    function installPackage(paquete)
-    {
+    function installaPackage(paquete)
+    {   
         var estatus = $("#estaus_reloj").val();
         if(estatus=='apagado'){
             $("#estaus_reloj").val('prendido');
-            $("#relojArena").html("<img src='images/hourglass.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$InstallPackage}{literal}: "+ paquete +"...</font>");
+            $("#relojArena").html("");
+            $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$InstallPackage}{literal}: "+ paquete +"...</font>");
             $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
             $("#neo-tabla-header-row-filter-1").click();
 		var arrAction                    = new Array();
@@ -59,5 +60,41 @@
         }
         else alert("{/literal}{$accionEnProceso}{literal}");
     }
+
+    function uninstallPackage(paquete)
+    {
+        var estatus = $("#estaus_reloj").val();
+        if(estatus=='apagado'){
+            $("#estaus_reloj").val('prendido');
+            $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$UninstallPackage}{literal}: "+ paquete +"...</font>");
+            $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
+            $("#neo-tabla-header-row-filter-1").click();
+                var arrAction                    = new Array();
+                arrAction["action"]      = "uninstall";
+                arrAction["menu"]        = "packages";
+                arrAction["paquete"]     = paquete;
+                arrAction["rawmode"]     = "yes";
+                request("index.php",arrAction,false,
+                    function(arrData,statusResponse,error){
+                                alert(statusResponse);
+                                $("#relojArena").html("");
+                                $("#estaus_reloj").val('apagado');
+                                $("#submit_nombre").click();
+
+                });
+        }
+        else alert("{/literal}{$accionEnProceso}{literal}");
+    }
+
+
 </script>
+
+<script>
+function confirmDelete(paquete) {
+  if (confirm("{/literal}{$msgConfirmDelete}{literal}")) {
+             uninstallPackage(paquete);
+  }
+}
+</script>
+
 {/literal}

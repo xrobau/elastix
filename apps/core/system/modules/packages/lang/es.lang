@@ -64,5 +64,12 @@ $arrLangModule=array(
 "Status" => "Estado",
 "The repositories are not up to date. Click on the"=>"Los repositorios no estan actualizados. De click en el boton",
 "button to list all available packages."=>"para listar todos los paquetes disponibles",
+"You will uninstall package along with everything what it depends on it. System can lose important functionalities or become unstable! Are you sure want to Uninstall?"=>"Se desinstalara el paquete con todas sus dependencias. El sistema puede perder funcionalidades importantes o volverse inestable! ¿Está seguro que desea desinstalar?",
+"Uninstalling Package"=>"Desinstalando Paquete",
+"Uninstall"=>"Desinstalar",
+"Package(s) Uninstalled"=>"Paquete(s) Desinstalado(s)",
+"Packages uninstalled"=>"Paquetes desinstalados",
+"Completed!"=>"Terminado",
+"Are you sure want to Install this package?"=>"¿Está seguro que desea instalar este paquete?",
 );
 ?>

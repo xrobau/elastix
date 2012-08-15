@@ -67,5 +67,12 @@ $arrLangModule=array(
 "Status"=>"Status",
 "The repositories are not up to date. Click on the"=>"The repositories are not up to date. Click on the",
 "button to list all available packages."=>"button to list all available packages.",
+"You will uninstall package along with everything what it depends on it. System can lose important functionalities or become unstable! Are you sure want to Uninstall?"=>"You will uninstall package along with everything what it depends on it. System can lose important functionalities or become unstable! Are you sure want to Uninstall?",
+"Uninstalling Package"=>"Uninstalling Package",
+"Uninstall"=>"Uninstall",
+"Package(s) Uninstalled"=>"Package(s) Uninstalled",
+"Packages uninstalled"=>"Packages uninstalled",
+"Completed!"=>"Completed!",
+"Are you sure want to Install this package?"=>"Are you sure want to Install this package?",
 );
 ?>

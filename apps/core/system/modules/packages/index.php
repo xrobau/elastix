@@ -65,6 +65,9 @@ function _moduleContent(&$smarty, $module_name)
         case "install":
             $contenidoModulo = installPaquete($paquete);
             break;
+        case "uninstall":
+            $contenidoModulo = uninstallPaquete($paquete);
+            break;
         default:
             $contenidoModulo = listPackages($smarty, $module_name, $local_templates_dir,$arrConf);
             break;
@@ -103,21 +106,24 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
 		$arrPaquetes = $oPackages->getDataPagination($arrPaquetes,$limit,$offset);
     }
 
-
     $url = array(
         'menu'      =>  $module_name,
         'submitInstalado'   =>  $submitInstalado,
         'nombre_paquete'    =>  $nombre_paquete,
     );
-
+    $smarty->assign("msgConfirmDelete", _tr("You will uninstall package along with everything what it depends on it. System can lose important functionalities or become unstable! Are you sure want to Uninstall?") ); 
+    $smarty->assign("msgConfirmInstall", _tr("Are you sure want to Install this package?") );
+    $smarty->assign("UninstallPackage",_tr("Uninstalling Package") );
     $arrData = array();
     if (is_array($arrPaquetes)) {
         for($i=0;$i<count($arrPaquetes);$i++){
             $estado_paquete = $oPackages->estaPaqueteInstalado($arrPaquetes[$i]['name']);
-            $instalar = $arrLang['Updated'];
+            $instalar = "";//$arrLang['Updated'];
             $tmpPaquete = $arrPaquetes[$i]['name'];
+            $desinstalar = "<a href='#'  onclick="."confirmDelete('$tmpPaquete')".">"._tr("Uninstall")."</a>";
             if(!$estado_paquete){
-                $instalar = "<a href='#'  onclick="."installPackage('$tmpPaquete')".">{$arrLang['Install']}</a>";
+                $instalar = "<a href='#'  onclick="."installaPackage('$tmpPaquete')".">{$arrLang['Install']}</a>";
+                $desinstalar = "";
             }
             $arrData[] = array(
                             $arrPaquetes[$i]['name'],
@@ -126,6 +132,7 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
                             $arrPaquetes[$i]['release'],
                             $arrPaquetes[$i]['repositorio'],
                             (($estado_paquete)?$arrLang["Package Installed"]:"")." $instalar",
+                            $desinstalar,
                             );
         }
     }
@@ -237,4 +244,16 @@ function installPaquete()
     $jsonObject->set_status($resultado);
     return $jsonObject->createJSON();
 }
+
+function uninstallPaquete()
+{
+    $oPackages = new PaloSantoPackages();
+    $paquete = getParameter("paquete");
+    $resultado = $oPackages->uninstallPackage($paquete);
+
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_status($resultado);
+    return $jsonObject->createJSON();
+}
+
 ?>

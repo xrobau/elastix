@@ -36,9 +36,11 @@ class PaloSantoFileEndPoint
     var $directory;
     var $errMsg;
     var $ipAdressServer;
+    var $PathDPMA;
 
     function PaloSantoFileEndPoint($dir,$endpoint_mask=NULL){
         $this->directory = $dir;
+        $this->PathDPMA = "/etc/asterisk/res_digium_phone.conf";
     if(is_null($endpoint_mask))
         $this->ipAdressServer = $_SERVER['SERVER_ADDR'];
     else{
@@ -198,6 +200,17 @@ class PaloSantoFileEndPoint
                 if($this->createFileConf($this->directory, $ArrayData['data']['model']."_".$ArrayData['data']['filename'].".cfg", $contentAudioCodes))
                     $return = true;
                 else $return = false;
+            break;
+
+            case 'Digium':
+                $timeZone= date_default_timezone_get();
+                $MAC= "mac=".$ArrayData['data']['filename'];
+                $contentDigium = PrincipalFileDigiumDPMA($ArrayData['data']['DisplayName'],$ArrayData['data']['id_device'],$ArrayData['data']['arrParameters'], $ArrayData['data']['filename'],$timeZone);
+                if($this->createRegisterDPMA($contentDigium,$MAC)){
+                    $return = true;
+                }
+                else $return = false;
+                
             break;
 
             case 'Yealink':
@@ -516,6 +529,73 @@ class PaloSantoFileEndPoint
         return false;
     }
 
+    function createRegisterDPMA($contentConf, $MAC)
+    {
+        $líneas = file($this->PathDPMA);
+        $flag=true;
+        foreach ($líneas as $num_línea => $línea) {
+            $tmp=trim($línea);
+            if(preg_match("/$MAC/","$tmp")){
+               $flag=false;
+                if($this->registerPhoneDpma($contentConf)){
+                    if($this->deletePhoneDpma($num_línea))
+                        return true;
+                    else return false;
+                }
+                else
+                    return false;
+            }
+        }
+        if($flag){
+            if($this->registerPhoneDpma($contentConf)){ 
+                return true;
+            }else
+                return false;
+        }
+    }
+
+    function deletePhoneDpma($num_línea, $MAC=null)
+    {   
+        $líneas = file($this->PathDPMA);
+        if($MAC!=null){
+            $MAC= "mac=".$MAC;
+            foreach ($líneas as $num_línea => $línea){ 
+                $tmp=trim($línea);
+                if(preg_match("/$MAC/","$tmp"))
+                    break;
+            }
+        }
+        
+        $cont=count($líneas);
+        for ($i = $num_línea; $i > 0; $i--) {
+            if(preg_match("/^\[/",$líneas[$i]))
+                break;
+        } 
+        for ($f = $num_línea; $f < $cont; $f++) {
+            if(preg_match("/^\[/",$líneas[$f]))
+                break;
+        }
+        for ($i ; $i < $f; $i++) {
+            unset($líneas[$i]);
+        }
+
+        if(file_put_contents($this->PathDPMA,$líneas)){
+            exec("/usr/sbin/asterisk -r -x 'module reload res_digium_phone.so'");
+            return true;
+        }else 
+            return false;
+    }
+    
+    function registerPhoneDpma($contentConf)
+    {  
+        $fd = fopen ($this->PathDPMA, "a+");
+        if ($fd){
+            fwrite($fd,$contentConf); // write config file
+            fclose ($fd);
+            exec("/usr/sbin/asterisk -r -x 'module reload res_digium_phone.so'");
+        }    
+        return true;
+    }
 
     /*
         La funcion deleteFiles nos permite eliminar los archivos de configuracion de un
@@ -563,6 +643,10 @@ class PaloSantoFileEndPoint
 
             case 'AudioCodes':
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['model']."_".$ArrayData['data']['filename'].".cfg");
+            break;
+            
+            case 'Digium':
+                return $this->deletePhoneDpma(null, $ArrayData['data']['filename']);
             break;
 
             case 'Yealink':

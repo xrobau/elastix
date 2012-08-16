@@ -67,20 +67,40 @@ class paloSantoEndPoint
         $pDB = $this->connectDataBase("sqlite","endpoint");
         if($pDB==false)
             return false;
-	$sqlPeticion = "select e.id,e.desc_device,e.account,e.mac_adress,e.id_model from endpoint e;";
+    $sqlPeticion = "select e.id,e.desc_device,e.account,e.mac_adress,e.id_model from endpoint e;";
         $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base endpoints
         $pDB->disconnect();
-	return $result;
+    return $result;
     }
 
     function listVendor() {
         $pDB = $this->connectDataBase("sqlite","endpoint");
         if($pDB==false)
             return false;
-	$sqlPeticion = "select v.id,v.name vendor ,m.value mac from vendor v inner join mac m on v.id = m.id_vendor;";
+    $sqlPeticion = "select v.id,v.name vendor ,m.value mac from vendor v inner join mac m on v.id = m.id_vendor;";
         $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base endpoints
         $pDB->disconnect(); 
-	return $result;
+    return $result;
+    }
+
+    function queryParametersEndpoints() {
+        $pDB = $this->connectDataBase("sqlite","endpoint");
+        if($pDB==false)
+            return false;    
+    $sqlPeticion = "select p.id_endpoint, p.name, p.value from parameter p, endpoint e where p.id_endpoint = e.id";
+        $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base endpoints
+        $pDB->disconnect(); 
+    return $result;
+    }
+
+    function queryIdEndpoints() {
+        $pDB = $this->connectDataBase("sqlite","endpoint");
+        if($pDB==false)
+            return false;    
+    $sqlPeticion = "select id_endpoint from parameter group by id_endpoint";
+        $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base endpoints
+        $pDB->disconnect(); 
+    return $result;
     }
 
      function deleteEndpointsConf($Mac) {
@@ -103,99 +123,99 @@ class paloSantoEndPoint
 
     function modelSupportIAX($id_model)
     {
-	$pDB = $this->connectDataBase("sqlite","endpoint");
+    $pDB = $this->connectDataBase("sqlite","endpoint");
         if($pDB==false)
             return false;
-	$query = "select iax_support from model where id=?";
-	$result = $pDB->getFirstRowQuery($query,true,array($id_model));
-	if(is_array($result) && count($result)>0){
-	    if($result['iax_support'] == '1')
-		return true;
-	    else
-		return false;
-	}
-	else
-	    return null;
+    $query = "select iax_support from model where id=?";
+    $result = $pDB->getFirstRowQuery($query,true,array($id_model));
+    if(is_array($result) && count($result)>0){
+        if($result['iax_support'] == '1')
+        return true;
+        else
+        return false;
+    }
+    else
+        return null;
     }
 
     function getEndpointParameters($mac)
     {
-	$pDB = $this->connectDataBase("sqlite","endpoint");
-	if($pDB==false)
+    $pDB = $this->connectDataBase("sqlite","endpoint");
+    if($pDB==false)
             return false;
-	$query = "select * from parameter where id_endpoint like (select id from endpoint where  mac_adress=?)";
-	$result = $pDB->fetchTable($query,true,array($mac)); //se consulta a la base endpoints
-	return $result;
+    $query = "select * from parameter where id_endpoint like (select id from endpoint where  mac_adress=?)";
+    $result = $pDB->fetchTable($query,true,array($mac)); //se consulta a la base endpoints
+    return $result;
     }
 
     function getCountries()
     {
-	$pDB = $this->connectDataBase("sqlite","endpoint");
-	if($pDB==false)
+    $pDB = $this->connectDataBase("sqlite","endpoint");
+    if($pDB==false)
             return false;
-	$query = "select id,country from settings_by_country order by country";
-	$result = $pDB->fetchTable($query,true); //se consulta a la base endpoints
-	return $result;
+    $query = "select id,country from settings_by_country order by country";
+    $result = $pDB->fetchTable($query,true); //se consulta a la base endpoints
+    return $result;
     }
 
     function getToneSet($id)
     {
-	$pDB = $this->connectDataBase("sqlite","endpoint");
-	if($pDB==false)
+    $pDB = $this->connectDataBase("sqlite","endpoint");
+    if($pDB==false)
             return false;
-	$query = "select fxo_fxs_profile,tone_set from settings_by_country where id=?";
-	$result = $pDB->getFirstRowQuery($query,true,array($id)); //se consulta a la base endpoints
-	return $result;
+    $query = "select fxo_fxs_profile,tone_set from settings_by_country where id=?";
+    $result = $pDB->getFirstRowQuery($query,true,array($id)); //se consulta a la base endpoints
+    return $result;
     }
 
     function countryExists($id)
     {
-	$pDB = $this->connectDataBase("sqlite","endpoint");
-	if($pDB==false)
+    $pDB = $this->connectDataBase("sqlite","endpoint");
+    if($pDB==false)
             return false;
-	$query = "select count(*) from settings_by_country where id=?";
-	$result = $pDB->getFirstRowQuery($query,false,array($id));
-	if($result===false){
+    $query = "select count(*) from settings_by_country where id=?";
+    $result = $pDB->getFirstRowQuery($query,false,array($id));
+    if($result===false){
             $this->errMsg = $pDB->errMsg;
             return false;
         }
-	if($result[0] > 0)
-	    return true;
-	else
-	    return false;
+    if($result[0] > 0)
+        return true;
+    else
+        return false;
     }
 
     function getPattonDevices()
     {
-	$sComando = '/usr/bin/elastix-helper patton_query';
-	$output = $ret = NULL;
+    $sComando = '/usr/bin/elastix-helper patton_query';
+    $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
             $this->errMsg = implode('', $output);
             return array();
         }
-	$pattonDevices = array();
-	$i=0;
-	if(is_array($output) && count($output) > 0){
-	    foreach($output as $value){
-		if(preg_match("/^\[(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\]$/",$value,$matches)){
-		    $i++;
-		    $pattonDevices[$i]['ip_adress'] = $matches[1];
-		    $pattonDevices[$i]['desc_vendor'] = "Patton Electronics Co.";
-		    $pattonDevices[$i]['name_vendor'] = "Patton";
-		    $pattonDevices[$i]['id_vendor'] = "";
-		    $pattonDevices[$i]['id'] = "";
-		    $pattonDevices[$i]['desc_device'] = "";
-		    $pattonDevices[$i]['account'] = "";
-		    $pattonDevices[$i]['configurated'] = "";
-		}
-		elseif(preg_match("/^type=(.+)$/",$value,$matches))
-		    $pattonDevices[$i]['model_no'] = $matches[1];
-	    }
-	    return $pattonDevices;
-	}
-	else
-	    return array();
+    $pattonDevices = array();
+    $i=0;
+    if(is_array($output) && count($output) > 0){
+        foreach($output as $value){
+        if(preg_match("/^\[(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\]$/",$value,$matches)){
+            $i++;
+            $pattonDevices[$i]['ip_adress'] = $matches[1];
+            $pattonDevices[$i]['desc_vendor'] = "Patton Electronics Co.";
+            $pattonDevices[$i]['name_vendor'] = "Patton";
+            $pattonDevices[$i]['id_vendor'] = "";
+            $pattonDevices[$i]['id'] = "";
+            $pattonDevices[$i]['desc_device'] = "";
+            $pattonDevices[$i]['account'] = "";
+            $pattonDevices[$i]['configurated'] = "";
+        }
+        elseif(preg_match("/^type=(.+)$/",$value,$matches))
+            $pattonDevices[$i]['model_no'] = $matches[1];
+        }
+        return $pattonDevices;
+    }
+    else
+        return array();
     }
    
     function saveVegaData($arrData)
@@ -294,95 +314,95 @@ class paloSantoEndPoint
 
     function savePattonData($arrData)
     {
-	$pDB = $this->connectDataBase("sqlite","endpoint");
-	if($pDB==false)
+    $pDB = $this->connectDataBase("sqlite","endpoint");
+    if($pDB==false)
             return false;
-	$query = "select count(*) from endpoint where mac_adress=?";
-	$result = $pDB->getFirstRowQuery($query,false,array($arrData["mac"])); //se consulta a la base endpoints
-	if($result === false){
-	    $this->errMsg = $pDB->errMsg;
-	    return false;
-	}
-	if($result[0] == 0){
-	    $query = "insert into endpoint (id_model,mac_adress,id_vendor,edit_date) values ((select id from model where name='Patton'),?,(select id from vendor where name='Patton'),datetime('now','localtime'))";
-	    $result = $pDB->genQuery($query,array($arrData["mac"]));
-	    if($result == false){
-		$this->errMsg = $pDB->errMsg;
-		return false;
-	    }
-	}
-	foreach($arrData as $name => $value){
-	    if($name != "mac" && $name != "ip_address"){
-		$query = "select count(*) from parameter where name=? and id_endpoint like (select id from endpoint where mac_adress=?)";
-		$result = $pDB->getFirstRowQuery($query,false,array($name,$arrData["mac"])); //se consulta a la base endpoints
-		if($result === false){
-		    $this->errMsg = $pDB->errMsg;
-		    return false;
-		}
-		if($result[0] > 0){
-		    $query = "update parameter set value=? where name=? and id_endpoint like (select id from endpoint where mac_adress=?)";
-		    $arrParameter = array($value,$name,$arrData["mac"]);
-		}
-		else{
-		    $query = "insert into parameter (id_endpoint,name,value) values ((select id from endpoint where mac_adress=?),?,?)";
-		    $arrParameter = array($arrData["mac"],$name,$value);
-		}
-		$result = $pDB->genQuery($query,$arrParameter);
-		if($result == false){
-		    $this->errMsg = $pDB->errMsg;
-		    return false;
-		}
-	    }
-	}
-	$extension = "";
-	$trunk = "";
-	$extensionsData = array("user_name","user","authentication_user");
-	$trunksData = array("line","ID","authentication_ID");
-	$number = 0;
-	foreach($extensionsData as $extData){
-	    if($number == 0)
-		$extension .= " (name like '$extData%'";
-	    else
-		$extension .= " or (name like '$extData%'";
-	    $number++;
-	    if($extData == "user")
-		$extension .= " and name not like 'user_name%'";
-	    for($i=0;$i<$arrData["analog_extension_lines"];$i++){
-		if($i==0)
-		    $extension .= " and name not in ('{$extData}{$i}'";
-		else
-		    $extension .= ",'{$extData}{$i}'";
-		if($i==($arrData["analog_extension_lines"] - 1))
-		    $extension .= ")";
-	    }
-	    $extension .= ")";
-	}
-	$number = 0;
-	foreach($trunksData as $trunData){
-	    if($number == 0)
-		$trunk .= " (name like '$trunData%'";
-	    else
-		$trunk .= " or (name like '$trunData%'";
-	    $number++;
-	    if($trunData == "line")
-		$trunk .= " and name<>'lines_sip_port'";
-	    for($i=0;$i<$arrData["analog_trunk_lines"];$i++){
-		if($i==0)
-		    $trunk .= " and name not in ('{$trunData}{$i}'";
-		else
-		    $trunk .= ",'{$trunData}{$i}'";
-		if($i==($arrData["analog_trunk_lines"] - 1))
-		    $trunk .= ")";
-	    }
-	    $trunk .= ")";
-	}
-	$query = "delete from parameter where id_endpoint like (select id from endpoint where mac_adress=?) and ($extension or $trunk)";
-	$result = $pDB->genQuery($query,array($arrData["mac"]));
-	if($result == false){
-	    $this->errMsg = $pDB->errMsg;
-	    return false;
-	}
-	return true;
+    $query = "select count(*) from endpoint where mac_adress=?";
+    $result = $pDB->getFirstRowQuery($query,false,array($arrData["mac"])); //se consulta a la base endpoints
+    if($result === false){
+        $this->errMsg = $pDB->errMsg;
+        return false;
+    }
+    if($result[0] == 0){
+        $query = "insert into endpoint (id_model,mac_adress,id_vendor,edit_date) values ((select id from model where name='Patton'),?,(select id from vendor where name='Patton'),datetime('now','localtime'))";
+        $result = $pDB->genQuery($query,array($arrData["mac"]));
+        if($result == false){
+        $this->errMsg = $pDB->errMsg;
+        return false;
+        }
+    }
+    foreach($arrData as $name => $value){
+        if($name != "mac" && $name != "ip_address"){
+        $query = "select count(*) from parameter where name=? and id_endpoint like (select id from endpoint where mac_adress=?)";
+        $result = $pDB->getFirstRowQuery($query,false,array($name,$arrData["mac"])); //se consulta a la base endpoints
+        if($result === false){
+            $this->errMsg = $pDB->errMsg;
+            return false;
+        }
+        if($result[0] > 0){
+            $query = "update parameter set value=? where name=? and id_endpoint like (select id from endpoint where mac_adress=?)";
+            $arrParameter = array($value,$name,$arrData["mac"]);
+        }
+        else{
+            $query = "insert into parameter (id_endpoint,name,value) values ((select id from endpoint where mac_adress=?),?,?)";
+            $arrParameter = array($arrData["mac"],$name,$value);
+        }
+        $result = $pDB->genQuery($query,$arrParameter);
+        if($result == false){
+            $this->errMsg = $pDB->errMsg;
+            return false;
+        }
+        }
+    }
+    $extension = "";
+    $trunk = "";
+    $extensionsData = array("user_name","user","authentication_user");
+    $trunksData = array("line","ID","authentication_ID");
+    $number = 0;
+    foreach($extensionsData as $extData){
+        if($number == 0)
+        $extension .= " (name like '$extData%'";
+        else
+        $extension .= " or (name like '$extData%'";
+        $number++;
+        if($extData == "user")
+        $extension .= " and name not like 'user_name%'";
+        for($i=0;$i<$arrData["analog_extension_lines"];$i++){
+        if($i==0)
+            $extension .= " and name not in ('{$extData}{$i}'";
+        else
+            $extension .= ",'{$extData}{$i}'";
+        if($i==($arrData["analog_extension_lines"] - 1))
+            $extension .= ")";
+        }
+        $extension .= ")";
+    }
+    $number = 0;
+    foreach($trunksData as $trunData){
+        if($number == 0)
+        $trunk .= " (name like '$trunData%'";
+        else
+        $trunk .= " or (name like '$trunData%'";
+        $number++;
+        if($trunData == "line")
+        $trunk .= " and name<>'lines_sip_port'";
+        for($i=0;$i<$arrData["analog_trunk_lines"];$i++){
+        if($i==0)
+            $trunk .= " and name not in ('{$trunData}{$i}'";
+        else
+            $trunk .= ",'{$trunData}{$i}'";
+        if($i==($arrData["analog_trunk_lines"] - 1))
+            $trunk .= ")";
+        }
+        $trunk .= ")";
+    }
+    $query = "delete from parameter where id_endpoint like (select id from endpoint where mac_adress=?) and ($extension or $trunk)";
+    $result = $pDB->genQuery($query,array($arrData["mac"]));
+    if($result == false){
+        $this->errMsg = $pDB->errMsg;
+        return false;
+    }
+    return true;
     }
 
     /**
@@ -400,7 +420,7 @@ class paloSantoEndPoint
     function endpointMap($sNetMask, $vendors, $prevEndpoints, $pattonDevices, $KeyAsMAC=false)
     {
         // Validación de parámetros
-    	if (!preg_match('|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$|', $sNetMask)) {
+        if (!preg_match('|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$|', $sNetMask)) {
             $this->errMsg = '(internal) invalid netmask';
             return NULL;
         }
@@ -495,10 +515,10 @@ class paloSantoEndPoint
         $pDB = $this->connectDataBase("mysql","asterisk");
         if($pDB==false)
             return false;
-	if($all)
-	    $iax = "OR tech = 'iax2'";
-	else
-	    $iax = "";
+    if($all)
+        $iax = "OR tech = 'iax2'";
+    else
+        $iax = "";
         $sqlPeticion = "select id, concat(description,' <',user,'>') label, tech FROM devices WHERE tech = 'sip' $iax ORDER BY id ASC;";
         $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base asterisk
         $pDB->disconnect(); 
@@ -512,33 +532,33 @@ class paloSantoEndPoint
         else{
             $arrDevices['no_device'] = "-- {$arrLang['No Extensions']} --";
         }
-	return $arrDevices;
+    return $arrDevices;
     }
 
     function getTech($extension)
     {
-	$pDB = $this->connectDataBase("mysql","asterisk");
+    $pDB = $this->connectDataBase("mysql","asterisk");
         if($pDB==false)
             return false;
-	$query  = "select tech from devices where id=?";
-	$result = $pDB->getFirstRowQuery($query,true,array($extension));
-	if(isset($result['tech']))
-	    return $result['tech'];
-	else
-	    return null;
+    $query  = "select tech from devices where id=?";
+    $result = $pDB->getFirstRowQuery($query,true,array($extension));
+    if(isset($result['tech']))
+        return $result['tech'];
+    else
+        return null;
     }
 
     function getVendor($mac)
     {
-	$pDB = $this->connectDataBase("sqlite","endpoint");
+    $pDB = $this->connectDataBase("sqlite","endpoint");
         if($pDB==false)
             return false;
-	$query = "select v.id, v.name from vendor v, mac m where m.value=? and v.id=m.id_vendor";
-	$result = $pDB->getFirstRowQuery($query,true,array($mac));
-	if(is_array($result))
-	    return $result;
-	else
-	    return array();
+    $query = "select v.id, v.name from vendor v, mac m where m.value=? and v.id=m.id_vendor";
+    $result = $pDB->getFirstRowQuery($query,true,array($mac));
+    if(is_array($result))
+        return $result;
+    else
+        return array();
     }
 
     function getAllModelsVendor($nameVendor)
@@ -619,8 +639,8 @@ class paloSantoEndPoint
 
         if($pDB==false)
             return false;
-	if($tech=='iax2')
-	    $tech = "iax";
+    if($tech=='iax2')
+        $tech = "iax";
         $sqlPeticion = "select 
                             d.id, 
                             d.description,
@@ -634,14 +654,14 @@ class paloSantoEndPoint
                             d.id = '$id_device';";
         $result = $pDB->getFirstRowQuery($sqlPeticion,true); //se consulta a la base endpoints
 
-	if(is_array($result) && count($result)>0){
+    if(is_array($result) && count($result)>0){
             $parameters['id_device']     = $result['id'];
             $parameters['desc_device']   = $result['description'];
             $parameters['account_device']   = $result['id'];//aparentemente siempre son iguales
             $parameters['secret_device'] = $result['data'];
-	}
+    }
         $pDB->disconnect(); 
-	return $parameters;
+    return $parameters;
     }
 
     function createEndpointDB($endpointVars)
@@ -727,7 +747,7 @@ class paloSantoEndPoint
         $report = "";
 
         //comprobar si existe en base asterisk
-	$tech = $this->getTech($device);
+    $tech = $this->getTech($device);
         $deviceParametersFreePBX = $this->getDeviceFreePBXParameters($device,$tech);
         if($deviceParametersFreePBX===false)
             return false;
@@ -786,8 +806,8 @@ class paloSantoEndPoint
 
     function getExtension($ip)
     {
-	unset($_SESSION['endpoint_configurator']['extensions_registered'][$ip]);
-	//Search in sip extensions
+    unset($_SESSION['endpoint_configurator']['extensions_registered'][$ip]);
+    //Search in sip extensions
         $parameters = array('Command'=>"sip show peers");
         $result = $this->AsteriskManagerAPI("Command",$parameters,true); 
         $data = explode("\n",$result['data']);
@@ -796,7 +816,7 @@ class paloSantoEndPoint
             if(preg_match("/(\d+\/\d+)[[:space:]]*($ip)[[:space:]]*[[:alpha:]]*[[:space:]]*[[:alpha:]]*[[:space:]]*[[:alpha:]]{0,1}[[:space:]]*[[:digit:]]*[[:space:]]*([[:alpha:]]*)/",$line,$match)){
                 if($match[3] == "OK"){
                     $tmp = explode("/",$match[1]);
-		    $_SESSION['endpoint_configurator']['extensions_registered'][$ip][] = "SIP:$tmp[0]";
+            $_SESSION['endpoint_configurator']['extensions_registered'][$ip][] = "SIP:$tmp[0]";
                     if($extension == "")
                         $extension = $tmp[0];
                     else
@@ -806,14 +826,14 @@ class paloSantoEndPoint
             }
         }
 
-	//Search in iax2 extensions
-	$parameters = array('Command'=>"iax2 show peers");
+    //Search in iax2 extensions
+    $parameters = array('Command'=>"iax2 show peers");
         $result = $this->AsteriskManagerAPI("Command",$parameters,true); 
         $data = explode("\n",$result['data']);
         foreach($data as $key => $line){
             if(preg_match("/(\d+)[[:space:]]*($ip)[[:space:]]*\([[:alpha:]]{1}\)[[:space:]]*[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+[[:space:]]*[[:digit:]]+[[:space:]]*([[:alpha:]]*)/",$line,$match)){
                 if($match[3] == "OK"){
-		    $_SESSION['endpoint_configurator']['extensions_registered'][$ip][] = "IAX2:$match[1]";
+            $_SESSION['endpoint_configurator']['extensions_registered'][$ip][] = "IAX2:$match[1]";
                     if($extension == "")
                         $extension = $match[1];
                     else

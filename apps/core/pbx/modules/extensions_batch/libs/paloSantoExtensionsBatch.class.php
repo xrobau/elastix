@@ -56,6 +56,25 @@ class paloSantoLoadExtension {
        $this->_DB->beginTransaction();
 
         $VoiceMail = strtolower($VoiceMail);
+        $Record_Incoming = strtolower($Record_Incoming);
+        $Record_Outgoing = strtolower($Record_Outgoing);
+
+        if(preg_match("/^(on demand|adhoc)/",$Record_Incoming)){
+            $Record_Incoming = "Adhoc";
+        }elseif(preg_match("/^always/",$Record_Incoming)){
+            $Record_Incoming = "always";
+        }elseif(preg_match("/^never/",$Record_Incoming)){
+            $Record_Incoming = "never";
+        }
+
+        if(preg_match("/(on demand|adhoc)/",$Record_Outgoing)){
+            $Record_Outgoing = "Adhoc";
+        }elseif(preg_match("/^always/",$Record_Outgoing)){
+            $Record_Outgoing = "always";
+        }elseif(preg_match("/^never/",$Record_Outgoing)){
+            $Record_Outgoing = "never";
+        }
+        
 
         if(preg_match("/^enable/",$VoiceMail))
             $mailbox = "$Ext@default";
@@ -421,16 +440,19 @@ class paloSantoLoadExtension {
                 if($grep != '' && $grep!=null)
                 {
                     $extension['voicemail'] = 'enabled';
-                    if(preg_match("/^{$extension['extension']} => ([[:alnum:]]*),[[:alnum:]| ]*,([[:alnum:]| |@|\.]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |=]*)attach=(yes|no)\|saycid=(yes|no)\|envelope=(yes|no)\|delete=(yes|no)/",$grep, $arrResult))
+                    if(preg_match("/^{$extension['extension']} => ([[:alnum:]]*),[[:alnum:]| ]*,([[:alnum:]| |@|\.]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |=]*)\|imapuser=([[:alnum:]| ]*)\|imappassword=([[:alnum:]| ]*)\|attach=(yes|no)\|saycid=(yes|no)\|envelope=(yes|no)\|delete=(yes|no)/",$grep, $arrResult))
                     {
                         $extension['vm_secret'] = $arrResult[1];
                         $extension['email_address'] = $arrResult[2];
                         $extension['pager_email_address'] = $arrResult[3];
-                        $extension['vm_options'] = substr($arrResult[4],0, strlen($arrResult[4])-1);
-                        $extension['email_attachment'] = $arrResult[5];
-                        $extension['play_cid'] = $arrResult[6];
-                        $extension['play_envelope'] = $arrResult[7];
-                        $extension['delete_vmail'] = $arrResult[8];
+                        //$extension['vm_options'] = substr($arrResult[4],0, strlen($arrResult[4])-1);
+                        $extension['vm_options'] = $arrResult[4];
+                        //$extension['imapuser'] = $arrResult[5];
+                        //$extension['imappassword'] = $arrResult[6];
+                        $extension['email_attachment'] = $arrResult[7];
+                        $extension['play_cid'] = $arrResult[8];
+                        $extension['play_envelope'] = $arrResult[9];
+                        $extension['delete_vmail'] = $arrResult[10];
                     }
                 }
                 $arrExtensions[] = $extension;
@@ -733,43 +755,39 @@ class paloSantoLoadExtension {
         return true;
     }
 
+    function valida_password($Secret)
+    {
+        if(strlen($Secret) < 8)
+            return false;
+        
+        if (!preg_match("/([a-z]{1,}[A-Z]{1,}[0-9]*)|([0-9]*[a-z]{1,}[A-Z]{1,})|([A-Z]{1,}[0-9]*[a-z]{1,})/", $Secret))
+            return false;
+
+        return true;
+    }
+
     function validarIpMask($ipMask)
     {
+        $pattern = "/^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:[.](?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}\/(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:[.](?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}$/";
         if ($ipMask == ""){
             $ipMask = "0.0.0.0/0.0.0.0";
+        return $ipMask;
         }
-        $array = explode("/", $ipMask, 2);
-        if(isset ($array[0]) && !isset($array[1]) ){
-            return false;
-        }
-        else{ 
-            $pattern = "/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/";
-            if ($array[0]=="0.0.0.0" && $array[1]=="0.0.0.0"){
-                $ipMask = "$array[0]/$array[1]";
-                return $ipMask;
-            }elseif ($array[0]=="0.0.0.0" && $array[1]!="0.0.0.0"){
-                if (preg_match($pattern,$array[1])){
-                    
+        if(preg_match("/^0.0.0.0\/0.0.0.0$/", $ipMask))
+            return $ipMask;
+        
+        if(preg_match($pattern,$ipMask))
+            return $ipMask;
+
+        if (preg_match("/&/",$ipMask)){
+            $array = explode("&", $ipMask);
+            foreach ($array as $clave => $valor) {
+                if(!preg_match($pattern,$array[$clave]))
                     return false;
-                }
-            }elseif ($array[0]!="0.0.0.0" && $array[1]=="0.0.0.0"){
-                if (preg_match($pattern,$array[0])){
-                    $ipMask = "$array[0]/$array[1]";
-                    return $ipMask;
-                }
             }
-            elseif ($array[0] == $array[1]){
-                if (preg_match($pattern,$array[0]) && preg_match($pattern,$array[1])){
-                    $ipMask = "$array[0]/$array[1]";
-                    return $ipMask;
-                }
-            }elseif($array[0]!="0.0.0.0" && $array[1]!="0.0.0.0"){
-                if (preg_match($pattern,$array[0]) && preg_match($pattern,$array[1])){
-                    $ipMask = "$array[0]/$array[1]";
-                    return $ipMask;
-                }
-            }
+            return $ipMask;
         }
+        
     }
 }
 ?>

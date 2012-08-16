@@ -96,13 +96,13 @@ function _moduleContent(&$smarty, $module_name)
         case "vega_data":
             $content = getVegaData($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf);
             break;
-	case "next_1":
+        case "next_1":
             $content = getExtensionsForm($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf, false);
             break;
         case "next_1_vega":
             $content = getExtensionsVegaForm($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf, false);
             break;
-	case "next_2":
+        case "next_2":
             $content = getLinesForm($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf, false);
             break;
         case "next_2_vega":
@@ -203,13 +203,13 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
                             $arrTmp[7] = _tr("Not Configured");
                         $_SESSION['endpoint_model'][$endspoint['mac_adress']] = $endspoint["model_no"];
                     }
-		    elseif($endspoint["name_vendor"] == "Sangoma"){
-		        
+            elseif($endspoint["name_vendor"] == "Sangoma"){
+            
                         $arrTmp[0] = "";
                         $arrTmp[1] = "";
                        // $arrTmp[5] = $endspoint["model_no"];
-		      //  $arrTmp[5] = "<select name='id_model_device_{$endspoint['mac_adress']}' onchange='getDevices(this,\"$macWithout2Points\");'>".combo($paloEndPoint->getAllModelsVendor($endspoint['name_vendor']),$endspoint['model_no'])."</select>";
-			$arrPorts = $paloFileEndPoint->getSangomaPorts($endspoint['ip_adress'],$endspoint["mac_adress"],$dsnAsterisk, $dsnSqlite,2);
+            //  $arrTmp[5] = "<select name='id_model_device_{$endspoint['mac_adress']}' onchange='getDevices(this,\"$macWithout2Points\");'>".combo($paloEndPoint->getAllModelsVendor($endspoint['name_vendor']),$endspoint['model_no'])."</select>";
+            $arrPorts = $paloFileEndPoint->getSangomaPorts($endspoint['ip_adress'],$endspoint["mac_adress"],$dsnAsterisk, $dsnSqlite,2);
                         
                          if($arrPorts==null){ $arrPorts['fxo']="?"; $arrPorts['fxs']="?";}
                          
@@ -312,8 +312,9 @@ function buildReport($arrData, $smarty, $module_name, $endpoint_mask)
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
     if($devices<=20){
        $devices = pow(2,(32-$devices));
+       $devices = $devices - 2;
        $smarty->assign("mb_title",_tr('WARNING').":");
-       $smarty->assign("mb_message",_tr("It can take several minutes, because your ip address has some devices, ").$devices);
+       $smarty->assign("mb_message",_tr("It can take several minutes, because your ip address has some devices, ").$devices._tr("hosts"));
     }
 
     if ($total <= $limit)
@@ -1203,7 +1204,7 @@ function getExtensionsVegaForm($smarty, $module_name, $local_templates_dir, $dsn
             $smarty->assign("mb_message", _tr("Invalid option for field wait for caller ID on incoming"));
             return getVegaData($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf);
         }
-	 elseif(getParameter("callerID_format") != "etsi" && getParameter("callerID_format") != "bell"){
+        elseif(getParameter("callerID_format") != "etsi" && getParameter("callerID_format") != "bell"){
             $smarty->assign("mb_title", _tr("Validation Error"));
             $smarty->assign("mb_message", _tr("Invalid option for field caller ID format"));
             return getVegaData($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf);
@@ -1333,15 +1334,15 @@ function getExtensionsVegaForm($smarty, $module_name, $local_templates_dir, $dsn
                 $_DATA["user_name$i"] = $extension;
             $number = $i+1;
             if((isset($_DATA["enable$i"]))&&($_DATA["enable$i"])==1)
-	        $check="checked=checked";
+            $check="checked=checked";
             else
-		$check="";	
+        $check="";	
 
-	    $fields .= "<tr class='letra12' align='center'>
+        $fields .= "<tr class='letra12' align='center'>
                           <td width='5%' align='center'><b>$number</b></td>
-		          <td class='enable'><input type='checkbox' name='enable$i' $check/></td>
+                <td class='enable'><input type='checkbox' name='enable$i' $check/></td>
                           <td><select name='caller_id$i'>". combo($comboCallerId,$_DATA["caller_id$i"]) ."</select></td>
-			  <td><select name='call_conference$i'>". combo($comboOnOff, $_DATA["call_conference$i"]) ."</select></td>
+            <td><select name='call_conference$i'>". combo($comboOnOff, $_DATA["call_conference$i"]) ."</select></td>
                           <td><select name='call_transfer$i'>". combo($comboOnOff, $_DATA["call_transfer$i"]) ."</select></td>
                           <td><select name='call_waiting$i'>". combo($comboOnOff, $_DATA["call_waiting$i"]) ."</select></td>
                           <td width='5%'><select name='call_dnd$i'>". combo($comboOnOff, $_DATA["call_dnd$i"]) ."</select></td>
@@ -1372,8 +1373,6 @@ function getExtensionsVegaForm($smarty, $module_name, $local_templates_dir, $dsn
     return $content;
   }
 
- 
-	
 function getLinesForm($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf, $validationError)
 {
     $paloEndPoint = new paloSantoEndPoint($dsnAsterisk,$dsnSqlite);
@@ -1474,74 +1473,74 @@ function getLinesVegaForm($smarty, $module_name, $local_templates_dir, $dsnAster
                 $arrSession["endpoint_configurator"]["user$i"] = getParameter("user$i");
                 $arrSession["endpoint_configurator"]["authentication_user$i"] = getParameter("authentication_user$i");
                 $arrSession["endpoint_configurator"]["call_conference$i"] = getParameter("call_conference$i"); 
-	        $arrSession["endpoint_configurator"]["call_transfer$i"] = getParameter("call_transfer$i"); 
+                $arrSession["endpoint_configurator"]["call_transfer$i"] = getParameter("call_transfer$i"); 
                 $arrSession["endpoint_configurator"]["call_waiting$i"] = getParameter("call_waiting$i");
                 $arrSession["endpoint_configurator"]["caller_id$i"] = getParameter("caller_id$i");
                 $arrSession["endpoint_configurator"]["call_dnd$i"] = getParameter("call_dnd$i"); 
                 if((getParameter("enable$i")))
-		  $arrSession["endpoint_configurator"]["enable$i"]=1;
-		else
-	          $arrSession["endpoint_configurator"]["enable$i"]=0;               
+                    $arrSession["endpoint_configurator"]["enable$i"]=1;
+                else
+                    $arrSession["endpoint_configurator"]["enable$i"]=0;               
             }
         }
         putSession($arrSession);
     }else
         $_DATA = $_POST;
-    if($arrSession["endpoint_configurator"]["analog_trunk_lines"] > 0){
-        $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-        $smarty->assign("CANCEL", _tr("Cancel"));
-        $smarty->assign("SAVE", _tr("Save"));
-        $smarty->assign("RETURN",_tr("Return"));
-        $smarty->assign("IMG", "/modules/$module_name/images/sangoma.gif");
-        if($arrSession["endpoint_configurator"]["analog_extension_lines"] > 0)
-            $smarty->assign("RETURN2_VEGA","return2_vega");
-        else
-            $smarty->assign("RETURN2_VEGA","return1_vega");
-	$fields ="";
-        $fields .= "<tr align='center' style='font-size:13px; font-weight:bold;'><td>"._tr("Port ID")."</td><td>"._tr("Enable")."<br><input type='checkbox' name='checkall' class='checkall'/>  </td><td>"._tr("Interface")."</td><td>"._tr("DN")."</td><td>"._tr("Username")."</td><td>"._tr("Telephone number(s) to route to the FXO interface")."</td></tr>";
-        $model = $arrSession["endpoint_model"][$arrSession["endpoint_configurator"]["mac"]];
-        $title = _tr("Lines Configuration for Vega (FXO)");
-        for($i = 0;$i < $arrSession["endpoint_configurator"]["analog_trunk_lines"];$i++){
-            $number = $i+1;
-            $nport=$arrSession["endpoint_configurator"]["analog_extension_lines"]+$number;
-	    if(!isset($_DATA["line$i"]))
-                $_DATA["line$i"] = 1000 + $i;
-            if(!isset($_DATA["ID$i"]))
-                $_DATA["ID$i"] = 1000 + $i;
-            if(!isset($_DATA["authentication_ID$i"]))
-                $_DATA["authentication_ID$i"] = "FXO$nport";
-
-	    if((isset($_DATA["enable_line$i"]))&&($_DATA["enable_line$i"])==1)
-                $check="checked=checked";
+        if($arrSession["endpoint_configurator"]["analog_trunk_lines"] > 0){
+            $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+            $smarty->assign("CANCEL", _tr("Cancel"));
+            $smarty->assign("SAVE", _tr("Save"));
+            $smarty->assign("RETURN",_tr("Return"));
+            $smarty->assign("IMG", "/modules/$module_name/images/sangoma.gif");
+            if($arrSession["endpoint_configurator"]["analog_extension_lines"] > 0)
+                $smarty->assign("RETURN2_VEGA","return2_vega");
             else
-                $check="";
+                $smarty->assign("RETURN2_VEGA","return1_vega");
+            $fields ="";
+            $fields .= "<tr align='center' style='font-size:13px; font-weight:bold;'><td>"._tr("Port ID")."</td><td>"._tr("Enable")."<br><input type='checkbox' name='checkall' class='checkall'/>  </td><td>"._tr("Interface")."</td><td>"._tr("DN")."</td><td>"._tr("Username")."</td><td>"._tr("Telephone number(s) to route to the FXO interface")."</td></tr>";
+            $model = $arrSession["endpoint_model"][$arrSession["endpoint_configurator"]["mac"]];
+            $title = _tr("Lines Configuration for Vega (FXO)");
+            for($i = 0;$i < $arrSession["endpoint_configurator"]["analog_trunk_lines"];$i++){
+                $number = $i+1;
+                $nport=$arrSession["endpoint_configurator"]["analog_extension_lines"]+$number;
+            if(!isset($_DATA["line$i"]))
+                    $_DATA["line$i"] = 1000 + $i;
+                if(!isset($_DATA["ID$i"]))
+                    $_DATA["ID$i"] = 1000 + $i;
+                if(!isset($_DATA["authentication_ID$i"]))
+                    $_DATA["authentication_ID$i"] = "FXO$nport";
 
-            $fields .= "<tr class='letra12' align='center'>
-                          <td><b>$nport:</b></td>
-			  <td class='enable'><input type='checkbox'name='enable_line$i' $check/></td>
-                          <td width='25%'><input type='text' maxlength='100' style='width: 100px;' value='".$_DATA["line$i"]."' name='line$i'></td>
-                          <td><input type='text' maxlength='100' style='width: 100px;' value='". $_DATA["ID$i"] ."' name='ID$i'></td>
-                          <td><input type='text' maxlength='100' style='width: 100px;' value='".$_DATA["authentication_ID$i"]."'  name='authentication_ID$i'></td>
-                          <td><input type='text' maxlength='200' style='width: 200px;' value='".$_DATA["num_list$i"]."'  name='num_list$i'></td>
-                      </tr>";
-            /* Telephone number(s) to route to the FXO interface $fields .= "<tr class='letra12'>
-                          <td><b>$nport:</b> <span  class='required'>*</span></td>
-                          <td><input type='checkbox'name='enable_line$i'/></td>
-                          <td width='25%'><input type='text' maxlength='100' style='width: 200px;' value='' name='line$i'></td>
-                          <td><b>ID $number: <span  class='required'>*</span></b></td>
-                          <td><input type='text' maxlength='100' style='width: 200px;' value='' name='ID$i'></td>
-                          <td><b>"._tr("Authentication ID")."$number:</b> <span  class='required'>*</span></td>
-                          <td><input type='text' maxlength='100' style='width: 200px;' value='' name='authentication_ID$i'></td>
-                      </tr>";*/
+            if((isset($_DATA["enable_line$i"]))&&($_DATA["enable_line$i"])==1)
+                    $check="checked=checked";
+                else
+                    $check="";
 
+                $fields .= "<tr class='letra12' align='center'>
+                            <td><b>$nport:</b></td>
+                <td class='enable'><input type='checkbox'name='enable_line$i' $check/></td>
+                            <td width='25%'><input type='text' maxlength='100' style='width: 100px;' value='".$_DATA["line$i"]."' name='line$i'></td>
+                            <td><input type='text' maxlength='100' style='width: 100px;' value='". $_DATA["ID$i"] ."' name='ID$i'></td>
+                            <td><input type='text' maxlength='100' style='width: 100px;' value='".$_DATA["authentication_ID$i"]."'  name='authentication_ID$i'></td>
+                            <td><input type='text' maxlength='200' style='width: 200px;' value='".$_DATA["num_list$i"]."'  name='num_list$i'></td>
+                        </tr>";
+                /* Telephone number(s) to route to the FXO interface $fields .= "<tr class='letra12'>
+                            <td><b>$nport:</b> <span  class='required'>*</span></td>
+                            <td><input type='checkbox'name='enable_line$i'/></td>
+                            <td width='25%'><input type='text' maxlength='100' style='width: 200px;' value='' name='line$i'></td>
+                            <td><b>ID $number: <span  class='required'>*</span></b></td>
+                            <td><input type='text' maxlength='100' style='width: 200px;' value='' name='ID$i'></td>
+                            <td><b>"._tr("Authentication ID")."$number:</b> <span  class='required'>*</span></td>
+                            <td><input type='text' maxlength='100' style='width: 200px;' value='' name='authentication_ID$i'></td>
+                        </tr>";*/
+
+            }
+            $smarty->assign("fields", $fields);
+            $oForm = new paloForm($smarty,array());
+            $htmlForm = $oForm->fetchForm("$local_templates_dir/vega_lines.tpl", $title, $_DATA);
+            $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
         }
-        $smarty->assign("fields", $fields);
-        $oForm = new paloForm($smarty,array());
-        $htmlForm = $oForm->fetchForm("$local_templates_dir/vega_lines.tpl", $title, $_DATA);
-        $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
-    }
-    else
-        $content = savePatton($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf);
+        else
+            $content = savePatton($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $dsnSqlite, $arrConf);
     return $content;
 }
 
@@ -1615,9 +1614,9 @@ function saveVega($smarty, $module_name, $local_templates_dir, $dsnAsterisk, $ds
             $arrSession["endpoint_configurator"]["authentication_ID$i"] = getParameter("authentication_ID$i");
             $arrSession["endpoint_configurator"]["num_list$i"] = getParameter("num_list$i");
             if(getParameter("enable_line$i"))
-	       $arrSession["endpoint_configurator"]["enable_line$i"] = 1;
-	    else
-               $arrSession["endpoint_configurator"]["enable_line$i"] = 0;
+                $arrSession["endpoint_configurator"]["enable_line$i"] = 1;
+            else
+                $arrSession["endpoint_configurator"]["enable_line$i"] = 0;
         }
     }
     $mac="";
@@ -1717,7 +1716,7 @@ function createFieldFormData($arrCountry)
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             
-	    "sntp_address"               => array(    "LABEL"        => _tr("SNTP Server address"),
+            "sntp_address"               => array(    "LABEL"        => _tr("SNTP Server address"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),

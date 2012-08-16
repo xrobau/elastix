@@ -69,7 +69,7 @@ function _moduleContent(&$smarty, $module_name)
 
     $pDB = new paloDB($dsnAsterisk);
     if(!empty($pDB->errMsg)) {
-        $smarty->assign("mb_message", $arrLang["Error when connecting to database"]."<br/>".$pDB->errMsg);
+        $smarty->assign("mb_message", _tr('Error when connecting to database')."<br/>".$pDB->errMsg);
     }
 
     $pConfig = new paloConfig($arrAMP['ASTETCDIR']['valor'], "asterisk.conf", "=", "[[:space:]]*=[[:space:]]*");
@@ -81,37 +81,37 @@ function _moduleContent(&$smarty, $module_name)
     //Sirve para todos los casos
     $smarty->assign("MODULE_NAME", $module_name);
     $smarty->assign("icon","modules/$module_name/images/pbx_batch_of_extensions.png");
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("DOWNLOAD", $arrLang["Download Extensions"]);
-    $smarty->assign("label_file", $arrLang["File"]);
-    $smarty->assign("title", $arrLang["Extensions Batch"]);
-    $smarty->assign("title_module", $arrLang["Batch of Extensions"]);
-    $smarty->assign("HeaderFile", $arrLang["Header File Extensions Batch"]);
-    $smarty->assign("AboutUpdate", $arrLang["About Update Extensions Batch"]);
-    $html_input = "<input class='button' type='submit' name='delete_all' value='{$arrLang["Delete All Extensions"]}' onClick=\"return confirmSubmit('{$arrLang["Are you really sure you want to delete all the extensions in this server?"]}');\">";
+    $smarty->assign("SAVE", _tr('Save'));
+    $smarty->assign("DOWNLOAD", _tr("Download Extensions"));
+    $smarty->assign("label_file", _tr("File"));
+    $smarty->assign("title", _tr("Extensions Batch"));
+    $smarty->assign("title_module", _tr("Batch of Extensions"));
+    $smarty->assign("HeaderFile", _tr("Header File Extensions Batch"));
+    $smarty->assign("AboutUpdate", _tr("About Update Extensions Batch"));
+    $html_input = "<input class='button' type='submit' name='delete_all' value='"._tr('Delete All Extensions')."' onClick=\" return confirmSubmit('"._tr("Are you really sure you want to delete all the extensions in this server?")."');\" />";
     $smarty->assign("DELETE_ALL", $html_input);
 
     switch($accion)
     {
         case 'delete_all':
-            delete_all_extention($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $pDB, $arrAST, $arrAMP);
-            $content = report_extension($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf);
+            delete_all_extention($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrAST, $arrAMP);
+            $content = report_extension($smarty, $module_name, $local_templates_dir, $arrConf);
             break;
         case 'load_extension':
-            $content = load_extension($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $base_dir, $pDB, $arrAST, $arrAMP);
+            $content = load_extension($smarty, $module_name, $local_templates_dir, $arrConf, $base_dir, $pDB, $arrAST, $arrAMP);
             break;
         case 'download_csv':
-            download_extensions();
+            download_extensions($pDB);
             break;
         default:
-            $content = report_extension($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf);
+            $content = report_extension($smarty, $module_name, $local_templates_dir, $arrConf);
             break;
     }
 
     return $content;
 }
 
-function delete_all_extention(&$smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $pDB, $arrAST, $arrAMP)
+function delete_all_extention(&$smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrAST, $arrAMP)
 {
     $message = "";
     $oPalo = new paloSantoLoadExtension($pDB);
@@ -126,65 +126,65 @@ function delete_all_extention(&$smarty, $module_name, $local_templates_dir, $arr
         {
             if($oPalo->do_reloadAll($data_connection, $arrAST, $arrAMP))
             {
-                $smarty->assign("mb_title", $arrLang["Message"]);
-                $smarty->assign("mb_message", $arrLang["All extensions deletes"]);
+                $smarty->assign("mb_title", _tr('Message'));
+                $smarty->assign("mb_message", _tr('All extensions deletes'));
             }else{
-                $smarty->assign("mb_title", $arrLang["Error"]);
-                $smarty->assign("mb_message", $arrLang["Unable to reload the changes"]);
+                $smarty->assign("mb_title", _tr('Error'));
+                $smarty->assign("mb_message", _tr('Unable to reload the changes'));
             }
         }else{
-            $smarty->assign("mb_title", $arrLang["Error"]);
-            $smarty->assign("mb_message", $arrLang["Could not delete the database"]);
+            $smarty->assign("mb_title", _tr('Error'));
+            $smarty->assign("mb_message", _tr('Could not delete the database'));
         }
     }else{
-        $smarty->assign("mb_title", $arrLang["Message"]);
-        $smarty->assign("mb_message", $arrLang["Could not delete the ASTERISK database"]);
+        $smarty->assign("mb_title", _tr('Message'));
+        $smarty->assign("mb_message", _tr('Could not delete the ASTERISK database'));
     }
 
 }
 
-function report_extension($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf){
+function report_extension($smarty, $module_name, $local_templates_dir, $arrConf){
 
     $oForm = new paloForm($smarty, array());
-    $html = $oForm->fetchForm("$local_templates_dir/extension.tpl", $arrLang["Extensions Batch"], $_POST);
+    $html = $oForm->fetchForm("$local_templates_dir/extension.tpl", _tr('Extensions Batch'), $_POST);
 
     $contenidoModulo = "<form  method='POST' enctype='multipart/form-data' style='margin-bottom:0;' action='?menu=$module_name'>".$html."</form>";
     return $contenidoModulo;
 }
 
-function load_extension($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $base_dir, $pDB, $arrAST, $arrAMP)
+function load_extension($smarty, $module_name, $local_templates_dir, $arrConf, $base_dir, $pDB, $arrAST, $arrAMP)
 {
     $oForm = new paloForm($smarty, array());
-    //$html = $oForm->fetchForm("$local_templates_dir/extension.tpl", $arrLang["Extensions Batch"], $_POST);
+    //$html = $oForm->fetchForm("$local_templates_dir/extension.tpl", _tr("Extensions Batch"), $_POST);
 
     $arrTmp=array();
     $bMostrarError = false;
 
     //valido el tipo de archivo
     if (!preg_match('/.csv$/', $_FILES['userfile']['name'])) {
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
-        $smarty->assign("mb_message", $arrLang["Invalid file extension.- It must be csv"]);
+        $smarty->assign("mb_title", _tr('Validation Error'));
+        $smarty->assign("mb_message", _tr('Invalid file extension.- It must be csv'));
     }else {
         if(is_uploaded_file($_FILES['userfile']['tmp_name'])) {
             $ruta_archivo = "/tmp/".$_FILES['userfile']['name'];
             copy($_FILES['userfile']['tmp_name'], $ruta_archivo);
             //Funcion para cargar las extensiones
-            load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $pDB, $arrAST, $arrAMP);
+            load_extension_from_csv($smarty, $ruta_archivo, $base_dir, $pDB, $arrAST, $arrAMP);
         }else {
-            $smarty->assign("mb_title", $arrLang["Error"]);
-            $smarty->assign("mb_message", $arrLang["Possible file upload attack. Filename"] ." :". $_FILES['userfile']['name']);
+            $smarty->assign("mb_title", _tr('Error'));
+            $smarty->assign("mb_message", _tr('Possible file upload attack. Filename') ." :". $_FILES['userfile']['name']);
         }
     }
-    $content = report_extension($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf);
+    $content = report_extension($smarty, $module_name, $local_templates_dir, $arrConf);
     return $content;
 }
 
-function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $pDB, $arrAST, $arrAMP){
+function load_extension_from_csv($smarty, $ruta_archivo, $base_dir, $pDB, $arrAST, $arrAMP){
     $Messages = "";
     $arrayColumnas = array();
     $data_connection = array('host' => "127.0.0.1", 'user' => "admin", 'password' => obtenerClaveAMIAdmin());
 
-    $result = isValidCSV($arrLang, $ruta_archivo, $arrayColumnas);
+    $result = isValidCSV($pDB, $ruta_archivo, $arrayColumnas);
     if($result != "valided"){
         $smarty->assign("mb_message", $result);
         return;
@@ -198,10 +198,12 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
         //Linea 1 header ignorada
         $tupla = fgetcsv($hArchivo, 4096, ",");
         $prueba = count ($tupla);
+       
         //Desde linea 2 son datos
         while ($tupla = fgetcsv($hArchivo, 4096, ",")) {
             if(is_array($tupla) && count($tupla)>=3)
             {
+                
                 $Name               = $tupla[$arrayColumnas[0]];
                 $Ext                = $tupla[$arrayColumnas[1]];
                 $Direct_DID         = isset($arrayColumnas[2]) ?$tupla[$arrayColumnas[2]]:"";
@@ -227,7 +229,7 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
                 $Permit             = isset($arrayColumnas[22])?$tupla[$arrayColumnas[22]]:"";
                 $Record_Incoming    = isset($arrayColumnas[23])?$tupla[$arrayColumnas[23]]:"";
                 $Record_Outgoing    = isset($arrayColumnas[24])?$tupla[$arrayColumnas[24]]:"";
-                
+                    
 //////////////////////////////////////////////////////////////////////////////////
                 // validando para que coja las comillas
                 $Outbound_CID = preg_replace('/“/', "\"", $Outbound_CID);
@@ -237,16 +239,16 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
                 //Paso 1: creando en la tabla sip - iax 
                 if(!$pLoadExtension->createTechDevices($Ext,$Secret,$VoiceMail,$Context,$Tech, $Disallow, $Allow, $Deny, $Permit, $Callgroup, $Pickupgroup, $Record_Incoming, $Record_Outgoing))
                 {
-                    $Messages .= "Ext: $Ext - ". $arrLang["Error updating Tech"].": ".$pLoadExtension->errMsg."<br />";
+                    $Messages .= "Ext: $Ext - ". _tr('Error updating Tech').": ".$pLoadExtension->errMsg."<br />";
                 }else{
                     
                     //Paso 2: creando en la tabla users
                     if(!$pLoadExtension->createUsers($Ext,$Name,$VoiceMail,$Direct_DID,$Outbound_CID, $Record_Incoming, $Record_Outgoing))
-                        $Messages .= "Ext: $Ext - ". $arrLang["Error updating Users"].": ".$pLoadExtension->errMsg."<br />";
+                        $Messages .= "Ext: $Ext - ". _tr('Error updating Users').": ".$pLoadExtension->errMsg."<br />";
                     
                     //Paso 3: creando en la tabla devices
                     if(!$pLoadExtension->createDevices($Ext,$Tech,$Name))
-                        $Messages .= "Ext: $Ext - ". $arrLang["Error updating Devices"].": ".$pLoadExtension->errMsg."<br />";
+                        $Messages .= "Ext: $Ext - ". _tr('Error updating Devices').": ".$pLoadExtension->errMsg."<br />";
                     
                     //Paso 4: creando en el archivo /etc/asterisk/voicemail.conf los voicemails
                     if(!$pLoadExtension->writeFileVoiceMail(
@@ -254,17 +256,17 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
                         $VM_Pager_Email_Addr,$VM_Options,$VM_EmailAttachment,$VM_Play_CID,
                         $VM_Play_Envelope, $VM_Delete_Vmail)
                       )
-                        $Messages .= "Ext: $Ext - ". $arrLang["Error updating Voicemail"]."<br />";
+                        $Messages .= "Ext: $Ext - ". _tr('Error updating Voicemail')."<br />";
                     
                     //Paso 5: Configurando el call waiting
                     if(!$pLoadExtension->processCallWaiting($Call_Waiting,$Ext))
-                        $Messages .= "Ext: $Ext - ". $arrLang["Error processing CallWaiting"]."<br />";
+                        $Messages .= "Ext: $Ext - ". _tr('Error processing CallWaiting')."<br />";
 
                     $outboundcid = preg_replace("/\"/", "'", $Outbound_CID);
                     $outboundcid = preg_replace("/\"/", "'", $outboundcid);
                     $outboundcid = preg_replace("/ /", "", $outboundcid);
                     if(!$pLoadExtension->putDataBaseFamily($data_connection, $Ext, $Tech, $Name, $VoiceMail, $outboundcid , $Record_Incoming, $Record_Outgoing))
-                        $Messages .= "Ext: $Ext - ". $arrLang["Error processing Database Family"]."<br />";
+                        $Messages .= "Ext: $Ext - ". _tr('Error processing Database Family')."<br />";
                     $cont++;
                 }
                     
@@ -272,7 +274,7 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
                 //Paso 7: Escribiendo en tabla incoming
         if($Direct_DID !== ""){
             if(!$pLoadExtension->createDirect_DID($Ext,$Direct_DID))
-            $Messages .= "Ext: $Ext - ". $arrLang["Error to insert or update Direct DID"]."<br />";
+            $Messages .= "Ext: $Ext - ". _tr('Error to insert or update Direct DID')."<br />";
         }
                 /////////////////////////////////////////////////////////////////////////
             }
@@ -280,14 +282,15 @@ function load_extension_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $p
         //Paso 6: Realizo reload
         if(!$pLoadExtension->do_reloadAll($data_connection, $arrAST, $arrAMP))
             $Messages .= $pLoadExtension->errMsg;
-        $Messages .= $arrLang["Total extension updated"].": $cont<br />";
+        $Messages .= _tr('Total extension updated').": $cont<br />";
         $smarty->assign("mb_message", $Messages);
     }
 
     unlink($ruta_archivo);
 }
 
-function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
+function isValidCSV($pDB, $sFilePath, &$arrayColumnas){
+    $pLoadExtension = new paloSantoLoadExtension($pDB);
     $hArchivo = fopen($sFilePath, 'r+');
     $cont = 0;
     $ColName = -1;
@@ -295,9 +298,7 @@ function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
     //Paso 1: Obtener Cabeceras (Minimas las cabeceras: Display Name, User Extension, Secret)
     if ($hArchivo) {
         $tupla = fgetcsv($hArchivo, 4096, ",");
-        //print_r ($tupla);
-        //$prueba = count ($tupla);
-        //var_dump ($prueba);
+        
         if(count($tupla)>=4)
         {
             for($i=0; $i<count($tupla); $i++)
@@ -339,21 +340,21 @@ function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
                         $Ext = $tupla[$arrayColumnas[1]];
                         if($Ext != '')
                             $arrExt[] = array("ext" => $Ext);
-                        else return $arrLang["Can't exist a extension empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
-
-                        $Secret = $tupla[$arrayColumnas[5]];
-                        if($Secret == '')
-                            return $arrLang["Can't exist a secret empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
+                        else return _tr("Can't exist a extension empty. Line").": $count. - ". _tr("Please read the lines in the footer");
 
                         $Display = $tupla[$arrayColumnas[0]];
                         if($Display == '')
-                            return $arrLang["Can't exist a display name empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
+                            return _tr("Can't exist a display name empty. Line").": $count. - ". _tr("Please read the lines in the footer");
+
+                        $Secret = $tupla[$arrayColumnas[5]];
+                        if(!$pLoadExtension->valida_password($Secret))
+                            return _tr("Secret weak. Line").": $count. - ". _tr("The secret must be minimum");
 
                         $Tech = $tupla[$arrayColumnas[16]];
                         if($Tech == '')
-                            return $arrLang["Can't exist a technology empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
-            else
-                $arrTech[] = strtolower($Tech);
+                            return _tr("Can't exist a technology empty. Line").": $count. - ". _tr("Please read the lines in the footer");
+                        else
+                            $arrTech[] = strtolower($Tech);
                     }
                     $count++;
                 }
@@ -363,19 +364,19 @@ function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
                     foreach($arrExt as $key1 => $values1){
                         foreach($arrExt as $key2 => $values2){
                             if( ($values1['ext']==$values2['ext'])  &&  ($key1!=$key2) ){
-                                return "{$arrLang["Error, extension"]} ".$values1['ext']." {$arrLang["repeat in lines"]} ".($key1 + 2)." {$arrLang["with"]} ".($key2 + 2);
+                                return _tr("Error, extension")." ".$values1['ext']." "._tr("repeat in lines")." ".($key1 + 2)." "._tr("with")." ".($key2 + 2);
                             }
                         }
                         if( $arrTech[$key1]!="sip" && $arrTech[$key1]!="iax" && $arrTech[$key1]!="iax2" ){
-                            return "{$arrLang["Error, extension"]} ".$values1['ext']." {$arrLang["has a wrong tech in line"]} ".($key1 + 2).". {$arrLang["Tech must be sip or iax"]}";
+                            return _tr("Error, extension")." ".$values1['ext']." "._tr("has a wrong tech in line")." ".($key1 + 2)." "._tr("Tech must be sip or iax");
                         }
                     }
                     return "valided";
                 }
-            }else return $arrLang["Verify the header"] ." - ". $arrLang["At minimum there must be the columns"].": \"Display Name\", \"User Extension\", \"Secret\", \"Tech\"";
+            }else return _tr("Verify the header") ." - ". _tr("At minimum there must be the columns").": \"Display Name\", \"User Extension\", \"Secret\", \"Tech\"";
         }
-        else return $arrLang["Verify the header"] ." - ". $arrLang["Incomplete Columns"];
-    }else return $arrLang["The file is incorrect or empty"] .": $sFilePath";
+        else return _tr("Verify the header") ." - ". _tr("Incomplete Columns");
+    }else return _tr("The file is incorrect or empty") .": $sFilePath";
 }
 
 function getAction()
@@ -395,26 +396,8 @@ function getAction()
         return "report_extension";
 }
 
-function download_extensions()
+function download_extensions($pDB)
 {
-    
-    global $arrLang;
-    global $arrConf;
-    
-
-    $pDB = new paloDB($arrConf["cadena_dsn"]);
-    $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
-    $arrAMP  = $pConfig->leer_configuracion(false);
-
-    $dsnAsterisk = $arrAMP['AMPDBENGINE']['valor']."://".
-                   $arrAMP['AMPDBUSER']['valor']. ":".
-                   $arrAMP['AMPDBPASS']['valor']. "@".
-                   $arrAMP['AMPDBHOST']['valor']. "/asterisk";
-    $pDB = new paloDB($dsnAsterisk);
-    if(!empty($pDB->errMsg)) {
-        echo $arrLang["Error when connecting to database"]."\n".$pDB->errMsg;
-    }
-
     header("Cache-Control: private");
     header("Pragma: cache");
     header('Content-Type: text/csv; charset=iso-8859-1; header=present');
@@ -424,7 +407,6 @@ function download_extensions()
 
 function backup_extensions($pDB)
 {
-    global $arrLang;
     $csv = "";
     $pLoadExtension = new paloSantoLoadExtension($pDB);
     $arrResult = $pLoadExtension->queryExtensions();
@@ -455,6 +437,12 @@ function backup_extensions($pDB)
 
             if (!isset($extension['callgroup'])) $extension['callgroup']= "";
             if (!isset($extension['pickupgroup'])) $extension['pickupgroup']= "";
+
+            if ($extension['record_in']=="Adhoc")
+                $extension['record_in'] = "On Demand";
+
+            if ($extension['record_out']=="Adhoc")
+                $extension['record_out'] = "On Demand";
 
 //////////////////////////////////////////////////////////////////////////////////
             $csv .= "\"{$extension['name']}\",\"{$extension['extension']}\",\"{$extension['directdid']}\",\"{$extension['outboundcid']}\",".

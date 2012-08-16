@@ -3,7 +3,8 @@
         <td>
             <table width="100%" cellpadding="4" cellspacing="0" border="0">
                 <tr>
-                    <td><input class="button" type="submit" name="save" value="{$SAVE}"></td>
+                    <td width="15%"><input class="button" type="submit" name="save" value="{$SAVE}"></td>
+                    <td><a class="link1" href="?menu={$MODULE_NAME}&amp;accion=download_csv&amp;rawmode=yes&amp;exportcsv=yes">{$DOWNLOAD}</a></td>
                     <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
                 </tr>
             </table>

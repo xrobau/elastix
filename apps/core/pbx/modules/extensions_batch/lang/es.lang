@@ -37,6 +37,7 @@ $arrLangModule=array(
 "Invalid file extension.- It must be csv" => "Invalid file extension.- It must be csv",
 "Possible file upload attack. Filename" => "Possible file upload attack. Filename",
 "Error" => "Error",
+"Secret weak. Line" => "Secret débil. Línea",
 "Error updating Tech" => "Error updating Tech",
 "Error updating Users" => "Error updating Users",
 "Error updating Devices" => "Error updating Devices",
@@ -51,7 +52,6 @@ $arrLangModule=array(
 "Verify the header" => "Verify the header",
 "At minimum there must be the columns" => "At minimum there must be the columns",
 "Can't exist a extension empty. Line" => "Can't exist a extension empty. Line",
-"Can't exist a secret empty. Line" => "Can't exist a secret empty. Line",
 "Can't exist a display name empty. Line" => "Can't exist a display name empty. Line",
 "Please read the lines in the footer"=>"Please read the lines in the footer",
 "Header File Extensions Batch" => "The first line must contains the name (or title) of the columns, and the file must have at minimum four columns: Display Name, User Extension, Secret, Tech. For more information about all the parameters supported, please read the online embedded help.",
@@ -78,6 +78,7 @@ $arrLangModule=array(
 "Error to insert or update Direct DID" => "Error to insert or update Direct DID",
 "Can't exist a technology empty. Line" => "Can't exist a technology empty. Line",
 "has a wrong tech in line" => "has a wrong tech in line",
-"Tech must be sip or iax" => "Tech must be sip or iax"
+"Tech must be sip or iax" => "Tech must be sip or iax",
+"The secret must be minimum" => "El Secret debe tener minimo 8 caracteres alfanumericos, incluido mayusculas y minusculas."
 );
 ?>

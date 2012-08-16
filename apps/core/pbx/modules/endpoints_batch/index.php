@@ -77,9 +77,11 @@ function _moduleContent(&$smarty, $module_name)
     $dsnSqlite   = $arrConf['dsn_conn_database'];
 
     //Sirve para todos los casos
+    $smarty->assign("MODULE_NAME", $module_name);
     $smarty->assign("label_file", _tr("File"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("HeaderFile", _tr("Header File Batch Endpoint"));
+    $smarty->assign("DOWNLOAD", _tr("Download Endpoints"));
     $smarty->assign("AboutUpdate", _tr("About Update Batch Endpoint"));
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("label_endpoint", _tr("Discover Endpoints in this Network"));
@@ -89,10 +91,12 @@ function _moduleContent(&$smarty, $module_name)
     //actions
     $action = getAction();
     $content = "";
-
     switch($action){
         case "load_endpoint":
             $content = load_endpoint($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $base_dir, $dsnAsterisk, $dsnSqlite);
+            break;
+        case "download_csv":
+            download_endpoints($dsnAsterisk, $dsnSqlite);
             break;
         default: // view_form
             $content = viewFormBatchofEndpoint($smarty, $module_name, $local_templates_dir, $arrConf);
@@ -114,7 +118,7 @@ function load_endpoint($smarty, $module_name, $local_templates_dir, $arrLang, $a
         if(is_uploaded_file($_FILES['file']['tmp_name'])) {
             $ruta_archivo = "/tmp/".$_FILES['file']['name'];
             copy($_FILES['file']['tmp_name'], $ruta_archivo);
-            //Funcion para cargar las extensiones
+            //Funcion para cargar los endpoints
             load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $dsnAsterisk, $dsnSqlite, $module_name, $local_templates_dir, $arrConf);
         }else {
             $smarty->assign("mb_title", _tr("Error"));
@@ -218,7 +222,7 @@ function load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo_csv, $base_dir,
                         $arrParametersOld = $paloEndPoint->getParameters($MAC);
                         $arrParameters    = $paloFileEndPoint->updateArrParameters($dataVendor["name"], $name_model, $arrParametersOld);
                         $tmpEndpoint['arrParameters']=array_merge($arrParameters,$arrEndpoint['data']);
-
+                        
                         if($paloEndPoint->createEndpointDB($tmpEndpoint)){
                             //verifico si la funcion createFilesGlobal del vendor ya fue ejecutado
                             if(!in_array($dataVendor["name"],$arrFindVendor)){
@@ -480,6 +484,8 @@ function getAction()
 {
     if(getParameter("save")) //Get parameter by POST (submit)
         return "load_endpoint";
+    elseif(getParameter("accion"))
+        return "download_csv";
 }
 
 function validaIpMask ($IpMask)
@@ -527,5 +533,68 @@ function subMask($ip)
         }
     }
     return 32;  // No se pudo encontrar máscara de la red
+}
+
+function download_endpoints($dsnAsterisk, $dsnSqlite)
+{
+    $paloEndPoint      = new paloSantoEndPoint($dsnAsterisk,$dsnSqlite);
+    
+    header("Cache-Control: private");
+    header("Pragma: cache");
+    header('Content-Type: text/csv; charset=iso-8859-1; header=present');
+    header("Content-disposition: attachment; filename=endpoints.csv");
+    echo backup_endpoints($paloEndPoint);
+}
+
+function backup_endpoints($paloEndPoint)
+{
+    global $arrLang;
+    $csv = "";
+    $parametersEndpoint = $paloEndPoint->queryParametersEndpoints();
+    $idEndpoints = $paloEndPoint->queryIdEndpoints();
+    $countId = count($idEndpoints);
+    $countPareameters = count($parametersEndpoint);
+
+    if(!$parametersEndpoint){
+
+    $csv .= "\"Vendor\",\"Model\",\"Mac\",\"Ext\",\"IP\",\"Mask\",\"GW\",\"DNS1\",\"Bridge\",\"Time Zone\",\"DNS2\"\n";
+    }else{
+        //cabecera
+        $csv .= "\"Vendor\",\"Model\",\"Mac\",\"Ext\",\"IP\",\"Mask\",\"GW\",\"DNS1\",\"Bridge\",\"Time Zone\",\"DNS2\"\n";
+                
+        for($i=0;$i<$countId;$i++){
+            for($j=0;$j<$countPareameters;$j++){
+                if($idEndpoints[$i]['id_endpoint']==$parametersEndpoint[$j]['id_endpoint']){
+                    if ($parametersEndpoint[$j]['name']=="Vendor"){
+                        $Vendor = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "Model"){
+                        $Model = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "MAC"){
+                        $MAC = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "Ext"){
+                        $Ext = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "IP"){
+                        $IP = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "Mask"){
+                        $Mask = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "GW"){
+                        $GW = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "DNS1"){
+                        $DNS1 = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "Bridge"){
+                        $Bridge = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "Time_Zone"){
+                        $Time_Zone = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }elseif($parametersEndpoint[$j]['name'] == "DNS2"){         
+                        $DNS2 = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
+                    }
+                }
+            }
+        $csv .= "\"$Vendor\",\"$Model\",\"$MAC\",\"$Ext\",\"$IP\",\"$Mask\",".
+            "\"$GW\",\"$DNS1\",\"$Bridge\",\"$Time_Zone\",\"$DNS2\",".
+            "\n";
+        }                                       
+    }
+    return $csv;
 }
 ?>

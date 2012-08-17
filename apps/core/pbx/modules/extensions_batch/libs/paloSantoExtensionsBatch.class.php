@@ -55,26 +55,7 @@ class paloSantoLoadExtension {
     {
        $this->_DB->beginTransaction();
 
-        $VoiceMail = strtolower($VoiceMail);
-        $Record_Incoming = strtolower($Record_Incoming);
-        $Record_Outgoing = strtolower($Record_Outgoing);
-
-        if(preg_match("/^(on demand|adhoc)/",$Record_Incoming)){
-            $Record_Incoming = "Adhoc";
-        }elseif(preg_match("/^always/",$Record_Incoming)){
-            $Record_Incoming = "always";
-        }elseif(preg_match("/^never/",$Record_Incoming)){
-            $Record_Incoming = "never";
-        }
-
-        if(preg_match("/(on demand|adhoc)/",$Record_Outgoing)){
-            $Record_Outgoing = "Adhoc";
-        }elseif(preg_match("/^always/",$Record_Outgoing)){
-            $Record_Outgoing = "always";
-        }elseif(preg_match("/^never/",$Record_Outgoing)){
-            $Record_Outgoing = "never";
-        }
-        
+        $VoiceMail = strtolower($VoiceMail);        
 
         if(preg_match("/^enable/",$VoiceMail))
             $mailbox = "$Ext@default";

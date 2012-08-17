@@ -229,6 +229,27 @@ function load_extension_from_csv($smarty, $ruta_archivo, $base_dir, $pDB, $arrAS
                 $Permit             = isset($arrayColumnas[22])?$tupla[$arrayColumnas[22]]:"";
                 $Record_Incoming    = isset($arrayColumnas[23])?$tupla[$arrayColumnas[23]]:"";
                 $Record_Outgoing    = isset($arrayColumnas[24])?$tupla[$arrayColumnas[24]]:"";
+                
+//////////////////////////////////////////////////////////////////////////////////
+
+                $Record_Incoming = strtolower($Record_Incoming);
+                $Record_Outgoing = strtolower($Record_Outgoing);
+        
+                if(preg_match("/^(on demand|adhoc)/",$Record_Incoming)){
+                    $Record_Incoming = "Adhoc";
+                }elseif(preg_match("/^always/",$Record_Incoming)){
+                    $Record_Incoming = "always";
+                }elseif(preg_match("/^never/",$Record_Incoming)){
+                    $Record_Incoming = "never";
+                }
+
+                if(preg_match("/(on demand|adhoc)/",$Record_Outgoing)){
+                    $Record_Outgoing = "Adhoc";
+                }elseif(preg_match("/^always/",$Record_Outgoing)){
+                    $Record_Outgoing = "always";
+                }elseif(preg_match("/^never/",$Record_Outgoing)){
+                    $Record_Outgoing = "never";
+                }
                     
 //////////////////////////////////////////////////////////////////////////////////
                 // validando para que coja las comillas

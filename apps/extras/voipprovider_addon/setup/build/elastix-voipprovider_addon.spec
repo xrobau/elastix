@@ -9,7 +9,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-pbx >= 2.3.0-11
+Prereq: elastix-pbx >= 2.3.0-13
 
 %description
 Elastix VoIPProvider

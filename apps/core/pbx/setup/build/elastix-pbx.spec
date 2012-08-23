@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 12
+Release: 13
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -294,6 +294,51 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Aug 23 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-13
+- CHANGED: module voipprovider, added spanish translation to an
+  informative message
+  SVN Rev[4117]
+- CHANGED: module voipprovider, this module was removed from core.
+  An informative message is added to indicate to the user that this
+  is now an Addon.
+  SVN Rev[4116]
+- ADDED: added new agi script called hangup.agi that is executed in
+  file extensions_override_elastix.conf. This agi intends to be an
+  intermediary between addons scripts that needs information about a
+  call as soon as it is hang up. This addons_scripts must be in path
+  /usr/local/elastix/addons_scripts 
+  SVN Rev[4114]
+- CHANGED: Module Batch of Extensions: By downloading the csv file
+  batch of Extensions reflects the Record Incoming and Record Outgoing
+  ("Adhoc") as "On Demand".
+  SVN Rev[4112]
+- CHANGED: Menu.xml: The Level 2 module named "Endpoints", now called
+  "Batch Configurations".
+  CHANGED: Module Endpoint Configurator: The warning message that shows
+  before discovering the endpoints on the network.
+  ADD: Module Endpoints Batch: Download the current endpoints in CSV format
+  CHANGED: Module Batch of Extensions: Upload the CSV with multiple subnets
+  separated by "&" in the "Denny" and "Permit".
+  CHANGED: Module Batch of Extensions: The parameters "IMAP Username" and
+  "IMAP Password" is not shown in the "VM Options".
+  CHANGED: Module Batch of Extensions: By downloading the csv file batch
+  of Extensions reflects the Record Incoming and Record Outgoing ("Adhoc")
+  as "On Demand".
+  CHANGED: Module Batch of Extensions: Field "Secret" must have minimum 8
+  alphanumeric characters, case sensitive.
+  SVN Rev[4111]
+- FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
+  Fixed graphic bug in ON/OFF Button
+  SVN Rev[4101]
+- CHANGED: module pbx, deleted tables and queries related to voipprovider
+  SVN Rev[4090]
+- Fixed bug 0001318, bug 0001338: fixed in Asterisk File Editor return last
+  query in Back link, fixed Popups, position and design, add in Dashboard
+  Applet Admin option to check all
+  SVN Rev[4088]
+- Add Mac and application form to Set Sangoma Vega Gateway
+  SVN Rev[4084]
+
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Endpoint Configurator: add new command-line utility.
   This new utility runs from /usr/bin/elastix-endpoint-configure. The program

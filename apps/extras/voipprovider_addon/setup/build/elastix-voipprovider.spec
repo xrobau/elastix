@@ -1,4 +1,4 @@
-%define modname voipprovider
+%define modname voipprovider_addon
 
 Summary: Elastix VoIPProvider 
 Name:    elastix-%{modname}
@@ -45,7 +45,7 @@ mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
 
 if [ $1 -eq 1 ]; then #install
-    elastix-menuremove "%{modname}"
+    elastix-menuremove "voipprovider"
   # The installer database
     elastix-dbprocess "install" "$pathModule/setup/db"
   # migrate database trunk.db to voipprovider.db

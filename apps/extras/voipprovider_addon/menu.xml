@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <menulist>
+    <menuitem menuid="voipprovider_addon"      desc="VoIP Provider"      parent=""          module="no"  link="" order="10"></menuitem>
+    <menuitem menuid="providers_accounts"   desc="Providers Accounts"   parent="voipprovider_addon" module="yes" link="" order="1">
+	<permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
+  </menulist>
+</module>

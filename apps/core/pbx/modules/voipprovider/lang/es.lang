@@ -29,6 +29,6 @@
 global $arrLangModule;
 $arrLangModule=array(
 "VoIP Provider" => "Provedor VoIP",
-"This module was removed from the package elastix-pbx and it was created as an Addon. This menu will be completely removed in the future. If you want it back please go to the Addons module and install it or click here." => "This module was removed from the package elastix-pbx and it was created as an Addon. This menu will be completely removed in the future. If you want it back please go to the Addons module and install it or click <a href='?menu=addons'>here</a>."
+"This module was removed from the package elastix-pbx and it was created as an Addon. This menu will be completely removed in the future. If you want it back please go to the Addons module and install it or click here." => "Este módulo fue removido del paquete elastix-pbx y fue creado como un Addon. Este menú será totalmente removido en un futuro. Si usted desea tenerlo nuevamente, por favor vaya al módulo Addons e instálelo o haga click <a href='?menu=addons'>aquí</a>."
 );
 ?>

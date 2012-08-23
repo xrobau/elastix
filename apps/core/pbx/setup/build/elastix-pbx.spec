@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 10
+Release: 13
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -294,6 +294,51 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Aug 23 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-13
+- CHANGED: module voipprovider, added spanish translation to an
+  informative message
+  SVN Rev[4117]
+- CHANGED: module voipprovider, this module was removed from core.
+  An informative message is added to indicate to the user that this
+  is now an Addon.
+  SVN Rev[4116]
+- ADDED: added new agi script called hangup.agi that is executed in
+  file extensions_override_elastix.conf. This agi intends to be an
+  intermediary between addons scripts that needs information about a
+  call as soon as it is hang up. This addons_scripts must be in path
+  /usr/local/elastix/addons_scripts 
+  SVN Rev[4114]
+- CHANGED: Module Batch of Extensions: By downloading the csv file
+  batch of Extensions reflects the Record Incoming and Record Outgoing
+  ("Adhoc") as "On Demand".
+  SVN Rev[4112]
+- CHANGED: Menu.xml: The Level 2 module named "Endpoints", now called
+  "Batch Configurations".
+  CHANGED: Module Endpoint Configurator: The warning message that shows
+  before discovering the endpoints on the network.
+  ADD: Module Endpoints Batch: Download the current endpoints in CSV format
+  CHANGED: Module Batch of Extensions: Upload the CSV with multiple subnets
+  separated by "&" in the "Denny" and "Permit".
+  CHANGED: Module Batch of Extensions: The parameters "IMAP Username" and
+  "IMAP Password" is not shown in the "VM Options".
+  CHANGED: Module Batch of Extensions: By downloading the csv file batch
+  of Extensions reflects the Record Incoming and Record Outgoing ("Adhoc")
+  as "On Demand".
+  CHANGED: Module Batch of Extensions: Field "Secret" must have minimum 8
+  alphanumeric characters, case sensitive.
+  SVN Rev[4111]
+- FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
+  Fixed graphic bug in ON/OFF Button
+  SVN Rev[4101]
+- CHANGED: module pbx, deleted tables and queries related to voipprovider
+  SVN Rev[4090]
+- Fixed bug 0001318, bug 0001338: fixed in Asterisk File Editor return last
+  query in Back link, fixed Popups, position and design, add in Dashboard
+  Applet Admin option to check all
+  SVN Rev[4088]
+- Add Mac and application form to Set Sangoma Vega Gateway
+  SVN Rev[4084]
+
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Endpoint Configurator: add new command-line utility.
   This new utility runs from /usr/bin/elastix-endpoint-configure. The program
@@ -301,6 +346,10 @@ fi
   encapsulation of vendor-specific operations, and with an emphasis on parallel
   configuration of multiple endpoints for speed. The ultimate goal is to enable 
   the quick configuration of hundreds of phones at once.
+
+* Wed Jul 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Endpoint Configurator: add SQL for vendor, MAC and model for Zultys.
+  MAC range taken from http://www.base64online.com/mac_address.php?mac=00:0B:EA
 
 * Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: for Cisco phones, syncinfo.xml must contain 
@@ -311,11 +360,35 @@ fi
 - FIXED: Endpoint Batch: Properly figure out network mask for local network 
   instead of hardcoding a /24 network mask. SVN Rev[4037]
 
+* Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Fri Jun 29 2012 German Macas <gmacas@palosanto.com>
+- ADDED: module - endpoints_batch: image file_csv.jpg for help of module.
+  SVN Rev[4029]
+
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4025]
+
 * Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: Remove stray print_r.
+  SVN Rev[4018]
+  
+* Wed Jun 27 2012 German Macas <gmacas@palosanto.com>
+- CHANGED : modules - endpoint_configurator: Add function and sql statement to 
+  set the new model Yealink VP530 from Endpoint Configurator.
+  SVN Rev[4014]
+
+* Tue Jun 26 2012 Sergio Broncano <sbroncano@palosanto.com>
+- ADDED: Module endpoints_batch, copy from trunk revision
+  SVN Rev[4013]
 
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Conference: Remove XSS vulnerability.
+  SVN Rev[4012]
 
 * Tue Jun 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: Reimplement Grandstream configuration encoder
@@ -323,21 +396,38 @@ fi
   which in turn allows the package to drop the openfire dependency.
 - CHANGED: Endpoint Configurator: modify listmacip so that it can stream output
   from nmap as it is generated.
+  SVN Rev[4009]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: Properly figure out network mask for local 
-  network instead of hardcoding a /24 network mask.
+  network instead of hardcoding a /24 network mask. SVN Rev[3993]
 - FIXED: Endpoint Configurator: Relax pattern matching in listmacip script to
   account for differences in output format in nmap from CentOS to Fedora 17.
+  SVN Rev[3992]
 - FIXED: Endpoint Configurator: Use ip addr show instead of ifconfig to get
   size of network mask for endpoint scan. Required for compatibility with 
   Fedora 17.
+  SVN Rev[3989]
+
+* Mon Jun 11 2012 Sergio Broncano <sbroncano@palosanto.com>
+- ADD: MODULE endpoints_batch, Parent menu is created second level called "Endpoints". 
+  with their respective classification Batch of Extensions, Endpoint Configurator become 
+  the third-level menu, menu is also added a third level called Batch Enpoints enabling 
+  mass configuration enpoints so fast, taking as input: subnet where the endpoints are 
+  connected and a file (. csv) file that contains configuration parameters such as 
+  (Vendor, Model, MAC, Ext, IP, Mask, GW, DNS1, DNS2, Bridge, Time Zone).
+  SVN Rev[3985]
+
+* Thu Jun 7 2012 Alberto Santos <asantos@palosanto.com>
+- NEW: new rest resource in pbxadmin to make calls.
+  SVN Rev[3971]
 
 * Tue Jun 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: installer.php: stop leaving temporary file /tmp/trunk_dump.sql around 
   after install or update.
 - FIXED: installer.php: stop leaving temporary file /var/www/db/trunk-pbx.db
-  around on most install/update scenarios. 
+  around on most install/update scenarios.
+  SVN Rev[3959] 
 
 * Mon Jun 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-10
 - FIXED: Changed specfile so that several files are explicitly set as 

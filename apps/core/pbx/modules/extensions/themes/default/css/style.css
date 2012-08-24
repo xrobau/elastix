@@ -19,3 +19,65 @@
 	color: black;
 	text-decoration: none;
 }
+
+/*desde aqui para el estilo de los tabs*/
+.tabs { /* es el rectángulo contenedor */
+min-height: 90px;
+height:auto;
+position: relative;
+border-bottom: 1px solid #AAA;
+padding-top: 5px;
+}
+
+.tab { /* cada una de las pestañas */
+float: left;
+}
+
+.tab label { /* la parte superior con el título de la pestaña */
+/*border-radius: 5px 5px 0 0;
+box-shadow: -3px 3px 2px #678 inset;*/
+color: #E35332; 
+font-weight: bold;
+float: left;
+cursor: pointer;
+left: 0;
+margin-right: 1px;
+margin-bottom: 5px;
+padding: 5px 15px;
+position: relative;
+text-shadow: 1px 1px #000;
+}
+/* el control input sólo lo necesitamos para que las pestañas permanezcan abiertas así que lo ocultamos */
+.tab [type=radio] { display: none; }
+
+/* el contenido de las pestañas */
+.content {
+bottom: 0;
+left: 0;
+overflow: hidden;
+padding: 5px;
+position: absolute;
+right: 0;
+top: 10px;
+}
+/* y un poco de animación */
+.content > * {
+opacity: 0;
+
+-moz-transform: translateX(-100%);
+-webkit-transform: translateX(-100%);
+-o-transform: translateX(-100%);
+
+-moz-transition: all 0.6s ease;
+-webkit-transition: all 0.6s ease;
+-o-transition: all 0.6s ease;
+}
+
+/* controlamos la pestaña activa */
+/*[type="radio"]:checked ~ label {
+z-index: 2;
+background: -moz-linear-gradient(center top , #777777, #999999);
+background: -webkit-gradient(linear,0% 40%,0% 70%,from(#777),to(#999));
+background: linear-gradient(center top , #777777, #999999);
+border-color: #888888 !important;
+}*/

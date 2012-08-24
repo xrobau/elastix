@@ -272,5 +272,21 @@ class paloSantoExtensions{
 		}
 		return $arrExtension;
 	}
+	
+	function getVMdefault($domain){
+        $arrVM=array();
+        $queryV="SELECT attach,context,deletevoicemail,saycid,envelope from voicemail_general where organization_domain=?";
+        $resultV=$this->_DB->getFirstRowQuery($queryV,true,array($domain));
+        if($resultV==false){
+            $this->errMsg .=_tr("Error getting voicemail default settings").$this->_DB->errMsg;
+        }else{
+            $arrVM["vmcontext"]=isset($resultV["context"])?$resultV["context"]:null;
+            $arrVM["vmattach"]=isset($resultV["attach"])?$resultV["attach"]:null;
+            $arrVM["vmdelete"]=isset($resultV["deletevoicemail"])?$resultV["deletevoicemail"]:null;
+            $arrVM["vmsaycid"]=isset($resultV["saycid"])?$resultV["saycid"]:null;
+            $arrVM["vmenvelope"]=isset($resultV["envelope"])?$resultV["envelope"]:null;
+        }
+        return $arrVM;
+	}
 }
 ?>

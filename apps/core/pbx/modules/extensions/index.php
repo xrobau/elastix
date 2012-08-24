@@ -25,7 +25,7 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
+  $Id: index.php,v 1.1.1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
 include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
@@ -68,10 +68,10 @@ function _moduleContent(&$smarty, $module_name)
 	$idOrganization=$arrCredentiasls["id_organization"];
 
 	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
-
+    
 	$action = getAction();
     $content = "";
-
+       
 	 switch($action){
         case "new_exten":
             $content = viewFormExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -193,7 +193,10 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 	//si es un usuario solo se ve su extension
 	//si es un administrador ve todas las extensiones
     foreach($arrExtens as $exten) {
-		$arrTmp[0] = "&nbsp;<a href='?menu=extensions&action=view&id_exten=".$exten['id']."'>".$exten["exten"]."</a>";
+        if($userLevel1=="superadmin")
+            $arrTmp[0] = $exten["exten"];
+        else
+            $arrTmp[0] = "&nbsp;<a href='?menu=extensions&action=view&id_exten=".$exten['id']."'>".$exten["exten"]."</a>";
         $arrTmp[1] = $exten['tech'];
         $arrTmp[2] = $exten['dial'];
         $arrTmp[3] = $exten['context'];
@@ -213,7 +216,7 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     }
 
 	if($pORGZ->getNumOrganization() > 1){
-		if(!($userLevel1 == "other"))
+		if($userLevel1 == "admin")
 			$oGrid->addNew("create_exten",_tr("Create New Extension"));
 
 		if($userLevel1 == "superadmin"){
@@ -285,22 +288,27 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 	$arrExten=array();
 	$action = getParameter("action");
 
-	$arrOrgz=array(0=>"Select one Organization");
 	if($userLevel1=="superadmin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+    
+	$arrOrgz=array(0=>"Select one Organization");
+	/*if($userLevel1=="superadmin"){
 		$orgTmp=$pORGZ->getOrganization("","","","");
 		$smarty->assign("isSuperAdmin",TRUE);
-	}else{
+	}else{*/
 		$orgTmp=$pORGZ->getOrganization("","","id",$idOrganization);
 		$smarty->assign("isSuperAdmin",FALSE);
-	}
-
+	//}
 	if($orgTmp===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}elseif(count($orgTmp)==0){
 		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You need yo have at least one organization created before you can create a extemsion"));
+		$smarty->assign("mb_message",_tr("Organization doesn't exist"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		if(($action=="new_exten" || $action=="save_new") && count($orgTmp)<=1){
@@ -315,7 +323,7 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 		$domain=$orgTmp[0]["domain"];
 	}
 	
-	$smarty->assign("DIV_VM","style='padding-left: 8px;'");
+	$smarty->assign("DIV_VM","yes");
 	$idExten=getParameter("id_exten");
 
 	if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
@@ -324,10 +332,10 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 			$smarty->assign("mb_message",_tr("Invalid Exten"));
 			return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 		}else{
-			if($userLevel1=="superadmin"){
+			/*if($userLevel1=="superadmin"){
 				$arrExten = $pExten->getExtensionById($idExten);
 				$domain=$arrExten["domain"];
-			}else{
+			}else{*/
 				if($userLevel1=="admin"){
 					$arrExten = $pExten->getExtensionById($idExten, $domain);
 				}else{
@@ -336,7 +344,7 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 					$idExten=$arrUserExt["id"];
 					$arrExten = $pExten->getExtensionById($arrUserExt["id"], $domain);
 				}
-			}
+			//}
 		}
 		
 		if($arrExten===false){
@@ -359,10 +367,10 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 			}else
 				$tech=null;
 
-			if($userLevel1=="superadmin"){
+			/*if($userLevel1=="superadmin"){
 				$smarty->assign("ORGANIZATION",$arrExten["domain"]);
 				$arrExten["domain_org"]=$arrExten["domain"];
-			}
+			}*/
 
 			if(getParameter("save_edit"))
 				$arrExten=$_POST;
@@ -383,14 +391,20 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 					$smarty->assign("DISPLAY_VM","style='visibility: visible;'");
 				}else{
 					if($action=="view"){
-						$smarty->assign("DIV_VM","style='padding-left: 8px; display: none;'");
+						$smarty->assign("DIV_VM","no");
+					}else{
+                        $arrVM=$pExten->getVMdefault($domain);
+                        $arrExten["vmcontext"]=$arrVM["vmcontext"];
+                        $arrExten["vmattach"]=$arrVM["vmattach"];
+                        $arrExten["vmdelete"]=$arrVM["vmdelete"];
+                        $arrExten["vmsaycid"]=$arrVM["vmsaycid"];
+                        $arrExten["vmenvelope"]=$arrVM["vmenvelope"];
 					}
 				}
 			}
 		}
 	}else{
 		$tech=null;
-		$smarty->assign("DISPLAY_VM","style='display: none;'");
 		if(getParameter("create_exten")){
 			//obtenemos los paramatros de configuracion de voicemial y extension por default
 			if($userLevel1!="superadmin"){
@@ -404,7 +418,6 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 		if(isset($_POST["create_vm"])){
 			$smarty->assign("VALVM","value='yes'");
 			$smarty->assign("CHECKED","checked");
-			$smarty->assign("DISPLAY_VM","style='visibility: visible;'");
 		}
 	}
 
@@ -443,15 +456,17 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 	$smarty->assign("MODULE_NAME",$module_name);
 	$smarty->assign("id_exten", $idExten);
 	$smarty->assign("CREATE_VM",_tr("Enabled Voicemail"));
-	$smarty->assign("EXT_OPTIONS",_tr("Extension Settings"));
 	$smarty->assign("DEV_OPTIONS",_tr("Device Settings"));
-	$smarty->assign("ADV_OPTIONS",_tr("Advanced Device Settings"));
+	$smarty->assign("ADV_OPTIONS",_tr("Advanced Settings"));
 	$smarty->assign("DICT_OPTIONS",_tr("Dictation Settings"));
 	$smarty->assign("REC_OPTIONS",_tr("Recording Settings"));
 	$smarty->assign("VM_OPTIONS",_tr("Voicemail Settings"));
+	$smarty->assign("EXTENSION",_tr("GENERAL"));
+	$smarty->assign("DEVICE",_tr("DEVICE"));
+	$smarty->assign("VOICEMAIL",_tr("VOICEMAIL"));
 	$smarty->assign("userLevel",$userLevel1);
 	$htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("Extensions"), $arrExten);
-	$content = "<form  method='POST' enctype='multipart/form-data' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
+	$content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $content;
 }
@@ -466,31 +481,31 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	$continuar=true;
 	$exito=false;
 
+	if($userLevel1!="admin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+	
 	if($pORGZ->getNumOrganization() <=1){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
         $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create extension to this organization"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}
 
-	if($userLevel1=="other"){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}
-
-	$domain=getParameter("domain_org");
+	/*$domain=getParameter("domain_org");
 	if($userLevel1=="superadmin"){
 		if(empty($domain)){
 			$domain=0;
 		}
-	}
+	}*/
 
-	$arrOrgz=array(0=>"Select one Organization");
+	/*$arrOrgz=array(0=>"Select one Organization");
 	if($userLevel1=="superadmin"){
 		$orgTmp=$pORGZ->getOrganizationByDomain_Name($domain);
-	}else{
+	}else{*/
 		$orgTmp=$pORGZ->getOrganizationById($idOrganization);
-	}
+	//}
 
 	if($orgTmp===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
@@ -499,9 +514,9 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	}elseif(count($orgTmp)==0){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Organization doesn't exist"));
-		if($userLevel1=="superadmin")
+		/*if($userLevel1=="superadmin")
 			return viewFormExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-		else
+		else*/
 			return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		foreach($orgTmp as $value){
@@ -520,7 +535,7 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v)
-                $strErrorMsg .= "$k, ";
+                $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
         return viewFormExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -531,12 +546,12 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 			$continuar=false;
 		}
 		
-		if($userLevel1=="superadmin"){
+		/*if($userLevel1=="superadmin"){
 			if(!isset($domain) || $domain=="0"){
 				$error=_tr("You must select a organization");
 				$continuar=false;
 			}
-		}
+		}*/
 
 		$type=getParameter("technology");
 		if(!isset($type) || !($type=="sip" || $type=="iax2")){
@@ -565,7 +580,7 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 			//obtenemos los datos para la creacion de voicemail
 			if(getParameter("create_vm")=="yes"){
 				$vmpassword=getParameter("vmpassword");
-				if(!preg_match("/\d+/","$vmpassword")){
+				if(!preg_match('/^[[:digit:]]+$/',"$vmpassword")){
 					$error=_tr("Voicemail password cannot be empty and must only contain digits");
 					$continuar=false;
 				}else{
@@ -623,6 +638,12 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 	$exito=false;
 	$idExten=getParameter("id_exten");
 
+	if($userLevel1=="superadmin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+	
 	//un usuario que no es administrador no puede editar la extension de otro usuario
 	if($userLevel1=="other"){
 		$idUser=$pACL->getIdUser($userAccount);
@@ -640,10 +661,10 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 		$smarty->assign("mb_message",_tr("Invalid Exten"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
-		if($userLevel1=="superadmin"){
+		/*if($userLevel1=="superadmin"){
 			$arrExten = $pExten->getExtensionById($idExten);
 			$domain=$arrExten["domain"];
-		}else{
+		}else{*/
 			$resultO=$pORGZ->getOrganizationById($idOrganization);
 			$domain=$resultO["domain"];
 			if($userLevel1=="admin"){
@@ -651,7 +672,7 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 			}else{
 				$arrExten = $pExten->getExtensionById($arrUserExt["id"], $domain);
 			}
-		}
+		//}
 	}
 
 	if($arrExten===false){
@@ -700,7 +721,7 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 			//obtenemos los datos para la creacion de voicemail
 			if(getParameter("create_vm")=="yes"){
 				$vmpassword=getParameter("vmpassword");
-				if(!preg_match("/\d+/","$vmpassword")){
+				if(!preg_match('/^[[:digit:]]+$/',"$vmpassword")){
 					$error=_tr("Voicemail password cannot be empty and must only contain digits");
 					$continuar=false;
 				}else{
@@ -833,7 +854,7 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 	$idExten=getParameter("id_exten");
 
 
-	if($userLevel1=="other"){
+	if($userLevel1!="superadmin"){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -846,10 +867,10 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 		$smarty->assign("mb_message",_tr("Invalid Exten"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
-		if($userLevel1=="superadmin"){
+		/*if($userLevel1=="superadmin"){
 			$arrExten = $pExten->getExtensionById($idExten);
 			$domain=$arrExten["domain"];
-		}else{
+		}else{*/
 			$resultO=$pORGZ->getOrganizationById($idOrganization);
 			$domain=$resultO["domain"];
 			if($userLevel1=="admin"){
@@ -859,7 +880,7 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 				$arrUserExt=$pACL->getExtUser($idUser);
 				$arrExten = $pExten->getExtensionById($arrUserExt["id"], $domain);
 			}
-		}
+		//}
 	}
 
 	if($arrExten===false){
@@ -905,7 +926,8 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 
 function createFieldForm($arrOrgz,$tech=null)
 {
-    $arrTech=array("sip"=>"Sip","iax2"=>"Iax2");$arrRings=array(0=>_tr("Default"),1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120);
+    $arrTech=array("sip"=>"Sip","iax2"=>"Iax2");
+    $arrRings=array(0=>_tr("Default"),1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120);
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
 	$arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrWait=array("no"=>_tr("Disabled"),"yes"=>_tr("Enabled"));
@@ -913,6 +935,7 @@ function createFieldForm($arrOrgz,$tech=null)
 	$arrScreen=array("no"=>"disabled","memory"=>"memory","nomemory"=>"nomemory");
 	$arrDictate=array("no"=>"disabled","yes"=>"enabled");
 	$arrDictFor=array("ogg"=>"ogg","gsm"=>"gsm","wav"=>"wav");
+	$arrLang=getLanguagePBX();
     $arrFormElements = array("exten" => array("LABEL"                  => _tr('Extension'),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
@@ -924,12 +947,6 @@ function createFieldForm($arrOrgz,$tech=null)
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrTech,
                                                     "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),//accion en javascript
-                             "domain_org"  => array("LABEL"                  => _tr("Organization"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrOrgz,
-                                                    "VALIDATION_TYPE"        => "domain",
                                                     "VALIDATION_EXTRA_PARAM" => ""),//accion en javascript
                              "secret"   => array("LABEL"                  => _tr("Secret"),
                                                     "REQUIRED"               => "no",
@@ -945,8 +962,8 @@ function createFieldForm($arrOrgz,$tech=null)
                                                     "VALIDATION_EXTRA_PARAM" => ""),
 							 "language"       => array("LABEL"           => _tr("Language Code"),
                                                     "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrLang,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                              "ring_timer"       => array("LABEL"             => _tr("Ringtimer"),
@@ -1497,12 +1514,12 @@ function createFieldFilter($arrOrgz)
 function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization){
 	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pDB2);
-	$showMsg=false;
 	$continue=false;
 
 	if($userLevel1=="other"){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}
 
 	if($userLevel1=="superadmin"){
@@ -1518,11 +1535,9 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	if($result===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
-		$showMsg=true;
 	}elseif(count($result)==0){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. "));
-		$showMsg=true;
 	}else{
 		$domain=$result[0];
 		$continue=true;

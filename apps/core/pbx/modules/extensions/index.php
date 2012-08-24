@@ -67,7 +67,7 @@ function _moduleContent(&$smarty, $module_name)
 	$userAccount=$arrCredentiasls["userAccount"];
 	$idOrganization=$arrCredentiasls["id_organization"];
 
-	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     
 	$action = getAction();
     $content = "";

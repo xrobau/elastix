@@ -31,7 +31,7 @@
 	include_once "libs/paloSantoPBX.class.php";
 	global $arrConf;
 class paloSantoExtensions{
-    var $_DB; //conexion base de mysql elx_pbx
+    var $_DB; //conexion base de mysql elxpbx
     var $errMsg;
 
     function paloSantoExtensions(&$pDB)

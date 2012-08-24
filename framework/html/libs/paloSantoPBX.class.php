@@ -125,7 +125,8 @@ class paloAsteriskDB {
 				$this->errMsg=_tr("Already exits a fax extension with same pattern");
 			}else{
 				//validamos que la extension no este siendo usado por los features code
-				$query="SELECT 1 from features_code where code=? or default_code=? and organization_domain=?";
+				$query="SELECT 1 from features_code f join features_code_settings fg on f.name=fg.name 
+				where f.code=? or fg.default_code=? and f.organization_domain=?";
 				$result=$this->getFirstResultQuery($query,array($extension,$extension,$domain));
 				if(count($result)>0 || $result===false){
 					$this->errMsg=_tr("Already exits a feature code with same pattern");
@@ -1337,6 +1338,69 @@ class paloDevice{
 		}
 		if(strtoupper($result["Response"]) == "ERROR")
 			$error=true;
+			
+		//VmX Locater
+		$state_unavail=$state_busy="disabled";
+		$ext0=$ext1=$ext2=$context=$vmx_opts_timeout=null;
+		$query="SELECT VMX_CONTEXT,VMX_OPTS_TIMEOUT from elx_pbx where organization_domain=?";
+		$arrResult=$this->tecnologia->getFirstResultQuery($query,array($this->domain),true,"Don't exist registers.");
+        if($arrResult!=false){
+            $context=$arrResult["VMX_CONTEXT"];
+            $vmx_opts_timeout=$arrResult["VMX_OPTS_TIMEOUT"];
+        }
+            
+        if($arrProp["voicemail_context"]!="novm"){
+            if(isset($arrProp["vmx_locator"])){
+                $familia="EXTUSER/$code/".$arrS['name'];
+                $pri="1";
+                $arrVMX=array("busy","unavail");
+                if($arrProp["vmx_locator"]=="enabled"){
+                    if(isset($arrProp["vmx_unavailable"])){
+                        if($arrProp["vmx_unavailable"]=="on")
+                            $state_unavail="enabled";
+                    }
+                    
+                    if(isset($arrProp["vmx_busy"])){
+                        if($arrProp["vmx_busy"]=="on")
+                            $state_busy="enabled";
+                    }
+                    
+                    if(!isset($arrProp["vmx_operator"])){
+                        if(isset($arrProp["vmx_extension_0"]))
+                            $ext0=$arrProp["vmx_extension_0"];
+                    }
+                    
+                    if(isset($arrProp["vmx_extension_1"]))
+                        $ext1=$arrProp["vmx_extension_1"];
+                    if(isset($arrProp["vmx_extension_2"]))
+                        $ext2=$arrProp["vmx_extension_2"];
+                    
+                    foreach($arrVMX as $item){
+                        $astMang->database_put("EXTUSER/$code/vmx/$item/","state",${"state_".$item});
+                        $astMang->database_put("EXTUSER/$code/vmx/$item/vmxopts","timeout",$vmx_opts_timeout);
+                        //se setean las extensiones
+                        for($i=0;$i<3;$i++){
+                            if(!is_null(${"ext".$i})){
+                                $astMang->database_put("EXTUSER/$code/vmx/$item/$i","ext",${"ext".$i});
+                                $astMang->database_put("EXTUSER/$code/vmx/$item/$i","context",$context);
+                                $astMang->database_put("EXTUSER/$code/vmx/$item/$i","context",$pri);
+                            }
+                        }
+                    }
+                }else{
+                    if(!isset($arrProp["vmx_operator"]) && isset($arrProp["vmx_extension_0"])){
+                        foreach($arrVMX as $item){
+                            $astMang->database_put("EXTUSER/$code/vmx/$item","state","bloked");
+                            $astMang->database_put("EXTUSER/$code/vmx/$item/0","ext",$arrProp["vmx_extension_0"]);
+                            $astMang->database_put("EXTUSER/$code/vmx/$item/0","context",$context);
+                            $astMang->database_put("EXTUSER/$code/vmx/$item/0","context",$pri);
+                        }
+                    }else
+                        $result=$astMang->database_delTree("EXTUSER/".$this->code."/vmx");
+                }
+            }
+        }else
+            $result=$astMang->database_delTree("EXTUSER/".$this->code."/vmx");
 
 		//si hubo algun error eliminar los datos que fueron insertados antes del error
 		if($error){

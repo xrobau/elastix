@@ -37,6 +37,7 @@ include_once $arrConf['basePath']."/libs/paloSantoConfig.class.php";
 include_once $arrConf['basePath']."/libs/paloSantoPBX.class.php";
 include_once $arrConf['basePath']."/libs/misc.lib.php";
 include_once $arrConf['basePath']."/modules/features_code/libs/paloSantoFeaturesCode.class.php";
+include_once $arrConf['basePath']."/modules/general_settings/libs/paloSantoGlobalsPBX.class.php";
 
 class paloSantoASteriskConfig{
     public $errMsg;
@@ -104,7 +105,7 @@ class paloSantoASteriskConfig{
 			return false;
 		else
 			$orgzCode=$result["code"];
-
+			
 		$fsource="/var/www/elastixdir/asteriskconf/generic_extensions.conf";
 		$extFile="/etc/asterisk/organizations/extensions_$orgzDomain.conf";
 		$extAddFile="/etc/asterisk/organizations/extensions_additionals_$orgzDomain.conf";
@@ -115,26 +116,31 @@ class paloSantoASteriskConfig{
 				$content = str_replace("{CODE}", "$orgzCode", $content);
 				$content = str_replace("{DOMAIN}", "$orgzDomain", $content);
 				fclose($handler);
-				//creamos el nuevo archivo de configuracion
-				if(file_put_contents($extFile, $content)===false)
-				{
-					$this->errMsg=_tr("File $extFile, couldn't be created");
-				}elseif(file_put_contents($extAddFile, "")===false){
-					$this->errMsg=_tr("File $extAddFile, couldn't be created");
-				}elseif(file_put_contents($extCusFile, "")===false){
-					$this->errMsg=_tr("File $extCusFile, couldn't be created");
-				}else{
-					$arrFile=array($extFile,$extAddFile,$extCusFile);
-					foreach($arrFile as $value){
-						$sComando = '/usr/bin/elastix-helper asteriskconfig changePermission '.$value.'  2>&1';
-						$output = $ret = NULL;
-						exec($sComando, $output, $ret);
-						if ($ret != 0) {
-							$this->errMsg = implode('', $output);
-						}else
-							$EXITO=true;
-					}
+				
+				foreach(array($extFile,$extAddFile,$extCusFile) as $file){
+                    if(file_put_contents($file, $content)!==false){
+                        $sComando = '/usr/bin/elastix-helper asteriskconfig changePermission '."$file".' 2>&1';
+                        $output = $ret = NULL;
+                        exec($sComando, $output, $ret);
+                        if ($ret != 0) {
+                            $this->errMsg = implode('', $output);
+                            return false;
+                        }
+                        $content="";
+                    }else{
+                        $this->errMsg=_tr("File")." $file "._tr("couldn't be written");
+                        return false;
+                    }    
 				}
+                
+               /* $sComando = '/usr/bin/elastix-helper asteriskconfig create_file '."$extCusFile $content".'  2>&1';
+                $output = $ret = NULL;
+                exec($sComando, $output, $ret);
+                if ($ret != 0) {
+                    $this->errMsg = implode('', $output);
+                    return false;
+                }*/
+				$EXITO=true;
 			}else{
 				$this->errMsg=_tr("Couldn't be opened for reading file")." $fsource";
 			}
@@ -158,6 +164,8 @@ class paloSantoASteriskConfig{
 		$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
 		$arrConfig = $pConfig->leer_configuracion(false);
 
+		//sacar la variable de globals
+		//TODO
 		$astmonitor = $arrConfig['MIXMON_DIR']['valor'];
 		$astlibsound = $arrConfig['ASTVARLIBDIR']['valor']."/sounds";
 		$astspooltmp= $arrConfig['ASTSPOOLDIR']['valor']."/tmp";
@@ -228,7 +236,17 @@ class paloSantoASteriskConfig{
 		}
 		if(count($lineas)==0)
 			$lineas[]=$includes;
-		return file_put_contents($file, $lineas);
+			
+		if(file_put_contents($file, $lineas)===false)
+            return false;	
+        /*$sComando = '/usr/bin/elastix-helper asteriskconfig create_file extensions.conf '.$lineas.'  2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = implode('', $output);
+            return false;
+        }*/
+		return true;
 	}
 
 	//borra el plan de marcado de una organizacion especifica
@@ -239,7 +257,13 @@ class paloSantoASteriskConfig{
 	function delete_dialplanfiles($orgzDomain)
 	{
 		$path="/etc/asterisk/organizations/";
-
+		$arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $this->errMsg =_tr("You are no authorized to perform this action");
+            return false;
+        }
+        
 		//reescribimos los archivos extensions.conf y extensions_globals.conf con las configuraciones correctas
 		if($this->createExtensionsGlobals()===false){
 			$this->errMsg=_tr("Error when trying write asterisk config file").$this->errMsg;
@@ -252,6 +276,9 @@ class paloSantoASteriskConfig{
 				$sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
 				$output = $ret = NULL;
 				exec($sComando, $output, $ret);
+				if ($ret != 0){
+                    $this->errMsg = implode('', $output);
+                }
 				return true;
 			}else{
 				$this->errMsg=_tr("Error when trying write asterisk config file").$this->errMsg;
@@ -261,7 +288,7 @@ class paloSantoASteriskConfig{
 	}
 
 	//Si se falla la momento de crear los archivos, ahi que deshacer los cambios desde donde se llame a esta funcion
-	function createOrganizationAsterisk($domain){
+	function createOrganizationAsterisk($domain,$country){
 		//obtenemos el codigo de la organizacion y de esa manera validamos que la organizacion exista
 		$query="SELECT 1 from organization where domain=?";
 		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
@@ -281,19 +308,25 @@ class paloSantoASteriskConfig{
 		//	  (extensions_dominio.conf,extensions_additionals_dominio.conf,extensions_custom_dominio.conf,extensions_globals_dominio.conf)
 		// 4.-Inclumos los archivos recien creados en con la sentencias include dentro del archivo
         //    extensions.conf y extensions_globals.conf
-		if($this->setGeneralSettingFirstTime($domain)){
+		if($this->setGeneralSettingFirstTime($domain,$country)){
 			if($pFC->insertPaloFeatureDB()){
 				if($this->createAsteriskDirectory($domain)){
-					if($this->createExtensionGlobalsDomain($domain) &&  $this->writeExtensionsDomain_conf($domain) && $this->setReloadDialplan($domain)){
-						if($this->createExtensionsGlobals()!==false && $this->includeInExtensions_conf()!==false){
-							$sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
-							$output = $ret = NULL;
-							exec($sComando, $output, $ret);
-							return true;
-						}else{
-							$this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
-					}else{
-						$this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
+                    if($pFC->createFeatureFile()){
+                        if($this->createExtensionGlobalsDomain($domain) &&  $this->writeExtensionsDomain_conf($domain) && $this->setReloadDialplan($domain)){
+                            if($this->createExtensionsGlobals()!==false && $this->includeInExtensions_conf()!==false){
+                                $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
+                                $output = $ret = NULL;
+                                exec($sComando, $output, $ret);
+                                if ($ret != 0){
+                                    $this->errMsg = implode('', $output);
+                                }
+                                return true;
+                            }else{
+                                $this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
+                        }else{
+                            $this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
+                    }else{
+                        $this->errMsg=_tr("Error trying created file features.conf ").$pFC->errMsg;}
 				}else{
 					$this->errMsg=_tr("Error trying created directories inside asterisk");}
 			}else
@@ -314,7 +347,8 @@ class paloSantoASteriskConfig{
 
 		//arreglo que contiene las tablas dentro de ast_realtime que no tienen el campo
         //organization_domian
-		$arrNoOrgDomain=array("trunk_dialpatterns");
+		$arrNoOrgDomain=array("trunk_dialpatterns","features_code_settings","globals_settings","iax_settings","sip_settings",
+		"voicemail_settings");
 
 		//obtenemos una lista de las tablas dentro de la base elx_pbx
 		$queryShow="show tables from elx_pbx";
@@ -323,7 +357,7 @@ class paloSantoASteriskConfig{
 			$this->errMsg = $this->_DB->errMsg;
 			return false;
 		}
-		//TODO: Implementarloe en una funcion aparte
+		//TODO: Implementarlo en una funcion aparte
 		foreach($result as $value){
 			$queryDel="DELETE from ".$value[0]." where organization_domain=?";
 			if(!in_array($value[0],$arrNoOrgDomain)){
@@ -376,81 +410,78 @@ class paloSantoASteriskConfig{
 
 		return $exito;
 	}
-
+	
 	//se crean la varias globales del sistema, antes esto estaba dentro de extensions_additionals
-	//ahora sera un archivo aparte
-	private function createExtensionsGlobals(){
-		global $arrConf;
-		$file="/etc/asterisk/extensions_globals.conf";
-		$source_file="/var/www/elastixdir/asteriskconf/elastix_pbx.conf";
-		$content ="[globals]\n";
-		if(is_file($source_file)){
-			if($handler=fopen($source_file,'r')){
-				$content .= fread($handler, filesize($source_file));
-				$content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
-				$content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
-				fclose($handler);
-				//creamos las globales de los archivos de configuracion
-				if(file_put_contents($file, $content)===false)
-				{
-					$this->errMsg=_tr("File extensions_globals, couldn't be created");
-					return false;
-				}
-			}
-		}else{
-			$this->errMsg=_tr("File /var/www/elastixdir/asteriskconf/elastix_pbx.conf dosen't exist");
-			$content ="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
-			$content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
-			file_put_contents($file, $content);
-			return false;
-		}
-		
-		//incluimos los archivos que tienen las configuraciones globales de cada organizacion
-		$query= "SELECT domain from organization";
-		$result=$this->_DBSQLite->fetchTable($query, false);
+    //ahora sera un archivo aparte
+    //se sobreescribe este archivo cada vez que se crea una nueva organizacion
+    private function createExtensionsGlobals(){
+        global $arrConf;
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $this->errMsg =_tr("You are no authorized to perform this action");
+            return false;
+        }
+        
+        $file="/etc/asterisk/extensions_globals.conf";
+        $source_file="/var/www/elastixdir/asteriskconf/elastix_pbx.conf";
+        $content ="[globals]\n";
+        if(is_file($source_file)){
+            if($handler=fopen($source_file,'r')){
+                $content .= fread($handler, filesize($source_file));
+            } 
+        }else{
+            $this->errMsg=_tr("File /var/www/elastixdir/asteriskconf/elastix_pbx.conf dosen't exist");
+            $content ="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+            $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+            file_put_contents($file, $content);
+            return false;
+        }
+        
+        //incluimos los archivos que tienen las configuraciones globales de cada organizacion
+        $query= "SELECT domain from organization";
+        $result=$this->_DBSQLite->fetchTable($query, false);
         if($result===FALSE){
             $this->errMsg = $pDB->errMsg;
             return false;
         }
 
         if(count($result)!=0){
-			$includes="; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
-			foreach($result as $domain)
-			{
-				if(isset($domain[0]) && $domain[0]!=""){
-					//antes de incluir el archivo validamos que el mismo exista
-					//ya que si no existe y lo incluimos esto provocara que asterisk crash
-					//en caso de no existir el archivo se lo inteta crear
-					if(!is_file("/etc/asterisk/organizations/extensions_globals_".$domain[0].".conf")){
-						if($this->createExtensionGlobalsDomain($domain[0]))
-							$includes .="#include organizations/extensions_globals_".$domain[0].".conf\n";
-					}else
-						$includes .="#include organizations/extensions_globals_".$domain[0].".conf\n";
-				}
-			}
-			$includes .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
-
-			$lineas=array();
-
-			foreach (file($file) as $sLinea) {
-				// Remover todos los include conrrespondientes a los archivos extensiones de las organizacion
-				if (preg_match('/; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE/', $sLinea)){
-					$lineas[] = $includes;
-					break;
-				} else {
-					$lineas[] = $sLinea;
-				}
-			}
-			if(count($lineas)==0)
-				$lineas[]=$includes;
-			return file_put_contents($file, $lineas);
-		}else
-			return true;
-	}
+            $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+            foreach($result as $domain)
+            {
+                if(isset($domain[0]) && $domain[0]!=""){
+                    //antes de incluir el archivo validamos que el mismo exista
+                    //ya que si no existe y lo incluimos esto provocara que asterisk crash
+                    //en caso de no existir el archivo se lo inteta crear
+                    if(!is_file("/etc/asterisk/organizations/extensions_globals_".$domain[0].".conf")){
+                        if($this->createExtensionGlobalsDomain($domain[0]))
+                            $content .="#include organizations/extensions_globals_".$domain[0].".conf\n";
+                    }else
+                        $content .="#include organizations/extensions_globals_".$domain[0].".conf\n";
+                }
+            }
+            $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";  
+        }else{
+            $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+            $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+        }
+        
+       /* $sComando = '/usr/bin/elastix-helper asteriskconfig create_file extensions_globals.con'." $content ".'2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = implode('', $output);
+            return false;
+        }else*/
+        if(file_put_contents($file, $content)==false)
+            return false;
+        return true;
+    }
 
 	//se lee las variables globales desde la base de datos y se las escribe en el archivo de
 	//configuracion
-	function createExtensionGlobalsDomain($domain){
+	private function createExtensionGlobalsDomain($domain){
 		global $arrConf;
 		$file="/etc/asterisk/organizations/extensions_globals_$domain.conf";
 		$contenido="";
@@ -514,50 +545,20 @@ class paloSantoASteriskConfig{
 					$contenido .="PREFIX_TRUNK_$trunkid = \n";
 			}
 		}
-		return file_put_contents($file,$contenido);
+		
+		if(file_put_contents($file, $contenido)===false)
+            return false;
+		/*$sComando = '/usr/bin/elastix-helper asteriskconfig create_file extensions_globals_'."$domain.conf $contenido".'  2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = implode('', $output);
+            return false;
+        }else*/
+            return true;
 	}
 
-	function insertDBGlobals($arrProp,$domain,$first=false){
-		global $arrConf;
-		$source_file="/var/www/elastixdir/asteriskconf/globals.conf";
-		//verificamos que exista el dominio
-		$query="SELECT count(domain) from organization where domain=?";
-		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
-		if($result===false){
-			$this->errMsg = $pDB->errMsg;
-			return false;
-		}elseif($result[0]==0){
-			$this->errMsg = _tr("Organization dosen't exist");
-			return false;
-		}
-
-		//acabamos de crear la organizacion y llenamos con los valores
-		//default de las globales
-		if($first){
-			if(is_file($source_file)){
-				require_once $arrConf['basePath'].'/libs/paloSantoConfig.class.php';
-				$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/globals.conf", "=", "[[:space:]]*=[[:space:]]*");
-				$arrConfig = $pConfig->leer_configuracion(false);
-
-				foreach($arrConfig as $key => $value){
-					$query="INSERT INTO globals values (?,?,?)";
-					$insert=$this->_DB->genQuery($query,array($domain,$key,$value["valor"]));
-					if($insert==false){
-						$this->errMsg=_tr("Problem setting globals variables").$this->_DB->errMsg;
-						break;
-					}
-				}
-				return $insert;
-			}else{
-				$this->errMsg=_tr("File /var/www/elastixdir/asteriskconf/globals.conf dosen't exist");
-				return false;
-			}
-		}
-
-		//validar que solo escriba el nombre de variables que existan cuando se setean solo algunas
-	}
-
-	private function setGeneralSettingFirstTime($domain)
+	private function setGeneralSettingFirstTime($domain,$country)
 	{
 		global $arrConf;
 		$source_file="/var/www/elastixdir/asteriskconf/globals.conf";
@@ -571,30 +572,56 @@ class paloSantoASteriskConfig{
 			$this->errMsg = _tr("Organization dosen't exist");
 			return false;
 		}
-
+		
+		$pGlobals=new paloGlobalsPBX($this->_DB,$domain);
+		$res=$pGlobals->insertDBGlobals($country,$this->_DBSQLite);
+        if($res==false){
+            $this->errMsg = $pGlobals->errMsg;
+            return false;
+        }
+        
+        $reslng=$pGlobals->getGlobalVar("LANGUAGE");
+        if($reslng!=false){
+            $language=$reslng[0];
+        }
+        
+        
 		$arrGeneral=array("sip","iax","voicemail");
 		foreach($arrGeneral as $type){
-			$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", $type."_general", "=", "[[:space:]]*=[[:space:]]*");
-			$arrConfig = $pConfig->leer_configuracion(false);
+            $queryg="Select * from ".$type."_settings";
+            $arrConfig=$this->_DB->getFirstRowQuery($queryg,true);
+            if($arrConfig===false){
+                $this->errMsg=$this->_DB->errMsg;
+                return false;
+            }elseif($arrConfig==false){
+                $this->errMsg=_tr("Don't exist default parameters ").$type."_settings";
+                return false;
+            }
+                
 			$questions="(?,";
 			$prop="(organization_domain,";
 			$arrValues=array($domain);
 			$i=1;
 			foreach($arrConfig as $key => $value){
-				$arrValues[$i]=$value["valor"];
-				$prop .="$key,";
-				$questions .="?,";
-				$i++;
+                if($key=="language" && !empty($language)){
+                    $value=$language;
+                }
+                if(isset($value) && $key!="id"){
+                    $arrValues[$i]=$value;
+                    $prop .="$key,";
+                    $questions .="?,";
+                    $i++;
+                }
 			}
 			$questions=substr($questions,0,-1).")";
 			$prop=substr($prop,0,-1).")";
 			$query="INSERT INTO ".$type."_general $prop values $questions";
 			if($this->_DB->genQuery($query,$arrValues)==false){
+                $this->errMsg=$this->_DB->errMsg;
 				return false;
 			}
 		}
-
-		return $this->insertDBGlobals(null,$domain,true);
+		return true;
 	}
 
 	/**
@@ -679,7 +706,7 @@ class paloSantoASteriskConfig{
 			return false;
 		}
 
-		$file="extensions_additionals_$domain.conf";
+		$file="organizations/extensions_additionals_$domain.conf";
 
 		$arrContext=array();
 		$arrFromInt=array();
@@ -724,6 +751,8 @@ class paloSantoASteriskConfig{
 
 		$contenido="";
 
+       // print_r($arrContext);
+		
 		foreach($arrContext as $value){
 			if(isset($value)){
 				if(empty($value->errMsg) && is_object($value)){
@@ -733,18 +762,25 @@ class paloSantoASteriskConfig{
 				}
 			}
 		}
-
-		//print_r($arrContext);
-
-		if(file_put_contents("/etc/asterisk/organizations/$file",$contenido)===false){
-			$this->errMsg=_tr("Couldn't be written file")." /etc/asterisk/organizations/$file";
-			return false;
-		}else{
-			$sComando = '/usr/bin/elastix-helper asteriskconfig dialplan-reload 2>&1';
-			$output = $ret = NULL;
-			exec($sComando, $output, $ret);
-			return true;
-		}
+        
+		/*$sComando ='/usr/bin/elastix-helper asteriskconfig create_file '.$file." '".$contenido."' 2>&1";
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);*/
+        $ret=0;
+        if(file_put_contents("/etc/asterisk/$file", $contenido)==false)
+            $ret=1;
+        if ($ret != 0) {
+            $this->errMsg = _tr("Couldn't be written file")." /etc/asterisk/$file ".implode('', $output);
+            return false;
+        }else{
+            $sComando = '/usr/bin/elastix-helper asteriskconfig dialplan-reload 2>&1';
+            $output = $ret = NULL;
+            exec($sComando, $output, $ret);
+            if ($ret != 0){
+                $this->errMsg = implode('', $output);
+            }
+            return true;
+        }
 	}
 
 }

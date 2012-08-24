@@ -293,7 +293,7 @@ class paloSantoOrganization{
                        y sera creado un nuevo dominio a nivel de mails
       *  @param string $name nombre de la organizacion o empresa que crea la entidad
       *  @param string $country pais donde reside la empresa dueña de la entidad
-      *  @param string $state estado donde reside la empresa dueña de la entidad
+      *  @param string $state estado o ciudad donde reside la empresa dueña de la entidad
     */
     function createOrganization($name,$dominio,$country,$state,$address,$country_code,$area_code,$quota, $email_contact, &$error)
     {
@@ -313,7 +313,7 @@ class paloSantoOrganization{
 	private function assignResource($idOrganization){
 		$rInsert=true;
 		$recurso=array();
-		$arrResource=array("usermgr","organization","userlist","grouplist","group_permission","preferences","language","themes_system","myex_config","webmail","cdrreport","billing","billing_rates","billing_report","dest_distribution","billing_setup","graphic_report","summary_by_extension","missed_calls","openfire","downloads","sphones","faxutils","instantmessaging","calendar","address_book","sec_accessaudit","sec_weak_keys","email_accounts","email_list","email_stats","vacations","virtual_fax","faxlist","sendfax","faxviewer","sysdash","dashboard","applet_admin","backup_restore","currency","pbxadmin","control_panel","voicemail","monitoring","endpoint_configurator","conference","extensions_batch","tools","asterisk_cli","file_editor","text_to_wav","festival","fop");
+		$arrResource=array("usermgr","organization","userlist","grouplist","group_permission","preferences","language","themes_system","myex_config","webmail","cdrreport","billing","billing_rates","billing_report","dest_distribution","billing_setup","graphic_report","summary_by_extension","missed_calls","openfire","downloads","sphones","faxutils","instantmessaging","calendar","address_book","sec_accessaudit","sec_weak_keys","email_accounts","email_list","email_stats","vacations","virtual_fax","faxlist","sendfax","faxviewer","sysdash","dashboard","applet_admin","backup_restore","currency","pbxadmin","control_panel","voicemail","monitoring","endpoint_configurator","conference","extensions_batch","tools","asterisk_cli","file_editor","text_to_wav",'extensions','queues','trunks','ivr','features_code','general_settings','inbound_route','outbound_route');
 		//1) Asignamos los recursos a la organizacion
 		//   estos recursos son sacados en base a los recursos por default a los que tiene acceso
         //   el adminitrador de cada entidad
@@ -326,7 +326,7 @@ class paloSantoOrganization{
 			//ocurrio un error con la conexion
 			$this->errMsg = "An error has occurred when were assigned resources to the organization. ".$this->_DB->errMsg;
 			return false;
-		}elseif(count($recursos)<0){
+		}elseif(count($recursos)>0){
 			foreach($recursos as $value){
 				$recurso[]=$value["id_resource"];
 			}
@@ -413,7 +413,7 @@ class paloSantoOrganization{
         return true;
     }
 
-    private function insertOrganizationDB($name,$domain,$city,$state,$address,$country_code,$area_code, $quota, $email_contact, &$error)
+    private function insertOrganizationDB($name,$domain,$country,$city,$address,$country_code,$area_code, $quota, $email_contact, &$error)
     {
         global $arrConf;
         $flag=false;
@@ -426,7 +426,7 @@ class paloSantoOrganization{
 		if(array($resOrgz) && count($resOrgz)==0){
 			$this->_DB->beginTransaction();
             $query="INSERT INTO organization (name,domain,country,city,address, email_contact) values(?,?,?,?,?,?);";
-            $arr_params = array($name,$domain,$city,$state,$address,$email_contact);
+            $arr_params = array($name,$domain,$country,$city,$address,$email_contact);
             $result=$this->_DB->genQuery($query,$arr_params);
             if($result==FALSE){
                 $this->_DB->rollBAck();
@@ -458,7 +458,7 @@ class paloSantoOrganization{
 								$pDB->beginTransaction();
 								$pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
 								//procedo a setear las configuaraciones generales del plan de marcado por cad organizacion
-								if($pAstConf->createOrganizationAsterisk($domain)){
+								if($pAstConf->createOrganizationAsterisk($domain,$country)){
 									//procedo a crear el nuevo dominio
 									if(!($pEmail->createDomain($domain,$error_domain))){
 										//no se puede crear el dominio
@@ -1049,7 +1049,6 @@ class paloSantoOrganization{
 				foreach($faxProperties as $key => $value){
 					if(!$pACL->setUserProp($idUser,$key,$value,"fax")){
 						$error= "Error setting $key in table user_properties. ".$pACL->errMsg;
-						$this->_DB->rollBack();
 						$continuar=false;
 						break;
 					}
@@ -1067,7 +1066,6 @@ class paloSantoOrganization{
 						}
 					}else{
 						$error= _tr("Error setting email quota").$pEmail->errMsg;
-						$this->_DB->rollBack();
 						$continuar=false;
 					}
 				}

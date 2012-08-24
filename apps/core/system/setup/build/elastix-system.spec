@@ -129,7 +129,7 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
-* Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
 

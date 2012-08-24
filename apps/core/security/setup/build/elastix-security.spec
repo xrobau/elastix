@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -121,6 +121,20 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Aug 09 2012 German Macas <gmacas@palosanto.com>
+- FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
+  Fixed graphic bug in ON/OFF Button.
+  SVN Rev[4101]
+
+* Wed Aug 08 2012 German Macas <gmacas@palosanto.com>
+- sec_rules - Fixed graphic bug in edition of New Rule of Firewall and improve
+  design
+  SVN Rev[4098]
+
 * Fri Jul 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Port Knocking: trim padding of null bytes from end of plaintext.
   SVN Rev[4079]
@@ -136,6 +150,7 @@ fi
 * Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4027]
 
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Define Ports, Audit, Weak Keys: Remove XSS vulnerability.

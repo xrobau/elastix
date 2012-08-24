@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -116,9 +116,28 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Aug 24 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-6
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Changed release in specfile
+
+* Wed Aug 15 2012 Alberto Santos <asantos87@palosanto.com>
+- CHANGED: module addons_availables, an informative chart is displayed for the
+  upgrades indicating which are the main features of the upgrade
+  SVN Rev[4110]
+
+* Wed Aug 08 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module addons, added the repo pgdg-91-centos.repo and the gpg-key
+  RPM-GPG-KEY-PGDG-91 for Postgresql91
+  SVN Rev[4097]
+
+* Tue Aug 07 2012 German Macas <gmacas@palosanto.com>
+- Addons - Add pagination and navigation in the footer page
+  SVN Rev[4095]
+
 * Mon Aug 06 2012 Alberto Santos <asantos@palosanto.com>
 - ADDED: module addons, added the repo pgdg-91-centos.repo and the gpg-key
-  RPM-GPG-KEY-PGDG-91 for Postgresql91 
+  RPM-GPG-KEY-PGDG-91 for Postgresql91.
+  SVN Rev[4019] 
 
 * Wed Jun 27 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-5
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest

@@ -16,7 +16,7 @@ engine = sqlite3
 path = /var/www/db
 deletable = yes
 
-[elx_pbx]
+[elxpbx]
 ignore_backup = no
 engine = mysql
 path = /var/lib/mysql

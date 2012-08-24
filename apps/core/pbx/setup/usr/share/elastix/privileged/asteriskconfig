@@ -1,0 +1,123 @@
+#!/usr/bin/php
+<?php
+/*
+  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: asteriskconfig,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+
+if(!isset($argv[1]))
+    exit(1);
+    
+switch($argv[1]){
+	case "changePermission":
+		if(isset($argv[2])){
+            exit(changeFilePermission($argv[2]) ? 0 : 1);
+		}else
+			error_exit("Missing filename \n");
+		break;
+	case "dialplan-reload":
+        exit(dialplanReload() ? 0 : 1);
+		break;
+	case "reload":
+        exit(reload() ? 0 : 1);
+		break;
+    case "create_file":
+        if(isset($argv[2]) && isset($argv[3])){
+            exit(writeNewFileAsterisk($argv[2],$argv) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
+        break;
+	default:
+		error_exit("No action specified \n");
+		break;
+}
+
+function error_exit($sMsg, $errorcode = 1)
+{
+    fwrite(STDERR, $sMsg);
+    exit($errorcode);
+}
+
+function changeFilePermission($file)
+{
+	$file=escapeshellarg($file);
+	chown($file,"asterisk");
+	chgrp($file,"asterisk");
+	exec("chmod 664 $file 2>&1",$output, $ret);
+	return true;
+}
+
+function reload(){
+    $ret = $output = null;
+	exec("/usr/sbin/asterisk -r -x 'core reload' 2>&1",$output,$ret);
+	if($ret!=0){
+        fwrite(STDERR, "Asterisk couldn't be reloaded. ".implode('', $output));
+        return false;
+	}
+	return true;
+}
+
+function dialplanReload(){
+    $ret = $output = null;
+	exec("/usr/sbin/asterisk -r -x 'dialplan reload' 2>&1",$output,$ret);
+	if($ret!=0){
+        fwrite(STDERR, "Couldn't be reloaded asterisk dialplan. ".implode('', $output));
+        return false;
+    }
+    return true;
+}
+
+//escribe un archivo de configuracion de asterisk dentro de /etc/asterisk
+//file -> ubicacion del archivo dentro del directorio /etc/asterisk/ y nombre ej: orgainzation/extensions_additional.conf
+//contenido -> contenido del archivo, este debe se un string de caracteres
+function writeNewFileAsterisk($file,$contenido){
+    $base="/etc/asterisk/";
+    $file=trim($file);
+   // $contenido=escapeshellarg($contenido);
+    $file=$base.$file;
+    foreach($contenido as $value){
+        print($value);
+    }
+    
+    if(empty($file)){
+        fwrite(STDERR, "Invalid name of file");
+        return false;
+    }
+    
+    $result=file_put_contents($file,$contenido);
+    if($result===false){
+        fwrite(STDERR, 'File '.$file.' could not be written in /etc/asterisk');
+        return false;
+    }
+    
+    chown($file,"asterisk");
+    chgrp($file,"asterisk");
+    exec("chmod 664 $file 2>&1",$output, $ret);
+    return true;
+}
+?>

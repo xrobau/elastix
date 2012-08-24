@@ -7,9 +7,10 @@ CREATE TABLE organization
        country           VARCHAR(100) NOT NULL,
        city              VARCHAR(150) NOT NULL,
        address           VARCHAR(255),
-	   code		         VARCHAR(20),
+       code              VARCHAR(20),   
        PRIMARY KEY (id)
 );
+create unique index domain on organization (domain);
 
 CREATE TABLE organization_properties
 (
@@ -79,6 +80,7 @@ CREATE TABLE acl_user
        PRIMARY KEY (id),
        FOREIGN KEY (id_group) REFERENCES acl_group(id)
 );
+create unique index username on acl_user (username);
 
 CREATE TABLE user_shortcut
 (
@@ -108,11 +110,10 @@ CREATE TABLE user_properties
        id_user   INTEGER     NOT NULL,
        property     VARCHAR(100) NOT NULL,
        value        VARCHAR(150) NOT NULL,
-       category 	VARCHAR(50),
+       category     VARCHAR(50),
        PRIMARY KEY (id_user,property,category),
        FOREIGN KEY (id_user) REFERENCES acl_user(id)
 );
-
 
 CREATE TABLE email_list
 (
@@ -182,7 +183,6 @@ CREATE TABLE fax_docs
         id_user        integer          not null,
         FOREIGN KEY    (id_user) REFERENCES acl_user(id)
 );
-
 
 INSERT INTO "settings" VALUES('elastix_version_release', '2.3.0-6');
 
@@ -286,7 +286,14 @@ INSERT INTO "acl_resource" VALUES('file_editor', 'Asterisk File Editor', 'tools'
 INSERT INTO "acl_resource" VALUES('text_to_wav', 'Text to Wav', 'tools', '', 'module', 83);
 INSERT INTO "acl_resource" VALUES('festival', 'Festival', 'tools', '', 'module', 84);
 INSERT INTO "acl_resource" VALUES('fop', 'Flash Operator Panel', 'pbxconfig', 'panel', 'framed', 9);
-
+INSERT INTO "acl_resource" VALUES('extensions', 'Extensions', 'pbxadmin', '', 'module', 11);
+INSERT INTO "acl_resource" VALUES('queues', 'Queues', 'pbxadmin', '', 'module', 17);
+INSERT INTO "acl_resource" VALUES('trunks', 'Trunks', 'pbxadmin', '', 'module', 14);
+INSERT INTO "acl_resource" VALUES('ivr', 'IVR', 'pbxadmin', '', 'module', 18);
+INSERT INTO "acl_resource" VALUES('features_code', 'Features Codes', 'pbxadmin', '', 'module', 12);
+INSERT INTO "acl_resource" VALUES('general_settings', 'General Settings', 'pbxadmin', '', 'module', 12);
+INSERT INTO "acl_resource" VALUES('inbound_route', 'Inbound Routes', 'pbxadmin', '', 'module', 15);
+INSERT INTO "acl_resource" VALUES('outbound_route', 'Outbound Routes', 'pbxadmin', '', 'module', 16);
 
 INSERT INTO "organization_resource" VALUES(1, 1, 'usermgr');
 INSERT INTO "organization_resource" VALUES(2, 1, 'organization');
@@ -362,13 +369,17 @@ INSERT INTO "organization_resource" VALUES(82, 1, 'asterisk_cli');
 INSERT INTO "organization_resource" VALUES(83, 1, 'file_editor');
 INSERT INTO "organization_resource" VALUES(84, 1, 'text_to_wav');
 INSERT INTO "organization_resource" VALUES(85, 1, 'festival');
-INSERT INTO "organization_resource" VALUES(86, 1, 'fop');
-
+INSERT INTO "organization_resource" VALUES(86, 1, 'extensions');
+INSERT INTO "organization_resource" VALUES(87, 1, 'queues');
+INSERT INTO "organization_resource" VALUES(88, 1, 'trunks');
+INSERT INTO "organization_resource" VALUES(89, 1, 'features_code');
+INSERT INTO "organization_resource" VALUES(90, 1, 'general_settings');
+INSERT INTO "organization_resource" VALUES(91, 1, 'inbound_route');
+INSERT INTO "organization_resource" VALUES(92, 1, 'outbound_route');
 
 INSERT INTO "group_resource" VALUES(1, 0, 1);
 INSERT INTO "group_resource" VALUES(2, 0, 2);
 INSERT INTO "group_resource" VALUES(3, 0, 3);
-INSERT INTO "group_resource" VALUES(4, 0, 4);
 INSERT INTO "group_resource" VALUES(5, 0, 5);
 INSERT INTO "group_resource" VALUES(7, 0, 7);
 INSERT INTO "group_resource" VALUES(8, 0, 8);
@@ -399,6 +410,7 @@ INSERT INTO "group_resource" VALUES(51, 0, 51);
 INSERT INTO "group_resource" VALUES(52, 0, 52);
 INSERT INTO "group_resource" VALUES(54, 0, 54);
 INSERT INTO "group_resource" VALUES(55, 0, 55);
+INSERT INTO "group_resource" VALUES(56, 0, 56);
 INSERT INTO "group_resource" VALUES(57, 0, 57);
 INSERT INTO "group_resource" VALUES(58, 0, 58);
 INSERT INTO "group_resource" VALUES(59, 0, 59);
@@ -422,7 +434,12 @@ INSERT INTO "group_resource" VALUES(82, 0, 82);
 INSERT INTO "group_resource" VALUES(83, 0, 83);
 INSERT INTO "group_resource" VALUES(84, 0, 84);
 INSERT INTO "group_resource" VALUES(85, 0, 85);
-
+INSERT INTO "group_resource" VALUES(86, 0, 86);
+INSERT INTO "group_resource" VALUES(87, 0, 87);
+INSERT INTO "group_resource" VALUES(88, 0, 88);
+INSERT INTO "group_resource" VALUES(90, 0, 90);
+INSERT INTO "group_resource" VALUES(91, 0, 91);
+INSERT INTO "group_resource" VALUES(92, 0, 92);
 
 INSERT INTO "group_resource" VALUES(101, 1, 1);
 INSERT INTO "group_resource" VALUES(102, 1, 2);
@@ -470,9 +487,13 @@ INSERT INTO "group_resource" VALUES(179, 1, 79);
 INSERT INTO "group_resource" VALUES(180, 1, 80);
 INSERT INTO "group_resource" VALUES(181, 1, 81);
 INSERT INTO "group_resource" VALUES(184, 1, 84);
-INSERT INTO "group_resource" VALUES(185, 1, 85);
 INSERT INTO "group_resource" VALUES(186, 1, 86);
-
+INSERT INTO "group_resource" VALUES(187, 1, 87);
+INSERT INTO "group_resource" VALUES(188, 1, 88);
+INSERT INTO "group_resource" VALUES(189, 1, 89);
+INSERT INTO "group_resource" VALUES(190, 1, 90);
+INSERT INTO "group_resource" VALUES(200, 1, 91);
+INSERT INTO "group_resource" VALUES(221, 1, 92);
 
 INSERT INTO "group_resource" VALUES(201, 2, 1);
 INSERT INTO "group_resource" VALUES(202, 2, 3);
@@ -494,7 +515,6 @@ INSERT INTO "group_resource" VALUES(217, 2, 60);
 INSERT INTO "group_resource" VALUES(218, 2, 75);
 INSERT INTO "group_resource" VALUES(219, 2, 76);
 INSERT INTO "group_resource" VALUES(220, 2, 77);
-INSERT INTO "group_resource" VALUES(221, 2, 86);
 
 
 INSERT INTO "group_resource" VALUES(222, 3, 1);

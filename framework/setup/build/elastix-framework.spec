@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.3.0
-Release: 12
+Release: 13
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -295,9 +295,28 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-13
+- CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Mon Aug 06 2012 German Macas <gmacas@palosanto.com>
+- Fixed bug when logout from A2billing, before didn't work in all a2b's menu.
+  SVN Rev[4093]
+
+* Fri Aug 03 2012 German Macas <gmacas@palosanto.com>
+- To remain embebed a2billing in elastix when logout.
+  SVN Rev[4089]
+
+* Fri Aug 03 2012 German Macas <gmacas@palosanto.com>
+- Fixed bug 0001318, bug 0001338: fixed in Asterisk File Editor return last
+  query in Back link, fixed Popups, position and design, add in Dashboard
+  Applet Admin option to check all.
+  SVN Rev[4088]
+
 * Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
 - CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4024]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use SERVER_ADDR instead of ifconfig for querying IP of 

@@ -713,3 +713,43 @@ requirecalltoken) values (NULL,NULL,"no","from-internal","dynamic","friend","yes
 
 insert into voicemail_settings (attach,context,serveremail,review,operator,maxmsg,deletevoicemail,saycid,
 envelope) values ("yes","deafault","vm@asterisk","yes","yes","100","no","no","no");
+
+INSERT INTO globals_settings VALUES("DIAL_OPTIONS","tr");
+INSERT INTO globals_settings VALUES("TRUNK_OPTIONS","");
+INSERT INTO globals_settings VALUES("RECORDING_STATE","ENABLED");
+INSERT INTO globals_settings VALUES("MIXMON_FORMAT","wav");
+INSERT INTO globals_settings VALUES("MIXMON_DIR","/var/spool/asterisk/monitor/");
+INSERT INTO globals_settings VALUES("MIXMON_POST","");
+INSERT INTO globals_settings VALUES("RINGTIMER","15");
+INSERT INTO globals_settings VALUES("VM_PREFIX","*");
+INSERT INTO globals_settings VALUES("VM_DDTYPE","u");
+INSERT INTO globals_settings VALUES("VM_GAIN","");
+INSERT INTO globals_settings VALUES("VM_OPTS","");
+INSERT INTO globals_settings VALUES("OPERATOR_XTN","");
+INSERT INTO globals_settings VALUES("VMX_CONTEXT","from-internal");
+INSERT INTO globals_settings VALUES("VMX_PRI","1");
+INSERT INTO globals_settings VALUES("VMX_TIMEDEST_CONTEXT","");
+INSERT INTO globals_settings VALUES("VMX_TIMEDEST_EXT","dovm");
+INSERT INTO globals_settings VALUES("VMX_TIMEDEST_PRI","1");
+INSERT INTO globals_settings VALUES("VMX_LOOPDEST_CONTEXT","");
+INSERT INTO globals_settings VALUES("VMX_LOOPDEST_EXT","dovm");
+INSERT INTO globals_settings VALUES("VMX_LOOPDEST_PRI","1");
+INSERT INTO globals_settings VALUES("VMX_OPTS_TIMEOUT","");
+INSERT INTO globals_settings VALUES("VMX_OPTS_LOOP","");
+INSERT INTO globals_settings VALUES("VMX_OPTS_DOVM","");
+INSERT INTO globals_settings VALUES("VMX_TIMEOUT","2");
+INSERT INTO globals_settings VALUES("VMX_REPEAT","1");
+INSERT INTO globals_settings VALUES("VMX_LOOPS","1");
+INSERT INTO globals_settings VALUES("DIRECTORY","last");
+INSERT INTO globals_settings VALUES("DIRECTORY_OPT_EXT","");
+INSERT INTO globals_settings VALUES("DIRECTORY_OPT_LENGTH","3"); 
+INSERT INTO globals_settings VALUES("TONEZONE","us");
+INSERT INTO globals_settings VALUES("LANGUAGE","en");
+INSERT INTO globals_settings VALUES("TIMEFORMAT","kM");
+INSERT INTO globals_settings VALUES("ALLOW_SIP_ANON","no");
+INSERT INTO globals_settings VALUES("TRANSFER_CONTEXT","from-internal-xfer"); 
+INSERT INTO globals_settings VALUES("INTERCOMCODE","nointercom ");
+INSERT INTO globals_settings VALUES("CALLFILENAME","");
+INSERT INTO globals_settings VALUES("OPERATOR","");
+INSERT INTO globals_settings VALUES("PARKNOTIFY","SIP/200");
+INSERT INTO globals_settings VALUES("RECORDEXTEN","");

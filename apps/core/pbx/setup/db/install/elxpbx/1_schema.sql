@@ -699,6 +699,10 @@ CREATE TABLE IF NOT EXISTS `voicemail_settings` (
     PRIMARY KEY (`id`)
 ) ENGINE = INNODB;
 
+
+-- Create user db
+GRANT SELECT, UPDATE, INSERT, DELETE ON `meetme`.* to asteriskuser@localhost;
+
 insert into sip_settings (faxdetect,vmexten,context,useragent,disallow,allow,port,host,qualify,type,deny,permit,dtmfmode,nat,
 create_vm,record_in,record_out,callcounter) values ("no","*97","from-internal","elastix_3.0","all","ulaw;alaw;gsm","5060",
 "dynamic","no","friend","0.0.0.0/0.0.0.0","0.0.0.0/0.0.0.0","rfc2833","yes","yes","on_demand","on_demand","yes");

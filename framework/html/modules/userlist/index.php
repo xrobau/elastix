@@ -195,7 +195,7 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
 	//si es un usuario solo se ve a si mismo
 	//si es un administrador ve a todo los usuarios de
     foreach($arrUsers as $user) {
-		$arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=$user[0]'>".$user[1]."</a>";
+        $arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=$user[0]'>".$user[1]."</a>";    
 		$arrOgz=$pORGZ->getOrganizationById($user[4]);
 		$arrTmp[1] = $arrOgz["name"];
 		$arrTmp[2] = $user[2];
@@ -213,7 +213,6 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
 		}
 		$arrTmp[4] = $ext." / ".$faxExt;
 		$arrData[] = $arrTmp;
-		$typeUser = "other";
 		$end++;
     }
 
@@ -246,7 +245,7 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
 }
 
 function showMessageReload($module_name, &$pDB, $userLevel1, $userAccount, $idOrganization){
-	$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+	$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 	$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
 	$params=array();
 	$msgs="";
@@ -597,7 +596,7 @@ function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("User has been created successfully"));
 		//mostramos el mensaje para crear los archivos de ocnfiguracion
-		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 		$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
 		$orgTmp2=$pORGZ->getOrganization("","","id",$idOrganization);
 		$pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
@@ -755,7 +754,7 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
 		$smarty->assign("mb_message",_tr("User has been edited successfully"));
 		if($reAsterisk){
 			//mostramos el mensaje para crear los archivos de ocnfiguracion
-			$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+			$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 			$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
 			$orgTmp2=$pORGZ->getOrganization("","","id",$pACL->getIdOrganizationUser($idUser));
 			$pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
@@ -805,7 +804,7 @@ function deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("The user was deleted successfully"));
 		//mostramos el mensaje para crear los archivos de ocnfiguracion
-		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 		$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
 		$orgTmp2=$pORGZ->getOrganization("","","id",$idOrgReload);
 		$pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
@@ -1168,7 +1167,7 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	}
 
 	if($continue){
-		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 		$pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pACL->_DB);
 		if($pAstConf->generateDialplan($domain)===false){
 			$pAstConf->setReloadDialplan($domain,true);

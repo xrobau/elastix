@@ -47,7 +47,7 @@
 		<td nowrap>{$password2.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
 		<td>{$password2.INPUT}</td>
       </tr>
-	  {if !$isSuperAdmin}
+	{if !$isSuperAdmin}
 	  <tr>
 		<td nowrap>{$organization.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
 		{if $mode ne 'edit' && $userLevel eq 'superadmin'}

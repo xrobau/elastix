@@ -41,10 +41,10 @@ include_once $arrConf['basePath']."/modules/general_settings/libs/paloSantoGloba
 
 class paloSantoASteriskConfig{
     public $errMsg;
-	public $_DB; //conexion a la base elx_pbx mysql
+	public $_DB; //conexion a la base elxpbx mysql
 	public $_DBSQLite; //conexion a la base elastix.db de sqlite
 
-	//recibe una conexion a la base de elx_pbx de mysql
+	//recibe una conexion a la base de elxpbx de mysql
 	function paloSantoASteriskConfig(&$pDB,&$pDBSQlite)
 	{
 		// Se recibe como parámetro una referencia a una conexión paloDB
@@ -350,8 +350,8 @@ class paloSantoASteriskConfig{
 		$arrNoOrgDomain=array("trunk_dialpatterns","features_code_settings","globals_settings","iax_settings","sip_settings",
 		"voicemail_settings");
 
-		//obtenemos una lista de las tablas dentro de la base elx_pbx
-		$queryShow="show tables from elx_pbx";
+		//obtenemos una lista de las tablas dentro de la base elxpbx
+		$queryShow="show tables from elxpbx";
 		$result=$this->_DB->fetchTable($queryShow);
 		if($result===false){
 			$this->errMsg = $this->_DB->errMsg;

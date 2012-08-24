@@ -149,7 +149,7 @@ class paloACL {
 	*/
 	function getExtUser($id_user){
 		$arr_result2=array();
-		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 		if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
             $this->errMsg = _tr("User ID must be numeric");
 		}else{

@@ -454,7 +454,7 @@ class paloSantoOrganization{
 							//procedo a crear el plan de marcado para la organizacion
 							$resCode=$this->getOrganizationCode($domain);
 							if($resCode!=false){
-								$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+								$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 								$pDB->beginTransaction();
 								$pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
 								//procedo a setear las configuaraciones generales del plan de marcado por cad organizacion
@@ -626,7 +626,7 @@ class paloSantoOrganization{
 						return false;
 					}
 					//borramos la organizacion de asterisk
-					$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+					$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 					$pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
 					$pAstConf->_DB->beginTransaction();
 					//ANTES DE BORRAR LA ORGANIZACION SE DEBE HACER UN BACKUP DE LOS ARCHIVOS DE
@@ -714,7 +714,7 @@ class paloSantoOrganization{
 		$continuar=true;
 		$Exito = false;
 		$error="";
-		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 
 		// 1) valido que la organizacion exista
 		// 2) trato de crea el usuario en la base -- aqui se hacen validaciones con respecto al usuario
@@ -946,7 +946,7 @@ class paloSantoOrganization{
 		$error="";
 		$cExten=false;
 		$cFExten=false;
-		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 		$arrBackup=array();
 		$editFax=false;
 		$faxProperties=array();
@@ -1250,7 +1250,7 @@ class paloSantoOrganization{
 		$clidNumber=$pACL->getUserProp($idUser,"clid_number");
 		$picture=$pACL->getUserPicture($idUser);
 
-		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDB2=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 
 		$idDomain=$arrUser[0][4];
 		$query="Select domain from organization where id=?";

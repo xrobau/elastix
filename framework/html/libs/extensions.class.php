@@ -1120,7 +1120,7 @@ class ext_hint extends extension {
 		// I'm pretty sure everything else will puke anyhow if not running
 		//
 		$error="";
-		$pDB=new paloDB(generarDSNSistema("asteriskuser", "elx_pbx"));
+		$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 		$astman=AsteriskManagerConnect($error);
 		if($astman!=false){
 			//se obtine los dispositivos a los cuales la extension esta asociada

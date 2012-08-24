@@ -1020,7 +1020,7 @@ class paloDevice{
 	/**
 		funcion utilizada para crear una nueva extension en asterisk
 		crea el peer y hace el correspondiente registro de la extension
-		en la base elx_pbx
+		en la base elxpbx
 	*/
 	function createNewDevice($arrProp,$type)
 	{
@@ -1342,7 +1342,7 @@ class paloDevice{
 		//VmX Locater
 		$state_unavail=$state_busy="disabled";
 		$ext0=$ext1=$ext2=$context=$vmx_opts_timeout=null;
-		$query="SELECT VMX_CONTEXT,VMX_OPTS_TIMEOUT from elx_pbx where organization_domain=?";
+		$query="SELECT VMX_CONTEXT,VMX_OPTS_TIMEOUT from globals where organization_domain=?";
 		$arrResult=$this->tecnologia->getFirstResultQuery($query,array($this->domain),true,"Don't exist registers.");
         if($arrResult!=false){
             $context=$arrResult["VMX_CONTEXT"];

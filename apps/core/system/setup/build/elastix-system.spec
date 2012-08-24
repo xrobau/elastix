@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 11
+Release: 12
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -129,11 +129,27 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Aug 15 2012 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages: Add option to uninstall packages and change
+  deprecated function
+  SVN Rev[4107]
+
+* Fri Aug 09 2012 German Macas <gmacas@palosanto.com>
+- Fixed bug 0001318, bug 0001338: fixed in Asterisk File Editor return last
+  query in Back link, fixed Popups, position and design, add in Dashboard
+  Applet Admin option to check all
+  SVN Rev[4088]
+
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): implement new option --phonesonly. If 
   specified, the DHCP server will be configured to answer only to MAC addresses
   from known phone vendor prefixes. This potentially enables the Elastix DHCP
   server and another DHCP server to coexist in the same LAN.
+  SVN Rev[4077]
 
 * Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): restrict DHCP option 160 to MAC addresses
@@ -155,6 +171,7 @@ fi
 * Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4031]
 
 * Fri Jun 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Add Requires: dhcp to specfile

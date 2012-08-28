@@ -817,6 +817,72 @@ LISTA_EXTENSIONES;
         }
     }
     
+    function listarEstadoMonitoreoAgentes()
+    {
+    	try {
+            $oECCP = $this->_obtenerConexion('ECCP');
+            $respuestaResumen = $oECCP->getagentactivitysummary();
+            $resumenColas = array();
+
+            foreach ($respuestaResumen->agents->agent as $xml_agent) {
+            	// Averiguar el estado del agente
+                $estadoAgente = $oECCP->getagentstatus((string)$xml_agent->agentchannel);
+
+                // Llenar plantilla con toda la información excepto el número de llamadas por cola
+                $linkstart = isset($estadoAgente->callinfo->linkstart) ? (string)$estadoAgente->callinfo->linkstart : NULL;
+
+                if (!is_null($linkstart) && preg_match('/^\d+:\d+:\d+$/', $linkstart))
+                    $linkstart = date('Y-m-d ').$linkstart;
+                $infoAgente = array(
+                    'agentchannel'          =>  (string)$xml_agent->agentchannel,
+                    'agentname'             =>  (string)$xml_agent->agentname,
+                    'agentstatus'           =>  (string)$estadoAgente->status,  // offline online oncall paused
+                    'logintime'             =>  (int)$xml_agent->logintime,
+                    'sec_calls'             =>  0,  // a llenar según la cola
+                    'num_calls'             =>  0,  // a llenar según la cola
+                    'lastsessionstart'      =>  isset($xml_agent->lastsessionstart) ? (string)$xml_agent->lastsessionstart : NULL,
+                    'lastsessionend'        =>  isset($xml_agent->lastsessionend) ? (string)$xml_agent->lastsessionend : NULL,
+                    'lastpausestart'        =>  isset($xml_agent->lastpausestart) ? (string)$xml_agent->lastpausestart : NULL,
+                    'lastpauseend'          =>  isset($xml_agent->lastpauseend) ? (string)$xml_agent->lastpauseend : NULL,
+                    'linkstart'             =>  NULL,
+                );
+                
+                // Averiguar a qué colas pertenece el agente
+                $agenteColas = $oECCP->getagentqueues((string)$xml_agent->agentchannel);
+                foreach ($agenteColas->queues->queue as $xml_queue) {
+                	$infoAgenteCola = $infoAgente;
+                    if (isset($xml_agent->callsummary->incoming->queue)) {
+                    	foreach ($xml_agent->callsummary->incoming->queue as $xml_queuestat) {
+                    		if ((string)$xml_queuestat['id'] == (string)$xml_queue) {
+                    			$infoAgenteCola['sec_calls'] += (int)$xml_queuestat->sec_calls;
+                                $infoAgenteCola['num_calls'] += (int)$xml_queuestat->num_calls;
+                    		}
+                            if (isset($estadoAgente->callinfo->queuenumber) &&
+                                (string)$estadoAgente->callinfo->queuenumber == (string)$xml_queuestat['id']) {
+                            }
+                    	}
+                    }
+                    if (isset($xml_agent->callsummary->outgoing->queue)) {
+                        foreach ($xml_agent->callsummary->outgoing->queue as $xml_queuestat) {
+                            if ((string)$xml_queuestat['id'] == (string)$xml_queue) {
+                                $infoAgenteCola['sec_calls'] += (int)$xml_queuestat->sec_calls;
+                                $infoAgenteCola['num_calls'] += (int)$xml_queuestat->num_calls;
+                            }
+                        }
+                    }
+                    if (isset($estadoAgente->callinfo->queuenumber) && 
+                        (string)$estadoAgente->callinfo->queuenumber == (string)$xml_queue) {
+                        $infoAgenteCola['linkstart'] = $linkstart;
+                    }
+                    $resumenColas[(string)$xml_queue][(string)$xml_agent->agentchannel] = $infoAgenteCola; 
+                }
+            }
+            return $resumenColas;
+    	} catch (Exception $e) {
+            $this->errMsg = '(internal) listarEstadoMonitoreoAgentes: '.$e->getMessage();
+    		return NULL;
+    	}
+    }
 }
 
 ?>

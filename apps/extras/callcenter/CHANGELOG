@@ -1,3 +1,4 @@
+* Agent Console: extend library to add support for getagentactivitysummary.
 * Dialer (ECCP): new request "getagentactivitysummary" that produces a summary
   of agent activity on a date range. 
 * Dialer (ECCP): extend "getagentstatus" request to report the queue number that

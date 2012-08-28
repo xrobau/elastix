@@ -280,11 +280,11 @@ class ECCP
         return $xml_response->logoutagent_response;
     }
 
-    public function getagentstatus()
+    public function getagentstatus($sAgentNumber = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
         $xml_cmdRequest = $xml_request->addChild('getagentstatus');
-        $xml_cmdRequest->addChild('agent_number', $this->_agentNumber);
+        $xml_cmdRequest->addChild('agent_number', is_null($sAgentNumber) ? $this->_agentNumber : $sAgentNumber);
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getagentstatus_response;
     }
@@ -545,5 +545,16 @@ class ECCP
         return $xml_response->getagentqueues_response;
     }
     
+    public function getagentactivitysummary($datetime_start = NULL, $datetime_end = NULL)
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('getagentactivitysummary');
+        if (!is_null($datetime_start))
+            $xml_cmdRequest->addChild('datetime_start', str_replace('&', '&amp;', $datetime_start));
+        if (!is_null($datetime_end))
+            $xml_cmdRequest->addChild('datetime_end', str_replace('&', '&amp;', $datetime_end));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->getagentactivitysummary_response;
+    }
 }
 ?>

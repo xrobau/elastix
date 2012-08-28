@@ -1927,6 +1927,8 @@ LISTA_EXTENSIONES;
                 $xml_callInfo->addChild('dialend', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialend']));
             $xml_callInfo->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_enterqueue']));
             $xml_callInfo->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_linkstart']));
+            if (!is_null($infoLlamada['queuenumber']))
+                $xml_callInfo->addChild('queuenumber', $infoLlamada['queuenumber']);
         }
 
         if ($bEstadoConocido) {
@@ -3035,6 +3037,126 @@ Privilege: Command
             $this->_log->output('ERR: lost synch with Asterisk AMI ("queue show" response lacks "data").');
             return NULL;
         }
+    }
+
+    private function Request_getagentactivitysummary($comando)
+    {
+        // Fechas de inicio y fin
+        $sFechaInicio = $sFechaFin = date('Y-m-d');
+        if (isset($comando->datetime_start)) {
+            $sFechaInicio = (string)$comando->datetime_start;
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaInicio))
+                return $this->_generarRespuestaFallo(400, 'Bad request - invalid start date');
+        }
+        if (isset($comando->datetime_end)) {
+            $sFechaFin = (string)$comando->datetime_end;
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaFin))
+                return $this->_generarRespuestaFallo(400, 'Bad request - invalid end date');
+        }
+        if (!is_null($sFechaInicio) && !is_null($sFechaFin) && $sFechaFin < $sFechaInicio) {
+            $t = $sFechaInicio;
+            $sFechaInicio = $sFechaFin;
+            $sFechaFin = $t;
+        }
+        
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_getagentactivitysummaryResponse = $xml_response->addChild('getagentactivitysummary_response');
+
+        // Leer la información de los agentes conocidos y su historial de sesión
+        $sPeticionSQL = <<<LEER_AGENTE_AUDIT
+SELECT agent.id, agent.number, agent.name, SUM(TIME_TO_SEC(duration)) AS total_login_time
+FROM agent
+LEFT JOIN audit 
+    ON agent.id = audit.id_agent AND audit.id_break IS NULL 
+    AND audit.datetime_init BETWEEN ? AND ?
+WHERE estatus = 'A' GROUP BY agent.id
+LEER_AGENTE_AUDIT;
+        $recordset = $this->_db->prepare($sPeticionSQL);
+        $recordset->execute(array($sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59'));
+        $listaAgentes = $recordset->fetchAll(PDO::FETCH_ASSOC);
+        $recordset->closeCursor();
+        
+        // Construir el árbol de salida, y consultar el historial de atención de llamadas
+        $xml_agents = $xml_getagentactivitysummaryResponse->addChild('agents');
+        $sPeticionSQL_sumallamadas = <<<LEER_HISTORIAL_ATENCION
+(SELECT 'incoming' AS campaign_type, queue_call_entry.queue AS queue, 
+    SUM(call_entry.duration) AS sec_calls, COUNT(*) AS num_calls
+FROM call_entry, queue_call_entry
+WHERE call_entry.id_agent = ?
+    AND call_entry.id_queue_call_entry = queue_call_entry.id
+    AND call_entry.datetime_init BETWEEN ? AND ?
+GROUP BY queue_call_entry.queue)
+UNION
+(SELECT 'outgoing' AS campaign_type, campaign.queue, 
+    SUM(calls.duration) AS sec_calls, COUNT(*) AS num_calls
+FROM calls, campaign
+WHERE calls.id_agent = ?
+    AND calls.id_campaign = campaign.id
+    AND calls.start_time BETWEEN ? AND ?
+GROUP BY campaign.queue)
+LEER_HISTORIAL_ATENCION;
+        $recordset_sumallamadas = $this->_db->prepare($sPeticionSQL_sumallamadas);
+        $sPeticionSQL_ultimasesion = <<<LEER_ULTIMA_SESION
+SELECT datetime_init, datetime_end FROM audit
+WHERE id_agent = ? AND id_break IS NULL AND datetime_init BETWEEN ? AND ?
+ORDER BY datetime_init DESC LIMIT 0,1
+LEER_ULTIMA_SESION;
+        $recordset_ultimasesion = $this->_db->prepare($sPeticionSQL_ultimasesion);
+        $sPeticionSQL_ultimapausa = <<<LEER_ULTIMA_PAUSA
+SELECT datetime_init, datetime_end FROM audit
+WHERE id_agent = ? AND id_break IS NOT NULL AND datetime_init BETWEEN ? AND ?
+ORDER BY datetime_init DESC LIMIT 0,1
+LEER_ULTIMA_PAUSA;
+        $recordset_ultimapausa = $this->_db->prepare($sPeticionSQL_ultimapausa);
+        foreach ($listaAgentes as $infoAgente) {
+        	$xml_agent = $xml_agents->addChild('agent');
+            $xml_agent->addChild('agentchannel', 'Agent/'.$infoAgente['number']);
+            $xml_agent->addChild('agentname', str_replace('&', '&amp;', $infoAgente['name']));
+            $xml_agent->addChild('logintime', is_null($infoAgente['total_login_time']) ? 0 : $infoAgente['total_login_time']);
+
+            $recordset_sumallamadas->execute(array(
+                $infoAgente['id'], $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59',
+                $infoAgente['id'], $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59',));
+            $listaResumen = array('incoming' => array(), 'outgoing' => array());
+            foreach ($recordset_sumallamadas->fetchAll(PDO::FETCH_ASSOC) as $tupla) {
+            	$listaResumen[$tupla['campaign_type']][] = $tupla;
+            }
+            
+            $xml_callsummary = $xml_agent->addChild('callsummary');
+            foreach (array('incoming', 'outgoing') as $k) {
+            	if (!isset($listaResumen[$k])) $listaResumen[$k] = array();
+                $xml_campaigntype = $xml_callsummary->addChild($k);
+                foreach ($listaResumen[$k] as $queuesummary) {
+                	$xml_queue = $xml_campaigntype->addChild('queue');
+                    $xml_queue->addAttribute('id', (string)$queuesummary['queue']);
+                    $xml_queue->addChild('sec_calls', $queuesummary['sec_calls']);
+                    $xml_queue->addChild('num_calls', $queuesummary['num_calls']);
+                }
+            }
+            
+            // Información sobre inicio y final de sesión más reciente del agente
+            $recordset_ultimasesion->execute(array(
+                $infoAgente['id'], $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59'));
+            $tupla = $recordset_ultimasesion->fetch(PDO::FETCH_ASSOC);
+            $recordset_ultimasesion->closeCursor();
+            if ($tupla) {
+            	$xml_agent->addChild('lastsessionstart', $tupla['datetime_init']);
+                if (!is_null($tupla['datetime_end']))
+                    $xml_agent->addChild('lastsessionend', $tupla['datetime_end']);
+            }
+
+            // Información sobre inicio y final de pausa más reciente del agente
+            $recordset_ultimapausa->execute(array(
+                $infoAgente['id'], $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59'));
+            $tupla = $recordset_ultimapausa->fetch(PDO::FETCH_ASSOC);
+            $recordset_ultimapausa->closeCursor();
+            if ($tupla) {
+                $xml_agent->addChild('lastpausestart', $tupla['datetime_init']);
+                if (!is_null($tupla['datetime_end']))
+                    $xml_agent->addChild('lastpauseend', $tupla['datetime_end']);
+            }
+        }
+        return $xml_response;
     }
 
     /***************************** EVENTOS *****************************/

@@ -928,6 +928,8 @@ Respuesta:
     la llamada a la cola de la campaña.
   * linkstart: Fecha y hora en formato [yyyy-mm-dd] hh:mm:ss para enlace de la
     llamada al agente.
+  * queuenumber: Cola a través de la cual se asignó la llamada al agente. Sólo
+    está presente si la llamada ha sido asignada a través de una cola. 
 
 Ejemplo:
 <request id="4">
@@ -977,6 +979,7 @@ pausa:
             <dialend>17:30:24</dialend>
             <queuestart>17:30:24</queuestart>
             <linkstart>17:30:24</linkstart>
+            <queuenumber>8000</queuenumber>
         </callinfo>
     </getagentstatus_response>
 </response>
@@ -2550,4 +2553,123 @@ En caso de que no exista el agente:
             <message>Specified agent not found</message>
         </failure>
     </getagentqueues_response>
+</response>
+
+
+Requerimiento "getagentactivitysummary"
+
+Este requerimiento lista, para un rango de fechas, un reporte de actividad de
+cada uno de los agentes activos. Este reporte de actividad incluye el total de
+segundos de todas las sesiones, el total de llamadas recibidas y el total de
+segundos de llamada en cada una de las colas, y el inicio y final de la última
+sesión y de la última pausa del agente.
+
+Atributos o argumentos:
+* datetime_start: Fecha inicial del rango, en formato yyyy-mm-dd. Si se omite,
+  se asume la fecha actual.
+* datetime_end: Fecha final del rango, en formato yyyy-mm-dd. Si se omite, se
+  asume la fecha actual.
+
+Respuesta:
+* agents: Lista de agentes encontrados en el rango de fechas indicado. Este 
+  elemento contiene múltiples elementos 'agent', los cuales contienen los 
+  siguientes campos:
+  * agentchannel: Agente descrito por el elemento. Este identificador está de la
+    forma 'Agent/9000'.
+  * agentname: Nombre del agente descrito.
+  * logintime: Segundos que el agente ha pasado en sesiones durante el intervalo
+    especificado. No se incluyen sesiones activas en el momento de la petición.
+  * lastsessionstart: Si hay al menos una sesión en el intervalo especificado,
+    este elemento indica el inicio de la última sesión, en formato 
+    yyyy-mm-dd hh:mm:ss. De otro modo no aparece.
+  * lastsessionend: Si hay al menos una sesión en el intervalo especificado, y
+    la sesión ha terminado, este elemento indica el final de la última sesión,
+    en formato yyyy-mm-dd hh:mm:ss. De otro modo no aparece. Si el agente está
+    actualmente en una sesión activa, lastsessionstart estará presente, y 
+    lastsessionend NO estará presente.
+  * lastpausestart: Si hay al menos una pausa en el intervalo especificado, este
+    elemento indica el inicio de la última pausa, en formato 
+    yyyy-mm-dd hh:mm:ss. De otro modo no aparece. No hay garantía alguna de que
+    la última pausa informada sea posterior al último inicio de sesión.
+  * lastpauseend: Si hay al menos una pausa en el intervalo especificado, y la
+    pausa ha terminado, este elemento indica el final de la última pausa, en
+    formato yyyy-mm-dd hh:mm:ss. De otro modo no aparece. Si el agente está
+    actualmente en pausa, lastpausestart estará presente, y lastpauseend NO
+    estará presente.
+  * callsummary: elemento que contiene dos subelementos, 'incoming' y 'outgoing'
+    según los tipos de campañas. Cada uno de los elementos tiene cero o más 
+    elementos 'queue'. Cada elemento queue tiene un atributo 'id' que indica 
+    el número de la cola. Además del atributo, existen los siguientes elementos:
+    * sec_calls: suma del tiempo en segundos en llamadas atendidas que entraron
+      a través de la cola indicada bajo el tipo de campaña indicado.
+    * num_calls: número de llamadas atendidas que entraron a través de la cola.
+
+Ejemplo:
+<request id="4">
+    <getagentactivitysummary>
+        <datetime_start>2010-01-01</datetime_start>
+        <datetime_end>2010-01-02</datetime_end>
+    </getagentactivitysummary>
+</request>
+
+Respuesta:
+<response id="4">
+    <getagentactivitysummary_response>
+        <agents>
+            <agent>
+                <agentchannel>Agent/9000</agentchannel>
+                <agentname>Over 9000!!!</agentname>
+                <logintime>1135</logintime>
+                <lastsessionstart>2010-01-01 11:40:34</lastsessionstart>
+                <lastsessionend>2010-01-01 11:55:22</lastsessionend>
+                <lastpausestart>2010-01-01 11:45:20</lastpausestart>
+                <lastpauseend>2010-01-01 11:46:00</lastpauseend>
+                <callsummary>
+                    <incoming>
+                        <queue id="8001">
+                            <sec_calls>172</sec_calls>
+                            <num_calls>3</num_calls>
+                        </queue>
+                        <queue id="8002">
+                            <sec_calls>20</sec_calls>
+                            <num_calls>1</num_calls>
+                        </queue>
+                    </incoming>
+                    <outgoing>
+                        <queue id="8000">
+                            <sec_calls>515</sec_calls>
+                            <num_calls>7</num_calls>
+                        </queue>
+                    </outgoing>
+                </callsummary>
+            </agent>
+            <agent>
+                <agentchannel>Agent/9001</agentchannel>
+                <agentname>Agente 9001</agentname>
+                <logintime>2031</logintime>
+                <lastsessionstart>2010-01-01 11:40:34</lastsessionstart>
+                <lastsessionend>2010-01-01 11:55:22</lastsessionend>
+                <lastpausestart>2010-01-01 11:45:20</lastpausestart>
+                <lastpauseend>2010-01-01 11:46:00</lastpauseend>
+                <callsummary>
+                    <incoming>
+                        <queue id="8004">
+                            <sec_calls>172</sec_calls>
+                            <num_calls>3</num_calls>
+                        </queue>
+                        <queue id="8005">
+                            <sec_calls>20</sec_calls>
+                            <num_calls>1</num_calls>
+                        </queue>
+                    </incoming>
+                    <outgoing>
+                        <queue id="8000">
+                            <sec_calls>515</sec_calls>
+                            <num_calls>7</num_calls>
+                        </queue>
+                    </outgoing>
+                </callsummary>
+            </agent>
+        </agents>
+    </getagentactivitysummary_response>
 </response>

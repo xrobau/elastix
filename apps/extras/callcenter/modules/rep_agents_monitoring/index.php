@@ -26,264 +26,672 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
-//include elastix framework
-include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoForm.class.php";
-$base_dir=$_SERVER['DOCUMENT_ROOT'];
-include_once "$base_dir/libs/xajax/xajax.inc.php";
+
+require_once 'libs/paloSantoGrid.class.php';
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoAgentsMonitoring.class.php";
-
-    // incluci� del xajax
-    $xajax = new xajax();
-    $xajax->waitCursorOff();
-    $xajax->registerFunction("create_report");
-    $xajax->processRequests();
-    $content  = $xajax->printJavascript("libs/xajax/");
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
-    //global variables
     global $arrConf;
-    global $arrConfModule;
     global $arrLang;
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
-    //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    require_once "modules/agent_console/libs/elastix2.lib.php";
+    require_once "modules/agent_console/libs/paloSantoConsola.class.php";
+    require_once "modules/agent_console/libs/JSON.php";
+    require_once "modules/$module_name/configs/default.conf.php";
+    
+    // Directorio de este módulo
+    $sDirScript = dirname($_SERVER['SCRIPT_FILENAME']);
 
-    //conexion resource
-    $pDB = new paloDB($arrConf['dsn_conn_database']);
-//     $pDB = "";
+    // Se fusiona la configuración del módulo con la configuración global
+    $arrConf = array_merge($arrConf, $arrConfModule);
 
+    /* Se pide el archivo de inglés, que se elige a menos que el sistema indique
+       otro idioma a usar. Así se dispone al menos de la traducción al inglés
+       si el idioma elegido carece de la cadena.
+     */
+    load_language_module($module_name);
 
-    //actions
-    $accion = getAction();
-//    $content = "";
+    // Asignación de variables comunes y directorios de plantillas
+    $sDirPlantillas = (isset($arrConf['templates_dir'])) 
+        ? $arrConf['templates_dir'] : 'themes';
+    $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['theme'];
+    $smarty->assign("MODULE_NAME", $module_name);
 
-    switch($accion){
-        default:
-            $content .= reportAgentsMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-            break;
+    // Incluir todas las bibliotecas y CSS necesarios
+    generarRutaJQueryModulo($smarty, $module_name);
+
+    $sAction = '';
+    $sContenido = '';
+
+    $sAction = getParameter('action');
+    if (!in_array($sAction, array('', 'checkStatus')))
+        $sAction = '';
+
+    $oPaloConsola = new PaloSantoConsola();
+    switch ($sAction) {
+    case 'checkStatus':
+        $sContenido = manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola);
+        break;
+    case '':
+    default:
+        $sContenido = manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola);
+        break;
     }
-    return $content;
+    $oPaloConsola->desconectarTodo();
+    
+    return $sContenido;
 }
 
-function reportAgentsMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang, $isCalledByAjax=false)
+function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
 {
-    $pAgentsMonitoring = new paloSantoAgentsMonitoring($pDB);
-    $filter_field = getParameter("filter_field");
-    $filter_value = getParameter("filter_value");
-    $action = getParameter("nav");
-    $start  = getParameter("start");
+    global $arrLang;
+/*
+global $arrConf;
+require_once "modules/$module_name/libs/paloSantoAgentsMonitoring.class.php";
+$x = new paloSantoAgentsMonitoring($arrConf['dsn_conn_database']);
+print_r($x->ObtainAgentsMonitoring(null, null, $arrLang, null, null));
+*/
 
-    //begin grid parameters
+    $smarty->assign(array(
+        'FRAMEWORK_TIENE_TITULO_MODULO' => existeSoporteTituloFramework(),
+        'icon'                          => 'modules/'.$module_name.'/images/call.png',
+        'title'                         =>  _tr('Agent Monitoring'),
+    ));
+
+    /*
+     * Un agente puede pertenecer a múltiples colas, y puede o no estar 
+     * atendiendo una llamada, la cual puede haber llegado de como máximo una
+     * cola. Hay 3 cronómetros que se pueden actualizar:
+     * 
+     * último estado:   el tiempo transcurrido desde el último cambio de estado
+     * total de login:  el tiempo durante el cual el agente ha estado logoneado
+     * total de llamadas: el tiempo que el agente pasa atendiendo llamadas
+     * 
+     * Para el monitoreo de este módulo, los estados en que puede estar
+     * una fila (que muestra un agente en una cola) pueden ser los siguientes:
+     * 
+     * offline: el tiempo total de login y el tiempo de llamadas no se 
+     *  actualizan. Si el cliente estuvo en otro estado previamente 
+     *  (lastsessionend) entonces se actualiza regularmente el cronómetro de
+     *  último estado. De otro modo el cronómetro de último estado está vacío.
+     * online: se actualiza el tiempo total de login y el tiempo de último 
+     *  estado, y el tiempo total de llamadas no se actualiza. El cronómetro de
+     *  último estado cuenta desde el inicio de sesión.
+     * paused: igual que online, pero el cronómentro de último estado cuenta
+     *  desde el inicio de la pausa.
+     * oncall: se actualiza el tiempo total de login. El cronómetro de último 
+     *  estado cuenta desde el inicio de la llamada únicamente para la cola que 
+     *  proporcionó la llamada que atiende el agente actualmente. De otro modo 
+     *  el cronómetro no se actualiza. De manera similar, el total de tiempo de
+     *  llamadas se actualiza únicamente para la cola que haya proporcionado la
+     *  llamada que atiende el agente.
+     * 
+     * El estado del cliente consiste en un arreglo de tantos elementos como
+     * agentes haya pertenecientes a cada cola. Si un agente pertenece a más de
+     * una cola, hay un elemento por cada pertenencia del mismo agente a cada
+     * cola. Cada elemento es una estructura que contiene los siguientes 
+     * valores:
+     * 
+     * status:          {offline|online|oncall|paused}
+     * sec_laststatus:  integer|null
+     * sec_calls:       integer
+     * logintime:       integer
+     * num_calls:       integer
+     * oncallupdate:    boolean
+     * 
+     * Cada elemento del arreglo se posiciona por 'queue-{NUM_COLA}-member-{NUM_AGENTE}'
+     * 
+     * El estado enviado por el cliente para detectar cambios es también un 
+     * arreglo con el mismo número de elementos que el arreglo anterior, 
+     * posicionado de la misma manera. Cada elemento es una estructura que 
+     * contiene los siguientes valores:
+     * 
+     * status:          {offline|online|oncall|paused}
+     * oncallupdate:    boolean
+     */
+    $estadoMonitor = $oPaloConsola->listarEstadoMonitoreoAgentes();
+    ksort($estadoMonitor);
+
+    $jsonData = construirDatosJSON($estadoMonitor);
+
+    $arrData = array();
+    $tuplaTotal = NULL;
+    $sPrevQueue = NULL;
+    foreach ($jsonData as $jsonKey => $jsonRow) {
+        list($d1, $sQueue, $d2, $sNumeroAgente) = explode('-', $jsonKey);
+        
+        $sEstadoTag = '(unimplemented)';
+        switch ($jsonRow['status']) {
+        case 'offline':
+            $sEstadoTag = _tr('LOGOUT');
+            break;
+        case 'online':
+            $sEstadoTag = '<img src="modules/'.$module_name.'/images/ready.png" border="0" alt="'._tr('READY').'"/>';
+            break;
+        case 'oncall':
+            $sEstadoTag = '<img src="modules/'.$module_name.'/images/call.png" border="0" alt="'._tr('CALL').'"/>';
+            break;
+        case 'paused':
+            $sEstadoTag = '<img src="modules/'.$module_name.'/images/break.png" border="0" alt="'._tr('BREAK').'"/>';
+            break;
+        }
+        $sEstadoTag = '<span id="'.$jsonKey.'-statuslabel">'.$sEstadoTag.'</span>';
+        $sEstadoTag .= '&nbsp;<span id="'.$jsonKey.'-sec_laststatus">';
+        if (!is_null($jsonRow['sec_laststatus'])) {
+        	$sEstadoTag .= timestamp_format($jsonRow['sec_laststatus']);
+        }
+        $sEstadoTag .= '</span>';
+
+        // Estado a mostrar en HTML se deriva del estado JSON
+        if ($sPrevQueue != $sQueue) {
+            if (!is_null($tuplaTotal)) {
+            	// Emitir fila de totales para la cola ANTERIOR
+                $jsTotalKey = 'queue-'.$sPrevQueue;
+                $arrData[] = array(
+                    '<b>'._tr('TOTAL').'</b>',
+                    '&nbsp;',
+                    '<b>'._tr('Agents').': '.$tuplaTotal['num_agents'].'</b>',
+                    '&nbsp;',
+                    '<b><span id="'.$jsTotalKey.'-num_calls">'.$tuplaTotal['num_calls'].'</span></b>',
+                    '<b><span id="'.$jsTotalKey.'-logintime">'.timestamp_format($tuplaTotal['logintime']).'</span></b>',
+                    '<b><span id="'.$jsTotalKey.'-sec_calls">'.timestamp_format($tuplaTotal['sec_calls']).'</span></b>',
+                );
+            }
+
+            // Reiniciar totales aquí
+            $tuplaTotal = array(
+                'num_agents'    =>  0,
+                'logintime'     =>  0,
+                'num_calls'     =>  0,
+                'sec_calls'     =>  0,
+            );
+        }
+        $tuplaTotal['num_agents']++;
+        $tuplaTotal['logintime'] += $jsonRow['logintime'];
+        $tuplaTotal['num_calls'] += $jsonRow['num_calls'];
+        $tuplaTotal['sec_calls'] += $jsonRow['sec_calls'];
+        $tupla = array(
+            ($sPrevQueue == $sQueue) ? '' : $sQueue,
+            $sNumeroAgente,
+            htmlentities($jsonRow['agentname'], ENT_COMPAT, 'UTF-8'),
+            $sEstadoTag,
+            '<span id="'.$jsonKey.'-num_calls">'.$jsonRow['num_calls'].'</span>',
+            '<span id="'.$jsonKey.'-logintime">'.timestamp_format($jsonRow['logintime']).'</span>',
+            '<span id="'.$jsonKey.'-sec_calls">'.timestamp_format($jsonRow['sec_calls']).'</span>',
+        );
+        $arrData[] = $tupla;
+        $sPrevQueue = $sQueue;
+    }
+    // Emitir fila de totales para la cola ÚLTIMA
+    $jsTotalKey = 'queue-'.$sPrevQueue;
+    $arrData[] = array(
+        '<b>'._tr('TOTAL').'</b>',
+        '&nbsp;',
+        '<b>'._tr('Agents').': '.$tuplaTotal['num_agents'].'</b>',
+        '&nbsp;',
+        '<b><span id="'.$jsTotalKey.'-num_calls">'.$tuplaTotal['num_calls'].'</span></b>',
+        '<b><span id="'.$jsTotalKey.'-logintime">'.timestamp_format($tuplaTotal['logintime']).'</span></b>',
+        '<b><span id="'.$jsTotalKey.'-sec_calls">'.timestamp_format($tuplaTotal['sec_calls']).'</span></b>',
+    );
+
+    // No es necesario emitir el nombre del agente la inicialización JSON
+    foreach (array_keys($jsonData) as $k) unset($jsonData[$k]['agentname']);
+
     $oGrid  = new paloSantoGrid($smarty);
+    $json = new Services_JSON();
+    $INITIAL_CLIENT_STATE = $json->encode($jsonData);
+    $sJsonInitialize = <<<JSON_INITIALIZE
+<script type="text/javascript">
+$(function() {
+    initialize_client_state($INITIAL_CLIENT_STATE);
+});
+</script>
+JSON_INITIALIZE;
+    return $oGrid->fetchGrid(array(
+            'title'     =>  _tr('Agents Monitoring'),
+            'icon'      =>  _tr('images/list.png'),
+            'width'     =>  '99%',
+            'start'     =>  1,
+            'end'       =>  1,
+            'total'     =>  1,
+            'url'       =>  array('menu' => $module_name),
+            'columns'   =>  array(
+                array('name'    =>  _tr('Queue')),
+                array('name'    =>  _tr('Number')),
+                array('name'    =>  _tr('Agent')),
+                array('name'    =>  _tr('Current status')),
+                array('name'    =>  _tr('Total calls')),
+                array('name'    =>  _tr('Total login time')),
+                array('name'    =>  _tr('Total talk time')),
+            ),
+        ), $arrData, $arrLang).
+        $sJsonInitialize;
+}
 
+function timestamp_format($i)
+{
+	return sprintf('%02d:%02d:%02d', 
+        ($i - ($i % 3600)) / 3600, 
+        (($i - ($i % 60)) / 60) % 60, 
+        $i % 60);
+}
 
-//     $total  = $totalAgentsMonitoring;
-    $limit  = 100;
-    $oGrid->setLimit($limit);
+function construirDatosJSON(&$estadoMonitor)
+{
+    $iTimestampActual = time();
+    $jsonData = array();
+    foreach ($estadoMonitor as $sQueue => $agentList) {
+        ksort($agentList);
+        foreach ($agentList as $sAgentChannel => $infoAgente) {
+            $iTimestampEstado = NULL;
+            $sNumeroAgente = $sAgentChannel;
+            if (substr($sNumeroAgente, 0, 6) == 'Agent/')
+                $sNumeroAgente = substr($sNumeroAgente, 6);
+            $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
 
-    $oGrid->calculatePagination($action,$start);
-    $offset = $oGrid->getOffsetValue();
-    $end    = $oGrid->getEnd();
-    $url    = "?menu=$module_name&filter_field=$filter_field&filter_value=$filter_value";
-
-    $arrData = null;
-    $arrResult =$pAgentsMonitoring->ObtainAgentsMonitoring($limit, $offset, $arrLang, $filter_field, $filter_value);
-
-
-    $total = count($arrResult);
-    $oGrid->setTotal($total);
-
-    if(is_array($arrResult) /*&& $total>0*/){
-        foreach($arrResult as $key => $value){ 
-	    $arrTmp[0] = isset($value['queue'])?$value['queue']:"";
-	    $arrTmp[1] = isset($value['agent_number'])?$value['agent_number']:"";
-	    $arrTmp[2] = isset($value['agent_name'])?$value['agent_name']:"";
-	    $arrTmp[3] = isset($value['current_status'])?$value['current_status']:"";
-            switch ($arrTmp[3]) {
-                case "CALL":
-                    $arrTmp[3] = "<img src='modules/$module_name/images/call.png' border='0'> &nbsp;".$value['time_current_status'];//." ".$value['current_status'];
+            switch ($infoAgente['agentstatus']) {
+            case 'offline':
+                if (!is_null($infoAgente['lastsessionend']))
+                    $iTimestampEstado = strtotime($infoAgente['lastsessionend']);
                 break;
-                case "BREAK":
-                    $arrTmp[3] = "<img src='modules/$module_name/images/break.png' border='0'> &nbsp;".$value['time_current_status'];//." ".$value['current_status'];
+            case 'online':
+                if (!is_null($infoAgente['lastsessionstart']))
+                    $iTimestampEstado = strtotime($infoAgente['lastsessionstart']);
                 break;
-                case "READY":
-                    $arrTmp[3] = "<img src='modules/$module_name/images/ready.png' border='0'> &nbsp;".$value['time_current_status'];//." ".$value['current_status'];
+            case 'oncall':
+                if (!is_null($infoAgente['linkstart']))
+                    $iTimestampEstado = strtotime($infoAgente['linkstart']);
                 break;
-                case "LOGOUT":
-                    $arrTmp[3] = $arrLang["LOGOUT"]." &nbsp;".$value['time_current_status'];
+            case 'paused':
+                if (!is_null($infoAgente['lastpausestart']))
+                    $iTimestampEstado = strtotime($infoAgente['lastpausestart']);
                 break;
             }
-	    $arrTmp[4] = isset($value['total_calls'])?$value['total_calls']:"0";
-	    $arrTmp[5] = isset($value['total_login_time'])?$value['total_login_time']:"00:00:00";
-	    $arrTmp[6] = isset($value['total_talk_time'])?$value['total_talk_time']:"00:00:00";
-            $arrData[] = $arrTmp;
+
+            // Preparar estado inicial JSON
+            $jsonData[$jsonKey] = array(
+                'agentname'         =>  $infoAgente['agentname'],
+                'status'            =>  $infoAgente['agentstatus'],
+                'sec_laststatus'    =>  is_null($iTimestampEstado) ? NULL : ($iTimestampActual - $iTimestampEstado),
+                'sec_calls'         =>  $infoAgente['sec_calls'] + 
+                    (is_null($infoAgente['linkstart']) 
+                        ? 0 
+                        : $iTimestampActual - strtotime($infoAgente['linkstart'])),
+                'logintime'         =>  $infoAgente['logintime'] + (
+                    (is_null($infoAgente['lastsessionend']) && !is_null($infoAgente['lastsessionstart'])) 
+                        ? $iTimestampActual - strtotime($infoAgente['lastsessionstart'])
+                        : 0),
+                'num_calls'         =>  $infoAgente['num_calls'],
+                'oncallupdate'      =>  !is_null($infoAgente['linkstart']),
+            );
         }
     }
-
-    $arrGrid = array("title"    => $arrLang["Agents Monitoring"],
-                        "icon"     => "images/list.png",
-                        "width"    => "99%",
-                        "start"    => ($total==0) ? 0 : $offset + 1,
-                        "end"      => $end,
-                        "total"    => $total,
-                        "url"      => $url,
-                        "columns"  => array(
-			0 => array("name"      => $arrLang["Queue"],
-                                   "property1" => ""),
-			1 => array("name"      => $arrLang["Number"],
-                                   "property1" => ""),
-			2 => array("name"      => $arrLang["Agent"],
-                                   "property1" => ""),
-			3 => array("name"      => $arrLang["Current status"],
-                                   "property1" => ""),
-			4 => array("name"      => $arrLang["Total calls"],
-                                   "property1" => ""),
-			5 => array("name"      => $arrLang["Total login time"],
-                                   "property1" => ""),
-			6 => array("name"      => $arrLang["Total talk time"],
-                                   "property1" => ""),
-                                        )
-                    );
-
-
-    //begin section filter
-    $arrFormFilterAgentsMonitoring = createFieldFilter($arrLang);
-    $oFilterForm = new paloForm($smarty, $arrFormFilterAgentsMonitoring);
-    $smarty->assign("SHOW", $arrLang["Show"]);
-
-    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
-    $htmlFilter = "<tr class='letra12'><td width='10%' align='left'>$htmlFilter</td></tr>";
-    // $oGrid->showFilter(trim($htmlFilter));
-    // end section filter
-
-    $content = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    //end grid parameters
-
-    if (!$isCalledByAjax) {
-        $smarty->assign("url", $url);
-//         $smarty->assign("filter", $htmlFilter);
-    }
-    $smarty->assign("columns", $content);
-
-
-    $content = $oFilterForm->fetchForm("$local_templates_dir/main_monitoring.tpl","",$_POST);
-
-    return $content;
+    return $jsonData;
 }
 
+function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
+{
+    $respuesta = array();
+    
+    ignore_user_abort(true);
+    set_time_limit(0);
 
-function createFieldFilter($arrLang){
-    $arrFilter = array(
-	    "queue" => $arrLang["Queue"],
-	    "agent" => $arrLang["Agent"],
-	    "current_status" => $arrLang["Current status"],
-	    "total_calls" => $arrLang["Total calls"],
-	    "total_login_time" => $arrLang["Total login time"],
-	    "total_talk_time" => $arrLang["Total talk time"],
-                    );
+    // Estado del lado del cliente
+    $estadoCliente = getParameter('clientstate');
+    if (!is_array($estadoCliente)) return;
+    foreach (array_keys($estadoCliente) as $k) 
+        $estadoCliente[$k]['oncallupdate'] = ($estadoCliente[$k]['oncallupdate'] == 'true'); 
 
-    $arrFormElements = array(
-            "filter_field" => array("LABEL"                  => $arrLang["Search"],
-                                    "REQUIRED"               => "no",
-                                    "INPUT_TYPE"             => "SELECT",
-                                    "INPUT_EXTRA_PARAM"      => $arrFilter,
-                                    "VALIDATION_TYPE"        => "text",
-                                    "VALIDATION_EXTRA_PARAM" => ""),
-            "filter_value" => array("LABEL"                  => "",
-                                    "REQUIRED"               => "no",
-                                    "INPUT_TYPE"             => "TEXT",
-                                    "INPUT_EXTRA_PARAM"      => "",
-                                    "VALIDATION_TYPE"        => "text",
-                                    "VALIDATION_EXTRA_PARAM" => ""),
-                    );
-    return $arrFormElements;
-}
+    // Estado del lado del servidor
+    $estadoMonitor = $oPaloConsola->listarEstadoMonitoreoAgentes();
+    ksort($estadoMonitor);
+    $jsonData = construirDatosJSON($estadoMonitor);
 
-
-//FUNCIONES AJAX
-function create_report() {
-    $respuesta = new xajaxResponse();
-    $module_name = get_module_name();
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-
-    if (file_exists("$base_dir/$lang_file")) {
-        include_once "$lang_file";
+    // Modo a funcionar: Long-Polling, o Server-sent Events
+    $sModoEventos = getParameter('serverevents');
+    $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
+    if ($bSSE) {
+        Header('Content-Type: text/event-stream');
+        printflush("retry: 1\n");
     } else {
-        include_once "modules/$module_name/lang/en.lang";
+        Header('Content-Type: application/json');
     }
-//  $respuesta->addAlert($lang_file);
 
-    global $arrConf;
-    global $smarty;
-    global $arrLang;
-    global $arrLangModule;
-    $arrLang = array_merge($arrLang,$arrLangModule);
+    // Acumular inmediatamente las filas que son distintas en estado
+    foreach ($jsonData as $jsonKey => $jsonRow) {
+    	if (isset($estadoCliente[$jsonKey])) {
+    		if ($estadoCliente[$jsonKey]['status'] != $jsonRow['status'] ||
+                $estadoCliente[$jsonKey]['oncallupdate'] != $jsonRow['oncallupdate']) {
+                $respuesta[$jsonKey] = $jsonRow;
+                $estadoCliente[$jsonKey]['status'] = $jsonRow['status'];
+                $estadoCliente[$jsonKey]['oncallupdate'] = $jsonRow['oncallupdate'];
+                unset($respuesta[$jsonKey]['agentname']); 
+            }
+    	}
+    }
 
-    //folder path for custom templates
-    $local_templates_dir=get_local_templates_dir();
+    $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
+    do {
+        $oPaloConsola->desconectarEspera();
+        
+        // Se inicia espera larga con el navegador...
+        session_commit();
+        $iTimestampInicio = time();
+        
+        while (connection_status() == CONNECTION_NORMAL && count($respuesta) <= 0 
+            && time() - $iTimestampInicio <  $iTimeoutPoll) {
 
+            $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
+            if (is_null($listaEventos)) {
+                // TODO: manejar de mejor manera
+                break;
+            }
+            
+            $iTimestampActual = time();
+            foreach ($listaEventos as $evento) {
+                $sNumeroAgente = $sCanalAgente = $evento['agent_number'];
+                if (substr($sNumeroAgente, 0, 6) == 'Agent/')
+                    $sNumeroAgente = substr($sNumeroAgente, 6);
 
-    $pDB = new paloDB($arrConf['dsn_conn_database']);
-    $content = reportAgentsMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, true);
-    $respuesta->addAssign("body_report","innerHTML",$content);
-    return $respuesta;
+            	switch ($evento['event']) {
+            	case 'agentloggedin':
+                    foreach (array_keys($estadoMonitor) as $sQueue) {
+                        if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
+                        	$jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
+                            if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] == 'offline') {
+                            	
+                                // Estado en el estado de monitor
+                                $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'online';
+                                $estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart'] = date('Y-m-d H:i:s', $iTimestampActual);
+                                $estadoMonitor[$sQueue][$sCanalAgente]['lastsessionend'] = NULL;
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) && 
+                                    is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'])) {
+                                	$estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = date('Y-m-d H:i:s', $iTimestampActual);
+                                }
+                                $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = NULL;
+                                
+                                // Estado en la estructura JSON
+                                $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
+                                $jsonData[$jsonKey]['sec_laststatus'] = 0;
+                                $jsonData[$jsonKey]['oncallupdate'] = FALSE;
+                                
+                                // Estado del cliente
+                                $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
+                                $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
+
+                                // Estado a emitir al cliente
+                                $respuesta[$jsonKey] = $jsonData[$jsonKey];
+                                unset($respuesta[$jsonKey]['agentname']);
+                            }
+                        }
+                    }
+                    break;
+                case 'agentloggedout':
+                    foreach (array_keys($estadoMonitor) as $sQueue) {
+                        if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
+                            $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
+                            if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
+                                
+                                // Estado en el estado de monitor
+                                $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'offline';
+                                $estadoMonitor[$sQueue][$sCanalAgente]['lastsessionend'] = date('Y-m-d H:i:s', $iTimestampActual);
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) && 
+                                    is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'])) {
+                                    $estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = date('Y-m-d H:i:s', $iTimestampActual);
+                                }
+                                $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = NULL;
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart'])) {
+                                    $iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart']);
+                                    $iDuracionSesion =  $iTimestampActual - $iTimestampInicio;
+                                    if ($iDuracionSesion >= 0) {
+                                    	$estadoMonitor[$sQueue][$sCanalAgente]['logintime'] += $iDuracionSesion;
+                                    }
+                                }
+                                
+                                // Estado en la estructura JSON
+                                $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
+                                $jsonData[$jsonKey]['sec_laststatus'] = 0;
+                                $jsonData[$jsonKey]['oncallupdate'] = FALSE;
+                                $jsonData[$jsonKey]['logintime'] = $estadoMonitor[$sQueue][$sCanalAgente]['logintime'];
+                                
+                                // Estado del cliente
+                                $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
+                                $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
+
+                                // Estado a emitir al cliente
+                                $respuesta[$jsonKey] = $jsonData[$jsonKey];
+                                unset($respuesta[$jsonKey]['agentname']);
+                            }
+                        }
+                    }
+                    break;
+                case 'pausestart':
+                    foreach (array_keys($estadoMonitor) as $sQueue) {
+                        if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
+                            $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
+                            if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
+                                
+                                // Estado en el estado de monitor
+                                if ($estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] != 'oncall')
+                                    $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'paused';
+                                $estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart'] = date('Y-m-d H:i:s', $iTimestampActual);
+                                $estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = NULL;
+                                
+                                // Estado en la estructura JSON
+                                $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
+                                if ($jsonData[$jsonKey]['status'] == 'oncall') {
+                                    if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart'])) {
+                                        $iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']);
+                                        $iDuracionLlamada = $iTimestampActual - $iTimestampInicio;
+                                        if ($iDuracionLlamada >= 0) {
+                                            $jsonData[$jsonKey]['sec_laststatus'] = $iDuracionLlamada;
+                                            $jsonData[$jsonKey]['sec_calls'] = 
+                                                $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] + $iDuracionLlamada; 
+                                        }
+                                    }
+                                } else {
+                                    $jsonData[$jsonKey]['sec_laststatus'] = 0;
+                                }
+                                $jsonData[$jsonKey]['logintime'] = $estadoMonitor[$sQueue][$sCanalAgente]['logintime'];
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart'])) {
+                                    $iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart']);
+                                    $iDuracionSesion =  $iTimestampActual - $iTimestampInicio;
+                                    if ($iDuracionSesion >= 0) {
+                                        $jsonData[$jsonKey]['logintime'] += $iDuracionSesion;
+                                    }
+                                }
+                                
+                                // Estado del cliente
+                                $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
+                                $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
+
+                                // Estado a emitir al cliente
+                                $respuesta[$jsonKey] = $jsonData[$jsonKey];
+                                unset($respuesta[$jsonKey]['agentname']);
+                            }
+                        }
+                    }
+                    break;
+                case 'pauseend':
+                    foreach (array_keys($estadoMonitor) as $sQueue) {
+                        if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
+                            $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
+                            if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
+                            
+                                // Estado en el estado de monitor
+                                if ($estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] != 'oncall')
+                                    $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'online';
+                                $estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = date('Y-m-d H:i:s', $iTimestampActual);
+                                
+                                // Estado en la estructura JSON
+                                $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
+                                if ($jsonData[$jsonKey]['status'] == 'oncall') {
+                                    if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart'])) {
+                                        $iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']);
+                                        $iDuracionLlamada = $iTimestampActual - $iTimestampInicio;
+                                        if ($iDuracionLlamada >= 0) {
+                                            $jsonData[$jsonKey]['sec_laststatus'] = $iDuracionLlamada;
+                                            $jsonData[$jsonKey]['sec_calls'] = 
+                                                $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] + $iDuracionLlamada; 
+                                        }
+                                    }
+                                } else {
+                                    $jsonData[$jsonKey]['sec_laststatus'] =
+                                        $iTimestampActual - strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart']);
+                                }
+                                $jsonData[$jsonKey]['logintime'] = $estadoMonitor[$sQueue][$sCanalAgente]['logintime'];
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart'])) {
+                                    $iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart']);
+                                    $iDuracionSesion =  $iTimestampActual - $iTimestampInicio;
+                                    if ($iDuracionSesion >= 0) {
+                                        $jsonData[$jsonKey]['logintime'] += $iDuracionSesion;
+                                    }
+                                }
+                                
+                                // Estado del cliente
+                                $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
+                                $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
+
+                                // Estado a emitir al cliente
+                                $respuesta[$jsonKey] = $jsonData[$jsonKey];
+                                unset($respuesta[$jsonKey]['agentname']);
+                            }
+                        }
+                    }
+                    break;
+                case 'agentlinked':
+                    // Averiguar la cola por la que entró la llamada nueva
+                    $sCallQueue = $evento['queue'];
+                    if (is_null($sCallQueue)) {
+                    	$infoCampania = $oPaloConsola->leerInfoCampania(
+                            $evento['call_type'],
+                            $evento['campaign_id']);
+                        if (!is_null($infoCampania)) $sCallQueue = $infoCampania['queue'];
+                    }
+                    
+                    foreach (array_keys($estadoMonitor) as $sQueue) {
+                        if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
+                            $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
+                            if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
+                            
+                                // Estado en el estado de monitor
+                                $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'oncall';
+                                $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = NULL;
+                                if ($sCallQueue == $sQueue) {
+                                    $estadoMonitor[$sQueue][$sCanalAgente]['num_calls']++;
+                                    $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = $evento['datetime_linkstart'];
+                                }
+
+                                // Estado en la estructura JSON
+                                $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
+                                $jsonData[$jsonKey]['sec_laststatus'] = 
+                                    is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']) 
+                                        ? NULL
+                                        : $iTimestampActual - strtotime($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']);
+                                $jsonData[$jsonKey]['num_calls'] = $estadoMonitor[$sQueue][$sCanalAgente]['num_calls'];
+                                $jsonData[$jsonKey]['sec_calls'] = $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] +
+                                    (is_null($jsonData[$jsonKey]['sec_laststatus']) 
+                                        ? 0 
+                                        : $jsonData[$jsonKey]['sec_laststatus']);
+                                $jsonData[$jsonKey]['oncallupdate'] = !is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']);
+                                $jsonData[$jsonKey]['logintime'] = $estadoMonitor[$sQueue][$sCanalAgente]['logintime'];
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart'])) {
+                                    $iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart']);
+                                    $iDuracionSesion =  $iTimestampActual - $iTimestampInicio;
+                                    if ($iDuracionSesion >= 0) {
+                                        $jsonData[$jsonKey]['logintime'] += $iDuracionSesion;
+                                    }
+                                }
+
+                                // Estado del cliente
+                                $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
+                                $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
+
+                                // Estado a emitir al cliente
+                                $respuesta[$jsonKey] = $jsonData[$jsonKey];
+                                unset($respuesta[$jsonKey]['agentname']);
+                            }
+                        }
+                    }
+                    break;
+                case 'agentunlinked':
+                    foreach (array_keys($estadoMonitor) as $sQueue) {
+                        if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
+                            $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
+                            if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
+                            
+                                // Estado en el estado de monitor
+                                $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 
+                                    (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) && is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend']))
+                                    ? 'paused' : 'online';
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart'])) {
+                                	$iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']);
+                                    $iDuracionLlamada = $iTimestampActual - $iTimestampInicio;
+                                    if ($iDuracionLlamada >= 0) {
+                                    	$estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] += $iDuracionLlamada;
+                                    }
+                                }
+                                $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = NULL;
+                                
+                                // Estado en la estructura JSON
+                                $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
+                                if ($jsonData[$jsonKey]['status'] == 'paused') {
+                                    $jsonData[$jsonKey]['sec_laststatus'] =
+                                        $iTimestampActual - strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']);
+                                } else {
+                                    $jsonData[$jsonKey]['sec_laststatus'] =
+                                        $iTimestampActual - strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart']);
+                                }
+                                $jsonData[$jsonKey]['num_calls'] = $estadoMonitor[$sQueue][$sCanalAgente]['num_calls'];
+                                $jsonData[$jsonKey]['sec_calls'] = $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'];
+                                $jsonData[$jsonKey]['oncallupdate'] = FALSE;
+                                $jsonData[$jsonKey]['logintime'] = $estadoMonitor[$sQueue][$sCanalAgente]['logintime'];
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart'])) {
+                                    $iTimestampInicio = strtotime($estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart']);
+                                    $iDuracionSesion =  $iTimestampActual - $iTimestampInicio;
+                                    if ($iDuracionSesion >= 0) {
+                                        $jsonData[$jsonKey]['logintime'] += $iDuracionSesion;
+                                    }
+                                }
+
+                                // Estado del cliente
+                                $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
+                                $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
+
+                                // Estado a emitir al cliente
+                                $respuesta[$jsonKey] = $jsonData[$jsonKey];
+                                unset($respuesta[$jsonKey]['agentname']);
+                            }
+                        }
+                    }
+                    break;
+            	}
+            }
+            
+            
+        }
+        jsonflush($bSSE, $respuesta);
+        
+        $respuesta = array();
+
+    } while ($bSSE && connection_status() == CONNECTION_NORMAL);
+    $oPaloConsola->desconectarTodo();
 }
-// FIN FUNCIONES AJAX
 
-function get_local_templates_dir()
+function jsonflush($bSSE, $respuesta)
 {
-    global $arrConf;
-    $module_name = get_module_name();
-    //folder path for custom templates
-    $base_dir=$_SERVER['DOCUMENT_ROOT'];
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    return "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $json = new Services_JSON();
+    $r = $json->encode($respuesta);
+    if ($bSSE)
+        printflush("data: $r\n\n");
+    else printflush($r);
 }
 
-function get_module_name()
+function printflush($s)
 {
-    return "rep_agents_monitoring";
+    print $s;
+    ob_flush();
+    flush();
 }
 
-if (!function_exists('getParameter')) {
-function getParameter($parameter)
-{
-    if(isset($_POST[$parameter]))
-        return $_POST[$parameter];
-    else if(isset($_GET[$parameter]))
-        return $_GET[$parameter];
-    else
-        return null;
-}
-}
-
-function getAction()
-{
-    if(getParameter("show")) //Get parameter by POST (submit)
-        return "show";
-    else if(getParameter("new"))
-        return "new";
-    else if(getParameter("action")=="show") //Get parameter by GET (command pattern, links)
-        return "show";
-    else
-        return "report";
-}?>
+?>

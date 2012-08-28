@@ -98,6 +98,19 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Aug 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agents Monitoring: make use of "getagentactivitysummary" request to 
+  rewrite the implementation of the real-time status report. The report now uses
+  long polling and Server Sent Events in a way similar to the Agent Console. 
+  This rewrite is expected to significantly reduce the server load over the old
+  strategy of running the complete report algorithm every four seconds.
+- CHANGED: Agent Console: extend library to add support for the 
+  "getagentactivitysummary" request.
+- CHANGED: Dialer (ECCP): new request "getagentactivitysummary" that produces a
+  summary of agent activity on a date range. 
+- CHANGED: Dialer (ECCP): extend "getagentstatus" request to report the queue 
+  number that assigned the call currently connected to the agent.
+
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-4.alpha
 - FIXED: Agent Console: fix incorrect check for schedule_use_daterange and
   schedule_use_sameagent flags in call scheduling.

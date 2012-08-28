@@ -1199,7 +1199,8 @@ class AMIEventProcess extends TuberiaProcess
         if (!is_null($llamada)) {
             $llamada->llamadaEntraEnCola(
                 $params['local_timestamp_received'],
-                $params['Channel']);
+                $params['Channel'],
+                $params['Queue']);
         }
         
         return FALSE;

@@ -142,6 +142,8 @@ class Llamada
 
     // ID de la cola de campaña entrante. Sólo para llamadas entrantes
     var $id_queue_call_entry = NULL;
+    
+    private $_queuenumber = NULL;
 
     // Referencia al agente agendado
     var $agente_agendado = NULL;
@@ -354,7 +356,11 @@ class Llamada
             'currentcallid'         =>  $this->id_current_call,
             'datetime_enterqueue'   => date('Y-m-d H:i:s', $this->timestamp_enterqueue),
             'datetime_linkstart'    => date('Y-m-d H:i:s', $this->timestamp_link),
+            'queuenumber'           =>  $this->_queuenumber,
         );
+        if (is_null($resumen['queuenumber']) && !is_null($this->campania)) {
+        	$resumen['queuenumber'] = $this->campania->queue;
+        }
         if ($this->tipo_llamada == 'outgoing') {
         	$resumen['datetime_dialstart'] = date('Y-m-d H:i:s', $this->timestamp_originatestart);
             $resumen['datetime_dialstart'] = date('Y-m-d H:i:s', $this->timestamp_originateend);
@@ -457,9 +463,10 @@ class Llamada
         $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
     }
     
-    public function llamadaEntraEnCola($timestamp, $channel)
+    public function llamadaEntraEnCola($timestamp, $channel, $sQueueNumber)
     {
         $this->timestamp_enterqueue = $timestamp;
+        $this->_queuenumber = $sQueueNumber;
         if (is_null($this->channel)) $this->channel = $channel;
         if (in_array($this->status, array('Placing', 'Ringing')))
             $this->status = 'OnQueue';

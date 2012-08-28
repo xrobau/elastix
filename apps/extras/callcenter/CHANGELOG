@@ -1,3 +1,7 @@
+* Dialer (ECCP): new request "getagentactivitysummary" that produces a summary
+  of agent activity on a date range. 
+* Dialer (ECCP): extend "getagentstatus" request to report the queue number that
+  assigned the call currently connected to the agent.
 * Agent Console: fix incorrect check for schedule_use_daterange and
   schedule_use_sameagent flags in call scheduling.
 * Agent Console: fix incorrect check for atxfer parameter in call transfer.

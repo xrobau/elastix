@@ -145,6 +145,8 @@ function manejarLogin($module_name, &$smarty, $sDirLocalPlantillas)
 // Mostrar el formulario donde el agente ingresa su login
 function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
 {
+    global $arrConf;
+
     // Acciones para mostrar el formulario, fuera de cualquier acción AJAX
     $smarty->assign(array(
         'FRAMEWORK_TIENE_TITULO_MODULO' => existeSoporteTituloFramework(),
@@ -185,6 +187,20 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
             'REANUDAR_VERIFICACION' =>  1,
         ));
         
+    } else {
+    	/* Si el usuario Elastix logoneado tiene una extensión y aparece en la
+         * lista, se sugiere esta extension como la extensión a usar para 
+         * marcar. */
+        $pACL = new paloACL($arrConf['elastix_dsn']['acl']);
+        $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
+        if ($idUser !== FALSE) {
+        	$tupla = $pACL->getUsers($idUser);
+            if (is_array($tupla) && count($tupla) > 0) {
+                $sExtension = $tupla[0][3];
+                if (isset($listaExtensiones[$sExtension]))
+                    $smarty->assign('ID_EXTENSION', $sExtension);
+            }
+        }
     }
     $sContenido = $smarty->fetch("$sDirLocalPlantillas/login_agent.tpl");
     return $sContenido;	

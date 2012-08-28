@@ -99,6 +99,9 @@ fi
 
 %changelog
 * Tue Aug 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: if Elastix user has a default extension, suggest this
+  extension as the extension to use for initial agent login. Possible fix for 
+  Elastix bug #1354.
 - CHANGED: Agents Monitoring: make use of "getagentactivitysummary" request to 
   rewrite the implementation of the real-time status report. The report now uses
   long polling and Server Sent Events in a way similar to the Agent Console. 

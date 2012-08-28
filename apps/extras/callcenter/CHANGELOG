@@ -1,3 +1,8 @@
+* Agents Monitoring: make use of "getagentactivitysummary" request to rewrite
+  the implementation of the real-time status report. The report now uses
+  long polling and Server Sent Events in a way similar to the Agent Console. 
+  This rewrite is expected to significantly reduce the server load over the old
+  strategy of running the complete report algorithm every four seconds.
 * Agent Console: extend library to add support for getagentactivitysummary.
 * Dialer (ECCP): new request "getagentactivitysummary" that produces a summary
   of agent activity on a date range. 

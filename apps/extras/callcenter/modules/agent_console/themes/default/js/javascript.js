@@ -522,7 +522,7 @@ function do_checkstatus()
 
 function manejarRespuestaStatus(respuesta)
 {
-	for (i in respuesta) {
+	for (var i in respuesta) {
 		if (respuesta[i].txt_estado_agente_inicial != null)
 			$('#elastix-callcenter-estado-agente-texto').text(respuesta[i].txt_estado_agente_inicial);
 		if (respuesta[i].class_estado_agente_inicial != null)
@@ -596,7 +596,7 @@ function manejarRespuestaStatus(respuesta)
 			if (respuesta[i].calltype == 'incoming') {
 				$('#elastix-callcenter-barra-llamada-saliente').hide();
 				$('#llamada_entrante_contacto_id').empty();
-				for (k in respuesta[i].lista_contactos) {
+				for (var k in respuesta[i].lista_contactos) {
 					// El código comentado no funciona en IE6
 					/*
 					var option_contacto = document.createElement('option');

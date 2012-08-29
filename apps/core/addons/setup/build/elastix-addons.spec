@@ -35,10 +35,15 @@ mv $RPM_BUILD_ROOT/opt/elastix/elastix-updater/elastix-updaterd $RPM_BUILD_ROOT/
 chmod +x $RPM_BUILD_ROOT/etc/init.d/elastix-updaterd
 mkdir -p $RPM_BUILD_ROOT/etc/yum.repos.d/
 
+## Add the GNU Privacy Guard for the Postgresql91 repo
+mkdir -p $RPM_BUILD_ROOT/etc/pki/
+mv setup/etc/pki/rpm-gpg/ $RPM_BUILD_ROOT/etc/pki/
+
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv setup/etc/yum.repos.d/commercial-addons.repo $RPM_BUILD_ROOT/etc/yum.repos.d/
+mv setup/etc/yum.repos.d/ $RPM_BUILD_ROOT/etc/
+
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -71,6 +76,9 @@ elif [ $1 -eq 2 ]; then #update
     # restart daemon
     /sbin/service elastix-updaterd restart
 fi
+
+# import the GPG-key
+/bin/rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
 
 
 # The installer script expects to be in /tmp/new_module
@@ -105,9 +113,15 @@ fi
 /opt/elastix/elastix-updater/*
 %defattr(-, root, root)
 /etc/init.d/elastix-updaterd
+/etc/pki/rpm-gpg/*
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Aug 29 Alberto Santos <asantos@palosanto.com>
+- ADDED: module addons, added the repo pgdg-91-centos.repo and the
+  gpg-key RPM-GPG-KEY-PGDG-91 for Postgresql91
+  SVN Rev[4157]
+
 * Fri Jun 15 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Explicitly return exit code in startup script
 - CHANGED: /etc/init.d/elastix-updaterd should be owned by root, not asterisk.

@@ -333,6 +333,98 @@ class paloFax {
         return $arrStatus;
     }
 
+    //Obtener estado en el momento de enviar Fax
+    function getSendStatus($destine)
+    {
+        $arrStatus = array();
+        $status = array();
+        $cont = 0;
+
+
+
+        exec("/usr/bin/faxstat -s", $arrOutCmd);
+
+        foreach($arrOutCmd as $linea) {
+                 if($linea==""||(preg_match("/^Modem/", $linea, $arrReg))||(preg_match("/^HylaFAX/", $linea, $arrReg))||(preg_match("/^JID/", $linea, $arrReg))) {
+                 }else{
+                        $tmpstatus = explode(" ",$linea);
+                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
+                        if($arrDestine[4]==$destine){
+                        $status["dial"][] = $arrDestine[6];
+                        $status["jid"][] = $arrDestine[0];
+                        $status["status"][]=$arrDestine[8]." ".$arrDestine[9]." ".$arrDestine[10];
+               }
+
+               }
+            }
+
+        return $status;
+    }
+    //Obtener El estado de un fax dado el jid
+    function getStateFax($jid)
+    {
+        $arrStatus = array();
+        $status = array();
+        $cont = 0;
+
+        exec("/usr/bin/faxstat -sdl output", $arrOutCmd);
+
+        foreach($arrOutCmd as $linea) {
+                 if($linea==""||(preg_match("/^Modem/", $linea, $arrReg))||(preg_match("/^HylaFAX/", $linea, $arrReg))||(preg_match("/^JID/", $linea, $arrReg))) {
+                 }else{
+                        $tmpstatus = explode(" ",$linea);
+                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
+                        if($arrDestine[0]==$jid){
+                           $status["state"][]=$arrDestine;
+                        }
+
+               }
+            }
+
+        return $status;
+    }
+     //Obtener el estado de todos los faxes enviados
+     function setFaxMsg()
+    {
+        $arrStatus = array();
+        $status = array();
+        $cont = 0;
+
+        exec("/usr/bin/faxstat -d", $arrOutCmd);
+
+        foreach($arrOutCmd as $linea) {
+                 if($linea==""||(preg_match("/^Modem/", $linea, $arrReg))||(preg_match("/^HylaFAX/", $linea, $arrReg))||(preg_match("/^JID/", $linea, $arrReg))) {
+                 }else{
+                        $tmpstatus = explode(" ",$linea);
+                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
+                        $id = $arrDestine[0];
+                        // if($arrDestine[0]==$jid){
+                           $status["state"][$id]=$arrDestine;
+                       // }
+
+               }
+            }
+        //$status["jid"][]=$jid;
+        return $status;
+    }
+    //Obtener el Estado de los IAX2
+    function checkFaxStatus($destine){
+    $status = array();
+    exec("/usr/sbin/asterisk -rx 'iax2 show peers'", $output, $retval);
+    foreach($output as $linea) {
+         if($linea==""||(preg_match("/^Name/", $linea, $arrReg))) {
+
+         }else{
+                $tmpstatus = explode(" ",$linea);
+                $arrDestine = array_values(array_diff($tmpstatus, array('')));
+                $sizeArr = count($arrDestine);
+                if(($arrDestine[0]==$destine)&&($arrDestine[5]=="OK"))
+                   $status="Fax OK";
+
+                }
+            }
+       return $status;
+    }
 
     function getConfigurationSendingFaxMail($id_user)
     {

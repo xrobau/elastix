@@ -45,5 +45,6 @@ $arrLangModule=array(
 "out" => "Enviado",
 "ERROR" => "ERROR",
 "Type" => "Tipo",
+"Status"=>"Estado",
 );
 ?>

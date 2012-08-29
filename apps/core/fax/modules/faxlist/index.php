@@ -69,6 +69,19 @@ function _moduleContent($smarty, $module_name)
         case "checkFaxStatus":
             $contenidoModulo = checkFaxStatus("faxListStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang);
             break;
+         case "checkFaxStatus2":
+            $contenidoModulo = faxListStatus2("faxListStatus2",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
+            break;
+        case "checkSendStatus":
+            $contenidoModulo = faxSendStatus("faxSendStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
+            break;
+        case "stateFax":
+            $contenidoModulo = stateFax("stateFax",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
+            break;
+        case "setFaxMsg":
+            $contenidoModulo = setFaxMsg("setFaxMsg",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB);
+            break;
+
         default:
             $contenidoModulo = listFax($pDB, $smarty, $module_name, $local_templates_dir, $arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
             break;
@@ -118,7 +131,8 @@ function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1
         _tr("Destination Email"),
         _tr("Caller ID Name"),
         _tr("Caller ID Number"),
-        _tr("Status"));
+        _tr("Status"),
+        "");
     $oGrid->setColumns($arrColumns);
     $offset = $oGrid->calculateOffset();
 
@@ -133,6 +147,8 @@ function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1
 			$arrTmp[2] = $fax['clid_name'] . "&nbsp;";
 			$arrTmp[3] = $fax['clid_number'] . "&nbsp;";
 			$arrTmp[4] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
+                        $arrTmp[5] = "<div class='load' onclick='checkStatus(".$fax['extension'].")'  id='".$fax['extension']."' style='cursor:pointer; text-align: center;'><strong>?</strong></div>";
+
 			$arrData[] = $arrTmp;
     }
 
@@ -232,6 +248,90 @@ function thereChanges($data){
     putSession($session);
     return $arraResult;
 }
+//Verifica el Tono del Fax
+function faxListStatus2($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB)
+{
+    $oFax    = new paloFax($pDB);
+    $arrFax  = $oFax->getFaxList();
+    $status  = TRUE;
+    $end = count($arrFax);
+    //$arrFaxStatus = $oFax->getFaxStatus();
+    //$arrFaxStatus    = array();
+    $ext = getParameter('ext');
+    $arrFaxStatus = $oFax->checkFaxStatus($ext);
+    $statusArr =  "Fax";
+
+    $jsonObject = new PaloSantoJSON();
+    $msgResponse["faxes"] = $arrFaxStatus;
+
+    $jsonObject->set_status($statusArr);
+    $jsonObject->set_message($msgResponse);
+
+    return $jsonObject->createJSON();
+}
+//Verificar el Estado del Envío del fax
+function faxSendStatus($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB)
+{
+    $oFax    = new paloFax($pDB);
+    $arrFax  = $oFax->getFaxList();
+    $status  = TRUE;
+    $end = count($arrFax);
+    //$arrFaxStatus = $oFax->getFaxStatus();
+    //$arrFaxStatus    = array();
+    $ext = getParameter('ext');
+    $arrFaxStatus = $oFax->getSendStatus($ext);
+    $statusArr =  "Fax";
+
+    $jsonObject = new PaloSantoJSON();
+    $msgResponse = $arrFaxStatus;
+
+    $jsonObject->set_status($statusArr);
+    $jsonObject->set_message($msgResponse);
+
+    return $jsonObject->createJSON();
+}
+//Verificar si el fax se  Envío o canceló
+function stateFax($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB)
+{
+    $oFax    = new paloFax($pDB);
+    $arrFax  = $oFax->getFaxList();
+    $status  = TRUE;
+    $end = count($arrFax);
+    //$arrFaxStatus = $oFax->getFaxStatus();
+    //$arrFaxStatus    = array();
+    $jid = getParameter('jid');
+    $arrFaxStatus = $oFax->getStateFax($jid);
+    $statusArr =  "Fax";
+
+    $jsonObject = new PaloSantoJSON();
+    $msgResponse = $arrFaxStatus;
+
+    $jsonObject->set_status($statusArr);
+    $jsonObject->set_message($msgResponse);
+
+    return $jsonObject->createJSON();
+}
+
+//Obtener Estado del Fax en Faxviewer: Enviado o Error  
+function setFaxMsg($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB)
+{
+    $oFax    = new paloFax($pDB);
+    $arrFax  = $oFax->getFaxList();
+    $status  = TRUE;
+    $end = count($arrFax);
+    $arrFaxStatus = $oFax->setFaxMsg();
+    $statusArr =  "Fax";
+
+    $jsonObject = new PaloSantoJSON();
+    $msgResponse = $arrFaxStatus;
+
+    $jsonObject->set_status($statusArr);
+    $jsonObject->set_message($msgResponse);
+
+    return $jsonObject->createJSON();
+}
+
+
 
 function getSession()
 {
@@ -272,6 +372,14 @@ function getAction()
 {
     if(getParameter("action")=="checkFaxStatus")
         return "checkFaxStatus";
+     if(getParameter("action")=="checkFaxStatus2")
+        return "checkFaxStatus2";
+    if(getParameter("action")=="checkSendStatus")
+        return "checkSendStatus";
+    if(getParameter("action")=="stateFax")
+        return "stateFax";
+    if(getParameter("action")=="setFaxMsg")
+        return "setFaxMsg";
     else
         return "default";
 }

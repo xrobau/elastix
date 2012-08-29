@@ -872,12 +872,17 @@ $(document).ready(function(){
 	});
       
       var menu = getParameterByName("menu");
-      var lblmenu = menu.split("_");    
-      if(lblmenu["0"]=="a2b"){
-         $('#myframe').load(function() {
+       if(typeof  menu!== "undefined" && menu){
+        var lblmenu = menu.split("_");
+
+        if(lblmenu["0"]=="a2b"){
+          $('#myframe').load(function() {
               $(".topmenu-right-button a",myframe.document).attr("target","_self");
-         });
+          });
+        }
       }
+
+          
 
 });
 

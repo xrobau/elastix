@@ -4,10 +4,18 @@ $(document).ready(function(){
 });
 
 function checkAllStatus(){
+    var arra = new Array(); 
+
       $('.load').each(function() {
-              ext = $(this).attr("id");
-              checkStatus(ext);
+          ext = $(this).attr("id");  
+          $("#"+ext).html("<div style='color:blue'>Checking...</div>");
+ 
+          arra.push(ext);
+          //$('#'+ext).click();
+             // ext = $(this).attr("id");
+             // checkStatus(ext);
       });
+      checkStatus(arra);
 }
 
 /*
@@ -44,8 +52,6 @@ function checkStatus(extension)
 {
     var label = $("#load_"+extension+" a").html();
 
-    $("#"+extension).attr("onclick","");
-    $("#"+extension).css("cursor","auto");
     $("#"+extension).html("<div style='color:blue'>Checking...</div>");
     if (extension != ""){
         var arrAction        = new Array();
@@ -57,13 +63,18 @@ function checkStatus(extension)
             function(arrData,statusResponse,error)
             {
                 if(statusResponse){
-                  if(arrData["faxes"]=="Fax OK")
-                     $("#"+extension).html("<img src='modules/faxlist/images/check.png' title='OK'/>");
-                  else
-                     $("#"+extension).html("<img src='modules/faxlist/images/error.png' title='ERROR'/>");
-
-                  $("#"+extension).attr("onclick","checkStatus("+extension+")");
-                  $("#"+extension).css("cursor","pointer");
+                  //var ext = arrData["faxes"][].split("_");
+                  $('.load').each(function() {
+                       ext = $(this).attr("id");
+                       if(typeof  arrData["faxes"][ext]!== "undefined" && arrData["faxes"][ext]){
+                       var exten = arrData["faxes"][ext].split("_");
+                       if(exten[0]=="Fax OK")
+                         $("#"+ext).html("<img src='modules/faxlist/images/check.png' title='Online'/>");
+                       else
+		         $("#"+ext).html("<img src='modules/faxlist/images/error.png' title='Offline'/>");
+                       }
+                       
+                   });
                   return true;
                 }
                 //return false; //continua la recursividad

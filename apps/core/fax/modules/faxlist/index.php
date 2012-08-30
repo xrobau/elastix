@@ -147,7 +147,7 @@ function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1
 			$arrTmp[2] = $fax['clid_name'] . "&nbsp;";
 			$arrTmp[3] = $fax['clid_number'] . "&nbsp;";
 			$arrTmp[4] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
-                        $arrTmp[5] = "<div class='load' onclick='checkStatus(".$fax['extension'].")'  id='".$fax['extension']."' style='cursor:pointer; text-align: center;'><strong>?</strong></div>";
+                        $arrTmp[5] = "<div class='load' id='".$fax['extension']."' style='text-align: center;'><strong>?</strong></div>";
 
 			$arrData[] = $arrTmp;
     }

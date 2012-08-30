@@ -409,20 +409,38 @@ class paloFax {
     }
     //Obtener el Estado de los IAX2
     function checkFaxStatus($destine){
-    $status = array();
-    exec("/usr/sbin/asterisk -rx 'iax2 show peers'", $output, $retval);
-    foreach($output as $linea) {
-         if($linea==""||(preg_match("/^Name/", $linea, $arrReg))) {
+    
+    $apDB = new paloDB("mysql://root:palosanto@localhost/elxpbx");
+    $pACL = new paloACL($apDB);   
+    $adestine = explode(",",$destine);   
+    foreach ($adestine  as $destine){
+      $query="select name from iax where cid_number=?";
+      $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
+      $status = array();
+      $iaxname[] = $arrReturn['name'];
+    }
+ 
+ //   $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
+ //   $status = array();
+ //   $iaxname = $arrReturn['name'];
+  foreach($iaxname as $iaxname2){
+     exec("/usr/sbin/asterisk -rx 'iax2 show peer $iaxname2'", $output, $retval);
 
-         }else{
+    foreach($output as $linea) {
+         //if((preg_match("/^Status/", $linea, $arrReg))) {
+
+        // }else{
+                $flag = explode("_", $iaxname2);
                 $tmpstatus = explode(" ",$linea);
                 $arrDestine = array_values(array_diff($tmpstatus, array('')));
                 $sizeArr = count($arrDestine);
-                if(($arrDestine[0]==$destine)&&($arrDestine[5]=="OK"))
-                   $status="Fax OK";
+                if(isset($arrDestine[0]))
 
-                }
+                  if($arrDestine[0]=="Status")
+                      $status[$flag[1]]="Fax ".$arrDestine[2]."_". $iaxname2; 
+          //      }
             }
+   }
        return $status;
     }
 

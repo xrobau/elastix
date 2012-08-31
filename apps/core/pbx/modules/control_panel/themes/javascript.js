@@ -738,11 +738,13 @@ function eventTimeParking(parkingLot, time){
 }
 
 function eventWaiting(queue,waiting){
-     if(waiting!=0){
-        var span = document.getElementById("span1_" + queue);
-        if(span){
+    var span = document.getElementById("span1_" + queue); 
+    if(waiting!=0){
+        if(span)
             span.firstChild.nodeValue = waiting;
-        }
+    }else{
+        if(span)
+            span.firstChild.nodeValue = "";
     }
 }
 

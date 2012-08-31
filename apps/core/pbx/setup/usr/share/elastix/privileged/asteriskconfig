@@ -30,25 +30,47 @@
   $Id: asteriskconfig,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
 
+include_once "/var/www/html/libs/misc.lib.php";
+include_once "/var/www/html/configs/default.conf.php";
+
+require_once 'Console/Getopt.php';
+require_once "/var/www/html/libs/paloSantoPBX.class.php";
+require_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
+
 if(!isset($argv[1]))
     exit(1);
     
 switch($argv[1]){
-	case "changePermission":
-		if(isset($argv[2])){
-            exit(changeFilePermission($argv[2]) ? 0 : 1);
-		}else
-			error_exit("Missing filename \n");
-		break;
 	case "dialplan-reload":
         exit(dialplanReload() ? 0 : 1);
 		break;
 	case "reload":
         exit(reload() ? 0 : 1);
 		break;
-    case "create_file":
+    case "createDirOrganization":
+        if(isset($argv[2])){
+            exit(createDirOrganization($argv[2]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
+        break;
+    case "createExtensionFile":
         if(isset($argv[2]) && isset($argv[3])){
-            exit(writeNewFileAsterisk($argv[2],$argv) ? 0 : 1);
+            exit(createExtensionFile($argv[2],$argv[3]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
+        break;
+    case "createExtensionGlobals":
+        if(isset($argv[2]) && isset($argv[3])){
+            exit(createExtensionGlobals($argv[2],$argv[3]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
+        break;
+    case "createFeaturesFile":
+        exit(createFeaturesFile() ? 0 : 1);
+        break; 
+    case "generateDialPlan":
+        if(isset($argv[2])){
+            exit(generateDialPlan($argv[2]) ? 0 : 1);
         }else
             error_exit("Missing arguments \n");
         break;
@@ -65,7 +87,6 @@ function error_exit($sMsg, $errorcode = 1)
 
 function changeFilePermission($file)
 {
-	$file=escapeshellarg($file);
 	chown($file,"asterisk");
 	chgrp($file,"asterisk");
 	exec("chmod 664 $file 2>&1",$output, $ret);
@@ -92,32 +113,531 @@ function dialplanReload(){
     return true;
 }
 
-//escribe un archivo de configuracion de asterisk dentro de /etc/asterisk
-//file -> ubicacion del archivo dentro del directorio /etc/asterisk/ y nombre ej: orgainzation/extensions_additional.conf
-//contenido -> contenido del archivo, este debe se un string de caracteres
-function writeNewFileAsterisk($file,$contenido){
-    $base="/etc/asterisk/";
-    $file=trim($file);
-   // $contenido=escapeshellarg($contenido);
-    $file=$base.$file;
-    foreach($contenido as $value){
-        print($value);
+function createDirOrganization($domain){
+    $pathDial="/etc/asterisk/organizations";
+    $exito=true;
+    
+    if(!is_dir($pathDial)){
+        if(mkdir($pathDial)){
+            exec("chown asterisk.asterisk $path",$output,$retval);
+            exec("chmod 775 $path",$output,$retval);
+        }else{
+            fprintf(STDERR, "ERR: failed to create '/etc/asterisk/organizations' directory");
+            return false;
+        }
     }
     
-    if(empty($file)){
-        fwrite(STDERR, "Invalid name of file");
+    $pathlib="/var/lib/asterisk";
+    $pathspool="/var/spool/asterisk";
+
+    $astmonitor = $pathspool."/monitor";
+    $astmeetme = $pathspool."/meetme";
+    $astspooltmp = $pathspool."/tmp";
+    $astlibsound = $pathlib."/sounds";
+    
+    $arrDir=array($astmonitor,$astmeetme,$astlibsound,$astspooltmp);
+    foreach($arrDir as $dir){
+        if(is_dir("$dir/$domain")){
+            $date=date("YMd_His");
+            rename("$dir/$domain","$dir/$domain"."_".$date);
+        }
+        
+        if(mkdir("$dir/$domain")){
+            exec("chown asterisk.asterisk $dir/$domain ",$output,$retval);
+            exec("chmod 775 $dir/$domain",$output,$retval);
+        }else{
+            fprintf(STDERR, "ERR: failed to create $dir/$domain directory - %s\n", $output[0]);
+            $exito=false;
+            break;
+        }
+    }
+
+    if(!$exito){
+        foreach($arrDir as $dir){
+            if(is_dir("$dir/$domain"))
+                rmdir("$dir/$domain");
+        }
         return false;
+    }else{
+        return true;
     }
+}
+
+function createExtensionFile($action,$orgdomain){
+    $EXITO=false;
+    $file="/etc/asterisk/extensions.conf";
     
-    $result=file_put_contents($file,$contenido);
+    $content = <<<EXTENSIONS_CONFIG
+[default]
+exten => s,1,Playback(vm-goodbye)
+exten => h,1,Hangup()
+
+EXTENSIONS_CONFIG;
+    
+    $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
+    $query="Select domain from organization";
+    $result=$pDB->fetchTable($query,false);
     if($result===false){
-        fwrite(STDERR, 'File '.$file.' could not be written in /etc/asterisk');
+        fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDB->errMsg);
+        return false;
+    }
+       
+    $arrDomain=array();
+    foreach($result as $domain)
+    {
+        $arrDomain[]=$domain[0];
+    }
+    
+    if($action=="add"){
+        if(in_array($orgdomain,$arrDomain)===false){
+            $arrDomain[]=$orgdomain;
+        }
+    }else{
+        $index=array_search($orgdomain,$arrDomain);
+        if($index!==false){    
+            $arrDomain[$index]=null;
+        }
+    }
+    
+    $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+    $content .="#include extensions_globals.conf\n";
+    foreach($arrDomain as $value){
+        if(isset($value) && $value!=""){
+            if(!is_file("/etc/asterisk/organizations/extensions_".$value.".conf")){
+                if(file_put_contents("/etc/asterisk/organizations/extensions_".$value.".conf","")!==false){
+                    $content .="#include organizations/extensions_".$value.".conf\n";
+                    changeFilePermission("/etc/asterisk/organizations/extensions_".$value.".conf");
+                }
+            }else{
+                $content .="#include organizations/extensions_".$value.".conf\n";
+            }
+        }
+    }
+    $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+        
+    if(file_put_contents($file, $content)!==false){
+        changeFilePermission($file);
+        return true;
+    }else{
+        fprintf(STDERR, "ERR: File $file couldn't be written");
+        return false;
+    }   
+}
+
+function createExtensionGlobals($action,$orgdomain){
+    $EXITO=false;
+    $file="/etc/asterisk/extensions.conf";
+    
+    $content = "";
+    
+    $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
+    $query="Select domain from organization";
+    $result=$pDB->fetchTable($query,false);
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDB->errMsg);
         return false;
     }
     
-    chown($file,"asterisk");
-    chgrp($file,"asterisk");
-    exec("chmod 664 $file 2>&1",$output, $ret);
+    $arrDomain=array();
+    foreach($result as $domain){
+        $arrDomain[]=$domain[0];
+    }
+    
+    if($action=="add"){
+        if(in_array($orgdomain,$arrDomain)===false){
+            $arrDomain[]=$orgdomain;
+        }
+    }else{
+        $index=array_search($orgdomain,$arrDomain);
+        if($index!==false){    
+            $arrDomain[$index]=null;
+        }
+    }
+
+    $file="/etc/asterisk/extensions_globals.conf";
+    $source_file="/var/www/elastixdir/asteriskconf/elastix_pbx.conf";
+    $content ="[globals]\n";
+    if(is_file($source_file)){
+        if($handler=fopen($source_file,'r')){
+            $content .= fread($handler, filesize($source_file));
+        } 
+    }else{
+        fprintf(STDERR, "File /var/www/elastixdir/asteriskconf/elastix_pbx.conf dosen't exist\n");
+        $content ="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+        $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+        file_put_contents($file, $content);
+        return false;
+    }
+    
+    if(count($arrDomain)!=0){
+        $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+        foreach($arrDomain as $value)
+        {
+            if(isset($value) && $value!=""){
+                //antes de incluir el archivo validamos que el mismo exista
+                //ya que si no existe y lo incluimos esto provocara que asterisk crash
+                //en caso de no existir el archivo se lo inteta crear
+                if(!is_file("/etc/asterisk/organizations/extensions_globals_".$value.".conf")){
+                    if(file_put_contents("/etc/asterisk/organizations/extensions_globals_".$value.".conf","")!==false){
+                        $content .="#include organizations/extensions_globals_".$value.".conf\n";
+                        changeFilePermission("/etc/asterisk/organizations/extensions_globals_".$value.".conf");
+                    }
+                }else
+                    $content .="#include organizations/extensions_globals_".$value.".conf\n";
+            }
+        }
+        $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";  
+    }else{
+        $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+        $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+    }
+    
+    if(file_put_contents($file, $content)!==false){
+        changeFilePermission($file);
+        return true;
+    }else{
+        fprintf(STDERR, "ERR: File $file couldn't be written");
+        return false;
+    } 
+}
+
+function createExtensionDomainFile($domain,$code){
+    $EXITO=false;
+    $fsource="/var/www/elastixdir/asteriskconf/generic_extensions.conf";
+    $extFile="/etc/asterisk/organizations/extensions_$domain.conf";
+    $extAddFile="/etc/asterisk/organizations/extensions_additionals_$domain.conf";
+    $extCusFile="/etc/asterisk/organizations/extensions_custom_$domain.conf";
+    $extGlobalFile="/etc/asterisk/organizations/extensions_globals_$domain.conf";
+    if(is_file($fsource)){
+        if($handler=fopen($fsource,'r')){
+            $content = fread($handler, filesize($fsource));
+            $content = str_replace("{CODE}", "$code", $content);
+            $content = str_replace("{DOMAIN}", "$domain", $content);
+            fclose($handler);
+            
+            if(file_put_contents($extFile, $content)!==false){
+                changeFilePermission($extFile);
+            }else{
+                fprintf(STDERR, "ERR: File $extFile couldn't be written");
+                return false;
+            }  
+            
+            $content="";
+            foreach(array($extAddFile,$extCusFile,$extGlobalFile) as $file){
+                if(is_file($file)===false){
+                    if(file_put_contents($file, $content)!==false){
+                        changeFilePermission($file);
+                    }else{
+                        fprintf(STDERR, "ERR: File $file couldn't be written");
+                        return false;
+                    }    
+                }
+            }
+            $EXITO=true;
+        }else{
+            fprintf(STDERR, "ERR: Couldn't be opened for reading file - %s\n", $fsource);
+        }
+    }else{
+        fprintf(STDERR, "ERR: File extensions_generic.conf doesn't exist, new fiel couldn't be created - %s\n", $output[0]);
+    }
+    return $EXITO;
+}
+
+function createExtensionGlobalsDomainFile($domain,$code){
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    
+    $file="/etc/asterisk/organizations/extensions_globals_$domain.conf";
+    $contenido="";
+            
+    //leemos todas las variables globales de la organizacion desde la tabla globals
+    $query="SELECT variable,value from globals where organization_domain=?";
+    $result=$pDB->fetchTable($query,false,array($domain));
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection elxppbx - %s\n", $pDB->errMsg);
+        return false;
+    }elseif(count($result)!=0){
+        $contenido = "[globals](+)\n"; //no quitar (+), esto permite escribir un mismo contexto en distintos archivos
+        foreach($result as $arrtemp){
+            if($arrtemp[0]!="CREATE_VM")
+                $contenido .=$code."_$arrtemp[0]=$arrtemp[1]\n";
+        }
+    }
+
+    //las globales correspondientes a las truncales de la organizacion
+    $queryTrunk="SELECT * from trunks where organization_domain=?";
+    $trunks=$pDB->fetchTable($queryTrunk,true,array($domain));
+    if($trunks===false){
+        fprintf(STDERR, "ERR: Database connection elxppbx - %s\n", $pDB->errMsg);
+        return false;
+    }elseif(count($trunks)!=0){
+        foreach($trunks as $arrtemp){
+            $trunkid=$arrtemp["trunkid"];
+            $tech=$arrtemp["tech"];
+            $channelId=$arrtemp["channelid"];
+            $outcid=isset($arrtemp["outcid"])?$arrtemp["outcid"]:"";
+            $maxchans=isset($arrtemp["maxchans"])?$arrtemp["maxchans"]:"";
+            $outprefix=isset($arrtemp["dialoutprefix"])?$arrtemp["dialoutprefix"]:"";
+            $outFail=isset($arrtemp["failscript"])?$arrtemp["failscript"]:"";
+            $disabled=isset($arrtemp["disabled"])?$arrtemp["disabled"]:"off";
+            $keepCid=isset($arrtemp["keepcid"])?$arrtemp["keepcid"]:"off";
+            $force=($keepCid=="all")?"1":"";
+
+            $contenido .="OUT_$trunkid = $tech/$channelId\n";
+            $contenido .="OUTCID_$trunkid = $outcid\n";
+            $contenido .="OUTMAXCHANS_$trunkid = $maxchans\n";
+            $contenido .="OUTPREFIX_$trunkid = $outprefix\n";
+            $contenido .="OUTDISABLE_$trunkid = $disabled\n";
+            $contenido .="OUTKEEPCID_$trunkid = $keepCid\n";
+            $contenido .="FORCEDOUTCID_$trunkid = $force\n";
+
+            $qPrefix="SELECT count(trunkid) from trunk_dialpatterns where trunkid=?";
+            $trunkPrefix=$pDB->fetchTable($qPrefix,true,array($trunkid));
+            if(count($trunkPrefix)>0)
+                $contenido .="PREFIX_TRUNK_$trunkid = 1\n";
+            else
+                $contenido .="PREFIX_TRUNK_$trunkid = \n";
+        }
+    }
+    
+    if(file_put_contents($file, $contenido)!==false){
+        changeFilePermission($file);
+        return true;
+    }else{
+        fprintf(STDERR, "ERR: File $file couldn't be written");
+        return false;
+    } 
+}
+
+function generateDialPlan($domain){
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
+    
+    //valido que exista el dominio y obtengo el code asociado a este
+    $queryCode="SELECT code from organization where domain=?";
+    $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, false, array($domain));
+    if($resultc===false){
+        fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDBSQLITE->errMsg);
+        return false;
+    }elseif(count($resultc)==0){
+        fprintf(STDERR, "ERR: Organization dosen't exist\n");
+        return false;
+    }
+    $code=$resultc[0];
+
+    $file="/etc/asterisk/organizations/extensions_additionals_$domain.conf";
+
+    $arrContext=array();
+    $arrFromInt=array();
+    
+    //escribimos el archivos extensions_domain.conf en caso de que esto no haya sido escrito
+    if(createExtensionDomainFile($domain,$code)==false){
+        fprintf(STDERR, "ERR: File extesions_$domain.conf couln't be written.\n");
+        return false;
+    }
+    
+    //escribir las variables globales
+    if(createExtensionGlobalsDomainFile($domain,$code)==false){
+        fprintf(STDERR, "ERR: Globlas variables couldn't be written.\n");
+        return false;
+    }
+    
+    //genero el plan de marcado relacionado con las extension internas
+    $pDevice=new paloDevice($domain,"sip",$pDB);
+    $arrContextExtLocal=$pDevice->createDialPlanLocalExtension($arrFromInt);
+    if($arrContextExtLocal===false || !is_array($arrContextExtLocal))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pDevice->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextExtLocal);
+
+    //genero el plan de marcado de los faxes
+    $arrContextExtFax=$pDevice->createDialPlanFaxExtension($arrFromInt);
+    if($arrContextExtFax===false || !is_array($arrContextExtFax))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pDevice->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextExtFax);
+
+    //genero el plan marcado relacionado con los features codes
+    $pFC=new paloFeatureCodePBX($pDB,$domain);
+    $arrContextFeaturesCode=$pFC->createDialPlanFeaturesCode($arrFromInt);
+    if($arrContextFeaturesCode===false || !is_array($arrContextFeaturesCode))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pFC->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextFeaturesCode);
+        
+    //genero plan de marcado relacionado con los irvs
+
+    //genero plan de marcado relacionado con la ringgroups
+
+    //genero plan de marcado relacionado con las truncales
+
+    //genero plan de marcado relacionado con las colas
+
+    //incluimos los contextos dentro de from-internal-additional
+    $fromInternal=new paloContexto($code,"from-internal-additional");
+    $fromInternal->arrInclude=$arrFromInt;
+    $fromInternal->arrExtensions=array(new paloExtensions("h",new ext_hangup(),"1"));
+    $arrContext[]=$fromInternal;
+
+    $contenido="";
+    
+    foreach($arrContext as $value){
+        if(isset($value)){
+            if(empty($value->errMsg) && is_object($value)){
+                $contenido .=$value->stringContexto($value->arrInclude,$value->arrExtensions);
+            }else{
+                fprintf(STDERR, "ERR: Error written dialplan - %s\n",$value->errMsg);
+            }
+        }
+    }
+       
+    if(file_put_contents($file, $contenido)!==false){
+        changeFilePermission($file);
+        if(reload()==false)
+            fprintf(STDERR, "ERR: Asterisk couldn't be reloaded");
+        return true;
+    }else{
+        fprintf(STDERR, "ERR: File $file couldn't be written");
+        return false;
+    }
+}
+
+function createFeaturesFile(){
+    $file="/etc/asterisk/features.conf";
+    
+    //si no existe el archivo features.conf este se crea
+    if(is_file($file)===false){
+            $contenido = <<<FEATURES_CONFIG
+[general]
+#include features_general.conf
+#include features_general_custom.conf
+
+[featuremap]
+#include features_map.conf
+#include features_map_custom.conf
+
+[applicationmap]
+#include features_applicationmap.conf
+#include features_applicationmap_custom.conf
+FEATURES_CONFIG;
+
+        if(file_put_contents("$file", $contenido)===false){
+            fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+            return false;
+        }else{
+            changeFilePermission($file);
+        }
+    }
+    
+    if(createFeatureMapfile()){
+        if(createFeatureGeneralfile())
+            return createFeatureApplicationMapfile();
+        else
+            return false;
+    }else
+        return false;
+}
+
+function createFeatureMapfile(){
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    
+    $contenido="";
+    $file="/etc/asterisk/features_map.conf";
+    $query="Select name, default_code from features_code_settings where name=? or name=? or name=? or name=? and estado=?";
+    $result=$pDB->fetchTable($query,true,array("blind_transfer","attended_transfer","one_touch_monitor","disconnect_call",'enabled'));
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection globals_settings - %s\n", $pDB->errMsg);
+        return false;
+    }else{
+        foreach($result as $value){
+            switch ($value["name"]) {
+                case "blind_transfer":
+                    $feature="blindxfer";
+                    break;
+                case "attended_transfer":
+                    $feature="atxfer";
+                    break;
+                case "one_touch_monitor":
+                    $feature="automon";
+                    break;
+                case "disconnect_call":
+                    $feature="disconnect";
+                    break;
+            }
+            $contenido .= $feature."=".$value["default_code"]."\n";
+        }
+    }
+    
+    if(file_put_contents("$file", $contenido)===false){
+        fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+        return false;
+    }else{
+        changeFilePermission($file);
+    }
+    
+    $file="/etc/asterisk/features_map_custom.conf";
+    $contenido="";
+    if(is_file($file)===false){
+        if(file_put_contents("$file", $contenido)===false){
+            fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+            return false;
+        }else{
+            changeFilePermission($file);
+        }
+    }
+    
     return true;
 }
+
+//TODO
+//falta ver que se va ha hacer con el asunto de la llamadas parqueadas
+//en caso de existir debe definirse aqui el numero de la estension
+function createFeatureGeneralfile(){
+    $file="/etc/asterisk/features_general.conf";
+    $contenido="";
+    
+    if(file_put_contents("$file", $contenido)===false){
+        fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+        return false;
+    }else{
+        changeFilePermission($file);
+    }
+    
+    $file="/etc/asterisk/features_general_custom.conf";
+    $contenido="";
+    if(is_file($file)===false){
+        if(file_put_contents("$file", $contenido)===false){
+            fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+            return false;
+        }else{
+            changeFilePermission($file);
+        }
+    }
+    return true;
+}
+
+//TODO
+function createFeatureApplicationMapfile(){
+    $file="/etc/asterisk/features_applicationmap.conf";
+    $contenido="";
+    
+    if(file_put_contents("$file", $contenido)===false){
+        fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+        return false;
+    }else{
+        changeFilePermission($file);
+    }
+    
+    $file="/etc/asterisk/features_applicationmap_custom.conf";
+    $contenido="";
+    if(is_file($file)===false){
+        if(file_put_contents("$file", $contenido)===false){
+            fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+            return false;
+        }else{
+            changeFilePermission($file);
+        }
+    }
+    return true;
+}
+
 ?>

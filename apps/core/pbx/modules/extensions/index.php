@@ -197,7 +197,7 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
             $arrTmp[0] = $exten["exten"];
         else
             $arrTmp[0] = "&nbsp;<a href='?menu=extensions&action=view&id_exten=".$exten['id']."'>".$exten["exten"]."</a>";
-        $arrTmp[1] = $exten['tech'];
+        $arrTmp[1] = strtoupper($exten['tech']);
         $arrTmp[2] = $exten['dial'];
         $arrTmp[3] = $exten['context'];
 		$query = "Select username from acl_user where extension=? and id_group in (select g.id from acl_group g join organization o on g.id_organization=o.id where o.domain=?)";
@@ -360,10 +360,10 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 			if($arrExten["technology"]=="iax2"){
 				$tech="iax2";
 				$smarty->assign("isIax",TRUE);
-				$smarty->assign("TECHNOLOGY","Iax2");
+				$smarty->assign("TECHNOLOGY",strtoupper("Iax2"));
 			}elseif($arrExten["technology"]=="sip"){
 				$tech="sip";
-				$smarty->assign("TECHNOLOGY","Sip");
+				$smarty->assign("TECHNOLOGY",strtoupper("Sip"));
 			}else
 				$tech=null;
 
@@ -744,11 +744,15 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 			$arrPropT=array_merge(propersParamByTech($type),$arrProp);
 			$pDevice=new paloDevice($domain,$type,$pDB);
 			$pDB->beginTransaction();
-			$exito=$pDevice->editDevice($arrPropT,$type);
-			if($exito)
+			$exito=$pDevice->editDevice($arrPropT);
+			if($exito){
 				$pDB->commit();
-			else
+				//recargamos la configuracion en realtime para que tomen efecto los cambios hechos en el dispositivo
+                $pDevice->tecnologia->prunePeer($arrExten["device"],$type);
+                $pDevice->tecnologia->loadPeer($arrExten["device"],$type);
+			}else{
 				$pDB->rollBack();
+            }
 			$error .=$pDevice->errMsg;
 		}
 	}
@@ -902,10 +906,12 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 		else{
 			$pDevice=new paloDevice($domain,$arrExten["technology"],$pDB);
 			$pDB->beginTransaction();
-			$exito=$pDevice->deleteExtension($arrExten["exten"],$arrExten["technology"]);
-			if($exito)
+			$exito=$pDevice->deleteExtension($arrExten["exten"]);
+			if($exito){
 				$pDB->commit();
-			else
+				//recargamos la configuracion en realtime para que tomen efecto los cambios hechos en el dispositivo
+                $pDevice->tecnologia->prunePeer($arrExten["device"],$arrExten["technology"]);
+			}else
 				$pDB->rollBack();
 		}
 	}
@@ -926,8 +932,8 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 
 function createFieldForm($arrOrgz,$tech=null)
 {
-    $arrTech=array("sip"=>"Sip","iax2"=>"Iax2");
-    $arrRings=array(0=>_tr("Default"),1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120);
+    $arrTech=array("sip"=>strtoupper("Sip"),"iax2"=>strtoupper("Iax2"));
+    $arrRings=array(""=>_tr("Default"),1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120);
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
 	$arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrWait=array("no"=>_tr("Disabled"),"yes"=>_tr("Enabled"));
@@ -1006,26 +1012,26 @@ function createFieldForm($arrOrgz,$tech=null)
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                                                   "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                             "vmsaycid"   => array("LABEL"               => _tr("Play CID"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                             "vmenvelope"   => array("LABEL"            => _tr("Play Envelope"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                             "vmdelete"   => array("LABEL"               => _tr("Delete Voicemail"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                             "vmoptions"   => array("LABEL"               => _tr("Voicemail Options"),
                                                     "REQUIRED"               => "no",
 													"INPUT_TYPE"             => "TEXTAREA",
@@ -1143,18 +1149,6 @@ function createSipForm(){
 												"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
-							"deny"     => array("LABEL"                   => _tr("deny"),
-													"REQUIRED"               => "yes",
-													"INPUT_TYPE"             => "TEXT",
-													"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
-							"permit"   => array( "LABEL"                  => _tr("permit"),
-													"REQUIRED"               => "no",
-													"INPUT_TYPE"             => "TEXT",
-													"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-													"VALIDATION_TYPE"        => "email",
-													"VALIDATION_EXTRA_PARAM" => ""),
 							"nat"  => array("LABEL"                  => _tr("nat"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "SELECT",
@@ -1171,8 +1165,8 @@ function createSipForm(){
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNo,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
 							"callgroup"   => array( "LABEL"                  => _tr("callgroup"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "TEXT",
@@ -1213,8 +1207,8 @@ function createSipForm(){
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNo,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
 							"directmedia"   => array( "LABEL"              => _tr("directmedia"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
@@ -1261,14 +1255,14 @@ function createSipForm(){
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNod,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
 							"videosupport"   => array( "LABEL"              => _tr("videosupport"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNod,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
 							"maxcallbitrate" => array("LABEL"             => _tr("maxcallbitrate"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "TEXT",
@@ -1378,18 +1372,6 @@ function createIaxForm(){
 												"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
-							"deny"     => array("LABEL"                   => _tr("deny"),
-													"REQUIRED"               => "yes",
-													"INPUT_TYPE"             => "TEXT",
-													"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
-							"permit"   => array( "LABEL"                  => _tr("permit"),
-													"REQUIRED"               => "no",
-													"INPUT_TYPE"             => "TEXT",
-													"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
 							"requierecalltoken" => array("LABEL"             => _tr("requierecalltoken"),
 													"REQUIRED"               => "yes",
 													"INPUT_TYPE"             => "SELECT",
@@ -1436,8 +1418,8 @@ function createIaxForm(){
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNod,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
 							"adsi" => array("LABEL"             => _tr("adsi"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
@@ -1460,14 +1442,14 @@ function createIaxForm(){
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNod,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
 							"forcejitterbuffer" => array("LABEL"             => _tr("forcejitterbuffer"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNod,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
                             "codecpriority" => array("LABEL"             => _tr("codecpriority"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
@@ -1478,8 +1460,8 @@ function createIaxForm(){
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrYesNod,
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+													"VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
 							"qualifyfreqok" => array("LABEL"             => _tr("qualifyfreqok"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "TEXT",

@@ -137,7 +137,6 @@
         <td>{$dnd_act_stat}</td>
         <td nowrap>{$dnd_desact.LABEL}: </td>
         <td>{$dnd_desact.INPUT}</td>
-        <td>{$dnd_desact_chk}</td>
         <td>{$dnd_desact_stat}</td>
     </tr>
     <tr class="feature">

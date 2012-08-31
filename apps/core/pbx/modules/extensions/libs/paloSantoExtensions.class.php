@@ -185,8 +185,11 @@ class paloSantoExtensions{
 								break;
 							default:
 								if(isset($value)){
-									if($key!="uniqueid" && $key!="organization_domain" && $key!="stamp"){
+									if($key!="uniqueid" && $key!="organization_domain" && $key!="stamp" && $key!="dialout" && $key!="callback"){
 										$option .="$key=$value|";
+									}
+									if($key=="dialout" || $key=="callback" || $key=="exitcontext"){
+                                        $option .="$key=".substr($arrExten["vmcontext"],16)."|";
 									}
 								}
 						}
@@ -221,7 +224,8 @@ class paloSantoExtensions{
 			}
 
 			$arrExtension["domain"]=$result["organization_domain"];
-
+            $arrExtension["device"]=$result["device"];
+			
 			$pORGZ = new paloSantoOrganization($arrConf['elastix_dsn']['elastix']);
 			$orgTmp=$pORGZ->getOrganizationByDomain_Name($result["organization_domain"]);
 			if($orgTmp!=false){
@@ -256,20 +260,10 @@ class paloSantoExtensions{
 			$arrExtension["vmsaycid"]=isset($resultV["saycid"])?$resultV["saycid"]:null;
 			$arrExtension["vmenvelope"]=isset($resultV["envelope"])?$resultV["envelope"]:null;
 		}
-		if($tech=="sip")
-			$tech ="sip_general";
-		elseif($tech=="iax2")
-			$tech ="iax_general";
-		$queryT="SELECT record_in,record_out,rt,callwaiting from $tech where organization_domain=?";
-		$resultT=$this->_DB->getFirstRowQuery($queryT,true,array($domain));
-		if($resultT==false){
-			$this->errMsg .=_tr("Error getting technology default settings").$this->_DB->errMsg;
-		}else{
-			$arrExtension["record_in"]=isset($resultT["record_in"])?$resultT["record_in"]:null;
-			$arrExtension["record_out"]=isset($resultT["record_out"])?$resultT["record_out"]:null;
-			$arrExtension["ring_timer"]=isset($resultT["ring_timer"])?$resultT["rt"]:null;
-			$arrExtension["call_waiting"]=isset($resultT["callwaiting"])?$resultT["callwaiting"]:null;
-		}
+		$pGPBX = new paloGlobalsPBX($this->_DB,$domain);
+		$arrExtension["ring_timer"]=$pGPBX->getGlobalVar("RINGTIMER");
+        $arrExtension["language"]=$pGPBX->getGlobalVar("LANGUAGE");
+		
 		return $arrExtension;
 	}
 	

@@ -60,8 +60,10 @@ function radio(id_radio){
     //div de las tabs
     var d_label=$("#"+id_radio).parent();
     $(".neo-table-header-row-filter").css("background","none");
+    $(".neo-table-header-row-filter").css("color","BLACK");
     d_label.css("background","-moz-linear-gradient(center top , #777777, #999999)");
     d_label.css("background","-webkit-gradient(linear,0% 40%,0% 70%,from(#777),to(#999))");
     d_label.css("background","linear-gradient(center top , #777777, #999999)");
     d_label.css("border-color"," #888888"); 
+    d_label.css("color"," #FFFFFF"); 
 }

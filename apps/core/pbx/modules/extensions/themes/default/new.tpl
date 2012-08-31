@@ -141,12 +141,6 @@
                     <td nowrap>{$requierecalltoken.LABEL}:</td>
                     <td>{$requierecalltoken.INPUT}</td>
                 </tr>
-                <tr class="iax_settings">
-                    <td width="15%" nowrap>{$deny.LABEL}:</td>
-                    <td width="31%">{$deny.INPUT}</td>
-                    <td width="21%" nowrap>{$permit.LABEL}:</td>
-                    <td>{$permit.INPUT}</td>
-                </tr>
                 {if $mode eq 'edit'}
                 <tr>
                     <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
@@ -246,12 +240,6 @@
                     <td>{$callgroup.INPUT}</td>
                     <td nowrap>{$pickupgroup.LABEL}: </td>
                     <td>{$pickupgroup.INPUT}</td>
-                </tr>
-                <tr class="sip_settings">
-                    <td nowrap>{$deny.LABEL}: </td>
-                    <td>{$deny.INPUT}</td>
-                    <td nowrap>{$permit.LABEL}: </td>
-                    <td>{$permit.INPUT}</td>
                 </tr>
                 <tr class="sip_settings">
                     <td nowrap>{$mailbox.LABEL}: </td>

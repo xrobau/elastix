@@ -37,11 +37,11 @@
 */
 global $arrConf;
 
-include_once $arrConf['basePath']."/libs/paloSantoACL.class.php";
-include_once $arrConf['basePath']."/libs/paloSantoConfig.class.php";
-include_once $arrConf['basePath']."/libs/paloSantoAsteriskConfig.class.php";
-include_once $arrConf['basePath']."/libs/extensions.class.php";
-include_once $arrConf['basePath']."/libs/misc.lib.php";
+include_once "/var/www/html/libs/paloSantoACL.class.php";
+include_once "/var/www/html/libs/paloSantoConfig.class.php";
+include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
+include_once "/var/www/html/libs/extensions.class.php";
+include_once "/var/www/html/libs/misc.lib.php";
 
 
 class paloGlobalsPBX extends paloAsteriskDB{
@@ -95,7 +95,7 @@ class paloGlobalsPBX extends paloAsteriskDB{
             foreach($content as $value){
                 if(preg_match("/^\[[a-z]{2}\]$/",$value)){
                     $str=str_replace(array("[","]"),"",$value);
-                    $arrTz[$str]=$str;
+                    $arrTz[trim($str)]=$str;
                 }
             }
         }
@@ -148,7 +148,6 @@ class paloGlobalsPBX extends paloAsteriskDB{
         //acabamos de crear la organizacion y llenamos con los valores
         //default de las globales
         $arrProp=$this->getAllGlobalSettings();
-        //print_r($arrProp);
         if($arrProp===false){
             return false;
         }else{
@@ -190,7 +189,44 @@ class paloGlobalsPBX extends paloAsteriskDB{
     }
     
     function updateGlobalsDB($arrProp){
+        if($this->validateGlobalsPBX()==false)
+            return false;
+            
+        $query="UPDATE globals SET value=? WHERE variable=? and organization_domain=?";
         
+        if($arrProp===false){
+            $this->errMsg=_tr("Invalid general properties. ");
+            return false;
+        }else{
+            foreach($arrProp as $name => $property){
+                switch($name){
+                    case "MIXMON_DIR":
+                        $value=(empty($property))?"":$property.$this->domain."/";
+                        break;
+                    case "VMX_CONTEXT":
+                        $value=(empty($property))?"":$this->code."-".$property;
+                        break;
+                    case "VMX_TIMEDEST_CONTEXT":
+                        $value=(empty($property))?"":$this->code."-".$property;
+                        break;
+                    case "VMX_LOOPDEST_CONTEXT":
+                        $value=(empty($property))?"":$this->code."-".$property;
+                        break;
+                    case "TRANSFER_CONTEXT":
+                        $value=(empty($property))?"":$this->code."-".$property;
+                        break;
+                    default:
+                        $value=isset($property)?$property:"";
+                        break;
+                }
+                $update=$this->_DB->genQuery($query,array($value,$name,$this->domain));
+                if($update==false){
+                    $this->errMsg=_tr("Problem setting globals variables").$this->_DB->errMsg;
+                    break;
+                }
+            }
+            return $update;
+        }
     }
     
     function getGlobalVar($variable){
@@ -200,7 +236,7 @@ class paloGlobalsPBX extends paloAsteriskDB{
             $this->errMsg=$this->_DB->errMsg;
             return false;
         }else
-            return $result;
+            return $result[0];
     }
     
     function getGlobalVarSettings($variable){
@@ -219,7 +255,8 @@ class paloGlobalsPBX extends paloAsteriskDB{
     */
     function getAllGlobals(){
         $query="SELECT variable,value from globals where organization_domain=?";
-        $result=$this->_DB->fetchTable($query,true,$this->domain);
+        
+        $result=$this->_DB->fetchTable($query,true,array($this->domain));
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;
             return false;
@@ -240,6 +277,74 @@ class paloGlobalsPBX extends paloAsteriskDB{
             return false;
         }else
             return $result;
+    }
+    
+    function getGeneralSettings(){
+        if($this->validateGlobalsPBX()==false)
+            return false;
+            
+        $arrSettings=array();
+        $psip=new paloSip($this->_DB);
+        $piax=new paloIax($this->_DB);
+        $pvm=new paloVoicemail($this->_DB);
+        $arrGlobals=$this->getAllGlobals();
+        
+        if(is_array($arrGlobals)){
+            foreach($arrGlobals as $global){
+                if(isset($global["value"])){
+                    if($global["variable"]=="VMX_CONTEXT" || $global["variable"]=="VMX_TIMEDEST_CONTEXT" || $global["variable"]=="VMX_LOOPDEST_CONTEXT")
+                        $arrSettings[$global["variable"]]=substr($global["value"],16);
+                    else
+                        $arrSettings[$global["variable"]]=$global["value"];
+                }
+            }
+        }else{
+            $this->errMsg=_tr("Error getting globals variables. ").$this->errMsg;
+            return false;
+        }
+        
+        foreach(array("sip","iax","vm") as $tech){
+            $arrValue = ${"p".$tech}->getDefaultSettings($this->domain);
+            if(is_array($arrValue)){
+                foreach($arrValue as $key => $value){
+                    if(isset($value))
+                        $arrSettings[$tech."_".$key]=$value;
+                }
+            }else{
+                $this->errMsg=_tr("Error getting ").$value._tr(" settings ").${"p".$tech}->errMsg;
+                return false;
+            }
+        }
+        return $arrSettings;
+    }
+    
+    function setGeneralSettings($arrProp){
+        if($this->validateGlobalsPBX()==false)
+            return false;
+            
+        $psip=new paloSip($this->_DB);
+        $piax=new paloIax($this->_DB);
+        $pvm=new paloVoicemail($this->_DB);
+        
+        $result=$this->updateGlobalsDB($arrProp["gen"]);
+        if($result==false){
+            return false;
+        }else{
+            foreach(array("sip","iax","vm") as $tech){
+                if(is_array($arrProp[$tech])){
+                    $arrProp[$tech]["organization_domain"]=$this->domain;
+                    $result = ${"p".$tech}->updateDefaultSettings($arrProp[$tech]);
+                    if($result==false){
+                        $this->errMsg=${"p".$tech}->errMsg;
+                        return false;
+                    }
+                }else{
+                    $this->errMsg=_tr("Error getting ").$value._tr(" settings ").${"p".$tech}->errMsg;
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 ?>

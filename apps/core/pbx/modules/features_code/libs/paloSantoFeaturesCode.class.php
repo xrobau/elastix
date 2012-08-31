@@ -29,11 +29,11 @@
 
 global $arrConf;
 
-include_once $arrConf['basePath']."/libs/paloSantoACL.class.php";
-include_once $arrConf['basePath']."/libs/paloSantoConfig.class.php";
-include_once $arrConf['basePath']."/libs/paloSantoAsteriskConfig.class.php";
-include_once $arrConf['basePath']."/libs/extensions.class.php";
-include_once $arrConf['basePath']."/libs/misc.lib.php";
+include_once "/var/www/html/libs/paloSantoACL.class.php";
+include_once "/var/www/html/libs/paloSantoConfig.class.php";
+include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
+include_once "/var/www/html/libs/extensions.class.php";
+include_once "/var/www/html/libs/misc.lib.php";
 
 class paloFeatureCode {
 	public $code;
@@ -333,7 +333,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoBLAdd->arrExtensions=$arrBLadd;
 		}
 
-		$arrBLaddIn[]=new paloExtensions("s",new ext_set("NumLoops",'$[${NumLoops} + 1]'));
+		$arrBLaddIn[]=new paloExtensions("s",new ext_set("NumLoops",'$[${NumLoops} + 1]'),1);
 		$arrBLaddIn[]=new paloExtensions("s",new ext_playback("pm-invalid-option"));
 		$arrBLaddIn[]=new paloExtensions("s",new ext_gotoIf('$[${NumLoops} < 3]',$this->code.'-app-blacklist-add,s,start'));
 		$arrBLaddIn[]=new paloExtensions("s",new ext_playback("goodbye"));
@@ -776,7 +776,8 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 		}
 
 		$arrContexts=array($contextoCF);
-
+		
+        $arrCFhint=array();
 		$result=$this->getAllDevice($this->domain);
 		if(is_array($result)){
 			foreach($result as $value){
@@ -1042,6 +1043,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 		$arrContexts=array($contextoDND);
 
 		$result=$this->getAllDevice($this->domain);
+		$arrhint=array();
 		if(is_array($result)){
 			foreach($result as $value){
 				$arrhint[]=new paloExtensions($fcode.$value["exten"], new ext_goto("1",$fcode,$this->code."-app-dnd-toggle"));
@@ -1622,128 +1624,15 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 	
 	//crea el archivo feature.conf
 	function createFeatureFile(){
-        global $arrConf;
-        
-        if($this->createFeatureMapfile()){
-            if($this->createFeatureGeneralfile())
-                return $this->createFeatureApplicationMapfile();
-            else
-                return false;
-        }else
-            return false;
+        $sComando = '/usr/bin/elastix-helper asteriskconfig createFeaturesFile 2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = implode('', $output);
+            return FALSE;
+        }
+        return TRUE;
 	}
 	
-	private function createFeatureMapfile(){
-        $contenido="";
-        $file="features_map.conf";
-        $query="Select name, default_code from features_code_settings where name=blind_transfer or name=attended_transfer
-        or name=one_touch_monitor or name=disconnect_call where estado='enabled'";
-        $result=$this->_DB->fetchTable($query,true);
-        if($result==false){
-            $this->errMsg=$this->_DB->errMsg;
-        }else{
-            $contenido .= $result["name"]."=".$result["deafult_code"]."\n";
-        }
-        
-        if(file_put_contents("/etc/asterisk/$file", $contenido)===false){
-            $this->errMsg=_tr("File")." /etc/asterisk/$file "._tr("couldn't be written");
-            return false;
-        }
-        /*$sComando = '/usr/bin/elastix-helper asteriskconfig create_file '."$file $contenido".'  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return false;
-        }*/
-        
-        $file=$file."_custom.conf";
-        $contenido="";
-        if(is_file($file)===false){
-           /* $sComando = '/usr/bin/elastix-helper asteriskconfig create_file '."$file $contenido".'  2>&1';
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0) {
-                $this->errMsg = implode('', $output);
-                return false;
-            }*/
-            if(file_put_contents("/etc/asterisk/$file", $contenido)===false){
-                $this->errMsg=_tr("File")." /etc/asterisk/$file "._tr("couldn't be written");
-                return false;
-            }
-        }
-        return true;
-	}
-	
-	//pendiente de revisar
-	//falta ver que se va ha hacer con el asunto de la llamadas parqueadas
-	//en caso de existir debe definirse aqui el numero de la estension
-	private function createFeatureGeneralfile(){
-        $file="features_general.conf";
-        $contenido="";
-        //false llenar contenido del archivo
-        /*$sComando = '/usr/bin/elastix-helper asteriskconfig create_file '."$file $contenido".'  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return false;
-        }*/
-        if(file_put_contents("/etc/asterisk/$file", $contenido)===false){
-            $this->errMsg=_tr("File")." /etc/asterisk/$file "._tr("couldn't be written");
-            return false;
-        }
-        
-        $file=$file."_custom.conf";
-        $contenido="";
-        if(is_file($file)===false){
-            /*$sComando = '/usr/bin/elastix-helper asteriskconfig create_file '."$file $contenido".'  2>&1';
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0) {
-                $this->errMsg = implode('', $output);
-                return false;
-            }*/
-            if(file_put_contents("/etc/asterisk/$file", $contenido)===false){
-                $this->errMsg=_tr("File")." /etc/asterisk/$file "._tr("couldn't be written");
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    private function createFeatureApplicationMapfile(){
-        $file="features_aplicationmap.conf";
-        $contenido="";
-        /*
-        $sComando = '/usr/bin/elastix-helper asteriskconfig create_file '."$file $contenido".'  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return false;
-        }*/
-         if(file_put_contents("/etc/asterisk/$file", $contenido)===false){
-            $this->errMsg=_tr("File")." /etc/asterisk/$file "._tr("couldn't be written");
-            return false;
-        }
-        
-        $file=$file."_custom.conf";
-        $contenido="";
-        if(is_file($file)===false){
-           /* $sComando = '/usr/bin/elastix-helper asteriskconfig create_file '."$file $contenido".'  2>&1';
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0) {
-                $this->errMsg = implode('', $output);
-                return false;
-            }*/
-            if(file_put_contents("/etc/asterisk/$file", $contenido)===false){
-                $this->errMsg=_tr("File")." /etc/asterisk/$file "._tr("couldn't be written");
-                return false;
-            }
-        }
-        return true;
-    }
 }
 ?>

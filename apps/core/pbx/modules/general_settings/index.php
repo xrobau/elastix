@@ -37,7 +37,7 @@ function _moduleContent(&$smarty, $module_name)
 	include_once "libs/paloSantoOrganization.class.php";
     include_once("libs/paloSantoACL.class.php");
     include_once "modules/$module_name/configs/default.conf.php";
-	include_once "modules/$module_name/libs/paloSantoFeaturesCode.class.php";
+	include_once "modules/$module_name/libs/paloSantoGlobalsPBX.class.php";
 
     //include file language agree to elastix configuration
     //if file language not exists, then include language by default (en)
@@ -67,6 +67,10 @@ function _moduleContent(&$smarty, $module_name)
 	$userAccount=$arrCredentiasls["userAccount"];
 	$idOrganization=$arrCredentiasls["id_organization"];
 
+	if($userLevel1!="admin"){
+        header("Location: index.php?menu=system");
+    }
+    
 	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 
 	$action = getAction();
@@ -116,20 +120,22 @@ function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccou
 	return $msgs;
 }
 
-function viewGeneralSetting($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, $action=""){
+function viewGeneralSetting($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
     $error = "";
     //conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pDB2);
     $pORGZ = new paloSantoOrganization($pDB2);
-    
-    $arrForm = createFieldForm();
-    if($userLevel1=="superadmin"){
+
+    if($userLevel1!="admin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to view this module. ")._tr($pORGZ->errMsg));
+        $arrForm = array();
         $resultO=false;
         $oForm = new paloForm($smarty,$arrForm);
+        $arrSettings = array();
     }else{
         $resultO=$pORGZ->getOrganizationById($idOrganization);
-        $oForm = new paloForm($smarty,$arrForm);
     }
     
     if($resultO==FALSE){
@@ -137,51 +143,22 @@ function viewGeneralSetting($smarty, $module_name, $local_templates_dir, &$pDB, 
         $smarty->assign("mb_message",_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg));
     }else{
         $domain=$resultO["domain"];
-        $pFC = new paloFeatureCodePBX($pDB,$domain);
-        $arrFC = $pFC->getAllFeaturesCode($domain);
-        if($arrFC===false){
+        $pGPBX = new paloGlobalsPBX($pDB,$domain);
+        $arrTone = $pGPBX->getToneZonePBX();
+        $arrForm = createFieldForm($arrTone);
+        $oForm = new paloForm($smarty,$arrForm);
+        $arrSettings = $pGPBX->getGeneralSettings();
+        if($arrSettings==false){
             $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message",_tr($pFC->errMsg));
+            $smarty->assign("mb_message",_tr("Error getting default settings. ")._tr($pGPBX->errMsg));
         }else{
-            foreach($arrFC as $feature){
-                $checked="";
-                $disabled=$disabled_sel="disabled";
-                $name=$feature["name"];
-                
-                if($action=="edit"){
-                    $data[$name]=$_POST[$name];
-                    if(isset($_POST[$name."_stat"]))
-                        $estado=$_POST[$name."_stat"];
-                    if(isset($_POST[$name."_chk"]))
-                        if($_POST[$name."_chk"]=="on")
-                            $checked="checked";  
-                }else{
-                    if(!is_null($feature["code"]) && $feature["code"]!=""){
-                        $code=$feature["code"];
-                    }else{
-                        $code=$feature["default_code"];
-                        $checked="checked";
-                    }
-                        
-                    if($feature["estado"]=="enabled")
-                        $estado="enabled";
-                    else
-                        $estado="disabled";
-                    
-                    $data[$feature["name"]]=$code;
-                }
-                if($name!="pickup" && $name!="blind_transfer" && $name!="attended_transfer" && $name!="one_touch_monitor" 
-                && $name!="disconnect_call"){
-                    if(getParameter("edit") || $action=="edit"){
-                        $disabled_sel=$disabled="";
-                    }
-                    $checkbox="<input type='checkbox' $disabled class='check' name=".$feature["name"]."_chk $checked onclick='fc_use_deafault();' >";
-                    $smarty->assign($feature["name"]."_chk",$checkbox);
-                    $smarty->assign($feature["name"]."_stat",crearSelect($feature["name"],$estado,$disabled_sel));
-                }
+            if(getParameter("save_edit")){
+                $arrSettings=$_POST;
             }
         }
     }
+    
+	$oForm->setEditMode();
 	
 	$smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("CANCEL", _tr("Cancel"));
@@ -189,25 +166,28 @@ function viewGeneralSetting($smarty, $module_name, $local_templates_dir, &$pDB, 
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("EDIT", _tr("Edit"));
     $smarty->assign("DELETE",_tr("Delete"));
-    $smarty->assign("BLACKLIST",_tr("BLACKLIST"));
-    $smarty->assign("CALLFORWARD",_tr("CALLFORWARD"));
-    $smarty->assign("CALLWAITING",_tr("CALLWAITING"));
-    $smarty->assign("CORE",_tr("CORE"));
-    $smarty->assign("DICTATION",_tr("DICTATION"));
-    $smarty->assign("DND",_tr("DND"));
-    $smarty->assign("INFO",_tr("INFO"));
-    $smarty->assign("RECORDING",_tr("RECORDING"));
-    $smarty->assign("SPEEDDIAL",_tr("SPEEDDIAL"));
-    $smarty->assign("VOICEMAIL",_tr("VOICEMAIL"));
-    $smarty->assign("FOLLOWME",_tr("FOLLOWME"));
-    $smarty->assign("QUEUE",_tr("QUEUE"));
+    $smarty->assign("GENERAL",_tr("General Settings"));
+    $smarty->assign("SIP_GENERAL",_tr("Sip Settings"));
+    $smarty->assign("IAX_GENERAL",_tr("Iax Settings"));
+    $smarty->assign("VM_GENERAL",_tr("Voicemail Settings"));
+    $smarty->assign("DIAL_OPTS",_tr("Dial Options"));
+    $smarty->assign("CALL_RECORDING",_tr("Call Recording"));
+    $smarty->assign("LOCATIONS",_tr("Locations"));
+    $smarty->assign("DIRECTORY_OPTS",_tr("Directory Options"));
+    $smarty->assign("EXT_OPTS",_tr("Create User Options"));
+    $smarty->assign("QUALIFY",_tr("Qualify Seetings"));
+    $smarty->assign("CODEC",_tr("Codec Selections"));
+    $smarty->assign("RTP_TIMERS",_tr("RTP Timers"));
+    $smarty->assign("VIDEO_OPTS",_tr("Video Support"));
+    $smarty->assign("MOH",_tr("Music on Hold"));
+    $smarty->assign("JITTER",_tr("Jitter Buffer Settings"));
+    $smarty->assign("GENERAL_VM",_tr("Voicemail Gneral Settings"));
+    $smarty->assign("VMX_OPTS",_tr("Voicemail VMX Locator"));
+    $smarty->assign("OTHER",_tr("Advande Settings"));
+    $smarty->assign("CONTEXT",_tr("context"));
     $smarty->assign("userLevel",$userLevel1);
-    if(getParameter("edit") || $action=="edit"){
-        $oForm->setEditMode();
-    }else{
-        $oForm->setViewMode();
-    }
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("General Settings"), $data);
+    
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("General Settings"), $arrSettings);
     $mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $idOrganization);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$mensaje.$htmlForm."</form>";
     return $content;
@@ -221,151 +201,181 @@ function applyChanges($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     $pACL = new paloACL($pDB2);
     $pORGZ = new paloSantoOrganization($pDB2);
     
-    $resultO=$pORGZ->getOrganizationById($idOrganization);
-    
-    $arrForm = createFieldForm();
-    $oForm = new paloForm($smarty,$arrForm);
-    
     if($userLevel1!="admin"){
         $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        $smarty->assign("mb_message",_tr("You are not authorized to view this module. ")._tr($pORGZ->errMsg));
+        return viewGeneralSetting($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }else{
-        if($resultO==false){
-            $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message",_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg));
+        $resultO=$pORGZ->getOrganizationById($idOrganization);
+    }
+
+    if($resultO==false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg));
+    }else{
+        $domain=$resultO["domain"];
+        $pGPBX = new paloGlobalsPBX($pDB,$domain);
+        $arrTone = $pGPBX->getToneZonePBX();
+        $arrForm = createFieldForm($arrTone);
+        $oForm = new paloForm($smarty,$arrForm);
+        
+        if(!$oForm->validateForm($_POST)){
+            // Validation basic, not empty and VALIDATION_TYPE
+            $smarty->assign("mb_title", _tr("Validation Error"));
+            $arrErrores = $oForm->arrErroresValidacion;
+            $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
+            if(is_array($arrErrores) && count($arrErrores) > 0){
+                foreach($arrErrores as $k=>$v)
+                    $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
+            }
+            $smarty->assign("mb_message", $strErrorMsg);
         }else{
-            if(!$oForm->validateForm($_POST)){
-                // Validation basic, not empty and VALIDATION_TYPE
-                $smarty->assign("mb_title", _tr("Validation Error"));
-                $arrErrores = $oForm->arrErroresValidacion;
-                $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
-                if(is_array($arrErrores) && count($arrErrores) > 0){
-                    foreach($arrErrores as $k=>$v)
-                        $strErrorMsg .= "$k, ";
-                }
-                $smarty->assign("mb_message", $strErrorMsg);
-                $action="edit";
+            $arrProp=getParameterGeneralSettings();
+            $pDB->beginTransaction();
+            $exito=$pGPBX->setGeneralSettings($arrProp);
+            if($exito===true){
+                $pDB->commit();
+                $smarty->assign("mb_title", _tr("MESSAGE"));
+                $smarty->assign("mb_message",_tr("Changes applied successfully. "));
+                //mostramos el mensaje para crear los archivos de ocnfiguracion
+                $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+                $pAstConf->setReloadDialplan($domain,true);
             }else{
-                $domain=$resultO["domain"];
-                $pFC = new paloFeatureCodePBX($pDB,$domain);
-                $arrFC = $pFC->getAllFeaturesCode($domain);
-                if($arrFC===false){
-                    $smarty->assign("mb_title", _tr("ERROR"));
-                    $smarty->assign("mb_message",_tr($pFC->errMsg));
-                }else{
-                    $arrData=array();
-                    //obtengo las entradas
-                    foreach($arrFC as $feature){
-                        $code=null;
-                        $name=$feature["name"];
-                        if($name!="pickup" && $name!="blind_transfer" && $name!="attended_transfer" && $name!="one_touch_monitor" 
-                        && $name!="disconnect_call"){
-                            $estado=getParameter($name."_stat"); //si esta o no habilitado el feature
-                            $use_default=getParameter($name."_chk");
-                            if($use_default!="on")
-                                $code=getParameter($name); //el code altenativo en caso de que no se quiera usar el de po default
-                        }else{
-                            $estado=$feature["estado"]; //si esta o no habilitado el feature
-                        }
-                        $arrData[]=array("name"=>$name,"default_code"=>$feature["default_code"],"code"=>$code,"estado"=>$estado);
-                    }
-                    $pDB->beginTransaction();
-                    $exito=$pFC->editPaloFeatureDB($arrData);
-                    if($exito===true){
-                        $pDB->commit();
-                        $smarty->assign("mb_title", _tr("MESSAGE"));
-                        $smarty->assign("mb_message",_tr("Changes applied successfully. "));
-                        //mostramos el mensaje para crear los archivos de ocnfiguracion
-                        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-                        $pAstConf->setReloadDialplan($domain,true);
-                    }else{
-                        $pDB->rollBack();
-                        $smarty->assign("mb_title", _tr("ERROR"));
-                        $smarty->assign("mb_message",_tr("Changes couldn't be applied. ").$pFC->errMsg);
-                        $action="edit";
-                    }
-                }
+                $pDB->rollBack();
+                $smarty->assign("mb_title", _tr("ERROR"));
+                $smarty->assign("mb_message",_tr("Changes couldn't be applied. ").$pGPBX->errMsg);
             }
         }
     }
+        
     $smarty->assign("userLevel",$userLevel1);
-    return viewGeneralSetting($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, $action);
+    return viewGeneralSetting($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 }
 
-function crearSelect($name,$option,$disabled){
-    $opt1 = $opt2 = "";
-    if($option=="enabled")
-        $opt1="selected";
-    else    
-        $opt2="selected";
-    $select="<select $disabled name='".$name."_stat' class='select'>";
-    $select .="<option $opt1 value='enabled'>Enabled</option>";
-    $select .="<option $opt2 value='disabled'>Disabled</option>";
-    $select .="</select>";
-    return $select; 
-}
-
-function get_default_code($smarty, $module_name, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
-    $jsonObject = new PaloSantoJSON();
-    $feature=getParameter("fc_name");
-    //conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pORGZ = new paloSantoOrganization($pDB2);
-    $resultO=$pORGZ->getOrganizationById($idOrganization);
-    if($resultO==FALSE){
-        $jsonObject->set_error(_tr(_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg)));
-    }else{
-        $pFC = new paloFeatureCodePBX($pDB,$resultO["domain"]);
-        $arrFC = $pFC->getFeaturesCode($resultO["domain"],$feature);
-        if($arrFC==FALSE){
-            $jsonObject->set_error(_tr(_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg)));
-        }else{
-            $arrData=$arrFC["default_code"];
-            $jsonObject->set_message($arrData);
+function getParameterGeneralSettings(){
+    //general settings
+        $arrPropGen["DIAL_OPTIONS"]=getParameter("DIAL_OPTIONS");
+        $arrPropGen["TRUNK_OPTIONS"]=getParameter("TRUNK_OPTIONS");
+        $arrPropGen["RECORDING_STATE"]=getParameter("RECORDING_STATE");
+        $arrPropGen["RINGTIMER"]=getParameter("RINGTIMER");
+        if(isset($arrPropGen["RINGTIMER"])){
+            if($arrPropGen["RINGTIMER"]==0)
+                $arrPropGen["RINGTIMER"]=="";
         }
-    }
-    return $jsonObject->createJSON();
-}
-
-function createFieldFilter($arrOrgz)
-{
-    $arrFields = array(
-		"organization"  => array("LABEL"                  => _tr("Organization"),
-				      "REQUIRED"               => "no",
-				      "INPUT_TYPE"             => "SELECT",
-				      "INPUT_EXTRA_PARAM"      => $arrOrgz,
-				      "VALIDATION_TYPE"        => "domain",
-				      "VALIDATION_EXTRA_PARAM" => "",
-				      "ONCHANGE"	       => "javascript:submit();"),
-		);
-    return $arrFields;
+        $arrPropGen["TONEZONE"]=getParameter("TONEZONE");
+        $arrPropGen["LANGUAGE"]=getParameter("LANGUAGE");
+        $arrPropGen["DIRECTORY"]=getParameter("DIRECTORY");
+        $arrPropGen["DIRECTORY_OPT_EXT"]=getParameter("DIRECTORY_OPT_EXT");
+        $arrPropGen["CREATE_VM"]=getParameter("CREATE_VM");
+        $arrPropGen["VM_PREFIX"]=getParameter("VM_PREFIX");
+        $arrPropGen["VM_DDTYPE"]=getParameter("VM_DDTYPE");
+        $arrPropGen["VM_GAIN"]=getParameter("VM_GAIN");
+        $arrPropGen["VM_OPTS"]=getParameter("VM_OPTS");
+        $arrPropGen["OPERATOR_XTN"]=getParameter("OPERATOR_XTN");
+        $arrPropGen["VMX_CONTEXT"]=getParameter("VMX_CONTEXT");
+        $arrPropGen["VMX_PRI"]=getParameter("VMX_PRI");
+        $arrPropGen["VMX_TIMEDEST_CONTEXT"]=getParameter("VMX_TIMEDEST_CONTEXT");
+        $arrPropGen["VMX_TIMEDEST_EXT"]=getParameter("VMX_TIMEDEST_EXT");
+        $arrPropGen["VMX_TIMEDEST_PRI"]=getParameter("VMX_TIMEDEST_PRI");
+        $arrPropGen["VMX_LOOPDEST_CONTEXT"]=getParameter("VMX_LOOPDEST_CONTEXT");
+        $arrPropGen["VMX_LOOPDEST_EXT"]=getParameter("VMX_LOOPDEST_EXT");
+        $arrPropGen["VMX_LOOPDEST_PRI"]=getParameter("VMX_LOOPDEST_PRI");
+        $arrPropGen["VMX_OPTS_TIMEOUT"]=getParameter("VMX_OPTS_TIMEOUT");
+        $arrPropGen["VMX_OPTS_LOOP"]=getParameter("VMX_OPTS_LOOP");
+        $arrPropGen["VMX_OPTS_DOVM"]=getParameter("VMX_OPTS_DOVM");
+        $arrPropGen["VMX_TIMEOUT"]=getParameter("VMX_TIMEOUT");
+        $arrPropGen["VMX_REPEAT"]=getParameter("VMX_REPEAT");
+        $arrPropGen["VMX_LOOPS"]=getParameter("VMX_LOOPS");
+    //sip settings
+        $arrPropSip["context"]=getParameter("sip_context");
+        $arrPropSip['dtmfmode']=getParameter("sip_dtmfmode");
+        $arrPropSip['host']=getParameter("sip_host");
+        $arrPropSip['type']=getParameter("sip_type");
+        $arrPropSip['port']=getParameter("sip_port");
+        $arrPropSip['qualify']=getParameter("sip_qualify");
+        $arrPropSip['nat']=getParameter("sip_nat");
+        $arrPropSip['disallow']=getParameter("sip_disallow");
+        $arrPropSip['allow']=getParameter("sip_allow");
+        $arrPropSip['canreinvite']=getParameter("sip_canreinvite");
+        $arrPropSip['allowtransfer']=getParameter("sip_allowtransfer");
+        $arrPropSip["vmexten"]=getParameter("sip_vmexten");
+        $arrPropSip['mohinterpret']=getParameter("sip_mohinterpret");
+        $arrPropSip['mohsuggest']=getParameter("sip_mohsuggest");
+        $arrPropSip['useragent']=getParameter("sip_useragent");
+        $arrPropSip['directmedia']=getParameter("sip_directmedia");
+        $arrPropSip['callcounter']=getParameter("sip_callcounter");
+        $arrPropSip['busylevel']=getParameter("sip_busylevel");
+        $arrPropSip['videosupport']=getParameter("sip_videosupport");
+        $arrPropSip['qualifyfreq']=getParameter("sip_qualifyfreq");
+        $arrPropSip['rtptimeout']=getParameter("sip_rtptimeout");
+        $arrPropSip['rtpholdtimeout']=getParameter("sip_rtpholdtimeout");
+        $arrPropSip['rtpkeepalive']=getParameter("sip_rtpkeepalive");
+        $arrPropSip['progressinband']=getParameter("sip_progressinband");
+        $arrPropSip['g726nonstandard']=getParameter("sip_g726nonstandard");
+        $arrPropSip['callingpres']=getParameter("sip_callingpres");
+        $arrPropSip['language']=getParameter("LANGUAGE");
+    //iax settings
+        $arrPropIax["context"]=getParameter("iax_context");
+        $arrPropIax['host']=getParameter("iax_host");
+        $arrPropIax['type']=getParameter("iax_type");
+        $arrPropIax['port']=getParameter("iax_port");
+        $arrPropIax['qualify']=getParameter("iax_qualify");
+        $arrPropIax['disallow']=getParameter("iax_disallow");
+        $arrPropIax['allow']=getParameter("iax_allow");
+        $arrPropIax['transfer']=getParameter("iax_transfer");
+        $arrPropIax['requirecalltoken']=getParameter("iax_requirecalltoken");
+        $arrPropIax['defaultip']=getParameter("iax_defaultip");
+        $arrPropIax['mask']=getParameter("iax_mask");
+        $arrPropIax['mohinterpret']=getParameter("iax_mohinterpret");
+        $arrPropIax['mohsuggest']=getParameter("iax_mohsuggest");
+        $arrPropIax['jitterbuffer']=getParameter("iax_jitterbuffer");
+        $arrPropIax['forcejitterbuffer']=getParameter("iax_forcejitterbuffer");
+        $arrPropIax['codecpriority']=getParameter("iax_codecpriority");
+        $arrPropIax['qualifysmoothing']=getParameter("iax_qualifysmoothing");
+        $arrPropIax['qualifyfreqok']=getParameter("iax_qualifyfreqok");
+        $arrPropIax['qualifyfreqnotok']=getParameter("iax_qualifyfreqnotok");
+        $arrPropIax['encryption']=getParameter("iax_encryption");
+        $arrPropIax['sendani']=getParameter("iax_sendani");
+        $arrPropIax['adsi']=getParameter("iax_adsi");
+        $arrPropIax['language']=getParameter("LANGUAGE");
+    //voicemail settings
+        $arrPropVM["attach"]=getParameter("vm_attach");
+        $arrPropVM["maxmsg"]=getParameter("vm_maxmsg");
+        $arrPropVM["saycid"]=getParameter("vm_saycid");
+        $arrPropVM["sayduration"]=getParameter("vm_sayduration");
+        $arrPropVM["envelope"]=getParameter("vm_envelope");
+        $arrPropVM["context"]=getParameter("vm_context");
+        $arrPropVM["tz"]=getParameter("vm_tz");
+        $arrPropVM["review"]=getParameter("vm_review");
+        $arrPropVM["operator"]=getParameter("vm_operator");
+        $arrPropVM["forcename"]=getParameter("vm_forcename");
+        $arrPropVM["forcegreetings"]=getParameter("vm_forcegreetings");
+        $arrPropVM['language']=getParameter("LANGUAGE");
+        $arrPropVM['volgain']=getParameter("VM_GAIN");
+    return array("gen"=>$arrPropGen,"sip"=>$arrPropSip,"iax"=>$arrPropIax,"vm"=>$arrPropVM);
 }
 
 function createFieldForm($arrTone)
 {
-    $arrTZ=getToneZonePBX();
     $arrRCstat=array("ENABLED"=>_tr("Enabled"),"DISABLED"=>_tr("Disabled"));
+    $arrRings=array("0"=>_tr("Default"),1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120);
     //TODO: obtener la lista de codecs de audio soportados por el servidor
     //se los puede hacer con el comando en consola de asterisk "module show like format" or "core show codecs audio"
     //por ahora se pone los que vienes con la instalacion de asterisk
     $arrRCFormat=array("WAV"=>"WAV","wav"=>"wav","ulaw"=>"ulaw","alaw"=>"alaw","sln"=>"sln","gsm"=>"gsm","g729"=>"g729");
-    $arrVMesg=array(""=>_tr("Default"),"u"=>_tr("Unavailable"),"b"=>_tr("Busy"),"s"=>("No Message"));
     $arrYesNO=array("yes"=>"YES","no"=>"NO");
-    $arrOptions=array(""=>_tr("Standard Message"),""=>_tr("Beep only"));
-    $arrTries=array("1","2","3","4");
-    $arrTime=array("1","2","3","4","5","6","7","8","9","10");
     $arrLng=getLanguagePBX();
     
     $arrFormElements = array("DIAL_OPTIONS" => array("LABEL"                  => _tr('Asterisk Dial Options'),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "TRUNK_OPTIONS" => array("LABEL"                  => _tr('Asterisk Dial Options in Trunk'),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:50px"),
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "RECORDING_STATE" => array("LABEL"                  => _tr('Enabled/Disabled Call Recording'),
@@ -381,19 +391,383 @@ function createFieldForm($arrTone)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "RINGTIMER" => array("LABEL"                  => _tr('Ringtime before Voicemail'),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrRings,
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                              "VM_PREFIX" => array("LABEL"                  => _tr('Voicemail Prefix'),
+                              "TONEZONE" => array("LABEL"        => _tr('Country Tonezone'),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrTone,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                              "LANGUAGE" => array("LABEL"            => _tr('Language'),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrLng,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                              "DIRECTORY" => array("LABEL"        => _tr('Search in Directory by'),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => array("last"=>"last","first"=>"first name","both"=>"both"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                              "DIRECTORY_OPT_EXT" => array("LABEL"            => _tr('Say Extension with name'),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNO,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                              "CREATE_VM" => array("LABEL"            => _tr('Create Voicemail with extension'),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNO,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                        );
+    $arrFormElements = array_merge(createSipForm(),$arrFormElements);
+    $arrFormElements = array_merge(createIaxForm(),$arrFormElements);
+    $arrFormElements = array_merge(createVMForm(),$arrFormElements);
+    return $arrFormElements;
+}
+
+function createSipForm(){
+    $arrNat=array("yes"=>"Yes","no"=>"No","never"=>"never","route"=>"route");
+    $arrCallingpres=array('allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
+    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
+    $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
+    $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update');
+    $arrFormElements = array("sip_type"  => array("LABEL"                  => _tr("type"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrType,
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_context"  => array("LABEL"                  => _tr("context"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_host"   => array("LABEL"                  => _tr("host"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_port"   => array("LABEL"                  => _tr("port"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_qualify"       => array("LABEL"           => _tr("qualify"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_allow"   => array("LABEL"                  => _tr("allow"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_disallow"   => array("LABEL"                  => _tr("disallow"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_nat"  => array("LABEL"                  => _tr("nat"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrNat,
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_dtmfmode"   => array( "LABEL"                  => _tr("dtmfmode"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrDtmf,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_canreinvite"   => array( "LABEL"                  => _tr("canreinvite"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "sip_vmexten" => array("LABEL"             => _tr("vmexten"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_mohinterpret"   => array( "LABEL"                  => _tr("mohinterpret"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_mohsuggest" => array("LABEL"             => _tr("mohsuggest"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_allowtransfer"   => array( "LABEL"              => _tr("allowtransfer"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "sip_directmedia"   => array( "LABEL"              => _tr("directmedia"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrMedia,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_useragent" => array("LABEL"             => _tr("useragent"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_busylevel" => array("LABEL"             => _tr("busylevel"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_callcounter"   => array( "LABEL"              => _tr("callcounter"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "sip_callingpres"   => array( "LABEL"              => _tr("callingpres"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrCallingpres,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_videosupport"   => array( "LABEL"              => _tr("videosupport"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "sip_maxcallbitrate" => array("LABEL"             => _tr("maxcallbitrate"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_qualifyfreq" => array("LABEL"             => _tr("qualifyfreq"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_rtptimeout" => array("LABEL"             => _tr("rtptimeout"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_rtpholdtimeout" => array("LABEL"             => _tr("rtpholdtimeout"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_rtpkeepalive" => array("LABEL"             => _tr("rtpkeepalive"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_progressinband" => array("LABEL"             => _tr("progressinband"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_g726nonstandard" => array("LABEL"             => _tr("g726nonstandard"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+    );
+    return $arrFormElements;
+}
+
+function createIaxForm(){
+    $arrTrans=array("yes"=>"yes","no"=>"no","mediaonly"=>"mediaonly");
+    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
+    $arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
+    $arrCodecPrio=array("noset"=>"noset","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
+    $encryption=array("noset"=>"noset","aes128"=>"aes128","yes"=>"yes","no"=>"no");
+    $arrFormElements = array("iax_transfer"  => array("LABEL"                  => _tr("transfer"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrTrans,
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_type"  => array("LABEL"                  => _tr("type"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrType,
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_context"  => array("LABEL"                  => _tr("context"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_host"   => array("LABEL"                  => _tr("host"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_port"   => array("LABEL"                  => _tr("port"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_qualify"=> array("LABEL"           => _tr("qualify"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_allow"   => array("LABEL"                  => _tr("allow"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_disallow"   => array("LABEL"                  => _tr("disallow"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_requierecalltoken" => array("LABEL"             => _tr("requierecalltoken"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrCallTok,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_mask"     => array("LABEL"                   => _tr("mask"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_mohinterpret"   => array( "LABEL"                  => _tr("mohinterpret"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_mohsuggest" => array("LABEL"             => _tr("mohsuggest"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_timezone"   => array( "LABEL"                  => _tr("timezone"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_sendani" => array("LABEL"             => _tr("sendani"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "iax_adsi" => array("LABEL"             => _tr("adsi"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "iax_encryption" => array("LABEL"             => _tr("encryption"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $encryption,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_jitterbuffer" => array("LABEL"             => _tr("jitterbuffer"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "iax_forcejitterbuffer" => array("LABEL"             => _tr("forcejitterbuffer"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "iax_codecpriority" => array("LABEL"             => _tr("codecpriority"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrCodecPrio,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "iax_qualifysmoothing" => array("LABEL"             => _tr("qualifysmoothing"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "iax_qualifyfreqok" => array("LABEL"             => _tr("qualifyfreqok"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "iax_qualifyfreqnotok" => array("LABEL"             => _tr("qualifyfreqnotok"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => "")
+    );
+    return $arrFormElements;
+}
+
+function createVMForm()
+{
+    $arrVMesg=array(""=>_tr("Default"),"u"=>_tr("Unavailable"),"b"=>_tr("Busy"),"s"=>("No Message"));
+    $arrYesNo=array("yes"=>"Yes","no"=>"No");
+    $arrOptions=array(""=>_tr("Standard Message"),"s"=>_tr("Beep only"));
+    $arrTries=array("1","2","3","4");
+    $arrTime=array("1","2","3","4","5","6","7","8","9","10");
+    $arrZoneMessage = array();
+    
+    $arrFormElements = array("VM_PREFIX" => array("LABEL"                  => _tr('Voicemail Prefix'),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^[0-9\#\*]+$"),
                               "VM_DDTYPE" => array("LABEL"                  => _tr('Voicemail Message type'),
-                                                    "REQUIRED"               => "no",
+                                                    "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrVMesg,
                                                     "VALIDATION_TYPE"        => "text",
@@ -401,17 +775,17 @@ function createFieldForm($arrTone)
                               "VM_GAIN" => array("LABEL"                  => _tr('Voicemail Gain'),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => "",
-                                                    "VALIDATION_TYPE"        => "text",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VM_OPTS" => array("LABEL"                  => _tr('Play "please leave message after tone" to caller'),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNO,
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => array("s"=>"Yes",""=>"No"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "OPERATOR_XTN" => array("LABEL"                  => _tr('Operator Extension'),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
                                                     "VALIDATION_TYPE"        => "text",
@@ -419,7 +793,7 @@ function createFieldForm($arrTone)
                               "VMX_CONTEXT" => array("LABEL"                  => _tr('Default Context & Pri'),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VMX_PRI" => array("LABEL"                  => _tr('pri'),
@@ -431,7 +805,7 @@ function createFieldForm($arrTone)
                               "VMX_TIMEDEST_CONTEXT" => array("LABEL"        => _tr('Timeout / #press'),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VMX_TIMEDEST_EXT" => array("LABEL"            => _tr("exten"),
@@ -449,7 +823,7 @@ function createFieldForm($arrTone)
                               "VMX_LOOPDEST_CONTEXT" => array("LABEL"        => _tr('Loop exceed Default'),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:80px"),
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VMX_LOOPDEST_EXT" => array("LABEL"            => _tr("exten"),
@@ -471,59 +845,107 @@ function createFieldForm($arrTone)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VMX_OPTS_LOOP" => array("LABEL"            => _tr("Max Loop VM msg"),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrOptions,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VMX_OPTS_DOVM" => array("LABEL"            => _tr('Direct VM Option'),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrOptions,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VMX_TIMEOUT" => array("LABEL"        => _tr('Msg Timeout'),
-                                                    "REQUIRED"               => "no",
+                                                    "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrtime,
-                                                    "VALIDATION_TYPE"        => "text",
+                                                    "INPUT_EXTRA_PARAM"      => $arrTime,
+                                                    "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                              "VMX_REPEAT " => array("LABEL"            => _tr("Msg Play"),
+                              "VMX_REPEAT" => array("LABEL"            => _tr("Msg Play"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrTries,
-                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "VMX_LOOPS" => array("LABEL"            => _tr('Error Re-tries'),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrTries,
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vm_attach"   => array("LABEL"               => _tr("Email Attachment"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_maxmsg"   => array("LABEL"               => _tr("Maximum # of message per Folder"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                              "TONEZONE" => array("LABEL"        => _tr('Country Tonezone'),
+                            "vm_saycid"   => array("LABEL"               => _tr("Play CID"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_sayduration"   => array("LABEL"               => _tr("Say Duration"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_envelope"   => array("LABEL"            => _tr("Play Envelope"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_delete"   => array("LABEL"               => _tr("Delete Voicemail"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_context"   => array("LABEL"               => _tr("Voicemail Context"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vm_tz"   => array("LABEL"               => _tr("Time Zone"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrTone,
+                                                    "INPUT_EXTRA_PARAM"      => $arrZoneMessage,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                              "LANGUAGE" => array("LABEL"            => _tr('Language'),
+                            "vm_review"   => array("LABEL"               => _tr("Review Message"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrLng,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                              "DIRECTORY" => array("LABEL"        => _tr('Search in Directory by'),
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_operator"   => array("LABEL"               => _tr("Operator"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("last"=>"last","first"=>"first name","both","both"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                              "DIRECTORY_OPT_EXT" => array("LABEL"            => _tr('Say Extension with name'),
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_forcename"   => array("LABEL"               => _tr("Force to record name"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNO,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                            "vm_forcegreetings" => array("LABEL"            => _tr("Force to record greetings"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                         );
     return $arrFormElements;
 }
@@ -582,8 +1004,6 @@ function getAction(){
         return "view_edit";
 	elseif(getParameter("action")=="reloadAsterisk")
 		return "reloadAasterisk";
-    elseif(getParameter("action")=="fc_get_default_code")
-        return "get_default_code";
     else
         return "view"; //cancel
 }

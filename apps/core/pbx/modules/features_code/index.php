@@ -67,6 +67,10 @@ function _moduleContent(&$smarty, $module_name)
 	$userAccount=$arrCredentiasls["userAccount"];
 	$idOrganization=$arrCredentiasls["id_organization"];
 
+	if($userLevel1=="superadmin"){
+        header("Location: index.php?menu=system");
+    }
+	
 	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 
 	$action = getAction();

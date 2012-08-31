@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `reload_dialplan` (
 ) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `sip_general` (
-      `organization_domain` varchar(50) NOT NULL, 
+	  `organization_domain` varchar(50) NOT NULL, 
       `port` int(5) DEFAULT NULL,
       `defaultuser` varchar(10) DEFAULT NULL,
       `useragent` varchar(20) DEFAULT NULL,
@@ -28,11 +28,13 @@ CREATE TABLE IF NOT EXISTS `sip_general` (
       `context` varchar(40) DEFAULT NULL,
       `deny` varchar(40) DEFAULT NULL,
       `permit` varchar(40) DEFAULT NULL,
+      `canreinvite` enum('yes','no') DEFAULT 'yes',
       `transport` enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
       `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT NULL,
       `directmedia` enum('yes','no','nonat','update') DEFAULT NULL,
       `nat` enum('yes','no','never','route') DEFAULT NULL,
       `language` varchar(40) DEFAULT NULL,
+      `tonezone` varchar(3) DEFAULT NULL,
       `disallow` varchar(40) DEFAULT NULL,
       `allow` varchar(40) DEFAULT NULL,
       `trustrpid` enum('yes','no') DEFAULT NULL,
@@ -81,11 +83,6 @@ CREATE TABLE IF NOT EXISTS `sip_general` (
       `g726nonstandard` enum('yes','no') DEFAULT NULL,
       `ignoresdpversion` enum('yes','no') DEFAULT NULL,
       `allowtransfer` enum('yes','no') DEFAULT NULL,
-      `create_vm` enum('yes','no') DEFAULT 'yes',
-      `record_in` enum('on_demand','always','never') DEFAULT 'on_demand',
-      `record_out` enum('on_demand','always','never') DEFAULT 'on_demand',
-      `callwaiting` enum('yes','no') DEFAULT 'no',
-      `rt` int(11) DEFAULT NULL,
       PRIMARY KEY (`organization_domain`)
 ) ENGINE = INNODB;
 
@@ -126,63 +123,58 @@ CREATE TABLE IF NOT EXISTS `iax_general` (
   `setvar` varchar(200) NULL, 
   `permit` varchar(40) DEFAULT NULL,
   `deny` varchar(40) DEFAULT NULL,
-  `create_vm` enum('yes','no') DEFAULT 'yes',
-  `record_in` enum('on_demand','always','never') DEFAULT 'on_demand',
-  `record_out` enum('on_demand','always','never') DEFAULT 'on_demand',
-  `callwaiting` enum('yes','no') DEFAULT 'no',
-  `rt` int(11) DEFAULT NULL,
   PRIMARY KEY (`organization_domain`)
 )ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `voicemail_general` (
-    organization_domain varchar(50) NOT NULL, 
-    -- Mailbox context.
-    context CHAR(80) NOT NULL DEFAULT 'default',
-    -- Attach sound file to email - YES/no
-    attach CHAR(3),
-    -- Send email from this address
-    serveremail CHAR(80),
-    -- Prompts in alternative language
-    language CHAR(20),
-    -- Alternative timezone, as defined in voicemail.conf
-    tz CHAR(30),
-    -- Delete voicemail from server after sending email notification - yes/NO
-    deletevoicemail CHAR(3),
-    -- Read back CallerID information during playback - yes/NO
-    saycid CHAR(3),
-    -- Allow user to send voicemail from within VoicemailMain - YES/no
-    sendvoicemail CHAR(3),
-    -- Listen to voicemail and approve before sending - yes/NO
-    review CHAR(3),
-    -- Warn user a temporary greeting exists - yes/NO
-    tempgreetwarn CHAR(3),
-    -- Allow '0' to jump out during greeting - yes/NO
-    operator CHAR(3),
-    -- Hear date/time of message within VoicemailMain - YES/no
-    envelope CHAR(3),
-    -- Hear length of message within VoicemailMain - yes/NO
-    sayduration CHAR(3),
-    -- Minimum duration in minutes to say
-    saydurationm INT(3),
-    -- Force new user to record name when entering voicemail - yes/NO
-    forcename CHAR(3),
-    -- Force new user to record greetings when entering voicemail - yes/NO
-    forcegreetings CHAR(3),
-    -- Context in which to dial extension for callback
-    callback CHAR(80),
-    -- Context in which to dial extension (from advanced menu)
-    dialout CHAR(80),
-    -- Context in which to execute 0 or * escape during greeting
-    exitcontext CHAR(80),
-    -- Maximum messages in a folder (100 if not specified)
-    maxmsg INT(5),
-    -- Increase DB gain on recorded message by this amount (0.0 means none)
-    volgain DECIMAL(5,2),
-    -- IMAP user for authentication (if using IMAP storage)
-    imapuser VARCHAR(80),
-    -- IMAP password for authentication (if using IMAP storage)
-    imappassword VARCHAR(80),
-    PRIMARY KEY (`organization_domain`)
+	organization_domain varchar(50) NOT NULL, 
+	-- Mailbox context.
+	context CHAR(80) NOT NULL DEFAULT 'default',
+	-- Attach sound file to email - YES/no
+	attach CHAR(3),
+	-- Send email from this address
+	serveremail CHAR(80),
+	-- Prompts in alternative language
+	language CHAR(20),
+	-- Alternative timezone, as defined in voicemail.conf
+	tz CHAR(30),
+	-- Delete voicemail from server after sending email notification - yes/NO
+	deletevoicemail CHAR(3),
+	-- Read back CallerID information during playback - yes/NO
+	saycid CHAR(3),
+	-- Allow user to send voicemail from within VoicemailMain - YES/no
+	sendvoicemail CHAR(3),
+	-- Listen to voicemail and approve before sending - yes/NO
+	review CHAR(3),
+	-- Warn user a temporary greeting exists - yes/NO
+	tempgreetwarn CHAR(3),
+	-- Allow '0' to jump out during greeting - yes/NO
+	operator CHAR(3),
+	-- Hear date/time of message within VoicemailMain - YES/no
+	envelope CHAR(3),
+	-- Hear length of message within VoicemailMain - yes/NO
+	sayduration CHAR(3),
+	-- Minimum duration in minutes to say
+	saydurationm INT(3),
+	-- Force new user to record name when entering voicemail - yes/NO
+	forcename CHAR(3),
+	-- Force new user to record greetings when entering voicemail - yes/NO
+	forcegreetings CHAR(3),
+	-- Context in which to dial extension for callback
+	callback CHAR(80),
+	-- Context in which to dial extension (from advanced menu)
+	dialout CHAR(80),
+	-- Context in which to execute 0 or * escape during greeting
+	exitcontext CHAR(80),
+	-- Maximum messages in a folder (100 if not specified)
+	maxmsg INT(5),
+	-- Increase DB gain on recorded message by this amount (0.0 means none)
+	volgain DECIMAL(5,2),
+	-- IMAP user for authentication (if using IMAP storage)
+	imapuser VARCHAR(80),
+	-- IMAP password for authentication (if using IMAP storage)
+	imappassword VARCHAR(80),
+	PRIMARY KEY (`organization_domain`)
 ) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `sip` (
@@ -203,13 +195,14 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `amaflags` varchar(40) DEFAULT NULL,
       `callgroup` varchar(40) DEFAULT NULL,
       `callerid` varchar(40) DEFAULT NULL,
-      `canreinvite` varchar(80) DEFAULT 'no',
+      `canreinvite` enum('yes','no') DEFAULT 'yes',
       `defaultip` varchar(40) DEFAULT NULL,
       `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT NULL,
       `fromuser` varchar(40) DEFAULT NULL,
       `fromdomain` varchar(40) DEFAULT NULL,
       `insecure` varchar(40) DEFAULT NULL,
       `language` varchar(40) DEFAULT NULL,
+      `tonezone` varchar(3) DEFAULT NULL,
       `mailbox` varchar(40) DEFAULT NULL,
       `pickupgroup` varchar(40) DEFAULT NULL,
       `qualify` char(3) DEFAULT 'yes',
@@ -274,8 +267,8 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `rtpkeepalive` int(11) DEFAULT NULL,
       `call-limit` int(11) DEFAULT NULL,
       `g726nonstandard` enum('yes','no') DEFAULT NULL,
-      `ignoresdpversion` enum('yes','no') DEFAULT NULL,
-      `organization_domain` varchar(50) NOT NULL,
+	  `ignoresdpversion` enum('yes','no') DEFAULT NULL,
+	  `organization_domain` varchar(50) NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `name` (`name`),
       KEY `ipaddr` (`ipaddr`,`port`),
@@ -342,79 +335,79 @@ CREATE TABLE IF NOT EXISTS `iax` (
 )ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS voicemail (
-    -- All of these column names are very specific, including "uniqueid".  Do not change them if you wish voicemail to work.
-    uniqueid INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    -- Mailbox context.
-    context CHAR(80) NOT NULL DEFAULT 'default',
-    -- Mailbox number.  Should be numeric.
-    mailbox CHAR(80) NOT NULL,
-    -- Must be numeric.  Negative if you don't want it to be changed from VoicemailMain
-    password CHAR(80) NOT NULL,
-    -- Used in email and for Directory app
-    fullname CHAR(80),
-    -- Email address (will get sound file if attach=yes)
-    email CHAR(80),
-    -- Email address (won't get sound file)
-    pager CHAR(80),
-    -- Attach sound file to email - YES/no
-    attach CHAR(3),
-    -- Which sound format to attach
-    attachfmt CHAR(10),
-    -- Send email from this address
-    serveremail CHAR(80),
-    -- Prompts in alternative language
-    language CHAR(20),
-    -- Alternative timezone, as defined in voicemail.conf
-    tz CHAR(30),
-    -- Delete voicemail from server after sending email notification - yes/NO
-    deletevoicemail CHAR(3),
-    -- Read back CallerID information during playback - yes/NO
-    saycid CHAR(3),
-    -- Allow user to send voicemail from within VoicemailMain - YES/no
-    sendvoicemail CHAR(3),
-    -- Listen to voicemail and approve before sending - yes/NO
-    review CHAR(3),
-    -- Warn user a temporary greeting exists - yes/NO
-    tempgreetwarn CHAR(3),
-    -- Allow '0' to jump out during greeting - yes/NO
-    operator CHAR(3),
-    -- Hear date/time of message within VoicemailMain - YES/no
-    envelope CHAR(3),
-    -- Hear length of message within VoicemailMain - yes/NO
-    sayduration CHAR(3),
-    -- Minimum duration in minutes to say
-    saydurationm INT(3),
-    -- Force new user to record name when entering voicemail - yes/NO
-    forcename CHAR(3),
-    -- Force new user to record greetings when entering voicemail - yes/NO
-    forcegreetings CHAR(3),
-    -- Context in which to dial extension for callback
-    callback CHAR(80),
-    -- Context in which to dial extension (from advanced menu)
-    dialout CHAR(80),
-    -- Context in which to execute 0 or * escape during greeting
-    exitcontext CHAR(80),
-    -- Maximum messages in a folder (100 if not specified)
-    maxmsg INT(5),
-    -- Increase DB gain on recorded message by this amount (0.0 means none)
-    volgain DECIMAL(5,2),
-    -- IMAP user for authentication (if using IMAP storage)
-    imapuser VARCHAR(80),
-    -- IMAP password for authentication (if using IMAP storage)
-    imappassword VARCHAR(80),
-    stamp timestamp,
-    organization_domain varchar(50) NOT NULL,
-    INDEX organization_domain (organization_domain)
+	-- All of these column names are very specific, including "uniqueid".  Do not change them if you wish voicemail to work.
+	uniqueid INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	-- Mailbox context.
+	context CHAR(80) NOT NULL DEFAULT 'default',
+	-- Mailbox number.  Should be numeric.
+	mailbox CHAR(80) NOT NULL,
+	-- Must be numeric.  Negative if you don't want it to be changed from VoicemailMain
+	password CHAR(80) NOT NULL,
+	-- Used in email and for Directory app
+	fullname CHAR(80),
+	-- Email address (will get sound file if attach=yes)
+	email CHAR(80),
+	-- Email address (won't get sound file)
+	pager CHAR(80),
+	-- Attach sound file to email - YES/no
+	attach CHAR(3),
+	-- Which sound format to attach
+	attachfmt CHAR(10),
+	-- Send email from this address
+	serveremail CHAR(80),
+	-- Prompts in alternative language
+	language CHAR(20),
+	-- Alternative timezone, as defined in voicemail.conf
+	tz CHAR(30),
+	-- Delete voicemail from server after sending email notification - yes/NO
+	deletevoicemail CHAR(3),
+	-- Read back CallerID information during playback - yes/NO
+	saycid CHAR(3),
+	-- Allow user to send voicemail from within VoicemailMain - YES/no
+	sendvoicemail CHAR(3),
+	-- Listen to voicemail and approve before sending - yes/NO
+	review CHAR(3),
+	-- Warn user a temporary greeting exists - yes/NO
+	tempgreetwarn CHAR(3),
+	-- Allow '0' to jump out during greeting - yes/NO
+	operator CHAR(3),
+	-- Hear date/time of message within VoicemailMain - YES/no
+	envelope CHAR(3),
+	-- Hear length of message within VoicemailMain - yes/NO
+	sayduration CHAR(3),
+	-- Minimum duration in minutes to say
+	saydurationm INT(3),
+	-- Force new user to record name when entering voicemail - yes/NO
+	forcename CHAR(3),
+	-- Force new user to record greetings when entering voicemail - yes/NO
+	forcegreetings CHAR(3),
+	-- Context in which to dial extension for callback
+	callback CHAR(80),
+	-- Context in which to dial extension (from advanced menu)
+	dialout CHAR(80),
+	-- Context in which to execute 0 or * escape during greeting
+	exitcontext CHAR(80),
+	-- Maximum messages in a folder (100 if not specified)
+	maxmsg INT(5),
+	-- Increase DB gain on recorded message by this amount (0.0 means none)
+	volgain DECIMAL(5,2),
+	-- IMAP user for authentication (if using IMAP storage)
+	imapuser VARCHAR(80),
+	-- IMAP password for authentication (if using IMAP storage)
+	imappassword VARCHAR(80),
+	stamp timestamp,
+	organization_domain varchar(50) NOT NULL,
+	INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `extension` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `organization_domain` varchar(50) NOT NULL,
-      `context` varchar(40) NOT NULL,
+	  `id` int(11) NOT NULL AUTO_INCREMENT,
+	  `organization_domain` varchar(50) NOT NULL,
+	  `context` varchar(40) NOT NULL,
       `exten` int(20) NOT NULL,
       `tech` varchar(20) NOT NULL,
-      `dial` varchar(40) DEFAULT NULL,
-      `device` varchar(40) DEFAULT NULL,
+	  `dial` varchar(40) DEFAULT NULL,
+	  `device` varchar(40) DEFAULT NULL,
       `voicemail` varchar(40) DEFAULT 'no', 
       `rt` varchar(20) DEFAULT NULL,
       `record_in` enum('on_demand','always','never') DEFAULT 'on_demand',
@@ -422,19 +415,19 @@ CREATE TABLE IF NOT EXISTS `extension` (
       `outboundcid` varchar(50) default NULL,
       `alias` varchar(50) default NULL,
       `mohclass` varchar(80) default 'default',
-      `noanswer` varchar(100) default NULL,
+	  `noanswer` varchar(100) default NULL,
       PRIMARY KEY (`id`),
       INDEX organization_domain (organization_domain)
 )ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `fax` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `organization_domain` varchar(50) NOT NULL,
-      `context` varchar(40) NOT NULL,
+	  `id` int(11) NOT NULL AUTO_INCREMENT,
+	  `organization_domain` varchar(50) NOT NULL,
+	  `context` varchar(40) NOT NULL,
       `exten` int(20) NOT NULL,
       `tech` varchar(20) NOT NULL,
-      `dial` varchar(40) DEFAULT NULL,
-      `device` varchar(40) DEFAULT NULL,
+	  `dial` varchar(40) DEFAULT NULL,
+	  `device` varchar(40) DEFAULT NULL,
       `rt` varchar(20) DEFAULT NULL,
       `callerid_name` varchar(20) DEFAULT NULL,
       `callerid_number` varchar(40) DEFAULT NULL, 
@@ -540,11 +533,13 @@ CREATE TABLE IF NOT EXISTS `sip_settings` (
       `context` varchar(40) DEFAULT NULL,
       `deny` varchar(40) DEFAULT NULL,
       `permit` varchar(40) DEFAULT NULL,
+      `canreinvite` enum('yes','no') DEFAULT 'yes',
       `transport` enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
       `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT NULL,
       `directmedia` enum('yes','no','nonat','update') DEFAULT NULL,
       `nat` enum('yes','no','never','route') DEFAULT NULL,
       `language` varchar(40) DEFAULT NULL,
+      `tonezone` varchar(3) DEFAULT NULL,
       `disallow` varchar(40) DEFAULT NULL,
       `allow` varchar(40) DEFAULT NULL,
       `trustrpid` enum('yes','no') DEFAULT NULL,
@@ -593,11 +588,6 @@ CREATE TABLE IF NOT EXISTS `sip_settings` (
       `g726nonstandard` enum('yes','no') DEFAULT NULL,
       `ignoresdpversion` enum('yes','no') DEFAULT NULL,
       `allowtransfer` enum('yes','no') DEFAULT NULL,
-      `create_vm` enum('yes','no') DEFAULT 'yes',
-      `record_in` enum('on_demand','always','never') DEFAULT 'on_demand',
-      `record_out` enum('on_demand','always','never') DEFAULT 'on_demand',
-      `callwaiting` enum('yes','no') DEFAULT 'no',
-      `rt` int(11) DEFAULT NULL,
       PRIMARY KEY (`id`)
 ) ENGINE = INNODB;
 
@@ -639,80 +629,71 @@ CREATE TABLE IF NOT EXISTS `iax_settings` (
   `setvar` varchar(200) NULL, 
   `permit` varchar(40) DEFAULT NULL,
   `deny` varchar(40) DEFAULT NULL,
-  `create_vm` enum('yes','no') DEFAULT 'yes',
-  `record_in` enum('on_demand','always','never') DEFAULT 'on_demand',
-  `record_out` enum('on_demand','always','never') DEFAULT 'on_demand',
-  `callwaiting` enum('yes','no') DEFAULT 'no',
-  `rt` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 )ENGINE = INNODB;
 
 
 CREATE TABLE IF NOT EXISTS `voicemail_settings` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
-    -- Mailbox context.
-    context CHAR(80) NOT NULL DEFAULT 'default',
-    -- Attach sound file to email - YES/no
-    attach CHAR(3),
-    -- Send email from this address
-    serveremail CHAR(80),
-    -- Prompts in alternative language
-    language CHAR(20),
-    -- Alternative timezone, as defined in voicemail.conf
-    tz CHAR(30),
-    -- Delete voicemail from server after sending email notification - yes/NO
-    deletevoicemail CHAR(3),
-    -- Read back CallerID information during playback - yes/NO
-    saycid CHAR(3),
-    -- Allow user to send voicemail from within VoicemailMain - YES/no
-    sendvoicemail CHAR(3),
-    -- Listen to voicemail and approve before sending - yes/NO
-    review CHAR(3),
-    -- Warn user a temporary greeting exists - yes/NO
-    tempgreetwarn CHAR(3),
-    -- Allow '0' to jump out during greeting - yes/NO
-    operator CHAR(3),
-    -- Hear date/time of message within VoicemailMain - YES/no
-    envelope CHAR(3),
-    -- Hear length of message within VoicemailMain - yes/NO
-    sayduration CHAR(3),
-    -- Minimum duration in minutes to say
-    saydurationm INT(3),
-    -- Force new user to record name when entering voicemail - yes/NO
-    forcename CHAR(3),
-    -- Force new user to record greetings when entering voicemail - yes/NO
-    forcegreetings CHAR(3),
-    -- Context in which to dial extension for callback
-    callback CHAR(80),
-    -- Context in which to dial extension (from advanced menu)
-    dialout CHAR(80),
-    -- Context in which to execute 0 or * escape during greeting
-    exitcontext CHAR(80),
-    -- Maximum messages in a folder (100 if not specified)
-    maxmsg INT(5),
-    -- Increase DB gain on recorded message by this amount (0.0 means none)
-    volgain DECIMAL(5,2),
-    -- IMAP user for authentication (if using IMAP storage)
-    imapuser VARCHAR(80),
-    -- IMAP password for authentication (if using IMAP storage)
-    imappassword VARCHAR(80),
-    PRIMARY KEY (`id`)
+	-- Mailbox context.
+	context CHAR(80) NOT NULL DEFAULT 'default',
+	-- Attach sound file to email - YES/no
+	attach CHAR(3),
+	-- Send email from this address
+	serveremail CHAR(80),
+	-- Prompts in alternative language
+	language CHAR(20),
+	-- Alternative timezone, as defined in voicemail.conf
+	tz CHAR(30),
+	-- Delete voicemail from server after sending email notification - yes/NO
+	deletevoicemail CHAR(3),
+	-- Read back CallerID information during playback - yes/NO
+	saycid CHAR(3),
+	-- Allow user to send voicemail from within VoicemailMain - YES/no
+	sendvoicemail CHAR(3),
+	-- Listen to voicemail and approve before sending - yes/NO
+	review CHAR(3),
+	-- Warn user a temporary greeting exists - yes/NO
+	tempgreetwarn CHAR(3),
+	-- Allow '0' to jump out during greeting - yes/NO
+	operator CHAR(3),
+	-- Hear date/time of message within VoicemailMain - YES/no
+	envelope CHAR(3),
+	-- Hear length of message within VoicemailMain - yes/NO
+	sayduration CHAR(3),
+	-- Minimum duration in minutes to say
+	saydurationm INT(3),
+	-- Force new user to record name when entering voicemail - yes/NO
+	forcename CHAR(3),
+	-- Force new user to record greetings when entering voicemail - yes/NO
+	forcegreetings CHAR(3),
+	-- Context in which to dial extension for callback
+	callback CHAR(80),
+	-- Context in which to dial extension (from advanced menu)
+	dialout CHAR(80),
+	-- Context in which to execute 0 or * escape during greeting
+	exitcontext CHAR(80),
+	-- Maximum messages in a folder (100 if not specified)
+	maxmsg INT(5),
+	-- Increase DB gain on recorded message by this amount (0.0 means none)
+	volgain DECIMAL(5,2),
+	-- IMAP user for authentication (if using IMAP storage)
+	imapuser VARCHAR(80),
+	-- IMAP password for authentication (if using IMAP storage)
+	imappassword VARCHAR(80),
+	PRIMARY KEY (`id`)
 ) ENGINE = INNODB;
 
-
--- Create user db
-GRANT SELECT, UPDATE, INSERT, DELETE ON `elxpbx`.* to asteriskuser@localhost;
-
 insert into sip_settings (faxdetect,vmexten,context,useragent,disallow,allow,port,host,qualify,type,deny,permit,dtmfmode,nat,
-create_vm,record_in,record_out,callcounter) values ("no","*97","from-internal","elastix_3.0","all","ulaw;alaw;gsm","5060",
-"dynamic","no","friend","0.0.0.0/0.0.0.0","0.0.0.0/0.0.0.0","rfc2833","yes","yes","on_demand","on_demand","yes");
+callcounter) values ("no","*97","from-internal","elastix_3.0","all","ulaw;alaw;gsm","5060",
+"dynamic","no","friend","0.0.0.0/0.0.0.0","0.0.0.0/0.0.0.0","rfc2833","yes","yes");
 
-insert into iax_settings (deny,permit,transfer,context,host,type,qualify,disallow,allow,create_vm,record_in,record_out,
-requirecalltoken) values (NULL,NULL,"no","from-internal","dynamic","friend","yes","all","ulaw,alaw,gsm","yes",
-"on_demand","on_demand","auto");
+insert into iax_settings (deny,permit,transfer,context,host,type,qualify,disallow,allow,
+requirecalltoken) values (NULL,NULL,"no","from-internal","dynamic","friend","yes","all","ulaw,alaw,gsm","auto");
 
 insert into voicemail_settings (attach,context,serveremail,review,operator,maxmsg,deletevoicemail,saycid,
-envelope) values ("yes","deafault","vm@asterisk","yes","yes","100","no","no","no");
+envelope,forcename,forcegreetings) values ("yes","default","vm@asterisk","yes","yes","100","no","no","no","yes","no");
+
 
 INSERT INTO globals_settings VALUES("DIAL_OPTIONS","tr");
 INSERT INTO globals_settings VALUES("TRUNK_OPTIONS","");
@@ -753,3 +734,6 @@ INSERT INTO globals_settings VALUES("CALLFILENAME","");
 INSERT INTO globals_settings VALUES("OPERATOR","");
 INSERT INTO globals_settings VALUES("PARKNOTIFY","SIP/200");
 INSERT INTO globals_settings VALUES("RECORDEXTEN","");
+INSERT INTO globals_settings VALUES("CREATE_VM","yes");
+
+

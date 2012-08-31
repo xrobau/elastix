@@ -72,6 +72,10 @@ function _moduleContent(&$smarty, $module_name)
     //actions
     $accion = getAction();
     $content = "";
+    
+    if($userLevel1=="superadmin"){
+        header("Location: index.php?menu=system");
+    }
 
     switch($accion){
         case "apply":

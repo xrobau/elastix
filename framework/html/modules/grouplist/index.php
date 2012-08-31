@@ -177,7 +177,11 @@ function reportGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 	foreach($Groups as $group) {
 		if($group[3]!=1){
 			$arrTmp    = array();
-			$arrTmp[0] = "&nbsp;<a href='?menu=grouplist&action=view&id=" . $group[0] . "'>" . $group[1] . "</a>";//id_group   name
+			if($userLevel1=="superadmin"){
+                $arrTmp[0] = $group[1];
+			}else{
+                $arrTmp[0] = "&nbsp;<a href='?menu=grouplist&action=view&id=" . $group[0] . "'>" . $group[1] . "</a>";//id_group name
+			}
 			$orgz=$pORGZ->getOrganizationById($group[3]);
 			$arrTmp[1] = $orgz["name"];
 			$arrTmp[2] = _tr($group[2]);//description
@@ -197,22 +201,21 @@ function reportGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 					);
 
 	if($pORGZ->getNumOrganization() > 1){
-		if($userLevel1 != "other"){
+		if($userLevel1 == "admin")
 			$oGrid->addNew("create_group",_tr("Create New Group"));
-			if($userLevel1 == "superadmin"){
-				$arrOrgz=array(0=>"all");
-				foreach(($pORGZ->getOrganization()) as $value){
-					if($value["id"]!=1)
-						$arrOrgz[$value["id"]]=$value["name"];
-				}
-				$arrFormElements = createFieldFilter($arrOrgz);
-				$oFilterForm = new paloForm($smarty, $arrFormElements);
-				$_POST["idOrganization"]=$idOrgFil;
-				$oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$idOrgFil], $_POST, array("idOrganization" => 0),true);
-				$htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-				$oGrid->showFilter(trim($htmlFilter));
-			}
-		}
+        if($userLevel1 == "superadmin"){
+            $arrOrgz=array(0=>"all");
+            foreach(($pORGZ->getOrganization()) as $value){
+                if($value["id"]!=1)
+                    $arrOrgz[$value["id"]]=$value["name"];
+            }
+            $arrFormElements = createFieldFilter($arrOrgz);
+            $oFilterForm = new paloForm($smarty, $arrFormElements);
+            $_POST["idOrganization"]=$idOrgFil;
+            $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$idOrgFil], $_POST, array("idOrganization" => 0),true);
+            $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+            $oGrid->showFilter(trim($htmlFilter));
+        }
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You need have created at least one organization before you can create a new group"));
@@ -231,9 +234,9 @@ function viewFormGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 
 	$arrOrgz=array(0=>"Select one Organization");
 	$arrOrgzNG=array(0=>"Select one Organization");
-	if($userLevel1=="superadmin")
+	/*if($userLevel1=="superadmin")
 		$orgTmp=$pORGZ->getOrganization();
-	else
+	else*/
 		$orgTmp=$pORGZ->getOrganization(null,null,"id",$idOrganization);
 
 	if($orgTmp===false){
@@ -264,11 +267,11 @@ function viewFormGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 			$smarty->assign("mb_message",_tr("Invalid Group"));
 			return reportGroup($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 		}else{
-			if($userLevel1=="superadmin"){
+			/*if($userLevel1=="superadmin"){
 				$arrGroup = $pACL->getGroups($idGroup);
-			}else {
+			}else {*/
 				$arrGroup = $pACL->getGroups($idGroup,$idOrganization);
-			}
+			//}
 		}
 		if($arrGroup===false){
 			$smarty->assign("mb_title", _tr("ERROR"));
@@ -287,11 +290,11 @@ function viewFormGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 				}
 				$arrFill["group"]=$value[1];
 				$arrFill["description"]=_tr($value[2]);
-				$arrFill["organization"]=$value[3];
+				//$arrFill["organization"]=$value[3];
 			}
 			$smarty->assign("GROUP",$arrFill["group"]);
-			$smarty->assign("ORGANIZATION",$arrOrgz[$arrFill["organization"]]);
-			$_POST["organization"]=$arrFill["organization"];
+			//$smarty->assign("ORGANIZATION",$arrOrgz[$arrFill["organization"]]);
+			//$_POST["organization"]=$arrFill["organization"];
 		}if(getParameter("save_edit")){
 			$arrFill["description"]=$_POST["description"];
 		}
@@ -332,11 +335,11 @@ function saveNewGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
 	$group=getParameter("group");
 	$description=getParameter("description");
-	$idOrgzSel=getParameter("organization");
+//	$idOrgzSel=getParameter("organization");
 
-	if($userLevel1!="superadmin"){
+//	if($userLevel1!="superadmin"){
 		$idOrgzSel=$idOrganization;
-	}
+//	}
 
 	if($userLevel1=="other"){
 		$smarty->assign("mb_title", _tr("ERROR"));
@@ -394,11 +397,11 @@ function saveEditGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 	$description=getParameter("description");
 
 	if(isset($idGroup)){
-		if($userLevel1=="superadmin"){
+		/*if($userLevel1=="superadmin"){
 			$arrGroup = $pACL->getGroups($idGroup);
-		}else{
+		}else{*/
 			$arrGroup = $pACL->getGroups($idGroup,$idOrganization);
-		}
+		//}
 		if($arrGroup===false){
 			$smarty->assign("mb_title", _tr("Error"));
 			$smarty->assign("mb_message", _tr($pACL->errMsg));
@@ -433,17 +436,20 @@ function deleteGroup($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 	$error="";
 
 	$idGroup=getParameter("id");
-
 	if(isset($idGroup))
 	{
 		// No se puede eliminar al grupo superadmin
 		if($idGroup==0)
 			$error=_tr("This group  can't be deleted because is used to admin elastix.");
-		elseif($pACL->getGroupNameByid($idGroup) == "administrator" && $userLevel1!="superadmin"){
-			//solo el superadmin puede eliminar el grupo adminitrator de una organizacion
+		elseif($pACL->getGroupNameByid($idGroup) == "administrator" ){
 			$error=_tr("The administrator group cannot be deleted because is the default Elastix Group. You can delete any other group.");
-		}
-
+		}else{
+            $arrGroup = $pACL->getGroups($idGroup,$idOrganization);
+            if($arrGroup==false){
+                $error=_tr("Group doesn't exist").$pACL->errMsg;
+            }
+        }
+		
 		if($error==""){
 			if($pACL->deleteGroup($idGroup)){
 				$smarty->assign("mb_title", _tr("MESSAGE"));
@@ -477,13 +483,6 @@ function createFieldForm($arrOrgz)
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-							"organization"       => array("LABEL"           => _tr("Organizatiion"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrOrgz,
-                                                    "VALIDATION_TYPE"        => "integer",
-                                                    "VALIDATION_EXTRA_PARAM" => "",
-													"ONCHANGE"	       => "")
     );
 	return $arrFormElements;
 }

@@ -530,7 +530,7 @@ function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v)
-                $strErrorMsg .= "$k, ";
+                $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
         return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -679,9 +679,9 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
 			$arrErrores = $oForm->arrErroresValidacion;
 			$strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
 			if(is_array($arrErrores) && count($arrErrores) > 0){
-				foreach($arrErrores as $k=>$v)
-					$strErrorMsg .= "$k, ";
-			}
+                foreach($arrErrores as $k=>$v)
+                    $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
+            }
 			$smarty->assign("mb_message", $strErrorMsg);
 			return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 		}else{
@@ -695,7 +695,9 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
 			$fax_extension=getParameter("fax_extension");
 			$name=getParameter("name");
 			$md5password=md5($password1);
-
+            $clidNumber=getParameter("clid_number");
+            $cldiName=getParameter("clid_name");
+			
 			if($userLevel1=="other"){
 				$extension=$arrUsers[0][5];
 				$fax_extension=$arrUsers[0][6];
@@ -717,6 +719,10 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
 					$error=_tr("Country Code must not be empty");
 				}elseif(!isset($areaCode) || $areaCode==""){
 					$error=_tr("Area Code must not be empty");
+                }elseif(!isset($clidNumber) || $clidNumber==""){
+                    $error=_tr("Caller Id Number must not be empty");
+                }elseif(!isset($cldiName) || $cldiName==""){
+                    $error=_tr("Caller Id Name must not be empty");
 				}else{
 					//esta seccion es solo si el usuario quiere subir una imagen a su cuenta
 					$pictureUpload = $_FILES['picture']['name'];
@@ -728,9 +734,7 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
 							return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 						}
 					}
-					$clidNumber=getParameter("clid_number");
-					$cldiName=getParameter("clid_name");
-					$quota=getParameter("email_quota");
+					
 					$exito=$pORGZ->updateUserOrganization($idUser, $name, $md5password, $password1, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $idGrupo, $quota, $userLevel1, $reAsterisk);
 					$error=$pORGZ->errMsg;
 				}
@@ -791,8 +795,7 @@ function deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
 		}else{
 			$exito=$pORGZ->deleteUserOrganization($idUser);
 		}
-	}
-	else if($userLevel1=="admin"){
+	}else if($userLevel1=="admin"){
 		if($pACL->userBellowOrganization($idUser,$idOrganization)){
 			$exito=$pORGZ->deleteUserOrganization($idUser);
 		}else{

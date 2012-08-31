@@ -68,19 +68,15 @@ function _moduleContent(&$smarty, $module_name)
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 
 	//verificar que tipo de usurio es: superadmin, admin o other
-	if($userAccount!=""){
-		$idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
-		if($pACL->isUserSuperAdmin($userAccount)){
-			$userLevel1 = "superadmin";
-		}else{
-			if($pACL->isUserAdministratorGroup($userAccount))
-				$userLevel1 = "admin";
-			else
-				$userLevel1 = "other";
-		}
-	}else
-		$idOrganization="";
+	$arrCredentiasls=getUserCredentials();
+    $userLevel1=$arrCredentiasls["userlevel"];
+    $userAccount=$arrCredentiasls["userAccount"];
+    $idOrganization=$arrCredentiasls["id_organization"];
 
+	if($userLevel1=="other"){
+        header("Location: index.php?menu=system");
+    }
+		
     $action = getAction();
     $content = "";
 
@@ -324,7 +320,7 @@ function saveNewOrganization($smarty, $module_name, $local_templates_dir, &$pDB,
         $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v)
-                $strErrorMsg .= "$k, ";
+                $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
         $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -388,7 +384,7 @@ function saveEditOrganization($smarty, $module_name, $local_templates_dir, &$pDB
         $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v)
-                $strErrorMsg .= "$k, ";
+                $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
         $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);

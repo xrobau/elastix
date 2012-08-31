@@ -38,17 +38,6 @@
 		<td>{$description.INPUT}</td>
         <td width="50%"></td>
       </tr>
-	{if $userLevel eq 'superadmin'}
-	<tr>
-		<td>{$organization.LABEL}:{if $mode ne 'view'} <span  class="required">*</span>{/if}</td>
-		{if $mode ne 'edit'}
-			<td>{$organization.INPUT}</td>
-		{else}
-			<td>{$ORGANIZATION}</td>
-		{/if}
-		<td width="50%"></td>
-	</tr>
-	{/if}
     </table>
   </td>
 </tr>

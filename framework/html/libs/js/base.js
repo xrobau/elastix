@@ -871,14 +871,17 @@ $(document).ready(function(){
 			}
 	});
       
-      var menu = getParameterByName("menu");
-      var lblmenu = menu.split("_");    
-      if(lblmenu["0"]=="a2b"){
-         $('#myframe').load(function() {
-              $(".topmenu-right-button a",myframe.document).attr("target","_self");
-         });
-      }
-
+         var menu = getParameterByName("menu");
+	       if(typeof  menu!== "undefined" && menu){
+	        var lblmenu = menu.split("_");
+	
+	        if(lblmenu["0"]=="a2b"){
+	          $('#myframe').load(function() {
+	              $(".topmenu-right-button a",myframe.document).attr("target","_self");
+	          });
+	        }
+	      }
+	
 });
 
 //Si se presiona enter se hace un submit al formulario para que se aplica el filtro

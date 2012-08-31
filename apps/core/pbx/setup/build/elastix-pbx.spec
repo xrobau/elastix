@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 13
+Release: 14
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -13,7 +13,7 @@ BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-9
 Prereq: elastix-my_extension >= 2.0.4-5
 Prereq: freePBX >= 2.8.1-12
-Prereq: elastix-system >= 2.2.0-18
+Prereq: elastix-system >= 2.3.0-10
 Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
 Requires: festival >= 1.95
@@ -294,6 +294,9 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Aug 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-14
+- FIXED: Prereq: elastix-system >= 2.3.0-10. Fixes Elastix bug #1358.
+
 * Thu Aug 23 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-13
 - CHANGED: module voipprovider, added spanish translation to an
   informative message

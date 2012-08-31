@@ -16,7 +16,7 @@
 //
 //    Copyright (C) 2004 Coalescent Systems Inc. (info@coalescentsystems.ca)
 //
-include_once "libs/misc.lib.php";
+include_once "/var/www/html/libs/misc.lib.php";
 
 class extension {
 	var $data;

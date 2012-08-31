@@ -580,7 +580,7 @@ function obtenerClaveAMIAdmin($ruta_base='')
  */
 function generarDSNSistema($sNombreUsuario, $sNombreDB, $ruta_base='')
 {
-    require_once $ruta_base.'libs/paloSantoConfig.class.php';
+    require_once '/var/www/html/libs/paloSantoConfig.class.php';
     switch ($sNombreUsuario) {
     case 'root':
         $sClave = obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base);

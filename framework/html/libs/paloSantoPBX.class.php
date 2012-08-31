@@ -29,11 +29,11 @@
 
 global $arrConf;
 
-include_once $arrConf['basePath']."/libs/paloSantoACL.class.php";
-include_once $arrConf['basePath']."/libs/paloSantoConfig.class.php";
-include_once $arrConf['basePath']."/libs/paloSantoAsteriskConfig.class.php";
-include_once $arrConf['basePath']."/libs/extensions.class.php";
-include_once $arrConf['basePath']."/libs/misc.lib.php";
+include_once "/var/www/html/libs/paloSantoACL.class.php";
+include_once "/var/www/html/libs/paloSantoConfig.class.php";
+include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
+include_once "/var/www/html/libs/extensions.class.php";
+include_once "/var/www/html/libs/misc.lib.php";
 
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
@@ -108,7 +108,7 @@ class paloAsteriskDB {
 		return $result;
 	}
 
-	//revisar que no exista dentro de la organizacion otra extension con el mismo numero
+	//revisar que no exista dentro de la organizacion otra elemento con el mismo patron de marcado
 	function existExtension($extension,$domain)
 	{
 		$exist=true;
@@ -155,6 +155,44 @@ class paloAsteriskDB {
 		return $result;
 	}
 
+	function prunePeer($device,$tech){
+        if(!$this->validateName($device))
+        {
+            $this->errMsg=_tr("Invalid device name");
+            return false;
+        }
+
+        $errorM="";
+        $astMang=AsteriskManagerConnect($errorM);
+        if($astMang==false){
+            $this->errMsg=$errorM;
+            return false;
+        }else{ //borro las propiedades dentro de la base ASTDB de asterisk
+            $result=$astMang->prunePeer($tech,$device);
+        }
+        return true;
+    }
+    
+    function loadPeer($device,$tech){
+        if(!$this->validateName($device))
+        {
+            print("hola");
+            print($device);
+            $this->errMsg=_tr("Invalid device name");
+            return false;
+        }
+
+        $errorM="";
+        $astMang=AsteriskManagerConnect($errorM);
+        if($astMang==false){
+            print("1");
+            $this->errMsg=$errorM;
+            return false;
+        }else{ //borro las propiedades dentro de la base ASTDB de asterisk
+            $result=$astMang->loadPeer($tech,$device);
+        }
+        return true;
+    }
 }
 
 class paloSip extends paloAsteriskDB {
@@ -319,7 +357,7 @@ class paloSip extends paloAsteriskDB {
 						case "session_refresher":
 							$Prop .="session-refresher,";
 							break;
-						case "call-limit":
+						case "call_limit":
 							$Prop .="call-limit,";
 							break;
 						case "context":
@@ -369,6 +407,72 @@ class paloSip extends paloAsteriskDB {
 			}
 		}
 	}
+	
+	function updateParameters($arrProp){
+        $arrQuery=array();
+        $arrParam=array();
+        $result=$this->getCodeByDomain($arrProp["organization_domain"]);
+        if($result==false){
+            $this->errMsg =_tr("Can't create the sip device").$this->errMsg;
+            return false;
+        }
+        $code=$result["code"];
+        if($this->existPeer($code."_".$arrProp["name"])){
+            foreach($arrProp as $name => $value){
+                if(property_exists($this,$name)){
+                    if(isset($value)){
+                        if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
+                            if($value=="" || $value=="noset"){
+                                $value=NULL;
+                            }
+                            switch ($name){
+                                case "session_timers":
+                                    $arrQuery[]="session-timers=?";
+                                    break;
+                                case "session_expires":
+                                    $arrQuery[]="session-expires=?";
+                                    break;
+                                case "session_minse":
+                                    $arrQuery[]="session-minse=?";
+                                    break;
+                                case "session_refresher":
+                                    $arrQuery[]="session-refresher=?";
+                                    break;
+                                case "call_limit":
+                                    $arrQuery[]="call-limit=?";
+                                    break;
+                                case "context":
+                                    $arrQuery[]="context=?";
+                                    $value = $code."-".$value;
+                                    break;
+                                default:
+                                    $arrQuery[]="$name=?";
+                                    break;
+                            }
+                            $arrParam[]=$value;
+                        }
+                    }
+                }
+            }
+            if(count($arrQuery)>0){
+                $query ="Update sip set ".implode(",",$arrQuery);
+                $query .=" where name=? and organization_domain=?";
+                $arrParam[]=$code."_".$arrProp["name"];
+                $arrParam[]=$arrProp["organization_domain"];
+                return $this->executeQuery($query,$arrParam);
+            }else
+                return true;
+        }else
+            return false;
+    }
+
+    function setParameter($device,$parameter,$value){
+        $query="UPDATE sip set $parameter=? where name=?";
+        if($this->executeQuery($query,array($parameter,$value,$device))){
+            return true;
+        }
+        return false;
+    }
 
 	//esta funcion solo debe ser llamada desde palodevice
 	function deletefromDB($deviceName)
@@ -389,72 +493,59 @@ class paloSip extends paloAsteriskDB {
 		else
 			return $arrResult; 
 	}
+	
+	function updateDefaultSettings($arrProp)
+    {
+        $arrQuery=array();
+        $arrParam=array();
+        
+        $result=$this->getCodeByDomain($arrProp["organization_domain"]);
+        if($result==false){
+            $this->errMsg =_tr("Can't create the iax device").$this->errMsg;
+            return false;
+        }
+        
+        $code=$result["code"];
+        foreach($arrProp as $name => $value){
+            if(property_exists($this,$name)){
+                if(isset($value)){
+                    if($name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
+                        if($value=="" || $value=="noset"){
+                            $value=NULL;
+                        }
+                        switch ($name){
+                            case "session_timers":
+                                $arrQuery[]="session-timers=?";
+                                break;
+                            case "session_expires":
+                                $arrQuery[]="session-expires=?";
+                                break;
+                            case "session_minse":
+                                $arrQuery[]="session-minse=?";
+                                break;
+                            case "session_refresher":
+                                $arrQuery[]="session-refresher=?";
+                                break;
+                            case "call_limit":
+                                $arrQuery[]="call-limit=?";
+                                break;
+                            default:
+                                $arrQuery[]="$name=?";
+                                break;
+                        }
+                        $arrParam[]=$value;
+                    }
+                }
+            }
+        }
+        if(count($arrQuery)>0){
+            $query ="Update sip_general set ".implode(",",$arrQuery)." where organization_domain=?";
+            $arrParam[]=$arrProp["organization_domain"];
+            return $this->executeQuery($query,$arrParam);
+        }else
+            return true;
+    }
 
-	function updateParameters($arrProp){
-		$arrQuery=array();
-		$arrParam=array();
-		$result=$this->getCodeByDomain($arrProp["organization_domain"]);
-		if($result==false){
-			$this->errMsg =_tr("Can't create the sip device").$this->errMsg;
-			return false;
-		}
-		$code=$result["code"];
-		if($this->existPeer($code."_".$arrProp["name"])){
-			foreach($arrProp as $name => $value){
-				if(property_exists($this,$name)){
-					if(isset($value)){
-						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
-							if($value=="" || $value=="noset"){
-								$value=NULL;
-							}
-							switch ($name){
-								case "session_timers":
-									$arrQuery[]="$name=?";
-									break;
-								case "session_expires":
-									$arrQuery[]="$name=?";
-									break;
-								case "session_minse":
-									$arrQuery[]="$name=?";
-									break;
-								case "session_refresher":
-									$arrQuery[]="$name=?";
-									break;
-								case "call-limit":
-									$arrQuery[]="$name=?";
-									break;
-								case "context":
-									$arrQuery[]="$name=?";
-									$value = $code."-".$value;
-									break;
-								default:
-									$arrQuery[]="$name=?";
-									break;
-							}
-							$arrParam[]=$value;
-						}
-					}
-				}
-			}
-			if(count($arrQuery)>0){
-				$query ="Update sip set ".implode(",",$arrQuery);
-				$query .=" where name=? and organization_domain=?";
-				$arrParam[]=$code."_".$arrProp["name"];
-				$arrParam[]=$arrProp["organization_domain"];
-				return $this->executeQuery($query,$arrParam);
-			}else
-				return true;
-		}else
-			return false;
-	}
-
-	function setParameter($device,$parameter,$value){
-		$query="UPDATE sip set $parameter=? where name=?";
-		if($this->executeQuery($query,array($parameter,$value,$device))){
-			return true;
-		}
-		return false;
-	}
 
 	function setSecret($device,$secret,$organization){
 		$query="update sip set md5secret=? where name=? and organization_domain=?";
@@ -463,7 +554,6 @@ class paloSip extends paloAsteriskDB {
 			$this->errMsg="Error setting secret for sip channel.";
 		else{
 			if($this->executeQuery($query,array($secret,$device,$organization))){
-				$this->prunePeer($device,"sip");
 				return true;
 			}else{
 				$this->errMsg="Secret couldn't be updated for sip channel. ".$this->errMsg;
@@ -482,23 +572,6 @@ class paloSip extends paloAsteriskDB {
 		}
 	}
 
-	function prunePeer($device,$tech){
-		if(!$this->validateName($device))
-		{
-			$this->errMsg=_tr("Invalid device name");
-			return false;
-		}
-
-		$errorM="";
-		$astMang=AsteriskManagerConnect($errorM);
-		if($astMang==false){
-			$this->errMsg=$errorM;
-			return false;
-		}else{ //borro las propiedades dentro de la base ASTDB de asterisk
-			$result=$astMang->prunePeer($tech,$device);
-		}
-		return true;
-	}
 }
 
 
@@ -632,6 +705,57 @@ class paloIax extends paloAsteriskDB {
 		}
 		return false;
 	}
+	
+	function updateParameters($arrProp){
+        $arrQuery=array();
+        $arrParam=array();
+        $result=$this->getCodeByDomain($arrProp["organization_domain"]);
+        if($result==false){
+            $this->errMsg =_tr("Can't create the iax device").$this->errMsg;
+            return false;
+        }
+        $code=$result["code"];
+        if($this->existPeer($code."_".$arrProp["name"])){
+            foreach($arrProp as $name => $value){
+                if(property_exists($this,$name)){
+                    if(isset($value)){
+                        if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
+                            if($value=="" || $value=="noset"){
+                                $value=NULL;
+                            }
+                            switch ($name){
+                                case "context":
+                                    $arrQuery[]="$name=?";
+                                    $value = $code."-".$value;
+                                    break;
+                                default:
+                                    $arrQuery[]="$name=?";
+                                    break;
+                            }
+                            $arrParam[]=$value;
+                        }
+                    }
+                }
+            }
+            if(count($arrQuery)>0){
+                $query ="Update iax set ".implode(",",$arrQuery);
+                $query .=" where name=? and organization_domain=?";
+                $arrParam[]=$code."_".$arrProp["name"];
+                $arrParam[]=$arrProp["organization_domain"];
+                return $this->executeQuery($query,$arrParam);
+            }else
+                return true;
+        }else
+            return false;
+    }
+
+    function setParameter($device,$parameter,$value){
+        $query="UPDATE iax set $parameter=? where name=?";
+        if($this->executeQuery($query,array($value,$device))){
+            return true;
+        }
+        return false;
+    }
 
 	function deletefromDB($deviceName)
 	{
@@ -652,57 +776,38 @@ class paloIax extends paloAsteriskDB {
 			return $arrResult;
 	}
 
-	function updateParameters($arrProp){
-		$arrQuery=array();
-		$arrParam=array();
-		$result=$this->getCodeByDomain($arrProp["organization_domain"]);
-		if($result==false){
-			$this->errMsg =_tr("Can't create the iax device").$this->errMsg;
-			return false;
-		}
-		$code=$result["code"];
-		if($this->existPeer($code."_".$arrProp["name"])){
-			foreach($arrProp as $name => $value){
-				if(property_exists($this,$name)){
-					if(isset($value)){
-						if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
-							if($value=="" || $value=="noset"){
-								$value=NULL;
-							}
-							switch ($name){
-								case "context":
-									$arrQuery[]="$name=?";
-									$value = $code."-".$value;
-									break;
-								default:
-									$arrQuery[]="$name=?";
-									break;
-							}
-							$arrParam[]=$value;
-						}
-					}
-				}
-			}
-			if(count($arrQuery)>0){
-				$query ="Update iax set ".implode(",",$arrQuery);
-				$query .=" where name=? and organization_domain=?";
-				$arrParam[]=$code."_".$arrProp["name"];
-				$arrParam[]=$arrProp["organization_domain"];
-				return $this->executeQuery($query,$arrParam);
-			}else
-				return true;
-		}else
-			return false;
-	}
-
-	function setParameter($device,$parameter,$value){
-		$query="UPDATE iax set $parameter=? where name=?";
-		if($this->executeQuery($query,array($value,$device))){
-			return true;
-		}
-		return false;
-	}
-
+	function updateDefaultSettings($arrProp)
+    {
+        $arrQuery=array();
+        $arrParam=array();
+        
+        $result=$this->getCodeByDomain($arrProp["organization_domain"]);
+        if($result==false){
+            $this->errMsg =_tr("Can't create the iax device").$this->errMsg;
+            return false;
+        }
+        
+        $code=$result["code"];
+        foreach($arrProp as $name => $value){
+            if(property_exists($this,$name)){
+                if(isset($value)){
+                    if($name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
+                        if($value=="" || $value=="noset"){
+                            $value=NULL;
+                        }
+                        $arrQuery[]="$name=?";
+                        $arrParam[]=$value;
+                    }
+                }
+            }
+        }
+        if(count($arrQuery)>0){
+            $query ="Update iax_general set ".implode(",",$arrQuery)." where organization_domain=?";
+            $arrParam[]=$arrProp["organization_domain"];
+            return $this->executeQuery($query,$arrParam);
+        }else
+            return true;
+    }
 
 	function setGroupProp($arrProp,$domain)
 	{
@@ -728,9 +833,9 @@ class paloIax extends paloAsteriskDB {
 	// los peers usados en los faxes
 	function setSecret($device,$secret,$organization){
 		$query="update iax set secret=? where name=? and organization_domain=?";
+		//obtenemos el md5 de la clave
 		$secret=md5($secret);
 		if($this->executeQuery($query,array($secret,$device,$organization))){
-			$this->prunePeer($device,"iax");
 			return true;
 		}else{
 			$this->errMsg="Secret couldn't be updated for iax channel. ".$this->errMsg;
@@ -748,23 +853,6 @@ class paloIax extends paloAsteriskDB {
 		}
 	}
 
-	function prunePeer($device,$tech){
-		if(!$this->validateName($device))
-		{
-			$this->errMsg=_tr("Invalid device name");
-			return false;
-		}
-
-		$errorM="";
-		$astMang=AsteriskManagerConnect($errorM);
-		if($astMang==false){
-			$this->errMsg=$errorM;
-			return false;
-		}else{ //borro las propiedades dentro de la base ASTDB de asterisk
-			$result=$astMang->prunePeer($tech,$device);
-		}
-		return true;
-	}
 }
 
 
@@ -935,6 +1023,38 @@ class paloVoicemail extends paloAsteriskDB{
 		else
 			return $arrResult;
 	}
+	
+	function updateDefaultSettings($arrProp)
+    {
+        $arrQuery=array();
+        $arrParam=array();
+        $result=$this->getCodeByDomain($arrProp["organization_domain"]);
+        if($result==false){
+            $this->errMsg =_tr("Can't create the iax device").$this->errMsg;
+            return false;
+        }
+        
+        $code=$result["code"];
+        foreach($arrProp as $name => $value){
+            if(property_exists($this,$name)){
+                if(isset($value)){
+                    if($name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
+                        if($value=="" || $value=="noset"){
+                            $value=NULL;
+                        }
+                        $arrQuery[]="$name=?";
+                        $arrParam[]=$value;
+                    }
+                }
+            }
+        }
+        if(count($arrQuery)>0){
+            $query ="Update voicemail_general set ".implode(",",$arrQuery)." where organization_domain=?";
+            $arrParam[]=$arrProp["organization_domain"];
+            return $this->executeQuery($query,$arrParam);
+        }else
+            return true;
+    }
 
 	function setVoicemailProp($arrProp,$domain)
 	{
@@ -1017,6 +1137,21 @@ class paloDevice{
 		return true;
 	}
 
+	function getExtension($exten){
+        $query="SELECT * from extension where organization_domain=? and exten=?";
+        $result=$this->tecnologia->getFirstResultQuery($query,array($this->domain,$exten),true,"Don't exist extension.");
+        if($result==false)
+            $this->errMsg=$this->tecnologia->errMsg;
+        return $result;
+    }
+    
+    function getFaxExtension($faxExten){
+        $query="SELECT * from fax where organization_domain=? and exten=?";
+        $result=$this->tecnologia->getFirstResultQuery($query,array($this->domain,$faxExten),true,"Don't exist fax extension.");
+        if($result==false)
+            $this->errMsg=$this->tecnologia->errMsg;
+        return $result;
+    }
 	/**
 		funcion utilizada para crear una nueva extension en asterisk
 		crea el peer y hace el correspondiente registro de la extension
@@ -1027,9 +1162,18 @@ class paloDevice{
 		if(!$this->validatePaloDevice())
 			return false;
 
+        if($type=="iax2")
+            $this->tecnologia=new paloIax($this->tecnologia->_DB);
+        elseif($type=="sip")
+            $this->tecnologia=new paloSip($this->tecnologia->_DB);
+        else{
+            $this->errMsg=_tr("Invalid Technology");
+            $continuar=false;
+        }
+        
 		$device=$this->code."_".$arrProp['name'];
 		if(!$this->existExtension($arrProp['name'],$type)){//se verifica que no exista otra extension y dispositivo igual
-														   //tambien se setea la tecnologia adecuada dentro de esta funcion
+            
 			$arrProp['dial'] = strtoupper($type)."/".$device;
 
 			//validamos que se haya ingresado un secret para el dispositivo
@@ -1094,11 +1238,11 @@ class paloDevice{
 			//guardar los setting en la tabla extensions; para despues con esta informacion procede a crear las extensiones de tipo local en el plan de marcado
 			if(isset($arrProp['rt'])){
 				if(!preg_match("/^[[:digit:]]+$/",$arrProp['rt']) && !($arrProp['rt']>0 && $arrProp['rt']<60))
-					$arrProp['rt']=0;
+					$arrProp['rt']=15;
 				else
 					$arrProp['rt']=$arrProp['rt'];
 			}else
-				$arrProp['rt']=0;
+				$arrProp['rt']=15;
 
 			//validamos los recording
 			switch(strtolower($arrProp["record_in"])){
@@ -1139,23 +1283,40 @@ class paloDevice{
 		}
 	}
 
-	function createFaxExtension($arrProp){
+	function createFaxExtension($arrProp,$type){
 		//validamos que la instacia del objeto haya sido creada correctamente
 		if(!$this->validatePaloDevice())
 			return false;
 
-		$type="iax2";
+		if($type=="iax2")
+            $this->tecnologia=new paloIax($this->tecnologia->_DB);
+        elseif($type=="sip")
+            $this->tecnologia=new paloSip($this->tecnologia->_DB);
+        else{
+            $this->errMsg=_tr("Invalid Technology");
+            $continuar=false;
+        }
+		
 		if(!$this->existExtension($arrProp['name'],$type)){
 			$device=$this->code."_".$arrProp['name'];
 			$arrProp['dial'] = strtoupper($type)."/".$device;
 			$arrProp['organization_domain']=$this->domain;
+			
+			//validamos que se haya ingresado un secret para el dispositivo
+            if(isset($arrProp['secret']) && $arrProp['secret']!=""){
+                $arrProp['secret']=md5($arrProp['secret']);
+            }else{
+                $this->errMsg="Field secret can't be empty";
+                return false;
+            }
+			
 			if(isset($arrProp['rt'])){
 				if(!preg_match("/^[[:digit:]]+$/",$arrProp['rt']) && !($arrProp['rt']>0 && $arrProp['rt']<60))
-					$arrProp['rt']=0;
+					$arrProp['rt']=15;
 				else
 					$arrProp['rt']=$arrProp['rt'];
 			}else
-				$arrProp['rt']=0;
+				$arrProp['rt']=15;
 
 			$this->tecnologia->setGroupProp($arrProp,$this->domain);
 			if($this->tecnologia->insertDB()==false){
@@ -1233,24 +1394,32 @@ class paloDevice{
 		$arrSetting["ringtimer"]=$arrProp['rt'];
 		$arrSetting["voicemail"]=$arrProp["voicemail_context"];
 
+		//validamos los recording
+        switch(strtolower($arrProp["record_out"])){
+            case "always":
+                $stRecord="out=always";
+                break;
+            case "never":
+                $stRecord="out=never";
+                break;
+            default:
+                $stRecord="out=on_demand";
+                break;
+        }
+        $stRecord .="|";
 		switch(strtolower($arrProp["record_in"])){
-				case "always":
-					$stRecord="in=always";
-				case "never":
-					$stRecord="in=never";
-				default:
-					$stRecord="in=on_demand";
-			}
-			$stRecord .="|";
-			//validamos los recording
-			switch(strtolower($arrProp["record_out"])){
-				case "always":
-					$stRecord .="out=always";
-				case "never":
-					$stRecord .="out=never";
-				default:
-					$stRecord .="out=on_demand";
-			}
+            case "always":
+                $stRecord .="in=always";
+                break;
+            case "never":
+                $stRecord .="in=never";
+                break;
+            default:
+                $stRecord .="in=on_demand";
+                break;
+        }
+			
+		
 
 		$arrSetting["recording"]=$stRecord;
 
@@ -1413,14 +1582,26 @@ class paloDevice{
 			return true;
 	}
 
-	function editDevice($arrProp,$tech){
+	function editDevice($arrProp){
 		//validamos que la instacia del objeto haya sido creada correctamente
 		if(!$this->validatePaloDevice())
 			return false;
 
-		$device=$this->code."_".$arrProp['name'];
-		$exten=$arrProp['name'];
-		if($this->existExtension($exten,$tech)){
+        $result=$this->getExtension($arrProp["name"]);
+        
+		if($result!=false){
+            $device=$result['device'];
+            $tech=$result['tech'];
+            
+            if($tech=="iax2")
+                $this->tecnologia=new paloIax($this->tecnologia->_DB);
+            elseif($tech=="sip")
+                $this->tecnologia=new paloSip($this->tecnologia->_DB);
+            else{
+                $this->errMsg=_tr("Invalid Technology");
+                return false;
+            }
+            
 			//si ingreso un nuevo secrte lo actualizamos
 			if(isset($arrProp['secret']) && $arrProp['secret']!=""){
 				if($tech=="sip"){
@@ -1526,9 +1707,9 @@ class paloDevice{
 			$outClid=isset($arrProp['out_clid'])?$arrProp['out_clid']:"";
 			$exito=$this->editExtensionDB($this->domain,$arrProp['name'],$arrProp['rt'],$arrProp['record_in'],$arrProp['record_out'], $arrProp['context'],$arrProp["voicemail_context"],$outClid,"","","");
 			if($exito){
-				if($this->insertDeviceASTDB($arrProp))
+				if($this->insertDeviceASTDB($arrProp)){
 					return true;
-				else{
+				}else{
 					$this->errMsg="Extension couldn't be updated .".$this->errMsg;
 					return false;
 				}
@@ -1537,7 +1718,6 @@ class paloDevice{
 				return false;
 			}
 		}else{
-			$this->errMsg=_tr("Extensions doesn't exist").$this->errMsg;
 			return false;
 		}
 	}
@@ -1549,8 +1729,50 @@ class paloDevice{
 			$this->errMsg=$this->tecnologia->errMsg;
 		return $result; 
 	}
+	
+	
+    function editFaxDevice($arrProp){
+        //validamos que la organizacion exista
+        //validamos que la instacia del objeto haya sido creada correctamente
+        if(!$this->validatePaloDevice())
+            return true;
 
-	//revisar que no exista dentro de la organizacion otra extension con el mismo numero
+        $result=$this->getFaxExtension($arrProp["name"]);
+
+        if($result==false){
+            //hubo problemas al hacer la consulta
+            return false;
+        }else{
+            if($result["tech"]=="iax2")
+                $this->tecnologia=new paloIax($this->tecnologia->_DB);
+            else
+                $this->tecnologia=new paloSip($this->tecnologia->_DB);
+
+            $arrProp["organization_domain"]=$this->domain;
+            if($this->tecnologia->updateParameters($arrProp)==false){
+                $this->errMsg="Error setting parameter ".$result["tech"]." device ".$this->tecnologia->errMsg;
+                return false;
+            }    
+            
+            if($this->editFaxExtensionDB($arrProp["name"],$arrProp["fullname"],$arrProp["cid_number"])==false){
+                $this->errMsg="Problem when trying updated data in fax table. ".$this->errMsg;
+                return false;
+            }
+            return true;
+        }
+    }
+
+        //en la tabla debe haber un unico numero de de extension por dominio
+    private function editFaxExtensionDB($exten,$callerIDname,$callerIDnumber)
+    {
+        $query="UPDATE fax SET callerid_name=?, callerid_number=? where exten=? and organization_domain=?";
+        $result=$this->tecnologia->executeQuery($query,array($callerIDname,$callerIDnumber,$exten,$this->domain));
+        if($result==false)
+            $this->errMsg=$this->tecnologia->errMsg;
+        return $result;
+    }
+
+	//revisar que no exista dentro de la organizacion otra extension con el mismo patron
 	function existExtension($extension,$tech)
 	{
 		//validamos que la instacia del objeto haya sido creada correctamente
@@ -1600,14 +1822,12 @@ class paloDevice{
 		if(!$this->validatePaloDevice())
 			return true;
 
-		$query="SELECT tech, device, voicemail from extension where exten=? and organization_domain=?";
-		$result=$this->tecnologia->getFirstResultQuery($query,array($exten,$this->domain),true,"Don't exist extension");
+		$result=$this->getExtension($exten);
 		//verifico que exista el dispositivo al que se le quiere cambiar le password y que el mismo
 		//este asociado a una extension
 
 		if($result==false){
 			//hubo problemas al hacer la consulta
-			$this->errMsg=$this->tecnologia->errMsg;
 			return false;
 		}else{
 			if($result["tech"]=="iax2")
@@ -1639,21 +1859,19 @@ class paloDevice{
 		if(!$this->validatePaloDevice())
 			return true;
 
-		$query="SELECT tech, device from fax where exten=? and organization_domain=?";
-		$result=$this->tecnologia->getFirstResultQuery($query,array($exten,$this->domain),true,"Don't exist Fax extension");
+		$result=$this->getFaxExtension($exten);
 		//verifico que exista el dispositivo al que se le quiere cambiar el password y que el mismo
 		//este asociado a una extension
 
 		if($result==false){
 			//hubo problemas al hacer la consulta
-			$this->errMsg=$this->tecnologia->errMsg;
 			return false;
 		}else{
 			if($result["tech"]=="iax2")
 				$this->tecnologia=new paloIax($this->tecnologia->_DB);
 			else
 				$this->tecnologia=new paloSip($this->tecnologia->_DB);
-
+				
 			if(!$this->tecnologia->setSecret($result["device"],$password,$this->domain)){
 				$this->errMsg=$this->tecnologia->errMsg;
 				return false;
@@ -1662,7 +1880,7 @@ class paloDevice{
 			}
 		}
 	}
-
+    
 	//vuelve a reconstruir las desde los datos anteriores contenidos en astDB
 	function backupAstDBEXT($exten){
 		//validamos que la organizacion exista
@@ -1730,32 +1948,31 @@ class paloDevice{
 		if(!$this->validatePaloDevice())
 			return true;
 
-		$tech="iax2";
-		$query="Select id, organization_domain, exten, device from fax where exten=? and organization_domain=?";
+		$query="Select id, organization_domain, exten, device, tech from fax where exten=? and organization_domain=?";
 		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$this->domain),true,"Don't fax exist extension $extension. ");
 		if($result==false && $this->tecnologia->errMsg!="Don't exist fax extension $extension. "){
 			$this->errMsg="Fax extension can't be deleted. ".$this->tecnologia->errMsg;
 			return false;
 		}else{
 			$device=$result["device"];
-			$this->tecnologia=new paloIax($this->tecnologia->_DB);
+			
+			$tech=$result["tech"];    
+            if($tech=="sip"){
+                $this->tecnologia=new paloSip($this->tecnologia->_DB);
+            }elseif($tech=="iax2"){
+                $this->tecnologia=new paloIax($this->tecnologia->_DB);
+            }
+            
 			if($this->tecnologia->deletefromDB($device)==false)
 				return false;
 
 			$dquery="delete from fax where device=? and tech=? and organization_domain=?";
-			$exito=$this->tecnologia->executeQuery($dquery,array($device,$tech,$this->domain));
+			$exito=$this->tecnologia->executeQuery($dquery,array($device,$result["tech"],$this->domain));
 			if(!$exito){
 				$this->errMsg="Extension can't be deleted. ".$this->tecnologia->errMsg;
 				return false;
 			}
 
-			$errorM="";
-			$astMang=AsteriskManagerConnect($errorM);
-			if($astMang==false){
-				$this->errMsg=$errorM;
-				return false;
-			}else
-				$result=$astMang->prunePeer($tech,$device);
 		}
 		return true;
 	}
@@ -1766,13 +1983,13 @@ class paloDevice{
     // 3. Se eliminia el registro correspondiente de esa extension de la tabla extensions
 	// 4. Despues de ello se debe mandar a recargar el plan de marcado para que los cambios tengan efecto
     //    dentro de asterisk
-	function deleteExtension($extension,$tech){
+	function deleteExtension($extension){
 		//validamos que la instacia del objeto haya sido creada correctamente
 		if(!$this->validatePaloDevice())
 			return true;
 
-		$query="Select id, organization_domain, exten, device, tech, voicemail from extension where exten=? and tech=? and organization_domain=?";
-		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$tech,$this->domain),true,"Don't exist extension $extension. ");
+		$query="Select id, organization_domain, exten, device, tech, voicemail from extension where exten=? and organization_domain=?";
+		$result=$this->tecnologia->getFirstResultQuery($query,array($extension,$this->domain),true,"Don't exist extension $extension. ");
 		if($result==false && $this->tecnologia->errMsg!="Don't exist extension $extension. "){
 			$this->errMsg="Extension can't be deleted. ".$this->tecnologia->errMsg;
 			return false;
@@ -1784,7 +2001,8 @@ class paloDevice{
 					$dvoicemial=$pVoicemail->deletefromDB($result["exten"],$this->domain);
 				}
 				$device=$result["device"];
-
+                $tech=$result["tech"];
+                
 				if($tech=="sip"){
 					$this->tecnologia=new paloSip($this->tecnologia->_DB);
 				}elseif($tech=="iax2"){
@@ -1801,13 +2019,13 @@ class paloDevice{
 				}
 
 				//borramos las entradas dentro de astDB
-				$this->deleteAstDBExt($extension,$device,$tech);
+				$this->deleteAstDBExt($extension,$device);
 			}
 		}
 		return true;
 	}
 
-	function deleteAstDBExt($exten,$device,$tech){
+	function deleteAstDBExt($exten,$device){
 		//validamos que la instacia del objeto haya sido creada correctamente
 		if(!$this->validatePaloDevice())
 			return true;
@@ -1826,7 +2044,6 @@ class paloDevice{
 			$result=$astMang->database_del("CFB",$this->code."/".$exten);
 			$result=$astMang->database_del("CF",$this->code."/".$exten);
 			$result=$astMang->database_del("Cw",$this->code."/".$exten);
-			$result=$astMang->prunePeer($tech,$device);
 		}
 		return true;
 	}

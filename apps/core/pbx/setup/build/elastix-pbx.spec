@@ -294,6 +294,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Batch of Endpoints: reimplement CSV download to take into account all
+  of the endpoints that were configured via Endpoint Configurator and therefore
+  have no parameters as inserted by Batch of Endpoints. Fixes Elastix bug #1360.
+  SVN Rev[4175]
+
 * Fri Aug 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-14
 - FIXED: Prereq: elastix-system >= 2.3.0-10. Fixes Elastix bug #1358.
 

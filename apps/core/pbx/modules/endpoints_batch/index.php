@@ -45,6 +45,7 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/endpoint_configurator/libs/paloSantoEndPoint.class.php";
     include_once "modules/endpoint_configurator/libs/paloSantoFileEndPoint.class.php";
+    include_once "modules/$module_name/libs/paloSantoEndPointDownload.class.php";
 
     //include file language agree to elastix configuration
     //if file language not exists, then include language by default (en)
@@ -537,64 +538,49 @@ function subMask($ip)
 
 function download_endpoints($dsnAsterisk, $dsnSqlite)
 {
-    $paloEndPoint      = new paloSantoEndPoint($dsnAsterisk,$dsnSqlite);
-    
     header("Cache-Control: private");
     header("Pragma: cache");
-    header('Content-Type: text/csv; charset=iso-8859-1; header=present');
-    header("Content-disposition: attachment; filename=endpoints.csv");
-    echo backup_endpoints($paloEndPoint);
-}
 
-function backup_endpoints($paloEndPoint)
-{
-    global $arrLang;
-    $csv = "";
-    $parametersEndpoint = $paloEndPoint->queryParametersEndpoints();
-    $idEndpoints = $paloEndPoint->queryIdEndpoints();
-    $countId = count($idEndpoints);
-    $countPareameters = count($parametersEndpoint);
-
-    if(!$parametersEndpoint){
-
-    $csv .= "\"Vendor\",\"Model\",\"Mac\",\"Ext\",\"IP\",\"Mask\",\"GW\",\"DNS1\",\"Bridge\",\"Time Zone\",\"DNS2\"\n";
-    }else{
-        //cabecera
-        $csv .= "\"Vendor\",\"Model\",\"Mac\",\"Ext\",\"IP\",\"Mask\",\"GW\",\"DNS1\",\"Bridge\",\"Time Zone\",\"DNS2\"\n";
-                
-        for($i=0;$i<$countId;$i++){
-            for($j=0;$j<$countPareameters;$j++){
-                if($idEndpoints[$i]['id_endpoint']==$parametersEndpoint[$j]['id_endpoint']){
-                    if ($parametersEndpoint[$j]['name']=="Vendor"){
-                        $Vendor = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "Model"){
-                        $Model = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "MAC"){
-                        $MAC = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "Ext"){
-                        $Ext = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "IP"){
-                        $IP = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "Mask"){
-                        $Mask = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "GW"){
-                        $GW = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "DNS1"){
-                        $DNS1 = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "Bridge"){
-                        $Bridge = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "Time_Zone"){
-                        $Time_Zone = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }elseif($parametersEndpoint[$j]['name'] == "DNS2"){         
-                        $DNS2 = isset($parametersEndpoint[$j]['value']) ?$parametersEndpoint[$j]['value']:"";
-                    }
-                }
-            }
-        $csv .= "\"$Vendor\",\"$Model\",\"$MAC\",\"$Ext\",\"$IP\",\"$Mask\",".
-            "\"$GW\",\"$DNS1\",\"$Bridge\",\"$Time_Zone\",\"$DNS2\",".
-            "\n";
-        }                                       
+	$sDSN = $dsnSqlite.'/endpoint.db';
+    $pEndpointDownload = new paloSantoEndPointDownload($sDSN);
+    $r = $pEndpointDownload->reportEndpointParameters();
+    if (!is_array($r)) {
+    	print $pEndpointDownload->errMsg;
+        return;
     }
-    return $csv;
+    
+    /* El siguiente código depende de forma fundamental del hecho de que PHP
+     * preserve el orden de las claves y valores en las funciones implode()
+     * y array_keys(). */
+    header('Content-Type: text/csv; charset=iso-8859-1; header=present');
+    header('Content-disposition: attachment; filename=endpoints.csv');
+    $keyOrder = array(
+        'Vendor'    => 'Vendor',
+        'Model'     => 'Model',
+        'MAC'       => 'Mac',
+        'Ext'       =>  'Ext',
+        'IP'        =>  'IP',
+        'Mask'      =>  'Mask',
+        'GW'        =>  'GW',
+        'DNS1'      =>  'DNS1',
+        'Bridge'    =>  'Bridge',
+        'Time_Zone' =>  'Time Zone',
+        'DNS2'      =>  'DNS2',
+    );
+    print '"'.implode('","', $keyOrder)."\"\n";
+    
+    foreach ($r as $tupla) {
+    	$t = array();
+        foreach (array_keys($keyOrder) as $k) switch ($k) {
+        case 'Vendor':  $t[] = $tupla['vendor_name']; break;
+        case 'Model':   $t[] = $tupla['model_name']; break;
+        case 'MAC':     $t[] = $tupla['mac_adress']; break;
+        case 'Ext':     $t[] = $tupla['account']; break;
+        default:
+            $t[] = (isset($tupla['parameters'][$k])) ? $tupla['parameters'][$k] : '';
+        }
+        
+        print '"'.implode('","', $t)."\"\n";
+    }
 }
 ?>

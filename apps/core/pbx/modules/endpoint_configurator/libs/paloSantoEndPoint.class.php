@@ -83,26 +83,6 @@ class paloSantoEndPoint
     return $result;
     }
 
-    function queryParametersEndpoints() {
-        $pDB = $this->connectDataBase("sqlite","endpoint");
-        if($pDB==false)
-            return false;    
-    $sqlPeticion = "select p.id_endpoint, p.name, p.value from parameter p, endpoint e where p.id_endpoint = e.id";
-        $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base endpoints
-        $pDB->disconnect(); 
-    return $result;
-    }
-
-    function queryIdEndpoints() {
-        $pDB = $this->connectDataBase("sqlite","endpoint");
-        if($pDB==false)
-            return false;    
-    $sqlPeticion = "select id_endpoint from parameter group by id_endpoint";
-        $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base endpoints
-        $pDB->disconnect(); 
-    return $result;
-    }
-
      function deleteEndpointsConf($Mac) {
         $pDB = $this->connectDataBase("sqlite","endpoint");
         if($pDB==false)

@@ -587,11 +587,9 @@ function createStatus($type,$text)
 
 function network()
 {
-    $paloNetwork = new paloNetwork(); // Patch
     $ip = $_SERVER['SERVER_ADDR'];
     $total = subMask($ip);
-    // return paloNetwork::getNetAdress($ip, $total)."/".$total;    // Patch
-    return $paloNetwork->getNetAdress($ip, $total)."/".$total;    // Patch
+    return paloNetwork::getNetAdress($ip, $total)."/".$total;    
 }
 
 function subMask($ip)

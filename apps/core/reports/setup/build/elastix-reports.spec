@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.3.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -91,9 +91,18 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Mon May 07 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: module - billing_rates: Change text information when edit a rate.
+  SVN Rev[4163]
+
 * Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-5
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4026]
 
 * Mon May 07 2012 German Macas <gmacas@palosanto.com>
 - CHANGED: Reports - Missed Calls: change application form Filter and spanish words in lang

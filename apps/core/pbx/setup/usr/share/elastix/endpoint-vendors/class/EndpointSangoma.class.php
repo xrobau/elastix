@@ -44,6 +44,185 @@ class EndpointSangoma extends Endpoint
             $sTech, $sDesc, $sAccount, $sSecret);
     }
 
+    public function setExtraParameters($param)
+    {
+        if (!isset($param['pbx_address'])) $param['pbx_address'] = $this->_serverip;
+        if (!isset($param['sip_port'])) $param['sip_port'] = 5060; 
+
+        // Unset empty keys
+        foreach (array('registration', 'registration_password') as $k) {
+            if (isset($param[$k]) && trim($param[$k]) == '')
+                unset($param[$k]);
+        }
+
+        // Keys that must be present
+        foreach (array('lan_type', 'analog_extension_lines', 'analog_trunk_lines',
+            //'first_extension', 'increment',   // Apparently unused 
+            ) as $k) {
+            if (!isset($param[$k])) {
+                $this->_log->output('ERR: required extra field not assigned: '.$k);
+                return FALSE;
+            }
+        }
+        
+        // Keys that must be conditionally present
+        $condKeys = array();
+        for ($i = 0; $i < $param['analog_extension_lines']; $i++) {
+            $condKeys[] = 'user_name'.$i;
+            $condKeys[] = 'user'.$i;
+            $condKeys[] = 'authentication_user'.$i;
+            $condKeys[] = 'call_conference'.$i;
+            $condKeys[] = 'call_dnd'.$i;
+            $condKeys[] = 'caller_id'.$i;
+            $condKeys[] = 'call_transfer'.$i;
+            $condKeys[] = 'call_waiting'.$i;
+            $condKeys[] = 'enable'.$i;
+        }
+        for ($i = 0; $i < $param['analog_trunk_lines']; $i++) {
+            $condKeys[] = 'line'.$i;
+            $condKeys[] = 'ID'.$i;
+            $condKeys[] = 'authentication_ID'.$i;
+            $condKeys[] = 'enable_line'.$i;
+            $condKeys[] = 'num_list'.$i;
+        }
+        if ($param['lan_type'] != 'dhcp') {
+            $condKeys[] = 'lan_ip_address';
+            $condKeys[] = 'lan_ip_mask';
+        }
+        foreach ($condKeys as $k) {
+            if (!isset($param[$k])) {
+                $this->_log->output('ERR: required extra field not assigned: '.$k);
+                return FALSE;
+            }
+        }
+        
+        // Keys that must be valid IP addresses
+        foreach (array('lan_ip_address', 'lan_ip_mask', 'pbx_address') as $k) {
+            if (isset($param[$k])) {
+                if ($param[$k] == '0.0.0.0' || 
+                    !preg_match('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/', $param[$k])) {
+                    $this->_log->output(
+                        'ERR: the following extra field is not a valid IPv4 address: '.
+                        $k.'='.$param[$k]);
+                    return FALSE;
+                }
+            }
+        }
+        
+        $this->_param = $param;
+        if (isset($param['telnet_username']))
+            $this->_telnet_username = $param['telnet_username'];
+        if (isset($param['telnet_password']))
+            $this->_telnet_password = $param['telnet_password'];
+        
+        
+        // TODO: terminar de implementar
+        return TRUE;
+    }
+    
+    /**
+     * Configuration for Sangoma Vega endpoints:
+     * 
+     * The file config.txt (may possibly accept an arbitrary name) is created
+     * in /tftpboot. For parallel configuration, the filename 
+     * XXXXXXXXXXXX_SangomaVega.cfg will be used in this implementation. Next,
+     * the Sangoma Vega is instructed to read the configuration file through a 
+     * series of telnet commands, and then rebooted through the same telnet 
+     * connection.
+     */
+    public function updateLocalConfig($oConn, $bClosing)
+    {
+        switch ($this->_step) {
+        case 'START':
+            // Need to calculate lowercase version of MAC address without colons
+            $sLowerMAC = strtolower(str_replace(':', '', $this->_mac));
+            
+            // Write out the configuration file
+            $sConfigPath = TFTP_DIR."/{$sLowerMAC}_SangomaVega.cfg";
+            if (!file_put_contents(
+                $sConfigPath,
+                $this->_getSangomaConfiguration(
+                    $this->_param))) {
+                $this->_log->output(
+                    'ERR: failed to write to configuration file '.$sConfigPath);
+                $this->_localConfigStatus = ENDPOINT_FAILURE;
+            }
+            
+            $this->_telnet = new AsyncTelnetClient($this->multiplex, $this);
+            $this->_telnet->nuevoTimeout(10);
+            //$this->_log->output('DEBUG: connecting via telnet...');
+            $st = $this->_telnet->connect($this->_ip);
+            if ($st === TRUE) {
+                //$this->_log->output('DEBUG: logging in...');
+                if (!is_null($this->_telnet_username))
+                    $this->_telnet->appendLines(array($this->_telnet_username));
+                if (!is_null($this->_telnet_password))
+                    $this->_telnet->appendLines(array($this->_telnet_password));
+                $this->_step = 'TELNET_LOGIN';
+            } else {
+                $this->_log->output('ERR: failed to connect - ('.$st[0].') '.$st[1]);
+                $this->_localConfigStatus = ENDPOINT_FAILURE;
+            }
+            break;
+        case 'TELNET_LOGIN':
+            if ($oConn !== $this->_telnet) break;
+            
+            if ($bClosing) {
+                $this->_log->output('ERR: abnormal telnet disconnect');
+                $this->_localConfigStatus = ENDPOINT_FAILURE;
+            } else {
+                $output = $this->_telnet->fetchOutput();
+                $lastline = $output[count($output)-1];
+                if (preg_match('/admin  >$/', $lastline)) {
+                    //$this->_log->output('DEBUG: prompt detected, issuing commands...');
+                    $sLowerMAC = strtolower(str_replace(':', '', $this->_mac));
+                    
+                    $telnetQueue = array(
+                        "set .tftp.ip={$this->_serverip}",
+                        'set .lan.file_transfer_method=TFTP',
+                        "get tftp:{$sLowerMAC}_SangomaVega.cfg",
+                        'apply',
+                        'save',
+                        'reboot system',
+                    );
+                    $this->_telnet->appendLines($telnetQueue);
+                    $this->_step = 'TELNET_COMMANDS';
+                } elseif (count($output) > 3 && 
+                    strpos($lastline, 'Username: ') === 0 && 
+                    strpos($output[count($output)-3], 'incorrect password and/or username') !== FALSE) {
+                    $this->_log->output('ERR: detected ACCESS DENIED on telnet connect');
+                    $this->_localConfigStatus = ENDPOINT_FAILURE;
+                }
+            }
+            break;
+        case 'TELNET_COMMANDS':
+            if ($oConn !== $this->_telnet) break;
+
+            $output = $this->_telnet->fetchOutput();
+            //$lastline = $output[count($output)-1];
+            
+            /* WARNING: the Sangoma Vega telnet interface has a habit of 
+             * interspacing log messages in between the command output, and will
+             * also repeat the command prompt with the current command if the
+             * log message gets inserted at the right time. The command parsing
+             * must be done to account for the possibility of a log message
+             * in the middle of the command output. */            
+            if (strpos(implode('', $output), 'rebooting ...')) {
+            	//$this->_log->output('DEBUG: detected gateway reboot...');
+                if (!$bClosing) {
+                    $this->_telnet->finalizarConexion();
+                }
+                $this->_telnet = NULL;
+                
+                $this->_localConfigStatus = ENDPOINT_SUCCESS;
+            } elseif ($bClosing) {
+                $this->_log->output('ERR: abnormal telnet disconnect');
+                $this->_localConfigStatus = ENDPOINT_FAILURE;
+            }
+            break;
+        }
+    }
+
     /**
      * Properties loaded from endpoint parameters:
      * 
@@ -53,8 +232,8 @@ class EndpointSangoma extends Endpoint
      *      lan_ip_address  IP address for LAN (static only)
      *      lan_ip_mask     IP mask for LAN (static only) 
      *  analog_extension_lines  Number of analog extension lines (0..N-1)
-     *  first_extension         Initial extension in analog extension range
-     *  increment               Increment between each extension in analog extension range
+     *  first_extension         (unused?)Initial extension in analog extension range
+     *  increment               (unused?)Increment between each extension in analog extension range
      *      user_nameN          Symbolic name for SIP mapping to analog extension N 
      *      userN               SIP account for mapping to analog extension N
      *      authentication_userN Password for SIP account N
@@ -76,14 +255,13 @@ class EndpointSangoma extends Endpoint
      *      authentication_IDN  Password for line N
      *      enable_lineN
      *      num_listN
-     * 
      */
     private function _getSangomaConfiguration($arrData)
     {
         $date =  date("j/m/Y H:i:s"); 
     
     
-        $config .= <<<CONF
+        $config = <<<CONF
         ;writing file ...
     ;PUT completed
     ;
@@ -153,8 +331,8 @@ CONF;
 CONF;
         }
 
-        $registration_ID = $arrData["registration"];
-        $registration_password = $arrData["registration_password"];
+        $registration_ID = isset($arrData["registration"]) ? $arrData["registration"] : '';
+        $registration_password = isset($arrData["registration_password"]) ? $arrData["registration_password"] : '';
         if (($registration_ID!="") && ($registration_password=!"")) {
             $config .= <<<CONF
 
@@ -225,7 +403,7 @@ CONF;
 
         $number=0;
         for ($i = 0; $i < $arrData["analog_extension_lines"]; $i++) {
-            $extension = $arrData["first_extension"] + $i*$arrData["increment"];
+            //$extension = $arrData["first_extension"] + $i*$arrData["increment"];
             $username = $arrData["authentication_user$i"];
             $dn = $arrData["user$i"]; 
             $interface = $arrData["user_name$i"];

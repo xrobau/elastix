@@ -95,7 +95,7 @@ fi
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
 
-* Mon May 07 2012 German Macas <gmacas@palosanto.com>
+* Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
 - CHANGED: module - billing_rates: Change text information when edit a rate.
   SVN Rev[4163]
 

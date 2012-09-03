@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 2.3.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,9 +102,18 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
+- FIXED: elastix-admin-passwords: Fixed bug when enter a not allowed character in password
+  SVN Rev[4161]
+
 * Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
 - CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4023]
 
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Optimization: do not attempt to start mysql unconditionally. It 

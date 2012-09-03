@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 14
+Release: 15
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -294,14 +294,37 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-15
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Batch of Endpoints: reimplement CSV download to take into account all
-  of the endpoints that were configured via Endpoint Configurator and therefore
-  have no parameters as inserted by Batch of Endpoints. Fixes Elastix bug #1360.
+- FIXED: Batch of Endpoints: reimplement CSV download to take into account all of 
+  the endpoints that were configured via Endpoint Configurator and therefore have no 
+  parameters as inserted by Batch of Endpoints. Fixes Elastix bug #1360.
   SVN Rev[4175]
+
+* Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: revert emergency commit. The problem that was fixed 
+  in this commit should no longer occur with the Prereq: elastix-system >= 2.3.0-10 
+  that fixed Elastix bug #1358.
+  SVN Rev[4174]
+
+* Sun Sep 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Endpoint Configurator: new endpoint class Sangoma, partial implementation.
+  SVN Rev[4173]
 
 * Fri Aug 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-14
 - FIXED: Prereq: elastix-system >= 2.3.0-10. Fixes Elastix bug #1358.
+  SVN Rev[4164]
+
+* Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
+- FIXED: modules -control_panel : Reset counter in queues when there are not calls.
+  SVN Rev[4162]
+
+* Thu Aug 23 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: modules - endpoint_configurator: network() function was changed, paloSantoNetwork invoke bad format.
+  SVN Rev[4160]
 
 * Thu Aug 23 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-13
 - CHANGED: module voipprovider, added spanish translation to an

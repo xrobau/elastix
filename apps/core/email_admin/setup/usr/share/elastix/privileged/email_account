@@ -54,7 +54,8 @@ function error_exit($sMsg, $errorcode = 1)
 }
 
 
-function reconstruct_mailbox($opt){
+function reconstruct_mailbox($opt)
+{
 	$bExito = TRUE;
 	$output = $ret = null;
 	$username =  NULL;
@@ -64,20 +65,37 @@ function reconstruct_mailbox($opt){
 			break;
 	}
 
-	if(is_null($username)){
+    $regexpUsuario = isPostfixToElastix2()
+        ? '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/'
+        : '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+
+	if (is_null($username)) {
 		$bExito = FALSE;
         fprintf(STDERR, "ERR: mailbox must be specified\n");
-	}else{
-		$mailbox = escapeshellarg($username);
-		exec("su - cyrus -c '/usr/lib/cyrus-imapd/reconstruct -r -f user/$mailbox'", $output, $ret);
-		if($ret==0){
+	} elseif (!preg_match($regexpUsuario, $username)) {
+        error_exit("ERR: invalid username\n");
+	} else {
+		$sMailboxPath = escapeshellarg("user/$username");
+		$sCmdReconstruct = escapeshellarg("/usr/lib/cyrus-imapd/reconstruct -r -f $sMailboxPath");
+		$sCmdSu = "su - cyrus -c $sCmdReconstruct";
+		exec($sCmdSu, $output, $ret);
+		
+		if ($ret == 0) {
 			exec("/etc/init.d/cyrus-imapd restart", $output, $ret);
 		}
-		if($ret==0){
+		if($ret == 0){
 			sleep(8);
 		}
 	}
 
 	return ($ret == 0);
+}
+
+function isPostfixToElastix2()
+{
+    foreach (file('/etc/imapd.conf') as $s) {
+        if (strpos(trim($s), 'virtdomains: yes') === 0) return TRUE;
+    }
+    return FALSE;
 }
 ?>

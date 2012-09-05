@@ -190,6 +190,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Wed Sep 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email Accounts: remove privilege escalation vulnerability on privileged
+  script for mailbox rebuild.
+  SVN Rev[4182]
+
 * Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Changed release in specfile.

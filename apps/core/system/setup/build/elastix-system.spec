@@ -130,8 +130,15 @@ fi
 
 %changelog
 * Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: reimplement automatic_backup.php as a wrapper around
+  a direct call to backupengine. This removes one duplication of the backup
+  implementation.
+  SVN Rev[4184]  
+
+* Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Backup/Restore: new privileged script 'backupengine' that reimplements
   backup/restore functionality.
+  SVN Rev[4183]
 
 * Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest

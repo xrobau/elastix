@@ -1,0 +1,1348 @@
+#!/usr/bin/php
+<?php
+/*
+  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: dhcpconfig.php,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+require_once 'Console/Getopt.php';
+
+/* The following is the master read-only data structure that defines what is to
+ * be backed up or restored, and in which way the backup/restore is implemented.
+ * The tree structure (the first two levels anyway) uses keys compatible with 
+ * the old backup programs. The keys in the first two levels are used to build
+ * the file a_options.xml which should remain compatible with old backup 
+ * implementations. Each of the subelements labeled 'components' are a list of
+ * elements that should be backed up. The meaning of the element fields are:
+ * 
+ * - type:  The kind of element to backup. Always present.
+ * 
+ * The remaining fields vary per type as follows:
+ * 
+ * - bundle: An element that recursively contains other elements:
+ *      - components: subelements that should be processed as backup
+ *      - backupdir:  temporary directory that accumulates output files of each 
+ *        component
+ *      - backupfile: name of tarball that packages the local backupdir
+ * - file: Simple file copy:
+ *      - path: absolute path of file to copy
+ *      - restoreown: if present, user and password ownership to restore
+ *      - restoreperm: if present, file permission mode to restore
+ * - sqlitedb: Simple file copy, of a sqlite database file:
+ *      - path: absolute path of file to copy
+ * - dir: Create tarball out of a directory tree:
+ *      - parentdir: directory containing the target directory
+ *      - dirname: if present, single directory to pack in tarball
+ *      - pathlist: if present, list of wildcard path specifications to pack
+ *      - backupfile: name of tarball that packages the directory
+ *      Either dirname or pathlist must be present.
+ *      - restoreown: if present, user and password ownership to restore
+ * - mysqldb: Dump of a mysql database:
+ *      - database: name of mysql database to dump or restore
+ *      - backupfile: if not NULL, name of tarball to generate
+ * 
+ * The difference between 'file' and 'sqlitedb' does not matter for ordinary
+ * tarball backup but can be used to optimize differences with repository-based
+ * backup.
+ * 
+ * Additionally each second-level may contain 'prerestore' and 'postrestore' 
+ * keys that specify function names to run before and after the restore 
+ * operation to fix up configurations.
+ */
+define('DEFAULT_BACKUP_DIR', '/var/www/backup');
+$BACKUP_PLAN = array(
+    'asterisk'  =>  array(
+        'as_db'             =>  array(
+            'desc'          =>  'Database',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'bundle',
+                    'backupdir'     =>  'mysqldb_asterisk',
+                    'backupfile'    =>  'mysqldb_asterisk.tgz',
+                    'components'    =>  array(
+                        array(
+                            'type'      =>  'mysqldb',
+                            'database'  =>  'asterisk',
+                            'backupfile'=>  NULL,
+                        ),
+                        array(
+                            'type'      =>  'mysqldb',
+                            'database'  =>  'asteriskcdrdb',
+                            'backupfile'=>  NULL,
+                        ),
+                        array(
+                            'type'      =>  'mysqldb',
+                            'database'  =>  'asteriskrealtime',
+                            'backupfile'=>  NULL,
+                        ),
+                    ),
+                ),
+                array(
+                    'type'          =>  'file',
+                    'path'          =>  '/var/lib/asterisk/astdb',
+                    'restoreperm'   =>  0664,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/www/html',
+                    'dirname'       =>  'admin',
+                    'backupfile'    =>  'var.www.html.admin.tgz',
+                ),
+            ),
+            'postrestore'   =>  'postrestore_as_db',
+        ),
+        'as_config_files'   =>  array(
+            'desc'          =>  'Configuration Files',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/etc',
+                    'dirname'       =>  'asterisk',
+                    'backupfile'    =>  'etc.asterisk.tgz',
+                ),
+            ),
+            'postrestore'   =>  'postrestore_as_config_files',
+        ),
+        'as_monitor'        =>  array(
+            'desc'          =>  'Monitors',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/spool/asterisk',
+                    'dirname'       =>  'monitor',
+                    'backupfile'    =>  'var.spool.asterisk.monitor.tgz',
+                ),
+            ),
+        ),
+        'as_voicemail'      =>  array(
+            'desc'          =>  'Voicemails',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/spool/asterisk',
+                    'dirname'       =>  'voicemail',
+                    'backupfile'    =>  'var.spool.asterisk.voicemail.tgz',
+                ),
+            ),
+        ),
+        'as_sounds'         =>  array(
+            'desc'          =>  'Sounds',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/lib/asterisk/sounds',
+                    'dirname'       =>  'custom',
+                    'backupfile'    =>  'var.lib.asterisk.sounds.custom.tgz',
+                ),
+            ),
+        ),
+        'as_mohmp3'         =>  array(
+            'desc'          =>  'MOH',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/lib/asterisk',
+                    'dirname'       =>  'mohmp3',
+                    'backupfile'    =>  'var.lib.asterisk.mohmp3.tgz',
+                ),
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/lib/asterisk',
+                    'dirname'       =>  'moh',
+                    'backupfile'    =>  'var.lib.asterisk.moh.tgz',
+                ),
+            ),
+        ),
+        'as_dahdi'          =>  array(
+            'desc'          =>  'DAHDI Configuration',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/etc',
+                    'dirname'       =>  'dahdi',
+                    'backupfile'    =>  'etc.dahdi.tgz',
+
+                    /* Previous backup implementation changed ownership to 
+                     * asterisk:asterisk before backup and this change got
+                     * embedded into the tarball. */
+                    'restoreown'    =>  array('root', 'root'),
+                ),
+            ),
+        ),
+    ),
+    'fax'       =>  array(
+        'fx_db'             =>  array(
+            'desc'          =>  'Database',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/fax.db',
+                    'restoreperm'   =>  0644,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+            ),
+            'postrestore'   =>  'postrestore_fx_db',
+        ),
+        'fx_pdf'            =>  array(
+            'desc'          =>  'PDF',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/www',
+                    'dirname'       =>  'faxes',
+                    'backupfile'    =>  'var.www.faxes.tgz',
+                ),
+            ),
+        ),
+    ),
+    'email'     =>  array(
+        'em_db'             =>  array(
+            'desc'          =>  'Database',
+            'components'    =>  array(
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'roundcubedb',
+                    'backupfile'=>  'roundcubedb_mysql.tgz',
+                ),
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/email.db',
+                    'restoreperm'   =>  0644,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+            ),
+            'prerestore'    =>  'prerestore_em_db',
+        ),
+        'em_mailbox'        =>  array(
+            'desc'          =>  'Mailbox',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/spool',
+                    'dirname'       =>  'imap',
+                    'backupfile'    =>  'var.spool.imap.tgz',
+                    
+                    /* Previous backup implementation changed ownership to 
+                     * asterisk:asterisk before backup and this change got
+                     * embedded into the tarball. */
+                    'restoreown'    =>  array('cyrus', 'mail'),
+                ),
+            ),
+            'postrestore'   =>  'postrestore_em_mailbox',
+        ),
+    ),
+    'endpoint'  =>  array(
+        'ep_db'             =>  array(
+            'desc'          =>  'Database',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/endpoint.db',
+                ),
+            ),
+        ),
+        'ep_config_files'   =>  array(
+            'desc'          =>  'Configuration Files',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/',
+                    'dirname'       =>  'tftpboot',
+                    'backupfile'    =>  'tftpboot.tgz',
+
+                    /* Previous backup implementation changed ownership to 
+                     * asterisk:asterisk before backup and this change got
+                     * embedded into the tarball. */
+                    'restoreown'    =>  array('root', 'root'),
+                ),
+            ),
+        ),
+    ),
+    'otros'     =>  array(
+        'sugar_db'          =>  array(
+            'desc'          =>  'SugarCRM Database',
+            'components'    =>  array(
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'sugarcrm',
+                    'backupfile'=>  'sugarcrm_mysql.tgz',
+                ),
+            ),
+        ),
+        'vtiger_db'         =>  array(
+            'desc'          =>  'VtigerCRM Database',
+            'components'    =>  array(
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'vtigercrm510',
+                    'backupfile'=>  'vtigercrm510_mysql.tgz',
+                ),
+            ),
+        ),
+        'a2billing_db'      =>  array(
+            'desc'          =>  'A2billing Database',
+            'components'    =>  array(
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'mya2billing',
+                    'backupfile'=>  'mya2billing_mysql.tgz',
+                ),
+            ),
+        ),
+        'mysql_db'          =>  array(
+            'desc'          =>  'Mysql Database',
+            'components'    =>  array(
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'mysql',
+                    'backupfile'=>  'mysql_mysql.tgz',
+                ),
+            ),
+        ),
+        'menus_permissions' =>  array(
+            'desc'          =>  'Menus and Permissions',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/menu.db',
+                    'restoreperm'   =>  0644,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/acl.db',
+                    'restoreperm'   =>  0644,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+            ),
+        ),
+        'fop_config'        =>  array(
+            'desc'          =>  'Flash Operator Panel Config Files',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/www/html/',
+                    'pathlist'      =>  array(
+                        'panel/*.cfg',
+                        'panel/*.txt',
+                    ),
+                    'backupfile'    =>  'var.www.html.panel.tgz',
+                ),
+                /* The previous implementation attempted to backup and restore
+                 * /var/lib/asterisk/bin/retrieve_op_conf_from_mysql.pl when 
+                 * the freePBX package version is not greater than 2.6.x . This
+                 * backup is now assumed to be obsolete. */
+            ),
+        ),
+    ),
+    'otros_new' =>  array(
+        'calendar_db'       =>  array(
+            'desc'          =>  'Calendar Database',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/calendar.db',
+                    'restoreperm'   =>  0644,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+            ),
+        ),
+        'address_db'        =>  array(
+            'desc'          =>  'Address Book Database',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/address_book.db',
+                    'restoreperm'   =>  0644,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+            ),
+        ),
+        'conference_db'     =>  array(
+            'desc'          =>  'Conference Database',
+            'components'    =>  array(
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'meetme',
+                    'backupfile'=>  'meetme_mysql.tgz',
+                ),
+            ),
+        ),
+        'eop_db'            =>  array(
+            'desc'          =>  'EOP',
+            'components'    =>  array(
+                array(
+                    'type'          =>  'sqlitedb',
+                    'path'          =>  '/var/www/db/control_panel_design.db',
+                    'restoreperm'   =>  0644,
+                    'restoreown'    =>  array('asterisk', 'asterisk'),
+                ),
+            ),
+        ),
+    ),
+);
+
+// Ugly - should not depend on anything under /var/www/html
+// Include here because it defines load_default_timezone() and is needed for
+// prerestore_em_db()
+ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+require_once('libs/misc.lib.php');
+
+load_default_timezone();
+
+// Parse command-line options
+$opt = Console_Getopt::getopt($argv, '', array(
+    'backup',       // Run a backup operation
+    'restore',      // Run a restore operation
+    'tmpdir=',      // Use this temporary directory for backup/restore operation
+    'backupfile=',  // Backup file to generate (backup) or use (restore)
+    'components=',  // Comma-separated list of backup options to backup/restore
+));
+if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
+validateOptions($opt);
+foreach ($opt[0] as $option) switch ($option[0]) {
+case '--backup':
+    exit(action_runBackup($opt) ? 0 : 1);
+case '--restore':
+    exit(action_runRestore($opt) ? 0 : 1);
+}
+error_exit("No action specified (--backup or --restore)\n");
+
+function error_exit($sMsg, $errorcode = 1)
+{
+    fwrite(STDERR, $sMsg);
+    exit($errorcode);
+}
+
+if (!function_exists('load_default_timezone')) {
+function load_default_timezone()
+{
+    $sDefaultTimezone = @date_default_timezone_get();
+    if ($sDefaultTimezone == 'UTC') {
+        $sDefaultTimezone = 'America/New_York';
+        if (file_exists('/etc/sysconfig/clock')) {
+            foreach (file('/etc/sysconfig/clock') as $s) {
+                $regs = NULL;
+                if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
+                    $sDefaultTimezone = $regs[1];
+                }
+            }
+        }
+    }
+    date_default_timezone_set($sDefaultTimezone);
+}
+}
+
+// Parse and validate known command-line options
+function validateOptions($opt)
+{
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--backup':
+    case '--restore':
+        break;
+    case '--tmpdir':
+        if (!is_dir($option[1]))
+            error_exit('Option '.$option[0].': Invalid backup directory: '.$option[1]."\n");
+        if (strpos($option[1], '/') !== 0)
+            error_exit('Option '.$option[0].': Backup directory requires absolute path: '.$option[1]."\n");
+        break;
+    case '--backupfile':
+        $s = basename($option[1]);
+        if ($s != $option[1])
+            error_exit('Option '.$option[0].': No directory names accepted: '.$option[1]."\n");
+        break;
+    case '--components':        
+        list($knownComponents, $unknownComponents) = expandBackupComponents($option[1]);
+        if (count($unknownComponents) > 0)
+            error_exit('Option '.$option[0].': unimplemented components: '.implode(',', $unknownComponents)."\n");
+        break;
+    }
+}
+
+/**
+ * Expand and validate backup components. Returns a list of known selected 
+ * components, and a list of unknown components.
+ * 
+ * @param   string  $comp   Comma-separated list of backup components to process
+ * 
+ * @return  mixed   array of two elements (known-selections,unknown-selections)
+ */
+function expandBackupComponents($comp)
+{
+    global $BACKUP_PLAN;
+    
+	// Expand 'all' into a list of first-level keys
+    $comp = str_replace('all', implode(',', array_keys($BACKUP_PLAN)), $comp);
+    
+    // Expand each instance of a first-level key into a list of second-level keys
+    foreach (array_keys($BACKUP_PLAN) as $firstLevelKey) {
+    	$comp = str_replace($firstLevelKey, implode(',', array_keys($BACKUP_PLAN[$firstLevelKey])), $comp);
+    }
+    $selection = array_unique(explode(',', $comp));
+    
+    $knownKeys = array();
+    foreach ($BACKUP_PLAN as $firstLevel) {
+    	$knownKeys = array_merge($knownKeys, array_keys($firstLevel));
+    }
+    $knownSelection = array_intersect($knownKeys, $selection);
+    $unknownSelection = array_diff($selection, $knownKeys);
+    return array($knownSelection, $unknownSelection);
+}
+
+function action_runBackup($opt)
+{
+    global $BACKUP_PLAN;
+    
+	$sBackupFile = NULL;
+    $sTempDir = DEFAULT_BACKUP_DIR;
+    $sComponentString = 'all';
+    $selectedComponents = array();
+    
+    // Backup-specific validation of options
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--tmpdir':
+        $sTempDir = $option[1];
+        break;
+    case '--backupfile':
+        $sBackupFile = $option[1];
+        break;
+    case '--components':
+        $sComponentString = $option[1];        
+        break;
+    }
+    $regs = NULL;
+    if (preg_match('|^(.+)/$|', $sTempDir, $regs)) {
+    	$sTempDir = $regs[1];
+    }
+    if (is_null($sBackupFile)) {
+        error_exit("Option --backupfile: Must specify a backup filename.\n");
+    }
+    if (file_exists($sTempDir.'/'.$sBackupFile)) {
+        error_exit("Option --backupfile: File already exists!\n");
+    }
+    list($selectedComponents, $unknownComponents) = expandBackupComponents($sComponentString);
+    if (count($selectedComponents) <= 0) {
+        error_exit("Option --components: Must specify a nonempty component list.\n");
+    }
+    
+    // Create temporary directory on backup directory, clean if required
+    $sWorkingDir = $sTempDir.'/backup';
+    if (file_exists($sWorkingDir)) {
+    	$output = $retval = NULL;
+        exec('rm -rf '.escapeshellarg($sWorkingDir), $output, $retval);
+        if ($output != 0 && file_exists($sWorkingDir)) {
+        	error_exit("FATAL: failed to remove existing working directory $sWorkingDir\n");
+        }
+    }
+    mkdir($sWorkingDir, 0755);
+
+    // Write manifests
+    writeSelectedComponentManifest($selectedComponents, $sWorkingDir.'/a_options.xml');
+    writeInstalledPackagesManifest($sWorkingDir.'/versions.xml');
+    
+    /* Process each backup component. In keeping with backward compatibility,
+     * the backup process will continue even if some of the components fail to
+     * backup. */
+    $bGlobalSuccess = TRUE;
+    foreach ($BACKUP_PLAN as $firstLevelKey => $firstLevelGroup) {
+    	foreach ($firstLevelGroup as $secondLevelKey => $backupComponent) {
+            if (in_array($secondLevelKey, $selectedComponents)) {
+        		$bResult = backupComponent($firstLevelKey.'/'.$secondLevelKey, $backupComponent, $sWorkingDir);
+                if (!$bResult) $bGlobalSuccess = FALSE;
+            }
+    	}
+    }
+    
+    // Create tarball with final result
+    $output = $retval = NULL;
+    exec('tar -C '.escapeshellarg($sTempDir).' -cf '.escapeshellarg($sTempDir.'/'.$sBackupFile).' backup', $output, $retval);
+    if ($retval != 0) {
+        error_exit("FATAL: failed to pack final tarball on $sWorkingDir\n");
+    }
+    
+    // Remove working directory
+    $output = $retval = NULL;
+    exec('rm -rf '.escapeshellarg($sWorkingDir), $output, $retval);
+
+    return $bGlobalSuccess;
+}
+
+// Write manifest of selected options
+function writeSelectedComponentManifest(&$selectedComponents, $sOutputPath)
+{
+    global $BACKUP_PLAN;
+    
+    $xml_manifest = new SimpleXMLElement('<raiz />');
+    foreach (array_keys($BACKUP_PLAN) as $firstLevelKey) {
+    	$xml_optiongroup = $xml_manifest->addChild('options');
+        $xml_optiongroup->addAttribute('id', $firstLevelKey);
+        foreach (array_keys($BACKUP_PLAN[$firstLevelKey]) as $secondLevelKey) {
+        	if (in_array($secondLevelKey, $selectedComponents)) {
+        		$xml_optiongroup->addChild('option', $secondLevelKey);
+        	}
+        }
+    }
+    if (!$xml_manifest->asXML($sOutputPath)) {
+    	error_exit("FATAL: failed to write selected options manifest!\n");
+    }
+}
+
+// Write manifest of installed packages
+function writeInstalledPackagesManifest($sOutputPath)
+{
+	$packageList = array('asterisk', 'dahdi', 'wanpipe-util', 'freePBX',
+        'elastix', 'elastix-pbx', 'elastix-email_admin', 'elastix-agenda',
+        'elastix-fax', 'elastix-vtigercrm', 'elastix-a2billing',
+        'elastix-sugarcrm-addon');
+    $output = $retval = NULL;
+    exec("rpm -q --queryformat '%{name} %{version} %{release}\\n' ".implode(' ', $packageList),
+        $output, $retval);
+
+    // Add all existing packages to XML tree
+    $xml_manifest = new SimpleXMLElement('<versions />');
+    foreach ($output as $s) {
+    	$fields = explode(' ', trim($s));
+        if (count($fields) == 3 && in_array($fields[0], $packageList)) {
+            $xml_program = $xml_manifest->addChild('program');
+            $xml_program->addAttribute('id', $fields[0]);
+            $xml_program->addAttribute('ver', $fields[1]);
+            $xml_program->addAttribute('rel', $fields[2]);
+            
+            $k = array_search($fields[0], $packageList);
+            unset($packageList[$k]);
+        }
+    }
+    
+    /* Any remaining values in $packageList are missing packages. The missing
+     * package is marked with 'Package not installed' as attribute value for
+     * compatibility with the previous backup implementation. */
+    foreach ($packageList as $sPackage) {
+        $xml_program = $xml_manifest->addChild('program');
+        $xml_program->addAttribute('id', $sPackage);
+        $xml_program->addAttribute('ver', 'Package not installed');
+        $xml_program->addAttribute('rel', 'Package not installed');
+    }
+
+    if (!$xml_manifest->asXML($sOutputPath)) {
+        error_exit("FATAL: failed to write package manifest!\n");
+    }
+}
+
+/**
+ * Select between each of the backup types and perform the backup.
+ * 
+ * @param   string  $sLevelTag          Informative tag for backup component name
+ * @param   mixed   $backupComponent    Information on backup parameters
+ * @param   string  $sWorkingDir        Working directory for backup operation
+ */
+function backupComponent($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+	$bGlobalSuccess = TRUE;
+
+    print "INFO: backing up component $sLevelTag...\n";
+
+    foreach ($backupComponent['components'] as $component) {
+		$sProcName = 'backupComponent_'.$component['type'];
+        if (function_exists($sProcName)) {
+        	$bResult = $sProcName($sLevelTag, $component, $sWorkingDir);
+            if (!$bResult) $bGlobalSuccess = FALSE;
+        } else {
+            error_exit('FATAL: unimplemented backup component type '.$component['type']."\n");
+        }
+	}
+    return $bGlobalSuccess;
+}
+
+function backupComponent_sqlitedb($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+	return backupComponent_file($sLevelTag, $backupComponent, $sWorkingDir);
+}
+
+function backupComponent_file($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+	$bResult = TRUE;
+    
+    $sDestination = $sWorkingDir.'/'.basename($backupComponent['path']);
+    if (!copy($backupComponent['path'], $sDestination)) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to copy ".$backupComponent['path']." to destination $sWorkingDir\n");
+    	$bResult = FALSE;
+    }
+    return $bResult;
+}
+
+function backupComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+	/* Directory change cannot be done with tar -C for all cases, because
+     * pathlist might need shell expansion relative to target directory. */
+    $sCommand = 'cd '.escapeshellarg($backupComponent['parentdir']).
+        '&& tar -czf '.escapeshellarg($sWorkingDir.'/'.$backupComponent['backupfile']).' '.
+        (isset($backupComponent['pathlist']) 
+            ? implode(' ', $backupComponent['pathlist']) 
+            : $backupComponent['dirname']); 
+    $output = $retval = NULL;
+    exec($sCommand, $output, $retval);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to create tarball ".$backupComponent['backupfile']." on destination $sWorkingDir\n");
+    	return FALSE;
+    }
+    return TRUE;
+}
+
+$sMysqlRootPass = NULL;
+$mysqlSchemata = array();
+
+function prepareMysqlData()
+{
+    // Read mysql credentials if running for the first time
+    global $sMysqlRootPass;
+    global $mysqlSchemata;
+    if (is_null($sMysqlRootPass)) {
+        if (!file_exists('/etc/elastix.conf')) {
+            $sMysqlRootPass = 'eLaStIx.2oo7';
+        } else {
+            foreach (file('/etc/elastix.conf') as $s) {
+                $regs = NULL;
+                if (preg_match('/^mysqlrootpwd\s*=\s*(.+)$/', trim($s), $regs)) {
+                    $sMysqlRootPass = $regs[1];
+                    break;
+                }
+            }
+            if (is_null($sMysqlRootPass)) {
+                error_exit("FATAL: $sLevelTag: failed to find MySQL root password in /etc/elastix.conf\n");
+            }
+        }
+    
+        // Read list of all schemata from database
+        try {
+            $conn = new PDO('mysql:host=localhost;dbname=information_schema', 'root', 'palosanto');
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sth = $conn->query('SELECT SCHEMA_NAME FROM SCHEMATA');
+            $mysqlSchemata = $sth->fetchAll(PDO::FETCH_COLUMN);
+            $sth = NULL;
+            $conn = NULL;
+        } catch (PDOException $e) {
+            error_exit("FATAL: $sLevelTag: failed to read list of MySQL schemata\n");
+        }
+    }
+}
+
+function backupComponent_mysqldb($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    global $sMysqlRootPass;
+    global $mysqlSchemata;
+
+    // Load mysql password if required
+    prepareMysqlData();
+    
+    // Check whether selected database exists
+    if (!in_array($backupComponent['database'], $mysqlSchemata)) {
+        fprintf(STDERR, "WARN: $sLevelTag: database ".$backupComponent['database']." not found\n");
+    	return TRUE;
+    }
+
+    /* Due to memory constraints, the database schema will be cached in memory
+     * but the data itself will be written to a temporary file. */
+    
+    // Schema
+    $output = $retval = NULL;
+    exec('mysqldump -h localhost -u root '.escapeshellarg('-p'.$sMysqlRootPass).
+        ' '.escapeshellarg($backupComponent['database']).' --no-data ', 
+        $output, $retval);
+    if ($retval != 0) {
+        fprintf(STDERR, "ERR: $sLevelTag: failed to dump schema for database ".$backupComponent['database']."\n");
+        return FALSE;
+    }
+    $schema = trim(str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', implode("\n", $output)));
+    if (strlen($schema) <= 0) {
+        fprintf(STDERR, "WARN: $sLevelTag: database ".$backupComponent['database']." has no schema\n");
+        return TRUE;
+    }
+
+    // Data
+    $output = $retval = NULL;
+    $sDataPath = $sWorkingDir.'/'.$backupComponent['database'].'2.sql';
+    exec('mysqldump -h localhost -u root '.escapeshellarg('-p'.$sMysqlRootPass).
+        ' '.escapeshellarg($backupComponent['database']).' -t -c --skip-triggers -r '.
+        escapeshellarg($sDataPath), 
+        $output, $retval);
+    if ($retval != 0) {
+        fprintf(STDERR, "ERR: $sLevelTag: failed to dump data for database ".$backupComponent['database']."\n");
+        return FALSE;
+    }
+    
+    // Write schema, then data
+    $sSchemaPath = $sWorkingDir.'/'.$backupComponent['database'].'.sql';
+    $h = fopen($sSchemaPath, 'w+');
+    if (!$h) error_exit("ERR: $sLevelTag: failed to open $sSchemaPath for writing\n");
+    fwrite($h, $schema."\n");
+    $htemp = fopen($sDataPath, 'r');
+    if (!$htemp) error_exit("ERR: $sLevelTag: failed to open $sDataPath for reading\n");
+    while (!feof($htemp)) fwrite($h, fread($htemp, 4096));     
+    fclose($htemp); fclose($h);
+    unlink($sDataPath);
+    
+    // Create tarball if required
+    if (!is_null($backupComponent['backupfile'])) {
+    	$output = $retval = NULL;
+        exec('tar -C '.escapeshellarg($sWorkingDir).' -czf '.
+            escapeshellarg($sWorkingDir.'/'.$backupComponent['backupfile']).' '.
+            escapeshellarg($backupComponent['database'].'.sql'),
+            $output, $retval);
+        if ($retval != 0) {
+            fprintf(STDERR, "ERR: $sLevelTag: failed to pack tarball for database ".$backupComponent['database']."\n");
+            return FALSE;
+        }
+        unlink($sSchemaPath);
+    }
+
+    return TRUE;
+}
+
+function backupComponent_bundle($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    $sWorkingSubdir = $sWorkingDir.'/'.$backupComponent['backupdir'];
+    if (!mkdir($sWorkingSubdir, 0755)) {
+        fprintf(STDERR, "ERR: $sLevelTag: failed to create directory $sWorkingSubdir\n");
+    	return FALSE;
+    }
+    
+    // Recursively run backup subcomponents
+    $bGlobalSuccess = backupComponent($sLevelTag.'/'.$backupComponent['backupdir'], $backupComponent, $sWorkingSubdir);
+
+    $bundleComponent = array(
+        'type'          =>  'dir',
+        'parentdir'     =>  $sWorkingDir,
+        'dirname'       =>  $backupComponent['backupdir'],
+        'backupfile'    =>  $backupComponent['backupfile'],
+    );
+    if (!backupComponent_dir($sLevelTag, $bundleComponent, $sWorkingDir)) {
+    	$bGlobalSuccess = FALSE;
+    }
+    
+    $output = $retval = NULL;
+    exec('rm -rf '.escapeshellarg($sWorkingSubdir), $output, $retval);
+
+    return $bGlobalSuccess;
+}
+
+function action_runRestore($opt)
+{
+    global $BACKUP_PLAN;
+    
+    $sBackupFile = NULL;
+    $sTempDir = DEFAULT_BACKUP_DIR;
+    $sComponentString = 'all';
+    $selectedComponents = array();
+    
+    // Restore-specific validation of options
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--tmpdir':
+        $sTempDir = $option[1];
+        break;
+    case '--backupfile':
+        $sBackupFile = $option[1];
+        break;
+    case '--components':
+        $sComponentString = $option[1];        
+        break;
+    }
+    $regs = NULL;
+    if (preg_match('|^(.+)/$|', $sTempDir, $regs)) {
+        $sTempDir = $regs[1];
+    }
+    if (is_null($sBackupFile)) {
+        error_exit("Option --backupfile: Must specify a backup filename.\n");
+    }
+    if (!file_exists($sTempDir.'/'.$sBackupFile)) {
+        error_exit("Option --backupfile: File not found!\n");
+    }
+    list($selectedComponents, $unknownComponents) = expandBackupComponents($sComponentString);
+    if (count($selectedComponents) <= 0) {
+        error_exit("Option --components: Must specify a nonempty component list.\n");
+    }
+    
+    // Create temporary directory on backup directory, clean if required
+    $sWorkingDir = $sTempDir.'/restore';
+    if (file_exists($sWorkingDir)) {
+        $output = $retval = NULL;
+        exec('rm -rf '.escapeshellarg($sWorkingDir), $output, $retval);
+        if ($output != 0 && file_exists($sWorkingDir)) {
+            error_exit("FATAL: failed to remove existing working directory $sWorkingDir\n");
+        }
+    }
+    mkdir($sWorkingDir, 0755);
+
+    // Unpack tarball with backup files. Should create 'backup' directory
+    $output = $retval = NULL;
+    $sUnpackedDir = $sWorkingDir.'/backup';
+    exec('tar -C '.escapeshellarg($sWorkingDir).' -xf '.escapeshellarg($sTempDir.'/'.$sBackupFile), $output, $retval);
+    if ($retval != 0) {
+        error_exit("FATAL: failed to unpack tarball on $sWorkingDir\n");
+    } elseif (!is_dir($sUnpackedDir)) {
+    	error_exit("FATAL: invalid tarball on $sWorkingDir - missing backup directory\n");
+    }
+
+    // Load options that were specified in backup
+    $availableOptions = array();
+    if (!file_exists($sUnpackedDir.'/a_options.xml'))
+        error_exit("FATAL: invalid tarball on $sWorkingDir - missing a_options.xml\n");
+    $xml_manifest = simplexml_load_file($sUnpackedDir.'/a_options.xml');
+    if (!$xml_manifest)
+        error_exit("FATAL: invalid tarball on $sWorkingDir - invalid a_options.xml\n");
+    foreach ($xml_manifest->options as $xml_optionlist) {
+    	foreach ($xml_optionlist->option as $xml_option) {
+    		$availableOptions[] = (string)$xml_option;
+    	}
+    }
+    
+    /* Process each backup component. In keeping with backward compatibility,
+     * the restore process will continue even if some of the components fail to
+     * restore. */
+    $bGlobalSuccess = TRUE;
+    foreach ($BACKUP_PLAN as $firstLevelKey => $firstLevelGroup) {
+        foreach ($firstLevelGroup as $secondLevelKey => $backupComponent) {
+            if (in_array($secondLevelKey, $selectedComponents)) {
+                $sLevelTag = $firstLevelKey.'/'.$secondLevelKey;
+                if (in_array($secondLevelKey, $availableOptions)) {
+                    $bResult = restoreComponent($sLevelTag, $backupComponent, $sUnpackedDir);
+                    if (!$bResult) $bGlobalSuccess = FALSE;
+                } else {
+                	fprintf(STDERR, "WARN: $sLevelTag: specified in restore but not available in backup\n");
+                }
+            }
+        }
+    }
+
+    // Remove working directory
+    $output = $retval = NULL;
+    exec('rm -rf '.escapeshellarg($sWorkingDir), $output, $retval);
+    
+    return $bGlobalSuccess;
+}
+
+/**
+ * Select between each of the backup types and perform the backup.
+ * 
+ * @param   string  $sLevelTag          Informative tag for backup component name
+ * @param   mixed   $backupComponent    Information on backup parameters
+ * @param   string  $sWorkingDir        Working directory for backup operation
+ */
+function restoreComponent($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    $bGlobalSuccess = TRUE;
+
+    print "INFO: restoring component $sLevelTag...\n";
+
+    // Run any custom pre-restore operation
+    if (isset($backupComponent['prerestore'])) {
+    	if (function_exists($backupComponent['prerestore'])) {
+    		$bResult = $backupComponent['prerestore']($sLevelTag, $backupComponent, $sWorkingDir);
+            if (!$bResult) $bGlobalSuccess = FALSE;
+    	} else {
+            error_exit('FATAL: unimplemented pre-restore action '.$backupComponent['prerestore']."\n");
+    	} 
+    }
+
+    foreach ($backupComponent['components'] as $component) {
+        $sProcName = 'restoreComponent_'.$component['type'];
+        if (function_exists($sProcName)) {
+            $bResult = $sProcName($sLevelTag, $component, $sWorkingDir);
+            if (!$bResult) $bGlobalSuccess = FALSE;
+        } else {
+            error_exit('FATAL: unimplemented restore component type '.$component['type']."\n");
+        }
+    }
+
+    // Run any custom post-restore operation
+    if (isset($backupComponent['postrestore'])) {
+        if (function_exists($backupComponent['postrestore'])) {
+            $bResult = $backupComponent['postrestore']($sLevelTag, $backupComponent, $sWorkingDir);
+            if (!$bResult) $bGlobalSuccess = FALSE;
+        } else {
+            error_exit('FATAL: unimplemented post-restore action '.$backupComponent['postrestore']."\n");
+        } 
+    }
+
+    return $bGlobalSuccess;
+}
+
+function restoreComponent_sqlitedb($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    return restoreComponent_file($sLevelTag, $backupComponent, $sWorkingDir);
+}
+
+function restoreComponent_file($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    $bResult = TRUE;
+    
+    $sSource = $sWorkingDir.'/'.basename($backupComponent['path']);
+    if (!copy($sSource, $backupComponent['path'])) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to copy ".$backupComponent['path']." from source $sWorkingDir\n");
+        $bResult = FALSE;
+    } else {
+    	// Restore owner and permissions
+        if (isset($backupComponent['restoreperm'])) {
+            chmod($backupComponent['path'], $backupComponent['restoreperm']);
+        }
+        if (isset($backupComponent['restoreown'])) {
+            chown($backupComponent['path'], $backupComponent['restoreown'][0]);
+            chgrp($backupComponent['path'], $backupComponent['restoreown'][1]);
+        }
+    }
+    return $bResult;
+}
+
+function restoreComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    if (isset($backupComponent['dirname'])) {
+        $sFullDirPath = $backupComponent['parentdir'].'/'.$backupComponent['dirname'];
+    	if (is_dir($sFullDirPath)) {
+            // Make a backup of the directory contents in case the restore is botched
+            $sCommand = 'tar -czf '.
+                escapeshellarg($sFullDirPath.'.tgz').' '.
+                escapeshellarg($sFullDirPath.'/');
+            $output = $retval = NULL;
+            exec($sCommand, $output, $retval);
+            if ($retval != 0) {
+                fwrite(STDERR, "ERR: $sLevelTag: failed to create safety-backup\n ");
+                return FALSE;
+            }
+            
+            // Remove everything inside the target directory
+            $sCommand = 'rm -rf '.$sFullDirPath.'/';
+            exec($sCommand, $output, $retval);
+        }
+    }
+    
+    // Restore inside parentdir
+    $sCommand = 'tar -C '.escapeshellarg($backupComponent['parentdir']).
+        ' -xvf '.escapeshellarg($sWorkingDir.'/'.$backupComponent['backupfile']);
+    $output = $retval = NULL;
+    exec($sCommand, $output, $retval);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to unpack tarball ".$backupComponent['backupfile']." from source $sWorkingDir\n");
+        return FALSE;
+    } else {
+        // Restore owner and permissions if restoring a full directory
+        if (isset($backupComponent['dirname']) && isset($backupComponent['restoreown'])) {
+            $output = $retval = NULL;
+            exec('/bin/chown -R '.implode(':', $backupComponent['restoreown']).
+                ' '.escapeshellarg($backupComponent['parentdir'].'/'.$backupComponent['dirname']));
+        }
+    }
+    return TRUE;
+}
+
+function restoreComponent_mysqldb($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    global $sMysqlRootPass;
+
+    // Load mysql password if required
+    prepareMysqlData();
+    
+    $sSchemaPath = $sWorkingDir.'/'.$backupComponent['database'].'.sql';
+    if (!is_null($backupComponent['backupfile'])) {
+        $sDbTarball = $sWorkingDir.'/'.$backupComponent['backupfile'];
+        if (!file_exists($sDbTarball)) {
+            fprintf(STDERR, "WARN: $sLevelTag: $sDbTarball not found, not restoring database...\n");
+        	return TRUE;
+        }
+        $sCommand = 'tar -C '.escapeshellarg($sWorkingDir).' -xzf '.escapeshellarg($sDbTarball);
+        $output = $retval = NULL;
+        exec($sCommand, $output, $retval);
+        if ($retval != 0) {
+            fwrite(STDERR, "ERR: $sLevelTag: failed to unpack database tarball $sDbTarball\n ");
+            return FALSE;
+        } elseif (!file_exists($sSchemaPath)) {
+            fwrite(STDERR, "ERR: $sLevelTag: unpacking of database tarball $sDbTarball failed to produce schema\n ");
+            return FALSE;
+        }
+    }
+    
+    if (!file_exists($sSchemaPath)) {
+        fprintf(STDERR, "WARN: $sLevelTag: $sSchemaPath not found, not restoring database...\n");
+        return TRUE;
+    }
+    $sCommand = 'mysql -h localhost -u root '.escapeshellarg('-p'.$sMysqlRootPass).
+        ' '.escapeshellarg($backupComponent['database']).' < '.escapeshellarg($sSchemaPath);
+    $output = $retval = NULL;
+    exec($sCommand, $output, $retval);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to restore database from schema $sSchemaPath\n ");
+        return FALSE;
+    }
+    return TRUE;
+}
+
+function restoreComponent_bundle($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    $sWorkingSubdir = $sWorkingDir.'/'.$backupComponent['backupdir'];
+    
+    // Unpack bundle tarball containing files to recursively restore
+    $sCommand = 'tar -C '.escapeshellarg($sWorkingDir).
+        ' -xvf '.escapeshellarg($sWorkingDir.'/'.$backupComponent['backupfile']);
+    $output = $retval = NULL;
+    exec($sCommand, $output, $retval);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to unpack tarball ".$backupComponent['backupfile']." from source $sWorkingDir\n");
+        return FALSE;
+    } elseif (!is_dir($sWorkingSubdir)) {
+        fwrite(STDERR, "ERR: $sLevelTag: unpacking of tarball ".$backupComponent['backupfile']." failed to produce $sWorkingSubdir/\n");
+        return FALSE;
+    }
+
+    // Recursively restore backup subcomponents
+    return restoreComponent($sLevelTag.'/'.$backupComponent['backupdir'], $backupComponent, $sWorkingSubdir);
+}
+
+// Custom processing after restoring asterisk databases
+function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    $keysFromFPBX = array('AMPDBHOST', 'AMPDBUSER', 'AMPDBPASS', 'PRE_RELOAD',
+        'AMPBIN', 'FOPRUN', 'POST_RELOAD', 'ASTETCDIR');
+    $keysFromAsterisk = array('astlogdir');
+    $fpbxConf = array();
+    $astConf = array();
+
+    // Read information from /etc/amportal.conf
+    foreach (file('/etc/amportal.conf') as $s) {
+    	$regs = NULL;
+        if (preg_match('/^(\w+)\s*=\s*(.+)/', trim($s), $regs)) {
+        	if (in_array($regs[1], $keysFromFPBX)) $fpbxConf[$regs[1]] = $regs[2];
+        }
+    }
+    
+    // Read information from /etc/asterisk/asterisk.conf
+    foreach (file('/etc/asterisk/asterisk.conf') as $s) {
+        $regs = NULL;
+        if (preg_match('/^(\w+)\s*=>\s*(.+)/', trim($s), $regs)) {
+            if (in_array($regs[1], $keysFromAsterisk)) $astConf[$regs[1]] = $regs[2];
+        }
+    }
+    
+    // Simulate refreshing of configuration
+    if (isset($fpbxConf['PRE_RELOAD'])) {
+        exec('su - asterisk -c '.escapeshellarg($fpbxConf['PRE_RELOAD']));
+    }
+    exec('su - asterisk -c '.escapeshellarg($fpbxConf['AMPBIN'].'/retrieve_conf'));
+    if (isset($fpbxConf['FOPRUN'])) {
+        exec('su - asterisk -c '.escapeshellarg($fpbxConf['AMPBIN'].'/bounce_op.sh &> '.$astConf['astlogdir'].'/freepbx-bounce_op.log'));
+    }
+    try {
+        // Reset the pending-changes flag
+        $conn = new PDO('mysql:host='.$fpbxConf['AMPDBHOST'].';dbname=asterisk',
+            $fpbxConf['AMPDBUSER'], $fpbxConf['AMPDBPASS']);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $conn->query("UPDATE admin SET value = 'false' WHERE variable = 'need_reload'");
+        $conn = NULL;
+    } catch (PDOException $e) {
+        fwrite(STDERR, "WARN: $sLevelTag: failed to reset FreePBX update flag!\n");
+    }
+    if (isset($fpbxConf['POST_RELOAD'])) {
+        exec('su - asterisk -c '.escapeshellarg($fpbxConf['POST_RELOAD']));
+    }
+    
+    // Finally restart everything
+    exec('/usr/sbin/amportal restart > /dev/null 2>&1');
+    
+    return TRUE;
+}
+
+// Custom processing after restoring asterisk configuration files
+function postrestore_as_config_files($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+	/* Workaround for Elastix bug #164. If backing up in 32-bit and restoring in
+     * 64-bit, or viceversa, the module directory will be incorrect - fix it. */
+    $sModulePath = '/usr/lib/asterisk/modules';
+    if (is_dir('/usr/lib64/asterisk/modules')) {
+        $sModulePath = '/usr/lib64/asterisk/modules';
+    }
+    $pathList = array("/usr/lib/asterisk/modules","/usr/lib64/asterisk/modules");
+    
+    foreach (array(
+        '/etc/asterisk/asterisk.conf',
+        '/etc/asterisk/extensions_additional.conf') as $sFilePath) {
+        $s = file_get_contents($sFilePath);
+        $s = str_replace($pathList, $sModulePath, $s);
+        file_put_contents($sFilePath, $s);
+    }
+    
+    return TRUE;
+}
+
+// Custom processing after restoring fax database
+function postrestore_fx_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+	$output = $retval = NULL;
+    exec('/usr/share/elastix/privileged/faxconfig --refresh', $output, $retval);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to refresh fax configuration after restore\n");
+    	return FALSE;
+    }
+    return TRUE;
+}
+
+// Custom processing before restoring email database
+function prerestore_em_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    // Ugly - should not depend on anything under /var/www/html
+    require_once('configs/email.conf.php');
+    require_once('libs/paloSantoDB.class.php');
+    require_once('libs/cyradm.php');
+    require_once('libs/paloSantoEmail.class.php');
+
+    // Connect to IMAP before doing anything else
+    $cyr_conn = new cyradm;
+    if (!$cyr_conn->imap_login()) {
+        fwrite(STDERR, "ERR: failed to login to IMAP\n");
+        return FALSE;
+    }
+
+    // Primero eliminar todos los dominios existentes
+    $pDB = new paloDB("sqlite3:////var/www/db/email.db");
+    $pEmail = new paloEmail($pDB);
+    $virtual = FALSE;
+    if (!empty($pDB->errMsg)) {
+        fwrite(STDERR, "ERR: failed to read old email database - {$pDB->errMsg}\n");
+        return FALSE;
+    }
+    $pEmail = new paloEmail($pDB);
+    $arrDomain = $pEmail->getDomains();
+    foreach($arrDomain as $key => $valor)
+    {
+        $arrTmp['domain_name']  = $valor[1];
+        $arrTmp['id_domain']    = $valor[0];
+        $errMsg = NULL;
+        $bExito = $pEmail->eliminar_dominio($pDB,$arrTmp,$errMsg,$virtual);
+        if (!$bExito) {
+        	fwrite(STDERR, "WARN: failed to remove old domain {$arrTmp['domain_name']} - $errMsg\n");
+        }
+    }
+    
+    // Create new domains using the database to be restored
+    $pDB = new paloDB("sqlite3:///$sWorkingDir/email.db");
+    $pEmail = new paloEmail($pDB);
+    $separador = "@";
+    
+    #crear los dominios
+    #seleccionar los dominios
+    $sQuery = 'SELECT * from domain';
+    $result = $pDB->fetchTable($sQuery,true);
+    if (is_array($result) && count($result)>0)
+    {
+        foreach ($result as $infoDominio)
+        {
+            //print "DEBUG: guardar_dominio_sistema(domain_name={$infoDominio['domain_name']})\n";
+            $bExito = $pEmail->guardar_dominio_sistema($infoDominio['domain_name'], $errMsg);
+            if (!$bExito) {
+            	fwrite(STDERR, "WARN: failed to add new domain {$infoDominio['domain_name']} - $errMsg\n");
+            }
+        }
+        #crear las cuentas
+        $sQuery = 'SELECT a.*,d.domain_name FROM accountuser AS a, domain AS d WHERE d.id = a.id_domain';
+        $result=$pDB->fetchTable($sQuery,true);
+        if (is_array($result)){
+            foreach ($result as $infoCuenta)
+            {
+                $username = $infoCuenta['username'];
+                $quota    = $infoCuenta['quota'];
+                $domain   = $infoCuenta['domain_name'];
+                #armo el email
+                $arrMatchAccount = preg_split("/$separador/",$username);
+                if (count($arrMatchAccount) > 0)
+                {
+                    $email=$arrMatchAccount[0].'@'.$infoCuenta['domain_name'];
+                    $password=$infoCuenta['password'];
+                    //print "DEBUG: crear_usuario_correo_sistema(email=$email,username=$username,password=$password)\n";
+                    $bExito = $pEmail->crear_usuario_correo_sistema($email,$username,$password,$errMsg,$virtual);
+                    if ($bExito){
+                        //crear el mailbox para la nueva cuenta
+                        //print "DEBUG: crear_mailbox_usuario(email=$email,username=$username,quota=$quota)\n";
+                        $bReturn=crear_mailbox_usuario($cyr_conn, $email,$username,$quota);
+                        if(!$bReturn) {
+                            fwrite(STDERR, "WARN: failed to create mailbox for email account $username\n");
+                            $bReturn = $pEmail->eliminar_usuario_correo_sistema($username,$email,$errMsg);
+                        }
+                    }else{
+                        //tengo que borrar el usuario creado en el sistema
+                        fwrite(STDERR, "WARN: failed to add new email account $username - $errMsg\n");
+                        $bReturn = $pEmail->eliminar_usuario_correo_sistema($username,$email,$errMsg);
+                    }
+                }
+            }
+        }
+    }
+    
+    return TRUE;
+}
+
+// Custom processing after restoring email mailboxes
+function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+	// Query all users of all domains and reconstruct mailboxes
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        foreach ($conn->query('SELECT a.username, d.domain_name FROM accountuser AS a, domain AS d WHERE d.id = a.id_domain') as $row) {
+        	$fields = explode('@', $row['username']);
+            if (count($fields) > 1) {
+            	$username = $fields[0].'@'.$row['domain_name'];
+                $sMailboxPath = escapeshellarg("user/$username");
+                $sCmdReconstruct = escapeshellarg("/usr/lib/cyrus-imapd/reconstruct -rf $sMailboxPath");
+                $sCmdSu = "su - cyrus -c $sCmdReconstruct";
+                //print "$sCmdSu\n";
+                exec($sCmdSu);
+            }
+        }
+        $conn = NULL;
+    } catch (PDOException $e) {
+        fwrite(STDERR, "WARN: $sLevelTag: failed to query list of usernames and domains\n");
+    }
+}
+
+function crear_mailbox_usuario($cyr_conn, $email, $username, $quota)
+{
+    global $CYRUS;
+
+    $userpath = 'user/'.$username;
+    if (!$cyr_conn->createmb($userpath)) {
+        fwrite(STDERR, "ERR: failed to create user $username: ".$cyr_conn->getMessage()."\n");
+        return FALSE;
+    }
+    if (!$cyr_conn->setacl($userpath, $CYRUS['ADMIN'], 'lrswipcda')) {
+    	fwrite(STDERR, "ERR: failed to set ACL on user $username: ".$cyr_conn->getMessage()."\n");
+        return FALSE;
+    }
+    if (!$cyr_conn->setmbquota($userpath, $quota)) {
+        fwrite(STDERR, "ERR: failed to set quota on user $username: ".$cyr_conn->getMessage()."\n");
+        return FALSE;
+    }
+    return TRUE;
+}
+
+?>

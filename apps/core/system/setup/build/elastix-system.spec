@@ -129,6 +129,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Backup/Restore: new privileged script 'backupengine' that reimplements
+  backup/restore functionality.
+
 * Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

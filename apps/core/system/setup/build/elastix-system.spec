@@ -129,6 +129,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Backup/Restore: new privileged script 'backupengine' that reimplements
+  backup/restore functionality.
+
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): implement new option --phonesonly. If 
   specified, the DHCP server will be configured to answer only to MAC addresses

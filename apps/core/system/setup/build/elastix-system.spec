@@ -130,6 +130,13 @@ fi
 
 %changelog
 * Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: extend 'backupengine' privileged script to install
+  a new crontab for automatic backup. Reimplement automatic backup 
+  administration using this capability. This removes four instances of sudo 
+  chown.
+  SVN Rev[4185]
+
+* Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: reimplement automatic_backup.php as a wrapper around
   a direct call to backupengine. This removes one duplication of the backup
   implementation.

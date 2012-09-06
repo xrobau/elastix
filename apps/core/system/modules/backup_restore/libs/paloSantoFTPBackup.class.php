@@ -268,41 +268,16 @@ class paloSantoFTPBackup {
     
     function createCronFile($time)
     {
-        global $arrConf;
-        global $arrLang;
-        $band = true;
-        $file = "/etc/cron.d/automatic_backup.cron";
-        if($time == "DAILY"){
-            $new_contents = "59 23 * * * root /usr/bin/php -q /var/www/backup/automatic_backup.php daily\n";
+        $time = strtolower($time);
+        if (!in_array($time, array('daily', 'monthly', 'weekly'))) $time = 'off';
+        $sComando = '/usr/bin/elastix-helper backupengine --autobackup '.$time;
+        $output = $retval = NULL;
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+        	$this->errMsg = _tr('Unabled write file').' - '.implode("\n", $output);
+            return FALSE;
         }
-        elseif($time == "MONTHLY"){
-            $new_contents = "59 23 30 * * root /usr/bin/php -q /var/www/backup/automatic_backup.php monthly\n";
-        }
-        elseif($time == "WEEKLY"){
-            $new_contents = "59 23 * * 7 root /usr/bin/php -q /var/www/backup/automatic_backup.php weekly\n";
-        }
-        else{
-            $new_contents = "";
-        }
-        exec("sudo -u root chown asterisk.asterisk /etc/cron.d/;");
-        if(is_file($file)){
-            exec("sudo -u root chown asterisk.asterisk /etc/cron.d/automatic_backup.cron;");
-        }
-        $fh = fopen($file, "w+");
-        if($fh){
-            if(fwrite($fh, $new_contents) == false){
-                $this->errMsg = $arrLang["Unabled write file"];
-                fclose($fh);
-                $band = false;
-            }
-        }else{
-            $this->errMsg = $arrLang["Unabled open file"];
-            $band = false;
-        }
-        exec("sudo -u root chown root.root /etc/cron.d/;");
-        exec("sudo -u root chown root.root /etc/cron.d/automatic_backup.cron;");
-        //exec("sudo -u root service crond restart;");
-        return $band;
+        return TRUE;
     }
 
 

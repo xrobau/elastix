@@ -419,6 +419,7 @@ load_default_timezone();
 $opt = Console_Getopt::getopt($argv, '', array(
     'backup',       // Run a backup operation
     'restore',      // Run a restore operation
+    'autobackup=',  // Manage automatic backup via crontab
     'tmpdir=',      // Use this temporary directory for backup/restore operation
     'backupfile=',  // Backup file to generate (backup) or use (restore)
     'components=',  // Comma-separated list of backup options to backup/restore
@@ -430,6 +431,8 @@ case '--backup':
     exit(action_runBackup($opt) ? 0 : 1);
 case '--restore':
     exit(action_runRestore($opt) ? 0 : 1);
+case '--autobackup':
+    exit(action_runAutoBackupAdmin($opt) ? 0 : 1);
 }
 error_exit("No action specified (--backup or --restore)\n");
 
@@ -464,6 +467,7 @@ function validateOptions($opt)
     foreach ($opt[0] as $option) switch ($option[0]) {
     case '--backup':
     case '--restore':
+    case '--autobackup':
         break;
     case '--tmpdir':
         if (!is_dir($option[1]))
@@ -482,6 +486,38 @@ function validateOptions($opt)
             error_exit('Option '.$option[0].': unimplemented components: '.implode(',', $unknownComponents)."\n");
         break;
     }
+}
+
+function action_runAutoBackupAdmin($opt)
+{
+    $sFrequency = NULL;
+    
+    // Admin-specific validation of options
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--autobackup':
+        $sFrequency = $option[1];
+        break;
+    }
+    if (is_null($sFrequency) || !in_array($sFrequency, array('off', 'daily', 'weekly', 'monthly'))) {
+        error_exit('Option '.$option[0].": expected one of [off daily weekly monthly]\n");
+    }
+    
+    switch ($sFrequency) {
+    case 'daily':
+        $s = "59 23 * * * root /usr/bin/php -q /var/www/backup/automatic_backup.php daily\n";
+        break;
+    case 'monthly':
+        $s = "59 23 30 * * root /usr/bin/php -q /var/www/backup/automatic_backup.php monthly\n";
+        break;
+    case 'weekly':
+        $s = "59 23 * * 7 root /usr/bin/php -q /var/www/backup/automatic_backup.php weekly\n";
+        break;
+    case 'off':
+    default:
+        $s = "";
+        break;
+    }
+    return (file_put_contents('/etc/cron.d/automatic_backup.cron', $s) !== FALSE);
 }
 
 /**

@@ -347,39 +347,24 @@ function Obtener_Backups($dir_backup, $offset_inv, $limit)
 
 function delete_backup($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, &$pDB)
 {
-    // se obtiene en un arreglo el listado de archivos a borrar
-    $archivos_borrar = isset($_POST["chk"])?$_POST["chk"]:array();
-    if (count($archivos_borrar)>0){
-        $error = false;
-        if (is_array($archivos_borrar)) {
-            //cambiar de usuario a la carpeta y a los archivos de backup para poder borrarlos
-            //no dejo los permisos como estaban porque estos archivos deben pertenecer al usuario
-            //asterisk, y si no fuera asi es incorrecto.
-            $comando="sudo -u root /bin/chown asterisk:asterisk $dir_backup -R";
-            exec($comando,$output,$retval);
-            if ($retval==0) {
-                // se hace un ciclo para borrar todos los archivos del respaldo checados
-                foreach($archivos_borrar as $archivo=>$estatus) {
-                    $ruta_archivo = $dir_backup."/".$archivo;
-                    // se verifica que el archivo exista para evitar errores en el unlink
-                    if (file_exists($ruta_archivo)) {
-                        // unlink borra el archivo
-                        if (!unlink($ruta_archivo)) {
-                            $error = true;
-                            break;
-                        }
-                    }
-                }
-            }else{
-                $error = true;
-            }
-        }
+    function delete_backup_isInvalidFile($file_name) {
+        return !preg_match('/^elastixbackup-\d{14}-\w{2}\.tar$/', $file_name);
+    }
+    function delete_backup_doDelete($filePath) {
+    	return file_exists($filePath) ? !unlink($filePath) : FALSE;
+    }
 
-        if ($error) {
-            $smarty->assign("mb_message", $arrLang["Error when deleting backup file"]);
-        }
+    $archivos_borrar = isset($_POST['chk']) ? array_keys($_POST['chk']) : array();
+    if (!is_array($archivos_borrar) || count($archivos_borrar) <= 0) {
+    	$smarty->assign('mb_message', _tr('There are not backup file selected'));
+    } elseif (count(array_filter(array_map('delete_backup_isInvalidFile', $archivos_borrar))) > 0) {
+        $smarty->assign('mb_message', _tr('Invalid files selected to delete'));
     } else {
-        $smarty->assign("mb_message", $arrLang["There are not backup file selected"]);
+    	foreach (array_keys($archivos_borrar) as $i)
+            $archivos_borrar[$i] = $dir_backup.'/'.$archivos_borrar[$i];
+        if (count(array_filter(array_map('delete_backup_doDelete', $archivos_borrar))) > 0) {
+            $smarty->assign('mb_message', _tr('Error when deleting backup file'));
+        }
     }
     return report_backup_restore($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, $pDB);
 }

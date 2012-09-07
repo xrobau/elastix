@@ -237,6 +237,7 @@ $BACKUP_PLAN = array(
                 ),
             ),
             'prerestore'    =>  'prerestore_em_db',
+            'postrestore'   =>  'postrestore_em_db',
         ),
         'em_mailbox'        =>  array(
             'desc'          =>  'Mailbox',
@@ -406,12 +407,11 @@ $BACKUP_PLAN = array(
         ),
     ),
 );
+$CYRUS = NULL;
+define('SASL_DOMAIN', 'example.com');
 
 // Ugly - should not depend on anything under /var/www/html
-// Include here because it defines load_default_timezone() and is needed for
-// prerestore_em_db()
 ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
-require_once('libs/misc.lib.php');
 
 load_default_timezone();
 
@@ -442,7 +442,6 @@ function error_exit($sMsg, $errorcode = 1)
     exit($errorcode);
 }
 
-if (!function_exists('load_default_timezone')) {
 function load_default_timezone()
 {
     $sDefaultTimezone = @date_default_timezone_get();
@@ -459,6 +458,33 @@ function load_default_timezone()
     }
     date_default_timezone_set($sDefaultTimezone);
 }
+
+function isPostfixToElastix2()
+{
+    foreach (file('/etc/imapd.conf') as $s) {
+        if (strpos(trim($s), 'virtdomains: yes') === 0) return TRUE;
+    }
+    return FALSE;
+}
+
+function loadCyrusPassword()
+{
+    global $CYRUS;
+    
+    if (is_null($CYRUS)) {
+        $CYRUS = array(
+            'HOST'  =>  'localhost',
+            'PORT'  =>  143,
+            'ADMIN' =>  'cyrus',
+            'PASS'  =>  'palosanto',
+        );
+        foreach (file('/etc/elastix.conf') as $s) {
+            $regs = NULL;
+            if (preg_match('/^cyrususerpwd\s*=\s*(.+)/', trim($s), $regs)) {
+                $CYRUS['PASS'] = $regs[1];
+            }
+        }
+    }
 }
 
 // Parse and validate known command-line options
@@ -532,14 +558,29 @@ function expandBackupComponents($comp)
 {
     global $BACKUP_PLAN;
     
-	// Expand 'all' into a list of first-level keys
-    $comp = str_replace('all', implode(',', array_keys($BACKUP_PLAN)), $comp);
+    // Expand 'all' into a list of first-level keys
+    $selection = array_unique(explode(',', $comp));
+    $newSelection = array();
+    $firstLevelKeys = array_keys($BACKUP_PLAN);
+    foreach ($selection as $c) {
+        if ($c == 'all') {
+            $newSelection = array_merge($newSelection, $firstLevelKeys);
+        } else {
+            $newSelection[] = $c;
+        }
+    }
+    $selection = array_unique($newSelection);
     
     // Expand each instance of a first-level key into a list of second-level keys
-    foreach (array_keys($BACKUP_PLAN) as $firstLevelKey) {
-    	$comp = str_replace($firstLevelKey, implode(',', array_keys($BACKUP_PLAN[$firstLevelKey])), $comp);
+    $newSelection = array();
+    foreach ($selection as $c) {
+        if (isset($BACKUP_PLAN[$c])) {
+            $newSelection = array_merge($newSelection, array_keys($BACKUP_PLAN[$c]));
+        } else {
+            $newSelection[] = $c;
+        }
     }
-    $selection = array_unique(explode(',', $comp));
+    $selection = array_unique($newSelection);
     
     $knownKeys = array();
     foreach ($BACKUP_PLAN as $firstLevel) {
@@ -616,7 +657,8 @@ function action_runBackup($opt)
     
     // Create tarball with final result
     $output = $retval = NULL;
-    exec('tar -C '.escapeshellarg($sTempDir).' -cf '.escapeshellarg($sTempDir.'/'.$sBackupFile).' backup', $output, $retval);
+    $sBackupPath = $sTempDir.'/'.$sBackupFile;
+    exec('tar -C '.escapeshellarg($sTempDir).' -cf '.escapeshellarg($sBackupPath).' backup', $output, $retval);
     if ($retval != 0) {
         error_exit("FATAL: failed to pack final tarball on $sWorkingDir\n");
     }
@@ -624,6 +666,10 @@ function action_runBackup($opt)
     // Remove working directory
     $output = $retval = NULL;
     exec('rm -rf '.escapeshellarg($sWorkingDir), $output, $retval);
+
+    // Switch tarball file permission to asterisk:asterisk
+    chown($sBackupPath, 'asterisk');
+    chgrp($sBackupPath, 'asterisk');
 
     return $bGlobalSuccess;
 }
@@ -664,8 +710,13 @@ function writeInstalledPackagesManifest($sOutputPath)
     foreach ($output as $s) {
     	$fields = explode(' ', trim($s));
         if (count($fields) == 3 && in_array($fields[0], $packageList)) {
+        
+            // This is needed for compatibility with previous backup implementation 
+            $sPackageName = $fields[0];
+            if ($sPackageName == 'freePBX') $sPackageName = 'freepbx';
+        
             $xml_program = $xml_manifest->addChild('program');
-            $xml_program->addAttribute('id', $fields[0]);
+            $xml_program->addAttribute('id', $sPackageName);
             $xml_program->addAttribute('ver', $fields[1]);
             $xml_program->addAttribute('rel', $fields[2]);
             
@@ -1243,142 +1294,277 @@ function postrestore_fx_db($sLevelTag, &$backupComponent, $sWorkingDir)
     return TRUE;
 }
 
-// Custom processing before restoring email database
+// Custom processing before restoring email database. Strictly speaking, all of
+// the database updates are unnecessary, since the sqlite file will be replaced
+// anyway, but all of the old accounts and domains should be deleted in cyrus
+// and postfix configurations.
 function prerestore_em_db($sLevelTag, &$backupComponent, $sWorkingDir)
 {
-    // Ugly - should not depend on anything under /var/www/html
-    require_once('configs/email.conf.php');
-    require_once('libs/paloSantoDB.class.php');
-    require_once('libs/cyradm.php');
-    require_once('libs/paloSantoEmail.class.php');
+    $bSuccess = TRUE;
+
+    loadCyrusPassword();
+
+	require_once('libs/cyradm.php');
 
     // Connect to IMAP before doing anything else
     $cyr_conn = new cyradm;
     if (!$cyr_conn->imap_login()) {
-        fwrite(STDERR, "ERR: failed to login to IMAP\n");
+        fwrite(STDERR, "ERR: $sLevelTag: failed to login to IMAP\n");
         return FALSE;
     }
+    
+    $bPostfixElastix2 = isPostfixToElastix2();
 
-    // Primero eliminar todos los dominios existentes
-    $pDB = new paloDB("sqlite3:////var/www/db/email.db");
-    $pEmail = new paloEmail($pDB);
-    $virtual = FALSE;
-    if (!empty($pDB->errMsg)) {
-        fwrite(STDERR, "ERR: failed to read old email database - {$pDB->errMsg}\n");
+    // Remove all current accounts of all known domains
+    $removedDomains = array();
+    $conn = NULL;
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $sthListAccounts = $conn->prepare(
+            'SELECT username, password, id_domain, quota FROM accountuser '.
+            'WHERE id_domain = ? ORDER BY username');
+        $sthListAliases = $conn->prepare(
+            'SELECT alias FROM virtual WHERE username = ? ORDER BY alias');
+        $sthDeleteAccount = $conn->prepare('DELETE FROM accountuser WHERE username = ?');
+        $sthDeleteAccountDomain = $conn->prepare('DELETE FROM accountuser WHERE id_domain = ?');
+        $sthDeleteAliases = $conn->prepare('DELETE FROM virtual WHERE username = ?');
+        $sthDeleteDomain = $conn->prepare('DELETE FROM domain WHERE id = ?');
+        
+        // Query and list all domains
+        $sth = $conn->query('SELECT id, domain_name FROM domain ORDER BY domain_name');
+        $domainList = $sth->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($domainList as $domain) {
+            $sthListAccounts->execute(array($domain['id']));
+            $accountList = $sthListAccounts->fetchAll(PDO::FETCH_ASSOC);
+            $bAccountsRemoved = TRUE;
+            foreach ($accountList as $account) {
+                // Query any aliases for the account, and delete them
+                $sthListAliases->execute(array($account['username']));
+                $aliasList = $sthListAliases->fetchAll(PDO::FETCH_COLUMN);
+                $sthDeleteAliases->execute(array($account['username']));
+                
+                // Delete account and associated mailbox
+                $sthDeleteAccount->execute(array($account['username']));
+                if (!$cyr_conn->deletemb('user/'.$account['username'])) {
+                    fwrite(STDERR, "ERR: $sLevelTag: failed to delete mailbox for username ".
+                        $account['username'].' - '.$cyr_conn->getMessage()."\n");
+                    $bSuccess = FALSE;
+                    $bAccountsRemoved = FALSE;                    
+                    break;
+                }
+                
+                // Remove sasl passwords linked to aliases
+                if (!$bPostfixElastix2 && count($aliasList) <= 0)
+                    $aliasList[] = $account['username'].'@'.SASL_DOMAIN;
+                foreach ($aliasList as $sAlias) {
+                    $retval = NULL;
+                    system('/usr/sbin/saslpasswd2 -d '.escapeshellarg($sAlias), $retval);
+                    if ($retval != 0) {
+                        fwrite(STDERR, "ERR: $sLevelTag: failed to delete alias ".
+                            $sAlias.' for username '.$account['username']."\n");
+                        $bSuccess = FALSE;
+                        $bAccountsRemoved = FALSE;
+                    }
+                }
+            }
+            
+            if (!$bAccountsRemoved) {
+                fwrite(STDERR, "ERR: $sLevelTag: could not remove all accounts from domain ".
+                    $domain['domain_name'].", skipping remove...\n");
+                break;
+            }
+            $sthDeleteAccountDomain->execute(array($domain['id']));
+            $sthDeleteDomain->execute(array($domain['id']));
+            $removedDomains[] = $domain['domain_name'];
+        }
+    } catch (PDOException $e) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to remove old domains - ".$e->getMessage()."\n");
         return FALSE;
     }
-    $pEmail = new paloEmail($pDB);
-    $arrDomain = $pEmail->getDomains();
-    foreach($arrDomain as $key => $valor)
-    {
-        $arrTmp['domain_name']  = $valor[1];
-        $arrTmp['id_domain']    = $valor[0];
-        $errMsg = NULL;
-        $bExito = $pEmail->eliminar_dominio($pDB,$arrTmp,$errMsg,$virtual);
-        if (!$bExito) {
-        	fwrite(STDERR, "WARN: failed to remove old domain {$arrTmp['domain_name']} - $errMsg\n");
-        }
-    }
     
-    // Create new domains using the database to be restored
-    $pDB = new paloDB("sqlite3:///$sWorkingDir/email.db");
-    $pEmail = new paloEmail($pDB);
-    $separador = "@";
-    
-    #crear los dominios
-    #seleccionar los dominios
-    $sQuery = 'SELECT * from domain';
-    $result = $pDB->fetchTable($sQuery,true);
-    if (is_array($result) && count($result)>0)
-    {
-        foreach ($result as $infoDominio)
-        {
-            //print "DEBUG: guardar_dominio_sistema(domain_name={$infoDominio['domain_name']})\n";
-            $bExito = $pEmail->guardar_dominio_sistema($infoDominio['domain_name'], $errMsg);
-            if (!$bExito) {
-            	fwrite(STDERR, "WARN: failed to add new domain {$infoDominio['domain_name']} - $errMsg\n");
+    // Remove domains from /etc/postfix/main.cf and reload postfix.
+    if (count($removedDomains) > 0) {
+        $sDomainKey = $bPostfixElastix2 ? 'virtual_mailbox_domains' : 'mydomain2';
+        $postfixConf = file('/etc/postfix/main.cf');
+        if ($postfixConf === FALSE) {
+            fwrite(STDERR, "ERR: $sLevelTag: failed to load /etc/postfix/main.cf for domain update\n");
+            $bSuccess = FALSE;
+        } else {
+            $bUpdated = FALSE;
+            foreach (array_keys($postfixConf) as $i) {
+                $regs = NULL;
+                if (preg_match('/^(\w+)\s*=\s*(.*)/', rtrim($postfixConf[$i]), $regs)) {
+                    if ($regs[1] == $sDomainKey) {
+                        $oldDomainList = preg_split('/,\s*/', $regs[2]);
+                        $newDomainList = array_diff($oldDomainList, $removedDomains);
+                        $postfixConf[$i] = $sDomainKey.' = '.implode(',', $newDomainList)."\n";
+                        $bUpdated = (count($oldDomainList) != count($newDomainList));
+                    }
+                }
             }
-        }
-        #crear las cuentas
-        $sQuery = 'SELECT a.*,d.domain_name FROM accountuser AS a, domain AS d WHERE d.id = a.id_domain';
-        $result=$pDB->fetchTable($sQuery,true);
-        if (is_array($result)){
-            foreach ($result as $infoCuenta)
-            {
-                $username = $infoCuenta['username'];
-                $quota    = $infoCuenta['quota'];
-                $domain   = $infoCuenta['domain_name'];
-                #armo el email
-                $arrMatchAccount = preg_split("/$separador/",$username);
-                if (count($arrMatchAccount) > 0)
-                {
-                    $email=$arrMatchAccount[0].'@'.$infoCuenta['domain_name'];
-                    $password=$infoCuenta['password'];
-                    //print "DEBUG: crear_usuario_correo_sistema(email=$email,username=$username,password=$password)\n";
-                    $bExito = $pEmail->crear_usuario_correo_sistema($email,$username,$password,$errMsg,$virtual);
-                    if ($bExito){
-                        //crear el mailbox para la nueva cuenta
-                        //print "DEBUG: crear_mailbox_usuario(email=$email,username=$username,quota=$quota)\n";
-                        $bReturn=crear_mailbox_usuario($cyr_conn, $email,$username,$quota);
-                        if(!$bReturn) {
-                            fwrite(STDERR, "WARN: failed to create mailbox for email account $username\n");
-                            $bReturn = $pEmail->eliminar_usuario_correo_sistema($username,$email,$errMsg);
-                        }
-                    }else{
-                        //tengo que borrar el usuario creado en el sistema
-                        fwrite(STDERR, "WARN: failed to add new email account $username - $errMsg\n");
-                        $bReturn = $pEmail->eliminar_usuario_correo_sistema($username,$email,$errMsg);
+            if ($bUpdated) {
+                if (FALSE === file_put_contents('/etc/postfix/main.cf', $postfixConf)) {
+                    fwrite(STDERR, "ERR: $sLevelTag: failed to write /etc/postfix/main.cf for domain update\n");
+                    $bSuccess = FALSE;
+                } else {
+                    $retval = NULL;
+                    system('/usr/sbin/postfix reload', $retval);
+                    if ($retval != 0) {
+                        fwrite(STDERR, "ERR: $sLevelTag: failed to reload postfix after domain update ($retval)\n");
+                        $bSuccess = FALSE;
                     }
                 }
             }
         }
     }
     
-    return TRUE;
+    $cyr_conn->imap_logout();
+    return $bSuccess;
+}
+
+// Custom processing after restoring email database.
+function postrestore_em_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    global $CYRUS;
+    $bSuccess = TRUE;
+
+    loadCyrusPassword();
+
+    require_once('libs/cyradm.php');
+
+    // Connect to IMAP before doing anything else
+    $cyr_conn = new cyradm;
+    if (!$cyr_conn->imap_login()) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to login to IMAP\n");
+        return FALSE;
+    }
+    
+    $bPostfixElastix2 = isPostfixToElastix2();
+
+    // Load all of the required domains and accounts
+    $domainList = array(); $accountList = array();
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $sth = $conn->query('SELECT domain_name FROM domain ORDER BY domain_name');
+        $domainList = $sth->fetchAll(PDO::FETCH_COLUMN);
+
+        $sth = $conn->query(
+            'SELECT a.username, a.password, a.quota, d.domain_name '.
+            'FROM accountuser AS a, domain AS d WHERE d.id = a.id_domain');
+        $accountList = $sth->fetchAll(PDO::FETCH_ASSOC);
+        
+        $sth = NULL; $conn = NULL;
+    } catch (PDOException $e) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to query new domains or accounts - ".$e->getMessage()."\n");
+        return FALSE;
+    }
+
+    // Create all of the new domains and reload postfix
+    if (count($domainList) > 0) {
+        $sDomainKey = $bPostfixElastix2 ? 'virtual_mailbox_domains' : 'mydomain2';
+        $postfixConf = file('/etc/postfix/main.cf');
+        if ($postfixConf === FALSE) {
+            fwrite(STDERR, "ERR: $sLevelTag: failed to load /etc/postfix/main.cf for domain update\n");
+            $bSuccess = FALSE;
+        } else {
+            $bUpdated = FALSE;
+            foreach (array_keys($postfixConf) as $i) {
+                $regs = NULL;
+                if (preg_match('/^(\w+)\s*=\s*(.*)/', rtrim($postfixConf[$i]), $regs)) {
+                    if ($regs[1] == $sDomainKey) {
+                        $oldDomainList = preg_split('/,\s*/', $regs[2]);
+                        $newDomainList = array_unique(array_merge($oldDomainList, $domainList));
+                        $postfixConf[$i] = $sDomainKey.' = '.implode(',', $newDomainList)."\n";
+                        $bUpdated = (count($oldDomainList) != count($newDomainList));
+                    }
+                }
+            }
+            if ($bUpdated) {
+                if (FALSE === file_put_contents('/etc/postfix/main.cf', $postfixConf)) {
+                    fwrite(STDERR, "ERR: $sLevelTag: failed to write /etc/postfix/main.cf for domain update\n");
+                    $bSuccess = FALSE;
+                } else {
+                    $retval = NULL;
+                    system('/usr/sbin/postfix reload', $retval);
+                    if ($retval != 0) {
+                        fwrite(STDERR, "ERR: $sLevelTag: failed to reload postfix after domain update ($retval)\n");
+                        $bSuccess = FALSE;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Create all the new accounts inside the domains
+    foreach ($accountList as $account) {
+        $emailFields = explode('@', $account['username']);
+        $sEmail = $emailFields[0].'@'.$account['domain_name'];
+        
+        // Assign password for new user
+        $sAccountCommand = 'echo '.escapeshellarg($account['password']).' | /usr/sbin/saslpasswd2 -c '.
+            ($bPostfixElastix2 
+                ? escapeshellarg($sEmail) 
+                : escapeshellarg($account['username']).' -u '.SASL_DOMAIN);
+        $retval = NULL;
+        system($sAccountCommand, $retval);
+        if ($retval != 0) {
+            fwrite(STDERR, "ERR: $sLevelTag: failed to create account $sEmail ($retval)\n");
+            $bSuccess = FALSE;
+        } else {
+            // Create mailbox for user
+            $userpath = 'user/'.$account['username'];
+            if (!$cyr_conn->createmb($userpath)) {
+                fwrite(STDERR, "ERR: $sLevelTag: failed to create user {$account['username']}: ".$cyr_conn->getMessage()."\n");
+                $bSuccess = FALSE;
+            } elseif (!$cyr_conn->setacl($userpath, $CYRUS['ADMIN'], 'lrswipcda')) {
+                fwrite(STDERR, "ERR: $sLevelTag: failed to set ACL on user {$account['username']}: ".$cyr_conn->getMessage()."\n");
+                $bSuccess = FALSE;
+            } elseif (!$cyr_conn->setmbquota($userpath, $account['quota'])) {
+                fwrite(STDERR, "ERR: $sLevelTag: failed to set quota on user {$account['username']}: ".$cyr_conn->getMessage()."\n");
+                $bSuccess = FALSE;
+            }
+        }
+    }
+    
+    $cyr_conn->imap_logout();
+    return $bSuccess;
 }
 
 // Custom processing after restoring email mailboxes
 function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
 {
-	// Query all users of all domains and reconstruct mailboxes
+    $bSuccess = TRUE;
+    
+    // Query all users of all domains and reconstruct mailboxes
     try {
         $conn = new PDO('sqlite:/var/www/db/email.db');
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         foreach ($conn->query('SELECT a.username, d.domain_name FROM accountuser AS a, domain AS d WHERE d.id = a.id_domain') as $row) {
-        	$fields = explode('@', $row['username']);
+            $fields = explode('@', $row['username']);
             if (count($fields) > 1) {
-            	$username = $fields[0].'@'.$row['domain_name'];
+                $username = $fields[0].'@'.$row['domain_name'];
                 $sMailboxPath = escapeshellarg("user/$username");
                 $sCmdReconstruct = escapeshellarg("/usr/lib/cyrus-imapd/reconstruct -rf $sMailboxPath");
                 $sCmdSu = "su - cyrus -c $sCmdReconstruct";
                 //print "$sCmdSu\n";
-                exec($sCmdSu);
+                $output = $retval = NULL;
+                exec($sCmdSu, $output, $retval);
+                if ($retval != 0) {
+                    fwrite(STDERR, "ERR: $sLevelTag: failed to reconstruct mailbox for user $username\n");
+                    $bSuccess = FALSE;
+                }
             }
         }
         $conn = NULL;
     } catch (PDOException $e) {
         fwrite(STDERR, "WARN: $sLevelTag: failed to query list of usernames and domains\n");
+        return FALSE;
     }
+    
+    return $bSuccess;
 }
-
-function crear_mailbox_usuario($cyr_conn, $email, $username, $quota)
-{
-    global $CYRUS;
-
-    $userpath = 'user/'.$username;
-    if (!$cyr_conn->createmb($userpath)) {
-        fwrite(STDERR, "ERR: failed to create user $username: ".$cyr_conn->getMessage()."\n");
-        return FALSE;
-    }
-    if (!$cyr_conn->setacl($userpath, $CYRUS['ADMIN'], 'lrswipcda')) {
-    	fwrite(STDERR, "ERR: failed to set ACL on user $username: ".$cyr_conn->getMessage()."\n");
-        return FALSE;
-    }
-    if (!$cyr_conn->setmbquota($userpath, $quota)) {
-        fwrite(STDERR, "ERR: failed to set quota on user $username: ".$cyr_conn->getMessage()."\n");
-        return FALSE;
-    }
-    return TRUE;
-}
-
 ?>

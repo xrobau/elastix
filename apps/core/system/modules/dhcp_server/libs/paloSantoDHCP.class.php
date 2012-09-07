@@ -116,20 +116,23 @@ class PaloSantoDHCP
                 }
     
                 // DNSs
-                $patron = "^[[:space:]]*option domain-name-servers[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
-                        "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?";
-                if(ereg($patron, $linea_archivo, $arrReg)) {
-                    if(!isset($arrConfigurationDHCP["DNS1"])) {
-                        $arrConfigurationDHCP["DNS1"]["in_dns1_1"] = $arrReg[1]; 
-                        $arrConfigurationDHCP["DNS1"]["in_dns1_2"] = $arrReg[2];
-                        $arrConfigurationDHCP["DNS1"]["in_dns1_3"] = $arrReg[3]; 
-                        $arrConfigurationDHCP["DNS1"]["in_dns1_4"] = $arrReg[4]; 
-                    } else if (!isset($arrConfigurationDHCP["DNS2"])){
-                        $arrConfigurationDHCP["DNS2"]["in_dns2_1"] = $arrReg[1]; 
-                        $arrConfigurationDHCP["DNS2"]["in_dns2_2"] = $arrReg[2];
-                        $arrConfigurationDHCP["DNS2"]["in_dns2_3"] = $arrReg[3]; 
-                        $arrConfigurationDHCP["DNS2"]["in_dns2_4"] = $arrReg[4];
-                    } 
+                $patron = '/^\s*option domain-name-servers\s+([\d\.\s,]+)/';
+                if (preg_match($patron, $linea_archivo, $arrReg)) {
+                	$dnsList = preg_split('/,\s*/', $arrReg[1]);
+                    foreach ($dnsList as $dnsString) {
+                    	$ip = explode('.', $dnsString);
+                        if(!isset($arrConfigurationDHCP["DNS1"])) {
+                            $arrConfigurationDHCP["DNS1"]["in_dns1_1"] = $ip[0]; 
+                            $arrConfigurationDHCP["DNS1"]["in_dns1_2"] = $ip[1];
+                            $arrConfigurationDHCP["DNS1"]["in_dns1_3"] = $ip[2]; 
+                            $arrConfigurationDHCP["DNS1"]["in_dns1_4"] = $ip[3]; 
+                        } else if (!isset($arrConfigurationDHCP["DNS2"])){
+                            $arrConfigurationDHCP["DNS2"]["in_dns2_1"] = $ip[0]; 
+                            $arrConfigurationDHCP["DNS2"]["in_dns2_2"] = $ip[1];
+                            $arrConfigurationDHCP["DNS2"]["in_dns2_3"] = $ip[2]; 
+                            $arrConfigurationDHCP["DNS2"]["in_dns2_4"] = $ip[3];
+                        } 
+                    }
                 }
             } //end while
     

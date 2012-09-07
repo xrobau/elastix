@@ -129,6 +129,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Sep 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: DHCP Server: option domain-name-servers should be written once with a
+  comma-separated list of DNS servers, instead of repeating the option for
+  multiple servers as done before. Fixes Elastix bug #1363.
+  SVN Rev[4186]
+
 * Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: extend 'backupengine' privileged script to install
   a new crontab for automatic backup. Reimplement automatic backup 

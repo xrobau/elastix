@@ -204,10 +204,11 @@ function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
         $sConfigGateway = "\toption routers\t\t\t{$sGateway};\n";
     if (!is_null($sWINS))
         $sConfigWINS = "\toption netbios-name-servers\t{$sWINS};\n";
-    if (!is_null($sDNS1))
-        $sConfigDNS .= "\toption domain-name-servers\t{$sDNS1};\n";;
-    if (!is_null($sDNS2))
-        $sConfigDNS .= "\toption domain-name-servers\t{$sDNS2};\n";;
+    $dnsList = array();
+    if (!is_null($sDNS1)) $dnsList[] = $sDNS1;
+    if (!is_null($sDNS2)) $dnsList[] = $sDNS2;
+    if (count($dnsList) > 0)
+        $sConfigDNS .= "\toption domain-name-servers\t".implode(', ', $dnsList).";\n";
 
     // Get timezone offset
     $sTimezoneOffset = date("Z");

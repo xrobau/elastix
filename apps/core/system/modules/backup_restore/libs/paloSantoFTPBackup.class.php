@@ -279,20 +279,5 @@ class paloSantoFTPBackup {
         }
         return TRUE;
     }
-
-
-	function existSchemaDB($base, $pDB)
-    {
-        $sql = "select count(*) existe from tables where table_schema='$base'";
-        $result = $pDB->getFirstRowQuery($sql,true);
-
-        if($sql==FALSE || $result ==null){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-
-        if($result['existe']==0)    return false;
-        else return true;
-    }
 }
 ?>

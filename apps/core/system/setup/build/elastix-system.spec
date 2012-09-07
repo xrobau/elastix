@@ -130,6 +130,18 @@ fi
 
 %changelog
 * Fri Sep 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: fixed backupengine to correctly expand backup
+  components only for full words.
+- CHANGED: Backup/Restore: task of granting correct ownership to backup tarball
+  is now shifted to backupengine.
+- FIXED: Backup/Restore: backward-compatibility fix of encoding freePBX package
+  name as 'freepbx'.
+- CHANGED: Backup/Restore: reimplement pre/post operations on email databases to
+  not depend on paloEmail class.
+- CHANGED: Backup/Restore: reimplement GUI backup and restore operations on top
+  of backupengine. This removes four dependencies on other libraries and removes
+  a lot of instances of sudo chown.
+  SVN Rev[4188]
 - FIXED: DHCP Server: option domain-name-servers should be written once with a
   comma-separated list of DNS servers, instead of repeating the option for
   multiple servers as done before. Fixes Elastix bug #1363.
@@ -141,14 +153,10 @@ fi
   administration using this capability. This removes four instances of sudo 
   chown.
   SVN Rev[4185]
-
-* Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: reimplement automatic_backup.php as a wrapper around
   a direct call to backupengine. This removes one duplication of the backup
   implementation.
   SVN Rev[4184]  
-
-* Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Backup/Restore: new privileged script 'backupengine' that reimplements
   backup/restore functionality.
   SVN Rev[4183]

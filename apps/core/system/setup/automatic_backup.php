@@ -37,11 +37,6 @@ $sBackupDir = '/var/www/backup';
 $retval = NULL;
 system('/usr/share/elastix/privileged/backupengine --backup --backupfile '.
     $sBackupFilename.' --tmpdir '.$sBackupDir, $retval);
-$sBackupPath = $sBackupDir.'/'.$sBackupFilename;
-if (file_exists($sBackupPath)) {
-	chown($sBackupPath, 'asterisk');
-    chgrp($sBackupPath, 'asterisk');
-}
 exit($retval);
 
 function load_default_timezone()

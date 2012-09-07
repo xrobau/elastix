@@ -130,6 +130,8 @@ fi
 
 %changelog
 * Fri Sep 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: fix up Spanish translation.
+  SVN Rev[4190]
 - CHANGED: Backup/Restore: remove unneeded sudo chown on /var/www/backup on file
   delete. With this, Backup/Restore is officially sudo-free.
   SVN Rev[4189]

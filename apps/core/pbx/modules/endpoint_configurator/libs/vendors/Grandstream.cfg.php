@@ -37,41 +37,71 @@ function PrincipalFileGrandstream($DisplayName, $id_device, $secret, $arrParamet
         # Display Name (John Doe)
         P407 = $DisplayName";
     }
-    elseif($model == "GXP2120" || $model == "GXV3175"){
-        $content="
-    
-    # Firmware Server Path
-    P192 = $ipAdressServer
-    
-    # Config Server Path
-    P237 = $ipAdressServer
-    
-    # Firmware Upgrade. 0 - TFTP Upgrade,  1 - HTTP Upgrade.
-    P212 = 0
-    
-    # Account Name
-    P270 = $DisplayName
-    
-    # SIP Server
-    P47 = $ipAdressServer
-    
-    # Outbound Proxy
-    P48 = $ipAdressServer
-    
-    # SIP User ID
-    P35 = $id_device
-    
-    # Authenticate ID
-    P36 = $id_device
-    
-    # Authenticate password
-    P34 = $secret
-    
-    # Display Name (John Doe)
-    P3 = $DisplayName";
+    elseif($model == "GXP2120" || $model == "GXP2100" || $model == "GXP1405" || $model == "GXV3175"){
+        $content = getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model);
     }
     else{
-        $content="
+        $content = getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model);
+    }
+    return $content;
+}
+
+#Los modelos GXP2100 , GXP2120 y GXP1405 son los mismos
+function getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model){
+
+    $configNetwork = "";
+    $ipTftpServer = explode(".", $ipAdressServer);   
+    $ByDHCP = existsValue($arrParameters,'By_DHCP',1);
+    $ByDHCP = ($ByDHCP == 1)?0:1; // 0 indica que es por DHCP y 1 por estatico
+    if($ByDHCP==1){
+        
+        
+        $IP = existsValue($arrParameters,'IP',"0.0.0.0");
+        $IP = explode(".", $IP);
+        $Mask = existsValue($arrParameters,'Mask',"0.0.0.0");
+        $Mask = explode(".", $Mask);
+        $GW = existsValue($arrParameters,'GW',"0.0.0.0");
+        $GW = explode(".", $GW);
+        $DNS1 = existsValue($arrParameters,'DNS1',"0.0.0.0");
+        $DNS1 = explode(".", $DNS1);
+        $DNS2 = existsValue($arrParameters,'DNS2',"0.0.0.0");
+        $DNS2 = explode(".", $DNS2);
+    
+        $configNetwork ="
+        
+        # IP Address
+        P9=$IP[0]
+        P10=$IP[1]
+        P11=$IP[2]
+        P12=$IP[3]
+        
+        # Subnet Mask
+        P13=$Mask[0]
+        P14=$Mask[1]
+        P15=$Mask[2]
+        P16=$Mask[3]
+        
+        # Gateway
+        P17=$GW[0]
+        P18=$GW[1]
+        P19=$GW[2]
+        P20=$GW[3]
+        
+        # DNS Server 1
+        P21=$DNS1[0]
+        P22=$DNS1[1]
+        P23=$DNS1[2]
+        P24=$DNS1[3]
+        
+        # DNS Server 2
+        P25=$DNS2[0]
+        P26=$DNS2[1]
+        P27=$DNS2[2]
+        P28=$DNS2[3]";
+   }
+
+
+    $content="
     
     # Firmware Server Path
     P192 = $ipAdressServer
@@ -101,8 +131,25 @@ function PrincipalFileGrandstream($DisplayName, $id_device, $secret, $arrParamet
     P34 = $secret
     
     # Display Name (John Doe)
-    P3 = $DisplayName";
-    }
+    P3 = $DisplayName
+    
+    # DHCP=0 o static=1
+    P8=$ByDHCP
+    
+    # SIP Registration ( 0 = do not register, 1 = register )
+    P31=1
+    
+    #Time Zone
+    P64=".existsValue($arrParameters,'Time_Zone','auto')."
+    
+    # TFT Server
+    P41=$ipTftpServer[0]
+    P42=$ipTftpServer[1]
+    P43=$ipTftpServer[2]
+    P44=$ipTftpServer[3]
+    
+    $configNetwork";    
+    
     return $content;
 }
 
@@ -175,6 +222,16 @@ function grandstream_codificar_config($sMAC, $sTxtConfig)
     if ((array_sum(unpack("n*", $sPayload)) & 0xFFFF) != 0) 
         die('Suma de verificación inválida');
     return $sPayload;
+}
+
+function existsValue($arr, $key, $default)
+{
+    if(isset($arr[$key])){
+        $value = trim($arr[$key]);
+        if($value != "") return $value;
+        else return $default;
+    }
+    else return $default;
 }
 
 ?>

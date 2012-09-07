@@ -485,6 +485,7 @@ class paloSantoEndPoint
             }
         }
         uasort($listaEndpoints, '_paloSantoEndPoint_cmp_endpoints');
+        
         return $listaEndpoints;
     }
 

@@ -154,7 +154,7 @@ function load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo_csv, $base_dir,
 
     $pattonDevices = $paloEndPoint->getPattonDevices();
     $arrles  = $paloEndPoint->endpointMap($endpoint_mask,$arrVendor,$arrEndpointsConf,$pattonDevices,true);
-
+    
     if(!(is_array($arrles) && count($arrles) > 0)){
         $smarty->assign("mb_title",_tr('ERROR').":");
         $smarty->assign("mb_message",_tr("There weren't  endpoints in the subnet."));
@@ -184,10 +184,11 @@ function load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo_csv, $base_dir,
                     $MAC    = $arrEndpoint['data']['MAC'];
                     $macTMP = strtolower($MAC);
                     $macTMP = str_replace(":","",$macTMP);
-
+                    
                     if(isset($arrles[$macTMP])){ // Si el endpoint fue encontrado en la red.
+                        
                         $currentEndpointIP = $arrles[$macTMP]['ip_adress'];
-
+                       
                         $tech = $paloEndPoint->getTech($extension);
                         $freePBXParameters = $paloEndPoint->getDeviceFreePBXParameters($extension,$tech);
 
@@ -255,6 +256,7 @@ function load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo_csv, $base_dir,
                         }                                   
                     }
                     else{
+                        
                         $v = isset($dataVendor['name'])?$dataVendor['name']:$arrEndpoint['data']['Vendor'];
                         $msg .= _tr("Line")."$line: " ._tr("Endpoint wasn't founded in subnet.")."(vendor:$v - model:$name_model - Ext:$extension)<br />";
                     }
@@ -557,7 +559,7 @@ function download_endpoints($dsnAsterisk, $dsnSqlite)
     $keyOrder = array(
         'Vendor'    => 'Vendor',
         'Model'     => 'Model',
-        'MAC'       => 'Mac',
+        'MAC'       => 'MAC',
         'Ext'       =>  'Ext',
         'IP'        =>  'IP',
         'Mask'      =>  'Mask',

@@ -232,8 +232,8 @@ class PaloSantoFileEndPoint
                else $return = false;
 
                 break;
-		
-	    case 'Xorcom':
+            
+        case 'Xorcom':
                if($ArrayData['data']['model'] == "XP0120P" || $ArrayData['data']['model'] == "XP0100P"){
                    $contentFileXorcom =PrincipalFileXorcom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$this->ipAdressServer);
                         if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileXorcom)){
@@ -248,22 +248,22 @@ class PaloSantoFileEndPoint
                 break;
                 
 
-            case 'LG-ERICSSON':
+        case 'LG-ERICSSON':
                 if($ArrayData['data']['model'] == "IP8802A"){
                     $contentFileLG_Ericsson = PrincipalFileLG_IP8802A($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'], $this->ipAdressServer);
                     if($this->createFileConf($this->directory, $ArrayData['data']['filename'], $contentFileLG_Ericsson)){
-		$parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
-		    $result      = $this->AsteriskManagerAPI('Command',$parameters);
-		    if($result===false)
-			$return = false;
-                            else $return = true;
+                        $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
+                        $result = $this->AsteriskManagerAPI('Command',$parameters);
+                        if($result===false)
+                            $return = false;
+                        else $return = true;
                     }
                     else $return = false;
                 }
                 break;
         }
-	if(isset($_SESSION['endpoint_configurator']['extensions_registered'][$ArrayData['data']['ip_endpoint']])){
-	    if(is_array($_SESSION['endpoint_configurator']['extensions_registered'][$ArrayData['data']['ip_endpoint']]) && count($_SESSION['endpoint_configurator']['extensions_registered'][$ArrayData['data']['ip_endpoint']]) > 0){
+    if(isset($_SESSION['endpoint_configurator']['extensions_registered'][$ArrayData['data']['ip_endpoint']])){
+        if(is_array($_SESSION['endpoint_configurator']['extensions_registered'][$ArrayData['data']['ip_endpoint']]) && count($_SESSION['endpoint_configurator']['extensions_registered'][$ArrayData['data']['ip_endpoint']]) > 0){
             foreach($_SESSION['endpoint_configurator']['extensions_registered'][$ArrayData['data']['ip_endpoint']] as $extension){
                 $tmp = explode(":",$extension);
                 $tech = strtolower($tmp[0]);
@@ -274,29 +274,29 @@ class PaloSantoFileEndPoint
                    //     $return = false;
                    // else $return = true;
             }
-	    }
-	}
-	return $return;
+        }
+    }
+    return $return;
     }
 
     function buildPattonConfFile($arrData,$tone_set)
     {
-	include_once "vendors/Patton.cfg.php";
-	$config = getPattonConfiguration($arrData,$tone_set);
-	if(!$this->createFileConf($this->directory,$arrData["mac"]."_Patton.cfg",$config))
-	    return false;
-	$arrCommands = getPattonCommands($arrData,$this->ipAdressServer);
-	$result = $this->checkTelnetCredentials($arrData["ip_address"],$arrData["telnet_username"],$arrData["telnet_password"],2);
-	if($result === true){
-	    if(!$this->telnet($arrData["ip_address"],"","",$arrCommands,2)){
-		$this->errMsg = _tr("Unable to telnet to ").$arrData["ip_address"];
-		return false;
-	    }
-	    else
-		return true;
-	}
-	else
-	    return $result;
+    include_once "vendors/Patton.cfg.php";
+    $config = getPattonConfiguration($arrData,$tone_set);
+    if(!$this->createFileConf($this->directory,$arrData["mac"]."_Patton.cfg",$config))
+        return false;
+    $arrCommands = getPattonCommands($arrData,$this->ipAdressServer);
+    $result = $this->checkTelnetCredentials($arrData["ip_address"],$arrData["telnet_username"],$arrData["telnet_password"],2);
+    if($result === true){
+        if(!$this->telnet($arrData["ip_address"],"","",$arrCommands,2)){
+        $this->errMsg = _tr("Unable to telnet to ").$arrData["ip_address"];
+        return false;
+        }
+        else
+        return true;
+    }
+    else
+        return $result;
     }
    
     function getSangomaModel($ip,$mac,$dsnAsterisk,$dsnSqlite,$sw)
@@ -320,12 +320,12 @@ class PaloSantoFileEndPoint
             $result = $this->read($fsock,$sw);
             fputs($fsock, "exit\r");
             $posi = strpos($result, "Hardware Platform : ");
-	    $posf = stripos($result, "Serial");
+            $posf = stripos($result, "Serial");
             $cad1 = explode("Hardware Platform : ", $result);
             $cad2 = explode("Serial",$cad1[1]); 
             //$cadena = substr($result, $posi+20,$posf);
 
-	    //$posfin = stripos($cadena, "Serial");	
+            //$posfin = stripos($cadena, "Serial");	
             //$rcadena = substr($cadena, 0,$posfin);
             return $cad2[0];  
         }
@@ -371,7 +371,7 @@ class PaloSantoFileEndPoint
         $password=$credential["password"];
 
         $result="";
-	$arrPorts= null;
+        $arrPorts= null;
         
         if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
         {
@@ -388,17 +388,17 @@ class PaloSantoFileEndPoint
             $nfxs=0;
             $nfxo=0;
             $cadena = explode("POTS port", $result);
- 	    $nports = count($cadena)-1;
-	    for($i=1;$i<count($cadena);$i++){
- 	     	  $fxo = stripos($cadena[$i], "FXO"); 
+            $nports = count($cadena)-1;
+            for($i=1;$i<count($cadena);$i++){   
+                $fxo = stripos($cadena[$i], "FXO"); 
                 if($fxo===false)
                    $nfxs++;
                 else
                    $nfxo++;
-		  
-	    }
+            
+            }
             $arrPorts['fxs']=$nfxs;
-	    $arrPorts['fxo']=$nfxo;		
+            $arrPorts['fxo']=$nfxo;		
             $arrPorts['ports']=$nports;
             $posfin = stripos($cadena, "Serial");
             $rcadena = substr($cadena, 0,$posfin);
@@ -465,13 +465,13 @@ class PaloSantoFileEndPoint
             fputs($fsock, "$password\r");
             $this->read($fsock,$sw);
             fputs($fsock, "get tftp:config.txt\r");
-	    $this->read($fsock,$sw);
+            $this->read($fsock,$sw);
             fputs($fsock, "apply\r");
-	    $this->read($fsock,$sw);
+            $this->read($fsock,$sw);
             fputs($fsock, "save\r");
             $this->read($fsock,$sw);
             fputs($fsock, "reboot system\r");
-	    $result = $this->read($fsock,$sw);
+            $result = $this->read($fsock,$sw);
             if(preg_match("/Authentication failed/",$result)){
                 $this->errMsg = _tr("The username or password are incorrect");
                 return null;
@@ -488,23 +488,23 @@ class PaloSantoFileEndPoint
 
     function checkTelnetCredentials($ip,$user,$password,$sw)
     {
-	if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+    if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
         {
             fputs($fsock, "$user\r");
-	    $this->read($fsock,$sw);
-	    fputs($fsock, "$password\r");
-	    $result = $this->read($fsock,$sw);
-	    if(preg_match("/Authentication failed/",$result)){
-		$this->errMsg = _tr("The username or password are incorrect");
-		return null;
-	    }
-	    else
-		return true;
-	}
-	else{
-	    $this->errMsg = _tr("Unable to telnet to ").$ip;
-	    return false;
-	}
+        $this->read($fsock,$sw);
+        fputs($fsock, "$password\r");
+        $result = $this->read($fsock,$sw);
+        if(preg_match("/Authentication failed/",$result)){
+        $this->errMsg = _tr("The username or password are incorrect");
+        return null;
+        }
+        else
+        return true;
+    }
+    else{
+        $this->errMsg = _tr("Unable to telnet to ").$ip;
+        return false;
+    }
     }
 
     /*
@@ -632,7 +632,7 @@ class PaloSantoFileEndPoint
                 break;
 
             case 'Grandstream':
-		if($this->deleteFileConf($this->directory, "cfg".$ArrayData['data']['filename'])){
+                if($this->deleteFileConf($this->directory, "cfg".$ArrayData['data']['filename'])){
                     return $this->deleteFileConf($this->directory, "gxp".$ArrayData['data']['filename']);
                 }else return false;
                 break;
@@ -775,13 +775,13 @@ class PaloSantoFileEndPoint
                 return true;
                 break;
 
-	    case 'Xorcom':
+            case 'Xorcom':
                 $contentFileXorcom = templatesFileXorcom($this->ipAdressServer);
                 $this->createFileConf($this->directory, "y000000000010.cfg", $contentFileXorcom);
                 $this->createFileConf($this->directory, "y000000000011.cfg", $contentFileXorcom);
                 return true; 
                 break;
-	   		
+                
         }
     }
 
@@ -815,22 +815,22 @@ class PaloSantoFileEndPoint
 
     function read($fsock, $sw=1 ,$seg=1)
     {
-	$s = ""; 
-	if($sw==1){
-	  $s = fread($fsock,1024);
-	}
-	else if($sw==2){
-	  stream_set_blocking($fsock, TRUE);
-	  stream_set_timeout($fsock,$seg);
-	  $info = stream_get_meta_data($fsock);
-	  while (true) {
-	    $char = fgetc($fsock);
-	    if(empty($char) && $info['timed_out']) break;
-	    $s .= "$char";
-	    $info = stream_get_meta_data($fsock);
-	  }
-	}
-	return $s;
+    $s = ""; 
+    if($sw==1){
+    $s = fread($fsock,1024);
+    }
+    else if($sw==2){
+    stream_set_blocking($fsock, TRUE);
+    stream_set_timeout($fsock,$seg);
+    $info = stream_get_meta_data($fsock);
+    while (true) {
+        $char = fgetc($fsock);
+        if(empty($char) && $info['timed_out']) break;
+        $s .= "$char";
+        $info = stream_get_meta_data($fsock);
+    }
+    }
+    return $s;
     }
 
 
@@ -853,11 +853,11 @@ class PaloSantoFileEndPoint
                 if($model == 'AT530' || $model == 'AT620' || $model == 'AT610' || $model == 'AT640'){
                     if(isset($arrParametersOld['versionCfg'])){
                         $arrParametersOld['versionCfg'] = $arrParametersOld['versionCfg'] + 0.0001;
-			if(strlen($arrParametersOld['versionCfg']) == 1)
-			    $arrParametersOld['versionCfg'] .= ".0";	
-			while(strlen($arrParametersOld['versionCfg']) < 6)
-			    $arrParametersOld['versionCfg'] .= "0";
-		    }
+            if(strlen($arrParametersOld['versionCfg']) == 1)
+                $arrParametersOld['versionCfg'] .= ".0";	
+            while(strlen($arrParametersOld['versionCfg']) < 6)
+                $arrParametersOld['versionCfg'] .= "0";
+            }
                     else
                         $arrParametersOld['versionCfg'] = '2.0005';
                 }
@@ -890,12 +890,12 @@ class PaloSantoFileEndPoint
     }
 
         /*  The function find_version() find the files included P0S as, P0S3-xx-x-xx.sb2 or other.
-	    This function return only the file name and not the extension.
-	    Add by Franck danard.
-	    Maybe there's several solution to do it!
-	*/
-	function find_version()
-	{
+        This function return only the file name and not the extension.
+        Add by Franck danard.
+        Maybe there's several solution to do it!
+    */
+    function find_version()
+    {
             // Replace this code by the good directory tftp.
             $monrep = opendir($this->directory);
             while ($entryname = readdir($monrep)){

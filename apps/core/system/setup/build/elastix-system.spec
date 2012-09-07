@@ -130,6 +130,9 @@ fi
 
 %changelog
 * Fri Sep 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: remove unneeded sudo chown on /var/www/backup on file
+  delete. With this, Backup/Restore is officially sudo-free.
+  SVN Rev[4189]
 - FIXED: Backup/Restore: fixed backupengine to correctly expand backup
   components only for full words.
 - CHANGED: Backup/Restore: task of granting correct ownership to backup tarball

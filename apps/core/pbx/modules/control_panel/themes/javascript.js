@@ -78,7 +78,7 @@ $(function(){
                 arrAction["width"]     = widthsize;
                 arrAction["area"]      = tmp[1];
                 arrAction["type"]      = "alsoResize";
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                             reFresh();
@@ -104,7 +104,7 @@ $(function(){
                 arrAction["height"]    = heightsize;
                 arrAction["width"]     = widthsize;
                 arrAction["area"]      = tmp[1];
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                           //  reFresh();
@@ -121,7 +121,7 @@ function actualizar()
 	var arrAction              = new Array();
 	    arrAction["action"]    = "refresh";
 	    arrAction["rawmode"]   = "yes";
-	    request("index.php",arrAction,true,
+	    request("index.php?menu=control_panel",arrAction,true,
 		function(arrData,statusResponse,error)
 		{
 
@@ -175,7 +175,7 @@ function getAllData()
     var arrAction              = new Array();
         arrAction["action"]    = "getAllData";
         arrAction["rawmode"]   = "yes";
-        request("index.php",arrAction,false,
+        request("index.php?menu=control_panel",arrAction,false,
             function(arrData,statusResponse,error)
             {
                 for(key in arrData){
@@ -226,7 +226,7 @@ function getDataBox()
     var arrAction              = new Array();
         arrAction["action"]    = "loadBoxes";
         arrAction["rawmode"]   = "yes";
-        request("index.php",arrAction,false,
+        request("index.php?menu=control_panel",arrAction,false,
             function(arrData,statusResponse,error)
             {
                 drawBoxExtension(arrData[0]);
@@ -314,7 +314,7 @@ function drawBoxParkinglot(arrData)
                                     "arrAction['rawmode']   = 'yes';"+
                                     "arrAction['extStart']  =  idStart[1];"+
                                     "arrAction['extFinish'] =  idFinish[1];"+
-                                    "request('index.php',arrAction,false,"+
+                                    "request('index.php?menu=control_panel',arrAction,false,"+
                                         "function(arrData,statusResponse,error)"+
                                         "{"+
                                             "$('#contentRight').html(arrData);"+
@@ -329,7 +329,7 @@ function drawBoxParkinglot(arrData)
                                 "arrAction['action']    = 'hangup';"+
                                 "arrAction['rawmode']   = 'yes';"+
                                 "arrAction['extStart']  =  extStart[1];"+
-                                "request('index.php',arrAction,false,"+
+                                "request('index.php?menu=control_panel',arrAction,false,"+
                                 "function(arrData,statusResponse,error)"+
                                 "{"+
                                         "$('#contentRight').html(arrData);"+
@@ -381,7 +381,7 @@ function drawBoxArea1(arrData)
                                 "arrAction['rawmode']   = 'yes';"+
                                 "arrAction['extStart']  =  idStart[1];"+
                                 "arrAction['extFinish'] =  idFinish[1];"+
-                                "request('index.php',arrAction,false,"+
+                                "request('index.php?menu=control_panel',arrAction,false,"+
                                     "function(arrData,statusResponse,error)"+
                                     "{"+
                                             "$('#contentRight').html(arrData);"+
@@ -406,7 +406,7 @@ function drawBoxArea1(arrData)
                                 "arrAction['action']    = 'voicemail';"+
                                 "arrAction['rawmode']   = 'yes';"+
                                 "arrAction['extStart']  =  idStart[1];"+
-                                "request('index.php',arrAction,false,"+
+                                "request('index.php?menu=control_panel',arrAction,false,"+
                                     "function(arrData,statusResponse,error)"+
                                     "{"+
                                             "$('#contentRight').html(arrData);"+
@@ -458,7 +458,7 @@ function drawBoxArea2(arrData)
                                 "arrAction['rawmode']   = 'yes';"+
                                 "arrAction['extStart']  =  idStart[1];"+
                                 "arrAction['extFinish'] =  idFinish[1];"+
-                                "request('index.php',arrAction,false,"+
+                                "request('index.php?menu=control_panel',arrAction,false,"+
                                     "function(arrData,statusResponse,error)"+
                                     "{"+
                                             "$('#contentRight').html(arrData);"+
@@ -483,7 +483,7 @@ function drawBoxArea2(arrData)
                                 "arrAction['action']    = 'voicemail';"+
                                 "arrAction['rawmode']   = 'yes';"+
                                 "arrAction['extStart']  =  idStart[1];"+
-                                "request('index.php',arrAction,false,"+
+                                "request('index.php?menu=control_panel',arrAction,false,"+
                                     "function(arrData,statusResponse,error)"+
                                     "{"+
                                             "$('#contentRight').html(arrData);"+
@@ -536,7 +536,7 @@ function drawBoxArea3(arrData)
                                     "arrAction['rawmode']   = 'yes';"+
                                     "arrAction['extStart']  =  idStart[1];"+
                                     "arrAction['extFinish'] =  idFinish[1];"+
-                                    "request('index.php',arrAction,false,"+
+                                    "request('index.php?menu=control_panel',arrAction,false,"+
                                         "function(arrData,statusResponse,error)"+
                                         "{"+
                                                 "$('#contentRight').html(arrData);"+
@@ -555,7 +555,7 @@ function drawBoxArea3(arrData)
                                     "arrAction['rawmode']   = 'yes';"+
                                     "arrAction['extStart']  =  idStart[1];"+
                                     "arrAction['area']      =  idArea[1];"+
-                                    "request('index.php',arrAction,false,"+
+                                    "request('index.php?menu=control_panel',arrAction,false,"+
                                         "function(arrData,statusResponse,error)"+
                                         "{"+
                                                 "$('#contentRight').html(arrData);"+
@@ -580,7 +580,7 @@ function drawBoxArea3(arrData)
                                     "arrAction['action']    = 'voicemail';"+
                                     "arrAction['rawmode']   = 'yes';"+
                                     "arrAction['extStart']  =  idStart[1];"+
-                                    "request('index.php',arrAction,false,"+
+                                    "request('index.php?menu=control_panel',arrAction,false,"+
                                         "function(arrData,statusResponse,error)"+
                                         "{"+
                                                 "$('#contentRight').html(arrData);"+
@@ -935,7 +935,7 @@ function loadSizeArea()
     var arrAction              = new Array();
         arrAction["action"]    = "loadArea";
         arrAction["rawmode"]   = "yes";
-        request("index.php",arrAction,false,
+        request("index.php?menu=control_panel",arrAction,false,
             function(arrData,statusResponse,error)
             {
                     loadArea(arrData['xml'],arrData['module_name'],arrData['loading']);
@@ -1007,7 +1007,7 @@ function saveDescriptionArea1(){
         arrAction["rawmode"]       = "yes";
         arrAction["description"]   = descripA1;
         arrAction["area"]          = 2;
-        request("index.php",arrAction,false,
+        request("index.php?menu=control_panel",arrAction,false,
             function(arrData,statusResponse,error)
             {
                     controlSaveDescripion1(arrData);
@@ -1030,7 +1030,7 @@ function saveDescriptionArea2() {
         arrAction["rawmode"]       = "yes";
         arrAction["description"]   = descripA2;
         arrAction["area"]          = 3;
-        request("index.php",arrAction,false,
+        request("index.php?menu=control_panel",arrAction,false,
             function(arrData,statusResponse,error)
             {
                     controlSaveDescripion2(arrData);
@@ -1054,7 +1054,7 @@ function saveDescriptionArea3() {
         arrAction["rawmode"]       = "yes";
         arrAction["description"]   = descripA3;
         arrAction["area"]          = 4;
-        request("index.php",arrAction,false,
+        request("index.php?menu=control_panel",arrAction,false,
             function(arrData,statusResponse,error)
             {
                     controlSaveDescripion3(arrData);
@@ -1083,7 +1083,7 @@ function actualizarQueues()
     var arrAction                  = new Array();
         arrAction["action"]        = "refreshQueues";
         arrAction["rawmode"]       = "yes";
-        request("index.php",arrAction,false,
+        request("index.php?menu=control_panel",arrAction,false,
             function(arrData,statusResponse,error)
             {
                     reloadQueues(arrData);
@@ -1200,7 +1200,7 @@ $(document).ready(function(){
                 arrAction["rawmode"]   = "yes";
                 arrAction["extStart"]  =  idStart[1];
                 arrAction["extFinish"] =  idFinish[1];
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                         $("#contentRight").html(arrData);
@@ -1218,7 +1218,7 @@ $(document).ready(function(){
             arrAction["action"]    = "hangup";
             arrAction["rawmode"]   = "yes";
             arrAction["extStart"]  =  extStart[1];
-            request("index.php",arrAction,false,
+            request("index.php?menu=control_panel",arrAction,false,
                function(arrData,statusResponse,error)
                {
                     $("#contentRight").html(arrData);
@@ -1244,7 +1244,7 @@ $(document).ready(function(){
                 arrAction["action"]    = "voicemail";
                 arrAction["rawmode"]   = "yes";
                 arrAction["extStart"]  =  idStart[1];
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                             $("#contentRight").html(arrData);
@@ -1287,7 +1287,7 @@ $(document).ready(function(){
                 arrAction["rawmode"]   = "yes";
                 arrAction["extStart"]  =  idStart[1];
                 arrAction["extFinish"] =  idFinish[1];
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                             $("#contentRight").html(arrData);
@@ -1307,7 +1307,7 @@ $(document).ready(function(){
                 arrAction["rawmode"]   = "yes";
                 arrAction["extStart"]  =  idStart[1];
                 arrAction["area"]      = 2;
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                             $("#contentRight").html(arrData);
@@ -1327,7 +1327,7 @@ $(document).ready(function(){
                 arrAction["rawmode"]   = "yes";
                 arrAction["extStart"]  =  idStart[1];
                 arrAction["area"]      = 3;
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                             $("#contentRight").html(arrData);
@@ -1347,7 +1347,7 @@ $(document).ready(function(){
                 arrAction["rawmode"]   = "yes";
                 arrAction["extStart"]  =  idStart[1];
                 arrAction["area"]      = 4;
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                             $("#contentRight").html(arrData);
@@ -1367,7 +1367,7 @@ $(document).ready(function(){
                 arrAction["rawmode"]   = "yes";
                 arrAction["extStart"]  = idStart[1];
                 arrAction["queue"]     = queue[1];
-                request("index.php",arrAction,false,
+                request("index.php?menu=control_panel",arrAction,false,
                     function(arrData,statusResponse,error)
                     {
                             $("#contentRight").html(arrData);

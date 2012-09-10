@@ -295,6 +295,9 @@ fi
 
 %changelog
 * Mon Sep 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Control Panel: fix failure to update interface after user opens browser
+  tab to different Elastix module while keeping Control Panel open.
+  SVN Rev[4194]
 - CHANGED: Endpoint Configurator: revert emergency commit (again). Now with a
   fat warning to update elastix-system instead.
   SVN Rev[4193]

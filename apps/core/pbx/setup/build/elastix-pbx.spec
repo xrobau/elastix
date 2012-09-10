@@ -294,6 +294,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Sep 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Port changes to Grandstream configurator for batch configuration to
+  new parallel implementation.
+
 * Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Endpoints: reimplement CSV download to take into account all
   of the endpoints that were configured via Endpoint Configurator and therefore

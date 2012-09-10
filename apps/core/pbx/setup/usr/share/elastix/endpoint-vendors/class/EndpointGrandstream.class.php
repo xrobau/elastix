@@ -35,6 +35,14 @@ class EndpointGrandstream extends Endpoint
     private $_telnet_username = NULL;
     private $_telnet_password = 'admin';
 
+    private $_enableDHCP = TRUE;
+    private $_staticIP = NULL;
+    private $_staticMask = NULL;
+    private $_staticGW = '0.0.0.0';
+    private $_staticDNS1 = '0.0.0.0';
+    private $_staticDNS2 = '0.0.0.0';
+    private $_timeZone = 'auto';
+
     public function __construct($oLog, $sServerIP, $sMAC, $sIP,
         $sDeviceID, $sTech, $sDesc, $sAccount, $sSecret)
     {
@@ -47,6 +55,8 @@ class EndpointGrandstream extends Endpoint
         if (in_array($sModel, array(
             // Tested models
             'GXP280', 'GXV3140', 'GXV3175', 'GXP2120', 'BT200',
+            // Tested by Sergio
+            'GXP2100', 'GXP1405',
             // Untested models 
             'GXP2000', 'GXP2020','HT386',
             ))) {
@@ -54,6 +64,45 @@ class EndpointGrandstream extends Endpoint
             return TRUE;
         }
         return FALSE;
+    }
+
+    public function setExtraParameters($param)
+    {
+        if (isset($param['Time_Zone'])) $this->_timeZone = $param['Time_Zone'];
+        if (isset($param['By_DHCP'])) {
+            $this->_enableDHCP = ($param['By_DHCP'] != 0);
+            if (!$this->_enableDHCP) {
+                // Unset empty values
+                foreach (array('IP', 'Mask', 'GW', 'DNS1', 'DNS2') as $k) {
+                    if (isset($param[$k]) && trim($param[$k]) == '')
+                        unset($param[$k]); 
+                }
+
+                // The following must be present
+                foreach (array('IP', 'Mask') as $k) {
+                    if (!isset($param[$k])) {
+                        $this->_log->output('ERR: required extra field not assigned: '.$k);
+                        return FALSE;
+                    }
+                }
+                
+                // All of these must be valid IPs
+                foreach (array('IP', 'Mask', 'GW', 'DNS1', 'DNS2') as $k) {
+                    if (isset($param[$k])) {
+                        if ($param[$k] == '0.0.0.0' || 
+                            !preg_match('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/', $param[$k])) {
+                            $this->_log->output(
+                                'ERR: the following extra field is not a valid IPv4 address: '.
+                                $k.'='.$param[$k]);
+                            return FALSE;
+                        }
+                        $sField = '_static'.$k;
+                        $this->$sField = $param[$k];
+                    }
+                }
+            }
+        }
+        return TRUE;
     }
 
     /**
@@ -94,6 +143,16 @@ class EndpointGrandstream extends Endpoint
                         'ID_DEVICE'         =>  $this->_device_id,
                         'SECRET'            =>  $this->_secret,
                         'DISPLAY_NAME'      =>  $this->_desc,
+
+                        'ENABLE_DHCP'       =>  $this->_enableDHCP ? 1 : 0,
+                        'STATIC_IP'         =>  explode('.', $this->_staticIP),
+                        'STATIC_MASK'       =>  explode('.', $this->_staticMask),
+                        'STATIC_GATEWAY'    =>  explode('.', $this->_staticGW),
+                        'STATIC_DNS1'       =>  explode('.', $this->_staticDNS1),
+                        'STATIC_DNS2'       =>  explode('.', $this->_staticDNS2),
+                        'TIME_ZONE'         =>  $this->_timeZone,
+                        
+                        'SERVER_IP_OCTETS'  =>  explode('.', $this->_serverip),
                     ))));
 
                 

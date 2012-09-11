@@ -130,7 +130,7 @@ class paloEmail {
     }
 
 
-    function deleteDomain($id_domain)
+    private function deleteDomain($id_domain)
     {
         $bExito = TRUE;
         if (!preg_match('/^[[:digit:]]+$/', "$id_domain")) {

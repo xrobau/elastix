@@ -295,6 +295,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Sep 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove commented-out dead code in paloSantoConfig
+- CHANGED: Framework: remove two methods in paloSantoConfig that are defined but
+  never used in Elastix. This removes two potential uses of sudo chown.
+  SVN Rev[4195]
+
 * Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-14
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile

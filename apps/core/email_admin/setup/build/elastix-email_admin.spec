@@ -190,6 +190,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Tue Sep 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email Admin: remove one method that is not used anywhere, and make
+  a few other methods private in paloSantoEmail.
+  SVN Rev[4196]
+
 * Wed Sep 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: remove privilege escalation vulnerability on privileged
   script for mailbox rebuild.

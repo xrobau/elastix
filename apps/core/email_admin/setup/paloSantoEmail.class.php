@@ -130,30 +130,6 @@ class paloEmail {
     }
 
 
-    function updateDomain($id_domain, $domain_name)
-    {
-        $bExito = FALSE;
-        if (!preg_match("/^[[:digit:]]+$/", "$id_domain")) {
-            $this->errMsg = "Domain ID is not valid";
-        } else {
-            $sPeticionSQL = paloDB::construirUpdate(
-                "domain",
-                array(
-                    "domain_name"          =>  paloDB::DBCAMPO($domain_name)
-                    ),
-                array(
-                    "id"  => $id_domain)
-                );
-            if ($this->_DB->genQuery($sPeticionSQL)) {
-                $bExito = TRUE;
-            } else {
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $bExito;
-    }
-
-
     function deleteDomain($id_domain)
     {
         $bExito = TRUE;
@@ -186,7 +162,7 @@ class paloEmail {
     }
 
 
-    function deleteAccountsFromDomain($id_domain)
+    private function deleteAccountsFromDomain($id_domain)
     {
         $bExito = TRUE;
         if (!preg_match('/^[[:digit:]]+$/', "$id_domain")) {
@@ -206,7 +182,7 @@ class paloEmail {
         return $bExito;
     }
 
-    function deleteAliasesFromAccount($username)
+    private function deleteAliasesFromAccount($username)
     {
         $bExito = TRUE;
         $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
@@ -354,7 +330,7 @@ class paloEmail {
     }
 
 
-    function getAliasAccount($username)
+    private function getAliasAccount($username)
     {
         $arr_result = FALSE;
         $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
@@ -450,7 +426,7 @@ class paloEmail {
     }
 
 
-    function construir_valor_nuevo_postfix($valor_anterior,$dominio,$eliminar_dominio=FALSE){
+    private function construir_valor_nuevo_postfix($valor_anterior,$dominio,$eliminar_dominio=FALSE){
 	$valor_nuevo=$valor_anterior;
 
 	if(is_null($valor_anterior)){
@@ -633,7 +609,7 @@ class paloEmail {
 	return TRUE;
     }
 
-    function crear_virtual_sistema($email,$username,&$error){
+    private function crear_virtual_sistema($email,$username,&$error){
 	$output=array();
 	$configPostfix2 = isPostfixToElastix2();
 	if($configPostfix2){

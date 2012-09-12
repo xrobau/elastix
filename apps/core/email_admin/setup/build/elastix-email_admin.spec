@@ -190,6 +190,13 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Domains: extend email_account helper script to add and remove 
+  mail domains. Domain operations are now reimplemented on top of the extended
+  email_account helper. This removes some uses of paloSantoConfig (indirect
+  sudo chown) and removes the need to grant sudo access to /usr/sbin/postfix.
+  SVN Rev[4199]
+
 * Tue Sep 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Email Admin: remove one method that is not used anywhere, and make
   a few other methods private in paloSantoEmail.

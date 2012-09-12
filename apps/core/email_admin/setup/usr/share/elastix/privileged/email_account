@@ -31,7 +31,15 @@
 
 require_once 'Console/Getopt.php';
 
+$CYRUS = NULL;
+define('SASL_DOMAIN', 'example.com');
+
+// Ugly - should not depend on anything under /var/www/html
+ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+
 $opt = Console_Getopt::getopt($argv, '', array(
+    'createdomain=',        // Create a new domain
+    'deletedomain=',        // Remove a domain
     'reconstruct_mailbox',  // Repair mailbox damage, cyrus function
     'mailbox=',    // mailbox that must be reconstructed
 ));
@@ -39,12 +47,16 @@ $opt = Console_Getopt::getopt($argv, '', array(
 if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
 
 foreach ($opt[0] as $option) switch ($option[0]) {
-	case '--reconstruct_mailbox':
-		exit(reconstruct_mailbox($opt) ? 0 : 1);
+    case '--createdomain':
+        exit(create_domain($opt) ? 0 : 1);
+	case '--deletedomain':
+		exit(delete_domain($opt) ? 0 : 1);
+    case '--reconstruct_mailbox':
+        exit(reconstruct_mailbox($opt) ? 0 : 1);
 }
 
 
-error_exit("No action specified (--reconstruct_mailbox)\n");
+error_exit("No action specified (--createdomain,--deletedomain,--reconstruct_mailbox)\n");
 
 
 function error_exit($sMsg, $errorcode = 1)
@@ -53,6 +65,209 @@ function error_exit($sMsg, $errorcode = 1)
     exit($errorcode);
 }
 
+function loadCyrusPassword()
+{
+    global $CYRUS;
+    
+    if (is_null($CYRUS)) {
+        $CYRUS = array(
+            'HOST'  =>  'localhost',
+            'PORT'  =>  143,
+            'ADMIN' =>  'cyrus',
+            'PASS'  =>  'palosanto',
+        );
+        foreach (file('/etc/elastix.conf') as $s) {
+            $regs = NULL;
+            if (preg_match('/^cyrususerpwd\s*=\s*(.+)/', trim($s), $regs)) {
+                $CYRUS['PASS'] = $regs[1];
+            }
+        }
+    }
+}
+
+function create_domain($opt)
+{
+    $sNewDomain = NULL;
+    
+    foreach ($opt[0] as $option) switch ($option[0]) {
+        case '--createdomain':
+            $sNewDomain = $option[1];
+            break;
+    }    
+    if (is_null($sNewDomain)) {
+        error_exit("ERR: --createdomain: no domain specified.\n");
+    }
+    if (!preg_match('/^[\w\.\-]+$/', $sNewDomain)) {
+        error_exit("ERR: --createdomain: invalid domain.\n");
+    }
+    
+    // Check for existing domain, and add new domain to database
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $sth = $conn->prepare('SELECT domain_name FROM domain WHERE domain_name = ?');
+        $sth->execute(array($sNewDomain));
+        $domainList = $sth->fetchAll(PDO::FETCH_COLUMN);
+        if (count($domainList) > 0) {
+            error_exit("ERR: Domain name already exists\n");
+        }        
+        $sth = $conn->prepare('INSERT INTO domain(domain_name) VALUES (?)');
+        $sth->execute(array($sNewDomain));
+    } catch (PDOException $e) {
+        error_exit("ERR: failed to check or insert domain - ".$e->getMessage()."\n");
+    }
+
+    // Add the new domain to the required key in main.cf
+    $bPostfixElastix2 = isPostfixToElastix2();
+    add_remove_domain_postfix($sNewDomain, TRUE, $bPostfixElastix2);
+    
+    return TRUE;
+}
+
+function delete_domain($opt)
+{
+    $sOldDomain = NULL;
+    
+    foreach ($opt[0] as $option) switch ($option[0]) {
+        case '--deletedomain':
+            $sOldDomain = $option[1];
+            break;
+    }    
+    if (is_null($sOldDomain)) {
+        error_exit("ERR: --deletedomain: no domain specified.\n");
+    }
+    
+    loadCyrusPassword();
+
+	require_once('libs/cyradm.php');
+
+    // Connect to IMAP before doing anything else
+    $cyr_conn = new cyradm;
+    if (!$cyr_conn->imap_login()) {
+        error_exit("ERR: failed to login to IMAP\n");
+    }
+    
+    $bPostfixElastix2 = isPostfixToElastix2();
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $sthListDomain = $conn->prepare(
+            'SELECT id, domain_name FROM domain WHERE domain_name = ?');
+        $sthListAccounts = $conn->prepare(
+            'SELECT username, password, id_domain, quota FROM accountuser '.
+            'WHERE id_domain = ? ORDER BY username');
+        $sthDeleteAccountDomain = $conn->prepare('DELETE FROM accountuser WHERE id_domain = ?');
+        $sthDeleteDomain = $conn->prepare('DELETE FROM domain WHERE id = ?');
+
+        // Query and list selected domain
+        $sthListDomain->execute(array($sOldDomain));
+        $domainList = $sthListDomain->fetchAll(PDO::FETCH_ASSOC);
+        if (count($domainList) <= 0) {
+            error_exit("ERR: specified domain not found in database.\n");
+        }
+        $domain = $domainList[0];
+        
+        // Query and list all accounts in the domain for removal
+        $sthListAccounts->execute(array($domain['id']));
+        $accountList = $sthListAccounts->fetchAll(PDO::FETCH_ASSOC);
+        $preparedSth = array();
+        foreach ($accountList as $account) {
+            _internal_delete_account($conn, $preparedSth, $cyr_conn, $account, $bPostfixElastix2);
+        }
+
+        // Remove remaining references to domain in database
+        $sthDeleteAccountDomain->execute(array($domain['id']));
+        $sthDeleteDomain->execute(array($domain['id']));
+    } catch (PDOException $e) {
+        error_exit("ERR: failed to remove old domains - ".$e->getMessage()."\n");
+    }
+    $cyr_conn->imap_logout();
+
+    // Remove the old domain from the required key in main.cf
+    add_remove_domain_postfix($sOldDomain, FALSE, $bPostfixElastix2);
+    
+    return TRUE;
+}
+
+function _internal_delete_account($conn, &$preparedSth, $cyr_conn, $account, $bPostfixElastix2)
+{
+    if (!isset($preparedSth['listAliases'])) {
+        $preparedSth['listAliases'] = $conn->prepare(
+            'SELECT alias FROM virtual WHERE username = ? ORDER BY alias');
+    }
+    if (!isset($preparedSth['deleteAliases'])) {
+        $preparedSth['deleteAliases'] = $conn->prepare(
+            'DELETE FROM virtual WHERE username = ?');
+    }
+    if (!isset($preparedSth['deleteAccount'])) {
+        $preparedSth['deleteAccount'] = $conn->prepare(
+            'DELETE FROM accountuser WHERE username = ?');
+    }
+    $sthListAliases = $preparedSth['listAliases'];
+    $sthDeleteAliases = $preparedSth['deleteAliases'];
+    $sthDeleteAccount = $preparedSth['deleteAccount'];
+    
+    // Query any aliases for the account, and delete them
+    $sthListAliases->execute(array($account['username']));
+    $aliasList = $sthListAliases->fetchAll(PDO::FETCH_COLUMN);
+    $sthDeleteAliases->execute(array($account['username']));
+    
+    // Delete account and associated mailbox
+    $sthDeleteAccount->execute(array($account['username']));
+    if (!$cyr_conn->deletemb('user/'.$account['username'])) {
+        error_exit("ERR: failed to delete mailbox for username ".
+            $account['username'].' - '.$cyr_conn->getMessage()."\n");
+    }
+    
+    // Remove sasl passwords linked to aliases
+    if (!$bPostfixElastix2 && count($aliasList) <= 0)
+        $aliasList[] = $account['username'].'@'.SASL_DOMAIN;
+    foreach ($aliasList as $sAlias) {
+        $retval = NULL;
+        system('/usr/sbin/saslpasswd2 -d '.escapeshellarg($sAlias), $retval);
+        if ($retval != 0) {
+            error_exit("ERR: $sLevelTag: failed to delete alias ".
+                $sAlias.' for username '.$account['username']."\n");
+        }
+    }
+}
+
+function add_remove_domain_postfix($sDomain, $bAddRemove, $bPostfixElastix2)
+{
+    $sDomainKey = $bPostfixElastix2 ? 'virtual_mailbox_domains' : 'mydomain2';
+    $postfixConf = file('/etc/postfix/main.cf');
+    if ($postfixConf === FALSE) {
+        error_exit("ERR: failed to load /etc/postfix/main.cf for domain update\n");
+    }
+    $bUpdated = FALSE;
+    foreach (array_keys($postfixConf) as $i) {
+        $regs = NULL;
+        if (preg_match('/^(\w+)\s*=\s*(.*)/', rtrim($postfixConf[$i]), $regs)) {
+            if ($regs[1] == $sDomainKey) {
+                $oldDomainList = array_unique(preg_split('/,\s*/', $regs[2]));
+                
+                $newDomainList = $bAddRemove 
+                    ? array_unique(array_merge($oldDomainList, array($sDomain)))
+                    : array_diff($oldDomainList, array($sDomain));
+                
+                $postfixConf[$i] = $sDomainKey.' = '.implode(',', $newDomainList)."\n";
+                $bUpdated = (count($oldDomainList) != count($newDomainList));
+            }
+        }
+    }
+    if ($bUpdated) {
+        if (FALSE === file_put_contents('/etc/postfix/main.cf', $postfixConf)) {
+            error_exit("ERR: failed to write /etc/postfix/main.cf for domain update\n");
+        }
+        $retval = NULL;
+        system('/usr/sbin/postfix reload', $retval);
+        if ($retval != 0) {
+            error_exit("ERR: failed to reload postfix after domain update ($retval)\n");
+        }
+    }
+}
 
 function reconstruct_mailbox($opt)
 {

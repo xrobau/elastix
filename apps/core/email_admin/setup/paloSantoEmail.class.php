@@ -104,50 +104,23 @@ class paloEmail {
      */
     function createDomain($domain_name)
     {
-        $bExito = FALSE;
-        //el campo ya viene validado del formulario
-        //verificar que no exista ya un dominio con ese nombre
-            $sPeticionSQL = "SELECT id FROM domain ".
-                " WHERE domain_name = '$domain_name'";
-            $arr_result =& $this->_DB->fetchTable($sPeticionSQL);
-            if (is_array($arr_result) && count($arr_result)>0) {
-                $bExito = FALSE;
-                $this->errMsg = "Domain name already exists";
-            }else{
-                $sPeticionSQL = paloDB::construirInsert(
-                    "domain",
-                    array(
-                        "domain_name"       =>  paloDB::DBCAMPO($domain_name),
-                    )
-                );
-                if ($this->_DB->genQuery($sPeticionSQL)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                }
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --createdomain '.
+            escapeshellarg($domain_name).' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+            	$regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+            		$this->errMsg = $regs[1];
+            	}
             }
-        return $bExito;
-    }
-
-
-    private function deleteDomain($id_domain)
-    {
-        $bExito = TRUE;
-        if (!preg_match('/^[[:digit:]]+$/', "$id_domain")) {
-            $this->errMsg = "Domain ID is not valid";
-            RETURN FALSE;
-        } 
-        else {
-            $this->errMsg = "";
-            $sPeticionSQL = 
-                "DELETE FROM domain WHERE id = '$id_domain'";
-            $bExito = $this->_DB->genQuery($sPeticionSQL);
-            if (!$bExito) {
-                $bExito = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+        	return FALSE;
         }
-        return $bExito;
+        return TRUE;
     }
 
     function getNumberOfAccounts($id_domain){
@@ -161,26 +134,6 @@ class paloEmail {
         return $number;
     }
 
-
-    private function deleteAccountsFromDomain($id_domain)
-    {
-        $bExito = TRUE;
-        if (!preg_match('/^[[:digit:]]+$/', "$id_domain")) {
-            $this->errMsg = "Domain ID is not valid";
-            RETURN FALSE;
-        } 
-        else {
-            $this->errMsg = "";
-            $sPeticionSQL = 
-                "DELETE FROM accountuser WHERE id_domain = '$id_domain'";
-            $bExito = $this->_DB->genQuery($sPeticionSQL);
-            if (!$bExito) {
-                $bExito = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $bExito;
-    }
 
     private function deleteAliasesFromAccount($username)
     {
@@ -395,142 +348,27 @@ class paloEmail {
 
     //***** new functions from email_functions.lib.php ***************************************************************/
 
-    function guardar_dominio_sistema($domain_name,&$errMsg)
+    function eliminar_dominio($db, $arrDominio, &$errMsg, $virtual=TRUE)
     {
-	$continuar=FALSE;
-	global $arrLang;
-	$configPostfix2 = isPostfixToElastix2();
-	$param1 = ""; // virtual_mailbox_domains or mydomain2
-	//Se debe modificar el archivo /etc/postfix/main.cf para agregar el dominio a la variable
-	//virtual_mailbox_domains if $configPostfix2=TRUE or mydomain2 if $configPostfix2=FALSE
-	if($configPostfix2)
-	    $param1 = "virtual_mailbox_domains";
-	else
-	    $param1 = "mydomain2";
-	$conf_file = new paloConfig("/etc/postfix","main.cf"," = ","[[:space:]]*=[[:space:]]*");
-	$contenido = $conf_file->leer_configuracion();
-	$valor_anterior = $conf_file->privado_get_valor($contenido,$param1);
-	$valor_nuevo =$this->construir_valor_nuevo_postfix($valor_anterior,$domain_name);
-	$arr_reemplazos = array("$param1"=>$valor_nuevo);
-	$bValido = $conf_file->escribir_configuracion($arr_reemplazos);
-	if($bValido){
-	    //Se deben recargar la configuracion de postfix
-	    $retval = $output = "";
-	    exec("sudo -u root postfix reload",$output,$retval);
-	    if($retval == 0)
-		$continuar = TRUE;
-	    else
-		$errMsg = $arrLang["main.cf file was updated successfully but when restarting the mail service failed"];
-	}
-	return $continuar;
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --deletedomain '.
+            escapeshellarg($arrDominio['domain_name']).' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+                $regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+                    $this->errMsg = $regs[1];
+                }
+            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+            return FALSE;
+        }
+        return TRUE;
     }
 
-
-    private function construir_valor_nuevo_postfix($valor_anterior,$dominio,$eliminar_dominio=FALSE){
-	$valor_nuevo=$valor_anterior;
-
-	if(is_null($valor_anterior)){
-	    $elemento=(!$eliminar_dominio)?"$dominio":"";
-	    $valor_nuevo="$elemento";
-	}
-	else{
-	    if(ereg("^(.*)$",$valor_anterior,$regs)){
-		$arr_valores=explode(',',$regs[1]);
-		if(!$eliminar_dominio)
-		    $arr_valores[]="$dominio";
-
-		$valor_nuevo="";
-		for($i=0;$i<count($arr_valores);$i++){
-		    $valor_nuevo.=$arr_valores[$i];
-		    if($i<(count($arr_valores)-1))
-			$valor_nuevo.=",";
-		}
-
-		if($eliminar_dominio==TRUE){
-		    $valor_nuevo=str_replace(",$dominio","",$valor_nuevo);
-		}
-	    }
-	}
-	return $valor_nuevo;
-    }
-
-    function eliminar_dominio($db,$arrDominio,&$errMsg, $virtual=TRUE)
-    {
-
-	$total_cuentas=0;
-	$output="";
-	$configPostfix2 = isPostfixToElastix2();
-	$param1 = "";
-
-	global $CYRUS;
-	global $arrLang;
-	$cyr_conn = new cyradm;
-	$continuar = $cyr_conn->imap_login();
-
-	if($configPostfix2)
-	    $param1 = "virtual_mailbox_domains";
-	else
-	    $param1 = "mydomain2";
-
-	  # First Delete all stuff related to the domain from the database
-	if ($continuar){
-	    $query1 = "SELECT * FROM accountuser WHERE id_domain='$arrDominio[id_domain]' order by username";
-	    $result=$db->fetchTable($query1,TRUE);
-
-	    if(is_array($result) && count($result)>0){
-		foreach ($result as $fila){
-		    $username = $fila['username'];
-		    $bExito = $this->eliminar_cuenta($db,$username,$errMsg, $virtual);
-		    if (!$bExito){
-			$output = $errMsg;
-		    }else{
-			$continuar = TRUE;
-		    }
-		}
-	    }
-
-	    if($output!="" & !$continuar){
-		$errMsg=$arrLang["Error deleting user accounts from system"].": $output";
-		return FALSE;
-	    }
-
-	    //uso la clase Email
-	    $bExito = $this->deleteAccountsFromDomain($arrDominio['id_domain']);
-	    if (!$bExito){
-		$errMsg = $arrLang["Error deleting user accounts"].' :'.((isset($arrLang[$this->errMsg]))?$arrLang[$this->errMsg]:$this->errMsg);
-		return FALSE;
-	    }
-
-	    $bExito = $this->deleteDomain($arrDominio['id_domain']);
-	    if (!$bExito){
-		$errMsg = $arrLang["Error deleting record from table domain"].' :'.((isset($arrLang[$this->errMsg]))?$arrLang[$this->errMsg]:$this->errMsg);
-		return FALSE;
-	    }
-
-	    //Se elimina el dominio del archivo main.cf y se recarga la configuracion
-	    $continuar=FALSE;
-	    //Se debe modificar el archivo /etc/postfix/main.cf para borrar el dominio a la variable
-	    //virtual_mailbox_domains if $configPostfix2=TRUE or mydomain2 if $configPostfix2=FALSE
-	    $conf_file=new paloConfig("/etc/postfix","main.cf"," = ","[[:space:]]*=[[:space:]]*");
-	    $contenido=$conf_file->leer_configuracion();
-	    $valor_anterior=$conf_file->privado_get_valor($contenido,$param1);
-	    $valor_nuevo=$this->construir_valor_nuevo_postfix($valor_anterior,$arrDominio['domain_name'],TRUE);
-	    $arr_reemplazos=array("$param1"=>$valor_nuevo);
-	    $bValido=$conf_file->escribir_configuracion($arr_reemplazos);
-
-	    if($bValido){
-	      //Se deben recargar la configuracion de postfix
-		$retval=$output="";
-		exec("sudo -u root postfix reload",$output,$retval);
-		if($retval==0)
-		    $continuar=TRUE;
-		else
-		    $errMsg=$arrLang["main.cf file was updated successfully but when restarting the mail service failed"]." : $retval";
-	    }
-	}
-	return $continuar;
-
-    }
     function eliminar_usuario_correo_sistema($username,$email,&$error){
 	$output=array();
 	$configPostfix2 = isPostfixToElastix2();

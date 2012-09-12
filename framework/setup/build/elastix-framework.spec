@@ -19,7 +19,8 @@ Provides: elastix-additionals
 Conflicts: elastix-system < 2.0.4-18
 Conflicts: elastix-callcenter <= 2.0.0-16
 Conflicts: elastix-pbx <= 2.2.0-16
-Conflicts: elastix-fax <= 2.2.0-5 
+Conflicts: elastix-fax <= 2.2.0-5
+Conflicts: elastix-email_admin <= 2.3.0-8
 Conflicts: kernel-module-dahdi
 Conflicts: kernel-module-rhino
 Conflicts: kernel-module-wanpipe
@@ -295,6 +296,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: Since commits 4199-4200, palosantoEmailAdmin no longer
+  requires sudo access to postfix, so remove it.
+- CHANGED: Framework: Conflicts: elastix-email_admin <= 2.3.0-8
+  SVN Rev[4201]
+
 * Tue Sep 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove commented-out dead code in paloSantoConfig
 - CHANGED: Framework: remove two methods in paloSantoConfig that are defined but

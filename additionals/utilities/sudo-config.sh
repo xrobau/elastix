@@ -44,11 +44,6 @@ if ! grep "asterisk ALL = NOPASSWD: /usr/sbin/postmap" /etc/sudoers >/dev/null 2
 	echo "asterisk ALL = NOPASSWD: /usr/sbin/postmap added to /etc/sudoers"
 fi
 
-if ! grep "asterisk ALL = NOPASSWD: /usr/sbin/postfix" /etc/sudoers >/dev/null 2>&1; then
-	echo "asterisk ALL = NOPASSWD: /usr/sbin/postfix" >> /etc/sudoers
-	echo "asterisk ALL = NOPASSWD: /usr/sbin/postfix added to /etc/sudoers"
-fi
-
 if ! grep "asterisk ALL = NOPASSWD: /usr/sbin/saslpasswd2" /etc/sudoers >/dev/null 2>&1; then
 	echo "asterisk ALL = NOPASSWD: /usr/sbin/saslpasswd2" >> /etc/sudoers
 	echo "asterisk ALL = NOPASSWD: /usr/sbin/saslpasswd2 added to /etc/sudoers"

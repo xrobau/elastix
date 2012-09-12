@@ -188,6 +188,13 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: faxconfig: change the encoding used to identify the
+  virtual fax ttys written to /etc/inittab. This raises the maximum number of
+  virtual faxes from 255 to 46655.
+- CHANGED: faxconfig: update help text to mention new supported actions.
+  SVN Rev[4198]
+
 * Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-5
 - CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
   SVN history. Changed release in specfile.

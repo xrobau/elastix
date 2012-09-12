@@ -55,7 +55,7 @@ case '--setfaxhosts':
 case '--faxmaster':
     exit(action_refreshFaxMaster($opt) ? 0 : 1);
 }
-error_exit("No action specified (--refresh)\n");
+error_exit("No action specified (--refresh,--getfaxhosts,--setfaxhosts,--faxmaster)\n");
 
 function error_exit($sMsg, $errorcode = 1)
 {
@@ -136,16 +136,13 @@ function writeInittab($faxData)
 {
     $sFaxesInittab = INITTAB_MARKER."\n";
     foreach (array_keys($faxData) as $devId) {
-        /* Nota: El id de la línea del inittab, que se encuentra compuesto de 
-         * "fx$devIdHex" no puede ser de más de 4 caracteres. Es una limitante 
-         * del inittab. Esto quiere decir que despues de poner el prefijo fx 
-         * solo tenemos 2 caracteres más. Para aprovecharlos mejor usamos un 
-         * número en hexadecimal en lugar de decimal. Esto nos deja 255 (FF) 
-         * posibilidades o un número máximo de 255 faxes virtuales que se pueden
-         * crear.
-         */
-        $devIdHex = dechex($devId);
-        $sFaxesInittab .= "fx$devIdHex:2345:respawn:/usr/sbin/faxgetty ttyIAX$devId\n";
+        /* Note: The inittab identifier cannot exceed 4 characters, as a limitation
+         * of inittab. To make as much use of the available space as possible,
+         * the encoding uses a base-36 identifier after a letter 'f', from 
+         * 'f000' to 'fzzz'. This allows a maximum of 46655 (36^3 - 1) fax 
+         * devices in inittab. */
+        $devIdB36 = substr('00'.base_convert("$devId", 10, 36), -3);
+        $sFaxesInittab .= "f{$devIdB36}:2345:respawn:/usr/sbin/faxgetty ttyIAX$devId\n";
     }    
     $lineas = array();
     $bInsertado = FALSE;
@@ -154,7 +151,7 @@ function writeInittab($faxData)
         if (!$bInsertado && strpos($sLinea, INITTAB_MARKER) === 0) {
             $bInsertado = TRUE;
             $lineas[] = $sFaxesInittab;
-        } elseif (!preg_match('/^(iax|fx)[[:alnum:]]{1,2}:2345:respawn/', $sLinea)) {
+        } elseif (!preg_match('/^(iax|f)[[:alnum:]]{1,3}:2345:respawn/', $sLinea)) {
             $lineas[] = $sLinea;
         }
     }

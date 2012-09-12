@@ -293,20 +293,11 @@ function create_email_domain($pDB,&$errMsg)
 {
     $bReturn=FALSE;
     $pEmail = new paloEmail($pDB);
-    //creo el dominio en la base de datos
+
     $bExito = $pEmail->createDomain($_POST['domain_name']);
-    if($bExito){
-        $bReturn = $pEmail->guardar_dominio_sistema($_POST['domain_name'],$errMsg);
-        if($bReturn)
-            $bReturn = TRUE;
-    }else{
-        $errMsg= (isset($arrLang[$pEmail->errMsg]))?$arrLang[$pEmail->errMsg]:$pEmail->errMsg;
-    }
-    return $bReturn;
-
+    if (!$bExito) $errMsg = _tr($pEmail->errMsg);    
+    return $bExito;
 }
-
-
 
 function getAction()
 {

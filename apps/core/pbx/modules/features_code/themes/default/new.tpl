@@ -212,14 +212,6 @@
         <td>{$fm_toggle.INPUT}</td>
         <td>{$fm_toggle_stat}</td>
     </tr>
-    <tr>
-        <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$QUEUE}</td>
-    </tr>
-    <tr class="feature">
-        <td nowrap>{$queue_toggle.LABEL}: </td>
-        <td>{$queue_toggle.INPUT}</td>
-        <td>{$queue_toggle_stat}</td>
-    </tr>
 </table>
 
 <input type="hidden" name="mostra_adv" id="mostra_adv" value="{$mostra_adv}">

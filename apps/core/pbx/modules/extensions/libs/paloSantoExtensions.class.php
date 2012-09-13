@@ -75,20 +75,27 @@ class paloSantoExtensions{
 			return $result[0];
     }
 
-	function getExtensions($domain=null){
+	function getExtensions($domain=null,$limit=null,$offset=null){
 		$where="";
-		$arrParam=null;
+		$pagging="";
+		$arrParam=array();
 		if(isset($domain)){
 			if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
 				$this->errMsg="Invalid domain format";
 				return false;
 			}else{
 				$where="where organization_domain=?";
-				$arrParam=array($domain);
+				$arrParam[]=$domain;
 			}
 		}
+		
+		if(isset($limit) && isset($offset)){
+            $pagging=" limit ? offset ?";
+            $arrParam[]=$limit;
+            $arrParam[]=$offset;
+        }
 
-		$query="SELECT * from extension $where";
+		$query="SELECT * from extension $where $pagging";
 		$result=$this->_DB->fetchTable($query,true,$arrParam);
         if($result===false){
 			$this->errMsg=$this->_DB->errMsg;

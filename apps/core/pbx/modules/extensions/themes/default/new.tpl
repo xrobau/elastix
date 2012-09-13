@@ -28,8 +28,6 @@
         {elseif $userLevel eq 'admin'}
         <input type="submit" name="edit" value="{$EDIT}">
         <input type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
-        {else}
-        <input type="submit" name="edit" value="{$EDIT}">
         {/if}
         <input type="submit" name="cancel" value="{$CANCEL}">
     </div>
@@ -39,17 +37,17 @@
        <div class="content" id="content_tab-1" style="padding-left: 8px;">
           <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm extension">
             <tr class="extension">
-                <td width="15%" nowrap>{$exten.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+                <td width="15%" nowrap>{$exten.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
                 {if $mode eq 'edit'}
                     <td width="31%">{$EXTEN}</td>
                 {else}
                     <td width="31%">{$exten.INPUT}</td>
                 {/if}
-                <td width="21%" nowrap>{$secret.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
+                <td width="21%" nowrap>{$secret.LABEL}: {if $mode eq 'input'}<span class="required">*</span>{/if}</td>
                 <td>{$secret.INPUT}</td>
             </tr>
             <tr class="extension">
-                <td width="15%" nowrap>{$technology.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+                <td width="15%" nowrap>{$technology.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
                 {if $mode eq 'edit'}
                     <td width="31%">{$TECHNOLOGY}</td>
                 {else}

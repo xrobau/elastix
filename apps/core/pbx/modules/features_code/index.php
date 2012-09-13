@@ -324,7 +324,7 @@ function get_default_code($smarty, $module_name, &$pDB, $arrConf, $userLevel1, $
         $pFC = new paloFeatureCodePBX($pDB,$resultO["domain"]);
         $arrFC = $pFC->getFeaturesCode($resultO["domain"],$feature);
         if($arrFC==FALSE){
-            $jsonObject->set_error(_tr(_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg)));
+            $jsonObject->set_error(_tr($pFC->errMsg));
         }else{
             $jsonObject->set_message($arrFC);
         }

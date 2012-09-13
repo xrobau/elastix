@@ -1,3 +1,6 @@
+-- Create user db
+GRANT SELECT, UPDATE, INSERT, DELETE ON `elxpbx`.* to asteriskuser@localhost;
+
 CREATE TABLE IF NOT EXISTS `globals` (
   `organization_domain` varchar(50) NOT NULL,
   `variable` varchar(255) NOT NULL,
@@ -435,7 +438,7 @@ CREATE TABLE IF NOT EXISTS `fax` (
       INDEX organization_domain (organization_domain)
 )ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS `trunks` (
+CREATE TABLE IF NOT EXISTS `trunk` (
   `organization_domain` varchar(50) NOT NULL,  
   `trunkid` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL default '',
@@ -694,7 +697,6 @@ requirecalltoken) values (NULL,NULL,"no","from-internal","dynamic","friend","yes
 insert into voicemail_settings (attach,context,serveremail,review,operator,maxmsg,deletevoicemail,saycid,
 envelope,forcename,forcegreetings) values ("yes","default","vm@asterisk","yes","yes","100","no","no","no","yes","no");
 
-
 INSERT INTO globals_settings VALUES("DIAL_OPTIONS","tr");
 INSERT INTO globals_settings VALUES("TRUNK_OPTIONS","");
 INSERT INTO globals_settings VALUES("RECORDING_STATE","ENABLED");
@@ -736,4 +738,132 @@ INSERT INTO globals_settings VALUES("PARKNOTIFY","SIP/200");
 INSERT INTO globals_settings VALUES("RECORDEXTEN","");
 INSERT INTO globals_settings VALUES("CREATE_VM","yes");
 
+DROP TABLE IF EXISTS queue;
+CREATE TABLE queue (
+    name VARCHAR(128) PRIMARY KEY,
+    description VARCHAR(128) DEFAULT NULL,
+    autofill enum ('yes','no') DEFAULT 'yes',
+    monitor_type enum ('MixMonitor','Monitor') default 'MixMonitor',
+    -- si no se configura un valor, no se graba la llamada
+    monitor_format enum ('wav','gsm','wav49') default NULL,
+    musicclass VARCHAR(128),
+    announce VARCHAR(128),
+    strategy enum ('ringall','leastrecent','fewestcalls','random','rrmemory','rrordered','linear','leastrecent') DEFAULT 'ringall',
+    servicelevel INT(11) default 60,
+    context VARCHAR(128),
+    penaltymemberslimit INT(11),
+    -- This timeout specifies the amount of time to try ringing a member's phone before considering the member to be unavailable
+    timeout INT(11) not NULL DEFAULT 15,
+    retry INT(11) DEFAULT 5,
+    timeoutpriority enum ('app','conf') default 'app',
+    weight INT(11) default 0,
+    wrapuptime INT(11) default 0,
+    autopause enum ('yes','no','all'),
+    autopausedelay INT(11),
+    -- maximo numero de llamadas esperando en la cola, 0 para ilimitado
+    maxlen INT(11) DEFAULT 0,
+    announce_frequency INT(11) DEFAULT 0,
+    min_announce_frequency INT(11),
+    periodic_announce_frequency INT(11),
+    announce_holdtime ENUM ('yes','no','once') DEFAULT 'no',
+    announce_position ENUM ('yes','no','limit','more') DEFAULT 'no',
+    announce_position_limit INT(11),
+    announce_round_seconds INT(11),
+    queue_youarenext VARCHAR(128),
+    queue_thereare VARCHAR(128),
+    queue_callswaiting VARCHAR(128),
+    queue_holdtime VARCHAR(128),
+    queue_minute VARCHAR(128),
+    queue_minutes VARCHAR(128),
+    queue_seconds VARCHAR(128),
+    queue_lessthan VARCHAR(128),
+    queue_thankyou VARCHAR(128),
+    queue_reporthold VARCHAR(128),
+    periodic_announce VARCHAR(50),
+    joinempty enum ('yes','no','strict','loose') default 'yes',
+    leavewhenempty enum ('yes','no','strict','loose') default 'no',
+    eventmemberstatus enum ('yes','no') default 'yes',
+    eventwhencalled enum ('yes','no'),
+    reportholdtime enum ('yes','no'),
+    ringinuse enum ('yes','no') default 'yes',
+    memberdelay INT(11),
+    timeoutrestart enum ('yes','no'),
+    defaultrule VARCHAR(128),
+    setinterfacevar enum ('yes','no') default 'yes',
+    setqueueentryvar enum ('yes','no') default 'yes',
+    setqueuevar enum ('yes','no') default 'yes',
+    organization_domain varchar(50) NOT NULL,
+    timeout_detail INT(11),
+    password_detail varchar(50),
+    cid_prefix_detail varchar(50),
+    cid_holdtime_detail enum ('yes','no') default 'no',
+    alert_info_detail varchar(50),
+    announce_caller_detail INT(11),
+    announce_detail INT(11),
+    ringing_detail enum ('yes','no') default 'no',
+    retry_detail enum ('yes','no') default 'yes',
+    destination_detail varchar(128),
+    restriction_agent enum ('yes','no') default 'no',
+    calling_restriction INT(11) default 0,
+    skip_busy_detail INT(11),
+    queue_number INT(11) not null,
+    UNIQUE KEY queue_number (queue_number,organization_domain),
+    INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
 
+
+DROP TABLE IF EXISTS queue_member;
+CREATE TABLE queue_member(
+uniqueid INT(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+membername varchar(40),
+queue_name varchar(128) not null,
+interface varchar(128) not null,
+penalty INT(11),
+paused INT(11),
+state_interface varchar(128), 
+exten INT(11) NOT NULL,
+UNIQUE KEY queue_interface (queue_name, interface),
+FOREIGN KEY (queue_name) REFERENCES queue(name)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS recordings;
+CREATE TABLE recordings (
+    uniqueid INT(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    -- path completo de donde se encuentra la grabacion incluyendo el nombre de la grabacion
+    filename varchar(128) NOT NULL,
+    -- nombre con el que se muestra la grabacion a los usuarios
+    description varchar(50) NOT NULL,
+    -- dominio al que pertenece la grabacion
+    organization_domain varchar(50) NOT NULL,
+    UNIQUE KEY filename (filename),
+    UNIQUE KEY description_recordings (description,organization_domain),
+    INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS ivr;
+CREATE TABLE ivr (
+    id INT(10) PRIMARY KEY AUTO_INCREMENT,
+    name varchar(50) NOT NULL,
+    announcement INT(11) default null,
+    timeout INT(11),
+    directdial enum ('yes','no') default 'no',
+    retvm enum ('yes','no') default 'no',
+    loops INT(11),
+    mesg_timeout INT(11) default null,
+    mesg_invalid INT(11) default null,
+    organization_domain varchar(50) NOT NULL,
+    UNIQUE KEY ivr_name (name,organization_domain),
+    INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS ivr_destination;
+CREATE TABLE ivr_destination (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    key_option varchar(50) NOT NULL,
+    type varchar(50) NOT NULL,
+    destine varchar(50) NOT NULL,
+    ivr_return enum ('yes','no') default 'no',
+    ivr_id INT(10) not NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (ivr_id) REFERENCES ivr(id)
+) ENGINE = INNODB;

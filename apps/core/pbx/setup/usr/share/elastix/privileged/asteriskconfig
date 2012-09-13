@@ -36,6 +36,8 @@ include_once "/var/www/html/configs/default.conf.php";
 require_once 'Console/Getopt.php';
 require_once "/var/www/html/libs/paloSantoPBX.class.php";
 require_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
+require_once "/var/www/html/modules/queues/libs/paloSantoQueues.class.php";
+require_once "/var/www/html/modules/ivr/libs/paloSantoIVR.class.php";
 
 if(!isset($argv[1]))
     exit(1);
@@ -364,7 +366,7 @@ function createExtensionGlobalsDomainFile($domain,$code){
     }
 
     //las globales correspondientes a las truncales de la organizacion
-    $queryTrunk="SELECT * from trunks where organization_domain=?";
+    $queryTrunk="SELECT * from trunk where organization_domain=?";
     $trunks=$pDB->fetchTable($queryTrunk,true,array($domain));
     if($trunks===false){
         fprintf(STDERR, "ERR: Database connection elxppbx - %s\n", $pDB->errMsg);
@@ -455,6 +457,26 @@ function generateDialPlan($domain){
         fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pDevice->errMsg);
     else
         $arrContext=array_merge($arrContext,$arrContextExtFax);
+    
+    //genero plan de marcado relacionado con los irvs
+    $pIVR=new paloIvrPBX($pDB,$domain);
+    $arrContextIVR=$pIVR->createDialPlanIvr($arrFromInt);
+    if($arrContextIVR===false || !is_array($arrContextIVR))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pIVR->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextIVR);
+        
+    //genero plan de marcado relacionado con la ringgroups
+
+    //genero plan de marcado relacionado con las truncales
+
+    //genero plan de marcado relacionado con las colas
+    $pQueue=new paloQueuePBX($pDB,$domain);
+    $arrContextQueue=$pQueue->createDialPlanQueue($arrFromInt);
+    if($arrContextQueue===false || !is_array($arrContextQueue))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pQueue->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextQueue);
 
     //genero el plan marcado relacionado con los features codes
     $pFC=new paloFeatureCodePBX($pDB,$domain);
@@ -464,14 +486,6 @@ function generateDialPlan($domain){
     else
         $arrContext=array_merge($arrContext,$arrContextFeaturesCode);
         
-    //genero plan de marcado relacionado con los irvs
-
-    //genero plan de marcado relacionado con la ringgroups
-
-    //genero plan de marcado relacionado con las truncales
-
-    //genero plan de marcado relacionado con las colas
-
     //incluimos los contextos dentro de from-internal-additional
     $fromInternal=new paloContexto($code,"from-internal-additional");
     $fromInternal->arrInclude=$arrFromInt;

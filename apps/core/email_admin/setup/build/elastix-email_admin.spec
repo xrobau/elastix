@@ -190,6 +190,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Thu Sep 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Accounts: extend email_account helper script to add and remove 
+  individual mail accounts.
+  SVN Rev[4210]
+
 * Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Domains: extend email_account helper script to add and remove 
   mail domains. Domain operations are now reimplemented on top of the extended

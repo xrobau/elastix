@@ -40,6 +40,13 @@ ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
 $opt = Console_Getopt::getopt($argv, '', array(
     'createdomain=',        // Create a new domain
     'deletedomain=',        // Remove a domain
+    'createaccount',        // Create a new account on a domain
+    'deleteaccount',        // Delete an account on a domain
+    'username=',            // Username to create or delete
+    'password=',            // Password for username to create or update
+    'domain=',              // Domain for username to create or delete
+    'quota=',               // Quota for createaccount or updatequota
+
     'reconstruct_mailbox',  // Repair mailbox damage, cyrus function
     'mailbox=',    // mailbox that must be reconstructed
 ));
@@ -51,12 +58,16 @@ foreach ($opt[0] as $option) switch ($option[0]) {
         exit(create_domain($opt) ? 0 : 1);
 	case '--deletedomain':
 		exit(delete_domain($opt) ? 0 : 1);
+	case '--createaccount':
+	    exit(create_account($opt) ? 0 : 1);
+	case '--deleteaccount':
+	    exit(delete_account($opt) ? 0 : 1);
     case '--reconstruct_mailbox':
         exit(reconstruct_mailbox($opt) ? 0 : 1);
 }
 
 
-error_exit("No action specified (--createdomain,--deletedomain,--reconstruct_mailbox)\n");
+error_exit("No action specified (--createdomain,--deletedomain,--createaccount,--deleteaccount,--reconstruct_mailbox)\n");
 
 
 function error_exit($sMsg, $errorcode = 1)
@@ -267,6 +278,226 @@ function add_remove_domain_postfix($sDomain, $bAddRemove, $bPostfixElastix2)
             error_exit("ERR: failed to reload postfix after domain update ($retval)\n");
         }
     }
+}
+
+function create_account($opt)
+{
+    $bSuccess = FALSE;
+
+    $sDomain = NULL;
+    $sUsername = NULL;
+    $sPassword = NULL;
+    $sQuota = NULL;
+    
+    // Collect and validate options
+    foreach ($opt[0] as $option) switch ($option[0]) {
+        case '--domain':
+            $sDomain = $option[1];
+            break;
+        case '--username':
+            $sUsername = $option[1];
+            break;
+        case '--password':
+            $sPassword = $option[1];
+            break;
+        case '--quota':
+            $sQuota = $option[1];
+            break;
+    }    
+    if (is_null($sDomain)) {
+        error_exit("ERR: no domain specified.\n");
+    }
+    if (is_null($sUsername)) {
+        error_exit("ERR: no username specified.\n");
+    }
+    if (is_null($sPassword)) {
+        error_exit("ERR: no password specified.\n");
+    }
+    if (is_null($sQuota)) {
+        error_exit("ERR: no quota specified.\n");
+    }
+    if (!preg_match('/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*$/', $sUsername)) {
+        error_exit("ERR: Wrong format for username.\n");
+    }
+    if (!ctype_digit($sQuota)) {
+        error_exit("ERR: invalid quota, expected integer.\n");
+    }
+    
+    loadCyrusPassword();
+
+	require_once('libs/cyradm.php');
+
+    // Connect to IMAP before doing anything else
+    $cyr_conn = new cyradm;
+    if (!$cyr_conn->imap_login()) {
+        error_exit("ERR: failed to login to IMAP\n");
+    }
+    
+    $bPostfixElastix2 = isPostfixToElastix2();
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $conn->beginTransaction();
+
+        // Check whether username already exists
+        $sth = $conn->prepare('SELECT username FROM accountuser WHERE username = ?');
+        $sFullUsername = $bPostfixElastix2
+            ? "{$sUsername}@{$sDomain}"
+            : "{$sUsername}.{$sDomain}";
+        $sth->execute(array($sFullUsername));
+        $accountList = $sth->fetchAll(PDO::FETCH_COLUMN);
+        if (count($accountList) > 0) {
+            error_exit("ERR: The e-mail address already exists\n");
+        }        
+
+        // username, password, id_domain, quota
+        $account = array(
+            'username'      =>  $sUsername,
+            'password'      =>  $sPassword,
+            'domain'        =>  $sDomain,
+            'quota'         =>  $sQuota,
+        );
+        $preparedSth = array();        
+        $bSuccess = _internal_create_account($conn, $preparedSth, $cyr_conn,
+            $account, $bPostfixElastix2);
+        if ($bSuccess)
+            $conn->commit();
+        else $conn->rollBack();
+    } catch (PDOException $e) {
+        $conn->rollBack();
+        error_exit("ERR: failed to add new account to database - ".$e->getMessage()."\n");
+    }
+    $cyr_conn->imap_logout();
+
+    return $bSuccess;
+}
+
+/* This routine assumes it is running inside a transaction, and that the described
+ * account has been already verified to not exist. This routine must perform all
+ * of the database updates *BEFORE* performing any of the system-wide updates. */
+function _internal_create_account($conn, &$preparedSth, $cyr_conn, $account, $bPostfixElastix2)
+{
+    global $CYRUS;
+
+    if (!isset($preparedSth['listDomain'])) {
+        $preparedSth['listDomain'] = $conn->prepare(
+            'SELECT id FROM domain WHERE domain_name = ?');
+    }
+    if (!isset($preparedSth['createAccount'])) {
+        $preparedSth['createAccount'] = $conn->prepare(
+            'INSERT INTO accountuser (id_domain, username, password, quota) '.
+            'VALUES (?, ?, ?, ?)');
+    }
+    if (!isset($preparedSth['createAlias'])) {
+        $preparedSth['createAlias'] = $conn->prepare(
+            'INSERT INTO virtual (username, alias) VALUES (?, ?)');
+    }
+    
+    // Query domain ID
+    $preparedSth['listDomain']->execute(array($account['domain']));
+    $domainList = $preparedSth['listDomain']->fetchAll(PDO::FETCH_COLUMN);
+    if (count($domainList) <= 0) {
+        fwrite(STDERR, "ERR: domain {$account['domain']} not found.\n");
+        return FALSE;
+    }
+    $idDomain = $domainList[0];
+
+    // Insert into database
+    $sFullUsername = $bPostfixElastix2
+        ? "{$account['username']}@{$account['domain']}"
+        : "{$account['username']}.{$account['domain']}";
+    $preparedSth['createAccount']->execute(array($idDomain, $sFullUsername, $account['password'], $account['quota']));
+    $preparedSth['createAlias']->execute(array($sFullUsername, "{$account['username']}@{$account['domain']}"));
+
+    // No exceptions so far, create actual email account in system
+    $sAccountCommand = 'echo '.escapeshellarg($account['password']).
+        ' | /usr/sbin/saslpasswd2 -c '.escapeshellarg($sFullUsername);
+    if (!$bPostfixElastix2) $sAccountCommand .= ' -u '.SASL_DOMAIN;
+    $retval = NULL;
+    system($sAccountCommand, $retval);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: failed to create account $sFullUsername ($retval)\n");
+        return FALSE;
+    }
+    
+    // Attempt to create the mailbox for the user
+    $bUndoEmailCreation = FALSE;
+    $userpath = 'user/'.$sFullUsername;
+    if (!$cyr_conn->createmb($userpath)) {
+        fwrite(STDERR, "ERR: failed to create user {$sFullUsername}: ".$cyr_conn->getMessage()."\n");
+        $bUndoEmailCreation = TRUE;
+    } elseif (!$cyr_conn->setacl($userpath, $CYRUS['ADMIN'], 'lrswipcda')) {
+        fwrite(STDERR, "ERR: failed to set ACL on user {$sFullUsername}: ".$cyr_conn->getMessage()."\n");
+        $bUndoEmailCreation = TRUE;
+    } elseif (!$cyr_conn->setmbquota($userpath, $account['quota'])) {
+        fwrite(STDERR, "ERR: failed to set quota on user {$sFullUsername}: ".$cyr_conn->getMessage()."\n");
+        $bUndoEmailCreation = TRUE;
+    }
+    
+    // Attempt to rollback failed mailbox/user creation
+    if ($bUndoEmailCreation) {
+        if (!$cyr_conn->deletemb($userpath)) {
+            fwrite(STDERR, "ERR: failed to remove user {$sFullUsername}: ".$cyr_conn->getMessage()."\n");
+        }
+        $sAlias = $sFullUsername; if (!$bPostfixElastix2) $sAlias .= '@'.SASL_DOMAIN;
+        $retval = NULL;
+        system('/usr/sbin/saslpasswd2 -d '.escapeshellarg($sAlias), $retval);
+        if ($retval != 0) {
+            fwrite(STDERR, "ERR: failed to delete alias {$sAlias} for username {$account['username']}\n");
+        }
+        return FALSE;
+    }
+    return TRUE;
+}
+
+function delete_account($opt)
+{
+    $sUsername = NULL;
+    
+    // Collect and validate options
+    foreach ($opt[0] as $option) switch ($option[0]) {
+        case '--username':
+            $sUsername = $option[1];
+            break;
+    }    
+    if (is_null($sUsername)) {
+        error_exit("ERR: no username specified.\n");
+    }
+
+    loadCyrusPassword();
+
+	require_once('libs/cyradm.php');
+
+    // Connect to IMAP before doing anything else
+    $cyr_conn = new cyradm;
+    if (!$cyr_conn->imap_login()) {
+        error_exit("ERR: failed to login to IMAP\n");
+    }
+    
+    $bPostfixElastix2 = isPostfixToElastix2();
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $sth = $conn->prepare(
+            'SELECT username FROM accountuser WHERE username = ?');
+        $sth->execute(array($sUsername));
+        $accountList = $sth->fetchAll(PDO::FETCH_COLUMN);
+        if (count($accountList) <= 0) {
+            fwrite(STDERR, "ERR: account {$sUsername} not found.\n");
+            $cyr_conn->imap_logout();
+            return FALSE;
+        }
+        $account = array(
+            'username'  =>  $sUsername,
+        );
+        _internal_delete_account($conn, $preparedSth, $cyr_conn, $account, $bPostfixElastix2);
+    } catch (PDOException $e) {
+        error_exit("ERR: failed to remove old account - ".$e->getMessage()."\n");
+    }
+    $cyr_conn->imap_logout();
+
+    return TRUE;
 }
 
 function reconstruct_mailbox($opt)

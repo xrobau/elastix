@@ -1,3 +1,4 @@
+* Dialer: fix incorrect field access syntax on trunk error output.
 * Agent Console: if Elastix user has a default extension, suggest this extension
   as the extension to use for initial agent login. Possible fix for Elastix bug
   #1354.

@@ -507,7 +507,7 @@ PETICION_CAMPANIAS_ENTRANTES;
         // Construir patrón de marcado a partir de trunk de campaña
         $datosTrunk = $this->_construirPlantillaMarcado($infoCampania['trunk']);
         if (is_null($datosTrunk)) {
-            $this->_log->output("ERR: no se puede construir plantilla de marcado a partir de trunk '{$infoCampania->trunk}'!");
+            $this->_log->output("ERR: no se puede construir plantilla de marcado a partir de trunk '{$infoCampania['trunk']}'!");
             $this->_log->output("ERR: Revise los mensajes previos. Si el problema es un tipo de trunk no manejado, ".
                 "se requiere informar este tipo de trunk y/o actualizar su versión de CallCenter");
             return FALSE;

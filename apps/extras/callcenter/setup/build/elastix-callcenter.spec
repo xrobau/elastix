@@ -98,6 +98,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Sep 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: fix incorrect field access syntax on trunk error output.
+
 * Tue Aug 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: if Elastix user has a default extension, suggest this
   extension as the extension to use for initial agent login. Possible fix for 

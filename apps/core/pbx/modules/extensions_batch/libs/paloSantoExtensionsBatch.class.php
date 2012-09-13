@@ -454,11 +454,9 @@ class paloSantoLoadExtension {
                     (select data as pickupgroup, id from sip where keyword='pickupgroup') as r5,
                     (select data as disallow, id from sip where keyword='disallow') as r6,
                     (select data as allow, id from sip where keyword='allow') as r7,
-                    (select data as deny, id from sip where keyword='deny') as r8,
-                    (select data as permit, id from sip where keyword='permit') as r9,
-                    (select data as record_in, id from sip where keyword='record_in') as r10,
-                    (select data as record_out, id from sip where keyword='record_out') as r11
-                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id and r1.extension=r8.id and r1.extension=r9.id and r1.extension=r10.id and r1.extension=r11.id);";
+                    (select data as record_in, id from sip where keyword='record_in') as r8,
+                    (select data as record_out, id from sip where keyword='record_out') as r9
+                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id and r1.extension=r8.id and r1.extension=r9.id);";
         $resultSIP = $this->_DB->fetchTable($sql, true);
 
     $dataSIP = $this->processData($resultSIP,$path);
@@ -469,11 +467,9 @@ class paloSantoLoadExtension {
                     (select data as context, id from iax where keyword='context') as r3,
                     (select data as disallow, id from iax where keyword='disallow') as r4,
                     (select data as allow, id from iax where keyword='allow') as r5,
-                    (select data as deny, id from iax where keyword='deny') as r6,
-                    (select data as permit, id from iax where keyword='permit') as r7,
-                    (select data as record_in, id from iax where keyword='record_in') as r8,
-                    (select data as record_out, id from iax where keyword='record_out') as r9
-                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id and r1.extension=r8.id and r1.extension=r9.id);";
+                    (select data as record_in, id from iax where keyword='record_in') as r6,
+                    (select data as record_out, id from iax where keyword='record_out') as r7
+                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id);";
         $resultIAX = $this->_DB->fetchTable($sql, true);
         
     $dataIAX = $this->processData($resultIAX,$path);

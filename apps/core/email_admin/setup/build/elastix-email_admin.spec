@@ -190,6 +190,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Fri Sep 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Domains: Clean up and simplify domain manipulation API and usage.
+- CHANGED: Domains: use SQL placeholders on domain account listing.
+  SVN Rev[4211]
+
 * Thu Sep 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Accounts: extend email_account helper script to add and remove 
   individual mail accounts.

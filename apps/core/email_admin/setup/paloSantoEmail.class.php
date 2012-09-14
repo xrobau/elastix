@@ -346,41 +346,6 @@ class paloEmail {
         return $arr_result;
     }
 
-
-    function updateAccount($username, $quota)
-    {
-        $bExito = FALSE;
-        $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
-        $regularExpresion = "";
-
-        if($configPostfix2)
-           $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
-        else
-           $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
-
-        if (!is_null($username) && !preg_match($regularExpresion, "$username")) {
-            $this->errMsg = "Username is not valid";
-        }  else {
-            //modificar cuenta
-            $sPeticionSQL = paloDB::construirUpdate(
-                        "accountuser",
-                        array(
-                            "quota"     => paloDB::DBCAMPO($quota)
-
-                         ),
-                        array(
-                            "username"  => paloDB::DBCAMPO($username))
-                        );
-            if ($this->_DB->genQuery($sPeticionSQL)) {
-                $bExito = TRUE;
-            } else {
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $bExito;
-    }
-
-
     //***** new functions from email_functions.lib.php ***************************************************************/
 
     function eliminar_usuario_correo_sistema($username,$email,&$error){

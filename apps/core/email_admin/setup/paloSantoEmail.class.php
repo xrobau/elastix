@@ -588,5 +588,69 @@ class paloEmail {
                 return TRUE;
     }
 
+    /**
+     * Obtener la cuota del correo del usuario indicado.
+     * 
+     * @param string    $username   Correo completo usuario@dominio.com
+     * 
+     * @return mixed    Arreglo (used,qmax) o NULL en caso de error
+     */
+    function getAccountQuota($username)
+    {
+        $this->errMsg = '';
+        $bPostfixElastix2 = isPostfixToElastix2();
+        $regexp = $bPostfixElastix2
+            ? '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/'
+            : '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+        if (!preg_match($regexp, $username)) {
+            $this->errMsg = _tr('Username is not valid');
+        	return NULL;
+        }
+
+        $cyr_conn = new cyradm;
+        if (!$cyr_conn->imap_login()) {
+            $this->errMsg = _tr('Failed to login to IMAP');
+            return NULL;
+        }
+        $quota = $cyr_conn->getquota('user/'.$username);
+        $cyr_conn->imap_logout();
+        return $quota;
+    }
+    
+    /**
+     * Actualizar la cuota del usuario indicado, tanto en cyrus como en la DB.
+     * 
+     * @param string    $username   Correo completo usuario@dominio.com
+     * @param int       $newquota   Nueva cuota de correo a asignar
+     * 
+     * @return bool     VERDADERO en caso de éxito, FALSO en caso de error.
+     */
+    function setAccountQuota($username, $newquota)
+    {
+        $this->errMsg = '';
+        $bPostfixElastix2 = isPostfixToElastix2();
+        $regexp = $bPostfixElastix2
+            ? '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/'
+            : '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+        if (!preg_match($regexp, $username)) {
+            $this->errMsg = _tr('Username is not valid');
+            return FALSE;
+        }
+
+        $cyr_conn = new cyradm;
+        if (!$cyr_conn->imap_login()) {
+            $this->errMsg = _tr('Failed to login to IMAP');
+            return NULL;
+        }
+        $bExito = $cyr_conn->setmbquota('user/'.$username, $newquota);
+        if (!$bExito) $this->errMsg = $cyr_conn->getMessage();
+        $cyr_conn->imap_logout();
+        if ($bExito) {
+        	$sPeticionSQL = 'UPDATE accountuser SET quota = ? WHERE username = ?';
+            $bExito = $this->_DB->genQuery($sPeticionSQL, array($newquota, $username));
+            if (!$bExito) $this->errMsg = $this->_DB->errMsg;
+        }
+        return $bExito;
+    }
 }
 ?>

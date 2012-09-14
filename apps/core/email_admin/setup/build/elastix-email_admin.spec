@@ -191,6 +191,11 @@ fi
 
 %changelog
 * Fri Sep 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Accounts: introduce methods getAccountQuota() and setAccountQuota()
+  in paloSantoEmail, use them to clean up quota management.
+- CHANGED: Accounts: replace tabs with spaces and clean up indentation.
+  SVN Rev[4212]
+
 - CHANGED: Domains: Clean up and simplify domain manipulation API and usage.
 - CHANGED: Domains: use SQL placeholders on domain account listing.
   SVN Rev[4211]

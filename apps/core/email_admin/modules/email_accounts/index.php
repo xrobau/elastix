@@ -513,7 +513,7 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
                     $username=$_POST['address'].'@'.$domain_name;
                 else
                     $username=$_POST['address'].'.'.$domain_name;
-                $pEmail->eliminar_cuenta($pDB,$username,"",false);
+                $pEmail->deleteAccount($username);
                 $content = false;
             }
             else{
@@ -642,17 +642,13 @@ function deleteAccount($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 {
     $pEmail   = new paloEmail($pDB);
     $username = getParameter("username");
-    $virtual  = FALSE;
-    $pDB->beginTransaction();
     $errMsg = "";
-    $bExito = $pEmail->eliminar_cuenta($pDB,$username,$errMsg, $virtual);
+    $bExito = $pEmail->deleteAccount($username);
     if (!$bExito){
-        $pDB->rollBack();
         $smarty->assign("mb_message", _tr("Error appliying changes").". ".$errMsg);
         $content = viewDetailAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
     }
     else{
-        $pDB->commit();
         $smarty->assign("mb_message", _tr("Account deleted successfully"));
         $content = viewFormAccount($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
     }
@@ -697,7 +693,7 @@ function create_email_account($pDB,$domain_name,&$errMsg)
     $bExito = $pEmail->crear_usuario_correo_sistema($email,$username,$_POST['password1'],$errMsg, $virtual);
     if(!$bExito) return FALSE;
     //inserto la cuenta de usuario en la bd
-    $bExito = $pEmail->createAccount($_POST['id_domain'],$username,$_POST['password1'],$_POST['quota']);
+    $bExito = $pEmail->createAccount_DB($_POST['id_domain'],$username,$_POST['password1'],$_POST['quota']);
     if ($bExito){
         //crear el mailbox para la nueva cuenta
         $bReturn = crear_mailbox_usuario($pDB,$email,$username,$errMsg);
@@ -741,7 +737,7 @@ function crear_mailbox_usuario($db,$email,$username,&$error_msg){
     }
     if($error_msg!=""){
         //Si hay error se trata de borrar la fila ingresada
-        $bValido=$pEmail->deleteAccount($username);
+        $bValido=$pEmail->deleteAccount_DB($username);
         if(!$bValido){
             $error_msg=(isset($arrLang[$pEmail->errMsg]))?$arrLang[$pEmail->errMsg]:$pEmail->errMsg;
             return FALSE;

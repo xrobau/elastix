@@ -167,33 +167,6 @@ class paloEmail {
     }
 
 
-    private function deleteAliasesFromAccount($username)
-    {
-        $bExito = TRUE;
-        $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
-        $regularExpresion = "";
-        if($configPostfix2)
-           $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
-        else
-           $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
-        if (!preg_match($regularExpresion, "$username")) {
-            $this->errMsg = "Username is not valid";
-            $bExito = FALSE;
-        }
-        else {
-            $this->errMsg = "";
-            $sPeticionSQL = 
-                "DELETE FROM virtual WHERE username = '$username'";
-            $bExito = $this->_DB->genQuery($sPeticionSQL);
-            if (!$bExito) {
-                $bExito = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $bExito;
-    }
-
-
     function getAccount($username)
     {
         $arr_result = FALSE;
@@ -244,13 +217,42 @@ class paloEmail {
     }
 
     /**
+     * Procedimiento para borrar completamente una cuenta de la base de datos y
+     * del sistema.
+     * 
+     * @param   string  $username   Usuario completo usuario@dominio.com
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function deleteAccount($username)
+    {
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --deleteaccount --username '.
+            escapeshellarg($username).' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+                $regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+                    $this->errMsg = $regs[1];
+                }
+            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    /**
      * Procedimiento para crear una nueva cuenta
      *
      * @param string    $domain_name       nombre para el dominio
      *
      * @return bool     VERDADERO si el dominio se crea correctamente, FALSO en error
      */
-    function createAccount($id_domain,$username,$password,$quota)
+    function createAccount_DB($id_domain,$username,$password,$quota)
     {
         $bExito = FALSE;
 
@@ -272,7 +274,7 @@ class paloEmail {
     }
 
 
-    function deleteAccount($username)
+    function deleteAccount_DB($username)
     {
         $bExito = TRUE;
         $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
@@ -317,34 +319,6 @@ class paloEmail {
         return $bExito;
     }
 
-
-    private function getAliasAccount($username)
-    {
-        $arr_result = FALSE;
-        $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
-        $regularExpresion = "";
-
-        if($configPostfix2)
-           $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
-        else
-           $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
-
-        if (!is_null($username) && !preg_match($regularExpresion, "$username")) {
-            $this->errMsg = "Username is not valid";
-        } 
-        else {
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id, alias FROM virtual ".
-                            "WHERE username = '$username' ";
-            $sPeticionSQL .="ORDER BY alias";
-            $arr_result =& $this->_DB->fetchTable($sPeticionSQL);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $arr_result;
-    }
 
     //***** new functions from email_functions.lib.php ***************************************************************/
 
@@ -454,49 +428,6 @@ class paloEmail {
             return TRUE;
     }
 
-    function eliminar_cuenta($db,$username,$errMsg, $virtual=TRUE){
-        global $CYRUS;
-        $arr_alias=array();
-
-        //primero se obtienen las direcciones de mail del usuario (virtuales)
-        $arrAlias = $this->getAliasAccount($username);
-        if (is_array($arrAlias)){
-            foreach ($arrAlias as $fila)
-                $arr_alias[]=$fila[1];
-        }
-        $bExito = $this->deleteAliasesFromAccount($username); // elimina los aliases de la base de datos
-        if($bExito){
-            $bExito = $this->deleteAccount($username);
-            if ($bExito){
-                $cyr_conn = new cyradm;
-                $bValido = $cyr_conn->imap_login();
-
-                if ($bValido ===FALSE){
-                    $errMsg = $cyr_conn->getMessage();
-                    return FALSE;
-                }
-
-                $bValido=$cyr_conn->deletemb("user/".$username); // elimina los buzones de entrada
-                if($bValido===FALSE){
-                    $errMsg=$cyr_conn->getMessage();
-                    return FALSE;
-                }
-                //$cyr_conn->deletemb("user/".$username)."<br>";
-
-                foreach($arr_alias as $alias){
-                    if(!$this->eliminar_usuario_correo_sistema($username,$alias,$errMsg)){ // elimina los usuarios del sistema
-                        return FALSE;
-                    }
-                }
-                if($virtual)
-                    $this->eliminar_virtual_sistema($username,$errMsg); // elimina los alias en /etc/postfix/virtual
-                return TRUE;
-            }
-        }else{
-            $bExito = FALSE;
-        }
-        return $bExito;
-    }
 
     function getListByDomain($id_domain)
     {

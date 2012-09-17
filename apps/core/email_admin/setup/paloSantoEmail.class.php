@@ -29,11 +29,9 @@
 
 if (isset($arrConf['basePath'])) {
     include_once($arrConf['basePath'] . "/libs/paloSantoDB.class.php");
-    include_once($arrConf['basePath'] . "/libs/paloSantoConfig.class.php");
     include_once($arrConf['basePath'] . "/libs/misc.lib.php");
 } else {
     include_once("libs/paloSantoDB.class.php");
-    include_once("libs/paloSantoConfig.class.php");
     include_once("libs/misc.lib.php");
 }
 
@@ -155,17 +153,17 @@ class paloEmail {
         return TRUE;
     }
 
-    function getNumberOfAccounts($id_domain){
+    function getNumberOfAccounts($id_domain)
+    {
         $number =0;
-        $sPeticionSQL = "SELECT count(*) FROM accountuser ".
-                " WHERE id_domain = '$id_domain'";
-        $arr_result =& $this->_DB->getFirstRowQuery($sPeticionSQL);
+        $arr_result =& $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM accountuser WHERE id_domain = ?',
+            FALSE, array($id_domain));
         if (is_array($arr_result) && count($arr_result)>0) {
-                $number=$arr_result[0];
+            $number=$arr_result[0];
         }
         return $number;
     }
-
 
     function getAccount($username)
     {
@@ -181,10 +179,14 @@ class paloEmail {
         } 
         else {
             $this->errMsg = "";
-            $sPeticionSQL = "SELECT username, password, id_domain, quota FROM accountuser".
-                (is_null($username) ? '' : " WHERE username = '$username'");
-            $sPeticionSQL .=" ORDER BY username";
-            $arr_result =& $this->_DB->fetchTable($sPeticionSQL);
+            $sPeticionSQL = 'SELECT username, password, id_domain, quota FROM accountuser';
+            $paramSQL = array();
+            if (!is_null($username)) {
+            	$sPeticionSQL .= ' WHERE username = ?';
+                $paramSQL[] = $username;
+            }
+            $sPeticionSQL .= ' ORDER BY username';
+            $arr_result =& $this->_DB->fetchTable($sPeticionSQL, FALSE, $paramSQL);
             if (!is_array($arr_result) && count($arr_result)>0) {
                 $arr_result = FALSE;
                 $this->errMsg = $this->_DB->errMsg;
@@ -217,6 +219,74 @@ class paloEmail {
     }
 
     /**
+     * Procedimiento para crear una nueva cuenta en la base de datos y en el 
+     * sistema.
+     * 
+     * @param   string  $domain     Dominio donde crear la cuenta
+     * @param   string  $username   Usuario SIN DOMINIO
+     * @param   string  $password   Password inicial para la cuenta de correo
+     * @param   int     $quota      Cuota inicial de la cuenta de correo
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function createAccount($domain, $username, $password, $quota)
+    {
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --createaccount'.
+            ' --domain '.escapeshellarg($domain).
+            ' --username '.escapeshellarg($username).
+            ' --password '.escapeshellarg($password).
+            ' --quota '.escapeshellarg($quota).
+            ' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+                $regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+                    $this->errMsg = $regs[1];
+                }
+            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    /**
+     * Procedimiento para actualizar la contraseña de una cuenta de correo en
+     * el sistema y en la base de datos.
+     * 
+     * @param   string  $username   Usuario completo usuario@dominio.com
+     * @param   string  $password   Password nuevo para la cuenta de correo
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function setAccountPassword($username, $password)
+    {
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --setaccountpassword'.
+            ' --username '.escapeshellarg($username).
+            ' --password '.escapeshellarg($password).
+            ' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+                $regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+                    $this->errMsg = $regs[1];
+                }
+            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    /**
      * Procedimiento para borrar completamente una cuenta de la base de datos y
      * del sistema.
      * 
@@ -245,189 +315,7 @@ class paloEmail {
         return TRUE;
     }
 
-    /**
-     * Procedimiento para crear una nueva cuenta
-     *
-     * @param string    $domain_name       nombre para el dominio
-     *
-     * @return bool     VERDADERO si el dominio se crea correctamente, FALSO en error
-     */
-    function createAccount_DB($id_domain,$username,$password,$quota)
-    {
-        $bExito = FALSE;
-
-        $sPeticionSQL = paloDB::construirInsert(
-                    "accountuser",
-                    array(
-                        "id_domain"   =>  paloDB::DBCAMPO($id_domain),
-                        "username"    =>  paloDB::DBCAMPO($username),
-                        "password"    =>  paloDB::DBCAMPO($password),
-                        "quota"       =>  paloDB::DBCAMPO($quota),
-                    )
-                );
-        if ($this->_DB->genQuery($sPeticionSQL)) {
-            $bExito = TRUE;
-        } else {
-            $this->errMsg = $this->_DB->errMsg;
-        }
-        return $bExito;
-    }
-
-
-    function deleteAccount_DB($username)
-    {
-        $bExito = TRUE;
-        $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
-        $regularExpresion = "";
-        if($configPostfix2)
-           $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
-        else
-           $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
-        if (!preg_match($regularExpresion, "$username")) {
-            $this->errMsg = "Username is not valid";
-            $bExito = FALSE;
-        }
-        else {
-            $this->errMsg = "";
-            $sPeticionSQL = 
-                "DELETE FROM accountuser WHERE username = '$username'";
-            $bExito = $this->_DB->genQuery($sPeticionSQL);
-            if (!$bExito) {
-                $bExito = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $bExito;
-    }
-
-    function createAliasAccount($username,$alias)
-    {
-        $bExito = FALSE;
-
-        $sPeticionSQL = paloDB::construirInsert(
-                    "virtual",
-                    array(
-                        "username"    =>  paloDB::DBCAMPO($username),
-                        "alias"    =>  paloDB::DBCAMPO($alias),
-                    )
-                );
-        if ($this->_DB->genQuery($sPeticionSQL)) {
-            $bExito = TRUE;
-        } else {
-            $this->errMsg = $this->_DB->errMsg;
-        }
-        return $bExito;
-    }
-
-
     //***** new functions from email_functions.lib.php ***************************************************************/
-
-    function eliminar_usuario_correo_sistema($username,$email,&$error){
-        $output=array();
-        $configPostfix2 = isPostfixToElastix2();
-        if($configPostfix2)
-            exec("sudo -u root /usr/sbin/saslpasswd2 -d ".escapeshellarg($email),$output);
-        else
-            exec("sudo -u root /usr/sbin/saslpasswd2 -d ".escapeshellarg($username)."@".SASL_DOMAIN,$output);
-        if(is_array($output) && count($output)>0){
-            foreach($output as $linea)
-                $error.=$linea."<br>";
-        }
-        if($error!="")
-            return FALSE;
-        else
-            return TRUE;
-    }
-
-    function eliminar_virtual_sistema($email,&$error){
-        $config=new paloConfig("/etc/postfix","virtual","\t","[[:space:]?\t[:space:]?]");
-        $arr_direcciones=$config->leer_configuracion();
-
-        $eliminado=FALSE;
-        foreach($arr_direcciones as $key=>$fila){
-            if(isset($fila['clave']) && $fila['clave']==$email){
-                unset($arr_direcciones[$key]);
-                $eliminado=TRUE;
-            }
-        }
-
-        if($eliminado){
-            $bool=$config->escribir_configuracion($arr_direcciones,true);
-            if($bool){
-                exec("sudo -u root postmap /etc/postfix/virtual",$output);
-                if(is_array($output) && count($output)>0)
-                    foreach($output as $linea)
-                        $error.=$linea."<br>";
-            }
-            else{
-                $error.=$config->getMessage();
-                return FALSE;
-            }
-        }
-
-        return TRUE;
-    }
-
-    function crear_usuario_correo_sistema($email,$username,$clave,&$error,$virtual=TRUE){
-        $output=array();
-        $configPostfix2 = isPostfixToElastix2();
-        if($configPostfix2){
-            exec("echo ".escapeshellarg($clave)." | sudo -u root /usr/sbin/saslpasswd2 -c ".escapeshellarg($email),$output);
-        }else{
-            exec("echo ".escapeshellarg($clave)." | sudo -u root /usr/sbin/saslpasswd2 -c ".escapeshellarg($username)." -u ".SASL_DOMAIN,$output);
-        }
-
-        if(is_array($output) && count($output)>0){
-            foreach($output as $linea_salida)
-                $error.=$linea_salida."<br>";
-        }
-
-        if($configPostfix2){
-            if($error!="")
-                return FALSE;
-        }else{
-            if($error!="")
-                return FALSE;
-        }
-
-        // escribir aliases
-        if($virtual){
-            $bool=$this->crear_virtual_sistema($email,$username,$error);
-            if(!$bool)
-                return FALSE;
-        }
-
-        return TRUE;
-    }
-
-    private function crear_virtual_sistema($email,$username,&$error){
-        $output=array();
-        $configPostfix2 = isPostfixToElastix2();
-        if($configPostfix2){
-            $username = $email;
-        }else{
-            $username.='@'.SASL_DOMAIN;
-        }
-        exec("sudo -u root chown asterisk /etc/postfix/virtual");
-        exec("echo ".escapeshellarg("$email \t $username")." >> /etc/postfix/virtual",$output);
-
-        if(is_array($output) && count($output)>0){
-            foreach($output as $linea)
-                $error.=$linea."<br>";
-        }
-        exec("sudo -u root chown root /etc/postfix/virtual");
-
-        exec("sudo -u root postmap /etc/postfix/virtual",$output);
-        if(is_array($output) && count($output)>0){
-            foreach($output as $linea)
-                $error.=$linea."<br>";
-        }
-        if($error!="")
-            return FALSE;
-        else
-            return TRUE;
-    }
-
 
     function getListByDomain($id_domain)
     {
@@ -455,33 +343,32 @@ class paloEmail {
             return false;
     }
 
-        function resconstruirMailBox($username)
+    function resconstruirMailBox($username)
     {
         $output = $retval = NULL;
 
-                $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
+        $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
         $regularExpresion = "";
         if($configPostfix2)
            $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
         else
            $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
 
-                if(!is_null($username)){
-                        if(!preg_match($regularExpresion,$username)){
-                                $this->errMsg = "Username format is not valid";
-                        }else{
-                                exec('/usr/bin/elastix-helper email_account --reconstruct_mailbox  --mailbox '.escapeshellarg($username).' 2>&1', $output, $retval);
-                        }
-                }else{
-                        $this->errMsg = "Username must not be null";
-                }
+        if (!is_null($username)) {
+            if(!preg_match($regularExpresion,$username)){
+                $this->errMsg = "Username format is not valid";
+            } else {
+                exec('/usr/bin/elastix-helper email_account --reconstruct_mailbox  --mailbox '.escapeshellarg($username).' 2>&1', $output, $retval);
+            }
+        } else {
+            $this->errMsg = "Username must not be null";
+        }
 
-                if ($retval != 0) {
+        if ($retval != 0) {
             $this->errMsg = implode('', $output);
             return FALSE;
         }
-
-                return TRUE;
+        return TRUE;
     }
 
     /**
@@ -538,14 +425,22 @@ class paloEmail {
             $this->errMsg = _tr('Failed to login to IMAP');
             return NULL;
         }
-        $bExito = $cyr_conn->setmbquota('user/'.$username, $newquota);
-        if (!$bExito) $this->errMsg = $cyr_conn->getMessage();
-        $cyr_conn->imap_logout();
-        if ($bExito) {
-        	$sPeticionSQL = 'UPDATE accountuser SET quota = ? WHERE username = ?';
-            $bExito = $this->_DB->genQuery($sPeticionSQL, array($newquota, $username));
-            if (!$bExito) $this->errMsg = $this->_DB->errMsg;
+
+        $this->_DB->beginTransaction();
+        $sPeticionSQL = 'UPDATE accountuser SET quota = ? WHERE username = ?';
+        $bExito = $this->_DB->genQuery($sPeticionSQL, array($newquota, $username));
+        if (!$bExito) {
+        	$this->errMsg = $this->_DB->errMsg;
+        } else {
+            $bExito = $cyr_conn->setmbquota('user/'.$username, $newquota);
+            if (!$bExito) $this->errMsg = $cyr_conn->getMessage();
         }
+        if ($bExito) {
+            $this->_DB->commit();
+        } else {
+        	$this->_DB->rollback();
+        }
+        $cyr_conn->imap_logout();
         return $bExito;
     }
 }

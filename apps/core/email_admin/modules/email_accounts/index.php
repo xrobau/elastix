@@ -486,7 +486,6 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
                 
             $content = false;
         }else{
-            $pDB->beginTransaction();
             if(getParameter("save")){
                 if($password1==""){
                     if(!$isFromFile){
@@ -507,7 +506,6 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
                     $smarty->assign("mb_title", _tr('ERROR').":");
                     $smarty->assign("mb_message", _tr("Error applying changes").". ".$error);
                 }
-                $pDB->rollBack();
                 $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
                 if($configPostfix2)
                     $username=$_POST['address'].'@'.$domain_name;
@@ -517,7 +515,6 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
                 $content = false;
             }
             else{
-                $pDB->commit();
                 if(!$isFromFile){
                     $smarty->assign("mb_title", _tr('MESSAGE').":");
                     $smarty->assign("mb_message", _tr("Changes Applied successfully"));
@@ -660,9 +657,6 @@ function deleteAccount($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 
 function create_email_account($pDB,$domain_name,&$errMsg)
 {
-    $bReturn=FALSE;
-    global $arrLang;
-    $virtual = FALSE;
     $pEmail = new paloEmail($pDB);
     //creo la cuenta
     // -- valido que el usuario no exista
@@ -673,7 +667,6 @@ function create_email_account($pDB,$domain_name,&$errMsg)
     $username = "";
     $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
 
-
     if($configPostfix2)
         $username=$_POST['address'].'@'.$domain_name;
     else
@@ -683,87 +676,16 @@ function create_email_account($pDB,$domain_name,&$errMsg)
 
     if (is_array($arrAccount) && count($arrAccount)>0 ){
        //YA EXISTE ESA CUENTA
-        $errMsg=$arrLang["The e-mail address already exists"].": $_POST[address]@$domain_name";
+        $errMsg = _tr('The e-mail address already exists').": $_POST[address]@$domain_name";
         return FALSE;
     }
-
-    $email=$_POST['address'].'@'.$domain_name;
-    //crear la cuenta de usuario en el sistema
-
-    $bExito = $pEmail->crear_usuario_correo_sistema($email,$username,$_POST['password1'],$errMsg, $virtual);
-    if(!$bExito) return FALSE;
-    //inserto la cuenta de usuario en la bd
-    $bExito = $pEmail->createAccount_DB($_POST['id_domain'],$username,$_POST['password1'],$_POST['quota']);
-    if ($bExito){
-        //crear el mailbox para la nueva cuenta
-        $bReturn = crear_mailbox_usuario($pDB,$email,$username,$errMsg);
-    }else{
-        //tengo que borrar el usuario creado en el sistema
-        $bReturn = $pEmail->eliminar_usuario_correo_sistema($username,$email,$errMsg);
-        $errMsg = (isset($arrLang[$pEmail->errMsg]))?$arrLang[$pEmail->errMsg]:$pEmail->errMsg;
-        if($bReturn && $virtual){
-            $bReturn = $pEmail->eliminar_virtual_sistema($email,$errMsg);
-            $errMsg = (isset($arrLang[$pEmail->errMsg]))?$arrLang[$pEmail->errMsg]:$pEmail->errMsg;
-        }
+    $bReturn = $pEmail->createAccount($domain_name, $_POST['address'],
+        $_POST['password1'], $_POST['quota']);
+    if (!$bReturn) {
+    	$errMsg = $pEmail->errMsg;
     }
     return $bReturn;
 }
-
-function crear_mailbox_usuario($db,$email,$username,&$error_msg){
-    global $CYRUS;
-    global $arrLang;
-    $pEmail = new paloEmail($db);
-    $cyr_conn = new cyradm;
-    $error=$cyr_conn->imap_login();
-    $virtual = FALSE;
-    if ($error===FALSE){
-        $error_msg.="IMAP login error: $error <br>";
-    }
-    else{
-        $seperator  = '/';
-        $bValido=$cyr_conn->createmb("user" . $seperator . $username);
-        if(!$bValido)
-            $error_msg.="Error creating user:".$cyr_conn->getMessage()."<br>";
-        else{
-            $bValido=$cyr_conn->setacl("user" . $seperator . $username, $CYRUS['ADMIN'], "lrswipcda");
-            if(!$bValido)
-                $error_msg.="error:".$cyr_conn->getMessage()."<br>";
-            else{
-                $bValido = $cyr_conn->setmbquota("user" . $seperator . $username, $_POST['quota']);
-                if(!$bValido)
-                    $error_msg.="error".$cyr_conn->getMessage()."<br>";
-            }
-        }
-    }
-    if($error_msg!=""){
-        //Si hay error se trata de borrar la fila ingresada
-        $bValido=$pEmail->deleteAccount_DB($username);
-        if(!$bValido){
-            $error_msg=(isset($arrLang[$pEmail->errMsg]))?$arrLang[$pEmail->errMsg]:$pEmail->errMsg;
-            return FALSE;
-        }
-        //borrar la cuenta del sistema
-        $bReturn = $pEmail->eliminar_usuario_correo_sistema($username,$email,$error_msg);
-        if($bReturn){
-            if($virtual){
-                $bReturn = $pEmail->eliminar_virtual_sistema($email,$errMsg);
-                $errMsg = (isset($arrLang[$pEmail->errMsg]))?$arrLang[$pEmail->errMsg]:$pEmail->errMsg;
-                if(!$bReturn)
-                    return FALSE;
-            }
-        }else
-            return FALSE;
-    }
-    else{
-        $bValido=$pEmail->createAliasAccount($username,$email);
-        if(!$bValido){
-            $error_msg=$arrLang["The account was created but could not add record for the e-mail in alias table"];
-            return FALSE;
-        }
-    }
-    return TRUE;
-}
-
 
 function obtener_quota_usuario($pEmail, $username,$module_name,$arrLang,$id_domain)
 {
@@ -798,11 +720,11 @@ function edit_email_account($pDB,&$error)
     $pEmail = new paloEmail($pDB);
     if (isset($_POST['password1']) && trim($_POST['password1'])!="")
     {
-        $username=$_POST['username'];
-        $bool = $pEmail->crear_usuario_correo_sistema($username,$username,$_POST['password1'],$error,$virtual); //False al final para indicar que no cree virtual
+        $username = $_POST['username'];
+        $bool = $pEmail->setAccountPassword($username, $_POST['password1']);
         if(!$bool){
-          $error_pwd=$arrLang["Password could not be changed"];
-          $bExito=FALSE;
+            $error_pwd = _tr('Password could not be changed').': '.$pEmail->errMsg;
+            $bExito = FALSE;
         }
     }
     if ($_POST['old_quota'] != $_POST['quota']) {

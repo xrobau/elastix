@@ -191,6 +191,15 @@ fi
 
 %changelog
 * Mon Sep 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Accounts: reimplement creation and update of email accounts via the
+  'email_account' privileged script. This achieves the following:
+  The paloEmail API gets cleaned up and becomes more consistent.
+  Removes the need for granting sudo access to saslpasswd2.
+  Removes the need for granting sudo access to postmap (though one unprivileged
+  use remains in remote_smtp).
+  Removes some uses of sudo chown, and some indirect uses via paloConfig.
+- CHANGED: Accounts: fix remaining methods in paloEmail to use SQL parameters.
+  SVN Rev[4216]
 - CHANGED: Accounts: extend email_account helper script to change the password
   of a single mail account. Rework invocation of saslpasswd2 to use popen 
   instead of echo via the shell.

@@ -296,6 +296,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Sep 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: Since commit 4216, palosantoEmailAdmin no longer requires
+  sudo access to postmap and saslpasswd2, so remove it.
+
 * Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: Since commits 4199-4200, palosantoEmailAdmin no longer
   requires sudo access to postfix, so remove it.

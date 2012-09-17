@@ -190,6 +190,12 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Mon Sep 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Accounts: extend email_account helper script to change the password
+  of a single mail account. Rework invocation of saslpasswd2 to use popen 
+  instead of echo via the shell.
+  SVN Rev[4215]
+
 * Fri Sep 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Accounts: reimplement account removal using the email_account helper
   script. Temporarily rename methods that use conflicting names.

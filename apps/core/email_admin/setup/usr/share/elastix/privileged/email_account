@@ -42,6 +42,7 @@ $opt = Console_Getopt::getopt($argv, '', array(
     'deletedomain=',        // Remove a domain
     'createaccount',        // Create a new account on a domain
     'deleteaccount',        // Delete an account on a domain
+    'setaccountpassword',   // Change password on existing account
     'username=',            // Username to create or delete
     'password=',            // Password for username to create or update
     'domain=',              // Domain for username to create or delete
@@ -62,6 +63,8 @@ foreach ($opt[0] as $option) switch ($option[0]) {
 	    exit(create_account($opt) ? 0 : 1);
 	case '--deleteaccount':
 	    exit(delete_account($opt) ? 0 : 1);
+	case '--setaccountpassword':
+	    exit(set_account_password($opt) ? 0 : 1);
     case '--reconstruct_mailbox':
         exit(reconstruct_mailbox($opt) ? 0 : 1);
 }
@@ -410,15 +413,8 @@ function _internal_create_account($conn, &$preparedSth, $cyr_conn, $account, $bP
     $preparedSth['createAlias']->execute(array($sFullUsername, "{$account['username']}@{$account['domain']}"));
 
     // No exceptions so far, create actual email account in system
-    $sAccountCommand = 'echo '.escapeshellarg($account['password']).
-        ' | /usr/sbin/saslpasswd2 -c '.escapeshellarg($sFullUsername);
-    if (!$bPostfixElastix2) $sAccountCommand .= ' -u '.SASL_DOMAIN;
-    $retval = NULL;
-    system($sAccountCommand, $retval);
-    if ($retval != 0) {
-        fwrite(STDERR, "ERR: failed to create account $sFullUsername ($retval)\n");
+    if (!_internal_create_account_password($sFullUsername, $account['password'], $bPostfixElastix2))
         return FALSE;
-    }
     
     // Attempt to create the mailbox for the user
     $bUndoEmailCreation = FALSE;
@@ -445,6 +441,20 @@ function _internal_create_account($conn, &$preparedSth, $cyr_conn, $account, $bP
         if ($retval != 0) {
             fwrite(STDERR, "ERR: failed to delete alias {$sAlias} for username {$account['username']}\n");
         }
+        return FALSE;
+    }
+    return TRUE;
+}
+
+function _internal_create_account_password($sFullUsername, $sPassword, $bPostfixElastix2)
+{
+    $sAccountCommand = '/usr/sbin/saslpasswd2 -c '.escapeshellarg($sFullUsername);
+    if (!$bPostfixElastix2) $sAccountCommand .= ' -u '.SASL_DOMAIN;
+    $procHandle = popen($sAccountCommand, 'w');
+    fwrite($procHandle, $sPassword);
+    $retval = pclose($procHandle);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: failed to create account $sFullUsername ($retval)\n");
         return FALSE;
     }
     return TRUE;
@@ -498,6 +508,59 @@ function delete_account($opt)
     $cyr_conn->imap_logout();
 
     return TRUE;
+}
+
+function set_account_password($opt)
+{
+    $bSuccess = TRUE;
+
+    $sUsername = NULL;
+    $sPassword = NULL;
+    
+    // Collect and validate options
+    foreach ($opt[0] as $option) switch ($option[0]) {
+        case '--username':
+            $sUsername = $option[1];
+            break;
+        case '--password':
+            $sPassword = $option[1];
+            break;
+    }    
+    if (is_null($sUsername)) {
+        error_exit("ERR: no username specified.\n");
+    }
+    if (is_null($sPassword)) {
+        error_exit("ERR: no password specified.\n");
+    }
+
+    $bPostfixElastix2 = isPostfixToElastix2();
+    try {
+        $conn = new PDO('sqlite:/var/www/db/email.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $conn->beginTransaction();
+
+        // Check whether username already exists
+        $sth = $conn->prepare('SELECT username FROM accountuser WHERE username = ?');
+        $sth->execute(array($sUsername));
+        $accountList = $sth->fetchAll(PDO::FETCH_COLUMN);
+        if (count($accountList) <= 0) {
+            $conn->rollBack();
+            error_exit("ERR: Specified username not found\n");
+        }        
+
+        $sth = $conn->prepare('UPDATE accountuser SET password = ? WHERE username = ?');
+        $sth->execute(array($sPassword, $sUsername));
+
+        $bSuccess = _internal_create_account_password($sUsername, $sPassword, $bPostfixElastix2);
+        if ($bSuccess)
+            $conn->commit();
+        else $conn->rollBack();
+    } catch (PDOException $e) {
+        $conn->rollBack();
+        error_exit("ERR: failed to add new account to database - ".$e->getMessage()."\n");
+    }
+
+    return $bSuccess;
 }
 
 function reconstruct_mailbox($opt)

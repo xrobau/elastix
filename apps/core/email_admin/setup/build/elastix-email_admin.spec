@@ -190,6 +190,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Tue Sep 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: mark some methods in paloSantoAntispam as private. Comment
+  out what appears to be dead code. Replace tabs with spaces.
+  SVN Rev[4218]
+
 * Mon Sep 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Accounts: reimplement creation and update of email accounts via the
   'email_account' privileged script. This achieves the following:

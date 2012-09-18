@@ -48,7 +48,7 @@ class paloSantoAntispam {
 
     /*HERE YOUR FUNCTIONS*/
 
-    function areFilesConfigurated()
+    private function areFilesConfigurated()
     {
         // Trato de abrir el archivo de configuracion
         $step_one_config = false;
@@ -217,7 +217,7 @@ class paloSantoAntispam {
         return $result;
     }
 
-    function getPassByEmail($email){
+    private function getPassByEmail($email){
         $pDB = new paloDB("sqlite3:////var/www/db/email.db");
         $data = array($email);
         $query = "SELECT password FROM accountuser WHERE username = ?";
@@ -256,7 +256,7 @@ class paloSantoAntispam {
     }
 
     // verifica si una cuenta tiene creada la carpeta spam en su buzon de correo
-    function haveFolderSpam($email)
+    private function haveFolderSpam($email)
     {
         global $CYRUS;
         global $arrLang;
@@ -301,7 +301,7 @@ class paloSantoAntispam {
         }
         return $data;
     }
-
+/*
     // activa un script determinado en el servidor
     function activateScriptSieveByUser($SIEVE, $scriptName)
     {
@@ -339,12 +339,13 @@ class paloSantoAntispam {
             return "no connection";
         }
     }
-
+*/
     // lista todos los script que esten en el servidor
     /*$SIEVE['USER']     = "account";
       $SIEVE['PASS']     = "password_account";
       $SIEVE['AUTHUSER'] = "account";
     */
+/*
     function listScriptSieveByUser($SIEVE){
         $sieve = new sieve($SIEVE['HOST'], $SIEVE['PORT'], $SIEVE['USER'], $SIEVE['PASS'], $SIEVE['AUTHUSER'], $SIEVE['AUTHTYPE']);
         $i = 0;
@@ -407,10 +408,10 @@ class paloSantoAntispam {
             return "no connection";
         }
     }
-
+*/
     // funcion que sube un script y lo activa apar todos los buzones de correo
     function uploadScriptSieve($pDB, $time_spam){
-	$pVacations  = new paloSantoVacations($pDB);
+        $pVacations  = new paloSantoVacations($pDB);
         // creando cron
         $this->createCron($time_spam);
         $emails = $this->getEmailList($pDB);
@@ -425,7 +426,7 @@ class paloSantoAntispam {
         }
         $content = $this->getContentScript();
         $fileScript = "/tmp/scriptTest.sieve";
-	$fileScriptVaca = "/tmp/vacations.sieve";
+        $fileScriptVaca = "/tmp/vacations.sieve";
         $fp = fopen($fileScript,'w');
         fwrite($fp,$content);
         fclose($fp);
@@ -440,54 +441,54 @@ class paloSantoAntispam {
         $SIEVE['AUTHUSER'] = "cyrus";
         foreach($emails as $key => $value){
             $SIEVE['USER'] = $value['username'];
-	    $spamCapture = true;
-	    // get messages vacations if these exist
-	    $scripts = $this->existScriptSieve($SIEVE['USER'], "vacations.sieve");
-	    if($scripts['actived'] != ""){
-		if(preg_match("/vacations.sieve/",$scripts['actived'])){
-		    $messageVacations = $pVacations->getMessageVacationByUser($SIEVE['USER']);
-		    if(is_array($messageVacations) && count($messageVacations) > 0){
-			$spamCapture = false;
-			$subject = $messageVacations['subject'];
-			$end_date = $messageVacations['end_date'];
-			$body = $messageVacations['body'];
-			$body = str_replace("{END_DATE}", $end_date, $body);
-			$contentVacations = $pVacations->getVacationScript($subject, $body);
-			$contentSpamFilter = str_replace("require \"fileinto\";", "require [\"fileinto\",\"vacation\"];", $content);
-			$new_content = $contentSpamFilter."\n".$contentVacations;
-			$fp = fopen($fileScriptVaca,'w');
-			fwrite($fp,$new_content);
-			fclose($fp);
-			exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'put $fileScriptVaca'",$flags, $status);
-			exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'activate vacations.sieve'",$flags, $status);
-			// se sube el script de captura de spam porque para la eliminacion del vacation es necesario de que exista
-			exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'put $fileScript'",$flags, $status);
-		    }
-		}
-	    }
+            $spamCapture = true;
+            // get messages vacations if these exist
+            $scripts = $this->existScriptSieve($SIEVE['USER'], "vacations.sieve");
+            if($scripts['actived'] != ""){
+                if(preg_match("/vacations.sieve/",$scripts['actived'])){
+                    $messageVacations = $pVacations->getMessageVacationByUser($SIEVE['USER']);
+                    if(is_array($messageVacations) && count($messageVacations) > 0){
+                        $spamCapture = false;
+                        $subject = $messageVacations['subject'];
+                        $end_date = $messageVacations['end_date'];
+                        $body = $messageVacations['body'];
+                        $body = str_replace("{END_DATE}", $end_date, $body);
+                        $contentVacations = $pVacations->getVacationScript($subject, $body);
+                        $contentSpamFilter = str_replace("require \"fileinto\";", "require [\"fileinto\",\"vacation\"];", $content);
+                        $new_content = $contentSpamFilter."\n".$contentVacations;
+                        $fp = fopen($fileScriptVaca,'w');
+                        fwrite($fp,$new_content);
+                        fclose($fp);
+                        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'put $fileScriptVaca'",$flags, $status);
+                        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'activate vacations.sieve'",$flags, $status);
+                        // se sube el script de captura de spam porque para la eliminacion del vacation es necesario de que exista
+                        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'put $fileScript'",$flags, $status);
+                    }
+                }
+            }
 
-	    if($spamCapture){ // no hay ningun script activo
-		exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'put $fileScript'",$flags, $status);
+            if($spamCapture){ // no hay ningun script activo
+                exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'put $fileScript'",$flags, $status);
 
-		exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'activate scriptTest.sieve'");
-	    }
+                exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'activate scriptTest.sieve'");
+            }
         }
 
         if(is_file($fileScript))
             unlink($fileScript);
-	if(is_file($fileScriptVaca))
-	    unlink($fileScriptVaca);
+        if(is_file($fileScriptVaca))
+            unlink($fileScriptVaca);
     }
 
     function deleteScriptSieve($pDB){
-	$pVacations  = new paloSantoVacations($pDB);
+        $pVacations  = new paloSantoVacations($pDB);
         //eliminando cron
         $this->deleteCron();
         $emails = $this->getEmailList($pDB);
         //creando carpetas Spam
         $accounts = $this->listEmailSpam($pDB);
         $status = "";
-	$fileScriptVaca = "/tmp/vacations.sieve";
+        $fileScriptVaca = "/tmp/vacations.sieve";
         // si el arreglo es vacio no hace nada
         if(isset($accounts) & $accounts!=""){// existe alguna cuenta sin esa carpeta
             foreach($accounts as $key => $value){
@@ -505,34 +506,34 @@ class paloSantoAntispam {
         foreach($emails as $key => $value){
             $SIEVE['USER'] = $value['username'];
 
-	    // get messages vacations if these exist
-	    $scripts = $this->existScriptSieve($SIEVE['USER'], "vacations.sieve");
-	    if($scripts['actived'] != ""){
-		if(preg_match("/vacations.sieve/",$scripts['actived'])){
-		    $messageVacations = $pVacations->getMessageVacationByUser($SIEVE['USER']);
-		    if(is_array($messageVacations) && $messageVacations != "" && count($messageVacations) > 0){
-			$subject = $messageVacations['subject'];
-			$body = $messageVacations['body'];
-			$end_date = $messageVacations['end_date'];
-			$body = str_replace("{END_DATE}", $end_date, $body);
-			$contentVacations = $pVacations->getVacationScript($subject, $body);
-			$requires = "require [\"fileinto\",\"vacation\"];";
-			$new_content = $requires."\n".$contentVacations;
-			$fp = fopen($fileScriptVaca,'w');
-			fwrite($fp,$new_content);
-			fclose($fp);
-			exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'put $fileScriptVaca'",$flags, $status);
-			exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'activate vacations.sieve'",$flags, $status);
-		    }
-		}
-	    }
+            // get messages vacations if these exist
+            $scripts = $this->existScriptSieve($SIEVE['USER'], "vacations.sieve");
+            if($scripts['actived'] != ""){
+                if(preg_match("/vacations.sieve/",$scripts['actived'])){
+                    $messageVacations = $pVacations->getMessageVacationByUser($SIEVE['USER']);
+                    if(is_array($messageVacations) && $messageVacations != "" && count($messageVacations) > 0){
+                        $subject = $messageVacations['subject'];
+                        $body = $messageVacations['body'];
+                        $end_date = $messageVacations['end_date'];
+                        $body = str_replace("{END_DATE}", $end_date, $body);
+                        $contentVacations = $pVacations->getVacationScript($subject, $body);
+                        $requires = "require [\"fileinto\",\"vacation\"];";
+                        $new_content = $requires."\n".$contentVacations;
+                        $fp = fopen($fileScriptVaca,'w');
+                        fwrite($fp,$new_content);
+                        fclose($fp);
+                        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'put $fileScriptVaca'",$flags, $status);
+                        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'activate vacations.sieve'",$flags, $status);
+                    }
+                }
+            }
 
-	    exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'delete scriptTest.sieve'");
+            exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." localhost:4190 -e 'delete scriptTest.sieve'");
         }
     }
 
     // funcion que se encarga de crear el cron o escribirlo si ya existe
-    function createCron($time_spam){
+    private function createCron($time_spam){
         // primero cambiamos los permisos de la carpèta cron.d
         $time = "30";
         if($time_spam == "one_week")
@@ -555,7 +556,7 @@ class paloSantoAntispam {
         exec("sudo -u root chown root.root /etc/cron.d/");
     }
 
-    function deleteCron(){
+    private function deleteCron(){
         $FILE = "/etc/cron.d/checkSpamFolder.cron";
         exec("sudo -u root chown asterisk.asterisk /etc/cron.d/");
         if(is_file($FILE)){
@@ -608,15 +609,15 @@ SCRIPT;
                     $uids = trim($sal[1]); //ids de mensajes
                     if($uids != ""){
                         //$bValido=$cyr_conn->command(". store 1:* +flags \Deleted");
-			$uids = trim($uids);
-			$uids = str_replace(" ", ",",$uids);
-			if(strlen($uids)>100){
-			    $arrID = explode(",","$uids");
-			    $size = count($arrID);
-			    $limitID = $arrID[0].":".$arrID[$size-1];
-			    $bValido=$cyr_conn->command(". store $limitID +flags \Deleted");
-			}else
-			    $bValido=$cyr_conn->command(". store $uids +flags \Deleted"); // messages $uids = 1 2 4 5 7 8
+                        $uids = trim($uids);
+                        $uids = str_replace(" ", ",",$uids);
+                        if(strlen($uids)>100){
+                            $arrID = explode(",","$uids");
+                            $size = count($arrID);
+                            $limitID = $arrID[0].":".$arrID[$size-1];
+                            $bValido=$cyr_conn->command(". store $limitID +flags \Deleted");
+                        }else
+                            $bValido=$cyr_conn->command(". store $uids +flags \Deleted"); // messages $uids = 1 2 4 5 7 8
                         if(!$bValido)
                             $error_msg = "error cannot be deleted the messages of Spam folder for $email:".$cyr_conn->getMessage()."<br>";
                         else{
@@ -658,7 +659,7 @@ SCRIPT;
     }
 
 
-    function subscribeSpamFolder($email, $pass){
+    private function subscribeSpamFolder($email, $pass){
         global $CYRUS;
         $cyr_conn = new cyradm;
         $cyr_conn->admin = $email;
@@ -680,33 +681,33 @@ SCRIPT;
 
     function existScriptSieve($email, $search)
     {
-	$SIEVE  = array();
+        $SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
         $SIEVE['PORT'] = 4190;
         $SIEVE['USER'] = "";
         $SIEVE['PASS'] = obtenerClaveCyrusAdmin("/var/www/html/");
         $SIEVE['AUTHTYPE'] = "PLAIN";
         $SIEVE['AUTHUSER'] = "cyrus";
-	$SIEVE['USER'] = $email;
-	$result['status']  = false;
-	$result['actived'] = "";
+        $SIEVE['USER'] = $email;
+        $result['status']  = false;
+        $result['actived'] = "";
 
-	exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'list'",$flags, $status);
+        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'list'",$flags, $status);
 
-	if($status != 0){
-	    return null;
-	}else{
-	    for($i=0; $i<count($flags); $i++){
-		$value = trim($flags[$i]);
-		if(preg_match("/$search/", $value)){
-		    $result['status'] = true;
-		}
-		if(preg_match("/active script/", $value)){
-		    $result['actived'] = $value;
-		}
-	    }
-	}
-	return $result;
+        if($status != 0){
+            return null;
+        }else{
+            for($i=0; $i<count($flags); $i++){
+                $value = trim($flags[$i]);
+                if(preg_match("/$search/", $value)){
+                    $result['status'] = true;
+                }
+                if(preg_match("/active script/", $value)){
+                    $result['actived'] = $value;
+                }
+            }
+        }
+        return $result;
     }
 
 }

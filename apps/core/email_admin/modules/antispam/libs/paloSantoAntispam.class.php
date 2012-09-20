@@ -105,10 +105,14 @@ class paloSantoAntispam {
         return $data;
     }
 
-    function activateSpamFilter()
+    function activateSpamFilter($pDB, $time_spam = NULL)
     {
         global $arrLangModule;
         $return = false;
+
+        if (!is_null($time_spam))
+            $this->uploadScriptSieve($pDB, $time_spam);
+        else $this->deleteScriptSieve($pDB);
 
         $cmd_one  =  "sed -ie 's/smtp[[:space:]]\{1,\}inet[[:space:]]\{1,\}n[[:space:]]\{1,\}-[[:space:]]\{1,\}n[[:space:]]\{1,\}-[[:space:]]\{1,\}-[[:space:]]\{1,\}smtpd/";
         $cmd_one .=  "smtp      inet  n       -       n       -       -       smtpd\\n  -o content_filter=spamfilter:dummy/' {$this->fileMaster}";
@@ -410,7 +414,7 @@ class paloSantoAntispam {
     }
 */
     // funcion que sube un script y lo activa apar todos los buzones de correo
-    function uploadScriptSieve($pDB, $time_spam){
+    private function uploadScriptSieve($pDB, $time_spam){
         $pVacations  = new paloSantoVacations($pDB);
         // creando cron
         $this->createCron($time_spam);
@@ -480,7 +484,7 @@ class paloSantoAntispam {
             unlink($fileScriptVaca);
     }
 
-    function deleteScriptSieve($pDB){
+    private function deleteScriptSieve($pDB){
         $pVacations  = new paloSantoVacations($pDB);
         //eliminando cron
         $this->deleteCron();

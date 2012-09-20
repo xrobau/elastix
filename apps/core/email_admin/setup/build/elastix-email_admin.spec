@@ -190,6 +190,12 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Thu Sep 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: methods uploadScriptSieve and deleteScriptSieve are used
+  only when enabling spam filtering, so the calls to the methods are now 
+  integrated to activateSpamFilter. Now the two methods can become private.
+  SVN Rev[4219]
+
 * Tue Sep 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam: mark some methods in paloSantoAntispam as private. Comment
   out what appears to be dead code. Replace tabs with spaces.

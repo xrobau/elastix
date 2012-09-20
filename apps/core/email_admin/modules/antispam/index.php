@@ -86,7 +86,11 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
     $politica  = getParameter("politica");
     $pDB       = new paloDB("sqlite3:////var/www/db/email.db");
 
-    $objAntispam = new paloSantoAntispam($arrConfModule['path_postfix'], $arrConfModule['path_spamassassin'],$arrConfModule['file_master_cf'], $arrConfModule['file_local_cf']);
+    $objAntispam = new paloSantoAntispam(
+        $arrConfModule['path_postfix'],
+        $arrConfModule['path_spamassassin'],
+        $arrConfModule['file_master_cf'],
+        $arrConfModule['file_local_cf']);
     $isOk = $objAntispam->changeFileLocal($level,$header);
     if($isOk === false){
         $smarty->assign("mb_title", $arrLang["Error"]);
@@ -94,12 +98,7 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
     }
 
     if($status == "on"){
-        if($politica=="capturar_spam"){
-            $objAntispam->uploadScriptSieve($pDB, $time_spam);
-        }else{
-            $objAntispam->deleteScriptSieve($pDB);
-        }
-        $isOk = $objAntispam->activateSpamFilter();
+        $isOk = $objAntispam->activateSpamFilter($pDB, ($politica == 'capturar_spam') ? $time_spam : NULL);
 
         if($isOk === false){
             $smarty->assign("mb_title", $arrLang["Error"]);
@@ -109,7 +108,6 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
             $smarty->assign("mb_message", $arrLang["Successfully Activated Service Antispam"]);
         }
     }else if($status == "off"){
-        //$objAntispam->deleteScriptSieve($pDB);
         $isOk = $objAntispam->disactivateSpamFilter();
 
         if($isOk === false){

@@ -2,15 +2,15 @@
 
 Summary: Elastix IM 
 Name:    elastix-%{modname}
-Version: 2.2.0
-Release: 2
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-%{release}.tgz
 Source0: %{modname}_%{version}-1.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.2.0-18
+Prereq: elastix-framework >= 3.0.0-1
 Requires: yum
 Requires: openfire
 
@@ -63,8 +63,15 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: im - Build/elastix-im.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+- CHANGED: In spec file changed Prereq elastix-framework to
+  elastix-framework >= 3.0.0-1
+
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Bring openfire dependency here, removed from elastix-system.
+  SVN Rev[4007]
 
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-2
 - CHANGED: In spec file changed Prereq elastix to

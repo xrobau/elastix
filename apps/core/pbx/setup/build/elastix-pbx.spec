@@ -2,18 +2,18 @@
 
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 14
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-20.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-9
-Prereq: elastix-my_extension >= 2.0.4-5
+Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-my_extension >= 3.0.0-1
 Prereq: freePBX >= 2.8.1-12
-Prereq: elastix-system >= 2.3.0-10
+Prereq: elastix-system >= 3.0.0-1
 Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
 Requires: festival >= 1.95
@@ -294,6 +294,37 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+- CHANGED: In spec file changed Prereq elastix-framework, elastix-my_extension and
+  elastix-system to >= 3.0.0-1
+
+* Thu Sep 13 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX/Setup/asteriskconfig: Was modified privileged script
+  asteriskconfig. Was added functionality to create queue and ivr dialplan
+  SVN Rev[4208]
+- CHANGED: Apps - PBX/Setup/generic_extensions.conf: Was modified the file
+  generic_extensions.conf. Was solve problem when use feature code automon
+  SVN Rev[4207]
+- CHANGED: Apps - PBX/Setup/elxpbx: Was modified the database elxpbx. Was added
+  tables ivr, ivr_destination, queue y queue_member
+  SVN Rev[4206]
+- CHANGED: Apps - PBX/Modules: Where made changed in modules features_code and
+  extensions to fixed some bugs
+  SVN Rev[4205]
+- ADDED: Apps - PBX/Modules: Was added new module ivr. This module permit the
+  creation and edition of ivr in asterisk
+  SVN Rev[4204]
+- ADDED: Apps - PBX/Modules: Was added new module queues. This module permit
+  the creation and edit of queue in asterisk using realtime technology
+  SVN Rev[4203]
+
+* Thu Sep 13 2012 Sergio Broncano <sbroncano@palosanto.com>
+- CHANGED: MODULE - PBX/EXTENSION_BATCH: Query parameters to download the file
+  .csv
+  SVN Rev[4202]
+
 * Mon Sep 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: fix failure to update interface after user opens browser
   tab to different Elastix module while keeping Control Panel open.
@@ -305,14 +336,98 @@ fi
   new parallel implementation.
   SVN Rev[4192]
 
+* Fri Sep 07 2012 Sergio Broncano <sbroncano@palosanto.com>
+- ADD: Module Endpoint Configurator, Endpoints Batch, Added support for phones
+  Grandstream models GXP2100, GXP1405.
+  SVN Rev[4191]
+- ADD: Module Endpoint Configurator, Endpoints Batch, Added support for phones
+  Grandstream models GXP2100, GXP1405, GXP2120.
+  SVN Rev[4187]
+
+* Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: fill-out implementation of Sangoma Vega
+  endpoint. Copy completed implementation to trunk.
+  SVN Rev[4181]
+
 * Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Endpoints: reimplement CSV download to take into account all
   of the endpoints that were configured via Endpoint Configurator and therefore
   have no parameters as inserted by Batch of Endpoints. Fixes Elastix bug #1360.
   SVN Rev[4175]
 
+- CHANGED: Endpoint Configurator: revert emergency commit. The problem that was
+  fixed in this commit should no longer occur with the Prereq: elastix-system
+  >= 2.3.0-10 that fixed Elastix bug #1358.
+  SVN Rev[4174]
+
+* Fri Aug 31 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Apps - PBX/Setup: Was modified database elxpbx
+  SVN Rev[4171]
+- ADDED: Apps - PBX/Setup: Was modified privileged scrip asteriskconfig. This
+  script write dialplan asterisk configuration
+  SVN Rev[4170]
+- ADDED: Apps - PBX/Setup: Was added file phpagi-asmanager.php. This file
+  contain function used with asterisk manager application
+  SVN Rev[4169]
+- CHANGED: Apps - PBX: Was modified file generic_extensions.conf. Was resolved
+  problem when realized recordings of calls and other issues
+  SVN Rev[4168]
+- CHANGED: Apps - PBX: Was finished module general_settings. This modules
+  permit to each organization admin customized this pbx
+  SVN Rev[4166]
+
 * Fri Aug 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-14
 - FIXED: Prereq: elastix-system >= 2.3.0-10. Fixes Elastix bug #1358.
+  SVN Rev[4164]
+
+* Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
+- FIXED: modules -control_panel : Reset counter in queues when there are not
+  calls
+  SVN Rev[4162]
+
+* Thu Aug 30 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: modules - endpoint_configurator: network() function was changed,
+  paloSantoNetwork invoke bad format.
+  SVN Rev[4160]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Apps - PBX/Privileged: Was added scrip asteriskconfig. This script
+  help in generation dialplan
+  SVN Rev[4150]
+- CHANGED: Apss - PBX/db: Was added to elxpbx sql script insert that must be
+  done while installation time
+  SVN Rev[4148]
+
+* Fri Aug 24 2012 Bruno Macias <bmacias@palosanto.com>
+- UPDATED: file script install elxpbx database was updated, user asteriskuser
+  privileges
+  SVN Rev[4147]
+
+* Fri Aug 24 2012 Bruno Macias <bmacias@palosanto.com>
+- UPDATED: file script install elxpbx database was updated, user asteriskuser
+  privileges
+  SVN Rev[4146]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: App - PBX: Was added file generic_extensions.conf. This file contain
+  the dialplan used in asterisk
+  SVN Rev[4145]
+
+* Fri Aug 24 2012 Bruno Macias <bmacias@palosanto.com>
+- CHANGED: database elxpbx was moved from framework  to apps
+  SVN Rev[4144]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was changed name database from elx_pbx to elxpbx
+  SVN Rev[4142]
+- CHANGED: Apps - PBX: Was changed name database from elx_pbx to elxpbx
+  SVN Rev[4140]
+- ADDED: Apps - PBX: Was added a new module general_settings. This module
+  permit edit parameters sip,iax,voicemail configuration by organization
+  SVN Rev[4135]
+- CHANGED: Was added module features_code. This module is used to configurate
+  dialplan of each organization
+  SVN Rev[4134]
 
 * Thu Aug 23 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-13
 - CHANGED: module voipprovider, added spanish translation to an
@@ -359,6 +474,17 @@ fi
 - Add Mac and application form to Set Sangoma Vega Gateway
   SVN Rev[4084]
 
+* Mon Jul 30 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Apps - Modules/PBX: Was added a new module called extensions. This
+  module is used to create extension type sip or iax2 using asterisk realtime
+  technology
+  SVN Rev[4081]
+
+* Fri Jul 20 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: modules - endpoint_configurator: Add sql_insert and code to set
+  models XP0100P and XP0120P of Xorcom Vendor
+  SVN Rev[4076]
+
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Endpoint Configurator: add new command-line utility.
   This new utility runs from /usr/bin/elastix-endpoint-configure. The program
@@ -366,6 +492,7 @@ fi
   encapsulation of vendor-specific operations, and with an emphasis on parallel
   configuration of multiple endpoints for speed. The ultimate goal is to enable 
   the quick configuration of hundreds of phones at once.
+  SVN Rev[4075]
 
 * Wed Jul 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Endpoint Configurator: add SQL for vendor, MAC and model for Zultys.

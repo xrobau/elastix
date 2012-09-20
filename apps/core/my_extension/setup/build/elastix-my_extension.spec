@@ -6,8 +6,8 @@ Version: 3.0.0
 Release: 1
 License: GPL
 Group:   Applications/System
-#Source0: %{modname}_%{version}-%{release}.tgz
-Source0: %{modname}_%{version}-4.tgz
+Source0: %{modname}_%{version}-%{release}.tgz
+#Source0: %{modname}_%{version}-4.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 3.0.0-1
@@ -89,6 +89,7 @@ fi
   release in specfile.
 - CHANGED: In spec file changed Prereq elastix-framework to
   elastix-framework >= 3.0.0-1
+- CHANGED: In spec file changed source0 to %{modname}_%{version}-%{release}.tgz
 
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-6
 - CHANGED: In spec file changed Prereq elastix to

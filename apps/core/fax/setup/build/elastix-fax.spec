@@ -2,15 +2,15 @@
 
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 4
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-2
+Prereq: elastix-framework >= 3.0.0-1
 Prereq: iaxmodem, hylafax
 
 %description
@@ -188,8 +188,51 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+- CHANGED: In spec file changed Prereq elastix-framework to
+  elastix-framework >= 3.0.0-1
+
+* Thu Aug 30 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: modules - faxlist: Fixed process to check Fax status
+  SVN Rev[4159]
+
+* Wed Aug 29 2012 German Macas <gmacas@palosanto.com>
+- CHANGED : modules - faxlist - sendfax - faxviewer: Add option to check faxes
+  status in faxlist, fixed messagges when send a fax, show status failed or OK
+  of sent faxes in faxviewer
+  SVN Rev[4156]
+
+* Fri Jul 27 2012 Rocio Mera <rmera@palosanto.com>
+- FIXED: Apps - Fax/Modules: Was fixed a bug in module faxviewer introduced in
+  commit 4068
+  SVN Rev[4080]
+
+* Wed Jul 18 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Apps - Fax/Faxlist: Was added file filter.tpl. this file it is
+  necesary to commit 4068
+  SVN Rev[4069]
+
+* Wed Jul 18 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Fax: Was modified modules faxlist, sendfax and faxviewer to
+  made compatible con multitenant model. Lib paloSantoFax.class.php and script
+  to send and recive fax inside Setup/Hylafax was changed too
+  SVN Rev[4068]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Fax/faxconfig: Script faxconfig was changed to support
+  multitenant
+  SVN Rev[4052]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Fax - Setup/paloSantoFax.class.php: Where changed lib
+  paloSantoFax.class.php to support multitenant
+  SVN Rev[4044]
+
 * Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Remove stray print_r.
+  SVN Rev[4017]
 
 * Wed May 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Modules - Fax Viewer: relax unnecessarily-restrictive validation type

@@ -2,8 +2,8 @@
 
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 7
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -13,7 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: asterisk
 Prereq: freePBX >= 2.8.1-1
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 3.0.0-1
 
 %description
 Elastix Module Agenda
@@ -122,8 +122,28 @@ fi
 
 %changelog
 #Se debe poner como prerequisito la version del framework nueva que se genere
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Wed Jul 11 2012 Alberto Santos <asantos@palosanto.com>
+- CHANGED: daemon elastix-synchronizer, added a default color for events on a
+  synchronization
+  SVN Rev[4059]
+
+* Tue Jul 10 2012 Alberto Santos <asantos@palosanto.com>
+- CHANGED: module calendar, added a new field called "new" to indicate if an
+  eventis new or not in a synchronization
+  SVN Rev[4058]
+
+* Tue Jul 10 2012 Alberto Santos <asantos@palosanto.com>
+- CHANGED: module address_book, added a new field called "new" to indicate if a
+  contact is new or not in a synchronization
+  SVN Rev[4057]
+
 * Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Remove stray print_r()
+  SVN Rev[4016]
 
 * Fri Jun 08 2012 Alberto Santos <asantos@palosanto.com>
 - CHANGED: modules agenda, the daemon elastix-synchronizerd

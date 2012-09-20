@@ -2,15 +2,15 @@
 
 Summary: Elastix Module Reports 
 Name:    elastix-reports
-Version: 2.3.0
-Release: 4
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 3.0.0-1
 Prereq: asterisk
 
 %description
@@ -91,9 +91,26 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: reports - Build/elastix-reports.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+- CHANGED: In spec file changed Prereq elastix-framework to
+  elastix-framework >= 3.0.0-1
+
+* Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: module - billing_rates: Change text information when edit a rate
+  SVN Rev[4163]
+
+* Tue Jun 12 2012 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: elastix - /: The svn repository was reconstructed for better use and
+  management.
+  SVN Rev[3997]
+
 * Mon May 07 2012 German Macas <gmacas@palosanto.com>
-- CHANGED: Reports - Missed Calls: change application form Filter and spanish words in lang
 - NEW: Missed Calls Module
+  SVN Rev[3932]
+- CHANGED: Reports - Missed Calls: change application form Filter and spanish words in lang
+  SVN Rev[3931]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4
 - CHANGED: Reports - Build/elastix-reports.spec: update specfile with latest

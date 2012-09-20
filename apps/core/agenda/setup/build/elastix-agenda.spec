@@ -12,7 +12,6 @@ Source1: calendarEvent.gsm
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: asterisk
-Prereq: freePBX >= 2.8.1-1
 Prereq: elastix-framework >= 3.0.0-1
 
 %description

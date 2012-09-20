@@ -10,7 +10,7 @@ Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-3.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 3.0.0-1
 Prereq: chkconfig, php-soap
 Requires: yum
 

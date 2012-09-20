@@ -2,16 +2,16 @@
 
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 9
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-9
-Prereq: elastix-fax >= 2.2.0-4 
+Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-fax >= 3.0.0-1 
 Prereq: php-soap
 Prereq: dahdi
 Conflicts: elastix-agenda < 2.2.0-1
@@ -129,6 +129,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: system - Build/elastix-system.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+- CHANGED: In spec file changed Prereq elastix-framework to
+  elastix-framework >= 3.0.0-1
+
 * Fri Sep 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: fix up Spanish translation.
   SVN Rev[4190]
@@ -166,11 +172,23 @@ fi
   backup/restore functionality.
   SVN Rev[4183]
 
+* Wed Aug 15 2012 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages: Add option to uninstall packages and change
+  deprecated function
+  SVN Rev[4108]
+
+* Mon Aug 06 2012 German Macas <gmacas@palosanto.com>
+- Fixed bug 0001318, bug 0001338: fixed in Asterisk File Editor return last
+  query in Back link, fixed Popups, position and design, add in Dashboard
+  Applet Admin option to check all
+  SVN Rev[4092]
+
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): implement new option --phonesonly. If 
   specified, the DHCP server will be configured to answer only to MAC addresses
   from known phone vendor prefixes. This potentially enables the Elastix DHCP
   server and another DHCP server to coexist in the same LAN.
+  SVN Rev[4077]
 
 * Tue Jul 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): restrict DHCP option 160 to MAC addresses
@@ -191,6 +209,7 @@ fi
 
 * Fri Jun 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Add Requires: dhcp to specfile
+  SVN Rev[4030]
 
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Remove openfire dependency, moved to elastix-im.
@@ -207,17 +226,21 @@ fi
   4) In Fedora 17, dhcpd no longer writes a pidfile, so running status must be
      queried with service dhcpd status
   5) Use ip addr show instead of ifconfig because of output format change
+  SVN Rev[4008]
 - CHANGED: PaloSantoNetwork: make some functions static
+  SVN Rev[3995]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: PaloSantoNetwork: rewrite network parameter query to stop using 
   ifconfig which changed output format between CentOS and Fedora 17. Add
   documentation on the output format of network query methods.
+  SVN Rev[3984]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: PaloSantoNetwork: mark some methods as private
 - CHANGED: PaloSantoNetwork: more efficient implementation for IP manipulation 
   methods.
+  SVN Rev[3974]
 
 * Wed Jun 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: Reorganize some of the code for system status. Before this
@@ -229,12 +252,14 @@ fi
   system probes. It also allows to remove some now-dead code. Additionally the 
   paloSantoSysInfo class was changed to only do the system probe on an explicit
   call, instead of every time an object is built.
+  SVN Rev[3961]
 
 * Fri Jun 01 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: rework service state query so that it works in both CentOS
   and Fedora. In particular, Fedora denies access to /var/run/asterisk/httpd.pid
   from asterisk user, so httpd needs to be queried by command name, not pid.
   Also, query uses filesystem functions instead of external commands - faster.
+  SVN Rev[3955]
 
 * Mon May 07 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-9
 - UPDATED: Specfile was updated to release 9

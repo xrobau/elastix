@@ -11,7 +11,6 @@ Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 3.0.0-1
-Prereq: freePBX >= 2.8.1-2
 Prereq: iptables
 Requires: elastix-system
 Requires: php-mcrypt
@@ -33,11 +32,6 @@ mv modules/ $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
 
 chmod +x setup/updateDatabase
-# The following folder should contain all the data that is required by the installer,
-# that cannot be handled by RPM.
-mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
-mv setup/   $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
 
 # Crontab for portknock authorization cleanup
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
@@ -53,6 +47,12 @@ chmod 755 $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/elastix-portknock
 mkdir -p $RPM_BUILD_ROOT%{_bindir}/
 cp setup/usr/bin/elastix-portknock* $RPM_BUILD_ROOT%{_bindir}/
 chmod 755 $RPM_BUILD_ROOT%{_bindir}/elastix-portknock*
+
+# The following folder should contain all the data that is required by the installer,
+# that cannot be handled by RPM.
+mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
+mv setup/   $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
+mv menu.xml $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
 
 %pre
 mkdir -p %{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/

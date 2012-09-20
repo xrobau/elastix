@@ -2,7 +2,7 @@
 
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
-Version: 2.2.0
+Version: 3.0.0
 Release: 1
 License: GPL
 Group:   Applications/System
@@ -10,7 +10,7 @@ Group:   Applications/System
 Source0: %{modname}_2.0.4-4.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.2.0-18
+Prereq: elastix-framework >= 3.0.0-1
 Requires: yum
 
 %description
@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: In spec file changed Prereq elastix to
+  elastix-framework >= 3.0.0-1
+
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-1
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-18

@@ -2,8 +2,8 @@
 
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 4
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -117,25 +117,47 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
-* Wed Aug 29 Alberto Santos <asantos@palosanto.com>
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: Addons - Build/elastix-addons.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Wed Aug 29 2012 Alberto Santos <asantos@palosanto.com>
+- CHANGED: addons - Build/elastix-addons.spec: update specfile with latest SVN
+  history.
+  SVN Rev[4158]
+
+* Wed Aug 29 2012 Alberto Santos <asantos@palosanto.com>
 - ADDED: module addons, added the repo pgdg-91-centos.repo and the
   gpg-key RPM-GPG-KEY-PGDG-91 for Postgresql91
   SVN Rev[4157]
 
-* Fri Jun 15 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Aug 15 2012 Alberto Santos <asantos@palosanto.com>
+- CHANGED: module addons_availables, an informative chart is displayed for the
+  upgrades indicating which are the main features of the upgrade
+  SVN Rev[4109]
+
+* Tue Aug 7 2012 German Macas <gmacas@palosanto.com>
+- Addons - Add pagination and navigation in the footer page
+  SVN Rev[4096]
+
+* Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Explicitly return exit code in startup script
 - CHANGED: /etc/init.d/elastix-updaterd should be owned by root, not asterisk.
+  SVN Rev[4005]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Elastix Updater: remove lone call to deprecated ereg().
+  SVN Rev[3965]
 
 * Mon Jun 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Elastix Updater: remove E_STRICT from error_reporting to silence
   warning messages at daemon startup in Fedora 17.
+  SVN Rev[3957]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Changed release in specfile
+  SVN Rev[3898]
 
 * Thu Apr 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: the elastix updater daemon should explicitly set the default 

@@ -2,15 +2,15 @@
 
 Summary: Elastix Security 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 5
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-6.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 3.0.0-1
 Prereq: freePBX >= 2.8.1-2
 Prereq: iptables
 Requires: elastix-system
@@ -121,6 +121,22 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: security - Build/elastix-security.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+- CHANGED: In spec file changed Prereq elastix-framework to
+  elastix-framework >= 3.0.0-1
+
+* Thu Aug 09 2012 German Macas <gmacas@palosanto.com>
+- FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
+  Fixed graphic bug in ON/OFF Button
+  SVN Rev[4102]
+
+* Wed Aug 08 2012 German Macas <gmacas@palosanto.com>
+- sec_rules - Fixed graphic bug in edition of New Rule of Firewall and improve
+  design
+  SVN Rev[4099]
+
 * Fri Jul 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Port Knocking: trim padding of null bytes from end of plaintext.
   SVN Rev[4079]
@@ -135,6 +151,7 @@ fi
 
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Define Ports, Audit, Weak Keys: Remove XSS vulnerability.
+  SVN Rev[4010]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Sec_Rules: Remove code that was copypasted from paloSantoNetwork, and

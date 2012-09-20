@@ -6,8 +6,8 @@ Version: 3.0.0
 Release: 1
 License: GPL
 Group:   Applications/System
-#Source0: %{modname}_%{version}-%{release}.tgz
-Source0: %{modname}_2.0.4-4.tgz
+Source0: %{modname}_%{version}-%{release}.tgz
+#Source0: %{modname}_2.0.4-4.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 3.0.0-1

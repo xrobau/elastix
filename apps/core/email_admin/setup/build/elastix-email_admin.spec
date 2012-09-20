@@ -2,15 +2,15 @@
 
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 6
+Version: 3.0.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 3.0.0-1
 Prereq: RoundCubeMail
 Prereq: php-imap
 Prereq: postfix, spamassassin, cyrus-imapd
@@ -190,19 +190,36 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: email_admin - Build/elastix-email_admin.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Wed Sep 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: remove privilege escalation vulnerability on privileged
   script for mailbox rebuild.
   SVN Rev[4182]
 
+* Thu Aug 9 2012 German Macas <gmacas@palosanto.com>
+- FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
+  Fixed graphic bug in ON/OFF Button
+  SVN Rev[4102]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Email_admin - Setup/PalosantoEmail: Where changed lib
+  paloSantoEmail.class.php to support multitenant
+  SVN Rev[4043]
+
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email List: Fix XSS vulnerability.
+  SVN Rev[4011]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Remote SMTP: only check authentication on activation, not deactivation.
+  SVN Rev[3987]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Postfix Stats: the cron job should explicitly set the default timezone.
+  SVN Rev[3966]
 
 * Mon Apr 02 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-6
 - CHANGED: Email_Admin - Remote_Smtp: Changed in index.php and remote.js to 

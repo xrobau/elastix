@@ -1,8 +1,8 @@
 Summary: Elastix is a Web based software to administrate a PBX based in open source programs
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
-Version: 2.3.0
-Release: 11
+Version: 3.0.0
+Release: 1
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -10,10 +10,10 @@ Source: elastix-framework_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: /sbin/chkconfig, /etc/sudoers, sudo
-Prereq: php, php-sqlite3, php-gd, php-pear, php-xml, php-mysql, php-pdo, php-imap, php-soap
+Prereq: php, php-sqlite3, php-gd, php-pear, php-xml, php-mysql, php-pdo, php-imap, php-soap, php-process
 Prereq: httpd, mysql-server, ntp, nmap, mod_ssl
 Prereq: perl
-Prereq: elastix-firstboot >= 2.3.0-4
+Prereq: elastix-firstboot >= 3.0.0-1
 Obsoletes: elastix-additionals
 Provides: elastix-additionals
 Conflicts: elastix-system < 2.0.4-18
@@ -295,25 +295,206 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
+- CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+- CHANGED: In spec file changed Prereq firstboot to elastix-firstboot >= 3.0.0-1
+
 * Tue Sep 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove commented-out dead code in paloSantoConfig
 - CHANGED: Framework: remove two methods in paloSantoConfig that are defined but
   never used in Elastix. This removes two potential uses of sudo chown.
   SVN Rev[4195]
 
+* Fri Aug 31 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Framework - Modules/Userlist: Was maked some modified at moment to
+  create a user
+  SVN Rev[4172]
+
+* Fri Aug 31 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Libs: Was updated libs to include last change. Now
+  dialplan file used by asterisk are written by priviliged scrip asteriskconfig
+  SVN Rev[4167]
+
+* Wed Aug 29 2012 German Macas <gmacas@palosanto.com>
+- CHANGED : modules - faxlist - sendfax - faxviewer: Add option to check faxes
+  status in faxlist, fixed messagges when send a fax, show status failed or OK
+  of sent faxes in faxviewer
+  SVN Rev[4156]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Framework - Modules/Organizations: Added file javascript.js
+  SVN Rev[4149]
+
+* Fri Aug 24 2012 Bruno Macias <bmacias@palosanto.com>
+- CHANGED: database elxpbx was moved from framework  to apps
+  SVN Rev[4144]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/Organizations: Was added a new function which
+  return a country code give a country
+  SVN Rev[4143]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/userlist: Was changed name database from elx_pbx
+  to elxpbx
+  SVN Rev[4141]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Libs: Was changed some libs because was changed name
+  database use to store asterisk configuration from elx_pbx to elxpbx
+  SVN Rev[4139]
+
+* Fri Aug 24 2012 Bruno Macias <bmacias@palosanto.com>
+- RENAME: elx_pbx database was rename by elxpbx
+  SVN Rev[4138]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Setup/DB: was changed script sql of elx_pbx and
+  elastix.db database
+  SVN Rev[4137]
+
+* Fri Aug 24 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework-Libs: Where added some funtions
+  SVN Rev[4132]
+
+* Wed Aug 8 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Libs: Was edited these libs to added new functions
+  SVN Rev[4100]
+
+* Mon Aug 6 2012 German Macas <gmacas@palosanto.com>
+- To reamin embebed a2billing in elastix when logout
+  SVN Rev[4094]
+
+* Mon Aug 6 2012 German Macas <gmacas@palosanto.com>
+- Fixed bug 0001318, bug 0001338: fixed in Asterisk File Editor return last
+  query in Back link, fixed Popups, position and design, add in Dashboard
+  Applet Admin option to check all
+  SVN Rev[4092]
+
+* Mon Jul 30 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/Group_Permission: Was fixed some bugs in
+  index.php
+  SVN Rev[4083]
+
+* Mon Jul 30 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Libs: was modified libs paloSantoACL.class.php and
+  paloSantoPBX.class.php. In paloSantoACL.class.php was fixed function
+  getExtUser bad connection database and paloSantoPBX was added new functions
+  SVN Rev[4082]
+
+* Wed Jul 18 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Modules/Organization_Permission: Was resolved bug in which
+  couldn't apply permission to organization when just one resource appear
+  SVN Rev[4071]
+
+* Wed Jul 18 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - DB: Was modificated databases elastix y elx_pbx
+  SVN Rev[4070]
+
+* Wed Jul 18 2012 Rocio Mera <rmera@palosanto.com>
+- CHANCED: Framework - Libs: Was modificated some libs to solve some bugs was
+  appeard after last updated
+  SVN Rev[4067]
+
+* Mon Jul 9 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Setup/DB: where added the table reload_dialplan. This
+  table is set to yes when is necesary rebuild dialplan ofone organization
+  SVN Rev[4056]
+
+* Mon Jul 9 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/userlist: where changed the way that show
+  message to reload dialplan of one organization
+  CHANGED: Framework - Setup/DB: where added the table reload_dialplan. This
+  table is set to yes when is necesary rebuild dialplan ofone organization
+  SVN Rev[4055]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Themes/elastixneo: changed in file _menu.tpl to support
+  multitenant
+  SVN Rev[4051]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/themes_system: Module themes_system where
+  changed th support multitenant
+  SVN Rev[4050]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/group_permission: Module group_permission where
+  changed th support multitenant
+  SVN Rev[4049]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/grouplist: Module grouplist where changed th
+  support multitenant
+  SVN Rev[4048]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/grouplist: Module grouplist where changed th
+  support multitenant
+  SVN Rev[4047]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Modules/userlist: Module userlist where changed th
+  support multitenant
+  SVN Rev[4046]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- UPDATED: Framework - Modules: Modules userlist, grouplist, group_permission,
+  themese_system, language where changed to support multitenant
+  SVN Rev[4045]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Framework - Modules/Organization: Where added a new module
+  Organization. This module permit the superadmin user create organization
+  inside elastix
+  SVN Rev[4041]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Framework - Modules/Organization: Where added a new module
+  Organization. This module permit the superadmin user create organization
+  inside elastix
+  SVN Rev[4040]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Framework - BD: where added sqlite database elastix.db. This is the
+  new unificated database for elastix. This database replace to acl.db.
+  menu.db, settings.db, email.db and fax.db
+  ADDED: Framework - BD: where added mysql database elx_pbx. This database
+  contains pbx configuration and asterisk realtime tables
+  DELETED: Framework - BD: where deleted the sqlite database acl.db,
+  settings.db, menu.db. These database have been replaced for elastix.db
+  SVN Rev[4039]
+
+* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Libs: Libs paloSantoAcl.class.php,
+  paloSantoGrid.class.php, paloSantoInstaller.class.php,
+  paloSantoMenu.class.php, paloSantoModuloXML.class.php, 
+  paloSantoNavigation.class.php where changed to add support for elastix
+  multitenant
+  ADDED: Framework - Libs: libs extensions.class.php,
+  paloSantoAsteriskConfig.class.php, paloSantoPBX.class.php where added to
+  elastix for support multitenant
+  SVN Rev[4038]
+
 * Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: remove stray print_r().
+  SVN Rev[4015]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use SERVER_ADDR instead of ifconfig for querying IP of 
   request in iframe module display.
+  SVN Rev[3994]
 - FIXED: Framework: use ip addr show instead of ifconfig to get assigned IP 
   address. Required for compatibility with Fedora 17.
+  SVN Rev[3991]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: replace TERM=dumb with TERM=xterm in elastix-helper 
   environment, prevents error messages from appearing on stderr.
+  SVN Rev[3988]
 - FIXED: Framework: teach version display to deal with some missing packages
+  SVN Rev[3986]
 
 * Fri Jun 08 2012 Alberto Santos <asantos@palosanto.com>
 - ADDED: framework databases, added a new database called elastix.db

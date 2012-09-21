@@ -35,6 +35,7 @@ function _moduleContent(&$smarty, $module_name)
 {
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
+    include_once "modules/did/libs/paloSantoDID.class.php";
     include_once "libs/paloSantoOrganization.class.php";
     include_once "libs/paloSantoACL.class.php";
 
@@ -105,6 +106,12 @@ function _moduleContent(&$smarty, $module_name)
         case "get_country_code":
             $content=get_country_code();
             break;
+        case "didAssign":
+            $content=didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+        case "saveDidAssign":
+            $content=saveDidAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
         default: // report
             $content = reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
@@ -151,14 +158,20 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
                 "start"    => ($total==0) ? 0 : $offset + 1,
                 "end"      => $end,
                 "total"    => $total,
-                'columns'   =>  array(
-                    array("name"      => _tr("Organization"),),
-                    array("name"      => _tr("Domain"),),
-                    array("name"      => _tr("Number of Users"),),
-                    array("name"      => _tr("Country Code")." / "._tr("Area Code"),),
-                    array("name"      => _tr("Email Qouta")." (MB)",)
-                    ),
                 );
+    
+    $arrColumns=array();
+    if($userLevel1=="superadmin"){
+        $arrColumns[]="";
+    }
+    
+    $arrColumns[]=_tr("Organization");
+    $arrColumns[]=_tr("Domain");
+    $arrColumns[]=_tr("Number of Users");
+    $arrColumns[]=_tr("Country Code")." / "._tr("Area Code");
+    $arrColumns[]=_tr("Email Qouta")." (MB)";
+                
+    $oGrid->setColumns($arrColumns);
 
     if($arrayOrganization===FALSE)
     {
@@ -170,22 +183,26 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
             {
 				if($value['id']!=1){
 					$arrTmp = array();
-					$arrTmp[0] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".$value['name']."</a>";
-					$arrTmp[1] = ($value['domain']==false)?_tr("NONE"):$value['domain'];
+					if($userLevel1=="superadmin"){
+                        $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=assignDIDs&id=".$value['id']."'>"._tr("Assign DIDs")."</a>";
+                    }
+					$arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".$value['name']."</a>";
+					$arrTmp[] = ($value['domain']==false)?_tr("NONE"):$value['domain'];
 					if($pOrganization->getNumUserByOrganization($value['id'])>0)
 					{
-						$arrTmp[2] = "&nbsp;<a href='?menu=$module_name&action=viewUsers&id=".$value['id']."'>".$pOrganization->getNumUserByOrganization($value['id'])."</a>";
+						$arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=viewUsers&id=".$value['id']."'>".$pOrganization->getNumUserByOrganization($value['id'])."</a>";
 					}
 					else
 					{
-						$arrTmp[2] = 0;
+						$arrTmp[] = 0;
 					}
 					$cCode=$pOrganization->getOrganizationProp($value['id'],"country_code");
 					$aCode=$pOrganization->getOrganizationProp($value['id'],"area_code");
 					$eQuota=$pOrganization->getOrganizationProp($value['id'],"email_quota");
-					$arrTmp[3] = ($cCode===false)?_tr("NONE"):$cCode;
-					$arrTmp[3] .=($aCode===false)?_tr("NONE"):" / ".$aCode;
-					$arrTmp[4] = ($eQuota===false)?_tr("NONE"):$eQuota;
+					$tmpcode = ($cCode===false)?_tr("NONE"):$cCode;
+					$tmpcode .=($aCode===false)?_tr("NONE"):" / ".$aCode;
+					$arrTmp[] = $tmpcode;
+					$arrTmp[] = ($eQuota===false)?_tr("NONE"):$eQuota;
 					$arrDatosGrid[] = $arrTmp;
 				}
             }
@@ -578,8 +595,7 @@ function createFieldForm()
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:290px","maxlength" =>"100"),
                                             "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
+                                            "VALIDATION_EXTRA_PARAM" => ""),
             "address"   => array(      "LABEL"                  => _tr("Address"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
@@ -610,6 +626,154 @@ function createFieldForm()
     return $arrFields;
 }
 
+function didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+    $pORGZ = new paloSantoOrganization($pDB);
+    $error = "";
+    
+    //conexion elxpbx
+    $pDB2 = new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDID=new paloDidPBX($pDB2);
+
+    if($userLevel1!="superadmin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportDID($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+    
+    $arrDID=array();
+    $action = getParameter("action");
+    
+    $idOrg=getParameter("id");
+    if($userLevel1!="superadmin"){
+        $idOrg=$idOrganization;
+    }
+    
+    if(!isset($idOrg)){
+        $error=_tr("Invalid Organization");
+    }else{
+        $dataOrgz = $pORGZ->getOrganizationById($idOrg);
+        if($dataOrgz==false){
+            $error=_tr("Organization doesn't exist").$pORGZ->errMsg ;
+        }else{
+            $domain=$dataOrgz["domain"];
+            $smarty->assign("DOMAIN",$domain);
+            $data=$pDID->getDIDs($domain);
+            if($data===false){
+                $error=_tr($pDID->errMsg);
+            }else{
+                $arrDID=$_POST;
+                if(getParameter("save_did")){
+                    if(isset($arrDID["select_dids"]))
+                        $smarty->assign("DIDS",$arrDID["select_dids"]);
+                }else{
+                    $select_did="";
+                    foreach($data as $value){
+                        $select_did .=$value["did"].",";
+                    }
+                    $smarty->assign("DIDS",$select_did);
+                }
+            }
+        }
+    }
+    
+    $DIDs=array("none"=>_tr("--Select one--"));
+    $tmpDIDs=$pDID->getDIDFree();
+    if($tmpDIDs!=false){
+        foreach($tmpDIDs as $key => $value){
+            $DIDs[$key]=$value;
+        }
+    }
+    $arrForm = createDidForn($DIDs);
+    $oForm = new paloForm($smarty,$arrForm);
+
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("DELETE", _tr("Delete"));
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
+    $smarty->assign("MODULE_NAME",$module_name);
+    $smarty->assign("Organization",_tr("Organization"));
+    $smarty->assign("ID", $idOrg);
+    $smarty->assign("userLevel",$userLevel1);
+    
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/organization_did.tpl","Organization DID", $arrDID);
+    $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
+
+    return $content;
+}
+
+function saveDidAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+
+    $error = "";    
+    //conexion elxpbx
+    $pDB2 = new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDID=new paloDidPBX($pDB2);
+
+    if($userLevel1!="superadmin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportDID($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+    
+    
+    $idOrg=getParameter("id");
+    $select_dids=getParameter("select_dids");
+    
+    $pDB->beginTransaction();
+    $exito=$pDID->saveOrgDID($idOrg,$select_dids);
+    if($exito)
+        $pDB->commit();
+    else
+        $pDB->rollBack();
+    $error .=$pDID->errMsg;
+    
+    if($exito){
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        if(writeDidFile($error)==true)
+            $smarty->assign("mb_message",_tr("DID was assignment successfully"));
+        else
+            $smarty->assign("mb_message",_tr("DID was assignment. ").$error);
+        $content = reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }else{
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",$error);
+        $content = didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+    return $content;
+}
+
+function createDidForn($arrDID){
+    $arrFormElements = array("did"   => array("LABEL"                => _tr("DIDs"),
+                                                "REQUIRED"               => "yes",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrDID,
+                                                "VALIDATION_TYPE"        => "numeric",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        );
+    return $arrFormElements;
+}
+
+function writeDidFile(&$error){
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createDIDinbound 2>&1';
+    $output = $ret = NULL;
+    exec($sComando, $output, $ret);
+    if ($ret != 0) {
+        $error = _tr("Error writing did file").implode('', $output);
+        return FALSE;
+    }
+    
+    $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
+    $output = $ret = NULL;
+    exec($sComando, $output, $ret);
+    if ($ret != 0){
+        $error = implode('', $output);
+        return FALSE;
+    }
+    
+    return true;
+}
+
 function getAction()
 {
 
@@ -631,6 +795,10 @@ function getAction()
         return "view_users";
     else if(getParameter("action")=="get_country_code")
         return "get_country_code";
+    else if(getParameter("action")=="assignDIDs")
+        return "didAssign";
+    else if(getParameter("save_did"))
+        return "saveDidAssign";
     else
         return "report"; //cancel
 }

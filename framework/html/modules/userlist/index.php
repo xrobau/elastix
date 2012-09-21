@@ -58,7 +58,7 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    //conexion acl.db
+    //conexion elastix.db
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pDB);
 
@@ -1049,7 +1049,7 @@ function createFieldForm($arrGrupos,$arrOrgz)
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-							 "organization"       => array("LABEL"           => _tr("Organizatiion"),
+							 "organization"       => array("LABEL"           => _tr("Organization"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrOrgz,
@@ -1086,19 +1086,19 @@ function createFieldForm($arrGrupos,$arrOrgz)
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-							"clid_name"   => array("LABEL"               => _tr("Clid Name"),
+							"clid_name"   => array("LABEL"               => _tr("Cid Name"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-							"clid_number" => array("LABEL"               => _tr("Clid Number"),
+							"clid_number" => array("LABEL"               => _tr("Cid Number"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-							"email_quota" => array("LABEL"               => _tr("Email Qouta")." (MB)",
+							"email_quota" => array("LABEL"               => _tr("Email Quota")." (MB)",
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),

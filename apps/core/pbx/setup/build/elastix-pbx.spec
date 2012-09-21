@@ -49,6 +49,7 @@ mkdir -p $RPM_BUILD_ROOT/tftpboot
 
 # ** /asterisk path ** #
 mkdir -p $RPM_BUILD_ROOT/etc/asterisk/
+mkdir -p $RPM_BUILD_ROOT/etc/asterisk.elastix/
 
 # ** service festival ** #
 mkdir -p $RPM_BUILD_ROOT/etc/init.d/
@@ -76,24 +77,19 @@ mv setup/asterisk/mohmp3/*                    $RPM_BUILD_ROOT/var/lib/asterisk/m
 chmod +x setup/etc/asterisk/sip_notify_custom_elastix.conf
 chmod +x setup/etc/init.d/festival
 mv setup/etc/asterisk/sip_notify_custom_elastix.conf      $RPM_BUILD_ROOT/etc/asterisk/
+mv setup/asterisk/astetc/*                                $RPM_BUILD_ROOT/etc/asterisk.elastix/
 mv setup/etc/init.d/festival                              $RPM_BUILD_ROOT/etc/init.d/
 mv setup/usr/share/elastix/privileged/*                   $RPM_BUILD_ROOT/usr/share/elastix/privileged/
 
 # Archivos tftp and ftp
 mv setup/etc/xinetd.d/tftp                     $RPM_BUILD_ROOT/usr/share/elastix/
-#mv setup/etc/vsftpd/vsftpd.conf               $RPM_BUILD_ROOT/usr/share/elastix/
-#mv setup/etc/vsftpd.user_list                 $RPM_BUILD_ROOT/etc/
 
 # ** files tftpboot for endpoints configurator ** #
 unzip setup/tftpboot/P0S3-08-8-00.zip  -d     $RPM_BUILD_ROOT/tftpboot/
-#mv setup/tftpboot/GS_CFG_GEN.tar.gz           $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-#tar -xvzf $RPM_BUILD_DIR/elastix/additionals/tftpboot/GS_CFG_GEN.tar.gz -C $RPM_BUILD_ROOT/tftpboot/ # Da algunos mensajes de warning, esto se puede obviar.
 mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
 
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-
-#chown asterisk.asterisk $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
 
 
 %pre
@@ -117,13 +113,6 @@ if [ $1 -eq 2 ]; then
 fi
 
 %post
-# Unpack tarball with binary files.
-#tar -xvzf /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/GS_CFG_GEN.tar.gz -C /tftpboot
-# Replace path java for script encode.sh
-#sed -i -e "s,JAVA_HOME=[0-9a-zA-Z._-/]*,JAVA_HOME=/opt/openfire/jre,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-#sed -i -e "s,JAVA_HOME=/usr/java/j2sdk1.4.2_07,JAVA_HOME=/opt/openfire/jre,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-#sed -i -e "s,GAPSLITE_HOME=/usr/local/src/GS_CFG_GEN,GAPSLITE_HOME=/tftpboot/GS_CFG_GEN,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-
 # Tareas de TFTP
 chmod 777 /tftpboot/
 
@@ -135,8 +124,6 @@ chmod 777 /tftpboot/
 # TODO: TAREA DE POST-INSTALACIÓN
 # Reemplazo archivos de otros paquetes: tftp, vsftp
 cat /usr/share/elastix/tftp   > /etc/xinetd.d/tftp
-#cat /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/etc/vsftpd/vsftpd.conf > /etc/vsftpd/vsftpd.conf
-
 
 ######### Para ejecucion del migrationFilesMonitor.php ##############
 
@@ -216,31 +203,17 @@ preversion=`cat $pathModule/preversion_%{modname}.info`
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
-   elastix-dbprocess "install" "/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/db"
+  elastix-dbprocess "install" "/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/db"
+
+  # Ruta a módulos es incorrecta en 64 bits. Se corrige a partir de ruta de Asterisk.
+  RUTAREAL=`grep astmoddir /etc/asterisk/asterisk.conf | sed 's|^.* \(/.\+\)$|\1|' -`
+  sed --in-place "s|/usr/lib/asterisk/modules|$RUTAREAL|g" /etc/asterisk.elastix/asterisk.conf
+
+  # Cambio carpeta de archivos de configuración de Asterisk
+  mv -f /etc/asterisk.elastix/* /etc/asterisk/
 elif [ $1 -eq 2 ]; then #update
   # The installer database
    elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
-fi
-
-#verificando si existe el menu en pbx
-path="/var/www/db/acl.db"
-path2="/var/www/db/menu.db"
-id_menu="control_panel"
-
-#obtenemos el id del recurso (EOP)
-res=`sqlite3 $path "select id from acl_resource  where name='control_panel'"`
-
-#obtenemos el id del grupo operador
-opid=`sqlite3 $path "select id from acl_group  where name='Operator'"`
-
-if [ $res ]; then #debe de existir el recurso EOP
-   if [ $opid ]; then #debe de existir el grupo operador
-      val=`sqlite3 $path "select * from acl_group_permission where id_group=$opid and id_resource=$res"`
-      if [ -z $val ]; then #se pregunta si existe el permiso de EOP para el grupo Operador
-         echo "updating group Operator with permissions in Control Panel Module"
-	 `sqlite3 $path "insert into acl_group_permission(id_action, id_group, id_resource) values(1,$opid,$res)"`
-      fi
-   fi
 fi
 
 # The installer script expects to be in /tmp/new_module
@@ -259,6 +232,70 @@ if [ -e /tmp/vsftpd.user_list ] ; then
     rm -f /tmp/vsftpd.user_list
 fi
 
+# The following files must exist (even if empty) for asterisk 1.6.x to work correctly.
+# This does not belong in %%install because these files are dynamically created.
+touch /etc/asterisk/manager_additional.conf
+touch /etc/asterisk/sip_general_custom.conf
+touch /etc/asterisk/sip_nat.conf
+touch /etc/asterisk/sip_registrations_custom.conf
+touch /etc/asterisk/sip_registrations.conf
+touch /etc/asterisk/sip_custom.conf
+touch /etc/asterisk/sip_additional.conf
+touch /etc/asterisk/sip_custom_post.conf
+touch /etc/asterisk/extensions_override_freepbx.conf
+touch /etc/asterisk/features_general_additional.conf
+touch /etc/asterisk/sip_general_additional.conf
+touch /etc/asterisk/queues_general_additional.conf
+touch /etc/asterisk/dahdi-channels.conf
+touch /etc/asterisk/meetme_additional.conf
+touch /etc/asterisk/sip_general_additional.conf
+touch /etc/asterisk/iax_general_additional.conf
+touch /etc/asterisk/musiconhold_custom.conf
+touch /etc/asterisk/extensions_additional.conf
+touch /etc/asterisk/features_general_custom.conf
+touch /etc/asterisk/queues_custom_general.conf
+touch /etc/asterisk/chan_dahdi_additional.conf
+touch /etc/asterisk/iax_registrations_custom.conf
+touch /etc/asterisk/features_applicationmap_additional.conf
+touch /etc/asterisk/queues_custom.conf
+touch /etc/asterisk/iax_registrations.conf
+touch /etc/asterisk/features_applicationmap_custom.conf
+touch /etc/asterisk/queues_additional.conf
+touch /etc/asterisk/iax_custom.conf
+touch /etc/asterisk/features_featuremap_additional.conf
+touch /etc/asterisk/queues_post_custom.conf
+touch /etc/asterisk/iax_additional.conf
+touch /etc/asterisk/features_featuremap_custom.conf
+touch /etc/asterisk/iax_custom_post.conf
+touch /etc/asterisk/sip_notify_additional.conf
+touch /etc/asterisk/sip_notify_custom.conf
+
+chown -R asterisk.asterisk /etc/asterisk/*
+
+# Fix once and for all the issue of recordings/MOH failing because
+# of Access Denied errors.
+if [ ! -e /var/lib/asterisk/sounds/custom/ ] ; then
+    mkdir -p /var/lib/asterisk/sounds/custom/
+    chown -R asterisk.asterisk /var/lib/asterisk/sounds/custom/
+fi
+
+# Copy any unaccounted files from moh to mohmp3
+for i in /var/lib/asterisk/moh/* ; do
+    if [ -e $i ] ; then
+        BN=`basename "$i"`
+        if [ ! -e "/var/lib/asterisk/mohmp3/$BN" ] ; then
+            cp $i /var/lib/asterisk/mohmp3/
+        fi
+    fi
+done
+
+# Change moh to mohmp3 on all Asterisk configuration files touched by FreePBX
+for i in /etc/asterisk/musiconhold*.conf ; do
+    if ! grep -q -s '^directory=/var/lib/asterisk/moh$' $i ; then
+        echo "Replacing instances of moh with mohmp3 in $i ..."
+        sed -i "s|^directory=/var/lib/asterisk/moh\(/\)\?$|directory=/var/lib/asterisk/mohmp3/|" $i
+    fi
+done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -278,6 +315,7 @@ fi
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /etc/asterisk/sip_notify_custom_elastix.conf
+/etc/asterisk.elastix/*
 /var/lib/asterisk/*
 /var/lib/asterisk/agi-bin
 /var/log/festival

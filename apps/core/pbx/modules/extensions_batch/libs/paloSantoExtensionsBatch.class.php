@@ -53,6 +53,7 @@ class paloSantoLoadExtension {
 
     function createTechDevices($Ext, $Secret, $VoiceMail, $Context, $Tech, $Disallow, $Allow, $Deny, $Permit, $Callgroup, $Pickupgroup, $Record_Incoming, $Record_Outgoing)
     {
+    
        $this->_DB->beginTransaction();
 
         $VoiceMail = strtolower($VoiceMail);        
@@ -153,21 +154,72 @@ class paloSantoLoadExtension {
                     $this->_DB->rollBack();
                     return false;
                 }
-                $sql = "update $Tech set data = '$Deny' where id='$Ext' and keyword='deny';";
-                if(!$this->_DB->genQuery($sql))
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
+                
+                
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                // se valida deny y permit que en versiones anteriores no se tenía contemplado
+                $sql = "select count(id) from $Tech where id='$Ext' and keyword='deny';";
+                $result = $this->_DB->getFirstRowQuery($sql);
+                
+                if(is_array($result) && count($result)>0){
+                    if($result[0]>0){
+                        $sql = "update $Tech set data = '$Deny' where id='$Ext' and keyword='deny';";
+                        if(!$this->_DB->genQuery($sql))
+                        {
+                            $this->errMsg = $this->_DB->errMsg;
+                            $this->_DB->rollBack();
+                            return false;
+                        }
+                    }
+                    else{
+                        $sql = "insert into $Tech (id,keyword,data)values('$Ext','deny','$Deny');";
+                        if(!$this->_DB->genQuery($sql))
+                        {
+                            $this->errMsg = $this->_DB->errMsg;
+                            $this->_DB->rollBack();
+                            return false;
+                        }
+                    }
+                    
                 }
-                $sql = "update $Tech set data = '$Permit' where id='$Ext' and keyword='permit';";
-                if(!$this->_DB->genQuery($sql))
-                {
+                else{
                     $this->errMsg = $this->_DB->errMsg;
                     $this->_DB->rollBack();
                     return false;
                 }
                 
+                
+                $sql = "select count(id) from $Tech where id='$Ext' and keyword='permit';";
+                $result = $this->_DB->getFirstRowQuery($sql);
+                
+                if(is_array($result) && count($result)>0){
+                    if($result[0]>0){
+                        $sql = "update $Tech set data = '$Permit' where id='$Ext' and keyword='permit';";
+                        if(!$this->_DB->genQuery($sql))
+                        {
+                            $this->errMsg = $this->_DB->errMsg;
+                            $this->_DB->rollBack();
+                            return false;
+                        }
+                    }
+                    else{
+                        $sql = "insert into $Tech (id,keyword,data)values('$Ext','permit','$Permit');";
+                        if(!$this->_DB->genQuery($sql))
+                        {
+                            $this->errMsg = $this->_DB->errMsg;
+                            $this->_DB->rollBack();
+                            return false;
+                        }
+                    }
+                    
+                }
+                else{
+                    $this->errMsg = $this->_DB->errMsg;
+                    $this->_DB->rollBack();
+                    return false;
+                }
+
+                ///////////////////////////////////////////////////////////////////////////////////////////////////
                 $sql = "update $Tech set data = '$Record_Incoming' where id='$Ext' and keyword='record_in';";
                 if(!$this->_DB->genQuery($sql))
                 {
@@ -391,8 +443,10 @@ class paloSantoLoadExtension {
 
     function processData($data, $path)
     {
+    
     $arrExtensions = array();
     if(is_array($data) && count($data)>0){
+   
             //Call Waiting
             $arrCallWaiting = $this->databaseCallWaiting();
             foreach($arrCallWaiting as $key => $valor)
@@ -402,10 +456,10 @@ class paloSantoLoadExtension {
                     $arrCW[$arrResult[1]] = $arrResult[2];
                 }
             }
-
+            
             //Extension
             foreach($data as $key => $extension){
-                $extension['callwaiting']=isset($arrCW[$extension['extension']]) ? $arrCW[$extension['extension']] : 'DISABLED';
+                $extension['callwaiting']=isset($arrCW[$extension['']]) ? $arrCW[$extension['extension']] : 'DISABLED';
                 $extension['directdid'] = $this->queryDIDByExt($extension['extension']);
                 $extension['voicemail'] = 'disable';
                 $extension['vm_secret'] = '';
@@ -416,7 +470,7 @@ class paloSantoLoadExtension {
                 $extension['play_cid'] = 'no';
                 $extension['play_envelope'] = 'no';
                 $extension['delete_vmail'] = 'no';
-
+             
                 $grep = exec("grep '^{$extension['extension']}' $path");
                 if($grep != '' && $grep!=null)
                 {
@@ -439,42 +493,97 @@ class paloSantoLoadExtension {
                 $arrExtensions[] = $extension;
             }
         }
+        
         return $arrExtensions;
     }
 
     function queryExtensions()
     {
         $path = "/etc/asterisk/voicemail.conf";
-
-        $sql = "select * from
-                    (select u.extension, u.name, u.outboundcid, d.tech from users u, devices d where u.extension=d.id) as r1,
-                    (select data as secret, id from sip where keyword='secret') as r2,
-                    (select data as context, id from sip where keyword='context') as r3,
-                    (select data as callgroup, id from sip where keyword='callgroup') as r4,
-                    (select data as pickupgroup, id from sip where keyword='pickupgroup') as r5,
-                    (select data as disallow, id from sip where keyword='disallow') as r6,
-                    (select data as allow, id from sip where keyword='allow') as r7,
-                    (select data as record_in, id from sip where keyword='record_in') as r8,
-                    (select data as record_out, id from sip where keyword='record_out') as r9
-                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id and r1.extension=r8.id and r1.extension=r9.id);";
-        $resultSIP = $this->_DB->fetchTable($sql, true);
-
-    $dataSIP = $this->processData($resultSIP,$path);
-
-    $sql = "select * from
-                    (select u.extension, u.name, u.outboundcid, d.tech from users u, devices d where u.extension=d.id) as r1,
-                    (select data as secret, id from iax where keyword='secret') as r2,
-                    (select data as context, id from iax where keyword='context') as r3,
-                    (select data as disallow, id from iax where keyword='disallow') as r4,
-                    (select data as allow, id from iax where keyword='allow') as r5,
-                    (select data as record_in, id from iax where keyword='record_in') as r6,
-                    (select data as record_out, id from iax where keyword='record_out') as r7
-                where (r1.extension=r2.id and r1.extension=r3.id and r1.extension=r4.id and r1.extension=r5.id and r1.extension=r6.id and r1.extension=r7.id);";
-        $resultIAX = $this->_DB->fetchTable($sql, true);
         
-    $dataIAX = $this->processData($resultIAX,$path);
+        $dataSIP = array();
+        $dataIAX = array();
+        $SIP = 0;
+        $IAX = 0;
+        
+        $sqlSip = "select u.extension, u.name, u.outboundcid, d.tech from users u, devices d, sip s where u.extension=d.id and u.extension=s.id;";
+        
+        $rSIP = $this->_DB->fetchTable($sqlSip, true);
+        if (!is_array($rSIP)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        else
+        $SIP = 1;
+        
+
+        $sqlIAX = "select u.extension, u.name, u.outboundcid, d.tech from users u, devices d, iax i where u.extension=d.id and u.extension=i.id;";
+        
+        $rIAX = $this->_DB->fetchTable($sqlIAX, true);
+        if (!is_array($rIAX)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        else
+        $IAX = 1;
+        
+        if($SIP == 1 AND !empty($rSIP)){
+            $extensionListSIP = array();
+            foreach ($rSIP as $tupla) {
+                $extensionListSIP[$tupla['extension']] = array(
+                    'extension'     =>  $tupla['extension'],
+                    'name'          =>  $tupla['name'],
+                    'outboundcid'   =>  $tupla['outboundcid'],
+                    'tech'          =>  $tupla['tech'],
+                    'parameters'    =>  array(),
+                );            
+            }
+            
+            $sqlParametersSIP = "select id, keyword, data from sip ;";
+            $resultSIP = $this->_DB->fetchTable($sqlParametersSIP, TRUE);
+            
+            if (!is_array($resultSIP)) {
+                $this->errMsg = $this->_DB->errMsg;
+                return NULL;
+            }
+                
+            foreach ($resultSIP as $tupla) {
+                if (isset($extensionListSIP[$tupla['id']]))
+                    $extensionListSIP[$tupla['id']]['parameters'][$tupla['keyword']] = $tupla['data'];
+            }
+            
+            $dataSIP = $this->processData($extensionListSIP,$path);
+        }
+        
     
-    return array_merge($dataSIP,$dataIAX);
+        if($IAX == 1 AND !empty($rIAX)){
+            $extensionListIAX = array();
+            foreach ($rIAX as $tupla) {
+                $extensionListIAX[$tupla['extension']] = array(
+                    'extension'     =>  $tupla['extension'],
+                    'name'          =>  $tupla['name'],
+                    'outboundcid'   =>  $tupla['outboundcid'],
+                    'tech'          =>  $tupla['tech'],
+                    'parameters'    =>  array(),
+                );            
+            }
+        
+            $sqlParametersIAX = "select id, keyword, data from iax ;";
+            $resultIAX = $this->_DB->fetchTable($sqlParametersIAX, TRUE);
+            if (!is_array($resultIAX)) {
+                $this->errMsg = $this->_DB->errMsg;
+                return NULL;
+            }
+            
+            foreach ($resultIAX as $tupla) {
+                if (isset($extensionListIAX[$tupla['id']]))
+                    $extensionListIAX[$tupla['id']]['parameters'][$tupla['keyword']] = $tupla['data'];
+            }
+        
+            $dataIAX = $this->processData($extensionListIAX,$path);
+        }
+        
+        return array_merge($dataSIP,$dataIAX);
     }
 ////////////////////////////////////////////////////////////////////////////////////////////
     function writeFileVoiceMail($Ext,$Name,$VoiceMail,$VoiceMail_PW,$VM_Email_Address,
@@ -734,7 +843,7 @@ class paloSantoLoadExtension {
 
     function valida_password($Secret)
     {
-        if(strlen($Secret) < 8)
+        if(strlen($Secret) <= 5)
             return false;
         
         if (!preg_match("/([a-z]{1,}[A-Z]{1,}[0-9]*)|([0-9]*[a-z]{1,}[A-Z]{1,})|([A-Z]{1,}[0-9]*[a-z]{1,})/", $Secret))

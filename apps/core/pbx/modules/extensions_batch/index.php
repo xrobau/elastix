@@ -430,51 +430,78 @@ function backup_extensions($pDB)
 {
     $csv = "";
     $pLoadExtension = new paloSantoLoadExtension($pDB);
-    $arrResult = $pLoadExtension->queryExtensions();
-
-    if(!$arrResult){
-
-    $csv .= "\"Display Name\",\"User Extension\",\"Direct DID\",\"Outbound CID\",\"Call Waiting\",".
-                "\"Secret\",\"Voicemail Status\",\"Voicemail Password\",\"VM Email Address\",".
-                "\"VM Pager Email Address\",\"VM Options\",\"VM Email Attachment\",".
-                "\"VM Play CID\",\"VM Play Envelope\",\"VM Delete Vmail\",\"Context\",\"Tech\",".
-                "\"Callgroup\",\"Pickupgroup\",\"Disallow\",\"Allow\",\"Deny\",\"Permit\",".
-                "\"Record Incoming\",\"Record Outgoing\"\n";
-    }else{
-        //cabecera
-        $csv .= "\"Display Name\",\"User Extension\",\"Direct DID\",\"Outbound CID\",\"Call Waiting\",".
-                "\"Secret\",\"Voicemail Status\",\"Voicemail Password\",\"VM Email Address\",".
-                "\"VM Pager Email Address\",\"VM Options\",\"VM Email Attachment\",".
-                "\"VM Play CID\",\"VM Play Envelope\",\"VM Delete Vmail\",\"Context\",\"Tech\",".
-                "\"Callgroup\",\"Pickupgroup\",\"Disallow\",\"Allow\",\"Deny\",\"Permit\",".
-                "\"Record Incoming\",\"Record Outgoing\"\n";
-        foreach($arrResult as $key => $extension)
-        {
-
-//////////////////////////////////////////////////////////////////////////////////
-        // validando para que coja las comillas
-            $extension['outboundcid'] = preg_replace("/\"/",'“',$extension['outboundcid']);
-            $extension['outboundcid'] = preg_replace("/\"/",'”', $extension['outboundcid']);
-
-            if (!isset($extension['callgroup'])) $extension['callgroup']= "";
-            if (!isset($extension['pickupgroup'])) $extension['pickupgroup']= "";
-
-            if ($extension['record_in']=="Adhoc")
-                $extension['record_in'] = "On Demand";
-
-            if ($extension['record_out']=="Adhoc")
-                $extension['record_out'] = "On Demand";
-
-//////////////////////////////////////////////////////////////////////////////////
-            $csv .= "\"{$extension['name']}\",\"{$extension['extension']}\",\"{$extension['directdid']}\",\"{$extension['outboundcid']}\",".
-                    "\"{$extension['callwaiting']}\",\"{$extension['secret']}\",\"{$extension['voicemail']}\",".
-                    "\"{$extension['vm_secret']}\",\"{$extension['email_address']}\",\"{$extension['pager_email_address']}\",".
-                    "\"{$extension['vm_options']}\",\"{$extension['email_attachment']}\",\"{$extension['play_cid']}\",".
-                    "\"{$extension['play_envelope']}\",\"{$extension['delete_vmail']}\",\"{$extension['context']}\",\"{$extension['tech']}\",".
-                    "\"{$extension['callgroup']}\",\"{$extension['pickupgroup']}\",\"{$extension['disallow']}\",\"{$extension['allow']}\",".
-                    "\"{$extension['deny']}\",\"{$extension['permit']}\",\"{$extension['record_in']}\",\"{$extension['record_out']}\"".
-                    "\n";
+    $r = $pLoadExtension->queryExtensions();
+    
+    if (!is_array($r)) {
+        print $pLoadExtension->errMsg;
+        return;
+    }
+    
+    $keyOrder = array(
+        'name'                  =>  'Display Name',
+        'extension'             =>  'User Extension',
+        'directdid'             =>  'Direct DID',
+        'outboundcid'           =>  'Outbound CID',
+        'callwaiting'           =>  'Call Waiting',
+        'secret'                =>  'Secret',
+        'voicemail'             =>  'Voicemail Status',
+        'vm_secret'             =>  'Voicemail Password',
+        'email_address'         =>  'VM Email Address',
+        'pager_email_address'   =>  'VM Pager Email Address',
+        'vm_options'            =>  'VM Options',
+        'email_attachment'      =>  'VM Email Attachment',
+        'play_cid'              =>  'VM Play CID',
+        'play_envelope'         =>  'VM Play Envelope',
+        'delete_vmail'          =>  'VM Delete Vmail',
+        'context'               =>  'Context',
+        'tech'                  =>  'Tech',
+        'callgroup'             =>  'Callgroup',
+        'pickupgroup'           =>  'Pickupgroup',
+        'disallow'              =>  'Disallow',
+        'allow'                 =>  'Allow',
+        'deny'                  =>  'Deny',
+        'permit'                =>  'Permit',
+        'record_in'             =>  'Record Incoming',
+        'record_out'            =>  'Record Outgoing',
+        );
+    print '"'.implode('","', $keyOrder)."\"\n";
+    
+    
+    foreach ($r as $tupla) {
+    
+        $t = array();
+        foreach (array_keys($keyOrder) as $k) switch ($k) {
+        
+            case 'name':                    $t[] = $tupla['name']; break;
+            case 'extension':               $t[] = $tupla['extension']; break;
+            case 'directdid':               $t[] = $tupla['directdid']; break;
+            case 'outboundcid':             $t[] = $tupla['outboundcid']; break;
+            case 'callwaiting':             $t[] = $tupla['callwaiting']; break;
+            case 'voicemail':               $t[] = $tupla['voicemail']; break;
+            case 'vm_secret':               $t[] = $tupla['vm_secret']; break;
+            case 'email_address':           $t[] = $tupla['email_address']; break;
+            case 'pager_email_address':     $t[] = $tupla['pager_email_address']; break;
+            case 'vm_options':              $t[] = $tupla['vm_options']; break;
+            case 'email_attachment':        $t[] = $tupla['email_attachment']; break;
+            case 'play_cid':                $t[] = $tupla['play_cid']; break;
+            case 'play_envelope':           $t[] = $tupla['play_envelope']; break;
+            case 'delete_vmail':            $t[] = $tupla['delete_vmail']; break;
+            case 'tech':                    $t[] = $tupla['tech']; break;
+            
+            default:
+            if (isset($tupla['parameters'][$k])){                             
+                if ($tupla['parameters'][$k] == "Adhoc"){
+                    $tupla['parameters'][$k] = "On Demand";
+                    $t[] = $tupla['parameters'][$k];
+                }
+                else
+                    $t[] = $tupla['parameters'][$k];
+            }else
+                $t[] = '';
+            
         }
+        
+        print '"'.implode('","', $t)."\"\n";
     }
     return $csv;
 }

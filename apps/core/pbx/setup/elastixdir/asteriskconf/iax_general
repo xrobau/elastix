@@ -1,0 +1,13 @@
+deny=NULL
+permit=NULL
+transfer=no
+context=from-internal
+host=dynamic
+type=friend
+qualify=yes
+disallow=all
+allow=ulaw,alaw,gsm
+create_vm=yes
+record_in=on_demand
+record_out=on_demand
+requirecalltoken=auto

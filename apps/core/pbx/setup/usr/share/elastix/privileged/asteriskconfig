@@ -76,6 +76,12 @@ switch($argv[1]){
         }else
             error_exit("Missing arguments \n");
         break;
+    case "createDIDinbound":
+        if(isset($argv[2])){
+            exit(createDIDinbound($argv[2]) ? 0 : 1);
+        }else
+            exit(createDIDinbound() ? 0 : 1);
+        break;
 	default:
 		error_exit("No action specified \n");
 		break;
@@ -203,6 +209,18 @@ EXTENSIONS_CONFIG;
     
     $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
     $content .="#include extensions_globals.conf\n";
+    
+    if(!is_file("/etc/asterisk/extensions_did.conf")){
+        if(file_put_contents("/etc/asterisk/extensions_did.conf","")!==false){
+            $content .="#include extensions_did.conf\n";
+            changeFilePermission("/etc/asterisk/extensions_did.conf");
+        }
+        /*if(createDIDinbound()!=false){
+            $content .="#include extensions_did.conf\n";
+        }*/
+    }else
+        $content .="#include extensions_did.conf\n";
+        
     foreach($arrDomain as $value){
         if(isset($value) && $value!=""){
             if(!is_file("/etc/asterisk/organizations/extensions_".$value.".conf")){
@@ -534,7 +552,7 @@ function createFeaturesFile(){
 #include features_applicationmap_custom.conf
 FEATURES_CONFIG;
 
-        if(file_put_contents("$file", $contenido)===false){
+    if(file_put_contents("$file", $contenido)===false){
             fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
             return false;
         }else{
@@ -654,4 +672,120 @@ function createFeatureApplicationMapfile(){
     return true;
 }
 
+/**
+    funcion que escribe el archivo extensions_did.conf
+    ese archivo contiene el contexto from-pstn. Con ese contexto
+    es posible redirigir las llamadas a la organizacion con el correspondiente
+    did. Este archivo es incluido dentro del archivo extensions.conf
+    @param $domain -> si exta seteado entonces los did con dicho dominio
+                      no deben ser incluicrados
+*/
+function createDIDinbound($domain=null){
+    $file="/etc/asterisk/extensions_did.conf";
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    
+    if(!is_null($domain)){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $domain=null;
+        }
+    }
+    
+    $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
+    //valido que exista el dominio y obtengo el code asociado a este
+    $queryCode="SELECT code from organization where domain=?";
+    
+    $query="select * from did where organization_domain IS NOT NULL";
+    $result=$pDB->fetchTable($query,true);
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection did - %s\n", $pDB->errMsg);
+        return false;
+    }
+    
+    $arrExt=array();
+    $contexto="";
+    foreach($result as $value){
+        $exten=$value["did"];
+        if(!empty($value["organization_domain"])){
+            if($value["organization_domain"]!=$domain){
+                $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
+                if($resultc!=false){
+                    $arrExt[]=new paloExtensions($exten,new ext_goto("1",'${EXTEN}',$resultc['code'].'-from-pstn'),"1");
+                }
+            }
+        }
+    }
+    $arrExt[]=new paloExtensions("h",new ext_hangup(),"1");
+    
+    $contexto="\n[from-pstn]\n";
+    $contexto .="include =>from-pstn-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contexto .=$extension->data."\n";
+        }
+    }
+    
+    if(file_put_contents("$file", $contexto)===false){
+        fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+        return false;
+    }else{
+        changeFilePermission($file);
+    }     
+    
+    return createFileDahdiChannelAdd($domain);
+}
+
+function createFileDahdiChannelAdd($domain=null){
+    $file="/etc/asterisk/chan_dahdi_additional.conf";
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    
+    if(!is_null($domain)){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $domain=null;
+        }
+    }
+    
+    $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
+    //valido que exista el dominio y obtengo el code asociado a este
+    $queryCode="SELECT code from organization where domain=?";
+    
+    //obtenemos los puertos que han sido asinados a un did y que pertencen a una organizacion
+    $query="SELECT dd.did, dd.data, di.organization_domain from did_details dd join did di on dd.did=di.did where di.organization_domain IS NOT NULL and dd.keyword=? and di.type=?";
+    $result=$pDB->fetchTable($query,true,array("port","analog"));
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection did - %s\n", $pDB->errMsg);
+        return false;
+    }
+    
+    $content="";
+    
+    if(is_file("/etc/asterisk/chan_dahdi_custom.conf")===false){
+        if(file_put_contents("/etc/asterisk/chan_dahdi_custom.conf", "")!==false){
+            $content .="#include chan_dahdi_custom.conf";
+            changeFilePermission("/etc/asterisk/chan_dahdi_custom.conf");
+        }
+    }else
+        $content .="#include chan_dahdi_custom.conf\n";
+        
+    foreach($result as $value){
+        if(!empty($value["organization_domain"])){
+            if($value["organization_domain"]!=$domain){
+                $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
+                if($resultc!=false){
+                    $content .="context=".$resultc["code"]."-from-pstn\n";
+                    $content .="channel => ".$value["data"]."\n";
+                }
+            }
+        }
+    }
+    
+    if(file_put_contents("$file", $content)===false){
+        fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+        return false;
+    }else{
+        changeFilePermission($file);
+    }     
+    
+    return true;
+}
 ?>

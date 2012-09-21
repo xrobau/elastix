@@ -79,6 +79,6 @@ $arrLangModule=array(
 "Can't exist a technology empty. Line" => "Can't exist a technology empty. Line",
 "has a wrong tech in line" => "has a wrong tech in line",
 "Tech must be sip or iax" => "Tech must be sip or iax",
-"The secret must be minimum" => "The Secret must be minimum 8 alphanumeric characters, including upper and lowercase."
+"The secret must be minimum" => "The Secret must be minimum 6 alphanumeric characters, including upper and lowercase."
 );
 ?>

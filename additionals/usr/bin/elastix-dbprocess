@@ -90,6 +90,8 @@ if ($argc < 2){
 $documentRoot="/var/www/html";
 require_once("$documentRoot/libs/misc.lib.php");
 require_once("$documentRoot/configs/default.conf.php");
+load_default_timezone();
+
 //global variables framework
 global $arrConf;
 require_once("$arrConf[basePath]/libs/paloSantoConfig.class.php");

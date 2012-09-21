@@ -320,7 +320,7 @@ function viewFormIVR($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
                 $result=$pIVR->getAllIvrs($idIVR);
                 $arrTmp=$result
                 if($arrTmp!=false){
-                    $arrTmp=$result[0];
+                    $arrIVR=$result[0];
                     $domain=$arrTmp["organization_domain"];
                     $pIVR=new paloIvrPBX($pDB,$domain);
                 }

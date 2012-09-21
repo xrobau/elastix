@@ -85,7 +85,7 @@
          </tr>
 		  {foreach from=$items key=myId item=i}
 		   <input type="hidden" value"{$j++}" />
-		   <tr class="content-destine" id="{$j}"><td align="center" ><input type="text" name="option{$j}" value="{$i.1}" style="width:25px;text-align:center;"></td>
+		   <tr class="content-destine" id="{$j}"><td align="center" ><input type="text" name="option{$j}" value="{$i.1}" style="width:50px;text-align:center;"></td>
 			  <td align="center" width="40%">
 			      <select name="goto{$j}" id="goto{$j}" class="goto">
 			      {foreach from=$arrGoTo key=k item=v}

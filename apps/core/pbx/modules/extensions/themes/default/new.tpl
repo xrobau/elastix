@@ -136,8 +136,8 @@
                 <tr class="iax_settings">
                     <td nowrap>{$accountcode.LABEL}:</td>
                     <td>{$accountcode.INPUT}</td>
-                    <td nowrap>{$requierecalltoken.LABEL}:</td>
-                    <td>{$requierecalltoken.INPUT}</td>
+                    <td nowrap>{$requirecalltoken.LABEL}:</td>
+                    <td>{$requirecalltoken.INPUT}</td>
                 </tr>
                 {if $mode eq 'edit'}
                 <tr>

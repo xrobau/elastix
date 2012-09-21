@@ -1369,7 +1369,7 @@ function createIaxForm(){
 												"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
-							"requierecalltoken" => array("LABEL"             => _tr("requierecalltoken"),
+							"requirecalltoken" => array("LABEL"             => _tr("requirecalltoken"),
 													"REQUIRED"               => "yes",
 													"INPUT_TYPE"             => "SELECT",
 													"INPUT_EXTRA_PARAM"      => $arrCallTok,

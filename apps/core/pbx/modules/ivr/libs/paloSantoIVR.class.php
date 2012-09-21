@@ -456,5 +456,3 @@ class paloIvrPBX extends paloAsteriskDB{
     }
 }
 ?>
-
-

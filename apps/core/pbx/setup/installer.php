@@ -536,10 +536,6 @@ function do_reloadAll($data_connection, $arrAST, $arrAMP, &$pDB)
 	exec( $arrAMP["PRE_RELOAD"]['valor']);
     }
 
-    //para crear los archivos de configuracion en /etc/asterisk
-    $retrieve = $arrAMP['AMPBIN']['valor'].'/retrieve_conf';
-    exec($retrieve);
-
     //reload MOH to get around 'reload' not actually doing that, reload asterisk
     $command_data = array("moh reload", "reload");
     $arrResult = AsteriskManager_Command($data_connection['host'], $data_connection['user'], $data_connection['password'], $command_data);

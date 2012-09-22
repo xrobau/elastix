@@ -48,7 +48,6 @@ require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
 
 $pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/elastix.db");
 
-if(!empty($pDB->errMsg)) echo "ERROR DE DB: {$pDB->errMsg}\n";
 if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
 
 $oMenu = new paloMenu($pDBACL);
@@ -56,7 +55,7 @@ $oMenu = new paloMenu($pDBACL);
 if(isset($_SERVER['argv'][1])){
     $menuName = $_SERVER['argv'][1];
     
-    $oACL->_DB->beginTransaction();
+    $oMenu->_DB->beginTransaction();
  
     if($oMenu->deleteFather($menuName)){
         $oMenu->_DB->commit();

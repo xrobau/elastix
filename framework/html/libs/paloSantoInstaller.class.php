@@ -109,10 +109,10 @@ class Installer
 							}
 							$idGroup = $oACL->_DB->getLastInsertId();
 						}
-						$bExito = $oACL->saveGroupPermission($idGroup,array($resource_id));
+						$bExito = $oACL->saveGroupPermissions($idGroup,array($resource_id));
                     }
                 }else
-                    $bExito = $oACL->saveGroupPermission(1,array($resource_id));
+                    $bExito = $oACL->saveGroupPermissions(1,array($resource_id));
                 if($bExito)
                     $oACL->_DB->commit();
                 else

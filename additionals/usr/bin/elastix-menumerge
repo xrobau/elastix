@@ -69,7 +69,7 @@ if(isset($_SERVER['argv'][1])){
             echo "Menu: $mName found\n";
             if(!empty($mName)){
                 //buscar si ya existe ese menu - Si no existe se lo crea
-                if(!$oACL->getIdResource($mName)){
+                if(!$oACL->getResources($mName)){
                     $newMenu["mName"]=$mName;
                     $newMenu["module"]=$menuitem['module'];
                     $newMenu["parent"]=$menuitem['parent'];

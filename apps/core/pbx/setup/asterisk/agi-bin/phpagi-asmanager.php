@@ -30,7 +30,10 @@
   {
     require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpagi.php');
   }
-
+  
+  require_once "/var/www/html/libs/misc.lib.php";
+  load_default_timezone();
+  
  /**
   * Asterisk Manager class
   *

@@ -10,6 +10,20 @@ $(document).ready(function(){
         }
         radio('tab-3');
     });
+    
+    $("td select[name=org]").change(function(){
+        var org=$("select[name=org] option:selected").val();
+        if(org!="none" && org!=""){
+            var act_orgs=$("#select_orgs").val();
+            //se agrega el elemento a la lista
+            $("select[name='arr_org']").append("<option value="+org+">"+org+"</option>");
+            //se quita el elemento de la lista de seleccion
+            $("select[name=org] option:selected").remove();
+            
+            $("#select_orgs").val(act_orgs+org+",");
+            $("select[name=org]").val("none");
+        }
+    });
 });
 
 $(window).load(function () {
@@ -108,4 +122,39 @@ function radio(id_radio){
     d_label.css("background","linear-gradient(center top , #777777, #999999)");
     d_label.css("border-color"," #888888"); 
     d_label.css("color"," #FFFFFF"); 
+}
+
+function quitar_org(){
+    var org=$("select[name=arr_org] option:selected").val();
+    //se quita el elemento de la lista de seleccionados
+    $("select[name=arr_org] option:selected").remove();
+    //se agrega el elemento de la lista de canales disponibles
+    $("select[name='org']").append("<option value="+org+">"+org+"</option>");
+    var val=$("#select_orgs").val();
+    var arrVal=val.split(",");
+    var option="";
+    for (x in arrVal){
+        if(arrVal[x]!=org && arrVal[x]!="")
+            option += arrVal[x]+",";
+    }
+    $("#select_orgs").val(option);
+}
+
+function mostrar_select_orgs(){
+    var val=$("#select_orgs").val();
+    var arrVal=val.split(",");
+    
+    for (x in arrVal){
+        if(arrVal[x]!=""){
+            $("select[name='arr_org']").append("<option value="+arrVal[x]+">"+arrVal[x]+"</option>");
+        }
+    }
+    
+    var chann=$("select[name='org']");
+    var options = $('option', chann);
+        options.each(function() {
+            if(arrVal.indexOf($(this).text())!=-1){
+                $("select[name=org] option[value='"+$(this).text()+"']").remove();
+            }
+        });
 }

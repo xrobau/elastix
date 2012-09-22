@@ -181,7 +181,7 @@ function reportTrunks($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	}
 
     foreach($arrTrunks as $trunk){
-        $arrTmp[0] = "&nbsp;<a href='?menu=trunks&action=view&id_trunk=".$trunk['trunkid']."&tech_trunk=".$trunk["tech"]."'>".$trunk['trunk_name']."</a>";
+        $arrTmp[0] = "&nbsp;<a href='?menu=trunks&action=view&id_trunk=".$trunk['trunkid']."&tech_trunk=".$trunk["tech"]."'>".$trunk['name']."</a>";
         $arrTmp[1] = strtoupper($trunk['tech']);
         $arrTmp[2] = $trunk['channelid'];
         $arrTmp[3] = $trunk['maxchans'];
@@ -271,21 +271,26 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
             $error=_tr("Invalid Trunk");
 		}else{
             if($userLevel1=="superadmin"){
-                $arrTrunks = $pTrunk->getTrunkById($idTrunk, $domain);
+                $arrTrunks = $pTrunk->getTrunkById($idTrunk);
             }
             if($arrTrunks===false){
                 $error=_tr($pTrunk->errMsg);
             }else if(count($arrTrunks)==0){
                 $error=_tr("Trunk doesn't exist");
-            }else{  
-                $marty->assign('NAME',$arrTrunks("name"));
-                $smarty->assign('j',0);
-                $tech=$arrTrunks("tech");
+            }else{
+                if($error!=""){
+                    $smarty->assign("mb_title", _tr("ERROR"));
+                    $smarty->assign("mb_message",$error);
+                    return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+                }
+                $tech=$arrTrunks["tech"];
+                if($tech=="sip" || $tech=="iax2")
+                    $smarty->assign('NAME',$arrTrunks["name"]);
                 
+                $smarty->assign('j',0);
                 if($action=="view"|| getParameter("edit") ){
                     $arrDialPattern = $pTrunk->getArrDestine($idTrunk);
                 }
-                
                 $smarty->assign('items',$arrDialPattern);
                 
                 if(getParameter("save_edit"))
@@ -293,7 +298,7 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
             }
 		}
 	}else{
-        $tech  = getParameter("tech_trunk");
+        $tech = getParameter("tech_trunk");
         $smarty->assign('j',0);
         $smarty->assign('items',$arrDialPattern);
         
@@ -303,7 +308,7 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
             $arrTrunks=$_POST;
         }
 	}
-	
+
 	if(!preg_match("/^(sip|iax2|dahdi){1}$/",$tech)){
         $error=_tr("Invalid Technology");
     }
@@ -388,6 +393,17 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	$arrForm = createFieldForm($tech);
     $oForm = new paloForm($smarty,$arrForm);
 
+    $arrDialPattern = getParameter("arrDestine");
+    $tmpstatus = explode(",",$arrDialPattern);
+    $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
+    $tmp_dial=array();
+    foreach($arrDialPattern as $pattern){
+        $prepend = getParameter("prepend_digit".$pattern);
+        $prefix = getParameter("pattern_prefix".$pattern);
+        $pattern = getParameter("pattern_pass".$pattern);
+        $tmp_dial[]=array(0,$prefix,$pattern,$prepend);
+    }
+    
 	if(!$oForm->validateForm($_POST)){
         // Validation basic, not empty and VALIDATION_TYPE
         $smarty->assign("mb_title", _tr("Validation Error"));
@@ -398,24 +414,20 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
                 $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+        return viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$tmp_dial);
     }else{
         $arrProp=array();
         $arrProp["tech"]=$tech;
         $arrProp["trunk_name"]=getParameter("trunk_name");
         $arrProp['outcid']=getParameter("outcid");
-        $arrProp['cid_options']=getParameter("keepcid");
+        $arrProp['keepcid']=getParameter("keepcid");
         $arrProp['max_chans']=getParameter("maxchans");
         $arrProp['disabled'] = (getParameter("disabled")) ? "on" : "off";
         $arrProp['dialout_prefix']=getParameter("dialoutprefix");
         
-        $arrDialPattern = getParameter("arrDestine");
-        $tmpstatus = explode(",",$arrDialPattern);
-        $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
-        
         if($tech=="dahdi"){
             $arrProp["channelid"]=getParameter("channelid");
-            if(preg_match("/^(g|r){0,1}[0-9]+$/")){
+            if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
                 $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
                 $continue=false;
             }
@@ -430,7 +442,7 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
 		if($continue){
 			$pDB->beginTransaction();
-			$successTrunk=$pTrunk->createNewTrunk($arrProp,$arrDialPattern);
+			$successTrunk=$pTrunk->createNewTrunk($arrProp,$tmp_dial);
 			if($successTrunk)
 				$pDB->commit();
 			else
@@ -449,104 +461,94 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",$error);
-		$content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		$content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$tmp_dial);
 	}
 	return $content;
 }
 
 function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
-	
-	$error = "";
-	//conexion elastix.db
-        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$pORGZ = new paloSantoOrganization($pDB2);
-	$continue=true;
-	$successTrunk=false;
-	$idTrunk=getParameter("id_trunk");
+    $pTrunk = new paloSantoTrunk($pDB);
+    $error = "";
+    //conexion elastix.db
+    $continue=true;
+    $successTrunk=false;
 
-	if($userLevel1=="superadmin"){
-	  $smarty->assign("mb_title", _tr("ERROR"));
-	  $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-	  return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-        }
-	
-	//un usuario que no es administrador no puede editar la extension de otro usuario
-	if($userLevel1=="other"){
-		$idUser=$pACL->getIdUser($userAccount);
-		$arrUserExt=$pACL->getExtUser($idUser);
-		if($arrUserExt["id"]!=$idExten){
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr("You are not authorized to edit"));
-			return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-		}
-	}
+    if($userLevel1!="superadmin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+    
+	$idTrunk=getParameter("id_trunk");
 
 	//obtenemos la informacion del usuario por el id dado, sino existe el trunk mostramos un mensaje de error
 	if(!isset($idTrunk)){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Invalid Trunk"));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+        $error=_tr("Invalid Trunk");
 	}else{
-		/*if($userLevel1=="superadmin"){
-			$arrExten = $pExten->getExtensionById($idExten);
-			$domain=$arrExten["domain"];
-		}else{*/
-			$resultO=$pORGZ->getOrganizationById($idOrganization);
-			$domain=$resultO["domain"];
-			if($userLevel1=="admin"){
-				$pTrunk = new paloSantoTrunk($pDB,$domain);
-				$arrTrunks = $pTrunk->getTrunkById($idTrunk, $domain);
-			}else{
-				$pTrunk = new paloSantoTrunk($pDB,$domain);
-				$arrTrunks = $pTrunk->getTrunkById($arrUserExt["id"], $domain);
-			}
-		//}
-	}
+        if($userLevel1=="superadmin"){
+            $arrTrunks = $pTrunk->getTrunkById($idTrunk);
+        }
+        if($arrTrunks===false){
+            $error=_tr($pTrunk->errMsg);
+        }else if(count($arrTrunks)==0){
+            $error=_tr("Trunk doesn't exist");
+        }else{
+            if($error!=""){
+                $smarty->assign("mb_title", _tr("ERROR"));
+                $smarty->assign("mb_message",$error);
+                return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            }
 
-	if($arrTrunks===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pTrunk->errMsg));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else if(count($arrTrunks)==0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Trunk doesn't exist"));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else{
-		$domain=$arrTrunks["domain"];
-		
-		if($continue){
-			//seteamos un arreglo con los parametros configurados
-			$arrProp=array();
-			$arrProp["name"]=getParameter("name");
-			$arrProp['outcid']=getParameter("outcid");
-		        $arrProp['cid_options']=getParameter("keepcid");
-			$arrProp['max_chans']=getParameter("maxchans");
-		        $arrProp['disabled'] = (getParameter("disabled")) ? "on" : "off";
-			$arrProp['dialout_prefix']=getParameter("dialoutprefix");
-			$arrProp['channelid']=getParameter("channelid");
-			$arrProp['domain']=$domain;
-			
-			
-			$arrDialPattern = getParameter("arrDestine");
-                        $tmpstatus = explode(",",$arrDialPattern);
-            		$arrDialPattern = array_values(array_diff($tmpstatus, array('')));
+            $arrDialPattern = getParameter("arrDestine");
+            $tmpstatus = explode(",",$arrDialPattern);
+            $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
+            $tmp_dial=array();
+            foreach($arrDialPattern as $pattern){
+                $prepend = getParameter("prepend_digit".$pattern);
+                $prefix = getParameter("pattern_prefix".$pattern);
+                $pattern = getParameter("pattern_pass".$pattern);
+                $tmp_dial[]=array(0,$prefix,$pattern,$prepend);
+            }
+            
+            $tech=$arrTrunks["tech"];
+            
+            $arrProp=array();
+            $arrProp["id_trunk"]=$idTrunk;
+            $arrProp["trunk_name"]=getParameter("trunk_name");
+            $arrProp['outcid']=getParameter("outcid");
+            $arrProp['keepcid']=getParameter("keepcid");
+            $arrProp['max_chans']=getParameter("maxchans");
+            $arrProp['disabled'] = (getParameter("disabled")) ? "on" : "off";
+            $arrProp['dialout_prefix']=getParameter("dialoutprefix");
+            
+            if($tech=="dahdi"){
+                $arrProp["channelid"]=getParameter("channelid");
+                if(!preg_match("/^(g|r){0,1}[0-9]+$/")){
+                    $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
+                    $continue=false;
+                }
+            }elseif($tech=="sip" || $tech=="iax2"){
+                $arrProp["secret"]=getParameter("secret");
+                if(isset($arrProp["secret"]) && $arrProp["secret"]!=""){
+                    if(strlen($arrProp["secret"])<6 || !preg_match("/^[[:alnum:]]+$/",$arrProp["secret"])){
+                        $error=_tr("Secret must be at least 6 characters and contain digits and letters");
+                        $continue=false;
+                    }
+                }
+                $arrProp=array_merge(getSipIaxParam($tech),$arrProp);
+            }
 
-		}
-
-		if($continue){
-			$pTrunkPBX=new paloTrunkPBX($domain,$pDB);
-			$pDB->beginTransaction();
-			$successTrunk=$pTrunkPBX->updateTrunkPBX($arrProp,$arrDialPattern,$idTrunk);
-			
-			if($successTrunk)
-				$pDB->commit();
-			else
-				$pDB->rollBack();
-			$error .=$pTrunkPBX->errMsg;
-	      
-			
-		}
+            if($continue){
+                $pDB->beginTransaction();
+                $successTrunk=$pTrunk->updateTrunkPBX($arrProp,$tmp_dial);
+                
+                if($successTrunk)
+                    $pDB->commit();
+                else
+                    $pDB->rollBack();
+            }
+            $error .=$pTrunk->errMsg;
+        }
 	}
 
 	//$smarty->assign("mostra_adv",getParameter("mostra_adv"));
@@ -562,7 +564,7 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",$error);
-		$content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		$content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$tmp_dial);
 	}
 	return $content;
 }
@@ -621,62 +623,45 @@ function getSipIaxParam($tech,$edit=false){
 
 function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
 	
-	$error = "";
-	//conexion elastix.db
-        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$pORGZ = new paloSantoOrganization($pDB2);
-	$continue=true;
-	$successTrunk=false;
-	$idTrunk=getParameter("id_trunk");
+	$pTrunk = new paloSantoTrunk($pDB);
+    $error = "";
+    //conexion elastix.db
+    $continue=true;
+    $successTrunk=false;
 
-	if($userLevel1!="admin"){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}
+    if($userLevel1!="superadmin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+    
+    $idTrunk=getParameter("id_trunk");
 
-	//obtenemos la informacion del trunk por el id dado, en caso de que la extension pertenzca a un usuario activo
-	//esta no puede volver a ser borrada
 	if(!isset($idTrunk)){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Invalid Trunk"));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else{
-		/*if($userLevel1=="superadmin"){
-			$pTrunk=new paloTrunkPBX($domain,$pDB);
-			$arrTrunks = $pTrunk->getTrunkById($idTrunk);
-			$domain = $arrTrunks["domain"];
-		}else{
-			$resultO=$pORGZ->getOrganizationById($idOrganization);
-			$domain=$resultO["domain"];*/
-			if($userLevel1=="admin"){
-				  $resultO=$pORGZ->getOrganizationById($idOrganization);
-				  $domain=$resultO["domain"];
-				  $pTrunk=new paloSantoTrunk($pDB,$domain);
-				  $arrTrunks = $pTrunk->getTrunkById($idTrunk, $domain);
-			
-			}
-		//}
-	}
-
-	if($arrTrunks===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pTrunk->errMsg));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else if(count($arrTrunks)==0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Trunk doesn't exist"));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else{
-		$pTrunkPBX=new paloTrunkPBX($domain, $pDB);
-		$pDB->beginTransaction();
-		$successTrunk = $pTrunkPBX->deleteTrunk($idTrunk);
-		if($successTrunk)
-		    $pDB->commit();
-		else
-		    $pDB->rollBack();
-		$error .=$pTrunkPBX->errMsg;
+        $error=_tr("Invalid Trunk");
+    }else{
+        if($userLevel1=="superadmin"){
+            $arrTrunks = $pTrunk->getTrunkById($idTrunk);
+        }
+        if($arrTrunks===false){
+            $error=_tr($pTrunk->errMsg);
+        }else if(count($arrTrunks)==0){
+            $error=_tr("Trunk doesn't exist");
+        }else{
+            if($error!=""){
+                $smarty->assign("mb_title", _tr("ERROR"));
+                $smarty->assign("mb_message",$error);
+                return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            }
+            $pTrunkPBX=new paloTrunkPBX($domain, $pDB);
+            $pDB->beginTransaction();
+            $successTrunk = $pTrunkPBX->deleteTrunk($idTrunk);
+            if($successTrunk)
+                $pDB->commit();
+            else
+                $pDB->rollBack();
+            $error .=$pTrunkPBX->errMsg;
+        }
 	}
 
 	if($successTrunk){
@@ -702,6 +687,15 @@ function createFieldForm($tech)
     $arrNat=array("yes"=>"Yes","no"=>"No","never"=>"never","route"=>"route");
     $arrType=array("friend"=>"friend","peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
+    
+    global $arrConf;
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pORGZ = new paloSantoOrganization($pDB2);
+    $arrTmp=$pORGZ->getOrganization("","","","");
+    $arrOrgz=array("--pickup organizations--");
+    foreach($arrTmp as $value){
+        $arrOrgz[$value["domain"]]=$value["domain"];
+    }
 
     $arrFormElements = array("trunk_name"	=> array("LABEL"                  => _tr('Descriptive Name'),
                                                     "REQUIRED"               => "yes",
@@ -757,8 +751,13 @@ function createFieldForm($tech)
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:150px;text-align:center;"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                            "org"            => array("LABEL"                => _tr("Organization"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrOrgz,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
                             );
-                            
     if($tech=="dahdi"){
         $arrFormElements["channelid"] = array("LABEL"                  => _tr("DAHDI Identifier"),
                                                     "REQUIRED"               => "yes",
@@ -889,7 +888,31 @@ function createSipFrom(){
     $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update');
-    $arrFormElements = array("canreinvite"   => array( "LABEL"                  => _tr("canreinvite"),
+    $arrFormElements = array("fromuser" => array("LABEL"             => _tr("fromuser"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "fromdomain" => array("LABEL"             => _tr("fromdomain"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sendrpid" => array("LABEL"             => _tr("sendrpid"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "trustrpid" => array("LABEL"             => _tr("trustrpid"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "canreinvite"   => array( "LABEL"                  => _tr("canreinvite"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,

@@ -42,7 +42,7 @@
             </tr>
             <tr class="tech">
                 <td width="20%" nowrap>{$outcid.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
-                <td width="30%">{if $mode ne 'view'}{$outcid.INPUT}{else}{$OUTCID}{/if}</td>
+                <td width="30%">{$outcid.INPUT}</td>
                 <td width="20%" nowrap>{$keepcid.LABEL}</td>
                 <td width="30%">{$keepcid.INPUT}</td>
             </tr>
@@ -59,6 +59,27 @@
                 <tr class="tech">
                     <td nowrap>{$channelid.LABEL}:</td>
                     <td >{$channelid.INPUT}</td>
+                </tr>
+            {/if}
+            <tr>
+                <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$ORGANIZATION_PERM}</td>
+            </tr>
+            {if $mode eq 'view'}
+                <tr class="tech">
+                    <td width="15%" nowrap>{$org.LABEL}: </td>
+                    <td width="20%"> {$ORGS} </td>
+                    <td ></td>
+                </tr>
+            {else}
+                <tr class="tech">
+                    <td width="15%" valign="top" nowrap>{$org.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+                    <td width="10%" valign="top">{$org.INPUT}</td>
+                    <td rowspan="2">
+                        <input class="button" name="remove" id="remove" value="<<" onclick="javascript:quitar_org();" type="button">
+                        <select name="arr_org" size="4" id="arr_org" style="width: 120px;">
+                        </select>
+                        <input type="hidden" id="select_orgs" name="select_orgs" value={$ORGS}>
+                    </td>
                 </tr>
             {/if}
          </table>
@@ -193,74 +214,74 @@
                     <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
                 </tr>
                 {if $TECH eq 'SIP'}
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$fromuser.LABEL}: </td>
                         <td >{$fromuser.INPUT}</td>
                         <td nowrap>{$fromdomain.LABEL}: </td>
                         <td>{$fromdomain.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td align="left">{$sendrpid.LABEL}: </td>
                         <td >{$sendrpid.INPUT}</td>
                         <td align="left">{$trustrpid.LABEL}: </td>
                         <td >{$trustrpid.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$canreinvite.LABEL}: </td>
                         <td>{$canreinvite.INPUT}</td>
                         <td nowrap>{$useragent.LABEL}: </td>
                         <td>{$useragent.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$videosupport.LABEL}: </td>
                         <td>{$videosupport.INPUT}</td>
                         <td nowrap>{$maxcallbitrate.LABEL}: </td>
                         <td>{$maxcallbitrate.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$qualifyfreq.LABEL}: </td>
                         <td>{$qualifyfreq.INPUT}</td>
                         <td nowrap>{$rtptimeout.LABEL}: </td>
                         <td>{$rtptimeout.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$rtpholdtimeout.LABEL}: </td>
                         <td>{$rtpholdtimeout.INPUT}</td>
                         <td nowrap>{$rtpkeepalive.LABEL}: </td>
                         <td>{$rtpkeepalive.INPUT}</td>
                     </tr>
                 {else}
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$trunkfreq.LABEL}: </td>
                         <td>{$trunkfreq.INPUT}</td>
                         <td nowrap>{$trunktimestamps.LABEL}: </td>
                         <td>{$trunktimestamps.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$sendani.LABEL}: </td>
                         <td>{$sendani.INPUT}</td>
                         <td nowrap>{$adsi.LABEL}: </td>
                         <td>{$adsi.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$requirecalltoken.LABEL}: </td>
                         <td>{$requirecalltoken.INPUT}</td>
                         <td nowrap>{$encryption.LABEL}: </td>
                         <td>{$encryption.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$jitterbuffer.LABEL}: </td>
                         <td>{$jitterbuffer.INPUT}</td>
                         <td nowrap>{$forcejitterbuffer.LABEL}: </td>
                         <td>{$forcejitterbuffer.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$codecpriority.LABEL}: </td>
                         <td>{$codecpriority.INPUT}</td>
                         <td nowrap>{$qualifysmoothing.LABEL}: </td>
                         <td>{$qualifysmoothing.INPUT}</td>
                     </tr>
-                    <tr class="tech" {$SHOW_MORE}>
+                    <tr class="tech show_more" {$SHOW_MORE}>
                         <td nowrap>{$qualifyfreqok.LABEL}: </td>
                         <td>{$qualifyfreqok.INPUT}</td>
                         <td nowrap>{$qualifyfreqnotok.LABEL}: </td>

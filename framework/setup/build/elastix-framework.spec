@@ -235,12 +235,12 @@ fi
 
 # Actualizacion About Version Release
 # Verificar si en la base ya existe algo
-if [ "`sqlite3 /var/www/db/settings.db "select count(key) from settings where key='elastix_version_release';"`" = "0" ]; then
-    `sqlite3 /var/www/db/settings.db "insert into settings (key, value) values('elastix_version_release','%{version}-%{release}');"`
-else
+#if [ "`sqlite3 /var/www/db/settings.db "select count(key) from settings where key='elastix_version_release';"`" = "0" ]; then
+#    `sqlite3 /var/www/db/settings.db "insert into settings (key, value) values('elastix_version_release','%{version}-%{release}');"`
+#else
     #Actualizar
-    `sqlite3 /var/www/db/settings.db "update settings set value='%{version}-%{release}' where key='elastix_version_release';"`
-fi
+#    `sqlite3 /var/www/db/settings.db "update settings set value='%{version}-%{release}' where key='elastix_version_release';"`
+#fi
 
 # Para q se actualice smarty (tpl updates)
 rm -rf /var/www/html/var/templates_c/*

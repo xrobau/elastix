@@ -320,6 +320,7 @@ fi
 /usr/share/elastix/module_installer/*
 /etc/asterisk/sip_notify_custom_elastix.conf
 /etc/asterisk.elastix/*
+/var/www/elastixdir/*
 /var/lib/asterisk/*
 /var/lib/asterisk/agi-bin
 /var/log/festival

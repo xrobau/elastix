@@ -1,8 +1,3 @@
--- Create database
-CREATE DATABASE IF NOT EXISTS elxpbx;
-USE elxpbx;
--- Database: `elxpbx`
-
 -- Create user db
 GRANT SELECT, UPDATE, INSERT, DELETE ON `elxpbx`.* to asteriskuser@localhost;
 
@@ -460,13 +455,13 @@ CREATE TABLE IF NOT EXISTS `trunk` (
     -- si es 'on' la truncal no estar activa y no se podran realizar llamadas por ella
     disabled enum('on','off') default 'off',
     -- si la truncal va a ser usada para conectarse con otro server de mi red o para obtener coneccion con otras redes (PSTN) 
-    type enum('intra','out') default 'out',
+    string_register varchar(100),
     PRIMARY KEY  (`trunkid`),
     UNIQUE KEY (`tech`,`channelid`)
 ) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `trunk_dialpatterns` (
-  `trunkid` int(11) NOT NULL default '0',
+  `trunkid` int(11) NOT NULL,
   `match_pattern_prefix` varchar(50) NOT NULL default '',
   `match_pattern_pass` varchar(50) NOT NULL default '',
   `prepend_digits` varchar(50) NOT NULL default '',
@@ -475,6 +470,12 @@ CREATE TABLE IF NOT EXISTS `trunk_dialpatterns` (
   FOREIGN KEY (`trunkid`) REFERENCES trunk(`trunkid`)
 ) ENGINE = INNODB;
 
+CREATE TABLE IF NOT EXISTS `trunk_organization` (
+  `trunkid` int(11) NOT NULL,
+  `organization_domain` varchar(50) NOT NULL,
+  PRIMARY KEY  (`trunkid`,`organization_domain`),
+  FOREIGN KEY (`trunkid`) REFERENCES trunk(`trunkid`)
+) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `features_code_settings` (
   `name` varchar(50) NOT NULL,
@@ -921,4 +922,77 @@ CREATE TABLE did_details (
     data varchar(50) NOT NULL,
     PRIMARY KEY (did,keyword,data),
     FOREIGN KEY (did) REFERENCES did(did)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS inbound_route;
+CREATE TABLE inbound_route (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    description varchar(50) NOT NULL,
+    did_number varchar(50) default null,
+    cid_number varchar(50) default null,
+    cid_prefix varchar(50) default null,
+    moh varchar(50) default null,
+    delay_answer int(11),
+    alertinfo varchar(50) default null,
+    language varchar(3) default 'en',
+    ringnig enum('on','off') default 'off',
+    primanager enum('yes','no') default 'no',
+    max_attempt int(2) default 3,
+    min_length int(2) default 5,
+    goto varchar(50) NOT NULL,
+    destination varchar(50) NOT NULL,
+    organization_domain varchar(50) NOT NULL,
+    PRIMARY KEY (id),
+    INDEX organization_domain (organization_domain),
+    UNIQUE KEY route_in (did_number,cid_number)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS outbound_route;
+CREATE TABLE outbound_route (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    routename varchar(50) NOT NULL,
+    outcid varchar(50) default null,
+    outcid_mode varchar(50) default null,
+    routepass varchar(50) default null,
+    mohsilence varchar(50) default null,
+    time_group_id int(11),
+    organization_domain varchar(50) NOT NULL,
+    PRIMARY KEY (id),
+    INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS outbound_route;
+CREATE TABLE outbound_route (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    routename varchar(50) NOT NULL,
+    outcid varchar(50) default null,
+    outcid_mode varchar(50) default null,
+    routepass varchar(50) default null,
+    mohsilence varchar(50) default null,
+    time_group_id int(11),
+    organization_domain varchar(50) NOT NULL,
+    PRIMARY KEY (id),
+    INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS outbound_route_dialpattern;
+CREATE TABLE outbound_route_dialpattern (
+    outbound_route_id int(11) NOT NULL,
+    prepend varchar(50) NOT NULL default '',
+    prefix varchar(50) NOT NULL default '',
+    match_pattern varchar(50) NOT NULL default '',
+    match_cid varchar(50) NOT NULL default '',
+    seq int(11) NOT NULL,
+    PRIMARY KEY (`outbound_route_id`,`prepend`,`prefix`,`match_pattern`,`seq`),
+    FOREIGN KEY (`outbound_route_id`) REFERENCES outbound_route(`id`)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS outbound_route_trunkpriority;
+CREATE TABLE outbound_route_trunkpriority (
+    outbound_route_id int(11) NOT NULL,
+    trunk_id int(11) NOT NULL,
+    seq int(11) NOT NULL,
+    PRIMARY KEY  (`outbound_route_id`,`trunk_id`),
+    FOREIGN KEY (`outbound_route_id`) REFERENCES outbound_route(`id`),
+    FOREIGN KEY (`trunk_id`) REFERENCES trunk(`trunkid`)
 ) ENGINE = INNODB;

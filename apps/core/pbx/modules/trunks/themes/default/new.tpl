@@ -100,7 +100,7 @@
         </thead>
         {if $mode eq 'view'}
 		   {foreach from=$items key=myId item=i}
-		      <tr><td align="center">({$i.3})</td>
+		      <tr><td align="center">{if $i.3 eq ''}(  ){else}($i.3){/if}</td>
 			  <td align="center">+</td>
 			  <td align="center">{$i.1}</td>
 			  <td align="center">|</td>

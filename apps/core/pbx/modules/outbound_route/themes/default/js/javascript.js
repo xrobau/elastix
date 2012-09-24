@@ -1,39 +1,57 @@
 $(document).ready(function(){
+
+        $("select.goto").trigger('change');
+	//$('#sortable2').trigger('sortupdate') ;
 	$("#arrDestine").val(getArrRows()); 
-    $(".adv_opt").click(function(){
-        if($("#mostra_adv").val()=="no"){
-            $("#mostra_adv").val("yes");
-            $(".show_more").attr("style","visibility: visible;");
-        }else{
-            $("#mostra_adv").val("no");
-            $(".show_more").attr("style","display: none;");
-        }
-        radio('tab-3');
-    });
-    
-    $("td select[name=org]").change(function(){
-        var org=$("select[name=org] option:selected").val();
-        if(org!="none" && org!=""){
-            var act_orgs=$("#select_orgs").val();
-            //se agrega el elemento a la lista
-            $("select[name='arr_org']").append("<option value="+org+">"+org+"</option>");
-            //se quita el elemento de la lista de seleccion
-            $("select[name=org] option:selected").remove();
-            
-            $("#select_orgs").val(act_orgs+org+",");
-            $("select[name=org]").val("none");
-        }
-    });
-    if($("#mode_input").val()=="edit" || $("#mode_input").val()=="input")
-        mostrar_select_orgs();
+	$("#arrTrunks").val(getIdTrunks()); 
+	
+	
 });
 
-$(window).load(function () {
-    $("div.neo-module-content").attr("style","");
+$(function() {
+ 
+  $( "#sortable1, #sortable2" ).sortable({
+  connectWith: ".connectedSortable"
+ 
+  }).disableSelection();
+  
+  $("#sortable2").bind( "sortupdate", function(event, ui) {
+            var newOrder = $(this).sortable('toArray').toString();
+            var _parent = Number(ui.item[0].parentElement.id);
+            var id_item = ui.item[0].id;
+            if (!isNaN(_parent))
+                id_parent = _parent;
+	    $("#arrTrunks").val(newOrder);
+            
+        
+  })
+  
 });
+
+
+
+
+$(window).load(function () {
+        $("div.neo-module-content").attr("style","");
+});
+
 
 if($("#mode_input").val()=="input")
    var index=0;
+
+
+function getIdTrunks(){
+  var rows =0;
+  var lastRow = getNumRows();
+  var valIndex = "";
+	$('.tab .content .tabForm ul#sortable2 li.ui-state-default input').each(function() {
+	    rows = $(this).attr("id");
+	    valIndex += rows+",";
+	  
+  }); 
+  return valIndex;
+   
+}
 
 function getArrRows(){
   var rows =0;
@@ -48,6 +66,7 @@ function getArrRows(){
 	  
   }); 
   return valIndex;
+   
 }
 
 function getNumRows(){
@@ -86,12 +105,13 @@ var add = function() {
 	$("#"+index).addClass("content-destine");
 	
      }
+     
 };
 
 $('.add').live('click', this, function(event) {
-    add();
-    radio("tab-2");
-});
+            add();
+            
+    });
 
 $('.delete').live('click', this, function(event) {
      //var index = $('table#destine tbody tr').length;    
@@ -104,17 +124,24 @@ $('.delete').live('click', this, function(event) {
 	$(this).closest('tr').remove();
 	$("#arrDestine").val(arrDestine);
     // }
-    radio("tab-2"); 
+     
 });
+
+
+
+
 
 function radio(id_radio){
     var alt=$("#content_"+id_radio).children("table").height();
     var alt_tab=alt+10;
     $(".tabs").css({'height':alt_tab});
+    $(".content").css({'height':'0'});
+    $("#content_"+id_radio).css({'height':''});
     $(".content").css({"z-index":"0"});
     $("div.tab > .content > *").css({"opacity":"0", "-moz-transform": "translateX(-100%)","-webkit-transform":"translateX(-100%)","-o-transform":"translateX(-100%)","-moz-transition":"all 0.6s ease","-webkit-transition":"all 0.6s ease","-o-transition":"all 0.6s ease"});
     $("#content_"+id_radio).css({"z-index":"1"});
     $("#content_"+id_radio+" > *").css({"opacity":"1", "-moz-transform":"translateX(0)", "-webkit-transform":"translateX(0)", "-o-transform":"translateX(0)", "-ms-transform":"translateX(0)"});
+    
     //div de las tabs
     var d_label=$("#"+id_radio).parent();
     $(".neo-table-header-row-filter").css("background","none");
@@ -124,39 +151,9 @@ function radio(id_radio){
     d_label.css("background","linear-gradient(center top , #777777, #999999)");
     d_label.css("border-color"," #888888"); 
     d_label.css("color"," #FFFFFF"); 
+    //$(".content").css({'display':'none'});
+    //$("#content_"+id_radio).css("display","");
 }
 
-function quitar_org(){
-    var org=$("select[name=arr_org] option:selected").val();
-    //se quita el elemento de la lista de seleccionados
-    $("select[name=arr_org] option:selected").remove();
-    //se agrega el elemento de la lista de canales disponibles
-    $("select[name='org']").append("<option value="+org+">"+org+"</option>");
-    var val=$("#select_orgs").val();
-    var arrVal=val.split(",");
-    var option="";
-    for (x in arrVal){
-        if(arrVal[x]!=org && arrVal[x]!="")
-            option += arrVal[x]+",";
-    }
-    $("#select_orgs").val(option);
-}
 
-function mostrar_select_orgs(){
-    var val=$("#select_orgs").val();
-    var arrVal=val.split(",");
-    
-    for (x in arrVal){
-        if(arrVal[x]!=""){
-            $("select[name='arr_org']").append("<option value="+arrVal[x]+">"+arrVal[x]+"</option>");
-        }
-    }
-    
-    var chann=$("select[name='org']");
-    var options = $('option', chann);
-        options.each(function() {
-            if(arrVal.indexOf($(this).text())!=-1){
-                $("select[name=org] option[value='"+$(this).text()+"']").remove();
-            }
-        });
-}
+

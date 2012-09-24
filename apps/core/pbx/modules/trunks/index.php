@@ -96,9 +96,6 @@ function _moduleContent(&$smarty, $module_name)
         case "delete":
             $content = deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
-        case "reloadAasterisk":
-            $content = reloadAasterisk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userLevel1, $idOrganization);
-            break;
         default: // report
             $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB,$arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
@@ -212,38 +209,7 @@ function reportTrunks($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	}
 	
 	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
-	$mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $idOrganization);
-	$contenidoModulo = $mensaje.$contenidoModulo;
     return $contenidoModulo;
-}
-
-function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccount, $idOrganization){
-	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-	$params=array();
-	$msgs="";
-
-	$query = "SELECT domain, id from organization";
-	//si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de mnarcada
-	if($userLevel1!="superadmin"){
-		$query .= " where id=?";
-		$params[]=$idOrganization;
-	}
-
-	$mensaje=_tr("Click here to reload dialplan");
-	$result=$pDB2->fetchTable($query,false,$params);
-	if(is_array($result)){
-		foreach($result as $value){
-			if($value[1]!=1){
-				$showmessage=$pAstConf->getReloadDialplan($value[0]);
-				if($showmessage=="yes"){
-					$append=($userLevel1=="superadmin")?" $value[0]":"";
-					$msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/><b>".$mensaje.$append."</b></a></div>";
-				}
-			}
-		}
-	}
-	return $msgs;
 }
 
 function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$arrDialPattern=array()){
@@ -293,8 +259,19 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                 }
                 $smarty->assign('items',$arrDialPattern);
                 
-                if(getParameter("save_edit"))
+                if(getParameter("save_edit")){
+                    if(isset($_POST["select_orgs"]))
+                        $smarty->assign("ORGS",$_POST["select_orgs"]);
                     $arrTrunks=$_POST;
+                }else{
+                    $select_orgs=implode(",",$arrTrunks["select_orgs"]);
+                    if(isset($arrTrunks["select_orgs"]))
+                        $smarty->assign("ORGS",$select_orgs.",");
+                }
+                
+                if($action=="view"){
+                    $smarty->assign("ORGS",$select_orgs);
+                }
             }
 		}
 	}else{
@@ -305,6 +282,8 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         if(getParameter("create_trunk")){
             $arrTrunks=$pTrunk->getDefaultConfig($tech);
         }else{
+            if(isset($_POST["select_orgs"]))
+                $smarty->assign("ORGS",$_POST["select_orgs"]);
             $arrTrunks=$_POST;
         }
 	}
@@ -315,7 +294,7 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 	
     if($error!=""){
         $smarty->assign("mb_title", _tr("Error"));
-        $smarty->assign("mb_message",$error);
+        $smarty->assign("mb_message",$error." ".$pTrunk->errMsg);
         return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }
     
@@ -424,6 +403,7 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $arrProp['max_chans']=getParameter("maxchans");
         $arrProp['disabled'] = (getParameter("disabled")) ? "on" : "off";
         $arrProp['dialout_prefix']=getParameter("dialoutprefix");
+        $arrProp["select_orgs"]=getParameter("select_orgs");
         
         if($tech=="dahdi"){
             $arrProp["channelid"]=getParameter("channelid");
@@ -453,11 +433,11 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
 	if($successTrunk){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("Trunk has been created successfully"));
-		//mostramos el mensaje para crear los archivos de ocnfiguracion
-		//$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-		//$pAstConf->setReloadDialplan($domain,true);
-		$content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		if(writeAsteriskFile($error)==true)
+            $smarty->assign("mb_message",_tr("Trunk has been created successfully"));
+        else
+            $smarty->assign("mb_message",_tr("Trunk has been created. ").$error);
+        $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",$error);
@@ -520,6 +500,7 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
             $arrProp['max_chans']=getParameter("maxchans");
             $arrProp['disabled'] = (getParameter("disabled")) ? "on" : "off";
             $arrProp['dialout_prefix']=getParameter("dialoutprefix");
+            $arrProp["select_orgs"]=getParameter("select_orgs");
             
             if($tech=="dahdi"){
                 $arrProp["channelid"]=getParameter("channelid");
@@ -535,7 +516,7 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
                         $continue=false;
                     }
                 }
-                $arrProp=array_merge(getSipIaxParam($tech),$arrProp);
+                $arrProp=array_merge(getSipIaxParam($tech,true),$arrProp);
             }
 
             if($continue){
@@ -556,11 +537,16 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 
 	if($successTrunk){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("Trunkhas been edited successfully"));
-		//mostramos el mensaje para crear los archivos de ocnfiguracion
-		//$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-		//$pAstConf->setReloadDialplan($domain,true);
-		$content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		//recargamos la configuracion del peer en caso que la truncal haya sido iax o sip
+		if($arrTrunks["tech"]=="sip" || $arrTrunks["tech"]=="iax2"){
+            $pTrunk->prunePeer($arrTrunks["name"],$arrTrunks["tech"]);
+            $pTrunk->loadPeer($arrTrunks["name"],$arrTrunks["tech"]);
+        }
+        if(writeAsteriskFile($error)==true)
+            $smarty->assign("mb_message",_tr("Trunk has been edited successfully"));
+        else
+            $smarty->assign("mb_message",_tr("Trunk has been edited. ").$error);
+        $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",$error);
@@ -653,29 +639,60 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
                 $smarty->assign("mb_message",$error);
                 return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
             }
-            $pTrunkPBX=new paloTrunkPBX($domain, $pDB);
             $pDB->beginTransaction();
-            $successTrunk = $pTrunkPBX->deleteTrunk($idTrunk);
+            $successTrunk = $pTrunk->deleteTrunk($idTrunk);
             if($successTrunk)
                 $pDB->commit();
             else
                 $pDB->rollBack();
-            $error .=$pTrunkPBX->errMsg;
+            $error .=$pTrunk->errMsg;
         }
 	}
 
 	if($successTrunk){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("The Trunk was deleted successfully"));
-		//mostramos el mensaje para crear los archivos de configuracion
-		//$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-		//$pAstConf->setReloadDialplan($domain,true);
+		//quitamos al peer de cache en caso que la truncal haya sido iax o sip
+        if($arrTrunks["tech"]=="sip" || $arrTrunks["tech"]=="iax2"){
+            $pTrunk->prunePeer($arrTrunks["name"],$arrTrunks["tech"]);
+        }
+        if(writeAsteriskFile($error)==true)
+            $smarty->assign("mb_message",_tr("Trunk was deleted successfully"));
+        else
+            $smarty->assign("mb_message",_tr("Trunk was deleted. ").$error);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($error));
 	}
 
 	return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);;
+}
+
+function writeAsteriskFile(&$error){
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals delete "" 2>&1';
+    $output = $ret = NULL;
+    exec($sComando, $output, $ret);
+    if ($ret != 0) {
+        $error = _tr("Error writing extensions_globals file").implode('', $output);
+        return FALSE;
+    }
+    
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals 2>&1';
+    $output = $ret = NULL;
+    exec($sComando, $output, $ret);
+    if ($ret != 0) {
+        $error = _tr("Error writing extensions_additionals file").implode('', $output);
+        return FALSE;
+    }
+    
+    $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
+    $output = $ret = NULL;
+    exec($sComando, $output, $ret);
+    if ($ret != 0){
+        $error = implode('', $output);
+        return FALSE;
+    }
+    
+    return true;
 }
 
 function createFieldForm($tech)
@@ -692,9 +709,10 @@ function createFieldForm($tech)
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pORGZ = new paloSantoOrganization($pDB2);
     $arrTmp=$pORGZ->getOrganization("","","","");
-    $arrOrgz=array("--pickup organizations--");
+    $arrOrgz=array(0=>"--pickup organizations--");
     foreach($arrTmp as $value){
-        $arrOrgz[$value["domain"]]=$value["domain"];
+        if(!empty($value["domain"]))
+            $arrOrgz[$value["domain"]]=$value["domain"];
     }
 
     $arrFormElements = array("trunk_name"	=> array("LABEL"                  => _tr('Descriptive Name'),
@@ -710,7 +728,7 @@ function createFieldForm($tech)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),//accion en javascript
                              "outcid"   => array("LABEL"                  => _tr("Outbound Caller ID"),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
@@ -1078,56 +1096,6 @@ function createFieldFilter($arrOrgz)
     return $arrFields;
 }
 
-
-function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization){
-	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$continue=false;
-
-	if($userLevel1=="other"){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}
-
-	if($userLevel1=="superadmin"){
-		$idOrganization = getParameter("organization_id");
-	}
-
-	if($idOrganization==1){
-		return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}
-
-	$query="select domain from organization where id=?";
-	$result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
-	if($result===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
-	}elseif(count($result)==0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. "));
-	}else{
-		$domain=$result[0];
-		$continue=true;
-	}
-
-	if($continue){
-		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-		if($pAstConf->generateDialplan($domain)===false){
-			$pAstConf->setReloadDialplan($domain,true);
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);
-			$showMsg=true;
-		}else{
-			$pAstConf->setReloadDialplan($domain);
-			$smarty->assign("mb_title", _tr("MESSAGE"));
-			$smarty->assign("mb_message",_tr("Asterisk was reloaded correctly. "));
-		}
-	}
-
-	return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-}
-
 function getAction(){
     if(getParameter("create_trunk"))
         return "new_trunk";
@@ -1143,8 +1111,6 @@ function getAction(){
         return "view";
     else if(getParameter("action")=="view_edit")
         return "view_edit";
-	else if(getParameter("action")=="reloadAsterisk")
-		return "reloadAasterisk";
     else
         return "report"; //cancel
 }

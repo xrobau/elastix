@@ -128,14 +128,20 @@ class paloSantoTrunk extends paloAsteriskDB{
 			$arrTrunk["disabled"]=$result["disabled"];
 			$arrTrunk["register"]=$result["string_register"]; 
 			
+			if($arrTrunk["tech"]=="iax2"){
+                $tech="iax";
+			}else{
+                $tech=$arrTrunk["tech"];
+			}
+			
 			//obtenemos los detalles del peer si la truncal es de tipo sip o iax2
-			if($arrTrunk["tech"]=="sip" || $arrTrunk["tech"]=="iax2"){
+			if($tech=="sip" || $tech=="iax"){
                 if($arrTrunk["tech"]=="sip"){
                     $queryT="insecure,nat,dtmfmode,fromuser,fromdomain,sendrpid,canreinvite,useragent,videosupport,maxcallbitrate,qualifyfreq,rtptimeout,rtpholdtimeout,rtpkeepalive";
                 }else{
                     $queryT="auth,trunk,trunkfreq,trunktimestamps,sendani,adsi,requirecalltoken,encryption,jitterbuffer,forcejitterbuffer,codecpriority,qualifysmoothing,qualifyfreqok,qualifyfreqnotok";
                 }
-                $query="SELECT context,name,type,username,host,qualify,disallow,allow,amaflags,deny,permit, $queryT from ".$arrTrunk["tech"]." where name=?";
+                $query="SELECT context,name,type,username,host,qualify,disallow,allow,amaflags,deny,permit, $queryT from ".$tech." where name=?";
                 $result=$this->_DB->getFirstRowQuery($query,true,array($arrTrunk["channelid"]));
                 if($result==false){
                     $this->errMsg=_tr("Error getting peer details. ").$this->_DB->errMsg;
@@ -144,6 +150,20 @@ class paloSantoTrunk extends paloAsteriskDB{
                     $arrTrunk=array_merge($result,$arrTrunk);
                 }
 			}
+			
+			$arrTrunk["select_orgs"]=array();
+			//obtenemos las organizaciones asociadas a las truncal
+			$query="SELECT organization_domain from trunk_organization where trunkid=?";
+			$result=$this->_DB->fetchTable($query,true,array($id));
+			if($result===false){
+                $this->errMsg=_tr("Error getting organizations related with trunks. ").$this->_DB->errMsg;
+                return false;
+            }else{
+                foreach($result as $value){
+                    $arrTrunk["select_orgs"][]=$value["organization_domain"];
+                }
+            }
+            
 			return $arrTrunk;
 		}
     }
@@ -165,7 +185,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             $arrTrunk["trustrpid"]="no";
             $arrTrunk["canreinvite"]="no";
             $arrTrunk["useragent"]="";
-        }elseif($tech=="iax"){
+        }elseif($tech=="iax2"){
             $arrTrunk["auth"]="plaintext";
             $arrTrunk["trunk"]="yes";
             $arrTrunk["trunkfreq"]="20";
@@ -183,7 +203,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             return true;
         }
         
-        if($tech=="sip" || $tech=="sip"){
+        if($tech=="sip" || $tech=="iax2"){
             $msg=_tr("Peer Name can't be empty");
         }else{
             $msg=_tr("DAHDI Identifier can't be empty");
@@ -282,21 +302,55 @@ class paloSantoTrunk extends paloAsteriskDB{
             if($this->createDialPattern($arrDialPattern,$trunkid)==false){
                 $this->errMsg=_tr("Trunk can't be created .").$this->errMsg;
                 return false;
-            }else
-                return true;
+            }
         }else{
             $this->errMsg=_tr("Trunk could not be created .").$this->_DB->errMsg;
             return false;
         }
+        
+        //guardamos las organizaciones relacionadas con la truncal
+        if($this->trunkOrganization($trunkid,$arrProp["select_orgs"])==false){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    
+    private function trunkOrganization($id_trunk,$arrOrg){
+        global $arrConf;
+        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+        $pORGZ = new paloSantoOrganization($pDB2);
+        $arrTmp=$pORGZ->getOrganization("","","","");
+        $arrOrgz=array();
+        foreach($arrTmp as $value){
+            if(!empty($value["domain"]))
+                $arrOrgz[$value["domain"]]=$value["domain"];
+        }
+        
+        $query="INSERT into trunk_organization values (?,?)";
+        //obtenemos las oraganizacion seleccionadas
+        $orgs=explode(",",$arrOrg);
+        foreach($orgs as $value){
+            if($value!=""){
+                if(in_array($value,$arrOrgz)){
+                    if($this->_DB->genQuery($query,array($id_trunk,$value))==false){
+                        $this->errMsg .=_tr("Organization in trunk couldn't be setted. ").$this->_DB->errMsg;
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
     
     private function createSipIaxTrunk($arrProp){
         $tech=$arrProp["tech"];
-        if($tech=="sip")
+        if($tech=="sip"){
             $this->type=new paloSip($this->_DB);
-        elseif($tech=="iax2")
+        }elseif($tech=="iax2"){
+            $tech="iax";
             $this->type=new paloIax($this->_DB);
-        else{
+        }else{
             $this->errMsg=_tr("Invalid technology");
             return false;
         }
@@ -449,21 +503,35 @@ class paloSantoTrunk extends paloAsteriskDB{
             if($this->createDialPattern($arrDialPattern,$idTrunk)==false){
                 $this->errMsg="Trunk can't be updated.".$this->errMsg;
                 return false;
-            }else
-                return true;
+            }
         }else{
             $this->errMsg=_tr("Trunk could not be updated.").$this->_DB->errMsg;
             return false;
         }
+        
+        //guardamos las organizaciones relacionadas con la truncal
+        $query="DELETE from trunk_organization where trunkid=?";
+        if($this->_DB->genQuery($query,array($idTrunk))==false){
+            $this->errMsg .=_tr("Trunk couldn't be updated. ").$this->_DB->errMsg;
+            return false;
+        }
+        
+        if($this->trunkOrganization($idTrunk,$arrProp["select_orgs"])==false){
+            return false;
+        }else{
+            return true;
+        }
+        
     }
     
     private function updateSipIaxTrunk($arrProp){
         $tech=$arrProp["tech"];
-        if($tech=="sip")
+        if($tech=="sip"){
             $this->type=new paloSip($this->_DB);
-        elseif($tech=="iax2")
+        }elseif($tech=="iax2"){
+            $tech="iax";
             $this->type=new paloIax($this->_DB);
-        else{
+        }else{
             $this->errMsg=_tr("Invalid technology");
             return false;
         }
@@ -608,16 +676,47 @@ class paloSantoTrunk extends paloAsteriskDB{
      }
     
      function deleteTrunk($trunkid){
+        if(!preg_match("/^[0-9]+$/",$trunkid)){
+            $this->errMsg=_tr("Invalid Trunk. ");
+            return false;
+        }
+        
+        $query="SELECT channelid,tech from trunk where trunkid=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($trunkid));
+        if($result===false || count($result)==0){
+            $this->errMsg=_tr("Trunk doesn't exist. ").$this->_DB->errMsg;
+            return false;
+        }
+        
         $resultDelete = $this->deleteDialPatterns($trunkid);
+        //borramos el peer creado para la truncal en caso de que la tecnologia sea iax2 o sip
+        if($result["tech"]=="iax2" || $result["tech"]=="sip"){
+            $tech=$result["tech"];
+            if($result["tech"]=="iax2")
+                $tech="iax";
+                
+            $query="DELETE from $tech where name=?";
+            if($this->_DB->genQuery($query,array($result["channelid"]))==false){
+                $this->errMsg .=_tr("Peer couldn't be deleted. ").$this->_DB->errMsg;
+                return false;
+            }
+        }
+        
+        $query="DELETE from trunk_organization where trunkid=?";
+        if($this->_DB->genQuery($query,array($trunkid))==false){
+            $this->errMsg .=_tr("Trunk can't be deleted. ").$this->_DB->errMsg;
+            return false;
+        }
         
         $query="DELETE from trunk where trunkid=?";
         if(($this->executeQuery($query,array($trunkid)))&&($resultDelete==true)){
             return true;
         }else{
-            $this->errMsg="Trunk can't be deleted.".$this->errMsg;
+            $this->errMsg=_tr("Trunk can't be deleted. ").$this->errMsg;
             return false;
         }
-                     
+        
+        return true;
     }
 
     private function deleteDialPatterns($trunkid){

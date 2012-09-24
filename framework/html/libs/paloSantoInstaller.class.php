@@ -23,9 +23,9 @@
   $Id: paloSantoInstaller.class.php,v 1.1 2007/09/05 00:25:25 gcarrillo Exp $
 */
 
-require_once "libs/paloSantoDB.class.php";
-require_once "libs/paloSantoModuloXML.class.php";
-require_once "libs/misc.lib.php";
+require_once "/var/www/html/libs/paloSantoDB.class.php";
+require_once "/var/www/html/libs/paloSantoModuloXML.class.php";
+require_once "/var/www/html/libs/misc.lib.php";
 
 // La presencia de MYSQL_ROOT_PASSWORD es parte del API global.
 define('MYSQL_ROOT_PASSWORD', obtenerClaveConocidaMySQL('root', '/var/www/html/'));
@@ -77,7 +77,7 @@ class Installer
 		$tag      = isset($arrTmp['tag'])?$arrTmp['tag']:"";
 		$mName   = isset($arrTmp['mName'])?$arrTmp['mName']:"";
 
-		if ($parentId=="")
+		if ($parent=="")
 			$type="";
 		else{
 			if($link=="")

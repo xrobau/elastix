@@ -25,8 +25,8 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: paloSantoACL.class.php,v 1.1.1.1 2007/07/06 21:31:55 gcarrillo Exp $ */
-
+  $Id: paloSantoACL.class.php,v 1.1.1.1 2007/07/06 21:31:55 gcarrillo Exp $ 
+  $Id: paloSantoACL.class.php,v 3.0 2012/09/01 21:31:55 Rocio Mera rmera@palosanto.com Exp $ */
 /*
 if (isset($arrConf['basePath'])) {
     include_once($arrConf['basePath'] . "/libs/paloSantoDB.class.php");
@@ -395,7 +395,7 @@ class paloACL {
 				}
 
                 $sPeticionSQL = "INSERT into acl_user (username,name,md5_password,id_group,extension,fax_extension,estado) VALUES (?,?,?,?,?,?,?)";
-                $arrParam = array($username,$name,$md5_password,$id_group,$extension, $fax_extension, "activo");
+                $arrParam = array($username,$name,$md5_password,$id_group,$extension, $fax_extension, "active");
                 if ($this->_DB->genQuery($sPeticionSQL,$arrParam)) {
                     $bExito = TRUE;
                 } else {

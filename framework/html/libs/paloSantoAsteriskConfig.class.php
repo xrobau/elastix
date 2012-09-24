@@ -164,7 +164,7 @@ class paloSantoASteriskConfig{
             return false;
         }
         
-		//reescribimos los archivos extensions.conf y extensions_globals.conf con las configuraciones correctas
+		//reescribimos los archivos extensions.conf, extensions_globals.conf y extensions_did.conf con las configuraciones correctas
 		if($this->createExtensionsGlobals("delete",$orgzDomain)===false){
 			$this->errMsg=_tr("Error when trying write asterisk config file").$this->errMsg;
 			return false;
@@ -216,6 +216,7 @@ class paloSantoASteriskConfig{
                     if($pFC->createFeatureFile()){
                         if($this->setReloadDialplan($domain)){
                             if($this->createExtensionsGlobals("add",$domain)!==false && $this->includeInExtensions_conf("add",$domain)!==false){
+                                //recargamos la configuracion de asterisk
                                 $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
                                 $output = $ret = NULL;
                                 exec($sComando, $output, $ret);
@@ -249,8 +250,7 @@ class paloSantoASteriskConfig{
 
 		//arreglo que contiene las tablas dentro de ast_realtime que no tienen el campo
         //organization_domian
-		$arrNoOrgDomain=array("trunk_dialpatterns","features_code_settings","globals_settings","iax_settings","sip_settings",
-		"voicemail_settings");
+		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details","did");
 
 		//obtenemos una lista de las tablas dentro de la base elxpbx
 		$queryShow="show tables from elxpbx";
@@ -263,22 +263,54 @@ class paloSantoASteriskConfig{
 		foreach($result as $value){
 			$queryDel="DELETE from ".$value[0]." where organization_domain=?";
 			if(!in_array($value[0],$arrNoOrgDomain)){
-				if($value[0]=="trunks"){
-					$queryTrunkId="SELECT trunkid from trunks where organization_domain=?";
-					$result=$this->_DB->fetchTable($queryTrunkId, false, array($domain));
-					if($result===false){
-						$this->errMsg=$this->_DB->errMsg;
-						return false;
-					}else{
-						foreach($result as $valor){
-							$qDelTrunkD="DELETE from trunk_dialpatterns where trunkid=?";
-							$result=$this->_DB->genQuery($qDelTrunkD,array($valor[0],$domain));
-							if($result==false){
-								$this->errMsg=$this->_DB->errMsg;
-								return false;
-							}
-						}
-					}
+                if($value[0]=="queue"){
+                    $query="SELECT name from queue where organization_domain=?";
+                    $result=$this->_DB->fetchTable($query, false, array($domain));
+                    if($result===false){
+                        $this->errMsg=$this->_DB->errMsg;
+                        return false;
+                    }else{
+                        foreach($result as $valor){
+                            $qDel="DELETE from queue_member where queue_name=?";
+                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
+                            if($result==false){
+                                $this->errMsg=$this->_DB->errMsg;
+                                return false;
+                            }
+                        }
+                    }
+				}elseif($value[0]=="ivr"){
+                    $query="SELECT id from ivr where organization_domain=?";
+                    $result=$this->_DB->fetchTable($query, false, array($domain));
+                    if($result===false){
+                        $this->errMsg=$this->_DB->errMsg;
+                        return false;
+                    }else{
+                        foreach($result as $valor){
+                            $qDel="DELETE from ivr_destination where ivr_id=?";
+                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
+                            if($result==false){
+                                $this->errMsg=$this->_DB->errMsg;
+                                return false;
+                            }
+                        }
+                    }
+				}elseif($value[0]=="outbound_route"){
+                    $query="SELECT id from outbound_router where organization_domain=?";
+                    $result=$this->_DB->fetchTable($query, false, array($domain));
+                    if($result===false){
+                        $this->errMsg=$this->_DB->errMsg;
+                        return false;
+                    }else{
+                        foreach($result as $valor){
+                            $qDel="DELETE from outbound_route_dialpattern where outbound_route_id=?";
+                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
+                            if($result==false){
+                                $this->errMsg=$this->_DB->errMsg;
+                                return false;
+                            }
+                        }
+                    }
 				}
 				$result=$this->_DB->genQuery($queryDel,array($domain));
 				if(!$result){
@@ -287,6 +319,12 @@ class paloSantoASteriskConfig{
 				}
 			}
 		}
+		
+		$queryd="UPDATE did set organization_domain=NULL where organization_domain=?";
+        if($this->_DB->genQuery($queryd,array($domain))==false){
+            $this->errMsg .=$this->_DB->errMsg;
+            return false;
+        }
 
 		//borramos las entradas de la organizacion dentro de astDB
 		$errorMng="";
@@ -304,12 +342,32 @@ class paloSantoASteriskConfig{
 			$result=$astMang->database_delTree("CF/".$code);
 			$result=$astMang->database_delTree("CW/".$code);
 			$result=$astMang->database_delTree("BLACKLIST/".$code);
+			$result=$astMang->database_delTree("QPENALTY/".$code);
 		}
-	
+		
+		//reescribimos los arcgivos extensions_did.conf y chan_dahdi_additional.conf
+		//por si la organizacion tenia asociado alguno
+        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals '."$domain".' 2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = _tr("Error writitn did file").implode('', $output);
+            return FALSE;
+        }
+        
 		$exito=$this->delete_dialplanfiles($domain);
-		if(!$exito)
+		if(!$exito){
 			$this->errMsg=_tr("Error deleting dialplan files of organization")."$domain. ".$this->errMsg;
-
+			//reescribimos los arcgivos extensions_did.conf y chan_dahdi_additional.conf
+			$sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals  2>&1';
+            $output = $ret = NULL;
+            exec($sComando, $output, $ret);
+            if ($ret != 0) {
+                $this->errMsg = _tr("Error writing did file").implode('', $output);
+                return FALSE;
+            }
+        }
+        
 		return $exito;
 	}
 	

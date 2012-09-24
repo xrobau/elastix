@@ -124,14 +124,20 @@ class paloAsteriskDB {
 			if($result[0]!=0){
 				$this->errMsg=_tr("Already exits a fax extension with same pattern");
 			}else{
-				//validamos que la extension no este siendo usado por los features code
+				//validamos que el patron de marcado no este siendo usado por los features code
 				$query="SELECT 1 from features_code f join features_code_settings fg on f.name=fg.name 
 				where f.code=? or fg.default_code=? and f.organization_domain=?";
 				$result=$this->getFirstResultQuery($query,array($extension,$extension,$domain));
 				if(count($result)>0 || $result===false){
 					$this->errMsg=_tr("Already exits a feature code with same pattern");
 				}else{
-					$exist=false;
+                    //validamos que el patron de marcado no este siendo usado por una cola
+					$query="SELECT count(name) from queue where queue_number=? and organization_domain=?";
+                    $result=$this->getFirstResultQuery($query,array($extension,$domain));
+                    if($result[0]!=0){
+                        $this->errMsg=_tr("Already exits a queue with same pattern");
+                    }else
+                        $exist=false;
 				}
 			}
 		}
@@ -156,11 +162,11 @@ class paloAsteriskDB {
 	}
 
 	function prunePeer($device,$tech){
-        if(!$this->validateName($device))
+       /* if(!$this->validateName($device))
         {
             $this->errMsg=_tr("Invalid device name");
             return false;
-        }
+        }*/
 
         $errorM="";
         $astMang=AsteriskManagerConnect($errorM);
@@ -174,24 +180,257 @@ class paloAsteriskDB {
     }
     
     function loadPeer($device,$tech){
-        if(!$this->validateName($device))
+       /* if(!$this->validateName($device))
         {
-            print("hola");
-            print($device);
             $this->errMsg=_tr("Invalid device name");
             return false;
-        }
+        }*/
 
         $errorM="";
         $astMang=AsteriskManagerConnect($errorM);
         if($astMang==false){
-            print("1");
             $this->errMsg=$errorM;
             return false;
         }else{ //borro las propiedades dentro de la base ASTDB de asterisk
             $result=$astMang->loadPeer($tech,$device);
         }
         return true;
+    }
+    
+    function getRecordingsSystem($domain){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return false;
+        }
+        
+        $recordings=array("none"=>_tr("None"));
+        $query="Select uniqueid,description,filename from recordings where organization_domain=?";
+        $result=$this->getResultQuery($query,array($domain),true,"Don't exist any recording created");
+        if($result!=false){
+            foreach($result as $value){
+                $recordings[$value["uniqueid"]]=$value["description"];
+            }
+        }
+        return $recordings; 
+    }
+    
+    //devuelve el archivo de audio que corresponde al id dado 
+    //caso contrario devuelve falso
+    function getFileRecordings($domain,$key){
+        $file=null;
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return null;
+        }
+        
+        $query="SELECT filename from recordings where organization_domain=? and uniqueid=?";
+        $result=$this->getFirstResultQuery($query,array($domain,$key));
+        if($result!=false){
+            $file=$result["filename"];
+        }
+        return $file;
+    }
+    
+    //devuelve un arreglo que contiene los posibles destinos de ultimo recurso dado una categoria
+    //categorias son: extensions, ivrs, queues, trunks, phonebook, terminate call
+    function getDefaultDestination($domain,$categoria){
+        $arrDestine=array();
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return false;
+        }
+        
+        switch($categoria){
+            case "extensions":
+                $qExt="SELECT dial,exten from extension where organization_domain=?";
+                $result=$this->getResultQuery($qExt,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["extensions,".$value["exten"]]=$value["exten"]." (".$value["dial"].")";
+                }
+                break;
+            case "ivrs":
+                $qIvr="SELECT id,name from ivr where organization_domain=?";
+                $result=$this->getResultQuery($qIvr,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["ivrs,".$value["id"]]=$value["name"];
+                }
+                break;
+            /*case "trunks":
+                $qTrunk="SELECT trunkid,name,tech from trunk where organization_domain=?";
+                $result=$this->getResultQuery($qTrunk,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["trunks,".$value["trunkid"]]=$value["name"]." (".$value["tech"].")";
+                }
+                break;*/
+            case "queues":
+                $qQueues="SELECT name,queue_number,description from queue where organization_domain=?";
+                $result=$this->getResultQuery($qQueues,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["queues,".$value["name"]]=$value["queue_number"]." (".$value["description"].")";
+                }
+                break;
+            case "terminate_call":
+                    $arrDestine["terminate_call,hangup"]=_tr("Hangup");
+                    $arrDestine["terminate_call,congestion"]=_tr("Congestion");
+                    $arrDestine["terminate_call,busy"]=_tr("Play busytones");
+                    $arrDestine["terminate_call,zapateller"]=_tr("Play SIT Tone (Zapateller)");
+                    $arrDestine["terminate_call,musiconhold"]=_tr("Put call in hold");
+                    $arrDestine["terminate_call,ring"]=_tr("Play ringtones");
+                break;
+            case "phonebook":
+                    $arrDestine["phonebook,phonebook"]=_tr("Phonebook");
+                break;
+        }
+        return $arrDestine;
+    }
+    
+    function validateDestine($domain,$valor){
+        $arrDestine=array();
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return false;
+        }
+        
+        $result=explode(",",$valor);
+        if(count($result)<2){
+            return false;
+        }
+        $categoria=$result[0];
+        $select=$result[1];
+        
+        switch($categoria){
+            case "extensions":
+                $query="SELECT count(exten) from extension where organization_domain=? and exten=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+            case "ivrs":
+                $query="SELECT count(id) from ivr where organization_domain=? and id=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+           /* case "trunks":
+                $query="SELECT count(trunkid) from trunk where organization_domain=? and trunkid=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;*/
+            case "queues":
+                $query="SELECT count(name) from queue where organization_domain=? and name=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+            case "terminate_call":
+                if(!preg_match("/^(hangup|congestion|busy|zapateller|musiconhold|ring){1}$/",$select)){
+                    return false;
+                }
+                break;
+            case "phonebook":
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+    
+    //funcion que dado los datos de destinations guardados devuelve el goto del mismo
+    function getGotoDestine($domain,$valor){
+        $arrDestine=array();
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return false;
+        }
+        
+        $result=explode(",",$valor);
+        if(count($result)<2){
+            return false;
+        }
+        $categoria=$result[0];
+        $destino=$result[1];
+        
+        $rc=$this->getCodeByDomain($domain);
+        if($rc==false)
+            return false;
+            
+        $code=$rc["code"];
+        
+        switch($categoria){
+            case "extensions":
+                $query="SELECT exten from extension where organization_domain=? and exten=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-from-did-direct,".$result["exten"].",1";
+                }
+                break;
+            case "ivrs":
+                $query="SELECT id from ivr where organization_domain=? and id=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-ivr-".$result["id"].",s,1";
+                }
+                break;
+            /*case "trunks":
+                $query="SELECT trunkid from trunk where organization_domain=? and trunkid=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-ext-trunk,".$result["trunkid"].",1";
+                }
+                break;*/
+            case "queues":
+                $query="SELECT queue_number from queue where organization_domain=? and name=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-ext-queues,".$result["queue_number"].",1";
+                }
+                break;
+            case "terminate_call":
+                if(preg_match("/^(hangup|congestion|busy|zapateller|musiconhold|ring){1}$/",$destino)){
+                    return "$code-app-blackhole,".$destino.",1";
+                }
+                break;
+            case "phonebook":
+                    return "$code-app-pbdirectory,pbdirectory,1";
+                break;
+            default:
+                return false;
+        }
+        return false;
+    }
+    
+    function getCategoryDefault($domain){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return false;
+        }
+        $arrCat=array("none"=>_tr("- choose one -"),"terminate_call"=>_tr("Terminate Call"),"phonebook"=>_tr("Phonebook"));
+        $query="select exten from extension where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["extensions"]=_tr("Extensions");
+        }
+        $query="select id from ivr where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["ivrs"]=_tr("Ivrs");
+        }
+        /*$query="select trunkid from trunk where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["trunks"]=_tr("Trunks");
+        }*/
+        $query="select queue_number from queue where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["queues"]=_tr("Queues");
+        }
+        return $arrCat;
     }
 }
 
@@ -2177,242 +2416,415 @@ class paloDevice{
 	}
 }
 
-
-class paloTrunks extends paloAsteriskDB{
+class paloOutboundPBX extends paloAsteriskDB{
 	public $type;
-	protected $dominio;
+	protected $domain;
 	protected $code;
 	public $_DB;
 	public $errMsg;
 
-	function paloTrunk($domain,&$pDB2){
+	function paloOutboundPBX($domain,&$pDB2){
 		if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
 			$this->errMsg="Invalid domain format";
 		}else{
 			$this->domain=$domain;
 
-			parent::__construct($pDB);
+			parent::__construct($pDB2);
 
 			$result=$this->getCodeByDomain($domain);
 			if($result==false){
-				$this->errMsg .=_tr("Can't create a new instace of paloTrunk").$this->errMsg;
+				$this->errMsg .=_tr("Can't create a new instace of paloOutboundPBX").$this->errMsg;
 			}else{
 				$this->code=$result["code"];
 			}
 		}
 	}
 
-	function createNewTrunk($arrProp,$type){
-		$query="INSERT INTO trunks values (tech";
-		$arrOpt=array($type);
+	function createNewOutbound($arrProp,$arrDialPattern,$arrTrunkPriority){
+		$query="INSERT INTO outbound_route (";
+		$arrOpt=array();
 
 		//definimos el tipo de truncal que vamos a crear
-		switch($type){
-			case "sip":
-				$this->type="sip";
-				break;
-			case "dahdi":
-				$this->type="dahdi";
-				break;
-			case "iax2":
-				$this->type="iax2";
-				break;
-			case "enum":
-				$this->type="enum";
-				break;
-			case "dundi":
-				$this->type="dundi";
-				break;
-			case "custom":
-				$this->type="custom";
-				break;
-			default:
-				$this->errMsg="Invalid type of trunk";
-				return false;
+				
+		//debe haberse seteado un nombre
+		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
+			$this->errMsg="Name of outbound can't be empty";
+		}else{
+			$val = $this->checkName($arrProp['domain'],$arrProp['routename']);
+		        if($val==1)
+			   $this->errMsg="Route Name is already used by another Outbound Route"; 
+			else{
+			   $query .="routename,";
+			   $arrOpt[0]=$arrProp["routename"];
+			}
 		}
 
-		//debe haberse seteado un nombre para la truncal
-		if(!isset($arrProp["name"]) || $arrProp["name"]==""){
-			$this->errMsg="Name of trunk could be empty";
-		}else{
-			$query .="name,";
-			$arrOpt[1]=$arrProp["name"];
-		}
-		
-		//si se define un callerid de salida
-		if(isset($arrProp["out_cid"])){
+		//si se define un callerid 
+		if(isset($arrProp["outcid"])){
 			$query .="outcid,";
-			$arrOpt[count($arrOpt)]=$arrProp["name"];
+			$arrOpt[count($arrOpt)]=$arrProp["outcid"];
+		}
+
+		if(isset($arrProp["outcid_mode"])){
+			$query .="outcid_mode,";
+			$arrOpt[count($arrOpt)]=$arrProp["outcid_mode"];
+		}
+	  
+		//si se define un password
+		if(isset($arrProp["routepass"])){
+			$query .="routepass,";
+			$arrOpt[count($arrOpt)]=$arrProp["routepass"];
+		}
+
+		
+		if(isset($arrProp["mohsilence"])){
+			$query .="mohsilence,";
+			$arrOpt[count($arrOpt)]=$arrProp["mohsilence"];
+		}
+
+		if(isset($arrProp["time_group_id"])){
+			$query .="time_group_id,";
+			$arrOpt[count($arrOpt)]=$arrProp["time_group_id"];
+		}
+
+		if(!isset($arrProp["domain"]) || $arrProp["domain"]==""){
+			$this->errMsg="It's necesary you create a new organization so you can create an Outbound to this organization";
+		}else{
+			$query .="organization_domain";
+			$arrOpt[count($arrOpt)]=$arrProp["domain"];
 		}
 
 		//caller id options
-		if($arrProp["cid_options"]!="on" && $arrProp["cid_options"]!="off" && $arrProp["cid_options"]!="cnum" && $arrProp["cid_options"]!="all"){
-			$this->errMsg="Invalid CID Options";
-		}else{
-			$query .="keepcid,";
-			$arrOpt[count($arrOpt)]=$arrProp["cid_options"];
-		}
 		
-		//si existe un maximo numero de canales
-		if(!preg_match("/^[[:digit:]]+$/",$arrProp["max_chans"])){
-			$this->errMsg="Invalid value field Maximun Channels";
-		}else{
-			$query .="maxchans,";
-			$arrOpt[count($arrOpt)]=$arrProp["max_chans"];
-		}
-
-		//si esta o no deshabilitada la truncal
-		if($arrProp["disabled"]=="on"){
-			$query .="disabled,";
-			$arrOpt[count($arrOpt)]=$arrProp["disabled"];
-		}
-
-		//oupbound dial prefix
-		if(!preg_match("/^[[:digit:]]+$/",$arrProp["dialout_prefix"])){
-			$this->errMsg="Invalid value field Outbound Prefix";
-		}else{
-			$query .="dialoutprefix";
-			$arrOpt[count($arrOpt)]=$arrProp["dialout_prefix"];
-		}
-
+		
 		$query .=")";
 		$qmarks = "(";
 		for($i=0;$i<count($arrOpt);$i++){
 			$qmarks .="?,"; 
 		}
 		$qmarks=substr($qmarks,0,-1).")"; 
-
+		$query = $query." values".$qmarks;
 		if($this->errMsg==""){
-			if($this->type=="sip"){
-				$exito=createSipTrunk($channelId,$trunkid,$query,$arrOpt,$arrProp);
-			}elseif($this->type=="iax"){
-				$exito=createIaxTrunk($channelId,$trunkid,$query,$arrOpt,$arrProp);
-			}elseif($this->type=="dahdi"){
-				$exito=createDahdiTrunk($channelId,$trunkid,$query,$arrOpt);
-			}
+			$exito=$this->createOutbound($query,$arrOpt,$arrProp);
+			
 		}else{
 			return false;
 		}
 
 		if($exito==true){
 			//si ahi dialpatterns se los procesa
-			if($this->createDialPattern($arrProp["dialPattern"],$trunkid)==false){
-				$this->errMsg="Trunk can't be created .".$this->errMsg;
-				return false;
-			}else
-				return true;
+			    $result = $this->getFirstResultQuery("SELECT LAST_INSERT_ID()",NULL);//{
+			
+			    $outboundid=$result[0];
+			   
+			    if($this->createDialPattern($arrDialPattern,$outboundid)==false){
+				    $this->errMsg="Outbound can't be created .".$this->errMsg;
+				    return false;
+			    }elseif($this->createTrunkPriority($arrTrunkPriority,$outboundid)==false){
+				    $this->errMsg="Outbound can't be created .".$this->errMsg;
+				    return false;
+			    }else
+				    return true;
+			//}
 		}else
 			return false;
 
 	}
 
-	private function createDialPattern($arrDialPattern,$trunkid)
-	{
-		$result=true;
-
-		if(is_array($arrDialPattern) && count($arrDialPattern)!=0){
-			$temp=$arrDialPattern;
-			foreach($temp as $ind => $value){
-				if(isset($value["prepend"])){
-					//validamos los campos
-					if(!preg_match("/^[[:digit:]]*$/",$value["prepend"])){
-						$this->errMsg="Invalid dial pattern";
-						break;
-					}
-				}else
-					$arrDialPattern[$ind]["prepend"]="";
-
-				if(isset($value["prefix"])){
-					if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$value["prefix"])){
-						$this->errMsg="Invalid dial pattern";
-						break;
-					}
-				}else
-					$arrDialPattern[$ind]["prefix"]="";
-
-				if(isset($value["match"])){
-					if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$value["match"])){
-						$this->errMsg="Invalid dial pattern";
-						break;
-					}
-				}else
-					$arrDialPattern[$ind]["match"]="";
-			}
-
-			if($this->errMsg==false)
-				return false;
-			else{
-				//verificar que exista una truncal con ese trunkid
-				$query="INSERT INTO trunk_dialpatterns (trunkid,match_pattern_prefix,match_pattern_pass,prepend_digits,seq) values (?,?,?,?,?)";
-				foreach($arrDialPattern as $key => $value){
-					if($value["prepend"]!="" || $value["prefix"]!="" || $value["match"]!="")
-						$result=$this->executeQuery($query,array($trunkid,$value["prepend"],$value["prefix"],$value["match"],$key));
-						if($result==false) //habria que eliminar los campos que fueron insertados demas
-							break;
-				}
-			}
-		}
-		return $result;
-	}
-
-	private function createDahdiTrunk($channelId,&$trunkid,$query,$arrProp)
-	{
-		//setear el identificador apropiadamente (channel id)
-		//campo group dentro de chan_dahdi.conf group=numCode(numeroGrupo)
-		//numero de grupo 2 digitos maximos al principio seteado 00
-		if(!preg_match("/^[g|r]{0,1}[[:digit:]]{1,2}$/",$channelId)){
-			$this->errMsg="Invalid DAHDI Identifier";
+	private function createOutbound($query,$arrOpt,$arrProp){
+		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
+			$this->errMsg="Outbound can't be created. Route Name can't be empty";
 			return false;
 		}
-
-		if(!preg_match("/^organization_[[:digit:]]{3}$/",$this->code)){
-			$this->errMsg="Invalid code organization";
-			return false;
-		}
-
-		$numCode=strpos($this->code,13);
-		if(substr($channelId,0,1)=="r" || substr($channelId,0,1)=="g"){
-			$channelId=substr($channelId,0,1).$numCode.substr($channelId,1);
-		}else{
-			$channelId=$numCode.$channelId;
-		}
-
-		$result=$this->executeQuery($query,$arrProp);
-		if($result==true){ //habria que eliminar los campos que fueron insertados demas
-			//obtengo el id de la ultima truncal insertada
-			$result=$this->getFirstResultQuery("SELECT LAST_INSERT_ID()",NULL);
-			$trunkid=$result[0];
-			return true;
-		}else{
-			$this->errMsg="Trunk can't be created .".$this->errMsg;
-			return false;
-		}
-	}
-
-	function createDialPlanTrunk(){
+		$result=$this->executeQuery($query,$arrOpt);
 		
-	}
+		
+		if($result==false)
+			$this->errMsg=$this->errMsg;
+		return $result; 
 
-	private function createSipTrunk($channelId,$trunkid,$query,$arrOpt,$arrProp){
-		if(!isset($arrProp["trunk_name"]) || $arrProp["trunk_name"]==""){
-			$this->errMsg="Trunk can't be created . Trunk Name can't be empty";
-			return false;
-		}
 		//validamos que no existe otros peers con el mismo nombre de truncal
 		
 	}
 
-	private function createIaxTrunk($channelId,$trunkid,$query,$arrOpt,$arrProp){
+	function updateOutboundPBX($arrProp,$arrDialPattern,$idOutbound,$arrTrunkPriority){
+		$query="UPDATE outbound_route SET ";
+		$arrOpt=array();
+
+		//definimos el tipo de truncal que vamos a crear
+				
+		//debe haberse seteado un nombre
+		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
+			$this->errMsg="Name of outbound can't be empty";
+		}else{
+			$val = $this->checkName($arrProp['domain'],$arrProp['routename'],$idOutbound);
+		        if($val==1)
+			   $this->errMsg="Route Name is already used"; 
+			else{
+			    $query .="routename=?,";
+			    $arrOpt[0]=$arrProp["routename"];
+			}
+		}
+
+		//si se define un callerid 
+		if(isset($arrProp["outcid"])){
+			$query .="outcid=?,";
+			$arrOpt[count($arrOpt)]=$arrProp["outcid"];
+		}
+      
+		if(isset($arrProp["outcid_mode"])){
+			$query .="outcid_mode=?,";
+			$arrOpt[count($arrOpt)]=$arrProp["outcid_mode"];
+		}
+	  
+		//si se define un password
+		if(isset($arrProp["routepass"])){
+			$query .="routepass=?,";
+			$arrOpt[count($arrOpt)]=$arrProp["routepass"];
+		}
+
+		
+		if(isset($arrProp["mohsilence"])){
+			$query .="mohsilence=?,";
+			$arrOpt[count($arrOpt)]=$arrProp["mohsilence"];
+		}
+
+		if(isset($arrProp["time_group_id"])){
+			$query .="time_group_id=?,";
+			$arrOpt[count($arrOpt)]=$arrProp["time_group_id"];
+		}
+
+		if(!isset($arrProp["domain"]) || $arrProp["domain"]==""){
+			$this->errMsg="It's necesary you create a new organization so you can create an Outbound to this organization";
+		}else{
+			$query .="organization_domain=?";
+			$arrOpt[count($arrOpt)]=$arrProp["domain"];
+		}
+		//caller id options
+				
+		$query = $query." WHERE id=?";
+	        $arrOpt[count($arrOpt)]=$idOutbound;
+		if($this->errMsg==""){
+			$exito=$this->updateOutbound($query,$arrOpt,$arrProp);
+		}else{
+			return false;
+		}
+
+		if($exito==true){
+			//si ahi dialpatterns se los procesa
+			    $resultDelete = $this->deleteDialPatterns($idOutbound);
+			    $resultDeleteTrunks = $this->deleteTrunks($idOutbound);
+			    if(($resultDelete==false)||($this->createDialPattern($arrDialPattern,$idOutbound)==false)||($resultDeleteTrunks==false)){
+ 				    $this->errMsg="Outbound can't be updated.".$this->errMsg;
+				    return false;
+			    }elseif($this->createTrunkPriority($arrTrunkPriority,$idOutbound)==false){
+				    $this->errMsg="Outbound can't be updated .".$this->errMsg;
+				    return false;
+			    }else
+				    return true;
+			//}
+		}else
+			return false;
+
+	}
+
+	private function updateOutbound($query,$arrOpt,$arrProp){
+		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
+			$this->errMsg="Outbound can't be created. Outbound Name can't be empty";
+			return false;
+		}
+		$result=$this->executeQuery($query,$arrOpt);
+		
+		
+		if($result==false)
+			$this->errMsg=$this->errMsg;
+		return $result; 
+
+		//validamos que no existe otros peers con el mismo nombre de truncal
 		
 	}
-	
-	//debe retorna un arregle donde el id es el nombre del contexto
-	function createExtTrunk()
-	{
-		//escribir en el contexto ext-trunk cada truncal
-		//escribir las globales de cada truncal
-		//si se le setea un patron de marcado a la truncal entonces escribir el contexto sub-flp-idtrunk para dicha truncal
-	}
-}
 
+	private function createDialPattern($arrDialPattern,$outboundid)
+	{
+		$result=true;
+		$seq = 0;
+		if(is_array($arrDialPattern) && count($arrDialPattern)!=0){
+			$temp=$arrDialPattern;
+			$arrPattern= array();
+			$query="INSERT INTO outbound_route_dialpattern (outbound_route_id,prepend,prefix,match_pattern,match_cid,seq) values (?,?,?,?,?,?)";
+			foreach($arrDialPattern as $pattern){ 
+			      $cid = getParameter("match_cid".$pattern);
+			      $prepend = getParameter("prepend_digit".$pattern);
+			      $prefix = getParameter("pattern_prefix".$pattern);
+			      $pattern = getParameter("pattern_pass".$pattern);
+			      $seq++;
+				
+			      $arrPattern=array($prepend,$prefix,$pattern,$cid,$outboundid);
+
+			      //Verificamos que no se haya guardado un dial pattern igual
+			      if($this-> checkDuplicateDialPattern($arrPattern)===true)
+			      {
+				if(isset($prepend)){
+					  //validamos los campos
+					  if(!preg_match("/^[[:digit:]]*$/",$prepend)){
+						  $this->errMsg="Invalid dial pattern";
+						  $result=false;
+						  break;
+					  }
+				}else
+					  $prepend="";
+				
+				if(isset($prefix)){
+					  if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$prefix)){
+						  $this->errMsg="Invalid dial pattern";
+						  $result=false;
+						  break;
+					  }
+				}else
+					  $prefix="";
+
+				if(isset($pattern)){
+					  if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$pattern)){
+						  $this->errMsg="Invalid dial pattern";
+						  $result=false;
+						  break;
+					  }
+				}else
+					  $pattern="";
+				  
+
+				if($prepend!="" || $prefix!="" || $pattern!="")
+				  $result=$this->executeQuery($query,array($outboundid,$prepend,$prefix,$pattern,$cid,$seq));
+			      
+				if($result==false)
+				    break;
+			    }
+			}
+			 
+     
+			
+		}
+		return $result;
+	}
+
+	//Trunk Priority
+	private function createTrunkPriority($arrTrunkPriority,$outboundid)
+	{
+		$result=true;
+		$seq = 0;
+		
+		if(is_array($arrTrunkPriority) && count($arrTrunkPriority)!=0){
+			$temp=$arrTrunkPriority;
+			$arrPattern= array();
+			$query="INSERT INTO outbound_route_trunkpriority (outbound_route_id,trunk_id,seq) values (?,?,?)";
+			foreach($arrTrunkPriority as $trunk){ 
+			      $trunk = getParameter("trunk".$trunk);
+			      $seq++;
+				
+			      $arrTrunk=array($outboundid,$trunk,$seq);
+			      
+			      $result=$this->executeQuery($query, array($outboundid,$trunk,$seq));
+			      
+			      if($result==false)
+				 break;
+			
+			}
+			 
+     
+			
+		}else{
+		    $this->errMsg="At least one trunk must be selected";
+		    $result=false;
+  
+		}
+      
+		return $result;
+	}
+
+
+
+	private function checkDuplicateDialPattern($arr){
+		$query="SELECT * from outbound_route_dialpattern WHERE prepend=? AND prefix=? AND match_pattern=? AND match_cid=? AND outbound_route_id=?";
+		$result=$this->_DB->fetchTable($query,true,$arr);
+		if(sizeof($result)==0)	
+		    return true;
+		else
+		    return false;
+
+
+	}
+
+	function checkName($domain,$routename,$id_outbound=null){
+		  $where="";
+		  if(!isset($id_outbound))
+		      $id_outbound = "";
+		  
+                  $arrParam=null;
+		  if(isset($domain)){
+			  if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+				  $this->errMsg="Invalid domain format";
+				  return false;
+			  }else{
+				  $where="where organization_domain=? AND id<>? AND routename=? ";
+				  $arrParam=array($domain,$id_outbound,$routename);
+			  }
+		  }
+		  
+		  $query="SELECT routename from outbound_route $where";
+		  
+		  $result=$this->_DB->fetchTable($query,true,$arrParam);
+		  if($result===false){
+			  $this->errMsg=$this->_DB->errMsg;
+			  return false;
+		  }else{
+			 if ($result==null)
+			     return 0;
+			 else
+			     return 1;
+			}
+	}
+
+	private function deleteDialPatterns($outboundId){
+		      
+		      $queryD="DELETE from outbound_route_dialpattern where outbound_route_id=?";
+		      $result=$this->_DB->genQuery($queryD,array($outboundId));
+		      if($result==false){
+			  $this->errMsg=_tr("Error Deleting Outbound dialpatterns.").$this->_DB->errMsg;
+			  return false;
+		      }else
+			  return true;
+		      
+	}
+	
+	private function deleteTrunks($outboundId){
+		      
+		      $queryD="DELETE from outbound_route_trunkpriority where outbound_route_id=?";
+		      $result=$this->_DB->genQuery($queryD,array($outboundId));
+		      if($result==false){
+			  $this->errMsg=_tr("Error Deleting Outbound trunkspriority.").$this->_DB->errMsg;
+			  return false;
+		      }else
+			  return true;
+		      
+	}
+
+	function deleteOutbound($outboundId){
+		$resultDeleteTrunks = $this->deleteTrunks($outboundId);
+		$resultDelete = $this->deleteDialPatterns($outboundId);
+		if(($resultDelete==true)&&($resultDeleteTrunks==true)){
+		  $query="DELETE from outbound_route where id=?";
+		  if($this->executeQuery($query,array($outboundId))){
+		      return true;
+		  }else{
+		      $this->errMsg="Outbound can't be deleted.".$this->errMsg;
+		      return false;
+		  }
+		}else{
+		      $this->errMsg="Outbound can't be deleted.".$this->errMsg;
+		      return false;
+		  }
+      
+				     
+	}	
+}
 ?>

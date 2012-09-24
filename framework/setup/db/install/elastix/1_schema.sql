@@ -7,7 +7,7 @@ CREATE TABLE organization
        country           VARCHAR(100) NOT NULL,
        city              VARCHAR(150) NOT NULL,
        address           VARCHAR(255),
-       code              VARCHAR(20),   
+	   code		         VARCHAR(20),	
        PRIMARY KEY (id)
 );
 create unique index domain on organization (domain);
@@ -110,7 +110,7 @@ CREATE TABLE user_properties
        id_user   INTEGER     NOT NULL,
        property     VARCHAR(100) NOT NULL,
        value        VARCHAR(150) NOT NULL,
-       category     VARCHAR(50),
+       category 	VARCHAR(50),
        PRIMARY KEY (id_user,property,category),
        FOREIGN KEY (id_user) REFERENCES acl_user(id)
 );
@@ -211,8 +211,6 @@ INSERT INTO "acl_resource" VALUES('group_permission', 'Group Resource', 'usermgr
 INSERT INTO "acl_resource" VALUES('preferences', 'Preferences', 'system', '', 'module', 10);
 INSERT INTO "acl_resource" VALUES('language', 'Language', 'preferences', '', 'module', 101);
 INSERT INTO "acl_resource" VALUES('themes_system', 'Themes', 'preferences', '', 'module', 103);
-INSERT INTO "acl_resource" VALUES('my_extension', 'My Extension', '', '', '', 11);
-INSERT INTO "acl_resource" VALUES('myex_config', 'Settings', 'my_extension', '', 'module', 1);
 INSERT INTO "acl_resource" VALUES('webmail', 'Webmail', 'email_admin', 'mail', 'framed', 4);
 INSERT INTO "acl_resource" VALUES('addons', 'Addons', '', '', '', 10);
 INSERT INTO "acl_resource" VALUES('addons_availables', 'Addons', 'addons', '', 'module', 1);
@@ -307,7 +305,6 @@ INSERT INTO "organization_resource" VALUES(6, 1, 'group_permission');
 INSERT INTO "organization_resource" VALUES(7, 1, 'preferences');
 INSERT INTO "organization_resource" VALUES(8, 1, 'language');
 INSERT INTO "organization_resource" VALUES(9, 1, 'themes_system');
-INSERT INTO "organization_resource" VALUES(10, 1, 'myex_config');
 INSERT INTO "organization_resource" VALUES(11, 1, 'webmail');
 INSERT INTO "organization_resource" VALUES(12, 1, 'addons_availables');
 INSERT INTO "organization_resource" VALUES(13, 1, 'cdrreport');
@@ -441,8 +438,6 @@ INSERT INTO "group_resource" VALUES(84, 0, 84);
 INSERT INTO "group_resource" VALUES(85, 0, 85);
 INSERT INTO "group_resource" VALUES(86, 0, 86);
 INSERT INTO "group_resource" VALUES(87, 0, 87);
-INSERT INTO "group_resource" VALUES(88, 0, 88);
-INSERT INTO "group_resource" VALUES(89, 0, 89);
 INSERT INTO "group_resource" VALUES(90, 0, 90);
 INSERT INTO "group_resource" VALUES(91, 0, 91);
 INSERT INTO "group_resource" VALUES(94, 0, 94);
@@ -457,7 +452,6 @@ INSERT INTO "group_resource" VALUES(106, 1, 6);
 INSERT INTO "group_resource" VALUES(107, 1, 7);
 INSERT INTO "group_resource" VALUES(108, 1, 8);
 INSERT INTO "group_resource" VALUES(109, 1, 9);
-INSERT INTO "group_resource" VALUES(110, 1, 10);
 INSERT INTO "group_resource" VALUES(111, 1, 11);
 INSERT INTO "group_resource" VALUES(113, 1, 13);
 INSERT INTO "group_resource" VALUES(115, 1, 15);
@@ -506,7 +500,6 @@ INSERT INTO "group_resource" VALUES(196, 1, 96);
 
 INSERT INTO "group_resource" VALUES(201, 2, 1);
 INSERT INTO "group_resource" VALUES(202, 2, 3);
-INSERT INTO "group_resource" VALUES(203, 2, 10);
 INSERT INTO "group_resource" VALUES(204, 2, 11);
 INSERT INTO "group_resource" VALUES(205, 2, 13);
 INSERT INTO "group_resource" VALUES(206, 2, 18);
@@ -528,7 +521,6 @@ INSERT INTO "group_resource" VALUES(221, 2, 96);
 
 INSERT INTO "group_resource" VALUES(222, 3, 1);
 INSERT INTO "group_resource" VALUES(223, 3, 3);
-INSERT INTO "group_resource" VALUES(224, 3, 10);
 INSERT INTO "group_resource" VALUES(225, 3, 11);
 INSERT INTO "group_resource" VALUES(226, 3, 30);
 INSERT INTO "group_resource" VALUES(227, 3, 31);
@@ -543,3 +535,4 @@ INSERT INTO "group_resource" VALUES(235, 3, 60);
 INSERT INTO "group_resource" VALUES(236, 3, 76);
 INSERT INTO "group_resource" VALUES(237, 3, 77);
 INSERT INTO "group_resource" VALUES(238, 3, 96);
+

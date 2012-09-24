@@ -59,7 +59,9 @@ function action_enableAnonymous($opt, $bEnable, $bExplicitSet)
 	$lineas = array();
     $bEncontrado = FALSE;   // was allowguest found?
     $bValorPrevio = TRUE;   // previous value?
-    foreach (file('/etc/asterisk/sip_general_custom.conf') as $sLinea) {
+
+    if(file_exists('/etc/asterisk/sip_general_custom.conf')) {
+      foreach (file('/etc/asterisk/sip_general_custom.conf') as $sLinea) {
     	$regs = NULL;
         if (preg_match('/^allowguest\s*=\s*(\S+)$/', trim($sLinea), $regs)) {
     		$bEncontrado = TRUE;
@@ -67,6 +69,7 @@ function action_enableAnonymous($opt, $bEnable, $bExplicitSet)
             $sLinea = "allowguest=".($bEnable ? 'yes' : 'no')."\n";
     	}
         $lineas[] = $sLinea;
+      }
     }
     if ($bValorPrevio == $bEnable) return TRUE;
     if ($bEncontrado && !$bExplicitSet) return TRUE;

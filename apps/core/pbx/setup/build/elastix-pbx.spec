@@ -57,7 +57,7 @@ mkdir -p $RPM_BUILD_ROOT/var/log/festival/
 
 # ** ElastixDir ** #
 mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/
-mv var/www/elastixdir/*      $RPM_BUILD_ROOTvar/www/elastixdir/
+mv setup/elastixdir/*      $RPM_BUILD_ROOT/var/www/elastixdir/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.

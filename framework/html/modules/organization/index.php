@@ -755,7 +755,7 @@ function createDidForn($arrDID){
 }
 
 function writeDidFile(&$error){
-    $sComando = '/usr/bin/elastix-helper asteriskconfig createDIDinbound 2>&1';
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals 2>&1';
     $output = $ret = NULL;
     exec($sComando, $output, $ret);
     if ($ret != 0) {

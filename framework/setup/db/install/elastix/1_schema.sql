@@ -7,7 +7,7 @@ CREATE TABLE organization
        country           VARCHAR(100) NOT NULL,
        city              VARCHAR(150) NOT NULL,
        address           VARCHAR(255),
-	   code		         VARCHAR(20),	
+       code              VARCHAR(20),   
        PRIMARY KEY (id)
 );
 create unique index domain on organization (domain);
@@ -110,7 +110,7 @@ CREATE TABLE user_properties
        id_user   INTEGER     NOT NULL,
        property     VARCHAR(100) NOT NULL,
        value        VARCHAR(150) NOT NULL,
-       category 	VARCHAR(50),
+       category     VARCHAR(50),
        PRIMARY KEY (id_user,property,category),
        FOREIGN KEY (id_user) REFERENCES acl_user(id)
 );
@@ -535,4 +535,3 @@ INSERT INTO "group_resource" VALUES(235, 3, 60);
 INSERT INTO "group_resource" VALUES(236, 3, 76);
 INSERT INTO "group_resource" VALUES(237, 3, 77);
 INSERT INTO "group_resource" VALUES(238, 3, 96);
-

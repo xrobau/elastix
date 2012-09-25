@@ -515,7 +515,7 @@ class paloSantoInbound extends paloAsteriskDB{
             if($context===false){
                 $context->errMsg="ext-did. Error: ".$context->errMsg;
             }else{
-                $context->arrExtensions=array(new paloExtensions('ext-did', 'foo','', new ext_noop('bar'),"1"));
+                $context->arrExtensions=array(new paloExtensions('foo',new ext_noop('bar'),"1"));
                 $context->arrInclude=array("ext-did-0001",'ext-did-0002');
                 $arrFromInt[]="ext-did";
                 $arrContext[]=$context;

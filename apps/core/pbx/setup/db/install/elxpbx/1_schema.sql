@@ -1,3 +1,8 @@
+-- Create database	 
+ CREATE DATABASE IF NOT EXISTS elxpbx;	 
+ USE elxpbx;	 
+ -- Database: `elxpbx`
+
 -- Create user db
 GRANT SELECT, UPDATE, INSERT, DELETE ON `elxpbx`.* to asteriskuser@localhost;
 

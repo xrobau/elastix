@@ -208,8 +208,6 @@ class paloSantoCDR
         // Cuenta del total de registros recuperados
         $sPeticionSQL = 
             'SELECT COUNT(*) FROM cdr '.
-            'LEFT JOIN asterisk.ringgroups '.
-                'ON asteriskcdrdb.cdr.dst = asterisk.ringgroups.grpnum '.
             $sWhere;
         $r = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramSQL);
         if (!is_array($r)) {
@@ -225,10 +223,8 @@ class paloSantoCDR
         // Los datos de los registros, respetando limit y offset
         $sPeticionSQL = 
             'SELECT calldate, src, dst, channel, dstchannel, disposition, '.
-                'uniqueid, duration, billsec, accountcode, grpnum, description '.
+                "uniqueid, duration, billsec, accountcode, '', description ".
             'FROM cdr '.
-            'LEFT JOIN asterisk.ringgroups '.
-                'ON asteriskcdrdb.cdr.dst = asterisk.ringgroups.grpnum '.
             $sWhere.
             ' ORDER BY calldate DESC';
         if (!empty($limit)) {
@@ -259,8 +255,6 @@ class paloSantoCDR
         // Cuenta del total de registros recuperados
         $sPeticionSQL = 
             'SELECT COUNT(*) FROM cdr '.
-            'LEFT JOIN asterisk.ringgroups '.
-                'ON asteriskcdrdb.cdr.dst = asterisk.ringgroups.grpnum '.
             $sWhere;
         $r = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramSQL);
         if (!is_array($r)) {
@@ -293,8 +287,6 @@ class paloSantoCDR
         // Borrado de los registros seleccionados
         $sPeticionSQL = 
             'DELETE cdr FROM cdr '.
-            'LEFT JOIN asterisk.ringgroups '.
-                'ON asteriskcdrdb.cdr.dst = asterisk.ringgroups.grpnum '.
             $sWhere;
         $r = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
         if (!$r) {

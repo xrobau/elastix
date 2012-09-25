@@ -250,7 +250,7 @@ class paloSantoASteriskConfig{
 
 		//arreglo que contiene las tablas dentro de ast_realtime que no tienen el campo
         //organization_domian
-		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details","did");
+		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details","did");
 
 		//obtenemos una lista de las tablas dentro de la base elxpbx
 		$queryShow="show tables from elxpbx";
@@ -296,7 +296,7 @@ class paloSantoASteriskConfig{
                         }
                     }
 				}elseif($value[0]=="outbound_route"){
-                    $query="SELECT id from outbound_router where organization_domain=?";
+                    $query="SELECT id from outbound_route where organization_domain=?";
                     $result=$this->_DB->fetchTable($query, false, array($domain));
                     if($result===false){
                         $this->errMsg=$this->_DB->errMsg;
@@ -304,6 +304,13 @@ class paloSantoASteriskConfig{
                     }else{
                         foreach($result as $valor){
                             $qDel="DELETE from outbound_route_dialpattern where outbound_route_id=?";
+                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
+                            if($result==false){
+                                $this->errMsg=$this->_DB->errMsg;
+                                return false;
+                            }
+                            
+                            $qDel="DELETE from outbound_route_trunkpriority where outbound_route_id=?";
                             $result=$this->_DB->genQuery($qDel,array($valor[0]));
                             if($result==false){
                                 $this->errMsg=$this->_DB->errMsg;

@@ -699,7 +699,8 @@ class paloSantoSysInfo
         $pDB = new paloDB($dsn);
         $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
         $pACL = new paloACL($pDB2);
-        if($pACL->isUserAdministratorGroup($user))
+        //if($pACL->isUserAdministratorGroup($user))
+        if($user=="admin")
             $id_dabu = 1;
         else
             $id_dabu = 13;

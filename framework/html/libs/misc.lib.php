@@ -392,6 +392,7 @@ function get_language($ruta_base='')
 {
     require_once $ruta_base."configs/default.conf.php";
     include $ruta_base."configs/languages.conf.php";
+    include_once "/var/www/html/libs/paloSantoOrganization.class.php";
 
     global $arrConf;
     $lang="";

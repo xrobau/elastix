@@ -589,7 +589,7 @@ function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 			$ext=explode(".",$filename);
 			$picture=$lastid.".".$ext[count($ext)-1];
 			if($pACL->setUserPicture($lastid,$picture))
-				rename($renameFile,"/var/www/users_images/$picture");
+				rename($renameFile,"/var/www/elastixdir/users_images/$picture");
 			else
 				unlink($renameFile);
 		}
@@ -750,7 +750,7 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
 			$ext=explode(".",$filename);
 			$picture=$idUser.".".$ext[count($ext)-1];
 			if($pACL->setUserPicture($idUser,$picture))
-				rename($renameFile,"/var/www/users_images/$picture");
+				rename($renameFile,"/var/www/elastixdir/users_images/$picture");
 			else
 				unlink($renameFile);
 		}
@@ -851,7 +851,7 @@ function getGroups(&$pDB){
 function getImage($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization)
 {
     $pACL       = new paloACL($pDB);
-    $ruta_destino = "/var/www/users_images";
+    $ruta_destino = "/var/www/elastixdir/users_images";
     $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/$module_name/images/Icon-user.png";
     $id_user="";
 
@@ -974,7 +974,7 @@ function redimensionarImagen($ruta1,$ruta2,$ancho,$alto)
 function uploadImage($idImg,&$fileUpload,&$error){
 	$pictureUpload = $_FILES['picture']['name'];
 	$file_upload = "";
-	$ruta_destino = "/var/www/users_images";
+	$ruta_destino = "/var/www/elastixdir/users_images";
 	$Exito=false;
 
 	//valido el tipo de archivo

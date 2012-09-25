@@ -242,6 +242,12 @@ fi
 #    `sqlite3 /var/www/db/settings.db "update settings set value='%{version}-%{release}' where key='elastix_version_release';"`
 #fi
 
+# Para que agrege el contenido de /etc/motd
+/bin/grep -r '/usr/local/sbin/motd.sh > /etc/motd' /etc/rc.local
+if [ "$?" == "1" ]; then
+  echo "/usr/local/sbin/motd.sh > /etc/motd" >> /etc/rc.local
+fi
+
 # Para q se actualice smarty (tpl updates)
 rm -rf /var/www/html/var/templates_c/*
 

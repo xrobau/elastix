@@ -1,0 +1,151 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Lakatos Tamás                                          |
+  | Email: lakatost@gmail.com                                            |
+  |                                                                      |
+  +----------------------------------------------------------------------+
+  : hu.lang,v 1.6 2008/01/21 09:51:55 bmacias@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+/*System Info*/
+"English" => "Hungarian",
+"System Resources" => "Rendszer erőforrások",
+"CPU Info" => "CPU információ",
+"Uptime" => "Futásidő",
+"CPU usage" => "CPU használat",
+"Memory usage" => "Memória használat",
+"Swap usage" => "Swap használat",
+"Hard Drives" => "Merevlemezek",
+"Partition Name" => "Partíció név",
+"Capacity" => "Kapacitás",
+"Usage" => "Használat",
+"Mount point" => "Csatolási pont",
+"No records found" => "Nem található rekord",
+"It was not possible to obtain information about the graph" => "Nem lehetséges a grafikonnal kapcsolatos információszerzés",
+"% used of"=>"% used of",
+"News"=>"News",
+"prev"=>"prev",
+"next"=>"next",
+"show_vertical"=>"show vertical scroller",
+"show_horizontal"=>"show horizontal scroller",
+"NoConnection"=>"No Connection",
+"Performance Graphic"=>"Performance Graphic",
+"Processes Status"=>"Processes Status",
+"Communication Activity"=>"Communication Activity",
+"Telephony Service"=>"Telephony Service",
+"Instant Messaging Service"=>"Instant Messaging Service",
+"Fax Service"=>"Fax Service",
+"Email Service"=>"Email Service",
+"Database Service"=>"Database Service",
+"Web Server"=>"Web Server",
+"Elastix Call Center Service"=>"Elastix Call Center Service",
+"Running"=>"Running",
+"Not installed"=>"Not installed",
+"Not running"=>"Service Not Activated",
+"OK1" => "OK",
+"Shutdown" => "N/A",
+"IAXModem Service" => "IAXModem Service",
+/*copiado desde el dashboard*/
+"You haven't extension" => "Extension has not been assigned.",
+"Imap: Connection error" => "Imap: Connection error.",
+"You don't recibed emails" => "No emails received.",
+"You don't recibed faxes" => "No faxes received.",
+"Query error" => "Query error",
+"You don't recibed calls" => "No calls received.",
+"You don't recibed voicemails" => "No voicemails received.",
+"Unenabled to open file" => "Unabled to open file",
+"Dashboard" => "Dashboard",
+"Calls" => "Calls",
+"Em@ils" => "Em@ils",
+"Faxes" => "Faxes",
+"Voicem@ils" => "Voicem@ils",
+"answered" => "<font color='green'><b>Answered</b></font>",
+"missed" => "<font color='red'><b>Missed</b></font>",
+"unknow" => "<b>unknow</b>",
+"call record" => "{status} call on date {date} from number {source}",
+"call duration" => " and {time} secs. of duration.",
+"fax recived" => "Received fax {file} from {source} on date {date}.",
+"voicemail recived" => "Voicemail from {source} on date {date} and {duration} seconds of duration",
+"mail recived" => "{date} {source} '{subject}'",
+"Quota asigned" => "Quota asigned:",
+"Quota Used" => "Quota used:",
+"Quota free space" => "Quota free space:",
+"Error at read yours calls." => "Failed to access call list.",
+"Error at read yours faxes." => "Failed to access fax list.",
+"Error at read yours voicemails." => "Failed to access voicemails list.",
+"Error at read yours mails." => "Failed to access voicemails list.",
+"Error at read status system." => "Failed to access status system.",
+"Error at read your calendar." => "Failed to access calendar list.",
+"You don't have events" => "There are no future events scheduled in the calendar",
+"You don't have a webmail account" => "An email account has not been associated with this user.",
+"Calendar" => "Calendar",
+"Expand" => "Expand",
+"Collapse" => "Collapse",
+"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager",
+"Total_calls" => "Total calls",
+"internal_calls" => "Internal calls",
+"external_calls" => "External calls",
+"total_channels" => "Total channels",
+"call" => "call",
+"calls" => "calls",
+"channels" => "channels",
+"Applet Admin" => "Applet Admin",
+"Applet" => "Applet",
+"Activated" => "Activated",
+"Queues_waiting" => "Calls in queue",
+"Waiting" => "Waiting",
+"asterisk_connection" => "asterisk_connection",
+"sip_extensions" => "SIP Extensions",
+"sip_trunks" => "SIP Trunks",
+"iax_extensions" => "IAX Extensions",
+"iax_trunks" => "IAX Trunks",
+"Extensions" => "Extensions",
+"Trunks" => "Trunks",
+"Trunks_register" => "Trunks registers",
+"sip_trunks_reg" => "SIP trunks registered",
+"iax_trunks_reg" => "IAX trunks registered",
+"OK" => "Registered",
+"NO_OK" => "Not Registered",
+"Network_traffic" => "Network Traffic",
+"rx_bytes" => "bytes rx",
+"tx_bytes" => "bytes tx",
+"Telephony Hardware" => "Telephony Hardware",
+"Registered" => "Registered",
+"No Registered" => "Not Registered",
+"Cards no found" => "Telephony Hardware not found",
+"Bytes" => "Bytes",
+"Unknown" => "Unknown",
+"Loading" => "Loading",
+"Could not get web server information. You may not have internet access or the web server is down" => "Could not get web server information. You may not have internet access or the web server is down",
+"No News to display" => "No News to display",
+"Nothing to show yet" => "Nothing to show yet",
+"does not exist locally or password is incorrect" => "does not exist locally or password is incorrect",
+"The following database could not be found" => "The following database could not be found",
+"Error, the following code does not exist" => "Error, the following code does not exist"
+);
+?>

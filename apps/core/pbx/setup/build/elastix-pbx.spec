@@ -11,7 +11,6 @@ Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 3.0.0-1
-Prereq: elastix-my_extension >= 3.0.0-1
 Prereq: elastix-system >= 3.0.0-1
 Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8

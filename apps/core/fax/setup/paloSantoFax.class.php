@@ -89,7 +89,7 @@ class paloFax {
 			 if($this->addFaxConfiguration($nextPort,$devId,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email))
 				return true;
 			 else{
-				$this->errMsg=_tr("Error refreshing configuration");
+				$this->errMsg=_tr("Error refreshing configuration")." ".$this->errMsg;
 				return false;
 			 }
 		}
@@ -339,9 +339,7 @@ class paloFax {
         $arrStatus = array();
         $status = array();
         $cont = 0;
-
-
-
+        
         exec("/usr/bin/faxstat -s", $arrOutCmd);
 
         foreach($arrOutCmd as $linea) {
@@ -360,6 +358,7 @@ class paloFax {
 
         return $status;
     }
+    
     //Obtener El estado de un fax dado el jid
     function getStateFax($jid)
     {
@@ -384,7 +383,7 @@ class paloFax {
         return $status;
     }
      //Obtener el estado de todos los faxes enviados
-     function setFaxMsg()
+    function setFaxMsg()
     {
         $arrStatus = array();
         $status = array();
@@ -409,38 +408,39 @@ class paloFax {
     }
     //Obtener el Estado de los IAX2
     function checkFaxStatus($destine){
-    
-    $apDB = new paloDB("mysql://root:palosanto@localhost/elxpbx");
-    $pACL = new paloACL($apDB);   
-    $adestine = explode(",",$destine);   
-    foreach ($adestine  as $destine){
-      $query="select name from iax where cid_number=?";
-      $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
-      $status = array();
-      $iaxname[] = $arrReturn['name'];
-    }
+        global $arrConf;
+        
+        $apDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+        $pACL = new paloACL($apDB);   
+        $adestine = explode(",",$destine);   
+        foreach ($adestine  as $destine){
+            $query="select name from iax where cid_number=?";
+            $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
+            $status = array();
+            $iaxname[] = $arrReturn['name'];
+        }
  
- //   $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
- //   $status = array();
- //   $iaxname = $arrReturn['name'];
-  foreach($iaxname as $iaxname2){
-     exec("/usr/sbin/asterisk -rx 'iax2 show peer $iaxname2'", $output, $retval);
+        //   $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
+        //   $status = array();
+        //   $iaxname = $arrReturn['name'];
+        foreach($iaxname as $iaxname2){
+            exec("/usr/sbin/asterisk -rx 'iax2 show peer $iaxname2'", $output, $retval);
 
-    foreach($output as $linea) {
-         //if((preg_match("/^Status/", $linea, $arrReg))) {
+            foreach($output as $linea) {
+                //if((preg_match("/^Status/", $linea, $arrReg))) {
 
-        // }else{
-                $flag = explode("_", $iaxname2);
-                $tmpstatus = explode(" ",$linea);
-                $arrDestine = array_values(array_diff($tmpstatus, array('')));
-                $sizeArr = count($arrDestine);
-                if(isset($arrDestine[0]))
+                // }else{
+                        $flag = explode("_", $iaxname2);
+                        $tmpstatus = explode(" ",$linea);
+                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
+                        $sizeArr = count($arrDestine);
+                        if(isset($arrDestine[0]))
 
-                  if($arrDestine[0]=="Status")
-                      $status[$flag[1]]="Fax ".$arrDestine[2]."_". $iaxname2; 
-          //      }
-            }
-   }
+                        if($arrDestine[0]=="Status")
+                            $status[$flag[1]]="Fax ".$arrDestine[2]."_". $iaxname2; 
+                //      }
+                    }
+        }
        return $status;
     }
 

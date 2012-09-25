@@ -83,6 +83,9 @@ switch($argv[1]){
         }else
             exit(createExtAddtionals() ? 0 : 1);
         break;
+    case "writeTechRegister":
+        exit(writeTechRegister() ? 0 : 1);
+        break;
 	default:
 		error_exit("No action specified \n");
 		break;
@@ -812,4 +815,40 @@ function createFileDahdiChannelAdd($domain=null){
     
     return true;
 }
+
+function writeTechRegister(){
+    $query="SELECT tech,string_register from trunk where tech=? or tech=?";
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $result=$pDB->fetchTable($query,true,array("sip","iax2"));
+    if($result===false){
+    }
+    
+    $file_sip=$file_iax="\n";
+    //obtenosmo los string de conneccion de las truncales que sean sip o iax
+    foreach($result as $value){
+        if(!empty($value["string_register"])){
+            if($value["tech"]=="sip"){
+                $file_sip .="register => ".$value["string_register"]."\n";
+            }elseif($value["tech"]=="iax2"){
+                $file_iax .="register => ".$value["string_register"]."\n";
+            }
+        }
+    }
+    
+    if(file_put_contents("/etc/asterisk/sip_register.conf", $file_sip)===false){
+        fprintf(STDERR, "ERR: Couldn't be written file - '/etc/asterisk/sip_register.conf'\n");
+        return false;
+    }else{
+        changeFilePermission("/etc/asterisk/sip_register.conf");
+    }
+    
+    if(file_put_contents("/etc/asterisk/iax_register.conf", $file_iax)===false){
+        fprintf(STDERR, "ERR: Couldn't be written file - '/etc/asterisk/iax_register.conf'\n");
+        return false;
+    }else{
+        changeFilePermission("/etc/asterisk/iax_register.conf");
+    }
+    return true;
+}
+
 ?>

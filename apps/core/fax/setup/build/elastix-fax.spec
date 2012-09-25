@@ -36,6 +36,7 @@ mv setup/hylafax/bin/faxrcvd.php              $RPM_BUILD_ROOT/var/spool/hylafax/
 mv setup/hylafax/bin/notify-elastix.php       $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify.php               $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/etc/FaxDictionary            $RPM_BUILD_ROOT/var/spool/hylafax/etc/
+mv setup/hylafax/etc/FaxDispatch              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/config                   $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
@@ -185,9 +186,15 @@ fi
 /var/log/iaxmodem
 %defattr(-, uucp, uucp)
 %config(noreplace) /var/spool/hylafax/etc/FaxDictionary
+%config(noreplace) /var/spool/hylafax/etc/FaxDispatch
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Thu Sep 25 2012 Rocio Mera <rmera@palosanto.com> 3.0.0-1
+- CHANGED: fax - Build/elastix-fax.spec: Was added in spec 
+  FaxDispatch file. It necesary is file be moved to 
+  /var/spool/hylafax/etc
+  
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

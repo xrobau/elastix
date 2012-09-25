@@ -433,10 +433,10 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
 	if($successTrunk){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
-		if(writeAsteriskFile($error)==true)
+		if(writeAsteriskFile($error,$tech)==true)
             $smarty->assign("mb_message",_tr("Trunk has been created successfully"));
         else
-            $smarty->assign("mb_message",_tr("Trunk has been created. ").$error);
+            $smarty->assign("mb_message",_tr("Error: Trunk has been created. ").$error);
         $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
@@ -542,10 +542,10 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
             $pTrunk->prunePeer($arrTrunks["name"],$arrTrunks["tech"]);
             $pTrunk->loadPeer($arrTrunks["name"],$arrTrunks["tech"]);
         }
-        if(writeAsteriskFile($error)==true)
+        if(writeAsteriskFile($error,$tech)==true)
             $smarty->assign("mb_message",_tr("Trunk has been edited successfully"));
         else
-            $smarty->assign("mb_message",_tr("Trunk has been edited. ").$error);
+            $smarty->assign("mb_message",_tr("Error: Trunk has been edited. ").$error);
         $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
@@ -655,10 +655,10 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
         if($arrTrunks["tech"]=="sip" || $arrTrunks["tech"]=="iax2"){
             $pTrunk->prunePeer($arrTrunks["name"],$arrTrunks["tech"]);
         }
-        if(writeAsteriskFile($error)==true)
+        if(writeAsteriskFile($error,$tech)==true)
             $smarty->assign("mb_message",_tr("Trunk was deleted successfully"));
         else
-            $smarty->assign("mb_message",_tr("Trunk was deleted. ").$error);
+            $smarty->assign("mb_message",_tr("Error: Trunk was deleted. ").$error);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($error));
@@ -667,7 +667,7 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 	return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);;
 }
 
-function writeAsteriskFile(&$error){
+function writeAsteriskFile(&$error,$tech){
     $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals delete "" 2>&1';
     $output = $ret = NULL;
     exec($sComando, $output, $ret);
@@ -682,6 +682,16 @@ function writeAsteriskFile(&$error){
     if ($ret != 0) {
         $error = _tr("Error writing extensions_additionals file").implode('', $output);
         return FALSE;
+    }
+    
+    if($tech=="sip" || $tech=="iax2"){
+        $sComando = '/usr/bin/elastix-helper asteriskconfig writeTechRegister 2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $error = _tr("Error writing $tech_register.conf file").implode('', $output);
+            return FALSE;
+        }
     }
     
     $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';

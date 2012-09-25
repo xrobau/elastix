@@ -521,7 +521,6 @@ class paloSantoTrunk extends paloAsteriskDB{
         }else{
             return true;
         }
-        
     }
     
     private function updateSipIaxTrunk($arrProp){
@@ -703,6 +702,12 @@ class paloSantoTrunk extends paloAsteriskDB{
         }
         
         $query="DELETE from trunk_organization where trunkid=?";
+        if($this->_DB->genQuery($query,array($trunkid))==false){
+            $this->errMsg .=_tr("Trunk can't be deleted. ").$this->_DB->errMsg;
+            return false;
+        }
+        
+        $query="DELETE from outbound_route_trunkpriority where trunkid=?";
         if($this->_DB->genQuery($query,array($trunkid))==false){
             $this->errMsg .=_tr("Trunk can't be deleted. ").$this->_DB->errMsg;
             return false;

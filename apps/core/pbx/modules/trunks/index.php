@@ -504,7 +504,7 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
             
             if($tech=="dahdi"){
                 $arrProp["channelid"]=getParameter("channelid");
-                if(!preg_match("/^(g|r){0,1}[0-9]+$/")){
+                if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
                     $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
                     $continue=false;
                 }

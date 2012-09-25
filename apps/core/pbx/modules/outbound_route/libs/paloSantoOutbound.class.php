@@ -98,25 +98,17 @@ class paloSantoOutbound extends paloAsteriskDB{
 			return false;
 		}else
 			return $result;
-         }
+    }
 
 
 	 function getTrunks($domain=null){
 		$where="";
 		$arrParam=null;
-		if(isset($domain)){
-			if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-				$this->errMsg="Invalid domain format";
-				return false;
-			}else{
-				$where="where organization_domain=?";
-				$arrParam=array($domain);
-			}
-		}
 
-		$query="SELECT trunkid, name, tech  from trunk $where";
-              
-		$result=$this->_DB->fetchTable($query,true,$arrParam);
+		$query="SELECT tr.trunkid, tr.name, tr.tech  from trunk as tr join trunk_organization as tor on tr.trunkid=tor.trunkid where organization_domain=?";
+        
+        $arrTrunk[]="";
+		$result=$this->_DB->fetchTable($query,true,array($domain));
 		if($result===false){
 			$this->errMsg=$this->_DB->errMsg;
 			return false;
@@ -126,11 +118,9 @@ class paloSantoOutbound extends paloAsteriskDB{
 			}
 			return $arrTrunk;
 		}
-			
-	
-         }
+    }
 
-	  function getAllTrunks($domain=null){
+/*	  function getAllTrunks($domain=null){
 		$where="";
 		$arrParam=null;
 		if(isset($domain)){
@@ -158,30 +148,19 @@ class paloSantoOutbound extends paloAsteriskDB{
 		      }   
 		      return $arrTrunk;
 		}
-         }
+    }*/
 
 	
-	 function getTrunkById($id,$domain=null){
+	 function getTrunkById($id){
 		global $arrConf;
 		$where="";
 		if (!preg_match('/^[[:digit:]]+$/', "$id")) {
-                    $this->errMsg = "Extension ID must be numeric";
+            $this->errMsg = "Trunk ID must be numeric";
 		    return false;
-                }
-
-		$param=array($id);
-		if(isset($domain)){
-			if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-				$this->errMsg="Invalid domain format";
-				return false;
-			}else{
-				$where=" and organization_domain=?";
-				$param[]=$domain;
-			}
-		}
+        }
 		
-		$query="SELECT t.trunkid, t.name, t.tech  from trunk t where trunkid=? $where";
-		$result=$this->_DB->getFirstRowQuery($query,true,$param);
+		$query="SELECT t.trunkid, t.name, t.tech  from trunk t where trunkid=?";
+		$result=$this->_DB->getFirstRowQuery($query,true,array());
 
 		if($result===false){
 		   $this->errMsg=$this->_DB->errMsg;
@@ -190,9 +169,7 @@ class paloSantoOutbound extends paloAsteriskDB{
 		  // $arrTrunk[$result["trunkid"]]=$result["name"]."/".strtoupper($result["tech"]);
 		   return $result;
 		}
-		    
-  
-          }    
+    }    
 
 
 	 
@@ -229,15 +206,13 @@ class paloSantoOutbound extends paloAsteriskDB{
 	  }
 
 		
-        function getArrDestine($idOutbound){
-	      $query="SELECT * from outbound_route_dialpattern WHERE outbound_route_id=? order by seq";
-              $result=$this->_DB->fetchTable($query,false,array($idOutbound));
+    function getArrDestine($idOutbound){
+        $query="SELECT * from outbound_route_dialpattern WHERE outbound_route_id=? order by seq";
+        $result=$this->_DB->fetchTable($query,false,array($idOutbound));
 	
-	      if($result==false)
-		 $this->errMsg=$this->errMsg;
-
-              return $result; 
-
+        if($result==false)
+            $this->errMsg=$this->errMsg;
+        return $result; 
 	}
 
 	function getArrTrunkPriority($idOutbound){
@@ -251,8 +226,7 @@ class paloSantoOutbound extends paloAsteriskDB{
 		foreach($result as $value){
 		    $arrTrunk[$value[0]]=$value[1]."/".strtoupper($value[2]);
 		}
-              return $arrTrunk; 
-
+        return $arrTrunk; 
 	}
 	
         //debo devolver un arreglo que contengan los parametros del Trunk
@@ -294,41 +268,5 @@ class paloSantoOutbound extends paloAsteriskDB{
 		}
 		
     }
-
-	function getDefaultSettings($domain,$tech){
-		$arrExtension=array();
-		$queryV="SELECT attach,context,deletevoicemail,saycid,envelope from voicemail_general where organization_domain=?";
-		$resultV=$this->_DB->getFirstRowQuery($queryV,true,array($domain));
-		if($resultV==false){
-			$this->errMsg .=_tr("Error getting voicemail default settings").$this->_DB->errMsg;
-		}else{
-			$arrExtension["vmcontext"]=isset($resultV["context"])?$resultV["context"]:null;
-			$arrExtension["vmattach"]=isset($resultV["attach"])?$resultV["attach"]:null;
-			$arrExtension["vmdelete"]=isset($resultV["deletevoicemail"])?$resultV["deletevoicemail"]:null;
-			$arrExtension["vmsaycid"]=isset($resultV["saycid"])?$resultV["saycid"]:null;
-			$arrExtension["vmenvelope"]=isset($resultV["envelope"])?$resultV["envelope"]:null;
-		}
-		$pGPBX = new paloGlobalsPBX($this->_DB,$domain);
-		$arrExtension["ring_timer"]=$pGPBX->getGlobalVar("RINGTIMER");
-        $arrExtension["language"]=$pGPBX->getGlobalVar("LANGUAGE");
-		
-		return $arrExtension;
-	}
-	
-	function getVMdefault($domain){
-        $arrVM=array();
-        $queryV="SELECT attach,context,deletevoicemail,saycid,envelope from voicemail_general where organization_domain=?";
-        $resultV=$this->_DB->getFirstRowQuery($queryV,true,array($domain));
-        if($resultV==false){
-            $this->errMsg .=_tr("Error getting voicemail default settings").$this->_DB->errMsg;
-        }else{
-            $arrVM["vmcontext"]=isset($resultV["context"])?$resultV["context"]:null;
-            $arrVM["vmattach"]=isset($resultV["attach"])?$resultV["attach"]:null;
-            $arrVM["vmdelete"]=isset($resultV["deletevoicemail"])?$resultV["deletevoicemail"]:null;
-            $arrVM["vmsaycid"]=isset($resultV["saycid"])?$resultV["saycid"]:null;
-            $arrVM["vmenvelope"]=isset($resultV["envelope"])?$resultV["envelope"]:null;
-        }
-        return $arrVM;
-	}
 }
 ?>

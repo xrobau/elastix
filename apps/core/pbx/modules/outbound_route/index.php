@@ -277,7 +277,7 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
         return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-        }
+    }
     
 	$arrOrgz=array(0=>"Select one Organization");
 	/*if($userLevel1=="superadmin"){
@@ -313,12 +313,11 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 	$smarty->assign("DISABLE_OUTBOUND","Disable Outbound");
         
 	if($action==NULL){
-	     $pOutbound=new paloSantoOutbound($pDB,$domain);
-             $arrTrunks = $pOutbound->getTrunks();
-	    
-	     $smarty->assign('arrTrunks',$arrTrunks);
-
+        $pOutbound=new paloSantoOutbound($pDB,$domain);
+        $arrTrunks = $pOutbound->getTrunks($domain);
+        $smarty->assign('arrTrunks',$arrTrunks);
 	}
+	
 	if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
 	      
 		if(!isset($idOutbound)){
@@ -326,22 +325,16 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 			$smarty->assign("mb_message",_tr("Invalid Outbound"));
 			return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 		}else{
-			/*if($userLevel1=="superadmin"){
-				$arrExten = $pExten->getExtensionById($idExten);
-				$domain=$arrExten["domain"];
-			}else{*/
-				if($userLevel1=="admin"){
-				        $pOutbound = new paloSantoOutbound($pDB,$domain);
-					$arrOutbound = $pOutbound->getOutboundById($idOutbound,$domain);
-				}else{
-					$smarty->assign("mb_title", _tr("ERROR"));
-					$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-					return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-				}
-			//}
+            if($userLevel1=="admin"){
+                $pOutbound = new paloSantoOutbound($pDB,$domain);
+                $arrOutbound = $pOutbound->getOutboundById($idOutbound,$domain);
+            }else{
+                $smarty->assign("mb_title", _tr("ERROR"));
+                $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+                return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            }
 		}
-		 $pOutbound=new paloSantoOutbound($pDB,$domain);
-		 $arrTrunks = $pOutbound->getTrunks();
+		
 		if($arrOutbound===false){
 			$smarty->assign("mb_title", _tr("ERROR"));
 			$smarty->assign("mb_message",_tr($pOutbound->errMsg));
@@ -353,7 +346,7 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 		}else{
 			$smarty->assign("OUTBOUND",$arrOutbound["routename"]);
 			$smarty->assign("OUTCID",$arrOutbound["outcid"]);
-		        $smarty->assign("ROUTEPASS",$arrOutbound["routepass"]); 
+            $smarty->assign("ROUTEPASS",$arrOutbound["routepass"]); 
 			$smarty->assign("MOHSILENCE",$arrOutbound["mohsilence"]);
 			$smarty->assign("TIMEGROUP",$arrOutbound["time_group_id"]);
 
@@ -367,41 +360,38 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 			$smarty->assign('post',$arrPost);
 			$arrDialPattern = $pOutbound->getArrDestine($idOutbound);
 			$smarty->assign('j',0);
-       		        $smarty->assign('k',0);
+       		$smarty->assign('k',0);
 			
-		        $arrAllTrunks = $pOutbound->getAllTrunks();
+		    $arrAllTrunks = $arrTrunks = $pOutbound->getTrunks($domain);
 			$arrTrunk =  getParameter("arrTrunks");
 			$pOutbound = new paloSantoOutbound($pDB,$domain);
-		        if(sizeof($arrTrunk)==0||$arrTrunk==""||(!isset($arrTrunk))){ 
+            if(sizeof($arrTrunk)==0||$arrTrunk==""||(!isset($arrTrunk))){ 
 			   $arrTrunkPriority = $pOutbound->getArrTrunkPriority($idOutbound);
 			   $smarty->assign('trunks',$arrTrunkPriority);
-			   if((is_array($arrAllTrunks)) && (is_array($arrTrunkPriority)))
-				$arrDif = array_diff_assoc($arrAllTrunks,$arrTrunkPriority);
-			   else
-				$arrDif = array();
-  
-				$smarty->assign('arrDif',$arrDif); 
-
+                if((is_array($arrAllTrunks)) && (is_array($arrTrunkPriority)))
+                    $arrDif = array_diff_assoc($arrAllTrunks,$arrTrunkPriority);
+                else
+                    $arrDif = array();
+    
+                $smarty->assign('arrDif',$arrDif); 
 			}else{
 			   $arrTrunks = array();
 			   $tmp = explode(",",$arrTrunk);
-         		   $arrTrunk = array_values(array_diff($tmp, array('')));
+               $arrTrunk = array_values(array_diff($tmp, array('')));
 			   foreach($arrTrunk as $trunk){
 			      $val = $pOutbound->getTrunkById($trunk);   
 			      $arrTrunks[$val["trunkid"]]=$val["name"]."/".strtoupper($val["tech"]);
 			   }
 			   $arrTrunkPriority = $arrTrunks;
 			   $smarty->assign('trunks',$arrTrunkPriority);
-	        	   $arrDif = array_diff_assoc($arrAllTrunks,$arrTrunkPriority);
+               $arrDif = array_diff_assoc($arrAllTrunks,$arrTrunkPriority);
 			   $smarty->assign('arrDif',$arrDif); 
 			}
 			$arrDialPatterns = getParameter("arrDestine");
 		        
-		        if(sizeof($arrDialPatterns)==0||$arrDialPatterns==""||(!isset($arrDialPatterns))){ 
+            if(sizeof($arrDialPatterns)==0||$arrDialPatterns==""||(!isset($arrDialPatterns))){ 
 			    $smarty->assign('items',$arrDialPattern);
-			    
-			}
-			else{
+			}else{
 			    $tmpstatus = explode(",",$arrDialPatterns);
 			    $arrDialPatterns = array_values(array_diff($tmpstatus, array('')));
 			    $smarty->assign('itemss',$arrDialPatterns);
@@ -409,24 +399,21 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 		  
 			if(getParameter("save_edit"))
 				$arrOutbound=$_POST;
-
 		}
 	}else{ 
 		$tech=null;
-                $arrOutbound=$_POST; 
-		
+        $arrOutbound=$_POST; 
 	}
-        $tech=null;
+
 	$arrFormOrgz = createFieldForm($arrOrgz,$pDB);
-        $oForm = new paloForm($smarty,$arrFormOrgz);
+    $oForm = new paloForm($smarty,$arrFormOrgz);
 
 	if($action=="view"){
         $oForm->setViewMode();
-        }else if($action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
-                $oForm->setEditMode();
+    }else if($action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
+        $oForm->setEditMode();
 		
     }
-	
 	
 	//$smarty->assign("ERROREXT",_tr($pTrunk->errMsg));
 	$smarty->assign("REQUIRED_FIELD", _tr("Required field"));
@@ -440,11 +427,11 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 	$smarty->assign("id_outbound", $idOutbound);
 	$smarty->assign("userLevel",$userLevel1);
 	$smarty->assign("CALLERID", _tr("Caller Id"));
-        $smarty->assign("PREPEND", _tr("Prepend"));
-        $smarty->assign("PREFIX", _tr("Prefix"));
-        $smarty->assign("MATCH_PATTERN", _tr("Match Pattern"));
-        $smarty->assign("RULES", _tr("Dial Patterns"));
-        $smarty->assign("GENERAL", _tr("General"));
+    $smarty->assign("PREPEND", _tr("Prepend"));
+    $smarty->assign("PREFIX", _tr("Prefix"));
+    $smarty->assign("MATCH_PATTERN", _tr("Match Pattern"));
+    $smarty->assign("RULES", _tr("Dial Patterns"));
+    $smarty->assign("GENERAL", _tr("General"));
 	$smarty->assign("TRUNK_SEQUENCE", _tr("Trunk Sequence for Matched Routes"));
 	$smarty->assign("DRAGANDDROP", _tr("Drag and Drop Trunk into Sequence Trunk Area"));
 	$smarty->assign("TRUNKS", _tr("TRUNKS"));
@@ -453,10 +440,10 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 	$smarty->assign("PEERDETAIL", _tr("PEER Details"));
 	$smarty->assign("USERDETAIL", _tr("USER Details"));
 	$smarty->assign("REGISTRATION", _tr("Registration"));
-        $smarty->assign("OUTGOING_SETTINGS", _tr("Outgoing Settings"));
+    $smarty->assign("OUTGOING_SETTINGS", _tr("Outgoing Settings"));
 	$smarty->assign("INCOMING_SETTINGS", _tr("Incoming Settings"));
 	$smarty->assign("OVEREXTEN", _tr("Override Extension"));
-        $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("Outbound Route"), $arrOutbound);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("Outbound Route"), $arrOutbound);
 	$content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $content;
@@ -466,7 +453,7 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	//$pTrunk = new paloSantoTrunk($pDB);
 	$error = "";
 	//conexion elastix.db
-        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pDB2);
 	$pORGZ = new paloSantoOrganization($pDB2);
 	$continue=true;
@@ -480,14 +467,12 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	
 	if($pORGZ->getNumOrganization() <=1){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
-	        $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create an outbound to this organization"));
+        $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create an outbound to this organization"));
 		return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}
-
 	
 	$orgTmp=$pORGZ->getOrganizationById($idOrganization);
 	
-
 	if($orgTmp===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
@@ -495,9 +480,6 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	}elseif(count($orgTmp)==0){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Organization doesn't exist"));
-		/*if($userLevel1=="superadmin")
-			return viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-		else*/
 		return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		foreach($orgTmp as $value){
@@ -507,7 +489,7 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	}
 
 	$arrFormOrgz = createFieldForm($arrOrgz,$pDB);
-        $oForm = new paloForm($smarty,$arrFormOrgz);
+    $oForm = new paloForm($smarty,$arrFormOrgz);
 
 	if(!$oForm->validateForm($_POST)){
         // Validation basic, not empty and VALIDATION_TYPE
@@ -532,22 +514,19 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 			$arrProp=array();
 			$arrProp["routename"]=getParameter("routename");
 			$arrProp['outcid']=getParameter("outcid");
-		        $arrProp['routepass']=getParameter("routepass");
+            $arrProp['routepass']=getParameter("routepass");
 			$arrProp['mohsilence']=getParameter("mohsilence");
-		        $arrProp['outcid_mode'] = (getParameter("over_exten")) ? "on" : "off";
+            $arrProp['outcid_mode'] = (getParameter("over_exten")) ? "on" : "off";
 			$arrProp['time_group_id']=getParameter("time_group_id");
 			$arrProp['domain']=$domain;
 						
 			$arrDialPattern = getParameter("arrDestine");
-                        $tmpstatus = explode(",",$arrDialPattern);
-          		$arrDialPattern = array_values(array_diff($tmpstatus, array('')));
+            $tmpstatus = explode(",",$arrDialPattern);
+            $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
 
 			$arrTrunkPriority = getParameter("arrTrunks");
-                        $tmpstatusT = explode(",",$arrTrunkPriority);
+            $tmpstatusT = explode(",",$arrTrunkPriority);
 			$arrTrunkPriority = array_values(array_diff($tmpstatusT, array('')));
-
-
-		      
 		}
 
 		if($continue){
@@ -568,8 +547,8 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("Outbound has been created successfully"));
 		//mostramos el mensaje para crear los archivos de ocnfiguracion
-		//$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-		//$pAstConf->setReloadDialplan($domain,true);
+		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+		$pAstConf->setReloadDialplan($domain,true);
 		$content = reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
@@ -667,7 +646,10 @@ function saveEditOutbound($smarty, $module_name, $local_templates_dir, $pDB, $ar
 	if($success){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("Outbound has been edited successfully"));
-		$content = reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		
+		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+        $pAstConf->setReloadDialplan($domain,true);
+        $content = reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",$error);
@@ -699,21 +681,12 @@ function deleteOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrC
 		$smarty->assign("mb_message",_tr("Invalid Outbound"));
 		return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
-		/*if($userLevel1=="superadmin"){
-			$pTrunk=new paloTrunkPBX($domain,$pDB);
-			$arrTrunks = $pTrunk->getTrunkById($idTrunk);
-			$domain = $arrTrunks["domain"];
-		}else{
-			$resultO=$pORGZ->getOrganizationById($idOrganization);
-			$domain=$resultO["domain"];*/
-			if($userLevel1=="admin"){
-				  $resultO=$pORGZ->getOrganizationById($idOrganization);
-				  $domain=$resultO["domain"];
-				  $pOutbound=new paloSantoOutbound($pDB,$domain);
-				  $arrOutbound = $pOutbound->getOutboundById($idOutbound, $domain);
-			
-			}
-		//}
+        if($userLevel1=="admin"){
+            $resultO=$pORGZ->getOrganizationById($idOrganization);
+            $domain=$resultO["domain"];
+            $pOutbound=new paloSantoOutbound($pDB,$domain);
+            $arrOutbound = $pOutbound->getOutboundById($idOutbound, $domain);
+        }
 	}
 
 	if($arrOutbound===false){
@@ -739,6 +712,9 @@ function deleteOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrC
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("The Outbound Route was deleted successfully"));
 		
+		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+        $pAstConf->setReloadDialplan($domain,true);
+        $content = reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($error));

@@ -27,6 +27,7 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # Files personalities for hylafax
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
@@ -37,11 +38,11 @@ mv setup/hylafax/bin/faxrcvd.php              $RPM_BUILD_ROOT/var/spool/hylafax/
 mv setup/hylafax/bin/notify-elastix.php       $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify.php               $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/etc/FaxDictionary            $RPM_BUILD_ROOT/var/spool/hylafax/etc/
-mv setup/hylafax/etc/FaxDispatch             $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+mv setup/hylafax/etc/FaxDispatch              $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/hylafax/etc/config                   $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mv setup/etc/init/faxgetty.conf               $RPM_BUILD_ROOT/etc/init
+mv setup/etc/init/faxgetty.conf               $RPM_BUILD_ROOT/etc/init/
 rm -rf setup/hylafax
 
 chmod -R 755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/includes
@@ -56,7 +57,7 @@ mv setup/paloSantoFax.class.php               $RPM_BUILD_ROOT/var/www/html/libs/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
-mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -189,6 +190,8 @@ fi
 /var/spool/hylafax/etc/setup.cache
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
+%defattr(644, root, root)
+/etc/init/faxgetty.conf
 %defattr(775, asterisk, uucp)
 /var/www/faxes/recvd
 /var/www/faxes/sent

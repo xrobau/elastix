@@ -440,8 +440,8 @@ INSERT INTO "group_resource" VALUES(90, 0, 90);
 INSERT INTO "group_resource" VALUES(91, 0, 91);
 INSERT INTO "group_resource" VALUES(94, 0, 94);
 INSERT INTO "group_resource" VALUES(95, 0, 95);
-INSERT INTO "group_resource" VALUES(94, 0, 96);
-INSERT INTO "group_resource" VALUES(95, 0, 97);
+INSERT INTO "group_resource" VALUES(96, 0, 96);
+INSERT INTO "group_resource" VALUES(97, 0, 97);
 
 INSERT INTO "group_resource" VALUES(101, 1, 1);
 INSERT INTO "group_resource" VALUES(102, 1, 2);

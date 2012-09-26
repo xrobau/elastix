@@ -58,6 +58,7 @@ mkdir -p $RPM_BUILD_ROOT/var/log/festival/
 mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/
 mv setup/elastixdir/*      $RPM_BUILD_ROOT/var/www/elastixdir/
 
+
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p      $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -240,8 +241,6 @@ fi
 touch /etc/asterisk/manager_additional.conf
 touch /etc/asterisk/sip_general_custom.conf
 touch /etc/asterisk/sip_nat.conf
-touch /etc/asterisk/sip_registrations_custom.conf
-touch /etc/asterisk/sip_registrations.conf
 touch /etc/asterisk/sip_custom.conf
 touch /etc/asterisk/sip_additional.conf
 touch /etc/asterisk/sip_custom_post.conf
@@ -258,10 +257,8 @@ touch /etc/asterisk/extensions_additional.conf
 touch /etc/asterisk/features_general_custom.conf
 touch /etc/asterisk/queues_custom_general.conf
 touch /etc/asterisk/chan_dahdi_additional.conf
-touch /etc/asterisk/iax_registrations_custom.conf
 touch /etc/asterisk/features_applicationmap_additional.conf
 touch /etc/asterisk/queues_custom.conf
-touch /etc/asterisk/iax_registrations.conf
 touch /etc/asterisk/features_applicationmap_custom.conf
 touch /etc/asterisk/queues_additional.conf
 touch /etc/asterisk/iax_custom.conf
@@ -272,6 +269,8 @@ touch /etc/asterisk/features_featuremap_custom.conf
 touch /etc/asterisk/iax_custom_post.conf
 touch /etc/asterisk/sip_notify_additional.conf
 touch /etc/asterisk/sip_notify_custom.conf
+touch /etc/asterisk/sip_register.conf
+touch /etc/asterisk/iax_register.conf
 
 chown -R asterisk.asterisk /etc/asterisk/*
 

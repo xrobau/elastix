@@ -106,3 +106,4 @@ asterisk ALL = NOPASSWD: /usr/sbin/hardware_detector
 asterisk ALL = NOPASSWD: /sbin/chkconfig
 
 asterisk ALL = NOPASSWD: /usr/sbin/elastix-helper
+uucp     ALL = NOPASSWD: /usr/sbin/elastix-helper

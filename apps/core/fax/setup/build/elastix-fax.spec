@@ -37,7 +37,7 @@ mv setup/hylafax/bin/faxrcvd.php              $RPM_BUILD_ROOT/var/spool/hylafax/
 mv setup/hylafax/bin/notify-elastix.php       $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify.php               $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/etc/FaxDictionary            $RPM_BUILD_ROOT/var/spool/hylafax/etc/
-mv setup/hylafax/etc/FaxDispatch              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
+mv setup/hylafax/etc/FaxDispatch             $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/hylafax/etc/config                   $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
@@ -131,6 +131,7 @@ if [ $1 -eq 2 ]; then
 	chown asterisk.uucp /var/www/faxes/recvd /var/www/faxes/sent
 fi
 
+
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
 elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
@@ -140,6 +141,14 @@ mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
 
 if [ $1 -eq 1 ]; then #install
+  # en caso de instalacion movemos el archivo FaxDispatch
+    if [ -f /var/spool/hylafax/etc/FaxDispatch ]; then
+        fecha=$(date +%F.%T) 
+        mv /var/spool/hylafax/etc/FaxDispatch /var/spool/hylafax/etc/FaxDispatch_$fecha
+    fi
+    mv $pathModule/FaxDispatch /var/spool/hylafax/etc/FaxDispatch
+    chmod 644 /var/spool/hylafax/etc/FaxDispatch
+    chown uucp.uucp /var/spool/hylafax/etc/FaxDispatch
   # The installer database
     elastix-dbprocess "install" "$pathModule/setup/db"
 elif [ $1 -eq 2 ]; then #update
@@ -188,7 +197,6 @@ fi
 /var/log/iaxmodem
 %defattr(-, uucp, uucp)
 %config(noreplace) /var/spool/hylafax/etc/FaxDictionary
-%config(noreplace) /var/spool/hylafax/etc/FaxDispatch
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog

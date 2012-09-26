@@ -30,6 +30,7 @@ mv modules/ $RPM_BUILD_ROOT/var/www/html/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
+mkdir -p $RPM_BUILD_ROOT/etc/init
 mv setup/hylafax/bin/includes                 $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/faxrcvd-elastix.php      $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/faxrcvd.php              $RPM_BUILD_ROOT/var/spool/hylafax/bin/
@@ -40,6 +41,7 @@ mv setup/hylafax/etc/FaxDispatch              $RPM_BUILD_ROOT/var/spool/hylafax/
 mv setup/hylafax/etc/config                   $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
+mv setup/etc/init/faxgetty.conf               $RPM_BUILD_ROOT/etc/init
 rm -rf setup/hylafax
 
 chmod -R 755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/includes

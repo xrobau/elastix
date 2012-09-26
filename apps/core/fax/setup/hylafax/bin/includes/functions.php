@@ -15,21 +15,17 @@
     function fax_info_insert ($tiff_file,$modemdev,$commID,$errormsg,$company_name,$company_number,$tipo,$faxpath) {
         global $db_object;
         $id_user=obtener_id_destiny($modemdev);
+        
+        faxes_log(" $tiff_file,$modemdev,$commID,$errormsg,$company_name,$company_number,$tipo,$faxpath ");
         if($id_user != -1){
-			$query="INSERT INTO fax_docs (pdf_file,modemdev,commID,company_name,company_fax,id_user,date,type,faxpath) VALUES ('$tiff_file','$modemdev','$commID','$company_name','$company_number',$id_user,datetime('now','localtime'),'$tipo','$faxpath')";
-			try{
-				$result=$db_object->query("INSERT INTO fax_docs (pdf_file,modemdev,commID,errormsg,company_name,company_fax,id_user,date,type,faxpath) VALUES  ('$tiff_file','$modemdev','$commID','$errormsg','$company_name','$company_number',$id_user,datetime('now','localtime'),'$tipo','$faxpath')");
-				if(!$result){
-					faxes_log("Error query");
-					faxes_log(print_r($db_object->errorInfo(),1));
-				}
-				faxes_log($query);
-			}catch(PDOException $e){
-				faxes_log("PROBLEMA DE CONEXION");
-				faxes_log($e->getMessage());
-			}
-        }
-        else{
+			$sComando = '/usr/bin/elastix-helper faxconfig recivedFaxsDB '."$tiff_file $modemdev $commID $company_number $tipo $faxpath $id_user $company_name".' 2>&1';
+            $output = $ret = NULL;
+            exec($sComando, $output, $ret);
+            if ($ret != 0) {
+                faxes_log("PROBLEMA DE CONEXION");
+                faxes_log(implode('', $output));
+            }
+        }else{
             faxes_log("Error al Obtener id de destino");
         }
     }

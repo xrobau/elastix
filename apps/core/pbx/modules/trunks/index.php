@@ -401,7 +401,7 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $arrProp['outcid']=getParameter("outcid");
         $arrProp['keepcid']=getParameter("keepcid");
         $arrProp['max_chans']=getParameter("maxchans");
-        $arrProp['disabled'] = (getParameter("disabled")) ? "on" : "off";
+        $arrProp['disabled'] = getParameter("disabled");
         $arrProp['dialout_prefix']=getParameter("dialoutprefix");
         $arrProp["select_orgs"]=getParameter("select_orgs");
         
@@ -498,7 +498,7 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
             $arrProp['outcid']=getParameter("outcid");
             $arrProp['keepcid']=getParameter("keepcid");
             $arrProp['max_chans']=getParameter("maxchans");
-            $arrProp['disabled'] = (getParameter("disabled")) ? "on" : "off";
+            $arrProp['disabled'] = getParameter("disabled");
             $arrProp['dialout_prefix']=getParameter("dialoutprefix");
             $arrProp["select_orgs"]=getParameter("select_orgs");
             

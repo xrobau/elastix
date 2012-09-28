@@ -6,7 +6,7 @@
             <input class="button" type="submit" name="save_new" value="{$SAVE}" >
             {elseif $mode eq 'edit'}
             <input class="button" type="submit" name="save_edit" value="{$APPLY_CHANGES}">
-            {elseif $userLevel eq 'admin'}
+            {elseif $userLevel eq 'admin' || $userLevel eq 'admin'}
             <input class="button" type="submit" name="edit" value="{$EDIT}">
             <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
             {else}
@@ -20,51 +20,70 @@
    </table>
 </div>
 <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
-    <tr class="extension">
+    <tr class="inbound">
         <td width="20%" nowrap>{$description.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
         <td width="30%">{$description.INPUT}</td>
     </tr>
-    <tr class="extension">
+    <tr class="inbound">
         <td width="20%" nowrap>{$did_number.LABEL}: </td>
         <td width="20%">{$did_number.INPUT}</td>
         <td>{$cid_number.LABEL}</td>
         <td>{$cid_number.INPUT}</td> 
     </tr>
     <tr><th>{$OPTIONS}</th></tr>
-        <tr class="extension">
+        <tr class="inbound">
         <td width="20%" nowrap>{$alertinfo.LABEL}:</td>
         <td width="30%">{$alertinfo.INPUT}</td>
         <td width="20%" nowrap>{$cid_prefix.LABEL}: </td>
         <td width="20%">{$cid_prefix.INPUT}</td>
     </tr>
-    <tr class="extension">
+    <tr class="inbound">
         <td width="20%" nowrap>{$moh.LABEL}:</td>
         <td width="30%">{$moh.INPUT}</td>
-        <td width="20%" nowrap>{$ringnig.LABEL}: </td>
-        <td width="20%">{$ringnig.INPUT}</td>
+        <td width="20%" nowrap>{$ringing.LABEL}: </td>
+        <td width="20%">{$ringing.INPUT}</td>
     </tr>
-    <tr class="extension">
+    <tr class="inbound">
         <td width="20%" nowrap>{$delay_answer.LABEL}:</td>
         <td width="30%">{$delay_answer.INPUT}</td>
     </tr>
     <tr><th>{$PRIVACY}</th></tr>
-    <tr class="extension">
+    <tr class="inbound">
         <td nowrap>{$primanager.LABEL}:</td>
         <td >{$primanager.INPUT}</td>
     </tr>
-    <tr class="extension">
-        <td class="privacy">{$max_attempt.LABEL}:</td>
-        <td class="privacy">{$max_attempt.INPUT}</td>
-        <td class="privacy">{$min_length.LABEL}: </td>
-        <td class="privacy">{$min_length.INPUT}</td>
+    {if $mode ne 'view' || $privacy_act eq 'yes'}
+    <tr class="inbound privacy">
+        <td nowrap>{$max_attempt.LABEL}:</td>
+        <td >{$max_attempt.INPUT}</td>
+        <td nowrap>{$min_length.LABEL}: </td>
+        <td >{$min_length.INPUT}</td>
     </tr>
+    {/if}
+    <tr><th>{$FAXDETECT}</th></tr>
+    <tr class="inbound">
+        <td nowrap>{$fax_detect.LABEL}:</td>
+        <td >{$fax_detect.INPUT}</td>
+    </tr>
+    {if $mode ne 'view' || $fax_detect_act eq 'yes'}
+    <tr class="inbound fax_detect">
+        <td nowrap>{$fax_type.LABEL}: </td>
+        <td >{$fax_type.INPUT}</td>
+        <td nowrap>{$fax_time.LABEL}:</td>
+        <td >{$fax_time.INPUT}</td>
+    </tr>
+    <tr class="inbound fax_detect">
+        <td nowrap>{$fax_destiny.LABEL}: </td>
+        <td >{$fax_destiny.INPUT}</td>
+    </tr>
+    {/if}
     <tr><th>{$LANGUAGE}</th></tr>       
-    <tr class="extension">
+    <tr class="inbound">
         <td>{$language.LABEL}:</td>
         <td>{$language.INPUT}</td>
     </tr>
     <tr><th>{$SETDESTINATION}</th></tr>       
-    <tr class="extension">
+    <tr class="inbound">
         <td>{$goto.LABEL}:</td>
         <td>{$goto.INPUT} {$destination.INPUT}</td>
     </tr>
@@ -74,8 +93,8 @@
 
 {literal}
 <style type="text/css">
-.extension td, {
-	padding-left: 12px;
-}	
+.inbound td {
+    padding-left: 12px;
+}
 </style>
 {/literal}

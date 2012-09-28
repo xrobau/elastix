@@ -1,17 +1,26 @@
 $(document).ready(function(){
-	
-    if($("#primanager option:selected").val()=="yes") 
-	    $(".privacy").css("display", "");
-	else
-	    $(".privacy").css("display", "none");
-	
-/*	$("#primanager").change(function(){
-        if($("#primanager option:selected").val()=="yes");
-            $(".privacy").attr("disabled", "");
-        else
-            $(".privacy").attr("disabled", "disabled");
-	});*/
-	
+    if($("#primanager option:selected").val()=="no") 
+	    $(".privacy").css("display","none");
+    
+    if($("#fax_detect option:selected").val()=="no") 
+        $(".fax_detect").css("display","none");
+
+    $("#primanager").change(function(){
+        if($("#primanager option:selected").val()=="yes"){
+            $(".privacy").css("display","table-row");
+        }else{
+            $(".privacy").css("display","none");
+        }
+    });
+    
+    $("#fax_detect").change(function(){
+        if($("#fax_detect option:selected").val()=="yes"){
+            $(".fax_detect").css("display","table-row");
+        }else{
+            $(".fax_detect").css("display","none");
+        }
+    });
+    
 	$("#goto").change(function(){
         var option = $("#goto option:selected").val();
         //obtenemos las opciones correspondientes a esa categoria

@@ -111,19 +111,23 @@ class paloSantoInbound extends paloAsteriskDB{
 		    return false;
         }
 
-		$param=array($id);
-        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $this->domain)){
-            $this->errMsg="Invalid domain format";
-            return false;
-        }else{
+        $param=array($id);
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $domain=getOrgDomainUser();
+            if($domain==false){
+                $this->errMsg=_tr("Invalid Organization");
+                return false;
+            }
             $where=" and organization_domain=?";
-            $param[]=$this->domain;
+            $param[]=$domain;
         }
 
 		$query="SELECT * from inbound_route where id=? $where";
 		$result=$this->_DB->getFirstRowQuery($query,true,$param);
 		
-                if($result===false){
+        if($result===false){
 			$this->errMsg=$this->_DB->errMsg;
 			return false;
 		}elseif(count($result)>0){
@@ -132,36 +136,115 @@ class paloSantoInbound extends paloAsteriskDB{
 		      return false;
     }
     
+    private function isRepeatDidCid($did,$cid){
+        if(isset($cid)){
+            if(!preg_match("/^[0-9]*$/",$cid)){
+                $this->errMsg=_tr("Invalid Caller ID number");
+                return true;
+            }
+        }else
+            $cid="";
+        
+        if(!isset($did))
+            $did="";
+            
+        $where="";
+        $param=array($cid,$did);
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $domain=getOrgDomainUser();
+            if($domain==false){
+                $this->errMsg=_tr("Invalid Organization");
+                return true;
+            }
+            $where=" and organization_domain=?";
+            $param[]=$domain;
+        }
+        
+        $query="SELECT description from inbound_route where cid_number=? and did_number=? $where";
+        $result=$this->_DB->getFirstRowQuery($query,true,$param);
+        if($result===false || count($result)!=0){
+            $this->errMsg=$this->_DB->errMsg;
+            return true;
+        }else
+            return false;
+    }
+    
+    /**
+        funcion que crea un nueva ruta entrante dentro del sistema
+    */
     function createNewInbound($arrProp){
         $query="INSERT INTO inbound_route (";
         $arrOpt=array();
+        
+        //las rutas entrantes pueden ser creadas por el administrador de la organizacion
+        //o pueden ser creadas por el superadmin en cuyo caso la ruta no pertence a ninguna organizacion
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $domain=getOrgDomainUser();
+            if($domain==false){
+                $this->errMsg=_tr("Invalid Organization");
+                return false;
+            }
+            $query .="organization_domain,";
+            $this->domain=$domain;
+            $arrOpt[0]=$domain;
+        }
 
         //debe haberse seteado un nombre
         if(!isset($arrProp["description"]) || $arrProp["description"]==""){
             $this->errMsg="Description of inbound can't be empty";
             return false;
         }else{
-            $val = $this->checkName($arrProp['domain'],$arrProp['description']);
-            if($val==1){
-               $this->errMsg="Description Name is already used by another Inbound Route"; 
-               return false;
-            }else{
-               $query .="description,";
-               $arrOpt[0]=$arrProp["description"];
-            }
+            $query .="description,";
+            $arrOpt[count($arrOpt)]=$arrProp["description"];
         }
-
-        //si se define un callerid 
+        
+        //la comdinacion de DID y CID debe se unica
         if(isset($arrProp["did_number"])){
             $query .="did_number,";
             $arrOpt[count($arrOpt)]=$arrProp["did_number"];
         }
 
         if(isset($arrProp["cid_number"])){
+            if(!preg_match("/^[0-9]*$/",$arrProp["cid_number"])){
+                $this->errMsg=_tr("Invalid Caller ID number");
+                return false;
+            }
             $query .="cid_number,";
             $arrOpt[count($arrOpt)]=$arrProp["cid_number"];
         }
         
+        if($this->isRepeatDidCid($arrProp["did_number"],$arrProp["cid_number"])==true){
+            $this->errMsg=_tr("Already exist other inbound route with the same DID number and Caller ID number").$this->errMsg;
+            return false;
+        }
+        
+        if(isset($arrProp["fax_detect"])){
+            $query .="fax_detect,";
+            $arrOpt[count($arrOpt)]=$arrProp["fax_detect"];
+            if($arrProp["fax_detect"]=="yes"){
+                if(isset($arrProp["fax_destiny"]) && $arrProp["fax_destiny"]!=""){
+                    $query .="fax_destiny,";
+                    $arrOpt[count($arrOpt)]=$arrProp["fax_destiny"];
+                }else{
+                    $this->errMsg=_tr("You must select a fax extension");
+                    return false;
+                }
+                
+                if(isset($arrProp["fax_type"])){
+                    $query .="fax_type,";
+                    $arrOpt[count($arrOpt)]=$arrProp["fax_type"];
+                }
+                if(isset($arrProp["fax_time"])){
+                    $query .="fax_time,";
+                    $arrOpt[count($arrOpt)]=$arrProp["fax_time"];
+                }
+            }
+        }
+
         if(isset($arrProp["alertinfo"])){
             $query .="alertinfo,";
             $arrOpt[count($arrOpt)]=$arrProp["alertinfo"];
@@ -177,9 +260,9 @@ class paloSantoInbound extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["moh"];
         }
 
-        if(isset($arrProp["ring"])){
+        if(isset($arrProp["ringing"])){
             $query .="ringing,";
-            $arrOpt[count($arrOpt)]=$arrProp["ring"];
+            $arrOpt[count($arrOpt)]=$arrProp["ringing"];
         }
 
         if(isset($arrProp["delay_answer"])){
@@ -190,21 +273,17 @@ class paloSantoInbound extends paloAsteriskDB{
         if(isset($arrProp["primanager"])){
             $query .="primanager,";
             $arrOpt[count($arrOpt)]=$arrProp["primanager"];
-        }
+            if($arrProp["primanager"]=="yes"){
+                if(isset($arrProp["max_attempt"])){
+                    $query .="max_attempt,";
+                    $arrOpt[count($arrOpt)]=$arrProp["max_attempt"];
+                }
 
-        if(isset($arrProp["max_attempt"])){
-            $query .="max_attempt,";
-            $arrOpt[count($arrOpt)]=$arrProp["max_attempt"];
-        }
-
-        if(isset($arrProp["min_length"])){
-            $query .="min_length,";
-            $arrOpt[count($arrOpt)]=$arrProp["min_length"];
-        }
-  
-        if(isset($arrProp["cid_lookup"])){
-            $query .="cid_lookup,";
-            $arrOpt[count($arrOpt)]=$arrProp["cid_lookup"];
+                if(isset($arrProp["min_length"])){
+                    $query .="min_length,";
+                    $arrOpt[count($arrOpt)]=$arrProp["min_length"];
+                }
+            }
         }
 
         if(isset($arrProp["language"])){
@@ -212,27 +291,16 @@ class paloSantoInbound extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["language"];
         }
 
-        if(isset($arrProp["goto"])){
-            $query .="goto,";
-            $arrOpt[count($arrOpt)]=$arrProp["goto"];
-        }
-
-        if(isset($arrProp["destination"])){
+       if(isset($arrProp["destination"])){
             if($this->validateDestine($this->domain,$arrProp["destination"])!=false){
-                $query .="destination,";
+                $query .="destination,goto";
                 $arrOpt[count($arrOpt)]=$arrProp["destination"];
+                $tmp=explode(",",$arrProp["destination"]);
+                $arrOpt[count($arrOpt)]=$tmp[0];
             }else{
                 $this->errMsg="Invalid destination";
                 return false;
             }
-        }
-        
-        if(!isset($arrProp["domain"]) || $arrProp["domain"]==""){
-            $this->errMsg="Invalid organization";
-            return false;
-        }else{
-            $query .="organization_domain";
-            $arrOpt[count($arrOpt)]=$arrProp["domain"];
         }
 
         $query .=")";
@@ -242,13 +310,7 @@ class paloSantoInbound extends paloAsteriskDB{
         }
         $qmarks=substr($qmarks,0,-1).")"; 
         $query = $query." values".$qmarks;
-        $result=$this->createInbound($query,$arrOpt,$arrProp);
-        if($result==false)
-            $this->errMsg=$this->errMsg;
-        return $result; 
-    }
-
-    private function createInbound($query,$arrOpt,$arrProp){
+        
         $result=$this->executeQuery($query,$arrOpt);
                 
         if($result==false)
@@ -256,33 +318,86 @@ class paloSantoInbound extends paloAsteriskDB{
         return $result; 
     }
 
-    function updateInboundPBX($arrProp,$idInbound){
+    function updateInboundPBX($arrProp){
         $query="UPDATE inbound_route SET ";
         $arrOpt=array();
+        
+        //las rutas entrantes pueden ser creadas por el administrador de la organizacion
+        //o pueden ser creadas por el superadmin en cuyo caso la ruta no pertence a ninguna organizacion
+        $where="";
+        $param=array($arrProp["id_inbound"]);
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $domain=getOrgDomainUser();
+            if($domain==false){
+                $this->errMsg=_tr("Invalid Organization");
+                return false;
+            }
+            $where =" and organization_domain=?";
+        }
+        //verificamos que la ruta exista
+        $q="Select id from inbound_route where id=? $where";
+        $result=$this->_DB->getFirstRowQuery($q,true,$param);
+        if($result===false || count($result)==0){
+            $this->errMsg=_("Inbound Route doesn't exist").$this->_DB->errMsg;
+            return false;
+        }
+        $idInbound=$result["id"];
+        
+        //que los nuevos did y cid que se quieren usar no esten ya siendo usado
+        if(isset($arrProp["did_number"])){
+            $query .="did_number=?,";
+            $arrOpt[0]=$arrProp["did_number"];
+        }else
+            $arrProp["did_number"]="";
+            
+        if(isset($arrProp["cid_number"])){
+            if(!preg_match("/^[0-9]*$/",$arrProp["cid_number"])){
+                $this->errMsg=_tr("Invalid Caller ID number");
+                return false;
+            }
+            $query .="cid_number=?,";
+            $arrOpt[count($arrOpt)]=$arrProp["cid_number"];
+        }else
+            $arrProp["cid_number"]="";
+        
+        $q="Select id from inbound_route where id!=? and cid_number=? and did_number=?";
+        $result=$this->_DB->getFirstRowQuery($q,true,array($idInbound,$arrProp["cid_number"],$arrProp["did_number"]));
+        if($result===false || count($result)!=0){
+            $this->errMsg=_("Already exist other inbound route with the same DID number and Caller ID number").$this->_DB->errMsg;
+            return false;
+        }
 
         if(!isset($arrProp["description"]) || $arrProp["description"]==""){
             $this->errMsg="Name of inbound can't be empty";
             return false;
         }else{
-            $val = $this->checkName($arrProp['domain'],$arrProp['description'],$idInbound);
-            if($val==1){
-                $this->errMsg="Route Name is already used";
-                return false;
-            }else{
-                $query .="description=?,";
-                $arrOpt[0]=$arrProp["description"];
+            $query .="description=?,";
+            $arrOpt[count($arrOpt)]=$arrProp["description"];
+        }
+        
+        if(isset($arrProp["fax_detect"])){
+            $query .="fax_detect=?,";
+            $arrOpt[count($arrOpt)]=$arrProp["fax_detect"];
+            if($arrProp["fax_detect"]=="yes"){
+                if(isset($arrProp["fax_destiny"]) && $arrProp["fax_destiny"]!=""){
+                    $query .="fax_destiny=?,";
+                    $arrOpt[count($arrOpt)]=$arrProp["fax_destiny"];
+                }else{
+                    $this->errMsg=_tr("You must select a fax extension");
+                    return false;
+                }
+                
+                if(isset($arrProp["fax_type"])){
+                    $query .="fax_type=?,";
+                    $arrOpt[count($arrOpt)]=$arrProp["fax_type"];
+                }
+                if(isset($arrProp["fax_time"])){
+                    $query .="fax_time=?,";
+                    $arrOpt[count($arrOpt)]=$arrProp["fax_time"];
+                }
             }
-        }
-
-        //si se define un callerid 
-        if(isset($arrProp["did_number"])){
-            $query .="did_number=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["did_number"];
-        }
-      
-        if(isset($arrProp["cid_number"])){
-            $query .="cid_number=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["cid_number"];
         }
       
         //si se define un password
@@ -291,7 +406,6 @@ class paloSantoInbound extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["alertinfo"];
         }
 
-        
         if(isset($arrProp["cid_prefix"])){
             $query .="cid_prefix=?,";
             $arrOpt[count($arrOpt)]=$arrProp["cid_prefix"];
@@ -307,100 +421,57 @@ class paloSantoInbound extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["delay_answer"];
         }
 
-        if(isset($arrProp["max_attempt"])){
-            $query .="max_attempt=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["max_attempt"];
-        }
+        if(isset($arrProp["primanager"])){
+            $query .="primanager=?,";
+            $arrOpt[count($arrOpt)]=$arrProp["primanager"];
+            if($arrProp["primanager"]=="yes"){
+                if(isset($arrProp["max_attempt"])){
+                    $query .="max_attempt=?,";
+                    $arrOpt[count($arrOpt)]=$arrProp["max_attempt"];
+                }
 
-        if(isset($arrProp["min_length"])){
-            $query .="min_length=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["min_length"];
+                if(isset($arrProp["min_length"])){
+                    $query .="min_length=?,";
+                    $arrOpt[count($arrOpt)]=$arrProp["min_length"];
+                }
+            }
         }
-
+        
         if(isset($arrProp["language"])){
             $query .="language=?,";
             $arrOpt[count($arrOpt)]=$arrProp["language"];
         }
 
-        if(isset($arrProp["goto"])){
-            $query .="goto=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["goto"];
-        }
-
         if(isset($arrProp["destination"])){
             if($this->validateDestine($this->domain,$arrProp["destination"])!=false){
-                $query .="destination=?,";
+                $query .="destination=?,goto=?,";
                 $arrOpt[count($arrOpt)]=$arrProp["destination"];
+                $tmp=explode(",",$arrProp["destination"]);
+                $arrOpt[count($arrOpt)]=$tmp[0];
             }else{
                 $this->errMsg="Invalid destination";
                 return false;
             }
         }
         
-        if(isset($arrProp["ring"])){
-            $query .="ringing=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["ring"];
+        if(isset($arrProp["ringing"])){
+            $query .="ringing=?";
+            $arrOpt[count($arrOpt)]=$arrProp["ringing"];
         }
-        
-        if(isset($arrProp["pri_manager"])){
-            $query .="primanager=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["pri_manager"];
-        }
-        if(!isset($arrProp["domain"]) || $arrProp["domain"]==""){
-            $this->errMsg="Invalid Oraganization";
-            return false;
-        }else{
-            $query .="organization_domain=?";
-            $arrOpt[count($arrOpt)]=$arrProp["domain"];
-        }
-        //caller id options
-                
+
+        //caller id options                
         $query = $query." WHERE id=?";
         $arrOpt[count($arrOpt)]=$idInbound;
         
-        $exito=$this->updateInbound($query,$arrOpt,$arrProp);
-        if($exito==false)
-            $this->errMsg=$this->errMsg;
-        return $exito; 
-    }
-
-    private function updateInbound($query,$arrOpt,$arrProp){
         $result=$this->executeQuery($query,$arrOpt);
+        print_r($query);
+        print_r($arrOpt);
         if($result==false)
             $this->errMsg=$this->errMsg;
         return $result; 
+         
     }
 
-
-    function checkName($domain,$description,$id_inbound=null){
-          $where="";
-          if(!isset($id_inbound))
-              $id_inbound = "";
-          
-            $arrParam=null;
-          if(isset($domain)){
-              if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-                  $this->errMsg="Invalid domain format";
-                  return false;
-              }else{
-                  $where="where organization_domain=? AND id<>? AND description=? ";
-                  $arrParam=array($domain,$id_inbound,$description);
-              }
-          }
-          
-          $query="SELECT description from inbound_route $where";
-          
-          $result=$this->_DB->fetchTable($query,true,$arrParam);
-          if($result===false){
-              $this->errMsg=$this->_DB->errMsg;
-              return false;
-          }else{
-             if ($result==null)
-                 return 0;
-             else
-                 return 1;
-            }
-    }
 
     function deleteInbound($inboundId){
         
@@ -495,6 +566,23 @@ class paloSantoInbound extends paloAsteriskDB{
                     $arrExt[$context][]=new paloExtensions($exten, new ext_setvar('CALLERID(name)','${RGPREFIX}${CALLERID(name)}'));
                 }
                 
+                //en caso de que se haya activado la funcion de detectar fax en la ruta escribimos el plan de marcado correspondiente
+                if($value['fax_detect']=="yes"){
+                    if(isset($value['fax_destiny'])){
+                        if($value['fax_destiny']!=""){
+                            $arrExt[$context][]=new paloExtensions($exten, new ext_setvar('FAX_EXTEN',$value['fax_destiny']));
+                            $arrExt[$context][]=new paloExtensions($exten, new ext_answer());
+                            $faxDetect=new ext_wait($value['fax_time']);
+                            if($value['fax_type']=='nvfax'){
+                                //comprobamos que este instalado el modulo de deteccion de faxs
+                                if(array_key_exists('nvfax',$this->getDetectFax()))
+                                    $faxDetect=new extension("NVFaxDetect(".$value['fax_time'].")");
+                            }
+                            $arrExt[$context][]=new paloExtensions($exten, $faxDetect);
+                        }
+                    }
+                }
+                
                 $arrExt[$context][]=new paloExtensions($exten, new extension("Goto(".$goto.")"));
             }
             
@@ -505,6 +593,7 @@ class paloSantoInbound extends paloAsteriskDB{
                 if($context===false){
                     $context->errMsg="ext-did-000".$key." Error: ".$context->errMsg;
                 }else{
+                    $value[]=new paloExtensions("fax", new ext_goto(1,'${FAX_EXTEN}',$this->code."-ext-fax"),"1");
                     $context->arrExtensions=$value;
                     $arrContext[]=$context;
                 }
@@ -517,11 +606,31 @@ class paloSantoInbound extends paloAsteriskDB{
             }else{
                 $context->arrExtensions=array(new paloExtensions('foo',new ext_noop('bar'),"1"));
                 $context->arrInclude=array("ext-did-0001",'ext-did-0002');
-                $arrFromInt[]="ext-did";
                 $arrContext[]=$context;
             }
             return $arrContext;
         }
+    }
+    
+    function getFaxExtesion(){
+        $fax=array();
+        $query="SELECT exten,callerid_name from fax where organization_domain=?";
+        $result=$this->_DB->fetchTable($query,true,array($this->domain));
+        if($result!=false){
+            $fax["any"]="any fax exten";
+            foreach($result as $value){
+                $fax[$value["exten"]]=$value["exten"]." (".$value["callerid_name"].")";
+            }
+        }
+        return $fax;
+    }
+    
+    function getDetectFax(){
+        $arrDetect=array("fax"=>"use extension 'fax'");
+        $loaded=$this->isAsteriskModInstaled('app_nv_faxdetect');
+        if($loaded==true)
+            $arrDetect["nvfax"]="NVFaxDetect";
+        return $arrDetect;
     }
 }
 ?>

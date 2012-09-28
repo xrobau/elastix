@@ -276,78 +276,58 @@ function viewFormInbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	$arrInbound=array();
 	$action = getParameter("action");
        
-	if($userLevel1=="superadmin"){
+	if($userLevel1!="admin"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
         return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }
     
-	$arrOrgz=array(0=>"Select one Organization");
-	/*if($userLevel1=="superadmin"){
-		$orgTmp=$pORGZ->getOrganization("","","","");
-		$smarty->assign("isSuperAdmin",TRUE);
-	}else{*/
-		$orgTmp=$pORGZ->getOrganization("","","id",$idOrganization);
-		$smarty->assign("isSuperAdmin",FALSE);
-	//}
-	
-	if($orgTmp===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
-		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}elseif(count($orgTmp)==0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Organization doesn't exist"));
-		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else{
-        if($userLevel1=="superadmin" && count($orgTmp)<=1){
-            $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message",_tr("You need yo have at least one organization created before you can create an inbound"));
-            return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-        }
-        
-		foreach($orgTmp as $value){
-			if($value['id']!=1)
-				$arrOrgz[$value["domain"]]=$value["name"];
-		}
-		$domain=$orgTmp[0]["domain"];
-	}
-	
-	$idInbound=getParameter("id_inbound");
+    $domain=getOrgDomainUser();
+    if($domain==false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid Action"));
+        return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
 
+	$idInbound=getParameter("id_inbound");
 	if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
 		if(!isset($idInbound)){
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr("Invalid Inbound"));
-			return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            $error=_tr("Invalid Inbound Route");
 		}else{
 			if($userLevel1=="admin"){
                 $pInbound = new paloSantoInbound($pDB,$domain);
 				$arrInbound = $pInbound->getInboundById($idInbound);
 			}else{
-				$smarty->assign("mb_title", _tr("ERROR"));
-				$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-				return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+                $error=_tr("You are not authorized to perform this action");
 			}
 		}
 		
-		if($arrInbound===false){
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr($pInbound->errMsg));
-			return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-		}else if(count($arrInbound)==0){
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr("Inbound doesn't exist"));
-			return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-		}else{
-			if(getParameter("save_edit"))
-				$arrInbound=$_POST;
-		}
+		if($error==""){
+            if($arrInbound===false){
+                $error=_tr($pInbound->errMsg);
+            }else if(count($arrInbound)==0){
+                $error=_tr("Inbound doesn't exist");
+            }else{
+                if(getParameter("save_edit"))
+                    $arrInbound=$_POST;
+                $smarty->assign("fax_detect_act",$arrInbound["fax_detect"]);
+                $smarty->assign("privacy_act",$arrInbound["primanager"]);
+            }
+        }
+        
+        if($error!=""){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",$error);
+            return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+        }
 	}else{
         $pInbound = new paloSantoInbound($pDB,$domain);
 		if(getParameter("create_inbound")){
             $arrInbound["primanager"]="no";
-            $arrInbound["max_attempt"]="3";
+            $arrInbound["fax_detect"]="no";
+            $arrInbound["fax_time"]="4";
+            $arrInbound["fax_type"]="fax";
+            $arrInbound["min_length"]="3";
             $arrInbound["max_attempt"]="5";
             $arrInbound["goto"]="";
         }else
@@ -359,8 +339,7 @@ function viewFormInbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         $goto=array();
     $res=$pInbound->getDefaultDestination($domain,$arrInbound["goto"]);
     $destiny=($res==false)?array():$res;
-    
-	$arrFormOrgz = createFieldForm($goto,$destiny);
+	$arrFormOrgz = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax());
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
 	if($action=="view"){
@@ -368,7 +347,6 @@ function viewFormInbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     }else if($action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
         $oForm->setEditMode();
     }
-	
 	
 	//$smarty->assign("ERROREXT",_tr($pTrunk->errMsg));
 	$smarty->assign("REQUIRED_FIELD", _tr("Required field"));
@@ -409,8 +387,6 @@ function saveNewInbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 	$error = "";
 	//conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$pORGZ = new paloSantoOrganization($pDB2);
 	$continue=true;
 	$success=false;
 
@@ -420,29 +396,13 @@ function saveNewInbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 	    return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }
 	
-	if($pORGZ->getNumOrganization() <=1){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create an inbound to this organization"));
-		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}
-
-	$orgTmp=$pORGZ->getOrganizationById($idOrganization);
+    $domain=getOrgDomainUser();
+    if($domain==false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid Action"));
+        return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
 	
-	if($orgTmp===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
-		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}elseif(count($orgTmp)==0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Organization doesn't exist"));
-		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else{
-		foreach($orgTmp as $value){
-			$arrOrgz[$orgTmp["domain"]]=$orgTmp["name"];
-			$domain=$orgTmp["domain"];
-		}
-	}
-
     $pInbound=new paloSantoInbound($pDB,$domain);
 	$goto=$pInbound->getCategoryDefault($domain);
     if($goto===false)
@@ -450,7 +410,7 @@ function saveNewInbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $res=$pInbound->getDefaultDestination($domain,getParameter("goto"));
     $destiny=($res==false)?array():$res;
     
-    $arrFormOrgz = createFieldForm($goto,$destiny);
+    $arrFormOrgz = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax());
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
 	if(!$oForm->validateForm($_POST)){
@@ -482,16 +442,22 @@ function saveNewInbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 			$arrProp["description"]=getParameter("description");
 			$arrProp['did_number']=getParameter("did_number");
             $arrProp['cid_number']=getParameter("cid_number");
-			$arrProp['cid_priority'] = (getParameter("cid_priority")) ? "on" : "off";
+			//$arrProp['cid_priority'] = (getParameter("cid_priority")) ? "on" : "off";
 			$arrProp['alertinfo']=getParameter("alertinfo");
             $arrProp['cid_prefix']=getParameter("cid_prefix");
 			$arrProp['moh']=getParameter("moh");
-			$arrProp['ringnig'] = getParameter("ringnig");
+			$arrProp['ringing'] = getParameter("ringing");
 			$arrProp['delay_answer']=getParameter("delay_answer");
 			$arrProp['primanager'] = getParameter("primanager");
 			if($arrProp['primanager']=="yes"){
 			    $arrProp['max_attempt']=getParameter("max_attempt");
 			    $arrProp['min_length']=getParameter("min_length");
+			}
+			$arrProp['fax_detect']=getParameter('fax_detect');
+			if($arrProp['fax_detect']=="yes"){
+                $arrProp['fax_type']=getParameter('fax_type');
+                $arrProp['fax_time']=getParameter('fax_time');
+                $arrProp['fax_destiny']=getParameter('fax_destiny');
 			}
 			$arrProp['language']=getParameter("language");
 			$arrProp['goto']=getParameter("goto");
@@ -529,9 +495,7 @@ function saveEditInbound($smarty, $module_name, $local_templates_dir, $pDB, $arr
 	
 	$error = "";
 	//conexion elastix.db
-        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$pORGZ = new paloSantoOrganization($pDB2);
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$continue=true;
 	$success=false;
 	$idInbound=getParameter("id_inbound");
@@ -541,24 +505,23 @@ function saveEditInbound($smarty, $module_name, $local_templates_dir, $pDB, $arr
 	  $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 	  return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }
+    
+    $domain=getOrgDomainUser();
+    if($domain==false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid Action"));
+        return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    }
+    
 	//obtenemos la informacion del usuario por el id dado, sino existe el inbound mostramos un mensaje de error
 	if(!isset($idInbound)){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Invalid Inbound"));
 		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-	}else{
-		$resultO=$pORGZ->getOrganizationById($idOrganization);
-		$domain=$resultO["domain"];
-		if($userLevel1=="admin"){
-			$pInbound = new paloSantoInbound($pDB,$domain);
-			$arrInbound = $pInbound->getInboundById($idInbound, $domain);
-		}else{
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-			return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-		}
 	}
 
+	$pInbound = new paloSantoInbound($pDB,$domain);
+    $arrInbound = $pInbound->getInboundById($idInbound, $domain);
 	if($arrInbound===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($pInbound->errMsg));
@@ -568,8 +531,6 @@ function saveEditInbound($smarty, $module_name, $local_templates_dir, $pDB, $arr
 		$smarty->assign("mb_message",_tr("Inbound doesn't exist"));
 		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
-		$domain=$arrInbound["organization_domain"];
-		
 		if($pInbound->validateDestine($domain,getParameter("destination"))==false){
             $error=_tr("You must select a destination for this inbound.");
             $continue=false;
@@ -578,19 +539,26 @@ function saveEditInbound($smarty, $module_name, $local_templates_dir, $pDB, $arr
 		if($continue){
 			//seteamos un arreglo con los parametros configurados
 			$arrProp=array();
+			$arrProp["id_inbound"]=$idInbound;
 			$arrProp["description"]=getParameter("description");
 			$arrProp['did_number']=getParameter("did_number");
             $arrProp['cid_number']=getParameter("cid_number");
 			$arrProp['alertinfo']=getParameter("alertinfo");
             $arrProp['cid_prefix']=getParameter("cid_prefix");
 			$arrProp['moh']=getParameter("moh");
-			$arrProp['ring'] = getParameter("ringing");
+			$arrProp['ringing'] = getParameter("ringing");
 			$arrProp['delay_answer']=getParameter("delay_answer");
-			$arrProp['pri_manager'] = getParameter("primanager");
-			if($arrProp['pri_manager']=="yes"){
-			    $arrProp['max_attempt']=getParameter("max_attempt");
-			    $arrProp['min_length']=getParameter("min_length");
-			}
+			$arrProp['primanager'] = getParameter("primanager");
+            if($arrProp['primanager']=="yes"){
+                $arrProp['max_attempt']=getParameter("max_attempt");
+                $arrProp['min_length']=getParameter("min_length");
+            }
+            $arrProp['fax_detect']=getParameter('fax_detect');
+            if($arrProp['fax_detect']=="yes"){
+                $arrProp['fax_type']=getParameter('fax_type');
+                $arrProp['fax_time']=getParameter('fax_time');
+                $arrProp['fax_destiny']=getParameter('fax_destiny');
+            }
 			
 			$arrProp['language']=getParameter("language");
 			$arrProp['goto']=getParameter("goto");
@@ -600,7 +568,7 @@ function saveEditInbound($smarty, $module_name, $local_templates_dir, $pDB, $arr
 
 		if($continue){
 			$pDB->beginTransaction();
-			$success=$pInbound->updateInboundPBX($arrProp,$idInbound);
+			$success=$pInbound->updateInboundPBX($arrProp);
 			
 			if($success)
 				$pDB->commit();
@@ -610,13 +578,15 @@ function saveEditInbound($smarty, $module_name, $local_templates_dir, $pDB, $arr
 		}
 	}
 
-	//$smarty->assign("mostra_adv",getParameter("mostra_adv"));
 	$smarty->assign("id_inbound", $idInbound);
 
 	if($success){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("Inbound has been edited successfully"));
-		$content = reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		//mostramos el mensaje para crear los archivos de ocnfiguracion
+		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+        $pAstConf->setReloadDialplan($domain,true);
+        $content = reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",$error);
@@ -630,8 +600,6 @@ function deleteInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 	$error = "";
 	//conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$pORGZ = new paloSantoOrganization($pDB2);
 	$continue=true;
 	$success=false;
 	$idInbound=getParameter("id_inbound");
@@ -648,21 +616,11 @@ function deleteInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 		$smarty->assign("mb_message",_tr("Invalid Inbound"));
 		return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
-		/*if($userLevel1=="superadmin"){
-			$pTrunk=new paloTrunkPBX($domain,$pDB);
-			$arrTrunks = $pTrunk->getTrunkById($idTrunk);
-			$domain = $arrTrunks["domain"];
-		}else{
-			$resultO=$pORGZ->getOrganizationById($idOrganization);
-			$domain=$resultO["domain"];*/
-			if($userLevel1=="admin"){
-				  $resultO=$pORGZ->getOrganizationById($idOrganization);
-				  $domain=$resultO["domain"];
-				  $pInbound=new paloSantoInbound($pDB,$domain);
-				  $arrInbound = $pInbound->getInboundById($idInbound, $domain);
-			
-			}
-		//}
+        if($userLevel1=="admin"){
+            $domain=getOrgDomainUser();
+            $pInbound=new paloSantoInbound($pDB,$domain);
+            $arrInbound = $pInbound->getInboundById($idInbound, $domain);
+        }
 	}
 
 	if($arrInbound===false){
@@ -686,7 +644,9 @@ function deleteInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 	if($success){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",_tr("The Inbound Route was deleted successfully"));
-		
+		//mostramos el mensaje para crear los archivos de ocnfiguracion
+		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+        $pAstConf->setReloadDialplan($domain,true);
 	}else{
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($error));
@@ -703,14 +663,14 @@ function generateOptionNum($start, $end){
     return $arr;
 }
 
-function createFieldForm($goto,$destination)
+function createFieldForm($goto,$destination,$faxes,$arrDetect)
 {
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     $arrMusic=array("default"=>_tr("Default"),"none"=>_tr("None"));
     $oneToTen = generateOptionNum(1, 10);
     $oneToFifteen = generateOptionNum(1, 15);
     $twoToTen = generateOptionNum(2, 10);
     $arrLng=getLanguagePBX();
-   
     //var_dump($arrTrunks);
     $arrLang=getLanguagePBX();
     $arrFormElements = array("description"	=> array("LABEL"             => _tr('Description'),
@@ -791,14 +751,36 @@ function createFieldForm($goto,$destination)
                                                     "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "ringnig"  => array("LABEL"             => _tr("Signal RINGING"),
+                            "ringing"  => array("LABEL"             => _tr("Signal RINGING"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "CHECKBOX",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-			
-			
+                            "fax_time"   => array("LABEL"             => _tr("Fax Detection Time"),
+                                                     "REQUIRED"              => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $oneToTen,
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),  
+                            "fax_type"    => array("LABEL"             => _tr("Fax Detection Type"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrDetect,
+                                                    "VALIDATION_TYPE"        => "",
+                                                    "VALIDATION_EXTRA_PARAM" => ""), 
+                            "fax_detect"  => array("LABEL"             => _tr("Activate Fax Detection"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "fax_destiny" => array("LABEL"             => _tr("Fax Extension"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $faxes,
+                                                    "VALIDATION_TYPE"        => "",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
     );
 	
 	return $arrFormElements;

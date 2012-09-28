@@ -162,12 +162,6 @@ class paloAsteriskDB {
 	}
 
 	function prunePeer($device,$tech){
-       /* if(!$this->validateName($device))
-        {
-            $this->errMsg=_tr("Invalid device name");
-            return false;
-        }*/
-
         $errorM="";
         $astMang=AsteriskManagerConnect($errorM);
         if($astMang==false){
@@ -180,12 +174,6 @@ class paloAsteriskDB {
     }
     
     function loadPeer($device,$tech){
-       /* if(!$this->validateName($device))
-        {
-            $this->errMsg=_tr("Invalid device name");
-            return false;
-        }*/
-
         $errorM="";
         $astMang=AsteriskManagerConnect($errorM);
         if($astMang==false){
@@ -431,6 +419,26 @@ class paloAsteriskDB {
             $arrCat["queues"]=_tr("Queues");
         }
         return $arrCat;
+    }
+    
+    /**
+        funcion que sirve para verificar si un determinado modulo 
+        se encuentra cargado dentro de asterisk
+        @param string $module_name nombre del modulo 
+        @return bool retorna verdadero si el module esta cargado
+                     falso caso contrario
+    */
+    function isAsteriskModInstaled($module_name){
+        $errorM="";
+        $astMang=AsteriskManagerConnect($errorM);
+        if($astMang==false){
+            $this->errMsg=$errorM;
+        }else{ //comprobamos que el modulo esta cargado
+            $result = $astMang->command("module show like $module_name");
+            if(preg_match('/[1-9] modules loaded/', $result['data']))
+                return true;
+        }
+        return false;
     }
 }
 
@@ -2381,6 +2389,7 @@ class paloDevice{
 			return false;
 
 		$arrExtensionFax=array();
+		$arrFax=array();
 		$query="Select * from fax where organization_domain=?";
 		$result=$this->tecnologia->getResultQuery($query,array($this->domain),true,"Don't exist faxs extensions for this domain");
 		if($result===false){
@@ -2388,20 +2397,27 @@ class paloDevice{
 			return false;
 		}else{
 			if(is_array($result)){
+                $i=1;
 				foreach($result as $value){
 					$exten=$value["exten"];
 					$arrExtensionFax[] = new paloExtensions($exten,new ext_noop('Receiving Fax for: '.$value["callerid_name"].' ('.$value["callerid_number"].'), From: ${CALLERID(all)}'),1);
 					if($value["rt"]!=0 && isset($value["rt"])){
 						$arrExtensionFax[] = new paloExtensions($exten,new ext_setvar("RT",$value["rt"]));
 					}
-					$arrExtensionFax[] = new paloExtensions($exten,new ext_setvar("DSTRING",$value["dial"]));
-					$arrExtensionFax[] = new paloExtensions($exten,new ext_goto("1","s",$this->code."-ext-fax"));
+					$arrExtensionFax[] = new paloExtensions($exten,new ext_dial($value["dial"],'${RT}'));
+					$arrExtensionFax[] = new paloExtensions($exten,new ext_return());
+					$arrFax[]=new paloExtensions("fax",new ext_Gosub("1",$exten),$i);
+					$i++;
 				}
-				$arrExtensionFax[] = new paloExtensions("s",new ext_dial('${DSTRING},${RT}'),1,"receivefax");
+				$arrFax[]=new paloExtensions("fax",new ext_congestion(),$i);
+				$arrFax[]=new paloExtensions("fax",new ext_macro($this->code."-hangupcall",""),++$i);
+				$arrExtensionFax[] = new paloExtensions("s",new ext_answer(),1);
+				$arrExtensionFax[] = new paloExtensions("s",new ext_wait(4));
 				$arrExtensionFax[] = new paloExtensions("h",new ext_macro($this->code."-hangupcall",""),1);
 			}
 		}
 
+		$arrExtensionFax=array_merge($arrExtensionFax,$arrFax);
 		$contextoFax=new paloContexto($this->code,"ext-fax");
 		if($contextoFax===false){
 			$contextoFax->errMsg="ext-fax. Error: ".$contextoFax->errMsg;
@@ -2520,7 +2536,7 @@ class paloOutboundPBX extends paloAsteriskDB{
 			    if($this->createDialPattern($arrDialPattern,$outboundid)==false){
 				    $this->errMsg="Outbound can't be created .".$this->errMsg;
 				    return false;
-			    }elseif($this->createTrunkPriority($arrTrunkPriority,$outboundid)==false){
+			    }elseif($this->createTrunkPriority($arrTrunkPriority,$outboundid,$arrProp["domain"])==false){
 				    $this->errMsg="Outbound can't be created .".$this->errMsg;
 				    return false;
 			    }else
@@ -2617,7 +2633,7 @@ class paloOutboundPBX extends paloAsteriskDB{
 			    if(($resultDelete==false)||($this->createDialPattern($arrDialPattern,$idOutbound)==false)||($resultDeleteTrunks==false)){
  				    $this->errMsg="Outbound can't be updated.".$this->errMsg;
 				    return false;
-			    }elseif($this->createTrunkPriority($arrTrunkPriority,$idOutbound)==false){
+			    }elseif($this->createTrunkPriority($arrTrunkPriority,$idOutbound,$arrProp["domain"])==false){
 				    $this->errMsg="Outbound can't be updated .".$this->errMsg;
 				    return false;
 			    }else
@@ -2700,44 +2716,48 @@ class paloOutboundPBX extends paloAsteriskDB{
 				    break;
 			    }
 			}
-			 
-     
-			
 		}
 		return $result;
 	}
 
 	//Trunk Priority
-	private function createTrunkPriority($arrTrunkPriority,$outboundid)
+	private function createTrunkPriority($arrTrunkPriority,$outboundid,$domain)
 	{
 		$result=true;
 		$seq = 0;
 		
+		/*$trunks=array();
+		$query=$query="SELECT tr.trunkid from trunk as tr join trunk_organization as tor on tr.trunkid=tor.trunkid where organization_domain=?";
+		$result=$this->_DB->fetchTable($query,true,array($domain));
+        if($result===false){
+            $this->errMsg=$this->_DB->errMsg;
+            return false;
+        }else{
+            foreach($result as $value){
+                $trunks[$value['trunkid']]=$value['trunkid'];
+            }
+            return $trunks;
+        }*/
+        
 		if(is_array($arrTrunkPriority) && count($arrTrunkPriority)!=0){
 			$temp=$arrTrunkPriority;
 			$arrPattern= array();
 			$query="INSERT INTO outbound_route_trunkpriority (outbound_route_id,trunk_id,seq) values (?,?,?)";
 			foreach($arrTrunkPriority as $trunk){ 
-			      $trunk = getParameter("trunk".$trunk);
-			      $seq++;
-				
-			      $arrTrunk=array($outboundid,$trunk,$seq);
-			      
-			      $result=$this->executeQuery($query, array($outboundid,$trunk,$seq));
-			      
-			      if($result==false)
-				 break;
-			
+                $trunk = getParameter("trunk".$trunk);
+                $seq++;
+                //if(in_array($trunk,$trunks)){
+                    $result=$this->executeQuery($query, array($outboundid,$trunk,$seq));
+                    if($result==false){
+                        $this->errMsg="Error setting trunk sequence";
+                        return false;
+                    }
+                //}
 			}
-			 
-     
-			
 		}else{
 		    $this->errMsg="At least one trunk must be selected";
 		    $result=false;
-  
 		}
-      
 		return $result;
 	}
 
@@ -2750,8 +2770,6 @@ class paloOutboundPBX extends paloAsteriskDB{
 		    return true;
 		else
 		    return false;
-
-
 	}
 
 	function checkName($domain,$routename,$id_outbound=null){
@@ -2785,46 +2803,41 @@ class paloOutboundPBX extends paloAsteriskDB{
 	}
 
 	private function deleteDialPatterns($outboundId){
-		      
-		      $queryD="DELETE from outbound_route_dialpattern where outbound_route_id=?";
-		      $result=$this->_DB->genQuery($queryD,array($outboundId));
-		      if($result==false){
-			  $this->errMsg=_tr("Error Deleting Outbound dialpatterns.").$this->_DB->errMsg;
-			  return false;
-		      }else
-			  return true;
+        $queryD="DELETE from outbound_route_dialpattern where outbound_route_id=?";
+        $result=$this->_DB->genQuery($queryD,array($outboundId));
+        if($result==false){
+            $this->errMsg=_tr("Error Deleting Outbound dialpatterns.").$this->_DB->errMsg;
+            return false;
+        }else
+            return true;
 		      
 	}
 	
 	private function deleteTrunks($outboundId){
-		      
-		      $queryD="DELETE from outbound_route_trunkpriority where outbound_route_id=?";
-		      $result=$this->_DB->genQuery($queryD,array($outboundId));
-		      if($result==false){
-			  $this->errMsg=_tr("Error Deleting Outbound trunkspriority.").$this->_DB->errMsg;
-			  return false;
-		      }else
-			  return true;
-		      
+        $queryD="DELETE from outbound_route_trunkpriority where outbound_route_id=?";
+        $result=$this->_DB->genQuery($queryD,array($outboundId));
+        if($result==false){
+            $this->errMsg=_tr("Error Deleting Outbound trunkspriority.").$this->_DB->errMsg;
+            return false;
+        }else
+            return true;
 	}
 
 	function deleteOutbound($outboundId){
 		$resultDeleteTrunks = $this->deleteTrunks($outboundId);
 		$resultDelete = $this->deleteDialPatterns($outboundId);
 		if(($resultDelete==true)&&($resultDeleteTrunks==true)){
-		  $query="DELETE from outbound_route where id=?";
-		  if($this->executeQuery($query,array($outboundId))){
-		      return true;
-		  }else{
-		      $this->errMsg="Outbound can't be deleted.".$this->errMsg;
-		      return false;
-		  }
+        $query="DELETE from outbound_route where id=?";
+        if($this->executeQuery($query,array($outboundId))){
+            return true;
+        }else{
+            $this->errMsg="Outbound can't be deleted.".$this->errMsg;
+            return false;
+        }
 		}else{
-		      $this->errMsg="Outbound can't be deleted.".$this->errMsg;
-		      return false;
-		  }
-      
-				     
+            $this->errMsg="Outbound can't be deleted.".$this->errMsg;
+            return false;
+        }     
 	}	
 }
 ?>

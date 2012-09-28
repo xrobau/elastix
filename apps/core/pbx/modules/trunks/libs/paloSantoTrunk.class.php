@@ -542,11 +542,14 @@ class paloSantoTrunk extends paloAsteriskDB{
             $this->errMsg=_tr("Peer trunk doesn't exist. ").$this->_DB->errMsg;
             return false;
         }
+        
         if(isset($arrProp["secret"]) && $arrProp["secret"]!=""){
             if(strlen($arrProp["secret"])<6 || !preg_match("/^[[:alnum:]]+$/",$arrProp["secret"])){
                 $error=_tr("Secret must be at least 6 characters and contain digits and letters");
                 return false;
             }
+        }else{
+            $arrProp["secret"]=null;
         }
         
         if($tech=="sip"){

@@ -703,11 +703,15 @@ function createExtAddtionals($domain=null){
         }
     }
     
+    $contenido="\n[from-pstn]\n";
+    $contenido .="include =>from-pstn-custom\n";
+    $contenido .="include =>ext-did\n";
+    
     $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
     //valido que exista el dominio y obtengo el code asociado a este
-    $queryCode="SELECT code from organization where domain=?";
+    $queryCode="SELECT code,name,domain from organization where domain=?";
     
-    $query="select * from did where organization_domain IS NOT NULL";
+    $query="SELECT did, organization_domain from did where organization_domain IS NOT NULL";
     $result=$pDB->fetchTable($query,true);
     if($result===false){
         fprintf(STDERR, "ERR: Database connection did - %s\n", $pDB->errMsg);
@@ -727,6 +731,7 @@ function createExtAddtionals($domain=null){
         return false;
     }
     
+    $arrCodeOrg=array();
     $arrExt=array();
     $contexto="";
     foreach($result as $value){
@@ -735,24 +740,88 @@ function createExtAddtionals($domain=null){
             if($value["organization_domain"]!=$domain){
                 $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
                 if($resultc!=false){
+                    $arrExt[]=new paloExtensions($exten,new ext_noop("Reciving call to organization ".$resultc['name']."( ".$value["organization_domain"].")"));
                     $arrExt[]=new paloExtensions($exten,new ext_goto("1",'${EXTEN}',$resultc['code'].'-from-pstn'),"1");
+                    $arrExt[]=new paloExtensions($exten,new ext_macro($resultc['code']."-Hangupcall"));
                     $astMang->database_put("DID",$exten,$value["organization_domain"]);
+                    $arrCodeOrg["organization_domain"]=$arrCodeOrg["code"];
                 }
             }
         }
     }
-    $arrExt[]=new paloExtensions("h",new ext_hangup(),"1");
     
-    $contexto="\n[from-pstn]\n";
-    $contexto .="include =>from-pstn-custom\n";
+    $contenido .="\n[ext-did]\n";
+    $contenido .="include =>ext-did-custom\n";
     if(is_array($arrExt)){
         foreach($arrExt as $extension){
             if(!is_null($extension) && is_object($extension))
-                $contexto .=$extension->data."\n";
+                $contenido .=$extension->data."\n";
         }
     }
 
-    if(file_put_contents("$file", $contexto)===false){
+    //contexto from-analog
+    //a este contexto llegan la llamadas provenientes de los puertos analogicos
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("_X.",new ext_setvar("DID",'${EXTEN}'),"1");
+    $arrExt[]=new paloExtensions("_X.",new ext_goto("1",'s'));
+    $arrExt[]=new paloExtensions("s",new ext_noop('Entering from-analog with DID == ${DID}'));
+    $arrExt[]=new paloExtensions("s",new ext_ringing());
+    $arrExt[]=new paloExtensions("s",new ext_setvar("DID",'${IF($["${DID}"= "]?s:${DID})}'));
+    $arrExt[]=new paloExtensions("s",new ext_noop('DID is now ${DID}'));
+    $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:5}"="DAHDI"]','dahdiok','checkzap'));
+    $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:3}"="Zap"]','zapok','neither'),"checkzap");
+    $arrExt[]=new paloExtensions("s",new ext_gosub(1,'${DID}'),"neither");
+    $arrExt[]=new paloExtensions("s",new ext_hangup());
+    $arrExt[]=new paloExtensions("s",new ext_noop('Is a DAHDI Channel'),"dahdiok");
+    $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:6}'));
+    $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
+    $arrExt[]=new paloExtensions("s",new ext_macro(1,'${DID}','from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_goto(1,'${DID}',"from-pstn"));
+    $arrExt[]=new paloExtensions("s",new ext_noop('Is a Zaptel Channel'),'zapok');
+    $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:4}'));
+    $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
+    $arrExt[]=new paloExtensions("s",new ext_macro(1,'${DID}','from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_goto(1,'${DID}',"from-pstn"));
+    
+    $contenido .="\n[from-analog]\n";
+    $contenido .="include =>from-analog-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
+        }
+    }
+    
+    $query="SELECT dd.did, dd.data, di.organization_domain from did_details dd join did di on dd.did=di.did where di.organization_domain IS NOT NULL and dd.keyword=? and di.type=?";
+    $result=$pDB->fetchTable($query,true,array("port","analog"));
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection did - %s\n", $pDB->errMsg);
+        return false;
+    }
+    foreach($result as $value){
+        $arrExt=array();
+        if(!empty($value["organization_domain"])){
+            if($value["organization_domain"]!=$domain){
+                $tmp=explode("/",$value["data"]);
+                if(count($tmp)==2){
+                    $arrExt[]=new paloExtensions("s",new ext_noop('Entering to macro from-dahdi-'.$tmp[1].' with DID == ${DID}'),"1");
+                    $arrExt[]=new paloExtensions("s",new ext_setvar("__FROM_DID",$value["did"]));
+                    $arrExt[]=new paloExtensions("s",new ext_goto("1",$value["did"],'from-pstn'));
+                    $contenido .="\n[from-dahdi-$tmp[1]]\n";
+                    if(is_array($arrExt)){
+                        foreach($arrExt as $extension){
+                            if(!is_null($extension) && is_object($extension))
+                                $contenido .=$extension->data."\n";
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    if(file_put_contents("$file", $contenido)===false){
         fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
         return false;
     }else{
@@ -761,6 +830,7 @@ function createExtAddtionals($domain=null){
     
     return createFileDahdiChannelAdd($domain);
 }
+
 
 function createFileDahdiChannelAdd($domain=null){
     $file="/etc/asterisk/chan_dahdi_additional.conf";
@@ -799,7 +869,7 @@ function createFileDahdiChannelAdd($domain=null){
             if($value["organization_domain"]!=$domain){
                 $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
                 if($resultc!=false){
-                    $content .="context=".$resultc["code"]."-from-pstn\n";
+                    $content .="context=from-analog\n";
                     $content .="channel => ".$value["data"]."\n";
                 }
             }

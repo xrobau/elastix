@@ -1,3 +1,5 @@
+* Dialer: put workaround for PHP bug #18556 which breaks dialerd with Turkish
+  locales. Fixes Elastix bug #1381. 
 * Campaign Out: implement manual choosing of character set encoding for CSV file
   upload. 
 * Dialer: fix incorrect field access syntax on trunk error output.

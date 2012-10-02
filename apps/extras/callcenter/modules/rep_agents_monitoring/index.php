@@ -85,12 +85,6 @@ function _moduleContent(&$smarty, $module_name)
 function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
 {
     global $arrLang;
-/*
-global $arrConf;
-require_once "modules/$module_name/libs/paloSantoAgentsMonitoring.class.php";
-$x = new paloSantoAgentsMonitoring($arrConf['dsn_conn_database']);
-print_r($x->ObtainAgentsMonitoring(null, null, $arrLang, null, null));
-*/
 
     $smarty->assign(array(
         'FRAMEWORK_TIENE_TITULO_MODULO' => existeSoporteTituloFramework(),
@@ -150,6 +144,13 @@ print_r($x->ObtainAgentsMonitoring(null, null, $arrLang, null, null));
      * oncallupdate:    boolean
      */
     $estadoMonitor = $oPaloConsola->listarEstadoMonitoreoAgentes();
+    if (!is_array($estadoMonitor)) {
+        $smarty->assign(array(
+            'mb_title'  =>  'ERROR',
+            'mb_message'    =>  $oPaloConsola->errMsg,
+        ));
+    	return '';
+    }
     ksort($estadoMonitor);
 
     $jsonData = construirDatosJSON($estadoMonitor);
@@ -344,8 +345,6 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
     // Estado del lado del servidor
     $estadoMonitor = $oPaloConsola->listarEstadoMonitoreoAgentes();
-    ksort($estadoMonitor);
-    $jsonData = construirDatosJSON($estadoMonitor);
 
     // Modo a funcionar: Long-Polling, o Server-sent Events
     $sModoEventos = getParameter('serverevents');
@@ -356,8 +355,17 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     } else {
         Header('Content-Type: application/json');
     }
+    
+    if (!is_array($estadoMonitor)) {
+        $respuesta['error'] = $oPaloConsola->errMsg;
+        jsonflush($bSSE, $respuesta);
+    	$oPaloConsola->desconectarTodo();
+        return;
+    }
 
     // Acumular inmediatamente las filas que son distintas en estado
+    ksort($estadoMonitor);
+    $jsonData = construirDatosJSON($estadoMonitor);
     foreach ($jsonData as $jsonKey => $jsonRow) {
     	if (isset($estadoCliente[$jsonKey])) {
     		if ($estadoCliente[$jsonKey]['status'] != $jsonRow['status'] ||
@@ -383,8 +391,10 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
             $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
             if (is_null($listaEventos)) {
-                // TODO: manejar de mejor manera
-                break;
+                $respuesta['error'] = $oPaloConsola->errMsg;
+                jsonflush($bSSE, $respuesta);
+                $oPaloConsola->desconectarTodo();
+                return;
             }
             
             $iTimestampActual = time();

@@ -272,15 +272,16 @@ CREATE TABLE IF NOT EXISTS `form_data_recolected` (
 CREATE TABLE IF NOT EXISTS `form_field` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `id_form` int(10) unsigned NOT NULL,
-  `etiqueta` varchar(40) NOT NULL,
-  `value` varchar(250) NOT NULL,
+  `etiqueta` text NOT NULL,
+  `value` text NOT NULL,
   `tipo` varchar(25) NOT NULL,
   `orden` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `id_form` (`id_form`),
   CONSTRAINT `form_field_ibfk_1` FOREIGN KEY (`id_form`) REFERENCES `form` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+ALTER TABLE form_field CHANGE COLUMN etiqueta etiqueta TEXT NOT NULL;
+ALTER TABLE form_field CHANGE COLUMN value value TEXT NOT NULL;
 
 --
 -- Table structure for table `queue_call_entry`

@@ -99,6 +99,8 @@ fi
 
 %changelog
 * Tue Oct 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Installer: change form_field.etiqueta and form_field.value fields to 
+  TEXT. Fixes Elastix bug #1250.
 - CHANGED: Dialer: put workaround for PHP bug #18556 which breaks dialerd with
   Turkish locales. Fixes Elastix bug #1381. 
 - CHANGED: Campaign Out: implement manual choosing of character set encoding for

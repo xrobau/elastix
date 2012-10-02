@@ -160,6 +160,14 @@ function manejarRespuestaStatus(respuesta)
 {
 	var fechaInicio = new Date();
 	var keys = ['sec_laststatus', 'logintime', 'sec_calls'];
+	
+	// Intentar recargar la página en caso de error
+	if (respuesta['error'] != null) {
+		window.alert(respuesta['error']);
+		location.reload();
+		return;
+	}
+	
 	for (var k in respuesta) {
 		if (estadoCliente[k] != null) {
 			if (estadoCliente[k]['status'] != respuesta[k]['status']) {

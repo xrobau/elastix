@@ -99,6 +99,8 @@ fi
 
 %changelog
 * Tue Oct 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agents Monitoring: improve error handling when dialer process is shut
+  down in the middle of monitoring.
 - CHANGED: Installer: change form_field.etiqueta and form_field.value fields to 
   TEXT. Fixes Elastix bug #1250.
 - CHANGED: Dialer: put workaround for PHP bug #18556 which breaks dialerd with

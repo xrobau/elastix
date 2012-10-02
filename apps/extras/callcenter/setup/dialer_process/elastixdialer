@@ -32,7 +32,11 @@ PIDFILE_SYSTEM="/var/run/$DAEMON.pid"
 
 start() {
     echo -n $"Starting $PROGRAMA: "
-    daemon $"su $USUARIO -c \"$DIR_TRABAJO/$DAEMON\""
+    NEWLANG=$LANG
+    if [ "$LANG" == "tr_TR" -o "$LANG" == "tr_TR.UTF-8" ] ; then
+        NEWLANG=en_US.UTF-8
+    fi
+    daemon $"su $USUARIO -c \"LANG=$NEWLANG $DIR_TRABAJO/$DAEMON\""
         RETVAL=$?
     echo
     if [ $RETVAL = 0 ] ; then

@@ -1,3 +1,5 @@
+* Installer: change form_field.etiqueta and form_field.value fields to TEXT.
+  Fixes Elastix bug #1250.
 * Dialer: put workaround for PHP bug #18556 which breaks dialerd with Turkish
   locales. Fixes Elastix bug #1381. 
 * Campaign Out: implement manual choosing of character set encoding for CSV file

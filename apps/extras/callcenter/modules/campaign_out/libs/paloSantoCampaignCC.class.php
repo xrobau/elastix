@@ -372,7 +372,7 @@ class paloSantoCampaignCC
      *
      * @return bool		VERDADERO si éxito, FALSO si ocurre un error
      */
-    function addCampaignNumbersFromFile($idCampaign, $sFilePath, &$sEncoding)
+    function addCampaignNumbersFromFile($idCampaign, $sFilePath, $sEncoding)
     {
     	$bExito = FALSE;
     	
@@ -392,18 +392,20 @@ class paloSantoCampaignCC
      * líneas vacías se ignoran, al igual que las líneas que empiecen con #
      *
      * @param	string	$sFilePath	Archivo local a leer para la lista
-     * @param   string  $sEncoding  (SALIDA) Codificación detectada para archivo
+     * @param   string  $sEncoding  Codificación a usar para archivo, NULL para 
+     *                              autodetectar.
      *
      * @return	mixed	Matriz cuyas tuplas contienen los contenidos del archivo,
      *					en el orden en que fueron leídos, o NULL en caso de error.
      */
-    private function parseCampaignNumbers($sFilePath, &$sEncoding)
+    private function parseCampaignNumbers($sFilePath, $sEncoding)
     {
 
     	$listaNumeros = NULL;
 
         // Detectar codificación para procesar siempre como UTF-8 (bug #325)
-        $sEncoding = $this->_adivinarCharsetArchivo($sFilePath);    	
+        if (is_null($sEncoding))
+            $sEncoding = $this->_adivinarCharsetArchivo($sFilePath);    	
 
     	$hArchivo = fopen($sFilePath, 'rt');
     	if (!$hArchivo) {

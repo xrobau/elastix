@@ -98,6 +98,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Oct 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: implement manual choosing of character set encoding for
+  CSV file upload. 
+
 * Thu Sep 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: fix incorrect field access syntax on trunk error output.
 

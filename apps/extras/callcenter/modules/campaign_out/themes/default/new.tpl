@@ -142,6 +142,10 @@ var rte_script = new richTextEditor('rte_script');
     	<td align='right'>{$LABEL_CALL_FILE}: <span  class="required">*</span></td>
     	<td  colspan='4'><input type='file' name='phonefile' /></td>
       </tr>
+      <tr>
+        <td align='right'>{$encoding.LABEL}: <span  class="required">*</span></td>
+        <td  colspan='4'>{$encoding.INPUT}</td>
+      </tr>
       {/if}
       <tr>
         <td align='right' valign='top'>{$script.LABEL}: <span  class="required">*</span></td>

@@ -1,3 +1,5 @@
+* Campaign Out: implement manual choosing of character set encoding for CSV file
+  upload. 
 * Dialer: fix incorrect field access syntax on trunk error output.
 * Agent Console: if Elastix user has a default extension, suggest this extension
   as the extension to use for initial agent login. Possible fix for Elastix bug

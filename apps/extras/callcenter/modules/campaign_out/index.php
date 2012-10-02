@@ -469,6 +469,9 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
             } elseif ((int)$_POST['reintentos'] <= 0) { 
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr('Campaign must allow at least one call retry'));
+            } elseif (!in_array($_POST['encoding'], mb_list_encodings())) {
+                $smarty->assign("mb_title", _tr('Validation Error'));
+                $smarty->assign("mb_message", _tr('Invalid character encoding'));
             } else {
                 $time_ini = $_POST['hora_ini_HH'].":".$_POST['hora_ini_MM'];
                 $time_fin = $_POST['hora_fin_HH'].":".$_POST['hora_fin_MM'];
@@ -540,7 +543,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                         if ($bExito && $bDoCreate) {
                             // Se puede tardar mucho tiempo en la inserción
                             ini_set('max_execution_time', 3600);
-                            $sEncoding = NULL;
+                            $sEncoding = $_POST['encoding'];
                             $bExito = $oCamp->addCampaignNumbersFromFile(
                                 $id_campaign,
                                 $_FILES['phonefile']['tmp_name'], 
@@ -743,9 +746,36 @@ function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm,
             "VALIDATION_TYPE"        => "text",
             "VALIDATION_EXTRA_PARAM" => "",
         ),
+        'encoding'          =>  array(
+            'LABEL'                     =>  _tr('Call File Encoding'),
+            'REQUIRED'                  =>  'yes',
+            'INPUT_TYPE'                =>  'SELECT',
+            'INPUT_EXTRA_PARAM'         =>  listarCodificaciones(),
+            'VALIDATION_TYPE'           =>  'text',
+            'VALIDATION_EXTRA_PARAM'    =>  '',
+        ),
     );
 
     return $formCampos;
+}
+
+function listarCodificaciones()
+{
+	$listaEncodings = array(
+        'UTF-8' =>  _tr('UTF-8'),
+    );
+    $listaPosterior = array();
+    foreach (mb_list_encodings() as $sEnc) {
+		if (!isset($listaEncodings[$sEnc]) && !isset($listaPosterior[$sEnc]) && 
+            !in_array($sEnc, array('pass', 'wchar', 'BASE64', 'UUENCODE',
+                'HTML-ENTITIES', 'Quoted-Printable', 'UTF7-IMAP'))) {
+			if ($sEnc != _tr($sEnc))
+                $listaEncodings[$sEnc] = _tr($sEnc);
+            else $listaPosterior[$sEnc] = _tr($sEnc);
+		}
+	}
+    $listaEncodings = array_merge($listaEncodings, $listaPosterior);
+    return $listaEncodings;
 }
 
 // TODO: validar esta funcion para verificar para qué es necesario escapar.

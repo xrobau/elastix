@@ -6,6 +6,7 @@ var module_name = 'rep_agents_monitoring';
  * a llamadas repetidas al servidor.
  * Este objeto se inicializa en initialize_client_state() */
 var estadoCliente = null;
+var estadoClienteHash = null;
 
 // Objeto de timer para el cronómetro
 var timer = null;
@@ -14,9 +15,10 @@ var timer = null;
 var evtSource = null;
 
 //Inicializar estado del cliente al refrescar la página
-function initialize_client_state(nuevoEstado)
+function initialize_client_state(nuevoEstado, nuevoEstadoHash)
 {
 	estadoCliente = nuevoEstado;
+	estadoClienteHash = nuevoEstadoHash;
 	
 	var fechaInicio = new Date();
 	var regexp = /^(queue-\d+)/;
@@ -125,6 +127,7 @@ function formatoMilisegundo(selector, msec)
 
 function do_checkstatus()
 {
+/*
 	var clientstate = {}; 
 	for (var k in estadoCliente) {
 		clientstate[k] = {
@@ -132,11 +135,13 @@ function do_checkstatus()
 			oncallupdate:	estadoCliente[k]['oncallupdate']
 		};
 	}
+*/
 	var params = {
 			menu:		module_name, 
 			rawmode:	'yes',
 			action:		'checkStatus',
-			clientstate: clientstate
+			//clientstate: clientstate
+			clientstatehash: estadoClienteHash
 		};
 
 	if (window.EventSource) {
@@ -169,7 +174,16 @@ function manejarRespuestaStatus(respuesta)
 	}
 	
 	for (var k in respuesta) {
-		if (estadoCliente[k] != null) {
+		if (k == 'estadoClienteHash') {
+			// Caso especial - actualizar hash de estado
+			if (respuesta[k] == 'mismatch') {
+				// Ha ocurrido un error y se ha perdido sincronía
+				location.reload();
+				return;
+			} else {
+				estadoClienteHash = respuesta[k];
+			}
+		} else if (estadoCliente[k] != null) {
 			if (estadoCliente[k]['status'] != respuesta[k]['status']) {
 				// El estado del agente ha cambiado, actualizar icono
 				var statuslabel = $('#'+k+'-statuslabel');

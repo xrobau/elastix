@@ -99,6 +99,9 @@ fi
 
 %changelog
 * Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agents Monitoring: replace sending of full client state with hash of
+  said state. This prevents a potential issue of hitting a maximum URL length
+  limit due to unbounded size of agent list.
 - CHANGED: Calls Per Agent: clean up implementation to use SQL query parameters
   and simplify the API. Fix average calculation. Fixes Elastix bug #1371. 
 

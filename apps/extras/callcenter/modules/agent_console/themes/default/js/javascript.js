@@ -145,7 +145,7 @@ function initialize_client_state(nuevoEstado)
 	// Lanzar el callback que actualiza el estado de la llamada
     setTimeout(do_checkstatus, 1);
 
-    iniciar_cronometro(nuevoEstado.timer_seconds);
+    iniciar_cronometro((nuevoEstado.timer_seconds !== '') ? nuevoEstado.timer_seconds : null);
     abrir_url_externo(nuevoEstado.urlopentype, nuevoEstado.url);
 }
 
@@ -532,7 +532,7 @@ function manejarRespuestaStatus(respuesta)
 				.removeClass('elastix-callcenter-class-estado-activo')
 				.addClass(respuesta[i].class_estado_agente_inicial);
 		if (respuesta[i].timer_seconds != null) {
-			if (respuesta[i].timer_seconds != '') {
+			if (respuesta[i].timer_seconds !== '') {
 				iniciar_cronometro(respuesta[i].timer_seconds);
 			} else {
 				iniciar_cronometro(null);

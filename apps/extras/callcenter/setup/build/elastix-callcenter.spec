@@ -98,6 +98,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Oct 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: fix breakage due to introduction of 'goto' as reserved word
+  in PHP 5.4.
+
 * Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-5.alpha
 - CHANGED: Agent Console: fix bug in which a chronometer counter that starts 
   from 0, as signaled in an event might be mistakenly interpreted as an order to

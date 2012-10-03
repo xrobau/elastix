@@ -99,6 +99,10 @@ fi
 
 %changelog
 * Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: fix bug in which a chronometer counter that starts 
+  from 0, as signaled in an event might be mistakenly interpreted as an order to
+  stop the chronometer. Might fix Elastix bug #1319. Also, set consistent 
+  behavior of stopping chronometer on idle agent case. 
 - CHANGED: Agent Console: if Elastix user matches an agent number, suggest this
   agent number as the default agent to use for initial agent login. Second part
   of fix for Elastix bug #1354.

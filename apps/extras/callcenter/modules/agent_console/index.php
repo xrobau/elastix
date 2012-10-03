@@ -526,7 +526,7 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         'calltype'      =>  NULL,
         'campaign_id'   =>  NULL,
         'callid'        =>  NULL,
-        'timer_seconds' =>  0,
+        'timer_seconds' =>  '',
         'url'           =>  NULL,
         'urlopentype'   =>  NULL,
     );

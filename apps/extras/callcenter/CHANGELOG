@@ -1,3 +1,5 @@
+* Calls Per Agent: clean up implementation to use SQL query parameters and 
+  simplify the API. Fix average calculation. Fixes Elastix bug #1371.
 * Agents Monitoring: improve error handling when dialer process is shut down in
   the middle of monitoring.
 * Installer: change form_field.etiqueta and form_field.value fields to TEXT.

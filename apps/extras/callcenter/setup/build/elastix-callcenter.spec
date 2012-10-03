@@ -98,6 +98,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calls Per Agent: clean up implementation to use SQL query parameters
+  and simplify the API. Fix average calculation. Fixes Elastix bug #1371. 
+
 * Tue Oct 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agents Monitoring: improve error handling when dialer process is shut
   down in the middle of monitoring.

@@ -89,150 +89,139 @@ function _moduleContent(&$smarty, $module_name)
     $arrFormElements = createFieldFilter();
     $oFilterForm = new paloForm($smarty, $arrFormElements);
     
-        // Por omision las fechas toman el sgte. valor (la fecha de hoy)
-        $date_start = date("Y-m-d") . " 00:00:00"; 
-        $date_end   = date("Y-m-d") . " 23:59:59";
-        $field_name = "";
-        $field_pattern = ""; 
-        //$status = "ALL"; 
+    // Por omision las fechas toman el sgte. valor (la fecha de hoy)
+    $date_start = date("Y-m-d") . " 00:00:00"; 
+    $date_end   = date("Y-m-d") . " 23:59:59";
     $arrFilterExtraVars = null;
+    $fieldPat = array();
     if(isset($_POST['filter'])) {
-            if($oFilterForm->validateForm($_POST)) {
-                // Exito, puedo procesar los datos ahora.
-                $date_start = translateDate($_POST['date_start']) . " 00:00:00"; 
-                $date_end   = translateDate($_POST['date_end']) . " 23:59:59";
-                
-                $field_name = array('field_name'    =>  $_POST['field_name'],
-                                'field_name_1'    =>  $_POST['field_name_1']);
-            
-                $field_pattern = array('field_pattern' => $_POST['field_pattern'],
-                                   'field_pattern_1'=> $_POST['field_pattern_1']);
+        if($oFilterForm->validateForm($_POST)) {
+            // Exito, puedo procesar los datos ahora.
+            $date_start = translateDate($_POST['date_start']) . " 00:00:00"; 
+            $date_end   = translateDate($_POST['date_end']) . " 23:59:59";
+            if (!empty($_POST['field_pattern']))
+                $fieldPat[$_POST['field_name']][] = $_POST['field_pattern'];
+            if (!empty($_POST['field_pattern_1']))
+                $fieldPat[$_POST['field_name_1']][] = $_POST['field_pattern_1'];
+            $arrFilterExtraVars = array("date_start" => $_POST['date_start'], 
+                                        "date_end" => $_POST['date_end'], 
+                                        "field_name" => $_POST['field_name'], 
+                                        "field_pattern" => $_POST['field_pattern'],
+                                        "field_name_1" => $_POST['field_name_1'], "field_pattern_1" => $_POST['field_pattern_1']);
+        } else {
+            // Error
+            $smarty->assign("mb_title", _tr("Validation Error"));
+            $arrErrores=$oFilterForm->arrErroresValidacion;
+            $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
+            foreach($arrErrores as $k=>$v) {
+                $strErrorMsg .= "$k, ";
+            }
+            $strErrorMsg .= "";
+            $smarty->assign("mb_message", $strErrorMsg);
+        }
+        $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
 
-               // $status = $_POST['status'];    
-                $arrFilterExtraVars = array("date_start" => $_POST['date_start'], 
-                                            "date_end" => $_POST['date_end'], 
-                                            "field_name" => $_POST['field_name'], 
-                                            "field_pattern" => $_POST['field_pattern'],
-                                            "field_name_1" => $_POST['field_name_1'], "field_pattern_1" => $_POST['field_pattern_1']/*,
-                                            "status" => $_POST['status']*/);
+    } else if(isset($_GET['date_start']) AND isset($_GET['date_end'])) {
+        $date_start = translateDate($_GET['date_start']) . " 00:00:00";
+        $date_end   = translateDate($_GET['date_end']) . " 23:59:59";
+        if (!empty($_GET['field_pattern']))
+            $fieldPat[$_GET['field_name']][] = $_GET['field_pattern'];
+        if (!empty($_GET['field_pattern_1']))
+            $fieldPat[$_GET['field_name_1']][] = $_GET['field_pattern_1'];
+
+        $arrFilterExtraVars = array("date_start" => $_GET['date_start'], "date_end" => $_GET['date_end']);
+        $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_GET);
+    } else {
+        $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", 
+                      array('date_start' => date("d M Y"), 'date_end' => date("d M Y"),'field_name' => 'agent','field_pattern' => '','field_name_1' => 'agent','field_pattern_1' => ''/*,'status' => 'ALL' */));
+    }
+    
+    $bElastixNuevo = method_exists('paloSantoGrid','setURL');
+
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->enableExport();   // enable export.
+    $oGrid->showFilter($htmlFilter); 
+
+    $bExportando = $bElastixNuevo
+    ? $oGrid->isExportAction()
+    : ( (isset( $_GET['exportcsv'] ) && $_GET['exportcsv'] == 'yes') || 
+        (isset( $_GET['exportspreadsheet'] ) && $_GET['exportspreadsheet'] == 'yes') || 
+        (isset( $_GET['exportpdf'] ) && $_GET['exportpdf'] == 'yes')
+      ) ;
+    $offset = 0;
+    $limit = 20;
+
+    $arrCallsAgentTmp = $oCallsAgent->obtenerCallsAgent($date_start, $date_end, $fieldPat);
+    if (!is_array($arrCallsAgentTmp)) {
+        $smarty->assign(array(
+            'mb_title'      =>  _tr('ERROR'),
+            'mb_message'    =>  $oCallsAgent->errMsg,
+        ));
+    	$arrCallsAgentTmp = array();
+    }
+    $totalCallsAgents = count($arrCallsAgentTmp);
+    // Si se quiere avanzar a la sgte. pagina
+    if($bElastixNuevo){
+        $oGrid->setLimit($limit);
+        $oGrid->setTotal($totalCallsAgents + 1);
+        $offset = $oGrid->calculateOffset();
+    } else {
+        if(isset($_GET['nav']) && $_GET['nav']=="end") {
+            // Mejorar el sgte. bloque.
+            if(($totalCallsAgents%$limit)==0) {
+                $offset = $totalCallsAgents - $limit;
             } else {
-                // Error
-                $smarty->assign("mb_title", _tr("Validation Error"));
-                $arrErrores=$oFilterForm->arrErroresValidacion;
-                $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
-                foreach($arrErrores as $k=>$v) {
-                    $strErrorMsg .= "$k, ";
-                }
-                $strErrorMsg .= "";
-                $smarty->assign("mb_message", $strErrorMsg);
+                $offset = $totalCallsAgents - $totalCallsAgents%$limit;
             }
-            $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-    
-        } else if(isset($_GET['date_start']) AND isset($_GET['date_end'])) {
-            $date_start = translateDate($_GET['date_start']) . " 00:00:00";
-            $date_end   = translateDate($_GET['date_end']) . " 23:59:59";
-
-            $field_name = array('field_name'    =>  $_GET['field_name'],
-                                'field_name_1'    =>  $_GET['field_name_1']);
-            
-            $field_pattern = array('field_pattern' => $_GET['field_pattern'],
-                                   'field_pattern_1'=> $_GET['field_pattern_1']);
-
-            //$status = $_GET['status'];
-            $arrFilterExtraVars = array("date_start" => $_GET['date_start'], "date_end" => $_GET['date_end']);
-            $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_GET);
-        } else {
-            $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", 
-                          array('date_start' => date("d M Y"), 'date_end' => date("d M Y"),'field_name' => 'agent','field_pattern' => '','field_name_1' => 'agent','field_pattern_1' => ''/*,'status' => 'ALL' */));
         }
-        
-        $bElastixNuevo = method_exists('paloSantoGrid','setURL');
-
-        $oGrid = new paloSantoGrid($smarty);
-        $oGrid->enableExport();   // enable export.
-        $oGrid->showFilter($htmlFilter); 
-
-        $bExportando = $bElastixNuevo
-        ? $oGrid->isExportAction()
-        : ( (isset( $_GET['exportcsv'] ) && $_GET['exportcsv'] == 'yes') || 
-            (isset( $_GET['exportspreadsheet'] ) && $_GET['exportspreadsheet'] == 'yes') || 
-            (isset( $_GET['exportpdf'] ) && $_GET['exportpdf'] == 'yes')
-          ) ;
-        $offset = 0;
-        $limit = 20;
-        $arrCallsAgentTmp  = $oCallsAgent->obtenerCallsAgent(null, $offset, $date_start, $date_end, $field_name, $field_pattern/*,$status*/);
-        $totalCallsAgents  = $arrCallsAgentTmp['NumRecords'];
+    
         // Si se quiere avanzar a la sgte. pagina
-        if($bElastixNuevo){
-            $oGrid->setLimit($limit);
-            $oGrid->setTotal($totalCallsAgents + 1);
-            $offset = $oGrid->calculateOffset();
-        } else {
-            if(isset($_GET['nav']) && $_GET['nav']=="end") {
-                // Mejorar el sgte. bloque.
-                if(($totalCallsAgents%$limit)==0) {
-                    $offset = $totalCallsAgents - $limit;
-                } else {
-                    $offset = $totalCallsAgents - $totalCallsAgents%$limit;
-                }
-            }
-        
-            // Si se quiere avanzar a la sgte. pagina
-            if(isset($_GET['nav']) && $_GET['nav']=="next") {
-                $offset = $_GET['start'] + $limit - 1;
-            }
-        
-            // Si se quiere retroceder
-            if(isset($_GET['nav']) && $_GET['nav']=="previous") {
-                $offset = $_GET['start'] - $limit - 1;
-            }
+        if(isset($_GET['nav']) && $_GET['nav']=="next") {
+            $offset = $_GET['start'] + $limit - 1;
         }
     
-        // Construyo el URL base
+        // Si se quiere retroceder
+        if(isset($_GET['nav']) && $_GET['nav']=="previous") {
+            $offset = $_GET['start'] - $limit - 1;
+        }
+    }
+
+    // Bloque comun
+    $arrCallsAgent = array_slice($arrCallsAgentTmp, $offset, $limit);
+    $arrData = array();
+    $sumCallAnswered = $sumDuration = $timeMayor = 0;
+    foreach($arrCallsAgent as $cdr) {
+        $arrData[] = array(
+            $cdr['agent_number'],
+            htmlentities($cdr['agent_name'], ENT_COMPAT, 'UTF-8'),
+            $cdr['type'],
+            $cdr['queue'],
+            $cdr['num_answered'],
+            formatoSegundos($cdr['sum_duration']),
+            formatoSegundos($cdr['avg_duration']),
+            formatoSegundos($cdr['max_duration']),
+        );
+
+        $sumCallAnswered += $cdr['num_answered'];   // Total de llamadas contestadas
+        $sumDuration += $cdr['sum_duration'];       // Total de segundos en llamadas
+        $timeMayor = ($timeMayor < $cdr['max_duration']) ? $cdr['max_duration'] : $timeMayor;
+    }
+    $sTagInicio = (!$bExportando) ? '<b>' : '';
+    $sTagFinal = ($sTagInicio != '') ? '</b>' : '';
+    $arrData[] = array(
+        $sTagInicio._tr('Total').$sTagFinal,
+        '', '', '',
+        $sTagInicio.$sumCallAnswered.$sTagFinal,
+        $sTagInicio.formatoSegundos($sumDuration).$sTagFinal,
+        $sTagInicio.formatoSegundos(($sumCallAnswered > 0) ? ($sumDuration / $sumCallAnswered) : 0).$sTagFinal,
+        $sTagInicio.formatoSegundos($timeMayor).$sTagFinal,
+    );
+
+    // Construyo el URL base
     if(isset($arrFilterExtraVars) && is_array($arrFilterExtraVars) && count($arrFilterExtraVars)>0) {
          $urlVars = array_merge($urlVars, $arrFilterExtraVars);
     }
 
-    // Bloque comun
-    $arrCallsAgent  = $oCallsAgent->obtenerCallsAgent($limit, $offset, $date_start, $date_end, $field_name, $field_pattern/*,$status*/);
-
-    if(is_array($arrCallsAgent['Data']))
-    {
-        foreach($arrCallsAgent['Data'] as $cdr) {
-            $arrTmp    = array();
-            $arrTmp[0] = $cdr[0];
-            $arrTmp[1] = htmlentities($cdr[1], ENT_COMPAT, "UTF-8");
-            $arrTmp[2] = $cdr[2];
-            $arrTmp[3] = $cdr[3];
-            $arrTmp[4] = $cdr[4];
-            $arrTmp[5] = $cdr[5];
-            $arrTmp[6] = $cdr[6];
-            $arrTmp[7] = $cdr[7];
-            $arrData[] = $arrTmp;
-        }
-
-        $numRegistros = count($arrData);
-        $sumCallAnswered = $sumDuration = 0;
-        $avgPromedio = $timeMayor = "00:00:00";
-        for($i=0;$i<$numRegistros;$i++){
-            $sumCallAnswered = $sumCallAnswered + $arrData[$i][4];
-            $sumDuration = $oCallsAgent->getTotalWaitTime($sumDuration,$arrData[$i][5]);
-            $avgPromedio = $oCallsAgent->getTotalWaitTime($avgPromedio,$arrData[$i][6]);
-            $timeMayor = $oCallsAgent->getFechaMayor($timeMayor,$arrData[$i][7]);
-        }
-        $sTagInicio = (!$bExportando) ? '<b>' : '';
-        $sTagFinal = ($sTagInicio != '') ? '</b>' : '';
-        $arrTmp[0] = $sTagInicio._tr("Total").$sTagFinal;
-        $arrTmp[1] = "";
-        $arrTmp[2] = "";
-        $arrTmp[3] = "";
-        $arrTmp[4] = $sTagInicio.$sumCallAnswered.$sTagFinal;
-        $arrTmp[5] = $sTagInicio.$sumDuration.$sTagFinal;
-        $arrTmp[6] = $sTagInicio.$oCallsAgent->getPromedioFecha($avgPromedio,$numRegistros).$sTagFinal;
-        $arrTmp[7] = $sTagInicio.$timeMayor.$sTagFinal;
-        $arrData[] = $arrTmp;
-    }
-    
     if($bElastixNuevo){
         $oGrid->setURL(construirURL($urlVars, array("nav", "start")));
         $oGrid->setData($arrData);
@@ -247,7 +236,7 @@ function _moduleContent(&$smarty, $module_name)
     } else {
          $url = construirURL($urlVars, array("nav", "start"));
          $offset = 0;
-         $total = count($arrCallsAgent['Data']) + 1;
+         $total = count($arrData);
          $limit = $total;
          $arrGrid = array("title"    => _tr("Calls per Agent"),
                      "url"      => $url,
@@ -281,7 +270,7 @@ function _moduleContent(&$smarty, $module_name)
         if($bExportando){
             header("Cache-Control: private");
             header("Pragma: cache");
-            header('Content-Type: application/octec-stream'); 
+            header('Content-Type: application/octet-stream'); 
             header('Content-disposition: inline; filename="calls_per_agent.csv"');
             header('Content-Type: application/force-download');
         }
@@ -292,6 +281,16 @@ function _moduleContent(&$smarty, $module_name)
             $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
         return $sContenido;
     }
+}
+
+function formatoSegundos($iSeg)
+{
+    $iSeg = (int)$iSeg;
+    $iHora = $iMinutos = $iSegundos = 0;
+    $iSegundos = $iSeg % 60; $iSeg = ($iSeg - $iSegundos) / 60;
+    $iMinutos = $iSeg % 60; $iSeg = ($iSeg - $iMinutos) / 60;
+    $iHora = $iSeg;
+    return sprintf('%02d:%02d:%02d', $iHora, $iMinutos, $iSegundos);
 }
 
 function createFieldFilter()

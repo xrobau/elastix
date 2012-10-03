@@ -47,244 +47,123 @@ class paloSantoCallsAgent {
             }
         }
     }
-    
-    function obtenerCallsAgent($limit, $offset, $date_start="", $date_end="", $field_name, $field_pattern/*,$status="ALL"*/,$calltype="",$troncales=NULL)
+
+    private function _construirWhere($sTipo, $date_start, $date_end, $fieldPat)
     {
-        $n_field = 0;
-        $sqlQuery = "";
-        $strWhereCalls = "";
-        $strWheredateCallEn = "";
-
-        if(!isset($field_name['field_name']))
-            $field_name['field_name'] = "";
-
-        $field_name_1 = $field_name['field_name'];
-
-        if(!isset($field_name['field_name_1']))
-            $field_name['field_name_1'] = "";
-
-        $field_name_2 = $field_name['field_name_1'];
-
-        if(!isset($field_pattern['field_pattern']))
-            $field_pattern['field_pattern']="";
-        if(!isset($field_pattern['field_pattern_1']))
-            $field_pattern['field_pattern_1']="";
-
-        $field_pattern_1 = strtoupper($field_pattern['field_pattern']);
-        $field_pattern_2 = strtoupper($field_pattern['field_pattern_1']);
+        $condSQL = array();
+        $paramSQL = array();
         
-        //Campos diferentes en tablas 
-        if(!empty($date_start)){
-            $strWhereCalls .= "AND cal.start_time between '$date_start' ";
-            $strWheredateCallEn .= " AND cale.datetime_entry_queue between '$date_start' ";
+        $campoLlamadas = array(
+            'incoming' => 'call_entry.datetime_entry_queue',
+            'outgoing' => 'calls.start_time'
+        );
+        $tablaCola = array(
+            'incoming' => 'queue_call_entry',
+            'outgoing' => 'campaign'
+        );
+        $sTablaCola = $tablaCola[$sTipo]; 
+        $sCampoLlamada = $campoLlamadas[$sTipo];
+
+        // Fechas de inicio y de fin
+        if (!is_null($date_start)) {
+        	$condSQL[] = "$sCampoLlamada >= ?";
+            $paramSQL[] = $date_start;
         }
-        if(!empty($date_end)){
-           $strWhereCalls .= " AND '$date_end' ";
-            $strWheredateCallEn .= " AND '$date_end' ";
+        if (!is_null($date_end)) {
+            $condSQL[] = "$sCampoLlamada <= ?";
+            $paramSQL[] = $date_end;
         }
         
+        if (!function_exists('_construirWhere_mapLike')) {
+        	function _construirWhere_mapLike($s) { return "%{$s}%"; }
+        }
+        
+        // Colas a buscar
+        if (isset($fieldPat['queue']) && count($fieldPat['queue']) > 0) {
+            $condSQL[] = '('.implode(' OR ', array_fill(0, count($fieldPat['queue']), "$sTablaCola.queue LIKE ?")).')';
+            $paramSQL = array_merge($paramSQL, array_map('_construirWhere_mapLike', $fieldPat['queue']));            
+        }
 
-        if(($field_name_1==$field_name_2)&&($field_pattern_1!="")&&($field_pattern_2!=""))
-        { 
-            $this->construirCondicionIguales($n_field,$field_name_1,$field_pattern_1,$strWhereCalls,$strWheredateCallEn);
-            $this->construirCondicionIguales($n_field,$field_name_2,$field_pattern_2,$strWhereCalls,$strWheredateCallEn);
+        // Agentes a buscar
+        if (isset($fieldPat['number']) && count($fieldPat['number']) > 0) {
+            $condSQL[] = '('.implode(' OR ', array_fill(0, count($fieldPat['number']), 'agent.number LIKE ?')).')';
+            $paramSQL = array_merge($paramSQL, array_map('_construirWhere_mapLike', $fieldPat['number']));            
+        }
+
+        // Construir fragmento completo de sentencia SQL
+        $where = array(implode(' AND ', $condSQL), $paramSQL);
+        if ($where[0] != '') $where[0] = ' AND '.$where[0];
+        return $where;
+    }
+
+    /**
+     * Procedimiento para listar los totales de llamadas de los agentes
+     * 
+     * @param   string  $date_start Fecha en formato yyyy-mm-dd hh:mm:ss 
+     * @param   string  $date_end   Fecha en formato yyyy-mm-dd hh:mm:ss
+     * @param   array   $fieldPat   Lista de elementos a buscar
+     *          number  Número de agente
+     *          queue   Cola usada para recibir la llamada
+     *          type    IN,INBOUND,OUT,OUTBOUND
+     * 
+     * @return  mixed   NULL en caso de error, o tupla (Data, NumRecords)  
+     */
+    function obtenerCallsAgent($date_start = NULL, $date_end = NULL, $fieldPat = array())
+    {
+    	$sPeticion_incoming = <<<SQL_INCOMING
+SELECT agent.number AS agent_number, agent.name AS agent_name,
+    'Inbound' AS type, queue_call_entry.queue AS queue,
+    COUNT(*) AS num_answered, SUM(call_entry.duration) AS sum_duration,
+    AVG(call_entry.duration) AS avg_duration, MAX(call_entry.duration) AS max_duration 
+FROM (call_entry, queue_call_entry)
+LEFT JOIN agent
+    ON agent.id = call_entry.id_agent
+WHERE queue_call_entry.id = call_entry.id_queue_call_entry AND call_entry.status = 'terminada'
+SQL_INCOMING;
+        list($sWhere_incoming, $param_incoming) = $this->_construirWhere(
+            'incoming', $date_start, $date_end, $fieldPat);
+        $sPeticion_incoming .= $sWhere_incoming.' GROUP BY agent.number, queue';
+
+        $sPeticion_outgoing = <<<SQL_OUTGOING
+SELECT agent.number AS agent_number, agent.name AS agent_name,
+    'Outbound' AS type, campaign.queue AS queue, COUNT(*) AS num_answered,
+    SUM(calls.duration) AS sum_duration, AVG(calls.duration) AS avg_duration,
+    MAX(calls.duration) AS max_duration
+FROM (calls, campaign)
+LEFT JOIN agent
+    ON agent.id = calls.id_agent
+WHERE calls.duration IS NOT NULL AND campaign.id = calls.id_campaign AND calls.status = 'Success'
+SQL_OUTGOING;
+        list($sWhere_outgoing, $param_outgoing) = $this->_construirWhere(
+            'outgoing', $date_start, $date_end, $fieldPat);
+        $sPeticion_outgoing .= $sWhere_outgoing.' GROUP BY agent.number, queue';
+
+        // Construir la unión SQL en caso necesario
+        if (!isset($fieldPat['type'])) $fieldPat['type'] = array('IN', 'OUT');
+        $sPeticionSQL = NULL; $paramSQL = NULL;
+        if (!in_array('IN', $fieldPat['type']) && !in_array('INBOUND', $fieldPat['type'])) {
+        	// Sólo llamadas salientes
+            $sPeticionSQL = $sPeticion_outgoing;
+            $paramSQL = $param_outgoing;
+        } elseif (!in_array('OUT', $fieldPat['type']) && !in_array('OUTBOUND', $fieldPat['type'])) {
+        	// Sólo llamadas entrantes
+            $sPeticionSQL = $sPeticion_incoming;
+            $paramSQL = $param_incoming;
         } else {
-            $this->construirCondicion($field_name_1,$field_pattern_1,$strWhereCalls,$strWheredateCallEn);
-            $this->construirCondicion($field_name_2,$field_pattern_2,$strWhereCalls,$strWheredateCallEn);
+        	// Todas las llamadas
+            $sPeticionSQL = "($sPeticion_incoming) UNION ($sPeticion_outgoing)";
+            $paramSQL = array_merge($param_incoming, $param_outgoing);
         }
+        $sPeticionSQL .= ' ORDER BY agent_number, queue';
 
-
-        //if(!empty($status) && $status!="ALL") $strWhere .= " AND disposition = '$status' ";
-
-        $sqlQueryCalls = "select age.number,age.name,'Outbound' as type,cam.queue,count(*)            calls_answ ,sec_to_time(sum(duration)),                                                  sec_to_time(avg(duration)),sec_to_time(max(duration))
-            from calls cal
-            inner join campaign cam on cam.id=cal.id_campaign
-            left join agent age on age.id=cal.id_agent
-            where status='Success'";
-        if(!empty($strWhereCalls)) $sqlQueryCalls .= " $strWhereCalls group by age.number"; 
-         $sqlQueryCallEn = "select age.number,age.name,'Inbound' as type,que.queue,count(*)        calls_answ, sec_to_time(sum(duration)),                                                 sec_to_time(avg(duration)),sec_to_time(max(duration))
-            from call_entry cale
-            left join agent age on age.id=cale.id_agent 
-            inner join queue_call_entry que on que.id=cale.id_queue_call_entry
-            where status='terminada'";
-        if(!empty($strWheredateCallEn)) $sqlQueryCallEn .= " $strWheredateCallEn group by age.number"; 
-        
-        if($field_name_1=="type")
-        {
-            if($field_pattern_1=="INBOUND" || $field_pattern_1=="IN"){   
-                $sqlQuery .= $sqlQueryCallEn;
-            }else if($field_pattern_1=="OUTBOUND"|| $field_pattern_1=="OUT"){
-                $sqlQuery .= $sqlQueryCalls;
-            }else if($field_pattern_1==""){
-                $sqlQuery=$sqlQueryCalls." union ".$sqlQueryCallEn;
-            }else $sqlQuery=$sqlQueryCalls." union ".$sqlQueryCallEn;
-        } 
-        if($field_name_2=="type"){
-            if($field_pattern_2=="INBOUND" || $field_pattern_2=="IN"){   
-                $sqlQuery .= $sqlQueryCallEn;
-            }else if($field_pattern_2=="OUTBOUND" || $field_pattern_2=="OUT"){
-                $sqlQuery .= $sqlQueryCalls;
-            }else if($field_pattern_2==""){
-                $sqlQuery=$sqlQueryCalls." union ".$sqlQueryCallEn;
-            } else $sqlQuery=$sqlQueryCalls." union ".$sqlQueryCallEn;
-        } 
-        if($field_name_1=="type" && $field_name_2=="type"){
-            $sqlQuery=$sqlQueryCalls." union ".$sqlQueryCallEn;
+        // Ejecutar la petición SQL para todos los datos
+        //print "<pre>$sPeticionSQL</pre>"; print_r($paramSQL);
+        $recordset = $this->_DB->fetchTable($sPeticionSQL, TRUE, $paramSQL);
+        if (!is_array($recordset)) {
+            $this->errMsg = '(internal) Failed to count calls - '.$this->_DB->errMsg;
+            return NULL;
         }
-        if($field_name_1!="type" && $field_name_2!="type"){
-            $sqlQuery=$sqlQueryCalls." union ".$sqlQueryCallEn;
-        }
-
-        $sqlQuery .= " order by number";
-
-        if(!empty($limit)) {
-	        $sqlQuery  .= " LIMIT $limit OFFSET $offset";
-        }
-        //echo $sqlQuery;
-        $result=$this->_DB->fetchTable($sqlQuery);
-        $arrResult['Data'] = $result;
-
-	$arrResult['NumRecords'] = count($arrResult['Data']);
-//echo $sqlQuery."<br>";
-        return $arrResult;
-    }
-    function construirCondicion($field_name,$field_pattern, &$strWhereCalls, &$strWheredateCallEn )
-    {
-        if(!empty($field_name) and !empty($field_pattern)){
-            if ($field_name=="queue") {
-                $strWhereCalls .= " AND cam.$field_name like '%$field_pattern%' ";
-                $strWheredateCallEn .= " AND que.$field_name like '%$field_pattern%' ";
-            }else if($field_name=="number"){
-                 $strWhereCalls .= " AND age.$field_name like '%$field_pattern%' ";
-                $strWheredateCallEn .= " AND age.$field_name like '%$field_pattern%' ";
-            }else if($field_name=="type"){}
-            else{
-                $strWhereCalls .= " AND cal.$field_name like '%$field_pattern%' ";
-                $strWheredateCallEn .= " AND cale.$field_name like '%$field_pattern%' ";
-            }
-        }
-    }
-    function construirCondicionIguales(&$n_field,$field_name,$field_pattern, &$strWhereCalls, &$strWheredateCallEn )
-    {
-        if(!empty($field_name) /*and !empty($field_pattern)*/){
-            if ($field_name=="queue") {
-                if($n_field==0){
-                    $strWhereCalls .= " AND (cam.$field_name like '%$field_pattern%' ";
-                    $strWheredateCallEn .= " AND (que.$field_name like '%$field_pattern%' ";
-                    $n_field++;
-                 } else {
-                    $strWhereCalls .= " OR cam.$field_name like '%$field_pattern%') ";
-                    $strWheredateCallEn .= " OR que.$field_name like '%$field_pattern%') ";
-                    $n_field=0;
-                 }
-            }else if($field_name=="number"){
-                if($n_field==0){
-                    $strWhereCalls .= " AND (age.$field_name like '%$field_pattern%' ";
-                    $strWheredateCallEn .= " AND (age.$field_name like '%$field_pattern%' ";
-                    $n_field++;
-                } else {
-                    $strWhereCalls .= " OR age.$field_name like '%$field_pattern%') ";
-                    $strWheredateCallEn .= " OR age.$field_name like '%$field_pattern%') ";
-                    $n_field=0;
-                }
-            }else if($field_name=="type"){}
-            else{
-                if($n_field==0){
-                    $strWhereCalls .= " AND (cal.$field_name like '%$field_pattern%' ";
-                    $strWheredateCallEn .= " AND (cale.$field_name like '%$field_pattern%' ";
-                    $n_field++;
-                } else {
-                    $strWhereCalls .= " OR cal.$field_name like '%$field_pattern%') ";
-                    $strWheredateCallEn .= " OR cale.$field_name like '%$field_pattern%') ";
-                    $n_field=0;
-                }
-            }
-        }
-    }
-
-    /*
-        Esta funcion recibe un dos tiempos y retorna la suma de ellos
-    */
-    function getTotalWaitTime($time1,$time2) {
-
- 	if( is_null($time1) ) {
- 	    $time1 = "00:00:00";
- 	}
- 	if( is_null($time2) ) {
- 	    $time2 = "00:00:00";
- 	}
- 
- 	$SQLConsulta = "select addtime('{$time1}','{$time2}') duracion";
- 	$resConsulta = $this->_DB->getFirstRowQuery($SQLConsulta,true); 
-
- 	if(!$resConsulta)  {
-             $this->msgError = $this->errMsg;
- 	    return false;
- 	} else {
- 	   return $resConsulta['duracion'];
- 	}
-    }
-
-    /*
-        Esta funcion recibe la suma de las fechas y el numero de fechas que se han sumado
-        y retorna el promedio de las fechas.
-    */
-    function getPromedioFecha($avgPromedio,$numRegistros){
-        $valido = true;
-        $SQLConsulta = "select time_to_sec('{$avgPromedio}') sec";
-        $resConsulta = $this->_DB->getFirstRowQuery($SQLConsulta,true);
-
-        if(!$resConsulta)  {
-             $this->msgError = $this->errMsg;
- 	    $valido = false;
- 	} else {
- 	   $sumaInSec = $resConsulta['sec'];
- 	}
-
-        if($valido && $numRegistros>0) {
-            $sumaInSec = $sumaInSec /  $numRegistros ;
-
-            $SQLConsulta = "select sec_to_time('{$sumaInSec}') date";
-            $resConsulta = $this->_DB->getFirstRowQuery($SQLConsulta,true);
-
-            if(!$resConsulta)  {
-                $this->msgError = $this->errMsg;
-                return false;
-            } else {
- 	      return $resConsulta['date'];
- 	}
-        }else {
-            return false;
-        }
-    }
-
-    /*
-        Esta funcion recibe dos tiempos y retorna el tiempo mayor.
-    */
-    function getFechaMayor($time1,$time2){
-
-        $SQLTime1 = "select time_to_sec('{$time1}') time1";
-        $SQLTime2 = "select time_to_sec('{$time2}') time2";
-
-        $resTime1 = $this->_DB->getFirstRowQuery($SQLTime1,true);
-        $resTime2 = $this->_DB->getFirstRowQuery($SQLTime2,true);
-
-        if(!$resTime1 || !$resTime2)  {
-            $this->msgError = $this->errMsg;
-            $valido = false;
- 	} else {
-            $time1Sec = $resTime1['time1'];
-            $time2Sec = $resTime2['time2']; 
-
-            if($time1Sec > $time2Sec) {
-                return $time1;
-            } elseif($time1Sec < $time2Sec) {
-                return $time2;
-            }else {
-                return $time1;
-            }
- 	}
-
+        return $recordset;
     }
 }
 ?>

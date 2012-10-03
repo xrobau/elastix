@@ -238,13 +238,23 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
     // No es necesario emitir el nombre del agente la inicialización JSON
     foreach (array_keys($jsonData) as $k) unset($jsonData[$k]['agentname']);
 
+    // Extraer la información que el navegador va a usar para actualizar
+    $estadoCliente = array();
+    foreach (array_keys($jsonData) as $k) {
+        $estadoCliente[$k] = array(
+            'status'        =>  $jsonData[$k]['status'],
+            'oncallupdate'  =>  $jsonData[$k]['oncallupdate'],
+        );
+    }
+    $estadoHash = generarEstadoHash($module_name, $estadoCliente);
+
     $oGrid  = new paloSantoGrid($smarty);
     $json = new Services_JSON();
     $INITIAL_CLIENT_STATE = $json->encode($jsonData);
     $sJsonInitialize = <<<JSON_INITIALIZE
 <script type="text/javascript">
 $(function() {
-    initialize_client_state($INITIAL_CLIENT_STATE);
+    initialize_client_state($INITIAL_CLIENT_STATE, '$estadoHash');
 });
 </script>
 JSON_INITIALIZE;
@@ -267,6 +277,15 @@ JSON_INITIALIZE;
             ),
         ), $arrData, $arrLang).
         $sJsonInitialize;
+}
+
+function generarEstadoHash($module_name, $estadoCliente)
+{
+    $estadoHash = md5(serialize($estadoCliente));
+    $_SESSION[$module_name]['estadoCliente'] = $estadoCliente;
+    $_SESSION[$module_name]['estadoClienteHash'] = $estadoHash;
+
+    return $estadoHash;
 }
 
 function timestamp_format($i)
@@ -338,13 +357,17 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     set_time_limit(0);
 
     // Estado del lado del cliente
-    $estadoCliente = getParameter('clientstate');
-    if (!is_array($estadoCliente)) return;
+    $estadoHash = getParameter('clientstatehash');
+    if (!is_null($estadoHash)) {
+        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente']) 
+            ? $_SESSION[$module_name]['estadoCliente'] 
+            : array();        
+    } else {
+        $estadoCliente = getParameter('clientstate');
+        if (!is_array($estadoCliente)) return;
+    }
     foreach (array_keys($estadoCliente) as $k) 
         $estadoCliente[$k]['oncallupdate'] = ($estadoCliente[$k]['oncallupdate'] == 'true'); 
-
-    // Estado del lado del servidor
-    $estadoMonitor = $oPaloConsola->listarEstadoMonitoreoAgentes();
 
     // Modo a funcionar: Long-Polling, o Server-sent Events
     $sModoEventos = getParameter('serverevents');
@@ -356,6 +379,16 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
         Header('Content-Type: application/json');
     }
     
+    // Verificar hash correcto
+    if (!is_null($estadoHash) && $estadoHash != $_SESSION[$module_name]['estadoClienteHash']) {
+    	$respuesta['estadoClienteHash'] = 'mismatch';
+        jsonflush($bSSE, $respuesta);
+        $oPaloConsola->desconectarTodo();
+        return;
+    }
+
+    // Estado del lado del servidor
+    $estadoMonitor = $oPaloConsola->listarEstadoMonitoreoAgentes();
     if (!is_array($estadoMonitor)) {
         $respuesta['error'] = $oPaloConsola->errMsg;
         jsonflush($bSSE, $respuesta);
@@ -679,6 +712,12 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             }
             
             
+        }
+        if (count($respuesta) > 0) {
+            @session_start();
+            $estadoHash = generarEstadoHash($module_name, $estadoCliente);
+            $respuesta['estadoClienteHash'] = $estadoHash;
+            session_commit();
         }
         jsonflush($bSSE, $respuesta);
         

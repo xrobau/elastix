@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 4.alpha
+Release: 5.alpha
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -98,7 +98,7 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-5.alpha
 - CHANGED: Agent Console: fix bug in which a chronometer counter that starts 
   from 0, as signaled in an event might be mistakenly interpreted as an order to
   stop the chronometer. Might fix Elastix bug #1319. Also, set consistent 

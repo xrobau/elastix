@@ -99,6 +99,9 @@ fi
 
 %changelog
 * Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: if Elastix user matches an agent number, suggest this
+  agent number as the default agent to use for initial agent login. Second part
+  of fix for Elastix bug #1354.
 - CHANGED: Agents Monitoring: replace sending of full client state with hash of
   said state. This prevents a potential issue of hitting a maximum URL length
   limit due to unbounded size of agent list.

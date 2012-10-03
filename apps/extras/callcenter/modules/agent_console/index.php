@@ -188,7 +188,13 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
         ));
         
     } else {
-    	/* Si el usuario Elastix logoneado tiene una extensión y aparece en la
+    	/* Si el usuario Elastix logoneado coincide con el número de agente de
+         * la lista, se coloca este agente como opción por omisión para login.
+         */
+        if (isset($listaAgentes[$_SESSION['elastix_user']]))
+            $smarty->assign('ID_AGENT', $_SESSION['elastix_user']);
+        
+        /* Si el usuario Elastix logoneado tiene una extensión y aparece en la
          * lista, se sugiere esta extension como la extensión a usar para 
          * marcar. */
         $pACL = new paloACL($arrConf['elastix_dsn']['acl']);

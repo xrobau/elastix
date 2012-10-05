@@ -190,6 +190,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Fri Oct  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: New helper script 'spamconfig'. This script enables and disables spam
+  filters for the Antispam module.
+  SVN Rev[4325]
+
 * Thu Sep 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam: methods uploadScriptSieve and deleteScriptSieve are used
   only when enabling spam filtering, so the calls to the methods are now 

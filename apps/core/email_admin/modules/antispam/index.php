@@ -84,7 +84,6 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
     $header    = getParameter("header");
     $time_spam = getParameter("time_spam");
     $politica  = getParameter("politica");
-    $pDB       = new paloDB("sqlite3:////var/www/db/email.db");
 
     $objAntispam = new paloSantoAntispam(
         $arrConfModule['path_postfix'],
@@ -98,7 +97,7 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
     }
 
     if($status == "on"){
-        $isOk = $objAntispam->activateSpamFilter($pDB, ($politica == 'capturar_spam') ? $time_spam : NULL);
+        $isOk = $objAntispam->activateSpamFilter(($politica == 'capturar_spam') ? $time_spam : NULL);
 
         if($isOk === false){
             $smarty->assign("mb_title", $arrLang["Error"]);

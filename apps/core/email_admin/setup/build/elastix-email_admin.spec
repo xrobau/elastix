@@ -191,6 +191,10 @@ fi
 
 %changelog
 * Fri Oct  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: extend spamconfig helper to refresh spam filter on request
+  and reimplement checkSpamFolder.php on top of this. This unifies the 
+  implementation of the spam script refresh and simplifies the antispam API.
+  SVN Rev[4328]
 - CHANGED: Antispam: reimplement GUI operations via the spamconfig helper 
   module. This manages to remove a large amount of instances of sudo chown.
   SVN Rev[4327]

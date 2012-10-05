@@ -42,6 +42,7 @@ $opt = Console_Getopt::getopt($argv, '', array(
     'enablespamfilter', // Enable spam filter
     'disablespamfilter',// Disable spam filter
     'deleteperiod=',    // Set new spam delete period when enabling spam filter
+    'refreshspamfilter',// Refresh spam filter scripts for newly created users
 ));
 
 if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
@@ -53,12 +54,14 @@ foreach ($opt[0] as $option) switch ($option[0]) {
         exit(action_setlevelheader($opt) ? 0 : 1);
     case '--enablespamfilter':
         exit(action_enablespamfilter($opt) ? 0 : 1);
+    case '--refreshspamfilter':
+        exit(action_refreshspamfilter($opt) ? 0 : 1);
     case '--disablespamfilter':
         exit(action_disablespamfilter($opt) ? 0 : 1);
 }
 
 
-error_exit("No action specified (--getdeleteperiod,--setlevelheader,--enablespamfilter,--disablespamfilter)\n");
+error_exit("No action specified (--getdeleteperiod,--setlevelheader,--enablespamfilter,--disablespamfilter,--refreshspamfilter)\n");
 
 function error_exit($sMsg, $errorcode = 1)
 {
@@ -231,10 +234,14 @@ function action_disablespamfilter($opt)
     return TRUE;
 }
 
+function action_refreshspamfilter($opt)
+{
+    _toggleAntispamScripts(TRUE);
+    return TRUE;
+}
+
 function _enable_sieve($iDeletePeriod)
 {
-    global $CYRUS;
-    
     if (!is_null($iDeletePeriod)) {
         // Enable cronjob for removal of old spam messages
     	$sContentCron = <<<CRON_JOB
@@ -243,7 +250,6 @@ function _enable_sieve($iDeletePeriod)
 CRON_JOB;
         if  (FALSE === file_put_contents('/etc/cron.d/checkSpamFolder.cron', $sContentCron)) {
             error_exit("ERR: failed to write cronjob\n");
-            return FALSE;
         }
     } else {
         // Disable cronjob for removal of old spam messages
@@ -253,6 +259,13 @@ CRON_JOB;
         }
     }
 
+    _toggleAntispamScripts(!is_null($iDeletePeriod));
+}
+
+function _toggleAntispamScripts($bEnable)
+{
+    global $CYRUS;
+    
     // Load all accounts and passwords - we need this list several times later
     $userInfoList = array();
     try {
@@ -306,7 +319,7 @@ EMAIL_INFO;
                 if (FALSE === $cyr_conn_user->imap_login()) {
                     fwrite(STDERR, 'WARN: IMAP login error for user '.$email."\n");
                 } else {
-                    if (!$cyr_conn_user->command('. subscribe Spam')) {
+                    if ($cyr_conn_user->command('. subscribe Spam') === FALSE) {
                         fwrite(STDERR, 'WARN: Error subscribe Spam folder: '.$cyr_conn->getMessage()."\n");
                     }
                     $cyr_conn_user->imap_logout();
@@ -334,7 +347,7 @@ EMAIL_INFO;
             $sieve->response['ACTIVE'] == $sVacationName && !empty($emailInfo['subject'])) {
             // Active vacation script
             $r = $sieve->sieve_sendscript($sVacationName,
-                (!is_null($iDeletePeriod) 
+                ($bEnable 
                     ? str_replace(
                         'require "fileinto";',
                         'require ["fileinto","vacation"];',
@@ -349,20 +362,20 @@ EMAIL_INFO;
             if (!$r) fwrite(STDERR, "WARN: failed to upload patched vacation script for $email\n");
             $r = $sieve->sieve_setactivescript($sVacationName);
             if (!$r) fwrite(STDERR, "WARN: failed to activate vacation script for $email\n");
-            if (!is_null($iDeletePeriod)) {
+            if ($bEnable) {
             	$r = $sieve->sieve_sendscript($sAntispamName, $sAntispamScript);
                 if (!$r) fwrite(STDERR, "WARN: failed to upload antispam script for $email\n");
             }
         } else {
             // There is no active vacation script
-            if (!is_null($iDeletePeriod)) {
+            if ($bEnable) {
                 $r = $sieve->sieve_sendscript($sAntispamName, $sAntispamScript);
                 if (!$r) fwrite(STDERR, "WARN: failed to upload antispam script for $email\n");
                 $r = $sieve->sieve_setactivescript($sAntispamName);
                 if (!$r) fwrite(STDERR, "WARN: failed to activate antispam script for $email\n");
             }
         }
-        if (is_null($iDeletePeriod)) {
+        if (!$bEnable) {
         	$r = $sieve->sieve_deletescript($sAntispamName);
             if (!$r) fwrite(STDERR, "WARN: failed to delete antispam script for $email\n");
         }

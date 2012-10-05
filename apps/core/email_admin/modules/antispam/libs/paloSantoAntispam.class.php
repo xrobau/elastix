@@ -155,91 +155,6 @@ class paloSantoAntispam {
         return $result;
     }
 
-    private function getPassByEmail($email){
-        $pDB = new paloDB("sqlite3:////var/www/db/email.db");
-        $data = array($email);
-        $query = "SELECT password FROM accountuser WHERE username = ?";
-        $result=$pDB->getFirstRowQuery($query, true, $data);
-        if($result==FALSE){
-            $this->errMsg = $pDB->errMsg;
-            return array();
-        }
-        return $result['password'];
-    }
-
-    //funcion que crea la carpeta de Spam dado un email en el servidor IMAP mediante telnet
-    function creacionSpamFolder($email)
-    {
-        global $CYRUS;
-        $cyr_conn = new cyradm;
-        $error_msg = "";
-        $error = $cyr_conn->imap_login();
-        $dataEmail = explode("@",$email);
-        if ($error===FALSE){
-            $error_msg = "IMAP login error: $error <br>";
-        }else{
-            $seperator  = '/';
-            $bValido=$cyr_conn->createmb("user" . $seperator . $dataEmail[0] . $seperator . "Spam@" . $dataEmail[1]);
-            if(!$bValido)
-                $error_msg = "Error creating Spam folder:".$cyr_conn->getMessage()."<br>";
-            else{// subscribe folder Spam
-                //$bValido=$cyr_conn->command(". subscribe \"user" . $seperator . $dataEmail[0] . $seperator . "Spam@" . $dataEmail[1] ."\"");
-                //$bValido=$cyr_conn->command(". noop");
-                $pass = $this->getPassByEmail($email);
-                $bValido=$this->subscribeSpamFolder($email, $pass);// subscribe la carpeta Spam dado el usuario ya que desde el cyrus se hace la suscripcion pero no en el rouncube no aparece dicho cambio.
-            }
-            $cyr_conn->imap_logout();
-        }
-        return $error_msg;
-    }
-
-    // verifica si una cuenta tiene creada la carpeta spam en su buzon de correo
-    private function haveFolderSpam($email)
-    {
-        global $CYRUS;
-        global $arrLang;
-        $cyr_conn = new cyradm();
-        $error = $cyr_conn->imap_login();
-        $dataEmail = explode("@",$email);
-        if ($error===FALSE){
-            $error_msg .= "IMAP login error: $error <br>";
-            return "login error";
-        }else{
-            $dataEmail = explode("@",$email);
-            $pathString = "*".$dataEmail[0]."*";
-            $data = $cyr_conn->GetFolders($pathString);
-            $cyr_conn->imap_logout();
-            for($i=0; $i<count($data); $i++){
-                $value = $data[$i];
-                $domain = str_replace(".","/",$dataEmail[1]);
-                $bool = strpos($value,"Spam@".$domain);
-                if($bool){// tiene carpeta spam
-                    return true;
-                }
-            }
-        }
-        return false;// no tiene carpeta spam
-    }
-
-    // funcion que devuelve la lista de correos que no tienen una carpeta Spam asignada
-    function listEmailSpam($pDB)
-    {
-        $emails = $this->getEmailList($pDB);
-        $data = array();
-        $i = 0;
-        foreach($emails as $key => $value){
-            $account = $value['username'];
-            $bool = $this->haveFolderSpam($account);
-            if($bool === "login error"){
-                return $bool;
-            }
-            if($bool === false)
-                $data[$i] = $account;
-            $i++;
-        }
-        return $data;
-    }
-
     function getContentScript(){
         $script = <<<SCRIPT
 require "fileinto";
@@ -322,27 +237,6 @@ SCRIPT;
         case '14':  return 'two_week';
         case '30':  return 'one_month';
         default:    return '';
-        }
-    }
-
-
-    private function subscribeSpamFolder($email, $pass){
-        global $CYRUS;
-        $cyr_conn = new cyradm;
-        $cyr_conn->admin = $email;
-        $cyr_conn->pass = $pass;
-        if($pass != ""){
-            $error_msg = "";
-            $error = $cyr_conn->imap_login();
-            if ($error===FALSE){
-                $error_msg = "IMAP login error: $error <br>";
-            }else{
-                $bValido=$cyr_conn->command(". subscribe Spam");
-                if(!$bValido)
-                    $error_msg = "Error subscribe Spam folder:".$cyr_conn->getMessage()."<br>";
-                $cyr_conn->imap_logout();
-            }
-            return $error_msg;
         }
     }
 

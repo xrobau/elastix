@@ -191,6 +191,10 @@ fi
 
 %changelog
 * Fri Oct  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: The spam removal interval is empty if antispam cronfile does not 
+  exist. Take advantage of this to simplify display logic and remove one sudo 
+  chown.
+  SVN Rev[4326]
 - ADDED: New helper script 'spamconfig'. This script enables and disables spam
   filters for the Antispam module.
   SVN Rev[4325]

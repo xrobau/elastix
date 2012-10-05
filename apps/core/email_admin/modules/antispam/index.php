@@ -143,27 +143,10 @@ function formAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $ar
 		$smarty->assign("statusSpam", "desactive");
 	}
 
-    exec("sudo -u root chown asterisk.asterisk /etc/cron.d/");
-    if(is_file("/etc/cron.d/checkSpamFolder.cron"))
-        $statusSieve = "on";
-    else
-        $statusSieve = "off";
-
-    exec("sudo -u root chown root.root /etc/cron.d/");
-
     $val = $objAntispam->getTimeDeleteSpam();
-    if($val != "")
-        $arrData['time_spam'] = $val;
-	if($activated){
-		if($statusSieve=="on"){
-			$arrData['politica'] = 'capturar_spam';
-		}else
-			$arrData['politica'] = 'marcar_asusto';
-	}else{
-		$arrData['politica'] = 'marcar_asusto';
-		$statusSieve = "off";
-	}
-
+    if($val != '') $arrData['time_spam'] = $val;
+    $statusSieve = ($activated && $val != '') ? 'on' : 'off';
+    $arrData['politica'] = ($statusSieve == 'on') ? 'capturar_spam' : 'marcar_asusto';
 
     $smarty->assign("statusSieve", $statusSieve);
     $valueRequiredHits = $objAntispam->getValueRequiredHits();

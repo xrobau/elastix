@@ -50,6 +50,7 @@ function saveSpan(){
         arrParams["lnbuildout"] = $('#lnbuildout').val();
         arrParams["framing"] = $('#framing').val();
         arrParams["coding"] = $('#coding').val();
+        arrParams["crc"] = $('#crc').val();
         arrParams["media_pri"] = $('#media_pri').val();
 
         request(url, arrParams, false, 
@@ -191,32 +192,70 @@ function paramSpan(id){
         		/* Se llenan las listas desplegables con las opciones válidas */
         		var coding_dropdown = $('#coding').get(0);
         		coding_dropdown.options.length = 0;
+        		var framing_dropdown = $('#framing').get(0);
+        		framing_dropdown.options.length = 0;
+        		var crc_dropdown = $('#crc').get(0);
+        		crc_dropdown.options.length = 0;
+
         		$.each(arrData['coding_options'], function() {
         			coding_dropdown[coding_dropdown.options.length] = new Option(this, this);
         		});
-        		var framing_dropdown = $('#framing').get(0);
-        		framing_dropdown.options.length = 0;
         		$.each(arrData['framing_options'], function() {
         			framing_dropdown[framing_dropdown.options.length] = new Option(this, this);
         		});
-        		
+        		$.each(arrData['crc_options'], function() {
+        			crc_dropdown[crc_dropdown.options.length] = new Option(this, this);
+        		});
+
         		/* Asignación de los valores actuales de las listas desplegables */
         		$('#tmsource').val(spaninfo["tmsource"]);
         		$('#lnbuildout').val(spaninfo["lnbuildout"]);
-        		$('#framing').val(spaninfo["framing"]);
-        		$('#coding').val(spaninfo["coding"]);
+        		$('#crc').val(spaninfo["crc"]);
+        		
+        		$('#media_pri').unbind('change');
+        		$('#media_pri').change(function() {
+        			var newval = $(this).val();
+        			
+        			var coding_dropdown = $('#coding').get(0);
+            		var framing_dropdown = $('#framing').get(0);
+            		var crc_dropdown = $('#crc').get(0);
+        			coding_dropdown.options.length = 0;
+            		framing_dropdown.options.length = 0;
+            		crc_dropdown.options.length = 0;
+        			if (newval == 'T1') {
+        				coding_dropdown[0] = new Option('b8zs', 'b8zs');
+        				coding_dropdown[1] = new Option('ami', 'ami');
+        				framing_dropdown[0] = new Option('esf', 'esf');
+        				framing_dropdown[1] = new Option('d4', 'd4');
+        				$('#switch_crc').attr("style","display: none;");
+        			} else if (newval == 'E1') {
+        				coding_dropdown[0] = new Option('hdb3', 'hdb3');
+        				coding_dropdown[1] = new Option('ami', 'ami');
+        				framing_dropdown[0] = new Option('ccs', 'ccs');
+        				framing_dropdown[1] = new Option('cas', 'cas');
+        				crc_dropdown[0] = new Option('crc4', 'crc4');
+        				crc_dropdown[1] = new Option('ncrc4', 'ncrc4');
+        				$('#switch_crc').attr("style","display: table-row;");
+        			}
+        		});
+        		
         		
         		if (spaninfo["wanpipe_force_media"] == "T1") {
         			$('#switch_pri_media').attr("style","display: table-row;");
             		$('#media_pri').val(spaninfo["wanpipe_force_media"]);
+            		$('#switch_crc').attr("style","display: none;");
         		} else if (spaninfo["wanpipe_force_media"] == "E1") {
         			$('#switch_pri_media').attr("style","display: table-row;");
             		$('#media_pri').val(spaninfo["wanpipe_force_media"]);
+            		$('#switch_crc').attr("style","display: table-row;");
         		} else {
         			$('#switch_pri_media').attr("style","display: none;");
+        			$('#switch_crc').attr("style","display: none;");
 				$('.neo-modal-elastix-popup-box').css('height', 225);
         		}
 			
+        		$('#framing').val(spaninfo["framing"]);
+        		$('#coding').val(spaninfo["coding"]);
         	}
         );
 $('.tabForm').css("border",0);
@@ -255,7 +294,7 @@ $(document).ready(function(){
     	request("index.php",arrAction,false,
           function(arrData,statusResponse,error)
           {
-  	      ShowModalPopUP(arrData['title'],365,265,arrData['html']);
+  	      ShowModalPopUP(arrData['title'],500,300,arrData['html']);
 	      paramSpan(id);
           }
         );
@@ -485,6 +524,7 @@ $(document).ready(function(){
     });
 });
 
+/*
 function saveSpanConfiguration(idSpan){
     var xhr = objAjax();
     var arrSpanConf = new Array();
@@ -514,7 +554,7 @@ function saveSpanConfiguration(idSpan){
 
     return;
 }
-
+*/
 function controllerDisplayConfig(xhr)
 {
     if(xhr.readyState==4)

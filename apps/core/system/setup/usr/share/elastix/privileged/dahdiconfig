@@ -77,7 +77,7 @@ function action_refreshConfiguration($opt)
 
         // Read all the span configuration information
         $sth = $conn->query(
-            'SELECT span_num, timing_source, linebuildout, framing, coding '.
+            'SELECT span_num, timing_source, linebuildout, framing, coding, crc '.
             'FROM span_parameter ORDER BY span_num');
         $recordset = $sth->fetchAll(PDO::FETCH_ASSOC);
         foreach ($recordset as $tupla) {
@@ -228,12 +228,15 @@ function action_refreshConfiguration($opt)
                 if ($bIsT1) {
                     $validFraming = array('esf', 'd4');
                     $validCoding = array('b8zs', 'ami');
+                    $spanData[$iSpan]['media_type'] = 'T1';
                 } elseif ($bIsE1) {
                     $validFraming = array('ccs', 'cas');
                     $validCoding = array('hdb3', 'ami');
+                    $spanData[$iSpan]['media_type'] = 'E1';
                 } else {
                     $validFraming = array('ccs');
                     $validCoding = array('ami'); 
+                    $spanData[$iSpan]['media_type'] = 'BRI';
                 }
                 if (!in_array($spanData[$iSpan]['framing'], $validFraming))
                     $spanData[$iSpan]['framing'] = $validFraming[0];
@@ -249,7 +252,7 @@ function action_refreshConfiguration($opt)
                     "span=%d,%d,%d,%s,%s", $spanData[$iSpan]['span_num'], 
                     $spanData[$iSpan]['timing_source'], $spanData[$iSpan]['linebuildout'], 
                     $spanData[$iSpan]['framing'], $spanData[$iSpan]['coding']);
-                if ($bIsE1) {
+                if ($bIsE1 && $spanData[$iSpan]['crc'] == 'crc4') {
                     // Only add CRC4 for E1 spans
                     $spanLine .= ",crc4";
                 }
@@ -347,6 +350,13 @@ function updateWanpipeConf($sWanpipe, $spanData)
             if ($regs[1] != strtoupper($spanData['framing'])) {
                 $bModified = TRUE;
                 $lineas[] = "FE_SIG_MODE = ".strtoupper($spanData['framing'])."\n";
+            } else {
+                $lineas[] = $s;
+            }
+        } elseif (preg_match('/^FE_FRAME\s*=\s*(\S+)/', $s, $regs)) {
+            if ($spanData['media_type'] == 'E1' && $regs[1] != strtoupper($spanData['crc'])) {
+                $bModified = TRUE;
+                $lineas[] = "FE_FRAME = ".strtoupper($spanData['crc'])."\n";
             } else {
                 $lineas[] = $s;
             }

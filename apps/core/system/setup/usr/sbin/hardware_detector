@@ -113,7 +113,9 @@ echo -e "HWDETECT: Starting card detection..."
 
 if is_asterisk_loaded ; then
     echo -e "HWDETECT: Stopping Asterisk..."
-    eval "/usr/sbin/amportal stop  $null_redirect_verbose"
+    if [ -e /usr/sbin/amportal ] ; then
+        eval "/usr/sbin/amportal stop  $null_redirect_verbose"
+    fi
     eval "/sbin/service asterisk stop $null_redirect_verbose"
 fi
 
@@ -298,7 +300,11 @@ fi
 
 if [ $? = 0 ]; then
     echo -e "HWDETECT: Restarting asterisk service..."
-    eval "/usr/sbin/amportal restart  $null_redirect_verbose"
+    if [ -e /usr/sbin/amportal ] ; then
+        eval "/usr/sbin/amportal restart  $null_redirect_verbose"
+    else
+    	eval "/sbin/service asterisk restart $null_redirect_verbose"
+    fi
 fi
 
 

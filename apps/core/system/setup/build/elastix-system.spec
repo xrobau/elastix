@@ -129,6 +129,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+- CHANGED: Hardware Detector: Elastix 3 no longer ships /usr/sbin/amportal which
+  is part of FreePBX. Check whether /usr/sbin/amportal exists in 
+  hardware_detector and use asterisk script instead if necessary.
+  SVN Rev[4329]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: system - Build/elastix-system.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

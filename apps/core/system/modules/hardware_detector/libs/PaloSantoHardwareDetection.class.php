@@ -274,6 +274,8 @@ class PaloSantoHardwareDetection
             if (preg_match('/^span=(\d+),(\d+),(\d+),(\w+),(\w+)/', $sLinea, $regs)) {
                 // Revisar si este span es un wanpipe
                 list($dummy, $iSpan, $iTimeSource, $iLBO, $sFraming, $sCoding) = $regs;
+                $crc = (strpos($sLinea, 'crc4') !== FALSE) ? 'crc4' : 'ncrc4';
+                
                 $sMedioWanpipe = NULL;  // T1/E1 o NULL si no es wanpipe o no es digital
                 if (file_exists("/proc/dahdi/$iSpan") && 
                     strpos(file_get_contents("/proc/dahdi/$iSpan"), 'wanpipe') !== FALSE) {
@@ -288,9 +290,10 @@ class PaloSantoHardwareDetection
                 }
 
                 $pDB->genQuery(
-                    'INSERT INTO span_parameter (id_card, span_num, timing_source, linebuildout, framing, coding, wanpipe_force_media) '.
-                    'VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    array($iSpan, $iSpan, $iTimeSource, $iLBO, $sFraming, $sCoding, $sMedioWanpipe));
+                    'INSERT INTO span_parameter (id_card, span_num, timing_source, '.
+                        'linebuildout, framing, coding, wanpipe_force_media, crc) '.
+                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                    array($iSpan, $iSpan, $iTimeSource, $iLBO, $sFraming, $sCoding, $sMedioWanpipe, $crc));
             }
         }
     }
@@ -308,7 +311,8 @@ class PaloSantoHardwareDetection
     {
     	$sPeticionSQL = 
             'SELECT id_card, span_num, timing_source AS tmsource, ' .
-                'linebuildout AS lnbuildout, framing, coding, wanpipe_force_media ' .
+                'linebuildout AS lnbuildout, framing, coding, '.
+                'wanpipe_force_media, crc ' .
             'FROM span_parameter';            
         $paramSQL = array();
         if (!is_null($iSpan)) {
@@ -340,7 +344,7 @@ class PaloSantoHardwareDetection
      * 
      * @return  bool    VERDADERO para éxito, FALSO para error
      */
-    function guardarSpanConfig($pDB, $idSpan, $tmsource, $lnbuildout, $framing, $coding, $force_media = NULL)
+    function guardarSpanConfig($pDB, $idSpan, $tmsource, $lnbuildout, $framing, $coding, $crc, $force_media = NULL)
     {
     	$idSpan = (int)$idSpan;
         $tmsource = (int)$tmsource;
@@ -357,11 +361,16 @@ class PaloSantoHardwareDetection
             $this->errMsg = _tr('Invalid media type');
         	return FALSE;
         }
+        if (is_null($crc)) $crc = 'ncrc4';
+        if (!in_array($crc, array('crc4', 'ncrc4'))) {
+            $this->errMsg = _tr('Invalid CRC type');
+            return FALSE;
+        }
         $r = $pDB->genQuery(
             'UPDATE span_parameter SET timing_source = ?, linebuildout = ?, ' .
-                'framing = ?, coding = ?, wanpipe_force_media = ? ' .
+                'framing = ?, coding = ?, wanpipe_force_media = ?, crc = ? ' .
             'WHERE span_num = ?', 
-            array($tmsource, $lnbuildout, $framing, $coding, $force_media, $idSpan));
+            array($tmsource, $lnbuildout, $framing, $coding, $force_media, $crc, $idSpan));
         if (!$r) {
             $this->errMsg = $pDB->errMsg;
             return FALSE;

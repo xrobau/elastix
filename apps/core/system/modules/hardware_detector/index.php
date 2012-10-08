@@ -80,9 +80,11 @@ function _moduleContent(&$smarty, $module_name)
         case "save_span":
             $content = saveNewConfSpan($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // save conf span
             break;
+/*
         case "setConfig":
             $content = setConfigHardware($pDB); 
             break;
+*/
         case "detection":
             $content = hardwareDetect($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // detection button
             break;
@@ -305,6 +307,7 @@ function viewFormConfSpanParam($smarty, $module_name, $local_templates_dir, &$pD
     $smarty->assign("Framing", _tr("Framing"));
     $smarty->assign("Coding", _tr("Coding")); 
     $smarty->assign("Media",_tr("ISDN PRI Media Type"));
+    $smarty->assign('CRC', _tr('CRC'));
     $smarty->assign('type_lnbuildout', array(
                               '0' => _tr('0 db (CSU) / 0-133 feet (DSX-1)'),
                               '1' => _tr('133-266 feet (DSX-1)'),
@@ -338,7 +341,11 @@ function viewFormConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $a
         'card_id'   =>  $idSpan,
     );
 
+    // DEBUG
+    $response['spaninfo']['crc'] = 'crc4';
+
     $arrPortsEcho  = $pconfEcho->getEchoCancellerByIdCard($idSpan);
+/*    
     if (!is_null($response['spaninfo']['wanpipe_force_media'])) {
     	// Las tarjetas digitales Sangoma pueden ser E1 o T1
         $response['framing_options'] = array('esf', 'd4', 'ccs', 'cas');
@@ -355,6 +362,32 @@ function viewFormConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $a
     	// Este es un puerto BRI
         $response['framing_options'] = array('ccs');
         $response['coding_options'] = array('ami');
+    }
+*/
+    $sMediaType = $response['spaninfo']['wanpipe_force_media'];
+    if (is_null($sMediaType)) {
+    	$sMediaType = 'BRI';
+        if (count($arrPortsEcho) == 23) $sMediaType = 'T1';
+        if (count($arrPortsEcho) == 30) $sMediaType = 'E1';
+    }
+    switch ($sMediaType) {
+    case 'T1':
+        // Este es un puerto T1
+        $response['framing_options'] = array('esf', 'd4');
+        $response['coding_options'] = array('b8zs', 'ami');
+        $response['crc_options'] = array();
+        break;
+    case 'E1':
+        $response['framing_options'] = array('ccs', 'cas');
+        $response['coding_options'] = array('hdb3', 'ami');
+        $response['crc_options'] = array('crc4', 'ncrc4');
+        break;
+    default:
+        // Este es un puerto BRI
+        $response['framing_options'] = array('ccs');
+        $response['coding_options'] = array('ami');
+        $response['crc_options'] = array();
+        break;
     }
 
     $jsonObject = new PaloSantoJSON();
@@ -413,6 +446,7 @@ function saveNewConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         'lnbuildout'            =>  getParameter('lnbuildout'),
         'framing'               =>  getParameter('framing'),
         'coding'                =>  getParameter('coding'),
+        'crc'                   =>  getParameter('crc'),
         'wanpipe_force_media'   =>  getParameter('media_pri'),
     );
     $response = array(
@@ -439,6 +473,7 @@ function saveNewConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $ar
             $estadoNuevo['lnbuildout'],
             $estadoNuevo['framing'],
             $estadoNuevo['coding'],
+            $estadoNuevo['crc'],
             $estadoNuevo['wanpipe_force_media']);
         if (!$bExito) {
         	$response['msg'] = $oPortsDetails->errMsg;
@@ -471,6 +506,7 @@ function saveNewConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $ar
                 $estadoNuevo['lnbuildout'],
                 $estadoNuevo['framing'],
                 $estadoNuevo['coding'],
+                $estadoNuevo['crc'],
                 $estadoNuevo['wanpipe_force_media']);
             if (!$bExito) {
                 $response['msg'] = $oPortsDetails->errMsg;
@@ -509,6 +545,7 @@ function createFieldForm()
     return $arrFields;
 }
 
+/*
 function setConfigHardware(&$pDB)
 {
     $oPortsDetails = new PaloSantoHardwareDetection();
@@ -522,6 +559,7 @@ function setConfigHardware(&$pDB)
     $oPortsDetails->refreshDahdiConfiguration();
     return "";    
 }
+*/
 
 function setDataCardHardware(&$pDB){
     $arrCardParam  = array();

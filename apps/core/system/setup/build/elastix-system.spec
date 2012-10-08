@@ -129,6 +129,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Oct 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Hardware Detector: implement switching on/off of CRC4 checksum for E1
+  spans, including support for modification of Wanpipe spans. Partial fix for
+  Elastix bug #1380.
+  SVN Rev[4330]
 - CHANGED: Hardware Detector: Elastix 3 no longer ships /usr/sbin/amportal which
   is part of FreePBX. Check whether /usr/sbin/amportal exists in 
   hardware_detector and use asterisk script instead if necessary.

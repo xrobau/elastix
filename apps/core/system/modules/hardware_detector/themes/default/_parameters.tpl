@@ -1,5 +1,5 @@
 <input type="hidden" name="idCard" id="idCard" value="" />
-<table class="tabForm" style="font-size: 16px; margin-left:-10px;" border="0" width="380px" >
+<table class="tabForm" style="font-size: 16px; margin-left:-10px;" border="0" >
    <tr>
      <td align="center">
           <label id="port_desc_span">{$CARD} # {$ID}: {$TIPO} {$ADICIONAL}</label>
@@ -15,6 +15,12 @@
                     {html_options options=$type_lnbuildout}
                     </select></td>
                 </tr>
+                <tr id="switch_pri_media" align="left">
+                    <td><label style='font-size: 12px; font-weight:bold'>{$Media}:</label></td>
+                    <td><select id='media_pri' name='media_pri'>
+                    {html_options options=$type_media}
+                    </select></td>
+                </tr>
                 <tr align="left">
                     <td><label style='font-size: 12px; font-weight:bold'>{$Framing}:</label></td>
                     <td><select id='framing' name='framing'>
@@ -27,10 +33,10 @@
                     {html_options options=$type_coding}
                     </select></td>
                 </tr>
-                <tr id="switch_pri_media" align="left">
-                    <td><label style='font-size: 12px; font-weight:bold'>{$Media}:</label></td>
-                    <td><select id='media_pri' name='media_pri'>
-                    {html_options options=$type_media}
+                <tr id="switch_crc" align="left">
+                    <td><label style='font-size: 12px; font-weight:bold'>{$CRC}:</label></td>
+                    <td><select id='crc' name='crc'>
+                    {html_options options=$type_crc}
                     </select></td>
                 </tr>
               </table>

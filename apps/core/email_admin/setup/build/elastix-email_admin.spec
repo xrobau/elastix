@@ -191,7 +191,13 @@ fi
 
 %changelog
 * Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: SMTP Relay: create new helper script 'remotesmtp' and use it to 
+  reimplement administration of SMTP relay. This removes six instances of sudo
+  chown, two uses of sudo to restart services, and one indirect use of sudo 
+  chown via escribir_configuracion.
+  SVN Rev[4333]
 - CHANGED: SMTP Relay: mark some methods as private, and some cleanup.
+  SVN Rev[4332]
 
 * Fri Oct  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam: extend spamconfig helper to refresh spam filter on request

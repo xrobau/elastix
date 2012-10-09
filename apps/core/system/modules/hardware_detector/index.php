@@ -341,29 +341,7 @@ function viewFormConfSpan($smarty, $module_name, $local_templates_dir, &$pDB, $a
         'card_id'   =>  $idSpan,
     );
 
-    // DEBUG
-    $response['spaninfo']['crc'] = 'crc4';
-
     $arrPortsEcho  = $pconfEcho->getEchoCancellerByIdCard($idSpan);
-/*    
-    if (!is_null($response['spaninfo']['wanpipe_force_media'])) {
-    	// Las tarjetas digitales Sangoma pueden ser E1 o T1
-        $response['framing_options'] = array('esf', 'd4', 'ccs', 'cas');
-        $response['coding_options'] = array('b8zs', 'hdb3', 'ami');
-    } elseif (count($arrPortsEcho) == 23) {
-    	// Este es un puerto T1
-        $response['framing_options'] = array('esf', 'd4');
-        $response['coding_options'] = array('b8zs', 'ami');
-    } elseif (count($arrPortsEcho) == 30) {
-    	// Este es un puerto E1
-        $response['framing_options'] = array('ccs', 'cas');
-        $response['coding_options'] = array('hdb3', 'ami');
-    } else {
-    	// Este es un puerto BRI
-        $response['framing_options'] = array('ccs');
-        $response['coding_options'] = array('ami');
-    }
-*/
     $sMediaType = $response['spaninfo']['wanpipe_force_media'];
     if (is_null($sMediaType)) {
     	$sMediaType = 'BRI';

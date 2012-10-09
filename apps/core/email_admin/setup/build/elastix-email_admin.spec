@@ -190,6 +190,9 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: SMTP Relay: mark some methods as private, and some cleanup.
+
 * Fri Oct  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam: extend spamconfig helper to refresh spam filter on request
   and reimplement checkSpamFolder.php on top of this. This unifies the 

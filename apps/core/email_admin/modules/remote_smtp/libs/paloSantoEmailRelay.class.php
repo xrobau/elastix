@@ -67,6 +67,17 @@ class paloSantoEmailRelay {
         return $arrData;
     }
 
+    /**
+     * Método para actualizar la configuración de SMTP remoto.
+     * 
+     * @param   array   $arrData    Arreglo con los parámetros de configuración:
+     *  status          'on' para activar SMTP remoto, 'off' para desactivar
+     *  relayhost       nombre de host del SMTP remoto
+     *  port            puerto TCP a contactar en SMTP remoto
+     *  user            nombre de usuario para autenticación
+     *  password        contraseña para autenticación
+     *  autentification 'on' para activar TLS, 'off' para desactivar
+     */
     function processUpdateConfiguration($arrData)
     {
         $this->_DB->beginTransaction();
@@ -87,7 +98,7 @@ class paloSantoEmailRelay {
         }
     }
 
-    function processUpdateConfigurationDB($arrData)
+    private function processUpdateConfigurationDB($arrData)
     {
         if(is_array($arrData) && count($arrData)>0){
             $query = "delete from email_relay;";
@@ -110,7 +121,7 @@ class paloSantoEmailRelay {
         return true;
     }
 
-    function processUpdateConfigurationFile($arrData)
+    private function processUpdateConfigurationFile($arrData)
     {
         if(is_array($arrData) && count($arrData)>0){
             $activated = $arrData['status'];
@@ -214,7 +225,7 @@ class paloSantoEmailRelay {
         else return 0;
     }
 
-    function createSASL()
+    private function createSASL()
     {
         exec("sudo -u root chown -R asterisk.asterisk /etc/postfix/");
         exec("mkdir /etc/postfix/sasl");
@@ -223,7 +234,7 @@ class paloSantoEmailRelay {
         exec("sudo -u root chown -R root.root /etc/postfix/");
     }
 
-    function createCert(){
+    private function createCert(){
         exec("postfix reload");
         exec("sudo -u root chown -R asterisk.asterisk /etc/postfix/");
         if(!is_file("/etc/postfix/tls/tlscer.crt")){
@@ -233,7 +244,7 @@ class paloSantoEmailRelay {
         exec("sudo -u root chown -R root.root /etc/postfix/");
     }
 
-    function writeSASL($data)
+    private function writeSASL($data)
     {
         exec("sudo -u root chown -R asterisk.asterisk /etc/postfix/");
         exec("echo '$data' > /etc/postfix/sasl/passwd");
@@ -242,7 +253,7 @@ class paloSantoEmailRelay {
         exec("sudo -u root chown -R root.root /etc/postfix/");
     }
 
-    function restartingServices(){
+    private function restartingServices(){
         //se ejecuta de esa forma porque es usuario asterisk el que corre el programa de elastix
         exec("sudo /sbin/service generic-cloexec saslauthd restart");
         exec("sudo /sbin/service generic-cloexec postfix restart");

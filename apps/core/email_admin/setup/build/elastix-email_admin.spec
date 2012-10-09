@@ -191,6 +191,10 @@ fi
 
 %changelog
 * Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email List: extend helper script 'mailman_config' to add action to 
+  check main.cf, and use it to reimplement the check. This removes one indirect 
+  use of sudo chown via escribir_configuracion.
+  SVN Rev[4334] 
 - CHANGED: SMTP Relay: create new helper script 'remotesmtp' and use it to 
   reimplement administration of SMTP relay. This removes six instances of sudo
   chown, two uses of sudo to restart services, and one indirect use of sudo 

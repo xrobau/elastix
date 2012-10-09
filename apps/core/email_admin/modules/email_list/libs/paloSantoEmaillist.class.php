@@ -128,18 +128,8 @@ class paloSantoEmailList {
 
     function checkPostfixFile()
     {
-	$conf_file = new paloConfig("/etc/postfix","main.cf"," = ","[[:space:]]*=[[:space:]]*");
-	$content = $conf_file->leer_configuracion();
-	$alias_maps = $conf_file->privado_get_valor($content,"alias_maps");
-	if($alias_maps != "hash:/etc/aliases"){
-	    $arr_replace = array("alias_maps" => "hash:/etc/aliases");
-	    $conf_file->escribir_configuracion($arr_replace);
-	}
-	$virtual_alias_maps = $conf_file->privado_get_valor($content,"virtual_alias_maps");
-	if($virtual_alias_maps != "hash:/etc/postfix/virtual"){
-	    $arr_replace = array("virtual_alias_maps" => "hash:/etc/postfix/virtual");
-	    $conf_file->escribir_configuracion($arr_replace);
-	}
+        $output = $ret = NULL;
+        exec('/usr/bin/elastix-helper mailman_config check_postfix_file', $output, $ret);
     }
 
     function domainExists($id_domain)

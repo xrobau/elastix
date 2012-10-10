@@ -45,9 +45,6 @@ mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privi
 mkdir -p $RPM_BUILD_ROOT/etc/dahdi
 mkdir -p $RPM_BUILD_ROOT/usr/sbin/
 
-# ** hardware_detector file ** #
-mv setup/usr/sbin/hardware_detector           $RPM_BUILD_ROOT/usr/sbin/
-
 # ** switch_wanpipe_media file ** #
 mv setup/usr/sbin/switch_wanpipe_media        $RPM_BUILD_ROOT/usr/sbin/
 
@@ -123,12 +120,17 @@ fi
 /usr/share/elastix/module_installer/*
 /var/www/backup/automatic_backup.php
 %defattr(755, root, root)
-/usr/sbin/hardware_detector
 /usr/sbin/switch_wanpipe_media
 /usr/share/elastix/privileged/*
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Oct 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Hardware Detector: move hardware_detector script to the privileged
+  script directory, and invoke it through elastix-helper. This is required to
+  remove hardware_detector from /etc/sudoers.
+  SVN Rev[4338]
+
 * Mon Oct 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Hardware Detector: implement switching on/off of CRC4 checksum for E1
   spans, including support for modification of Wanpipe spans. Partial fix for

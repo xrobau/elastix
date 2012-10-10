@@ -297,6 +297,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove hardware_detector from /etc/sudoers. The hardware
+  detection module now invokes it as a privileged script through elastix-helper.
+  SVN Rev[4339]
 - CHANGED: Framework: at long last, remove the entries in /etc/sudoers for the
   commands: /bin/touch, /bin/chmod, /bin/chown, /sbin/init. With the migration
   to privileged scripts completed, these commands are no longer needed (and 

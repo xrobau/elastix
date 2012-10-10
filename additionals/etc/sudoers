@@ -95,7 +95,6 @@ root	ALL=(ALL) 	ALL
 asterisk ALL = NOPASSWD: /sbin/shutdown
 asterisk ALL = NOPASSWD: /usr/bin/yum
 asterisk ALL = NOPASSWD: /sbin/service
-asterisk ALL = NOPASSWD: /usr/sbin/hardware_detector
 asterisk ALL = NOPASSWD: /sbin/chkconfig
 
 asterisk ALL = NOPASSWD: /usr/sbin/elastix-helper

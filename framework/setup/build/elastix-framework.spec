@@ -296,6 +296,13 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: replace implementation of paloConfig::privado_chown with
+  a version that does not invoke sudo chown. The last user of the method 
+  paloConfig::escribir_configuracion is search_ami_admin_pwd which runs in root
+  context at RPM install time.
+  SVN Rev[4335]
+
 * Mon Sep 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: Since commit 4216, palosantoEmailAdmin no longer requires
   sudo access to postmap and saslpasswd2, so remove it.

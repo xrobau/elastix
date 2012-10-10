@@ -94,11 +94,7 @@ root	ALL=(ALL) 	ALL
 
 asterisk ALL = NOPASSWD: /sbin/shutdown
 asterisk ALL = NOPASSWD: /usr/bin/yum
-asterisk ALL = NOPASSWD: /bin/touch
-asterisk ALL = NOPASSWD: /bin/chmod
-asterisk ALL = NOPASSWD: /bin/chown
 asterisk ALL = NOPASSWD: /sbin/service
-asterisk ALL = NOPASSWD: /sbin/init
 asterisk ALL = NOPASSWD: /usr/sbin/hardware_detector
 asterisk ALL = NOPASSWD: /sbin/chkconfig
 

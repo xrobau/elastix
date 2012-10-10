@@ -16,7 +16,7 @@ Prereq: perl
 Prereq: elastix-firstboot >= 2.3.0-4
 Obsoletes: elastix-additionals
 Provides: elastix-additionals
-Conflicts: elastix-system < 2.0.4-18
+Conflicts: elastix-system <= 2.3.0-12
 Conflicts: elastix-callcenter <= 2.0.0-16
 Conflicts: elastix-pbx <= 2.2.0-16
 Conflicts: elastix-fax <= 2.2.0-5
@@ -296,6 +296,13 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Oct 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: at long last, remove the entries in /etc/sudoers for the
+  commands: /bin/touch, /bin/chmod, /bin/chown, /sbin/init. With the migration
+  to privileged scripts completed, these commands are no longer needed (and 
+  there was much rejoicing).
+  SVN Rev[4336]
+
 * Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: replace implementation of paloConfig::privado_chown with
   a version that does not invoke sudo chown. The last user of the method 

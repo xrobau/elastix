@@ -191,6 +191,10 @@ fi
 
 %changelog
 * Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email Relay: create new helper script 'relayconfig' and use it to 
+  reimplement the modification of the email relay list. This removes the last
+  four sudo chown instances in the Elastix core packages.
+  SVN Rev[4336] 
 - CHANGED: Email List: extend helper script 'mailman_config' to add action to 
   check main.cf, and use it to reimplement the check. This removes one indirect 
   use of sudo chown via escribir_configuracion.

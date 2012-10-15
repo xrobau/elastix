@@ -192,9 +192,9 @@ function reportReportedeTroncalesusadasporHoraeneldia($smarty, $module_name, $lo
         $oGrid->setData($arrData);
         $arrColumnas = array(_tr("Time Period "), _tr("Entered"), _tr("Answered"), _tr("Abandoned"),_tr("In queue"),_tr("Without monitoring "));
         $oGrid->setColumns($arrColumnas);
-        $oGrid->setTitle(_tr("Reporte de Troncales usadas por hora en el dia"));
+        $oGrid->setTitle(_tr("Reporte de Troncales usadas por Hora en el dia"));
         $oGrid->pagingShow(true); 
-        $oGrid->setNameFile_Export(_tr("Reporte de Troncales usadas por hora en el dia"));
+        $oGrid->setNameFile_Export(_tr("Reporte de Troncales usadas por Hora en el dia"));
      
 
         return $oGrid->fetchGrid();

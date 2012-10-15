@@ -334,6 +334,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Oct 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: allow listmacip to be interrupted via a 
+  signal in order to implement cancellation of runaway network scans. 
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

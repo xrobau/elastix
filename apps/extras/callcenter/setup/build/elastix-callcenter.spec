@@ -98,6 +98,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Oct 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Reports: fix incorrect translations in reports
+
 * Thu Oct 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: fix breakage due to introduction of 'goto' as reserved word
   in PHP 5.4.

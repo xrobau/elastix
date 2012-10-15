@@ -208,9 +208,9 @@ function reportReporteGeneraldeTiempoConexionAgentesPorDia($smarty, $module_name
             $oGrid->setData($arrData);
             $arrColumnas = array(_tr("Number Agent"), _tr("Agent Name"), _tr("First Conecction"), _tr("Last Conecction"),_tr("Total time of session"),_tr("Time Total Calls"),_tr("Service %"),_tr("Status"));
             $oGrid->setColumns($arrColumnas);
-            $oGrid->setTitle(_tr("Reporte General de Tiempo Conexion Agentes por Dia"));
+            $oGrid->setTitle(_tr("Reporte General de Tiempo Conexion Agentes Por Dia"));
             $oGrid->pagingShow(true); 
-            $oGrid->setNameFile_Export(_tr("Reporte General de Tiempo Conexion Agentes por Dia"));
+            $oGrid->setNameFile_Export(_tr("Reporte General de Tiempo Conexion Agentes Por Dia"));
             return $oGrid->fetchGrid();
         } else {
             global $arrLang;

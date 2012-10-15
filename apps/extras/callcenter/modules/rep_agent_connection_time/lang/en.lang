@@ -28,9 +28,9 @@
   $Id: en.lang,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Reporte General de Tiempo Conexion Agentes Por Dia" => "Reporte General de Tiempo Conexion Agentes Por Dia",
+"Reporte General de Tiempo Conexion Agentes Por Dia" => "General Report Agents Time Connection per Day",
 "Id Agent" => "Id Agent",
-"Number Agent" => "Number Agente",
+"Number Agent" => "Agent Number",
 "Agent Name" => "Agent Name",
 "First Conecction" => "First Conecction",
 "Last Conecction" => "Last Conecction",

@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Reporte General de Tiempo Conexion Agentes Por Dia" => "Reporte General de Tiempo Conexion Agentes Por Dia",
 "Id Agent" => "Id Agente",
-"Number Agent" => "Numero de Agente",
+"Number Agent" => "Número de Agente",
 "Agent Name" => "Nombre Agente",
 "First Conecction" => "Primera Conexion",
 "Last Conecction" => "Ultima Conexion",

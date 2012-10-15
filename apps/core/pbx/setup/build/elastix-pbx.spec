@@ -294,6 +294,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Oct 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: allow listmacip to be interrupted via a 
+  signal in order to implement cancellation of runaway network scans. 
+
 * Mon Sep 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: fix failure to update interface after user opens browser
   tab to different Elastix module while keeping Control Panel open.

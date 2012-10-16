@@ -189,7 +189,8 @@ class PaloSantoPackages
     function checkUpdate()
     {
         global $arrLang;
-        exec("sudo yum check-update",$respuesta,$retorno);
+        $respuesta = $retorno = NULL;
+        exec('/usr/bin/elastix-helper ryum check-update', $respuesta, $retorno);
 
         if(is_array($respuesta)){
             foreach($respuesta as $key => $linea){
@@ -209,7 +210,8 @@ class PaloSantoPackages
     function installPackage($package)
     {
         global $arrLang;
-        exec("sudo yum install -y $package",$respuesta,$retorno);
+        $respuesta = $retorno = NULL;
+        exec('/usr/bin/elastix-helper ryum install '.escapeshellarg($package), $respuesta, $retorno);
         $indiceInicial = $indiceFinal = 0;
         $terminado = array();
         $paquetesIntall = false;
@@ -299,7 +301,8 @@ class PaloSantoPackages
 function uninstallPackage($package)
 {
         global $arrLang;
-        exec("sudo yum remove -y $package",$respuesta,$retorno);
+        $respuesta = $retorno = NULL;
+        exec('/usr/bin/elastix-helper ryum remove '.escapeshellarg($package), $respuesta, $retorno);
         $indiceInicial = $indiceFinal = 0;
         $terminado = array();
         $paquetesUnintall = false;

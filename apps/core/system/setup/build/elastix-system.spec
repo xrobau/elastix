@@ -129,6 +129,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: implemented new helper script 'ryum' and use it to replace 
+  invocations of 'sudo yum' with the helper script.
+  SVN Rev[4342]
+
 * Mon Oct 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Hardware Detector: implement switching on/off of CRC4 checksum for E1
   spans, including support for modification of Wanpipe spans. Partial fix for

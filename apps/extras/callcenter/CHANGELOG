@@ -1,3 +1,5 @@
+* Dialer (ECCP): restore writing to database of transferred extension, lost when 
+  rewriting the Agent Console to use the ECCP protocol. Fixes Elastix bug #1396. 
 * Reports: fix incorrect translations in reports
 * Dialer: fix breakage due to introduction of 'goto' as reserved word in PHP 5.4
 * Agent Console: fix bug in which a chronometer counter that starts from 0, as

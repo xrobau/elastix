@@ -125,6 +125,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: implemented new helper script 'ryum' and use it to replace 
+  invocations of 'sudo yum' with the helper script.
+  SVN Rev[4342]
+
 * Wed Oct 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Hardware Detector: move hardware_detector script to the privileged
   script directory, and invoke it through elastix-helper. This is required to

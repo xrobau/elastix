@@ -296,6 +296,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove the entry in /etc/sudoers for the command 
+  /usr/bin/yum. Since commit 4342 the only user of sudo yum has been converted
+  to use a privileged script.
+  SVN Rev[4343] 
+
 * Wed Oct 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove hardware_detector from /etc/sudoers. The hardware
   detection module now invokes it as a privileged script through elastix-helper.

@@ -2538,6 +2538,13 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
 
+        // Obtener la información de la llamada atendida por el agente
+        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
+        if (is_null($infoLlamada) || is_null($infoLlamada['currentcallid'])) {
+            $this->_agregarRespuestaFallo($xml_transferResponse, 417, 'Agent not in call');
+            return $xml_response;
+        }
+
         // Mandar a transferir la llamada usando el canal Agent/9000
         $r = $this->_ami->Redirect(
             $sCanalRemoto,      // channel 
@@ -2550,6 +2557,8 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $sCanalRemoto.' a '.$sExtension.' - '.$r['Message']);
             $this->_agregarRespuestaFallo($xml_transferResponse, 500, 'Unable to transfer call');
             return $xml_response;
+        } else {
+            $this->_registrarTransferencia($infoLlamada, $sExtension);
         }
 
         $xml_transferResponse->addChild('success');
@@ -2607,6 +2616,13 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
 
+        // Obtener la información de la llamada atendida por el agente
+        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
+        if (is_null($infoLlamada) || is_null($infoLlamada['currentcallid'])) {
+            $this->_agregarRespuestaFallo($xml_transferResponse, 417, 'Agent not in call');
+            return $xml_response;
+        }
+
         // Mandar a transferir la llamada usando el canal Agent/9000
         $r = $this->_ami->Atxfer(
             $sAgente,           // channel
@@ -2618,10 +2634,20 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $sCanalRemoto.' a '.$sExtension.' - '.$r['Message']);
             $this->_agregarRespuestaFallo($xml_transferResponse, 500, 'Unable to transfer call');
             return $xml_response;
+        } else {
+            $this->_registrarTransferencia($infoLlamada, $sExtension);
         }
 
         $xml_transferResponse->addChild('success');
         return $xml_response;
+    }
+
+    private function _registrarTransferencia($infoLlamada, $sExtension)
+    {
+    	$sth = $this->_db->prepare( 
+            'UPDATE '.(($infoLlamada['calltype'] == 'incoming') ? 'call_entry' : 'calls').
+            ' SET transfer = ? WHERE id = ?');
+        $sth->execute(array($sExtension, $infoLlamada['callid']));
     }
 
     private function Request_hold($comando)

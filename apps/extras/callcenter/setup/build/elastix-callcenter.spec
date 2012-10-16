@@ -98,6 +98,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): restore writing to database of transferred extension, 
+  lost when rewriting the Agent Console to use the ECCP protocol. Fixes Elastix 
+  bug #1396.
+
 * Mon Oct 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Reports: fix incorrect translations in reports
 

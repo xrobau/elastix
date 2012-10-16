@@ -108,7 +108,7 @@ function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
     // Construir el nombre del archivo de configuración
     $sRutaTrabajo = dirname($argv[0]);
     $sArchivoConfig = "$sRutaTrabajo/$sNombreConfig";
-    $sArchivoPID = "$sRutaTrabajo/$sNombrePID";
+    $sArchivoPID = "/var/run/$sNombrePID";
 
     // Intentar cargar el archivo de configuración
     $infoConfig = parse_ini_file($sArchivoConfig, TRUE);
@@ -143,7 +143,7 @@ function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
     openlog($sNombreDemonio, LOG_PID, LOG_USER);
     $oMainLog = new AppLogger();
     try {
-        $oMainLog->open("$sRutaTrabajo/$sNombreMainLog");
+        $oMainLog->open("/var/log/$sNombreMainLog");
         $bExitoAbrirLogs = TRUE;
     } catch (Exception $e) {
         syslog(LOG_WARNING, "Unable to open applogs properly: ".$e->getMessage());
@@ -171,7 +171,7 @@ $sBannerLog
 ----------------------------------------
 BANNEREND;
         $oMainLog->output($sBanner);
-        $oMainLog->output("Main log located at $sRutaTrabajo/$sNombreMainLog");
+        $oMainLog->output("Main log located at /var/log/$sNombreMainLog");
 
         $oMainLog->prefijo("ProcessMonitor");
         $oMainLog->output("PID = ".posix_getpid().", monitor started normally");

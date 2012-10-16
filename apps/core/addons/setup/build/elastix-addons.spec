@@ -109,13 +109,20 @@ fi
 %defattr(-, asterisk, asterisk)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-/opt/elastix/elastix-updater/*
 %defattr(-, root, root)
 /etc/init.d/elastix-updaterd
+/opt/elastix/elastix-updater
 /etc/pki/rpm-gpg/*
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: fix elastix-updaterd so that it writes logs at /var/log and
+  pidfiles to /var/run instead of /opt/elastix/elastix-updater. This should 
+  allow /opt/elastix/elastix-updater to remain read-only. Fixes Elastix bug 
+  #1397.
+  SVN Rev[4345]
+
 * Fri Aug 24 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-6
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Changed release in specfile

@@ -27,7 +27,6 @@ USUARIO=root
 
 # Los siguientes parametros son normalmente derivados de los dos primeros
 SERVICE_LOCK="/var/lock/subsys/elastix-updaterd"
-PIDFILE_USER="$DIR_TRABAJO/$DAEMON.pid"
 PIDFILE_SYSTEM="/var/run/$DAEMON.pid"
 
 start() {
@@ -37,7 +36,6 @@ start() {
     echo
     if [ $RETVAL = 0 ] ; then
         touch $SERVICE_LOCK
-        [ -f $PIDFILE_USER ] && cp $PIDFILE_USER /var/run/
     fi
     return $RETVAL
 }

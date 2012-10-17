@@ -301,6 +301,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove the entry in /etc/sudoers for the command
+  /usr/bin/yum. Since commit 4342 the only user of sudo yum has been converted
+  to use a privileged script.
+  SVN Rev[4346]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

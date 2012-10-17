@@ -93,7 +93,6 @@ root	ALL=(ALL) 	ALL
 # %users  localhost=/sbin/shutdown -h now
 
 asterisk ALL = NOPASSWD: /sbin/shutdown
-asterisk ALL = NOPASSWD: /usr/bin/yum
 asterisk ALL = NOPASSWD: /bin/touch
 asterisk ALL = NOPASSWD: /bin/chmod
 asterisk ALL = NOPASSWD: /bin/chown

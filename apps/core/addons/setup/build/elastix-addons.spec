@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -116,6 +116,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-7
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Changed release in specfile
+
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: fix elastix-updaterd so that it writes logs at /var/log and
   pidfiles to /var/run instead of /opt/elastix/elastix-updater. This should 

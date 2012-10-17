@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.3.0
-Release: 14
+Release: 15
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -296,6 +296,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-15
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Changed release in specfile
+
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove the entry in /etc/sudoers for the command 
   /usr/bin/yum. Since commit 4342 the only user of sudo yum has been converted
@@ -322,6 +326,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Sep 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: Since commit 4216, palosantoEmailAdmin no longer requires
   sudo access to postmap and saslpasswd2, so remove it.
+  SVN Rev[4217]
 
 * Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: Since commits 4199-4200, palosantoEmailAdmin no longer
@@ -338,6 +343,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-14
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile
+  SVN Rev[4176]
 
 * Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
 - Fixed javascript error in index.php

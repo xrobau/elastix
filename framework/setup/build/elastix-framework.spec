@@ -141,7 +141,8 @@ mv          $RPM_BUILD_DIR/elastix-framework/additionals/etc/logrotate.d/*      
 mkdir -p    $RPM_BUILD_ROOT/var/log/elastix
 touch       $RPM_BUILD_ROOT/var/log/elastix/audit.log
 touch	    $RPM_BUILD_ROOT/var/log/elastix/postfix_stats.log
- 
+
+rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
 %pre
 #Para conocer la version de elastix antes de actualizar o instalar
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -199,6 +200,7 @@ sed --in-place "s,Group\sapache,#Group apache,g" /etc/httpd/conf/httpd.conf
 # ** Uso de elastix-dbprocess ** #
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 preversion=`cat $pathModule/preversion_elastix-framework.info`
+rm -f $pathModule/preversion_elastix-framework.info
 
 if [ $1 -eq 1 ]; then #install
     # The installer database
@@ -263,13 +265,23 @@ rm -rf $RPM_BUILD_ROOT
 # basic contains some reasonable sane basic tiles
 %files
 %defattr(-, asterisk, asterisk)
-/var/www/html/*
+/var/www/html/var
 /var/www/db
 /var/www/backup
 /var/log/elastix
 /var/log/elastix/*
 # %config(noreplace) /var/www/db/
 %defattr(-, root, root)
+/var/www/html/configs
+/var/www/html/favicon.ico
+/var/www/html/help
+/var/www/html/images
+/var/www/html/lang
+/var/www/html/libs
+/var/www/html/modules
+/var/www/html/themes
+/var/www/html/*.php
+/var/www/html/robots.txt
 /usr/share/elastix/*
 /usr/share/pear/DB/sqlite3.php
 /usr/local/elastix/sampler.php
@@ -299,6 +311,19 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-15
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile
+
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  SVN Rev[4347]
 
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove the entry in /etc/sudoers for the command 

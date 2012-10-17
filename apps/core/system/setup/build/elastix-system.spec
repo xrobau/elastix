@@ -37,6 +37,8 @@ mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
 mv setup/automatic_backup.php            $RPM_BUILD_ROOT/var/www/backup/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
 
+rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
+
 # Additional (module-specific) files that can be handled by RPM
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
 #mv setup/dialer
@@ -47,11 +49,13 @@ mkdir -p $RPM_BUILD_ROOT/usr/sbin/
 
 # ** switch_wanpipe_media file ** #
 mv setup/usr/sbin/switch_wanpipe_media        $RPM_BUILD_ROOT/usr/sbin/
+rmdir setup/usr/sbin
 
 # ** The following selects oslec as default echo canceller ** #
 echo "echo_can oslec" > $RPM_BUILD_ROOT/etc/dahdi/genconf_parameters
 echo "bri_sig_style bri" >> $RPM_BUILD_ROOT/etc/dahdi/genconf_parameters
 
+rmdir setup/usr
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -74,6 +78,7 @@ elastix-menumerge $pathModule/menu.xml
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
@@ -115,7 +120,7 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /var/www/backup/automatic_backup.php
@@ -128,6 +133,19 @@ fi
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-13
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  SVN Rev[4347]
 
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: implemented new helper script 'ryum' and use it to replace 

@@ -27,6 +27,7 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # Files personalities for hylafax
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
@@ -40,6 +41,7 @@ mv setup/hylafax/etc/config                   $RPM_BUILD_ROOT/var/spool/hylafax/
 mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
 rm -rf setup/hylafax
+rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
 
 chmod -R 755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/includes
 chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/faxrcvd.php
@@ -53,7 +55,6 @@ mv setup/paloSantoFax.class.php               $RPM_BUILD_ROOT/var/www/html/libs/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
-mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -135,6 +136,7 @@ elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{relea
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
@@ -169,10 +171,9 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-%defattr(- root, root)
 /var/spool/hylafax/bin/*
 /var/spool/hylafax/etc/setup.cache
 %defattr(755, root, root)
@@ -191,6 +192,19 @@ fi
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
 - CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
   SVN history. Changed release in specfile.
+
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  SVN Rev[4347]
 
 * Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: faxconfig: change the encoding used to identify the

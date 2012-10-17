@@ -63,15 +63,19 @@ mkdir -p      $RPM_BUILD_ROOT/usr/share/elastix/privileged/
 # crons config
 mv setup/etc/cron.daily/asterisk_cleanup      $RPM_BUILD_ROOT/etc/cron.daily/
 chmod 755 $RPM_BUILD_ROOT/etc/cron.daily/*
+rmdir setup/etc/cron.daily/
 
 # ** asterisk.reload file ** #
 mv setup/bin/asterisk.reload                  $RPM_BUILD_ROOT/bin/
 chmod 755 $RPM_BUILD_ROOT/bin/asterisk.reload
+rmdir setup/bin
 
 # ** files asterisk for agi-bin and mohmp3 ** #
 mv setup/asterisk/agi-bin/*                   $RPM_BUILD_ROOT/var/lib/asterisk/agi-bin/
 chmod 755 $RPM_BUILD_ROOT/var/lib/asterisk/agi-bin/*
 mv setup/asterisk/mohmp3/*                    $RPM_BUILD_ROOT/var/lib/asterisk/mohmp3/
+rmdir setup/asterisk/*
+rmdir setup/asterisk
 
 # Moviendo archivos festival y sip_notify_custom_elastix.conf
 chmod +x setup/etc/asterisk/sip_notify_custom_elastix.conf
@@ -79,22 +83,28 @@ chmod +x setup/etc/init.d/festival
 mv setup/etc/asterisk/sip_notify_custom_elastix.conf      $RPM_BUILD_ROOT/etc/asterisk/
 mv setup/etc/init.d/festival                              $RPM_BUILD_ROOT/etc/init.d/
 mv setup/usr/share/elastix/privileged/*                   $RPM_BUILD_ROOT/usr/share/elastix/privileged/
+rmdir setup/etc/init.d
+rmdir setup/etc/asterisk
+rmdir setup/usr/share/elastix/privileged
 
 # Archivos tftp and ftp
 mv setup/etc/xinetd.d/tftp                     $RPM_BUILD_ROOT/usr/share/elastix/
-#mv setup/etc/vsftpd/vsftpd.conf               $RPM_BUILD_ROOT/usr/share/elastix/
-#mv setup/etc/vsftpd.user_list                 $RPM_BUILD_ROOT/etc/
+rmdir setup/etc/xinetd.d
 
 # ** files tftpboot for endpoints configurator ** #
 unzip setup/tftpboot/P0S3-08-8-00.zip  -d     $RPM_BUILD_ROOT/tftpboot/
-#mv setup/tftpboot/GS_CFG_GEN.tar.gz           $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-#tar -xvzf $RPM_BUILD_DIR/elastix/additionals/tftpboot/GS_CFG_GEN.tar.gz -C $RPM_BUILD_ROOT/tftpboot/ # Da algunos mensajes de warning, esto se puede obviar.
 mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
+
+# Install new endpoint configurator
+mkdir -p $RPM_BUILD_ROOT/usr/bin/
+mv setup/usr/bin/elastix-endpoint-configure $RPM_BUILD_ROOT/usr/bin/
+chmod 755 $RPM_BUILD_ROOT/usr/bin/elastix-endpoint-configure
+mv setup/usr/share/elastix/endpoint-vendors $RPM_BUILD_ROOT/usr/share/elastix/
+
+rmdir setup/usr/share/elastix rmdir setup/usr/share setup/usr
 
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-
-#chown asterisk.asterisk $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
 
 
 %pre
@@ -118,13 +128,6 @@ if [ $1 -eq 2 ]; then
 fi
 
 %post
-# Unpack tarball with binary files.
-#tar -xvzf /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/GS_CFG_GEN.tar.gz -C /tftpboot
-# Replace path java for script encode.sh
-#sed -i -e "s,JAVA_HOME=[0-9a-zA-Z._-/]*,JAVA_HOME=/opt/openfire/jre,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-#sed -i -e "s,JAVA_HOME=/usr/java/j2sdk1.4.2_07,JAVA_HOME=/opt/openfire/jre,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-#sed -i -e "s,GAPSLITE_HOME=/usr/local/src/GS_CFG_GEN,GAPSLITE_HOME=/tftpboot/GS_CFG_GEN,g" /tftpboot/GS_CFG_GEN/bin/encode.sh
-
 # Tareas de TFTP
 chmod 777 /tftpboot/
 
@@ -136,8 +139,6 @@ chmod 777 /tftpboot/
 # TODO: TAREA DE POST-INSTALACIÓN
 # Reemplazo archivos de otros paquetes: tftp, vsftp
 cat /usr/share/elastix/tftp   > /etc/xinetd.d/tftp
-#cat /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/etc/vsftpd/vsftpd.conf > /etc/vsftpd/vsftpd.conf
-
 
 ######### Para ejecucion del migrationFilesMonitor.php ##############
 
@@ -214,10 +215,11 @@ elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{relea
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
-   elastix-dbprocess "install" "/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/db"
+  elastix-dbprocess "install" "/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/db"
 elif [ $1 -eq 2 ]; then #update
   # The installer database
    elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
@@ -276,17 +278,19 @@ fi
 
 %files
 %defattr(-, asterisk, asterisk)
-%{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
 /etc/asterisk/sip_notify_custom_elastix.conf
 /var/lib/asterisk/*
 /var/lib/asterisk/agi-bin
 /var/log/festival
 /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
 %defattr(-, root, root)
+%{_localstatedir}/www/html/*
+/usr/share/elastix/module_installer/*
 /tftpboot/*
 /usr/share/elastix/tftp
+/usr/share/elastix/endpoint-vendors
 %defattr(755, root, root)
+/usr/bin/elastix-endpoint-configure
 /etc/init.d/festival
 /bin/asterisk.reload
 /usr/share/elastix/privileged/*
@@ -298,6 +302,21 @@ fi
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
   SVN Rev[4179]
+
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+- Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
+  SVN Rev[4347]
 
 * Mon Oct 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: allow listmacip to be interrupted via a 

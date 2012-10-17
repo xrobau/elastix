@@ -313,6 +313,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework: fix elastix-dbprocess to remove the temporary file 1_sqlFile.sql
+  whenever it is successfully committed to a database or copied to firstboot.
+  Part of the fix for Elastix bug #1398.
+
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove the entry in /etc/sudoers for the command
   /usr/bin/yum. Since commit 4342 the only user of sudo yum has been converted

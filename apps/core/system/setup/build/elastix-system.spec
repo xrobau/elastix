@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 12
+Release: 13
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -125,6 +125,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-13
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: implemented new helper script 'ryum' and use it to replace 
   invocations of 'sudo yum' with the helper script.
@@ -135,6 +139,11 @@ fi
   script directory, and invoke it through elastix-helper. This is required to
   remove hardware_detector from /etc/sudoers.
   SVN Rev[4338]
+
+* Tue Oct 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Hardware Detector: remove hardcoded default in previous commit, as
+  well as some dead code.
+  SVN Rev[4331]
 
 * Mon Oct 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Hardware Detector: implement switching on/off of CRC4 checksum for E1

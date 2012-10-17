@@ -286,6 +286,7 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
     if($sql_export==false){
         if(file_get_contents("$path_folder/1_sqlFile.sql") == ""){
             echo "Nothing to be done in database $dbName.\n";
+            unlink("$path_folder/1_sqlFile.sql");
             return true;
         }
         if(ismysqlRunning() || $data["engine"] != "mysql"){
@@ -306,6 +307,7 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
                 echo "Error, Action $action database $dbName failed.\n";
                 return false;
             }
+            unlink("$path_folder/1_sqlFile.sql");
 	    if($data["engine"]=="sqlite3"){
 		if(!chown($data['path']."/".$dbName.".db","asterisk")){
 		    echo "Could not change the owner to asterisk to the database $dbName.\n";
@@ -345,6 +347,7 @@ function copyToFirstBoot($path_folder, $dbName, $action)
         echo "Error, Could not copy the file $path_folder/1_sqlFile.sql to FirstBoot.\n";
         return false;
     }
+    unlink("$path_folder/1_sqlFile.sql");
     return true;
 }
 

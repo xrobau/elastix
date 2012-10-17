@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -190,6 +190,10 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Email Relay: create new helper script 'relayconfig' and use it to 
   reimplement the modification of the email relay list. This removes the last
@@ -253,6 +257,8 @@ fi
 - CHANGED: Accounts: reimplement account removal using the email_account helper
   script. Temporarily rename methods that use conflicting names.
   SVN Rev[4214]
+- CHANGED: Accounts: remove now-unused function updateAccount()
+  SVN Rev[4213]
 - CHANGED: Accounts: introduce methods getAccountQuota() and setAccountQuota()
   in paloSantoEmail, use them to clean up quota management.
 - CHANGED: Accounts: replace tabs with spaces and clean up indentation.

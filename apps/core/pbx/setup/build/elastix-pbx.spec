@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 15
+Release: 16
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -294,9 +294,25 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4179]
+
 * Mon Oct 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: allow listmacip to be interrupted via a 
-  signal in order to implement cancellation of runaway network scans. 
+  signal in order to implement cancellation of runaway network scans.
+  SVN Rev[4341] 
+
+* Fri Sep 21 2012 Sergio Broncano <sbroncano@palosanto.com>
+- CHANGED: MODULE - PBX/EXTENSION_BATCH: Password at least 6 characters, and
+  query parameters for downloading extensions.
+  SVN Rev[4240]
+
+* Fri Sep 13 2012 Sergio Broncano <sbroncano@palosanto.com>
+- CHANGED: MODULE - PBX/EXTENSION_BATCH: Query parameters to download the file
+  .csv
+  SVN Rev[4202]
 
 * Mon Sep 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: fix failure to update interface after user opens browser
@@ -309,9 +325,25 @@ fi
   new parallel implementation.
   SVN Rev[4192]
 
+* Fri Sep 07 2012 Sergio Broncano <sbroncano@palosanto.com>
+- ADD: Module Endpoint Configurator, Endpoints Batch, Added support for phones
+  Grandstream models GXP2100, GXP1405.
+  SVN Rev[4191]
+
+* Fri Sep 07 2012 Sergio Broncano <sbroncano@palosanto.com>
+- ADD: Module Endpoint Configurator, Endpoints Batch, Added support for phones
+  Grandstream models GXP2100, GXP1405, GXP2120.
+  SVN Rev[4187]
+
+* Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: fill-out implementation of Sangoma Vega
+  endpoint. Copy completed implementation to trunk.
+  SVN Rev[4181]
+
 * Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-15
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4179]
 
 * Mon Sep 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Endpoints: reimplement CSV download to take into account all of 

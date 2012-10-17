@@ -79,11 +79,24 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  SVN Rev[4347]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: my_extension - Build/elastix-my_extension.spec: Changed version and 
   release in specfile.

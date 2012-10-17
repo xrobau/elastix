@@ -43,6 +43,7 @@ mv setup/disable_vacations.php           $RPM_BUILD_ROOT/var/www/
 mv setup/stats/postfix_stats.cron        $RPM_BUILD_ROOT/etc/cron.d/
 mv setup/stats/postfix_stats.php         $RPM_BUILD_ROOT/usr/local/elastix/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
+rmdir setup/stats
 
 # ** dando los permisos a los archivos que usara postfix stats
 chmod 644 $RPM_BUILD_ROOT/usr/local/elastix/postfix_stats.php
@@ -74,6 +75,10 @@ mv setup/etc/cyrus.conf.elastix               $RPM_BUILD_ROOT/etc/
 
 # ** /usr/local/ files ** #
 mv setup/usr/local/bin/spamfilter.sh          $RPM_BUILD_ROOT/usr/local/bin/
+
+rmdir setup/etc/postfix setup/etc
+rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
+rmdir setup/usr/local/bin setup/usr/local setup/usr 
 
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -136,6 +141,7 @@ elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{relea
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
@@ -172,10 +178,9 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-%defattr(-, root, root)
 /usr/local/bin/spamfilter.sh
 /etc/imapd.conf.elastix
 /etc/postfix/main.cf.elastix
@@ -189,6 +194,19 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  SVN Rev[4347]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: email_admin - Build/elastix-email_admin.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

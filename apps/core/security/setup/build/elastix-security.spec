@@ -30,6 +30,7 @@ mkdir -p    $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
 mv modules/ $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
+rmdir setup/usr/share/elastix/privileged
 
 chmod +x setup/updateDatabase
 
@@ -47,6 +48,9 @@ chmod 755 $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/elastix-portknock
 mkdir -p $RPM_BUILD_ROOT%{_bindir}/
 cp setup/usr/bin/elastix-portknock* $RPM_BUILD_ROOT%{_bindir}/
 chmod 755 $RPM_BUILD_ROOT%{_bindir}/elastix-portknock*
+rmdir setup/usr/bin
+
+rmdir setup/usr/share/elastix setup/usr/share setup/usr
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -69,6 +73,7 @@ elastix-menumerge $pathModule/menu.xml
 pathSQLiteDB="%{_localstatedir}/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
@@ -109,7 +114,7 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 %{_datadir}/elastix/module_installer/*
 %defattr(644, root, root)
@@ -121,6 +126,19 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  SVN Rev[4347]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: security - Build/elastix-security.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

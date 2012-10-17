@@ -38,12 +38,14 @@ mkdir -p $RPM_BUILD_ROOT/etc/yum.repos.d/
 ## Add the GNU Privacy Guard for the Postgresql91 repo
 mkdir -p $RPM_BUILD_ROOT/etc/pki/
 mv setup/etc/pki/rpm-gpg/ $RPM_BUILD_ROOT/etc/pki/
+rmdir setup/etc/pki
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/etc/yum.repos.d/ $RPM_BUILD_ROOT/etc/
 
+rmdir setup/etc
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -62,6 +64,7 @@ elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{relea
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
@@ -79,7 +82,6 @@ fi
 
 # import the GPG-key
 /bin/rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
-
 
 # The installer script expects to be in /tmp/new_module
 mkdir -p /tmp/new_module/%{modname}
@@ -117,6 +119,19 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework,Modules: remove temporary file preversion_MODULE.info under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  RPM update. Part of the fix for Elastix bug #1398.
+- Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  Elastix bug #1399.
+- Framework,Modules: clean up specfiles by removing directories under 
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  SVN Rev[4347]
+
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: fix elastix-updaterd so that it writes logs at /var/log and
   pidfiles to /var/run instead of /opt/elastix/elastix-updater. This should 

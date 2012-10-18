@@ -142,7 +142,7 @@ mkdir -p    $RPM_BUILD_ROOT/var/log/elastix
 touch       $RPM_BUILD_ROOT/var/log/elastix/audit.log
 touch	    $RPM_BUILD_ROOT/var/log/elastix/postfix_stats.log
 
-rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
+rm -f setup/usr/share/elastix/privileged/ setup/usr/share/elastix setup/usr/share setup/usr
 %pre
 #Para conocer la version de elastix antes de actualizar o instalar
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/

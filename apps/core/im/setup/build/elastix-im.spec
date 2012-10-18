@@ -2,8 +2,8 @@
 
 Summary: Elastix IM 
 Name:    elastix-%{modname}
-Version: 2.2.0
-Release: 3
+Version: 2.3.0
+Release: 1
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-%{release}.tgz
@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-1
+- CHANGED: im - Build/elastix-im.spec: update specfile with latest 
+  SVN history. Changed release in specfile.
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

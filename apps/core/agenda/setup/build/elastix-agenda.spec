@@ -109,7 +109,7 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
-* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
 - CHANGED: Agenda - Build/elastix-agenda.spec: Changed release in specfile.
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>

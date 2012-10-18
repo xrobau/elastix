@@ -89,7 +89,7 @@ function action_refreshConfiguration($opt)
     // Read all of the fax information
     $faxData = array();
     try {
-    	$conn = new PDO('sqlite:/var/www/db/fax.db');
+        $conn = new PDO('sqlite:/var/www/db/fax.db');
         
         // Read all the fax configuration information
         $sth = $conn->query(
@@ -112,8 +112,13 @@ function action_refreshConfiguration($opt)
             glob(CONFIGDIR_IAXMODEM.'/iaxmodem-cfg.ttyIAX*'), 
             glob(CONFIGDIR_HYLAFAX.'/config.ttyIAX*')));
 
-    // Update the fax configuration in /etc/inittab
-    writeInittab($faxData);
+    if (file_exists("/etc/systemd")) {
+        // This is a systemd configuration. Update systemd links
+        writeSystemd($faxData);
+    } else {
+        // Update the fax configuration in /etc/inittab
+        writeInittab($faxData);
+    }
     
     // Update /var/spool/hylafax/etc/FaxDispatch
     writeFaxDispatch($faxData);
@@ -125,7 +130,15 @@ function action_refreshConfiguration($opt)
     }
 
     // Restart all relevant services
-    exec('/sbin/init q');
+    if (file_exists('/etc/systemd')) {
+        // Restart faxgetty - systemd style
+        foreach (array_keys($faxData) as $devId) {
+            system("/bin/systemctl start faxgetty@ttyIAX$devId.service");
+        }
+    } else {
+        // Restart faxgetty - old SYSV style
+        exec('/sbin/init q');
+    }
     exec('/sbin/service iaxmodem restart > /dev/null 2>&1');
     exec('/sbin/service hylafax restart > /dev/null 2>&1');
 
@@ -157,6 +170,56 @@ function writeInittab($faxData)
     }
     if (!$bInsertado) $lineas[] = "\n$sFaxesInittab";
     file_put_contents('/etc/inittab', $lineas);
+}
+
+function writeSystemd($faxData)
+{
+    // Create template for faxgetty if it does not exist
+    $sTemplate = '/lib/systemd/system/faxgetty@.service';
+    if (!file_exists($sTemplate)) {
+        $sContent = <<<TEMPLATE
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+
+[Unit]
+Description=Hylafax faxgetty on %I
+Documentation=man:faxgetty(8)
+After=hylafax.service iaxmodem.service
+
+[Service]
+ExecStart=-/usr/sbin/faxgetty %I
+Type=idle
+Restart=always
+RestartSec=0
+UtmpIdentifier=%I
+TTYPath=/dev/%I
+TTYReset=yes
+TTYVHangup=yes
+KillMode=process
+IgnoreSIGPIPE=no
+
+[Install]
+WantedBy=multi-user.target
+TEMPLATE;
+        file_put_contents($sTemplate, $sContent);
+    }
+    
+    // Remove all existing links for faxgetty and shutdown the corresponding tty
+    $sPathSystemd = '/etc/systemd/system/multi-user.target.wants';
+    foreach (glob($sPathSystemd.'/faxgetty@ttyIAX*.service') as $sPathService) {
+        $sNameService = basename($sPathService);
+        system('/bin/systemctl stop '.escapeshellarg($sNameService));
+        unlink($sPathService);
+    }
+    
+    // Add new links for the new faxes, but do not start ttys yet
+    foreach (array_keys($faxData) as $devId) {
+        system("ln -s $sTemplate $sPathSystemd/faxgetty@ttyIAX$devId.service");
+    }
 }
 
 function writeFaxDispatch($faxData)

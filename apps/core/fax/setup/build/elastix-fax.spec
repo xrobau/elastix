@@ -194,6 +194,10 @@ fi
 
 %changelog
 * Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax: extend faxconfig helper script to detect a systemd environment
+  and adapt fax tty initialization to it. Required to set up virtual faxes 
+  correctly in Raspberry Pi.
+  SVN Rev[4375]
 - CHANGED: Fax: add Requires: ghostscript, /usr/bin/tiff2pdf to specfile. This
   fixes inability to display received fax in Fedora 17 for Raspberry Pi.
   SVN Rev[4369]

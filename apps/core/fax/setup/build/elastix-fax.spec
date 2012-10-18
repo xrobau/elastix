@@ -12,6 +12,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 3.0.0-1
 Prereq: iaxmodem, hylafax
+# ghostscript supplies eps2eps, ps2pdfwr, gs
+Requires: ghostscript
+# tiff2pdf supplied by libtiff (CentOS), libtiff-tools (Fedora)
+Requires: /usr/bin/tiff2pdf
 
 %description
 Elastix Module Fax
@@ -203,6 +207,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax: add Requires: ghostscript, /usr/bin/tiff2pdf to specfile. This
+  fixes inability to display received fax in Fedora 17 for Raspberry Pi.
+  SVN Rev[4369]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

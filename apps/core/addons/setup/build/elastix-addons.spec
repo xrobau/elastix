@@ -118,7 +118,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
-* Wed Oct 17 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-7
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: Addons - Build/elastix-addons.spec: Corrected some isues in the spec
+  file about ownership of the commits.
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Changed release in specfile
 
@@ -142,7 +146,7 @@ fi
   #1397.
   SVN Rev[4345]
 
-* Fri Aug 24 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-6
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Changed release in specfile
 

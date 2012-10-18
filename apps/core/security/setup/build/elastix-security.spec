@@ -46,7 +46,7 @@ chmod 755 $RPM_BUILD_ROOT%{_sysconfdir}/rc.d/init.d/elastix-portknock
 
 # Portknock-related utilities
 mkdir -p $RPM_BUILD_ROOT%{_bindir}/
-cp setup/usr/bin/elastix-portknock* $RPM_BUILD_ROOT%{_bindir}/
+mv setup/usr/bin/elastix-portknock* $RPM_BUILD_ROOT%{_bindir}/
 chmod 755 $RPM_BUILD_ROOT%{_bindir}/elastix-portknock*
 rmdir setup/usr/bin
 

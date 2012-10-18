@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Network: (trival) fix typo in DNS template. Fixes Elastix bug #1400.
+  SVN Rev[4376] 
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-13
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

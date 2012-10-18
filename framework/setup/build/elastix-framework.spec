@@ -108,6 +108,7 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/share/pear/DB/sqlite3.php   
 
 # ** setup ** #
 mv $RPM_BUILD_DIR/elastix-framework/framework/setup/usr/share/elastix/privileged/*   $RPM_BUILD_ROOT/usr/share/elastix/privileged/
+rmdir framework/setup/usr/share/elastix/privileged/ framework/setup/usr/share/elastix framework/setup/usr/share framework/setup/usr
 mv $RPM_BUILD_DIR/elastix-framework/framework/setup/ 	                             $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 # ** elastix-* file ** #
@@ -142,7 +143,6 @@ mkdir -p    $RPM_BUILD_ROOT/var/log/elastix
 touch       $RPM_BUILD_ROOT/var/log/elastix/audit.log
 touch	    $RPM_BUILD_ROOT/var/log/elastix/postfix_stats.log
 
-rm -f setup/usr/share/elastix/privileged/ setup/usr/share/elastix setup/usr/share setup/usr
 %pre
 #Para conocer la version de elastix antes de actualizar o instalar
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/

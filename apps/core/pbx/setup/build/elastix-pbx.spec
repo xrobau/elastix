@@ -101,7 +101,7 @@ mv setup/usr/bin/elastix-endpoint-configure $RPM_BUILD_ROOT/usr/bin/
 chmod 755 $RPM_BUILD_ROOT/usr/bin/elastix-endpoint-configure
 mv setup/usr/share/elastix/endpoint-vendors $RPM_BUILD_ROOT/usr/share/elastix/
 
-rmdir setup/usr/share/elastix rmdir setup/usr/share setup/usr
+rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
 
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/

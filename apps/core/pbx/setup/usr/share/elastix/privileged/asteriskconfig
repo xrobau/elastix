@@ -740,8 +740,8 @@ function createExtAddtionals($domain=null){
             if($value["organization_domain"]!=$domain){
                 $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
                 if($resultc!=false){
-                    $arrExt[]=new paloExtensions($exten,new ext_noop("Reciving call to organization ".$resultc['name']."( ".$value["organization_domain"].")"));
-                    $arrExt[]=new paloExtensions($exten,new ext_goto("1",'${EXTEN}',$resultc['code'].'-from-pstn'),"1");
+                    $arrExt[]=new paloExtensions($exten,new ext_noop("Reciving call to organization ".$resultc['name']."( ".$value["organization_domain"].")"),"1");
+                    $arrExt[]=new paloExtensions($exten,new ext_goto("1",'${EXTEN}',$resultc['code'].'-from-pstn'));
                     $arrExt[]=new paloExtensions($exten,new ext_macro($resultc['code']."-Hangupcall"));
                     $astMang->database_put("DID",$exten,$value["organization_domain"]);
                     $arrCodeOrg["organization_domain"]=$arrCodeOrg["code"];
@@ -764,21 +764,21 @@ function createExtAddtionals($domain=null){
     $arrExt=array();
     $arrExt[]=new paloExtensions("_X.",new ext_setvar("DID",'${EXTEN}'),"1");
     $arrExt[]=new paloExtensions("_X.",new ext_goto("1",'s'));
-    $arrExt[]=new paloExtensions("s",new ext_noop('Entering from-analog with DID == ${DID}'));
+    $arrExt[]=new paloExtensions("s",new ext_noop('Entering from-analog with DID == ${DID}'),"1");
     $arrExt[]=new paloExtensions("s",new ext_ringing());
-    $arrExt[]=new paloExtensions("s",new ext_setvar("DID",'${IF($["${DID}"= "]?s:${DID})}'));
+    $arrExt[]=new paloExtensions("s",new ext_setvar("DID",'${IF($["${DID}"= ""]?s:${DID})}'));
     $arrExt[]=new paloExtensions("s",new ext_noop('DID is now ${DID}'));
     $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:5}"="DAHDI"]','dahdiok','checkzap'));
-    $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:3}"="Zap"]','zapok','neither'),"checkzap");
-    $arrExt[]=new paloExtensions("s",new ext_gosub(1,'${DID}'),"neither");
+    $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:3}"="Zap"]','zapok','neither'),"n",'checkzap');
+    $arrExt[]=new paloExtensions("s",new ext_gosub(1,'${DID}'),"n","neither");
     $arrExt[]=new paloExtensions("s",new ext_hangup());
-    $arrExt[]=new paloExtensions("s",new ext_noop('Is a DAHDI Channel'),"dahdiok");
+    $arrExt[]=new paloExtensions("s",new ext_noop('Is a DAHDI Channel'),"n","dahdiok");
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:6}'));
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
     $arrExt[]=new paloExtensions("s",new ext_macro(1,'${DID}','from-dahdi-${CHAN}'));
     $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro from-dahdi-${CHAN}'));
     $arrExt[]=new paloExtensions("s",new ext_goto(1,'${DID}',"from-pstn"));
-    $arrExt[]=new paloExtensions("s",new ext_noop('Is a Zaptel Channel'),'zapok');
+    $arrExt[]=new paloExtensions("s",new ext_noop('Is a Zaptel Channel'),"n",'zapok');
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:4}'));
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
     $arrExt[]=new paloExtensions("s",new ext_macro(1,'${DID}','from-dahdi-${CHAN}'));

@@ -216,6 +216,7 @@ class Agente
         $this->_Uniqueid = NULL;
         $this->_login_channel = NULL;
         $this->_extension = $sExtension;
+        $this->_listaAgentes->agregarIndice('extension', $sExtension, $this);
     }
     
     // Se llama en OriginateResponse exitoso, o en Hangup antes de completar login
@@ -234,6 +235,8 @@ class Agente
                 $this->_listaAgentes->removerIndice('uniqueidlogin', $this->_Uniqueid);
             $this->_Uniqueid = NULL;
             $this->_login_channel = NULL;
+            if (!is_null($this->_extension))
+                $this->_listaAgentes->removerIndice('extension', $this->_extension);
             $this->_extension = NULL;
         }
     }
@@ -255,6 +258,8 @@ class Agente
             $this->_listaAgentes->removerIndice('uniqueidlogin', $this->_Uniqueid);
         $this->_Uniqueid = NULL;
         $this->_login_channel = NULL;
+        if (!is_null($this->_extension))
+            $this->_listaAgentes->removerIndice('extension', $this->_extension);
         $this->_extension = NULL;
         $this->_id_sesion = NULL;
     }

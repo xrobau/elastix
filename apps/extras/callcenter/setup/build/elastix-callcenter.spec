@@ -98,6 +98,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Oct 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): intercept PeerStatus message to detect whether an 
+  extension currently in use for an agent login has been unregistered.
+
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): restore writing to database of transferred extension, 
   lost when rewriting the Agent Console to use the ECCP protocol. Fixes Elastix 

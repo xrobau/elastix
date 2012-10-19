@@ -34,6 +34,7 @@ class ListaAgentes implements IteratorAggregate
         'agentchannel'  =>  array(),    // agent->channel canal de agente (Agent/9000)
         'uniqueidlogin' =>  array(),    // agent->Uniqueid uniqueid de llamada usada para login de agente
         'uniqueidlink'  =>  array(),    // agent->UniqueidAgente uniqueid de pata enlazada con llamada atendida
+        'extension'     =>  array(),    // agent->extension extensión (SIP/1064) que inició la llamada de login
     );
 
     function numLlamadas() { return count($this->_agentes); }
@@ -82,6 +83,8 @@ class ListaAgentes implements IteratorAggregate
                     unset($this->_indices['uniqueidlogin'][$obj->Uniqueid]);
                 if (isset($this->_indices['uniqueidlink'][$obj->UniqueidAgente]))
                     unset($this->_indices['uniqueidlink'][$obj->UniqueidAgente]);
+                if (isset($this->_indices['extension'][$obj->extension]))
+                    unset($this->_indices['extension'][$obj->extension]);
             }
         }
     }

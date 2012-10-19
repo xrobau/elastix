@@ -1,3 +1,5 @@
+* Dialer (ECCP): intercept PeerStatus message to detect whether an extension
+  currently in use for an agent login has been unregistered.
 * Dialer (ECCP): restore writing to database of transferred extension, lost when 
   rewriting the Agent Console to use the ECCP protocol. Fixes Elastix bug #1396. 
 * Reports: fix incorrect translations in reports

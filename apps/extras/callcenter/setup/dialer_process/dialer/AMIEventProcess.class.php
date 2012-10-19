@@ -153,7 +153,8 @@ class AMIEventProcess extends TuberiaProcess
                 $astman->add_event_handler('*', array($this, 'OnDefault'));
 */                
             foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join', 
-                'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff') as $k)
+                'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
+                'PeerStatus') as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
             $astman->add_event_handler('Bridge', array($this, "msg_Link")); // Visto en Asterisk 1.6.2.x
             if ($this->DEBUG && $this->_config['dialer']['allevents'])
@@ -1534,6 +1535,29 @@ class AMIEventProcess extends TuberiaProcess
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
         
         return FALSE;
+    }
+
+    public function msg_PeerStatus($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+    	if ($params['PeerStatus'] == 'Unregistered') {
+    		// Alguna extensión se ha desregistrado. Verificar si es un agente logoneado
+            $a = $this->_listaAgentes->buscar('extension', $params['Peer']);
+            if (!is_null($a)) {
+            	// La extensión usada para login se ha desregistrado - deslogonear al agente
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__.' se detecta desregistro de '.
+                        $params['Peer'].' - deslogoneando Agent/'.$a->number);
+                }
+                $r = $this->_ami->Agentlogoff($a->number);
+            }
+    	}
     }
 }
 ?>

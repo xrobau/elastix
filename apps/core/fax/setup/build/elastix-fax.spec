@@ -193,6 +193,18 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax: rewrite fax notification scripts. This achieves the following:
+  Improved readability and documentation of the code.
+  Unification of notification for sent and received faxes as a single method.
+  Removal of unnecessary uses of external commands (grep, sqlite3).
+  Use of SQL parameters in database manipulation.
+  Removal of some cases where the invocation of an external command could fail
+  silently and lead to a missing fax file.
+  Reduction of code size, even after including documentation.
+  Notification script now logs success/failure messages in preparation for GUI.
+  Fixes Elastix bug #1387.
+
 * Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax: extend faxconfig helper script to detect a systemd environment
   and adapt fax tty initialization to it. Required to set up virtual faxes 

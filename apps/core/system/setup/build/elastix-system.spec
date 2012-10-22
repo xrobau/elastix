@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: actually use root mysql password instead of hardcoded
+  default when reading schemata. Print PDO exception message in case of failure
+  to read schemata. Pass around level tag to display on error message.
+  SVN Rev[4378]  
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Network: (trival) fix typo in DNS template. Fixes Elastix bug #1400.
   SVN Rev[4376] 

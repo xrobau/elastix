@@ -803,7 +803,7 @@ function backupComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
 $sMysqlRootPass = NULL;
 $mysqlSchemata = array();
 
-function prepareMysqlData()
+function prepareMysqlData($sLevelTag)
 {
     // Read mysql credentials if running for the first time
     global $sMysqlRootPass;
@@ -826,14 +826,14 @@ function prepareMysqlData()
     
         // Read list of all schemata from database
         try {
-            $conn = new PDO('mysql:host=localhost;dbname=information_schema', 'root', 'palosanto');
+            $conn = new PDO('mysql:host=localhost;dbname=information_schema', 'root', $sMysqlRootPass);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $sth = $conn->query('SELECT SCHEMA_NAME FROM SCHEMATA');
             $mysqlSchemata = $sth->fetchAll(PDO::FETCH_COLUMN);
             $sth = NULL;
             $conn = NULL;
         } catch (PDOException $e) {
-            error_exit("FATAL: $sLevelTag: failed to read list of MySQL schemata\n");
+            error_exit("FATAL: $sLevelTag: failed to read list of MySQL schemata: ".$e->getMessage()."\n");
         }
     }
 }
@@ -844,7 +844,7 @@ function backupComponent_mysqldb($sLevelTag, &$backupComponent, $sWorkingDir)
     global $mysqlSchemata;
 
     // Load mysql password if required
-    prepareMysqlData();
+    prepareMysqlData($sLevelTag);
     
     // Check whether selected database exists
     if (!in_array($backupComponent['database'], $mysqlSchemata)) {

@@ -469,7 +469,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
             } elseif ((int)$_POST['reintentos'] <= 0) { 
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr('Campaign must allow at least one call retry'));
-            } elseif (!in_array($_POST['encoding'], mb_list_encodings())) {
+            } elseif ($bDoCreate && !in_array($_POST['encoding'], mb_list_encodings())) {
                 $smarty->assign("mb_title", _tr('Validation Error'));
                 $smarty->assign("mb_message", _tr('Invalid character encoding'));
             } else {

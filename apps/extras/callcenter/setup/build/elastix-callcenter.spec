@@ -98,6 +98,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Oct 23 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Out: fix broken campaign edit due to character encoding 
+  verification. Fixes Elastix bug #1403.
+
 * Fri Oct 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): intercept PeerStatus message to detect whether an 
   extension currently in use for an agent login has been unregistered.

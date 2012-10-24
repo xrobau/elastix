@@ -42,6 +42,10 @@ class AMIEventProcess extends TuberiaProcess
 
     // Estimación de la versión de Asterisk que se usa
     private $_asteriskVersion = array(1, 4, 0, 0);
+    
+    // Fecha y hora de inicio de Asterisk, para detectar reinicios
+    private $_asteriskStartTime = NULL;
+    private $_bReinicioAsterisk = FALSE;
 
     private $_finalizandoPrograma = FALSE;
     private $_finalizacionConfirmada = FALSE;
@@ -100,6 +104,40 @@ class AMIEventProcess extends TuberiaProcess
             }
         }
 
+        // Verificar si se ha reiniciado Asterisk en medio de procesamiento
+        if (!is_null($this->_ami) && $this->_bReinicioAsterisk) {
+        	$this->_bReinicioAsterisk = FALSE;
+            
+            // Cerrar todas las llamadas
+            $listaLlamadas = array();
+            foreach ($this->_listaLlamadas as $llamada) {
+                $listaLlamadas[] = $llamada;
+            }
+            foreach ($listaLlamadas as $llamada) {
+                $this->_procesarLlamadaColgada($llamada, array(
+                    'local_timestamp_received'  =>  microtime(TRUE),
+                     'Uniqueid'                 =>  $llamada->Uniqueid,
+                     'Channel'                  =>  $llamada->channel,
+                     'Cause'                    =>  NULL,
+                     'Cause-txt'                =>  NULL,
+                ));
+            }
+            
+            // Desconectar a todos los agentes
+            foreach ($this->_listaAgentes as $a) {
+                if (!is_null($a->id_sesion)) {
+                    $this->_tuberia->msg_ECCPProcess_AgentLogoff(
+                        $a->channel,
+                        microtime(TRUE), 
+                        $a->id_agent,
+                        $a->id_sesion,
+                        $a->id_audit_break,
+                        $a->id_audit_hold);
+                    $a->terminarLoginAgente();
+                }
+            }
+        }
+
         // Rutear todos los mensajes pendientes entre tareas
         if ($this->_multiplex->procesarPaquetes())
             $this->_multiplex->procesarActividad(0);
@@ -147,11 +185,25 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output("INFO: no hay soporte CoreSettings en Asterisk Manager, se asume Asterisk 1.4.x.");
             }
 
+            /* Ejecutar el comando CoreStatus para obtener la fecha de arranque de 
+             * Asterisk. Si se tiene una fecha previa distinta a la obtenida aquí,
+             * se concluye que Asterisk ha sido reiniciado */
+            $sFechaInicio = '';
+            $r = $astman->CoreStatus();
+            if (isset($r['Response']) && $r['Response'] == 'Success') {
+                $sFechaInicio = $r['CoreStartupDate'].' '.$r['CoreStartupTime'];
+                $this->_log->output('INFO: esta instancia de Asterisk arrancó en: '.$sFechaInicio);
+            } else {
+                $this->_log->output('INFO: esta versión de Asterisk no soporta CoreStatus');
+            }
+            if (is_null($this->_asteriskStartTime)) {
+                $this->_asteriskStartTime = $sFechaInicio;
+            } elseif ($this->_asteriskStartTime != $sFechaInicio) {
+                $this->_log->output('INFO: esta instancia de Asterisk ha sido reiniciada, se eliminará información obsoleta...');
+                $this->_bReinicioAsterisk = TRUE;
+            }
+
             // Instalación de los manejadores de eventos
-/*
-            if ($this->DEBUG && $this->REPORTAR_TODO)
-                $astman->add_event_handler('*', array($this, 'OnDefault'));
-*/                
             foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join', 
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
                 'PeerStatus') as $k)
@@ -1428,34 +1480,7 @@ class AMIEventProcess extends TuberiaProcess
         }
 
         if (!is_null($llamada)) {
-        	if (is_null($llamada->timestamp_link)) {
-                /* Si se detecta el Hangup antes del OriginateResponse, se marca 
-                 * la llamada como fallida y se deja de monitorear. */
-                if (is_null($llamada->timestamp_originateend) && 
-                    !is_null($llamada->timestamp_originatestart)) {
-                    if ($this->DEBUG) {
-                        $this->_log->output("DEBUG: ".__METHOD__.": Hangup de llamada por fallo de Originate");                        
-                    }
-                    $llamada->llamadaFueOriginada($params['local_timestamp_received'], 
-                        $params['Uniqueid'], $params['Channel'], 'Failure',
-                        $params['Cause'], $params['Cause-txt']);
-                } else {
-                    $llamada->llamadaFinalizaSeguimiento(
-                        $params['local_timestamp_received'],
-                        $this->_config['dialer']['llamada_corta']);
-                }
-            } else {
-            	if ($llamada->status == 'OnHold') {
-                    if ($this->DEBUG) {
-                        $this->_log->output('DEBUG: '.__METHOD__.': se ignora Hangup para llamada que se envía a HOLD.');
-                    }
-                } else {
-                    // Llamada ha sido enlazada al menos una vez
-                    $llamada->llamadaFinalizaSeguimiento(
-                        $params['local_timestamp_received'],
-                        $this->_config['dialer']['llamada_corta']);
-                }
-            }
+            $this->_procesarLlamadaColgada($llamada, $params);
         } elseif (is_null($a)) {
             /* No se encuentra la llamada entre las monitoreadas. Puede ocurrir
              * que este sea el Hangup de un canal auxiliar que tiene información
@@ -1475,6 +1500,43 @@ class AMIEventProcess extends TuberiaProcess
         
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
         return FALSE;
+    }
+    
+    /* Procesamiento de llamada identificada: params requiere los elementos:
+     * local_timestamp_received Uniqueid Channel Cause Cause-txt
+     * Esta función también se invoca al cerrar todas las llamadas luego de 
+     * reiniciado Asterisk. 
+     */
+    private function _procesarLlamadaColgada($llamada, $params)
+    {
+        if (is_null($llamada->timestamp_link)) {
+            /* Si se detecta el Hangup antes del OriginateResponse, se marca 
+             * la llamada como fallida y se deja de monitorear. */
+            if (is_null($llamada->timestamp_originateend) && 
+                !is_null($llamada->timestamp_originatestart)) {
+                if ($this->DEBUG) {
+                    $this->_log->output("DEBUG: ".__METHOD__.": Hangup de llamada por fallo de Originate");                        
+                }
+                $llamada->llamadaFueOriginada($params['local_timestamp_received'], 
+                    $params['Uniqueid'], $params['Channel'], 'Failure',
+                    $params['Cause'], $params['Cause-txt']);
+            } else {
+                $llamada->llamadaFinalizaSeguimiento(
+                    $params['local_timestamp_received'],
+                    $this->_config['dialer']['llamada_corta']);
+            }
+        } else {
+            if ($llamada->status == 'OnHold') {
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__.': se ignora Hangup para llamada que se envía a HOLD.');
+                }
+            } else {
+                // Llamada ha sido enlazada al menos una vez
+                $llamada->llamadaFinalizaSeguimiento(
+                    $params['local_timestamp_received'],
+                    $this->_config['dialer']['llamada_corta']);
+            }
+        }
     }
     
     public function msg_Agentlogin($sEvent, $params, $sServer, $iPort)

@@ -98,6 +98,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Oct 24 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: add a method to detect that the Asterisk server process has
+  been restarted. This fixes the scenario where Asterisk crashes/restarts and
+  the dialer is stuck with stale agent/call status until restarted.
+
 * Tue Oct 23 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Campaign Out: fix broken campaign edit due to character encoding 
   verification. Fixes Elastix bug #1403.

@@ -932,5 +932,15 @@ class AMIClientConn extends MultiplexConn
     {
         return $this->send_request('CoreSettings');
     }
+    
+    /**
+     * Fetch core status from the running Asterisk server.
+     * 
+     * @return array Response with requested data, if successful
+     */
+    function CoreStatus()
+    {
+    	return $this->send_request('CoreStatus');
+    }
 }
 ?>

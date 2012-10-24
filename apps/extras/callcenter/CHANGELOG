@@ -1,3 +1,6 @@
+* Dialer: add a method to detect that the Asterisk server process has been 
+  restarted. This fixes the scenario where Asterisk crashes/restarts and the
+  dialer is stuck with stale agent/call status until restarted.
 * Campaign Out: fix broken campaign edit due to character encoding verification.
   Fixes Elastix bug #1403.
 * Dialer (ECCP): intercept PeerStatus message to detect whether an extension

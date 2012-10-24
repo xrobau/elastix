@@ -91,6 +91,8 @@ fi
 
 %files
 %defattr(-, asterisk, asterisk)
+/opt/elastix/dialer
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /opt/elastix/dialer/*
@@ -99,6 +101,8 @@ fi
 
 %changelog
 * Wed Oct 24 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Switch ownership of all files to root, except for the directory
+  /opt/elastix/dialer where logs are written.
 - FIXED: Dialer: add a method to detect that the Asterisk server process has
   been restarted. This fixes the scenario where Asterisk crashes/restarts and
   the dialer is stuck with stale agent/call status until restarted.

@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 13
+Release: 14
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,19 +130,24 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Oct 25 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-14
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: actually use root mysql password instead of hardcoded
   default when reading schemata. Print PDO exception message in case of failure
   to read schemata. Pass around level tag to display on error message.
-  SVN Rev[4378]  
+  SVN Rev[4378]
 
-* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Network: (trival) fix typo in DNS template. Fixes Elastix bug #1400.
-  SVN Rev[4376] 
+  SVN Rev[4376]
 
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-13
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4352]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -155,6 +160,8 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
+- Endpoint Configurator: install new configurator properly instead of leaving 
+  it at module_installer/MODULE/setup
   SVN Rev[4347]
 
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>

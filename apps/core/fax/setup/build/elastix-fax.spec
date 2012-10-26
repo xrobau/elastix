@@ -193,6 +193,12 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Fri Oct 26 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax Viewer: at check status routine, session variable might be 
+  invalid and trigger PHP warnings. Initialize local copy as array and copy 
+  session variable only after checking it is too an array.
+  SVN Rev[4384]
+
 * Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax: rewrite fax notification scripts. This achieves the following:
   Improved readability and documentation of the code.

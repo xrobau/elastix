@@ -207,6 +207,12 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Fri Oct 26 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax Viewer: at check status routine, session variable might be 
+  invalid and trigger PHP warnings. Initialize local copy as array and copy 
+  session variable only after checking it is too an array.
+  SVN Rev[4384]
+
 * Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax: add Requires: ghostscript, /usr/bin/tiff2pdf to specfile. This
   fixes inability to display received fax in Fedora 17 for Raspberry Pi.

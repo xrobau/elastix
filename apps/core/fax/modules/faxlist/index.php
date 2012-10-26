@@ -234,7 +234,10 @@ function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $a
 
 function thereChanges($data){
     $session = getSession();
-    $arrData = $session['faxlist']['faxListStatus'];
+    $arrData = array();
+    if (isset($session['faxlist']['faxListStatus']) && 
+        is_array($session['faxlist']['faxListStatus']))
+        $arrData = $session['faxlist']['faxListStatus'];
     $arraResult = array();
     foreach($arrData as $key => $value){
         $fax = $value[0];

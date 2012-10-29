@@ -526,8 +526,6 @@ insert into `features_code_settings` (name,default_code,description,estado) valu
 insert into `features_code_settings` (name,default_code,description,estado) values("speak_clock","*60","Speaking Clock","enabled");
 insert into `features_code_settings` (name,default_code,description,estado) values("pbdirectory","411","Phonebook dial-by-name directory","enabled"); 
 insert into `features_code_settings` (name,default_code,description,estado) values("queue_toggle","*45","Queue Toggle","enabled"); 
-insert into `features_code_settings` (name,default_code,description,estado) values("recording_check","*99","Check Recording","enabled");  
-insert into `features_code_settings` (name,default_code,description,estado) values("recording_save","*77","Save Recording","enabled");  
 insert into `features_code_settings` (name,default_code,description,estado) values("speeddial_set","*75","Set user speed dial","enabled");
 insert into `features_code_settings` (name,default_code,description,estado) values("speeddial_prefix","*0","Speeddial Prefix","enabled");
 insert into `features_code_settings` (name,default_code,description,estado) values("voicemail_dial","*98","Dial Voicemail","enabled");
@@ -909,20 +907,20 @@ CREATE TABLE ivr_destination (
 DROP TABLE IF EXISTS did;
 CREATE TABLE did (
     id int(11) NOT NULL AUTO_INCREMENT,
-    did int(11) NOT NULL,
+    did varchar(100) NOT NULL,
     organization_domain varchar(50),
     country varchar(100) NOT NULL,
     city varchar(100) NOT NULL,
     country_code varchar(100) NOT NULL,
     area_code varchar(100) NOT NULL,
-    type enum ('digital','analog','custom') NOT NULL,
+    type enum ('digital','analog','voip') NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY did (did)
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS did_details;
 CREATE TABLE did_details (
-    did int(11) NOT NULL,
+    did varchar(100) NOT NULL,
     keyword varchar(50) NOT NULL,
     data varchar(50) NOT NULL,
     PRIMARY KEY (did,keyword,data),
@@ -933,19 +931,23 @@ DROP TABLE IF EXISTS inbound_route;
 CREATE TABLE inbound_route (
     id int(11) NOT NULL AUTO_INCREMENT,
     description varchar(50) NOT NULL,
-    did_number varchar(50) default null,
-    cid_number varchar(50) default null,
+    did_number varchar(50) default "",
+    cid_number varchar(50) default "",
     cid_prefix varchar(50) default null,
     moh varchar(50) default null,
     delay_answer int(11),
     alertinfo varchar(50) default null,
     language varchar(3) default 'en',
-    ringnig enum('on','off') default 'off',
+    ringing enum('on','off') default 'off',
     primanager enum('yes','no') default 'no',
     max_attempt int(2) default 3,
     min_length int(2) default 5,
     goto varchar(50) NOT NULL,
     destination varchar(50) NOT NULL,
+    fax_detect enum('yes','no') default 'no',
+    fax_type enum('fax','nvfax') default 'fax',
+    fax_time  int(2) default 10,
+    fax_destiny varchar(50),
     organization_domain varchar(50) NOT NULL,
     PRIMARY KEY (id),
     INDEX organization_domain (organization_domain),
@@ -961,20 +963,7 @@ CREATE TABLE outbound_route (
     routepass varchar(50) default null,
     mohsilence varchar(50) default null,
     time_group_id int(11),
-    organization_domain varchar(50) NOT NULL,
-    PRIMARY KEY (id),
-    INDEX organization_domain (organization_domain)
-) ENGINE = INNODB;
-
-DROP TABLE IF EXISTS outbound_route;
-CREATE TABLE outbound_route (
-    id int(11) NOT NULL AUTO_INCREMENT,
-    routename varchar(50) NOT NULL,
-    outcid varchar(50) default null,
-    outcid_mode varchar(50) default null,
-    routepass varchar(50) default null,
-    mohsilence varchar(50) default null,
-    time_group_id int(11),
+    seq int(11) NOT NULL,
     organization_domain varchar(50) NOT NULL,
     PRIMARY KEY (id),
     INDEX organization_domain (organization_domain)

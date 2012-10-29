@@ -39,6 +39,7 @@ require_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
 require_once "/var/www/html/modules/queues/libs/paloSantoQueues.class.php";
 require_once "/var/www/html/modules/ivr/libs/paloSantoIVR.class.php";
 require_once "/var/www/html/modules/inbound_route/libs/paloSantoInbound.class.php";
+require_once "/var/www/html/modules/outbound_route/libs/paloSantoOutbound.class.php";
 
 if(!isset($argv[1]))
     exit(1);
@@ -86,6 +87,12 @@ switch($argv[1]){
     case "writeTechRegister":
         exit(writeTechRegister() ? 0 : 1);
         break;
+    case "deleteFileOrgAst":
+        if(isset($argv[2])){
+            exit(deleteFileOrgAst($argv[2]) ? 0 : 1);
+        }else
+            exit(deleteFileOrgAst() ? 0 : 1);
+        break;
 	default:
 		error_exit("No action specified \n");
 		break;
@@ -125,9 +132,42 @@ function dialplanReload(){
     return true;
 }
 
+
+/**
+    funcion usada para eliminar los archivos de configuracion
+    de asterisk de una organizacion dentro del servidor elastix
+    @param string domain -> dominio de la organizacion de la queç
+                            se van a eliminar los archivos
+*/
+function deleteFileOrgAst($domain){
+    if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+        fprintf(STDERR, "Invalid domain format");
+        return false;
+    }
+    
+    $date=date("YMd_His");
+    $path="/etc/asterisk/organizations/";
+    $arrayFile=array("extensions_$domain.conf","extensions_additionals_$domain.conf","extensions_globals_$domain.conf","extensions_custom_$domain.conf");
+    
+    foreach($arrayFile as $file){
+        if(file_exists($path.$file)){
+            if(unlink($path.$file)===false){
+                fprintf(STDERR, "File %s couldn't be deleted",$file);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 function createDirOrganization($domain){
     $pathDial="/etc/asterisk/organizations";
     $exito=true;
+    
+    if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+        fprintf(STDERR, "Invalid domain format");
+        return false;
+    }
     
     if(!is_dir($pathDial)){
         if(mkdir($pathDial)){
@@ -191,6 +231,11 @@ EXTENSIONS_CONFIG;
     $result=$pDB->fetchTable($query,false);
     if($result===false){
         fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDB->errMsg);
+        return false;
+    }
+    
+    if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $orgdomain)){
+        fprintf(STDERR, "Invalid domain format");
         return false;
     }
        
@@ -273,11 +318,18 @@ function createExtensionGlobals($action,$orgdomain){
         $arrDomain[]=$domain[0];
     }
     
+    if($action=="add" || $action=="delete"){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $orgdomain)){
+            fprintf(STDERR, "Invalid domain format");
+            return false;
+        }
+    }
+    
     if($action=="add"){
         if(in_array($orgdomain,$arrDomain)===false){
             $arrDomain[]=$orgdomain;
         }
-    }else{
+    }elseif($action=="delete"){
         $index=array_search($orgdomain,$arrDomain);
         if($index!==false){    
             $arrDomain[$index]=null;
@@ -327,8 +379,8 @@ function createExtensionGlobals($action,$orgdomain){
             $content .="FORCEDOUTCID_$trunkid = $force\n";
 
             $qPrefix="SELECT count(trunkid) from trunk_dialpatterns where trunkid=?";
-            $trunkPrefix=$pDB->fetchTable($qPrefix,true,array($trunkid));
-            if(count($trunkPrefix)>0)
+            $trunkPrefix=$pDBpbx->getFirstRowQuery($qPrefix,false,array($trunkid));
+            if($trunkPrefix[0]!="0")
                 $content .="PREFIX_TRUNK_$trunkid = 1\n";
             else
                 $content .="PREFIX_TRUNK_$trunkid = \n";
@@ -441,6 +493,11 @@ function generateDialPlan($domain){
     $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
     
+    if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+        fprintf(STDERR, "Invalid domain format");
+        return false;
+    }
+    
     //valido que exista el dominio y obtengo el code asociado a este
     $queryCode="SELECT code from organization where domain=?";
     $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, false, array($domain));
@@ -470,6 +527,30 @@ function generateDialPlan($domain){
         return false;
     }
     
+    //genero plan de marcado relacionado con los irvs
+    $pIVR=new paloIvrPBX($pDB,$domain);
+    $arrContextIVR=$pIVR->createDialPlanIvr($arrFromInt);
+    if($arrContextIVR===false || !is_array($arrContextIVR))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pIVR->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextIVR);
+
+    //genero plan de marcado relacionado a rutas de entrada
+    $pInbound=new paloSantoInbound($pDB,$domain);
+    $arrContextIN=$pInbound->createDialplanIndbound($arrFromInt);
+    if($arrContextIN===false || !is_array($arrContextIN))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pInbound->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextIN);
+        
+     //genero plan de marcado relacionado a rutas de salida
+    $pOutbound=new paloSantoOutbound($pDB,$domain);
+    $arrContextOut=$pOutbound->createDialPlanOutbound($arrFromInt);
+    if($arrContextOut===false || !is_array($arrContextOut))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pOutbound->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextOut);
+    
     //genero el plan de marcado relacionado con las extension internas
     $pDevice=new paloDevice($domain,"sip",$pDB);
     $arrContextExtLocal=$pDevice->createDialPlanLocalExtension($arrFromInt);
@@ -484,23 +565,7 @@ function generateDialPlan($domain){
         fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pDevice->errMsg);
     else
         $arrContext=array_merge($arrContext,$arrContextExtFax);
-    
-    //genero plan de marcado relacionado con los irvs
-    $pIVR=new paloIvrPBX($pDB,$domain);
-    $arrContextIVR=$pIVR->createDialPlanIvr($arrFromInt);
-    if($arrContextIVR===false || !is_array($arrContextIVR))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pIVR->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextIVR);
-
-    //genero plan de marcado relacionado a rutas de entrada
-    $pInbound=new paloSantoInbound($pDB,$domain);
-    $arrContextIN=$pInbound->createDialplanIndbound($arrFromInt);
-    if($arrContextIN===false || !is_array($arrContextIN))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pIVR->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextIN);
-    
+        
     //genero plan de marcado relacionado con las colas
     $pQueue=new paloQueuePBX($pDB,$domain);
     $arrContextQueue=$pQueue->createDialPlanQueue($arrFromInt);
@@ -686,12 +751,12 @@ function createFeatureApplicationMapfile(){
 }
 
 /**
-    funcion que escribe el archivo extensions_did.conf
+    funcion que escribe el archivo extensions_additionals.conf
     ese archivo contiene el contexto from-pstn. Con ese contexto
     es posible redirigir las llamadas a la organizacion con el correspondiente
     did. Este archivo es incluido dentro del archivo extensions.conf
     @param $domain -> si esta seteado entonces los did con dicho dominio
-                      no deben ser incluicrados
+                      no deben ser incluidos
 */
 function createExtAddtionals($domain=null){
     $file="/etc/asterisk/extensions_additionals.conf";
@@ -731,7 +796,6 @@ function createExtAddtionals($domain=null){
         return false;
     }
     
-    $arrCodeOrg=array();
     $arrExt=array();
     $contexto="";
     foreach($result as $value){
@@ -743,8 +807,7 @@ function createExtAddtionals($domain=null){
                     $arrExt[]=new paloExtensions($exten,new ext_noop("Reciving call to organization ".$resultc['name']."( ".$value["organization_domain"].")"),"1");
                     $arrExt[]=new paloExtensions($exten,new ext_goto("1",'${EXTEN}',$resultc['code'].'-from-pstn'));
                     $arrExt[]=new paloExtensions($exten,new ext_macro($resultc['code']."-Hangupcall"));
-                    $astMang->database_put("DID",$exten,$value["organization_domain"]);
-                    $arrCodeOrg["organization_domain"]=$arrCodeOrg["code"];
+                    $astMang->database_put("DID",$exten,$resultc['code']);
                 }
             }
         }
@@ -766,10 +829,10 @@ function createExtAddtionals($domain=null){
     $arrExt[]=new paloExtensions("_X.",new ext_goto("1",'s'));
     $arrExt[]=new paloExtensions("s",new ext_noop('Entering from-analog with DID == ${DID}'),"1");
     $arrExt[]=new paloExtensions("s",new ext_ringing());
-    $arrExt[]=new paloExtensions("s",new ext_setvar("DID",'${IF($["${DID}"= ""]?s:${DID})}'));
+    $arrExt[]=new paloExtensions("s",new ext_setvar("DID",'${IF($["${DID}"= "]?s:${DID})}'));
     $arrExt[]=new paloExtensions("s",new ext_noop('DID is now ${DID}'));
     $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:5}"="DAHDI"]','dahdiok','checkzap'));
-    $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:3}"="Zap"]','zapok','neither'),"n",'checkzap');
+    $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${CHANNEL:0:3}"="Zap"]','zapok','neither'),"n","checkzap");
     $arrExt[]=new paloExtensions("s",new ext_gosub(1,'${DID}'),"n","neither");
     $arrExt[]=new paloExtensions("s",new ext_hangup());
     $arrExt[]=new paloExtensions("s",new ext_noop('Is a DAHDI Channel'),"n","dahdiok");
@@ -819,6 +882,11 @@ function createExtAddtionals($domain=null){
                 }
             }
         }
+    }
+    
+    $TrunkPattern=createDialplanTrunkPattern();
+    if($TrunkPattern!==false){
+        $contenido .=$TrunkPattern;
     }
     
     if(file_put_contents("$file", $contenido)===false){
@@ -921,4 +989,59 @@ function writeTechRegister(){
     return true;
 }
 
+function createDialplanTrunkPattern(){
+    $arrExt=array();
+    $exten="s";
+    $prepend=$prefix=$pattern=$len="";
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $query="SELECT * from trunk_dialpatterns order by trunkid";
+    $result=$pDB->fetchTable($query,true);
+    if($result===false){
+        fprintf(STDERR, "ERR: Error getting trunk dialpatterns %s.\n",$pDB->errMsg);
+        return false;
+    }else{
+        $trunkid="none";
+        foreach($result as $value){
+            $context="sub-flp-".$value["trunkid"];
+            
+            if(isset($value['prepend_digits']))
+                $prepend=$value['prepend_digits'];
+            if(isset($value['match_pattern_prefix'])){
+                $prefix=strtoupper($value['match_pattern_prefix']);
+                $len=($prefix=="")?"":":".count($prefix);
+            }
+            if(isset($value['match_pattern_pass']))
+                $pattern=strtoupper($value['match_pattern_pass']);
+                
+            $expression = str_replace(
+                array('X','Z','N','.','*','+'),
+                array('[0-9]','[1-9]','[2-9]','[0-9#*\\\$]$','\\\*','\\\$'),
+                $prefix.$pattern);
+            $expression = strtr($expression,"$","+");
+            
+            if($trunkid!=$value["trunkid"]){
+                $arrExt[$context][]=new paloExtensions($exten,new ext_set("NEW_DIAL_NUMBER",''),1);
+            }
+            
+            if($prepend!="" || $prefix!=""){
+                $arrExt[$context][]=new paloExtensions($exten,new ext_execif('$[${REGEX("^'.$expression.'$" ${DIAL_NUMBER})} = 1]','Set','NEW_DIAL_NUMBER='.$prepend.'${DIAL_NUMBER'.$len.'}'));
+                $arrExt[$context][]=new paloExtensions($exten,new ext_gotoif('$[${LEN(${NEW_DIAL_NUMBER})} != 0]', 'match'));
+            }
+            $trunkid=$value["trunkid"];
+        }
+        
+        $contenido="";
+        foreach(array_keys($arrExt) as $name){
+            $contenido .="\n[$name]\n";
+            $arrExt[$name][]=new paloExtensions($exten,new ext_return(''));
+            $arrExt[$name][]=new paloExtensions($exten,new ext_set('DIAL_NUMBER','${NEW_DIAL_NUMBER}'),"n","match");
+            $arrExt[$name][]=new paloExtensions($exten,new ext_return(''));
+            foreach($arrExt[$name] as $extension){
+                if(!is_null($extension) && is_object($extension))
+                    $contenido .=$extension->data."\n";
+            }
+        }
+    }
+    return $contenido;
+}   
 ?>

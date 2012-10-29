@@ -322,7 +322,7 @@
         <tr class="voicemail">
             <td width="15%" nowrap>{$vmpassword.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
             <td width="31%">{$vmpassword.INPUT}</td>
-            <td width="21%" nowrap>{$vmemail.LABEL}:</td>
+            <td width="15%" nowrap>{$vmemail.LABEL}:</td>
             <td>{$vmemail.INPUT}</td>
         </tr>
         <tr class="voicemail">
@@ -343,6 +343,27 @@
         </tr>
         <tr class="voicemail">
             <td width="15%" nowrap>{$vmoptions.LABEL}: </td> <td colspan=3>{$vmoptions.INPUT}</td>
+        </tr>
+        <tr>
+            <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4><b>{$LOCATOR}</b></td>
+        </tr>
+        <tr class="voicemail">
+            <td nowrap>{$vmx_locator.LABEL}:</td>
+            <td>{$vmx_locator.INPUT}</td>
+        </tr>
+        <tr class="voicemail vm_locator">
+            <td nowrap>{$vmx_use.LABEL}:</td>
+            <td>{$vmx_use.INPUT}</td>
+        </tr>
+        <tr class="voicemail">
+            <td nowrap>{$vmx_extension_0.LABEL}:</td>
+            <td colspan=3>{$vmx_extension_0.INPUT}  {$vmx_operator.INPUT} {$vmx_operator.LABEL}</td>
+        </tr>
+        <tr class="voicemail vm_locator">
+            <td nowrap>{$vmx_extension_1.LABEL}:</td>
+            <td>{$vmx_extension_1.INPUT}</td>
+            <td nowrap>{$vmx_extension_2.LABEL}:</td>
+            <td>{$vmx_extension_2.INPUT}</td>
         </tr>
         </table>
      </div>

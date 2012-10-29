@@ -100,7 +100,7 @@
         </thead>
         {if $mode eq 'view'}
 		   {foreach from=$items key=myId item=i}
-		      <tr><td align="center">{if $i.3 eq ''}(  ){else}($i.3){/if}</td>
+		      <tr><td align="center">{if $i.3 eq ''}(  ){else}({$i.3}){/if}</td>
 			  <td align="center">+</td>
 			  <td align="center">{$i.1}</td>
 			  <td align="center">|</td>
@@ -142,7 +142,7 @@
             </tr>
             <tr class="tech">
                 <td width="20%" nowrap>{$register.LABEL}:</td>
-                <td width="30%">{$register.INPUT}</td>
+                <td colspan=3 >{$register.INPUT}</td>
             </tr>
             <tr>
                 <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$PEER_Details}</td>

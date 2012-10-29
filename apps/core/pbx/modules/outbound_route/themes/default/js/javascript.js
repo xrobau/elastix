@@ -1,12 +1,54 @@
 $(document).ready(function(){
-
-        $("select.goto").trigger('change');
+    $("select.goto").trigger('change');
 	//$('#sortable2').trigger('sortupdate') ;
 	$("#arrDestine").val(getArrRows()); 
 	$("#arrTrunks").val(getIdTrunks()); 
-	
-	
+    
+    
+    $('td select[class=seq_route]').live("change",function(){
+        var id=$(this).attr("id");
+        var out_id=id.substring(6);
+        var seq=$("#"+id+" option:selected").val();
+        if(validateDigit(seq)==false){
+            alert("Invalid New Orden");
+        }else{
+            var arrAction = new Array();
+            arrAction["action"]   = "ordenR";
+            arrAction["menu"]     = "outbound_route";
+            arrAction["rawmode"]  = "yes";
+            arrAction["seq"]  = seq;
+            arrAction["out_id"]  = out_id;
+            request("index.php",arrAction,false,
+            function(arrData,statusResponse,error)
+            {
+                if(error!=""){
+                    alert(error);
+                }else{
+                    $(".mensajeStatus").remove();
+                    var idform=$("#"+id).parents("form:first").attr("id");
+                    $("#"+idform).detach();
+                    $(".neo-module-content").apend(arrData[1]);
+                    alert(arrData[0]);
+                }
+            });
+        }
+    });        
 });
+
+function validateDigit(obj) {
+    for (n = 0; n < obj.length; n++){
+        if ( ! isDigit(obj.charAt(n))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function isDigit(ch) {
+   if (ch >= '0' && ch <= '9')
+      return true;
+   return false;
+}
 
 $(function() {
  
@@ -22,17 +64,14 @@ $(function() {
             if (!isNaN(_parent))
                 id_parent = _parent;
 	    $("#arrTrunks").val(newOrder);
-            
-        
   })
-  
 });
 
 
 
 
 $(window).load(function () {
-        $("div.neo-module-content").attr("style","");
+    $("div.neo-module-content").attr("style","");
 });
 
 
@@ -47,10 +86,8 @@ function getIdTrunks(){
 	$('.tab .content .tabForm ul#sortable2 li.ui-state-default input').each(function() {
 	    rows = $(this).attr("id");
 	    valIndex += rows+",";
-	  
   }); 
   return valIndex;
-   
 }
 
 function getArrRows(){
@@ -63,7 +100,6 @@ function getArrRows(){
 	  valIndex += rows;
 	else
 	  valIndex += rows+",";
-	  
   }); 
   return valIndex;
    
@@ -78,40 +114,37 @@ function getNumRows(){
 }
 
 var add = function() {
-     index ++;
-     if(isNaN(index))
+    index ++;
+    if(isNaN(index))
 	index=1;
      
-     if (($("#mode_input").val()=="edit")&& ($("#mostra_adv").val()==""))
-         index = $("#index").val();
+    if (($("#mode_input").val()=="edit")&& ($("#mostra_adv").val()==""))
+        index = $("#index").val();
     
-     var row = $('table#destine tr#test').html();
-     if(typeof  row!== "undefined" && row)
-     {
-	var arrDestine = $("#arrDestine").val();
-	if(index==1)
-	  arrDestine = index;
-	else{
-	  arrDestine = arrDestine+","+index;
-	  arrDestine = arrDestine.replace(",,",",");
-	}
-	$("#arrDestine").val(arrDestine);
-	$("#mostra_adv").val("val");
-	
-	row = row.replace(/\__/g, index);
-	var val = "<tr id="+index+">"+row+"</tr>"; 
-	$('table#destine tbody').append(val);
-	$("#goto"+index).addClass("goto");
-	$("#"+index).addClass("content-destine");
-	
-     }
+    var row = $('table#destine tr#test').html();
+    if(typeof  row!== "undefined" && row)
+    {
+        var arrDestine = $("#arrDestine").val();
+        if(index==1)
+            arrDestine = index;
+        else{
+            arrDestine = arrDestine+","+index;
+            arrDestine = arrDestine.replace(",,",",");
+        }
+        $("#arrDestine").val(arrDestine);
+        $("#mostra_adv").val("val");
+        row = row.replace(/\__/g, index);
+        var val = "<tr id="+index+">"+row+"</tr>"; 
+        $('table#destine tbody').append(val);
+        $("#goto"+index).addClass("goto");
+        $("#"+index).addClass("content-destine");
+    }
      
 };
 
 $('.add').live('click', this, function(event) {
-            add();
-            
-    });
+        add();
+});
 
 $('.delete').live('click', this, function(event) {
      //var index = $('table#destine tbody tr').length;    
@@ -124,12 +157,7 @@ $('.delete').live('click', this, function(event) {
 	$(this).closest('tr').remove();
 	$("#arrDestine").val(arrDestine);
     // }
-     
 });
-
-
-
-
 
 function radio(id_radio){
     var alt=$("#content_"+id_radio).children("table").height();

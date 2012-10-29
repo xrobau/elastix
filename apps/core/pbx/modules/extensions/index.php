@@ -398,6 +398,9 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                         $arrExten["vmdelete"]=$arrVM["vmdelete"];
                         $arrExten["vmsaycid"]=$arrVM["vmsaycid"];
                         $arrExten["vmenvelope"]=$arrVM["vmenvelope"];
+                        $arrExten["vmx_locator"]="enabled";
+                        $arrExten["vmx_use"]="both";
+                        $arrExten["vmx_operator"]="on";
 					}
 				}
 			}
@@ -462,6 +465,7 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 	$smarty->assign("EXTENSION",_tr("GENERAL"));
 	$smarty->assign("DEVICE",_tr("DEVICE"));
 	$smarty->assign("VOICEMAIL",_tr("VOICEMAIL"));
+	$smarty->assign("LOCATOR",_tr("Vmx Locator"));
 	$smarty->assign("userLevel",$userLevel1);
 	$htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("Extensions"), $arrExten);
 	$content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
@@ -589,6 +593,13 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 					$arrProp["vmenvelope"]=getParameter("vmenvelope");
 					$arrProp["vmcontext"]=getParameter("vmcontext");
 					$arrProp["vmoptions"]=getParameter("vmoptions");
+					//vmx_locator settings
+					$arrProp["vmx_locator"]=getParameter("vmx_locator");
+                    $arrProp["vmx_use"]=getParameter("vmx_use");
+                    $arrProp["vmx_extension_0"]=getParameter("vmx_extension_0");
+                    $arrProp["vmx_extension_1"]=getParameter("vmx_extension_1");
+                    $arrProp["vmx_extension_2"]=getParameter("vmx_extension_2");
+                    $arrProp["vmx_operator"]=getParameter("vmx_operator");
 				}
 			}else{
 				$arrProp["create_vm"]="no";
@@ -730,6 +741,13 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 					$arrProp["vmenvelope"]=getParameter("vmenvelope");
 					$arrProp["vmcontext"]=getParameter("vmcontext");
 					$arrProp["vmoptions"]=getParameter("vmoptions");
+					//vmx_locator settings
+                    $arrProp["vmx_locator"]=getParameter("vmx_locator");
+                    $arrProp["vmx_use"]=getParameter("vmx_use");
+                    $arrProp["vmx_extension_0"]=getParameter("vmx_extension_0");
+                    $arrProp["vmx_extension_1"]=getParameter("vmx_extension_1");
+                    $arrProp["vmx_extension_2"]=getParameter("vmx_extension_2");
+                    $arrProp["vmx_operator"]=getParameter("vmx_operator");
 				}
 			}else{
 				$arrProp["create_vm"]="no";
@@ -854,7 +872,7 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 	$idExten=getParameter("id_exten");
 
 
-	if($userLevel1!="superadmin"){
+	if($userLevel1!="admin"){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -876,9 +894,7 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 			if($userLevel1=="admin"){
 				$arrExten = $pExten->getExtensionById($idExten, $domain);
 			}else{
-				$idUser=$pACL->getIdUser($userAccount);
-				$arrUserExt=$pACL->getExtUser($idUser);
-				$arrExten = $pExten->getExtensionById($arrUserExt["id"], $domain);
+                $arrExten = false;
 			}
 		//}
 	}
@@ -929,8 +945,11 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 function createFieldForm($arrOrgz,$tech=null)
 {
     $arrTech=array("sip"=>strtoupper("Sip"),"iax2"=>strtoupper("Iax2"));
-    $arrRings=array(""=>_tr("Default"),"1"=>1,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"11"=>11,"12"=>12,"13"=>13,"14"=>14,"15"=>15,"16"=>16,"17"=>17,"18"=>18,"19"=>19,"20"=>20,"21"=>21,"22"=>22,"23"=>23,"24"=>24,"25"=>25,"26"=>26,"27"=>27,"28"=>28,"29"=>29,"30"=>30,"31"=>31,"32"=>32,"33"=>33,"34"=>34,"35"=>35,"36"=>36,"37"=>37,"38"=>38,"39"=>39,"40"=>40,"41"=>41,"42"=>42,"43"=>43,"44"=>44,"45"=>45,"46"=>46,"47"=>47,"48"=>48,"49"=>49,"50"=>50,"51"=>51,"52"=>52,"53"=>53,"54"=>54,"55"=>55,"56"=>56,"57"=>57,"58"=>58,"59"=>59,"60"=>60,"61"=>61,"62"=>62,"63"=>63,"64"=>64,"65"=>65,"66"=>66,"67"=>67,"68"=>68,"69"=>69,"70"=>70,"71"=>71,"72"=>72,"73"=>73,"74"=>74,"75"=>75,"76"=>76,"77"=>77,"78"=>78,"79"=>79,"80"=>80,"81"=>81,"82"=>82,"83"=>83,"84"=>84,"85"=>85,"86"=>86,"87"=>87,"88"=>88,"89"=>89,"90"=>90,"91"=>91,"92"=>92,"93"=>93,"94"=>94,"95"=>95,"96"=>96,"97"=>97,"98"=>98,"99"=>99,"100"=>100,"101"=>101,"102"=>102,"103"=>103,"104"=>104,"105"=>105,"106"=>106,"107"=>107,"108"=>108,"109"=>109,"
-110"=>110,"111"=>111,"112"=>112,"113"=>113,"114"=>114,"115"=>115,"116"=>116,"117"=>117,"118"=>118,"119"=>119,"120"=>120);
+    $arrRings=range("1","120");
+    $arrRings[""]=_tr("Default");
+    /*
+    array(""=>_tr("Default"),"1"=>1,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"11"=>11,"12"=>12,"13"=>13,"14"=>14,"15"=>15,"16"=>16,"17"=>17,"18"=>18,"19"=>19,"20"=>20,"21"=>21,"22"=>22,"23"=>23,"24"=>24,"25"=>25,"26"=>26,"27"=>27,"28"=>28,"29"=>29,"30"=>30,"31"=>31,"32"=>32,"33"=>33,"34"=>34,"35"=>35,"36"=>36,"37"=>37,"38"=>38,"39"=>39,"40"=>40,"41"=>41,"42"=>42,"43"=>43,"44"=>44,"45"=>45,"46"=>46,"47"=>47,"48"=>48,"49"=>49,"50"=>50,"51"=>51,"52"=>52,"53"=>53,"54"=>54,"55"=>55,"56"=>56,"57"=>57,"58"=>58,"59"=>59,"60"=>60,"61"=>61,"62"=>62,"63"=>63,"64"=>64,"65"=>65,"66"=>66,"67"=>67,"68"=>68,"69"=>69,"70"=>70,"71"=>71,"72"=>72,"73"=>73,"74"=>74,"75"=>75,"76"=>76,"77"=>77,"78"=>78,"79"=>79,"80"=>80,"81"=>81,"82"=>82,"83"=>83,"84"=>84,"85"=>85,"86"=>86,"87"=>87,"88"=>88,"89"=>89,"90"=>90,"91"=>91,"92"=>92,"93"=>93,"94"=>94,"95"=>95,"96"=>96,"97"=>97,"98"=>98,"99"=>99,"100"=>100,"101"=>101,"102"=>102,"103"=>103,"104"=>104,"105"=>105,"106"=>106,"107"=>107,"108"=>108,"109"=>109,"
+110"=>110,"111"=>111,"112"=>112,"113"=>113,"114"=>114,"115"=>115,"116"=>116,"117"=>117,"118"=>118,"119"=>119,"120"=>120);*/
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
 	$arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrWait=array("no"=>_tr("Disabled"),"yes"=>_tr("Enabled"));
@@ -1079,6 +1098,43 @@ function createFieldForm($arrOrgz,$tech=null)
                                                     "INPUT_EXTRA_PARAM"      => $arrScreen,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmx_operator"   => array("LABEL"               => _tr("Go to Operator"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "CHECKBOX",
+                                                    "INPUT_EXTRA_PARAM"      => "",
+                                                    "VALIDATION_TYPE"        => "",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmx_extension_0"   => array("LABEL"               => _tr("Opcion 0"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmx_extension_1"   => array("LABEL"               => _tr("Opcion 1"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmx_extension_2"   => array("LABEL"               => _tr("Opcion 2"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmx_use" => array("LABEL"              => _tr("Use When"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => array("unavailable"=>_tr("Unavailable"),"busy"=>_tr("Busy"),"both"=>_tr("Unavailable & busy")),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmx_locator"       => array("LABEL"              => _tr("Use Locator"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => array("enabled"=>_tr("Enabled"),"disabled"=>_tr("Disabled")),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            
     );
 	if(isset($tech)){
 		if($tech=="sip"){

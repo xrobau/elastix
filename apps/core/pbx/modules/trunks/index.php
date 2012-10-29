@@ -655,7 +655,7 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
         if($arrTrunks["tech"]=="sip" || $arrTrunks["tech"]=="iax2"){
             $pTrunk->prunePeer($arrTrunks["name"],$arrTrunks["tech"]);
         }
-        if(writeAsteriskFile($error,$tech)==true)
+        if(writeAsteriskFile($error,$arrTrunks["tech"])==true)
             $smarty->assign("mb_message",_tr("Trunk was deleted successfully"));
         else
             $smarty->assign("mb_message",_tr("Error: Trunk was deleted. ").$error);
@@ -668,7 +668,7 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 }
 
 function writeAsteriskFile(&$error,$tech){
-    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals delete "" 2>&1';
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals nothing "" 2>&1';
     $output = $ret = NULL;
     exec($sComando, $output, $ret);
     if ($ret != 0) {
@@ -803,7 +803,7 @@ function createFieldForm($tech)
         $arrFormElements["register"] =  array("LABEL"                 => _tr("Register String"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:400px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => "");
         $arrFormElements["type"] =  array("LABEL"                       => _tr("type"),

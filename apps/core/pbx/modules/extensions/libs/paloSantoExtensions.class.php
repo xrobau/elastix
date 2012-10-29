@@ -154,6 +154,8 @@ class paloSantoExtensions{
 			$arrExtension["ring_timer"]=$result["rt"];
 			$arrExtension["record_in"]=$result["record_in"];
 			$arrExtension["record_out"]=$result["record_out"];
+			$arrExtension["out_clid"]=$result["outboundcid"];
+			
 			//obtenemos las caracteristicas de voicemail de la extension en caso de que este tenga creada uno
 			if(isset($result["voicemail"]) && $result["voicemail"]!="no"){
 				$query="SELECT * from voicemail where mailbox=? and organization_domain=?";
@@ -240,14 +242,42 @@ class paloSantoExtensions{
 				if($astMang==false){
 					$this->errMsg .=$errorM;
 				}else{
-					$arrExtension["clid_name"]=$astMang->database_get("EXTUSER/".$orgTmp["code"]."/".$result["exten"], "cidname");
-					$arrExtension["clid_number"]=$astMang->database_get("EXTUSER/".$orgTmp["code"]."/".$result["exten"], "cidnum");
+                    $familia="EXTUSER/".$orgTmp["code"]."/".$result["exten"];
+					$arrExtension["clid_name"]=$astMang->database_get($familia, "cidname");
+					$arrExtension["clid_number"]=$astMang->database_get($familia, "cidnum");
 					$arrExtension["call_waiting"]=($astMang->database_get("CW/".$orgTmp["code"], $result["exten"])=="ENABLED")?"yes":"no";
-					$arrExtension["screen"]=$astMang->database_get("EXTUSER/".$orgTmp["code"]."/".$result["exten"],"screen");
-					$enDictate=$astMang->database_get("EXTUSER/".$orgTmp["code"]."/".$result["exten"]."/dictate", "enabled");
+					$arrExtension["screen"]=$astMang->database_get($familia,"screen");
+					$enDictate=$astMang->database_get($familia."/dictate", "enabled");
 					$arrExtension["dictate"]=($enDictate=="enabled")?"yes":"no";
-					$arrExtension["dictformat"]=$astMang->database_get("EXTUSER/".$orgTmp["code"]."/".$result["exten"]."/dictate", "format");
-					$arrExtension["dictemail"]=$astMang->database_get("EXTUSER/".$orgTmp["code"]."/".$result["exten"]."/dictate", "email");
+					$arrExtension["dictformat"]=$astMang->database_get($familia."/dictate", "format");
+					$arrExtension["dictemail"]=$astMang->database_get($familia."/dictate", "email");
+					
+					//vmx_locator options
+                    $vmx_unavail=$astMang->database_get("$familia/vmx/unavail", "state");
+                    $vmx_busy=$astMang->database_get("$familia/vmx/busy", "state");
+                    if($vmx_unavail=="enabled" || $vmx_busy=="enabled"){
+                        $arrExtension["vmx_locator"]="enabled";
+                    }else{
+                        $arrExtension["vmx_locator"]="disabled";
+                    }
+                    
+                    if($vmx_unavail=="enabled" && $vmx_busy=="enabled")
+                        $arrExtension["vmx_use"]="both";
+                    else{
+                        if($vmx_unavail=="enabled")
+                            $arrExtension["vmx_use"]="unavailable";
+                        else
+                            $arrExtension["vmx_use"]="busy";
+                    }
+                    
+                    $arrExtension["vmx_extension_0"]=$astMang->database_get($familia."/vmx/0", "ext");
+                    if(isset($arrExtension["vmx_extension_0"]) && $arrExtension["vmx_extension_0"]!=""){
+                        $arrExtension["vmx_operator"]="off";
+                    }else
+                        $arrExtension["vmx_operator"]="on";
+                        
+                    $arrExtension["vmx_extension_1"]=$astMang->database_get($familia."/vmx/1", "ext");
+                    $arrExtension["vmx_extension_2"]=$astMang->database_get($familia."/vmx/2", "ext");
 				}
 			}
 		}
@@ -267,6 +297,10 @@ class paloSantoExtensions{
 			$arrExtension["vmsaycid"]=isset($resultV["saycid"])?$resultV["saycid"]:null;
 			$arrExtension["vmenvelope"]=isset($resultV["envelope"])?$resultV["envelope"]:null;
 		}
+		$arrExtension["vmx_locator"]="disabled";
+		$arrExtension["vmx_use"]="both";
+		$arrExtension["vmx_operator"]="on";
+		
 		$pGPBX = new paloGlobalsPBX($this->_DB,$domain);
 		$arrExtension["ring_timer"]=$pGPBX->getGlobalVar("RINGTIMER");
         $arrExtension["language"]=$pGPBX->getGlobalVar("LANGUAGE");

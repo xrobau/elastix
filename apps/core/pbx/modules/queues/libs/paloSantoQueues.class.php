@@ -823,7 +823,7 @@ class paloQueuePBX extends paloAsteriskDB{
                 $contextQ->errMsg="ext-queues. Error: ".$contextQ->errMsg;
             }else{
                 $contextQ->arrExtensions=$arrQ;
-                $arrFromInt[]="ext-queues";
+                $arrFromInt[]["name"]="ext-queues";
             }
             
             //creamos el contexto from-queue
@@ -862,7 +862,7 @@ class paloQueuePBX extends paloAsteriskDB{
                 $fromQueue2->errMsg="from-queue-exten-internal. Error: ".$fromQueue2->errMsg;
             }else{
                 $fromQueue2->arrExtensions=$fromQueueExtenInt;
-                $fromQueue2->arrInclude=array("from-queue-exten-only",'from-internal');
+                $fromQueue2->arrInclude=array(array("name"=>"from-queue-exten-only","name"=>'from-internal'));
             }
             
              //creamos el contexto from_queue_exten_only

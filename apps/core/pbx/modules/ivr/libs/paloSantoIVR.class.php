@@ -444,9 +444,9 @@ class paloIvrPBX extends paloAsteriskDB{
                     $context->arrExtensions=$arrIvr;
                     if(isset($ivr["directdial"])){
                         if($ivr["directdial"]=="yes")
-                            $context->arrInclude=array("from-did-direct-ivr");
+                            $context->arrInclude=array(array("name"=>"from-did-direct-ivr"));
                     }
-                    $arrFromInt[]="ivr-".$ivr["id"];
+                    $arrFromInt[]["name"]="ivr-".$ivr["id"];
                 }
                 
                 $arrConIvr[]=$context;

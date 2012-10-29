@@ -174,7 +174,7 @@ class paloSantoTrunk extends paloAsteriskDB{
         $arrTrunk["qualify"]="yes";
         $arrTrunk["context"]="from-pstn";
         $arrTrunk["disallow"]="all";
-        $arrTrunk["allow"]="ulaw,alaw,gsm";
+        $arrTrunk["allow"]="ulaw;alaw;gsm";
         $arrTrunk["deny"]="0.0.0.0/0.0.0.0";
         $arrTrunk["permit"]="0.0.0.0/0.0.0.0";
         if($tech=="sip"){
@@ -228,6 +228,13 @@ class paloSantoTrunk extends paloAsteriskDB{
         if(!preg_match("/^(sip|iax2|dahdi)$/",$arrProp["tech"])){
                 $this->errMsg="Invalid tech trunk";
                 return false;
+        }
+        
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $this->errMsg=_tr("You are not authorized to perform this action");
+            return false;
         }
         
         //debe haberse seteado un nombre para la truncal
@@ -427,6 +434,13 @@ class paloSantoTrunk extends paloAsteriskDB{
     }
     
     function updateTrunkPBX($arrProp,$arrDialPattern){
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $this->errMsg=_tr("You are not authorized to perform this action");
+            return false;
+        }
+        
         //verificamos que la truncal exista
         $idTrunk=$arrProp["id_trunk"];
         $query="SELECT tech,channelid from trunk where trunkid=?";
@@ -642,7 +656,7 @@ class paloSantoTrunk extends paloAsteriskDB{
                   if(isset($prepend)){
                     //validamos los campos
                     if(!preg_match("/^[[:digit:]]*$/",$prepend)){
-                        $this->errMsg="Invalid dial pattern";
+                        $this->errMsg .=_tr("Invalid dial pattern").". Prepend '$prepend'";
                         $result=false;
                         break;
                     }
@@ -651,7 +665,7 @@ class paloSantoTrunk extends paloAsteriskDB{
                   
                   if(isset($prefix)){
                     if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$prefix)){
-                        $this->errMsg="Invalid dial pattern";
+                        $this->errMsg .=_tr("Invalid dial pattern").". Prefix '$prefix'";
                         $result=false;
                         break;
                     }
@@ -659,8 +673,8 @@ class paloSantoTrunk extends paloAsteriskDB{
                     $prefix="";
 
                   if(isset($pattern)){
-                    if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$pattern)){
-                        $this->errMsg="Invalid dial pattern";
+                    if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*\.{0,1})+$/",$pattern)){
+                        $this->errMsg .=_tr("Invalid dial pattern").". Match Pattern '$pattern'";
                         $result=false;
                         break;
                     }
@@ -677,9 +691,16 @@ class paloSantoTrunk extends paloAsteriskDB{
         return $result;
      }
     
+     //solo puede borrar la truncal el superadmin
      function deleteTrunk($trunkid){
         if(!preg_match("/^[0-9]+$/",$trunkid)){
             $this->errMsg=_tr("Invalid Trunk. ");
+            return false;
+        }
+        $arrCredentiasls=getUserCredentials();
+        $userLevel1=$arrCredentiasls["userlevel"];
+        if($userLevel1!="superadmin"){
+            $this->errMsg=_tr("You are not authorized to perform this action");
             return false;
         }
         
@@ -710,7 +731,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        $query="DELETE from outbound_route_trunkpriority where trunkid=?";
+        $query="DELETE from outbound_route_trunkpriority where trunk_id=?";
         if($this->_DB->genQuery($query,array($trunkid))==false){
             $this->errMsg .=_tr("Trunk can't be deleted. ").$this->_DB->errMsg;
             return false;
@@ -736,6 +757,5 @@ class paloSantoTrunk extends paloAsteriskDB{
         }else
             return true;
     }
-    
-    
 }
+?>

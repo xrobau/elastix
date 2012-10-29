@@ -7,9 +7,21 @@ $(document).ready(function(){
             $("tr[class='voicemail']").children("td").children().each(function(){
                 $(this).removeAttr("disabled");
             });
+            var option=$("#vmx_locator option:selected").val(); 
+            if(option=="enabled"){
+                $("tr[class='voicemail vm_locator']").children("td").children().each(function(){
+                    $(this).removeAttr("disabled");
+                });
+            }
+            if($("input[name='vmx_operator']").val()=="on"){
+                $("input[name='vmx_extension_0']").attr("disabled","disabled");
+            }
 		}else{
 			$("#create_vm").val("off");
             $("tr[class='voicemail']").children("td").children().each(function(){
+                $(this).attr("disabled","disabled");
+            });
+            $("tr[class='voicemail vm_locator']").children("td").children().each(function(){
                 $(this).attr("disabled","disabled");
             });
 		}
@@ -26,6 +38,28 @@ $(document).ready(function(){
 		}
 		radio('tab-2');
 	});
+    
+    $("#vmx_locator").change(function (){
+        var option=$("#vmx_locator option:selected").val(); 
+        if(option=="enabled"){
+            $("tr[class='voicemail vm_locator']").children("td").children().each(function(){
+                $(this).removeAttr("disabled");
+            });
+        }else{
+            $("tr[class='voicemail vm_locator']").children("td").children().each(function(){
+                $(this).attr("disabled","disabled");
+            });
+        }
+        radio('tab-3');
+    });
+    
+    $("input[name='chkoldvmx_operator']").change(function(){
+        if($("input[name='chkoldvmx_operator']").is(":checked")){
+            $("input[name='vmx_extension_0']").attr("disabled","disabled");
+        }else{
+            $("input[name='vmx_extension_0']").removeAttr("disabled");
+        }
+    });
 });
 
 $(window).load(function () {
@@ -34,15 +68,29 @@ $(window).load(function () {
 
 function enabled_voicemail(){
     $("#create_vm").val("off");
-        $("tr[class='voicemail']").children("td").children().each(function(){
-            $(this).attr("disabled","disabled");
+    $("tr[class='voicemail']").children("td").children().each(function(){
+        $(this).attr("disabled","disabled");
     });
+    $("tr[class='voicemail vm_locator']").children("td").children().each(function(){
+        $(this).attr("disabled","disabled");
+    });
+    
     if($("#create_vm").is(":checked")){
         $("#create_vm").val("yes");
         $("#create_vm").attr("checked","checked");
         $("tr[class='voicemail']").children("td").children().each(function(){
             $(this).removeAttr("disabled");
         });
+        var option=$("#vmx_locator option:selected").val(); 
+        if(option=="enabled"){
+            $("tr[class='voicemail vm_locator']").children("td").children().each(function(){
+                $(this).removeAttr("disabled");
+            });
+        }
+    }
+    
+    if($("input[name='vmx_operator']").val()=="on"){
+        $("input[name='vmx_extension_0']").attr("disabled","disabled");
     }
 }
 

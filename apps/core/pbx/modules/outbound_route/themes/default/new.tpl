@@ -111,27 +111,7 @@
    <div class="tab" style="width:100%">
       <div class="content" id="content_tab-3">
         <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
-            {if $mode eq 'input'}
-                <tr class="extension"><th>{$TRUNKS}</th><th>{$SEQUENCE}</th></tr>
-                <tr class="extension"> 
-                    <td width="50%">
-                        <ul id="sortable1" class="connectedSortable">
-                            <li style="visibility:hidden; padding:0px;"></li>
-                            {foreach from=$arrTrunks key=id item=m}
-                                <li class="ui-state-default" id="{$id}">{$m}<input type="hidden" name="trunk{$id}" id="{$id}" value="{$id}"></li>
-                            {/foreach}  
-                        </ul>
-                    </td>
-                    <td width="50%">
-                        <ul id="sortable2" class="connectedSortable">
-                            <li style="visibility:hidden; padding:0px;"></li>
-                        </ul>
-                    </td> 
-                </tr>
-                <tr>
-                    <td><div><span  class="required">*</span>{$DRAGANDDROP}</div> </td>
-                </tr>
-            {elseif $mode eq 'view'}
+            {if $mode eq 'view'}
                 {foreach from=$trunks key=myId item=i}
                     <input type="hidden" value"{$k++}" />
                     <tr><td align="center">{$k}. {$i} </td>
@@ -151,9 +131,9 @@
                         <td width="50%">
                             <ul id="sortable2" class="connectedSortable">
                                 <li style="visibility:hidden; padding:0px;"></li>
-                                {foreach from=$trunks key=id item=m}
-                                    <li class="ui-state-default" id="{$id}">{$m}<input type="hidden" name="trunk{$id}" id="{$id}" value="{$id}"></li>
-                                {/foreach}  
+                                    {foreach from=$trunks key=id item=m}
+                                        <li class="ui-state-default" id="{$id}">{$m}<input type="hidden" name="trunk{$id}" id="{$id}" value="{$id}"></li>
+                                    {/foreach}  
                             </ul>
                         </td> 
                 </tr>

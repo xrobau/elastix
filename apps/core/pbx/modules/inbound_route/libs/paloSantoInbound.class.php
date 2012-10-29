@@ -335,6 +335,7 @@ class paloSantoInbound extends paloAsteriskDB{
                 return false;
             }
             $where =" and organization_domain=?";
+            $param[]=$domain;
         }
         //verificamos que la ruta exista
         $q="Select id from inbound_route where id=? $where";
@@ -464,8 +465,6 @@ class paloSantoInbound extends paloAsteriskDB{
         $arrOpt[count($arrOpt)]=$idInbound;
         
         $result=$this->executeQuery($query,$arrOpt);
-        print_r($query);
-        print_r($arrOpt);
         if($result==false)
             $this->errMsg=$this->errMsg;
         return $result; 
@@ -605,7 +604,9 @@ class paloSantoInbound extends paloAsteriskDB{
                 $context->errMsg="ext-did. Error: ".$context->errMsg;
             }else{
                 $context->arrExtensions=array(new paloExtensions('foo',new ext_noop('bar'),"1"));
-                $context->arrInclude=array("ext-did-0001",'ext-did-0002');
+                $arrInclude[]=array("name"=>"ext-did-0001");
+                $arrInclude[]=array("name"=>"ext-did-0002");
+                $context->arrInclude=$arrInclude;
                 $arrContext[]=$context;
             }
             return $arrContext;

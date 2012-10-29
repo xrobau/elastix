@@ -170,11 +170,14 @@ class paloSantoASteriskConfig{
 			return false;
 		}else{
 			if($this->includeInExtensions_conf("delete",$orgzDomain)!==false){
-				$arrayFile=array("extensions_$orgzDomain.conf","extensions_additionals_$orgzDomain.conf","extensions_custom_$orgzDomain.conf","extensions_globals_$orgzDomain.conf");
-				foreach($arrayFile as $file){
-                   if(file_exists($path.$file))
-                        unlink($path.$file);
+                $sComando = '/usr/bin/elastix-helper asteriskconfig deleteFileOrgAst '.$orgzDomain.' 2>&1';
+                $output = $ret = NULL;
+                exec($sComando, $output, $ret);
+                if ($ret != 0){
+                    $this->errMsg = implode('', $output);
+                    return false;
                 }
+                
 				$sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
 				$output = $ret = NULL;
 				exec($sComando, $output, $ret);
@@ -250,7 +253,7 @@ class paloSantoASteriskConfig{
 
 		//arreglo que contiene las tablas dentro de ast_realtime que no tienen el campo
         //organization_domian
-		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details","did");
+		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details","musiconhold");
 
 		//obtenemos una lista de las tablas dentro de la base elxpbx
 		$queryShow="show tables from elxpbx";
@@ -321,6 +324,7 @@ class paloSantoASteriskConfig{
 				}
 				$result=$this->_DB->genQuery($queryDel,array($domain));
 				if(!$result){
+                    print_r($queryDel);
 					$this->errMsg=$this->_DB->errMsg;
 					return false;
 				}
@@ -608,6 +612,7 @@ class paloContexto{
 			return false;
 		}
 	}
+	
 
 	//retorna el contexto como un string para se añadido
 	//al plan de marcado, esto es de una contexto especifico
@@ -617,11 +622,16 @@ class paloContexto{
 		$contexto .="include =>".substr($this->name,1,-1)."-custom\n";
 		if(isset($arrInclude)){
 			foreach($arrInclude as $value){
-				if(preg_match("/^[A-Za-z0-9\-_]+$/",$value) || strlen($value)>62){
+				if(preg_match("/^[A-Za-z0-9\-_]+$/",$value["name"]) || strlen($value["name"])>62){
 					if(substr($this->name,0,6)=="macro-")
-						$contexto .="include =>macro-".$this->code."-".substr($value,6)."\n";
+						$contexto .="include =>macro-".$this->code."-".substr($value["name"],6);
 					else
-						$contexto .="include =>".$this->code."-".$value."\n";
+						$contexto .="include =>".$this->code."-".$value["name"];
+                    
+                    if(isset($value["extra"])){
+                        $contexto .=$value["extra"];
+                    }
+                    $contexto .="\n";
 				}else{
 					$this->errMsg=_tr("Context names cannot contain special characters and have a maximum length of 62 characters");
 					return "";

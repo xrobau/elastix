@@ -440,6 +440,16 @@ class paloAsteriskDB {
         }
         return false;
     }
+    
+    function getGlobalVar($variable,$domain){
+        $query="SELECT value from globals where organization_domain=? and variable=?";
+        $result=$this->_DB->getFirstRowQuery($query,false,array($domain,$variable));
+        if($result===false){
+            $this->errMsg=$this->_DB->errMsg;
+            return false;
+        }else
+            return $result[0];
+    }
 }
 
 class paloSip extends paloAsteriskDB {
@@ -1665,8 +1675,6 @@ class paloDevice{
                 $stRecord .="in=on_demand";
                 break;
         }
-			
-		
 
 		$arrSetting["recording"]=$stRecord;
 
@@ -1754,70 +1762,10 @@ class paloDevice{
 		}
 		if(strtoupper($result["Response"]) == "ERROR")
 			$error=true;
-			
-		//VmX Locater
-		$state_unavail=$state_busy="disabled";
-		$ext0=$ext1=$ext2=$context=$vmx_opts_timeout=null;
-		$query="SELECT VMX_CONTEXT,VMX_OPTS_TIMEOUT from globals where organization_domain=?";
-		$arrResult=$this->tecnologia->getFirstResultQuery($query,array($this->domain),true,"Don't exist registers.");
-        if($arrResult!=false){
-            $context=$arrResult["VMX_CONTEXT"];
-            $vmx_opts_timeout=$arrResult["VMX_OPTS_TIMEOUT"];
-        }
-            
-        if($arrProp["voicemail_context"]!="novm"){
-            if(isset($arrProp["vmx_locator"])){
-                $familia="EXTUSER/$code/".$arrS['name'];
-                $pri="1";
-                $arrVMX=array("busy","unavail");
-                if($arrProp["vmx_locator"]=="enabled"){
-                    if(isset($arrProp["vmx_unavailable"])){
-                        if($arrProp["vmx_unavailable"]=="on")
-                            $state_unavail="enabled";
-                    }
-                    
-                    if(isset($arrProp["vmx_busy"])){
-                        if($arrProp["vmx_busy"]=="on")
-                            $state_busy="enabled";
-                    }
-                    
-                    if(!isset($arrProp["vmx_operator"])){
-                        if(isset($arrProp["vmx_extension_0"]))
-                            $ext0=$arrProp["vmx_extension_0"];
-                    }
-                    
-                    if(isset($arrProp["vmx_extension_1"]))
-                        $ext1=$arrProp["vmx_extension_1"];
-                    if(isset($arrProp["vmx_extension_2"]))
-                        $ext2=$arrProp["vmx_extension_2"];
-                    
-                    foreach($arrVMX as $item){
-                        $astMang->database_put("EXTUSER/$code/vmx/$item/","state",${"state_".$item});
-                        $astMang->database_put("EXTUSER/$code/vmx/$item/vmxopts","timeout",$vmx_opts_timeout);
-                        //se setean las extensiones
-                        for($i=0;$i<3;$i++){
-                            if(!is_null(${"ext".$i})){
-                                $astMang->database_put("EXTUSER/$code/vmx/$item/$i","ext",${"ext".$i});
-                                $astMang->database_put("EXTUSER/$code/vmx/$item/$i","context",$context);
-                                $astMang->database_put("EXTUSER/$code/vmx/$item/$i","context",$pri);
-                            }
-                        }
-                    }
-                }else{
-                    if(!isset($arrProp["vmx_operator"]) && isset($arrProp["vmx_extension_0"])){
-                        foreach($arrVMX as $item){
-                            $astMang->database_put("EXTUSER/$code/vmx/$item","state","bloked");
-                            $astMang->database_put("EXTUSER/$code/vmx/$item/0","ext",$arrProp["vmx_extension_0"]);
-                            $astMang->database_put("EXTUSER/$code/vmx/$item/0","context",$context);
-                            $astMang->database_put("EXTUSER/$code/vmx/$item/0","context",$pri);
-                        }
-                    }else
-                        $result=$astMang->database_delTree("EXTUSER/".$this->code."/vmx");
-                }
-            }
-        }else
-            $result=$astMang->database_delTree("EXTUSER/".$this->code."/vmx");
-
+        
+        //VmX Locater
+        $this->setVmxVoicemailAstDB($arrProp);
+        
 		//si hubo algun error eliminar los datos que fueron insertados antes del error
 		if($error){
 			$this->errMsg = _tr("Couldn't be inserted data in ASTDB");
@@ -1827,6 +1775,77 @@ class paloDevice{
 			return false;
 		}else
 			return true;
+	}
+	
+	private function setVmxVoicemailAstDB($arrProp){
+        //VmX Locater
+        $state_unavail=$state_busy="disabled";
+        $ext0=$ext1=$ext2=$context=$vmx_opts_timeout=null;
+        $context=$this->tecnologia->getGlobalVar("VMX_CONTEXT",$this->domain);
+        $vmx_opts_timeout=$this->tecnologia->getGlobalVar("VMX_OPTS_TIMEOUT",$this->domain);
+        $context=($context==false)?"":$context;
+        $vmx_opts_timeout=($vmx_opts_timeout==false)?"":$vmx_opts_timeout;
+        
+        $familia="EXTUSER/".$this->code."/".$arrProp['name']."/vmx";
+        $pri="1";
+        
+        $astMang=AsteriskManagerConnect($errorM);
+        if($astMang==false){
+            $this->errMsg=$errorM;
+            return false;
+        }
+        //extensiones que marcar
+        if(isset($arrProp["vmx_operator"])){
+            if($arrProp["vmx_operator"]=="off"){
+                if(isset($arrProp["vmx_extension_0"]))
+                    $ext0=$arrProp["vmx_extension_0"];
+            }
+        }
+        if(isset($arrProp["vmx_extension_1"]))
+            $ext1=$arrProp["vmx_extension_1"];
+        if(isset($arrProp["vmx_extension_2"]))
+            $ext2=$arrProp["vmx_extension_2"];
+        
+        for($i=0;$i<3;$i++){
+            if(!is_null(${"ext".$i}) && ${"ext".$i}!=""){
+                $astMang->database_put("$familia/$i","ext",${"ext".$i});
+                $astMang->database_put("$familia/$i","context",$context);
+                $astMang->database_put("$familia/$i","pri",$pri);
+            }else{
+                $astMang->database_del("$familia/$i","ext");
+                $astMang->database_del("$familia/$i","context");
+                $astMang->database_del("$familia/$i","pri");
+            }
+        }
+         
+        if(isset($arrProp["vmx_locator"])){
+            if($arrProp["vmx_locator"]=="enabled"){
+                if(isset($arrProp["vmx_use"])){
+                    if($arrProp["vmx_use"]=="both"){
+                        $state_unavail="enabled";
+                        $state_busy="enabled";
+                    }else{
+                        if($arrProp["vmx_use"]=="unavailable"){
+                            $state_unavail="enabled";
+                        }
+                        if($arrProp["vmx_use"]=="busy"){
+                            $state_busy="enabled";
+                        }
+                    }
+                }
+            }
+        }
+                    
+        if($arrProp["voicemail_context"]=="novm"){
+            $state_unavail="bloked";
+            $state_busy="bloked";
+        }
+        
+        $astMang->database_put("$familia/unavail","state",$state_unavail);
+        $astMang->database_put("$familia/unavail/vmxopts","timeout",$vmx_opts_timeout);
+        
+        $astMang->database_put("$familia/busy","state",$state_busy);
+        $astMang->database_put("$familia/busy/vmxopts","timeout",$vmx_opts_timeout);
 	}
 
 	function editDevice($arrProp){
@@ -2369,7 +2388,7 @@ class paloDevice{
 			$contextoLocal->errMsg="ext-local. Error: ".$contextoLocal->errMsg;
 		}else{
 			$contextoLocal->arrExtensions=$arrExtensionLocal;
-			$arrFromInt[]="ext-local";//se hace la inclusion del contexto creado en el arreglo de from internal additional
+			$arrFromInt[]["name"]="ext-local";//se hace la inclusion del contexto creado en el arreglo de from internal additional
 											   //de la organizacion
 		}
 
@@ -2423,421 +2442,11 @@ class paloDevice{
 			$contextoFax->errMsg="ext-fax. Error: ".$contextoFax->errMsg;
 		}else{
 			$contextoFax->arrExtensions=$arrExtensionFax;
-			$arrFromInt[]="ext-fax";//se hace la inclusion del contexto creado en el arreglo de from internal additional
-											   //de la organizacion
+			$arrFromInt[]["name"]="ext-fax";//se hace la inclusion del contexto creado en el arreglo de from internal additional				   //de la organizacion
 		}
 
 		$arrContext=array($contextoFax);
 		return $arrContext; 
 	}
-}
-
-class paloOutboundPBX extends paloAsteriskDB{
-	public $type;
-	protected $domain;
-	protected $code;
-	public $_DB;
-	public $errMsg;
-
-	function paloOutboundPBX($domain,&$pDB2){
-		if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-			$this->errMsg="Invalid domain format";
-		}else{
-			$this->domain=$domain;
-
-			parent::__construct($pDB2);
-
-			$result=$this->getCodeByDomain($domain);
-			if($result==false){
-				$this->errMsg .=_tr("Can't create a new instace of paloOutboundPBX").$this->errMsg;
-			}else{
-				$this->code=$result["code"];
-			}
-		}
-	}
-
-	function createNewOutbound($arrProp,$arrDialPattern,$arrTrunkPriority){
-		$query="INSERT INTO outbound_route (";
-		$arrOpt=array();
-
-		//definimos el tipo de truncal que vamos a crear
-				
-		//debe haberse seteado un nombre
-		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
-			$this->errMsg="Name of outbound can't be empty";
-		}else{
-			$val = $this->checkName($arrProp['domain'],$arrProp['routename']);
-		        if($val==1)
-			   $this->errMsg="Route Name is already used by another Outbound Route"; 
-			else{
-			   $query .="routename,";
-			   $arrOpt[0]=$arrProp["routename"];
-			}
-		}
-
-		//si se define un callerid 
-		if(isset($arrProp["outcid"])){
-			$query .="outcid,";
-			$arrOpt[count($arrOpt)]=$arrProp["outcid"];
-		}
-
-		if(isset($arrProp["outcid_mode"])){
-			$query .="outcid_mode,";
-			$arrOpt[count($arrOpt)]=$arrProp["outcid_mode"];
-		}
-	  
-		//si se define un password
-		if(isset($arrProp["routepass"])){
-			$query .="routepass,";
-			$arrOpt[count($arrOpt)]=$arrProp["routepass"];
-		}
-
-		
-		if(isset($arrProp["mohsilence"])){
-			$query .="mohsilence,";
-			$arrOpt[count($arrOpt)]=$arrProp["mohsilence"];
-		}
-
-		if(isset($arrProp["time_group_id"])){
-			$query .="time_group_id,";
-			$arrOpt[count($arrOpt)]=$arrProp["time_group_id"];
-		}
-
-		if(!isset($arrProp["domain"]) || $arrProp["domain"]==""){
-			$this->errMsg="It's necesary you create a new organization so you can create an Outbound to this organization";
-		}else{
-			$query .="organization_domain";
-			$arrOpt[count($arrOpt)]=$arrProp["domain"];
-		}
-
-		//caller id options
-		
-		
-		$query .=")";
-		$qmarks = "(";
-		for($i=0;$i<count($arrOpt);$i++){
-			$qmarks .="?,"; 
-		}
-		$qmarks=substr($qmarks,0,-1).")"; 
-		$query = $query." values".$qmarks;
-		if($this->errMsg==""){
-			$exito=$this->createOutbound($query,$arrOpt,$arrProp);
-			
-		}else{
-			return false;
-		}
-
-		if($exito==true){
-			//si ahi dialpatterns se los procesa
-			    $result = $this->getFirstResultQuery("SELECT LAST_INSERT_ID()",NULL);//{
-			
-			    $outboundid=$result[0];
-			   
-			    if($this->createDialPattern($arrDialPattern,$outboundid)==false){
-				    $this->errMsg="Outbound can't be created .".$this->errMsg;
-				    return false;
-			    }elseif($this->createTrunkPriority($arrTrunkPriority,$outboundid,$arrProp["domain"])==false){
-				    $this->errMsg="Outbound can't be created .".$this->errMsg;
-				    return false;
-			    }else
-				    return true;
-			//}
-		}else
-			return false;
-
-	}
-
-	private function createOutbound($query,$arrOpt,$arrProp){
-		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
-			$this->errMsg="Outbound can't be created. Route Name can't be empty";
-			return false;
-		}
-		$result=$this->executeQuery($query,$arrOpt);
-		
-		
-		if($result==false)
-			$this->errMsg=$this->errMsg;
-		return $result; 
-
-		//validamos que no existe otros peers con el mismo nombre de truncal
-		
-	}
-
-	function updateOutboundPBX($arrProp,$arrDialPattern,$idOutbound,$arrTrunkPriority){
-		$query="UPDATE outbound_route SET ";
-		$arrOpt=array();
-
-		//definimos el tipo de truncal que vamos a crear
-				
-		//debe haberse seteado un nombre
-		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
-			$this->errMsg="Name of outbound can't be empty";
-		}else{
-			$val = $this->checkName($arrProp['domain'],$arrProp['routename'],$idOutbound);
-		        if($val==1)
-			   $this->errMsg="Route Name is already used"; 
-			else{
-			    $query .="routename=?,";
-			    $arrOpt[0]=$arrProp["routename"];
-			}
-		}
-
-		//si se define un callerid 
-		if(isset($arrProp["outcid"])){
-			$query .="outcid=?,";
-			$arrOpt[count($arrOpt)]=$arrProp["outcid"];
-		}
-      
-		if(isset($arrProp["outcid_mode"])){
-			$query .="outcid_mode=?,";
-			$arrOpt[count($arrOpt)]=$arrProp["outcid_mode"];
-		}
-	  
-		//si se define un password
-		if(isset($arrProp["routepass"])){
-			$query .="routepass=?,";
-			$arrOpt[count($arrOpt)]=$arrProp["routepass"];
-		}
-
-		
-		if(isset($arrProp["mohsilence"])){
-			$query .="mohsilence=?,";
-			$arrOpt[count($arrOpt)]=$arrProp["mohsilence"];
-		}
-
-		if(isset($arrProp["time_group_id"])){
-			$query .="time_group_id=?,";
-			$arrOpt[count($arrOpt)]=$arrProp["time_group_id"];
-		}
-
-		if(!isset($arrProp["domain"]) || $arrProp["domain"]==""){
-			$this->errMsg="It's necesary you create a new organization so you can create an Outbound to this organization";
-		}else{
-			$query .="organization_domain=?";
-			$arrOpt[count($arrOpt)]=$arrProp["domain"];
-		}
-		//caller id options
-				
-		$query = $query." WHERE id=?";
-	        $arrOpt[count($arrOpt)]=$idOutbound;
-		if($this->errMsg==""){
-			$exito=$this->updateOutbound($query,$arrOpt,$arrProp);
-		}else{
-			return false;
-		}
-
-		if($exito==true){
-			//si ahi dialpatterns se los procesa
-			    $resultDelete = $this->deleteDialPatterns($idOutbound);
-			    $resultDeleteTrunks = $this->deleteTrunks($idOutbound);
-			    if(($resultDelete==false)||($this->createDialPattern($arrDialPattern,$idOutbound)==false)||($resultDeleteTrunks==false)){
- 				    $this->errMsg="Outbound can't be updated.".$this->errMsg;
-				    return false;
-			    }elseif($this->createTrunkPriority($arrTrunkPriority,$idOutbound,$arrProp["domain"])==false){
-				    $this->errMsg="Outbound can't be updated .".$this->errMsg;
-				    return false;
-			    }else
-				    return true;
-			//}
-		}else
-			return false;
-
-	}
-
-	private function updateOutbound($query,$arrOpt,$arrProp){
-		if(!isset($arrProp["routename"]) || $arrProp["routename"]==""){
-			$this->errMsg="Outbound can't be created. Outbound Name can't be empty";
-			return false;
-		}
-		$result=$this->executeQuery($query,$arrOpt);
-		
-		
-		if($result==false)
-			$this->errMsg=$this->errMsg;
-		return $result; 
-
-		//validamos que no existe otros peers con el mismo nombre de truncal
-		
-	}
-
-	private function createDialPattern($arrDialPattern,$outboundid)
-	{
-		$result=true;
-		$seq = 0;
-		if(is_array($arrDialPattern) && count($arrDialPattern)!=0){
-			$temp=$arrDialPattern;
-			$arrPattern= array();
-			$query="INSERT INTO outbound_route_dialpattern (outbound_route_id,prepend,prefix,match_pattern,match_cid,seq) values (?,?,?,?,?,?)";
-			foreach($arrDialPattern as $pattern){ 
-			      $cid = getParameter("match_cid".$pattern);
-			      $prepend = getParameter("prepend_digit".$pattern);
-			      $prefix = getParameter("pattern_prefix".$pattern);
-			      $pattern = getParameter("pattern_pass".$pattern);
-			      $seq++;
-				
-			      $arrPattern=array($prepend,$prefix,$pattern,$cid,$outboundid);
-
-			      //Verificamos que no se haya guardado un dial pattern igual
-			      if($this-> checkDuplicateDialPattern($arrPattern)===true)
-			      {
-				if(isset($prepend)){
-					  //validamos los campos
-					  if(!preg_match("/^[[:digit:]]*$/",$prepend)){
-						  $this->errMsg="Invalid dial pattern";
-						  $result=false;
-						  break;
-					  }
-				}else
-					  $prepend="";
-				
-				if(isset($prefix)){
-					  if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$prefix)){
-						  $this->errMsg="Invalid dial pattern";
-						  $result=false;
-						  break;
-					  }
-				}else
-					  $prefix="";
-
-				if(isset($pattern)){
-					  if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*)+$/",$pattern)){
-						  $this->errMsg="Invalid dial pattern";
-						  $result=false;
-						  break;
-					  }
-				}else
-					  $pattern="";
-				  
-
-				if($prepend!="" || $prefix!="" || $pattern!="")
-				  $result=$this->executeQuery($query,array($outboundid,$prepend,$prefix,$pattern,$cid,$seq));
-			      
-				if($result==false)
-				    break;
-			    }
-			}
-		}
-		return $result;
-	}
-
-	//Trunk Priority
-	private function createTrunkPriority($arrTrunkPriority,$outboundid,$domain)
-	{
-		$result=true;
-		$seq = 0;
-		
-		/*$trunks=array();
-		$query=$query="SELECT tr.trunkid from trunk as tr join trunk_organization as tor on tr.trunkid=tor.trunkid where organization_domain=?";
-		$result=$this->_DB->fetchTable($query,true,array($domain));
-        if($result===false){
-            $this->errMsg=$this->_DB->errMsg;
-            return false;
-        }else{
-            foreach($result as $value){
-                $trunks[$value['trunkid']]=$value['trunkid'];
-            }
-            return $trunks;
-        }*/
-        
-		if(is_array($arrTrunkPriority) && count($arrTrunkPriority)!=0){
-			$temp=$arrTrunkPriority;
-			$arrPattern= array();
-			$query="INSERT INTO outbound_route_trunkpriority (outbound_route_id,trunk_id,seq) values (?,?,?)";
-			foreach($arrTrunkPriority as $trunk){ 
-                $trunk = getParameter("trunk".$trunk);
-                $seq++;
-                //if(in_array($trunk,$trunks)){
-                    $result=$this->executeQuery($query, array($outboundid,$trunk,$seq));
-                    if($result==false){
-                        $this->errMsg="Error setting trunk sequence";
-                        return false;
-                    }
-                //}
-			}
-		}else{
-		    $this->errMsg="At least one trunk must be selected";
-		    $result=false;
-		}
-		return $result;
-	}
-
-
-
-	private function checkDuplicateDialPattern($arr){
-		$query="SELECT * from outbound_route_dialpattern WHERE prepend=? AND prefix=? AND match_pattern=? AND match_cid=? AND outbound_route_id=?";
-		$result=$this->_DB->fetchTable($query,true,$arr);
-		if(sizeof($result)==0)	
-		    return true;
-		else
-		    return false;
-	}
-
-	function checkName($domain,$routename,$id_outbound=null){
-		  $where="";
-		  if(!isset($id_outbound))
-		      $id_outbound = "";
-		  
-                  $arrParam=null;
-		  if(isset($domain)){
-			  if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-				  $this->errMsg="Invalid domain format";
-				  return false;
-			  }else{
-				  $where="where organization_domain=? AND id<>? AND routename=? ";
-				  $arrParam=array($domain,$id_outbound,$routename);
-			  }
-		  }
-		  
-		  $query="SELECT routename from outbound_route $where";
-		  
-		  $result=$this->_DB->fetchTable($query,true,$arrParam);
-		  if($result===false){
-			  $this->errMsg=$this->_DB->errMsg;
-			  return false;
-		  }else{
-			 if ($result==null)
-			     return 0;
-			 else
-			     return 1;
-			}
-	}
-
-	private function deleteDialPatterns($outboundId){
-        $queryD="DELETE from outbound_route_dialpattern where outbound_route_id=?";
-        $result=$this->_DB->genQuery($queryD,array($outboundId));
-        if($result==false){
-            $this->errMsg=_tr("Error Deleting Outbound dialpatterns.").$this->_DB->errMsg;
-            return false;
-        }else
-            return true;
-		      
-	}
-	
-	private function deleteTrunks($outboundId){
-        $queryD="DELETE from outbound_route_trunkpriority where outbound_route_id=?";
-        $result=$this->_DB->genQuery($queryD,array($outboundId));
-        if($result==false){
-            $this->errMsg=_tr("Error Deleting Outbound trunkspriority.").$this->_DB->errMsg;
-            return false;
-        }else
-            return true;
-	}
-
-	function deleteOutbound($outboundId){
-		$resultDeleteTrunks = $this->deleteTrunks($outboundId);
-		$resultDelete = $this->deleteDialPatterns($outboundId);
-		if(($resultDelete==true)&&($resultDeleteTrunks==true)){
-        $query="DELETE from outbound_route where id=?";
-        if($this->executeQuery($query,array($outboundId))){
-            return true;
-        }else{
-            $this->errMsg="Outbound can't be deleted.".$this->errMsg;
-            return false;
-        }
-		}else{
-            $this->errMsg="Outbound can't be deleted.".$this->errMsg;
-            return false;
-        }     
-	}	
 }
 ?>

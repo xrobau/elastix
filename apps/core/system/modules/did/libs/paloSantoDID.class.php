@@ -287,10 +287,16 @@ class paloDidPBX extends paloAsteriskDB{
         return true;
     }
     
+    //no se debe eliminar un did que ha sido asignado a una organizacion
     function deleteDID($idDID){
         $did=$this->getDID_id($idDID);
         if($did==false){
             $this->errMsg .=_tr("DID doesn't exist");
+            return false;
+        }
+        
+        if(!empty($did["organization_domain"])){
+            $this->errMsg .=_tr("DID couldn't be deleted")." "._tr("This DID have been assigned to a organization");
             return false;
         }
         

@@ -9,7 +9,7 @@
                 <input class="button" type="submit" name="save_edit" value="{$APPLY_CHANGES}" >
             {elseif $mode eq 'view'}
                 <input class="button" type="submit" name="edit" value="{$EDIT}">
-                <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
+                <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return validateSubmit()">
             {/if}
           {/if}
 		  <input class="button" type="submit" name="cancel" value="{$CANCEL}"></td>

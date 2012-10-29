@@ -28,6 +28,28 @@ $(document).ready(function(){
     });
 });
 
+function validateSubmit(){
+    var message = "";
+    var arrAction = new Array();
+    arrAction["menu"]="organization";
+    arrAction["action"]="validate_delete";
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error!=""){
+                alert(error);
+                return false;
+            }else{
+                message=arrData;
+            }
+    });
+    var agree=confirm(message);
+    if (agree)
+        return true ;
+    else
+        return false ;
+}
+
 function select_country()
 {
     var country=$("#country").find('option:selected').val();

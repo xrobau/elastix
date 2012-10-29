@@ -98,6 +98,9 @@ function _moduleContent(&$smarty, $module_name)
         case "get_country_code":
             $content=get_country_code();
             break;
+        case "validate_delete":
+            $content = validate_delete($pDB,$userLevel1, $userAccount, $idOrganization);
+            break;
         default: // report
             $content = reportDID($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
@@ -557,6 +560,27 @@ function get_country_code(){
     return $jsonObject->createJSON();
 }
 
+function validate_delete($pDB,$userLevel1, $userAccount, $idOrganization){
+    $jsonObject = new PaloSantoJSON();
+    if($userLevel1!="superadmin"){
+        $jsonObject->error(_tr("You are not authorized to perform this action"));
+    }else{
+        $id_did=getParameter("id_did");
+        $pDB="Select did, organization_domain from did where id_did=?";
+        $result=$pDB->getFirstRowQuery($query,true,array($id_did));
+        if($arrSettings==false){
+            $jsonObject->error(_tr("Did doesn't exist"));
+        }else{
+            $message="";
+            if(!is_null($result["organization_domain"])){
+                $message="DID ".$result["did"]._tr("<b>is assigned</b> to the organzanization with domain <b>")._tr($result["organization_domain"])."</b>";
+            }
+            $jsonObject->set_message($message._tr("Are you sure you wish to continue?"));
+        }
+    }
+    return $jsonObject->createJSON();
+}
+
 function createFieldForm($arrChannel){
     $arrCountry = array(_tr("Select a country").' --');
     $arrCountry = array_merge($arrCountry,getCountry());
@@ -565,8 +589,8 @@ function createFieldForm($arrChannel){
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^[0-9]+$"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
                              "type"   => array("LABEL"                => _tr("Type"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
@@ -640,6 +664,8 @@ function getAction()
         return "view_edit";
     else if(getParameter("action")=="get_country_code")
         return "get_country_code";
+    else if(getParameter("action")=="validate_delete")
+        return "validate_delete";
     else
         return "report"; //cancel
 }

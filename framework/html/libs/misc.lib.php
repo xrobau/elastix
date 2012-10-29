@@ -1301,6 +1301,19 @@ function getUserCredentials(){
 	return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1);
 }
 
+function getOrgDomainUser(){
+    global $arrConf;
+    $credentials=getUserCredentials();
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $query="SELECT domain from organization where id=?";
+    $result=$pDB->getFirstRowQuery($query,false,array($credentials["id_organization"]));
+    if($result==false){
+        return false;
+    }else{
+        return $result[0];
+    }
+}
+
 /**
     Funcion que devuelve un arreglo que contiene una lista de paises
     @return array(country_name=>country_name,country_name=>country_name,...)

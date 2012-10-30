@@ -86,7 +86,6 @@ $arrLangModule = array(
 "This campaign have calls done"=>"Esta campaña tiene llamada realizadas",
 "Delete Error"=>"Error al eliminar",
 "Error when deleting the Campaign" => "Error when deleting the Campaign",
-"This campaign have calls done"=>"This campaign have calls done",
 "There aren't form selected"=>"No hay formularios seleccionados",
 "Are you sure you wish to delete campaign?"=>"¿Est&aacute; seguro que desea eliminar la campaña?",
 "Error when desactivating the Campaign" => "Error al desactivar la campaña",

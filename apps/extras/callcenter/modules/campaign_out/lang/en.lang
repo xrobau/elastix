@@ -86,7 +86,6 @@ $arrLangModule=array(
 "This campaign have calls done"=>"This campaign have calls done",
 "Delete Error"=>"Delete Error",
 "Error when deleting the Campaign" => "Error when deleting the Campaign",
-"This campaign have calls done"=>"This campaign have calls done",
 "There aren't form selected"=>"There aren't form selected",
 "To rapair is necesary delete agent from configuration file. Do you want to continue?"=>"To rapair is necesary delete agent from configuration file. Do you want to continue?",
 "To rapair is necesary add an agent in configuration file. Do you want to continue?"=>"To rapair is necesary add an agent in configuration file. Do you want to continue?",

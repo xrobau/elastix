@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Tue Oct 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign In,Campaign Out: lift restriction on removing campaigns with 
+  connected calls. Users really do need to remove campaigns even after calls 
+  have been made.
 - FIXED: Agent Console: fix scenario in which an agent that opens several 
   instances of the agent console under the same session will find that the pause
   duration increases by the pause multiplied by the number of consoles.

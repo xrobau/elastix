@@ -1,3 +1,6 @@
+* Agent Console: fix scenario in which an agent that opens several instances of
+  the agent console under the same session will find that the pause duration
+  increases by the pause multiplied by the number of consoles. 
 * Dialer: add a method to detect that the Asterisk server process has been 
   restarted. This fixes the scenario where Asterisk crashes/restarts and the
   dialer is stuck with stale agent/call status until restarted.

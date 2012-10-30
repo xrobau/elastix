@@ -472,6 +472,9 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
             } elseif ($bDoCreate && !in_array($_POST['encoding'], mb_list_encodings())) {
                 $smarty->assign("mb_title", _tr('Validation Error'));
                 $smarty->assign("mb_message", _tr('Invalid character encoding'));
+            } elseif ($bDoCreate && empty($_FILES['phonefile']['tmp_name'])) {
+                $smarty->assign("mb_title", _tr('Validation Error'));
+                $smarty->assign("mb_message", _tr('Call file not specified or failed to be uploaded'));
             } else {
                 $time_ini = $_POST['hora_ini_HH'].":".$_POST['hora_ini_MM'];
                 $time_fin = $_POST['hora_fin_HH'].":".$_POST['hora_fin_MM'];
@@ -540,7 +543,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                         }
                         
                         // Para creación, se introduce lista de valores CSV
-                        if ($bExito && $bDoCreate) {
+                        if ($bExito && !empty($_FILES['phonefile']['tmp_name'])) {
                             // Se puede tardar mucho tiempo en la inserción
                             ini_set('max_execution_time', 3600);
                             $sEncoding = $_POST['encoding'];

@@ -162,5 +162,7 @@ $arrLangModule = array(
 'CP866'         =>  'CP866 - Alfabeto cirílico',
 'KOI8-R'        =>  'KOI8-R - Ruso',
 'ArmSCII-8'     =>  'ArmSCII-8 - Armenio',
+
+'Call file not specified or failed to be uploaded' => 'Archivo de llamadas no especificado o falló la transferencia',
 );
 ?>

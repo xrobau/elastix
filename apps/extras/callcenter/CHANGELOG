@@ -1,3 +1,5 @@
+* Campaign Out: Campaign modification now allows upload of call file, which will
+  be appended to the call list already present.
 * Campaign In,Campaign Out: lift restriction on removing campaigns with 
   connected calls. Users really do need to remove campaigns even after calls 
   have been made.

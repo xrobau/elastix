@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Tue Oct 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: Campaign modification now allows upload of call file,
+  which will be appended to the call list already present.
 - CHANGED: Campaign In,Campaign Out: lift restriction on removing campaigns with 
   connected calls. Users really do need to remove campaigns even after calls 
   have been made.

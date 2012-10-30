@@ -163,5 +163,7 @@ $arrLangModule=array(
 'CP866'         =>  'CP866 - Cyrillic alphabet',
 'KOI8-R'        =>  'KOI8-R - Russian',
 'ArmSCII-8'     =>  'ArmSCII-8 - Armenian',
+
+'Call file not specified or failed to be uploaded' => 'Call file not specified or failed to be uploaded',
 );
 ?>

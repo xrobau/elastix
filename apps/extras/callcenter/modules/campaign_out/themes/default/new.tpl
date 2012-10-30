@@ -137,16 +137,14 @@ var rte_script = new richTextEditor('rte_script');
 	    <td align='right'>{$reintentos.LABEL}: <span  class="required">*</span></td>
 	    <td  colspan='4'>{$reintentos.INPUT}</td>
       </tr>
-      {if $mode eq 'input'}
       <tr>
-    	<td align='right'>{$LABEL_CALL_FILE}: <span  class="required">*</span></td>
+    	<td align='right'>{$LABEL_CALL_FILE}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
     	<td  colspan='4'><input type='file' name='phonefile' /></td>
       </tr>
       <tr>
-        <td align='right'>{$encoding.LABEL}: <span  class="required">*</span></td>
+        <td align='right'>{$encoding.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
         <td  colspan='4'>{$encoding.INPUT}</td>
       </tr>
-      {/if}
       <tr>
         <td align='right' valign='top'>{$script.LABEL}: <span  class="required">*</span></td>
         <td  colspan='2'> 

@@ -433,41 +433,24 @@ SQL_CAMPANIAS;
 
     function delete_campaign($id_campaign) 
     {
-    	$tupla =& $this->_DB->getFirstRowQuery(
-            'SELECT COUNT(id) llamadas_realizadas FROM call_entry WHERE id_campaign = ?',
-            true, array($id_campaign));
-        if (!is_array($tupla)) {
-            $this->errMsg = $this->_DB->errMsg;
-            return FALSE;
-        }
-        if ($tupla['llamadas_realizadas'] > 0) {
-            $this->errMsg = _tr('This campaign has already received calls');
-        	return FALSE;
-        }
         $listaSQL = array(
             // TODO: si se implementan contactos por campaña, meter SQL aquí
             'DELETE FROM campaign_form_entry WHERE id_campaign = ?',
+            'DELETE FROM form_data_recolected_entry WHERE id_call_entry IN (SELECT id from call_entry WHERE id_campaign = ?)',
+            'DELETE FROM call_entry WHERE id_campaign = ?',
             'DELETE FROM campaign_entry WHERE id = ?'
         );
         
-        // Inicio de transacción
-        $r = $this->_DB->genQuery('SET AUTOCOMMIT=0');
-        if (!$r) {
-        	$this->errMsg = $this->_DB->errMsg;
-            return FALSE;
-        }
+        $this->_DB->beginTransaction();
         foreach ($listaSQL as $sql) {
             $r = $this->_DB->genQuery($sql, array($id_campaign));
             if (!$r) {
-            	$this->errMsg = $this->_DB->errMsg;
-                $this->_DB->genQuery('ROLLBACK');
-                $this->_DB->genQuery('SET AUTOCOMMIT=1');
+                $this->errMsg = $this->_DB->errMsg;
+                $this->_DB->rollBack();
                 return FALSE;
             }
         }
-        // Fin de transacción
-        $this->_DB->genQuery('COMMIT');
-        $this->_DB->genQuery('SET AUTOCOMMIT=1');        
+        $this->_DB->commit();
         return TRUE;
     }
 

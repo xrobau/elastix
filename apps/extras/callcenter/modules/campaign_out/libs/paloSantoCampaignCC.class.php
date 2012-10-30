@@ -647,58 +647,25 @@ class paloSantoCampaignCC
 
     function delete_campaign($idCampaign)
     {
-        $sQuery = "SELECT count(id) llamadas_realizadas FROM calls WHERE id_campaign=$idCampaign and status is not null";
-//echo "query = $sQuery<br>";
-        $result =& $this->_DB->getFirstRowQuery($sQuery, true);
-//print_r($result); echo "<br>";
-        $valido = false;
-        if (is_array($result) && count($result)>0) {
-            if ($result["llamadas_realizadas"] == 0) {
-                $result = $this->_DB->genQuery("SET AUTOCOMMIT=0");
-                if ($result) {
-                    $sql = "DELETE FROM campaign_form WHERE id_campaign=$idCampaign";
-                    $result = $this->_DB->genQuery($sql);
-                    if (!$result) {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->genQuery("ROLLBACK");
-                        $this->_DB->genQuery("SET AUTOCOMMIT=1");
-                        return false;
-                    }
-                    $sql = "DELETE FROM call_attribute WHERE id_call in (select id from calls where id_campaign=$idCampaign)";
-                    $result = $this->_DB->genQuery($sql);
-                    if (!$result) {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->genQuery("ROLLBACK");
-                        $this->_DB->genQuery("SET AUTOCOMMIT=1");
-                        return false;
-                    }
-                    $sql = "DELETE FROM calls WHERE id_campaign=$idCampaign";
-                    $result = $this->_DB->genQuery($sql);
-                    if (!$result) {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->genQuery("ROLLBACK");
-                        $this->_DB->genQuery("SET AUTOCOMMIT=1");
-                        return false;
-                    }
+        $listaSQL = array(
+            'DELETE FROM campaign_form WHERE id_campaign = ?',
+            'DELETE FROM call_attribute WHERE id_call IN (SELECT id from calls WHERE id_campaign = ?)',
+            'DELETE FROM form_data_recolected WHERE id_calls IN (SELECT id from calls WHERE id_campaign = ?)',
+            'DELETE FROM calls WHERE id_campaign = ?',
+            'DELETE FROM campaign WHERE id = ?',
+        );
 
-                    $sql = "DELETE FROM campaign WHERE id=$idCampaign";
-                    $result = $this->_DB->genQuery($sql);
-                    if (!$result) {
-                        $this->errMsg = $this->_DB->errMsg;
-                        $this->_DB->genQuery("ROLLBACK");
-                        $this->_DB->genQuery("SET AUTOCOMMIT=1");
-                        return false;
-                    }
-                    $this->_DB->genQuery("COMMIT");
-                    $result = $this->_DB->genQuery("SET AUTOCOMMIT=1");
-                    $valido = true;
-                }
-            } else {
-                $valido = true;
-                $this->errMsg = _tr("This campaign have calls done");
+    	$this->_DB->beginTransaction();
+        foreach ($listaSQL as $sql) {
+        	$r = $this->_DB->genQuery($sql, array($idCampaign));
+            if (!$r) {
+            	$this->errMsg = $this->_DB->errMsg;
+                $this->_DB->rollBack();
+                return FALSE;
             }
         }
-        return $valido;
+        $this->_DB->commit();
+        return TRUE;
     }
 
 /********************************************

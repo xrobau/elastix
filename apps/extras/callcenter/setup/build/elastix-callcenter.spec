@@ -100,6 +100,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Oct 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix scenario in which an agent that opens several 
+  instances of the agent console under the same session will find that the pause
+  duration increases by the pause multiplied by the number of consoles.
+
 * Wed Oct 24 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Switch ownership of all files to root, except for the directory
   /opt/elastix/dialer where logs are written.

@@ -1183,8 +1183,10 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
                         $respuestaEventos['break'] = construirRespuesta_breakexit();
                     }
                     @session_start();
-                    $_SESSION['callcenter']['break_acumulado'] += $evento['pause_duration'];
-                    $_SESSION['callcenter']['break_iniciado'] = NULL;
+                    if (!is_null($_SESSION['callcenter']['break_iniciado'])) {
+                        $_SESSION['callcenter']['break_acumulado'] += $evento['pause_duration'];
+                        $_SESSION['callcenter']['break_iniciado'] = NULL;
+                    }
                     break;
                 case 'hold':
                     if ($estadoCliente['onhold']) {

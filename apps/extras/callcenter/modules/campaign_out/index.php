@@ -550,6 +550,10 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                                 $id_campaign,
                                 $_FILES['phonefile']['tmp_name'], 
                                 $sEncoding);
+                            if ($bExito && $bDoUpdate && $arrCampaign[0]['estatus'] == 'T') {
+                            	// Agregar números a una campaña terminada debe volverla a activar
+                                $oCamp->activar_campaign($id_campaign, 'A');
+                            }
                         }
 
                         // Confirmar o deshacer la transacción según sea apropiado

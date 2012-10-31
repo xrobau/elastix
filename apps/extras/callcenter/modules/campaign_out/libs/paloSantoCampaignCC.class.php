@@ -29,6 +29,9 @@
 
 include_once("libs/paloSantoDB.class.php");
 
+define(REGEXP_FECHA_VALIDA, '/^\d{4}-\d{2}-\d{2}$/');
+define(REGEXP_HORA_VALIDA, '/^\d{2}:\d{2}$/');
+
 /* Clase que implementa campaña (saliente por ahora) de CallCenter (CC) */
 class paloSantoCampaignCC
 {
@@ -70,39 +73,38 @@ class paloSantoCampaignCC
      */
     function getCampaigns($limit, $offset, $id_campaign = NULL,$estatus='all')
     {
-        $where = "";
-        if($estatus=='all')
-            $where .= " where 1";
-        else if($estatus=='A')
-            $where .= " where estatus='A'";
-        else if($estatus=='I')
-            $where .= " where estatus='I'";
-        else if($estatus=='T')
-            $where .= " where estatus='T'";
-
-        $arr_result = FALSE;
-        if (!is_null($id_campaign) && !ereg('^[[:digit:]]+$', "$id_campaign")) {
+        $this->errMsg = '';
+        if (!is_null($id_campaign) && !ctype_digit("$id_campaign")) {
             $this->errMsg = _tr("Campaign ID is not valid");
+            return FALSE;
         } 
-        else {
-            if ($where=="") {
-                $where = (is_null($id_campaign) ? '' : " WHERE id = $id_campaign");
-            } else {
-                $where =  $where." ".(is_null($id_campaign) ? '' : " and id = $id_campaign");
-            }
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id, name, trunk, context, queue, datetime_init, datetime_end, daytime_init, daytime_end, script, retries, promedio, num_completadas, estatus, max_canales, id_url FROM campaign ".$where;
-            $sPeticionSQL .=" ORDER BY datetime_init, daytime_init";
-            if (!is_null($limit)) {
-                $sPeticionSQL .= " LIMIT $limit OFFSET $offset";
-            }
-
-//echo "$sPeticionSQL<br>";
-            $arr_result =& $this->_DB->fetchTable($sPeticionSQL, true);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
+        $sPeticionSQL = <<<SQL_SELECT_CAMPAIGNS
+SELECT id, name, trunk, context, queue, datetime_init, datetime_end, daytime_init,
+    daytime_end, script, retries, promedio, num_completadas, estatus, max_canales,
+    id_url
+FROM campaign
+SQL_SELECT_CAMPAIGNS;
+        $paramWhere = array();
+        $paramSQL = array();
+        
+        if (in_array($estatus, array('A', 'I', 'T'))) {
+        	$paramWhere[] = 'estatus = ?';
+            $paramSQL[] = $estatus;
+        }
+        if (!is_null($id_campaign)) {
+        	$paramWhere[] = 'id = ?';
+            $paramSQL[] = $id_campaign;
+        }
+        if (count($paramWhere) > 0) $sPeticionSQL .= ' WHERE '.implode(' AND ', $paramWhere);
+        $sPeticionSQL .= ' ORDER BY datetime_init, daytime_init';
+        if (!is_null($limit)) {
+        	$sPeticionSQL .= ' LIMIT ? OFFSET ?';
+            $paramSQL[] = $limit; $paramSQL[] = $offset;
+        }
+        $arr_result = $this->_DB->fetchTable($sPeticionSQL, TRUE, $paramSQL);
+        if (!is_array($arr_result)) {
+            $this->errMsg = $this->_DB->errMsg;
+        	return FALSE;
         }
         return $arr_result;
     }
@@ -121,38 +123,26 @@ class paloSantoCampaignCC
      * @param   $sFechaFinal        Fecha YYYY-MM-DD en que finaliza la campaña
      * @param   $sHoraInicio        Hora del día (HH:MM militar) en que se puede iniciar llamadas
      * @param   $sHoraFinal         Hora del día (HH:MM militar) en que se debe dejar de hacer llamadas
+     * @param   $script             Texto del script a recitar por el agente
+     * @param   $id_url             NULL, o ID del URL externo a cargar
      * 
      * @return  int    El ID de la campaña recién creada, o NULL en caso de error
      */
     function createEmptyCampaign($sNombre, $iMaxCanales, $iRetries, $sTrunk, $sContext, $sQueue, 
-        $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $combo,
-        $id_url)
+        $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $id_url)
     {
         $id_campaign = NULL;
         $bExito = FALSE;
-//hacemos el query para ver lasa colas seleccionadas
-    global $arrConf;
-    $error_cola = 0;
-    $pDB = new paloDB($arrConf["cadena_dsn"]);
-    $query_call_entry = "SELECT queue FROM queue_call_entry WHERE estatus='A'";
-    $arr_call_entry = $pDB->fetchTable($query_call_entry, true);
-    $arreglo_colas = array();
-    foreach($arr_call_entry as $cola){
-        foreach($cola as $row){
-                 array_push($arreglo_colas,$row);//llenamos el arreglo de colas que estan en queue_call_entry
-        }
-    }
 
-//para traer valor de cola elegida en combo Colas
-	$sCombo = trim($combo);
-    if (is_array($arreglo_colas)){
-        foreach($arreglo_colas as $queue) {
-            if (in_array($sCombo,$arreglo_colas)){//si la cola de queue_call_entry no esta siendo usada la asignamos al combo
-                $error_cola = "1";
-            }
+        // Carga de colas entrantes activas
+        $recordset = $this->_DB->fetchTable("SELECT queue FROM queue_call_entry WHERE estatus='A'");
+        if (!is_array($recordset)) {
+            $this->errMsg = _tr('(internal) Failed to query active incoming queues').
+                ' - '.$this->_DB->errMsg;
+        	return NULL;
         }
-    }
-
+        $colasEntrantes = array();
+        foreach ($recordset as $tupla) $colasEntrantes[] = $tupla[0];
 
         $sNombre = trim($sNombre);
         $iMaxCanales = trim($iMaxCanales);
@@ -172,70 +162,57 @@ class paloSantoCampaignCC
             $this->errMsg = _tr("Name Campaign can't be empty");//'Nombre de campaña no puede estar vacío';
         } elseif ($sContext == '') {
             $this->errMsg = _tr("Context can't be empty");//'Contexto no puede estar vacío';
-        } elseif (!ereg('^[[:digit:]]+$', $iRetries)) {
-            $this->errMsg = _tr("Retries must be numeric");//'Número de reintentos debe de ser numérico y entero';
+        } elseif (!ctype_digit($iRetries)) {
+            $this->errMsg = _tr('Retries must be numeric');//'Número de reintentos debe de ser numérico y entero';
         } elseif ($sQueue == '') {
             $this->errMsg = _tr("Queue can't be empty");//'Número de cola no puede estar vacío';
-        } elseif (!ereg('^[[:digit:]]+$', $sQueue)) {
-            $this->errMsg = _tr("Queue must be numeric");//'Número de cola debe de ser numérico y entero';
-        } elseif (!ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $sFechaInicial)) {
-            $this->errMsg = _tr("Invalid Start Date");//'Fecha de inicio no es válida (se espera yyyy-mm-dd)';
-        } elseif (!ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $sFechaFinal)) {
-            $this->errMsg = _tr("Invalid End Date");//'Fecha de final no es válida (se espera yyyy-mm-dd)';
+        } elseif (!ctype_digit($sQueue)) {
+            $this->errMsg = _tr('Queue must be numeric');//'Número de cola debe de ser numérico y entero';
+        } elseif (!preg_match(REGEXP_FECHA_VALIDA, $sFechaInicial)) {
+            $this->errMsg = _tr('Invalid Start Date');//'Fecha de inicio no es válida (se espera yyyy-mm-dd)';
+        } elseif (!preg_match(REGEXP_FECHA_VALIDA, $sFechaFinal)) {
+            $this->errMsg = _tr('Invalid End Date');//'Fecha de final no es válida (se espera yyyy-mm-dd)';
         } elseif ($sFechaInicial > $sFechaFinal) {
-            $this->errMsg = _tr("Start Date must be greater than End Date");//'Fecha de inicio debe ser anterior a la fecha final';
-        } elseif (!ereg('^[[:digit:]]{2}:[[:digit:]]{2}$', $sHoraInicio)) {
-            $this->errMsg = _tr("Invalid Start Time");//'Hora de inicio no es válida (se espera hh:mm)';
-        } elseif (!ereg('^[[:digit:]]{2}:[[:digit:]]{2}$', $sHoraFinal)) {
-            $this->errMsg = _tr("Invalid End Time");//'Hora de final no es válida (se espera hh:mm)';
+            $this->errMsg = _tr('Start Date must be greater than End Date');//'Fecha de inicio debe ser anterior a la fecha final';
+        } elseif (!preg_match(REGEXP_HORA_VALIDA, $sHoraInicio)) {
+            $this->errMsg = _tr('Invalid Start Time');//'Hora de inicio no es válida (se espera hh:mm)';
+        } elseif (!preg_match(REGEXP_HORA_VALIDA, $sHoraFinal)) {
+            $this->errMsg = _tr('Invalid End Time');//'Hora de final no es válida (se espera hh:mm)';
         } elseif (strcmp($sFechaInicial,$sFechaFinal)==0 && strcmp ($sHoraInicio,$sHoraFinal)>=0) {
-            $this->errMsg = _tr("Start Time must be greater than End Time");//'Hora de inicio debe ser anterior a la hora final';
-   	} elseif ($error_cola==1){
-	     $this->errMsg =  _tr("Queue is being used, choose other one");//La cola ya está siendo usada, escoja otra
-        } elseif (!is_null($id_url) && !ereg('^[[:digit:]]+$', $id_url)) {
+            $this->errMsg = _tr('Start Time must be greater than End Time');//'Hora de inicio debe ser anterior a la hora final';
+        } elseif (!is_null($id_url) && !ctype_digit("$id_url")) {
             $this->errMsg = _tr('(internal) Invalid URL ID');
-	}
-	else {
-                // Verificar que el nombre de la campaña es único
-                $recordset =& $this->_DB->fetchTable("SELECT * FROM campaign WHERE name = ".paloDB::DBCAMPO($sNombre));
-                if (is_array($recordset) && count($recordset) > 0) {
-                    // Ya existe una campaña duplicada
-                    $this->errMsg = _tr("Name Campaign already exists");//'Nombre de campaña indicado ya está en uso';
-                } else {
-                    // Construir y ejecutar la orden de inserción SQL
-                    $sPeticionSQL = paloDB::construirInsert(
-                        "campaign",
-                        array(
-                            "name"          =>  paloDB::DBCAMPO($sNombre),
-                            "max_canales"   =>  paloDB::DBCAMPO($iMaxCanales),
-                            "retries"       =>  paloDB::DBCAMPO($iRetries),
-                            "trunk"       =>  (is_null($sTrunk) ? NULL : paloDB::DBCAMPO($sTrunk)),
-                            "context"     =>  paloDB::DBCAMPO($sContext),
-                            "queue"       =>  paloDB::DBCAMPO($sQueue),
-                            "datetime_init" =>  paloDB::DBCAMPO($sFechaInicial),
-                            "datetime_end"       =>  paloDB::DBCAMPO($sFechaFinal),
-                            "daytime_init"       =>  paloDB::DBCAMPO($sHoraInicio),
-                            "daytime_end"       =>  paloDB::DBCAMPO($sHoraFinal),
-                            "script"       =>  paloDB::DBCAMPO($script),
-                            "id_url"        =>  (is_null($id_url) ? NULL : paloDB::DBCAMPO($id_url)),
-                        )
-                    );
+        } elseif (in_array($sQueue, $colasEntrantes)) {
+             $this->errMsg =  _tr('Queue is being used, choose other one');//La cola ya está siendo usada, escoja otra
+        } else {
+            // Verificar que el nombre de la campaña es único
+            $tupla = $this->_DB->getFirstRowQuery(
+                'SELECT COUNT(*) AS N FROM campaign WHERE name = ?', TRUE, array($sNombre));
+            if (is_array($tupla) && $tupla['N'] > 0) {
+                // Ya existe una campaña duplicada
+                $this->errMsg = _tr('Name Campaign already exists');//'Nombre de campaña indicado ya está en uso';
+            	return NULL;
+            }
 
-    	            $result = $this->_DB->genQuery($sPeticionSQL);
-    	            if ($result) {
-                        // Leer el ID insertado por la operación
-                        $sPeticionSQL = 'SELECT MAX(id) FROM campaign WHERE name = '.paloDB::DBCAMPO($sNombre);
-                        $tupla =& $this->_DB->getFirstRowQuery($sPeticionSQL);
-                		if (!is_array($tupla)) {
-                			$this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-                		} else {
-                                        $id_campaign = (int)$tupla[0];
-                                        $bExito = TRUE;
-                		}
-    	            } else {
-    	                $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-    	            }
+            // Construir y ejecutar la orden de inserción SQL
+            $sPeticionSQL = <<<SQL_INSERT_CAMPAIGN
+INSERT INTO campaign (name, max_canales, retries, trunk, context, queue,
+    datetime_init, datetime_end, daytime_init, daytime_end, script, id_url)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+SQL_INSERT_CAMPAIGN;
+            $paramSQL = array($sNombre, $iMaxCanales, $iRetries, $sTrunk, 
+                $sContext, $sQueue, $sFechaInicial, $sFechaFinal, $sHoraInicio,
+                $sHoraFinal, $script, $id_url);
+            if ($this->_DB->genQuery($sPeticionSQL, $paramSQL)) {
+            	// Leer el ID insertado por la operación
+                $id_campaign = $this->_DB->getLastInsertId();
+                if ($id_campaign === FALSE) {
+                	$this->errMsg = $this->_DB->errMsg;
+                    $id_campaign = NULL;
                 }
+            } else {
+            	$this->errMsg = $this->_DB->errMsg;
+            }
         }
         return $id_campaign;
     }
@@ -249,27 +226,21 @@ class paloSantoCampaignCC
     */
     function addCampaignForm($id_campania,$formularios)
     {
-
-        if ($formularios != "") {
-            $arr_form = explode(",",$formularios);
-            foreach($arr_form as $key => $value){
-                $sPeticionSQL = paloDB::construirInsert(
-                            "campaign_form",
-                            array(
-                                "id_campaign"    =>  paloDB::DBCAMPO($id_campania),
-                                "id_form"        =>  paloDB::DBCAMPO($value)
-                            ));
-                $result = $this->_DB->genQuery($sPeticionSQL);
-                if (!$result){ 
-                    $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-                    return false;
-                }
-            }
-        } else {
+        if (!is_array($formularios)) $formularios = explode(',', $formularios);
+        if (count($formularios) <= 0) {
             $this->errMsg = _tr("There aren't form selected");
-            return false;
+        	return FALSE;
         }
-        return true;
+        foreach ($formularios as $id_form) {
+        	$r = $this->_DB->genQuery(
+                'INSERT INTO campaign_form (id_campaign, id_form) VALUES (?, ?)',
+                array($id_campania, $id_form));
+            if (!$r) {
+                $this->errMsg = $this->_DB->errMsg;
+            	return FALSE;
+            }
+        }
+        return TRUE;
     }
 
     /**
@@ -279,18 +250,15 @@ class paloSantoCampaignCC
      * @param	string		$formularios	los id de los formularios 1,2,....., 
      * @return	bool            true or false       
     */
-    function updateCampaignForm($id_campania,$formularios)
+    function updateCampaignForm($id_campania, $formularios)
     {
-        $arr_form = explode(",",substr($formularios,0,strlen($formularios)-1));
-        $sql = "delete from campaign_form where id_campaign = $id_campania";
-        $result = $this->_DB->genQuery($sql);
-        if (!$result){ 
-             $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            return false;
+        if (!$this->_DB->genQuery(
+            'DELETE FROM campaign_form WHERE id_campaign = ?', 
+            array($id_campania))) { 
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
         }
-        else{
-            return $this->addCampaignForm($id_campania,$formularios);
-        }
+        return $this->addCampaignForm($id_campania, $formularios);
     }
 
     /**
@@ -301,34 +269,28 @@ class paloSantoCampaignCC
     */
     function obtenerCampaignForm($id_campania)
     {
-        $sPeticionSQL = "SELECT id_form FROM campaign_form WHERE id_campaign = $id_campania";
-        $tupla =& $this->_DB->fetchTable($sPeticionSQL);
+        $tupla = $this->_DB->fetchTable(
+            'SELECT id_form FROM campaign_form WHERE id_campaign = ?',
+            FALSE, array($id_campania));
         if (!is_array($tupla)) {
-            $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            return null;
-        } else {
-            $salida = array();
-            foreach($tupla as $key => $value){
-                $salida[] = $value[0];
-            }
-            return $salida;
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
         }
+        $salida = array();
+        foreach ($tupla as $value) $salida[] = $value[0];
+        return $salida;
     }
 
     function getExternalUrls()
     {
-    	$sPeticionSQL = 'SELECT id, description FROM campaign_external_url WHERE active = 1';
-        $tupla = $this->_DB->fetchTable($sPeticionSQL);
+        $tupla = $this->_DB->fetchTable('SELECT id, description FROM campaign_external_url WHERE active = 1');
         if (!is_array($tupla)) {
-            $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            return null;
-        } else {
-            $salida = array();
-            foreach($tupla as $key => $value){
-                $salida[$value[0]] = $value[1];
-            }
-            return $salida;
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
         }
+        $salida = array();
+        foreach ($tupla as $value) $salida[$value[0]] = $value[1];
+        return $salida;
     }
 
 	/**
@@ -343,18 +305,18 @@ class paloSantoCampaignCC
     {
     	$iNumTelefonos = NULL;
     	
-    	if (!ereg('^[[:digit:]]+$', $idCampaign)) {
-    		$this->errMsg = _tr("Invalid Campaign ID"); //;'ID de campaña no es numérico';
-    	} else {
-    		$sPeticionSQL = "SELECT COUNT(*) FROM calls WHERE id_campaign = $idCampaign";
-    		$tupla =& $this->_DB->getFirstRowQuery($sPeticionSQL);
-    		if (!is_array($tupla)) {
-    			$this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-    		} else {
-    			$iNumTelefonos = (int)$tupla[0];
-    		}
-    	}
-    	return $iNumTelefonos;
+        if (!ctype_digit($idCampaign)) {
+            $this->errMsg = _tr('Invalid Campaign ID'); //;'ID de campaña no es numérico';
+            return NULL;
+        }
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM calls WHERE id_campaign = ?',
+            FALSE, array($idCampaign));
+        if (!is_array($tupla)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        return (int)$tupla[0];
     }
     
     /**
@@ -364,97 +326,99 @@ class paloSantoCampaignCC
      * tampoco para verificar si los números existentes se encuentran en el
      * listado nuevo definido.
      *
-     * Esta función está construida en base a parseCampaignNumbers() y 
-     * addCampaignNumbers()
+     * @param   int     $idCampaign ID de la campaña a modificar
+     * @param   string  $sFilePath  Archivo local a leer para los números
      *
-     * @param	int		$idCampaign	ID de la campaña a modificar
-     * @param	string	$sFilePath	Archivo local a leer para los números
-     *
-     * @return bool		VERDADERO si éxito, FALSO si ocurre un error
+     * @return bool     VERDADERO si éxito, FALSO si ocurre un error
      */
     function addCampaignNumbersFromFile($idCampaign, $sFilePath, $sEncoding)
     {
-    	$bExito = FALSE;
-    	
-    	$listaNumeros = $this->parseCampaignNumbers($sFilePath, $sEncoding); 
-    	if (is_array($listaNumeros)) {
-    		$bExito = $this->addCampaignNumbers($idCampaign, $listaNumeros);
-    	}
-    	return $bExito;
-    }
-    
-    /**
-     * Procedimiento que carga un archivo CSV con números y parámetros en memoria
-     * y devuelve la matriz de datos obtenida. El formato del archivo es CSV, 
-     * con campos separados por comas. La primera columna contiene el número
-     * telefónico, el cual consiste de cualquier cadena numérica. El resto de
-     * columnas contienen parámetros que se agregan como campos adicionales. Las
-     * líneas vacías se ignoran, al igual que las líneas que empiecen con #
-     *
-     * @param	string	$sFilePath	Archivo local a leer para la lista
-     * @param   string  $sEncoding  Codificación a usar para archivo, NULL para 
-     *                              autodetectar.
-     *
-     * @return	mixed	Matriz cuyas tuplas contienen los contenidos del archivo,
-     *					en el orden en que fueron leídos, o NULL en caso de error.
-     */
-    private function parseCampaignNumbers($sFilePath, $sEncoding)
-    {
-
-    	$listaNumeros = NULL;
-
         // Detectar codificación para procesar siempre como UTF-8 (bug #325)
         if (is_null($sEncoding))
-            $sEncoding = $this->_adivinarCharsetArchivo($sFilePath);    	
+            $sEncoding = $this->_adivinarCharsetArchivo($sFilePath);        
 
-    	$hArchivo = fopen($sFilePath, 'rt');
-    	if (!$hArchivo) {
-    		$this->errMsg = _tr("Invalid CSV File");//'No se puede abrir archivo especificado para leer CSV';
-    	} else {
-    		$iNumLinea = 0;
-    		$listaNumeros = array();
-    		$clavesColumnas = array();
-    		while ($tupla = fgetcsv($hArchivo, 2048,",")) {
-    			$iNumLinea++;
-    			if (function_exists('mb_convert_encoding')) {
-    			    foreach ($tupla as $k => $v)
-    			        $tupla[$k] = mb_convert_encoding($tupla[$k], "UTF-8", $sEncoding);
-    			}
-                $tupla[0] = trim($tupla[0]);
-    			if (count($tupla) == 1 && trim($tupla[0]) == '') {
-    				// Línea vacía
-    			} elseif (strlen($tupla[0]) > 0 && $tupla[0]{0} == '#') {
-    				// Línea que empieza por numeral
-    			} elseif (!ereg('^[[:digit:]#*]+$', $tupla[0])) {
-                    if ($iNumLinea == 1) {
-                        // Podría ser una cabecera de nombres de columnas
-                        array_shift($tupla);
-                        $clavesColumnas = $tupla;
-                    } else {
-                        // Teléfono no es numérico
-                        $this->errMsg = _tr("Invalid CSV File Line")." "."$iNumLinea: "._tr("Invalid number");
-                        return NULL;
-                    }
-    			} else {
-                    // Como efecto colateral, $tupla pierde su primer elemento
-                    $tuplaLista = array(
-                        'NUMERO'    =>  array_shift($tupla),
-                        'ATRIBUTOS' =>  array(),
+        $hArchivo = fopen($sFilePath, 'rt');
+        if (!$hArchivo) {
+            $this->errMsg = _tr('Invalid CSV File');//'No se puede abrir archivo especificado para leer CSV';
+            return FALSE;
+        }
+
+        $iNumLinea = 0;
+        $clavesColumnas = array();
+        while ($tupla = fgetcsv($hArchivo, 8192, ',')) {
+            $iNumLinea++;
+            if (function_exists('mb_convert_encoding')) {
+                foreach ($tupla as $k => $v)
+                    $tupla[$k] = mb_convert_encoding($tupla[$k], 'UTF-8', $sEncoding);
+            }
+            $tupla[0] = trim($tupla[0]);
+            if (count($tupla) == 1 && trim($tupla[0]) == '') {
+                // Línea vacía
+            } elseif (strlen($tupla[0]) > 0 && $tupla[0]{0} == '#') {
+                // Línea que empieza por numeral
+            } elseif (!preg_match('/^([\d#\*])+$/', $tupla[0])) {
+                if ($iNumLinea == 1) {
+                    // Podría ser una cabecera de nombres de columnas
+                    array_shift($tupla);
+                    $clavesColumnas = $tupla;
+                } else {
+                    // Teléfono no es numérico
+                    $this->errMsg = _tr('Invalid CSV File Line')." "."$iNumLinea: "._tr('Invalid number');
+                    fclose($hArchivo);
+                    return FALSE;
+                }
+            } else {
+                // Como efecto colateral, $tupla pierde su primer elemento
+                $tuplaNumero = array(
+                    'NUMERO'    =>  array_shift($tupla),
+                    'ATRIBUTOS' =>  array(),
+                );
+                for ($i = 0; $i < count($tupla); $i++) {
+                    $tuplaNumero['ATRIBUTOS'][$i + 1] = array(
+                        'CLAVE' =>  ($i < count($clavesColumnas) && $clavesColumnas[$i] != '') ? $clavesColumnas[$i] : ($i + 1),
+                        'VALOR' =>  $tupla[$i],
                     );
-                    for ($i = 0; $i < count($tupla); $i++) {
-                    	$tuplaLista['ATRIBUTOS'][$i + 1] = array(
-                            'CLAVE' =>  ($i < count($clavesColumnas) && $clavesColumnas[$i] != '') ? $clavesColumnas[$i] : ($i + 1),
-                            'VALOR' =>  $tupla[$i],
-                        );
-                    }
-  					$listaNumeros[] = $tuplaLista;
-    			}
-    		}
-    		fclose($hArchivo);
-    	}
-    	return $listaNumeros;
-    }
+                }
 
+                // Buscar número en lista DNC. Esto es más rápido si hay índice sobre dont_call(caller_id).
+                $sql = 'SELECT COUNT(*) FROM dont_call WHERE caller_id = ? AND status = ?';
+                $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, array($tuplaNumero['NUMERO'], 'A'));
+                $iDNC = ($tupla[0] != 0) ? 1 : 0;
+                
+                // Inserción del número principal
+                $sql = 'INSERT INTO calls (id_campaign, phone, status, dnc) VALUES (?, ?, NULL, ?)';
+                $result = $this->_DB->genQuery($sql, array($idCampaign, $tuplaNumero['NUMERO'], $iDNC));
+                if (!$result) {
+                    // TODO: internacionalizar
+                    $this->errMsg = sprintf('(internal) Cannot insert phone %s - %s', 
+                        $tuplaNumero['NUMERO'], $this->_DB->errMsg);
+                    fclose($hArchivo);
+                    return FALSE;
+                }
+                
+                // Recuperar el ID de inserción para insertar atributos. Esto asume MySQL.
+                $idCall = $this->_DB->getLastInsertId();
+                
+                // Insertar atributos adicionales.
+                foreach ($tuplaNumero['ATRIBUTOS'] as $iNumColumna => $atributos) {
+                    $sClave = $atributos['CLAVE'];
+                    $sValor = $atributos['VALOR'];
+                    $sql = 'INSERT INTO call_attribute (id_call, columna, value, column_number) VALUES (?, ?, ?, ?)';
+                    $result = $this->_DB->genQuery($sql, array($idCall, $sClave, $sValor, $iNumColumna));
+                    if (!$result) {
+                        // TODO: internacionalizar
+                        $this->errMsg = sprintf('(internal) Cannot insert attribute %s=%s for phone %s - %s',
+                            $sClave, $sValor, $tuplaNumero['NUMERO'], $this->_DB->errMsg);
+                        fclose($hArchivo);
+                        return FALSE;
+                    }
+                }
+            }
+        }
+        fclose($hArchivo);
+        return TRUE;
+    }
+    
     // Función que intenta adivinar la codificación de caracteres del archivo
     private function _adivinarCharsetArchivo($sFilePath)
     {
@@ -471,77 +435,21 @@ class paloSantoCampaignCC
             //"ISO-2022-JP",
             "ISO-8859-15"
         );
-        $sContenido = file_get_contents($sFilePath);
+        //$sContenido = file_get_contents($sFilePath);
+        
+        // Ya no se usa file_get_contents() porque el archivo puede ser muy grande
+        $hArchivo = fopen($sFilePath);
+        if (!$hArchivo) return 'UTF-8';
+        for ($i = 0; $i < 20 && !feof($hArchivo); $i++) $sContenido .= fgets($hArchivo);
+        fclose($hArchivo);
         $sEncoding = mb_detect_encoding($sContenido, $listaEncodings);
         return $sEncoding;
     }
     
     /**
-     * Procedimiento que agrega números a una campaña existente. La lista de
-     * números consiste en un arreglo de tuplas, cuyo elemento __PHONE_NUMBER
-     * es el número de teléfono, y el resto de claves es el conjunto clave->valor
-     * a guardar en la tabla call_attribute para cada llamada
+     * Procedimiento para modificar las propiedades de una campaña existente
      *
-     * @param int $idCampaign   ID de Campaña
-     * @param array $listaNumeros   Lista de números como se describe arriba
-     *      array('__PHONE_NUMBER' => '1234567', 'Name' => 'Fulano de Tal', 'Address' => 'La Conchinchina')
-     *
-     * @return bool VERDADERO si todos los números fueron insertados, FALSO en error
-     */
-    private function addCampaignNumbers($idCampaign, $listaNumeros)
-    {
-    	
-    	if (!ereg('^[[:digit:]]+$', $idCampaign)) {
-    		$this->errMsg = _tr("Invalid Campaign ID");//'ID de campaña no es numérico';
-    	} elseif (!is_array($listaNumeros)) {
-            // TODO: internacionalizar
-    		$this->errMsg = '(internal) Lista de números tiene que ser un arreglo';
-    	} else {
-            // Realizar inserción de número y de atributos 
-            // TODO: reportar cuáles números no serán marcados por DNC
-            foreach ($listaNumeros as $tuplaNumero) {
-            	// Buscar número en lista DNC. Esto es más rápido si hay índice sobre dont_call(caller_id).
-                $sql = 'SELECT COUNT(*) FROM dont_call WHERE caller_id = ? AND status = ?';
-                $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, array($tuplaNumero['NUMERO'], 'A'));
-                $iDNC = ($tupla[0] != 0) ? 1 : 0;
-                
-                // Inserción del número principal
-                $sql = 'INSERT INTO calls (id_campaign, phone, status, dnc) VALUES (?, ?, NULL, ?)';
-                $result = $this->_DB->genQuery($sql, array($idCampaign, $tuplaNumero['NUMERO'], $iDNC));
-                if (!$result) {
-                    // TODO: internacionalizar
-                    $this->errMsg = sprintf('(internal) Cannot insert phone %s - %s', 
-                        $tuplaNumero['NUMERO'], $this->_DB->errMsg);
-                	return FALSE;
-                }
-                
-                // Recuperar el ID de inserción para insertar atributos. Esto asume MySQL.
-                $tupla = $this->_DB->getFirstRowQuery('SELECT LAST_INSERT_ID()');
-                $idCall = $tupla[0];
-                
-                // Insertar atributos adicionales.
-                foreach ($tuplaNumero['ATRIBUTOS'] as $iNumColumna => $atributos) {
-                    $sClave = $atributos['CLAVE'];
-                    $sValor = $atributos['VALOR'];
-                    $sql = 'INSERT INTO call_attribute (id_call, columna, value, column_number) VALUES (?, ?, ?, ?)';
-                    $result = $this->_DB->genQuery($sql, array($idCall, $sClave, $sValor, $iNumColumna));
-                    if (!$result) {
-                        // TODO: internacionalizar
-                        $this->errMsg = sprintf('(internal) Cannot insert attribute %s=%s for phone %s - %s',
-                            $sClave, $sValor, $tuplaNumero['__PHONE_NUMBER'], $this->_DB->errMsg);
-                    	return FALSE;
-                    }
-                }
-            }
-    	}
-    	
-    	return TRUE;
-    }
-
-    /**
-     * Procedimiento para crear una nueva campaña, vacía e inactiva. Esta campaña 
-     * debe luego llenarse con números de teléfono en sucesivas operaciones.
-     *
+     * @param   $idCampaign         ID de la campaña existente
      * @param   $sNombre            Nombre de la campaña
      * @param   $iMaxCanales        Número máximo de canales a usar simultáneamente por campaña
      * @param   $iRetries           Número de reintentos de la campaña, por omisión 5
@@ -552,11 +460,14 @@ class paloSantoCampaignCC
      * @param   $sFechaFinal        Fecha YYYY-MM-DD en que finaliza la campaña
      * @param   $sHoraInicio        Hora del día (HH:MM militar) en que se puede iniciar llamadas
      * @param   $sHoraFinal         Hora del día (HH:MM militar) en que se debe dejar de hacer llamadas
+     * @param   $script             Texto del script a recitar por el agente
+     * @param   $id_url             NULL, o ID del URL externo a cargar
      * 
-     * @return  int    El ID de la campaña recién creada, o NULL en caso de error
+     * @return  bool                VERDADERO si se actualiza correctamente, FALSO en error
      */
-    function updateCampaign($idCampaign,$sNombre, $iMaxCanales, $iRetries, $sTrunk, $sContext, $sQueue, 
-        $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $id_url)
+    function updateCampaign($idCampaign, $sNombre, $iMaxCanales, $iRetries, $sTrunk,
+        $sContext, $sQueue, $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal,
+        $script, $id_url)
     {
 
         $bExito = FALSE;
@@ -579,70 +490,53 @@ class paloSantoCampaignCC
             $this->errMsg = _tr("Name Campaign can't be empty");//'Nombre de campaña no puede estar vacío';
         } elseif ($sContext == '') {
             $this->errMsg = _tr("Context can't be empty");//'Contexto no puede estar vacío';
-        } elseif (!ereg('^[[:digit:]]+$', $iRetries)) {
-            $this->errMsg = _tr("Retries must be numeric");//'Número de reintentos debe de ser numérico y entero';
+        } elseif (!ctype_digit($iRetries)) {
+            $this->errMsg = _tr('Retries must be numeric');//'Número de reintentos debe de ser numérico y entero';
         } elseif ($sQueue == '') {
             $this->errMsg = _tr("Queue can't be empty");//'Número de cola no puede estar vacío';
-        } elseif (!ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $sFechaInicial)) {
-            $this->errMsg = _tr("Invalid Start Date");//'Fecha de inicio no es válida (se espera yyyy-mm-dd)';
-        } elseif (!ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $sFechaFinal)) {
-            $this->errMsg = _tr("Invalid End Date");//'Fecha de final no es válida (se espera yyyy-mm-dd)';
+        } elseif (!preg_match(REGEXP_FECHA_VALIDA, $sFechaInicial)) {
+            $this->errMsg = _tr('Invalid Start Date');//'Fecha de inicio no es válida (se espera yyyy-mm-dd)';
+        } elseif (!preg_match(REGEXP_FECHA_VALIDA, $sFechaFinal)) {
+            $this->errMsg = _tr('Invalid End Date');//'Fecha de final no es válida (se espera yyyy-mm-dd)';
         } elseif ($sFechaInicial > $sFechaFinal) {
-            $this->errMsg = _tr("Start Date must be greater than End Date");//'Fecha de inicio debe ser anterior a la fecha final';
-        } elseif (!ereg('^[[:digit:]]{2}:[[:digit:]]{2}$', $sHoraInicio)) {
-            $this->errMsg = _tr("Invalid Start Time");//'Hora de inicio no es válida (se espera hh:mm)';
-        } elseif (!ereg('^[[:digit:]]{2}:[[:digit:]]{2}$', $sHoraFinal)) {
-            $this->errMsg = _tr("Invalid End Time");//'Hora de final no es válida (se espera hh:mm)';
+            $this->errMsg = _tr('Start Date must be greater than End Date');//'Fecha de inicio debe ser anterior a la fecha final';
+        } elseif (!preg_match(REGEXP_HORA_VALIDA, $sHoraInicio)) {
+            $this->errMsg = _tr('Invalid Start Time');//'Hora de inicio no es válida (se espera hh:mm)';
+        } elseif (!preg_match(REGEXP_HORA_VALIDA, $sHoraFinal)) {
+            $this->errMsg = _tr('Invalid End Time');//'Hora de final no es válida (se espera hh:mm)';
         } elseif (strcmp($sFechaInicial,$sFechaFinal)==0 && strcmp ($sHoraInicio,$sHoraFinal)>=0) {
-            $this->errMsg = _tr("Start Time must be greater than End Time");//'Hora de inicio debe ser anterior a la hora final';
-        } elseif (!is_null($id_url) && !ereg('^[[:digit:]]+$', $id_url)) {
+            $this->errMsg = _tr('Start Time must be greater than End Time');//'Hora de inicio debe ser anterior a la hora final';
+        } elseif (!is_null($id_url) && !ctype_digit("$id_url")) {
             $this->errMsg = _tr('(internal) Invalid URL ID');
         } else {
 
             // Construir y ejecutar la orden de update SQL
-            $sPeticionSQL = paloDB::construirUpdate(
-                "campaign",
-                array(
-                    "name"          =>  paloDB::DBCAMPO($sNombre),
-                    "max_canales"   =>  paloDB::DBCAMPO($iMaxCanales),
-                    "retries"       =>  paloDB::DBCAMPO($iRetries),
-                    "trunk"         =>  (is_null($sTrunk) ? NULL : paloDB::DBCAMPO($sTrunk)),
-                    "context"       =>  paloDB::DBCAMPO($sContext),
-                    "queue"         =>  paloDB::DBCAMPO($sQueue),
-                    "datetime_init" =>  paloDB::DBCAMPO($sFechaInicial),
-                    "datetime_end"  =>  paloDB::DBCAMPO($sFechaFinal),
-                    "daytime_init"  =>  paloDB::DBCAMPO($sHoraInicio),
-                    "daytime_end"   =>  paloDB::DBCAMPO($sHoraFinal),
-                    "script"        =>  paloDB::DBCAMPO($script),
-                    "id_url"        =>  (is_null($id_url) ? NULL : paloDB::DBCAMPO($id_url)),
-                ),
-                " id=$idCampaign "
-            );
-
-            $result = $this->_DB->genQuery($sPeticionSQL);
-            if ($result) {
-                return true;
-            } else {
-                $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            }
+            $sPeticionSQL = <<<SQL_UPDATE_CAMPAIGN
+UPDATE campaign SET 
+    name = ?, max_canales = ?, retries = ?, trunk = ?,
+    context = ?, queue = ?, datetime_init = ?, datetime_end = ?,
+    daytime_init = ?, daytime_end = ?, script = ?, id_url = ?
+WHERE id = ?
+SQL_UPDATE_CAMPAIGN;
+            $paramSQL = array($sNombre, $iMaxCanales, $iRetries, $sTrunk,
+                $sContext, $sQueue, $sFechaInicial, $sFechaFinal,
+                $sHoraInicio, $sHoraFinal, $script, $id_url,
+                $idCampaign);
+            if ($this->_DB->genQuery($sPeticionSQL, $paramSQL)) return TRUE;
+            $this->errMsg = $this->_DB->errMsg;
         }
         return false;
     }
 
-    function activar_campaign($idCampaign,$activar)
+    function activar_campaign($idCampaign, $activar)
     {
-         $sPeticionSQL = paloDB::construirUpdate(
-             "campaign",
-             array("estatus"       =>  paloDB::DBCAMPO($activar)),
-             " id=$idCampaign "
-            );
-        
-            $result = $this->_DB->genQuery($sPeticionSQL);
-            if ($result) 
-                return true;
-            else 
-                $this->errMsg = $this->_DB->errMsg."<br/>$sPeticionSQL";
-            return false;
+        if (!$this->_DB->genQuery(
+            'UPDATE campaign SET estatus = ? WHERE id = ?',
+            array($activar, $idCampaign))) {
+        	$this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
     } 
 
     function delete_campaign($idCampaign)
@@ -667,52 +561,6 @@ class paloSantoCampaignCC
         $this->_DB->commit();
         return TRUE;
     }
-
-/********************************************
-///// codigo agregado por Carlos Barcos
-*********************************************/
-
-    /*
-        Funcion que me permite obtener una lista de llamadas a ser bloquedas
-    */
-    function getDontCallList(){
-	$sql = "select id,caller_id from dont_call where status='A'";
-	$arr_result =& $this->_DB->fetchTable($sql, true);
-	if (!is_array($arr_result)) {
-	    $arr_result = FALSE;
-	    $this->errMsg = $this->_DB->errMsg;
-	}
-	return $arr_result;
-    }
-
-    /*
-        Funcion que permite tomar un arreglo de la forma:
-            [0]=>array("clave"=>valor1)
-            [1]=>array("clave"=>valor2)
-                .
-                .
-                .
-        y convertirlo en otro de la forma:
-            [0]=>valor1
-            [1]=>valor1
-                .
-                .
-                .
-    */
-    function convertir_array($data){
-        $data_modificada=array();
-        if(is_array($data) && count($data)>0){
-            foreach($data as $d){
-                $data_modificada[] = $d["caller_id"];
-            }
-        }
-        return $data_modificada;
-    }
-
-/********************************************
-///// Fin codigo agregado por Carlos Barcos
-*********************************************/
-
 
     /**
      * Procedimiento para leer la totalidad de los datos de una campaña terminada, 

@@ -100,6 +100,15 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Oct 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: Cleanup of outgoing campaign library:
+  Replace all uses of ereg with preg_match
+  Removed some dead code
+  Replace uses of DBCAMPO with proper SQL parameters
+  Refactor check of queue by incoming campaigns
+  Remove code that reveals SQL query in several error paths
+  Rewrite loading of phone numbers in order to greatly reduce memory usage
+
 * Tue Oct 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: Campaign modification now allows upload of call file,
   which will be appended to the call list already present.

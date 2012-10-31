@@ -513,7 +513,6 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                                             $time_ini,
                                             $time_fin,
                                             $_POST['rte_script'],
-                                            $_POST['queue'],
                                             ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
                             if (is_null($id_campaign)) $bExito = FALSE;
                         } elseif ($bDoUpdate) {

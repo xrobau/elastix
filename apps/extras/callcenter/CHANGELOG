@@ -1,3 +1,10 @@
+* Campaign Out: Cleanup of outgoing campaign library:
+  Replace all uses of ereg with preg_match
+  Removed some dead code
+  Replace uses of DBCAMPO with proper SQL parameters
+  Refactor check of queue by incoming campaigns
+  Remove code that reveals SQL query in several error paths
+  Rewrite loading of phone numbers in order to greatly reduce memory usage
 * Campaign Out: Campaign modification now allows upload of call file, which will
   be appended to the call list already present.
 * Campaign In,Campaign Out: lift restriction on removing campaigns with 

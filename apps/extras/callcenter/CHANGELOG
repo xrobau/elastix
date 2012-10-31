@@ -1,3 +1,4 @@
+* Campaign Out: reactivate a finished campaign if calls are added to it
 * Campaign Out: Cleanup of outgoing campaign library:
   Replace all uses of ereg with preg_match
   Removed some dead code

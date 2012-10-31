@@ -101,6 +101,7 @@ fi
 
 %changelog
 * Wed Oct 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: reactivate a finished campaign if calls are added to it
 - CHANGED: Campaign Out: Cleanup of outgoing campaign library:
   Replace all uses of ereg with preg_match
   Removed some dead code

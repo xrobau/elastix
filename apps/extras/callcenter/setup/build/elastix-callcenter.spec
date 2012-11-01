@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 5.alpha
+Release: 6.alpha
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,6 +100,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Nov  1 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-6.alpha
+- Bump version for release.
+
 * Wed Oct 31 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: reactivate a finished campaign if calls are added to it
 - CHANGED: Campaign Out: Cleanup of outgoing campaign library:

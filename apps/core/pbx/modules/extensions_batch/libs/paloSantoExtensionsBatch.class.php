@@ -443,9 +443,8 @@ class paloSantoLoadExtension {
 
     function processData($data, $path)
     {
-    
-    $arrExtensions = array();
-    if(is_array($data) && count($data)>0){
+        $arrExtensions = array();
+        if(is_array($data) && count($data)>0){
    
             //Call Waiting
             $arrCallWaiting = $this->databaseCallWaiting();
@@ -456,10 +455,34 @@ class paloSantoLoadExtension {
                     $arrCW[$arrResult[1]] = $arrResult[2];
                 }
             }
-            
+
+            // Se carga la totalidad de voicemail.conf
+            $voicemailData = array();
+            foreach (file($path) as $s) {
+               $regs = NULL;
+               if (preg_match('/^\s*(\d+)\s*=>\s*(.+)/', trim($s), $regs)) {
+                   $vmext = $regs[1];
+                   $fields = array_map('trim', explode(',', $regs[2]));
+                   $properties = array(
+                       'vm_secret'              => $fields[0],
+                       'email_address'          => $fields[2],
+                       'pager_email_address'    => $fields[3],
+                   );
+                   $fields = array_map('trim', explode('|', $fields[4]));
+                   foreach ($fields as $propval) {
+                       $regs = NULL;
+                       if (preg_match('/^(.+)=(.+)$/', $propval, $regs))
+                           $properties[$regs[1]] = $regs[2];
+                   }
+                   $voicemailData[$vmext] = $properties;
+               }
+            }
+
             //Extension
             foreach($data as $key => $extension){
-                $extension['callwaiting']=isset($arrCW[$extension['']]) ? $arrCW[$extension['extension']] : 'DISABLED';
+                $extension['callwaiting'] = isset($arrCW[$extension['extension']]) 
+                    ? $arrCW[$extension['extension']] 
+                    : 'DISABLED';
                 $extension['directdid'] = $this->queryDIDByExt($extension['extension']);
                 $extension['voicemail'] = 'disable';
                 $extension['vm_secret'] = '';
@@ -470,25 +493,27 @@ class paloSantoLoadExtension {
                 $extension['play_cid'] = 'no';
                 $extension['play_envelope'] = 'no';
                 $extension['delete_vmail'] = 'no';
-             
-                $grep = exec("grep '^{$extension['extension']}' $path");
-                if($grep != '' && $grep!=null)
-                {
+
+                if (isset($voicemailData[$extension['extension']])) {
                     $extension['voicemail'] = 'enabled';
-                    if(preg_match("/^{$extension['extension']} => ([[:alnum:]]*),[[:alnum:]| ]*,([[:alnum:]| |@|\.]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |=]*)\|imapuser=([[:alnum:]| ]*)\|imappassword=([[:alnum:]| ]*)\|attach=(yes|no)\|saycid=(yes|no)\|envelope=(yes|no)\|delete=(yes|no)/",$grep, $arrResult))
-                    {
-                        $extension['vm_secret'] = $arrResult[1];
-                        $extension['email_address'] = $arrResult[2];
-                        $extension['pager_email_address'] = $arrResult[3];
-                        //$extension['vm_options'] = substr($arrResult[4],0, strlen($arrResult[4])-1);
-                        $extension['vm_options'] = $arrResult[4];
-                        //$extension['imapuser'] = $arrResult[5];
-                        //$extension['imappassword'] = $arrResult[6];
-                        $extension['email_attachment'] = $arrResult[7];
-                        $extension['play_cid'] = $arrResult[8];
-                        $extension['play_envelope'] = $arrResult[9];
-                        $extension['delete_vmail'] = $arrResult[10];
+                    $properties = $voicemailData[$extension['extension']];
+                    foreach (array(
+                            'vm_secret'             => 'vm_secret',
+                            'email_address'         => 'email_address',
+                            'pager_email_address'   => 'pager_email_address',
+                            'attach'                => 'email_attachment',
+                            'saycid'                => 'play_cid',
+                            'envelope'              => 'play_envelope',
+                            'delete'                => 'delete_vmail',
+                        ) as $k1 => $k2) {
+                        if (isset($properties[$k1])) {
+                            $extension[$k2] = $properties[$k1];
+                            unset($properties[$k1]);
+                        }
                     }
+                    $vmoptions = array();
+                    foreach ($properties as $k => $v) $vmoptions[] = "$k=$v";
+                    $extension['vm_options'] = implode('|', $vmoptions);
                 }
                 $arrExtensions[] = $extension;
             }

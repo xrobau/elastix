@@ -298,6 +298,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Nov  1 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Batch of Extensions: replace brittle regexp parsing of voicemail.conf
+  and repeated invocation of grep with a single load. The rewritten loading of
+  voicemail.conf is also more robust in the face of missing/additional/reordered
+  key/value pairs in vm_options. Fixes Elastix bug #1117.
+  SVN Rev[4401]
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.

@@ -846,6 +846,8 @@ DROP TABLE IF EXISTS musiconhold;
 CREATE TABLE musiconhold (
     -- Name of the MOH class
     name char(80) not null primary key,
+    -- Descriptive name of the MOH class
+    description char(80) default "", 
     -- One of 'custom', 'files', 'mp3nb', 'quietmp3nb', or 'quietmp3'
     mode char(80) null,
     -- If 'custom', directory is ignored.  Otherwise, specifies a directory with files to play or a stream URL
@@ -859,8 +861,15 @@ CREATE TABLE musiconhold (
     -- In custom mode, the format of the audio delivered.  Ignored otherwise.  Defaults to SLIN.
     format char(10) null,
     -- When this record was last modified
-    stamp timestamp
+    stamp timestamp,
+    -- Domain of organization that is own of this class
+    organization_domain varchar(50) NOT NULL,
+    INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
+
+insert into musiconhold (name,description,mode,directory,sort) values('default','Default','files','/var/lib/asterisk/mohmp3/','random');
+
+insert into musiconhold (name,description,mode,directory,sort) values('none','None','files','/var/lib/asterisk/mohmp3/none/','random');
 
 DROP TABLE IF EXISTS recordings;
 CREATE TABLE recordings (
@@ -989,4 +998,31 @@ CREATE TABLE outbound_route_trunkpriority (
     PRIMARY KEY  (`outbound_route_id`,`trunk_id`),
     FOREIGN KEY (`outbound_route_id`) REFERENCES outbound_route(`id`),
     FOREIGN KEY (`trunk_id`) REFERENCES trunk(`trunkid`)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS ring_group;
+CREATE TABLE ring_group (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    rg_number varchar(50) NOT NULL,
+    rg_name varchar(50) NOT NULL,
+    rg_strategy enum ('ringall','leastrecent','fewestcalls','random','rrmemory','rrordered','linear','leastrecent') DEFAULT 'ringall',
+    rg_time TINYINT default 10,
+    rg_recording varchar(128),
+    rg_alertinfo varchar(50),
+    rg_play_moh enum ('ring','yes') default 'ring',
+    rg_moh varchar(80),
+    rg_cid_prefix varchar(100),
+    rg_cf_ignore enum ('yes','no') default 'no',
+    rg_skipbusy enum ('yes','no') default 'no',
+    rg_confirm_call enum ('yes','no') default 'no',
+    rg_record_remote varchar(128),
+    rg_record_toolate varchar(128),
+    goto varchar(50) NOT NULL,
+    destination varchar(128) NOT NULL,
+    rg_extensions varchar(128),
+    organization_domain varchar(50) NOT NULL,
+    PRIMARY KEY  (id),
+    FOREIGN KEY (rg_moh) REFERENCES musiconhold(name),
+    UNIQUE INDEX rg_num_org (rg_number,organization_domain),
+    INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;

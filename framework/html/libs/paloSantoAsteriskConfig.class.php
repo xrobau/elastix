@@ -253,7 +253,7 @@ class paloSantoASteriskConfig{
 
 		//arreglo que contiene las tablas dentro de ast_realtime que no tienen el campo
         //organization_domian
-		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details","musiconhold");
+		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details");
 
 		//obtenemos una lista de las tablas dentro de la base elxpbx
 		$queryShow="show tables from elxpbx";

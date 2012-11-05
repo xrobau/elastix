@@ -294,6 +294,7 @@ INSERT INTO "acl_resource" VALUES('features_code', 'Features Codes', 'pbxadmin',
 INSERT INTO "acl_resource" VALUES('general_settings', 'General Settings', 'pbxadmin', '', 'module', 18);
 INSERT INTO "acl_resource" VALUES('inbound_route', 'Inbound Routes', 'pbxadmin', '', 'module', 14);
 INSERT INTO "acl_resource" VALUES('outbound_route', 'Outbound Routes', 'pbxadmin', '', 'module', 13);
+INSERT INTO "acl_resource" VALUES('ring_group', 'Ring Groups', 'pbxadmin', '', 'module', 19);
 
 INSERT INTO "organization_resource" VALUES(1, 1, 'usermgr');
 INSERT INTO "organization_resource" VALUES(2, 1, 'organization');
@@ -378,6 +379,7 @@ INSERT INTO "organization_resource" VALUES(92, 1, 'features_code');
 INSERT INTO "organization_resource" VALUES(93, 1, 'general_settings');
 INSERT INTO "organization_resource" VALUES(94, 1, 'did');
 INSERT INTO "organization_resource" VALUES(95, 1, 'hardware_configuration');
+INSERT INTO "organization_resource" VALUES(98, 1, 'ring_group');
 
 INSERT INTO "group_resource" VALUES(1, 0, 1);
 INSERT INTO "group_resource" VALUES(2, 0, 2);
@@ -491,6 +493,7 @@ INSERT INTO "group_resource" VALUES(190, 1, 90);
 INSERT INTO "group_resource" VALUES(191, 1, 91);
 INSERT INTO "group_resource" VALUES(192, 1, 92);
 INSERT INTO "group_resource" VALUES(193, 1, 93);
+INSERT INTO "group_resource" VALUES(193, 1, 98);
 
 INSERT INTO "group_resource" VALUES(201, 2, 1);
 INSERT INTO "group_resource" VALUES(202, 2, 3);

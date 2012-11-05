@@ -116,28 +116,35 @@ class paloAsteriskDB {
 		$query="SELECT count(id) from extension where exten=? and organization_domain=?";
 		$result=$this->getFirstResultQuery($query,array($extension,$domain));
 		if($result[0]!=0){
-			$this->errMsg=_tr("Already exits a extension with same pattern");
+			$this->errMsg=_tr("Already exits a extension with same pattern").$this->errMsg;
 		}else{
 			//validamos que el patron de marcado no esta siendo usado para una extension de fax
 			$query="SELECT count(id) from fax where exten=? and organization_domain=?";
 			$result=$this->getFirstResultQuery($query,array($extension,$domain));
 			if($result[0]!=0){
-				$this->errMsg=_tr("Already exits a fax extension with same pattern");
+				$this->errMsg=_tr("Already exits a fax extension with same pattern").$this->errMsg;
 			}else{
 				//validamos que el patron de marcado no este siendo usado por los features code
 				$query="SELECT 1 from features_code f join features_code_settings fg on f.name=fg.name 
 				where f.code=? or fg.default_code=? and f.organization_domain=?";
 				$result=$this->getFirstResultQuery($query,array($extension,$extension,$domain));
 				if(count($result)>0 || $result===false){
-					$this->errMsg=_tr("Already exits a feature code with same pattern");
+					$this->errMsg=_tr("Already exits a feature code with same pattern").$this->errMsg;
 				}else{
                     //validamos que el patron de marcado no este siendo usado por una cola
 					$query="SELECT count(name) from queue where queue_number=? and organization_domain=?";
                     $result=$this->getFirstResultQuery($query,array($extension,$domain));
                     if($result[0]!=0){
-                        $this->errMsg=_tr("Already exits a queue with same pattern");
-                    }else
-                        $exist=false;
+                        $this->errMsg=_tr("Already exits a queue with same pattern").$this->errMsg;
+                    }else{
+                        //valido que el patron de marcado no este siendo usado por un ring_group
+                        $query="SELECT 1 from ring_group where organization_domain=? and rg_number=?";
+                        $result=$this->getFirstResultQuery($query,array($extension,$domain));
+                        if(count($result)>0 || $result===false){
+                            $this->errMsg=_tr("Already exits a ring group with same pattern").$this->errMsg;
+                        }else
+                            $exist=false;
+                    }
 				}
 			}
 		}
@@ -191,7 +198,7 @@ class paloAsteriskDB {
             return false;
         }
         
-        $recordings=array("none"=>_tr("None"));
+        $recordings=array();
         $query="Select uniqueid,description,filename from recordings where organization_domain=?";
         $result=$this->getResultQuery($query,array($domain),true,"Don't exist any recording created");
         if($result!=false){
@@ -217,6 +224,41 @@ class paloAsteriskDB {
             $file=$result["filename"];
         }
         return $file;
+    }
+    
+    function getMoHClass($domain){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return false;
+        }
+        
+        $moh=array("none"=>"none","default"=>"default");
+        $query="Select name,description from musiconhold where organization_domain=?";
+        $result=$this->getResultQuery($query,array($domain),true,"");
+        if($result!=false){
+            foreach($result as $value){
+                $moh[$value["name"]]=$value["description"];
+            }
+        }
+        return $moh; 
+    }
+    
+    function existMoHClass($class,$domain=null){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg="Invalid domain format";
+            return null;
+        }
+        
+        if($class=="none" || $class=="default"){
+            return true;
+        }
+        
+        $query="SELECT 1 from musiconhold where name=? and organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($class,$domain));
+        if(is_array($result) && count($result)>0){
+            return true;
+        }
+        return false;
     }
     
     //devuelve un arreglo que contiene los posibles destinos de ultimo recurso dado una categoria

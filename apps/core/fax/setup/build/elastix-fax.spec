@@ -194,6 +194,9 @@ fi
 
 %changelog
 * Mon Nov  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Fax: new module Fax Queue to monitor status of outgoing faxes that 
+  cannot be immediately dispatched.
+  SVN Rev[4408]
 - FIXED: Fax: fix regression in which mail notification placeholders were not
   replaced with the intended values.
   SVN Rev[4402]

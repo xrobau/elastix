@@ -36,9 +36,13 @@ $dsarray  = array();	// This will hold all the dial strings, used to check for d
 $AGI = new AGI();
 debug("Starting New Dialparties.agi", 1);
 
-$codigo    = get_var( $AGI, "ARG1" ); //identificador de la organizacion
-$timer		= get_var( $AGI, "ARG2" );
-$dialopts	= get_var( $AGI, "ARG3" );
+if(isset($argv[1])){
+    $codigo = $argv[1]; //identificador de la organizacion
+}else{
+    $AGI->stream_file("goodbye");
+    $AGI->hangup();
+    exit(0);
+}
 
 // Get required channels variables 
 $cwinusebusy = get_var( $AGI, "CWINUSEBUSY" );
@@ -50,19 +54,6 @@ $cwignore    = strtoupper(trim($cwignore));
 $cfignore    = get_var( $AGI, "CFIGNORE" );
 $cfignore    = strtoupper(trim($cfignore));
 
-//$ast_ge_16   = version_compare($ast_version, "1.6", "ge");
-//$has_extension_state = (get_var( $AGI, "HAS_EXTENSION_STATE" ) || $ast_ge_16);
-// If we are 1.6 then we have the EXTENSION_STATE() function and don't need to use the manager
-//
-/*if (!$has_extension_state) {
-  require_once "phpagi-asmanager.php";
-  $ampmgruser  = get_var( $AGI, "AMPMGRUSER" );
-  $ampmgrpass  = get_var( $AGI, "AMPMGRPASS" );
-  $astman = $AGI->new_AsteriskManager();
-	if (!$astman->connect("127.0.0.1", $ampmgruser , $ampmgrpass,'off')) {
-		exit (1);
-	}
-}*/
 
 // Caller ID info is stored in $request in AGI class, passed from Asterisk
 $cidnum = $AGI->request['agi_callerid'];
@@ -180,8 +171,8 @@ if ( ($use_confirmation != "FALSE") && ($rgmethod != "ringall") && ($rgmethod !=
 	$rgmethod	= "ringall";
 }
 
-// Start with Arg Count set to 4 as three args are used
-$arg_cnt = 4;
+// Start with Arg Count set to 3 as three args are used
+$arg_cnt = 3;
 while($arg = get_var($AGI,"ARG". $arg_cnt)) {
 	// not sure why, dialparties will get stuck in a loop if noresponse
 	if ($arg == '-') {
@@ -213,10 +204,10 @@ if ($rgmethod == "ringallv2" && $fmgrp != "") {
 
 	$fmgrp_primaryremoved = 0;
 
-	$fmgrp_prering  = $AGI->database_get('EXT', "/$codigo/$fmgrp/followme/prering");
+	$fmgrp_prering  = $AGI->database_get('EXTUSER', "/$codigo/$fmgrp/followme/prering");
 	$fmgrp_prering  = $fmgrp_prering['data'] > 1 ? $fmgrp_prering['data'] : 2;
 		 
-	$fmgrp_grptime  = $AGI->database_get('EXT', "/$codigo/$fmgrp/followme/grptime");
+	$fmgrp_grptime  = $AGI->database_get('EXTUSER', "/$codigo/$fmgrp/followme/grptime");
 	$fmgrp_grptime  = $fmgrp_grptime['data'];
 	debug("got fmgrp_prering: $fmgrp_prering, fmgrp_grptime: $fmgrp_grptime",4);
 
@@ -243,7 +234,7 @@ $from_outside     = get_var( $AGI, "FROM_DID" );
 // If this isn't a ring group, check to see if the user has call screening on
 // Only screen calls if the primary extension is called, or it's follow-me is called, not ring groups
 if(($from_outside != '') && isset($ext[0]) && ($rgmethod == "none" || $fmgrp == $ext[0]) && !$already_screened && !($nodest != '' && $fmgrp != $nodest)) {
-	$screen_call = $AGI->database_get('EXT', "/$codigo/".$ext[0]."/screen");
+	$screen_call = $AGI->database_get('EXTUSER', "/$codigo/".$ext[0]."/screen");
 	$screen_call = $screen_call['data'];
 	if (strlen($screen_call)) {
 		if($screen_call == 'nomemory' && $cidnum != '')  { // This can't go in the dialplan because macro-dial can get called multiple times
@@ -769,7 +760,7 @@ function get_dial_string( $agi, $extnum, $use_confirmation, $ringgroup_index ) {
 				}				
 				$dialstring .= '&';
 			} else {
-				$dialstring .= 'Local/LC-'.$adevice.'@'.$codigo.'from-internal&';
+				$dialstring .= 'Local/LC-'.$adevice.'@'.$codigo.'-from-internal&';
 			}
 		}
 		$dialstring = trim($dialstring," &");
@@ -785,8 +776,11 @@ function debug($string, $level=3) {
 function is_ext_avail( $extnum ) {
 	global $astman;
 	global $AGI;
+	global $codigo;
 
-	$extstate_result  = get_var( $AGI, "EXTENSION_STATE($extnum)" );
+	debug("EXTENSION_STATE($extnum)", 1); 
+	
+	$extstate_result  = get_var( $AGI, "EXTENSION_STATE($extnum@$codigo-from-internal)" );
 	switch ($extstate_result) {
 		case "NOT_INUSE":
 			$status = 0;

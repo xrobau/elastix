@@ -88,7 +88,7 @@ function phonebook_list() {
 	$numbers = array();
 	$astman = new AGI_AsteriskManager();
 	if ($res = $astman->connect("127.0.0.1", $mgruser , $mgrpass)) {
-		$list = $astman->database_show("EXTUSER/".$this->code);
+		$list = $astman->database_show("EXTUSER/".$code);
 		foreach ($list as $k => $v)	{
 			if (strstr($k, 'cidname')) {
 				$split = explode("/",$k);
@@ -254,19 +254,21 @@ function do_directory($type, &$directory, $say_exten, $operator) {
 	$escape_digits = "1*";
 	if ($operator) $escape_digits .= "0";
 
-	$agi->stream_file("pbdirectory/welcome-to-phonebook");
-	
-	switch ($type) {
-		case DIR_FIRST: $intro = "pbdirectory/first-three-letters-entry"; break;
-		case DIR_ANY: $intro = "pbdirectory/first-three-letters-entry"; break;
-	}
+	$agi->stream_file("dir-welcome");
 
+	switch ($type) {
+        case DIR_FIRST: $intro ="dir-first"; break;
+        case DIR_ANY: $intro ="dir-last"; break;
+    }
+    
 	if (DEBUG) $agi->verbose("start loop");
 	
 	$loop = 0;
 	while ($loop < MAX_REPEAT) {
+        $agi->exec("PLAYBACK", "dir-pls-enter&digits/3&$intro");
+        
 		if (DEBUG) $agi->verbose("loop = ".$loop);
-		$r = $agi->get_data($intro, 4000, NUM_DIGITS);
+		$r = $agi->get_data("beep", 4000, NUM_DIGITS);
 		
 		if (($r["result"] == "0") && $operator) {
 			// operator
@@ -298,7 +300,7 @@ function do_directory($type, &$directory, $say_exten, $operator) {
 				$digit = say_alpha($match["name"],$escape_digits);
 				
 				if (!$digit) {
-					$digit = stream_multiple(array("pbdirectory/if-correct-press","digits/1","pbdirectory/if-incorrect-press","digits/star"), $escape_digits, 3000);
+					$digit = stream_multiple(array("if-this-is-correct","press-1","if-this-is-not-correct","press-star"), $escape_digits, 3000);
 				}
 				
 				switch ($digit) {
@@ -363,11 +365,13 @@ $agi = new AGI;
 
 $mgruser  = get_var( $agi, "MGUSER" );
 $mgrpass  = get_var( $agi, "MGPASSWORD" );
-$code = get_var( $AGI, "ARG1" );
-if($code==""){
-	$agi->stream_file("goodbye");
-	$agi->hangup();
-	exit(0);
+
+if(isset($argv[1])){
+    $code = $argv[1];
+}else{
+    $agi->stream_file("goodbye");
+    $agi->hangup();
+    exit(0);
 }
 
 if (DEBUG) $logfile = fopen("/tmp/pbdirectory.log","w");
@@ -378,7 +382,7 @@ $operator = false;
 $dir_type = DIR_FIRST;
 $say_exten = false;
 
-if (isset($argv[1])) {
+if (isset($argv[2])) {
 	for($i=0; $i<strlen($argv[2]); $i++) {
 		switch ($argv[2][$i]) {
 			case "f": case "F": 

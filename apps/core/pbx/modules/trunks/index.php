@@ -66,7 +66,7 @@ function _moduleContent(&$smarty, $module_name)
 	$userLevel1=$arrCredentiasls["userlevel"];
 	$userAccount=$arrCredentiasls["userAccount"];
 	$idOrganization=$arrCredentiasls["id_organization"];
-
+        
 	//comprobacion de la credencial del usuario, el usuario superadmin es el unico capaz de crear truncales
     if($userLevel1!="superadmin"){
         header("Location: index.php?menu=system");

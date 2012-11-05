@@ -85,7 +85,7 @@
     <tr><th>{$SETDESTINATION}</th></tr>       
     <tr class="inbound">
         <td>{$goto.LABEL}:</td>
-        <td>{$goto.INPUT} {$destination.INPUT}</td>
+        <td colspan="3">{$goto.INPUT} {if $mode eq 'view'}>>{/if} {$destination.INPUT}</td>
     </tr>
     <tr><td></td></tr>
 </table>

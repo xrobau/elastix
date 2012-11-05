@@ -172,17 +172,6 @@
         <td>{$pbdirectory_stat}</td>
     </tr>
     <tr>
-        <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$RECORDING}</td>
-    </tr>
-    <tr class="feature">
-        <td nowrap>{$recording_check.LABEL}: </td>
-        <td>{$recording_check.INPUT}</td>
-        <td>{$recording_check_stat}</td>
-        <td nowrap>{$recording_save.LABEL}: </td>
-        <td>{$recording_save.INPUT}</td>
-        <td>{$recording_save_stat}</td>
-    </tr>
-    <tr>
         <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$SPEEDDIAL}</td>
     </tr>
     <tr class="feature">

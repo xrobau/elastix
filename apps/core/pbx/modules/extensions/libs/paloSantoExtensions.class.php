@@ -192,6 +192,8 @@ class paloSantoExtensions{
 								break;
 							case "mailbox":
 								break;
+                            case "fullname":
+                                break;
 							default:
 								if(isset($value)){
 									if($key!="uniqueid" && $key!="organization_domain" && $key!="stamp" && $key!="dialout" && $key!="callback"){

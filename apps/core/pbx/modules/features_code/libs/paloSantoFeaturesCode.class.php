@@ -278,7 +278,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoBLCheck->errMsg="app-blacklist-check. Error: ".$contextoBLCheck->errMsg;
 		}else{
 			$contextoBLCheck->arrExtensions=$arrBLCheck;
-			$arrFromInt[]="app-blacklist-check";
+			$arrFromInt[]["name"]="app-blacklist-check";
 		}
 
 		$arrContext[]=$contextoBLCheck;
@@ -288,7 +288,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 		$this->setArrFCbyCategory($arrFeature);
 
 		$contextoBLapp=new paloContexto($this->code,"app-blacklist");
-		$arrFromInt[]="app-blacklist";
+		$arrFromInt[]["name"]="app-blacklist";
 
 		if(is_array($this->arrFeatureCode)){
 			foreach($this->arrFeatureCode as $value){
@@ -476,7 +476,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-on. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-on";
+			$arrFromInt[]["name"]="app-cf-on";
 		}
 
 		return array($contextoCF);
@@ -519,7 +519,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-off. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-off";
+			$arrFromInt[]["name"]="app-cf-off";
 		}
 
 		return array($contextoCF);
@@ -556,7 +556,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-off-any. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-off-any";
+			$arrFromInt[]["name"]="app-cf-off-any";
 		}
 
 		return array($contextoCF);
@@ -597,7 +597,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-busy-on. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-busy-on";
+			$arrFromInt[]["name"]="app-cf-busy-on";
 		}
 
 		return array($contextoCF);
@@ -627,7 +627,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-busy-off. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-busy-off";
+			$arrFromInt[]["name"]="app-cf-busy-off";
 		}
 
 		return array($contextoCF);
@@ -652,7 +652,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-busy-off-any. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-busy-off-any";
+			$arrFromInt[]["name"]="app-cf-busy-off-any";
 		}
 
 		return array($contextoCF);
@@ -693,7 +693,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-unavailable-on. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-unavailable-on";
+			$arrFromInt[]["name"]="app-cf-unavailable-on";
 		}
 
 		return array($contextoCF);
@@ -723,7 +723,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-unavailable-off. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-unavailable-on";
+			$arrFromInt[]["name"]="app-cf-unavailable-on";
 		}
 
 		return array($contextoCF);
@@ -772,7 +772,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCF->errMsg="app-cf-toggle. Error: ".$contextoCF->errMsg;
 		}else{
 			$contextoCF->arrExtensions=$arrCF;
-			$arrFromInt[]="app-cf-toggle";
+			$arrFromInt[]["name"]="app-cf-toggle";
 		}
 
 		$arrContexts=array($contextoCF);
@@ -792,7 +792,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 				$contextoCFhint->errMsg="app-cf-toggle. Error: ".$contextoCFhint->errMsg;
 			}else{
 				$contextoCFhint->arrExtensions=$arrCFhint;
-				$arrFromInt[]="ext-cf-hints";
+				$arrFromInt[]["name"]="ext-cf-hints";
 			}
 			$arrContexts[]=$contextoCFhint;
 		}
@@ -833,7 +833,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCW->errMsg="app-callwaiting-cwon. Error: ".$contextoCW->errMsg;
 		}else{
 			$contextoCW->arrExtensions=$arrCW;
-			$arrFromInt[]="app-callwaiting-cwon";
+			$arrFromInt[]["name"]="app-callwaiting-cwon";
 		}
 		return array($contextoCW);
 	}
@@ -852,7 +852,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCW->errMsg="app-callwaiting-cwon. Error: ".$contextoCW->errMsg;
 		}else{
 			$contextoCW->arrExtensions=$arrCW;
-			$arrFromInt[]="app-callwaiting-cwoff";
+			$arrFromInt[]["name"]="app-callwaiting-cwoff";
 		}
 		return array($contextoCW);
 	}
@@ -894,7 +894,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoDT->errMsg="app-dictate-record. Error: ".$contextoDT->errMsg;
 		}else{
 			$contextoDT->arrExtensions=$arrDT;
-			$arrFromInt[]="app-dictate-record";
+			$arrFromInt[]["name"]="app-dictate-record";
 		}
 		return array($contextoDT);
 	}
@@ -924,7 +924,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoDT->errMsg="app-dictate-send. Error: ".$contextoDT->errMsg;
 		}else{
 			$contextoDT->arrExtensions=$arrDT;
-			$arrFromInt[]="app-dictate-send";
+			$arrFromInt[]["name"]="app-dictate-send";
 		}
 		return array($contextoDT);
 	}
@@ -972,7 +972,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoDND->errMsg="app-dnd-on. Error: ".$contextoDND->errMsg;
 		}else{
 			$contextoDND->arrExtensions=$arrDND;
-			$arrFromInt[]="app-dnd-on";
+			$arrFromInt[]["name"]="app-dnd-on";
 		}
 		return array($contextoDND);
 	}
@@ -1002,7 +1002,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoDND->errMsg="app-dnd-off. Error: ".$contextoDND->errMsg;
 		}else{
 			$contextoDND->arrExtensions=$arrDND;
-			$arrFromInt[]="app-dnd-off";
+			$arrFromInt[]["name"]="app-dnd-off";
 		}
 		return array($contextoDND);
 	}
@@ -1038,7 +1038,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoDND->errMsg="app-dnd-toggle. Error: ".$contextoDND->errMsg;
 		}else{
 			$contextoDND->arrExtensions=$arrDND;
-			$arrFromInt[]="app-dnd-toggle";
+			$arrFromInt[]["name"]="app-dnd-toggle";
 		}
 		$arrContexts=array($contextoDND);
 
@@ -1054,7 +1054,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 				$contextohint->errMsg="app-dnd-hints. Error: ".$contextohint->errMsg;
 			}else{
 				$contextohint->arrExtensions=$arrhint;
-				$arrFromInt[]="ext-dnd-hints";
+				$arrFromInt[]["name"]="ext-dnd-hints";
 			}
 			$arrContexts[]=$contextohint;
 		}
@@ -1095,7 +1095,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contextoCT->errMsg="app-calltrace. Error: ".$contextoCT->errMsg;
 		}else{
 			$contextoCT->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-calltrace";
+			$arrFromInt[]["name"]="app-calltrace";
 		}
 		$arrContext=array($contextoCT);
 
@@ -1152,11 +1152,11 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 		$arrEXT[]=new paloExtensions($fcode,new ext_answer(),"1");
 		$arrEXT[]=new paloExtensions($fcode,new ext_wait("1"));
 		$arrEXT[]=new paloExtensions($fcode,new ext_setvar("DIRECTORY_OPT_LENGTH",'${IF($["${'.$this->code.'_DIRECTORY_OPT_LENGTH}"!="" ]?${'.$this->code.'_DIRECTORY_OPT_LENGTH}:3)}'));
-		$arrEXT[]=new paloExtensions($fcode,new ext_directory($vm_context,$dial_context,$this->code.'_${DIRECTORY_OPT_EXT}'.$this->code.'_${DIRECTORY:0:1}(${DIRECTORY_OPT_LENGTH})p(1)'));
+		$arrEXT[]=new paloExtensions($fcode,new ext_directory($vm_context,$dial_context,'${'.$this->code.'_DIRECTORY_OPT_EXT}${'.$this->code.'_DIRECTORY:0:1}(${DIRECTORY_OPT_LENGTH})p(1)'));
 		$arrEXT[]=new paloExtensions($fcode,new ext_playback('vm-goodbye'));
 		$arrEXT[]=new paloExtensions($fcode,new ext_hangup());
 		if ($operator_ext != '') {
-			$arrEXT[]=new paloExtensions('o',new ext_goto($this->code.'-from-internal,'.$this->code.'_${OPERATOR_XTN},1'));
+			$arrEXT[]=new paloExtensions('o',new ext_goto($this->code.'-from-internal,${'.$this->code.'_OPERATOR_XTN},1'));
 		} else {
 			$arrEXT[]=new paloExtensions('o',new ext_playback('privacy-incorrect'));
 		}
@@ -1166,7 +1166,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-directory. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-directory";
+			$arrFromInt[]["name"]="app-directory";
 		}
 		return array($contexto);
 	}
@@ -1185,7 +1185,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-echo-test. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-echo-test";
+			$arrFromInt[]["name"]="app-echo-test";
 		}
 		return array($contexto);
 	}
@@ -1208,7 +1208,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-speakextennum. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-speakextennum";
+			$arrFromInt[]["name"]="app-speakextennum";
 		}
 		return array($contexto);
 	}
@@ -1238,19 +1238,19 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-speakingclock. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-speakingclock";
+			$arrFromInt[]["name"]="app-speakingclock";
 		}
 		return array($contexto);
 	}
 
 	private function dialPlanInfo_pbdirectory(&$arrEXT,&$arrFromInt){
-		$opts="";
+		$opts="f";
 		//DIRECTORY=last -> cuando se busca por nombre
 		//DIRECTORY=first -> cuando se busca por apellido
 		$query="select value from globals where organization_domain=? and variable=?";
 		$result=$this->getFirstResultQuery($query,array($this->domain,"DIRECTORY"));
 		if($result!=false){
-			if($result[0]!="last")
+			if($result[0]=="first" || $result[0]=="both")
 				$opts="a";
 		}
 
@@ -1269,59 +1269,9 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-pbdirectory. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-pbdirectory";
+			$arrFromInt[]["name"]="app-pbdirectory";
 		}
 		return array($contexto);
-	}
-
-	//TODO:pendiente
-	//aun falta definir como se realizaran las grabaciones del sistema personalizada
-	private function createDialPlanFuntionRecord(){
-		/*$arrContext=array();
-		$arrFeature=array("recording_check","recording_save");
-		unset($this->arrFeatureCode);
-		$this->setArrFCbyCategory($arrFeature);
-		if(is_array($this->arrFeatureCode)){
-			foreach($this->arrFeatureCode as $value){
-				if($value!=false){
-					//funcion que me devuelve un arreglo con los contexto creados
-					$fname="dialPlanRD_".$value->name;
-					$contexts=$this->$fname($value->getCurrentCode());
-					$arrContext=array_merge($arrContext,$contexts);
-				}
-			}
-		}
-		return $arrContext;*/
-
-		/*TAMBIEN ES DE REVISAR ESTA MACRO
-		[macro-{CODE}-systemrecording]
-		include => macro-{CODE}-systemrecording-custom
-		exten => s,1,Set(RECFILE=${IF($["${ARG2}" = ""]?/var/spool/asterisk/tmp/{domino}/${EXTUSER}-ivrrecording:${ARG2})})
-		exten => s,n,ExecIf($["${ARG3}" != ""]?Authenticate(${ARG3}))
-		exten => s,n,Goto(${ARG1},1)
-		exten => dorecord,1,System(rm ${ASTVARLIBDIR}/sounds/{domino}/${RECFILE}.*)
-		exten => dorecord,n,Record(${RECFILE}:wav)
-		exten => dorecord,n,Wait(1)
-		exten => dorecord,n,Goto(confmenu,1)
-		exten => docheck,1,Playback(beep)
-		exten => docheck,n(dc_start),Background(${RECFILE},m,${CHANNEL(language)},macro-{CODE}-systemrecording)
-		exten => docheck,n,Wait(1)
-		exten => docheck,n,Goto(confmenu,1)
-		exten => confmenu,1,Background(to-listen-to-it&press-1&to-rerecord-it&press-star&astcc-followed-by-pound,m,${CHANNEL(language)},macro-{CODE}-systemrecording)
-		exten => confmenu,n,Read(RECRESULT,,1,,,4)
-		exten => confmenu,n,GotoIf($["x${RECRESULT}"="x*"]?dorecord,1)
-		exten => confmenu,n,GotoIf($["x${RECRESULT}"="x1"]?docheck,2)
-		exten => confmenu,n,Goto(1)
-		exten => 1,1,Goto(docheck,dc_start)
-		exten => *,1,Goto(dorecord,1)
-		exten => t,1,Playback(goodbye)
-		exten => t,n,Hangup
-		exten => i,1,Playback(pm-invalid-option)
-		exten => i,n,Goto(confmenu,1)
-		exten => h,1,Hangup
-
-		; end of [macro-{CODE}-systemrecording]
-		*/
 	}
 
 	private function createDialPlanFuntionSpeedDial(&$arrFromInt){
@@ -1363,7 +1313,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-speeddial. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-speeddial";
+			$arrFromInt[]["name"]="app-speeddial";
 		}
 		return $contexto;
 	}
@@ -1460,7 +1410,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-dialvm. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-dialvm";
+			$arrFromInt[]["name"]="app-dialvm";
 		}
 		return array($contexto);
 	}
@@ -1487,7 +1437,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
 			$contexto->errMsg="app-vmmain. Error: ".$contexto->errMsg;
 		}else{
 			$contexto->arrExtensions=$arrEXT;
-			$arrFromInt[]="app-vmmain";
+			$arrFromInt[]["name"]="app-vmmain";
 		}
 		return array($contexto);
 	}
@@ -1523,7 +1473,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
             $contexto->errMsg="ext-test. Error: ".$contexto->errMsg;
         }else{
             $contexto->arrExtensions=$arrEXT;
-            $arrFromInt[]="ext-test";
+            $arrFromInt[]["name"]="ext-test";
         }
         return array($contexto);
     }
@@ -1575,7 +1525,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
             $contexto->errMsg="app-pickup. Error: ".$contexto->errMsg;
         }else{
             $contexto->arrExtensions=$arrEXT;
-            $arrFromInt[]="app-pickup";
+            $arrFromInt[]["name"]="app-pickup";
         }
         return array($contexto);
 	}

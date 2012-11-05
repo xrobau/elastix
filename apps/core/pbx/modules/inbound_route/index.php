@@ -671,8 +671,6 @@ function createFieldForm($goto,$destination,$faxes,$arrDetect)
     $oneToFifteen = generateOptionNum(1, 15);
     $twoToTen = generateOptionNum(2, 10);
     $arrLng=getLanguagePBX();
-    //var_dump($arrTrunks);
-    $arrLang=getLanguagePBX();
     $arrFormElements = array("description"	=> array("LABEL"             => _tr('Description'),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",

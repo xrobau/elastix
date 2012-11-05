@@ -537,7 +537,7 @@ class paloSantoInbound extends paloAsteriskDB{
                 }
                 
                 // If we require RINGING, signal it as soon as we enter.
-                if ($value['ringnig'] === "on") {
+                if ($value['ringing'] === "on") {
                     $arrExt[$context][]=new paloExtensions($exten, new ext_ringing(''));
                 }
                 if ($value['delay_answer']) {

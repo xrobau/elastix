@@ -740,6 +740,13 @@ function get_destination_category($smarty, $module_name, $pDB, $arrConf, $userLe
 
 function createFieldForm($arrOrgz,$recordings,$arrGoTo)
 {
+    $arrRecordings=array("none"=>"None");
+    if(is_array($recordings)){
+        foreach($recordings as $key => $value){
+            $arrRecordings[$key] = $value;
+        }
+    }
+    
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $loops=array(0,1,2,3,4,5,6,7,8,9);
     $arrFormElements = array("name" => array("LABEL"                  => _tr('Display Name'),
@@ -751,7 +758,7 @@ function createFieldForm($arrOrgz,$recordings,$arrGoTo)
                              "announcement"  => array("LABEL"                => _tr("Announcement"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $recordings,
+                                                    "INPUT_EXTRA_PARAM"      => $arrRecordings,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),//accion en javascript
                              "timeout"   => array("LABEL"                  => _tr("Timeout"),
@@ -775,13 +782,13 @@ function createFieldForm($arrOrgz,$recordings,$arrGoTo)
                             "mesg_timeout"       => array("LABEL"             => _tr("Timeout Message"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $recordings,
+                                                    "INPUT_EXTRA_PARAM"      => $arrRecordings,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "mesg_invalid"  => array("LABEL"                  => _tr("Invalid Message"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $recordings,
+                                                    "INPUT_EXTRA_PARAM"      => $arrRecordings,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "loops"       => array("LABEL"                  => _tr("Repeat Loops"),

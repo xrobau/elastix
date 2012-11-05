@@ -112,7 +112,7 @@
                 </tr>
                 <tr class="queue">
                     <td nowrap>{$category.LABEL}:</td>
-                    <td colspan=3>{$category.INPUT} {$destination.INPUT}</td>
+                    <td colspan=3>{$category.INPUT} {if $mode eq 'view'}>>{/if} {$destination.INPUT}</td>
                 </tr>
             </table>
         </div>       

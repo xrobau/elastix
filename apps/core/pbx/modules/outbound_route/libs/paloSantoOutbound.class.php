@@ -781,7 +781,7 @@ class paloSantoOutbound extends paloAsteriskDB{
         $arrPattern=$this->_DB->fetchTable($query,true,array($out_id));
         if($arrPattern!=false){
             foreach($arrPattern as $value){
-                print_r($arrPattern);
+                
                 if((isset($value["match_pattern"]) && $value["match_pattern"]!="") || (isset($value["prefix"]) && $value["prefix"]!="")){
                     //prefix
                     if(isset($value["prefix"]) && $value["prefix"]!=""){

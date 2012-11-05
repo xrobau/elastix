@@ -193,6 +193,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Mon Nov  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Fax: fix regression in which mail notification placeholders were not
+  replaced with the intended values.
+  SVN Rev[4402]
+
 * Fri Oct 26 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax Viewer: at check status routine, session variable might be 
   invalid and trigger PHP warnings. Initialize local copy as array and copy 

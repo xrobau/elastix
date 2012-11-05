@@ -480,16 +480,16 @@ function sendEmailFax($conn, $sRepresentativeName, $idModemDevice, $sCompanyName
         'content'   =>  "Fax $sRepresentativeName of $sCompanyName - $sCompanyNumber",
     );
     $replaceStrings = array(
-        '{NAME_PDF}'            =>  basename($sRepresentativeName, '.pdf'),
-        '{COMPANY_NAME_FROM}'   =>  $sCompanyName,
-        '{COMPANY_NUMBER_FROM}' =>  $sCompanyNumber,
+        array('{NAME_PDF}',             basename($sRepresentativeName, '.pdf')),
+        array('{COMPANY_NAME_FROM}',    $sCompanyName),
+        array('{COMPANY_NUMBER_FROM}',  $sCompanyNumber),
     );
     $sth = $conn->query(
         'SELECT remite, remitente, subject, content FROM configuration_fax_mail WHERE id = 1');
     while ($tuple = $sth->fetch(PDO::FETCH_ASSOC)) {
         foreach ($replaceStrings as $replace) {
-        	str_replace($replace[0], $replace[1], $tuple['subject']);
-            str_replace($replace[0], $replace[1], $tuple['content']);
+            $tuple['subject'] = str_replace($replace[0], $replace[1], $tuple['subject']);
+            $tuple['content'] = str_replace($replace[0], $replace[1], $tuple['content']);
         }
         foreach ($tuple as $k => $v) $tuple[$k] = utf8_decode($v);
         $emailInfo = $tuple;

@@ -489,9 +489,9 @@ class paloSantoRG extends paloAsteriskDB{
                     $arrExt[]=new paloExtensions($exten, new ext_gotoif('$["${RGPREFIX}" = "${CURRENT_PREFIX}"]', 'continue'));
                     $arrExt[]=new paloExtensions($exten, new ext_noop('CALLERID(name) is ${CALLERID(name)}'),"n",'rgprefix');
                     $arrExt[]=new paloExtensions($exten, new ext_setvar('_RGPREFIX', $value["rg_cid_prefix"]));
-                    $arrExt[]=new paloExtensions($exten, new ext_setvar('CALLERID(name)','${RGPREFIX}${CALLERID(name)}'));
+                    $arrExt[]=new paloExtensions($exten, new ext_setvar('CALLERID(name)','${RGPREFIX} ${CALLERID(name)}'));
                     //seteamos los parametros para la grabacion
-                    $arrExt[]=new paloExtensions($exten, new ext_macro('record-enable',$value["rg_extensions"].',Group'),'n','continue');
+                    $arrExt[]=new paloExtensions($exten, new ext_macro($this->code.'-record-enable',$value["rg_extensions"].',Group'),'n','continue');
                     
                     if($value["rg_alertinfo"]!=""){
                         $arrExt[]=new paloExtensions($exten, new ext_setvar('__ALERT_INFO', str_replace(';', '\;', $value["rg_alertinfo"])));
@@ -529,13 +529,13 @@ class paloSantoRG extends paloAsteriskDB{
                     }
                     
                     if($value["rg_confirm_call"]=="yes"){
-                        $remote=$this->getFileRecordings($this->domain,$arrProp["rg_record_remote"]);
-                        $toolate=$this->getFileRecordings($this->domain,$arrProp["rg_record_toolate"]);
+                        $remote=$this->getFileRecordings($this->domain,$value["rg_record_remote"]);
+                        $toolate=$this->getFileRecordings($this->domain,$value["rg_record_toolate"]);
                         $remote=($remote==false)?"":$remote;
                         $toolate=($toolate==false)?"":$toolate;
                         $len=strlen($exten)+4;
                         
-                        $arrExt2[]=new paloExtensions("_RG-$exten-.", new ext_macro($this->code.'-dial',$value["rg_time"].",M(".$this->code."-confirm^$remote^$toolate^$exten)$dialopts".',${EXTEN:'.$len.'}'));
+                        $arrExt2[]=new paloExtensions("_RG-$exten-.", new ext_macro($this->code.'-dial',$value["rg_time"].",M(".$this->code."-confirm^$remote^$toolate^$exten)$dialopts".',${EXTEN:'.$len.'}'),"1");
                         
                         $arrExt[]=new paloExtensions($exten, new ext_macro($this->code.'-dial-confirm',$value["rg_time"].",".$dialopts.",".$value["rg_extensions"].",".$exten),"n",'DIALGRP');
                     }else{
@@ -549,7 +549,7 @@ class paloSantoRG extends paloAsteriskDB{
                     
                     if($value["rg_skipbusy"]=="yes"){
                         $arrExt[]=new paloExtensions($exten, new ext_setvar('_CFIGNORE', ''));
-                        $arrExt[]=new paloExtensions($exten, new ext_setvar('_FORWARD_CONTEXT', $this->code.'from-internal'));
+                        $arrExt[]=new paloExtensions($exten, new ext_setvar('_FORWARD_CONTEXT', $this->code.'-from-internal'));
                     }
                     
                     $arrExt[]=new paloExtensions($exten, new ext_setvar('__NODEST', ''));

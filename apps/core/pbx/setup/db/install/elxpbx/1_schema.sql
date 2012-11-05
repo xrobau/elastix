@@ -739,7 +739,7 @@ INSERT INTO globals_settings VALUES("VMX_OPTS_DOVM","");
 INSERT INTO globals_settings VALUES("VMX_TIMEOUT","2");
 INSERT INTO globals_settings VALUES("VMX_REPEAT","1");
 INSERT INTO globals_settings VALUES("VMX_LOOPS","1");
-INSERT INTO globals_settings VALUES("DIRECTORY","last");
+INSERT INTO globals_settings VALUES("DIRECTORY","first");
 INSERT INTO globals_settings VALUES("DIRECTORY_OPT_EXT","");
 INSERT INTO globals_settings VALUES("DIRECTORY_OPT_LENGTH","3"); 
 INSERT INTO globals_settings VALUES("TONEZONE","us");

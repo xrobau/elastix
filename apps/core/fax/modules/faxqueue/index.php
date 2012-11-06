@@ -30,6 +30,7 @@
 //require_once 'libs/paloSantoFax.class.php';
 require_once 'libs/paloSantoGrid.class.php';
 require_once 'libs/paloSantoJSON.class.php';
+require_once 'libs/paloSantoFax.class.php';
 require_once 'libs/misc.lib.php';
 
 function _moduleContent($smarty, $module_name)
@@ -145,30 +146,10 @@ JID  Pri S  Owner Number       Pages Dials     TTS Status
  */
 function enumerarFaxesPendientes()
 {
-    // %-4j %3i %1a %6.6o %-12.12e %5P %5D %7z %.25s
-    $regexp = '/^(\d+)\s+(\d+)\s+(\w+)\s+(\S+)\s+(\S+)\s+(\d+):(\d+)\s+(\d+):(\d+)\s*(\d+:\d+)?\s*(.*)/';    
-	$output = $retval = NULL;
-    exec('/usr/bin/faxstat -sl', $output, $retval);
-    $faxqueue = array();
-    foreach ($output as $s) {
-    	$regs = NULL;
-        if (preg_match($regexp, trim($s), $regs)) {
-    		$faxqueue[] = array(
-                'jobid'         =>  $regs[1],
-                'priority'      =>  $regs[2],
-                'state'         =>  $regs[3],
-                'owner'         =>  $regs[4],
-                'outnum'        =>  $regs[5],
-                'sentpages'     =>  $regs[6],
-                'totalpages'    =>  $regs[7],
-                'retries'       =>  $regs[8],
-                'totalretries'  =>  $regs[9],
-                'timetosend'    =>  $regs[10],
-                'status'        =>  $regs[11],
-            );
-    	}
-    }
-    
-    return $faxqueue;
+    $faxstatus = paloFax::getFaxStatus();
+    $jobs = array();
+    foreach ($faxstatus['jobs'] as $k => $t) 
+        if (!in_array($t['state'], array('F', 'D'))) $jobs[$k] = $t;
+    return $jobs;
 }
 ?>

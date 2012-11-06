@@ -194,6 +194,8 @@ fi
 
 %changelog
 * Tue Nov  6 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax Queue: reimplement fax job listing on top of getFaxStatus
+  SVN Rev[4415]
 - CHANGED: Fax: rework getFaxStatus method to provide more information about the
   fax queue, in addition to the modems.
   SVN Rev[4414]

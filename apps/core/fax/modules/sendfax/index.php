@@ -95,22 +95,6 @@ function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $id     = getParameter("id");
     $smarty->assign("ID", $id); //persistence id with input hidden in tpl
 
-
-    if($action=="view")
-        $oForm->setViewMode();
-    else if($action=="view_edit" || getParameter("save_edit"))
-        $oForm->setEditMode();
-    //end, Form data persistence to errors and other events.
-
-    if($action=="view" || $action=="view_edit"){ // the action is to view or view_edit.
-        $dataSendFax = $pSendFax->getSendFaxById($id);
-        if(is_array($dataSendFax) & count($dataSendFax)>0)
-            $_DATA = $dataSendFax;
-        else{
-            $smarty->assign("mb_title", $arrLang["Error get Data"]);
-            $smarty->assign("mb_message", $pSendFax->errMsg);
-        }
-    }
     //Lo q hace es ckeckear por default Text Information
     if(isset($_POST['option_fax']) && $_POST['option_fax']=='by_file')
         $smarty->assign("check_file", "checked");
@@ -171,22 +155,10 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
         }
 
-
         if(getParameter("option_fax")=="by_file"){
             if(is_uploaded_file($_FILES['file_record']['tmp_name'])) {
-                $ruta_archivo = "/tmp/".$_FILES['file_record']['name'];
-                // Validation of type file
-                $ext = explode(".",$_FILES['file_record']['name']);
-                $size_ext = count($ext) - 1;
-				if(strtolower($ext[$size_ext])!="pdf" && $ext[$size_ext]!="tiff" && strtolower($ext[$size_ext])!="tif" && strtolower($ext[$size_ext])!="txt"){
-                    $smarty->assign("mb_title", $arrLang["Validation Error"]);
-                    $smarty->assign("mb_message", $arrLang["Wrong type of file"]);
-                    return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-                }
-                // Done by Ivette
-                copy($_FILES['file_record']['tmp_name'], $ruta_archivo);
-            }
-            else{
+                $ruta_archivo = $_FILES['file_record']['tmp_name'];
+            } else {
                 $smarty->assign("mb_title", $arrLang["Validation Error"]);
                 $smarty->assign("mb_message", $arrLang["File to upload is empty"]);
                 return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
@@ -205,17 +177,16 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             }
         }
     
-        $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
-        exec("rm -rf $ruta_archivo");
-        $smarty->assign("SEND_FAX_SUCCESS",_tr('Fax has been sent correctly'));
-        $smarty->assign("SENDING_FAX",_tr('Sending Fax...'));
-          //Notification Sucessfull
-        //$smarty->assign("mb_title", $arrLang["Notification Sucessfull"].": ");
-        //$smarty->assign("mb_message", $arrLang["Fax has been sent correctly"]);
+        $bExito = $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
+        if (!$bExito) {
+            $smarty->assign("mb_title", _tr('Validation Error'));
+            $smarty->assign("mb_message", _tr('Failed to submit job').': '.$pSendFax->errMsg);
+        } else {
+            $smarty->assign("SEND_FAX_SUCCESS",_tr('Fax has been sent correctly'));
+            $smarty->assign("SENDING_FAX",_tr('Sending Fax...'));
+        }
         return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-        //done by Ivette
     }
-    //return $content;
 }
 
 function createFieldForm($arrLang, $arrFaxList)
@@ -253,16 +224,6 @@ function getAction()
 {
     if(getParameter("save_new")) //Get parameter by POST (submit)
         return "save_new";
-    else if(getParameter("save_edit"))
-        return "save_edit";
-    else if(getParameter("delete")) 
-        return "delete";
-    else if(getParameter("new_open")) 
-        return "view_form";
-    else if(getParameter("action")=="view")      //Get parameter by GET (command pattern, links)
-        return "view_form";
-    else if(getParameter("action")=="view_edit")
-        return "view_form";
     else
         return "report"; //cancel
 }

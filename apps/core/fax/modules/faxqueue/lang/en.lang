@@ -47,5 +47,7 @@ $arrLangModule = array(
 'Are you sure to cancel selected jobs?' => 'Are you sure to cancel selected jobs?',
 'Cancel job' => 'Cancel job',
 'Failed to cancel job' => 'Failed to cancel job',
+// Note: truncation on faxstat output
+'Blocked by concurrent cal' => 'Blocked by concurrent call',
 );
 ?>

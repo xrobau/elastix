@@ -207,6 +207,17 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Tue Nov  6 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Send Fax: partial cleanup:
+  Do not silently ignore failure to submit a fax job, and display error instead.
+  Remove useless code that could potentially error out the module.
+  Remove needless copy of temporary file followed by manual delete. Use the
+  temporary uploaded file directly.
+  Remove file type validation based on file extension. It is easy to beat, also
+  prevents legitimate text files from being uploaded, and sendfax already has
+  to figure out file type in order to apply conversion.
+  SVN Rev[4412]
+
 * Fri Oct 26 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax Viewer: at check status routine, session variable might be 
   invalid and trigger PHP warnings. Initialize local copy as array and copy 

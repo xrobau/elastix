@@ -43,5 +43,9 @@ $arrLangModule = array(
 'No answer from remote' => 'No hay respuesta del lado remoto',
 'Could not read request file' => 'No se puede leer archivo de petición',
 'Blocked by another job' => 'Bloqueado por otro trabajo',
+'Delayed by prior call' => 'Detenido por llamada anterior',
+'Are you sure to cancel selected jobs?' => '¿Está seguro de cancelar el trabajo?',
+'Cancel job' => 'Cancelar trabajo',
+'Failed to cancel job' => 'No se pudo cancelar trabajo',
 );
 ?>

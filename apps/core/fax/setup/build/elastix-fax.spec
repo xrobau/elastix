@@ -193,6 +193,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Tue Nov  6 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax Queue: implement fax job cancelation. Fix regexp to show running
+  jobs, not just stalled ones. Remove stray debugging messages.
+  SVN Rev[4410]
+
 * Mon Nov  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Fax: new module Fax Queue to monitor status of outgoing faxes that 
   cannot be immediately dispatched.

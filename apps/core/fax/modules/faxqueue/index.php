@@ -58,6 +58,17 @@ function _moduleContent($smarty, $module_name)
 
 function listarColaFax_html($smarty, $module_name, $local_templates_dir)
 {
+    if (isset($_POST['remove']) && isset($_POST['jobid'])) {
+    	$output = $retval = NULL;
+        exec('/usr/bin/faxrm '.escapeshellarg($_POST['jobid']).' 2>&1', $output, $retval);
+        if ($retval != 0) {
+            $smarty->assign(array(
+                'mb_title'      =>  _tr('ERROR'),
+                'mb_message'    =>  _tr('Failed to remove job').': '.implode('<br\>', $output),
+            ));
+        }
+    }
+    
     $listaColaFax = enumerarFaxesPendientes();
     $hash = md5(serialize($listaColaFax));
     $html = listarColaFax_raw($smarty, $module_name, $local_templates_dir, $listaColaFax);
@@ -75,7 +86,6 @@ function listarColaFax_json($smarty, $module_name, $local_templates_dir)
     do {
         $listaColaFax = enumerarFaxesPendientes();
         $newhash = md5(serialize($listaColaFax));
-        file_put_contents('/tmp/debug-faxqueue.txt', "oldhash=$oldhash newhash=$newhash\n", FILE_APPEND);
         if ($oldhash == $newhash) {
         	usleep(2 * 1000000);
         } else {
@@ -94,10 +104,12 @@ function listarColaFax_raw($smarty, $module_name, $local_templates_dir, $listaCo
 {
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->pagingShow(FALSE);
-    $oGrid->setURL("?menu=faxqueue");
+    $oGrid->setURL('?menu=faxqueue');
     $oGrid->setTitle(_tr('Fax Queue'));
+    $oGrid->deleteList('Are you sure to cancel selected jobs?', 'remove', _tr('Cancel job'));
     
     $arrColumns = array(
+        '',
         _tr('Job ID'),
         _tr('Priority'),
         _tr('Destination'),
@@ -109,12 +121,13 @@ function listarColaFax_raw($smarty, $module_name, $local_templates_dir, $listaCo
     function listarColaFax_toHTML($t)
     {
     	return array(
+            '<input type="radio" name="jobid" value="'.$t['jobid'].'"/>',
             $t['jobid'],
             $t['priority'],
             $t['outnum'],
             sprintf(_tr('Sent %d pages of %d'), $t['sentpages'], $t['totalpages']),
             sprintf(_tr('Try %d of %d'), $t['retries'], $t['totalretries']),
-            _tr($t['status']),
+            '['.$t['state'].'] '._tr($t['status']),
         );
     }    
     $oGrid->setData(array_map('listarColaFax_toHTML', $listaColaFax));
@@ -133,7 +146,7 @@ JID  Pri S  Owner Number       Pages Dials     TTS Status
 function enumerarFaxesPendientes()
 {
     // %-4j %3i %1a %6.6o %-12.12e %5P %5D %7z %.25s
-    $regexp = '/^(\d+)\s+(\d+)\s+(\w+)\s+(\S+)\s+(\S+)\s+(\d+):(\d+)\s+(\d+):(\d+)\s+(\d+:\d+)?\s*(.*)/';    
+    $regexp = '/^(\d+)\s+(\d+)\s+(\w+)\s+(\S+)\s+(\S+)\s+(\d+):(\d+)\s+(\d+):(\d+)\s*(\d+:\d+)?\s*(.*)/';    
 	$output = $retval = NULL;
     exec('/usr/bin/faxstat -sl', $output, $retval);
     $faxqueue = array();

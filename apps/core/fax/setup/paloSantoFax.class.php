@@ -290,6 +290,7 @@ class paloFax {
         }
     }
 
+/*
     function getFaxStatus()
     {
         $arrStatus = array();
@@ -303,6 +304,61 @@ class paloFax {
         }
 
         return $arrStatus;
+    }
+*/
+    /**
+     * Procedimiento para reportar el estado completo de la cola de faxes.
+     * 
+     * @return  mixed   Arreglo con el siguiente formato:
+     *  array(
+     *      'modems' => array(
+     *          'ttyIAX1' => 'Running and idle',
+     *          'ttyIAX2' => 'Running and idle',
+     *      ),
+     *      'jobs'  =>  array(
+     *          ...
+     *      ),     
+     * 
+     *  )
+     */
+    function getFaxStatus()
+    {
+        /*
+        [root@elx2 ~]# faxstat -s -d
+        HylaFAX scheduler on localhost: Running
+        Modem ttyIAX1 (): Running and idle
+        Modem ttyIAX2 (): Running and idle
+        
+        JID  Pri S  Owner Number       Pages Dials     TTS Status
+        28   125 S asteri 1099          0:1   2:12   17:27 Busy signal detected
+         */
+        $status = array('modems' => array(), 'jobs' => array());
+        $regexpModem = '/^Modem (ttyIAX\d+).*?:\s*(.*)/';
+        $regexpJob = '/^(\d+)\s+(\d+)\s+(\w+)\s+(\S+)\s+(\S+)\s+(\d+):(\d+)\s+(\d+):(\d+)\s*(\d+:\d+)?\s*(.*)/';    
+        $output = $retval = NULL;
+        exec('/usr/bin/faxstat -sdl', $output, $retval);
+        foreach ($output as $s) {
+        	$regs = NULL;
+            if (preg_match($regexpModem, $s, $regs)) {
+        		$status['modems'][$regs[1]] = $regs[2];
+        	} elseif (preg_match($regexpJob, $s, $regs)) {
+        		$status['jobs'][(int)$regs[1]] = array(
+                    'jobid'         =>  $regs[1],
+                    'priority'      =>  $regs[2],
+                    'state'         =>  $regs[3],
+                    'owner'         =>  $regs[4],
+                    'outnum'        =>  $regs[5],
+                    'sentpages'     =>  $regs[6],
+                    'totalpages'    =>  $regs[7],
+                    'retries'       =>  $regs[8],
+                    'totalretries'  =>  $regs[9],
+                    'timetosend'    =>  $regs[10],
+                    'status'        =>  $regs[11],
+                );
+        	}
+        }
+        ksort($status['jobs']);
+        return $status;
     }
 
     function editFaxExtension($idFax,$virtualFaxName, $extNumber, $extSecret, $destinationEmail, $CIDName, $CIDNumber, $devId, $port,$countryCode, $areaCode)

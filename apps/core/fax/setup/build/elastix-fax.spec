@@ -194,6 +194,9 @@ fi
 
 %changelog
 * Tue Nov  6 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax: rework getFaxStatus method to provide more information about the
+  fax queue, in addition to the modems.
+  SVN Rev[4414]
 - CHANGED: Send Fax: partial cleanup:
   Do not silently ignore failure to submit a fax job, and display error instead.
   Remove useless code that could potentially error out the module.

@@ -105,7 +105,7 @@ function listFax($smarty, $module_name, $local_templates_dir)
         $arrTmp[3] = $fax['email'];
         $arrTmp[4] = $fax['clid_name'] . "&nbsp;";
         $arrTmp[5] = $fax['clid_number'] . "&nbsp;";
-        $arrTmp[6] = $arrFaxStatus['ttyIAX' . $fax['dev_id']].' on ttyIAX' . $fax['dev_id'];
+        $arrTmp[6] = $arrFaxStatus['modems']['ttyIAX' . $fax['dev_id']].' on ttyIAX' . $fax['dev_id'];
         $arrData[] = $arrTmp;
     }
 
@@ -147,7 +147,7 @@ function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $a
     $arrFaxStatus = $oFax->getFaxStatus();
     $arrData    = array();
     foreach($arrFax as $fax) {
-        $arrData[$fax['extension']] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
+        $arrData[$fax['extension']] = $arrFaxStatus['modems']['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
     }
 
     $statusArr    = thereChanges($arrData);

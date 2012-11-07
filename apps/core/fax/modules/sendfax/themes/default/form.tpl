@@ -56,7 +56,7 @@
 </table>
 <input class="button" type="hidden" name="id" value="{$ID}" />
 <input type='hidden' name='filename' value='{$filename}' />
-
+<input type='hidden' name='jobid' id='jobid' value='{$JOBID}' />
 {literal}
     <script type="text/javascript">
         Activate_Option_Fax();

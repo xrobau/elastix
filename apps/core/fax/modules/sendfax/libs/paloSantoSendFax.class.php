@@ -57,10 +57,12 @@ class paloSantoSendFax {
         $data = escapeshellarg($data);
         $output = $retval = NULL;
         exec("sendfax -D -h $faxhost -n -d $destine $data 2>&1", $output, $retval);
-        if ($retval != 0) {
+        $regs = NULL;
+        if ($retval != 0 || !preg_match('/request id is (\d+)/', implode('', $output), $regs)) {
             $this->errMsg = implode('<br/>', $output);
+            return NULL;
         }
-        return ($retval == 0);
+        return $regs[1];
     }
 }
 ?>

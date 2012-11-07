@@ -30,6 +30,7 @@
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoFax.class.php";
+require_once 'libs/paloSantoJSON.class.php';
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -67,6 +68,9 @@ function _moduleContent(&$smarty, $module_name)
     switch($action){
         case "save_new":
             $content = sendNewSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            break;
+        case 'checkFaxStatus':
+            $content = checkFaxStatus();
             break;
         default: // view_form
             $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
@@ -177,16 +181,48 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             }
         }
     
-        $bExito = $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
-        if (!$bExito) {
+        $jobid = $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
+        if (is_null($jobid)) {
             $smarty->assign("mb_title", _tr('Validation Error'));
             $smarty->assign("mb_message", _tr('Failed to submit job').': '.$pSendFax->errMsg);
         } else {
             $smarty->assign("SEND_FAX_SUCCESS",_tr('Fax has been sent correctly'));
             $smarty->assign("SENDING_FAX",_tr('Sending Fax...'));
+            $smarty->assign('JOBID', $jobid);
         }
         return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
     }
+}
+
+function checkFaxStatus()
+{
+    session_commit();
+	$jobid = getParameter('jobid');
+    $modem = getParameter('modem');
+    $oldhash = getParameter('outputhash');
+
+    $startTime = time();
+    do {
+        $faxinfo = paloFax::getFaxStatus();
+        $faxstatus = array(
+            'state' => 'F',
+            'modemstatus' => '(invalid modem)',
+            'status' => '(invalid jobid)'
+        );
+        if (isset($faxinfo['modems'][$modem]))
+            $faxstatus['modemstatus'] = $modem.': '.$faxinfo['modems'][$modem];
+        if (isset($faxinfo['jobs'][$jobid]))
+            $faxstatus = array_merge($faxstatus, $faxinfo['jobs'][$jobid]);
+
+        $newhash = md5(serialize($faxstatus));
+        if ($oldhash == $newhash) usleep(2 * 1000000);
+    } while($oldhash == $newhash && time() - $startTime < 30);
+
+    $jsonObject = new PalosantoJSON();
+    $jsonObject->set_status(($oldhash != $newhash) ? 'CHANGED' : 'NOCHANGED');
+    $jsonObject->set_message(array('faxstatus' => $faxstatus, 'outputhash' => $newhash));
+    Header('Content-Type: application/json');
+    return $jsonObject->createJSON();
 }
 
 function createFieldForm($arrLang, $arrFaxList)
@@ -224,6 +260,8 @@ function getAction()
 {
     if(getParameter("save_new")) //Get parameter by POST (submit)
         return "save_new";
+    elseif (getParameter('action') == 'checkFaxStatus')
+        return 'checkFaxStatus';
     else
         return "report"; //cancel
 }

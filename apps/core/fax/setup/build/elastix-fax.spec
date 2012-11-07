@@ -193,6 +193,12 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Wed Nov  7 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Send Fax: properly track status of submitted fax job by ID instead of 
+  assuming that an idle modem means the fax was sent successfully. Part of fix
+  for Elastix bug #1299.
+  SVN Rev[4416] 
+
 * Tue Nov  6 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax Queue: reimplement fax job listing on top of getFaxStatus
   SVN Rev[4415]

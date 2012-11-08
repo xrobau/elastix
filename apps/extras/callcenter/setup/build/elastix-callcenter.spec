@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Thu Nov  8 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Agents Connection Time: removed. This report is now essentially 
+  identical to Login Logout.
 - CHANGED: Login Logout: complete rewrite. This rewrite takes advantage of the
   updated Elastix API for paloSantoGrid available since elastix-framework 
   2.2-18. The custom code for calendars was replaced with standard date 

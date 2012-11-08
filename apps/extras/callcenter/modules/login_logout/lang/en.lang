@@ -48,5 +48,7 @@ $arrLangModule=array(
 "Total"                             => "Total",
 "Detallado"                         => "Detailed",
 "General"                           => "General",
+'Incoming Queue'                    => 'Incoming Queue',
+'All'                               => 'All',
 );
 ?>

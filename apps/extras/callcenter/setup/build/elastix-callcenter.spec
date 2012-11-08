@@ -100,6 +100,15 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Nov  8 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Login Logout: complete rewrite. This rewrite takes advantage of the
+  updated Elastix API for paloSantoGrid available since elastix-framework 
+  2.2-18. The custom code for calendars was replaced with standard date 
+  controls. Most importantly, the SQL query was considerably simplified for
+  readability, and in the process, fixes the calculation of total session time.
+  Finally, the filtering by incoming queue from Agents Connection Time was added
+  to this module. Part of fix for Elastix bug #1409.
+
 * Thu Nov  1 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-6.alpha
 - Bump version for release.
 

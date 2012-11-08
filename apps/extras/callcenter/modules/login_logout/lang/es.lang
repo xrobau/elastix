@@ -39,7 +39,7 @@ $arrLangModule = array(
 "Logout"                            => "Logout",
 "Total Login"                       => "Total Login",
 "Tiempo en Llamadas"                => "Tiempo en Llamadas",
-"Service(%)"                        => "Service(%)",
+"Service(%)"                        => "Servicio(%)",
 "Date Init"                         => "Fecha Inicial",
 "Date End"                          => "Fecha Final",
 "Tipo"                              => "Tipo",
@@ -47,5 +47,7 @@ $arrLangModule = array(
 "Estado"                            => "Estado",
 "Detallado"                         => "Detallado",
 "General"                           => "General",
+'Incoming Queue'                    => 'Cola Entrante',
+'All'                               => 'Todas',
 );
 ?>

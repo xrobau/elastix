@@ -1,3 +1,10 @@
+* Login Logout: complete rewrite. This rewrite takes advantage of the updated
+  Elastix API for paloSantoGrid available since elastix-framework 2.2-18. The 
+  custom code for calendars was replaced with standard date controls. Most 
+  importantly, the SQL query was considerably simplified for readability, and in
+  the process, fixes the calculation of total session time. Finally, the 
+  filtering by incoming queue from Agents Connection Time was added to this 
+  module. Part of fix for Elastix bug #1409.
 * Campaign Out: reactivate a finished campaign if calls are added to it
 * Campaign Out: Cleanup of outgoing campaign library:
   Replace all uses of ereg with preg_match

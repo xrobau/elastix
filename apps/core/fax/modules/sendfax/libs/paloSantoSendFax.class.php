@@ -49,6 +49,40 @@ class paloSantoSendFax {
         }
     }
 
+    function generarArchivoTextoPS(&$data_content)
+    {
+        // Si el contenido es ASCII se escribe directamente al archivo
+        $bEsAscii = TRUE;
+        foreach (str_split($data_content) as $c) if (ord($c) >= 127) {
+             $bEsAscii = FALSE; break;
+        }
+        if ($bEsAscii) {
+            $ruta_archivo = tempnam('/tmp', 'data_');
+            file_put_contents($ruta_archivo, $data_content);
+            return $ruta_archivo;
+        }
+        
+        /* El contenido a escribir no es ASCII. Ya que la página web emite 
+         * UTF-8, se asumirá que el contenido está también codificado en UTF-8
+         * (verificado en Firefox 16 e Internet Explorer 6). 
+         * 
+         * El código de abajo es necesario debido a que
+         * 1) /usr/bin/sendfax no reconoce como texto un archivo en codificación
+         *    distinta de ASCII
+         * 2) /usr/sbin/textfmt sólo puede convertir desde una fuente ISO-8859-15
+         */
+        $ruta_temp = tempnam('/tmp', 'data_');
+        file_put_contents($ruta_temp, iconv('UTF-8', 'ISO-8859-15//TRANSLIT', $data_content));
+        $ruta_archivo = tempnam('/tmp', 'data_');
+        $output = $retval = NULL;
+        exec('/usr/sbin/textfmt -B -f Courier-Bold -Ml=0.4in -p11 < '.
+            escapeshellarg($ruta_temp).' > '.escapeshellarg($ruta_archivo),
+            $output, $retval);
+        unlink($ruta_temp);
+
+        return ($retval == 0) ? $ruta_archivo : NULL;
+    }
+
     /*HERE YOUR FUNCTIONS*/
     function sendFax($faxexten, $destine, $data)
     {

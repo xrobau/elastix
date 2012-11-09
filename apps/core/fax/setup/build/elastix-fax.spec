@@ -207,6 +207,12 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Send Fax: check whether text to send as fax is entirely ASCII, and 
+  attempt to convert to ISO-8859-15 if not, before converting to PostScript
+  directly. Fixes Elastix bug #446.
+  SVN Rev[4419]
+
 * Tue Nov  6 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Send Fax: partial cleanup:
   Do not silently ignore failure to submit a fax job, and display error instead.

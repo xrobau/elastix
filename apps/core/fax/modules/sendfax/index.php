@@ -191,13 +191,20 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
                 return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
             }
         }else{
-            if(!empty($data_content) || $data_content!=null){
-                $ruta_archivo = '/tmp/data_'.time().'.txt';
-                $fh = fopen($ruta_archivo, 'w');
-                fwrite($fh, $data_content);
-                fclose($fh);
-            }
-            else{
+            if (!empty($data_content)) {
+                /* Las siguientes operaciones son necesarias para lidiar con el
+                 * bug Elastix #446. El programa sendfax es incapaz de detectar
+                 * un archivo como un archivo de texto si contiene caracteres 
+                 * fuera del rango ASCII. */
+                $ruta_archivo = $pSendFax->generarArchivoTextoPS($data_content);
+                if (is_null($ruta_archivo)) {
+                    $smarty->assign(array(
+                        'mb_title'      =>  _tr('Validation Error'),
+                        'mb_message'    =>  _tr('Failed to convert text'),
+                    ));
+                    return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+                }
+            } else {
                 $smarty->assign("mb_title", $arrLang["Validation Error"]);
                 $smarty->assign("mb_message", $arrLang["Text to send is empty"]);
                 return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
@@ -212,6 +219,7 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             $smarty->assign("SEND_FAX_SUCCESS",_tr('Fax has been sent correctly'));
             $smarty->assign("SENDING_FAX",_tr('Sending Fax...'));
         }
+        if (file_exists($ruta_archivo)) unlink($ruta_archivo);
         return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
     }
 }

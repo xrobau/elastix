@@ -194,6 +194,11 @@ fi
 
 %changelog
 * Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax: Add support in notification scripts for new placeholder 
+  {JOB_STATUS} which will be replaced with the final status of the fax job.
+  Update default email notification to make use of {JOB STATUS}. Final part of
+  fix for Elastix bug #1299.
+  SVN Rev[4422]
 - CHANGED: Fax Viewer: now that the notification scripts populate the status
   field in the fax database, we can show the information to the user. This 
   provides a much-needed feedback on the final status of the fax job. Part of

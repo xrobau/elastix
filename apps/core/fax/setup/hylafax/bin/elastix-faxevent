@@ -345,7 +345,7 @@ function commonFaxProcessing($conn, $faxinfo, $sDirection, $status)
     // Send email with attached fax
     sendEmailFax($conn, $sRepresentativeName, $idModemDevice,
         $faxinfo['properties']['sender'], $faxinfo['properties']['number'],
-        "$sDestDir/fax.pdf");
+        "$sDestDir/fax.pdf", $status, $faxinfo['properties']['status']);
 }
 
 /**
@@ -463,7 +463,7 @@ INSERT_FAX;
  * @return void
  */
 function sendEmailFax($conn, $sRepresentativeName, $idModemDevice, $sCompanyName,
-    $sCompanyNumber, $sPdfPath)
+    $sCompanyNumber, $sPdfPath, $status, $errmsg)
 {
     // Read destination email for notification
     $sth = $conn->prepare('SELECT email FROM fax WHERE id = ?');
@@ -483,6 +483,7 @@ function sendEmailFax($conn, $sRepresentativeName, $idModemDevice, $sCompanyName
         array('{NAME_PDF}',             basename($sRepresentativeName, '.pdf')),
         array('{COMPANY_NAME_FROM}',    $sCompanyName),
         array('{COMPANY_NUMBER_FROM}',  $sCompanyNumber),
+        array('{JOB_STATUS}',           ($status == 'done') ? $status : "$status: $errmsg"),
     );
     $sth = $conn->query(
         'SELECT remite, remitente, subject, content FROM configuration_fax_mail WHERE id = 1');

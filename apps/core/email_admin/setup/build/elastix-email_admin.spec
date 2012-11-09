@@ -194,6 +194,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email_admin: comment out statement that logs every single IMAP 
+  command, inherited from the Stickgate project.
+  SVN Rev[4420] 
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

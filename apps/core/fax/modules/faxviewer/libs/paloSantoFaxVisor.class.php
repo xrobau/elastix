@@ -84,7 +84,8 @@ class paloFaxVisor
         $sPeticionSQL = 
             'SELECT r.id, r.pdf_file, r.modemdev, r.commID, r.errormsg, '.
                 'r.company_name, r.company_fax, r.fax_destiny_id, r.date, '.
-                'r.type, r.faxpath, f.name destiny_name, f.extension destiny_fax '.
+                'r.type, r.faxpath, f.name destiny_name, f.extension destiny_fax, '.
+                'r.status '.
             'FROM info_fax_recvq r, fax f '.
             'WHERE ';
         $listaWhere = array('f.id = r.fax_destiny_id');

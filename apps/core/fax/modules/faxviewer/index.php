@@ -151,12 +151,16 @@ function listarFaxes(&$smarty, $module_name, $local_templates_dir)
         _tr('Company Fax'),
         _tr('Fax Destiny'),
         _tr('Fax Date'),
+        _tr('Status'),
         _tr('Options')));
 
     if(is_array($arrResult) && $total>0) {
         foreach ($arrResult as $fax) {
-            foreach (array('pdf_file', 'company_name', 'company_fax', 'destiny_name', 'destiny_fax') as $k)
+            foreach (array('pdf_file', 'company_name', 'company_fax',
+                'destiny_name', 'destiny_fax', 'errormsg') as $k)
                 $fax[$k] = htmlentities($fax[$k], ENT_COMPAT, 'UTF-8');
+            if (empty($fax['status']) && !empty($fax['errormsg']))
+                $fax['status'] = 'failed';
             $arrData[] = array(
                 '<input type="checkbox" name="faxes[]" value="'.$fax['id'].'" />',
                 _tr($fax['type']),
@@ -167,6 +171,7 @@ function listarFaxes(&$smarty, $module_name, $local_templates_dir)
                 $fax['company_fax'],
                 $fax['destiny_name']." - ".$fax['destiny_fax'],
                 $fax['date'],
+                _tr($fax['status']).(empty($fax['errormsg']) ? '' : ': '.$fax['errormsg']),
                 "<a href='?menu=$module_name&action=edit&id=".$fax['id']."'>"._tr('Edit')."</a>"
             );
         }

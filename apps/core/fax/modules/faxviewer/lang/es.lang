@@ -45,5 +45,9 @@ $arrLangModule=array(
 "out" => "Enviado",
 "ERROR" => "ERROR",
 "Type" => "Tipo",
+'done' => 'Terminado',
+'failed' => 'Fallido',
+'killed' => 'Abortado',
+'timedout' => 'Expirado',
 );
 ?>

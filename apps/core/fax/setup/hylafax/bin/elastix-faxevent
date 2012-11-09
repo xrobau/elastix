@@ -196,6 +196,7 @@ function action_faxRecvEvent($opt)
             'status'    =>  $opt[1][3],
             'number'    =>  $opt[1][4],
             'sender'    =>  $opt[1][5],
+            'mailaddr'  =>  NULL,
         ),
         'files'         =>  array(
             array('tiff', 0, NULL, $opt[1][0]),
@@ -343,9 +344,27 @@ function commonFaxProcessing($conn, $faxinfo, $sDirection, $status)
         $sDestDir);
     
     // Send email with attached fax
-    sendEmailFax($conn, $sRepresentativeName, $idModemDevice,
-        $faxinfo['properties']['sender'], $faxinfo['properties']['number'],
-        "$sDestDir/fax.pdf", $status, $faxinfo['properties']['status']);
+    $emailList = array();
+    if ($idModemDevice != 0) {
+        $sDestinationEmail = readNotificationEmail($conn, $idModemDevice);
+        if (!is_null($sDestinationEmail)) $emailList[] = $sDestinationEmail;
+    }
+    if (isset($faxinfo['properties']['mailaddr']) && !empty($faxinfo['properties']['mailaddr'])) {
+        $sDestinationEmail = $faxinfo['properties']['mailaddr'];
+        foreach (array('/@localhost$/', '/@localhost.localdomain/', '/@127.0.0.1/') as $regexp) {
+            if (!is_null($sDestinationEmail) && preg_match($regexp, $sDestinationEmail))
+                $sDestinationEmail = NULL;
+        }
+        if (!is_null($sDestinationEmail)) $emailList[] = $sDestinationEmail;
+    }    
+    foreach ($emailList as $sDestinationEmail) {
+        sendEmailFax($conn, $sRepresentativeName, $sDestinationEmail,
+            $faxinfo['properties']['sender'], $faxinfo['properties']['number'],
+            "$sDestDir/fax.pdf", $status, $faxinfo['properties']['status']);
+    }
+    if (count($emailList) <= 0) {
+        dblog($conn, 'WARN', 'No notification emails were available for this job');
+    }
 }
 
 /**
@@ -399,6 +418,9 @@ function invokeCommand($conn, $command)
  */
 function getIdModemDevice($conn, $sModemDevice)
 {
+    // This should return NULL but 'info_fax_recvq.fax_destiny_id' column is defined as NOT NULL.
+    if ($sModemDevice == 'any') return 0;
+
     // Locate ID of fax device record given the modem device
     $regs = NULL;
     if (!preg_match('/^ttyIAX(\d+)$/', $sModemDevice, $regs))
@@ -450,28 +472,38 @@ INSERT_FAX;
         date('Y-m-d H:i:s'), $sDirection, $sFaxDir));
 }
 
-/**
- * Procedure to send an email with a sent/received fax.
- * 
- * @param   resource    $conn                   Database connection
- * @param   string      $sRepresentativeName    Document name to show on interface
+/** 
+ * Fetch a notification e-mail from the modem device ID
+ *
  * @param   string      $idModemDevice          Database ID for fax TTY.
- * @param   string      $sCompanyName           Company name for fax job
- * @param   string      $sCompanyNumber         Company number for fax job
- * @param   string      $sPdfPath               Path to fax PDF relative to ELASTIX_FAXDIR
  * 
- * @return void
+ * @return  string  E-Mail address for notification, or NULL 
  */
-function sendEmailFax($conn, $sRepresentativeName, $idModemDevice, $sCompanyName,
-    $sCompanyNumber, $sPdfPath, $status, $errmsg)
+function readNotificationEmail($conn, $idModemDevice)
 {
     // Read destination email for notification
     $sth = $conn->prepare('SELECT email FROM fax WHERE id = ?');
     $sth->execute(array($idModemDevice));
     $tuple = $sth->fetch(PDO::FETCH_ASSOC);
     $sth->closeCursor();
-    $sDestinationEmail = $tuple['email'];
+    return isset($tuple['email']) ? $tuple['email'] : NULL;
+}
 
+/**
+ * Procedure to send an email with a sent/received fax.
+ * 
+ * @param   resource    $conn                   Database connection
+ * @param   string      $sRepresentativeName    Document name to show on interface
+ * @param   string      $sDestinationEmail      Destination email
+ * @param   string      $sCompanyName           Company name for fax job
+ * @param   string      $sCompanyNumber         Company number for fax job
+ * @param   string      $sPdfPath               Path to fax PDF relative to ELASTIX_FAXDIR
+ * 
+ * @return void
+ */
+function sendEmailFax($conn, $sRepresentativeName, $sDestinationEmail, $sCompanyName,
+    $sCompanyNumber, $sPdfPath, $status, $errmsg)
+{
 	// Read configured values for fax email template
     $emailInfo = array(
         'remite'    =>  'elastix@example.com',

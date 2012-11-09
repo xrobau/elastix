@@ -194,6 +194,9 @@ fi
 
 %changelog
 * Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Fax: pick up notification email from submitted fax job in addition to
+  notification email for outgoing fax device. Fixes Elastix bug #1300.
+  SVN Rev[4424]
 - CHANGED: Fax Viewer: use LEFT JOIN instead of simple join for fax table. This
   prepares the report for sent notifications where fax device is 'any', as 
   placed by WinHylafax.

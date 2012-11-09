@@ -113,7 +113,7 @@ class cyradm
         */
         function command($line)
         {       $bValido=FALSE;
-                $this->escribir_log($line);
+                //$this->escribir_log($line);
                 //global $rtxt;
                  //print ("line in command: <br><pre><tt>" . $line . "</tt></pre><br>");
                 $result = array();

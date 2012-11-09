@@ -194,6 +194,10 @@ fi
 
 %changelog
 * Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax Viewer: use LEFT JOIN instead of simple join for fax table. This
+  prepares the report for sent notifications where fax device is 'any', as 
+  placed by WinHylafax.
+  SVN Rev[4423]
 - CHANGED: Fax: Add support in notification scripts for new placeholder 
   {JOB_STATUS} which will be replaced with the final status of the fax job.
   Update default email notification to make use of {JOB STATUS}. Final part of

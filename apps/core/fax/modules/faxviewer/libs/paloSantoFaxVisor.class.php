@@ -86,9 +86,8 @@ class paloFaxVisor
                 'r.company_name, r.company_fax, r.fax_destiny_id, r.date, '.
                 'r.type, r.faxpath, f.name destiny_name, f.extension destiny_fax, '.
                 'r.status '.
-            'FROM info_fax_recvq r, fax f '.
-            'WHERE ';
-        $listaWhere = array('f.id = r.fax_destiny_id');
+            'FROM info_fax_recvq r LEFT JOIN fax f ON f.id = r.fax_destiny_id';
+        $listaWhere = array();
         $paramSQL = array();
         if (!is_null($company_name)) {
         	$listaWhere[] = 'company_name LIKE ?';
@@ -107,7 +106,9 @@ class paloFaxVisor
         	$listaWhere[] = 'type = ?';
             $paramSQL[] = $type;
         }
-        $sPeticionSQL .= implode(' AND ', $listaWhere).' ORDER BY r.id desc LIMIT ? OFFSET ?';
+        if (count($listaWhere) > 0)
+            $sPeticionSQL .= ' WHERE '.implode(' AND ', $listaWhere);
+        $sPeticionSQL .= ' ORDER BY r.id desc LIMIT ? OFFSET ?';
         $paramSQL[] = $cantidad; $paramSQL[] = $offset;
         
         $arrReturn = $this->_db->fetchTable($sPeticionSQL, TRUE, $paramSQL);

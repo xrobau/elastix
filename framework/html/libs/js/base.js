@@ -894,7 +894,7 @@ function keyPressed(e)
     else if (e) keycode = e.which;
     else return true;
         
-    if (!$("textarea").is(":focus") && !$("#neo-submit-button").is(":focus")) {
+    if ($("[id^=pageup]").is(":focus") || $("[id^=pagedown]").is(":focus")) {
 	  if(keycode == 13){
 		$("form").submit();
 		return false;

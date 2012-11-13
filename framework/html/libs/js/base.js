@@ -771,8 +771,13 @@ function showVersion(){
 
 $(document).ready(function(){
     //***Para los módulos con filtro se llama a la función pressKey
-    if(document.getElementById("filter_value") || document.getElementById("pageup") || document.getElementById("neo-sticky-note-textarea"))
-	document.onkeypress = keyPressed;
+    if (document.getElementById("filter_value") || 
+        document.getElementById("pageup") || 
+        document.getElementById("neo-sticky-note-textarea")) {
+        $('#pageup').keypress(keyPressed);
+        $('#pagedown').keypress(keyPressed);
+    }
+    	
     //*****************************************/
     $(".close_image_box").click(function(){
             $("#boxRPM").attr("style","display: none;");
@@ -892,12 +897,10 @@ function keyPressed(e)
     else if (e) keycode = e.which;
     else return true;
         
-    if ($("[id^=pageup]").is(":focus") || $("[id^=pagedown]").is(":focus")) {
-	  if(keycode == 13){
+	if (keycode == 13) {
 		$("form").submit();
 		return false;
-	  }
-    }
+	}
 }
 
 // implement JSON.parse de-serialization

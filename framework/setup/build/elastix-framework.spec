@@ -308,6 +308,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Nov 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework: limit scope of javascript keypress handler to just the input boxes
+  on the elastixneo theme grid views. Original fix by Bruno Macias. Fixes 
+  Elastix bug #1365.
+  SVN Rev[4431]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework: fix elastix-dbprocess to remove the temporary file 1_sqlFile.sql
   whenever it is successfully committed to a database or copied to firstboot.

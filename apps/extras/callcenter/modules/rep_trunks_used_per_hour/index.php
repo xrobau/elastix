@@ -143,9 +143,18 @@ function reportReportedeTroncalesusadasporHoraeneldia($smarty, $module_name, $lo
 
    // se obtienen los datos que se van a mostrar
     $arrData = null;
-    $arrResult =$pReportedeTroncalesusadasporHoraeneldia->ObtainReportedeTroncalesusadasporHoraeneldia($limit, $offset, $filter_field, $filter_value, $date_from, $date_to, $bExportando);
+    $filter_value = trim($filter_value);
+    $recordset = $pReportedeTroncalesusadasporHoraeneldia->listarTraficoLlamadasHora(
+        $date_from, $date_to, empty($filter_value) ? NULL: $filter_value);
+    if (!is_array($recordset)) {
+        $smarty->assign(array(
+            'mb_title'      =>  _tr('Query Error'),
+            'mb_message'    =>  $oCalls->errMsg,
+        ));
+        $recordset = array();
+    }
 
-    $total = count($arrResult);
+    $total = count($recordset);
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     
@@ -167,16 +176,36 @@ function reportReportedeTroncalesusadasporHoraeneldia($smarty, $module_name, $lo
     
 
     // se guarda la data en un arreglo que luego es enviado como parámetro para crear el reporte
-    if(is_array($arrResult)){
-        foreach($arrResult as $key => $value){ 
-	    $arrTmp[0] = $value['time_period'];
-	    $arrTmp[1] = isset($value['entered'])?$value['entered']:"0";
-	    $arrTmp[2] = isset($value['terminada'])?$value['terminada']:"0"; //answered
-	    $arrTmp[3] = isset($value['abandonada'])?$value['abandonada']:"0"; //abandoned
-	    $arrTmp[4] = isset($value['en-cola'])?$value['en-cola']:"0"; //en-cola
-	    $arrTmp[5] = isset($value['fin-monitoreo'])?$value['fin-monitoreo']:"0"; //no han sido monitoreadas hasta el final, por algn error del dialer
-            $arrData[] = $arrTmp;
+    if(is_array($recordset)){
+        $arrData = array();
+        $total = array(
+            'entered'       =>  0,
+            'terminada'     =>  0,
+            'abandonada'    =>  0,
+            'en-cola'       =>  0,
+            'fin-monitoreo' =>  0,
+        );
+        foreach ($recordset as $iHora => $tupla) {
+        	$arrData[] = array(
+                sprintf('%02d:00:00 - %02d:00:00', $iHora, $iHora + 1),
+                $tupla['entered'],
+                $tupla['terminada'],
+                $tupla['abandonada'],
+                $tupla['en-cola'],
+                $tupla['fin-monitoreo'],
+            );
+            foreach (array_keys($total) as $k) $total[$k] += $tupla[$k];
         }
+        $sTagInicio = (!$bExportando) ? '<b>' : '';
+        $sTagFinal = ($sTagInicio != '') ? '</b>' : '';
+        $arrData[] = array(
+            $sTagInicio._tr('TOTAL').$sTagFinal,
+            $sTagInicio.$total['entered'].$sTagFinal,
+            $sTagInicio.$total['terminada'].$sTagFinal,
+            $sTagInicio.$total['abandonada'].$sTagFinal,
+            $sTagInicio.$total['en-cola'].$sTagFinal,
+            $sTagInicio.$total['fin-monitoreo'].$sTagFinal,
+        );
     }
 
     //begin section filter
@@ -281,7 +310,7 @@ function createFieldFilter($arrTrunk){
 
 function obtener_nuevas_trunks($pDB, $pDB_asterisk)
 {
-    $listaTrunks = array();
+    $listaTrunks = array('' => _tr('(All)'));
     $trunks = getTrunks($pDB_asterisk);    
 
     foreach ($trunks as $tuplaTrunk) {
@@ -312,4 +341,5 @@ function getAction()
         return "show";
     else
         return "report";
-}?>
+}
+?>

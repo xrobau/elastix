@@ -1,3 +1,6 @@
+* Trunks Used per Hour: core query method rewritten to use SQL parameters. SQL
+  was reimplemented to use more efficient grouping. HTML formatting moved to 
+  index.php. Trunk filter now allows report on calls from all trunks.
 * Agents Connection Time: removed. This report is now essentially identical to
   Login Logout.
 * Login Logout: complete rewrite. This rewrite takes advantage of the updated

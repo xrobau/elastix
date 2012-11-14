@@ -1223,7 +1223,24 @@ class AMIEventProcess extends TuberiaProcess
 
         $llamada->llamadaFueOriginada($params['local_timestamp_received'], 
             $params['Uniqueid'], $params['Channel'], $params['Response']);
-        
+
+        // Si la fuente de la llamada está en blanco, se asigna al número marcado
+        $r = $this->_ami->GetVar($params['Channel'], 'CALLERID(num)');
+        if ($r['Response'] != 'Success') {
+        	$this->_log->output('ERR: '.__METHOD__.
+                ': fallo en obtener CALLERID(num) para canal '.$params['Channel'].
+                ': '.print_r($r, 1));
+        } else {
+            if ($r['Value'] == '(null)') $r['Value'] = '';
+            if (empty($r['Value'])) {
+                $r = $this->_ami->SetVar($params['Channel'], 'CALLERID(num)', $llamada->phone);
+                if ($r['Response'] != 'Success') {
+                    $this->_log->output('ERR: '.__METHOD__.
+                        ': fallo en asignar CALLERID(num) para canal '.$params['Channel'].
+                        ': '.print_r($r, 1));
+                }
+            }
+        }
         return FALSE;
     }
     

@@ -27,7 +27,7 @@ $(document).ready(function(){
                     $(".mensajeStatus").remove();
                     var idform=$("#"+id).parents("form:first").attr("id");
                     $("#"+idform).detach();
-                    $(".neo-module-content").apend(arrData[1]);
+                    $(".neo-module-content").append(arrData[1]);
                     alert(arrData[0]);
                 }
             });
@@ -136,7 +136,6 @@ var add = function() {
         row = row.replace(/\__/g, index);
         var val = "<tr id="+index+">"+row+"</tr>"; 
         $('table#destine tbody').append(val);
-        $("#goto"+index).addClass("goto");
         $("#"+index).addClass("content-destine");
     }
      
@@ -179,8 +178,6 @@ function radio(id_radio){
     d_label.css("background","linear-gradient(center top , #777777, #999999)");
     d_label.css("border-color"," #888888"); 
     d_label.css("color"," #FFFFFF"); 
-    //$(".content").css({'display':'none'});
-    //$("#content_"+id_radio).css("display","");
 }
 
 

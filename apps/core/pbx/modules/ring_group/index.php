@@ -273,14 +273,14 @@ function viewFormRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
 	if($userLevel1!="admin"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }
     
     $domain=$org_domain;
     if($domain==false){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }
 
 	$idRG=getParameter("id_rg");
@@ -323,7 +323,7 @@ function viewFormRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         if($error!=""){
             $smarty->assign("mb_title", _tr("ERROR"));
             $smarty->assign("mb_message",$error);
-            return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
         }
 	}else{
         $pRG = new paloSantoRG($pDB,$domain);
@@ -386,14 +386,14 @@ function saveNewRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
 	if($userLevel1!="admin"){
 	    $smarty->assign("mb_title", _tr("ERROR"));
 	    $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-	    return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	    return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }
 	
     $domain=$org_domain;
     if($domain==false){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }
 	
     $pRG=new paloSantoRG($pDB,$domain);

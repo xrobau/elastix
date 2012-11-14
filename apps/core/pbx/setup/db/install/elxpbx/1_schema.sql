@@ -849,7 +849,7 @@ CREATE TABLE musiconhold (
     -- Descriptive name of the MOH class
     description char(80) default "", 
     -- One of 'custom', 'files', 'mp3nb', 'quietmp3nb', or 'quietmp3'
-    mode char(80) null,
+    mode enum('custom', 'files', 'mp3nb', 'quietmp3nb', 'quietmp3') default 'files',
     -- If 'custom', directory is ignored.  Otherwise, specifies a directory with files to play or a stream URL
     directory char(255) null,
     -- If 'custom', application will be invoked to provide MOH.  Ignored otherwise.
@@ -857,19 +857,20 @@ CREATE TABLE musiconhold (
     -- Digit associated with this MOH class, when MOH is selectable by the caller.
     digit char(1) null,
     -- One of 'random' or 'alpha', to determine how files are played.  If NULL, files are played in directory order
-    sort char(10) null,
+    sort enum('random', 'alpha') default 'alpha',
     -- In custom mode, the format of the audio delivered.  Ignored otherwise.  Defaults to SLIN.
     format char(10) null,
     -- When this record was last modified
     stamp timestamp,
-    -- Domain of organization that is own of this class
+    -- organization's Domain that is owner of the class
     organization_domain varchar(50) NOT NULL,
-    INDEX organization_domain (organization_domain)
+    INDEX organization_domain (organization_domain),
+    UNIQUE KEY description_moh (description,organization_domain)
 ) ENGINE = INNODB;
 
-insert into musiconhold (name,description,mode,directory,sort) values('default','Default','files','/var/lib/asterisk/mohmp3/','random');
+insert into musiconhold (name,description,mode,directory,sort) values('default','default','files','/var/lib/asterisk/mohmp3/','random');
 
-insert into musiconhold (name,description,mode,directory,sort) values('none','None','files','/var/lib/asterisk/mohmp3/none/','random');
+insert into musiconhold (name,description,mode,directory,sort) values('none','none','files','/var/lib/asterisk/mohmp3/none/','random');
 
 DROP TABLE IF EXISTS recordings;
 CREATE TABLE recordings (
@@ -975,6 +976,7 @@ CREATE TABLE outbound_route (
     seq int(11) NOT NULL,
     organization_domain varchar(50) NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (mohsilence) REFERENCES musiconhold(name),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 

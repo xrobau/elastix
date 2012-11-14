@@ -441,7 +441,7 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
         $smarty->assign('arrDif',$arrDif); 
 	}
 
-	$arrForm= createFieldForm($pDB);
+	$arrForm= createFieldForm($pDB,$domain);
     $oForm = new paloForm($smarty,$arrForm);
 
 	if($action=="view"){
@@ -507,7 +507,7 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         return reportInbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }
 
-	$arrForm = createFieldForm($pDB);
+	$arrForm = createFieldForm($pDB,$domain);
     $oForm = new paloForm($smarty,$arrForm);
 
     $arrDialPattern = getParameter("arrDestine");
@@ -740,9 +740,13 @@ function deleteOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrC
 	return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);;
 }
 
-function createFieldForm($pDB)
+function createFieldForm($pDB,$domain)
 {
-    $arrMusic=array("default"=>_tr("Default"),"none"=>_tr("None"));
+    $pOutbound = new paloSantoOutbound($pDB,$domain);
+    $arrMusic=$pOutbound->getMoHClass($domain);
+    if($arrMusic==false)
+        $arrMusic=array("default"=>_tr("Default"));
+        
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
    
     //var_dump($arrTrunks);

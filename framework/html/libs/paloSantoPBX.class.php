@@ -232,12 +232,14 @@ class paloAsteriskDB {
             return false;
         }
         
-        $moh=array("none"=>"none","default"=>"default");
-        $query="Select name,description from musiconhold where organization_domain=?";
-        $result=$this->getResultQuery($query,array($domain),true,"");
+        $moh=array();
+        $query="Select name,description,organization_domain from musiconhold where organization_domain=? or organization_domain=?";
+        $result=$this->getResultQuery($query,array($domain,""),true,"");
         if($result!=false){
             foreach($result as $value){
                 $moh[$value["name"]]=$value["description"];
+                if($value["organization_domain"]=="")
+                    $moh[$value["name"]]=$value["description"]."- system";
             }
         }
         return $moh; 
@@ -249,12 +251,8 @@ class paloAsteriskDB {
             return null;
         }
         
-        if($class=="none" || $class=="default"){
-            return true;
-        }
-        
-        $query="SELECT 1 from musiconhold where name=? and organization_domain=?";
-        $result=$this->getFirstResultQuery($query,array($class,$domain));
+        $query="SELECT 1 from musiconhold where name=? and (organization_domain=? or organization_domain=?)";
+        $result=$this->getFirstResultQuery($query,array($class,$domain,""));
         if(is_array($result) && count($result)>0){
             return true;
         }
@@ -297,6 +295,13 @@ class paloAsteriskDB {
                 $result=$this->getResultQuery($qQueues,array($domain),true);
                 foreach($result as $value){
                     $arrDestine["queues,".$value["name"]]=$value["queue_number"]." (".$value["description"].")";
+                }
+                break;
+            case "ring_group":
+                $qQueues="SELECT rg_name,rg_number from ring_group where organization_domain=?";
+                $result=$this->getResultQuery($qQueues,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["ring_group,".$value["rg_number"]]=$value["rg_number"]." (".$value["rg_name"].")";
                 }
                 break;
             case "terminate_call":
@@ -352,6 +357,13 @@ class paloAsteriskDB {
                 break;*/
             case "queues":
                 $query="SELECT count(name) from queue where organization_domain=? and name=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+            case "ring_group":
+                $query="SELECT count(rg_number) from ring_group where organization_domain=? and rg_number=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
                 if($result[0]!="1"){
                     return false;
@@ -420,6 +432,13 @@ class paloAsteriskDB {
                     return "$code-ext-queues,".$result["queue_number"].",1";
                 }
                 break;
+            case "ring_group":
+                $query="SELECT rg_number from ring_group where organization_domain=? and rg_number=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-ext-group,".$result["rg_number"].",1";
+                }
+                break;
             case "terminate_call":
                 if(preg_match("/^(hangup|congestion|busy|zapateller|musiconhold|ring){1}$/",$destino)){
                     return "$code-app-blackhole,".$destino.",1";
@@ -460,6 +479,11 @@ class paloAsteriskDB {
         if($result!=false){
             $arrCat["queues"]=_tr("Queues");
         }
+        $query="select rg_number from ring_group where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["ring_group"]=_tr("Ring Group");
+        }
         return $arrCat;
     }
     
@@ -491,6 +515,30 @@ class paloAsteriskDB {
             return false;
         }else
             return $result[0];
+    }
+    
+    function getAudioFormatAsterisk(){
+        $errorM="";
+        $arrFormats=array();
+        $astMang=AsteriskManagerConnect($errorM);
+        if($astMang==false){
+            $this->errMsg=$errorM;
+        }else{ //comprobamos que el modulo esta cargado
+            $result = $astMang->command("module show like format");
+            $test=explode("\n",$result['data']);
+            foreach($test as $line){
+                if(preg_match("/^(format_([[:alnum:]]|_)+\.so)(.)(.)(.)/",$line,$match)){
+                    $format=substr(substr(trim($match[0]),7),0,-3);
+                    if($format=="pcm"){
+                        $arrFormats["alaw"]="alaw";
+                        $arrFormats["ulaw"]="ulaw";
+                    }else{
+                        $arrFormats[$format]=$format;
+                    }
+                }
+            }
+        }
+        return $arrFormats;
     }
 }
 

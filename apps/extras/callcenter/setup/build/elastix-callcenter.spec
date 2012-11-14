@@ -100,6 +100,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Nov 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: set CALLERID(num) in OriginateResponse handler in order to 
+  ensure the CDR has a meaningful source field value. Fixes Elastix bug #1411.
+
 * Tue Nov 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Trunks Used per Hour: core query method rewritten to use SQL 
   parameters. SQL was reimplemented to use more efficient grouping. HTML

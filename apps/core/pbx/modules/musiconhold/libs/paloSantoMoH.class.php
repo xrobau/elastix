@@ -42,7 +42,7 @@ class paloSantoMoH extends paloAsteriskDB{
        parent::__construct($pDB);
         
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-            $this->errMsg="Invalid domain format";
+           // $this->errMsg="Invalid domain format";
         }else{
             $this->domain=$domain;
 

@@ -654,7 +654,7 @@ function createFieldForm($goto,$destination,$pDB,$domain)
         }
     }
     
-    $arrMusic=array("ring"=>_tr("Ring"));
+    $arrMusic=array("ring"=>_tr("Only Ring"));
     if(is_array($arrMoH)){
         foreach($arrMoH as $key => $value){
             $arrMusic[$key] = $value;

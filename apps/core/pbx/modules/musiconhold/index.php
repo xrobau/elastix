@@ -151,7 +151,7 @@ function reportMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
 
 	$end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
 	
-	$oGrid->setTitle(_tr('MoH Routes List'));
+	$oGrid->setTitle(_tr('MoH Class List'));
 	//$oGrid->setIcon('url de la imagen');
 	$oGrid->setWidth("99%");
 	$oGrid->setStart(($total==0) ? 0 : $offset + 1);
@@ -232,38 +232,7 @@ function reportMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
 	}
 	
 	$contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
-	$mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $org_domain);
-	$contenidoModulo = $mensaje.$contenidoModulo;
     return $contenidoModulo;
-}
-
-function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccount, $org_domain){
-	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-	$params=array();
-	$msgs="";
-
-	$query = "SELECT domain, id from organization";
-	//si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de mnarcada
-	if($userLevel1!="superadmin"){
-		$query .= " where domain=?";
-		$params[]=$org_domain;
-	}
-
-	$mensaje=_tr("Click here to reload dialplan");
-	$result=$pDB2->fetchTable($query,false,$params);
-	if(is_array($result)){
-		foreach($result as $value){
-			if($value[1]!=1){
-				$showmessage=$pAstConf->getReloadDialplan($value[0]);
-				if($showmessage=="yes"){
-					$append=($userLevel1=="superadmin")?" $value[0]":"";
-					$msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/><b>".$mensaje.$append."</b></a></div>";
-				}
-			}
-		}
-	}
-	return $msgs;
 }
 
 function viewFormMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $org_domain,$arrFiles=array()){
@@ -659,8 +628,6 @@ function getAction(){
         return "view";
     else if(getParameter("action")=="view_edit")
         return "view_edit";
-	else if(getParameter("action")=="reloadAsterisk")
-		return "reloadAasterisk";
     else
         return "report"; //cancel
 }

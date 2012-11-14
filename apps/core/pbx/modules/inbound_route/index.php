@@ -339,7 +339,7 @@ function viewFormInbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         $goto=array();
     $res=$pInbound->getDefaultDestination($domain,$arrInbound["goto"]);
     $destiny=($res==false)?array():$res;
-	$arrFormOrgz = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax());
+	$arrFormOrgz = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax(),$pInbound->getMoHClass($domain));
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
 	if($action=="view"){
@@ -410,7 +410,7 @@ function saveNewInbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $res=$pInbound->getDefaultDestination($domain,getParameter("goto"));
     $destiny=($res==false)?array():$res;
     
-    $arrFormOrgz = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax());
+    $arrFormOrgz = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax(),$pInbound->getMoHClass($domain));
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
 	if(!$oForm->validateForm($_POST)){
@@ -663,10 +663,9 @@ function generateOptionNum($start, $end){
     return $arr;
 }
 
-function createFieldForm($goto,$destination,$faxes,$arrDetect)
+function createFieldForm($goto,$destination,$faxes,$arrDetect,$arrMusic)
 {
     $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    $arrMusic=array("default"=>_tr("Default"),"none"=>_tr("None"));
     $oneToTen = generateOptionNum(1, 10);
     $oneToFifteen = generateOptionNum(1, 15);
     $twoToTen = generateOptionNum(2, 10);

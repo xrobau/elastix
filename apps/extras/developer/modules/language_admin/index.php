@@ -246,50 +246,46 @@ function showLanguages($smarty, $module_name, $local_templates_dir, $arrLang, $a
     $pLanguages = new paloSantoLanguageAdmin();
 
     //Paginacion
-    $limit  = 15;
+    $limit  = 20;
     $total_datos = $pLanguages->ObtainNumLanguages($module, $language);
     $total  = $total_datos;
 
     $oGrid->addNew("new",_tr("Add"));
-	$oGrid->customAction("save_all",_tr("Save All"));
-
-    $offset = $oGrid->getOffSet($limit,$total,$action,$start);
-
-    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+    $oGrid->customAction("save_all",_tr("Save All"));
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $oGrid->setTitle(_tr("Language Admin"));
+    $oGrid->setIcon("images/list.png");
+    $oGrid->pagingShow(true);
+    $offset = $oGrid->calculateOffset();
 
     $url = "?menu=$module_name&module=$module&language=$language";
+    $oGrid->setURL($url);
+
+    $arrColumns = array(_tr("Key"),_tr("Value"));
+    $oGrid->setColumns($arrColumns);
 
     $arrLangMod = $pLanguages->obtainLanguages($limit, $offset, $module, $language);
     $arrData = array();
-
+    $counter = 1;
     if(is_array($arrLangMod) && count($arrLangMod)>0)
         foreach($arrLangMod as $key => $value){
             $tmpKey = htmlspecialchars($key);
             $tmpValue = htmlspecialchars($value);
 
             $arrTmp[0]  = $tmpKey;
-            $arrTmp[1]  = "<input class='table_data' style='width:450px' type='text' name=\"lang_$tmpKey\" id=\"lang_$tmpKey\" value=\"$tmpValue\" />";
+            $arrTmp[1]  = "<input class='table_data' style='width:450px' type='text' name=\"langvalue_$counter\" id=\"langvalue_$counter\" value=\"$tmpValue\" /><input type='hidden' name='langkey_$counter' id='langkey_$counter' value='$tmpKey'>";
+	    $counter++;
             $arrData[] = $arrTmp;
         }
-
-    $arrGrid = array("title"    => $arrLangModule["Language Admin"],
-                     "icon"     => "images/list.png",
-                     "width"    => "99%",
-                     "start"    => ($total==0) ? 0 : $offset + 1,
-                     "end"      => $end,
-                     "total"    => $total,
-                     "url"      => $url,
-                     "columns"  => array(0 => array("name"      => "Clave",
-                                                    "property1" => ""),
-                                         1 => array("name"      => "Value",
-                                                    "property1" => "")
-                                        )
-                    );
+    $oGrid->setData($arrData);
 
     $oGrid->showFilter(trim($htmlFilter));
-    $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=$url>".$oGrid->fetchGrid($arrGrid, $arrData,$arrLang)."</form>";
+    $moduleContent = $oGrid->fetchGrid();
+    if (strpos($moduleContent, '<form') === FALSE)
+        $moduleContent = "<form  method='POST' style='margin-bottom:0;' action=$url>$moduleContent</form>";
 
-    return $contenidoModulo;
+    return $moduleContent;
 }
 
 function saveAll($smarty, $module_name, $local_templates_dir, $arrLang, $arrLangModule, $oForm)
@@ -301,8 +297,14 @@ function saveAll($smarty, $module_name, $local_templates_dir, $arrLang, $arrLang
 
     foreach($_POST as $key => $value)
     {
-        if( substr($key,0,5) == "lang_" )
-            $arrayLangTrasl[str_replace('_',' ',substr($key,5))] = $value;
+        if( substr($key,0,8) == "langkey_" ){
+	    $number = explode("_",$key);
+	    if(isset($_POST["langvalue_$number[1]"]))
+		$translation = $_POST["langvalue_$number[1]"];
+	    else
+		$translation = "";
+            $arrayLangTrasl[$value] = $translation;
+	}
     }
 
     $bandera = $oPalo->saveAll($arrayLangTrasl, $module, $language);

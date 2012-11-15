@@ -3,14 +3,14 @@
 Summary: Elastix Module Developer
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-1.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-1
+Prereq: elastix-framework >= 2.3.0-6
 
 %description
 Elastix Module Developer
@@ -63,6 +63,17 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Jul 11 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-3
+- CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-6
+- FIXED: module language_admin, words with a key that has spaces were
+  not able to change the value. To fix this problem, a new hidden input
+  was added to the form which contains the key of the word
+  SVN Rev[4061]
+- FIXED: module language_admin, fixed mantis bug #1317, number of 
+  pages was not displayed and also keys with the character '_' were
+  not able to change
+  SVN Rev[4053]
+
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-2
 - CHANGED: extras module build_module, changed the use from xajax to the
   framework function "requestrequest"

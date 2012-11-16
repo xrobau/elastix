@@ -70,12 +70,15 @@ fi
 
 %changelog
 * Fri Nov 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Build Module: create new privileged script develbuilder and reimplement module 
-  creation using this script. Required to cope with recent security changes that
-  switch ownership of Elastix GUI to root. As a side effect, we get a net 
-  reduction of code size and some improvement in readability.
+- FIXED: Developer: check that form element exists before traversing its fields.
+  SVN Rev[4439]
+- CHANGED: Build Module: create new privileged script develbuilder and 
+  reimplement module creation using this script. Required to cope with recent 
+  security changes that switch ownership of Elastix GUI to root. As a side 
+  effect, we get a net reduction of code size and some improvement in
+  readability.
 - CHANGED: Developer: switched module ownership to root.root.
-  SVN Rev[4437]
+  SVN Rev[4438]
 
 * Wed Jul 11 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-3
 - CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-6

@@ -254,9 +254,11 @@ function buildModule_lang($xml_modulespec)
 
     $s = phpstring($xml_modulespec->name);
     $langList = array("\"$s\" => \"$s\"");
-    foreach ($xml_modulespec->form->field as $xml_field) {
-        $s = phpstring($xml_field);
-        $langList[] = "\"$s\" => \"$s\"";
+    if (isset($xml_modulespec->form)) {
+        foreach ($xml_modulespec->form->field as $xml_field) {
+            $s = phpstring($xml_field);
+            $langList[] = "\"$s\" => \"$s\"";
+        }
     }
     return $sContent.str_replace(
         '{LANG_CONTENT}', implode(",\n", $langList), loadTemplate('lang.s')).

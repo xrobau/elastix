@@ -42,13 +42,8 @@ function _moduleContent(&$smarty, $module_name)
 
     //include lang local module
     global $arrLangModule;
-    $lang=get_language();
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    if (file_exists("$base_dir/$lang_file"))
-        include_once($lang_file);
-    else
-        include_once("modules/$module_name/lang/en.lang");
+
+    load_language_module($module_name);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
@@ -64,15 +59,15 @@ function _moduleContent(&$smarty, $module_name)
     $accion = getAction();
     switch($accion)
     {
-	case "mostrar_menu":
-	    $content = mostrar_menu();
-	    break;
-	case "save_module":
-	    $content = save_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl, $arrConf);
-	    break;
-	case "check_errors":
-	    $content = check_errors();
-	    break;
+        case "mostrar_menu":
+            $content = mostrar_menu();
+            break;
+        case "save_module":
+            $content = save_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl, $arrConf);
+            break;
+        case "check_errors":
+            $content = check_errors();
+            break;
         default:
             $content = new_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl);
             break;
@@ -112,9 +107,9 @@ function new_module($smarty, $module_name, $local_templates_dir, $arrLangModule,
 
     $smarty->assign("general_information", $arrLangModule["General Information"]);
     $smarty->assign("location", $arrLangModule["Location"]);
-	$smarty->assign("module_description", $arrLangModule["Module Description"]);
+    $smarty->assign("module_description", $arrLangModule["Module Description"]);
     $smarty->assign("option_type",$arrConfig['arr_type']);
-	$smarty->assign("email", $arrLangModule["Your e-mail"]); 
+    $smarty->assign("email", $arrLangModule["Your e-mail"]); 
 
     $smarty->assign("module_name_label", $arrLangModule["Module Name"]);
     $smarty->assign("id_module_label", $arrLangModule["Module Id"]);
@@ -149,394 +144,128 @@ function new_module($smarty, $module_name, $local_templates_dir, $arrLangModule,
     return $html;
 }
 
+// Return a string that can be used as a PHP identifier for a class name
+function phpidentifier($s)
+{
+    $s = preg_replace('/\W/', '_', $s);
+    $s = preg_replace('/_+/', '_', $s);
+    $s = preg_replace("/_$/", '', $s);
+    return $s;
+}
+
 function save_module($smarty, $module_name, $local_templates_dir, $arrLangModule, &$pDB_acl, $arrConf)
 {
-    $ruta = "$arrConf[basePath]/modules";
-
+    $errMsg = '';
+    $error = FALSE;
+    
     $jsonObject = new PaloSantoJSON();
-
-    $new_module_name = getParameter("module_name");
-    $new_module_name = (isset($new_module_name)) ? $new_module_name : "";
-    $new_id_module = preg_replace("/\W/","_",strtolower($new_module_name));
-    $new_id_module = preg_replace("/_+/","_",$new_id_module);
-    $new_id_module = preg_replace("/_$/","",$new_id_module);
-
-    $parent_1_name = getParameter("parent_1_name");
-    $parent_1_name = (isset($parent_1_name)) ? $parent_1_name : "";
-    $parent_1_id = preg_replace("/\W/","_",strtolower($parent_1_name));
-    $parent_1_id = preg_replace("/_+/","_",$parent_1_id);
-    $parent_1_id = preg_replace("/_$/","",$parent_1_id);
-
-    $parent_2_name = getParameter("parent_2_name");
-    $parent_2_name = (isset($parent_2_name)) ? $parent_2_name : "";
-    $parent_2_id = preg_replace("/\W/","_",strtolower($parent_2_name));
-    $parent_2_id = preg_replace("/_+/","_",$parent_2_id);
-    $parent_2_id = preg_replace("/_$/","_",$parent_2_id);
-
-    $selected_gp = getParameter("group_permissions");
-    $selected_gp = explode("\n",$selected_gp);
-    array_pop($selected_gp);
-    $module_type = getParameter("module_type");
-    $your_name = getParameter("your_name");
-    $level = getParameter("module_level_options");
-    $exists_p1 = getParameter("parent_1_existing_option");
-    $exists_p2 = getParameter("parent_2_existing_option");
-    $selected_parent_1 = getParameter("parent_module");
-    $selected_parent_1 = (isset($selected_parent_1)) ? $selected_parent_1 : "";
-    $selected_parent_2 = getParameter("parent_module_2");
-    $selected_parent_2 = (isset($selected_parent_2)) ? $selected_parent_2 : "";
-    $arr_form = getParameter("arr_form");
-    $arr_form = explode("\n",$arr_form);
-    array_pop($arr_form);
-    $email_module = getParameter("email_module");
-    $val_url = getParameter("valor_url");
-    $val_url = (isset($val_url)) ? $val_url : "";
-
-    $errMsg = $arrLangModule["The following fields contain errors"].": ";
-    $errTitle = "";
-    $error = false;
-
-    $db_menu = new paloDB($arrConf['elastix_dsn']['menu']);
-    if(!empty($db_menu->errMsg)) {
-	$jsonObject->set_error("ERROR DE DB: {$db_menu->errMsg} <br>");
-	return $jsonObject->createJSON();
+    $pNewMod = new paloSantoBuildModule(
+        $arrConf['elastix_dsn']['settings'],
+        $arrConf['elastix_dsn']['menu'],
+        $arrConf['elastix_dsn']['acl']);
+    if(!empty($pNewMod->errMsg)) {
+        $jsonObject->set_error("ERROR DE DB: {$pNewMod->errMsg} <br>");
+        return $jsonObject->createJSON();
     }
 
-    $db_acl = new paloDB($arrConf['elastix_dsn']['acl']);
-    if(!empty($db_acl->errMsg)) {
-	$jsonObject->set_error("ERROR DE DB: {$db_acl->errMsg} <br>");
-	return $jsonObject->createJSON();
-    }
+    // Nivel al cual crear. Valores son 0 para nivel-2 y 1 para nivel-3
+    $iNivel = getParameter('module_level_options');
 
-    $db_settings = new paloDB($arrConf['elastix_dsn']['settings']);
-    if(!empty($db_settings->errMsg)) {
-	$jsonObject->set_error("ERROR DE DB: {$db_settings->errMsg} <br>");
-	return $jsonObject->createJSON();
+    // Este arreglo representará la rama de módulos intermedios y finales
+    $moduleBranch = array();
+    if (getParameter('parent_1_existing_option') == 0) {
+    	$moduleBranch[] = array('existing' => getParameter('parent_module'));
+    } else {
+    	$parentName = getParameter('parent_1_name');
+        $level = array('create' => phpidentifier(strtolower($parentName)), 'name' => $parentName);
+        if ($level['name'] == '') $errMsg .= _tr('Level 1 Parent Name').', ';
+        if (trim($level['create']) == '')
+            $errMsg .= _tr('Level 1 Parent Id').' ('._tr('Level 1 Parent Id is empty').'), ';
+        $moduleBranch[] = $level;
     }
-
-    $pNewMod_menu = new paloSantoBuildModule($db_menu);
-    $pNewMod_acl = new paloSantoBuildModule($db_acl);
-    $pNewMod_settings = new paloSantoBuildModule($db_settings);
-
-    //Manejo de errores
-    if($new_module_name == "")
-    {
-        $errMsg .= $arrLangModule["Module Name"].", ";
-        $error = true;
-    }
-    if((count($arr_form) == 0) && (empty($arr_form)) && ($module_type == "form" || $module_type == "grid"))
-    {
-        $errMsg .= $arrLangModule["Module Description is empty"].", ";
-        $error = true;
-    }
-
-    if($val_url == "" && $module_type == "framed")
-    {   
-        $errMsg .= $arrLangModule["URL is empty"].", ";
-        $error = true;   
-    }
-
-    if($new_id_module == "" || strrpos($new_id_module, " ")!=false)
-    {
-        $errMsg .= $arrLangModule["Module Id"]." (".$arrLangModule["Module Id is empty"]."), ";
-        $error = true;
-    }
-    if($your_name == "")
-    {
-        $errMsg .= $arrLangModule["Your Name"].", ";
-        $error = true;
-    }
-	if($email_module == "")
-    {
-        $errMsg .= $arrLangModule["Your e-mail"].", ";
-        $error = true;
-    }
-    if($level == 0)
-    {
-        if($exists_p1 == 1)
-        {
-            if($parent_1_name == "")
-            {
-                $errMsg .= $arrLangModule["Level 1 Parent Name"].", ";
-                $error = true;
-            }
-            if($parent_1_id == "")
-            {
-                $errMsg .= $arrLangModule["Level 1 Parent Id"]." (".$arrLangModule["Level 1 Parent Id is empty"]."), ";
-                $error = true;
-            }
+    if ($iNivel == 1) {
+        if (getParameter('parent_2_existing_option') == 0) {
+        	$moduleBranch[] = array('existing' => getParameter('parent_module_2'));
+        } else {
+            $parentName = getParameter('parent_2_name');
+            $level = array('create' => phpidentifier(strtolower($parentName)), 'name' => $parentName);
+            if ($level['name'] == '') $errMsg .= _tr('Level 2 Parent Name').', ';
+            if (trim($level['create']) == '')
+                $errMsg .= _tr('Level 2 Parent Id').' ('._tr('Level 2 Parent Id is empty').'), ';
+            $moduleBranch[] = $level;
         }
     }
-    else if($level == 1)
-    {
-        if($exists_p1 == 1)
-        {
-            if($parent_1_name == "")
-            {
-                $errMsg .= $arrLangModule["Level 1 Parent Name"].", ";
-                $error = true;
-            }
-            if($parent_1_id == "")
-            {
-                $errMsg .= $arrLangModule["Level 1 Parent Id"]." (".$arrLangModule["Level 1 Parent Id is empty"]."), ";
-                $error = true;
-            }
-            if($parent_2_name == "")
-            {
-                $errMsg .= $arrLangModule["Level 2 Parent Name"].", ";
-                $error = true;
-            }
-            if($parent_2_id == "")
-            {
-                $errMsg .= $arrLangModule["Level 2 Parent Id"]." (".$arrLangModule["Level 2 Parent Id is empty"]."), ";
-                $error = true;
-            }
-        }
-        else if($exists_p1 == 0)
-        {
-            if($exists_p2 == 1)
-            {
-                if($parent_2_name == "")
-                {
-                    $errMsg .= $arrLangModule["Level 2 Parent Name"].", ";
-                    $error = true;
-                }
-                if($parent_2_id == "")
-                {
-                    $errMsg .= $arrLangModule["Level 2 Parent Id"]." (".$arrLangModule["Level 2 Parent Id is empty"]."), ";
-                    $error = true;
-                }
-            }
+    $moduleName = getParameter('module_name');
+    $level = array('create' => phpidentifier(strtolower($moduleName)), 'name' => $moduleName);
+    if ($level['name'] == '') $errMsg .= _tr('Module Name').', ';
+    if (trim($level['create']) == '')
+        $errMsg .= _tr('Module Id').' ('._tr('Module Id is empty').'), ';
+    elseif (file_exists($arrConf['basePath'].'/modules/'.$level['create']))
+        $errMsg .= $level['create'].' ('._tr('Folder already exists').'),';
+    $moduleBranch[] = $level;
+
+    // Listado de IDs de grupos a autorizar para nuevo módulo
+    $groupList = explode("\n", trim(getParameter('group_permissions')));
+
+    // Validación según tipo de módulo
+    $sAutor = $sEmail = $sUrl = $fieldList = NULL;
+    $sModuleType = getParameter('module_type');
+    if ($sModuleType == 'framed') {
+    	$sUrl = getParameter('valor_url');
+        if ($sUrl == '') $errMsg .= _tr('URL is empty').', ';
+    } else { // form|grid
+    	$arr_form = explode("\n", trim(getParameter('arr_form')));
+        if (count($arr_form) <= 0) $errMsg .= _tr('Module Description is empty').', ';
+        $sAutor = getParameter('your_name');
+        if ($sAutor == '') $errMsg .= _tr('Your Name').', ';
+        $sEmail = getParameter('email_module');
+        if ($sEmail == '') $errMsg .= _tr('Your e-mail').', ';
+
+        if ($sModuleType == 'form') {
+            $fieldList = array();
+            foreach ($arr_form as $s) $fieldList[] = explode('/', $s);
+        } else $fieldList = $arr_form;
+    }
+
+    if ($errMsg != '') {
+    	$errMsg = _tr('The following fields contain errors').': '.$errMsg;
+        $errTitle = _tr('Validation Error');
+        $error = TRUE;
+    } else {
+    	$errTitle = _tr('ERROR');
+        $r = ($sModuleType == 'framed') 
+            ? $pNewMod->createModuleURL($moduleBranch, $groupList, $sUrl)
+            : $pNewMod->createModuleFormGrid($moduleBranch, $groupList,
+                $sAutor, $sEmail, $sModuleType, $fieldList);
+        if (!$r) {
+        	$error = TRUE;
+            $errMsg = $pNewMod->errMsg;
         }
     }
-    if (file_exists("$ruta/$new_id_module") && !empty($new_id_module)) {
-        $errMsg .= "$new_id_module (". $arrLangModule["Folder already exists"]."), ";
-        $error = true;
-    }
-    //Manejo de errores
 
-
-    if($error)
-    {
-        $errTitle = $arrLangModule["Validation Error"];
-    }
-    else{
-
-        if($pNewMod_menu->Existe_Id_Module($new_id_module))
-        {
-            $error = true;
-            $errTitle = $arrLangModule["ERROR"];
-            $errMsg = $arrLangModule['Module Id already exists']. ": $new_id_module";
-        }
-        else{
-            $parent = "";
-            $errTitle = $arrLangModule["ERROR"];
-            if($level == 0)
-            {
-                if($exists_p1 == 0)
-                    $parent = $selected_parent_1;
-                else if($exists_p1 == 1){
-                    //Insertar Menu de nivel 1
-                    if($pNewMod_menu->Existe_Id_Module($parent_1_id))
-                    {
-                        $error = true;
-                        $errMsg = $arrLangModule['Module Id already exists'].": $parent_1_id";
-                    }else{
-                        $parent = $parent_1_id;
-                        if(!$pNewMod_menu->Insertar_Menu($parent_1_id, '', $parent_1_name, $module_type, $val_url))
-                        {
-                            $error = true;
-                            $errMsg = $pNewMod_menu->errMsg;
-                        }else{
-                            $id_resource = $pNewMod_acl->Insertar_Resource($parent_1_id, $parent_1_name);
-                            if($id_resource == 0)
-                            {
-                                $error = true;
-                                $errMsg = $pNewMod_acl->errMsg;
-                            }
-                            else{
-                                if(!$pNewMod_acl->Insertar_Group_Permissions($selected_gp, $id_resource))
-                                {
-                                    $error = true;
-                                    $errMsg = $pNewMod_acl->errMsg;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else if($level == 1)
-            {
-                if($exists_p1 == 0)
-                {
-                    if($exists_p2 == 0)
-                        $parent = $selected_parent_2;
-                    else if($exists_p2 == 1)
-                    {
-                        //Insertar Menu de nivel 2
-                        if($pNewMod_menu->Existe_Id_Module($parent_2_id))
-                        {
-                            $error = true;
-                            $errMsg = $arrLangModule['Module Id already exists'].": $parent_2_id";
-                        }else{
-                            $parent = $parent_2_id;
-                            if(!$pNewMod_menu->Insertar_Menu($parent_2_id, $selected_parent_1, $parent_2_name, $module_type, $val_url))
-                            {
-                                $error = true;
-                                $errMsg = $pNewMod_menu->errMsg;
-                            }else{
-                                $id_resource = $pNewMod_acl->Insertar_Resource($parent_2_id, $parent_2_name);
-                                if($id_resource == 0)
-                                {
-                                    $error = true;
-                                    $errMsg = $pNewMod_acl->errMsg;
-                                }
-                                else{
-                                    if(!$pNewMod_acl->Insertar_Group_Permissions($selected_gp, $id_resource))
-                                    {
-                                        $error = true;
-                                        $errMsg = $pNewMod_acl->errMsg;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }else if($exists_p1 == 1)
-                {
-                    //Insertar Menu de nivel 1
-                    if($pNewMod_menu->Existe_Id_Module($parent_1_id))
-                    {
-                        $error = true;
-                        $errMsg = $arrLangModule['Module Id already exists'].": $parent_1_id";
-                    }else{
-                        //$parent = $parent_1_id;
-                        if(!$pNewMod_menu->Insertar_Menu($parent_1_id, '', $parent_1_name, $module_type, $val_url))
-                        {
-                            $error = true;
-                            $errMsg = $pNewMod_menu->errMsg;
-                        }else{
-                            $id_resource = $pNewMod_acl->Insertar_Resource($parent_1_id, $parent_1_name);
-                            if($id_resource == 0)
-                            {
-                                $error = true;
-                                $errMsg = $pNewMod_acl->errMsg;
-                            }
-                            else{
-                                if(!$pNewMod_acl->Insertar_Group_Permissions($selected_gp, $id_resource))
-                                {
-                                    $error = true;
-                                    $errMsg = $pNewMod_acl->errMsg;
-                                }
-                            }
-                        }
-                    }
-
-                    if(!$error)
-                    {
-                        //Insertar Menu de nivel 2
-                        if($pNewMod_menu->Existe_Id_Module($parent_2_id))
-                        {
-                            $error = true;
-                            $errMsg = $arrLangModule['Module Id already exists'].": $parent_2_id";
-                        }else{
-                            $parent = $parent_2_id;
-                            if(!$pNewMod_menu->Insertar_Menu($parent_2_id, $parent_1_id, $parent_2_name, $module_type, $val_url))
-                            {
-                                $error = true;
-                                $errMsg = $pNewMod_menu->errMsg;
-                            }else{
-                                $id_resource = $pNewMod_acl->Insertar_Resource($parent_2_id, $parent_2_name);
-                                if($id_resource == 0)
-                                {
-                                    $error = true;
-                                    $errMsg = $pNewMod_acl->errMsg;
-                                }
-                                else{
-                                    if(!$pNewMod_acl->Insertar_Group_Permissions($selected_gp, $id_resource))
-                                    {
-                                        $error = true;
-                                        $errMsg = $pNewMod_acl->errMsg;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            //Insertar Menu Final que es el modulo en si
-            if(!$error)
-            {
-                if(!$pNewMod_menu->Insertar_Menu($new_id_module, $parent, $new_module_name, $module_type, $val_url))
-                {
-                    $error = true;
-                    $errMsg = $pNewMod_menu->errMsg;
-                }else{
-                    $id_resource = $pNewMod_acl->Insertar_Resource($new_id_module, $new_module_name);
-                    if($id_resource == 0)
-                    {
-                        $error = true;
-                        $errMsg = $pNewMod_acl->errMsg;
-                    }
-                    else{
-                        if(!$pNewMod_acl->Insertar_Group_Permissions($selected_gp, $id_resource))
-                        {
-                            $error = true;
-                            $errMsg = $pNewMod_acl->errMsg;
-                        }else unset($_SESSION['elastix_user_permission']);
-                    }
-                }
-            }
-        }
-
-        //Crear estructura de carpetas y archivos
-        if(!$error && ($module_type == "form" || $module_type == "grid"))
-        {
-            $errTitle = $arrLangModule["ERROR"];
-
-            $fieldList = NULL;
-            if ($module_type == 'form') {
-            	$fieldList = array();
-                foreach ($arr_form as $s) $fieldList[] = explode('/', $s);
-            } else $fieldList = $arr_form;
-                
-            $bExito = $pNewMod_settings->createModuleFiles($new_id_module,
-                $new_module_name, $your_name, $email_module, $module_type,
-                $fieldList);
-            if (!$bExito) {
-            	$error = TRUE;
-                $errMsg = _tr("Folders can't be created").' - '.$pNewMod_settings->errMsg;
-            }
-        }
-    }
     $response = array();
-    if($error)
-    {
-	$htmlError  = "<table width='99%' height='0px' border='0' cellspacing='0' cellpadding='0' align='center' class='message_board'>";
-        $htmlError .= "<tr>";
-        $htmlError .= "<td height='0px' valign='middle' id='mb_title' name='mb_title' class='mb_title'>".$errTitle."</td>";
-        $htmlError .= "</tr>";
-        $htmlError .= "<tr>";
-        $htmlError .= "<td height='0px' valign='middle' id='mb_message' name='mb_message' class='mb_message'>".$errMsg."</td>";
-        $htmlError .= "</tr>";
-        $htmlError .= "</table>";
-	$response["message"] = $htmlError;
-	$jsonObject->set_status("ERROR");
-	$jsonObject->set_message($response);
-    }else{
-	$message = $arrLangModule["The module was crated successfully"].". ".$arrLangModule["If you are not redirected to your new module in a few seconds, you can click"]." <a href=?menu=$new_id_module>{$arrLangModule["here"]}</a>.";
-	$htmlMessage  = "<table width='99%' height='0px' border='0' cellspacing='0' cellpadding='0' align='center' class='message_board'>";
-        $htmlMessage .= "<tr>";
-        $htmlMessage .= "<td height='0px' valign='middle' id='mb_title' name='mb_title' class='mb_title'>".$arrLangModule["Message"]."</td>";
-        $htmlMessage .= "</tr>";
-        $htmlMessage .= "<tr>";
-        $htmlMessage .= "<td height='0px' valign='middle' id='mb_message' name='mb_message' class='mb_message'>".$message."</td>";
-        $htmlMessage .= "</tr>";
-        $htmlMessage .= "</table>";
-	$response["message"] = $htmlMessage;
-	$response["moduleId"] = $new_id_module;
-	$jsonObject->set_message($response);
+    if($error) {
+        $jsonObject->set_status('ERROR');
+        $msgTitle = $errTitle;
+        $message = $errMsg;
+    } else {
+        $new_id_module = $moduleBranch[count($moduleBranch) - 1]['create'];
+        $response["moduleId"] = $new_id_module;
+        $msgTitle = _tr('Message');
+        $message = _tr('The module was crated successfully').'. '.
+            _tr('If you are not redirected to your new module in a few seconds, you can click').
+            " <a href=?menu=$new_id_module>"._tr('here')."</a>.";
     }
+    $htmlMessage  = "<table width='99%' height='0px' border='0' cellspacing='0' cellpadding='0' align='center' class='message_board'>";
+    $htmlMessage .= "<tr>";
+    $htmlMessage .= "<td height='0px' valign='middle' id='mb_title' name='mb_title' class='mb_title'>".$msgTitle."</td>";
+    $htmlMessage .= "</tr>";
+    $htmlMessage .= "<tr>";
+    $htmlMessage .= "<td height='0px' valign='middle' id='mb_message' name='mb_message' class='mb_message'>".$message."</td>";
+    $htmlMessage .= "</tr>";
+    $htmlMessage .= "</table>";
+    $response["message"] = $htmlMessage;
+    $jsonObject->set_message($response);
 
     return $jsonObject->createJSON();
 }
@@ -568,9 +297,9 @@ function mostrar_menu()
         {
             $pDB_menu = new paloDB($arrConf['elastix_dsn']['menu']);
             if(!empty($pDB_menu->errMsg)){
-		  $jsonObject->set_error("ERROR DE DB: {$pDB_menu->errMsg}");
-		  return $jsonObject->createJSON();
-	    }
+                  $jsonObject->set_error("ERROR DE DB: {$pDB_menu->errMsg}");
+                  return $jsonObject->createJSON();
+            }
 
             $pMenu = new paloMenu($pDB_menu);
             $arrMenuOptions = $pMenu->getRootMenus();
@@ -590,10 +319,10 @@ function mostrar_menu()
             $parent_Menu .= "<td align='left' width='11%'><b>{$arrLangModule["Level 1 Parent Id"]}: </b></td>";
             $parent_Menu .= "<td align='left'><i id='parent_1_id'></i></td>";
         }
-	$respuesta["parent_menu_1"] = $parent_Menu;
-	$respuesta["level2_exist"] = "";
-	$respuesta["parent_menu_2"] = "";
-	$respuesta["label_level2"] = "";
+        $respuesta["parent_menu_1"] = $parent_Menu;
+        $respuesta["level2_exist"] = "";
+        $respuesta["parent_menu_2"] = "";
+        $respuesta["label_level2"] = "";
     }
     //Nivel 3
     else
@@ -606,20 +335,20 @@ function mostrar_menu()
             {
                 require_once('libs/paloSantoNavigation.class.php');
                 $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
-		$arrMenu = $pMenu->cargar_menu();
+                $arrMenu = $pMenu->cargar_menu();
                 $pNav = new paloSantoNavigation(null, $arrMenu, $smarty);
                 $arrMenuOptions = $pNav->getArrSubMenu($id_parent);
-		if(is_array($arrMenuOptions)){
-		    $parent_Menu2  = "<td align='left'><b>{$arrLangModule["Level 2 Parent"]}: <span  class='required'>*</span></b></td>";
-		    $parent_Menu2 .= "<td>";
-		    $parent_Menu2 .= "<select name='parent_module_2' id='parent_module_2'>";
-		    foreach($arrMenuOptions as $key => $valor)
-			$parent_Menu2 .= "<option value='$key'>{$valor['Name']}</option>";
-		    $parent_Menu2 .= "</select>";
-		    $parent_Menu2 .= "</td>";
-		    $parent_Menu2 .= "<td></td><td></td><td></td>";
-		    $respuesta["parent_menu_2"] = $parent_Menu2;
-		}
+                if(is_array($arrMenuOptions)){
+                    $parent_Menu2  = "<td align='left'><b>{$arrLangModule["Level 2 Parent"]}: <span  class='required'>*</span></b></td>";
+                    $parent_Menu2 .= "<td>";
+                    $parent_Menu2 .= "<select name='parent_module_2' id='parent_module_2'>";
+                    foreach($arrMenuOptions as $key => $valor)
+                        $parent_Menu2 .= "<option value='$key'>{$valor['Name']}</option>";
+                    $parent_Menu2 .= "</select>";
+                    $parent_Menu2 .= "</td>";
+                    $parent_Menu2 .= "<td></td><td></td><td></td>";
+                    $respuesta["parent_menu_2"] = $parent_Menu2;
+                }
             }
             //Padre nivel 2 NO existe
             else if($parent_2_existing==1)
@@ -628,15 +357,15 @@ function mostrar_menu()
                 $parent_Menu2 .= "<td align='left' width='21%'><input type='text' name='parent_2_name' id='parent_2_name' value='' onkeyup='generateId(this,\"parent_2_id\")'></td>";
                 $parent_Menu2 .= "<td align='left' width='11%'><b>{$arrLangModule["Level 2 Parent Id"]}: </b></td>";
                 $parent_Menu2 .= "<td align='left'><i id='parent_2_id'></i></td>";
-		$respuesta["parent_menu_2"] = $parent_Menu2;
+                $respuesta["parent_menu_2"] = $parent_Menu2;
             }
             //Aun no se a creado el select
             else{
                 $pDB_menu = new paloDB($arrConf['elastix_dsn']['menu']);
                 if(!empty($pDB_menu->errMsg)){
                     $jsonObject->set_error("ERROR DE DB: {$pDB_menu->errMsg}");
-		    return $jsonObject->createJSON();
-		}
+                    return $jsonObject->createJSON();
+                }
 
                 $pMenu = new paloMenu($pDB_menu);
                 $arrMenuOptions = $pMenu->getRootMenus();
@@ -649,24 +378,24 @@ function mostrar_menu()
                     $parent_Menu .= "</select>";
                 $parent_Menu .= "</td>";
                 $parent_Menu .= "<td></td><td></td><td></td>";
-		$respuesta["parent_menu_1"] = $parent_Menu;
+                $respuesta["parent_menu_1"] = $parent_Menu;
 
                 //$respuesta->addAssign("parent_menu_1","innerHTML", "");
 
                 $parent_exist = "<b>{$arrLangModule["Level 2 Parent Exists"]}: <span  class='required'>*</span></b>";
-		$respuesta["label_level2"] = $parent_exist;
+                $respuesta["label_level2"] = $parent_exist;
 
                 $parent_option  = "<select id='parent_2_existing_option' name='parent_2_existing_option' onchange='mostrar_menu()'>";
                 $parent_option .= "<option value='{$arrLangModule["Yes"]}'>{$arrLangModule["Yes"]}</option>";
                 $parent_option .= "<option value='{$arrLangModule["No"]}' selected='selected'>{$arrLangModule["No"]}</option>";
                 $parent_option .= "</select>";
-		$respuesta["level2_exist"] = $parent_option;
+                $respuesta["level2_exist"] = $parent_option;
 
                 $parent_Menu2  = "<td align='left'><b>{$arrLangModule["Level 2 Parent Name"]}: <span  class='required'>*</span></b></td>";
                 $parent_Menu2 .= "<td align='left' width='22%'><input type='text' name='parent_2_name' id='parent_2_name' value='' onkeyup='generateId(this,\"parent_2_id\")'></td>";
                 $parent_Menu2 .= "<td align='left' width='11%'><b>{$arrLangModule["Level 2 Parent Id"]}: </b></td>";
                 $parent_Menu2 .= "<td align='left'><i id='parent_2_id'></i></td>";
-		$respuesta["parent_menu_2"] = $parent_Menu2;
+                $respuesta["parent_menu_2"] = $parent_Menu2;
             }
         }
         //Padre nivel 1 NO existe
@@ -675,15 +404,15 @@ function mostrar_menu()
             $parent_Menu .= "<td align='left' width='22%'><input type='text' name='parent_1_name' id='parent_1_name' value='' onkeyup='generateId(this,\"parent_1_id\")'></td>";
             $parent_Menu .= "<td align='left' width='11%'><b>{$arrLangModule["Level 1 Parent Id"]}: </b></td>";
             $parent_Menu .= "<td align='left'><i id='parent_1_id'></i></td>";
-	    $respuesta["parent_menu_1"] = $parent_Menu;
+            $respuesta["parent_menu_1"] = $parent_Menu;
 
             $parent_Menu2  = "<td align='left'><b>{$arrLangModule["Level 2 Parent Name"]}: <span  class='required'>*</span></b></td>";
             $parent_Menu2 .= "<td align='left' width='22%'><input type='text' name='parent_2_name' id='parent_2_name' value='' onkeyup='generateId(this,\"parent_2_id\")'></td>";
             $parent_Menu2 .= "<td align='left' width='11%'><b>{$arrLangModule["Level 2 Parent Id"]}: </b></td>";
             $parent_Menu2 .= "<td align='left'><i id='parent_2_id'></i></td>";
-	    $respuesta["parent_menu_2"] = $parent_Menu2;
-	    $respuesta["level2_exist"] = "";
-	    $respuesta["label_level2"] = "";
+            $respuesta["parent_menu_2"] = $parent_Menu2;
+            $respuesta["level2_exist"] = "";
+            $respuesta["label_level2"] = "";
         }
     }
     $jsonObject->set_message($respuesta);
@@ -693,12 +422,12 @@ function mostrar_menu()
 function getAction()
 {
     if(getParameter("action") == "mostrar_menu")
-	return "mostrar_menu";
+        return "mostrar_menu";
     elseif(getParameter("action") == "save_module")
-	return "save_module";
+        return "save_module";
     elseif(getParameter("action") == "check_errors")
-	return "check_errors";
+        return "check_errors";
     else
-	return "new_module";
+        return "new_module";
 }
 ?>

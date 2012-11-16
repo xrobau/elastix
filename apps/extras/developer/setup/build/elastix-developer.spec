@@ -70,6 +70,9 @@ fi
 
 %changelog
 * Fri Nov 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Build Module: rewrite to enclose the creation of the module inside a
+  transaction. The rewrite also achieved a net reduction of code size.
+  SVN Rev[4440]
 - FIXED: Developer: check that form element exists before traversing its fields.
   SVN Rev[4439]
 - CHANGED: Build Module: create new privileged script develbuilder and 

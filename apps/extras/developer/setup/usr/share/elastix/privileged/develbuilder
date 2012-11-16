@@ -1,0 +1,321 @@
+#!/usr/bin/php
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: develbuilder.php,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+require_once 'Console/Getopt.php';
+
+define('MODULEPATH', '/var/www/html/modules');
+define('MODULE_TEMPLATE_PATH', '/var/www/html/modules/build_module/libs/sources');
+
+load_default_timezone();
+
+// Parse command-line options
+$opt = Console_Getopt::getopt($argv, '', array(
+    'createmodule=',    // Create a brand new module directory from XML specfile
+));
+if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
+//validateOptions($opt);
+foreach ($opt[0] as $option) switch ($option[0]) {
+case '--createmodule':
+    exit(action_createModule($opt) ? 0 : 1);
+}
+error_exit("No action specified (--createmodule)\n");
+
+function error_exit($sMsg, $errorcode = 1)
+{
+    fwrite(STDERR, $sMsg);
+    exit($errorcode);
+}
+
+function load_default_timezone()
+{
+    $sDefaultTimezone = @date_default_timezone_get();
+    if ($sDefaultTimezone == 'UTC') {
+        $sDefaultTimezone = 'America/New_York';
+        if (file_exists('/etc/sysconfig/clock')) {
+            foreach (file('/etc/sysconfig/clock') as $s) {
+                $regs = NULL;
+                if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
+                    $sDefaultTimezone = $regs[1];
+                }
+            }
+        }
+    }
+    date_default_timezone_set($sDefaultTimezone);
+}
+
+
+function action_createModule($opt)
+{
+    $sModuleSpec = NULL;
+    
+    // Name of XML specification of module
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--createmodule':
+        $sModuleSpec = $option[1];
+        break;
+    }
+    if (is_null($sModuleSpec)) error_exit("ERR: module spec not specified!\n");
+    if (!is_readable($sModuleSpec)) error_exit("ERR: module spec at $sModuleSpec is not readable!\n");
+    $xml_modulespec = simplexml_load_file($sModuleSpec);
+    if ($xml_modulespec === FALSE) error_exit("ERR: failed to parse $sModuleSpec as XML!\n");
+
+    if (!preg_match('/^\w+$/', $xml_modulespec->id))
+        error_exit("ERR: invalid module id: ".$xml_modulespec->id."\n");
+
+    // List of files to be created as part of a new module
+    $files = array(
+        array(
+            'filename'  =>  'index.php',
+            'directory' =>  NULL,
+            'content'   =>  buildModule_index($xml_modulespec),
+        ),
+        array(
+            'filename'  =>  'default.conf.php',
+            'directory' =>  'configs',
+            'content'   =>  buildModule_defaultconf($xml_modulespec),
+        ),
+        array(
+            'filename'  =>  'en.lang',
+            'directory' =>  'lang',
+            'content'   =>  buildModule_lang($xml_modulespec),
+        ),
+        array(
+            'filename'  =>  'paloSanto'.phpidentifier($xml_modulespec->name).'.class.php',
+            'directory' =>  'libs',
+            'content'   =>  buildModule_libs($xml_modulespec),
+        ),
+        array(
+            'filename'  =>  ((string)$xml_modulespec->id).'.hlp',
+            'directory' =>  'help',
+            'content'   =>  loadTemplate('help.tpl'),
+        ),
+        array(
+            'filename'  =>  NULL,
+            'directory' =>  'images',
+            'content'   =>  NULL,
+        ),
+    );
+    if (isset($xml_modulespec->form)) {
+        $files[] = array(
+            'filename'  =>  'form.tpl',
+            'directory' =>  'themes/default',
+            'content'   =>  buildModule_formtpl($xml_modulespec),
+        );
+    } elseif (isset($xml_modulespec->grid)) {
+        $files[] = array(
+            'filename'  =>  'filter.tpl',
+            'directory' =>  'themes/default',
+            'content'   =>  loadTemplate('filter.tpl'),
+        );
+    }
+
+    // Create files in corresponding directories
+    $sModuleDirectory = MODULEPATH.'/'.((string)$xml_modulespec->id);
+    foreach ($files as &$filespec) {
+        $sDirectory = $sModuleDirectory;
+        if (!is_null($filespec['directory']))
+            $sDirectory .= '/'.$filespec['directory'];
+        if (!is_dir($sDirectory) && !mkdir($sDirectory, 0755, TRUE))
+            error_exit("ERR: failed to create directory: $sDirectory\n");
+        if (!is_null($filespec['filename']) && !is_null($filespec['content'])) {
+            $sFilepath = $sDirectory.'/'.$filespec['filename'];
+            if (FALSE === file_put_contents($sFilepath, $filespec['content']))
+                error_exit("ERR: failed to write file $sFilepath\n");
+        }
+    }
+
+    return TRUE;
+}
+
+function buildModule_index($xml_modulespec)
+{
+    // Load and replace in comment section for index file
+    $sContent = buildModule_phpheader($xml_modulespec, 'index.php');
+
+    // Load and replace main section according to chosen variant
+    if (isset($xml_modulespec->form)) {
+        $sContentForm = '';
+        $widgetCache = array();
+        foreach ($xml_modulespec->form->field as $xml_field) {
+            $sFieldType = (string)$xml_field['type'];
+            if (!preg_match('/^\w+$/', $sFieldType)) 
+                error_exit("ERR: invalid field type ".$xml_field['type']."\n");
+            if (!isset($widgetCache[$sFieldType]))
+                $widgetCache[$sFieldType] = loadTemplate('fields_form/'.$sFieldType.'.s');
+            $sContentForm .= str_replace(
+                array(
+                    '{LABEL_FIELD}',
+                    '{NAME_FIELD}'),
+                array(
+                    phpstring((string)$xml_field),
+                    phpidentifier(strtolower(trim($xml_field)))),
+                $widgetCache[$sFieldType]);
+        }
+        
+        $sContent .= str_replace('{ARR_FIELDS_FORM}', $sContentForm, 
+            loadTemplate('index_form.s'));
+    } elseif (isset($xml_modulespec->grid)) {
+        $blockRows    ="";
+        $blockColumns ="";
+        $blockFilters ="";
+        foreach ($xml_modulespec->grid->column as $xml_column) {
+            $key = (string)$xml_column['key'];
+            $column = (string)$xml_column;
+            
+            $sColumnKey = phpidentifier(strtolower($column));
+            $sColumnString = phpstring($column);
+
+            $blockRows .= "\n\t    \$arrTmp[$key] = \$value['$sColumnKey'];";
+            $blockColumns .= "_tr(\"$sColumnString\"),";
+            $blockFilters .= "\n\t    \"$sColumnKey\" => _tr(\"$sColumnString\"),";
+        }
+
+        $sContent .= str_replace(
+            array(
+                '{ARR_DATA_ROWS}',
+                '{ARR_NAME_COLUMNS}',
+                '{ARR_FILTERS}'),
+            array(
+                $blockRows,
+                $blockColumns,
+                $blockFilters),
+            loadTemplate('index_grid.s')
+        );
+    } else {
+        error_exit("ERR: unknown or missing module type\n");
+    }
+    
+    return str_replace(
+        array(
+            '{NAME_CLASS}',
+            '{NEW_MODULE_NAME}'),
+        array(
+            phpidentifier($xml_modulespec->name),
+            phpstring($xml_modulespec->name)),
+        $sContent).'?>';
+}
+
+function buildModule_defaultconf($xml_modulespec)
+{
+    // Load and replace in comment section for config file
+    $sContent = buildModule_phpheader($xml_modulespec, 'default.conf.php');
+
+    $sContent .= str_replace(
+        '{MODULE_ID}',
+        $xml_modulespec->id,
+        loadTemplate('default.s')).'?>';
+    return $sContent;
+}
+
+function buildModule_formtpl($xml_modulespec)
+{
+    $sTemplate = loadTemplate('fields_form/fields_form.tpl');
+    $sContentForm = '';
+    foreach ($xml_modulespec->form->field as $xml_field) {
+        $sContentForm .= str_replace(
+            '{FIELD_LABEL}',
+            phpidentifier(strtolower(trim($xml_field))),
+            $sTemplate);
+    }
+    return str_replace('{FIELDS_FORM}', $sContentForm, loadTemplate('form.tpl'));
+}
+
+function buildModule_lang($xml_modulespec)
+{
+    // Load and replace in comment section for config file
+    $sContent = buildModule_phpheader($xml_modulespec, 'en.lang');
+
+    $s = phpstring($xml_modulespec->name);
+    $langList = array("\"$s\" => \"$s\"");
+    foreach ($xml_modulespec->form->field as $xml_field) {
+        $s = phpstring($xml_field);
+        $langList[] = "\"$s\" => \"$s\"";
+    }
+    return $sContent.str_replace(
+        '{LANG_CONTENT}', implode(",\n", $langList), loadTemplate('lang.s')).
+        '?>';
+}
+
+function buildModule_libs($xml_modulespec)
+{
+    // Load and replace in comment section for library file
+    $sClassName = phpidentifier($xml_modulespec->name);
+    $sContent = buildModule_phpheader($xml_modulespec, "paloSanto{$sClassName}.class.php");
+
+    return $sContent.str_replace('{NAME_CLASS}', $sClassName, loadTemplate('lib_class.s'));
+}
+
+function buildModule_phpheader($xml_modulespec, $sFileName)
+{
+    return "<?php\n".str_replace(
+        array(
+            '{ELASTIX_VERSION}',
+            '{DATE}',
+            '{YOUR_NAME}',
+            '{FILE_NAME}',
+            '{YOUR_EMAIL}'),
+        array(
+            (string)$xml_modulespec->elastixversion,
+            date('Y-m-d h:m:s'),
+            (string)$xml_modulespec->author,
+            $sFileName,
+            (string)$xml_modulespec->email),
+        loadTemplate('comment.s'));
+}
+
+// Return a string that can be used as a PHP identifier for a class name
+function phpidentifier($s)
+{
+    $s = preg_replace('/\W/', '_', $s);
+    $s = preg_replace('/_+/', '_', $s);
+    $s = preg_replace("/_$/", '', $s);
+    return $s;
+}
+
+// Return a string that can be embedded inside double quotes in PHP code
+function phpstring($s)
+{
+    return str_replace(
+        array('"', '$'),
+        array('\"', '\$'),
+        $s);
+    return $s;
+}
+
+// Read a template from specified path and error out on failure
+function loadTemplate($s)
+{
+    $sTemplatePath = MODULE_TEMPLATE_PATH.'/'.$s;
+    $sTemplate = file_get_contents($sTemplatePath);
+    if ($sTemplate === FALSE) error_exit("ERR: failed to read template $sTemplatePath\n");
+    return $sTemplate;
+}
+
+?>

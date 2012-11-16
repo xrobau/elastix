@@ -25,6 +25,10 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
+mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
+rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
+
 # Additional (module-specific) files that can be handled by RPM
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
 #mv setup/dialer
@@ -58,11 +62,21 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+%defattr(755, root, root)
+/usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Build Module: create new privileged script develbuilder and reimplement module 
+  creation using this script. Required to cope with recent security changes that
+  switch ownership of Elastix GUI to root. As a side effect, we get a net 
+  reduction of code size and some improvement in readability.
+- CHANGED: Developer: switched module ownership to root.root.
+  SVN Rev[4437]
+
 * Wed Jul 11 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-3
 - CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-6
 - FIXED: module language_admin, words with a key that has spaces were

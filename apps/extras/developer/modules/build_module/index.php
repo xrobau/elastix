@@ -493,116 +493,19 @@ function save_module($smarty, $module_name, $local_templates_dir, $arrLangModule
         if(!$error && ($module_type == "form" || $module_type == "grid"))
         {
             $errTitle = $arrLangModule["ERROR"];
-            //$type = "report";
-            //$type = "grid";
-            $type = $module_type;
-            $arrForm = array();//agregado
-            $arrForm = $arr_form;//agregado
 
-            //Primero la carpeta principal del modulo
-            $folder = "$new_id_module";
-            $comando="mkdir $ruta/$folder";
-            exec($comando,$output,$retval);
-            if ($retval!=0){
-                $error = true;
-                $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-            }
-            else{
-                $elastix_Version = $pNewMod_settings->Query_Elastix_Version();
-
-                //Crear index.php
-                if(!$pNewMod_menu->Create_Index_File($new_module_name, $new_id_module, $your_name, $ruta, $elastix_Version, $arrLangModule, $type, $module_name, $arrForm, $email_module))
-                {
-                    $error = true;
-                    $errMsg = $pNewMod_menu->errMsg;
-                }
-
-                //Carpetas comunes
-                $folder = "$new_id_module/themes";
-                $comando="mkdir $ruta/$folder";
-                exec($comando,$output,$retval);
-                if ($retval!=0){
-                    $error = true;
-                    $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-                }else{
-                    $folder = "$new_id_module/themes/default";
-                    $comando="mkdir $ruta/$folder";
-                    exec($comando,$output,$retval);
-                    if ($retval!=0){
-                        $error = true;
-                        $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-                    }else{
-                        if(!$pNewMod_menu->Create_tpl_File($new_id_module, $ruta, $arrLangModule, $type, $module_name, $arrForm))
-                        {
-                            $error = true;
-                            $errMsg = $pNewMod_menu->errMsg;
-                        }
-                    }
-                }
-
-                $folder = "$new_id_module/configs";
-                $comando="mkdir $ruta/$folder";
-                exec($comando,$output,$retval);
-                if ($retval!=0){
-                    $error = true;
-                    $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-                }else{
-                    if(!$pNewMod_menu->Create_File_Config($new_id_module, $your_name, $ruta, $elastix_Version, $arrLangModule, $module_name, $email_module))
-                    {
-                        $error = true;
-                        $errMsg = $pNewMod_menu->errMsg;
-                    }
-                }
-
-                $folder = "$new_id_module/lang";
-                $comando="mkdir $ruta/$folder";
-                exec($comando,$output,$retval);
-                if ($retval!=0){
-                    $error = true;
-                    $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-                }else{
-                    if(!$pNewMod_menu->Create_File_Lang($new_module_name, $new_id_module, $your_name, $ruta, $elastix_Version, $arrLangModule, $module_name, $arrForm, $email_module))
-                    {
-                        $error = true;
-                        $errMsg = $pNewMod_menu->errMsg;
-                    }
-                }
-
-                $folder = "$new_id_module/libs";
-                $comando="mkdir $ruta/$folder";
-                exec($comando,$output,$retval);
-                if ($retval!=0){
-                    $error = true;
-                    $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-                }else{
-                    if(!$pNewMod_menu->Create_Module_Class_File($new_module_name, $new_id_module, $your_name, $ruta, $elastix_Version, $arrLangModule, $module_name,$email_module))
-                    {
-                        $error = true;
-                        $errMsg = $pNewMod_menu->errMsg;
-                    }
-                }
-
-                $folder = "$new_id_module/help";
-                $comando="mkdir $ruta/$folder";
-                exec($comando,$output,$retval);
-                if ($retval!=0){
-                    $error = true;
-                    $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-                }else{
-                    if(!$pNewMod_menu->Create_File_Help($new_id_module, $your_name, $ruta, $elastix_Version, $arrLangModule, $module_name))
-                    {
-                        $error = true;
-                        $errMsg = $pNewMod_menu->errMsg;
-                    }
-                }
-
-                $folder = "$new_id_module/images";
-                $comando="mkdir $ruta/$folder";
-                exec($comando,$output,$retval);
-                if ($retval!=0){
-                    $error = true;
-                    $errMsg = $arrLangModule["Folders can't be created"]." $folder, ";
-                }
+            $fieldList = NULL;
+            if ($module_type == 'form') {
+            	$fieldList = array();
+                foreach ($arr_form as $s) $fieldList[] = explode('/', $s);
+            } else $fieldList = $arr_form;
+                
+            $bExito = $pNewMod_settings->createModuleFiles($new_id_module,
+                $new_module_name, $your_name, $email_module, $module_type,
+                $fieldList);
+            if (!$bExito) {
+            	$error = TRUE;
+                $errMsg = _tr("Folders can't be created").' - '.$pNewMod_settings->errMsg;
             }
         }
     }

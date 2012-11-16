@@ -27,93 +27,197 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoCDR.class.php,v 1.1.1.1 2008/05/16 17:31:55 afigueroa Exp $ */
 
+require_once 'libs/paloSantoDB.class.php';
+
 class paloSantoBuildModule {
-    var $_DB;
+    //var $_DB;
+    private $_DB_settings;
+    private $_DB_menu;
+    private $_DB_acl;
     var $errMsg;
 
-    function paloSantoBuildModule(&$pDB)
+    function __construct($dsnSettings, $dsnMenu, $dsnACL)
     {
-        // Se recibe como parámetro una referencia a una conexión paloDB
-        if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        } else {
-            $dsn = (string)$pDB;
-            $this->_DB = new paloDB($dsn);
+    	$this->errMsg = '';
+        $this->_initDB($this->_DB_settings, $dsnSettings);
+        $this->_initDB($this->_DB_menu, $dsnMenu);
+        $this->_initDB($this->_DB_acl, $dsnACL);
+    }
 
-            if (!$this->_DB->connStatus) {
-                $this->errMsg = $this->_DB->errMsg;
-                // debo llenar alguna variable de error
+    private function _initDB(&$db, $dsn)
+    {
+    	$db = new paloDB($dsn);
+        if (!$db->connStatus) $this->errMsg = $db->errMsg;
+    } 
+
+    /**
+     * Procedimiento para crear una especificación de base de datos que incluye
+     * a un nuevo módulo, y a continuación crear los archivos del módulo en sí.
+     * 
+     * @param   array   $moduleBranch   Lista de tuplas que describe la rama de
+     *  niveles a crear o usar. Cada tupla puede ser ('existing' => idmodulo), 
+     *  o ('create' => idmodulo, 'name' => nombremodulo). El último elemento 
+     *  debe ser siempre de tipo create. Todos los 'existing' deben estar antes
+     *  de todos los 'create'.
+     * @param   array   $groupList      Lista de todos los grupos autorizados
+     * @param   string  $sAuthorName    Nombre del autor, se incluye en cabeceras
+     * @param   string  $sEmail         Correo electrónico del autor
+     * @param   string  $sModuleType    grid|form
+     * @param   array   $fieldList      Para grid, lista de etiquetas de columnas 
+     *                                  a crear. Para form, lista de tuplas de 
+     *                                  (etiqueta, tipo).
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function createModuleFormGrid($moduleBranch, $groupList, $sAuthorName, $sEmail,
+        $sModuleType, $fieldList)
+    {
+        $l = $this->_insertModuleBranchTransaction($moduleBranch, $groupList, 'module');
+        if (!is_array($l)) return FALSE;
+        list($sModuleID, $sModuleName) = $l;
+        
+        if (!$this->createModuleFiles($sModuleID, $sModuleName, $sAuthorName, $sEmail,
+            $sModuleType, $fieldList)) {
+            // errMsg ya fue asignado por createModuleFiles
+            $this->errMsg = _tr("Folders can't be created").' - '.$this->errMsg;
+            $this->_DB_acl->rollBack();
+            $this->_DB_menu->rollBack();
+            return FALSE;
+        }
+        
+        $this->_DB_acl->commit();
+        $this->_DB_menu->commit();
+        return TRUE;
+    }
+
+    /**
+     * Procedimiento para crear una especificación de base de datos que incluye
+     * a un nuevo módulo, de tipo enlace externo.
+     * 
+     * @param   array   $moduleBranch   Lista de tuplas que describe la rama de
+     *  niveles a crear o usar. Cada tupla puede ser ('existing' => idmodulo), 
+     *  o ('create' => idmodulo, 'name' => nombremodulo). El último elemento 
+     *  debe ser siempre de tipo create. Todos los 'existing' deben estar antes
+     *  de todos los 'create'.
+     * @param   array   $groupList      Lista de todos los grupos autorizados
+     * @param   string  $sURL           Enlace externo a usar para el módulo
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function createModuleURL($moduleBranch, $groupList, $sURL)
+    {
+        $l = $this->_insertModuleBranchTransaction($moduleBranch, $groupList, 'framed', $sURL);
+        if (!is_array($l)) return FALSE;
+        
+        $this->_DB_acl->commit();
+        $this->_DB_menu->commit();
+        return TRUE;
+    }
+
+    private function _insertModuleBranchTransaction($moduleBranch, $groupList, 
+        $sInternalModuleType, $sURL = NULL)
+    {
+        // Validación de la rama de módulos
+        if (!is_array($moduleBranch) || count($moduleBranch) <= 0) {
+            $this->errMsg = '(internal) Invalid or empty module branch';
+            return FALSE;
+        }
+        $bCrear = FALSE;
+        foreach ($moduleBranch as $moduleLevel) {
+            if (isset($moduleLevel['create'])) {
+                $bCrear = TRUE;
+                if (!isset($moduleLevel['name'])) {
+                    $this->errMsg = '(internal) Missing name on create level';
+                    return FALSE;
+                }
+            } elseif (isset($moduleLevel['existing'])) {
+                if ($bCrear) {
+                    $this->errMsg = '(internal) Existing level found past create level';
+                    return FALSE;
+                }
             } else {
-                // debo llenar alguna variable de error
+                $this->errMsg = '(internal) Invalid or unsupported level type';
+                return FALSE;
             }
         }
-    }
-
-    function Existe_Id_Module($id_module)
-    {
-        $query = "SELECT count(*) FROM menu WHERE id=?";
-        $result = $this->_DB->getFirstRowQuery($query,false,array($id_module));
-        if($result[0] > 0)
-            return true;
-        else return false;
-    }
-
-    function Insertar_Menu($id_module, $parent, $module_name, $module_type, $url="")
-    {
-        $type = "";
-        if($module_type == "form" || $module_type == "grid")
-           $type = "module";
-        else
-           $type = "framed";
-                   
-        $query = "INSERT INTO menu values(?,?,?,?,?,'')";
-        $result = $this->_DB->genQuery($query,array($id_module,$parent,$url,$module_name,$type));
-        if($result)
-            return true;
-        else{
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
+        if (!$bCrear) {
+            $this->errMsg = '(internal) Missing create level at end of branch';
+            return FALSE;
         }
-    }
+        
+        $this->_DB_acl->beginTransaction();
+        $this->_DB_menu->beginTransaction();
+        
+        $sModuleID = ''; $sModuleName = NULL;
+        for ($i = 0; $i < count($moduleBranch); $i++) {
+            $moduleLevel = $moduleBranch[$i];
+            $bUltimoNivel = ($i + 1 == count($moduleBranch));
+            
+            if (isset($moduleLevel['existing'])) {
+                $sModuleID = $moduleLevel['existing'];
+            } elseif (isset($moduleLevel['create'])) {
+                // El nivel insertado no debe existir previamente
+                $tupla = $this->_DB_menu->getFirstRowQuery(
+                    'SELECT COUNT(*) FROM menu WHERE id = ?', FALSE,
+                    array($moduleLevel['create']));
+                if ($tupla[0] > 0) {
+                    $this->errMsg = _tr('Module Id already exists').': '.$moduleLevel['create'];
+                    $this->_DB_acl->rollBack();
+                    $this->_DB_menu->rollBack();
+                    return FALSE;
+                }
+                $r = $this->_DB_menu->genQuery(
+                    'INSERT INTO menu (id, IdParent, Link, Name, Type, order_no) '.
+                    "VALUES (?,?,?,?,?,'')",
+                    array(
+                        $moduleLevel['create'],
+                        $sModuleID,
+                        ($bUltimoNivel ? $sURL : NULL),
+                        $moduleLevel['name'],
+                        (($i != 0) ? $sInternalModuleType : '')));
+                if (!$r) {
+                    $this->errMsg = $this->_DB_menu->errMsg;
+                    $this->_DB_acl->rollBack();
+                    $this->_DB_menu->rollBack();
+                    return FALSE;
+                }
+                
+                // Insertar el recurso de ACL y otorgar los permisos
+                $r = $this->_DB_acl->genQuery(
+                    'INSERT INTO acl_resource (name, description) VALUES (?,?)',
+                    array($moduleLevel['create'], $moduleLevel['name']));
+                if (!$r) {
+                    $this->errMsg = $this->_DB_acl->errMsg;
+                    $this->_DB_acl->rollBack();
+                    $this->_DB_menu->rollBack();
+                    return FALSE;
+                }
+                $idResource = $this->_DB_acl->getLastInsertId();
+                foreach ($groupList as $idGroup) {
+                    $r = $this->_DB_acl->genQuery(
+                        'INSERT INTO acl_group_permission (id_action, id_group, id_resource) VALUES (1,?,?)',
+                        array($idGroup, $idResource));
+                    if (!$r) {
+                        $this->errMsg = $this->_DB_acl->errMsg;
+                        $this->_DB_acl->rollBack();
+                        $this->_DB_menu->rollBack();
+                        return FALSE;
+                    }
+                }
 
-    function Insertar_Resource($id_module, $module_name)
-    {
-        $query = "Insert into  acl_resource (name, description) values(?,?)";
-        $result = $this->_DB->genQuery($query,array($id_module,$module_name));
-        if($result)
-        {
-            $result = $this->_DB->getLastInsertId();
-            return $result;
-        }
-        else{
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-    }
-
-    function Insertar_Group_Permissions($selected_gp, $id_resource)
-    {
-        $error = false;
-        foreach($selected_gp as $value)
-        {
-            $query = "Insert into acl_group_permission (id_action, id_group, id_resource) values(1,?,?)";
-            $result = $this->_DB->genQuery($query,array($value,$id_resource));
-            if(!$result)
-            {
-                $error = true;
-                $this->errMsg = $this->_DB->errMsg;
+                // Sobreescribir el ID de padre para siguiente nivel
+                $sModuleID = $moduleLevel['create'];
+                $sModuleName = $moduleLevel['name'];
             }
         }
 
-        if($error) return false;
-        else return true;
+        return array($sModuleID, $sModuleName);
     }
 
     private function Query_Elastix_Version()
     {
         $query = "SELECT value FROM settings WHERE key='elastix_version_release'";
-        $result = $this->_DB->getFirstRowQuery($query);
+        $result = $this->_DB_settings->getFirstRowQuery($query);
         return $result[0];
     }
 
@@ -131,7 +235,8 @@ class paloSantoBuildModule {
      * 
      * @return  bool    VERDADERO en éxito, FALSO en error
      */
-    function createModuleFiles($sModuleId, $sModuleName, $sAuthorName, $sEmail, $sModuleType, $fieldList)
+    private function createModuleFiles($sModuleId, $sModuleName, $sAuthorName, $sEmail,
+        $sModuleType, $fieldList)
     {
         if (!in_array($sModuleType, array('grid', 'form'))) {
             $this->errMsg = '(internal) Unsupported module type, must be grid or form';

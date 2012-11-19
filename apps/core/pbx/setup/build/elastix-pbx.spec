@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 16
+Release: 17
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,6 +298,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-17
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Thu Nov  1 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: replace brittle regexp parsing of voicemail.conf
   and repeated invocation of grep with a single load. The rewritten loading of
@@ -305,10 +309,15 @@ fi
   key/value pairs in vm_options. Fixes Elastix bug #1117.
   SVN Rev[4401]
 
+* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: pbx - Build/elastix-pbx.spec: For correct behavior of rmdir we have to
+  erase all folders that exists inside the dir in order to erase it.
+  SVN Rev[4365]
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
-  SVN Rev[4179]
+  SVN Rev[4350]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 

@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -195,7 +195,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
-* Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - CHANGED: Email_admin: comment out statement that logs every single IMAP 
   command, inherited from the Stickgate project.
   SVN Rev[4420] 
@@ -203,6 +207,7 @@ fi
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4356]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 

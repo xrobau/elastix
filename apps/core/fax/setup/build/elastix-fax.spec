@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -35,7 +35,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mv setup/hylafax/bin/includes                 $RPM_BUILD_ROOT/var/spool/hylafax/bin/
+#mv setup/hylafax/bin/includes                 $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/faxrcvd-elastix.php      $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/faxrcvd.php              $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify-elastix.php       $RPM_BUILD_ROOT/var/spool/hylafax/bin/
@@ -193,7 +193,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
-* Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
+  SVN history. Changed release in specfile.  
+
+* Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Fax: pick up notification email from submitted fax job in addition to
   notification email for outgoing fax device. Fixes Elastix bug #1300.
   SVN Rev[4424]
@@ -228,6 +232,9 @@ fi
 - CHANGED: Fax: rework getFaxStatus method to provide more information about the
   fax queue, in addition to the modems.
   SVN Rev[4414]
+- ADDED: Fax: new module Fax Queue to monitor status of outgoing faxes that
+  cannot be immediately dispatched.
+  SVN Rev[4413]
 - CHANGED: Send Fax: partial cleanup:
   Do not silently ignore failure to submit a fax job, and display error instead.
   Remove useless code that could potentially error out the module.
@@ -266,6 +273,7 @@ fi
   Reduction of code size, even after including documentation.
   Notification script now logs success/failure messages in preparation for GUI.
   Fixes Elastix bug #1387.
+  SVN Rev[4379]
 
 * Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax: extend faxconfig helper script to detect a systemd environment
@@ -276,9 +284,25 @@ fi
   fixes inability to display received fax in Fedora 17 for Raspberry Pi.
   SVN Rev[4369]
 
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+ - Framework,Modules: remove temporary file preversion_MODULE.info under
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on RPM
+  update. Part of the fix for Elastix bug #1398.
+  - Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
+  Elastix bug #1399.
+  - Framework,Modules: clean up specfiles by removing directories under
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  - Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
+  SVN Rev[4354]
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
 - CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4348]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 

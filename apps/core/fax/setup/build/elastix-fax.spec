@@ -39,11 +39,12 @@ mv setup/hylafax/bin/faxrcvd-elastix.php      $RPM_BUILD_ROOT/var/spool/hylafax/
 mv setup/hylafax/bin/faxrcvd.php              $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify-elastix.php       $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify.php               $RPM_BUILD_ROOT/var/spool/hylafax/bin/
+mv setup/hylafax/bin/elastix-faxevent         $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/etc/FaxDictionary            $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/config                   $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
-rm -rf setup/hylafax
+rmdir setup/hylafax/bin setup/hylafax/etc/ setup/hylafax
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
 
 chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/faxrcvd.php

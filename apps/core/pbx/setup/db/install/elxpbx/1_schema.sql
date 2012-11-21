@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `iax_general` (
 )ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `voicemail_general` (
-    organization_domain varchar(50) NOT NULL, 
+    organization_domain varchar(100) NOT NULL, 
     -- Mailbox context.
     context CHAR(80) NOT NULL DEFAULT 'default',
     -- Attach sound file to email - YES/no
@@ -406,7 +406,7 @@ CREATE TABLE IF NOT EXISTS voicemail (
     -- IMAP password for authentication (if using IMAP storage)
     imappassword VARCHAR(80),
     stamp timestamp,
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
@@ -808,7 +808,7 @@ CREATE TABLE queue (
     setinterfacevar enum ('yes','no') default 'yes',
     setqueueentryvar enum ('yes','no') default 'yes',
     setqueuevar enum ('yes','no') default 'yes',
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     timeout_detail INT(11),
     password_detail varchar(50),
     cid_prefix_detail varchar(50),
@@ -863,7 +863,7 @@ CREATE TABLE musiconhold (
     -- When this record was last modified
     stamp timestamp,
     -- organization's Domain that is owner of the class
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     INDEX organization_domain (organization_domain),
     UNIQUE KEY description_moh (description,organization_domain)
 ) ENGINE = INNODB;
@@ -880,7 +880,7 @@ CREATE TABLE recordings (
     -- nombre con el que se muestra la grabacion a los usuarios
     description varchar(50) NOT NULL,
     -- dominio al que pertenece la grabacion
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     UNIQUE KEY filename (filename),
     UNIQUE KEY description_recordings (description,organization_domain),
     INDEX organization_domain (organization_domain)
@@ -897,7 +897,7 @@ CREATE TABLE ivr (
     loops INT(11),
     mesg_timeout INT(11) default null,
     mesg_invalid INT(11) default null,
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     UNIQUE KEY ivr_name (name,organization_domain),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
@@ -918,7 +918,7 @@ DROP TABLE IF EXISTS did;
 CREATE TABLE did (
     id int(11) NOT NULL AUTO_INCREMENT,
     did varchar(100) NOT NULL,
-    organization_domain varchar(50),
+    organization_domain varchar(100),
     country varchar(100) NOT NULL,
     city varchar(100) NOT NULL,
     country_code varchar(100) NOT NULL,
@@ -958,7 +958,7 @@ CREATE TABLE inbound_route (
     fax_type enum('fax','nvfax') default 'fax',
     fax_time  int(2) default 10,
     fax_destiny varchar(50),
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     PRIMARY KEY (id),
     INDEX organization_domain (organization_domain),
     UNIQUE KEY route_in (did_number,cid_number)
@@ -974,7 +974,7 @@ CREATE TABLE outbound_route (
     mohsilence varchar(50) default null,
     time_group_id int(11),
     seq int(11) NOT NULL,
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (mohsilence) REFERENCES musiconhold(name),
     INDEX organization_domain (organization_domain)
@@ -1022,9 +1022,29 @@ CREATE TABLE ring_group (
     goto varchar(50) NOT NULL,
     destination varchar(128) NOT NULL,
     rg_extensions varchar(128),
-    organization_domain varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
     PRIMARY KEY  (id),
     FOREIGN KEY (rg_moh) REFERENCES musiconhold(name),
     UNIQUE INDEX rg_num_org (rg_number,organization_domain),
     INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS time_group;
+CREATE TABLE time_group (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    name varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
+    PRIMARY KEY  (id),
+    INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS tg_parameters;
+CREATE TABLE tg_parameters (
+    id_tg int(11) NOT NULL,
+    tg_hour varchar(50),
+    tg_day_w varchar(50), 
+    tg_day_m varchar(50),
+    tg_month varchar(50),
+    FOREIGN KEY (id_tg) REFERENCES time_group(id),
+    PRIMARY KEY (id_tg,tg_hour,tg_day_w,tg_day_m,tg_month)
 ) ENGINE = INNODB;

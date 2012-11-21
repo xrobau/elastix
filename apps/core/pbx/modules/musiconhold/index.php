@@ -189,6 +189,7 @@ function reportMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
         $arrMoH=array();
 	}
 
+	$arrData=array();
 	foreach($arrMoH as $moh) {
         $arrTmp=array();
         if($userLevel1=="superadmin"){

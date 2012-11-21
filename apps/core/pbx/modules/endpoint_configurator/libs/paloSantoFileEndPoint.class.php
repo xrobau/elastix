@@ -49,7 +49,7 @@ class PaloSantoFileEndPoint
         $endpoint_mask = explode("/",$endpoint_mask);
         $endpoint_network = $pNetwork->getNetAdress($endpoint_mask[0],$endpoint_mask[1]);
         foreach($pInterfaces as $interface){
-        $mask = $pNetwork->maskToDecimalFormat($interface["Mask"]);
+	$mask = $pNetwork->maskToDecimalFormat($interface["Mask"]);
         $network = $pNetwork->getNetAdress($interface["Inet Addr"],$mask);
         if($network == $endpoint_network){
             $this->ipAdressServer = $interface["Inet Addr"];
@@ -166,6 +166,34 @@ class PaloSantoFileEndPoint
                 }
 
                 break;
+	    
+	    case 'Fanvil':
+                if($ArrayData['data']['model'] == "C62"){
+		    $currentVersion = getVersionConfigFileFANVIL($ArrayData['data']['ip_endpoint'],"admin","admin");
+                    $tmpVersion['versionCfg'] = $currentVersion;
+                    $newVersion = $this->updateArrParameters("Fanvil", $ArrayData['data']['model'], $tmpVersion);
+                    $ArrayData['data']['arrParameters']['versionCfg'] = $newVersion['versionCfg'];
+                    $version = $ArrayData['data']['arrParameters']['versionCfg'];
+		    
+                    if($ArrayData['data']['tech'] == "iax2")
+                       $contentFileFanvil = PrincipalFileFanvilC62IAX($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['filename'],$version);
+                    else
+                       $contentFileFanvil = PrincipalFileFanvilC62SIP($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['filename'],$version);
+                   
+		    $result = $this->telnet($ArrayData['data']['ip_endpoint'], "admin", "admin", $contentFileFanvil);
+                    if($result) $return = true;
+                    else $return = false;
+                }
+		if($this->createFileConf($this->directory,$ArrayData['data']['filename'].".cfg", $contentFileFanvil)) {
+                        $arrComandos = arrFanvil($this->ipAdressServer, $ArrayData['data']['filename']);
+                        $result = $this->telnet($ArrayData['data']['ip_endpoint'], "admin", "admin", $arrComandos);
+                        if($result) $return = true;
+                        else $return = false;
+                }else $return = false;
+               
+
+                break;
+	    
 
             case 'Snom':
                 $contentFileSnom = PrincipalFileSnom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
@@ -626,6 +654,10 @@ class PaloSantoFileEndPoint
             case 'Atcom':
                 return $this->deleteFileConf($this->directory, "atc".$ArrayData['data']['filename'].".cfg");
                 break;
+	    
+	    case 'Fanvil':
+                return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
+                break;
 
             case 'Snom':
                 return $this->deleteFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm");
@@ -727,6 +759,13 @@ class PaloSantoFileEndPoint
                 //Creando archivos de ejemplo.
                 $contentFileAtcom = templatesFileAtcom($this->ipAdressServer);
                 $this->createFileConf($this->directory, "atcxxxxxxxxxxxx.template.cfg", $contentFileAtcom);
+                return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
+                break;
+	
+	    case 'Fanvil':
+                //Creando archivos de ejemplo.
+                $contentFileAtcom = templatesFileFanvil($this->ipAdressServer);
+                $this->createFileConf($this->directory, "fanvilxxxxxxxx.template.cfg", $contentFileAtcom);
                 return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
                 break;
 
@@ -862,7 +901,20 @@ class PaloSantoFileEndPoint
                         $arrParametersOld['versionCfg'] = '2.0005';
                 }
                 break;
-
+	    case 'Fanvil':
+                if($model == 'C62'){
+                    if(isset($arrParametersOld['versionCfg'])){
+                        $arrParametersOld['versionCfg'] = $arrParametersOld['versionCfg'] + 0.0001;
+			    if(strlen($arrParametersOld['versionCfg']) == 1)
+				$arrParametersOld['versionCfg'] .= ".0";	
+			    while(strlen($arrParametersOld['versionCfg']) < 6)
+				 $arrParametersOld['versionCfg'] .= "0";
+                    }
+                    else
+                        $arrParametersOld['versionCfg'] = '2.0002';
+                }
+                break;
+	    
             case 'Snom':
                 break;
 

@@ -88,15 +88,15 @@ $('.checkall').click(function () {
     $("#localization_data").css("display","none");
 });
 
-$(document).ready(function() {
+/*$(document).ready(function() {
 	$(":checkbox").click(function() {
 	var param = $(this).attr("id");
 	var toRemove = 'chk_';
 	var param = param.replace(toRemove,'');
 
-	 changeInput(param);
+	 ////changeInput(param);
 	});
-
+*/
    /*     if($("input[name='analog_trunk_lines']").val()!="")
 		$("input[name='analog_trunk_lines']").prop('disabled', true);
 
@@ -106,7 +106,7 @@ $(document).ready(function() {
    //      $("input[name='telnet_username']").prop('disabled', true);
        
 
-});
+//});
 /*
 
 function verifyIP(IPvalue) {

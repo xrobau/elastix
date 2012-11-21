@@ -162,7 +162,7 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
             }
 
             if(is_array($arrEndpointsMap) && count($arrEndpointsMap)>0){
-                $cont=0;
+		$cont=0;
                 foreach($arrEndpointsMap as $key => $endspoint){
                     $cont++;
                     if(isset($endspoint['model_no']) && $endspoint['model_no'] != ""){

@@ -537,17 +537,28 @@ Download Interval  :1
 function PrincipalFileAtcom530IAX($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $macAdress, $versionCfg)
 {
    $versionCfg = isset($versionCfg)?$versionCfg:'2.0002';
+   $configNetwork ="";
+   $ByDHCP = existsValue($arrParameters,'By_DHCP',1);
+   // 1 indica que es por DHCP y 0 por estatico
+
+   if($ByDHCP==0){ // 0 es IP Estatica
+        $configNetwork ="
+	Static IP          :".existsValue($arrParameters,'IP','')."
+	Static NetMask     :".existsValue($arrParameters,'Mask','')."
+	Static GateWay     :".existsValue($arrParameters,'GW','')."
+	Primary DNS        :".existsValue($arrParameters,'DNS1','')."
+	Secundary DNS      :".existsValue($arrParameters,'DNS2','')."
+	";
+   }
+  
    $content=
 "<<VOIP CONFIG FILE>>Version:$versionCfg                         
 
 <GLOBAL CONFIG MODULE>
 SNTP Server        :$ipAdressServer
 Enable SNTP        :1
-Static IP          :".existsValue($arrParameters,'IP','')."
-Static NetMask     :".existsValue($arrParameters,'Mask','')."
-Static GateWay     :".existsValue($arrParameters,'GW','')."
-Primary DNS        :".existsValue($arrParameters,'DNS','')."
-DHCP Mode          :".existsValue($arrParameters,'By_DHCP',0)."
+$configNetwork 
+DHCP Mode          :$ByDHCP
 Time Zone          :".existsValue($arrParameters,'Time_Zone',12)."
 
 <LAN CONFIG MODULE>

@@ -763,13 +763,18 @@ WHERE id_campaign = ? AND id = ?
 SQL_LLAMADA_COLOCADA;
         $sth_fallo = $this->_db->prepare($sPeticionLlamadaFallida);
         foreach ($listaLlamadas as $tupla) {
-            $sCadenaVar = $this->_construirCadenaVariables(array(
+            $listaVars = array(
                 'ID_CAMPAIGN'   =>  $infoCampania['id'],
                 'ID_CALL'       =>  $tupla['id'],
                 'NUMBER'        =>  $tupla['phone'],
                 'QUEUE'         =>  $infoCampania['queue'],
                 'CONTEXT'       =>  $infoCampania['context'],
-            ));
+            );
+            if (!is_null($tupla['agent'])) {
+            	$listaVars['AGENTCHANNEL'] = $tupla['agent'];
+                $listaVars['QUEUE_MONITOR_FORMAT'] = $this->_formatoGrabacionCola($infoCampania['queue']);
+            }
+            $sCadenaVar = $this->_construirCadenaVariables($listaVars);
             if ($this->DEBUG) {
                 $this->_log->output("DEBUG: ".__METHOD__." generando llamada\n".
                     "\tClave....... {$tupla['actionid']}\n" .
@@ -793,11 +798,13 @@ SQL_LLAMADA_COLOCADA;
                     NULL, 
                     TRUE, $tupla['actionid']);
             } else {
+                // Este código asume Agent/9000
+                $sExten = $tupla['agent']; $regs = NULL;
+                if (preg_match('|^Agent/(\d+)|', $sExten, $regs))
+                    $sExten = $regs[1];
                 $resultado = $this->_ami->Originate(
-                    $tupla['dialstring'], 
-                    NULL, NULL, $iTimeoutOriginate,
-                    'Dial', $this->_construirListaParametros(array($tupla['agent'], 300, 't')), 
-                    NULL, 
+                    $tupla['dialstring'], $sExten, 'llamada_agendada', 1,
+                    NULL, NULL, $iTimeoutOriginate, 
                     (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : NULL), 
                     $sCadenaVar,
                     NULL, 
@@ -837,6 +844,22 @@ SQL_LLAMADA_COLOCADA;
             $sth = $this->_db->prepare('UPDATE campaign SET estatus = "T" WHERE id = ?');
             $sth->execute(array($infoCampania['id']));
         }
+    }
+
+    /* Leer el formato de grabación de la cola indicada por el parámetro, la cual
+     * está indicada en queues_additional.conf */
+    private function _formatoGrabacionCola($sCola)
+    {
+    	$sColaActual = NULL;
+        foreach (file('/etc/asterisk/queues_additional.conf') as $s) {
+    		$regs = NULL;
+            if (preg_match('/^\[(\d+)\]/', $s, $regs)) {
+    			$sColaActual = $regs[1];
+    		} elseif ($sColaActual == $sCola && preg_match('/^monitor-format=(\w+)/', $s, $regs)) {
+    			return $regs[1];
+    		}
+    	}
+        return NULL;
     }
 
     private function _actualizarLlamadasAgendables($infoCampania, $datosTrunk)

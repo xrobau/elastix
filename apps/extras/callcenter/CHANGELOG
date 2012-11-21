@@ -1,3 +1,5 @@
+* Dialer: fix inability to record scheduled calls. Now the dialer will use a
+  special context to enable recording if the campaign queue recorded calls.
 * Dialer: set CALLERID(num) in OriginateResponse handler in order to ensure the
   CDR has a meaningful source field value. Fixes Elastix bug #1411.
 * Trunks Used per Hour: core query method rewritten to use SQL parameters. SQL

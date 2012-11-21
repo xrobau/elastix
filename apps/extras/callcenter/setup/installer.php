@@ -166,8 +166,14 @@ function instalarContextosEspeciales()
         $contenido[] = <<<CONTEXTOS_CALLCENTER
 
 [llamada_agendada]
-exten => _X.,1,NoOP("NUMERO DE AGENTE -------------- \${EXTEN}")
-exten => _X.,n,Dial(Agent/\${EXTEN},300,t)
+exten => _X.,1,NoOP("Elastix CallCenter: AGENTCHANNEL=${AGENTCHANNEL}")
+exten => _X.,n,NoOP("Elastix CallCenter: QUEUE_MONITOR_FORMAT=${QUEUE_MONITOR_FORMAT}")
+exten => _X.,n,GotoIf($["${QUEUE_MONITOR_FORMAT}" = ""]?skiprecord)
+exten => _X.,n,Set(CALLFILENAME=${STRFTIME(${EPOCH},,%Y%m%d-%H%M%S)}-${UNIQUEID})
+exten => _X.,n,MixMonitor(${MIXMON_DIR}${CALLFILENAME}.${MIXMON_FORMAT},,${MIXMON_POST})
+exten => _X.,n,Set(CDR(userfield)=audio:${CALLFILENAME}.${MIXMON_FORMAT})
+exten => _X.,n(skiprecord),Dial(${AGENTCHANNEL},300,tw)
+exten => h,1,Macro(hangupcall,)
 
 
 CONTEXTOS_CALLCENTER;

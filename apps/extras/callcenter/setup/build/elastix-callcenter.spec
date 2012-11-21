@@ -100,6 +100,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Nov 21 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix inability to record scheduled calls. Now the dialer will 
+  use a special context to enable recording if the campaign queue recorded 
+  calls.
+
 * Wed Nov 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: set CALLERID(num) in OriginateResponse handler in order to 
   ensure the CDR has a meaningful source field value. Fixes Elastix bug #1411.

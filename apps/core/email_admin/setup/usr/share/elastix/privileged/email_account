@@ -256,10 +256,12 @@ function add_remove_domain_postfix($sDomain, $bAddRemove, $bPostfixElastix2)
         error_exit("ERR: failed to load /etc/postfix/main.cf for domain update\n");
     }
     $bUpdated = FALSE;
+    $bKeyExists = FALSE;
     foreach (array_keys($postfixConf) as $i) {
         $regs = NULL;
         if (preg_match('/^(\w+)\s*=\s*(.*)/', rtrim($postfixConf[$i]), $regs)) {
             if ($regs[1] == $sDomainKey) {
+                $bKeyExists = TRUE;
                 $oldDomainList = array_unique(preg_split('/,\s*/', $regs[2]));
                 
                 $newDomainList = $bAddRemove 
@@ -270,6 +272,10 @@ function add_remove_domain_postfix($sDomain, $bAddRemove, $bPostfixElastix2)
                 $bUpdated = (count($oldDomainList) != count($newDomainList));
             }
         }
+    }
+    if (!$bKeyExists && $bAddRemove) {
+        $postfixConf[] = "$sDomainKey = $sDomain\n";
+        $bUpdated = TRUE;
     }
     if ($bUpdated) {
         if (FALSE === file_put_contents('/etc/postfix/main.cf', $postfixConf)) {

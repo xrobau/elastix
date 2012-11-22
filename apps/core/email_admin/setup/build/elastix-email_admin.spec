@@ -195,6 +195,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email_admin: (regression) privileged script for domain creation would
+  not add the key virtual_mailbox_domains if the key was missing in main.cf.
+  SVN Rev[4452]
+
 * Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Changed release in specfile.

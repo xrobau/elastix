@@ -196,6 +196,10 @@ fi
 
 %changelog
 * Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email Accounts: do not attempt to erase an account in case of errors
+  while creating or updating an account. Account creation was affected if new
+  account name collided with an existing one.
+  SVN Rev[4454]
 - FIXED: Email_admin: (regression) privileged script for domain creation would
   not add the key virtual_mailbox_domains if the key was missing in main.cf.
   SVN Rev[4452]

@@ -506,13 +506,6 @@ function saveOneAccount($smarty, &$pDB, $arrLang, $isFromFile)
                     $smarty->assign("mb_title", _tr('ERROR').":");
                     $smarty->assign("mb_message", _tr("Error applying changes").". ".$error);
                 }
-                $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
-                if($configPostfix2)
-                    $username=$_POST['address'].'@'.$domain_name;
-                else
-                    $username=$_POST['address'].'.'.$domain_name;
-                $pEmail->deleteAccount($username);
-                $content = false;
             }
             else{
                 if(!$isFromFile){

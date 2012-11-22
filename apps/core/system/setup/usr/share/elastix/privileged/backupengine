@@ -1472,16 +1472,22 @@ function postrestore_em_db($sLevelTag, &$backupComponent, $sWorkingDir)
             $bSuccess = FALSE;
         } else {
             $bUpdated = FALSE;
+            $bKeyExists = FALSE;
             foreach (array_keys($postfixConf) as $i) {
                 $regs = NULL;
                 if (preg_match('/^(\w+)\s*=\s*(.*)/', rtrim($postfixConf[$i]), $regs)) {
                     if ($regs[1] == $sDomainKey) {
+                        $bKeyExists = TRUE;
                         $oldDomainList = preg_split('/,\s*/', $regs[2]);
                         $newDomainList = array_unique(array_merge($oldDomainList, $domainList));
                         $postfixConf[$i] = $sDomainKey.' = '.implode(',', $newDomainList)."\n";
                         $bUpdated = (count($oldDomainList) != count($newDomainList));
                     }
                 }
+            }
+            if (!$bKeyExists) {
+                $postfixConf[] = $sDomainKey.' = '.implode(',', $domainList)."\n";
+                $bUpdated = TRUE;
             }
             if ($bUpdated) {
                 if (FALSE === file_put_contents('/etc/postfix/main.cf', $postfixConf)) {

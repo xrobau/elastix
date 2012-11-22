@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: backupengine restore would fail to insert the key
+  virtual_mailbox_domains if the key is missing prior to a restore that includes
+  virtual domains. Fixed.
+  SVN Rev[4453]
+
 * Thu Oct 25 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-14
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

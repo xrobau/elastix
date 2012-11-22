@@ -100,6 +100,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Login Logout: add consistency checks on audit records to counter the
+  situation where an abnormal termination of the dialer leaves unclosed audit 
+  records. Inconsistent records are now displayed as CORRUPTED instead of adding
+  invalid values as if they were valid ONLINE records.
+
 * Wed Nov 21 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fix inability to record scheduled calls. Now the dialer will 
   use a special context to enable recording if the campaign queue recorded 

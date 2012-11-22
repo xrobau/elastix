@@ -1,3 +1,7 @@
+* Login Logout: add consistency checks on audit records to counter the situation
+  where an abnormal termination of the dialer leaves unclosed audit records.
+  Inconsistent records are now displayed as CORRUPTED instead of adding invalid
+  values as if they were valid ONLINE records.
 * Dialer: fix inability to record scheduled calls. Now the dialer will use a
   special context to enable recording if the campaign queue recorded calls.
 * Dialer: set CALLERID(num) in OriginateResponse handler in order to ensure the

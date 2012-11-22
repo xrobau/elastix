@@ -135,11 +135,62 @@ SQL_REGISTROS;
             $this->errMsg = $this->_DB->errMsg;
         	return NULL;
         }
+        $ultimoOnline = array();
         foreach (array_keys($recordset) as $i) {
-        	if (is_null($recordset[$i]['total_incoming']))
+            if (is_null($recordset[$i]['total_incoming']))
                 $recordset[$i]['total_incoming'] = 0;
             if (is_null($recordset[$i]['total_outgoing']))
                 $recordset[$i]['total_outgoing'] = 0;
+        
+            /* Para el reporte detallado, cada agente debe cumplir la condición
+             * de que todos los registros de auditoría deben estar cerrados, a
+             * excepción de el registro más reciente, el cual puede estar 
+             * abierto. Un registro abierto que no es el último está corrompido.
+             */
+            if (isset($ultimoOnline[$recordset[$i]['id']]) && 
+                $recordset[$i]['datetime_init'] > $ultimoOnline[$recordset[$i]['id']]['datetime_init']) {
+
+                // El registro anteriormente visto está corrompido
+                $iPosCorrompido = $ultimoOnline[$recordset[$i]['id']]['index']; 
+                $recordset[$iPosCorrompido]['estado'] = 'CORRUPTED';
+                $recordset[$iPosCorrompido]['datetime_end'] = NULL;
+                $recordset[$iPosCorrompido]['duration'] = NULL;
+                $recordset[$iPosCorrompido]['total_incoming'] = 0;
+                $recordset[$iPosCorrompido]['total_outgoing'] = 0;
+                
+                // No es necesario conservar la info si ya se marcó como corrupto
+                unset($ultimoOnline[$recordset[$i]['id']]);
+            }
+            if ($recordset[$i]['estado'] == 'ONLINE') {
+                $ultimoOnline[$recordset[$i]['id']] = array(
+                    'index'         =>  $i,
+                    'datetime_init' =>  $recordset[$i]['datetime_init'],
+                );
+            }
+        }
+        
+        /* Incluso si los registros revisados parecen ser consistentes, pueden 
+         * estar corruptos por registros futuros no consultados en el query de 
+         * arriba. 
+         */
+        foreach ($ultimoOnline as $agentid => $agentOnline) {
+        	$tuple = $this->_DB->getFirstRowQuery(
+                'SELECT COUNT(*) AS N FROM audit '.
+                'WHERE id_agent = ? AND id_break IS NULL AND datetime_init > ?',
+                TRUE, array($agentid, $agentOnline['datetime_init']));
+            if (!is_array($tuple)) {
+                $this->errMsg = $this->_DB->errMsg;
+                return NULL;
+            }
+            if ($tuple['N'] > 0) {
+                // El registro anteriormente visto está corrompido
+                $iPosCorrompido = $agentOnline['index']; 
+                $recordset[$iPosCorrompido]['estado'] = 'CORRUPTED';
+                $recordset[$iPosCorrompido]['datetime_end'] = NULL;
+                $recordset[$iPosCorrompido]['duration'] = NULL;
+                $recordset[$iPosCorrompido]['total_incoming'] = 0;
+                $recordset[$iPosCorrompido]['total_outgoing'] = 0;
+            }
         }
         
         // Para reporte detallado, ya se puede devolver recordset

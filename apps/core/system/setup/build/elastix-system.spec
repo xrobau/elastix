@@ -134,6 +134,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: backupengine restore would fail to insert the key
+  virtual_mailbox_domains if the key is missing prior to a restore that includes
+  virtual domains. Fixed.
+  SVN Rev[4453]
+
 * Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: actually use root mysql password instead of hardcoded
   default when reading schemata. Print PDO exception message in case of failure

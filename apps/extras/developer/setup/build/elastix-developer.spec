@@ -69,6 +69,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Delete Module: replace direct 'rm -rf' with calls to privileged
+  script, which has been extended to remove a single module directory.
+  SVN Rev[4455]
+
 * Fri Nov 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Build Module: rewrite to enclose the creation of the module inside a
   transaction. The rewrite also achieved a net reduction of code size.

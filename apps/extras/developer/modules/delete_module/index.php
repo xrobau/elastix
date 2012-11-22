@@ -156,7 +156,9 @@ function delete_module($smarty, $module_name, $local_templates_dir, $arrLangModu
         if($delete_files=='on'){
             if(file_exists("$ruta/$key3"))
             {
-                exec("rm -rf $ruta/$key3", $output, $retval);
+                $output = $retval = NULL;
+                exec('/usr/bin/elastix-helper develbuilder --deletemodule '.escapeshellarg($key3).' 2>&1',
+                    $output, $retval);
                 if ($retval!=0) $error = true;
             }
         }
@@ -174,7 +176,9 @@ function delete_module($smarty, $module_name, $local_templates_dir, $arrLangModu
             if($delete_files=='on'){
                 if(file_exists("$ruta/$key2"))
                 {
-                    exec("rm -rf $ruta/$key2", $output, $retval);
+                    $output = $retval = NULL;
+                    exec('/usr/bin/elastix-helper develbuilder --deletemodule '.escapeshellarg($key2).' 2>&1',
+                        $output, $retval);
                     if ($retval!=0) $error = true;
                 }
             }

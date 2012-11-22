@@ -175,7 +175,9 @@ function listadoLoginLogout($pDB, $smarty, $module_name, $local_templates_dir)
     $arrData = array();
     $sTagInicio = (!$bExportando) ? '<b>' : '';
     $sTagFinal = ($sTagInicio != '') ? '</b>' : '';
-    $recordSlice = array_slice($recordset, $offset, LIMITE_PAGINA);
+    $recordSlice = $bExportando
+        ? $recordset 
+        : array_slice($recordset, $offset, LIMITE_PAGINA);
     foreach ($recordSlice as $tupla) {
     	$arrData[] = array(
             $tupla['number'],

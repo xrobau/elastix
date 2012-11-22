@@ -101,6 +101,7 @@ fi
 
 %changelog
 * Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Login Logout: fix issue of report export displaying only a single page.
 - CHANGED: Login Logout: add consistency checks on audit records to counter the
   situation where an abnormal termination of the dialer leaves unclosed audit 
   records. Inconsistent records are now displayed as CORRUPTED instead of adding

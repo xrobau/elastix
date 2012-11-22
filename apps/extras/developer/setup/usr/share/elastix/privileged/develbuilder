@@ -38,12 +38,15 @@ load_default_timezone();
 // Parse command-line options
 $opt = Console_Getopt::getopt($argv, '', array(
     'createmodule=',    // Create a brand new module directory from XML specfile
+    'deletemodule=',    // Delete a module directory without touching acls
 ));
 if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
 //validateOptions($opt);
 foreach ($opt[0] as $option) switch ($option[0]) {
 case '--createmodule':
     exit(action_createModule($opt) ? 0 : 1);
+case '--deletemodule':
+    exit(action_deleteModule($opt) ? 0 : 1);
 }
 error_exit("No action specified (--createmodule)\n");
 
@@ -70,6 +73,23 @@ function load_default_timezone()
     date_default_timezone_set($sDefaultTimezone);
 }
 
+function action_deleteModule($opt)
+{
+    $sModuleDir = NULL;
+    
+    // Name of module directory
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--deletemodule':
+        $sModuleDir = $option[1];
+        break;
+    }
+    if (is_null($sModuleDir)) error_exit("ERR: module directory not specified!\n");
+    if (!preg_match('/^\w+$/', $sModuleDir))
+        error_exit("ERR: invalid module directory: ".$sModuleDir."\n");
+    $retval = NULL;
+    system('rm -rf '.escapeshellarg(MODULEPATH.'/'.$sModuleDir), $retval);
+    return ($retval == 0);
+}
 
 function action_createModule($opt)
 {

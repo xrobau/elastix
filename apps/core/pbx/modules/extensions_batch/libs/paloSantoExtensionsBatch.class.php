@@ -615,15 +615,20 @@ class paloSantoLoadExtension {
             $VM_Pager_Email_Addr, $VM_Options, $VM_EmailAttachment, $VM_Play_CID,
             $VM_Play_Envelope, $VM_Delete_Vmail)
     {
-        $path = "/etc/asterisk/voicemail.conf";
         $VoiceMail = strtolower($VoiceMail);
-
+	
         // Only numeric voicemail password allowed (Elastix bug #1238)
         if ($VoiceMail_PW != '' && !ctype_digit($VoiceMail_PW))
             return false;
-
+	
+	$path = "/etc/asterisk/voicemail.conf";
+        if(file_exists($path))
+             exec("sed -ie '/^$Ext =>/d' $path");
+        else{
+           $this->errMsg = "File $path does not exist";
+           return false;
+        }
         if(preg_match("/^enable/",$VoiceMail)){
-            exec("sed -ie '/^$Ext =>/d' $path");
             if($VM_Options!="") $VM_Options .= "|";
             if($VM_EmailAttachment!='yes') $VM_EmailAttachment = 'no';
             if($VM_Play_CID!='yes')        $VM_Play_CID = 'no';

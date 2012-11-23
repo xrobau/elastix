@@ -69,6 +69,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 23 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Remove useless and vulnerable webservice support.
+  SVN Rev[4457]
+
 * Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Delete Module: replace direct 'rm -rf' with calls to privileged
   script, which has been extended to remove a single module directory.

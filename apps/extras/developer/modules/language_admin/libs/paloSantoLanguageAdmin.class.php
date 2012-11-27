@@ -37,12 +37,23 @@ class paloSantoLanguageAdmin {
 
     /*HERE YOUR FUNCTIONS*/
 
+    /**
+     * Procedimiento para contar el número de traducciones dentro de un archivo
+     * de lenguaje.
+     * 
+     * @param   string  $module     FRAMEWORK para el framework, o el nombre del
+     *                              módulo que se examina
+     * @param   string  $language   Archivo de lenguaje (en.lang)
+     * 
+     * @return  int     Número de traducciones, o 0 en caso de algún error
+     */
     function ObtainNumLanguages($module, $language)
     {
         $count = 0; $file = '';
         $arrData = array();
 
-        if( strlen($module) == 0 ) return $count;
+        if (!preg_match('/^\w+$/', $module)) return $count;
+        if (!preg_match('/^\w+\.lang$/', $language)) return $count;
 
         if( strcmp($module,'FRAMEWORK') == 0 ){
             $file = "/var/www/html/lang/$language";
@@ -70,12 +81,25 @@ class paloSantoLanguageAdmin {
         return $count;
     }
     
+    /**
+     * Procedimiento para leer el arreglo de traducciones dentro de un archivo 
+     * de lenguaje.
+     * 
+     * @param   int     $limit      Número máximo de traducciones a devolver
+     * @param   int     $offset     Offset desde el cual devolver traducciones
+     * @param   string  $module     FRAMEWORK para el framework, o el nombre del
+     *                              módulo que se examina
+     * @param   string  $language   Archivo de lenguaje (en.lang)
+     * 
+     * @return  int     Número de traducciones, o 0 en caso de algún error
+     */
     function obtainLanguages($limit, $offset, $module, $language)
     {
         $file = '';
         $arrData = array();
 
-        if( strlen($module) == 0 ) return $arrData;
+        if (!preg_match('/^\w+$/', $module)) return $arrData;
+        if (!preg_match('/^\w+\.lang$/', $language)) return $arrData;
 
         if( strcmp($module,'FRAMEWORK') == 0 ){
             $file = "/var/www/html/lang/$language";
@@ -205,99 +229,39 @@ class paloSantoLanguageAdmin {
         }
     }
 
-    function saveNewLanguage($newLanguage)
-    {
-        //save language at the framework
-        $folder_lang_framework = "/var/www/html/lang";
-
-        if( strlen($newLanguage) == 0 ){
-            $str_error = '';
-            if( strlen($newLanguage) == 0 ){
-                $str_error = $str_error."Input New Language"; 
-            }
-
-            $tmpError['head'] = 'ERROR';
-            $tmpError['body'] = "In ".$str_error;
-            $this->errMsg = $tmpError;
-            return false;
+    /**
+     * Procedimiento para crear los archivos de lenguaje para un nuevo lenguaje.
+     * Los archivos se copian a partir de en.lang en el framework y en cada uno
+     * de los módulos instalados. El lenguaje nuevo NO se agrega a la lista de
+     * lenguajes conocidos, sino que se tiene que agregar a mano. Sin embargo,
+     * el nuevo lenguaje podrá editarse en el módulo language_admin.
+     * 
+     * @param string $sNewLang Nombre del nuevo archivo de idioma
+     * 
+     * @return VERDADERO en éxito, o FALSO en error
+     */
+    function saveNewLanguage($sNewLang)
+    {    	
+        if (!preg_match('/^(\w+)\.lang$/', $sNewLang, $regs)) {
+    		$this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  'Invalid file name for language',
+            );
+            return FALSE;
+    	}
+        $output = $retval = NULL;
+        exec('/usr/bin/elastix-helper develbuilder --createlanguage '.
+            escapeshellarg($regs[1]).' 2>&1', $output, $retval);
+        if ($retval != 0) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  'Failed to create language: <br/>'.implode("<br/>\n", $output),
+            );
+        	return FALSE;
         }
-        //****** PARA EL FRAMEWORK *****
-        $file_lang_framework = "$folder_lang_framework/$newLanguage";
-        //en caso que ya exista el archivo
-        
-        $nombre = "";
-        $pos = stripos($newLanguage,'.lang');
-        if( $pos === false){
-            $tmpError['head'] = 'ERROR';
-            $tmpError['body'] = "Incorrect Name File: "."$file_lang_framework";
-            $this->errMsg = $tmpError;
-            return false;
-        }
-        if( file_exists($file_lang_framework) ){
-            $tmpError['head'] = 'ERROR';
-            $tmpError['body'] = "File existent: "."$file_lang_framework";
-            $this->errMsg = $tmpError;
-            return false;
-        }
-        //en caso que no pueda abrir el archivo
-        $file_framework = fopen("$file_lang_framework","w");
-        if($file_framework == false){
-            $tmpError['head'] = 'ERROR';
-            $tmpError['body'] = "Can't be open file".": $file_lang_framework";
-            $this->errMsg = $tmpError;
-            return false;
-        }
-
-        include_once "/var/www/html/lang/en.lang";
-        global $arrLang;
-        $list = '';
-        foreach($arrLang as $key => $cont)
-                $list = $list.'"'."$key".'"'." => ".'"'."$cont".'"'.",\n";
-
-        fwrite($file_framework, $this->load_Template($list,0));
-        fclose($file_framework);
-
-        //PARA LOS MODULOS
-        $listModules = $this->leer_directorio_modulos();
-        foreach( $listModules as $key_x => $module_x )
-        {
-            if( strcmp($module_x,'FRAMEWORK') == 0 ){
-                $rutaEnLangFRA = "/var/www/html/lang/en.lang";
-                if( file_exists($rutaEnLangFRA) ){
-                    include_once $rutaEnLangFRA;
-                    global $arrLang;
-    
-                    $list = "";
-                    foreach($arrLang as $key_y => $value )
-                        $list = $list.'"'.str_replace('"','\\"',$key_y).'"'." => ".'"'.str_replace('"','\\"',$value).'"'.",\n";
-
-                    $file_module = fopen("/var/www/html/lang/$newLanguage","w");
-                    fwrite($file_module, $this->load_Template($list,0));
-                    fclose($file_module);
-                }
-            }
-            else
-            {
-                $rutaEnLangModule = "/var/www/html/modules/$module_x/lang/en.lang";
-                if( file_exists($rutaEnLangModule) ){
-                    include_once $rutaEnLangModule;
-                    global $arrLangModule;
-    
-                    $list = "";
-                    foreach($arrLangModule as $key_y => $value )
-                        //$list = $list.'"'."$key_y".'"'." => ".'"'."$value".'"'.",\n";
-                        $list = $list.'"'.str_replace('"','\\"',$key_y).'"'." => ".'"'.str_replace('"','\\"',$value).'"'.",\n";
-
-                    $file_module = fopen("/var/www/html/modules/$module_x/lang/$newLanguage","w");
-                    fwrite($file_module, $this->load_Template($list,1));
-                    fclose($file_module);
-                }
-            }
-        }
-
-        return true;
+        return TRUE;
     }
-
+    
     function saveAll($arrayLangTrasl, $module, $language)
     {
         $folder = '';
@@ -358,76 +322,7 @@ class paloSantoLanguageAdmin {
         return true;
     }
 
-    function upload($arrayLangTrasl, $module, $language)
-    {
-        $folder = '';
-        $file = "";
-        $list = '';
-        $i = 0;
-        if( count($arrayLangTrasl) < 6 ){ 
-            return false;
-        }
-        if( strcmp($module,'FRAMEWORK') == 0 ){
-            $file = "/var/www/html/lang/$language";
-
-            include_once $file;
-            global $arrLang;
- 
-            foreach($arrayLangTrasl as $key => $value)
-            {
-                if($i > 4)
-                {
-                    if( strlen($arrayLangTrasl[$key] ) == 0 ){
-                        $tmpError['head'] = 'ERROR';
-                        $tmpError['body'] = "Existent values empty";
-                        $this->errMsg = $tmpError;
-                        return false;
-                    }
-                    $arrLang[$key] = $value;
-                }
-                $i++;
-            }
-
-            foreach($arrLang as $key => $value )
-                $list = $list.'"'.str_replace('"','\\"',$key).'"'." => ".'"'.str_replace('"','\\"',$value).'"'.",\n";
-
-            $file_FRAM = fopen($file,"w");
-            fwrite($file_FRAM, $this->load_Template($list, 0));
-            fclose($file_FRAM);
-        }
-        else{
-            $file = "/var/www/html/modules/$module/lang/$language";
-
-            include_once $file;
-            global $arrLangModule;
-
-            foreach($arrayLangTrasl as $key => $value)
-            {
-                if($i > 4)
-                {
-                    if( strlen($arrayLangTrasl[$key] ) == 0 ){
-                        $tmpError['head'] = 'ERROR';
-                        $tmpError['body'] = "Existent values empty";
-                        $this->errMsg = $tmpError;
-                        return false;
-                    }
-                    $arrLangModule[$key] = $value;
-                }
-                $i++;
-            }
-
-            foreach($arrLangModule as $key => $value )
-                $list = $list.'"'.str_replace('"','\\"',$key).'"'." => ".'"'.str_replace('"','\\"',$value).'"'.",\n";
-
-            $file_MOD = fopen($file,"w");
-            fwrite($file_MOD, $this->load_Template($list, 1));
-            fclose($file_MOD);
-        }
-
-        return true;
-    }
-
-    function load_Template($content, $modo)
+    private function load_Template($content, $modo)
     {
         //$modo == 0 => FRAMEWORK
         //$modo == 1 => MODULES

@@ -69,6 +69,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Nov 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Language Admin: extend develbuilder to create files for new 
+  languages. Use this to reimplement the creation of a new language. Also, 
+  remove some dead code.
+  SVN Rev[4458]
+
 * Fri Nov 23 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: Remove useless and vulnerable webservice support.
   SVN Rev[4457]

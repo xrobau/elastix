@@ -197,18 +197,20 @@ function createFieldForm($arrLangModule)
 
 function showLanguages($smarty, $module_name, $local_templates_dir, $arrLang, $arrLangModule)
 {
-    $oPaloSanto = new paloSantoLanguageAdmin();
+    //$oPaloSanto = new paloSantoLanguageAdmin();
+    $pLanguages = new paloSantoLanguageAdmin();
+
     $arrFormElements = array(
         "module"            => array(   "LABEL"                  => $arrLangModule["Select Module"],
                                         "REQUIRED"               => "no",
                                         "INPUT_TYPE"             => "SELECT",
-                                        "INPUT_EXTRA_PARAM"      => $oPaloSanto->leer_directorio_modulos(),
+                                        "INPUT_EXTRA_PARAM"      => $pLanguages->leer_directorio_modulos(),
                                         "VALIDATION_TYPE"        => "text",
                                         "VALIDATION_EXTRA_PARAM" => ""),
         "language"           => array(   "LABEL"                 => $arrLangModule["Select Language"],
                                         "REQUIRED"               => "no",
                                         "INPUT_TYPE"             => "SELECT",
-                                        "INPUT_EXTRA_PARAM"      => $oPaloSanto->leer_directorio_lenguajes(),
+                                        "INPUT_EXTRA_PARAM"      => $pLanguages->leer_directorio_lenguajes(),
                                         "VALIDATION_TYPE"        => "text",
                                         "VALIDATION_EXTRA_PARAM" => "")
                             );
@@ -242,8 +244,6 @@ function showLanguages($smarty, $module_name, $local_templates_dir, $arrLang, $a
     $oGrid->addFilterControl(_tr("Filter applied: ").$nameModule." = ".$valueLanguage,$_POST, array("module" => null,"language" => null));
 
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-
-    $pLanguages = new paloSantoLanguageAdmin();
 
     //Paginacion
     $limit  = 20;

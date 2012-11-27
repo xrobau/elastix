@@ -30,6 +30,7 @@
 */
 require_once 'Console/Getopt.php';
 
+define('FRAMEWORKLANG', '/var/www/html/lang');
 define('MODULEPATH', '/var/www/html/modules');
 define('MODULE_TEMPLATE_PATH', '/var/www/html/modules/build_module/libs/sources');
 
@@ -39,6 +40,7 @@ load_default_timezone();
 $opt = Console_Getopt::getopt($argv, '', array(
     'createmodule=',    // Create a brand new module directory from XML specfile
     'deletemodule=',    // Delete a module directory without touching acls
+    'createlanguage=',  // Create support files for a new language
 ));
 if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
 //validateOptions($opt);
@@ -47,8 +49,10 @@ case '--createmodule':
     exit(action_createModule($opt) ? 0 : 1);
 case '--deletemodule':
     exit(action_deleteModule($opt) ? 0 : 1);
+case '--createlanguage':
+    exit(action_createLanguage($opt) ? 0 : 1);
 }
-error_exit("No action specified (--createmodule)\n");
+error_exit("No action specified (--createmodule,--deletemodule,--createlanguage)\n");
 
 function error_exit($sMsg, $errorcode = 1)
 {
@@ -324,11 +328,8 @@ function phpidentifier($s)
 // Return a string that can be embedded inside double quotes in PHP code
 function phpstring($s)
 {
-    return str_replace(
-        array('"', '$'),
-        array('\"', '\$'),
-        $s);
-    return $s;
+    // Escape ASCII 0..31 (37 octal) plus dollar, double quote, backslash
+    return addcslashes($s, "\0..\37\$\"\\");
 }
 
 // Read a template from specified path and error out on failure
@@ -340,4 +341,157 @@ function loadTemplate($s)
     return $sTemplate;
 }
 
+function action_createLanguage($opt)
+{
+    $sLanguage = NULL;
+    
+    // Name of new language string, without .lang
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--createlanguage':
+        $sLanguage = $option[1];
+        break;
+    }
+    if (is_null($sLanguage)) error_exit("ERR: language name not specified!\n");
+    if (!preg_match('/^\w+$/', $sLanguage))
+        error_exit("ERR: invalid language specification!\n");
+    if (file_exists(FRAMEWORKLANG."/$sLanguage.lang"))
+        error_exit("ERR: language files for $sLanguage already exist\n");
+
+    foreach (listModules() as $sModule) {
+        $sPathSource = ($sModule == 'FRAMEWORK') ? FRAMEWORKLANG : MODULEPATH."/$sModule/lang";
+        if (file_exists($sPathSource.'/en.lang')) {
+            $arrLang = loadLanguageFile($sPathSource.'/en.lang');
+            writeLanguageFile($sPathSource."/$sLanguage.lang", $arrLang,
+                ($sModule == 'FRAMEWORK'));
+        }
+    }
+
+    return TRUE;
+}
+
+function listModules()
+{
+    $modList = array('FRAMEWORK');
+    if (!is_dir(MODULEPATH)) error_exit("ERR: module directory not found!\n");
+    foreach (scandir(MODULEPATH) as $dir) {
+        if (preg_match('/^\w+$/', $dir)) $modList[] = $dir;
+    }
+    return $modList;
+}
+
+function loadLanguageFile($filename)
+{
+    /* The following procedure needs some explanation. Since the Elastix language
+     * files are PHP code, it is hard to write a custom parser that can cope with
+     * all of the syntax issues that might be present in a legal language file.
+     * Instead, this program will use the internal PHP parser using include()
+     * on the language file. However, this introduces the risk that an attacker
+     * can overwrite the requested filename with a malicious version, which 
+     * therefore will run as root inside the privileged script. In order to 
+     * mitigate this, the program will fork and drop privileges, include() the
+     * file, and transmit a serialized version through a pipe. The parent side
+     * will check that the serialized variable is an array composed of only
+     * string keys and values, and only then return the array of translations.
+     */
+    if (!file_exists($filename)) error_exit("ERR: file not found: $filename\n");
+    $socks = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+    if (FALSE === $socks) error_exit("ERR: failed to create socketpair!\n");
+    $iPid = pcntl_fork();
+    if ($iPid == -1) error_exit("ERR: failed to fork!");
+    if ($iPid != 0) {
+        // Parent process - try to read serialized array from child pipe
+        fclose($socks[0]);
+        $s = stream_get_contents($socks[1]);
+        fclose($socks[1]);
+        posix_kill(-1 * $iPid, SIGKILL);
+        $pidstatus = NULL;
+        pcntl_waitpid($iPid, $pidstatus);
+
+        // Unserialize data and return
+        if ($s === FALSE) error_exit("ERR: failed to receive language data from child\n");
+        $arrLang = unserialize($s);
+        if (!is_array($arrLang)) error_exit("ERR: invalid serialized data\n");
+        foreach ($arrLang as $k => $v) if (!is_string($k) || !is_string($v))
+            error_exit("ERR: invalid language data!\n");
+        return $arrLang;
+    } else {
+        // Child process - drop privileges, include the file and serialize to pipe
+        fclose($socks[1]);
+        if (FALSE === ($newuser = posix_getpwnam('nobody')))
+            error_exit("ERR: failed to query information on user nobody\n");
+        if (!posix_setgid($newuser['gid'])) error_exit("ERR: failed to switch gid\n");
+        if (!posix_setuid($newuser['uid'])) error_exit("ERR: failed to switch uid\n");
+        if (!posix_setsid() == -1) error_exit("ERR: failed to become session leader\n");
+        
+        // The insecure operation...
+        include ($filename);
+        
+        global $arrLang;
+        global $arrLangModule;
+        
+        $s = NULL;
+        if (isset($arrLangModule) && is_array($arrLangModule) && count($arrLangModule) > 0) {
+            $s = serialize($arrLangModule);
+        } elseif (isset($arrLang) && is_array($arrLang) && count($arrLang) > 0) {
+            $s = serialize($arrLang);
+        } else {
+            error_exit("ERR: invalid language file - does not define \$arrLang or \$arrLangModule!\n");
+        }
+        while (strlen($s) > 0) {
+            $i = fwrite($socks[0], $s);
+            if ($i === FALSE) error_exit("ERR: failed to write language data to parent!\n");
+            $s = substr($s, $i);
+        }
+        fflush($socks[0]);
+        fclose($socks[0]);
+        exit(0);
+    }
+}
+
+function writeLanguageFile($filename, $arrLang, $bAsFramework)
+{
+    $list = '';
+    foreach ($arrLang as $k => $v)
+        $list .= "\t\"".phpstring($k)."\" => \"".phpstring($v)."\",\n";
+    $sArrayVariable = $bAsFramework ? 'arrLang' : 'arrLangModule';
+    $sDate = date('Y-m-d H:i:s');
+    $sTemplate = <<<LANG_TEMPLATE
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+   Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.3                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on "AS IS"     |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translated by: YOUR_NAME_HERE                                        |
+  | Email: youremail@example.org                                         |
+  +----------------------------------------------------------------------+
+  \$Id: en.lang,v 1.7 $sDate username Exp $ */
+global \$$sArrayVariable;
+\$$sArrayVariable=array(
+$list);
+?>
+LANG_TEMPLATE;
+    return file_put_contents($filename, $sTemplate);
+}
 ?>

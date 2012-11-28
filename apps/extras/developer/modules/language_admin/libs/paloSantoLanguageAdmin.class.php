@@ -128,107 +128,55 @@ class paloSantoLanguageAdmin {
         return $arrData;
     }
 
+    /**
+     * Procedimiento para agregar una nueva cadena de texto y su correspondiente
+     * traducción en el archivo de idioma y módulo indicados. No se admite el
+     * reemplazo de cadenas de texto existentes en el archivo indicado. Si el 
+     * archivo de idioma del módulo no existe, se lo crea.
+     * 
+     * @param   string  $module_name    FRAMEWORK, o módulo a modificar
+     * @param   string  $lang_name      Nombre de archivo de idioma (es.lang)
+     * @param   string  $lang_english   Texto en inglés que debe ser traducido
+     * @param   string  $lang_traslate  Texto traducido en el idioma elegido
+     * 
+     * @return  VERDADERO en éxito, o FALSE en error.
+     */
     function saveTraslate($module_name, $lang_name, $lang_english, $lang_traslate)
     {
-        if( strcmp($module_name,'FRAMEWORK') == 0 ){
-            $folder_fram = "/var/www/html/lang";
-
-            include_once "$folder_fram/$lang_name";
-            global $arrLang;
-
-            if( array_key_exists($lang_english, $arrLang) ){
-                $tmpError['head'] = 'ERROR';
-                $tmpError['body'] = "Just it have traslate: ENGLISH: $lang_english - TRASLATE: $arrLang[$lang_english]";
-                $this->errMsg = $tmpError;
-                return false;
-            }
-
-            $arrLang[$lang_english] = $lang_traslate;
-            $list = '';
-            foreach($arrLang as $key => $cont)
-                $list = $list.'"'.str_replace('"','\\"',$key).'"'." => ".'"'.str_replace('"','\\"',$cont).'"'.",\n";
-
-            $file = fopen("$folder_fram/$lang_name","w");
-    
-            if($file == false){
-                $tmpError['head'] = $arrLang['ERROR'];
-                $tmpError['body'] = $arrLangModule["Can't be open file"].": $lang_nam";
-                $this->errMsg = $tmpError;
-                return false;
-            }
-    
-            fwrite($file, $this->load_Template($list,0));
-            fclose($file);
-    
-            return true;
-            
+        $regs = NULL;
+        if (!preg_match('/^(\w+)$/', $module_name, $regs)) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  'Invalid module name',
+            );
+            return FALSE;
         }
-        else{
-            $folder_lang = "/var/www/html/modules/$module_name/lang/";
-            
-            if( !is_dir($folder_lang) && !mkdir($folder_lang, 0755, true) ){
-                $tmpError['head'] = 'ERROR';
-                $tmpError['body'] = "Folder no exist:"." $module_name/lang/";
-                $this->errMsg = $tmpError;
-                return false;
-            }
-    
-            if( strlen($lang_english) == 0 || strlen($lang_traslate) == 0 ){
-                $bandera = false;
-                $str_error = '';
-                if( strlen($lang_english) == 0 )
-                {
-                    $str_error = $str_error."Input Language English "; 
-                    $bandera = true;
-                }
-    
-                if( strlen($lang_traslate) == 0 ){
-                    if( $bandera ) $str_error = $str_error."AND "; 
-                    $str_error = $str_error."Input Traslate"; 
-                }
-                $tmpError['head'] = 'ERROR';
-                $tmpError['body'] = "In ".$str_error;
-                $this->errMsg = $tmpError;
-                return false;
-            }
-    
-            $list = '';
-            if( !file_exists("$folder_lang/$lang_name") ) {
-                $list = '"'."$lang_english".'"'." => ".'"'."$lang_traslate".'"'.",\n";
-            }
-            else{
-                include_once "$folder_lang/$lang_name";
-                global $arrLangModule;
-    
-                if( array_key_exists($lang_english, $arrLangModule) ){
-                    $tmpError['head'] = 'ERROR';
-                    $tmpError['body'] = "Just it have traslate: ENGLISH: $lang_english - TRASLATE: $arrLangModule[$lang_english]";
-                    $this->errMsg = $tmpError;
-                    return false;
-                }
-    
-                $arrLangModule[$lang_english] = $lang_traslate;
-                
-                foreach($arrLangModule as $key => $cont)
-                    $list = $list.'"'.str_replace('"','\\"',$key).'"'." => ".'"'.str_replace('"','\\"',$cont).'"'.",\n";
-            }
-    
-            $file = fopen("$folder_lang/$lang_name","w");
-    
-            if($file == false){
-                $tmpError['head'] = $arrLang['ERROR'];
-                $tmpError['body'] = $arrLangModule["Can't be open file"].": $lang_nam";
-                $this->errMsg = $tmpError;
-                return false;
-            }
-    
-            fwrite($file, $this->load_Template($list,1));
-            fclose($file);
-    
-            return true;
+        if (!preg_match('/^(\w+)\.lang$/', $lang_name, $regs)) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  'Invalid file name for language',
+            );
+            return FALSE;
         }
+        $lang_name = $regs[1];
+        
+        $output = $retval = NULL;
+        exec('/usr/bin/elastix-helper develbuilder --addtranslation'.
+            ' --language '.escapeshellarg($lang_name).
+            ' --module '.escapeshellarg($module_name).
+            ' --string-en '.escapeshellarg($lang_english).
+            ' --string-tr '.escapeshellarg($lang_traslate).
+            ' 2>&1', $output, $retval);
+        if ($retval != 0) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  'Failed to add translation: <br/>'.implode("<br/>\n", $output),
+            );
+            return FALSE;
+        }
+        return TRUE;
     }
-
+    
     /**
      * Procedimiento para crear los archivos de lenguaje para un nuevo lenguaje.
      * Los archivos se copian a partir de en.lang en el framework y en cada uno
@@ -242,6 +190,7 @@ class paloSantoLanguageAdmin {
      */
     function saveNewLanguage($sNewLang)
     {    	
+        $regs = NULL;
         if (!preg_match('/^(\w+)\.lang$/', $sNewLang, $regs)) {
     		$this->errMsg = array(
                 'head'  =>  'ERROR',

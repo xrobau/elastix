@@ -41,6 +41,11 @@ $opt = Console_Getopt::getopt($argv, '', array(
     'createmodule=',    // Create a brand new module directory from XML specfile
     'deletemodule=',    // Delete a module directory without touching acls
     'createlanguage=',  // Create support files for a new language
+    'addtranslation',   // Add a translated string to a language file
+    'module=',          // Module to add a translation to
+    'language=',       // Language to add a translation to
+    'string-en=',       // English string to use for translation key
+    'string-tr=',       // Translated string
 ));
 if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
 //validateOptions($opt);
@@ -51,8 +56,10 @@ case '--deletemodule':
     exit(action_deleteModule($opt) ? 0 : 1);
 case '--createlanguage':
     exit(action_createLanguage($opt) ? 0 : 1);
+case '--addtranslation':
+    exit(action_addTranslation($opt) ? 0 : 1);
 }
-error_exit("No action specified (--createmodule,--deletemodule,--createlanguage)\n");
+error_exit("No action specified (--createmodule,--deletemodule,--createlanguage,--addtranslation)\n");
 
 function error_exit($sMsg, $errorcode = 1)
 {
@@ -365,6 +372,49 @@ function action_createLanguage($opt)
                 ($sModule == 'FRAMEWORK'));
         }
     }
+
+    return TRUE;
+}
+
+function action_addTranslation($opt)
+{
+    $sModule = NULL;
+    $sLanguage = NULL;
+    $sEnglishString = NULL;
+    $sTranslatedString = NULL;
+
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--language':
+        $sLanguage = $option[1];
+        break;
+    case '--module':
+        $sModule = $option[1];
+        break;
+    case '--string-en':
+        if (trim($option[1]) != '') $sEnglishString = $option[1];
+        break;
+    case '--string-tr':
+        if (trim($option[1]) != '') $sTranslatedString = $option[1];
+        break;
+    }
+    
+    if (is_null($sModule)) error_exit("ERR: module name not specified!\n");
+    if (!preg_match('/^\w+$/', $sModule))
+        error_exit("ERR: invalid module specification!\n");
+    if (is_null($sLanguage)) error_exit("ERR: language name not specified!\n");
+    if (!preg_match('/^\w+$/', $sLanguage))
+        error_exit("ERR: invalid language specification!\n");
+    if (is_null($sEnglishString)) error_exit("ERR: English string not specified!\n");
+    if (is_null($sTranslatedString)) error_exit("ERR: translated string not specified!\n");
+
+    // Load existing translations if they exist
+    $sPathSource = (($sModule == 'FRAMEWORK') ? FRAMEWORKLANG : MODULEPATH."/$sModule/lang").
+        "/$sLanguage.lang";
+    $arrLang = file_exists($sPathSource) ? loadLanguageFile($sPathSource) : array();
+    if (array_key_exists($sEnglishString, $arrLang))
+        error_exit("ERR: translation for string already exists!\n");
+    $arrLang[$sEnglishString] = $sTranslatedString;
+    writeLanguageFile($sPathSource, $arrLang, ($sModule == 'FRAMEWORK'));
 
     return TRUE;
 }

@@ -69,6 +69,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Nov 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Language Admin: extend develbuilder to add a single translation to
+  a language file. Use this to reimplement the Add Translation functionality.
+  SVN Rev[4459]
+
 * Tue Nov 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Language Admin: extend develbuilder to create files for new 
   languages. Use this to reimplement the creation of a new language. Also, 

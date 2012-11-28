@@ -26,6 +26,45 @@ $(document).ready(function(){
     });
     if($("#mode_input").val()=="edit" || $("#mode_input").val()=="input")
         mostrar_select_orgs();
+    
+    $("#sec_call_time").change(function(){
+        if($("#sec_call_time option:selected").val()=="yes"){
+            $(".sec_call_time").css("display","table-row");
+            var alt=$("#content_tab-1").children("table").height();
+            var alt_tab=alt+10;
+            $(".tabs").css({'height':alt_tab});
+        }else{
+            $(".sec_call_time").css("display","none");
+            var alt=$("#content_tab-1").children("table").height();
+            var alt_tab=alt+5;
+            $(".tabs").css({'height':alt});
+        }
+    });
+    if($("#sec_call_time option:selected").val()=="no") 
+        $(".sec_call_time").css("display","none");
+    
+    $('td select[class=state_trunk]').change(function(){
+        var trunkId=$(this).attr("id");
+        var action=$("#"+trunkId+" option:selected").val();
+        var arrAction = new Array();
+        arrAction["action"]   = "actDesactTrunk";
+        arrAction["menu"]     = "trunks";
+        arrAction["rawmode"]  = "yes";
+        arrAction["id_trunk"]  = trunkId.substring(4);
+        arrAction["trunk_action"]  = action;
+        request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            if(error!=""){
+                alert(error);
+            }else{
+                alert(arrData);
+            }
+        });
+    });  
+    
+    if(typeof $("#mode_input").val()==="undefined")
+        getCurrentNumCalls();
 });
 
 $(window).load(function () {
@@ -157,6 +196,38 @@ function mostrar_select_orgs(){
         options.each(function() {
             if(arrVal.indexOf($(this).text())!=-1){
                 $("select[name=org] option[value='"+$(this).text()+"']").remove();
+            }
+        });
+}
+
+function getCurrentNumCalls(){
+    var limit=$("#grid_limit").val();
+    var offset=$("#grid_offset").val();
+    var arrAction        = new Array();
+    arrAction["action"]  = "get_num_calls";
+    arrAction["menu"]    = "trunks";
+    arrAction["limit"]   = limit
+    arrAction["offset"]  = offset;
+    arrAction["rawmode"] = "yes";
+    request("index.php",arrAction,true,
+        function(arrData,statusResponse,error)
+        {
+            if(error!=""){
+                return true; //algo fallo detenemos la recursividad
+            }else{
+                $(".sec_trunk").each(function(){
+                    var trunkId=$(this).children("p.num_calls").attr("id");
+                    if(typeof arrData[trunkId] !== "undefined")
+                        $(this).children("p.num_calls").remove();
+                        $(this).prepend(arrData[trunkId]["p"]);
+                        $(this).find("p.elapsed_time").children("span").html(arrData[trunkId]["elapsed_time"]);
+                        $(this).find("p.count_calls").children("span").html(arrData[trunkId]["count_calls"]);
+                        $(this).find("p.state").children("span").html(arrData[trunkId]["state"]);
+                        $(this).find("p.fail_calls").children("span").html(arrData[trunkId]["fail_calls"]);
+                        if(arrData[trunkId]["state"]=="YES")
+                            $("#sel_"+trunkId).val("on");
+                });
+                return false; //continua la recursividad
             }
         });
 }

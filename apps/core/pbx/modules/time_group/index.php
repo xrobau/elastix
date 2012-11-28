@@ -186,10 +186,11 @@ function reportTG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
 	$arrData=array();
 	foreach($arrTG as $tg) {
         $arrTmp=array();
-        if($userLevel1=="superadmin")
-            $arrTmp[0] = $tg["name"];
-        else
-            $arrTmp[0] = "&nbsp;<a href='?menu=$module_name&action=edit&id_tg=".$tg['id']."'>".$tg['name']."</a>";
+        if($userLevel1=="superadmin"){
+            $arrTmp[] = $tg["organization_domain"];
+            $arrTmp[] = $tg["name"];
+        }else
+            $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=edit&id_tg=".$tg['id']."'>".$tg['name']."</a>";
         $arrData[] = $arrTmp;
     }
 			

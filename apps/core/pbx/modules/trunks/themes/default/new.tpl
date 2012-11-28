@@ -37,7 +37,7 @@
        <div class="content" id="content_tab-1">
         <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
             <tr class="tech">
-                <td width="20%" nowrap>{$trunk_name.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+                <td width="20%" nowrap>{$trunk_name.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
                 <td width="30%">{$trunk_name.INPUT}</td>
             </tr>
             <tr class="tech">
@@ -46,24 +46,33 @@
                 <td width="20%" nowrap>{$keepcid.LABEL}</td>
                 <td width="30%">{$keepcid.INPUT}</td>
             </tr>
+            <tr><th>{$SEC_SETTINGS}</th></tr>
             <tr class="tech">
                 <td nowrap>{$maxchans.LABEL}</td>
                 <td>{$maxchans.INPUT}</td>
                 <td nowrap>{$disabled.LABEL}</td>
                 <td>{$disabled.INPUT}</td>
             </tr>
+            <tr class="tech">
+                <td nowrap>{$sec_call_time.LABEL}</td>
+                <td>{$sec_call_time.INPUT}</td>
+            </tr>
+            {if $mode ne 'view' || $SEC_TIME eq 'yes' }
+            <tr class="tech sec_call_time">
+                <td nowrap>{$maxcalls_time.LABEL}</td>
+                <td>{$maxcalls_time.INPUT}</td>
+                <td nowrap>{$period_time.LABEL}</td>
+                <td>{$period_time.INPUT}</td>
+            </tr>
+            {/if}
             {if $TECH eq 'DAHDI'}
-                <tr>
-                    <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$DAHDI_CHANNEL}</td>
-                </tr>
+                <tr><th>{$DAHDI_CHANNEL}</th></tr>
                 <tr class="tech">
                     <td nowrap>{$channelid.LABEL}:</td>
                     <td >{$channelid.INPUT}</td>
                 </tr>
             {/if}
-            <tr>
-                <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$ORGANIZATION_PERM}</td>
-            </tr>
+            <tr><th>{$ORGANIZATION_PERM}</th></tr>
             {if $mode eq 'view'}
                 <tr class="tech">
                     <td width="15%" nowrap>{$org.LABEL}: </td>

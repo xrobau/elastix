@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
     global $arrConfModule;
-    $arrConfModule['module_name'] = 'ring_group';
+    $arrConfModule['module_name'] = 'time_group';
     $arrConfModule['templates_dir'] = 'themes';
 
 ?>

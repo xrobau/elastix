@@ -155,7 +155,7 @@ class paloSantoTG extends paloAsteriskDB{
         $arrCredentiasls=getUserCredentials();
         $userLevel1=$arrCredentiasls["userlevel"];
         if($userLevel1=="admin"){
-            if($this->domain==false){
+            if($arrCredentiasls["domain"]==false){
                 $this->errMsg=_tr("Invalid Organization");
                 return false;
             }

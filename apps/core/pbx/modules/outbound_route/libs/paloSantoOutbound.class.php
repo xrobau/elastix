@@ -785,14 +785,14 @@ class paloSantoOutbound extends paloAsteriskDB{
                 if((isset($value["match_pattern"]) && $value["match_pattern"]!="") || (isset($value["prefix"]) && $value["prefix"]!="")){
                     //prefix
                     if(isset($value["prefix"]) && $value["prefix"]!=""){
-                        if(!preg_match("/[0-9]+/",$value["prefix"])){
+                        if(!preg_match("/^[0-9]+$/",$value["prefix"])){
                             $add="_";
                         }
                         $prefix=$value["prefix"];
                     }
                     //match_pattern
                     if(isset($value["match_pattern"]) && $value["match_pattern"]!=""){
-                        if(!preg_match("/[0-9]+/",$value["match_pattern"])){
+                        if(!preg_match("/^[0-9]+$/",$value["match_pattern"])){
                             $add="_";
                         }
                         $match_pattern=$value["match_pattern"];

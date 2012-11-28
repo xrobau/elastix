@@ -96,6 +96,12 @@ function _moduleContent(&$smarty, $module_name)
         case "delete":
             $content = deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
+        case "get_num_calls":
+            $content = get_num_calls($smarty,$pDB,$userLevel1, $userAccount);
+            break;
+        case "actDesactTrunk":
+            $content = actDesactTrunk($smarty,$pDB,$userLevel1);
+            break;
         default: // report
             $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB,$arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
@@ -148,46 +154,58 @@ function reportTrunks($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
 	
-	$arrGrid = array("title"    => _tr('Trunks List'),
-                "url"      => $url,
-                "width"    => "99%",
-                "start"    => ($total==0) ? 0 : $offset + 1,
-                "end"      => $end,
-                "total"    => $total,
-                'columns'   =>  array(
-                    array("name"      => _tr("Name"),),
-                    array("name"      => _tr("Technology"),),
-                    array("name"      => _tr("Channel / Peer Name"),),
-                    array("name"      => _tr("Max. Channels"),),
-                    array("name"      => _tr("Disabled"),),
-                    ),
-                );
+	$oGrid->setTitle(_tr('Trunks List'));
+    //$oGrid->setIcon('url de la imagen');
+    $oGrid->setWidth("99%");
+    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
+    $oGrid->setEnd($end);
+    $oGrid->setTotal($total);
+    $oGrid->setURL($url);
+    
+    $arrColum[]=_tr("Name");
+    $arrColum[]=_tr("Technology");
+    $arrColum[]=_tr("Channel / Peer Name");
+    $arrColum[]=_tr("Max. Channels");
+    $arrColum[]=_tr("Current # of calls by period");
+    $arrColum[]=_tr("Disabled");
+    $oGrid->setColumns($arrColum);
 
-	$arrTrunks=array();
-	$arrData = array();
-	if($userLevel1=="superadmin"){
-	    if($domain!="all")
-            $arrTrunks=$pTrunk->getTrunks($domain);
-	    else
+    $arrTrunks=array();
+    $arrData = array();
+    if($userLevel1=="superadmin"){
+        if($domain!="all")
+            $arrTrunks=$pTrunk->getTrunks($domain,$limit,$offset);
+        else
             $arrTrunks=$pTrunk->getTrunks();
-	}
+    }
 
 	if($arrTrunks===false){
 		$error=_tr("Error to obtain trunks").$pTrunk->errMsg;
         $arrTrunks=array();
 	}
-
+     
     foreach($arrTrunks as $trunk){
         $arrTmp[0] = "&nbsp;<a href='?menu=trunks&action=view&id_trunk=".$trunk['trunkid']."&tech_trunk=".$trunk["tech"]."'>".$trunk['name']."</a>";
         $arrTmp[1] = strtoupper($trunk['tech']);
         $arrTmp[2] = $trunk['channelid'];
         $arrTmp[3] = $trunk['maxchans'];
-        $arrTmp[4] = $trunk['disabled'];
+        $state="";
+        if($trunk['sec_call_time']=="yes"){
+            $arrTmp[4] = createDivToolTip($trunk['trunkid'],$pTrunk,$state);
+        }else
+            $arrTmp[4] = _tr("Feature don't Set");     
+            
+        if($trunk['disabled']=="on" || $state=="YES")
+            $disabled = "on";
+        else
+            $disabled = "off";
+        
+        $arrTmp[5]=createSelect($trunk['trunkid'],$disabled);
         $arrData[] = $arrTmp;
     }
     
-	$arrTech = array("sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"));
-
+    $arrTech = array("sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"));
+     
     if($userLevel1 == "superadmin"){
         $oGrid->addComboAction($name_select="tech_trunk",_tr("Create New Trunk"), $arrTech, $selected=null, $task="create_trunk", $onchange_select=null);
         $arrOrgz=array("all"=>"all");
@@ -203,14 +221,178 @@ function reportTrunks($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $oGrid->showFilter(trim($htmlFilter));
     }
 
-	if($error!=""){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
+    if($error!=""){
+        $smarty->assign("mb_title", _tr("MESSAGE"));
         $smarty->assign("mb_message",$error);
-	}
-	
-	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+    }
+    
+    $contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
+    $contenidoModulo .="<input type='hidden' name='grid_limit' id='grid_limit' value='$limit'>";
+    $contenidoModulo .="<input type='hidden' name='grid_offset' id='grid_offset' value='$offset'>";
     return $contenidoModulo;
 }
+
+function createDivToolTip($trunkid,$pTrunk,&$block){
+    $arrSec=array();
+    $res=$pTrunk->getSecTimeASTDB($trunkid);
+    
+    $block="NO";
+    $fail=0;
+    $style=$tmp_block="";
+    if($res['BLOCK']=="true"){
+        $block="YES";
+        $tmp_block=" / BLOCKED";
+        $fail=(int)$res['NUM_FAIL'];
+        $style = "style='color: red; font-weight:bold'";
+    }
+    $count=$res["COUNT"];
+    
+    $start="--";
+    if(isset($res["START_TIME"])){
+        $start=strftime("%D - %T",(int)$res["START_TIME"]);
+    }
+    
+    //recibimos el periodo en minutos y lo llevamos asegundos
+    $perid_sec=(int)$res["period_time"]*60;  
+    if((int)$res["period_time"]<59){
+        $period=$res["period_time"]." min.";
+    }else{
+        $period=($res["period_time"] / 60)." h.";
+    }
+    
+    $elapsed_sec=fmod((time()-(int)$res["START_TIME"]),$perid_sec);
+    $elap_h=floor($elapsed_sec / 3600);
+    $elap_m=floor(fmod($elapsed_sec,3600) / 60);
+    $elap=$elap_h.":".$elap_m;
+    
+    $max=$res["maxcalls_time"];
+    $count=$res["COUNT"];
+    
+    $div ="<div class='trunk_tooltip'>
+        <p class='start_point'><label>"._tr("Applied Since").": </label><span>$start</span></p>
+        <p class='time_period'><label>"._tr("Period Duration").": </label><span>$period</span></p>
+        <p class='elapsed_time'><label>"._tr("Elapsed Time Since Last Period").": </label><span>$elap</span></p>
+        <p class='max_calls'><label>"._tr("Max Number of Calls").": </label><span>$max</span></p>
+        <p class='count_calls'><label>"._tr("Current Number of Calls").": </label><span>$count</span></p>
+        <p class='state'><label>"._tr("Bloqued").": </label><span>$block</span></p>
+        <p class='fail_calls'><label>"._tr("Number of Fail Calls").": </label><span>$fail</span></p>
+     </div>";
+     
+     return "<div class='sec_trunk'><p class='num_calls' id='".$trunkid."' $style>".$count.$tmp_block."</p>".$div."</div>";
+}
+
+function createSelect($id,$disabled){
+    $arr=array("on","off");
+    $field="<select id='sel_$id' name='state_trunk' class='state_trunk' >";
+    foreach($arr as $value){
+        $select="";
+        if($disabled==$value)
+            $select="selected";
+        $field .="<option value='$value' $select>$value</option>";
+    }
+    $field .="</select>";
+    return $field;
+}
+
+function get_num_calls($smarty,&$pDB,$userLevel1, $userAccount){
+    $pTrunk = new paloSantoTrunk($pDB);
+    $error=$pagging="";
+    $arrParam=$arrTrunk=array();
+    $jsonObject=new PaloSantoJSON();
+    $limit=getParameter("limit");
+    $offset=getParameter("offset");
+    
+    if(preg_match("/^[0-9]+$/",$limit) && preg_match("/^[0-9]+$/",$offset)){
+        $pagging=" limit ? offset ?";
+        $arrParam[]=(int)$limit;
+        $arrParam[]=(int)$offset;
+    }
+    
+    $query="SELECT trunkid,sec_call_time from trunk $pagging";
+    $result=$pDB->fetchTable($query,true,$arrParam);
+    if($result==false){
+        if($result===false)
+            $jsonObject->set_error($pDB->errMsg);
+        else
+            $jsonObject->set_error("There aren't trunks");
+    }else{
+        foreach($result as $value){
+            if($value["sec_call_time"]=="yes"){
+                $block=$style="";
+                $res=$pTrunk->getSecTimeASTDB($value["trunkid"]);
+                $fail=0;
+                if($res['BLOCK']=="true"){
+                    $block = " / BLOCKED";
+                    $style = "style='color: red; font-weight:bold'";
+                    $fail=(int)$res['NUM_FAIL'];
+                }
+                $arrTrunk[$value["trunkid"]]["p"]="<p class='num_calls' id='".$value['trunkid']."' $style>".$res['COUNT'].$block."</p>";
+                
+                //tiempo transcurrido desde el ultimo periodo
+                $elapsed_sec=fmod((time()-(int)$res["START_TIME"]),(int)$res["period_time"]*60);
+                $elap_h=floor($elapsed_sec / 3600);
+                $elap_m=floor(fmod($elapsed_sec,3600) / 60);
+                $elap=$elap_h.":".$elap_m;
+                
+                $arrTrunk[$value["trunkid"]]["elapsed_time"]=$elap;
+                $arrTrunk[$value["trunkid"]]["count_calls"]=$res['COUNT'];
+                $arrTrunk[$value["trunkid"]]["state"]=($block=="")?"NO":"YES";
+                $arrTrunk[$value["trunkid"]]["fail_calls"]=$fail;
+            }else
+                $arrTrunk[$value["trunkid"]]["p"]="";
+        }
+        $jsonObject->set_message($arrTrunk);
+    }
+    
+    sleep(2);
+    return $jsonObject->createJSON();
+}
+
+function actDesactTrunk($smarty,&$pDB,$userLevel1){
+    $pTrunk=new paloSantoTrunk($pDB);
+    $error="";
+    $idTrunk=getParameter("id_trunk");
+    $action=getParameter("trunk_action");
+    $jsonObject=new PaloSantoJSON();
+    
+    if($userLevel1!="superadmin"){
+        $error=_tr("You are not authorized to perform this action");
+    }elseif(!preg_match('/^[[:digit:]]+$/', "$idTrunk")){
+        $error=_tr("Invalid Trunk Id");
+    }else{
+        $pDB->beginTransaction();
+        $result=$pTrunk->actDesacTrunk($idTrunk,$action);
+        if($result==true){
+            $pDB->commit();
+            $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals nothing "" 2>&1';
+            $output = $ret = NULL;
+            exec($sComando, $output, $ret);
+            if ($ret != 0) {
+                $error = _tr("Error writing extensions_globals file").implode('', $output);
+                return FALSE;
+            }
+            $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
+            $output = $ret = NULL;
+            exec($sComando, $output, $ret);
+            if ($ret != 0){
+                $error = implode('', $output);
+                return FALSE;
+            }
+        }else{
+            $error=$pTrunk->errMsg();
+            $pDB->rollBack();
+        }
+    }
+    
+    if($error!=""){
+        $jsonObject->set_error($error);
+    }else{
+        $state=($action=="on")?"desactivated":"activated";    
+        $jsonObject->set_message(_tr("Trunk have been $state successfully"));
+    }
+    return $jsonObject->createJSON();
+}
+
 
 function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$arrDialPattern=array()){
 	
@@ -269,6 +451,9 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                         $smarty->assign("ORGS",$select_orgs.",");
                 }
                 
+                if($arrTrunks["sec_call_time"]=="yes")
+                    $smarty->assign("SEC_TIME","yes");
+                    
                 if($action=="view"){
                     $smarty->assign("ORGS",$select_orgs);
                 }
@@ -342,6 +527,8 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 	$smarty->assign("GENERAL", _tr("General"));
 	$smarty->assign("SETTINGS", _tr("Peer Settings"));
 	$smarty->assign("REGISTRATION", _tr("Registration"));
+	$smarty->assign("SEC_SETTINGS", _tr("Security Settings"));
+	$smarty->assign("ORGANIZATION_PERM",_tr("Organizations Allowed"));
     
     $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("Trunk")." ".strtoupper($tech), $arrTrunks);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
@@ -404,6 +591,20 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $arrProp['disabled'] = getParameter("disabled");
         $arrProp['dialout_prefix']=getParameter("dialoutprefix");
         $arrProp["select_orgs"]=getParameter("select_orgs");
+        $arrProp["sec_call_time"]=getParameter("sec_call_time");
+        $arrProp["maxcalls_time"]=getParameter("maxcalls_time");
+        $arrProp["period_time"]=getParameter("period_time");
+        
+        if($arrProp["sec_call_time"]=="yes"){
+            if(!preg_match("/^[0-9]+$/",$arrProp["maxcalls_time"])){
+                $error=_tr("Field 'Max Num Calls' can't be empty");
+                $continue=false;
+            }
+            if(!preg_match("/^[0-9]+$/",$arrProp["period_time"])){
+                $error=_tr("Field 'Period of Time' can't be empty");
+                $continue=false;
+            }
+        }
         
         if($tech=="dahdi"){
             $arrProp["channelid"]=getParameter("channelid");
@@ -501,6 +702,20 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
             $arrProp['disabled'] = getParameter("disabled");
             $arrProp['dialout_prefix']=getParameter("dialoutprefix");
             $arrProp["select_orgs"]=getParameter("select_orgs");
+            $arrProp["sec_call_time"]=getParameter("sec_call_time");
+            $arrProp["maxcalls_time"]=getParameter("maxcalls_time");
+            $arrProp["period_time"]=getParameter("period_time");
+            
+            if($arrProp["sec_call_time"]=="yes"){
+                if(!preg_match("/^[0-9]+$/",$arrProp["maxcalls_time"])){
+                    $error=_tr("Field 'Max Num Calls' can't be empty");
+                    $continue=false;
+                }
+                if(!preg_match("/^[0-9]+$/",$arrProp["period_time"])){
+                    $error=_tr("Field 'Period of Time' can't be empty");
+                    $continue=false;
+                }
+            }
             
             if($tech=="dahdi"){
                 $arrProp["channelid"]=getParameter("channelid");
@@ -705,6 +920,8 @@ function writeAsteriskFile(&$error,$tech){
     return true;
 }
 
+
+
 function createFieldForm($tech)
 {
     $arrCid=array("off"=>_tr("Allow Any CID"), "on"=>_tr("Block Foreign CIDs"), "cnum"=>_tr("Remove CNAM"), "all"=>_tr("Force Trunk CID"));
@@ -714,6 +931,7 @@ function createFieldForm($tech)
     $arrNat=array("yes"=>"Yes","no"=>"No","never"=>"never","route"=>"route");
     $arrType=array("friend"=>"friend","peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
+    $arrPeriod=array(5=>"5 min",10=>"10 min",15=>"15 min",30=>"30 min",45=>"45",60=>"1 hora",120=>"2 horas",180=>"3 horas",240=>"4 horas",300=>"5 horas",360=>"6 horas",600=>"10 horas",720=>"12 horas",900=>"15 horas",1200=>"20 horas",1440=>"1 dia");
     
     global $arrConf;
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
@@ -783,6 +1001,24 @@ function createFieldForm($tech)
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrOrgz,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "period_time"    => array("LABEL"                => _tr("Period of Time"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrPeriod,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "maxcalls_time"  => array("LABEL"                => _tr("Max Num of Calls"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sec_call_time"  => array("LABEL"                => _tr("Max Num Calls By time"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             );
@@ -1121,6 +1357,10 @@ function getAction(){
         return "view";
     else if(getParameter("action")=="view_edit")
         return "view_edit";
+    else if(getParameter("action")=="get_num_calls")
+        return "get_num_calls";
+    else if(getParameter("action")=="actDesactTrunk")
+        return "actDesactTrunk";
     else
         return "report"; //cancel
 }

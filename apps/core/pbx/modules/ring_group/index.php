@@ -148,34 +148,38 @@ function reportRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
 	$offset = $oGrid->calculateOffset();
 
 	$end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
-	
-	$arrGrid = array("title"    => _tr('RG Routes List'),
-                "url"      => $url,
-                "width"    => "99%",
-                "start"    => ($total==0) ? 0 : $offset + 1,
-                "end"      => $end,
-                "total"    => $total,
-                'columns'   =>  array(
-                    array("name"      => _tr("Number"),),
-                    array("name" => _tr("Name")),
-                    array("name" => _tr("Strategy"),),  
-                    array("name" => _tr("Ring Time"),),
-                    array("name" => _tr("Ignore CF"),),
-                    array("name" => _tr("Skip Busy Extensions"),),
-                    array("name" => _tr("Default Destination"),),
-                  ),
-                );
+    
+    $oGrid->setTitle(_tr('RG Routes List'));
+    //$oGrid->setIcon('url de la imagen');
+    $oGrid->setWidth("99%");
+    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
+    $oGrid->setEnd($end);
+    $oGrid->setTotal($total);
+    $oGrid->setURL($url);
 
-	$arrRG=array();
-	$arrData = array();
-	if($userLevel1=="superadmin"){
-	    if($domain!="all")
-            $arrRG = $pRG->getRGs($domain);
-	    else
-            $arrRG = $pRG->getRGs();
-	}else{
+    $arrColum=array(); 
+    if($userLevel1=="superadmin"){
+        $arrColum[]=_tr("Organization");
+    }
+    $arrColum[]=_tr("Number");
+    $arrColum[]=_tr("Name");
+    $arrColum[]=_tr("Strategy");
+    $arrColum[]=_tr("Ring Time");
+    $arrColum[]=_tr("Ignore CF");
+    $arrColum[]=_tr("Skip Busy Extensions");
+    $arrColum[]=_tr("Default Destination");
+    $oGrid->setColumns($arrColum);
+
+    $arrRG=array();
+    $arrData = array();
+    if($userLevel1=="superadmin"){
+        if($domain!="all")
+           $arrRG = $pRG->getRGs($domain,$limit,$offset);
+        else
+            $arrRG = $pRG->getRGs(null,$limit,$offset);
+    }else{
         if($userLevel1=="admin"){
-            $arrRG = $pRG->getRGs($domain);
+            $arrRG = $pRG->getRGs($domain,$limit,$offset);
         }
     }
 
@@ -186,10 +190,11 @@ function reportRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
 
 	foreach($arrRG as $rg) {
         $arrTmp=array();
-        if($userLevel1=="superadmin")
-            $arrTmp[0] = $rg["rg_number"];
-        else
-            $arrTmp[0] = "&nbsp;<a href='?menu=ring_group&action=view&id_rg=".$rg['id']."'>".$rg['rg_number']."</a>";
+        if($userLevel1=="superadmin"){
+            $arrTmp[] = $rg["organization_domain"];
+            $arrTmp[] = $rg["rg_number"];
+        }else
+            $arrTmp[] = "&nbsp;<a href='?menu=ring_group&action=view&id_rg=".$rg['id']."'>".$rg['rg_number']."</a>";
         
         $arrTmp[]=$rg["rg_name"];
         $arrTmp[]=$rg["rg_strategy"];
@@ -227,7 +232,7 @@ function reportRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",$error);
 	}
-	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+	$contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
 	$mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $org_domain);
 	$contenidoModulo = $mensaje.$contenidoModulo;
     return $contenidoModulo;

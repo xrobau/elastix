@@ -68,6 +68,7 @@ class paloSantoRG extends paloAsteriskDB{
                 $arrParam=array($domain);
             }
         }
+        
         $query="SELECT count(id) from ring_group $where";
         $result=$this->_DB->getFirstRowQuery($query,false,$arrParam);
         if($result==false){
@@ -78,8 +79,8 @@ class paloSantoRG extends paloAsteriskDB{
     }
 
     
-    function getRGs($domain=null){
-        $where="";
+    function getRGs($domain=null,$limit=null,$offset=null){
+        $where=$pagging="";
         $arrParam=null;
         if(isset($domain)){
             if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
@@ -90,8 +91,14 @@ class paloSantoRG extends paloAsteriskDB{
                 $arrParam=array($domain);
             }
         }
+        
+        if(isset($limit) && isset($offset)){
+            $pagging=" limit ? offset ?";
+            $arrParam[]=$limit;
+            $arrParam[]=$offset;
+        }
 
-        $query="SELECT * from ring_group $where";
+        $query="SELECT * from ring_group $where $pagging";
                 
         $result=$this->_DB->fetchTable($query,true,$arrParam);
         if($result===false){

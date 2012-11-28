@@ -339,8 +339,8 @@ function viewFormInbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         $goto=array();
     $res=$pInbound->getDefaultDestination($domain,$arrInbound["goto"]);
     $destiny=($res==false)?array():$res;
-	$arrFormOrgz = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax(),$pInbound->getMoHClass($domain));
-    $oForm = new paloForm($smarty,$arrFormOrgz);
+	$arrForm = createFieldForm($goto,$destiny,$pInbound->getFaxExtesion(),$pInbound->getDetectFax(),$pInbound->getMoHClass($domain));
+    $oForm = new paloForm($smarty,$arrForm);
 
 	if($action=="view"){
         $oForm->setViewMode();

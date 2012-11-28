@@ -79,8 +79,8 @@ class paloSantoMoH extends paloAsteriskDB{
     }
 
     
-    function getMoHs($domain=null){
-        $where="";
+    function getMoHs($domain=null,$limit=null,$offset=null){
+        $where=$pagging="";
         $arrParam=null;
         
         if(isset($domain)){
@@ -92,8 +92,14 @@ class paloSantoMoH extends paloAsteriskDB{
                 $arrParam=array($domain);
             }
         }
+        
+        if(isset($limit) && isset($offset)){
+            $pagging=" limit ? offset ?";
+            $arrParam[]=$limit;
+            $arrParam[]=$offset;
+        }
 
-        $query="SELECT name, description, mode,directory, application, sort, organization_domain from musiconhold   $where";
+        $query="SELECT name, description, mode,directory, application, sort, organization_domain from musiconhold   $where $pagging";
                 
         $result=$this->_DB->fetchTable($query,true,$arrParam);
         if($result===false){

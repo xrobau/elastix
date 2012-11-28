@@ -175,12 +175,12 @@ function reportMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
 	$arrData = array();
 	if($userLevel1=="superadmin"){
 	    if($domain!="all")
-            $arrMoH = $pMoH->getMoHs($domain);
+            $arrMoH = $pMoH->getMoHs($domain,$limit,$offset);
 	    else
-            $arrMoH = $pMoH->getMoHs();
+            $arrMoH = $pMoH->getMoHs(null,$limit,$offset);
 	}else{
         if($userLevel1=="admin"){
-            $arrMoH = $pMoH->getMoHs($domain);
+            $arrMoH = $pMoH->getMoHs($domain,$limit,$offset);
         }
     }
 

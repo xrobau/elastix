@@ -459,6 +459,7 @@ CREATE TABLE IF NOT EXISTS `trunk` (
     provider varchar(40) default NULL,
     -- si es 'on' la truncal no estar activa y no se podran realizar llamadas por ella
     disabled enum('on','off') default 'off',
+    sec_call_time enum('yes','no') default 'no',
     -- si la truncal va a ser usada para conectarse con otro server de mi red o para obtener coneccion con otras redes (PSTN) 
     string_register varchar(100),
     PRIMARY KEY  (`trunkid`),
@@ -1047,4 +1048,19 @@ CREATE TABLE tg_parameters (
     tg_month varchar(50),
     FOREIGN KEY (id_tg) REFERENCES time_group(id),
     PRIMARY KEY (id_tg,tg_hour,tg_day_w,tg_day_m,tg_month)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS time_conditions;
+CREATE TABLE time_conditions (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    name varchar(50) NOT NULL,
+    id_tg int(11) NOT NULL,
+    goto_m varchar(50) NOT NULL,
+    destination_m varchar(50) NOT NULL,
+    goto_f varchar(50) NOT NULL,
+    destination_f varchar(50) NOT NULL,
+    organization_domain varchar(100) NOT NULL,
+    PRIMARY KEY  (id),
+    FOREIGN KEY (id_tg) REFERENCES time_group(id),
+    INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;

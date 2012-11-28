@@ -107,7 +107,7 @@ class paloSantoInbound extends paloAsteriskDB{
 		$arrInbound=array();
 		$where="";
 		if (!preg_match('/^[[:digit:]]+$/', "$id")) {
-            $this->errMsg = "Extension ID must be numeric";
+            $this->errMsg = "Invalid Inbound ID";
 		    return false;
         }
 

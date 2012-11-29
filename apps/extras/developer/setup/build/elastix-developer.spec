@@ -3,7 +3,7 @@
 Summary: Elastix Module Developer
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -26,6 +26,7 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
+rm -rf setup/build/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
 
@@ -69,7 +70,8 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-4
+- CHANGED: Bump version for release.
 - DELETED: Removed Load Module functionality, as now modules should be installed
   via RPM packages.
   SVN Rev[4468]

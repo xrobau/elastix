@@ -4,4 +4,3 @@
         <td align="left">{$status.INPUT}</td>
     </tr>
 </table>
-<input type="hidden" value="" id="start" name="start" />

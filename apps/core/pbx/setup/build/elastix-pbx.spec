@@ -298,6 +298,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Festival: fix iButton setup so that it runs directly from $.ready
+  instead of $.change. Fixes part 1 of Elastix bug #1416.
+
 * Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-17
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.

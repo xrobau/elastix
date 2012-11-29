@@ -64,15 +64,15 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
+    $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
     $arrConfig = $pConfig->leer_configuracion(false);
     
-    $dsn_agi_manager['password'] = $arrConfig['AMPMGRPASS']['valor'];
+    $dsn_agi_manager['password'] = $arrConfig['MGPASSWORD']['valor'];
     //$dsn_agi_manager['host'] = $arrConfig['AMPDBHOST']['valor'];
-    $dsn_agi_manager['user'] = 'admin';
+    $dsn_agi_manager['user'] = $arrConfig['MGUSER']['valor'];
 
     //if($dsn_agi_manager['host']==null)
-    $dsn_agi_manager['host']='localhost';
+    $dsn_agi_manager['host']=$arrConfig['DBHOST']['valor'];
 
     $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
     

@@ -209,11 +209,10 @@ class paloSantoRecordings extends paloAsteriskDB{
    }
   
     function AsteriskManager_Originate($host, $user, $password, $command_data) {
-        global $arrLang;
         $astman = new AGI_AsteriskManager();
-
+       // $astMang=AsteriskManagerConnect($errorM);
         if (!$astman->connect("$host", "$user" , "$password")) {
-            $this->errMsg = $arrLang["Error when connecting to Asterisk Manager"];
+            $this->errMsg = _tr("Error when connecting to Asterisk Manager");
         } else{
           //
             $parameters = $this->Originate($command_data['origen'], $command_data['channel'],$command_data['device'], $command_data["recording_name"]);

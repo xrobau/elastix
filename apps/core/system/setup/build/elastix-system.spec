@@ -130,6 +130,14 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: since the privileged script conversion, the backupengine
+  script writes an XML manifest with untranslated strings. This conflicts with
+  the 'not installed' case in the GUI, which uses translated strings for 
+  comparison. Now both are consistently using non-translated strings. Fixes part
+  8 of Elastix bug #1416.
+  SVN Rev[4479]
+
 * Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: backupengine restore would fail to insert the key
   virtual_mailbox_domains if the key is missing prior to a restore that includes

@@ -751,97 +751,47 @@ function viewDetail($smarty, $module_name, $local_templates_dir, $arrLang, $path
     return $content;
 }
 
-function getVersionPrograms_SYSTEM(){
-     //obteniendo version de asterisk, dahdi, Sangoma, freePBX, elastix
-     // asterisk
-     $comando1="rpm -q --queryformat '%{version}' asterisk";
-     $comando2="rpm -q --queryformat '%{release}' asterisk";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['asterisk'] = array("version" => "$output1", "release" => "$output2");
+function getVersionPrograms_SYSTEM()
+{
+    $packageList = array('asterisk', 'dahdi', 'wanpipe-util', 'freePBX',
+        'elastix', 'elastix-pbx', 'elastix-email_admin', 'elastix-agenda',
+        'elastix-fax', 'elastix-vtigercrm', 'elastix-a2billing',
+        'elastix-sugarcrm-addon');
+    $output = $retval = NULL;
+    exec("rpm -q --queryformat '%{name} %{version} %{release}\\n' ".implode(' ', $packageList),
+        $output, $retval);
 
-     // dahdi
-     $comando1="rpm -q --queryformat '%{version}' dahdi";
-     $comando2="rpm -q --queryformat '%{release}' dahdi";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['dahdi'] = array("version" => "$output1", "release" => "$output2");
+    // Add all existing packages to report
+    $arrPro = array();
+    foreach ($output as $s) {
+        $fields = explode(' ', trim($s));
+        if (count($fields) == 3 && in_array($fields[0], $packageList)) {
+        
+            // This is needed for compatibility with previous backup implementation 
+            $sPackageName = $fields[0];
+            if ($sPackageName == 'freePBX') $sPackageName = 'freepbx';
 
-     // Sangoma
-     $comando1="rpm -q --queryformat '%{version}' wanpipe-util";
-     $comando2="rpm -q --queryformat '%{release}' wanpipe-util";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['wanpipe-util'] = array("version" => "$output1", "release" => "$output2");
+            $arrPro[$sPackageName] = array(
+                'version'   =>  $fields[1],
+                'release'   =>  $fields[2],
+            );
+            $k = array_search($fields[0], $packageList);
+            unset($packageList[$k]);
+        }
+    }
+    
+    /* Any remaining values in $packageList are missing packages. The missing
+     * package is marked with 'Package not installed' as attribute value for
+     * compatibility with the previous backup implementation. */
+    foreach ($packageList as $sPackage) {
+        // The string is deliberately not translated
+        $arrPro[$sPackage] = array(
+            'version'   =>  'Package not installed',
+            'release'   =>  'Package not installed',
+        );
+    }
 
-     // freePBX
-     $comando1="rpm -q --queryformat '%{version}' freePBX";
-     $comando2="rpm -q --queryformat '%{release}' freePBX";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['freepbx']  = array("version" => "$output1", "release" => "$output2");
-
-     // elastix
-     $comando1="rpm -q --queryformat '%{version}' elastix";
-     $comando2="rpm -q --queryformat '%{release}' elastix";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['elastix']  = array("version" => "$output1", "release" => "$output2");
-/***************************** added ******************************************************/
-     // elastix-pbx
-     $comando1="rpm -q --queryformat '%{version}' elastix-pbx";
-     $comando2="rpm -q --queryformat '%{release}' elastix-pbx";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['elastix-pbx']  = array("version" => "$output1", "release" => "$output2");
-
-     // elastix-email
-     $comando1="rpm -q --queryformat '%{version}' elastix-email_admin";
-     $comando2="rpm -q --queryformat '%{release}' elastix-email_admin";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['elastix-email_admin']  = array("version" => "$output1", "release" => "$output2");
-
-     // elastix-agenda
-     $comando1="rpm -q --queryformat '%{version}' elastix-agenda";
-     $comando2="rpm -q --queryformat '%{release}' elastix-agenda";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['elastix-agenda']  = array("version" => "$output1", "release" => "$output2");
-
-     // elastix-fax
-     $comando1="rpm -q --queryformat '%{version}' elastix-fax";
-     $comando2="rpm -q --queryformat '%{release}' elastix-fax";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['elastix-fax']  = array("version" => "$output1", "release" => "$output2");
-
-     // elastix-vtigercrm
-     $comando1="rpm -q --queryformat '%{version}' elastix-vtigercrm";
-     $comando2="rpm -q --queryformat '%{release}' elastix-vtigercrm";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['elastix-vtigercrm']  = array("version" => "$output1", "release" => "$output2");
-
-     // elastix-a2billing
-     $comando1="rpm -q --queryformat '%{version}' elastix-a2billing";
-     $comando2="rpm -q --queryformat '%{release}' elastix-a2billing";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     $arrPro['elastix-a2billing']  = array("version" => "$output1", "release" => "$output2");
-
-     // elastix-sugarcrm-addon
-     $comando1="rpm -q --queryformat '%{version}' elastix-sugarcrm-addon";
-     $comando2="rpm -q --queryformat '%{release}' elastix-sugarcrm-addon";
-     $output1 = `$comando1`;
-     $output2 = `$comando2`;
-     if(strlen($output2)>3){
-        $output1 = _tr("Package not installed");
-        $output2 = _tr("Package not installed");
-     }
-     $arrPro['elastix-sugarcrm-addon']  = array("version" => "$output1", "release" => "$output2");
-/***************************** end added ***************************************************/
-     return $arrPro;
+    return $arrPro;
 }
 
 function getVersionPrograms_XML($path_backup)

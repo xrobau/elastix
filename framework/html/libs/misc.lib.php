@@ -1298,7 +1298,18 @@ function getUserCredentials(){
 		header("Location: index.php");
 	}
 
-	return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1);
+	$query="SELECT domain from organization where id=?";
+    $result=$pdbACL->getFirstRowQuery($query,false,array($idOrganization));
+    if($result==false){
+        $domain=false;
+    }else{
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $result[0]))
+            $domain=false;
+        else
+            $domain=$result[0];
+    }
+    
+	return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
 }
 
 function getOrgDomainUser(){
@@ -1310,7 +1321,10 @@ function getOrgDomainUser(){
     if($result==false){
         return false;
     }else{
-        return $result[0];
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $result[0]))
+            return false;
+        else
+            return $result[0];
     }
 }
 

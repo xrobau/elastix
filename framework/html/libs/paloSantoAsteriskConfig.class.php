@@ -575,7 +575,6 @@ class paloSantoASteriskConfig{
         }
         return TRUE;
 	}
-
 }
 
 class paloContexto{

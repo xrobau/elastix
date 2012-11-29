@@ -298,10 +298,17 @@ class paloAsteriskDB {
                 }
                 break;
             case "ring_group":
-                $qQueues="SELECT rg_name,rg_number from ring_group where organization_domain=?";
-                $result=$this->getResultQuery($qQueues,array($domain),true);
+                $query="SELECT rg_name,rg_number from ring_group where organization_domain=?";
+                $result=$this->getResultQuery($query,array($domain),true);
                 foreach($result as $value){
                     $arrDestine["ring_group,".$value["rg_number"]]=$value["rg_number"]." (".$value["rg_name"].")";
+                }
+                break;
+            case "time_conditions":
+                $query="SELECT id,name from time_conditions where organization_domain=?";
+                $result=$this->getResultQuery($query,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["time_conditions,".$value["id"]]=$value["name"];
                 }
                 break;
             case "terminate_call":
@@ -364,6 +371,13 @@ class paloAsteriskDB {
                 break;
             case "ring_group":
                 $query="SELECT count(rg_number) from ring_group where organization_domain=? and rg_number=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+            case "time_conditions":
+                $query="SELECT count(id) from time_conditions where organization_domain=? and id=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
                 if($result[0]!="1"){
                     return false;
@@ -439,6 +453,13 @@ class paloAsteriskDB {
                     return "$code-ext-group,".$result["rg_number"].",1";
                 }
                 break;
+            case "time_conditions":
+                $query="SELECT id from time_conditions where organization_domain=? and id=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-timeconditions,".$result["id"].",1";
+                }
+                break;
             case "terminate_call":
                 if(preg_match("/^(hangup|congestion|busy|zapateller|musiconhold|ring){1}$/",$destino)){
                     return "$code-app-blackhole,".$destino.",1";
@@ -483,6 +504,11 @@ class paloAsteriskDB {
         $result=$this->getFirstResultQuery($query,array($domain));
         if($result!=false){
             $arrCat["ring_group"]=_tr("Ring Group");
+        }
+        $query="select id from time_conditions where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["time_conditions"]=_tr("Time Conditions");
         }
         return $arrCat;
     }

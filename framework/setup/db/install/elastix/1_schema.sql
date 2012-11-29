@@ -296,6 +296,8 @@ INSERT INTO "acl_resource" VALUES('inbound_route', 'Inbound Routes', 'pbxadmin',
 INSERT INTO "acl_resource" VALUES('outbound_route', 'Outbound Routes', 'pbxadmin', '', 'module', 13);
 INSERT INTO "acl_resource" VALUES('ring_group', 'Ring Groups', 'pbxadmin', '', 'module', 19);
 INSERT INTO "acl_resource" VALUES('musiconhold', 'Music On Hold', 'pbxadmin', '', 'module', 20);
+INSERT INTO "acl_resource" VALUES('time_group', 'Time Group', 'pbxadmin', '', 'module', 21);
+INSERT INTO "acl_resource" VALUES('time_conditions', 'Time Conditions', 'pbxadmin', '', 'module', 22);
 
 INSERT INTO "organization_resource" VALUES(1, 1, 'usermgr');
 INSERT INTO "organization_resource" VALUES(2, 1, 'organization');
@@ -382,6 +384,8 @@ INSERT INTO "organization_resource" VALUES(94, 1, 'did');
 INSERT INTO "organization_resource" VALUES(95, 1, 'hardware_configuration');
 INSERT INTO "organization_resource" VALUES(98, 1, 'ring_group');
 INSERT INTO "organization_resource" VALUES(99, 1, 'musiconhold');
+INSERT INTO "organization_resource" VALUES(100, 1,'time_group');
+INSERT INTO "organization_resource" VALUES(101, 1,'time_conditions');
 
 INSERT INTO "group_resource" VALUES(1, 0, 1);
 INSERT INTO "group_resource" VALUES(2, 0, 2);
@@ -440,6 +444,8 @@ INSERT INTO "group_resource" VALUES(84, 0, 84);
 INSERT INTO "group_resource" VALUES(85, 0, 85);
 INSERT INTO "group_resource" VALUES(86, 0, 86);
 INSERT INTO "group_resource" VALUES(87, 0, 87);
+INSERT INTO "group_resource" VALUES(88, 0, 88);
+INSERT INTO "group_resource" VALUES(89, 0, 89);
 INSERT INTO "group_resource" VALUES(90, 0, 90);
 INSERT INTO "group_resource" VALUES(91, 0, 91);
 INSERT INTO "group_resource" VALUES(94, 0, 94);
@@ -448,6 +454,8 @@ INSERT INTO "group_resource" VALUES(96, 0, 96);
 INSERT INTO "group_resource" VALUES(97, 0, 97);
 INSERT INTO "group_resource" VALUES(98, 0, 98);
 INSERT INTO "group_resource" VALUES(99, 0, 99);
+INSERT INTO "group_resource" VALUES(100, 0, 100);
+INSERT INTO "group_resource" VALUES(238, 0, 101);
 
 INSERT INTO "group_resource" VALUES(101, 1, 1);
 INSERT INTO "group_resource" VALUES(102, 1, 2);
@@ -499,6 +507,8 @@ INSERT INTO "group_resource" VALUES(192, 1, 92);
 INSERT INTO "group_resource" VALUES(193, 1, 93);
 INSERT INTO "group_resource" VALUES(194, 1, 98);
 INSERT INTO "group_resource" VALUES(195, 1, 99);
+INSERT INTO "group_resource" VALUES(196, 1, 100);
+INSERT INTO "group_resource" VALUES(197, 1, 101);
 
 INSERT INTO "group_resource" VALUES(201, 2, 1);
 INSERT INTO "group_resource" VALUES(202, 2, 3);

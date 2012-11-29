@@ -356,6 +356,7 @@ fi
 * Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Festival: fix iButton setup so that it runs directly from $.ready
   instead of $.change. Fixes part 1 of Elastix bug #1416.
+  SVN Rev[4475]
 
 * Thu Nov  1 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: replace brittle regexp parsing of voicemail.conf

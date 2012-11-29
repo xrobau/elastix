@@ -576,13 +576,13 @@ if (($rgmethod == "hunt") || ($rgmethod == "memoryhunt") || ($rgmethod == "first
 $ds = chop($ds," &");
 
 if ($nodest != '' && $use_confirmation == 'FALSE') {
-	if (strpos($dialopts,"M(auto-blkvm)") > 0  || strpos($dialopts,"M(auto-blkvm)") === 0 ||
-	    strpos($dialopts,"M(auto-confirm") > 0 || strpos($dialopts,"M(auto-confirm") === 0 ||
-	    strpos($dialopts,"M(confirm") > 0      || strpos($dialopts,"M(confirm") === 0) {
+	if (strpos($dialopts,"M($codigo-auto-blkvm)") > 0  || strpos($dialopts,"M($codigo-auto-blkvm)") === 0 ||
+	    strpos($dialopts,"M($codigo-auto-confirm") > 0 || strpos($dialopts,"M($codigo-auto-confirm") === 0 ||
+	    strpos($dialopts,"M($codigo-confirm") > 0      || strpos($dialopts,"M($codigo-confirm") === 0) {
 		debug("NODEST: $nodest blkvm enabled macro already in dialopts: $dialopts",4);
 	} else {
-		$dialopts .= "M(auto-blkvm)";
-		debug("NODEST: $nodest adding M(auto-blkvm) to dialopts: $dialopts",4);
+		$dialopts .= "M($codigo-auto-blkvm)";
+		debug("NODEST: $nodest adding M($codigo-auto-blkvm) to dialopts: $dialopts",4);
 	}
 }
 
@@ -648,13 +648,13 @@ if ($rgmethod == 'ringallv2') {
 }
 
 if ($nodest != '' && $use_confirmation == 'FALSE') {
-	if (strpos($dialopts,"M(auto-blkvm)") > 0  || strpos($dialopts,"M(auto-blkvm)") === 0 ||
-	    strpos($dialopts,"M(auto-confirm") > 0 || strpos($dialopts,"M(auto-confirm") === 0 ||
-	    strpos($dialopts,"M(confirm") > 0      || strpos($dialopts,"M(confirm") === 0) {
+	if (strpos($dialopts,"M($codigo-auto-blkvm)") > 0  || strpos($dialopts,"M($codigo-auto-blkvm)") === 0 ||
+	    strpos($dialopts,"M($codigo-auto-confirm") > 0 || strpos($dialopts,"M($codigo-auto-confirm") === 0 ||
+	    strpos($dialopts,"M($codigo-confirm") > 0      || strpos($dialopts,"M($codigo-confirm") === 0) {
 		debug("NODEST: $nodest blkvm enabled macro already in dialopts: $dialopts",4);
 	} else {
-		$dialopts .= "M(auto-blkvm)";
-		debug("NODEST: $nodest adding M(auto-blkvm) to dialopts: $dialopts",4);
+		$dialopts .= "M($codigo-auto-blkvm)";
+		debug("NODEST: $nodest adding M($codigo-auto-blkvm) to dialopts: $dialopts",4);
 	}
 }
 

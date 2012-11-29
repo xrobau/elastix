@@ -40,6 +40,8 @@ require_once "/var/www/html/modules/queues/libs/paloSantoQueues.class.php";
 require_once "/var/www/html/modules/ivr/libs/paloSantoIVR.class.php";
 require_once "/var/www/html/modules/inbound_route/libs/paloSantoInbound.class.php";
 require_once "/var/www/html/modules/outbound_route/libs/paloSantoOutbound.class.php";
+require_once "/var/www/html/modules/ring_group/libs/paloSantoRG.class.php";
+require_once "/var/www/html/modules/time_conditions/libs/paloSantoTC.class.php";
 
 if(!isset($argv[1]))
     exit(1);
@@ -92,6 +94,12 @@ switch($argv[1]){
             exit(deleteFileOrgAst($argv[2]) ? 0 : 1);
         }else
             exit(deleteFileOrgAst() ? 0 : 1);
+        break;
+    case "createMoHDir":
+        if(isset($argv[2])){
+            exit(createMoHDir($argv[2],$argv[3]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
         break;
 	default:
 		error_exit("No action specified \n");
@@ -157,6 +165,48 @@ function deleteFileOrgAst($domain){
             }
         }
     }
+    return true;
+}
+
+function createMoHDir($class,$domain=null){
+    if(!preg_match('/^([[:alnum:]]|-|_)+$/', "$class")){
+        fprintf(STDERR,"Invalid Class name MoH");
+        return false;
+    }
+    
+    if(isset($domain)){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            fprintf(STDERR, "Invalid domain format");
+            return false;
+        }
+        $base="/var/lib/asterisk/moh/".$domain;
+    }else{
+        $base="/var/lib/asterisk/mohmp3";
+    }
+    
+    if(!is_dir($base)){
+        if(mkdir($base,0755)){
+            chown($base,"asterisk");
+            chgrp($base,"asterisk");
+        }else{
+            fprintf(STDERR, "ERR: failed to create '%s' directory",$base);
+            return false;
+        }
+    }
+    
+    if(!is_dir($base."/$class")){
+        if(mkdir($base."/$class",0755)){
+            chown($base."/$class","asterisk");
+            chgrp($base."/$class","asterisk");
+        }else{
+            fprintf(STDERR, "ERR: failed to create '%s' directory",$base."/$class");
+            return false;
+        }
+    }else{
+        chown($base."/$class","asterisk");
+        chgrp($base."/$class","asterisk");
+    }
+        
     return true;
 }
 
@@ -374,7 +424,7 @@ function createExtensionGlobals($action,$orgdomain){
             $content .="OUTCID_$trunkid = $outcid\n";
             $content .="OUTMAXCHANS_$trunkid = $maxchans\n";
             $content .="OUTPREFIX_$trunkid = $outprefix\n";
-            $content .="OUTDISABLE_$trunkid = $disabled\n";
+            //$content .="OUTDISABLE_$trunkid = $disabled\n";
             $content .="OUTKEEPCID_$trunkid = $keepCid\n";
             $content .="FORCEDOUTCID_$trunkid = $force\n";
 
@@ -573,7 +623,23 @@ function generateDialPlan($domain){
         fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pQueue->errMsg);
     else
         $arrContext=array_merge($arrContext,$arrContextQueue);
+        
+    //genero plan de marcado relacionado con los ring-groups
+    $pRG=new paloSantoRG($pDB,$domain);
+    $arrRG=$pRG->createDialplanRG($arrFromInt);
+    if($arrRG===false || !is_array($arrRG))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pRG->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrRG);
 
+    //genero plan de marcado relacionado con los time_conditions
+    $pTC=new paloSantoTC($pDB,$domain);
+    $arrTC=$pTC->createDialplanTC($arrFromInt);
+    if($arrTC===false || !is_array($arrTC))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pTC->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrTC);
+        
     //genero el plan marcado relacionado con los features codes
     $pFC=new paloFeatureCodePBX($pDB,$domain);
     $arrContextFeaturesCode=$pFC->createDialPlanFeaturesCode($arrFromInt);

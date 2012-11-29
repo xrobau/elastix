@@ -886,12 +886,18 @@
 	*/
 	function prunePeer($tech,$device){
 		$r = $this->command("$tech prune realtime $device");
-		return (bool)strstr($r["data"], "removed");
+		if(preg_match("/Peer '$device' pruned/",$r["data"]))
+            return true;
+        else
+            return false;
 	}
 	
 	function loadPeer($tech,$device){
         $r = $this->command("$tech show peer $device load");
-        return (bool)strstr($r["data"], "removed");
+        if(preg_match("/Peer '$device' not found/",$r["data"]))
+            return false;
+        else
+            return true;
     }
 
 }

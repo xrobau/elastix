@@ -878,12 +878,11 @@ CREATE TABLE recordings (
     uniqueid INT(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     -- path completo de donde se encuentra la grabacion incluyendo el nombre de la grabacion
     filename varchar(128) NOT NULL,
-    -- nombre con el que se muestra la grabacion a los usuarios
-    description varchar(50) NOT NULL,
     -- dominio al que pertenece la grabacion
     organization_domain varchar(100) NOT NULL,
+    source varchar(20) NOT NULL,
+    name varchar(50) default null,
     UNIQUE KEY filename (filename),
-    UNIQUE KEY description_recordings (description,organization_domain),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 

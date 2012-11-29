@@ -199,11 +199,11 @@ class paloAsteriskDB {
         }
         
         $recordings=array();
-        $query="Select uniqueid,description,filename from recordings where organization_domain=?";
+        $query="Select uniqueid,name,filename from recordings where organization_domain=?";
         $result=$this->getResultQuery($query,array($domain),true,"Don't exist any recording created");
         if($result!=false){
             foreach($result as $value){
-                $recordings[$value["uniqueid"]]=$value["description"];
+                $recordings[$value["uniqueid"]]=$value["name"];
             }
         }
         return $recordings; 
@@ -218,10 +218,12 @@ class paloAsteriskDB {
             return null;
         }
         
-        $query="SELECT filename from recordings where organization_domain=? and uniqueid=?";
-        $result=$this->getFirstResultQuery($query,array($domain,$key));
+        $query="SELECT filename,source from recordings where organization_domain=? and uniqueid=?";
+        $result=$this->getFirstResultQuery($query,array($domain,$key),true);
         if($result!=false){
-            $file=$result["filename"];
+            $path="\\/var\\/lib\\/asterisk\\/sounds\\/$domain\\/".$result["source"]."\\/";
+            if(preg_match_all("/^($path(\w|-|\.|\(|\)|\s)+)\.(wav|WAV|Wav|gsm|GSM|Gsm|Wav49|wav49|WAV49)$/",$result["filename"],$match))
+                $file=$match[1][0];
         }
         return $file;
     }

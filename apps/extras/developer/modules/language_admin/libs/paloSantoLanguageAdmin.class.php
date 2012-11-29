@@ -211,128 +211,75 @@ class paloSantoLanguageAdmin {
         return TRUE;
     }
     
+    /**
+     * Procedimiento para reemplazar todas las traducciones en un módulo en 
+     * particular con las versiones indicadas en la lista proporcionada.
+     * 
+     * @param   array   $arrayLangTrasl Lista de traducciones
+     * @param   string  $module         FRAMEWORK, o nombre del módulo a afectar
+     * @param   string  $language       Nombre del archivo de idioma (es.lang)
+     * 
+     * @return VERDADERO en éxito, FALSO en error
+     */
     function saveAll($arrayLangTrasl, $module, $language)
     {
-        $folder = '';
-        $file = "";
-        $list = '';
-
-        if( strcmp($module,'FRAMEWORK') == 0 ){
-            $file = "/var/www/html/lang/$language"; 
-
-            include_once $file;
-            global $arrLang;
-
-            foreach($arrayLangTrasl as $key => $value)
-            {
-                if( strlen($arrayLangTrasl[$key] ) == 0 ){
-                    $tmpError['head'] = 'ERROR';
-                    $tmpError['body'] = "Existent values empty";
-                    $this->errMsg = $tmpError;
-                    return false;
-                }
-                
-                $arrLang[$key] = $value;
-            }
-
-            foreach($arrLang as $key => $value )
-                $list = $list.'"'.str_replace('"','\\"',$key).'"'." => ".'"'.str_replace('"','\\"',$value).'"'.",\n";
-
-            $file_FRAM = fopen($file,"w");
-            fwrite($file_FRAM, $this->load_Template($list, 0));
-            fclose($file_FRAM);
-        }
-        else{
-            $file = "/var/www/html/modules/$module/lang/$language";
-
-            include_once $file;
-            global $arrLangModule;
-
-            foreach($arrayLangTrasl as $key => $value)
-            {
-                if( strlen($arrayLangTrasl[$key] ) == 0 ){
-                    $tmpError['head'] = 'ERROR';
-                    $tmpError['body'] = "Existent values empty";
-                    $this->errMsg = $tmpError;
-                    return false;
-                }
-                
-                $arrLangModule[$key] = $value;
-            }
-
-            foreach($arrLangModule as $key => $value )
-                $list = $list.'"'.str_replace('"','\\"',$key).'"'." => ".'"'.str_replace('"','\\"',$value).'"'.",\n";
-
-            $file_MOD = fopen($file,"w");
-            fwrite($file_MOD, $this->load_Template($list, 1));
-            fclose($file_MOD);
-        }
-
-        return true;
-    }
-
-    private function load_Template($content, $modo)
-    {
-        //$modo == 0 => FRAMEWORK
-        //$modo == 1 => MODULES
-        $str_modo = '';
-        $str_modo2 = '';
-        if($modo == 0){
-            $str_modo = '$arrLang';
-            $str_modo2 = '$arrLang=array(';
-        }
-        else{
-            $str_modo = '$arrLangModule';
-            $str_modo2 = '$arrLangModule=array(';
-        }
-
-        $version = "1.0";
-        $name_Translate_by = "Jonathan Vega";
-        $email = "jvega@palosanto.com";
-        $date = "2008/02/18 09:49:00";
-        $user = "jvega";
+        $sTempFile = $this->_writeLanguageSpec($arrayLangTrasl, $module, $language);
+        if (is_null($sTempFile)) return FALSE;
         
-        $template =
-            "<?php\n".
-            "/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:\n".
-            "   Codificación: UTF-8\n".
-            "  +----------------------------------------------------------------------+\n".
-            "  | Elastix version $version                                             |\n".
-            "  | http://www.elastix.org                                               |\n".
-            "  +----------------------------------------------------------------------+\n".
-            "  | Copyright (c) 2006 Palosanto Solutions S. A.                         |\n".
-            "  +----------------------------------------------------------------------+\n".
-            "  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |\n".
-            "  | Telfs. 2283-268, 2294-440, 2284-356                                  |\n".
-            "  | Guayaquil - Ecuador                                                  |\n".
-            "  | http://www.palosanto.com                                             |\n".
-            "  +----------------------------------------------------------------------+\n".
-            "  | The contents of this file are subject to the General Public License  |\n".
-            "  | (GPL) Version 2 (the \"License\"); you may not use this file except in |\n".
-            "  | compliance with the License. You may obtain a copy of the License at |\n".
-            "  | http://www.opensource.org/licenses/gpl-license.php                   |\n".
-            "  |                                                                      |\n".
-            "  | Software distributed under the License is distributed on \"AS IS\"     |\n".
-            "  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |\n".
-            "  | the License for the specific language governing rights and           |\n".
-            "  | limitations under the License.                                       |\n".
-            "  +----------------------------------------------------------------------+\n".
-            "  | The Original Code is: Elastix Open Source.                           |\n".
-            "  | The Initial Developer of the Original Code is PaloSanto Solutions    |\n".
-            "  |                                                                      |\n".
-            "  | Translate by: $name_Translate_by                                     |\n".
-            "  | Email: $email                                                        |\n".
-            "  +----------------------------------------------------------------------+\n".
-            '  $Id'.": en.lang,v 1.7 $date $user Exp $ */"."\n".
-            "global $str_modo;"."\n".
-            $str_modo2."\n".
-            $content.
-            ");\n".
-            "?>";
-    
-        return $template;
+        // Invocación del script privilegiado
+        $output = $retval = NULL;
+        exec('/usr/bin/elastix-helper develbuilder --savetranslation '.escapeshellarg($sTempFile).' 2>&1',
+            $output, $retval);
+        unlink($sTempFile);
+        if ($retval != 0) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  '(internal) Failed to save translations - '.implode('<br/>', $output),
+            );
+            return FALSE;
+        }
+        return TRUE;
     }
-
+    
+    private function _writeLanguageSpec($arrayLangTrasl, $module, $language)
+    {
+        $regs = NULL;
+        if (!preg_match('/^(\w+)$/', $module, $regs)) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  'Invalid module name',
+            );
+            return NULL;
+        }
+        if (!preg_match('/^(\w+)\.lang$/', $language, $regs)) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  'Invalid file name for language',
+            );
+            return NULL;
+        }
+        $language = $regs[1];
+        
+        // Generación de archivo XML temporal para script privilegiado
+        $xml_languagespec = new SimpleXMLElement('<languagespec />');
+        $xml_languagespec->addChild('language', str_replace('&', '&amp;', $language));
+        $xml_languagespec->addChild('module', str_replace('&', '&amp;', $module));
+        foreach ($arrayLangTrasl as $k => $v) {
+            $xml_tr = $xml_languagespec->addChild('translation');
+            $xml_tr->addChild('original', str_replace('&', '&amp;', $k));
+            $xml_tr->addChild('translate', str_replace('&', '&amp;', $v));
+        }
+        $sTempFile = tempnam('/tmp', 'languagespec_');
+        if (!$xml_languagespec->asXML($sTempFile)) {
+            $this->errMsg = array(
+                'head'  =>  'ERROR',
+                'body'  =>  '(internal) Failed to write temporary language specification',
+            );
+            return NULL;
+        }
+        return $sTempFile;
+    }
+    
     function leer_directorio_modulos()
     {
         $folder = "/var/www/html/modules/";

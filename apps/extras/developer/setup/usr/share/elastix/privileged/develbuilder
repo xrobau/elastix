@@ -42,6 +42,7 @@ $opt = Console_Getopt::getopt($argv, '', array(
     'deletemodule=',    // Delete a module directory without touching acls
     'createlanguage=',  // Create support files for a new language
     'addtranslation',   // Add a translated string to a language file
+    'savetranslation=',// Replace translations with the ones supplied in XML
     'module=',          // Module to add a translation to
     'language=',       // Language to add a translation to
     'string-en=',       // English string to use for translation key
@@ -58,8 +59,10 @@ case '--createlanguage':
     exit(action_createLanguage($opt) ? 0 : 1);
 case '--addtranslation':
     exit(action_addTranslation($opt) ? 0 : 1);
+case '--savetranslation':
+    exit(action_saveTranslation($opt) ? 0 : 1);
 }
-error_exit("No action specified (--createmodule,--deletemodule,--createlanguage,--addtranslation)\n");
+error_exit("No action specified (--createmodule,--deletemodule,--createlanguage,--addtranslation,--savetranslations)\n");
 
 function error_exit($sMsg, $errorcode = 1)
 {
@@ -417,6 +420,50 @@ function action_addTranslation($opt)
     writeLanguageFile($sPathSource, $arrLang, ($sModule == 'FRAMEWORK'));
 
     return TRUE;
+}
+
+function action_saveTranslation($opt)
+{
+    $sLanguageSpec = NULL;
+
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--savetranslation':
+        $sLanguageSpec = $option[1];
+        break;
+    }
+
+    $languagespec = loadLanguageSpec($sLanguageSpec);
+
+    // Load existing translations if they exist
+    $sPathSource = (($languagespec['module'] == 'FRAMEWORK') ? FRAMEWORKLANG : MODULEPATH."/{$languagespec['module']}/lang").
+        "/{$languagespec['language']}.lang";
+    $arrLang = file_exists($sPathSource) ? loadLanguageFile($sPathSource) : array();
+    $arrLang = array_merge($arrLang, $languagespec['arrlang']);
+    writeLanguageFile($sPathSource, $arrLang, ($languagespec['module'] == 'FRAMEWORK'));
+    return TRUE;
+}
+
+function loadLanguageSpec($sLanguageSpec)
+{
+    if (is_null($sLanguageSpec)) error_exit("ERR: language spec not specified!\n");
+    if (!is_readable($sLanguageSpec)) error_exit("ERR: language spec at $sLanguageSpec is not readable!\n");
+    $xml_languagespec = simplexml_load_file($sLanguageSpec);
+    if ($xml_languagespec === FALSE) error_exit("ERR: failed to parse $sLanguageSpec as XML!\n");
+
+    if (!preg_match('/^\w+$/', $xml_languagespec->language))
+        error_exit("ERR: invalid language specification: ".$xml_languagespec->language."\n");
+    if (!preg_match('/^\w+$/', $xml_languagespec->module))
+        error_exit("ERR: invalid module specification: ".$xml_languagespec->module."\n");
+    $arrLangNew = array();
+    foreach ($xml_languagespec->translation as $translation)
+        $arrLangNew[(string)$translation->original] = (string)$translation->translate;
+    if (count($arrLangNew) <= 0) error_exit("ERR: no translations defined in language spec!\n");
+
+    return array(
+        'module'    =>  (string)$xml_languagespec->module,
+        'language'  =>  (string)$xml_languagespec->language,
+        'arrlang'   =>  $arrLangNew,
+    );
 }
 
 function listModules()

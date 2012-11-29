@@ -69,6 +69,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Language Admin: extend develbuilder to save a list of translations 
+  from a XML specification. Use this to reimplement the Save All functionality.
+  SVN Rev[4461]
+
 * Wed Nov 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Language Admin: extend develbuilder to add a single translation to
   a language file. Use this to reimplement the Add Translation functionality.

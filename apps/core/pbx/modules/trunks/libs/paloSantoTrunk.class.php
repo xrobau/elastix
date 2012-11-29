@@ -353,9 +353,9 @@ class paloSantoTrunk extends paloAsteriskDB{
         if($this->trunkOrganization($trunkid,$arrProp["select_orgs"])==false){
             return false;
         }else{
-            if($arrProp["sec_call_time"]=="yes"){
-                if($this->setSecTimeASTDB($trunkid,$arrProp["sec_call_time"],$arrProp["period_time"],$arrProp["maxcalls_time"])==false){
-                    $this->errMsg=_tr("Trunk could not be updated.")._tr("Problem setting max num of calls by time. ").$this->errMsg;
+            if($arrProp["sec_call_time"]=="yes" || $arrProp["disabled"]=="on"){
+                if($this->setTrunkASTDB($trunkid,$arrProp["disabled"],$arrProp["sec_call_time"],$arrProp["period_time"],$arrProp["maxcalls_time"])==false){
+                    $this->errMsg=_tr("Trunk could not be updated.").$this->errMsg;
                     return false;
                 }else
                     return true;
@@ -474,7 +474,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
     }
     
-    private function setSecTimeASTDB($trunkid,$set_security,$period_time,$max_calls){
+    private function setTrunkASTDB($trunkid,$disabled,$set_security,$period_time,$max_calls){
         $errorM="";
         
         if($set_security!="yes"){
@@ -487,6 +487,11 @@ class paloSantoTrunk extends paloAsteriskDB{
             $this->errMsg=$errorM;
             return false;
         }else{
+            if($disabled=="on"){
+                $astMang->database_put("TRUNK/$trunkid","OUTDISABLE","on");
+            }else
+                $result=$astMang->database_del("TRUNK/$trunkid","OUTDISABLE");
+                
             if($set_security=="yes"){
                 if(!preg_match("/^[0-9]+$/",$max_calls)){
                     $this->errMsg=_tr("Field 'Max Num Calls' can't be empty");
@@ -620,8 +625,8 @@ class paloSantoTrunk extends paloAsteriskDB{
         if($this->trunkOrganization($idTrunk,$arrProp["select_orgs"])==false){
             return false;
         }else{
-            if($this->setSecTimeASTDB($idTrunk,$arrProp["sec_call_time"],$arrProp["period_time"],$arrProp["maxcalls_time"])==false){
-                $this->errMsg=_tr("Trunk could not be updated.")._tr("Problem setting max num of calls by time. ").$this->errMsg;
+            if($this->setTrunkASTDB($idTrunk,$arrProp["disabled"],$arrProp["sec_call_time"],$arrProp["period_time"],$arrProp["maxcalls_time"])==false){
+                $this->errMsg=_tr("Trunk could not be updated.").$this->errMsg;
                 return false;
             }else
                 return true;
@@ -827,7 +832,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        if($this->deleteSecTimeASTDB($trunkid)==false){
+        if($this->deleteTrunkASTDB($trunkid)==false){
             $this->errMsg =_tr("Trunk can't be deleted. ").$this->errMsg;
             return false;
         }
@@ -853,14 +858,14 @@ class paloSantoTrunk extends paloAsteriskDB{
             return true;
     }
     
-    private function deleteSecTimeASTDB($id_trunk){
+    private function deleteTrunkASTDB($id_trunk){
         $errorM="";
         $astMang=AsteriskManagerConnect($errorM);
         if($astMang==false){
             $this->errMsg=$errorM;
             return false;
         }else{ //borro las propiedades dentro de la base ASTDB de asterisk
-            $result=$astMang->database_delTree("TRUNK/$id_trunk/COUNT_TIME");
+            $result=$astMang->database_delTree("TRUNK/$id_trunk");
         }
         return true;
     }
@@ -878,7 +883,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        $query="SELECT channelid,tech from trunk where trunkid=?";
+        $query="SELECT channelid,sec_call_time from trunk where trunkid=?";
         $result=$this->_DB->getFirstRowQuery($query,true,array($id));
         if($result===false || count($result)==0){
             $this->errMsg=_tr("Trunk doesn't exist. ").$this->_DB->errMsg;
@@ -894,17 +899,21 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        if($action=="off"){
-            $astMang=AsteriskManagerConnect($errorM);
-            if($astMang==false){
-                $this->errMsg=$errorM;
-                return false;
-            }else{ //borro las propiedades dentro de la base ASTDB de asterisk
-                $result=$astMang->database_del("TRUNK/$id/COUNT_TIME","BLOCK");
-                $result=$astMang->database_del("TRUNK/$id/COUNT_TIME","NUM_FAIL");
-                $astMang->database_put("TRUNK/$id/COUNT_TIME","COUNT",0);
-            }
-            
+        $astMang=AsteriskManagerConnect($errorM);
+        if($astMang==false){
+            $this->errMsg=$errorM;
+            return false;
+        }else{
+            if($action=="off"){ 
+                //borro las propiedades dentro de la base ASTDB de asterisk
+                if($result["sec_call_time"]=="yes"){
+                    $result=$astMang->database_del("TRUNK/$id/COUNT_TIME","BLOCK");
+                    $result=$astMang->database_del("TRUNK/$id/COUNT_TIME","NUM_FAIL");
+                    $astMang->database_put("TRUNK/$id/COUNT_TIME","COUNT",0);
+                }
+                $result=$astMang->database_del("TRUNK/$id","OUTDISABLE");
+            }else
+                $astMang->database_put("TRUNK/$id","OUTDISABLE","on");
         }
         return true;
     }

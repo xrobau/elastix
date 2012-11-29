@@ -663,13 +663,17 @@ function generateOptionNum($start, $end){
     return $arr;
 }
 
-function createFieldForm($goto,$destination,$faxes,$arrDetect,$arrMusic)
+function createFieldForm($goto,$destination,$faxes,$arrDetect,$music)
 {
     $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     $oneToTen = generateOptionNum(1, 10);
     $oneToFifteen = generateOptionNum(1, 15);
     $twoToTen = generateOptionNum(2, 10);
     $arrLng=getLanguagePBX();
+    $arrMusic=array(""=>_tr("-don't music-"));
+    foreach($music as $key => $value){
+        $arrMusic[$key] = $value;
+    }
     $arrFormElements = array("description"	=> array("LABEL"             => _tr('Description'),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",

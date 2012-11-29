@@ -774,7 +774,7 @@ class paloQueuePBX extends paloAsteriskDB{
                 
                 $timeout="";
                 if(isset($value["timeout_detail"]) && $value["timeout_detail"]!=0)
-                    $timeout=isset($value["timeout_detail"]);
+                    $timeout=$value["timeout_detail"];
                 
                 if ($value['skip_busy_detail'] == 1 || $value['skip_busy_detail'] == 2 ) {
                     $arrQ[]=new paloExtensions($exten, new ext_setvar('__CWIGNORE', 'TRUE'));

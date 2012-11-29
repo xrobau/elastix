@@ -385,7 +385,7 @@ function viewQueue($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     $res=$pQueue->getDefaultDestination($domain,$arrQueue["category"]);
     $destiny=($res==false)?array():$res;
     
-    $arrForm = createFieldForm($arrOrgz,$pQueue->getRecordingsSystem($domain),getArrayExtens($pDB,$domain),$category,$destiny);
+    $arrForm = createFieldForm($arrOrgz,$pQueue->getRecordingsSystem($domain),getArrayExtens($pDB,$domain),$category,$destiny,$pQueue->getMoHClass($domain));
     $oForm = new paloForm($smarty,$arrForm);
     
     if($action=="view"){
@@ -534,7 +534,7 @@ function saveNewQueue($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     $res=$pQueue->getDefaultDestination($domain,$_POST["category"]);
     $destiny=($res==false)?array():$res;
     
-    $arrForm = createFieldForm($arrOrgz,$pQueue->getRecordingsSystem($domain),getArrayExtens($pDB,$domain),$category,$destiny);
+    $arrForm = createFieldForm($arrOrgz,$pQueue->getRecordingsSystem($domain),getArrayExtens($pDB,$domain),$category,$destiny,$pQueue->getMoHClass($domain));
     $oForm = new paloForm($smarty,$arrForm);
 
     if(!$oForm->validateForm($_POST)){
@@ -631,7 +631,7 @@ function saveEditQueue($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                 $category=array();
             $res=$pQueue->getDefaultDestination($domain,$_POST["category"]);
             $destiny=($res==false)?array():$res;
-            $arrForm = createFieldForm(array(),$pQueue->getRecordingsSystem($domain),getArrayExtens($pDB,$domain),$category,$destiny);
+            $arrForm = createFieldForm(array(),$pQueue->getRecordingsSystem($domain),getArrayExtens($pDB,$domain),$category,$destiny,$pQueue->getMoHClass($domain));
             $oForm = new paloForm($smarty,$arrForm);
             if(!$oForm->validateForm($_POST)){
                 // Validation basic, not empty and VALIDATION_TYPE
@@ -819,7 +819,7 @@ function get_destination_category($smarty, $module_name, $pDB, $arrConf, $userLe
     return $jsonObject->createJSON();
 }
 
-function createFieldForm($arrOrg,$Recordings,$extens,$category,$destiny)
+function createFieldForm($arrOrg,$Recordings,$extens,$category,$destiny,$arrMusic)
 {   
     $arrRecordings=array("none"=>"None");
     if(is_array($Recordings)){
@@ -828,7 +828,10 @@ function createFieldForm($arrOrg,$Recordings,$extens,$category,$destiny)
         }
     }
     
-    $music=array("ring"=>"ring","default"=>"default","none"=>"none");
+    $music=array("ring"=>"ring");
+    foreach($arrMusic as $key => $value){
+        $music[$key]=$value;
+    }
     
     $arrTime=range(0,120);
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));

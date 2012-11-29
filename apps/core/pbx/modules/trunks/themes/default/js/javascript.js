@@ -1,3 +1,4 @@
+var trunk_flag=false;
 $(document).ready(function(){
 	$("#arrDestine").val(getArrRows()); 
     $(".adv_opt").click(function(){
@@ -44,23 +45,34 @@ $(document).ready(function(){
         $(".sec_call_time").css("display","none");
     
     $('td select[class=state_trunk]').change(function(){
-        var trunkId=$(this).attr("id");
-        var action=$("#"+trunkId+" option:selected").val();
-        var arrAction = new Array();
-        arrAction["action"]   = "actDesactTrunk";
-        arrAction["menu"]     = "trunks";
-        arrAction["rawmode"]  = "yes";
-        arrAction["id_trunk"]  = trunkId.substring(4);
-        arrAction["trunk_action"]  = action;
-        request("index.php",arrAction,false,
-        function(arrData,statusResponse,error)
-        {
-            if(error!=""){
-                alert(error);
-            }else{
-                alert(arrData);
-            }
-        });
+        if(trunk_flag==false){
+            trunk_flag=true;
+            var trunkId=$(this).attr("id");
+            var action=$("#"+trunkId+" option:selected").val();
+            var arrAction = new Array();
+            arrAction["action"]   = "actDesactTrunk";
+            arrAction["menu"]     = "trunks";
+            arrAction["rawmode"]  = "yes";
+            arrAction["id_trunk"]  = trunkId.substring(4);
+            arrAction["trunk_action"]  = action;
+            request("index.php",arrAction,false,
+            function(arrData,statusResponse,error)
+            {
+                if(action=="on")
+                    var tmp="on";
+                else
+                    var tmp="off";
+                
+                if(error!=""){
+                    trunk_flag=false;
+                    alert(error);
+                }else{
+                    trunk_flag=false;
+                    $("#"+trunkId).val(tmp);
+                    alert(arrData);
+                }
+            });
+        }
     });  
     
     if(typeof $("#mode_input").val()==="undefined")
@@ -224,7 +236,7 @@ function getCurrentNumCalls(){
                         $(this).find("p.count_calls").children("span").html(arrData[trunkId]["count_calls"]);
                         $(this).find("p.state").children("span").html(arrData[trunkId]["state"]);
                         $(this).find("p.fail_calls").children("span").html(arrData[trunkId]["fail_calls"]);
-                        if(arrData[trunkId]["state"]=="YES")
+                        if(arrData[trunkId]["state"]=="YES" && trunk_flag==false)
                             $("#sel_"+trunkId).val("on");
                 });
                 return false; //continua la recursividad

@@ -75,7 +75,7 @@ class paloSantoOutbound extends paloAsteriskDB{
     }
 
 	function getOutbounds($domain=null){
-		$where="";
+		$where=$pagging="";
 		$arrParam=null;
 		if(isset($domain)){
 			if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
@@ -86,8 +86,14 @@ class paloSantoOutbound extends paloAsteriskDB{
 				$arrParam=array($domain);
 			}
 		}
+		
+		if(isset($limit) && isset($offset)){
+            $pagging=" limit ? offset ?";
+            $arrParam[]=$limit;
+            $arrParam[]=$offset;
+        }
 
-		$query="SELECT * from outbound_route $where order by seq";
+		$query="SELECT * from outbound_route $where order by seq $pagging";
                 
 		$result=$this->_DB->fetchTable($query,true,$arrParam);
 		if($result===false){

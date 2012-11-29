@@ -274,7 +274,7 @@ function createDivToolTip($trunkid,$pTrunk,&$block){
         <p class='elapsed_time'><label>"._tr("Elapsed Time Since Last Period").": </label><span>$elap</span></p>
         <p class='max_calls'><label>"._tr("Max Number of Calls").": </label><span>$max</span></p>
         <p class='count_calls'><label>"._tr("Current Number of Calls").": </label><span>$count</span></p>
-        <p class='state'><label>"._tr("Bloqued").": </label><span>$block</span></p>
+        <p class='state'><label>"._tr("Blocked").": </label><span>$block</span></p>
         <p class='fail_calls'><label>"._tr("Number of Fail Calls").": </label><span>$fail</span></p>
      </div>";
      
@@ -364,20 +364,6 @@ function actDesactTrunk($smarty,&$pDB,$userLevel1){
         $result=$pTrunk->actDesacTrunk($idTrunk,$action);
         if($result==true){
             $pDB->commit();
-            $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals nothing "" 2>&1';
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0) {
-                $error = _tr("Error writing extensions_globals file").implode('', $output);
-                return FALSE;
-            }
-            $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0){
-                $error = implode('', $output);
-                return FALSE;
-            }
         }else{
             $error=$pTrunk->errMsg();
             $pDB->rollBack();

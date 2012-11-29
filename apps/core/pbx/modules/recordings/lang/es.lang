@@ -46,6 +46,27 @@ $arrLangModule=array(
 "Possible file upload attack" => "Possible file upload attack",
 "contact_admin" => "No hay número de extensión asociado con el usuario actual. Por favor contáctese con el administrador para que le asigne una extensión",
 "You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup" => "Usted puede iniciar la grabación después de escuchar un pitido en su teléfono. Una vez que usted haya terminado la grabación, usted debe presionar la tecla # y luego colgar",
-"You do not need to add an extension to the record name" => "No es necesario agregar una extensión al nombre de la grabación"
+"You do not need to add an extension to the record name" => "No es necesario agregar una extensión al nombre de la grabación",
+"It's necesary you create a new organization so you can create new Recording" => "Es necesario crear una organización para crear una nueva Grabación",
+"Are you sure you want to delete?" => "¿Está seguro que desea eliminar?",
+"You are not authorized to perform this action" => "No esta autorizado para realizar esta acción",
+"The Recordings were deleted successfully" => "Las grabaciones fueron eliminadas satisfactoriamente",
+"You must select at least one record" => "Debe seleccionar al menos una grabación",
+"Filename's length must be max 50 characters" => "El nombre del archivo no puede ser mayor a 50 caracteres",
+"Already exists a file with same filename" => "Ya existe un archivo con el mismo nombre",
+"Destiny directory couldn't be created" => "Directorio destino no pudo ser creado",
+"Record Saved Successfully" => "Grabación guardada correctamente",
+"The record couldn't be saved " => "La grabación no pudo ser guardada ",
+"The record couldn't be realized " => "La grabación no pudo ser realizada ",
+"Insert the Recording Name." => "Ingrese el nombre de la grabación",
+"System" => "Sistema",
+"Checking Name..." => "Verificando Nombre...",
+"Dialing..." => "Marcando...",
+"This Record Name already exists." => "Este nombre ya existe.",
+"Record was saved succesfully." => "Grabación guardada correctamente.",
+"Record was canceled." => "Grabación cancelada",
+"Hang up." => "Hang up.",
+"File size exceeds the limit. "=>"El tamaño de archivo excede el límite "
+
 );
 ?>

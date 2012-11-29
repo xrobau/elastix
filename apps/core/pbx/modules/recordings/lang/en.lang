@@ -49,6 +49,26 @@ $arrLangModule=array(
 "Possible file upload attack" => "Possible file upload attack",
 "contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
 "You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup" => "You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup",
-"You do not need to add an extension to the record name" => "You do not need to add an extension to the record name"
+"You do not need to add an extension to the record name" => "You do not need to add an extension to the record name",
+"It's necesary you create a new organization so you can create new Recording" => "It's necesary you create a new organization so you can create new Recording",
+"Are you sure you want to delete?" => "Are you sure you want to delete?",
+"You are not authorized to perform this action" => "You are not authorized to perform this action",
+"The Recordings were deleted successfully" => "The Recordings were deleted successfully",
+"You must select at least one record" => "You must select at least one record",
+"Filename's length must be max 50 characters" => "Filename's length must be max 50 characters",
+"Already exists a file with same filename" => "Already exists a file with same filename",
+"Destiny directory couldn't be created" => "Destiny directory couldn't be created",
+"Record Saved Successfully" => "Record Saved Successfully",
+"The record couldn't be saved " => "The record couldn't be saved ",
+"The record couldn't be realized " => "The record couldn't be realized ",
+"Insert the Recording Name." => "Insert the Recording Name.",
+"System" => "System",
+"Checking Name..." => "Checking Name...",
+"Dialing..." => "Dialing...",
+"This Record Name already exists." => "This Record Name already exists.",
+"Record was saved succesfully." => "Record was saved succesfully.",
+"Record was canceled." => "Record was canceled.",
+"Hang up." => "Hang up.",
+"File size exceeds the limit. "=>"File size exceeds the limit. "
 );
 ?>

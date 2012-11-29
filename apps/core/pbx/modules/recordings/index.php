@@ -2,7 +2,7 @@
   /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.1-4                                               |
+  | Elastix version 1.1-4                                                |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -29,23 +29,27 @@
 
 function _moduleContent(&$smarty, $module_name)
 {
+    include_once "libs/paloSantoPBX.class.php";
+    
     //include elastix framework
+    include_once "libs/paloSantoJSON.class.php";
+    include_once("libs/paloSantoDB.class.php");
     include_once "libs/paloSantoGrid.class.php";
     include_once "libs/paloSantoForm.class.php";
     include_once "libs/paloSantoConfig.class.php";
-
+    include_once "libs/paloSantoOrganization.class.php";
+    include_once("libs/paloSantoACL.class.php");
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoRecordings.class.php";
     //include file language agree to elastix configuration
     //if file language not exists, then include language by default (en)
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-/*
     $lang=get_language();
     $lang_file="modules/$module_name/lang/$lang.lang";
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
     else include_once "modules/$module_name/lang/en.lang";
-*/
+
     load_language_module($module_name);
 
     //global variables
@@ -62,101 +66,445 @@ function _moduleContent(&$smarty, $module_name)
 
     $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
     $arrConfig = $pConfig->leer_configuracion(false);
-
+    
     $dsn_agi_manager['password'] = $arrConfig['AMPMGRPASS']['valor'];
-    $dsn_agi_manager['host'] = $arrConfig['AMPDBHOST']['valor'];
+    //$dsn_agi_manager['host'] = $arrConfig['AMPDBHOST']['valor'];
     $dsn_agi_manager['user'] = 'admin';
 
+    //if($dsn_agi_manager['host']==null)
+    $dsn_agi_manager['host']='localhost';
+
     $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
+    
     $accion = getAction();
 
+    
+    //Comprobación de la credencial del usuario
+    $arrCredentiasls=getUserCredentials();
+    $userLevel1=$arrCredentiasls["userlevel"];
+    $userAccount=$arrCredentiasls["userAccount"];
+    $idOrganization=$arrCredentiasls["id_organization"];
+  
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+  
     $content = "";
     switch($accion)
     {
+	case "add":
+            $content = form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
         case "record":
-            $content = new_recording($smarty, $module_name, $local_templates_dir, $arrLang, $dsn_agi_manager, $arrConf, $pDBACL);
+            $content = record($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
+            break;
+	case "hangup":
+            $content = hangup($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
             break;
         case "save":
-            $content = save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $pDBACL);
+            $content = save_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
-        default:
-            $content = form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+	case "remove":
+	    $content = remove_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            break;
+	case "check_call_status":
+            $content = checkCallStatus("call_status", $smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
+	    break;
+	case "checkName":
+            $content = check_name($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
+	    break;
+	case "download":
+            $content = downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
+            break;
+	default:
+	    $content = reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
             break;
     }
 
     return $content;
 }
 
-function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $pDBACL)
+function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization)
 {
-    $bExito = true;
-    $pRecording = new paloSantoRecordings();
-    $extension = $pRecording->Obtain_Extension_Current_User($arrConf);
+	
+	$error = "";
+	//conexion elastix.db
+        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+	$pACL = new paloACL($pDB2);
+	$pORGZ = new paloSantoOrganization($pDB2);
+         
+	$domain=getParameter("organization");
+	
+        if($userLevel1=="superadmin"){
+		if(!empty($domain)){
+			$url = "?menu=$module_name&organization=$domain";
+		}else{
+			$domain = "all";
+			$url = "?menu=$module_name";
+		}
+	}else{
+		$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+		$domain=$arrOrg["domain"];
+		$url = "?menu=$module_name";
+	}
+	 
+	if($userLevel1=="superadmin"){
+	  if(isset($domain) && $domain!="all"){
+	      $pRecording = new paloSantoRecordings($pDB,$domain);
+	      $total=$pRecording->getNumRecording($domain);
+	  }else{
+	      $pRecording = new paloSantoRecordings($pDB,$domain);
+	      $total=$pRecording->getNumRecording();
+	  }
+	}else{
+	    $pRecording = new paloSantoRecordings($pDB,$domain);
+	    $total=$pRecording->getNumRecording($domain);
+	}
+       
+	if($total===false){
+		$error=$pRecording->errMsg;
+		$total=0;
+	}
+       
+	$limit=20;
 
-    if(!$extension)
-        return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+  
+    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
 
-    $destiny_path = "/var/lib/asterisk/sounds/custom/$extension/";
+    if($userLevel1=="admin")
+	$check = "&nbsp;<input type='checkbox' name='checkall' class='checkall' id='checkall' onclick='jqCheckAll(this.id);' />";
+    else
+        $check = "";
 
-    if(isset($_POST['option_record']) && $_POST['option_record']=='by_record')
-    {
-        $filename   = isset($_POST['filename'])?$_POST['filename']:'';
-        $smarty->assign("filename", $filename);
+	$arrGrid = array("title"    => _tr('Recordings List'),
+                "url"      => $url,
+                "width"    => "99%",
+                "start"    => ($total==0) ? 0 : $offset + 1,
+                "end"      => $end,
+                "total"    => $total,
+                'columns'   =>  array(
+		    array("name"      => $check ),
+                    array("name"      => _tr("Name"),),
+		    array("name"      => _tr("Source"),),
+		    array("name"      => _tr(""),),
+                    ),
+                );
 
-        if($filename != "")
-        {
-            $path = "/var/spool/asterisk/tmp";
-            $archivo = "";
-            $file_ext = "";
-            if ($handle = opendir($path)) {
-                while (false !== ($dir = readdir($handle))) {
-                    if (ereg("({$extension}-.*)\.([gsm|wav]*)$", $dir, $regs)) {
-                        $archivo = $regs[1];
-                        $file_ext = $regs[2];
-                        break;
-                    }
-                }
-            }
+	$arrRecordings=array();
+	$arrData = array();
+		    if($userLevel1=="admin"){
+			    $arrRecordings = $pRecording->getRecordings($domain);
+		    }else{
+			    $extUser=$pACL->getUserExtension($userAccount);
+			    $arrRecordings = $pRecording->getRecordingsByUser($domain,$extUser);
+			    
+			    //$arrExtens=$pExten->getExtensionByNum($domain,$extUser);
+			    $total=1;
+		    }
+	if($arrRecordings===false){
+		$error=_tr("Error to obtain Recordings").$pRecording->errMsg;
+                $arrRecordings=array();
+	}
 
-            $tmp_file = "$archivo.$file_ext";
-            $filename .= ".$file_ext";
+	$i=0;
+	foreach($arrRecordings as $recording) {
 
-            if($filename != "" && $tmp_file != "" && $extension != "")
-            {
-                if(!file_exists($destiny_path))
-                {
-                    if (!mkdir($destiny_path, 0755, false)){
-                        $bExito = false;
-                    }
-                }
-                if($bExito)
-                {
-                    $filetmp = basename("$destiny_path/$filename"); 
-                    $dirFile = "/var/spool/asterisk/tmp/$tmp_file";
-                    $dirDest = $destiny_path.$filetmp;
-
-                    if(is_file($dirFile)){
-                        if(!rename($dirFile, $dirDest)){
-                            $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                            $smarty->assign("mb_message", $arrLang["Possible file upload attack"]." $filename");
-                            $bExito = false;
-                            return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
-                        }
-                    }else{
-                        $bExito = false;
-                    }
-                }
-            }else $bExito = false;
-        }else $bExito = false;
-
-        if(!$bExito)
-        {
-            $smarty->assign("mb_title", $arrLang['ERROR'].":");
-            $smarty->assign("mb_message", $arrLang["The recording couldn't be realized"]);
+	  $ext = explode(".",$recording["name"]);
+	  if($userLevel1!="admin"){
+	      $arrTmp[0] = "";
+	      $arrTmp[1] = $recording["name"];
+              $arrTmp[2] = $recording["source"];
+	  }else{
+	      
+	      $arrTmp[0] = "&nbsp;<input type ='checkbox' class='delete' name='record_delete[]' value='".$recording['source'].",".$recording['name']."' />";
+	      $idfile = $recording['uniqueid'];
+	      $namefile = $recording['name'];
+	      if($ext[1]=="gsm"){
+		$arrTmp[1] = "<span>".$recording['name']."</span>";
+		$arrTmp[3] = "";
+	      }
+	      else{
+	        $arrTmp[1] = "<div class='single' id='$i'><span data-src='index.php?menu=$module_name&action=download&id=$idfile&rawmode=yes'><img style='cursor:pointer;' width='13px' src='/modules/recordings/images/sound.png'/>&nbsp;&nbsp;".$recording['name']."</span>";
+		$arrTmp[3] = "<audio></audio>";
+		$i++;
+             }
+	      $arrTmp[2] = $recording["source"];
+	    
+	    
+	  }
+	  $arrData[] = $arrTmp;
+	  
         }
-    }else{
-        if (isset($_FILES['file_record'])) {
+				 
+	if($pORGZ->getNumOrganization() > 1){
+		if($userLevel1 == "admin"){
+			$oGrid->addNew("add_recording",_tr("Add Recording"));
+			$oGrid->deleteList(_tr("Are you sure you want to delete?"), "remove", _tr("Delete Selected"),false);
+			
+                }
+		
+	}else{
+		$smarty->assign("mb_title", _tr("MESSAGE"));
+		$smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create new Recording"));
+	}
+
+	if($error!=""){
+		$smarty->assign("mb_title", _tr("MESSAGE"));
+		$smarty->assign("mb_message",$error);
+	}
+	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+	
+    return $contenidoModulo;
+}
+
+
+
+function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization)
+  {     
+      $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+      $pACL = new paloACL($pDB2);
+      $pORGZ = new paloSantoOrganization($pDB2);
+      $domain=getParameter("organization");
+	  
+      if($domain==null){
+	  $arrOrg=$pORGZ->getOrganizationById($idOrganization);
+	  $domain=$arrOrg["domain"];
+      }
+      $id = getParameter("id");
+      $pRecording = new paloSantoRecordings($pDB,$domain);
+      $record = $pRecording->getRecordingById($id);
+      if($record){
+	 $fullPath = $record['filename'];
+	 $name = $record['name'];
+	
+      }
+   	  // Must be fresh start 
+	  if(headers_sent()) 
+	    die('Headers Sent'); 
+
+	  // Required for some browsers 
+	  if(ini_get('zlib.output_compression')) 
+	    ini_set('zlib.output_compression', 'Off'); 
+
+	  // File Exists? 
+	  if( file_exists($fullPath) ){ 
+	    
+	    // Parse Info / Get Extension 
+	    $fsize = filesize($fullPath); 
+
+	    ini_set("memory_limit", "64M" );
+
+	    $path_parts = pathinfo($fullPath); 
+	    $ext = strtolower($path_parts["extension"]); 
+	    
+	    // Determine Content Type 
+	    switch ($ext) { 
+	       case "wav": $ctype="audio/x-wav"; break;
+	       case "Wav": $ctype="audio/x-wav"; break;
+	       case "WAV": $ctype="audio/x-wav"; break;
+	       case "gsm": $ctype="audio/x-gsm"; break;
+	       case "GSM": $ctype="audio/x-gsm"; break;
+	      //default: $ctype="application/force-download"; 
+	    } 
+
+            ob_end_clean();
+	    
+	    header("Pragma: public"); // required 
+	    header("Expires: 0"); 
+	    header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
+	    header("Cache-Control: private",false); //required for certain browsers 
+	    header("Content-Type: $ctype"); 
+	   
+	    header("Content-Disposition: attachment; filename=\"".basename($fullPath)."\";" ); 
+	    header("Content-Transfer-Encoding: binary"); 
+	    header("Content-Length: ".$fsize); 
+	    
+	    //flush(); 
+	    //readfile( $fullPath ); 
+	    //readfile($fullPath);
+		
+            if ($fileh = fopen($fullPath, 'rb')) {
+                while(!feof($fileh) and (connection_status()==0)) {
+		    print(fread($fileh, 1024*12));//10kb de buffer stream
+                    flush();
+		    //fpassthru($fileh); 
+                }
+		
+		fclose($fileh);
+            }else die('File Not Found'); 
+    	    
+	    return((connection_status()==0) and !connection_aborted());
+
+	  } 
+          else die('File Not Found'); 
+	  
+ } 
+
+function check_name($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization)
+{
+  
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
+    $domain=getParameter("organization");
+	
+    if($domain==null){
+    	$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+	$domain=$arrOrg["domain"];
+    }
+    $name = getParameter("recording_name");
+    $pRecording = new paloSantoRecordings($pDB,$domain);
+    if($name!=""){
+      $filename = "/var/lib/asterisk/sounds/".$domain."/system/".$name.".wav";
+      $status = $pRecording->checkFilename($filename);
+      if($userLevel1=="admin"){
+	$recId = $pRecording->getId($name.".wav","system");
+	$id  = $recId["uniqueid"];
+	
+      }
+    }else
+       $status = "empty";
+
+    $jsonObject = new PaloSantoJSON();
+    $msgResponse["name"] = $status;
+    $msgResponse["id"] = $id;
+    $jsonObject->set_status("OK");
+    $jsonObject->set_message($msgResponse);
+
+    return $jsonObject->createJSON();
+}
+
+function record($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization)
+{
+    session_commit();
+    $status  = TRUE;
+    $status = new_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
+    $jsonObject = new PaloSantoJSON();
+    $msgResponse["record"] = $status;
+    $jsonObject->set_status("OK");
+    $jsonObject->set_message($msgResponse);
+
+    return $jsonObject->createJSON();
+}
+
+
+function hangup($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization)
+{
+   
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
+    $domain=getParameter("organization");
+	
+    if($domain==null){
+    	$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+	$domain=$arrOrg["domain"];
+    }
+    $extension = getParameter("extension");
+    $pRecording = new paloSantoRecordings($pDB,$domain);
+    $result = $pRecording->Obtain_Protocol_Current_User($arrConf,$domain,$extension);
+      
+    if($result != FALSE)
+       $result = $pRecording->hangupPhone($dsn_agi_manager, $result['device'], $result['dial'], $result['exten']);
+   
+    $msgResponse["record"] = $result;
+    //$msgResponse["id"] = $id;
+    
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_status("OK");
+    $jsonObject->set_message($msgResponse);
+
+    return $jsonObject->createJSON();
+}
+
+
+function remove_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+        $error = "";
+	$success = false;
+        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+	$pACL = new paloACL($pDB2);
+	$pORGZ = new paloSantoOrganization($pDB2);
+         
+	$domain=getParameter("organization");
+	
+	
+        if($userLevel1!="admin"){
+		$smarty->assign("mb_title", _tr("ERROR"));
+		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+		return reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+	}
+	else{
+		$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+		$domain=$arrOrg["domain"];
+		$url = "?menu=$module_name";
+	    
+		$record=getParameter("record_delete");
+		
+		if (isset($record)&& count($record)>0){
+		    $pRecording = new paloSantoRecordings($pDB,$domain);
+		    
+		    $pDB->beginTransaction();
+		    $success = $pRecording->deleteRecordings($record,$domain);
+		    if($success)
+			$pDB->commit();
+		    else
+			$pDB->rollBack();
+		    $error .=$pRecording->errMsg;
+      		      if($success){
+			      $smarty->assign("mb_title", _tr("MESSAGE"));
+			      $smarty->assign("mb_message",_tr("The Recordings were deleted successfully"));
+		      }else{
+			      $smarty->assign("mb_title", _tr("ERROR"));
+			      $smarty->assign("mb_message",$error);
+		      }
+		}
+		else{
+		    $smarty->assign("mb_title", _tr("ERROR"));
+		    $smarty->assign("mb_message",_tr("You must select at least one record"));
+		}
+		
+
+	}
+ 	return reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+
+	
+}
+
+function save_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization)
+{
+    $success= false;
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
+    $domain=getParameter("organization");
+    
+
+    if($domain==null){
+    	$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+	$domain=$arrOrg["domain"];
+    }
+    //var_dump($success); die();
+    $bExito = true;
+    $pRecording = new paloSantoRecordings($pDB,$domain);
+    $extension = $pRecording->Obtain_Extension_Current_User($arrConf);
+  
+    if(!$extension)
+       return form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    
+     if($userLevel1 == "admin"){
+	$destiny_path = "/var/lib/asterisk/sounds/$domain/system/";
+	$source = "system";
+    }
+   else{
+	$destiny_path = "/var/lib/asterisk/sounds/$domain/$extension/";
+	$source = $extension;
+    }	    
+         if (isset($_FILES['file_record'])) {
+	   
             if($_FILES['file_record']['name']!=""){
+
                 $smarty->assign("file_record_name", $_FILES['file_record']['name']);
                 if(!file_exists($destiny_path))
                 {
@@ -164,114 +512,271 @@ function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $
                     exec($comando, $output, $retval);
                     if ($retval!=0) $bExito = false;
                 }
-                if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(wav|WAV|Wav|gsm|GSM|Gsm|Wav49|wav49|WAV49)$/",$_FILES['file_record']['name'])) {
-                    $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                    $smarty->assign("mb_message", $arrLang["Possible file upload attack"]." ".$_FILES["file_record"]["name"]);
+                if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(wav|WAV|Wav|gsm|GSM|Gsm|Wav49|wav49|WAV49)$/",$_FILES['file_record']['name'])){
+                    $smarty->assign("mb_title", _tr("ERROR"));
+                    $smarty->assign("mb_message",_tr("Invalid extension file ")." ".$_FILES["file_record"]["name"]);
                     $bExito = false;
-                    return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+                    return form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
                 }
                 if($bExito)
                 {
-                    $filenameTmp = $_FILES['file_record']['name'];
-                    $tmp_name = $_FILES['file_record']['tmp_name'];
-                    $filename = basename("$destiny_path/$filenameTmp");
-                    if (!move_uploaded_file($tmp_name, "$destiny_path/$filename"))
-                    {
-                        $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                        $smarty->assign("mb_message", $arrLang["Possible file upload attack"]." $filename");
-                        $bExito = false;
-                    }
+		      
+		   $filenameTmp = $_FILES['file_record']['name'];
+                   $tmp_name = $_FILES['file_record']['tmp_name'];
+	
+			if(strlen($filenameTmp)>50){
+			    $smarty->assign("mb_title", _tr("ERROR"));
+			    $smarty->assign("mb_message",_tr("Filename's length must be max 50 characters").": $filenameTmp");
+			    $bExito = false;
+			}elseif($pRecording->checkFilename($destiny_path.$filenameTmp)!=true){
+			    //Verificar que no existe otro archivo con el mismo nombre en la misma carpeta
+			    $smarty->assign("mb_title", _tr("ERROR"));
+			    $smarty->assign("mb_message",_tr("Already exists a file with same filename").": $filenameTmp");
+			    $bExito = false;
+			}else{
+
+			      $filename = basename("$destiny_path/$filenameTmp");
+			    
+			      if (!move_uploaded_file($tmp_name, "$destiny_path/$filename"))
+			      {
+				  $smarty->assign("mb_title",_tr("ERROR").":");
+				  $smarty->assign("mb_message", _tr("Possible file upload attack")." $filename");
+				  $bExito = false;
+			      }
+			}
                 }else
                 {
-                    $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                    $smarty->assign("mb_message", $arrLang["Destiny directory couldn't be created"]);
+                    $smarty->assign("mb_title", _tr("ERROR").":");
+                    $smarty->assign("mb_message", _tr("Destiny directory couldn't be created"));
                     $bExito = false;
                 }
             }
             else{
-                $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                $smarty->assign("mb_message", $arrLang["Error copying the file"]);
+                $smarty->assign("mb_title", _tr("ERROR").":");
+                $smarty->assign("mb_message", _tr("Error copying the file"));
                 $bExito = false;
             }
         }else{
-            $smarty->assign("mb_title", $arrLang['ERROR'].":");
-            $smarty->assign("mb_message", $arrLang["Error copying the file"]);
+            $smarty->assign("mb_title",  _tr("ERROR").":");
+            $smarty->assign("mb_message", _tr("Error copying the file"));
             $bExito = false;
         }
-    }
-
+ 
     if($bExito)
     {
-       $smarty->assign("mb_title", $arrLang["Message"]);
-       $smarty->assign("mb_message", $arrLang["The recording was saved"]);
+      $pRecording = new paloSantoRecordings($pDB,$domain);
+       $name = "$destiny_path$filename";
+       $pDB->beginTransaction();
+       $success=$pRecording->createNewRecording($filename,$name,$source,$domain);
+			
+       if($success)
+	  $pDB->commit();
+       else
+	  $pDB->rollBack();
+       $error =$pRecording->errMsg;
+
+     
+       if($success==false){
+	   $smarty->assign("mb_title", $arrLang['ERROR'].":");
+           $smarty->assign("mb_message",  $error);   
+	}else{
+	   $smarty->assign("mb_title", _tr("MESSAGE"));
+	   $smarty->assign("mb_message",_tr("Record Saved Successfully"));
+	}
+      
     }
 
-    return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+    return reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 }
 
-function new_recording($smarty, $module_name, $local_templates_dir, $arrLang, $dsn_agi_manager, $arrConf, $pDBACL)
+function new_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization)
 {
-    $recording_name = isset($_POST['recording_name'])?$_POST['recording_name']:'';
-    if($recording_name != '')
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
+    $domain=getParameter("organization");
+	
+    if($domain==null){
+    	$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+	$domain=$arrOrg["domain"];
+    }
+  
+   $recording_name = getParameter("recording_name");
+  
+   if($recording_name != '')
     {
-        $pRecording = new paloSantoRecordings();
-        $result = $pRecording->Obtain_Protocol_Current_User($arrConf);
+	$extension = getParameter("extension");
+        $pRecording = new paloSantoRecordings($pDB,$domain);
+        $filename = "/var/lib/asterisk/sounds/".$domain."/system/".$recording_name.".wav";
+	$checkRecordingName = $pRecording->checkFileName($filename);
+	
+        $result = $pRecording->Obtain_Protocol_Current_User($arrConf,$domain,$extension);
 
-        $number2call = '*77';
+     
         if($result != FALSE)
         {
-            $result = $pRecording->Call2Phone($dsn_agi_manager, $result['id'], $number2call, $result['dial'], $result['description']);
+            $result = $pRecording->Call2Phone($dsn_agi_manager, $result['device'], $result['dial'], $result['exten'],$recording_name);
             if($result)
             {
-                $smarty->assign("filename", $recording_name);
-                $smarty->assign("mb_message", $arrLang["To continue: record a message then click on save"]);
-            }
+               $result["filename"] = $recording_name;
+	       $result["msg"] = _tr("Recording...") ;
+	       $result["status"] = "ok";
+
+               if($checkRecordingName==TRUE){
+		  
+		    
+		    $pDB->beginTransaction();
+		    $name = $recording_name.".wav";
+		    $success=$pRecording->createNewRecording($name,$filename,"system",$domain);
+				      
+		    if($success){
+			$pDB->commit();
+                         $name =$recording_name.".wav";
+			 $recId = $pRecording->getId($name,"system");
+			 $id=$recId["uniqueid"];
+			 $result["id"] = $id;
+
+		    }
+		    else{
+			$pDB->rollBack();
+			$error =$pRecording->errMsg;
+			$result["msg"]=_tr("The record couldn't be saved ") ;
+			$result["status"] = "error";
+		    }
+	        }
+
+            }   
             else{
-                $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                $smarty->assign("mb_message", $arrLang["The call couldn't be realized"]);
+               
+	       $result["msg"]=_tr("The record couldn't be realized ") ;
+	       $result["status"] = "error";
             }
-        }
+        }else{
+	       $result["msg"]=_tr("The record couldn't be realized ") ;
+	       $result["status"] = "error";
+	  }
     }
     else{
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
-        $smarty->assign("mb_message", $arrLang['Insert the Recording Name']);
+          $result["msg"]=_tr("Insert the Recording Name.") ;
+	  $result["status"] = "error";
     }
 
-    return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+    return $result;
 }
 
-function form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL)
+function checkCallStatus($function, $smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization)
+{
+    $executed_time = 2; //en segundos
+    $max_time_wait = 30; //en segundos
+    $event_flag    = false;
+    $data          = null;
+
+    $i = 1;
+    while(($i*$executed_time) <= $max_time_wait){
+        $return = $function($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
+        $data   = $return['data'];
+        if($return['there_was_change']){
+            $event_flag = true;
+            break;
+        }
+        $i++;
+        sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
+    }
+	$return = $function($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization);
+	$data   = $return['data'];
+   return $data;
+}
+
+function call_status($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $dsn_agi_manager, $userLevel1, $userAccount, $idOrganization)
+{
+    session_commit();
+    $status = TRUE;
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
+    $domain=getParameter("organization");
+	
+    if($domain==null){
+    	$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+	$domain=$arrOrg["domain"];
+    }
+
+    $extension = getParameter("extension");
+    $pRecording = new paloSantoRecordings($pDB,$domain);
+    $result = $pRecording->Obtain_Protocol_Current_User($arrConf,$domain,$extension);
+	
+    $state = $pRecording->callStatus($result['dial']);
+    $jsonObject = new PaloSantoJSON();
+    if($state=="hangup")
+        $status = FALSE;
+   
+    if($status){
+        $msgResponse["status"] = $state;
+        $jsonObject->set_status("RECORDING");
+        $jsonObject->set_message($msgResponse);
+	return array("there_was_change" => false,
+                 "data" => $jsonObject->createJSON());
+    }else{
+        $jsonObject->set_status("HANGUP");
+	return array("there_was_change" => true,
+                 "data" => $jsonObject->createJSON());
+    }
+   
+}
+
+
+function form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization)
 {
     $pACL = new paloACL($pDBACL);
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $extension = $pACL->getUserExtension($user);
-    if(is_null($extension) || $extension==""){
-	$smarty->assign("DISABLED","DISABLED");
-	if($pACL->isUserAdministratorGroup($user))
-	    $smarty->assign("mb_message", "<b>".$arrLang["You don't have extension number associated with user"]."</b>");
-	else
-	    $smarty->assign("mb_message", "<b>".$arrLang["contact_admin"]."</b>");
-    }
+         
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
+    $arrOrg=$pORGZ->getOrganizationById($idOrganization);
+    $domain=$arrOrg["domain"];
+
+    $pRecording = new paloSantoRecordings($pDB,$domain);
+    $extension = $pRecording->Obtain_Extension_Current_User($arrConf);
+   
     if(isset($_POST['option_record']) && $_POST['option_record']=='by_file')
         $smarty->assign("check_file", "checked");
     else
         $smarty->assign("check_record", "checked");
-
+    
     $oForm = new paloForm($smarty,array());
 
-    $smarty->assign("recording_name_Label", $arrLang["Record Name"]);
-    $smarty->assign("record_Label", $arrLang["File Upload"]);
-
-    $smarty->assign("Record", $arrLang["Record"]);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("INFO", $arrLang["You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup"].".");
-    $smarty->assign("NAME", $arrLang["You do not need to add an extension to the record name"].".");
+    $smarty->assign("recording_name_Label", _tr("Record Name"));
+    $smarty->assign("overwrite_record", _tr("This record Name already exists. Do you want to Overwrite it?"));
+    $smarty->assign("record_Label",_tr("File Upload"));
+    $smarty->assign("record_on_extension", _tr("Record On Extension"));
+    $smarty->assign("Record", _tr("Record"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("INFO", _tr("Press REC and start your recording. Once you have finished recording you must press ·STOP or hangup the phone").".");
+    $smarty->assign("NAME", _tr("You do not need to add an extension to the record name").".");
     $smarty->assign("icon", "/modules/$module_name/images/recording.png");
     $smarty->assign("module_name", $module_name);
-    $smarty->assign("file_upload", $arrLang["File Upload"]);
-    $smarty->assign("record", $arrLang["Record"]);
-
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLang["Recordings"], $_POST);
+    $smarty->assign("file_upload", _tr("File Upload"));
+    $smarty->assign("record", _tr("Record"));
+    $smarty->assign("ext", _tr("Extension"));
+    $smarty->assign("system", _tr("System"));
+    $smarty->assign("exten", _tr("Extension"));
+    $smarty->assign("EXTENSION",$extension);
+    $smarty->assign("checking", _tr("Checking Name..."));
+    $smarty->assign("dialing", _tr("Dialing..."));
+    $smarty->assign("domain", $domain);
+    $smarty->assign("confirm_dialog", _tr("This Record Name already exists."));
+    $smarty->assign("success_record", _tr("Record was saved succesfully."));
+    $smarty->assign("cancel_record", _tr("Record was canceled."));
+    $smarty->assign("hangup", _tr("Hang up."));
+      $max_upload = (int)(ini_get('upload_max_filesize'));
+      $max_post = (int)(ini_get('post_max_size'));
+      $memory_limit = (int)(ini_get('memory_limit'));
+      $upload_mb = min($max_upload, $max_post, $memory_limit)*1048576;
+    $smarty->assign("max_size", $upload_mb);
+    $smarty->assign("alert_max_size", _tr("File size exceeds the limit. "));
+  
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr("Recordings"), $_POST);
 
     $contenidoModulo = "<form enctype='multipart/form-data' method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
@@ -284,6 +789,22 @@ function getAction()
         return "record";
     else if(getParameter("save"))
         return "save";
+    else if(getParameter("remove"))
+        return "remove";
+    else if(getParameter("add_recording"))
+        return "add";
+    elseif(getParameter("action")=="record")
+        return "record";
+    elseif(getParameter("action")=="hangup")
+        return "hangup";
+    elseif(getParameter("action")=="check_call_status")
+        return "check_call_status";
+    elseif(getParameter("action")=="checkName")
+        return "checkName";
+    elseif(getParameter("action")=="download")
+        return "download";
+    elseif(getParameter("action")=="remove")
+        return "remove";
     else
         return "report";
 }

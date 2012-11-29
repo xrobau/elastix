@@ -70,6 +70,9 @@ fi
 
 %changelog
 * Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Removed Load Module functionality, as now modules should be installed
+  via RPM packages.
+  SVN Rev[4468]
 - CHANGED: Language Admin: extend develbuilder to save a list of translations 
   from a XML specification. Use this to reimplement the Save All functionality.
   SVN Rev[4461]

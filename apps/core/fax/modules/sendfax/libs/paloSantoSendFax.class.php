@@ -90,6 +90,7 @@ class paloSantoSendFax {
         $destine = escapeshellarg($destine);
         $data = escapeshellarg($data);
         $output = $retval = NULL;
+        print_r("sendfax -D -h $faxhost -n -d $destine $data");
         exec("sendfax -D -h $faxhost -n -d $destine $data 2>&1", $output, $retval);
         if ($retval != 0) {
             $this->errMsg = implode('<br/>', $output);

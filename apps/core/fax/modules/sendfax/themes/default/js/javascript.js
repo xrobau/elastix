@@ -3,9 +3,7 @@ $(document).ready(function() {
    if(valor!=""){
       var intervalo  = setInterval("checkSendStatus("+valor+")",30000);
       checkFaxStatus();
-
    }
-
 });
 
 /*
@@ -25,10 +23,10 @@ function checkFaxStatus()
     request("index.php",arrAction,true,
             function(arrData,statusResponse,error)
             {
-		var from = $("#from option:selected'").text();
-		var toRemove = 'chk_';
-		from = from.replace("/", '');
-		from = from.replace(/^.*\s+|\s+$/g,"")
+                var from = $("#from option:selected'").text();
+                var toRemove = 'chk_';
+                from = from.replace("/", '');
+                from = from.replace(/^.*\s+|\s+$/g,"")
 	
                 if(statusResponse=="CHANGED"){
                     var key = "";
@@ -37,26 +35,22 @@ function checkFaxStatus()
                             //var field = $(this).text();
                             if(from==key)
                                 if(arrData["faxes"][from]){
-					var status = arrData["faxes"][from];
-					status = status.substring(1,8);
-					//alert(status);
-					//if(status=="Running"){
-					//	$("#sending_fax").css("display","none");
-					//	$("#success_fax").css("display","block");
-					//	$("#statusFax").html("");
-					//}
-					//else{
-						$("#sending_fax").css("display","none");
-						$("#statusFax").html(arrData["faxes"][from]+"...");
-					//}
-				}
-			
-				
-                        
+                                    var status = arrData["faxes"][from];
+                                    status = status.substring(1,8);
+                                    //alert(status);
+                                    //if(status=="Running"){
+                                    //	$("#sending_fax").css("display","none");
+                                    //	$("#success_fax").css("display","block");
+                                    //	$("#statusFax").html("");
+                                    //}
+                                    //else{
+                                        $("#sending_fax").css("display","none");
+                                        $("#statusFax").html(arrData["faxes"][from]+"...");
+                                    //}
+                                }
                         });
                     }
                 }
-		
                 //return false; //continua la recursividad
             });
 }

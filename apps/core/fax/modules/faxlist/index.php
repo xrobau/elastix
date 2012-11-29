@@ -81,7 +81,6 @@ function _moduleContent($smarty, $module_name)
         case "setFaxMsg":
             $contenidoModulo = setFaxMsg("setFaxMsg",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB);
             break;
-
         default:
             $contenidoModulo = listFax($pDB, $smarty, $module_name, $local_templates_dir, $arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
             break;
@@ -147,7 +146,7 @@ function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1
 			$arrTmp[2] = $fax['clid_name'] . "&nbsp;";
 			$arrTmp[3] = $fax['clid_number'] . "&nbsp;";
 			$arrTmp[4] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
-                        $arrTmp[5] = "<div class='load' id='".$fax['extension']."' style='text-align: center;'><strong>?</strong></div>";
+            $arrTmp[5] = "<div class='load' id='".$fax['extension']."' style='text-align: center;'><strong>?</strong></div>";
 
 			$arrData[] = $arrTmp;
     }
@@ -224,9 +223,6 @@ function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $a
     }else{
         $jsonObject->set_status("NOCHANGED");
     }
-
-	 $jsonObject->set_status("CHANGED");
-        $jsonObject->set_message("hola");
 
     return array("there_was_change" => true,
                  "data" => $jsonObject->createJSON());

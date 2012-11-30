@@ -353,6 +353,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Text to Wav: change operation mode of module. Now the module will
+  stream the output of text2wave directly without creating a downloadable file
+  in a web directory. This removes one requirement for a web directory that is
+  both readable and writable by the httpd user.
+  SVN Rev[4486] 
+
 * Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Festival: fix iButton setup so that it runs directly from $.ready
   instead of $.change. Fixes part 1 of Elastix bug #1416.

@@ -89,7 +89,7 @@ function generateWav($smarty, $module_name, $local_templates_dir, $arrLang)
         }
         $smarty->assign("mb_message", $strErrorMsg);
         $contenidoModulo =  form_TexttoWav($smarty, $module_name, $local_templates_dir, $arrLang);
-    }else{
+    } else {
         $smarty->assign("GENERATE", $arrLang["Generate"]);
         $smarty->assign("BACK", $arrLang["Back"]);
         $smarty->assign("icon", "modules/$module_name/images/pbx_tools_text_to_wav.png");
@@ -102,23 +102,21 @@ function generateWav($smarty, $module_name, $local_templates_dir, $arrLang)
         $message = stripslashes(trim(getParameter('message')));
         $message = substr($message, 0, 1024);
 
-        $audiodir = "/var/www/html/$path";
         $oTextToWap = new paloSantoTexttoWav();
-        $execute = $oTextToWap->TextoWav($audiodir, $format, $message);
-        if($execute){	
-            $smarty->assign("FILENAME","tts.");
-            $smarty->assign("EXTENSION",getParameter('format'));
-            $smarty->assign("EXECUTE",$execute);
-        }
-        else{
+        $execute = $oTextToWap->outputTextWave($format, $message);
+        if ($execute) {
+        	/* Cortar la salida en este lugar. Evita lidiar con rawmode sólo 
+             * para caso de éxito */
+            die();
+        } else {
             $smarty->assign("mb_title", $arrLang["Error"]);
             $smarty->assign("mb_message", $oTextToWap->errMsg);
         }
 
         $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLang["Text to Wav"], $_POST);
         $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
-  }
-return $contenidoModulo;
+    }
+    return $contenidoModulo;
 }
 
 

@@ -458,7 +458,6 @@ INSERT INTO "group_resource" VALUES(98, 0, 98);
 INSERT INTO "group_resource" VALUES(99, 0, 99);
 INSERT INTO "group_resource" VALUES(100, 0, 100);
 INSERT INTO "group_resource" VALUES(238, 0, 101);
-INSERT INTO "group_resource" VALUES(239, 0, 102);
 
 INSERT INTO "group_resource" VALUES(101, 1, 1);
 INSERT INTO "group_resource" VALUES(102, 1, 2);

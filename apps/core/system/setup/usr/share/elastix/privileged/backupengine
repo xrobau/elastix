@@ -1570,7 +1570,15 @@ function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
         fwrite(STDERR, "WARN: $sLevelTag: failed to query list of usernames and domains\n");
         return FALSE;
     }
-    
+
+    // Fix quota usage for all the mailboxes
+    $retval = NULL;
+    system('su - cyrus -c '.escapeshellarg('/usr/lib/cyrus-imapd/quota -f'), $retval);
+    if ($retval != 0) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to repair quotas for mailboxes\n");
+        $bSuccess = FALSE;
+    }
+
     return $bSuccess;
 }
 ?>

@@ -155,7 +155,7 @@ function reportReportCall($smarty, $module_name, $local_templates_dir, &$pDB_cdr
             $arrTmp[3] = $val['num_outgoing_call'];
             $arrTmp[4] = "<label style='color: green;' title='{$val['duration_incoming_call']} {$arrLang['seconds']}'>".$pReportCall->Sec2HHMMSS($val['duration_incoming_call'])."</label>";
             $arrTmp[5] = "<label style='color: green;' title='{$val['duration_outgoing_call']} {$arrLang['seconds']}'>".$pReportCall->Sec2HHMMSS($val['duration_outgoing_call'])."</label>";
-            $arrTmp[6] = "<a href='javascript: popup_ventana(\"?menu=$module_name&action=graph&rawmode=yes&ext=$ext&dini=$date_ini&dfin=$date_end&num_in=$val[num_incoming_call]&num_out=$val[num_outgoing_call]\");'>".
+            $arrTmp[6] = "<a href='javascript: popup_ventana(\"?menu=$module_name&action=graph&rawmode=yes&ext=$ext&dini=$date_ini&dfin=$date_end\");'>".
                     "".$arrLang['Call Details']."</a>";
 
             $arrData[] = $arrTmp;
@@ -274,7 +274,7 @@ function createFieldForm($arrLang){
 
 function graphLinks($smarty, $module_name, $local_templates_dir)
 {
-    $getParams = array('ext', 'dini', 'dfin', 'num_in', 'num_out');
+    $getParams = array('ext', 'dini', 'dfin');
     foreach ($getParams as $k) if (!isset($_GET[$k])) $_GET[$k] = '';
     $urlEntrantes = construirURL(array(
         'module'    =>  $module_name,
@@ -283,8 +283,7 @@ function graphLinks($smarty, $module_name, $local_templates_dir)
         'ext'       =>  $_GET['ext'],
         'dini'      =>  $_GET['dini'],
         'dfin'      =>  $_GET['dfin'],
-        'num'       =>  $_GET['num_in'],
-    ), array('num_in', 'num_out'));
+    ));
     $urlSalientes = construirURL(array(
         'module'    =>  $module_name,
         'rawmode'   =>  'yes',
@@ -292,8 +291,7 @@ function graphLinks($smarty, $module_name, $local_templates_dir)
         'ext'       =>  $_GET['ext'],
         'dini'      =>  $_GET['dini'],
         'dfin'      =>  $_GET['dfin'],
-        'num'       =>  $_GET['num_out'],
-    ), array('num_in', 'num_out'));
+    ));
     $sPlantilla = <<<PLANTILLA_GRAPH
 <html>
 <head><title>Top 10</title></head>
@@ -313,7 +311,7 @@ function executeImage($module_name, $sImage)
     require_once "libs/paloSantoGraphImage.lib.php";
     
     $arrParameterCallbyGraph = array();
-    $getParams = array('dini', 'dfin', 'ext', 'num');
+    $getParams = array('dini', 'dfin', 'ext');
     foreach ($getParams as $k) $arrParameterCallbyGraph[] = isset($_GET[$k]) ? $_GET[$k] : '';
 
     if ($sImage == 'imageTop10Entrantes')

@@ -103,7 +103,51 @@ class paloSantoRecordings extends paloAsteriskDB{
 		}else
 			return $result;
     }
+    
+    function convertMP3toWAV($base,&$tmpFile,$file_sin_ext,$prep){
+        $output = $ret = NULL;
+        
+        $tmp=$tmpFile;
+        $tmpFile=$prep."_".$file_sin_ext.".wav";
+        //mpg123 -w outputFile inputFile
+	
+        exec("mpg123 -w $base/$tmpFile $base/$tmp", $output, $ret);
+	
+        if ($ret != 0) {
+            unlink("$base/$tmp");
+            $this->errMsg = implode('', $output);
+            return FALSE;
+        }else{
+            unlink("$base/$tmp");
+            return TRUE;
+        }
+    }
 
+    function getTipeOfFile($file){
+	$mime_type="";
+        $finfo = new finfo(FILEINFO_MIME, "/usr/share/misc/magic.mgc");
+        if(is_file($file)){
+            $mime_type = $finfo->file($file);
+        }else{
+            $this->errMsg = _tr("File doens't exist ").$file;
+            return false;
+        }
+        return $mime_type;
+    }
+    
+     function resampleMoHFiles($base,$tmpFile,$filename){
+      //  sox inputFile -r 8000 -c 1 outputFile
+        $output = $ret = NULL;		
+	exec("sox $base/$tmpFile -r 8000 -c 1 $base/$filename", $output, $ret);
+        if ($ret != 0) {
+            unlink("$base/$tmpFile");
+            $this->errMsg = implode('', $output);
+            return FALSE;
+        }else{
+            unlink("$base/$tmpFile");
+            return TRUE;
+        }
+    }
 
     function getRecordingsByUser($domain,$extUser){
 		$where="";
@@ -209,13 +253,15 @@ class paloSantoRecordings extends paloAsteriskDB{
    }
   
     function AsteriskManager_Originate($host, $user, $password, $command_data) {
+        global $arrLang;
+	
         $astman = new AGI_AsteriskManager();
-       // $astMang=AsteriskManagerConnect($errorM);
+
         if (!$astman->connect("$host", "$user" , "$password")) {
-            $this->errMsg = _tr("Error when connecting to Asterisk Manager");
+            $this->errMsg = $arrLang["Error when connecting to Asterisk Manager"];
         } else{
           //
-            $parameters = $this->Originate($command_data['origen'], $command_data['channel'],$command_data['device'], $command_data["recording_name"]);
+            $parameters = $this->Originate($command_data['origen'], $command_data['channel'],$command_data['description'], $command_data["recording_name"]);
 
             $salida = $astman->send_request('Originate', $parameters);
            
@@ -249,8 +295,6 @@ class paloSantoRecordings extends paloAsteriskDB{
 	       }
 	       
             }
-
-
 	    $parameters = array('Channel'=>$channel);
 	   
             $salida = $astman->send_request('Hangup',$parameters);

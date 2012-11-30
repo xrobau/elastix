@@ -227,12 +227,12 @@ class paloSantoReportCall {
     }
 
     //PARA PLOT3D
-    function callbackTop10Salientes($date_ini, $date_end, $ext, $num_out)
+    function callbackTop10Salientes($date_ini, $date_end, $ext)
     {
         $arrData = $this->obtainTop10Salientes( $date_ini, $date_end, $ext );
         $result = $arrData['data'];
         $numTopCalls = $arrData['total'];
-        //$num_out = $this->obtainAllSalientes($date_ini, $date_end, $ext);
+        $num_out = $this->obtainAllSalientes($date_ini, $date_end, $ext);
         
         if($num_out > 0)
             $numCallNoTop = $num_out - $numTopCalls;
@@ -330,7 +330,7 @@ class paloSantoReportCall {
         if($result == FALSE){
             $this->errMsg = $this->_DB_cdr->errMsg;
         }
-        return $result[0];
+        return $result[0][0];
     }
     
     function obtainAllEntrantes($date_ini, $date_end, $ext)
@@ -347,15 +347,15 @@ class paloSantoReportCall {
         if($result == FALSE){
             $this->errMsg = $this->_DB_cdr->errMsg;
         }
-        return $result[0];
+        return $result[0][0];
     }
 ////////
-    function callbackTop10Entrantes($date_ini, $date_end, $ext, $num_in)
+    function callbackTop10Entrantes($date_ini, $date_end, $ext)
     {
         $arrData = $this->obtainTop10Entrantes( $date_ini, $date_end, $ext );
         $result = $arrData['data'];
         $numTopCalls = $arrData['total'];
-        //$num_in = $this->obtainAllEntrantes($date_ini, $date_end, $ext);
+        $num_in = $this->obtainAllEntrantes($date_ini, $date_end, $ext);
         
         if($num_in > 0)
             $numCallNoTop = $num_in - $numTopCalls;

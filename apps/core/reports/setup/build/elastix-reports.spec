@@ -92,6 +92,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Summary by Extension: do not use or add number of calls on URL. Read
+  this number from the database instead. Fixes part 2 of Elastix bug #1416.
+  SVN Rev[4482]
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.

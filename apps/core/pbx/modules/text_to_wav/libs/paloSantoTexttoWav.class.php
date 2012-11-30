@@ -35,62 +35,40 @@ class paloSantoTexttoWav {
     {
     }
 
-    function TextoWav($path, $format, $message)
+    function outputTextWave($format, $message)
     {
-        global $arrLang;
-
-        $text_file = $path.'/tts.txt';
-        $wave_file = $path.'/tts.wav';
-        $gsm_file  = $path.'/tts.gsm';
-
-        $cmd1 = "/usr/bin/text2wave $text_file -F 8000 -o $wave_file -scale 4.0 -otype wav";
-        $cmd2 = "/usr/bin/sox       $wave_file -r 8001    $gsm_file   resample -ql";
-
-        $fh = fopen($text_file, "w+");
-        if ($fh) {
-            if(fwrite($fh, $message) == false){
-                $this->errMsg = $arrLang["Unabled write file"];
-                fclose($fh);
-                return false;
-            }
-            fclose($fh);
+        $pipespec = array(
+            0 => array('pipe', 'r'),
+            1 => array('pipe', 'w'),
+            2 => array('file', '/tmp/stderr.txt', 'a'),
+        );
+        $pipes = NULL;
+        $sComando = '/usr/bin/text2wave -F 8000 -scale 4.0 -otype riff';
+        switch ($format) {
+        case 'gsm':
+            Header('Content-Type: audio/x-gsm');
+            $sComando .= ' | /usr/bin/sox -t wav - -r 8000 -t gsm -';
+            break;
+        case 'wav':
+        default:
+            $format = 'wav';
+            Header('Content-Type: audio/x-wav');
+            break;
         }
-        else{
-            $this->errMsg = $arrLang["Unabled open file"];
-            return false;
+        Header('Content-Disposition: attachment; filename=tts.'.$format);
+        
+        $proc = proc_open($sComando, $pipespec, $pipes);
+        if (!is_resource($proc)) {
+            $this->errMsg = '(internal) Failed to open pipe for TTS';
+        	return FALSE;
         }
+        fwrite($pipes[0], $message);
+        fclose($pipes[0]);
+        fpassthru($pipes[1]);
+        fclose($pipes[1]);
+        proc_close($proc);
 
-        if (file_exists($text_file)) {
-            if($format == "wav"){
-                exec($cmd1,$arrConsole1,$flatStatus1);
-                if($flatStatus1 == 0)
-                    return true;
-                else{
-                    $this->errMsg = $arrLang["Unabled create file wav"];
-                    return false;
-                }
-            }
-            else{
-                exec($cmd1,$arrConsole1,$flatStatus1);
-                if($flatStatus1 == 0){
-                    exec($cmd2,$arrConsole2,$flatStatus2);
-                    if($flatStatus2 == 0)
-                        return true;
-                    else{
-                        $this->errMsg = $arrLang["Unabled create file gsm"];
-                        return false;
-                    }
-                }
-                else{
-                    $this->errMsg = $arrLang["Unabled create file gsm"];
-                    return false;
-                }
-            }
-        }
-        else{
-            $this->errMsg = $arrLang["Not exists file"];
-            return false;
-        }
+        return TRUE;
     }
 }
 ?>

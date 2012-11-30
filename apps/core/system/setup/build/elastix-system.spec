@@ -134,6 +134,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: mailbox quotas need to be repaired after a mailbox 
+  restore. Otherwise the quotas of the restored mailboxes always appear as 0.
+  Fixes part 10a of Elastix bug #1416.
+  SVN Rev[4489] 
+
 * Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: since the privileged script conversion, the backupengine
   script writes an XML manifest with untranslated strings. This conflicts with

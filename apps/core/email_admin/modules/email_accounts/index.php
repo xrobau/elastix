@@ -198,9 +198,11 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 
     $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
 
-    $smarty->assign("id_domain",$id_domain);
-    $smarty->assign("LINK", "?menu=$module_name&action=export&domain=$id_domain&rawmode=yes");
-    $smarty->assign("EXPORT", _tr("Export Accounts"));
+    if ($id_domain != 0) {
+        $smarty->assign("id_domain",$id_domain);
+        $smarty->assign("LINK", "?menu=$module_name&action=export&domain=$id_domain&rawmode=yes");
+        $smarty->assign("EXPORT", _tr("Export Accounts"));
+    }
 
     if($isAdministrator)
         $oGrid->setColumns(array(_tr("Account Name"),_tr("Used Space"),_tr("Reconstruct MailBox")));

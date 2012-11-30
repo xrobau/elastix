@@ -3,9 +3,9 @@
       <tr class="letra12">
         <td width="5%" align="right">{$domain.LABEL}: </td>
         <td width="12%" align="left" nowrap>{$domain.INPUT}</td>
-        <td align="left">
-                <a href="{$LINK}">{$EXPORT}</a>
-        </td>
+{if $LINK <> ''}
+        <td align="left"><a href="{$LINK}">{$EXPORT}</a></td>
+{/if}
       </tr>
    </table>
 </form>

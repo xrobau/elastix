@@ -195,6 +195,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email Accounts: do not display the "Export Accounts" link until an
+  email domain is selected. Fixes part 7 of Elastix bug #1416.
+  SVN Rev[4481]
+
 * Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: do not attempt to erase an account in case of errors
   while creating or updating an account. Account creation was affected if new

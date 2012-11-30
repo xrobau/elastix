@@ -33,14 +33,8 @@ include_once "../configs/default.conf.php";
 session_name("elastixSession");
 session_start();
 
-// load smarty
-require_once("../libs/smarty/libs/Smarty.class.php");
-$smarty = new Smarty();
-
-$smarty->template_dir = "../themes/" . $arrConf['mainTheme'];
-$smarty->compile_dir =  "../var/templates_c/";
-$smarty->config_dir =   "../configs/";
-$smarty->cache_dir =    "../var/cache/";
+// Load smarty
+$smarty = getSmarty($arrConf['mainTheme']);
 
 $smarty->assign("THEMENAME", $arrConf['mainTheme']);
 $smarty->assign("titulo", "Help Window");

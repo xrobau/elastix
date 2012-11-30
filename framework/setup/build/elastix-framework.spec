@@ -313,6 +313,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Framework: round up three duplicates of smarty creation into a single method,
+  paves the way to moving compiled template directory off the wwwroot.
+  SVN Rev[4488]
+
 * Tue Nov 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework: limit scope of javascript keypress handler to just the input boxes
   on the elastixneo theme grid views. Original fix by Bruno Macias. Fixes 

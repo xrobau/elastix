@@ -1233,4 +1233,18 @@ function load_default_timezone()
     date_default_timezone_set($sDefaultTimezone);
 }
 
+// Create a new Smarty object and initialize template directories
+function getSmarty($mainTheme, $basedir = '/var/www/html')
+{
+    require_once("$basedir/libs/smarty/libs/Smarty.class.php");
+    $smarty = new Smarty();
+    
+    $smarty->template_dir = "$basedir/themes/$mainTheme";
+    $smarty->config_dir =   "$basedir/configs/";
+    $smarty->compile_dir =  "$basedir/var/templates_c/";
+    $smarty->cache_dir =    "$basedir/var/cache/";
+
+    return $smarty;
+}
+
 ?>

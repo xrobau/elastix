@@ -54,15 +54,8 @@ if(!empty($pACL->errMsg)) {
     echo "ERROR DE DB: $pACL->errMsg <br>";
 }
 
-// Load smarty 
-require_once("libs/smarty/libs/Smarty.class.php");
-$smarty = new Smarty();
-$smarty->template_dir = "themes/" . $arrConf['mainTheme'];
-$smarty->compile_dir =  "var/templates_c/";
-$smarty->config_dir =   "configs/";
-$smarty->cache_dir =    "var/cache/";
-//$smarty->debugging =    true;
-
+// Load smarty
+$smarty = getSmarty($arrConf['mainTheme']);
 
 $pDBMenu = new paloDB($arrConf['elastix_dsn']['menu']);
 

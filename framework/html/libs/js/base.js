@@ -187,24 +187,23 @@ function ShowModalPopUP(title, width, height, html){
     var maskHeight = $(document).height();
     var maskWidth = $(window).width();
 
-    $('.neo-modal-elastix-popup-blockmask').css({'width':"100%",'height':"100%"});
-    $('.neo-modal-elastix-popup-blockmask').css('padding',  "100%");
+    $('.neo-modal-elastix-popup-blockmask').css({'width':maskWidth,'height':maskHeight});
+
     $('.neo-modal-elastix-popup-blockmask').fadeIn(600);
     $('.neo-modal-elastix-popup-blockmask').fadeTo("fast",0.8);
 
     var winH = $(window).height();
     var winW = $(window).width();
-  
+
     var top = winH/2-height/2;
     if(top<0){
-	top=10;
+        top=10;
         $('.neo-modal-elastix-popup-box').css({'height':"auto", 'bottom':10});
-	$('.neo-modal-elastix-popup-content').css({'overflow-y':"auto", 'overflow-x':"visible", 'bottom':20, 'position': "absolute", 'top':40, 'width':"93%"});
-	
+        $('.neo-modal-elastix-popup-content').css({'overflow-y':"auto", 'overflow-x':"visible", 'bottom':20, 'position': "absolute", 'top':40, 'width':"93%"});
+
     }else{
-    	$('.neo-modal-elastix-popup-box').height(height);
+        $('.neo-modal-elastix-popup-box').height(height);
     }
-    $('.neo-modal-elastix-popup-box').css('position', "absolute");
     $('.neo-modal-elastix-popup-box').width(width);
     $('.neo-modal-elastix-popup-box').css('top',  top);
     $('.neo-modal-elastix-popup-box').css('left', winW/2-width/2);
@@ -215,8 +214,6 @@ function ShowModalPopUP(title, width, height, html){
     $('.neo-modal-elastix-popup-close').click(function() {
         hideModalPopUP();
     });
-
-
 }
 
 function hideModalPopUP()

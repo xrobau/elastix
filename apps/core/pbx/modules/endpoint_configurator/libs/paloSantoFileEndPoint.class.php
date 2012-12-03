@@ -194,6 +194,22 @@ class PaloSantoFileEndPoint
 
                 break;
 	    
+	     case 'Escene':
+                if($ArrayData['data']['model'] == "ES620"){
+	          $contentFileEscene = PrincipalFileEscene620($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
+		   if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".xml", $contentFileEscene)){
+		       $arrComandos = arrEscene($this->ipAdressServer, $ArrayData['data']['filename']);
+	               if ($result = $this->telnet($ArrayData['data']['ip_endpoint'], "root", "root", $arrComandos,2)){
+			    $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
+			    $result      = $this->AsteriskManagerAPI('Command',$parameters);
+			    if($result) $return = true;
+			    else $return = false;
+			} else $return = false;
+		   }
+		   else 
+		      $return = false;
+		}
+	        break;
 
             case 'Snom':
                 $contentFileSnom = PrincipalFileSnom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
@@ -306,7 +322,7 @@ class PaloSantoFileEndPoint
     }
     return $return;
     }
-
+      
     function buildPattonConfFile($arrData,$tone_set)
     {
     include_once "vendors/Patton.cfg.php";
@@ -658,6 +674,10 @@ class PaloSantoFileEndPoint
 	    case 'Fanvil':
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
                 break;
+	    
+	    case 'Escene':
+                return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".xml");
+                break;
 
             case 'Snom':
                 return $this->deleteFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm");
@@ -764,8 +784,15 @@ class PaloSantoFileEndPoint
 	
 	    case 'Fanvil':
                 //Creando archivos de ejemplo.
-                $contentFileAtcom = templatesFileFanvil($this->ipAdressServer);
-                $this->createFileConf($this->directory, "fanvilxxxxxxxx.template.cfg", $contentFileAtcom);
+                $contentFileFanvil = templatesFileFanvil($this->ipAdressServer);
+                $this->createFileConf($this->directory, "fanvilxxxxxxxx.template.cfg", $contentFileFanvil);
+                return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
+                break;
+
+	    case 'Escene':
+                //Creando archivos de ejemplo.
+                $contentFileEscene = templatesFileEscene($this->ipAdressServer);
+                $this->createFileConf($this->directory, "ES000000.xml", $contentFileEscene);
                 return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
                 break;
 
@@ -824,11 +851,11 @@ class PaloSantoFileEndPoint
         }
     }
 
-    function telnet($ip, $user, $password, $arrComandos, $sw=1)
+   function telnet($ip, $user, $password, $arrComandos, $sw=1)
     {
         if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
         {
-            if(is_array($arrComandos) && count($arrComandos)>0)
+	   if(is_array($arrComandos) && count($arrComandos)>0)
             {
                 if($user!="" && $user!=null){
                     fputs($fsock, "$user\r");
@@ -843,7 +870,7 @@ class PaloSantoFileEndPoint
                     $line = $comando;
                     if($valor!="")
                         $line = "$comando $valor";
-                    fputs($fsock, "$line\r");
+		    fputs($fsock, "$line\r");
                     $this->read($fsock,$sw);
                 }
             }

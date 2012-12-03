@@ -169,10 +169,10 @@ function PrincipalFileFanvilC62SIP($DisplayName, $id_device, $secret, $arrParame
 {
  $versionCfg = isset($versionCfg)?$versionCfg:'2.0002';
  $configNetwork ="";
- $ByDHCP = existsValue($arrParameters,'By_DHCP',1);
+ $ByDHCP = existsValue($arrParameters,'By_DHCP',"");
    // 1 indica que es por DHCP y 0 por estatico
 
-if($ByDHCP==0){ // 0 es IP Estatica
+if($ByDHCP==="0"){ // 0 es IP Estatica
 $configNetwork ="
 WAN Mode:	   :STATIC
 WAN IP             :".existsValue($arrParameters,'IP','')."
@@ -180,7 +180,17 @@ WAN Subnet Mask    :".existsValue($arrParameters,'Mask','')."
 WAN Gateway        :".existsValue($arrParameters,'GW','')."
 Primary DNS        :".existsValue($arrParameters,'DNS1','')."
 Secondary DNS      :".existsValue($arrParameters,'DNS2','')."
+Enable DHCP        :$ByDHCP
 ";
+}
+elseif($ByDHCP==="1"){ // 0 es IP Estatica
+$configNetwork ="
+WAN Mode:	   :DHCP
+Enable DHCP        :$ByDHCP
+";
+}
+else{ 
+$configNetwork = "";
 }
 
 # CONTENT
@@ -188,8 +198,9 @@ Secondary DNS      :".existsValue($arrParameters,'DNS2','')."
 
 <GLOBAL CONFIG MODULE>
 $configNetwork
+
 Default Protocol   :2
-Enable DHCP        :$ByDHCP
+
 Time Zone          :".existsValue($arrParameters,'Time_Zone',12)."
 
 <LAN CONFIG MODULE>
@@ -356,10 +367,10 @@ function PrincipalFileFanvilC62IAX($DisplayName, $id_device, $secret, $arrParame
  $versionCfg = isset($versionCfg)?$versionCfg:'2.0002';
 
  $configNetwork ="";
- $ByDHCP = existsValue($arrParameters,'By_DHCP',1);
+ $ByDHCP = existsValue($arrParameters,'By_DHCP',"");
    // 1 indica que es por DHCP y 0 por estatico
 
-if($ByDHCP==0){ // 0 es IP Estatica
+if($ByDHCP==="0"){ // 0 es IP Estatica
 $configNetwork ="
 WAN Mode:	   :STATIC
 WAN IP             :".existsValue($arrParameters,'IP','')."
@@ -367,7 +378,17 @@ WAN Subnet Mask    :".existsValue($arrParameters,'Mask','')."
 WAN Gateway        :".existsValue($arrParameters,'GW','')."
 Primary DNS        :".existsValue($arrParameters,'DNS1','')."
 Secondary DNS      :".existsValue($arrParameters,'DNS2','')."
+Enable DHCP        :$ByDHCP
 ";
+}
+elseif($ByDHCP==="1"){ // 0 es IP Estatica
+$configNetwork ="
+WAN Mode:	   :DHCP
+Enable DHCP        :$ByDHCP
+";
+}
+else{ 
+$configNetwork = "";
 }
 # CONTENT
    $content= "<<VOIP CONFIG FILE>>Version:$versionCfg                            
@@ -375,8 +396,9 @@ Secondary DNS      :".existsValue($arrParameters,'DNS2','')."
 <PHONE CONFIG MODULE>
 <GLOBAL CONFIG MODULE>
 $configNetwork
+
 Default Protocol   :2
-Enable DHCP        :$ByDHCP
+
 Time Zone          :".existsValue($arrParameters,'Time_Zone',12)."
 --Function Key--   :
 Fkey1 Type         :2

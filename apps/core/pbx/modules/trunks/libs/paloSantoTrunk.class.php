@@ -213,6 +213,7 @@ class paloSantoTrunk extends paloAsteriskDB{
         $arrTrunk["period_time"]="60";
         if($tech=="sip"){
             $arrTrunk["insecure"]="port,invite";
+            $arrTrunk["host"]="dynamic";
             $arrTrunk["nat"]="auto";
             $arrTrunk["dtmfmode"]="rfc2833";
             $arrTrunk["sendrpid"]="no";
@@ -221,6 +222,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             $arrTrunk["useragent"]="";
         }elseif($tech=="iax2"){
             $arrTrunk["auth"]="plaintext";
+            $arrTrunk["host"]="dynamic";
             $arrTrunk["trunk"]="yes";
             $arrTrunk["trunkfreq"]="20";
             $arrTrunk["trunktimestamps"]="yes";
@@ -428,6 +430,10 @@ class paloSantoTrunk extends paloAsteriskDB{
         
         if(!$this->validateIP($arrProp['permit'])){
             $arrProp['permit']="0.0.0.0/0.0.0.0";
+        }
+        
+        if(empty($arrProp['host'])){
+            $arrProp['host']="dynamic";
         }
         
         $arrValues=array();
@@ -673,6 +679,10 @@ class paloSantoTrunk extends paloAsteriskDB{
         
         if(!$this->validateIP($arrProp['permit'])){
             $arrProp['permit']="0.0.0.0/0.0.0.0";
+        }
+        
+        if(empty($arrProp['host'])){
+            $arrProp['host']="dynamic";
         }
         
         $arrQuery=array();

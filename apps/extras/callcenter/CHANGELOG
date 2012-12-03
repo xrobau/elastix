@@ -1,3 +1,5 @@
+* Agent Console: expose the Uniqueid of the linked call as an additional 
+  variable for External URL.
 * Login Logout: fix issue of report export displaying only a single page.
 * Login Logout: add consistency checks on audit records to counter the situation
   where an abnormal termination of the dialer leaves unclosed audit records.

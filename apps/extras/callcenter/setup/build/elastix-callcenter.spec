@@ -100,6 +100,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Dec 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: expose the Uniqueid of the linked call as an 
+  additional variable for External URL.
+
 * Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Login Logout: fix issue of report export displaying only a single page.
 - CHANGED: Login Logout: add consistency checks on audit records to counter the

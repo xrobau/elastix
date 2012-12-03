@@ -1486,6 +1486,7 @@ function construirUrlExterno($s, $infoLlamada)
         '{__CAMPAIGN_ID__}'     =>  $infoLlamada['campaign_id'],
         '{__CALL_ID__}'         =>  $infoLlamada['callid'],
         '{__PHONE__}'           =>  $infoLlamada['callnumber'],
+        '{__UNIQUEID__}'        =>  $infoLlamada['uniqueid'],
     );
     if (isset($infoLlamada['call_attributes'])) foreach ($infoLlamada['call_attributes'] as $tupla) {
         $reemplazos['{'.$tupla['label'].'}'] = $tupla['value'];

@@ -109,12 +109,13 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
                     'action'    =>  'edit',
                     'file'      =>  $sArchivo,
 		    'search'	=>  $sSubStrArchivo,
+		    'nav'	=>  getParameter('nav'),
+		    'page'	=>  getParameter('page'),
                 )),
                 htmlentities($sArchivo, ENT_COMPAT, 'UTF-8')),
             filesize($sDirectorio.$sArchivo),
         );
     }
-
     ////PARA EL PAGINEO
     $total = count($arrData); $limit = 25; $offset = 0;
 
@@ -122,7 +123,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
         array(
             "file"  => array(
                 "LABEL"                  => _tr("File"),
-                "REQUIRED"               => "no",
+		"REQUIRED"               => "no",
                 "INPUT_TYPE"             => "TEXT",
                 "INPUT_EXTRA_PARAM"      => "",
                 "VALIDATION_TYPE"        => "text",
@@ -134,9 +135,13 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     $smarty->assign("NEW_FILE", _tr("New File"));
     $smarty->assign('url_new', construirURL(array('menu' => $module_name, 'action' => 'new')));
     $oGrid = new paloSantoGrid($smarty);
+    $arr = array("file"=>getParameter("file"),"filter"=>"Filter");
+    if(empty($_POST))
+	$_POST = $arr;
+
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("File")." = ".$sSubStrArchivo, $_POST, array("file" => ""));
     $htmlFilter = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("File Editor"), $_POST);
-
+  
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
 
@@ -145,8 +150,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     $inicio = ($total == 0) ? 0 : $offset + 1;
     $fin = ($offset+$limit) <= $total ? $offset+$limit : $total;
     $leng = $fin - $inicio;
-
-    
+   
     $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
     $arrGrid = array(
         "title"    => _tr("File Editor"),
@@ -259,9 +263,9 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
         )
     );
     $oForm->setEditMode();
-
+  
     $smarty->assign('url_edit', construirURL(array('menu' => $module_name, 'action' => $sAccion, 'file' => $sNombreArchivo)));
-    $smarty->assign('url_back', construirURL(array('menu' => $module_name), array('action', 'file')));
+    $smarty->assign('url_back', construirURL(array('menu' => $module_name), array('action', 'file', 'nav'=>getParameter('nav'), 'page'=>getParameter('page'))));
     $smarty->assign('search',getParameter('search'));
     $smarty->assign('LABEL_SAVE', _tr('Save'));
     $smarty->assign('RELOAD_ASTERISK', _tr('Reload Asterisk'));

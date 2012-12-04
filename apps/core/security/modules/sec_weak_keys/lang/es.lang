@@ -61,6 +61,8 @@ $arrLangModule=array(
 "The Current Secret is invalid" => "La Clave Actual es inválida",
 "The New Secret does not match with the Confirmation Secret" => "La Nueva clave no concuerda con la Confirmación de Clave",
 "Successful Secret Update" => "Actualización de Clave Exitosa",
-"Change Secret" => "Cambiar Clave" 
+"Change Secret" => "Cambiar Clave",
+"Weak Key" => "Key Débil",
+"Status" => "Estado" 
 );
 ?>

@@ -61,6 +61,8 @@ $arrLangModule=array(
 "The Current Secret is invalid" => "The Current Secret is invalid",
 "The New Secret does not match with the Confirmation Secret" => "The New Secret does not match with the Confirmation Secret",
 "Successful Secret Update" => "Successful Secret Update",
-"Change Secret" => "Change Secret"
+"Change Secret" => "Change Secret",
+"Weak Key" => "Weak Key",
+"Status" => "Status"
 );
 ?>

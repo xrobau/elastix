@@ -123,7 +123,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $arrResult =$pWeakKeys->getWeakKeys($limit,$offset,$filter_field,$filter_value);
     $arrData = null;
     //$arrResult =$pWeakKeys->getWeakKeysChecker();
-    $arrColumns = array(_tr("Extension"),_tr("Description"),_tr("Reason"));
+    $arrColumns = array(_tr("Extension"),_tr("Description"),_tr("Status"));
     $oGrid->setColumns($arrColumns);
     if(is_array($arrResult) && $total>0){
         foreach($arrResult as $tech){
@@ -133,7 +133,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             $mensaje = getMensaje($value['id'],$value['data']);
             if($mensaje != "OK" && !$bExportation)
                 if($pACL->isUserAdministratorGroup($_SESSION['elastix_user']) || $pACL->getUserExtension($_SESSION['elastix_user'])==$value['id'])
-                    $mensaje.= "&nbsp;<a href='?menu=$module_name&action=change&id=$value[id]'>"._tr("Change Secret")."</a>";
+                    $mensaje = _tr("Weak Key").": $mensaje &nbsp;<a href='?menu=$module_name&action=change&id=$value[id]'>"._tr("Change Secret")."</a>";
             $arrTmp[2] = $mensaje;
             $arrData[] = $arrTmp;
             }

@@ -12,7 +12,7 @@
         <b>{$basename.LABEL}:</b>&nbsp;{$basename.INPUT}{$LABEL_COMPLETADO}&nbsp;&nbsp;
         <input type="submit" class="button" name="Guardar" value="{$LABEL_SAVE}" />&nbsp;&nbsp;
         <input type="submit" class="button" name="Reload"  value="{$RELOAD_ASTERISK}" />
-        </td>
+	</td>
     </tr>
     <tr>
         <td>{$content.INPUT}</td>

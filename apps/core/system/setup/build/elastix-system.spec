@@ -134,6 +134,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Dec 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Network Parameters: allow optional quote before dhcp keyword.
+  SVN Rev[4500]
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: mailbox quotas need to be repaired after a mailbox 
   restore. Otherwise the quotas of the restored mailboxes always appear as 0.

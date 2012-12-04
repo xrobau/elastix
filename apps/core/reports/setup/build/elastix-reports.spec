@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.3.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Summary by Extension: do not use or add number of calls on URL. Read
   this number from the database instead. Fixes part 2 of Elastix bug #1416.
@@ -100,6 +104,7 @@ fi
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4362]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -112,11 +117,14 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
-  SVN Rev[4347]
+- Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
+  SVN Rev[4354]
 
 * Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4178]
 
 * Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
 - CHANGED: module - billing_rates: Change text information when edit a rate.

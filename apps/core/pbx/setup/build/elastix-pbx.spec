@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 17
+Release: 18
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,6 +298,15 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-18
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Mon Dec 03 2012 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - endpoint_configurator: Add Support to set new model Escene
+  620 and Fixed bug in Fanvil vendor
+  SVN Rev[4492]
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Text to Wav: change operation mode of module. Now the module will
   stream the output of text2wave directly without creating a downloadable file
@@ -308,11 +317,27 @@ fi
 * Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Festival: fix iButton setup so that it runs directly from $.ready
   instead of $.change. Fixes part 1 of Elastix bug #1416.
+  SVN Rev[4476]
+
+* Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Festival: fix iButton setup so that it runs directly from $.ready
+  instead of $.change. Fixes part 1 of Elastix bug #1416.
   SVN Rev[4475]
+
+* Fri Nov 23 2012 German Macas <gmacas@palosanto.com>
+- FIXED: modules - extensions_batch: Bug 1117, set disable voicemail from csv
+  file.
+  SVN Rev[4456]
+
+* Wed Nov 21 2012 German Macas <gmacas@palosanto.com>
+- ADD: modules - endpoint_configurator: Add support to set new model Fanvil C62
+  and fix validation in vendor Atcom.cfg
+  SVN Rev[4446]
 
 * Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-17
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4443]
 
 * Thu Nov  1 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: replace brittle regexp parsing of voicemail.conf

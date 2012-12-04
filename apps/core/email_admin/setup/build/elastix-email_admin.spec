@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 10
+Release: 11
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -195,6 +195,10 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: do not display the "Export Accounts" link until an
   email domain is selected. Fixes part 7 of Elastix bug #1416.
@@ -212,6 +216,7 @@ fi
 * Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4441]
 
 * Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - CHANGED: Email_admin: comment out statement that logs every single IMAP 

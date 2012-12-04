@@ -117,11 +117,19 @@ fi
 /var/lib/asterisk/sounds/custom
 /var/lib/asterisk/sounds/custom/calendarEvent.gsm
 /var/lib/asterisk/sounds/custom/*
+/opt/elastix/elastix-synchronizer
 /opt/elastix/elastix-synchronizer/*
 /etc/init.d/elastix-synchronizerd
 
 %changelog
 #Se debe poner como prerequisito la version del framework nueva que se genere
+* Tue Dec 04 2012 Alberto Santos <asantos@palosanto.com>
+- CHANGED: In spec file, added asterisk user as owner of folder
+  /opt/elastix/elastix-synchronizer
+- CHANGED: added function daemon_load_default_timezone to avoid php date/time
+  warnings. Also replaced the deprecated ereg function to preg_match
+  SVN Rev[4501]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

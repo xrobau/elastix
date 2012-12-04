@@ -308,7 +308,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
-* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
+* Thu Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
 - FIXED: framework - Build/elastix-framework.spec: Put in correct order the
   procedure of delete a group of dirs in the spec.
 

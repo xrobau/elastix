@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.3.0
-Release: 15
+Release: 16
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -308,10 +308,24 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
+- FIXED: framework - Build/elastix-framework.spec: Put in correct order the
+  procedure of delete a group of dirs in the spec.
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework: round up three duplicates of smarty creation into a single method,
   paves the way to moving compiled template directory off the wwwroot.
   SVN Rev[4488]
+
+* Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: no module is using var/backups anymore. Remove this
+  directory.
+  SVN Rev[4487]
+
+* Fri Nov 30 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: framework elastix, file base.js in the function ShowModalPopUP, was
+  improved usability.
+  SVN Rev[4483]
 
 * Tue Nov 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework: limit scope of javascript keypress handler to just the input boxes
@@ -319,14 +333,42 @@ rm -rf $RPM_BUILD_ROOT
   Elastix bug #1365.
   SVN Rev[4431]
 
+* Tue Nov 13 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: elastix framework - file base.js, fixed bug when applied enter button
+  in same  modules, the focus field is not correct, new validation was wrote
+  SVN Rev[4429]
+
+* Tue Nov 13 2012 Bruno Macias <bmacias@palosanto.com>
+- CHANGED: elastix framework, file menu.tpl of elastixneo theme, logout link
+  was updated
+  SVN Rev[4426]
+
+* Mon Nov 12 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: elastix framework - file base.js, fixed bug when applied enter button
+  in module pin set freepbx, it deleted a register. Extra validation
+  on function keyPressed was wrote.
+  SVN Rev[4425]
+
+* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: framework - Build/elastix-framework.spec: Put in correct order the
+  procedure of delete a group of dirs in the spec.
+  SVN Rev[4367]
+
+* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: framework - Build/elastix-framework.spec: The procedure of delete a
+  group of dirs in the spec its now working.
+  SVN Rev[4364]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework: fix elastix-dbprocess to remove the temporary file 1_sqlFile.sql
   whenever it is successfully committed to a database or copied to firstboot.
   Part of the fix for Elastix bug #1398.
+  SVN Rev[4355]
 
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-15
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile
+  SVN Rev[4349]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 

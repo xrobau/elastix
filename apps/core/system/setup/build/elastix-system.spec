@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Dec 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Network Parameters: allow optional quote before dhcp keyword.
+  SVN Rev[4500]
+
 * Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-15
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

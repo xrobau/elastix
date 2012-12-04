@@ -49,7 +49,7 @@ class paloNetwork
             if($fh = fopen($fileIf, "r")) {
                 while(!feof($fh)) {
                     $lineaIfcfg = fgets($fh, 4048);
-                    if(preg_match("/^BOOTPROTO[[:space:]]*=[[:space:]]*dhcp/", $lineaIfcfg)) {
+                    if(preg_match("/^BOOTPROTO[[:space:]]*=[[:space:]]*\"?dhcp/", $lineaIfcfg)) {
                         $type = "dhcp";
                     }
                 }

@@ -1,3 +1,5 @@
+* Dialer (ECCP): add a new request 'getchanvars'. This request lists the channel
+  variables of the call currently handled by the agent.
 * Agent Console: expose the Uniqueid of the linked call as an additional 
   variable for External URL.
 * Login Logout: fix issue of report export displaying only a single page.

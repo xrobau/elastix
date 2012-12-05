@@ -3185,6 +3185,76 @@ LEER_ULTIMA_PAUSA;
         return $xml_response;
     }
 
+    private function Request_getchanvars($comando)
+    {
+        if (is_null($this->_ami))
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
+        // Verificar que agente está presente
+        if (!isset($comando->agent_number)) 
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        $sAgente = (string)$comando->agent_number;
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_getchanvarsResponse = $xml_response->addChild('getchanvars_response');
+
+        // El siguiente código asume formato Agent/9000
+        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 417, 'Invalid agent number');
+            return $xml_response;
+        }
+        $sNumAgente = $regs[1];
+
+        // Verificar que el agente está autorizado a realizar operación
+        if (!$this->_hashValidoAgenteECCP($comando)) {
+            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 401, 'Unauthorized agent');
+            return $xml_response;
+        }
+
+        // Verificar si el agente está siendo monitoreado
+        $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
+        if (is_null($infoSeguimiento)) {
+            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 404, 'Specified agent not found');
+            return $xml_response;
+        }
+        if ($infoSeguimiento['estado_consola'] != 'logged-in') {
+            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 417, 'Agent currenty not logged in');
+            return $xml_response;
+        }
+        $sCanalRemoto = $infoSeguimiento['clientchannel'];
+        if (is_null($sCanalRemoto)) {
+            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 417, 'Agent not in call');
+            return $xml_response;
+        }
+        $xml_getchanvarsResponse->addChild('clientchannel', str_replace('&', '&amp;', $sCanalRemoto));
+        $xml_chanvars = $xml_getchanvarsResponse->addChild('chanvars');
+
+        // Listar la información disponible sobre las variables de canal
+        $respuesta = $this->_ami->Command('core show channel '.$sCanalRemoto);
+        if (isset($respuesta['data'])) {
+        	$bSeccionVars = FALSE;
+            foreach (explode("\n", $respuesta['data']) as $sLinea) {
+            	$regs = NULL;
+                if (preg_match('/^\s+Variables:\s*$/', $sLinea)) {
+                    $bSeccionVars = TRUE;
+                } elseif ($bSeccionVars && preg_match('/^(\w+)=(.*)$/', $sLinea, $regs)) {
+                	$xml_chanvar = $xml_chanvars->addChild('chanvar');
+                    $xml_chanvar->addChild('label', str_replace('&', '&amp;', $regs[1]));
+                    $xml_chanvar->addChild('value', str_replace('&', '&amp;', $regs[2]));
+                } elseif (trim($sLinea) == '') {
+                	$bSeccionVars = FALSE;
+                }
+            }
+        } else {
+            $this->_log->output('ERR: lost synch with Asterisk AMI ("core show channel" response lacks "data").');
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+        }
+        return $xml_response;
+    }
+
     /***************************** EVENTOS *****************************/
     
     function notificarEvento_AgentLogin($sAgente, $bExitoLogin)

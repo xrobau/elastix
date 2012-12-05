@@ -556,5 +556,15 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getagentactivitysummary_response;
     }
+
+    public function getchanvars($sAgentNumber = NULL)
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('getchanvars');
+        $xml_cmdRequest->addChild('agent_number', is_null($sAgentNumber) ? $this->_agentNumber : $sAgentNumber);
+        $xml_cmdRequest->addChild('agent_hash', $this->agentHash($this->_agentNumber, $this->_agentPass));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->getchanvars_response;
+    }
 }
 ?>

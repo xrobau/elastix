@@ -2673,3 +2673,50 @@ Respuesta:
         </agents>
     </getagentactivitysummary_response>
 </response>
+
+
+Requerimiento "getchanvars"
+Este requerimiento lista, para el agente indicado, las variables de canal 
+definidas para la llamada activa que esté atendiendo. Este requerimiento permite
+construir contextos y/o AGIs que asignen variables de canal que luego pueden
+obtenerse a través de este requerimiento.
+
+Atributos o argumentos:
+* agent_number: Agente que va a agendar la llamada. Este identificador está de la
+  forma 'Agent/9000'.
+* agent_hash: Hash de autenticación para el agente.
+
+Respuesta:
+* clientchannel: Canal Asterisk correspondiente a la llamada remota que se
+  atiende. Por ejemplo: SIP/troncal/5551234-abcdef. Este es el canal del cual
+  se reportan las variables de canal.
+* chanvars: Lista de variables de canal encontradas en el canal de la llamada.
+  Este elemento contiene múltiples elementos 'chanvar', los cuales contienen los
+  siguientes campos:
+  * label: Nombre de la variable de canal
+  * value: Valor de la variable de canal
+
+Ejemplo:
+<request id="14">
+    <getchanvars>
+        <agent_number>Agent/9000</agent_number>
+        <agent_hash>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</agent_hash>
+    </getchanvars>
+</request>
+
+Respuesta:
+<response id="14">
+    <getchanvars_response>
+        <clientchannel>SIP/troncal/5551234-abcdef</clientchannel>
+        <chanvars>
+            <chanvar>
+                <label>AAA</label>
+                <value>xxx</value>
+            </chanvar>
+            <chanvar>
+                <label>BBB</label>
+                <value>yyy</value>
+            </chanvar>
+        </chanvars>
+    </getchanvars_response>
+</response>

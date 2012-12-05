@@ -356,7 +356,7 @@ class paloIvrPBX extends paloAsteriskDB{
                         $timeout=$ivr["timeout"]+0;
                     }
                 }
-                $arrIvr[]=new paloExtensions("s",new ext_setvar("TIMEOUT(digit)","5"),"n","start");
+                $arrIvr[]=new paloExtensions("s",new ext_setvar("TIMEOUT(digit)","3"),"n","start");
                 $arrIvr[]=new paloExtensions("s",new ext_setvar("TIMEOUT(response)",$timeout));
                 $return="";
                 if(isset($ivr["retvm"])){
@@ -365,7 +365,6 @@ class paloIvrPBX extends paloAsteriskDB{
                 }
                 $arrIvr[]=new paloExtensions("s",new ext_setvar('__IVR_RETVM', "$return"));
                 $arrIvr[]=new paloExtensions("s",new ext_execif('$["${MSG}"!=""]','Background','${MSG}'));
-                $arrIvr[]=new paloExtensions("s",new ext_background("beep"));
                 $arrIvr[]=new paloExtensions("s",new ext_waitexten());
                 
                 $i_mesg=$t_mesg=false;
@@ -425,7 +424,7 @@ class paloIvrPBX extends paloAsteriskDB{
                 if(preg_match("/^[0-9]+$/",$ivr["loops"]))
                     $repeat=$ivr["loops"]+0;
                 if($repeat!="0"){
-                    $arrIvr[]=new paloExtensions("repeat",new ext_setvar('${COUNT}','${COUNT}+1'),"1");
+                    $arrIvr[]=new paloExtensions("repeat",new ext_setvar('COUNT','$[${COUNT} + 1]'),"1");
                     $arrIvr[]=new paloExtensions("repeat",new ext_gotoif('$[${COUNT} > '.$repeat.']',"hang,1","s,start"));
                 }else{
                     $arrIvr[]=new paloExtensions("repeat",new ext_goto("1","hang"),"1");

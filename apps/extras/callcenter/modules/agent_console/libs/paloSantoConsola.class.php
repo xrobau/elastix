@@ -883,6 +883,22 @@ LISTA_EXTENSIONES;
     		return NULL;
     	}
     }
+    
+    function leerVariablesCanalLlamadaActiva($sAgentNumber = NULL)
+    {
+    	try {
+    		$oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->getchanvars($sAgentNumber);
+            $chanvars = array();
+            foreach ($respuesta->chanvars->chanvar as $xml_chanvar) {
+            	$chanvars[(string)$xml_chanvar->label] = (string)$xml_chanvar->value;
+            }
+            return $chanvars;
+    	} catch (Exception $e) {
+    		$this->errMsg = '(internal) leerVariablesCanalLlamadaActiva'.$e->getMessage();
+            return NULL;
+    	}
+    }
 }
 
 ?>

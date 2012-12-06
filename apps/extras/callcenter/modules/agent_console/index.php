@@ -589,6 +589,9 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         if (is_null($infoCampania['script']) || $infoCampania['script'] == '')
             $infoCampania['script'] = _tr('(No script available)');
 
+        // Variables de canal de la llamada activa
+        $chanvars = $oPaloConsola->leerVariablesCanalLlamadaActiva();
+
         // Almacenar para regenerar formulario
         $_SESSION['callcenter']['ultimo_calltype'] = $estado['callinfo']['calltype'];
         $_SESSION['callcenter']['ultimo_callid'] = $estado['callinfo']['callid'];
@@ -626,7 +629,8 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
             'callnumber'        =>  $estado['callinfo']['callnumber'],
             'callid'            =>  $infoLlamada['call_id'],
             'agent_number'      =>  $estado['callinfo']['agent_number'],
-            'remote_channel'    =>  $estado['callinfo']['remote_channel']));
+            'remote_channel'    =>  $estado['callinfo']['remote_channel']),
+            $chanvars);
         
         // Asignaciones específicas para llamadas entrantes
         if ($estado['callinfo']['calltype'] == 'incoming') {
@@ -1392,6 +1396,9 @@ function construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas,
     if (is_null($infoCampania['script']) || $infoCampania['script'] == '')
         $infoCampania['script'] = _tr('(No script available)');
 
+    // Variables de canal de la llamada activa
+    $chanvars = $oPaloConsola->leerVariablesCanalLlamadaActiva();
+
     // Fecha completa de la llamada
     $iDuracionLlamada = time() - strtotime($callinfo['linkstart']);
 
@@ -1412,7 +1419,7 @@ function construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas,
     );
     
     if (isset($infoCampania['urltemplate']) && !is_null($infoCampania['urltemplate'])) {
-        $registroCambio['url'] = construirUrlExterno($infoCampania['urltemplate'], $infoLlamada);
+        $registroCambio['url'] = construirUrlExterno($infoCampania['urltemplate'], $infoLlamada, $chanvars);
     }
     
     // Asignaciones específicas para llamadas entrantes
@@ -1475,7 +1482,7 @@ function construirRespuesta_agentunlinked()
     );	
 }
 
-function construirUrlExterno($s, $infoLlamada)
+function construirUrlExterno($s, $infoLlamada, $chanvars)
 {
     $reemplazos = array(
         '{__AGENT_NUMBER__}'    =>  (isset($infoLlamada['agent_number']) 
@@ -1488,6 +1495,9 @@ function construirUrlExterno($s, $infoLlamada)
         '{__PHONE__}'           =>  $infoLlamada['callnumber'],
         '{__UNIQUEID__}'        =>  $infoLlamada['uniqueid'],
     );
+    if (is_array($chanvars)) foreach ($chanvars as $k => $v) {
+    	$reemplazos['{'.$k.'}'] = $v;
+    }
     if (isset($infoLlamada['call_attributes'])) foreach ($infoLlamada['call_attributes'] as $tupla) {
         $reemplazos['{'.$tupla['label'].'}'] = $tupla['value'];
     }

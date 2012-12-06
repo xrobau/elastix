@@ -100,7 +100,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Wed Dec 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Dec 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: use the new getchanvars request to add the list of 
+  channel variables to the ones available in an external URL. This allows 
+  variables set via custom contexts or AGIs to be used to drive external URLs.
+
+* Wed Dec 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Dialer (ECCP): add a new request 'getchanvars'. This request lists the
   channel variables of the call currently handled by the agent.
 

@@ -1197,6 +1197,20 @@ class AMIEventProcess extends TuberiaProcess
                 if ($this->DEBUG) {
                     $this->_log->output("DEBUG: ".__METHOD__.": encontrado canal auxiliar para llamada: {$llamada->actionid}");         
                 }
+
+                if (strpos($params['Destination'], 'Local/') !== 0) {
+                    if (is_null($llamada->actualchannel)) {
+                        $llamada->actualchannel = $params['Destination'];
+                        if ($this->DEBUG) {
+                            $this->_log->output('DEBUG: '.__METHOD__.
+                                ': capturado canal remoto real: '.$params['Destination']);
+                        }
+                    } elseif ($llamada->actualchannel != $params['Destination']) {
+                        $this->_log->output('WARN: '.__METHOD__.': canal remoto en '.
+                            'conflicto, anterior '.$llamada->actualchannel.' nuevo '.
+                            $params['Destination']);
+                    }
+                }
             }
         }
         

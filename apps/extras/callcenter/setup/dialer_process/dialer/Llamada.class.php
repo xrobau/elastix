@@ -268,7 +268,6 @@ class Llamada
                 $this->_listaLlamadas->agregarIndice('channel', $this->_channel, $this);
                 
                 // El valor de trunk es derivado de channel
-                $this->_trunk = NULL;
                 $regs = NULL;
                 if (preg_match('/^(.+)-[0-9a-fA-F]+$/', $this->_channel, $regs)) {
                 	$this->_trunk = $regs[1];
@@ -290,13 +289,14 @@ class Llamada
                 $this->_listaLlamadas->agregarIndice('actualchannel', $this->_actualchannel, $this);
                 
                 // El valor de trunk es derivado de channel
-                /*
-                $this->_trunk = NULL;
-                $regs = NULL;
-                if (preg_match('/^(.+)-[0-9a-fA-F]+$/', $this->_channel, $regs)) {
-                    $this->_trunk = $regs[1];
+                if ((is_null($this->_trunk) || strpos($this->_trunk, 'Local/') === 0) 
+                    && strpos($v, 'Local/') !== 0) {
+                    $this->_trunk = NULL;
+                    $regs = NULL;
+                    if (preg_match('/^(.+)-[0-9a-fA-F]+$/', $this->_actualchannel, $regs)) {
+                        $this->_trunk = $regs[1];
+                    }
                 }
-                */
             }
             break;
         case 'uniqueid':
@@ -480,6 +480,7 @@ class Llamada
                 
                 'status'                =>  $this->status,
                 'datetime_entry_queue'  =>  date('Y-m-d H:i:s', $this->timestamp_enterqueue),
+                'trunk'                 =>  $this->trunk,
             );
             $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
         } else {

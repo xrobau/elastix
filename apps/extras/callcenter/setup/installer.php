@@ -78,6 +78,9 @@ if (file_exists($path_script_db))
     crearColumnaSiNoExiste($pDB, 'call_center', 'campaign_entry', 
         'id_url', 
         "ADD COLUMN id_url int unsigned, ADD FOREIGN KEY (id_url) REFERENCES campaign_external_url (id)");
+    crearColumnaSiNoExiste($pDB, 'call_center', 'calls', 
+        'trunk', 
+        "ADD COLUMN trunk varchar(20) NOT NULL");
 
     // Asegurarse de que todo agente tiene una contraseña de ECCP
     $pDB->genQuery('UPDATE agent SET eccp_password = SHA1(CONCAT(NOW(), RAND(), number)) WHERE eccp_password IS NULL');

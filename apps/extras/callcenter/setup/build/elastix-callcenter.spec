@@ -100,6 +100,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Dec 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Dialer: add new column calls.trunk to keep track of trunk used for 
+  outgoing call. Add outgoing trunk support to dialer code. This is required for
+  planned functionality of trunk display of in-progress calls.
+
 * Thu Dec 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: use the new getchanvars request to add the list of 
   channel variables to the ones available in an external URL. This allows 

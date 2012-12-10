@@ -128,6 +128,9 @@ CREATE TABLE IF NOT EXISTS `calls` (
 
   /* 2010-06-18: Store timestamp of Originate call */
   `datetime_originate` datetime default NULL,
+
+  /* 2012-12-07: Store trunk used to route outgoing call */
+  `trunk`               varchar(20),
   
   PRIMARY KEY  (`id`),
   KEY `id_campaign` (`id_campaign`),
@@ -731,6 +734,35 @@ DELIMITER ; ++
 
 CALL temp_campaign_external_url_2012_01_23();
 DROP PROCEDURE IF EXISTS temp_campaign_external_url_2012_01_23;
+
+/* Procedimiento para agregar recolección de trunk de llamada saliente */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_campania_saliente_trunk_2012_12_07 ++
+CREATE PROCEDURE temp_campania_saliente_trunk_2012_12_07 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_columna tinyint(1);
+    
+    SET l_existe_columna = 0;
+
+    /* Verificar existencia de columna calls.trunk que debe agregarse */
+    SELECT COUNT(*) INTO l_existe_columna 
+    FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_SCHEMA = 'call_center' 
+        AND TABLE_NAME = 'calls' 
+        AND COLUMN_NAME = 'trunk';
+    IF l_existe_columna = 0 THEN
+        ALTER TABLE calls
+        ADD COLUMN trunk varchar(20);
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_campania_saliente_trunk_2012_12_07();
+DROP PROCEDURE IF EXISTS temp_campania_saliente_trunk_2012_12_07;
 
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;

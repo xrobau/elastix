@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Dec 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Batch of Extensions: if individual extensions list a blank context, 
+  assume from-internal. Fixes Elastix bug #854.
+  SVN Rev[4509]
+
 * Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-18
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.

@@ -220,6 +220,7 @@ function load_extension_from_csv($smarty, $ruta_archivo, $base_dir, $pDB, $arrAS
                 $VM_Play_Envelope   = isset($arrayColumnas[13])?$tupla[$arrayColumnas[13]]:"";
                 $VM_Delete_Vmail    = isset($arrayColumnas[14])?$tupla[$arrayColumnas[14]]:"";
                 $Context            = isset($arrayColumnas[15])?$tupla[$arrayColumnas[15]]:"from-internal";
+                if (trim($Context) == "") $Context = "from-internal";
                 $Tech               = strtolower($tupla[$arrayColumnas[16]]);
                 $Callgroup          = isset($arrayColumnas[17])?$tupla[$arrayColumnas[17]]:"";
                 $Pickupgroup        = isset($arrayColumnas[18])?$tupla[$arrayColumnas[18]]:"";

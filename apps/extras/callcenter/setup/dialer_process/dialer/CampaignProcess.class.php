@@ -1478,11 +1478,14 @@ PETICION_LLAMADAS_AGENTE;
         
         // Para llamada entrante se debe de insertar el log de progreso
         if ($tipo_llamada == 'incoming') {
-            $sth = $this->_db->prepare(
-                'INSERT INTO call_progress_log (datetime_entry, id_call_incoming, new_status, uniqueid, trunk) '.
-                'VALUES (?, ?, ?, ?, ?)');
-            $sth->execute(array($paramInsertar['datetime_entry_queue'], $idCall,
-                'OnQueue', $paramInsertar['uniqueid'], $paramInsertar['trunk']));
+            // Notificar el progreso de la llamada
+            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
+                'datetime_entry'    =>  $paramInsertar['datetime_entry_queue'],
+                'new_status'        =>  'OnQueue',
+                'id_call_incoming'  =>  $idCall,
+                'uniqueid'          =>  $paramInsertar['uniqueid'],
+                'trunk'             =>  $paramInsertar['trunk'],
+            ));
         }
         
         // Mandar de vuelta el ID de inserción a AMIEventProcess

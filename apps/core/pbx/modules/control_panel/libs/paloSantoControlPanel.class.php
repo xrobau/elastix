@@ -33,6 +33,12 @@ require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
 require_once $arrConf['basePath']."/libs/paloSantoTrunk.class.php";
 
+/* Esta clase sólo sirve para tragarse el mensaje de error para que no se 
+ * escriba permanentemente en el log de httpd */ 
+class dummy_pagi {
+    function conlog($a, $b) {}
+}
+
 class paloSantoControlPanel {
     var $_DB1;
     var $_DB2;
@@ -73,6 +79,7 @@ class paloSantoControlPanel {
         $astman_pwrd = obtenerClaveAMIAdmin();
 
         $astman = new AGI_AsteriskManager();
+        $astman->pagi = new dummy_pagi;
 
         if (!$astman->connect("$astman_host", "$astman_user" , "$astman_pwrd")) {
             $this->errMsg = _tr("Error when connecting to Asterisk Manager");

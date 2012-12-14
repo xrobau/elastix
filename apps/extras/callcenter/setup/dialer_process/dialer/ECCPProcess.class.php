@@ -76,8 +76,10 @@ class ECCPProcess extends TuberiaProcess
         if (!$this->_iniciarConexionAMI()) return FALSE;
         
         // Registro de manejadores de eventos
+        foreach (array('notificarProgresoLlamada') as $k)
+            $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('AgentLogin', 'AgentLogoff', 'AgentLinked',
-            'AgentUnlinked', 'marcarFinalHold') as $k)
+            'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -677,7 +679,7 @@ INFO_FORMULARIOS;
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
 
-        list($sTipoLlamada, $idCampania, $idLlamada, $sChannel, $sRemChannel, $sFechaLink) = $datos;
+        list($sTipoLlamada, $idCampania, $idLlamada, $sChannel, $sRemChannel, $sFechaLink, $id_agent) = $datos;
         try {
         	$infoLlamada = $this->leerInfoLlamada($sTipoLlamada, $idCampania, $idLlamada);
             /* Ya que la escritura a la base de datos es asíncrona, puede 
@@ -689,6 +691,15 @@ INFO_FORMULARIOS;
                 $infoLlamada['status'] = 'Success';
             $infoLlamada['datetime_linkstart'] = $sFechaLink;
             $this->_multiplex->notificarEvento_AgentLinked($sChannel, $sRemChannel, $infoLlamada);
+
+            // Notificar el progreso de la llamada
+            $paramProgreso = array(
+                'datetime_entry'    =>  $sFechaLink,
+                'new_status'        =>  'Success',
+                'id_agent'          =>  $id_agent,
+            );
+            $paramProgreso[($sTipoLlamada == 'incoming') ? 'id_call_incoming' : 'id_call_outgoing'] = $idLlamada;
+            $this->notificarProgresoLlamada($paramProgreso);
         } catch (PDOException $e) {
         	$this->_stdManejoExcepcionDB($e, 'no se puede leer información de llamada para AgentLinked');
         }   	
@@ -764,6 +775,68 @@ INFO_FORMULARIOS;
         $this->_finalizandoPrograma = TRUE;
         $this->_multiplex->finalizarConexionesECCP();
         $this->_tuberia->msg_HubProcess_finalizacionTerminada();
+    }
+    
+    public function msg_notificarProgresoLlamada($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+
+        call_user_func_array(array($this, 'notificarProgresoLlamada'), $datos);
+    }
+    
+    public function notificarProgresoLlamada($prop)
+    {
+        if (isset($prop['id_call_incoming'])) $sColLlamada = 'id_call_incoming';
+        elseif (isset($prop['id_call_outgoing'])) $sColLlamada = 'id_call_outgoing';
+        else {
+        	$this->_log->output('WARN: '.__METHOD__.' - no hay asociación con llamada, se ignora.');
+            return;
+        }
+        try {
+            /* Se leen las propiedades del último log de la llamada, o NULL si no 
+             * hay cambio de estado previo. */
+            $recordset = $this->_db->prepare(
+                "SELECT retry, uniqueid, trunk, id_agent, duration ".
+                "FROM call_progress_log WHERE $sColLlamada = ? ".
+                "ORDER BY datetime_entry DESC, id DESC LIMIT 0,1");
+            $recordset->execute(array($prop[$sColLlamada]));
+            $tuplaAnterior = $recordset->fetch(PDO::FETCH_ASSOC);
+            $recordset->closeCursor();
+            if (!is_array($tuplaAnterior) || count($tuplaAnterior) <= 0) {
+            	$tuplaAnterior = array(
+                    'retry'             =>  0,
+                    'uniqueid'          =>  NULL,
+                    'trunk'             =>  NULL,
+                    'id_agent'          =>  NULL,
+                    'duration'          =>  NULL,
+                );
+            }
+
+            // Si el número de reintento es distinto, se anulan datos anteriores
+            if (isset($prop['retry']) && $tuplaAnterior['retry'] != $prop['retry']) {
+                $tuplaAnterior['uniqueid'] = NULL;
+                $tuplaAnterior['trunk'] = NULL;
+                $tuplaAnterior['id_agent'] = NULL;
+                $tuplaAnterior['duration'] = NULL;
+            }
+            $tuplaAnterior = array_merge($tuplaAnterior, $prop);
+            
+            // Escribir los valores nuevos en un nuevo registro
+            $columnas = array_keys($tuplaAnterior);
+            $paramSQL = array();
+            foreach ($columnas as $k) $paramSQL[] = $tuplaAnterior[$k];
+            $sPeticionSQL = 'INSERT INTO call_progress_log ('.
+                implode(', ', $columnas).') VALUES ('.
+                implode(', ', array_fill(0, count($columnas), '?')).')';
+            $sth = $this->_db->prepare($sPeticionSQL);
+            $sth->execute($paramSQL);
+
+            // TODO: emitir el evento a las conexiones ECCP
+        } catch (PDOException $e) {
+        	$this->_stdManejoExcepcionDB($e, 'no se puede escribir bitácora de estado de llamada');
+        }
     }
 }
 ?>

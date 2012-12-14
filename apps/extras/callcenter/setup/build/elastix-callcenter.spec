@@ -101,6 +101,7 @@ fi
 
 %changelog
 * Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Out: fix incorrect declaration of string constants for rexexp.
 - ADDED: Dialer: add logging capability of events that happen to a call. For 
   this a new database table was created. Allow campaign deletion to cope with 
   the new table. This is required functionality for call progress events.

@@ -410,14 +410,13 @@ CREATE TABLE IF NOT EXISTS voicemail (
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
-CREATE TABLE extensions_table (
+CREATE TABLE extensions_rt (
     id int(11) NOT NULL auto_increment,
     context varchar(20) NOT NULL default '',
     exten varchar(20) NOT NULL default '',
     priority tinyint(4) NOT NULL default '0',
     app varchar(20) NOT NULL default '',
     appdata varchar(128) NOT NULL default '',
-    organization_domain varchar(100) NOT NULL,
     PRIMARY KEY (`context`,`exten`,`priority`),
     KEY `id` (`id`),
     INDEX organization_domain (organization_domain)
@@ -1074,5 +1073,28 @@ CREATE TABLE time_conditions (
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY  (id),
     FOREIGN KEY (id_tg) REFERENCES time_group(id),
+    INDEX organization_domain (organization_domain)
+) ENGINE = INNODB;
+
+DROP TABLE IF EXISTS meetme;
+CREATE TABLE meetme (
+    bookid int(11) auto_increment,
+    confno char(80) DEFAULT '0' NOT NULL,
+    startTime datetime default '1900-01-01 12:00:00',
+    endtime datetime default '2999-01-01 12:00:00',
+    pin char(20) NULL,
+    adminpin char(20) NULL,
+    opts varchar(350) NULL,
+    adminopts varchar(350) NULL,
+    recordingfilename char(80) NULL,
+    recordingformat char(10) NULL,
+    maxusers int(11) NULL,
+    members integer DEFAULT 0 NOT NULL,
+    -- options fuera de realtime
+    name varchar(50) NOT NULL,
+    ext_conf char(80) DEFAULT '0' NOT NULL,
+    organization_domain varchar(100) NOT NULL,
+    index confno (confno,starttime,endtime),
+    PRIMARY KEY (bookid),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;

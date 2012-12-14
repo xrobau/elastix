@@ -261,12 +261,10 @@ touch /etc/asterisk/sip_nat.conf
 touch /etc/asterisk/sip_custom.conf
 touch /etc/asterisk/sip_additional.conf
 touch /etc/asterisk/sip_custom_post.conf
-touch /etc/asterisk/extensions_override_freepbx.conf
 touch /etc/asterisk/features_general_additional.conf
 touch /etc/asterisk/sip_general_additional.conf
 touch /etc/asterisk/queues_general_additional.conf
 touch /etc/asterisk/dahdi-channels.conf
-touch /etc/asterisk/meetme_additional.conf
 touch /etc/asterisk/sip_general_additional.conf
 touch /etc/asterisk/iax_general_additional.conf
 touch /etc/asterisk/musiconhold_custom.conf
@@ -288,6 +286,7 @@ touch /etc/asterisk/sip_notify_additional.conf
 touch /etc/asterisk/sip_notify_custom.conf
 touch /etc/asterisk/sip_register.conf
 touch /etc/asterisk/iax_register.conf
+touch /etc/asterisk/meetme_custom.conf
 
 chown -R asterisk.asterisk /etc/asterisk/*
 

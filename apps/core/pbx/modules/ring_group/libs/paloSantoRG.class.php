@@ -148,8 +148,6 @@ class paloSantoRG extends paloAsteriskDB{
         $query="INSERT INTO ring_group (";
         $arrOpt=array();
         
-        //las rutas entrantes pueden ser creadas por el administrador de la organizacion
-        //o pueden ser creadas por el superadmin en cuyo caso la ruta no pertence a ninguna organizacion
         $arrCredentiasls=getUserCredentials();
         $userLevel1=$arrCredentiasls["userlevel"];
         if($userLevel1=="admin"){
@@ -324,7 +322,7 @@ class paloSantoRG extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["rg_name"];
         }
         
-        //el numero del ring_group no debe estar siendo usado como patron de marcado
+        /*//el numero del ring_group no debe estar siendo usado como patron de marcado
         if(!preg_match("/^[0-9]*$/",$arrProp["rg_number"])){
             $this->errMsg=_tr("Invalid Ring Group Number");
             return false;
@@ -337,7 +335,7 @@ class paloSantoRG extends paloAsteriskDB{
                 $query .="rg_number=?,";
                 $arrOpt[count($arrOpt)]=$arrProp["rg_number"];
             }
-        }
+        }*/
         
         $extensions="";
         //el conjunto de extensiones que pertence al grupo de marcado

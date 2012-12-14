@@ -30,6 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Number" => "Numero RG",
 "Name"   => "Nombre RG",
+"RG List" => "Ring Group",
 "Strategy" => "Estrategia de Marcado",
 "Ring Time" => "Tiempo de Timbrado",
 "Ignore CF" => "Ignorar Reenvio de Llamadas",

@@ -35,6 +35,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Number" => "RG Number",
 "Name"   => "RG Name",
+"RG List" => "Ring Group",
 "Strategy" => "Dial Strategy",
 "Ring Time" => "Ring Time",
 "Ignore CF" => "Ignore Call Forward",

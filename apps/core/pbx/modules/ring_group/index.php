@@ -55,23 +55,23 @@ function _moduleContent(&$smarty, $module_name)
     $arrConf = array_merge($arrConf,$arrConfModule);
     $arrLang = array_merge($arrLang,$arrLangModule);
 
-	 //folder path for custom templates
+     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-	 //comprobacion de la credencial del usuario
+     //comprobacion de la credencial del usuario
     $arrCredentiasls=getUserCredentials();
-	$userLevel1=$arrCredentiasls["userlevel"];
-	$userAccount=$arrCredentiasls["userAccount"];
-	$idOrganization=$arrCredentiasls["id_organization"];
-	$domain=$arrCredentiasls["domain"];
+    $userLevel1=$arrCredentiasls["userlevel"];
+    $userAccount=$arrCredentiasls["userAccount"];
+    $idOrganization=$arrCredentiasls["id_organization"];
+    $domain=$arrCredentiasls["domain"];
 
-	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     
-	$action = getAction();
+    $action = getAction();
     $content = "";
     
-	switch($action){
+    switch($action){
         case "new_rg":
             $content = viewFormRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
             break;
@@ -103,53 +103,53 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $org_domain)
 {
-	$error = "";
-	//conexion elastix.db
+    $error = "";
+    //conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$pORGZ = new paloSantoOrganization($pDB2);
+    $pACL = new paloACL($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
 
-	$domain=getParameter("organization");
-	if($userLevel1=="superadmin"){
-		if(!empty($domain)){
-			$url = "?menu=$module_name&organization=$domain";
-		}else{
-			$domain = "all";
-			$url = "?menu=$module_name";
-		}
-	}else{
-		$domain=$org_domain;
-		$url = "?menu=$module_name";
-	}
-	
-	if($userLevel1=="superadmin"){
-	  if(isset($domain) && $domain!="all"){
-	      $pRG = new paloSantoRG($pDB,$domain);
-	      $total=$pRG->getNumRG($domain);
-	  }else{
-	      $pRG = new paloSantoRG($pDB,$domain);
-	      $total=$pRG->getNumRG();
-	  }
-	}else{
-	    $pRG = new paloSantoRG($pDB,$domain);
-	    $total=$pRG->getNumRG($domain);
-	}
-
-	if($total===false){
-		$error=$pRG->errMsg;
-		$total=0;
-	}
-
-	$limit=20;
-
-	$oGrid = new paloSantoGrid($smarty);
-	$oGrid->setLimit($limit);
-	$oGrid->setTotal($total);
-	$offset = $oGrid->calculateOffset();
-
-	$end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+    $domain=getParameter("organization");
+    if($userLevel1=="superadmin"){
+        if(!empty($domain)){
+            $url = "?menu=$module_name&organization=$domain";
+        }else{
+            $domain = "all";
+            $url = "?menu=$module_name";
+        }
+    }else{
+        $domain=$org_domain;
+        $url = "?menu=$module_name";
+    }
     
-    $oGrid->setTitle(_tr('RG Routes List'));
+    if($userLevel1=="superadmin"){
+      if(isset($domain) && $domain!="all"){
+          $pRG = new paloSantoRG($pDB,$domain);
+          $total=$pRG->getNumRG($domain);
+      }else{
+          $pRG = new paloSantoRG($pDB,$domain);
+          $total=$pRG->getNumRG();
+      }
+    }else{
+        $pRG = new paloSantoRG($pDB,$domain);
+        $total=$pRG->getNumRG($domain);
+    }
+
+    if($total===false){
+        $error=$pRG->errMsg;
+        $total=0;
+    }
+
+    $limit=20;
+
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+
+    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+    
+    $oGrid->setTitle(_tr('RG List'));
     //$oGrid->setIcon('url de la imagen');
     $oGrid->setWidth("99%");
     $oGrid->setStart(($total==0) ? 0 : $offset + 1);
@@ -183,12 +183,12 @@ function reportRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
         }
     }
 
-	if($arrRG===false){
-		$error=_tr("Error to obtain Ring Groups").$pRG->errMsg;
+    if($arrRG===false){
+        $error=_tr("Error to obtain Ring Groups").$pRG->errMsg;
         $arrRG=array();
-	}
+    }
 
-	foreach($arrRG as $rg) {
+    foreach($arrRG as $rg) {
         $arrTmp=array();
         if($userLevel1=="superadmin"){
             $arrTmp[] = $rg["organization_domain"];
@@ -205,77 +205,77 @@ function reportRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
 
         $arrData[] = $arrTmp;
     }
-			
-	if($pORGZ->getNumOrganization() > 1){
-		if($userLevel1 == "admin")
-			$oGrid->addNew("create_rg",_tr("Create New Ring Group"));
+            
+    if($pORGZ->getNumOrganization() > 1){
+        if($userLevel1 == "admin")
+            $oGrid->addNew("create_rg",_tr("Create New Ring Group"));
 
-		if($userLevel1 == "superadmin"){
-			$arrOrgz=array("all"=>"all");
-			foreach(($pORGZ->getOrganization()) as $value){
-				if($value["id"]!=1)
-					$arrOrgz[$value["domain"]]=$value["name"];
-			}
-			$arrFormElements = createFieldFilter($arrOrgz);
-			$oFilterForm = new paloForm($smarty, $arrFormElements);
-			$_POST["organization"]=$domain;
-			$oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$domain], $_POST, array("organization" => "all"),true);
-			$htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-			$oGrid->showFilter(trim($htmlFilter));
-		}
-	}else{
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("At least one organization must exist before you can create a new Ring Group."));
-	}
+        if($userLevel1 == "superadmin"){
+            $arrOrgz=array("all"=>"all");
+            foreach(($pORGZ->getOrganization()) as $value){
+                if($value["id"]!=1)
+                    $arrOrgz[$value["domain"]]=$value["name"];
+            }
+            $arrFormElements = createFieldFilter($arrOrgz);
+            $oFilterForm = new paloForm($smarty, $arrFormElements);
+            $_POST["organization"]=$domain;
+            $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$domain], $_POST, array("organization" => "all"),true);
+            $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+            $oGrid->showFilter(trim($htmlFilter));
+        }
+    }else{
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",_tr("At least one organization must exist before you can create a new Ring Group."));
+    }
 
-	if($error!=""){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",$error);
-	}
-	$contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
-	$mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $org_domain);
-	$contenidoModulo = $mensaje.$contenidoModulo;
+    if($error!=""){
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",$error);
+    }
+    $contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
+    $mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $org_domain);
+    $contenidoModulo = $mensaje.$contenidoModulo;
     return $contenidoModulo;
 }
 
 function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccount, $org_domain){
-	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-	$params=array();
-	$msgs="";
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+    $params=array();
+    $msgs="";
 
-	$query = "SELECT domain, id from organization";
-	//si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de mnarcada
-	if($userLevel1!="superadmin"){
-		$query .= " where domain=?";
-		$params[]=$org_domain;
-	}
+    $query = "SELECT domain, id from organization";
+    //si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de mnarcada
+    if($userLevel1!="superadmin"){
+        $query .= " where domain=?";
+        $params[]=$org_domain;
+    }
 
-	$mensaje=_tr("Click here to reload dialplan");
-	$result=$pDB2->fetchTable($query,false,$params);
-	if(is_array($result)){
-		foreach($result as $value){
-			if($value[1]!=1){
-				$showmessage=$pAstConf->getReloadDialplan($value[0]);
-				if($showmessage=="yes"){
-					$append=($userLevel1=="superadmin")?" $value[0]":"";
-					$msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/><b>".$mensaje.$append."</b></a></div>";
-				}
-			}
-		}
-	}
-	return $msgs;
+    $mensaje=_tr("Click here to reload dialplan");
+    $result=$pDB2->fetchTable($query,false,$params);
+    if(is_array($result)){
+        foreach($result as $value){
+            if($value[1]!=1){
+                $showmessage=$pAstConf->getReloadDialplan($value[0]);
+                if($showmessage=="yes"){
+                    $append=($userLevel1=="superadmin")?" $value[0]":"";
+                    $msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/><b>".$mensaje.$append."</b></a></div>";
+                }
+            }
+        }
+    }
+    return $msgs;
 }
 
 function viewFormRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $org_domain){
-	$error = "";
-	//conexion elastix.db
+    $error = "";
+    //conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
 
-	$arrRG=array();
-	$action = getParameter("action");
+    $arrRG=array();
+    $action = getParameter("action");
        
-	if($userLevel1!="admin"){
+    if($userLevel1!="admin"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
         return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
@@ -288,20 +288,20 @@ function viewFormRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }
 
-	$idRG=getParameter("id_rg");
-	if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
-		if(!isset($idRG)){
+    $idRG=getParameter("id_rg");
+    if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
+        if(!isset($idRG)){
             $error=_tr("Invalid Ring Group");
-		}else{
-			if($userLevel1=="admin"){
+        }else{
+            if($userLevel1=="admin"){
                 $pRG = new paloSantoRG($pDB,$domain);
-				$arrRG = $pRG->getRGById($idRG);
-			}else{
+                $arrRG = $pRG->getRGById($idRG);
+            }else{
                 $error=_tr("You are not authorized to perform this action");
-			}
-		}
-		
-		if($error==""){
+            }
+        }
+        
+        if($error==""){
             if($arrRG===false){
                 $error=_tr($pRG->errMsg);
             }else if(count($arrRG)==0){
@@ -322,6 +322,7 @@ function viewFormRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
                     }
                 }
                 $smarty->assign("confirm",$arrRG["rg_confirm_call"]);
+                $smarty->assign("RG_NUMBER",$arrRG["rg_number"]);
             }
         }
         
@@ -330,9 +331,9 @@ function viewFormRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
             $smarty->assign("mb_message",$error);
             return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
         }
-	}else{
+    }else{
         $pRG = new paloSantoRG($pDB,$domain);
-		if(getParameter("create_rg")){
+        if(getParameter("create_rg")){
             $arrRG["rg_strategy"]="ringall";
             $arrRG["rg_moh"]="ring";
             $arrRG["rg_recording"]="none";
@@ -343,66 +344,66 @@ function viewFormRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
             $arrRG["goto"]="";
         }else
             $arrRG=$_POST; 
-	}
-	
-	$goto=$pRG->getCategoryDefault($domain);
+    }
+    
+    $goto=$pRG->getCategoryDefault($domain);
     if($goto===false)
         $goto=array();
     $res=$pRG->getDefaultDestination($domain,$arrRG["goto"]);
     $destiny=($res==false)?array():$res;
     
-	$arrFormOrgz = createFieldForm($goto,$destiny,$pDB,$domain);
+    $arrFormOrgz = createFieldForm($goto,$destiny,$pDB,$domain);
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
-	if($action=="view"){
+    if($action=="view"){
         $oForm->setViewMode();
     }else if($action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
         $oForm->setEditMode();
     }
-	
-	//$smarty->assign("ERROREXT",_tr($pTrunk->errMsg));
-	$smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-	$smarty->assign("CANCEL", _tr("Cancel"));
-	$smarty->assign("OPTIONS", _tr("Options"));
-	$smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
-	$smarty->assign("SAVE", _tr("Save"));
-	$smarty->assign("EDIT", _tr("Edit"));
-	$smarty->assign("DELETE", _tr("Delete"));
-	$smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
-	$smarty->assign("MODULE_NAME",$module_name);
-	$smarty->assign("id_rg", $idRG);
-	$smarty->assign("userLevel",$userLevel1);
-	$smarty->assign("SETDESTINATION", _tr("Final Destination"));
+    
+    //$smarty->assign("ERROREXT",_tr($pTrunk->errMsg));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("OPTIONS", _tr("Options"));
+    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("DELETE", _tr("Delete"));
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
+    $smarty->assign("MODULE_NAME",$module_name);
+    $smarty->assign("id_rg", $idRG);
+    $smarty->assign("userLevel",$userLevel1);
+    $smarty->assign("SETDESTINATION", _tr("Final Destination"));
         
     $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("RG Route"), $arrRG);
-	$content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
+    $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $content;
 }
 
 function saveNewRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $org_domain){
-	//$pTrunk = new paloSantoTrunk($pDB);
-	$error = "";
-	//conexion elastix.db
+    //$pTrunk = new paloSantoTrunk($pDB);
+    $error = "";
+    //conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$continue=true;
-	$success=false;
+    $continue=true;
+    $success=false;
 
-	if($userLevel1!="admin"){
-	    $smarty->assign("mb_title", _tr("ERROR"));
-	    $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-	    return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    if($userLevel1!="admin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }
-	
+    
     $domain=$org_domain;
     if($domain==false){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("Invalid Action"));
         return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }
-	
+    
     $pRG=new paloSantoRG($pDB,$domain);
-	$goto=$pRG->getCategoryDefault($domain);
+    $goto=$pRG->getCategoryDefault($domain);
     if($goto===false)
         $goto=array();
     $res=$pRG->getDefaultDestination($domain,getParameter("goto"));
@@ -411,7 +412,7 @@ function saveNewRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     $arrFormOrgz = createFieldForm($goto,$destiny,$pDB,$domain);
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
-	if(!$oForm->validateForm($_POST)){
+    if(!$oForm->validateForm($_POST)){
         // Validation basic, not empty and VALIDATION_TYPE
         $smarty->assign("mb_title", _tr("Validation Error"));
         $arrErrores = $oForm->arrErroresValidacion;
@@ -423,116 +424,21 @@ function saveNewRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
         $smarty->assign("mb_message", $strErrorMsg);
         return viewFormRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
     }else{
-		$name = getParameter("rg_name");
-		if($name==""){
-			$error=_tr("Field 'Name' can't be empty.");
-			$continue=false;
-		}
-		
-		if($pRG->validateDestine($domain,getParameter("destination"))==false){
-            $error=_tr("You must select a default destination.");
-            $continue=false;
-		}
-		    
-		if($continue){
-			//seteamos un arreglo con los parametros configurados
-			$arrProp=array();
-			$arrProp["rg_name"]=getParameter("rg_name");
-			$arrProp["rg_number"]=getParameter("rg_number");
-            $arrProp['rg_strategy']=getParameter("rg_strategy");
-			$arrProp['rg_time']=getParameter("rg_time");
-            $arrProp['rg_alertinfo']=getParameter("rg_alertinfo");
-			$arrProp['rg_cid_prefix']=getParameter("rg_cid_prefix");
-			$arrProp['rg_recording'] = getParameter("rg_recording");
-			$arrProp['rg_moh']=getParameter("rg_moh");
-			$arrProp['rg_cf_ignore'] = getParameter("rg_cf_ignore");
-			$arrProp['rg_skipbusy'] = getParameter("rg_skipbusy");
-			$arrProp['rg_confirm_call'] = getParameter("rg_confirm_call");
-			$arrProp['rg_extensions'] = getParameter("rg_extensions");
-			if($arrProp['rg_confirm_call']=="yes"){
-			    $arrProp['rg_record_remote']=getParameter("rg_record_remote");
-			    $arrProp['rg_record_toolate']=getParameter("rg_record_toolate");
-			}
-			$arrProp['goto']=getParameter("goto");
-			$arrProp['destination']=getParameter("destination");
-		}
-
-		if($continue){
-			$pDB->beginTransaction();
-			$success=$pRG->createNewRG($arrProp);
-			if($success)
-				$pDB->commit();
-			else
-				$pDB->rollBack();
-			$error .=$pRG->errMsg;
-		}
-	}
-
-	if($success){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("Ring Group has been created successfully"));
-		 //mostramos el mensaje para crear los archivos de ocnfiguracion
-        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-        $pAstConf->setReloadDialplan($domain,true);
-		$content = reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}else{
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",$error);
-		$content = viewFormRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}
-	return $content;
-}
-
-function saveEditRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain){
-	
-	$error = "";
-	//conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$continue=true;
-	$success=false;
-	$idRG=getParameter("id_rg");
-
-	if($userLevel1!="admin"){
-	  $smarty->assign("mb_title", _tr("ERROR"));
-	  $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-	  return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }
-    
-    $domain=$org_domain;
-    if($domain==false){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }
-    
-	//obtenemos la informacion del ring_group por el id dado, sino existe el ring_group mostramos un mensaje de error
-	if(!isset($idRG)){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Invalid Ring Group"));
-		return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}
-
-	$pRG = new paloSantoRG($pDB,$domain);
-    $arrRG = $pRG->getRGById($idRG);
-	if($arrRG===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pRG->errMsg));
-		return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}else if(count($arrRG)==0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("RG doesn't exist"));
-		return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}else{
-		if($pRG->validateDestine($domain,getParameter("destination"))==false){
-            $error=_tr("You must select a destination for this ring_group.");
+        $name = getParameter("rg_name");
+        if($name==""){
+            $error=_tr("Field 'Name' can't be empty.");
             $continue=false;
         }
         
-		if($continue){
-			//seteamos un arreglo con los parametros configurados
-			$arrProp=array();
-			$arrProp["id_rg"]=$idRG;
-			$arrProp["rg_name"]=getParameter("rg_name");
+        if($pRG->validateDestine($domain,getParameter("destination"))==false){
+            $error=_tr("You must select a default destination.");
+            $continue=false;
+        }
+            
+        if($continue){
+            //seteamos un arreglo con los parametros configurados
+            $arrProp=array();
+            $arrProp["rg_name"]=getParameter("rg_name");
             $arrProp["rg_number"]=getParameter("rg_number");
             $arrProp['rg_strategy']=getParameter("rg_strategy");
             $arrProp['rg_time']=getParameter("rg_time");
@@ -550,64 +456,159 @@ function saveEditRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
             }
             $arrProp['goto']=getParameter("goto");
             $arrProp['destination']=getParameter("destination");
-		}
+        }
 
-		if($continue){
-			$pDB->beginTransaction();
-			$success=$pRG->updateRGPBX($arrProp);
-			
-			if($success)
-				$pDB->commit();
-			else
-				$pDB->rollBack();
-			$error .=$pRG->errMsg;
-		}
-	}
+        if($continue){
+            $pDB->beginTransaction();
+            $success=$pRG->createNewRG($arrProp);
+            if($success)
+                $pDB->commit();
+            else
+                $pDB->rollBack();
+            $error .=$pRG->errMsg;
+        }
+    }
 
-	$smarty->assign("id_inbound", $idRG);
-
-	if($success){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("Ring Group has been edited successfully"));
-		//mostramos el mensaje para crear los archivos de ocnfiguracion
-		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+    if($success){
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",_tr("Ring Group has been created successfully"));
+         //mostramos el mensaje para crear los archivos de ocnfiguracion
+        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
         $pAstConf->setReloadDialplan($domain,true);
         $content = reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}else{
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",$error);
-		$content = viewFormRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}
-	return $content;
+    }else{
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",$error);
+        $content = viewFormRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
+    return $content;
+}
+
+function saveEditRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain){
+    
+    $error = "";
+    //conexion elastix.db
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $continue=true;
+    $success=false;
+    $idRG=getParameter("id_rg");
+
+    if($userLevel1!="admin"){
+      $smarty->assign("mb_title", _tr("ERROR"));
+      $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+      return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
+    
+    $domain=$org_domain;
+    if($domain==false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid Action"));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
+    
+    //obtenemos la informacion del ring_group por el id dado, sino existe el ring_group mostramos un mensaje de error
+    if(!isset($idRG)){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid Ring Group"));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
+
+    $pRG = new paloSantoRG($pDB,$domain);
+    $arrRG = $pRG->getRGById($idRG);
+    if($arrRG===false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr($pRG->errMsg));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }else if(count($arrRG)==0){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("RG doesn't exist"));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }else{
+        if($pRG->validateDestine($domain,getParameter("destination"))==false){
+            $error=_tr("You must select a destination for this ring_group.");
+            $continue=false;
+        }
+        
+        if($continue){
+            //seteamos un arreglo con los parametros configurados
+            $arrProp=array();
+            $arrProp["id_rg"]=$idRG;
+            $arrProp["rg_name"]=getParameter("rg_name");
+            $arrProp["rg_number"]=getParameter("rg_number");
+            $arrProp['rg_strategy']=getParameter("rg_strategy");
+            $arrProp['rg_time']=getParameter("rg_time");
+            $arrProp['rg_alertinfo']=getParameter("rg_alertinfo");
+            $arrProp['rg_cid_prefix']=getParameter("rg_cid_prefix");
+            $arrProp['rg_recording'] = getParameter("rg_recording");
+            $arrProp['rg_moh']=getParameter("rg_moh");
+            $arrProp['rg_cf_ignore'] = getParameter("rg_cf_ignore");
+            $arrProp['rg_skipbusy'] = getParameter("rg_skipbusy");
+            $arrProp['rg_confirm_call'] = getParameter("rg_confirm_call");
+            $arrProp['rg_extensions'] = getParameter("rg_extensions");
+            if($arrProp['rg_confirm_call']=="yes"){
+                $arrProp['rg_record_remote']=getParameter("rg_record_remote");
+                $arrProp['rg_record_toolate']=getParameter("rg_record_toolate");
+            }
+            $arrProp['goto']=getParameter("goto");
+            $arrProp['destination']=getParameter("destination");
+        }
+
+        if($continue){
+            $pDB->beginTransaction();
+            $success=$pRG->updateRGPBX($arrProp);
+            
+            if($success)
+                $pDB->commit();
+            else
+                $pDB->rollBack();
+            $error .=$pRG->errMsg;
+        }
+    }
+
+    $smarty->assign("id_inbound", $idRG);
+
+    if($success){
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",_tr("Ring Group has been edited successfully"));
+        //mostramos el mensaje para crear los archivos de ocnfiguracion
+        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+        $pAstConf->setReloadDialplan($domain,true);
+        $content = reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }else{
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",$error);
+        $content = viewFormRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
+    return $content;
 }
 
 function deleteRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain){
-	
-	$error = "";
-	//conexion elastix.db
+    
+    $error = "";
+    //conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$continue=true;
-	$success=false;
-	$idRG=getParameter("id_rg");
+    $continue=true;
+    $success=false;
+    $idRG=getParameter("id_rg");
 
-	if($userLevel1!="admin"){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-		return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}
+    if($userLevel1!="admin"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
 
-	//obtenemos la informacion del inbound por el id dado, 
-	if(!isset($idRG)){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Invalid RG"));
-		return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}else{
+    //obtenemos la informacion del inbound por el id dado, 
+    if(!isset($idRG)){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid RG"));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }else{
         if($userLevel1=="admin"){
             $domain=$org_domain;
             $pRG=new paloSantoRG($pDB,$domain);
             $arrRG = $pRG->getRGById($idRG);
         }
-	}
+    }
 
     $pDB->beginTransaction();
     $success = $pRG->deleteRG($idRG);
@@ -617,18 +618,18 @@ function deleteRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $
         $pDB->rollBack();
     $error .=$pRG->errMsg;
 
-	if($success){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("The Ring Group was deleted successfully"));
-		//mostramos el mensaje para crear los archivos de ocnfiguracion
-		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+    if($success){
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",_tr("The Ring Group was deleted successfully"));
+        //mostramos el mensaje para crear los archivos de ocnfiguracion
+        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
         $pAstConf->setReloadDialplan($domain,true);
-	}else{
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($error));
-	}
+    }else{
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr($error));
+    }
 
-	return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);;
+    return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);;
 }
 
 function generateOptionNum($start, $end){
@@ -673,55 +674,55 @@ function createFieldForm($goto,$destination,$pDB,$domain)
         }
     }
     
-    $arrFormElements = array("rg_name"	=> array("LABEL"             => _tr('Name'),
+    $arrFormElements = array("rg_name"  => array("LABEL"             => _tr('Name'),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "rg_number"   	=> array("LABEL"             => _tr("Number"),
+                             "rg_number"    => array("LABEL"             => _tr("Number"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "rg_strategy" 	=> array("LABEL"             => _tr("Strategy"),
+                             "rg_strategy"  => array("LABEL"             => _tr("Strategy"),
                                                     "REQUIRED"              => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $strategy,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "rg_alertinfo"    	=> array("LABEL"             => _tr("Alert Info"),
+                             "rg_alertinfo"     => array("LABEL"             => _tr("Alert Info"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:100px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "rg_cid_prefix" 	=> array("LABEL"             => _tr("CID Name Prefix"),
+                             "rg_cid_prefix"    => array("LABEL"             => _tr("CID Name Prefix"),
                                                     "REQUIRED"               => "no",
                                                      "INPUT_TYPE"            => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:100px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "rg_moh"	    	=> array("LABEL"             => _tr("Music On Hold"),
+                             "rg_moh"           => array("LABEL"             => _tr("Music On Hold"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrMusic,
                                                     "VALIDATION_TYPE"        => "",
                                                     "VALIDATION_EXTRA_PARAM" => ""),  
-                            "rg_time" 	=> array("LABEL"             => _tr("Ring Time"),
+                            "rg_time"   => array("LABEL"             => _tr("Ring Time"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"            => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $time,
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "goto"  	=> array("LABEL"             => _tr("Destine"),
+                            "goto"      => array("LABEL"             => _tr("Destine"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $goto,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""), 
-                            "destination"  	=> array("LABEL"             => _tr(""),
+                            "destination"   => array("LABEL"             => _tr(""),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $destination,
@@ -779,8 +780,8 @@ function createFieldForm($goto,$destination,$pDB,$domain)
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             
     );
-	
-	return $arrFormElements;
+    
+    return $arrFormElements;
 }
 
 
@@ -788,65 +789,65 @@ function createFieldForm($goto,$destination,$pDB,$domain)
 function createFieldFilter($arrOrgz)
 {
     $arrFields = array(
-		"organization"  => array("LABEL"                  => _tr("Organization"),
-				      "REQUIRED"               => "no",
-				      "INPUT_TYPE"             => "SELECT",
-				      "INPUT_EXTRA_PARAM"      => $arrOrgz,
-				      "VALIDATION_TYPE"        => "domain",
-				      "VALIDATION_EXTRA_PARAM" => "",
-				      "ONCHANGE"	       => "javascript:submit();"),
-		);
+        "organization"  => array("LABEL"                  => _tr("Organization"),
+                      "REQUIRED"               => "no",
+                      "INPUT_TYPE"             => "SELECT",
+                      "INPUT_EXTRA_PARAM"      => $arrOrgz,
+                      "VALIDATION_TYPE"        => "domain",
+                      "VALIDATION_EXTRA_PARAM" => "",
+                      "ONCHANGE"           => "javascript:submit();"),
+        );
     return $arrFields;
 }
 
 
 function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization,$org_domain){
-	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
-	$continue=false;
+    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB2);
+    $continue=false;
 
-	if($userLevel1=="other"){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-		return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}
+    if($userLevel1=="other"){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
 
-	if($userLevel1=="superadmin"){
-		$idOrganization = getParameter("organization_id");
-	}
+    if($userLevel1=="superadmin"){
+        $idOrganization = getParameter("organization_id");
+    }
 
-	if($idOrganization=="1"){
-		return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}
+    if($idOrganization=="1"){
+        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    }
 
-	$query="select domain from organization where id=?";
-	$result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
-	if($result===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
-	}elseif(count($result)==0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. "));
-	}else{
-		$domain=$result[0];
-		$continue=true;
-	}
+    $query="select domain from organization where id=?";
+    $result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
+    if($result===false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
+    }elseif(count($result)==0){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. "));
+    }else{
+        $domain=$result[0];
+        $continue=true;
+    }
 
-	if($continue){
-		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-		if($pAstConf->generateDialplan($domain)===false){
-			$pAstConf->setReloadDialplan($domain,true);
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);
-			$showMsg=true;
-		}else{
-			$pAstConf->setReloadDialplan($domain);
-			$smarty->assign("mb_title", _tr("MESSAGE"));
-			$smarty->assign("mb_message",_tr("Asterisk was reloaded correctly. "));
-		}
-	}
+    if($continue){
+        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+        if($pAstConf->generateDialplan($domain)===false){
+            $pAstConf->setReloadDialplan($domain,true);
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);
+            $showMsg=true;
+        }else{
+            $pAstConf->setReloadDialplan($domain);
+            $smarty->assign("mb_title", _tr("MESSAGE"));
+            $smarty->assign("mb_message",_tr("Asterisk was reloaded correctly. "));
+        }
+    }
 
-	return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
+    return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
 }
 
 function getAction(){
@@ -864,8 +865,8 @@ function getAction(){
         return "view";
     else if(getParameter("action")=="view_edit")
         return "view_edit";
-	else if(getParameter("action")=="reloadAsterisk")
-		return "reloadAasterisk";
+    else if(getParameter("action")=="reloadAsterisk")
+        return "reloadAasterisk";
     else
         return "report"; //cancel
 }

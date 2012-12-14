@@ -2,15 +2,15 @@
     <table width="100%" cellpadding="4" cellspacing="0" border="0">
       <tr>
         <td align="left">
-        {if $mode eq 'input'}
-            <input class="button" type="submit" name="save_new" value="{$SAVE}" >
+        {if $userLevel eq 'admin'}
+            {if $mode eq 'input'}
+                <input class="button" type="submit" name="save_new" value="{$SAVE}" >
             {elseif $mode eq 'edit'}
-            <input class="button" type="submit" name="save_edit" value="{$APPLY_CHANGES}">
-            {elseif $userLevel eq 'admin' || $userLevel eq 'admin'}
-            <input class="button" type="submit" name="edit" value="{$EDIT}">
-            <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
+                <input class="button" type="submit" name="save_edit" value="{$APPLY_CHANGES}">
             {else}
-            <input class="button" type="submit" name="edit" value="{$EDIT}">
+                <input class="button" type="submit" name="edit" value="{$EDIT}">
+                <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
+            {/if}
         {/if}
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         {if $mode ne 'view'}

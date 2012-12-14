@@ -2788,6 +2788,15 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $sth = $this->_db->prepare('UPDATE calls set status = ? WHERE id = ?');
                 $sth->execute(array('OnHold', $infoLlamada['callid']));
             }
+            
+            // Notificar progreso de la llamada
+            $paramProgreso = array(
+                'datetime_entry'    =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
+                'new_status'        =>  'OnHold',
+            );
+            $paramProgreso[($infoLlamada['calltype'] == 'incoming') ? 'id_call_incoming' : 'id_call_outgoing'] = $infoLlamada['callid'];
+            $this->_eccpProcess->notificarProgresoLlamada($paramProgreso);
+            
             $this->_db->commit();
         } catch (PDOException $e) {
         	$this->_db->rollBack();

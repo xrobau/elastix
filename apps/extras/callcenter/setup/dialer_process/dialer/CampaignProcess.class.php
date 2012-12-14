@@ -621,7 +621,7 @@ PETICION_CAMPANIAS_ENTRANTES;
             $sPeticionLlamadas = <<<PETICION_LLAMADAS
 (SELECT 1 AS dummy_priority, id_campaign, id, phone, date_init AS dummy_date_init,
     time_init AS dummy_time_init, date_end AS dummy_date_end,
-    time_end AS dummy_time_end, retries AS dummy_retries
+    time_end AS dummy_time_end, retries
 FROM calls
 WHERE id_campaign = ?
     AND (status IS NULL 
@@ -633,7 +633,7 @@ WHERE id_campaign = ?
 UNION
 (SELECT 2 AS dummy_priority, id_campaign, id, phone, date_init AS dummy_date_init,
     time_init AS dummy_time_init, date_end AS dummy_date_end,
-    time_end AS dummy_time_end, retries AS dummy_retries
+    time_end AS dummy_time_end, retries
 FROM calls
 WHERE id_campaign = ?
     AND (status IS NULL 
@@ -642,7 +642,7 @@ WHERE id_campaign = ?
     AND dnc = 0
     AND date_init IS NULL AND date_end IS NULL AND time_init IS NULL AND time_end IS NULL
     AND agent IS NULL)
-ORDER BY dummy_priority, dummy_retries, dummy_date_end, dummy_time_end, dummy_date_init, dummy_time_init, id
+ORDER BY dummy_priority, retries, dummy_date_end, dummy_time_end, dummy_date_init, dummy_time_init, id
 LIMIT 0,?
 PETICION_LLAMADAS;
             $recordset = $this->_db->prepare($sPeticionLlamadas);
@@ -834,6 +834,15 @@ SQL_LLAMADA_COLOCADA;
                     $infoCampania['id'], $tupla['id']));
                 $this->_tuberia->msg_AMIEventProcess_avisoInicioOriginate($tupla['actionid'], NULL);
             }
+            
+            // Notificar el progreso de la llamada
+            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
+                'datetime_entry'    =>  date('Y-m-d H:i:s', $iTimestampInicioOriginate),
+                'new_status'        =>  ($resultado['Response'] == 'Success') ? 'Placing' : 'Failure',
+                'id_call_outgoing'  =>  $tupla['id'],
+                'retry'             =>  (is_null($tupla['retries']) ? 0 : $tupla['retries']) + 1,
+                'trunk'             =>  $infoCampania['trunk'],
+            ));
         }
         
         /* Si se llega a este punto, se presume que, con agentes disponibles, y 
@@ -1025,7 +1034,7 @@ PETICION_LLAMADAS_AGENTE;
         $sHoraSys = date('H:i:s');
 
         $sPeticionLlamadasAgente = <<<PETICION_LLAMADAS_AGENTE
-SELECT calls.id_campaign, calls.id, calls.phone, calls.agent  
+SELECT calls.id_campaign, calls.id, calls.phone, calls.agent, calls.retries  
 FROM calls, campaign
 WHERE calls.id_campaign = ?
     AND calls.agent = ?
@@ -1465,10 +1474,20 @@ PETICION_LLAMADAS_AGENTE;
         
         $sth = $this->_db->prepare($sql);
         $sth->execute($params);
+        $idCall = $this->_db->lastInsertId();
+        
+        // Para llamada entrante se debe de insertar el log de progreso
+        if ($tipo_llamada == 'incoming') {
+            $sth = $this->_db->prepare(
+                'INSERT INTO call_progress_log (datetime_entry, id_call_incoming, new_status, uniqueid, trunk) '.
+                'VALUES (?, ?, ?, ?, ?)');
+            $sth->execute(array($paramInsertar['datetime_entry_queue'], $idCall,
+                'OnQueue', $paramInsertar['uniqueid'], $paramInsertar['trunk']));
+        }
         
         // Mandar de vuelta el ID de inserción a AMIEventProcess
         $this->_tuberia->msg_AMIEventProcess_idnewcall(
-            $tipo_llamada, $paramInsertar['uniqueid'], $this->_db->lastInsertId());
+            $tipo_llamada, $paramInsertar['uniqueid'], $idCall);
     }
 
     // Procedimiento que actualiza una sola llamada de la tabla calls o call_entry

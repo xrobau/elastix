@@ -445,6 +445,31 @@ CREATE TABLE IF NOT EXISTS `campaign_external_url` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Table structure for table `call_progress_log`
+--
+CREATE TABLE IF NOT EXISTS `call_progress_log` (
+    `id` int(10) unsigned NOT NULL auto_increment,
+
+    `datetime_entry`    datetime    NOT NULL,
+    `id_call_incoming`  int(10) unsigned,
+    `id_call_outgoing`  int(10) unsigned,
+    
+    `new_status`        varchar(32) NOT NULL,
+    `retry`             int(10) unsigned,
+    `uniqueid`          varchar(32),
+    `trunk`             varchar(20),
+    `id_agent`          int(10) unsigned,
+    `duration`          int(10) unsigned,
+    
+    PRIMARY KEY (`id`),
+    CONSTRAINT `call_progress_log_ibfk_1` FOREIGN KEY (`id_call_incoming`) REFERENCES `call_entry` (`id`),
+    CONSTRAINT `call_progress_log_ibfk_2` FOREIGN KEY (`id_call_outgoing`) REFERENCES `calls` (`id`),
+    CONSTRAINT `call_progress_log_ibfk_4` FOREIGN KEY (`id_agent`) REFERENCES `agent` (`id`),
+    KEY `incoming_datetime_entry` (`id_call_incoming`, `datetime_entry`),
+    KEY `outgoing_datetime_entry` (`id_call_outgoing`, `datetime_entry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 /* Procedimiento que agrega soporte para DNC (DO NOT CALL) y quita la columna agent.queue */
 DELIMITER ++ ;

@@ -100,6 +100,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Dialer: add logging capability of events that happen to a call. For 
+  this a new database table was created. Allow campaign deletion to cope with 
+  the new table. This is required functionality for call progress events.
+
 * Mon Dec 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Dialer: add new column calls.trunk to keep track of trunk used for 
   outgoing call. Add outgoing trunk support to dialer code. This is required for

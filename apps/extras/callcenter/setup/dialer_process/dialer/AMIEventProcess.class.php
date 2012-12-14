@@ -1205,6 +1205,16 @@ class AMIEventProcess extends TuberiaProcess
                             $this->_log->output('DEBUG: '.__METHOD__.
                                 ': capturado canal remoto real: '.$params['Destination']);
                         }
+                        
+                        // Notificar el progreso de la llamada
+                        $paramProgreso = array(
+                            'datetime_entry'=>  date('Y-m-d H:i:s', $params['local_timestamp_received']),
+                            'new_status'    =>  'Dialing',
+                            'trunk'         =>  $llamada->trunk,                            
+                        );
+                        $paramProgreso[($llamada->tipo_llamada == 'outgoing') ? 'id_call_outgoing' : 'id_call_incoming'] 
+                            = $llamada->id_llamada;
+                        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
                     } elseif ($llamada->actualchannel != $params['Destination']) {
                         $this->_log->output('WARN: '.__METHOD__.': canal remoto en '.
                             'conflicto, anterior '.$llamada->actualchannel.' nuevo '.

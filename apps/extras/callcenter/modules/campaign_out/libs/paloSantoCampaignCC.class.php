@@ -29,8 +29,8 @@
 
 include_once("libs/paloSantoDB.class.php");
 
-define(REGEXP_FECHA_VALIDA, '/^\d{4}-\d{2}-\d{2}$/');
-define(REGEXP_HORA_VALIDA, '/^\d{2}:\d{2}$/');
+define('REGEXP_FECHA_VALIDA', '/^\d{4}-\d{2}-\d{2}$/');
+define('REGEXP_HORA_VALIDA', '/^\d{2}:\d{2}$/');
 
 /* Clase que implementa campaña (saliente por ahora) de CallCenter (CC) */
 class paloSantoCampaignCC

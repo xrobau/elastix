@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Elastix Operator Panel: assign dummy logger to silence logging spam on
+  httpd error logfile. Fixes Elastix bug #1426.
+  SVN Rev[4512]
+
 * Tue Dec 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: if individual extensions list a blank context, 
   assume from-internal. Fixes Elastix bug #854.

@@ -46,7 +46,7 @@ class paloSantoRecordings extends paloAsteriskDB{
        parent::__construct($pDB);
        
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-            $this->errMsg="Invalid domain format";
+            $this->errMsg="Invalid domain format...";
         }else{
             $this->domain=$domain;
 
@@ -63,38 +63,55 @@ class paloSantoRecordings extends paloAsteriskDB{
 		$where="";
 		$arrParam=null;
 
-		if(isset($domain)){
+		if((isset($domain))&&($domain!="src_custom")){
 			if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-				$this->errMsg="Invalid domain format";
+				$this->errMsg="Invalid domain format.";
 				return false;
 			}else{
 				$where="where organization_domain=?";
 				$arrParam=array($domain);
 			}
 		}
+		if($domain=="src_custom"){
+		    $where = " where source=?";
+		    $arrParam=array("custom");
+		}
+		
 		$query="SELECT count(uniqueid) from recordings $where";
 		$result=$this->_DB->getFirstRowQuery($query,false,$arrParam);
-        if($result==false){
+               if($result==false){
 			$this->errMsg=$this->_DB->errMsg;
 			return false;
 		}else
 			return $result[0];
     }
 
-    function getRecordings($domain=null){
+    function getRecordings($domain=null,$limit=null,$offset=null){
 		$where="";
+		$pagging="";
 		$arrParam=null;
-		if(isset($domain)){
+		if((isset($domain))&&($domain!="src_custom")){
 			if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-				$this->errMsg="Invalid domain format";
+				$this->errMsg="Invalid domain format....";
 				return false;
 			}else{
 				$where="where organization_domain=? ";
 				$arrParam=array($domain);
 			}
 		}
+	      
+		if(isset($limit) && isset($offset)){
+		    $pagging=" limit ? offset ?";
+		    $arrParam[]=$limit;
+		    $arrParam[]=$offset;
+		}
 
-		$query="SELECT * from recordings $where ORDER BY uniqueid DESC";
+		if($domain=="src_custom"){
+		    $where = " where source=?";
+		    $arrParam=array("custom");
+		}
+		
+		$query="SELECT * from recordings $where ORDER BY uniqueid DESC $pagging ";
                 
 		$result=$this->_DB->fetchTable($query,true,$arrParam);
 		if($result===false){
@@ -154,7 +171,7 @@ class paloSantoRecordings extends paloAsteriskDB{
 		$arrParam=null;
 		if(isset($domain)){
 			if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-				$this->errMsg="Invalid domain format";
+				$this->errMsg="Invalid domain format..";
 				return false;
 			}else{
 				$where="where organization_domain=? and source=?";
@@ -172,13 +189,22 @@ class paloSantoRecordings extends paloAsteriskDB{
 			return $result;
     }
 
-     function getRecordingById($id)
+     function getRecordingById($id,$userLevel1)
     {
+        $dom = $this->domain;
+	if($userLevel1=="admin"){
+	    $query = "SELECT filename,name FROM recordings WHERE uniqueid=? and organization_domain=?";
+	    $result = $this->_DB->getFirstRowQuery($query, TRUE, array($id,$dom));
+
+	}
+	elseif($userLevel1=="superadmin"){
+	    $query = "SELECT filename,name FROM recordings WHERE uniqueid=?";
+	    $result = $this->_DB->getFirstRowQuery($query, TRUE, array($id));
+	}
+
+//	$result = $this->_DB->getFirstRowQuery($query, TRUE, array($id,$dom));
         
-	$dom = $this->domain;
-        $query = "SELECT filename,name FROM recordings WHERE uniqueid=? and organization_domain=?";
-     	$result = $this->_DB->getFirstRowQuery($query, TRUE, array($id,$dom));
-        if($result != FALSE)
+	if($result != FALSE)
             return $result;
         else{
             $this->errMsg = $this->_DB->errMsg;
@@ -374,9 +400,10 @@ class paloSantoRecordings extends paloAsteriskDB{
         }
     }
 
-    function deleteRecordings($records,$domain)
+    function deleteRecordings($records,$domain,$userLevel1)
     {
 	$retval = 0;
+	$err = 0;
         $where="where ";
 	$arrRec = array();
         $i=0;$arrComando="";
@@ -390,10 +417,25 @@ class paloSantoRecordings extends paloAsteriskDB{
 	   else
 		$where .= "filename = ? or "; 
 	  
-
-	$val = "/var/lib/asterisk/sounds/".$domain."/".$pieces[0]."/".$pieces[1];
+	if($userLevel1=="admin"){
+	    if($pieces[0]=="system")
+		  $val = "/var/lib/asterisk/sounds/".$domain."/".$pieces[0]."/".$pieces[1];
+	    else
+		  $err = 1;
+	}
+	elseif($userLevel1=="superadmin")
+	    if($pieces[0]=="custom")  
+		  $val = "/var/lib/asterisk/sounds/".$pieces[0]."/".$pieces[1];
+	    else
+		  $err = 1;
 	array_push($arrRec,$val); 
 	}   
+
+    if($err == 1){
+       $this->errMsg=_tr("You are not authorized to perform this action").$this->_DB->errMsg;
+       return false;
+    }
+    else{
      
 	$arrTmp = array();
 	foreach($arrRec as $arr){
@@ -433,7 +475,7 @@ class paloSantoRecordings extends paloAsteriskDB{
 
             }
        	} 
-	
+       }
      }
     
 }

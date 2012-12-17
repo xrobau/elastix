@@ -81,9 +81,9 @@ function _moduleContent(&$smarty, $module_name)
     $userAccount=$arrCredentiasls["userAccount"];
     $idOrganization=$arrCredentiasls["id_organization"];
     
-    if($userLevel1=="other"){
+    /*if($userLevel1=="other"){
         header("Location: index.php?menu=system");
-    }
+    }*/
 
   
     $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
@@ -133,31 +133,36 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	$pORGZ = new paloSantoOrganization($pDB2);
 	
         if($userLevel1=="superadmin"){
-		if(!empty($domain)){
+		$domain = getParameter("organization");
+		if((!empty($domain))||(!isset($domain))){
 			$url = "?menu=$module_name&organization=$domain";
+			if($domain=="src_custom")
+			    $domain_f = "all";
+			else
+			    $domain_f = $domain;
+		      
+			$pRecording = new paloSantoRecordings($pDB,$domain_f);
+			
+			if($domain=="src_custom")
+			  $total=$pRecording->getNumRecording($domain);
+			else
+			  $total=$pRecording->getNumRecording(); 
+
 		}else{
 			$domain = "all";
 			$url = "?menu=$module_name";
+			$pRecording = new paloSantoRecordings($pDB,$domain);
+			$total=$pRecording->getNumRecording($domain);
 		}
 	}else{
 		$arrOrg=$pORGZ->getOrganizationById($idOrganization);
 		$domain=$arrOrg["domain"];
 		$url = "?menu=$module_name";
+		$pRecording = new paloSantoRecordings($pDB,$domain);
+	        $total=$pRecording->getNumRecording($domain);
 	}
-	 
-	if($userLevel1=="superadmin"){
-	  if(isset($domain) && $domain!="all"){
-	      $pRecording = new paloSantoRecordings($pDB,$domain);
-	      $total=$pRecording->getNumRecording($domain);
-	  }else{
-	      $pRecording = new paloSantoRecordings($pDB,$domain);
-	      $total=$pRecording->getNumRecording();
-	  }
-	}else{
-	    $pRecording = new paloSantoRecordings($pDB,$domain);
-	    $total=$pRecording->getNumRecording($domain);
-	}
-       
+	
+	
 	if($total===false){
 		$error=$pRecording->errMsg;
 		$total=0;
@@ -172,7 +177,7 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
   
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
 
-    if($userLevel1=="admin")
+    if(($userLevel1=="admin")||($userLevel1=="superadmin"))
 	$check = "&nbsp;<input type='checkbox' name='checkall' class='checkall' id='checkall' onclick='jqCheckAll(this.id);' />";
     else
         $check = "";
@@ -194,28 +199,42 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	$arrRecordings=array();
 	$arrData = array();
 		    if($userLevel1=="admin"){
-			    $arrRecordings = $pRecording->getRecordings($domain);
-		    }else{
-			    $extUser=$pACL->getUserExtension($userAccount);
-			    $arrRecordings = $pRecording->getRecordingsByUser($domain,$extUser);
-			    
-			    //$arrExtens=$pExten->getExtensionByNum($domain,$extUser);
-			    $total=1;
-		    }
+			    $arrRecordings = $pRecording->getRecordings($domain,$limit,$offset);
+		    }elseif(($userLevel1=="superadmin")&&($domain=="all"))
+	                    $arrRecordings=$pRecording->getRecordings(null,$limit,$offset);
+			 else
+			    $arrRecordings=$pRecording->getRecordings($domain);  
+		   
 	if($arrRecordings===false){
 		$error=_tr("Error to obtain Recordings").$pRecording->errMsg;
                 $arrRecordings=array();
 	}
 
 	$i=0;
+       
 	foreach($arrRecordings as $recording) {
-
+	
 	  $ext = explode(".",$recording["name"]);
-	  if($userLevel1!="admin"){
-	      $arrTmp[0] = "";
-	      $arrTmp[1] = $recording["name"];
-              $arrTmp[2] = $recording["source"];
-	  }else{
+	  if($userLevel1=="superadmin"){
+	      if($recording["source"]=="custom"){
+	         $arrTmp[0] = "&nbsp;<input type ='checkbox' class='delete' name='record_delete[]' value='".$recording['source'].",".$recording['name']."' />";
+	         $arrTmp[2] = $recording["source"];
+	      }else{
+		 $arrTmp[0] = "";
+		 $arrTmp[2] = $recording["organization_domain"];
+	       }
+	       $idfile = $recording['uniqueid'];
+	      if($ext[1]=="gsm"){
+		$arrTmp[1] = "<span>".$recording['name']."</span>";
+		$arrTmp[3] = "";
+	      }
+	      else{
+	        $arrTmp[1] = "<div class='single' id='$i'><span data-src='index.php?menu=$module_name&action=download&id=$idfile&rawmode=yes'><img style='cursor:pointer;' width='13px' src='/modules/recordings/images/sound.png'/>&nbsp;&nbsp;".$recording['name']."</span>";
+		$arrTmp[3] = "<audio></audio>";
+		$i++;
+             }
+              
+	  }elseif($userLevel1=="admin"){
 	      
 	      $arrTmp[0] = "&nbsp;<input type ='checkbox' class='delete' name='record_delete[]' value='".$recording['source'].",".$recording['name']."' />";
 	      $idfile = $recording['uniqueid'];
@@ -238,7 +257,7 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         }
 				 
 	if($pORGZ->getNumOrganization() > 1){
-		if($userLevel1 == "admin"){
+		if(($userLevel1 == "admin")||($userLevel1 == "superadmin")){
 			$oGrid->addNew("add_recording",_tr("Add Recording"));
 			$oGrid->deleteList(_tr("Are you sure you want to delete?"), "remove", _tr("Delete Selected"),false);
 			
@@ -253,6 +272,23 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 		$smarty->assign("mb_title", _tr("MESSAGE"));
 		$smarty->assign("mb_message",$error);
 	}
+	
+	if($userLevel1 == "superadmin"){
+	    $arrOrgz=array("all"=>"all","src_custom"=>_tr("custom"));
+            foreach(($pORGZ->getOrganization()) as $value){
+                if($value["id"]!=1)
+                    $arrOrgz[$value["domain"]]=$value["name"];
+            }
+	   
+	    $arrFormElements = createFieldFilter($arrOrgz);
+	    $oFilterForm = new paloForm($smarty, $arrFormElements);
+	    $_POST["organization"]=$domain;
+	    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$domain], $_POST, array("organization" => "all"),true);
+	    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+	    $oGrid->showFilter(trim($htmlFilter));
+	}
+	
+      
 	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
 	
     return $contenidoModulo;
@@ -265,23 +301,27 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
       $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
       $pACL = new paloACL($pDB2);
       $pORGZ = new paloSantoOrganization($pDB2);
-      
-      $arrOrg=$pORGZ->getOrganizationById($idOrganization);
-      $domain=$arrOrg["domain"];
+      if($userLevel1=="superadmin"){
+	   	    $domain = "all";
+      }elseif($userLevel1=="admin"){
+	    $arrOrg=$pORGZ->getOrganizationById($idOrganization);
+	    $domain=$arrOrg["domain"];
+      }
+      $fullPath=NULL;
+     // $domain=$arrOrg["domain"];
       $id = getParameter("id");
       $pRecording = new paloSantoRecordings($pDB,$domain);
-      $record = $pRecording->getRecordingById($id);
+      $record = $pRecording->getRecordingById($id,$userLevel1);
       if($record){
 	 $fullPath = $record['filename'];
 	 $name = $record['name'];
-	
       }
    	  // Must be fresh start 
 	  if(headers_sent()) 
 	    die('Headers Sent'); 
 
 	  // File Exists? 
-	  if( file_exists($fullPath) ){ 
+	  if(file_exists($fullPath)){ 
 	    
 	    // Parse Info / Get Extension 
 	    $fsize = filesize($fullPath); 
@@ -406,23 +446,26 @@ function remove_recording($smarty, $module_name, $local_templates_dir, &$pDB, $a
 	$pACL = new paloACL($pDB2);
 	$pORGZ = new paloSantoOrganization($pDB2);
          
-	if($userLevel1!="admin"){
+	if(($userLevel1!="admin")&&($userLevel1!="superadmin")){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 		return reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}
 	else{
-		$arrOrg=$pORGZ->getOrganizationById($idOrganization);
-		$domain=$arrOrg["domain"];
-		$url = "?menu=$module_name";
-	    
+		if($userLevel1=="superadmin"){
+		            $domain = "all";
+		}elseif($userLevel1=="admin"){
+			$arrOrg=$pORGZ->getOrganizationById($idOrganization);
+			$domain=$arrOrg["domain"];
+		}
+
 		$record=getParameter("record_delete");
 		
 		if (isset($record)&& count($record)>0){
 		    $pRecording = new paloSantoRecordings($pDB,$domain);
 		    
 		    $pDB->beginTransaction();
-		    $success = $pRecording->deleteRecordings($record,$domain);
+		    $success = $pRecording->deleteRecordings($record,$domain,$userLevel1);
 		    if($success)
 			$pDB->commit();
 		    else
@@ -462,12 +505,15 @@ function save_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $pRecording = new paloSantoRecordings($pDB,$domain);
     $extension = $pRecording->Obtain_Extension_Current_User($arrConf);
     $error ="";
-    if(!$extension)
-       return form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+    //if(!$extension)
+      // return form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     
      if($userLevel1 == "admin"){
 	$destiny_path = "/var/lib/asterisk/sounds/$domain/system";
 	$source = "system";
+     }elseif($userLevel1 == "superadmin"){
+	$destiny_path = "/var/lib/asterisk/sounds/custom";
+	$source = "custom";
      }
   	    
          if (isset($_FILES)) {
@@ -494,19 +540,23 @@ function save_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arr
                 {
 		   $filenameTmp = $_FILES['file_record']['name'];
                    $tmp_name = $_FILES['file_record']['tmp_name'];
-	
+		   $filename = basename("$destiny_path/$filenameTmp");
+		   $info=pathinfo($filename);
+                   $file_sin_ext=$info["filename"];
 			if(strlen($filenameTmp)>50){
 			    $smarty->assign("mb_title", _tr("ERROR"));
 			    $smarty->assign("mb_message",_tr("Filename's length must be max 50 characters").": $filenameTmp");
 			    $bExito = false;
-			}elseif($pRecording->checkFilename($destiny_path.$filenameTmp)!=true){
+			}elseif(($pRecording->checkFilename($destiny_path."/".$filenameTmp)!=true)||($pRecording->checkFilename($destiny_path."/".$file_sin_ext.".wav")!=true)){
 			    //Verificar que no existe otro archivo con el mismo nombre en la misma carpeta
 			    $smarty->assign("mb_title", _tr("ERROR"));
 			    $smarty->assign("mb_message",_tr("Already exists a file with same filename").": $filenameTmp");
 			    $bExito = false;
+		            return form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+		
 			}else{
 
-			      $filename = basename("$destiny_path/$filenameTmp");
+			     // $filename = basename("$destiny_path/$filenameTmp");
 			      $date=date("YMd_His");
                               $tmpFile=$date."_".$filename;
 			      if (move_uploaded_file($tmp_name, "$destiny_path/$tmpFile"))
@@ -522,15 +572,16 @@ function save_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arr
                                 }
                               
                                 if($type=="audio/mpeg; charset=binary"){
-				    if($pRecording->convertMP3toWAV($destiny_path,$tmpFile,$file_sin_ext,$date)==false){
-                                        $error .=$pRecording->errMsg;
-					$continue=false;
-					$bExito = false;
-                                    }else{
-                                        $filename=$file_sin_ext.".wav";
-					
-                                    }
-                                }
+				            if($pRecording->convertMP3toWAV($destiny_path,$tmpFile,$file_sin_ext,$date)==false){
+						$error .=$pRecording->errMsg;
+						$continue=false;
+						$bExito = false;
+					    }else{
+						$filename=$file_sin_ext.".wav";
+						
+					    }
+				   
+				}
                                 if($continue){
                                     if($pRecording->resampleMoHFiles($destiny_path,$tmpFile,$filename)==false){
                                         $error .=$pRecording->errMsg;
@@ -777,13 +828,28 @@ function form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $ar
       $upload_mb = min($max_upload, $max_post, $memory_limit)*1048576;
     $smarty->assign("max_size", $upload_mb);
     $smarty->assign("alert_max_size", _tr("File size exceeds the limit. "));
-  
+    $smarty->assign("user_level", $userLevel1);
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr("Recordings"), $_POST);
 
     $contenidoModulo = "<form enctype='multipart/form-data' method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $contenidoModulo;
 }
+
+function createFieldFilter($arrOrgz)
+{
+    $arrFields = array(
+		"organization"  => array("LABEL"               => _tr("Organization"),
+				      "REQUIRED"               => "no",
+				      "INPUT_TYPE"             => "SELECT",
+				      "INPUT_EXTRA_PARAM"      => $arrOrgz,
+				      "VALIDATION_TYPE"        => "domain",
+				      "VALIDATION_EXTRA_PARAM" => "",
+				      "ONCHANGE"	       => "javascript:submit();"),
+		);
+    return $arrFields;
+}
+
 
 function getAction()
 {

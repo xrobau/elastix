@@ -4,14 +4,17 @@
     </tr>
     <tr>
         <table class="tabForm" style="font-size: 16px;" width="100%" border='0'>
-            <tr class="letra12">
+           {if $user_level eq 'admin'} 
+		<tr class="letra12">
                 <td colspan='2' style='padding-bottom: 2%;'>
+		    
                     <input type="radio" name="option_record" id="record_by_phone" value="by_record" {$check_record} onclick="Activate_Option_Record()" />
                     {$record} &nbsp;&nbsp;&nbsp;
                     <input type="radio" name="option_record" id="record_by_file" value="by_file" {$check_file} onclick="Activate_Option_Record()" />
                     {$file_upload}
                 </td>
             </tr>
+	   
             <tr class="letra12" id='record_option'>
                 <td align="left" width='15%'>{$recording_name_Label}</td>
                 <td align="left">
@@ -45,7 +48,7 @@
 		  <div id="contplay" style="margin-left: 4%; margin-top: -1%;"><audio preload></audio></div>
                   <!--  <input class="button" title={$record} type="submit" name="record" id="record" value="{$record}"  {$DISABLED}/>-->
                 </td>
-            </tr>
+            </tr> {/if}
             <tr class="letra12" id='upload_option'>
 		
                 <td align="left" width='13%'>{$record_Label}</td>
@@ -55,10 +58,11 @@
             </tr>
         </table>
     </tr>
+ {if $user_level eq 'admin'} 
     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm" id="info">
-	
 	<tr><td><i>{$INFO}</i></td></tr>
     </table>
+ {/if}
 </table>
 <input type='hidden' name='dialing' id='dialing' value="{$dialing}" />
 <input type='hidden' name='domain' id='domain' value="{$domain}" />
@@ -73,6 +77,7 @@
 <input type='hidden' name='alert_max_size' id='alert_max_size' value='{$alert_max_size}' />
 
 <input type='hidden' name='cod' id='cod' value='' />
+ {if $user_level eq 'admin'} 
 {literal}
     <script type="text/javascript">
 	$('#clock1').stopwatch();     
@@ -106,3 +111,4 @@
         }
     </script>
 {/literal}
+{/if}

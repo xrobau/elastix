@@ -860,6 +860,16 @@ INFO_FORMULARIOS;
                     unset($tuplaAnterior['id_call_incoming']);
                     unset($tuplaAnterior['id_campaign_incoming']);
                 }
+                
+                // Agregar el teléfono callerid o marcado
+                $recordset = $this->_db->prepare(
+                    ($tuplaAnterior['campaign_type'] == 'outgoing') 
+                        ? 'SELECT phone FROM calls WHERE id = ?' 
+                        : 'SELECT callerid AS phone FROM call_entry WHERE id = ?');
+                $recordset->execute(array($tuplaAnterior['call_id']));
+                $tuplaNumero = $recordset->fetch(PDO::FETCH_ASSOC);
+                $recordset->closeCursor();
+                $tuplaAnterior['phone'] = $tuplaNumero['phone'];
                 $this->_multiplex->notificarEvento_CallProgress($tuplaAnterior);
             }
         } catch (PDOException $e) {

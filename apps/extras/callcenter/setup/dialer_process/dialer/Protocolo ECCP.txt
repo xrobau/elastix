@@ -745,7 +745,7 @@ Elementos informativos:
 * uniqueid: ID único de Asterisk para la llamada correspondiente al intento.
 * trunk: Troncal a través de la cual se realiza la llamada saliente, o se recibe
   la llamada entrante.
-
+* phone: número de teléfono de callerid o marcado
 
 Ejemplo:
 Para una llamada saliente, se puede esperar esta secuencia de eventos:
@@ -757,6 +757,7 @@ Para una llamada saliente, se puede esperar esta secuencia de eventos:
         <call_id>85</call_id>
         <new_status>Placing</new_status>
         <retry>1</retry>
+        <phone>1099</phone>
     </callprogress>
 </event>
 <event>
@@ -768,6 +769,7 @@ Para una llamada saliente, se puede esperar esta secuencia de eventos:
         <new_status>Dialing</new_status>
         <retry>1</retry>
         <trunk>IAX2/1099</trunk>
+        <phone>1099</phone>
     </callprogress>
 </event>
 <event>
@@ -780,6 +782,7 @@ Para una llamada saliente, se puede esperar esta secuencia de eventos:
         <uniqueid>1355524474.28</uniqueid>
         <retry>1</retry>
         <trunk>IAX2/1099</trunk>
+        <phone>1099</phone>
     </callprogress>
 </event>
 <event>
@@ -792,6 +795,7 @@ Para una llamada saliente, se puede esperar esta secuencia de eventos:
         <uniqueid>1355524474.28</uniqueid>
         <retry>1</retry>
         <trunk>IAX2/1099</trunk>
+        <phone>1099</phone>
     </callprogress>
 </event>
 

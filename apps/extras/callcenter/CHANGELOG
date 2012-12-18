@@ -1,3 +1,6 @@
+* Dialer (ECCP): add and document call progress events. Rework call progress
+  logging so that the campaign ID is available. Add a new request 'callprogress'
+  to enable call progress events, which are disabled by default.
 * Dialer: add logging capability of events that happen to a call. For this a 
   new database table was created. Allow campaign deletion to cope with the new
   table. This is required functionality for call progress events.

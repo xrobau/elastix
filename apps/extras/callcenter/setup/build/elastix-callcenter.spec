@@ -100,6 +100,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Dec 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Dialer (ECCP): add and document call progress events. Rework call 
+  progress logging so that the campaign ID is available. Add a new request 
+  'callprogress' to enable call progress events, which are disabled by default.
+
 * Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Campaign Out: fix incorrect declaration of string constants for rexexp.
 - ADDED: Dialer: add logging capability of events that happen to a call. For 

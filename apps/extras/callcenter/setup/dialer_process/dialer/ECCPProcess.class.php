@@ -698,7 +698,13 @@ INFO_FORMULARIOS;
                 'new_status'        =>  'Success',
                 'id_agent'          =>  $id_agent,
             );
-            $paramProgreso[($sTipoLlamada == 'incoming') ? 'id_call_incoming' : 'id_call_outgoing'] = $idLlamada;
+            if ($sTipoLlamada == 'outgoing') {
+                $paramProgreso['id_call_outgoing'] = $idLlamada;
+                $paramProgreso['id_campaign_outgoing'] = $idCampania;
+            } else {
+                $paramProgreso['id_call_incoming'] = $idLlamada;
+                if (!is_null($idCampania)) $paramProgreso['id_campaign_incoming'] = $idCampania;
+            }
             $this->notificarProgresoLlamada($paramProgreso);
         } catch (PDOException $e) {
         	$this->_stdManejoExcepcionDB($e, 'no se puede leer información de llamada para AgentLinked');
@@ -833,7 +839,29 @@ INFO_FORMULARIOS;
             $sth = $this->_db->prepare($sPeticionSQL);
             $sth->execute($paramSQL);
 
-            // TODO: emitir el evento a las conexiones ECCP
+            /* Emitir el evento a las conexiones ECCP. Para mantener la 
+             * consistencia con el resto del API, se quitan los valores de 
+             * id_call_* y id_campaign_*, y se sintetiza tipo_llamada. */
+            if (!in_array($tuplaAnterior['new_status'], array('Success', 'Hangup'))) {
+                // Todavía no se soporta emitir agente conectado para OnHold/OffHold
+                unset($tuplaAnterior['id_agent']);
+                
+                if (isset($tuplaAnterior['id_call_outgoing'])) {
+                    $tuplaAnterior['campaign_type'] = 'outgoing';
+                    $tuplaAnterior['campaign_id'] = $tuplaAnterior['id_campaign_outgoing'];
+                    $tuplaAnterior['call_id'] = $tuplaAnterior['id_call_outgoing'];
+                    unset($tuplaAnterior['id_call_outgoing']);
+                    unset($tuplaAnterior['id_campaign_outgoing']);
+                } elseif (isset($tuplaAnterior['id_call_incoming'])) {
+                    $tuplaAnterior['campaign_type'] = 'incoming';
+                    if (isset($tuplaAnterior['id_campaign_incoming']))
+                        $tuplaAnterior['campaign_id'] = $tuplaAnterior['id_campaign_incoming'];
+                    $tuplaAnterior['call_id'] = $tuplaAnterior['id_call_incoming'];
+                    unset($tuplaAnterior['id_call_incoming']);
+                    unset($tuplaAnterior['id_campaign_incoming']);
+                }
+                $this->_multiplex->notificarEvento_CallProgress($tuplaAnterior);
+            }
         } catch (PDOException $e) {
         	$this->_stdManejoExcepcionDB($e, 'no se puede escribir bitácora de estado de llamada');
         }

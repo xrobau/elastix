@@ -1212,8 +1212,13 @@ class AMIEventProcess extends TuberiaProcess
                             'new_status'    =>  'Dialing',
                             'trunk'         =>  $llamada->trunk,                            
                         );
-                        $paramProgreso[($llamada->tipo_llamada == 'outgoing') ? 'id_call_outgoing' : 'id_call_incoming'] 
-                            = $llamada->id_llamada;
+                        if ($llamada->tipo_llamada == 'outgoing') {
+                            $paramProgreso['id_call_outgoing'] = $llamada->id_llamada;
+                            $paramProgreso['id_campaign_outgoing'] = $llamada->campania->id;
+                        } else {
+                            $paramProgreso['id_call_incoming'] = $llamada->id_llamada;
+                            if (!is_null($llamada->campania)) $paramProgreso['id_campaign_incoming'] = $llamada->campania->id;
+                        }
                         $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
                     } elseif ($llamada->actualchannel != $params['Destination']) {
                         $this->_log->output('WARN: '.__METHOD__.': canal remoto en '.

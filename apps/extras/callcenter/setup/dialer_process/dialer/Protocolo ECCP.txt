@@ -710,6 +710,91 @@ Para final de pausa de hold:
 </event>
 
 
+Evento "callprogress"
+
+Este evento se genera para indicar el progreso de la llamada, especificamente la
+transición de estado de la llamada referenciada. Este evento no es normalmente
+generado para todos los clientes. Para recibir este evento, el cliente ECCP debe
+de ejecutar el requerimiento "callprogress" con la bandera "enable" puesta a 1.
+
+Elementos informativos:
+* datetime_entry: Fecha y hora en la que se produjo la transición de estado
+* campaign_type: Tipo de la campaña, uno de 'incoming' u 'outgoing'
+* campaign_id: ID en la base de datos de la campaña a la que pertenece la 
+  llamada. Este valor siempre está presente para una llamada saliente, pero 
+  puede no estar presente para una llamada entrante.
+* call_id: ID en la base de datos de la llamada que se hace referencia en evento.
+* new_status: El nuevo estado al cual ha llegado la llamada. Los eventos 
+  reportados pueden ser uno de los siguientes:
+  Placing: se ha empezado a colocar la llamada saliente. El único parámetro
+    válido es retry.
+  Dialing: se ha empezado a marcar la llamada saliente. Se conocen los valores
+    de retry y trunk.
+  Ringing: la llamada saliente está timbrando y va a conectarse a la cola. Se
+    conocen los valores de uniqueid, retry, trunk.
+  OnQueue: la llamada está en la cola esperando ser asignada un agente. Se
+    conocen los valores de uniqueid, retry, trunk.
+  Failure: la llamada no ha podido ser conectada. Los valores válidos son 
+    dependientes del estado en el cual se detectó el fallo.
+  OnHold: la llamada ha entrado en hold. Se conocen los valores de uniqueid, 
+    retry, trunk.
+  OffHold: la llamada ha salido de hold. Se conocen los valores de uniqueid, 
+    retry, trunk.
+* retry: Para llamadas salientes, el número de intento de marcado que 
+  corresponde a este cambio de estado. Siempre 0 para la llamada entrante.
+* uniqueid: ID único de Asterisk para la llamada correspondiente al intento.
+* trunk: Troncal a través de la cual se realiza la llamada saliente, o se recibe
+  la llamada entrante.
+
+
+Ejemplo:
+Para una llamada saliente, se puede esperar esta secuencia de eventos:
+<event>
+    <callprogress>
+        <datetime_entry>2012-12-14 17:34:34</datetime_entry>
+        <campaign_type>outgoing</campaign_type>
+        <campaign_id>7</campaign_id>
+        <call_id>85</call_id>
+        <new_status>Placing</new_status>
+        <retry>1</retry>
+    </callprogress>
+</event>
+<event>
+    <callprogress>
+        <datetime_entry>2012-12-14 17:34:34</datetime_entry>
+        <campaign_type>outgoing</campaign_type>
+        <campaign_id>7</campaign_id>
+        <call_id>85</call_id>
+        <new_status>Dialing</new_status>
+        <retry>1</retry>
+        <trunk>IAX2/1099</trunk>
+    </callprogress>
+</event>
+<event>
+    <callprogress>
+        <datetime_entry>2012-12-14 17:34:39</datetime_entry>
+        <campaign_type>outgoing</campaign_type>
+        <campaign_id>7</campaign_id>
+        <call_id>85</call_id>
+        <new_status>Ringing</new_status>
+        <uniqueid>1355524474.28</uniqueid>
+        <retry>1</retry>
+        <trunk>IAX2/1099</trunk>
+    </callprogress>
+</event>
+<event>
+    <callprogress>
+        <datetime_entry>2012-12-14 17:34:39</datetime_entry>
+        <campaign_type>outgoing</campaign_type>
+        <campaign_id>7</campaign_id>
+        <call_id>85</call_id>
+        <new_status>OnQueue</new_status>
+        <uniqueid>1355524474.28</uniqueid>
+        <retry>1</retry>
+        <trunk>IAX2/1099</trunk>
+    </callprogress>
+</event>
+
 Listado de requerimientos
 -------------------------
 Nota: Para facilitar la legibilidad del presente documento, se presentarán aquí 
@@ -862,19 +947,19 @@ Para recibir otra vez eventos de todos los agentes:
 Respuesta:
 En caso de éxito:
 <response id="1000">
-    <filterbyagent>
+    <filterbyagent_response>
         <success/>
-    </filterbyagent>
+    </filterbyagent_response>
 </response>
 
 En caso de agente en formato no reconocido:
 <response id="1">
-    <filterbyagent>
+    <filterbyagent_response>
         <failure>
             <code>417</code>
             <message>Invalid agent number</message>
         </failure>
-    </filterbyagent>
+    </filterbyagent_response>
 </response>
 
 
@@ -2719,4 +2804,37 @@ Respuesta:
             </chanvar>
         </chanvars>
     </getchanvars_response>
+</response>
+
+
+Requerimiento "callprogress"
+Este requerimiento activa o desactiva la emisión de eventos de progreso de 
+llamada. Por omisión los eventos de progreso de llamada están desactivados, para
+compatibilidad con versiones anteriores de clientes ECCP. Si un cliente puede
+hacer uso de los eventos, debe activarlos con este requerimiento.
+
+Atributos o argumentos:
+* enable: Valor de bandera: 1 para activar, 0 para desactivar
+
+Ejemplo:
+Para activar los eventos de progreso de llamada:
+<request id="4">
+    <callprogress>
+        <enable>1</enable>
+    </callprogress>
+</request>
+
+Para desactivar los eventos de progreso:
+<request id="4">
+    <callprogress>
+        <enable>0</enable>
+    </callprogress>
+</request>
+
+Respuesta:
+En caso de éxito:
+<response id="4">
+    <callprogress_response>
+        <success/>
+    </callprogress_response>
 </response>

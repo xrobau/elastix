@@ -452,8 +452,10 @@ CREATE TABLE IF NOT EXISTS `call_progress_log` (
     `id` int(10) unsigned NOT NULL auto_increment,
 
     `datetime_entry`    datetime    NOT NULL,
-    `id_call_incoming`  int(10) unsigned,
-    `id_call_outgoing`  int(10) unsigned,
+    `id_campaign_incoming`  int(10) unsigned,
+    `id_call_incoming`      int(10) unsigned,
+    `id_campaign_outgoing`  int(10) unsigned,
+    `id_call_outgoing`      int(10) unsigned,
     
     `new_status`        varchar(32) NOT NULL,
     `retry`             int(10) unsigned,
@@ -466,6 +468,8 @@ CREATE TABLE IF NOT EXISTS `call_progress_log` (
     CONSTRAINT `call_progress_log_ibfk_1` FOREIGN KEY (`id_call_incoming`) REFERENCES `call_entry` (`id`),
     CONSTRAINT `call_progress_log_ibfk_2` FOREIGN KEY (`id_call_outgoing`) REFERENCES `calls` (`id`),
     CONSTRAINT `call_progress_log_ibfk_4` FOREIGN KEY (`id_agent`) REFERENCES `agent` (`id`),
+    CONSTRAINT `call_progress_log_ibfk_5` FOREIGN KEY (`id_campaign_incoming`) REFERENCES `campaign_entry` (`id`),
+    CONSTRAINT `call_progress_log_ibfk_6` FOREIGN KEY (`id_campaign_outgoing`) REFERENCES `campaign` (`id`),
     KEY `incoming_datetime_entry` (`id_call_incoming`, `datetime_entry`),
     KEY `outgoing_datetime_entry` (`id_call_outgoing`, `datetime_entry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

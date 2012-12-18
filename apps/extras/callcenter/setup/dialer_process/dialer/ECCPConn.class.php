@@ -51,6 +51,9 @@ class ECCPConn extends MultiplexConn
     // Si != NULL, eventos sólo se despachan si el agente coincide con este valor
     private $_sAgenteFiltrado = NULL;
 
+    // Si VERDADERO, cliente está interesado en eventos de progreso de llamada
+    private $_bProgresoLlamada = FALSE;
+
     function __construct($oMainLog, $tuberia)
     {
         $this->_log = $oMainLog;
@@ -3264,6 +3267,19 @@ LEER_ULTIMA_PAUSA;
         return $xml_response;
     }
 
+    private function Request_callprogress($comando)
+    {
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_callprogress = $xml_response->addChild('callprogress_response');
+
+        $this->_bProgresoLlamada = ((int)$comando->enable != 0);
+        $xml_callprogress->addChild('success');
+        return $xml_response;
+    }
+
     /***************************** EVENTOS *****************************/
     
     function notificarEvento_AgentLogin($sAgente, $bExitoLogin)
@@ -3351,6 +3367,21 @@ LEER_ULTIMA_PAUSA;
         $infoPausa['agent_number'] = $sAgente;
         foreach ($infoPausa as $sKey => $valor) {
             if (!is_null($valor)) $xml_agentLinked->addChild($sKey, str_replace('&', '&amp;', $valor));
+        }
+        
+        $s = $xml_response->asXML();
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
+    }
+    
+    function notificarEvento_CallProgress($infoProgreso)
+    {
+    	if (is_null($this->_sUsuarioECCP)) return;
+        if (!$this->_bProgresoLlamada) return;
+        
+        $xml_response = new SimpleXMLElement('<event />');
+        $xml_callProgress = $xml_response->addChild('callprogress');
+        foreach ($infoProgreso as $sKey => $valor) {
+            if (!is_null($valor)) $xml_callProgress->addChild($sKey, str_replace('&', '&amp;', $valor));
         }
         
         $s = $xml_response->asXML();

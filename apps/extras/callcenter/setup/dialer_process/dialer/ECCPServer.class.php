@@ -163,5 +163,14 @@ class ECCPServer extends MultiplexServer
             }
         }
     }
+    
+    function notificarEvento_CallProgress($infoProgreso)
+    {
+        foreach ($this->_listaConn as &$oConn) {
+            if (method_exists($oConn, 'notificarEvento_CallProgress')) {
+                $oConn->notificarEvento_CallProgress($infoProgreso);
+            }
+        }
+    }
 }
 ?>

@@ -837,11 +837,12 @@ SQL_LLAMADA_COLOCADA;
             
             // Notificar el progreso de la llamada
             $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
-                'datetime_entry'    =>  date('Y-m-d H:i:s', $iTimestampInicioOriginate),
-                'new_status'        =>  ($resultado['Response'] == 'Success') ? 'Placing' : 'Failure',
-                'id_call_outgoing'  =>  $tupla['id'],
-                'retry'             =>  (is_null($tupla['retries']) ? 0 : $tupla['retries']) + 1,
-                'trunk'             =>  $infoCampania['trunk'],
+                'datetime_entry'        =>  date('Y-m-d H:i:s', $iTimestampInicioOriginate),
+                'new_status'            =>  ($resultado['Response'] == 'Success') ? 'Placing' : 'Failure',
+                'id_campaign_outgoing'  =>  $infoCampania['id'],
+                'id_call_outgoing'      =>  $tupla['id'],
+                'retry'                 =>  (is_null($tupla['retries']) ? 0 : $tupla['retries']) + 1,
+                'trunk'                 =>  $infoCampania['trunk'],
             ));
         }
         
@@ -1479,13 +1480,15 @@ PETICION_LLAMADAS_AGENTE;
         // Para llamada entrante se debe de insertar el log de progreso
         if ($tipo_llamada == 'incoming') {
             // Notificar el progreso de la llamada
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
-                'datetime_entry'    =>  $paramInsertar['datetime_entry_queue'],
-                'new_status'        =>  'OnQueue',
-                'id_call_incoming'  =>  $idCall,
-                'uniqueid'          =>  $paramInsertar['uniqueid'],
-                'trunk'             =>  $paramInsertar['trunk'],
-            ));
+            $infoProgreso = array(
+                'datetime_entry'        =>  $paramInsertar['datetime_entry_queue'],
+                'new_status'            =>  'OnQueue',
+                'id_campaign_incoming'  =>  $paramInsertar['id_campaign'],
+                'id_call_incoming'      =>  $idCall,
+                'uniqueid'              =>  $paramInsertar['uniqueid'],
+                'trunk'                 =>  $paramInsertar['trunk'],
+            );
+            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($infoProgreso);
         }
         
         // Mandar de vuelta el ID de inserción a AMIEventProcess

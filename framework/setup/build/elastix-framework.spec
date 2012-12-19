@@ -308,6 +308,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Dec 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework: update internal jQuery to 1.8.3.
+  SVN Rev[4522]
+
 * Thu Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
 - FIXED: framework - Build/elastix-framework.spec: Put in correct order the
   procedure of delete a group of dirs in the spec.

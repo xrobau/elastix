@@ -313,6 +313,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Dec 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework: update internal jQuery to 1.8.3.
+  SVN Rev[4522]
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework: round up three duplicates of smarty creation into a single method,
   paves the way to moving compiled template directory off the wwwroot.

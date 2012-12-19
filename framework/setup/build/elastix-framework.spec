@@ -309,6 +309,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Dec 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework: (trivial) remove extra newline in jslib/css lists.
+  SVN Rev[4523]
 - CHANGED: framework: update internal jQuery to 1.8.3.
   SVN Rev[4522]
 

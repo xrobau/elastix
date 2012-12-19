@@ -398,7 +398,7 @@ class paloSantoNavigation {
 
         //STEP 1: include file of module
         $directory = "$documentRoot/modules/".$menuLibs;
-        $HEADER_MODULES = "";
+        $HEADER_MODULES = array();
         if(is_dir($directory)){
             // FIXED: The theme default shouldn't be static.
             $directoryScrips = "$documentRoot/modules/$menuLibs/themes/default/js/";
@@ -408,7 +408,7 @@ class paloSantoNavigation {
                 if($arr_js!=false && count($arr_js)>0){
                     for($i=0; $i<count($arr_js); $i++){
                         $dir_script = "modules/$menuLibs/themes/default/js/".$arr_js[$i];
-                        $HEADER_MODULES .= "\n<script type='text/javascript' src='$dir_script'></script>";
+                        $HEADER_MODULES[] = "<script type='text/javascript' src='$dir_script'></script>";
                     }
                 }
             }
@@ -417,20 +417,20 @@ class paloSantoNavigation {
                 if($arr_css!=false && count($arr_css)>0){
                     for($i=0; $i<count($arr_css); $i++){
                         $dir_css = "modules/$menuLibs/themes/default/css/".$arr_css[$i];
-                        $HEADER_MODULES .= "\n<link rel='stylesheet' href='$dir_css' />";
+                        $HEADER_MODULES[] = "<link rel='stylesheet' href='$dir_css' />";
                     }
                 }
             }
             //$HEADER_MODULES
         }
-        $this->smarty->assign("HEADER_MODULES",$HEADER_MODULES);
+        $this->smarty->assign("HEADER_MODULES", implode("\n", $HEADER_MODULES));
     }
 
     function putHEAD_JQUERY_HTML()
     {
         $documentRoot = $_SERVER["DOCUMENT_ROOT"];
         // include file of framework
-        $HEADER_LIBS_JQUERY = "";
+        $HEADER_LIBS_JQUERY = array();
         $JQqueryDirectory = "$documentRoot/libs/js/jquery";
         // it to load libs JQuery
         if(is_dir($JQqueryDirectory)){
@@ -440,7 +440,7 @@ class paloSantoNavigation {
                 if($arr_js!=false && count($arr_js)>0){
                     for($i=0; $i<count($arr_js); $i++){
                         $dir_script = "libs/js/jquery/".$arr_js[$i];
-                        $HEADER_LIBS_JQUERY .= "\n<script type='text/javascript' src='$dir_script'></script>";
+                        $HEADER_LIBS_JQUERY[] = "<script type='text/javascript' src='$dir_script'></script>";
                     }
                 }
             }
@@ -452,13 +452,13 @@ class paloSantoNavigation {
                 if($arr_css!=false && count($arr_css)>0){
                     for($i=0; $i<count($arr_css); $i++){
                         $dir_css = "libs/js/jquery/css/ui-lightness/".$arr_css[$i];
-                        $HEADER_LIBS_JQUERY .= "\n<link rel='stylesheet' href='$dir_css' />";
+                        $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
                     }
                 }
             }
             //$HEADER_LIBS_JQUERY
         }
-        $this->smarty->assign("HEADER_LIBS_JQUERY",$HEADER_LIBS_JQUERY);
+        $this->smarty->assign("HEADER_LIBS_JQUERY", implode("\n", $HEADER_LIBS_JQUERY));
     }
 
     /**

@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: new implementation introduced by SVN commit 3955 introduced
+  a regression in which an empty pid list confused the code into reporting a
+  process was active. Fixed. Fixes Elastix bug #1431.
+  SVN Rev[4524]
+
 * Tue Dec 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Network Parameters: allow optional quote before dhcp keyword.
   SVN Rev[4500]

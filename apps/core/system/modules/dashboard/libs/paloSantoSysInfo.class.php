@@ -350,7 +350,7 @@ class paloSantoSysInfo
     {
         if (!$this->_existService($nameService)) return "Not_exists";
         foreach (explode(' ', trim(`/sbin/pidof $serviceName`)) as $pid) {
-        	if ((is_dir("/proc/$pid"))) return 'OK';
+        	if (ctype_digit($pid) && (is_dir("/proc/$pid"))) return 'OK';
         }
         return 'Shutdown';
     }

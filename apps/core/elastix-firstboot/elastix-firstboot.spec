@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-firstboot: Revert SVN commit 4161 and fix the proper way.
+  Original bug was caused by forgotten blanking of password after regexp failed.
+  SVN Rev[4526]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.

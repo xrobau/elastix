@@ -149,6 +149,12 @@ function getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParamet
     P44=$ipTftpServer[3]
     
     $configNetwork";    
+
+    if ($model == "GXP280"){
+            $content .="
+        # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO
+        P73=1";
+    }
     
     return $content;
 }

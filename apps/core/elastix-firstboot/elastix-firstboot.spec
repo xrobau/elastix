@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-firstboot: Remove ampersand from accepted characters in 
+  passwords, since freePBX update chokes on these. Fixes Elastix bug #1432.
+  SVN Rev[4525]
+
 * Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
 - CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
   SVN history. Changed release in specfile.

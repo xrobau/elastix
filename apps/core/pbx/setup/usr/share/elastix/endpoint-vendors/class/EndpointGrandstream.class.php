@@ -153,6 +153,7 @@ class EndpointGrandstream extends Endpoint
                         'TIME_ZONE'         =>  $this->_timeZone,
                         
                         'SERVER_IP_OCTETS'  =>  explode('.', $this->_serverip),
+                        'FORCE_DTMF_RTP'    =>  in_array($this->_model, array('GXP280')),
                     ))));
 
                 

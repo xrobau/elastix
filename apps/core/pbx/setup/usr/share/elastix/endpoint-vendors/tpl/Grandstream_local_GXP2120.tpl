@@ -76,3 +76,8 @@ P41 = {$SERVER_IP_OCTETS[0]}
 P42 = {$SERVER_IP_OCTETS[1]}
 P43 = {$SERVER_IP_OCTETS[2]}
 P44 = {$SERVER_IP_OCTETS[3]}
+
+{if $FORCE_DTMF_RTP}
+# Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO
+P73=1
+{/if}

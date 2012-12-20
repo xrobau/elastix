@@ -103,6 +103,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-firstboot: Revert SVN commit 4161 and fix the proper way.
+  Original bug was caused by forgotten blanking of password after regexp failed.
+  SVN Rev[4526]
 - CHANGED: elastix-firstboot: Remove ampersand from accepted characters in 
   passwords, since freePBX update chokes on these. Fixes Elastix bug #1432.
   SVN Rev[4525]

@@ -899,6 +899,71 @@ LISTA_EXTENSIONES;
             return NULL;
     	}
     }
+    
+    function leerListaCampanias()
+    {
+    	try {
+    		$oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->getcampaignlist();
+            $listaCampania = array();
+            foreach ($respuesta->campaigns->campaign as $xml_campaign) {
+            	$listaCampania[(int)$xml_campaign->id] = array(
+                    'id'        =>  (int)$xml_campaign->id,
+                    'type'      =>  (string)$xml_campaign->type,
+                    'name'      =>  (string)$xml_campaign->name,
+                    'status'    =>  (string)$xml_campaign->status,
+                );
+            }
+            return $listaCampania;
+    	} catch (Exception $e) {
+            $this->errMsg = '(internal) leerListaCampanias'.$e->getMessage();
+            return NULL;
+    	}
+    }
+    
+    function leerEstadoCampania($sCallType, $iCampaignId)
+    {
+    	try {
+    		$oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->getcampaignstatus($sCallType, $iCampaignId);
+            if (isset($respuesta->failure)) {
+                $this->errMsg = _tr('Unable to read campaign information').' - '.$this->_formatoErrorECCP($respuesta);
+                return NULL;
+            }
+            
+            $reporte = array(
+                'statuscount'   =>  array(),
+                'activecalls'   =>  array(),
+            );
+            foreach ($respuesta->children() as $xml_node) {
+                switch ($xml_node->getName()) {
+                case 'statuscount':
+                    foreach ($xml_node->children() as $xml_field) {
+                    	$reporte['statuscount'][$xml_field->getName()] = (int)$xml_field;
+                    }
+                    ksort($reporte['statuscount']);
+                    break;
+                case 'agents':
+                    // No implementado
+                    break;
+                case 'activecalls':
+                    foreach ($xml_node->activecall as $xml_activecall) {
+                    	$idCall = (int)$xml_activecall->callid;
+                        $reporte['activecalls'][$idCall] = array(
+                            'callid'        =>  $idCall,
+                            'callnumber'    =>  (string)$xml_activecall->callnumber,
+                            'callstatus'    =>  (string)$xml_activecall->callstatus,
+                        );
+                    }
+                    break;
+                }
+            }
+            return $reporte;
+        } catch (Exception $e) {
+            $this->errMsg = '(internal) leerEstadoCampania'.$e->getMessage();
+            return NULL;
+    	}
+    }
 }
 
 ?>

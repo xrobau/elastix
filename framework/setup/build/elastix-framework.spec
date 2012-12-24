@@ -308,6 +308,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Dec 24 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework: update internal jQueryUI to 1.8.24, fixes Draggable 
+  incompatibilities with updated jQuery.
+  SVN Rev[4530]
+
 * Wed Dec 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework: (trivial) remove extra newline in jslib/css lists.
   SVN Rev[4523]

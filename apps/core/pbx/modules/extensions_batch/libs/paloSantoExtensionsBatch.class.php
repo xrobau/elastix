@@ -875,8 +875,23 @@ class paloSantoLoadExtension {
     {
         if(strlen($Secret) <= 5)
             return false;
+            
+        if (!preg_match("/[[:alnum:]]/", $Secret))
+            return false;
+            
+        if (preg_match("/[[:space:]]/", $Secret))
+            return false;    
         
-        if (!preg_match("/([a-z]{1,}[A-Z]{1,}[0-9]*)|([0-9]*[a-z]{1,}[A-Z]{1,})|([A-Z]{1,}[0-9]*[a-z]{1,})/", $Secret))
+        if (preg_match("/[[:punct:]]/", $Secret))
+            return false;
+        
+        if (!preg_match("/[a-z]/", $Secret))
+            return false;
+            
+        if (!preg_match("/[A-Z]/", $Secret))
+            return false;
+            
+        if (!preg_match("/[0-9]/", $Secret))
             return false;
 
         return true;

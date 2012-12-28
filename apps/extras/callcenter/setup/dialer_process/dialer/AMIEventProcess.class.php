@@ -206,7 +206,7 @@ class AMIEventProcess extends TuberiaProcess
             // Instalación de los manejadores de eventos
             foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join', 
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
-                'PeerStatus') as $k)
+                'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved') as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
             $astman->add_event_handler('Bridge', array($this, "msg_Link")); // Visto en Asterisk 1.6.2.x
             if ($this->DEBUG && $this->_config['dialer']['allevents'])
@@ -402,6 +402,10 @@ class AMIEventProcess extends TuberiaProcess
             case 'RedirectFromHold':
                 /* Por ahora se ignora el OriginateResponse resultante del Originate
                  * para regresar de HOLD */
+                return TRUE;
+            case 'QueueMemberAdded':
+                /* Nada que hacer */
+                $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberAdded detectado");  
                 return TRUE;
             default:
                 $this->_log->output("ERR: ".__METHOD__.": no se ha implementado soporte ECCP para: {$sKey}");
@@ -948,13 +952,14 @@ class AMIEventProcess extends TuberiaProcess
         $iTimestamp, $datos)
     {
         foreach ($datos[0] as $tupla) {
-            // id number name estatus
-        	$sAgente = 'Agent/'.$tupla['number'];
+            // id type number name estatus
+        	$sAgente = $tupla['type'].'/'.$tupla['number'];
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (is_null($a)) {
             	// Agente nuevo por registrar
                 $a = $this->_listaAgentes->nuevoAgente($tupla['id'], 
-                    $tupla['number'], $tupla['name'], ($tupla['estatus'] == 'A'));
+                    $tupla['number'], $tupla['name'], ($tupla['estatus'] == 'A'),
+                    $tupla['type']);
             } elseif ($a->id_agent != $tupla['id']) {
             	// Agente ha cambiado de ID de base de datos, y está deslogoneado
                 if ($a->estado_consola == 'logged-out') {
@@ -1273,6 +1278,78 @@ class AMIEventProcess extends TuberiaProcess
         return FALSE;
     }
     
+    // Nueva función
+    public function msg_QueueMemberAdded($sEvent, $params, $sServer, $iPort)
+    {  
+
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }      
+
+       $sAgente = $params['Location']; 
+       
+       /* tomado de msg_agentLogin */
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+
+        /* if (is_null($a) || $a->estado_consola == 'logged-out') { // Línea original */ 
+       if (is_null($a)) {
+            if ($this->DEBUG) {
+                $this->_log->output("DEBUG: ".__METHOD__.": AgentLogin($sAgente) no iniciado por programa, no se hace nada.");
+                $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogin");
+            }
+            return FALSE;
+        }        
+        
+        if ($a->estado_consola != 'logged-in') {
+            $a->completarLoginAgente();
+            $this->_tuberia->msg_ECCPProcess_AgentLogin(
+                $sAgente,
+                $params['local_timestamp_received'],
+                $a->id_agent);
+        } else {
+        	if ($this->DEBUG) {
+        		$this->_log->output("DEBUG: ".__METHOD__.": AgentLogin($sAgente) duplicado (múltiples colas), ignorando");
+                $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogin");
+        	}
+        }
+    }
+
+    public function msg_QueueMemberRemoved($sEvent, $params, $sServer, $iPort)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $params['Location']);
+
+        if (is_null($a)) {
+            if ($this->DEBUG) {
+                $this->_log->output("DEBUG: ".__METHOD__.": AgentLogin({$params['Location']}) no iniciado por programa, no se hace nada.");
+                $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogoff");
+            }
+            return FALSE;
+        }        
+
+        if ($a->estado_consola == 'logged-in') {
+            $this->_tuberia->msg_ECCPProcess_AgentLogoff(
+                $params['Location'],
+                $params['local_timestamp_received'], 
+                $a->id_agent,
+                $a->id_sesion,
+                $a->id_audit_break,
+                $a->id_audit_hold);
+            $a->terminarLoginAgente();
+        } else {
+            if ($this->DEBUG) {
+                $this->_log->output("DEBUG: ".__METHOD__.": AgentLogin({$params['Location']}) duplicado (múltiples colas), ignorando");
+                $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogoff");
+            }
+        }
+        
+        if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
+        
+        return FALSE;
+    }
+
     public function msg_Join($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1325,11 +1402,21 @@ class AMIEventProcess extends TuberiaProcess
             $sAgentNum = $regs[1];
             $sChannel = $params['Channel1'];
             $sRemChannel = $params['Channel2'];
+        } elseif (  preg_match('|^(SIP/(\d+))\-\w+$|',  $params['Channel1'], $regs) || 
+                    preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel1'], $regs)) {        
+            $sAgentNum   = $regs[2];
+            $sChannel    = $regs[1];
+            $sRemChannel = $params['Channel2'];
         }
         if (preg_match('|^Agent/(\d+)$|', $params['Channel2'], $regs)) {
             $sAgentNum = $regs[1];
             $sChannel = $params['Channel2'];
             $sRemChannel = $params['Channel1'];
+        } elseif(   preg_match('|^(SIP/(\d+))\-\w+$|', $params['Channel2'], $regs) || 
+                    preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel2'], $regs)) {
+            $sAgentNum = $regs[2];         
+            $sChannel  = $regs[1];                    
+            $sRemChannel = $params['Channel1']; // Remote Channel
         }
 
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid1']);

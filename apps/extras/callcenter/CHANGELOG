@@ -1,3 +1,10 @@
+* Dialer (ECCP): merge in-progress support for CallbackLogin-style agents.
+  Currently the supported agents are SIP and IAX2 extensions. The agents must be
+  declared at the Callback Extensions module under Call Center-->Agent Options,
+  and also added as Dynamic Members of the queues to use for the campaigns, as
+  S4321 (for extension SIP/4321) or I4321 (for extension IAX2/4321). The 
+  extensions will be added with QueueAdd at login and will only ring if a call
+  enters the corresponding queue.
 * Dialer (ECCP): add and document call progress events. Rework call progress
   logging so that the campaign ID is available. Add a new request 'callprogress'
   to enable call progress events, which are disabled by default.

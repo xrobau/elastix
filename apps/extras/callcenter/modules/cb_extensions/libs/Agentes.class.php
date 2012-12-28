@@ -82,16 +82,20 @@ class Agentes
     function getAgents($id=null)
     {
         // CONSULTA DE LA BASE DE DATOS LA INFORMACIÓN DE LOS AGENTES
-        $paramQuery = array(); $where = array("type = 'Agent'", "estatus = 'A'"); $sWhere = '';
+        $paramQuery = array(); $where = array("estatus = 'A'"); $sWhere = '';
         if (!is_null($id)) {
         	$paramQuery[] = $id;
             $where[] = 'number = ?';
         }
-        if (count($where) > 0) $sWhere = 'WHERE '.join(' AND ', $where);
+        if (count($where) > 0) $sWhere = 'WHERE type<>"Agent" AND '.join(' AND ', $where);
+	else $sWhere = 'WHERE type<>"Agent"';
         $sQuery = 
             "SELECT id, number, name, password, estatus, eccp_password ".
             "FROM agent $sWhere ORDER BY number";
+
         $arr_result =& $this->_DB->fetchTable($sQuery, true, $paramQuery);
+
+
         if (is_array($arr_result)) {
             if (is_null($id) || count($arr_result) <= 0) {
                 return $arr_result;
@@ -135,6 +139,7 @@ class Agentes
      */
     function addAgent($agent)
     {
+	
         if (!is_array($agent) || count($agent) < 3) {
             $this->errMsg = 'Invalid agent data';
             return FALSE;
@@ -150,9 +155,11 @@ class Agentes
          * La contraseña será legible por la nueva consola de agente */
         if (!isset($agent[3]) || $agent[3] == '') $agent[3] = sha1(time().rand());
 
+	$typeExtension = explode("/",$agent[0]);
+
         // GRABAR EN BASE DE DATOS
-        $sPeticionSQL = 'INSERT INTO agent (number, password, name, eccp_password) VALUES (?, ?, ?, ?)';
-        $paramSQL = array($agent[0], $agent[1], $agent[2], $agent[3]);
+        $sPeticionSQL = 'INSERT INTO agent (type, number, password, name, eccp_password) VALUES (?, ?, ?, ?, ?)';
+        $paramSQL = array($typeExtension[0], $typeExtension[1], $agent[1], $agent[2], $agent[3]);
         
         $this->_DB->genQuery("SET AUTOCOMMIT = 0");
         $result = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
@@ -164,14 +171,9 @@ class Agentes
             return false;
         }
 
-        $resp = $this->addAgentFile($agent);
-        if ($resp) {
-            $this->_DB->genQuery("COMMIT");
-        } else {
-            $this->_DB->genQuery("ROLLBACK");
-        }
+	$this->_DB->genQuery("COMMIT");
         $this->_DB->genQuery("SET AUTOCOMMIT = 1");
-        return $resp; 
+        return true; 
     }
 
     /**
@@ -301,51 +303,6 @@ class Agentes
         $this->_DB->genQuery("SET AUTOCOMMIT = 1");
 
         return $resp;
-    }
-
-    /**
-     * Procedimiento para agregar un agente estático al archivo agents.conf y
-     * reiniciar Asterisk para que lea los cambios de agentes.
-     * 
-     * @param   array   $agent  Información del agente. Se recogen los valores:
-     *                  0   =>  Número del agente
-     *                  1   =>  Contraseña telefónica del agente
-     *                  2   =>  Nombre descriptivo del agente
-     *                  Otras claves o posiciones se ignoran.
-     * 
-     * @return  VERDADERO si se puede escribir el archivo y reiniciar Asterisk,
-     *          FALSO si ocurre algún error.
-     */
-    function addAgentFile($agent)
-    {
-        if (!is_array($agent) || count($agent) < 3) {
-            $this->errMsg = '(internal) Invalid agent information';
-            return FALSE;
-        }
-
-        // GRABAR EN EL ARCHIVO
-        $archivo=$this->AGENT_FILE;
-        $tamanio_linea = 4096;
-        $open = fopen ($archivo,"a+");
-
-        $nuevo_agente="agent => {$agent[0]},{$agent[1]},{$agent[2]}\n";
-        // vas leyendo linea a linea , hasta llegar al final del archivo en
-        //donde  fgets() retorna false
-
-        while ($sLinea = fgets($open,$tamanio_linea))  // [0]
-        {
-            $regs = NULL;
-            if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),', $sLinea, $regs) &&
-                $regs[1] == $agent[0]) {
-                $this->errMsg = "Agent number already exists.";
-                fclose($open);
-                return false;
-            }
-        }
-
-        $escribir = fwrite ( $open, $nuevo_agente);
-        fclose($open);
-        return $this->_reloadAsterisk();
     }
 
     function deleteAgentFile($id_agent)
@@ -650,6 +607,28 @@ class Agentes
             $this->errMsg .= $this->_DB->errMsg; 
         }
         return false;
+    }
+
+    /**
+      Retorna un array de extensiones de la PBX no utilizadas como callback extensions.
+    */    
+    public function getUnusedExtensions()
+    {
+	$query = "SELECT data FROM (SELECT data FROM asterisk.sip WHERE keyword = 'Dial' UNION 
+				    SELECT data FROM asterisk.iax WHERE keyword = 'Dial') 
+				    AS union_extensiones WHERE data NOT IN (
+				    SELECT concat(type,'/',number) 
+				    FROM call_center.agent WHERE type<>'Agent') ORDER BY data";
+	$result = $this->_DB->fetchTable($query,true);
+	if($result == FALSE){
+	    $this->_DB->errMsg;
+	    return array("Unavailable extensions.");
+	}
+
+	foreach($result as $k => $array){
+	    $arrResult[$array['data']] = $array['data'];
+	}	
+	return $arrResult;
     }
 
     /* FUNCIONES DEL AGI*/

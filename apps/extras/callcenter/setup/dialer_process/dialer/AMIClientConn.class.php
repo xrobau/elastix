@@ -551,7 +551,7 @@ class AMIClientConn extends MultiplexConn
     */
     function QueueAdd($queue, $interface, $penalty=0)
     {
-      $parameters = array('Queue'=>$queue, 'Interface'=>$interface);
+      $parameters = array('Queue'=>$queue, 'Interface'=>$interface, 'Paused'=>'false');
       if($penalty) $parameters['Penalty'] = $penalty;
       return $this->send_request('QueueAdd', $parameters);
     }
@@ -879,7 +879,20 @@ class AMIClientConn extends MultiplexConn
         
         foreach ($data as $line) {
             $temp = explode(":",$line);
-            $db[ trim($temp[0]) ] = trim($temp[1]);
+            if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);
+        }
+        return $db;
+    }
+
+    function database_showkey($key) 
+    {  
+        $r = $this->command("database showkey $key");     
+        $data = explode("\n",$r["data"]);
+        $db = array();
+        
+        foreach ($data as $line) {
+            $temp = explode(":",$line);
+            if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);        
         }
         return $db;
     }

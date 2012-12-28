@@ -118,5 +118,7 @@ $arrLangModule = array(
 'External site' => 'Sitio externo',
 'Blind transfer' => 'Transferencia ciega',
 'Attended transfer' => 'Transferencia atendida',
+'Password' => 'Contraseña',
+'Callback Extension' => 'Extensión de Callback',
 );
 ?>

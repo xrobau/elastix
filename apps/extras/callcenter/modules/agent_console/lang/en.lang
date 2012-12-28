@@ -119,5 +119,7 @@ $arrLangModule = array(
 
 'Blind transfer' => 'Blind transfer',
 'Attended transfer' => 'Attended transfer',
+'Password' => 'Password',
+'Callback Extension' => 'Callback Extension',
 );
 ?>

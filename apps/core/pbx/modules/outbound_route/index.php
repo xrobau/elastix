@@ -179,12 +179,12 @@ function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 	$arrData = array();
 	if($userLevel1=="superadmin"){
 	    if($domain!="all")
-            $arrOutbound = $pOutbound->getOutbounds($domain);
+            $arrOutbound = $pOutbound->getOutbounds($domain,$limit,$offset);
 	    else
-            $arrOutbound = $pOutbound->getOutbounds();
+            $arrOutbound = $pOutbound->getOutbounds(null,$limit,$offset);
 	}else{
         if($userLevel1=="admin")
-            $arrOutbound = $pOutbound->getOutbounds($domain);
+            $arrOutbound = $pOutbound->getOutbounds($domain,$limit,$offset);
     }
 
 	if($arrOutbound===false){

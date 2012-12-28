@@ -322,21 +322,6 @@ class paloSantoRG extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["rg_name"];
         }
         
-        /*//el numero del ring_group no debe estar siendo usado como patron de marcado
-        if(!preg_match("/^[0-9]*$/",$arrProp["rg_number"])){
-            $this->errMsg=_tr("Invalid Ring Group Number");
-            return false;
-        }
-        
-        if($result["rg_number"]!=$arrProp["rg_number"]){
-            if($this->existExtension($arrProp["rg_number"],$this->domain)==true){
-                return false;
-            }else{
-                $query .="rg_number=?,";
-                $arrOpt[count($arrOpt)]=$arrProp["rg_number"];
-            }
-        }*/
-        
         $extensions="";
         //el conjunto de extensiones que pertence al grupo de marcado
         $arrExtens=explode("\n",$arrProp["rg_extensions"]);

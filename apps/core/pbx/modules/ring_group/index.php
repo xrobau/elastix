@@ -643,13 +643,12 @@ function generateOptionNum($start, $end){
 function createFieldForm($goto,$destination,$pDB,$domain)
 {
     $pRG=new paloSantoRG($pDB,$domain);
-    $strategy = array('ringall'=>'ringall','leastrecent'=>'leastrecent','fewestcalls'=>'fewestcalls','random'=>'random','rrmemory'=>'rrmemory','rrordered'=>'rrordered','linear'=>'linear','leastrecent'=>'leastrecent');
+    $strategy = array('ringall'=>'ringall','ringall-prim'=>'ringall-prim','hunt'=>'hunt','hunt-prim'=>'hunt-prim','memoryhunt'=>'memoryhunt','memoryhunt-prim'=>'memoryhunt-prim', 'firstavailable'=>'firstavailable', 'firstnotonphone'=>'firstnotonphone');
     $time = generateOptionNum(1, 60);
     $arrYesNo = array("yes" => _tr("Yes"), "no" => "No");
     
     $arrRecording=$pRG->getRecordingsSystem($domain);
     $arrMoH=$pRG->getMoHClass($domain);
-    $arrExten=$pRG->getAllDevice($domain);
     
     $recording = array("none"=>"None");
     $recording2 = array("default"=>"Default");
@@ -667,10 +666,17 @@ function createFieldForm($goto,$destination,$pDB,$domain)
         }
     }
     
-    $extens=array("none"=>"select one");
-    if($arrExten!=false){
-        foreach($arrExten as $value){
-            $extens[$value["exten"]]=$value["exten"]." (".$value["dial"].")";
+    $extens=$pRG->getAllDevice($domain);
+    $arrExten=array(""=>"--unselected--");
+    if($extens!=false){
+        $astMang=AsteriskManagerConnect($errorM);
+        $result=$pRG->getCodeByDomain($domain);
+        foreach($extens as $value){
+            $cidname="";
+            if($astMang!=false && $result!=false){
+                $cidname=$astMang->database_get("EXTUSER/".$result["code"]."/".$value["exten"], "cidname");
+            } 
+            $arrExten[$value["exten"]]=isset($cidname)?$cidname." <{$value["exten"]}>":$value["exten"]." ({$value["dial"]})";
         }
     }
     
@@ -775,7 +781,7 @@ function createFieldForm($goto,$destination,$pDB,$domain)
                             "pickup_extensions"   => array("LABEL"                => _tr(""),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $extens,
+                                                    "INPUT_EXTRA_PARAM"      => $arrExten,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             

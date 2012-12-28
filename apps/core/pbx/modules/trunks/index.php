@@ -600,9 +600,9 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
             }
         }elseif($tech=="sip" || $tech=="iax2"){
             $arrProp["secret"]=getParameter("secret");
-            if(strlen($arrProp["secret"])<6 || !preg_match("/^[[:alnum:]]+$/",$arrProp["secret"])){
-                $error=_tr("Secret must be at least 6 characters and contain digits and letters");
-                $continue=false;
+            if(!isStrongPassword($arrProp["secret"])){
+                $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
+                $continuar=false;
             }
             $arrProp=array_merge(getSipIaxParam($tech),$arrProp);
         }
@@ -711,10 +711,10 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
                 }
             }elseif($tech=="sip" || $tech=="iax2"){
                 $arrProp["secret"]=getParameter("secret");
-                if(isset($arrProp["secret"]) && $arrProp["secret"]!=""){
-                    if(strlen($arrProp["secret"])<6 || !preg_match("/^[[:alnum:]]+$/",$arrProp["secret"])){
-                        $error=_tr("Secret must be at least 6 characters and contain digits and letters");
-                        $continue=false;
+                if($arrProp["secret"]!=""){
+                    if(!isStrongPassword($arrProp["secret"])){
+                        $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
+                        $continuar=false;
                     }
                 }
                 $arrProp=array_merge(getSipIaxParam($tech,true),$arrProp);
@@ -869,15 +869,17 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 }
 
 function writeAsteriskFile(&$error,$tech){
-    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals nothing "" 2>&1';
-    $output = $ret = NULL;
-    exec($sComando, $output, $ret);
-    if ($ret != 0) {
-        $error = _tr("Error writing extensions_globals file").implode('', $output);
-        return FALSE;
+    if($tech=="sip" || $tech=="iax2"){
+        $sComando = "/usr/bin/elastix-helper asteriskconfig writeTechRegister $tech 2>&1";
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $error = _tr("Error writing $tech.conf file").implode('', $output);
+            return FALSE;
+        }
     }
     
-    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals 2>&1';
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtGeneral 2>&1';
     $output = $ret = NULL;
     exec($sComando, $output, $ret);
     if ($ret != 0) {
@@ -885,17 +887,7 @@ function writeAsteriskFile(&$error,$tech){
         return FALSE;
     }
     
-    if($tech=="sip" || $tech=="iax2"){
-        $sComando = '/usr/bin/elastix-helper asteriskconfig writeTechRegister 2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $error = _tr("Error writing $tech_register.conf file").implode('', $output);
-            return FALSE;
-        }
-    }
-    
-    $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
+    $sComando = '/usr/bin/elastix-helper asteriskconfig dialplan-reload 2>&1';
     $output = $ret = NULL;
     exec($sComando, $output, $ret);
     if ($ret != 0){

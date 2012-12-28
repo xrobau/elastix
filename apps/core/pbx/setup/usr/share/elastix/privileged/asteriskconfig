@@ -42,6 +42,7 @@ require_once "/var/www/html/modules/inbound_route/libs/paloSantoInbound.class.ph
 require_once "/var/www/html/modules/outbound_route/libs/paloSantoOutbound.class.php";
 require_once "/var/www/html/modules/ring_group/libs/paloSantoRG.class.php";
 require_once "/var/www/html/modules/time_conditions/libs/paloSantoTC.class.php";
+require_once "/var/www/html/modules/conference/libs/paloSantoConference.class.php";
 
 if(!isset($argv[1]))
     exit(1);
@@ -76,7 +77,7 @@ switch($argv[1]){
         break; 
     case "generateDialPlan":
         if(isset($argv[2])){
-            exit(generateDialPlan($argv[2]) ? 0 : 1);
+            exit(generateDialPlan($argv[2],$argv[3]) ? 0 : 1);
         }else
             error_exit("Missing arguments \n");
         break;
@@ -86,8 +87,26 @@ switch($argv[1]){
         }else
             exit(createExtAddtionals() ? 0 : 1);
         break;
+    case "createFileDahdiChannelAdd":
+        if(isset($argv[2])){
+            exit(createFileDahdiChannelAdd($argv[2]) ? 0 : 1);
+        }else
+            exit(createFileDahdiChannelAdd() ? 0 : 1);
+        break;
+    case "createExtGeneral":
+        exit(createExtGeneral() ? 0 : 1);
+        break;
+    case "createExtAddtionals":
+        if(isset($argv[2])){
+            exit(createExtAddtionals($argv[2]) ? 0 : 1);
+        }else
+            exit(createExtAddtionals() ? 0 : 1);
+        break;
     case "writeTechRegister":
-        exit(writeTechRegister() ? 0 : 1);
+        if(isset($argv[2])){
+            exit(writeTechRegister($argv[2]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
         break;
     case "deleteFileOrgAst":
         if(isset($argv[2])){
@@ -309,7 +328,7 @@ EXTENSIONS_CONFIG;
     $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
     
     if(!is_file("/etc/asterisk/extensions_custom.conf")){
-        if(file_put_contents("/etc/asteriskextensions_custom.conf","")!==false){
+        if(file_put_contents("/etc/asterisk/extensions_custom.conf","")!==false){
             $content .="#include extensions_custom.conf\n";
             changeFilePermission("/etc/asterisk/extensions_custom.conf");
         }
@@ -318,13 +337,12 @@ EXTENSIONS_CONFIG;
         
     $content .="#include extensions_globals.conf\n";
     
-    if(!is_file("/etc/asterisk/extensions_additionals.conf")){
-        if(file_put_contents("/etc/asterisk/extensions_additionals.conf","")!==false){
-            $content .="#include extensions_additionals.conf\n";
-            changeFilePermission("/etc/asterisk/extensions_additionals.conf");
+    if(!is_file("/etc/asterisk/extensions_general.conf")){
+        if(createExtGeneral()!==false){
+            $content .="#include extensions_general.conf\n";
         }
     }else
-        $content .="#include extensions_additionals.conf\n";
+        $content .="#include extensions_general.conf\n";
         
     foreach($arrDomain as $value){
         if(isset($value) && $value!=""){
@@ -401,7 +419,7 @@ function createExtensionGlobals($action,$orgdomain){
         return false;
     }
     
-    //las globales correspondientes a las truncales
+/*    //las globales correspondientes a las truncales
     $pDBpbx=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     $queryTrunk="SELECT * from trunk";
     $trunks=$pDBpbx->fetchTable($queryTrunk,true,array());
@@ -424,7 +442,6 @@ function createExtensionGlobals($action,$orgdomain){
             $content .="OUTCID_$trunkid = $outcid\n";
             $content .="OUTMAXCHANS_$trunkid = $maxchans\n";
             $content .="OUTPREFIX_$trunkid = $outprefix\n";
-            //$content .="OUTDISABLE_$trunkid = $disabled\n";
             $content .="OUTKEEPCID_$trunkid = $keepCid\n";
             $content .="FORCEDOUTCID_$trunkid = $force\n";
 
@@ -435,7 +452,7 @@ function createExtensionGlobals($action,$orgdomain){
             else
                 $content .="PREFIX_TRUNK_$trunkid = \n";
         }
-    }
+    }*/
     
     if(count($arrDomain)!=0){
         $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
@@ -539,7 +556,7 @@ function createExtensionGlobalsDomainFile($domain,$code){
     } 
 }
 
-function generateDialPlan($domain){
+function generateDialPlan($domain,$reload=false){
     $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
     
@@ -565,7 +582,14 @@ function generateDialPlan($domain){
     $arrContext=array();
     $arrFromInt=array();
     
-    //escribimos el archivos extensions_domain.conf en caso de que esto no haya sido escrito
+    //al momento de crear una organizacion no se escriben las variables globales de la misma
+    //por lo que es necesario una vez que se mande a generar por primera vez el plan de marcado para
+    //la misma hacer un reload para que las variables globales sean seteadas correctamente
+    if(is_file("/etc/asterisk/organizations/extensions_globals_$domain.conf")===false || filesize("/etc/asterisk/organizations/extensions_globals_$domain.conf")==0){
+        $reload=true;
+    }
+    
+    //escribimos el archivos extensions_domain.conf
     if(createExtensionDomainFile($domain,$code)==false){
         fprintf(STDERR, "ERR: File extesions_$domain.conf couln't be written.\n");
         return false;
@@ -631,6 +655,14 @@ function generateDialPlan($domain){
         fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pRG->errMsg);
     else
         $arrContext=array_merge($arrContext,$arrRG);
+        
+    //genero plan de marcado relacionado con los ring-groups
+    $pConf=new paloConference($pDB,$domain);
+    $arrConf=$pConf->createDialplanConf($arrFromInt);
+    if($arrConf===false || !is_array($arrConf))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pConf->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrConf);
 
     //genero plan de marcado relacionado con los time_conditions
     $pTC=new paloSantoTC($pDB,$domain);
@@ -668,8 +700,15 @@ function generateDialPlan($domain){
        
     if(file_put_contents($file, $contenido)!==false){
         changeFilePermission($file);
-        if(reload()==false)
-            fprintf(STDERR, "ERR: Asterisk couldn't be reloaded");
+        if($reload==true){
+            if(reload()==false){
+                return false;
+            }
+        }else{
+            if(dialplanReload()==false){
+                return false;
+            }
+        }
         return true;
     }else{
         fprintf(STDERR, "ERR: File $file couldn't be written");
@@ -817,68 +856,120 @@ function createFeatureApplicationMapfile(){
 }
 
 /**
-    funcion que escribe el archivo extensions_additionals.conf
+    funcion que escribe el archivo extensions_general.conf
     ese archivo contiene el contexto from-pstn. Con ese contexto
     es posible redirigir las llamadas a la organizacion con el correspondiente
     did. Este archivo es incluido dentro del archivo extensions.conf
-    @param $domain -> si esta seteado entonces los did con dicho dominio
-                      no deben ser incluidos
+    dentro de este archivo se encuentra tambien los patrones de marcado de las 
+    truncales en caso de que existan
 */
-function createExtAddtionals($domain=null){
-    $file="/etc/asterisk/extensions_additionals.conf";
+function createExtGeneral(){
+    $file="/etc/asterisk/extensions_general.conf";
     $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    
-    if(!is_null($domain)){
-        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-            $domain=null;
-        }
-    }
     
     $contenido="\n[from-pstn]\n";
     $contenido .="include =>from-pstn-custom\n";
     $contenido .="include =>ext-did\n";
+    $contenido .="include =>ext-did-catchall\n";
     
-    $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
-    //valido que exista el dominio y obtengo el code asociado a este
-    $queryCode="SELECT code,name,domain from organization where domain=?";
-    
-    $query="SELECT did, organization_domain from did where organization_domain IS NOT NULL";
-    $result=$pDB->fetchTable($query,true);
-    if($result===false){
-        fprintf(STDERR, "ERR: Database connection did - %s\n", $pDB->errMsg);
-        return false;
-    }
-    
-    //debemos eliminar los anteriores DID de la base astDB
-    $errorMng="";
-    $astMang=AsteriskManagerConnect($errorMng);
-    if($astMang==false){
-        fprintf(STDERR, "ERR: Asterisk Manager connection - %s\n", $errorMng);
-        return false;
-    }
-    $connection=$astMang->database_delTree("DID");
-    if(strtoupper($connection["Response"]) == "ERROR"){
-        fprintf(STDERR, "ERR: Asterisk astDB - couldn't set DID\n");
-        return false;
-    }
-    
+    /*
+    //This dialplan is generated in base to dialplan generated by freepbx
+    ;-------------------------------------------------------------------------------
+    ; from-pstn-e164-us:
+    ;
+    ; The context is designed for providers who send calls in e164 format and is
+    ; biased towards NPA calls, callerid and dialing rules. It will do the following:
+    ;
+    ;  DIDs in an NPA e164 format of +1NXXNXXXXXX will be converted to 10 digit DIDs
+    ;
+    ;  DIDs in any other format will be delivered as they are, including e164 non NPA
+    ;  DIDs which means they will need the full format including the + in the inbound
+    ;  route.
+    ;
+    ;  CallerID(number) presented in e164 NPA format will be trimmed to a 10 digit CID
+    ;
+    ;  CallerID(number) presented in e164 non-NPA (country code other than 1) will be
+    ;  reformated from: +<CountryCode><Number> to 011<CountryCode><Number>
+    ;
+    [from-pstn-e164-us]
+    exten => _+1NXXNXXXXXX/_+1NXXNXXXXXX,1,Set(CALLERID(number)=${CALLERID(number):2})
+    exten => _+1NXXNXXXXXX/_NXXNXXXXXX,2,Goto(from-pstn,${EXTEN:2},1)
+    exten => _+1NXXNXXXXXX/_+X.,1,Set(CALLERID(number)=011${CALLERID(number):1})
+    exten => _+1NXXNXXXXXX/_011X.,n,Goto(from-pstn,${EXTEN:2},1)
+    exten => _+1NXXNXXXXXX,1,Goto(from-pstn,${EXTEN:2},1)
+    exten => _[0-9+]./_+1NXXNXXXXXX,1,Set(CALLERID(number)=${CALLERID(number):2})
+    exten => _[0-9+]./_NXXNXXXXXX,n,Goto(from-pstn,${EXTEN},1)
+    exten => _[0-9+]./_+X.,1,Set(CALLERID(number)=011${CALLERID(number):1})
+    exten => _[0-9+]./_011X.,n,Goto(from-pstn,${EXTEN},1)
+    exten => _[0-9+].,1,Goto(from-pstn,${EXTEN},1)
+    exten => s/_+1NXXNXXXXXX,1,Set(CALLERID(number)=${CALLERID(number):2})
+    exten => s/_NXXNXXXXXX,n,Goto(from-pstn,${EXTEN},1)
+    exten => s/_+X.,1,Set(CALLERID(number)=011${CALLERID(number):1})
+    exten => s/_011X.,n,Goto(from-pstn,${EXTEN},1)
+    exten => s,1,Goto(from-pstn,${EXTEN},1)
+     ;-------------------------------------------------------------------------------*/
     $arrExt=array();
-    $contexto="";
-    foreach($result as $value){
-        $exten=$value["did"];
-        if(!empty($value["organization_domain"])){
-            if($value["organization_domain"]!=$domain){
-                $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
-                if($resultc!=false){
-                    $arrExt[]=new paloExtensions($exten,new ext_noop("Reciving call to organization ".$resultc['name']."( ".$value["organization_domain"].")"),"1");
-                    $arrExt[]=new paloExtensions($exten,new ext_goto("1",'${EXTEN}',$resultc['code'].'-from-pstn'));
-                    $arrExt[]=new paloExtensions($exten,new ext_macro($resultc['code']."-Hangupcall"));
-                    $astMang->database_put("DID",$exten,$resultc['code']);
-                }
-            }
+    $arrExt[]=new paloExtensions("_+1NXXNXXXXXX/_+1NXXNXXXXXX",new ext_set('CALLERID(number)','${CALLERID(number):2}'),1);
+    $arrExt[]=new paloExtensions("_+1NXXNXXXXXX/_NXXNXXXXXX",new ext_goto('1','${EXTEN:2}',"from-pstn"),2);
+    $arrExt[]=new paloExtensions("_+1NXXNXXXXXX/_+X.",new ext_set('CALLERID(number)','011${CALLERID(number):1}'),"1");
+    $arrExt[]=new paloExtensions("_+1NXXNXXXXXX/_011X.",new ext_goto('1','${EXTEN:2}',"from-pstn"));
+    $arrExt[]=new paloExtensions("_+1NXXNXXXXXX",new ext_goto('1','${EXTEN:2}',"from-pstn"),1);
+    $arrExt[]=new paloExtensions("_[0-9+]./_+1NXXNXXXXXX",new ext_set('CALLERID(number)','${CALLERID(number):2}'),1);
+    $arrExt[]=new paloExtensions("_[0-9+]./_NXXNXXXXXX",new ext_goto('1','${EXTEN}',"from-pstn"));
+    $arrExt[]=new paloExtensions("_[0-9+]./_+X.",new ext_set('CALLERID(number)','011${CALLERID(number):1}'),"1");
+    $arrExt[]=new paloExtensions("_[0-9+]./_011X.",new ext_goto('1','${EXTEN}',"from-pstn"));
+    $arrExt[]=new paloExtensions("_[0-9+].",new ext_goto('1','${EXTEN}',"from-pstn"),1);
+    $arrExt[]=new paloExtensions("s/_+1NXXNXXXXXX",new ext_set('CALLERID(number)','${CALLERID(number):2}'),1);
+    $arrExt[]=new paloExtensions("s/_NXXNXXXXXX",new ext_goto('1','${EXTEN}',"from-pstn"));
+    $arrExt[]=new paloExtensions("s/_+X.",new ext_set('CALLERID(number)','011${CALLERID(number):1}'),1);
+    $arrExt[]=new paloExtensions("s/_011X.",new ext_goto('1','${EXTEN}',"from-pstn"));
+    $arrExt[]=new paloExtensions("s",new ext_goto('1','${EXTEN}',"from-pstn"),1);
+    $contenido .="\n[from-pstn-e164-us]\n";
+    $contenido .="include =>from-pstn-e164-us-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
         }
     }
     
+
+/*  ;-------------------------------------------------------------------------------
+    ; from-pstn-to-did
+    ;
+    ; The context is designed for providers who send the DID in the TO: SIP header
+    ; only. The format of this header is:
+    ;
+    ; To: <sip:2125551212@172.31.74.25>
+    ;
+    ; So the DID must be extracted between the sip: and the @, which this does
+    ;
+    [from-pstn-toheader]
+    exten => _.,1,Goto(from-pstn,${CUT(CUT(SIP_HEADER(To),@,1),:,2)},1)
+    ;-------------------------------------------------------------------------------
+    */
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("_.",new ext_goto('1','${CUT(CUT(SIP_HEADER(To),@,1),:,2)}',"from-pstn"),1);
+    $contenido .="\n[from-pstn-to-did]\n";
+    $contenido .="include =>from-pstn-to-did-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
+        }
+    }
+    
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("_X.",new ext_set('ORG_CODE',''),"1");
+    $arrExt[]=new paloExtensions("_X.",new ext_set('ORG_DOMAIN',''));
+    $arrExt[]=new paloExtensions("_X.",new ext_set('ARRAY(ORG_CODE,__ORG_DOMAIN)','${DID_EXISTDID(${EXTEN})}'));
+    $arrExt[]=new paloExtensions("_X.",new ext_gotoif('$["${ORG_CODE}"=""]','ext-did-catchall,s,1'));
+    $arrExt[]=new paloExtensions("_X.",new ext_noop('Reciving call to organization with domain ${ORG_DOMAIN}'));
+    $arrExt[]=new paloExtensions("_X.",new ext_set('CDR(fromout)','1'));
+    
+    $arrExt[]=new paloExtensions("_X.",new ext_set('CDR(organization_domain)','${ORG_DOMAIN}'));
+    $arrExt[]=new paloExtensions("_X.",new ext_goto("1",'${EXTEN}','${ORG_CODE}-from-pstn'));
+    $arrExt[]=new paloExtensions("_X.",new ext_macro('${ORG_CODE}-Hangupcall'));
     $contenido .="\n[ext-did]\n";
     $contenido .="include =>ext-did-custom\n";
     if(is_array($arrExt)){
@@ -887,7 +978,89 @@ function createExtAddtionals($domain=null){
                 $contenido .=$extension->data."\n";
         }
     }
-
+    
+    //contexto ext-did-catchall
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("s",new ext_noop('No DID or CID Match'),"1");
+    $arrExt[]=new paloExtensions("s",new ext_answer(),"n","a2");
+    $arrExt[]=new paloExtensions("s",new ext_wait(2));
+    $arrExt[]=new paloExtensions("s",new ext_playback("ss-noservice"));
+    $arrExt[]=new paloExtensions("s",new ext_sayalpha('${FROM_DID}'));
+    $arrExt[]=new paloExtensions("s",new ext_hangup());
+    $arrExt[]=new paloExtensions("_.",new ext_set('__FROM_DID','${EXTEN}'),1);
+    $arrExt[]=new paloExtensions("_.",new ext_noop('Received an unknown call with DID set to ${EXTEN}'));
+    $arrExt[]=new paloExtensions("_.",new ext_goto('a2','s'));
+    $arrExt[]=new paloExtensions("h",new ext_hangup(),1);
+    $contenido .="\n[ext-did-catchall]\n";
+    $contenido .="include =>ext-did-catchall-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
+        }
+    }
+    
+    // contexto salida-check
+    // se creo para verificar que llamadas realizadas de una compañia a otra compañia
+    // que pertenezcan al mismo servidor no salgan por la truncal
+    // ${ARG1}=ORGANIZATION_CODE
+    // ${ARG2}=ORGANIZATION_DOMAIN
+    // ${ARG3}=DIAL_NUMBER ; numero a marcar por la truncal si añadir el OUTPREFIX
+    // ${ARG4}=TRUNNK_CHANNEL ; 
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("s",new ext_set('_REDIRECCIONAR',''),"1");
+    $arrExt[]=new paloExtensions("s",new ext_set('ORG_CODE','${ARG1}'));
+    $arrExt[]=new paloExtensions("s",new ext_set('_REDIRECCIONAR','${DID_INFODID(${ARG3},${ARG2})}')); 
+    $arrExt[]=new paloExtensions("s",new ext_gotoif('$["${REDIRECCIONAR}" = "1"]','indial'));
+    $arrExt[]=new paloExtensions("s",new ext_set('outtrunk','continue'));
+    $arrExt[]=new paloExtensions("s",new ext_return('${outtrunk}'));
+    // b options sera efectiva en asterisk 11
+    $arrExt[]=new paloExtensions("s",new ext_dial('Local/${ARG3}@from-pstn/n','60,${DIAL_TRUNK_OPTIONS}f(${CALLERID(all)})'),"n","indial");
+    $arrExt[]=new paloExtensions("s",new ext_noop('TRUNK Dialed with ${DIALSTATUS} HANGUPCAUSE: ${HANGUPCAUSE}'));
+    $arrExt[]=new paloExtensions("s",new ext_hangup());
+    $arrExt[]=new paloExtensions("h",new ext_macro('${ORG_CODE}-hangupcall'),"1");
+    $contenido .="\n[salida-check]\n";
+    $contenido .="include =>salida-check-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
+        }
+    }
+    
+    // en asterisk 11 puede ser usado este contexto
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("s",new ext_set('CDR(intraforward)','${ARG1}'),"1");
+    $contenido .="\n[intraforward-call]\n";
+    $contenido .="include =>intraforward-call-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
+        }
+    }
+    
+    // contexto allow-out
+    // este contexto se creo para aegurarnos que solos las organizaciones 
+    // autorizadas por el superadmin podran realizar llamdas a traves de la 
+    // truncal con el id pasado como parametro
+    // ${ARG1}=ORGANIZATION_DOMAIN
+    // ${ARG2}=TRUNK_ID
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("s",new ext_noop('TRUNK ${OUT_${ARG2}} Organization: ${ARG1}'),"1");
+    $arrExt[]=new paloExtensions("s",new ext_set('ORG_PERMIT',''));
+    $arrExt[]=new paloExtensions("s",new ext_set('ORG_PERMIT','${TRUNK_INFOORG(${ARG1},${ARG2})}'));
+    $arrExt[]=new paloExtensions("s",new ext_execif('$["${ORG_PERMIT}"!="1"]','Set','ORG_PERMIT=noallow'));
+    $arrExt[]=new paloExtensions("s",new ext_return('${ORG_PERMIT}'));
+    $contenido .="\n[allow-out]\n";
+    $contenido .="include =>allow-out-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
+        }
+    }
+    
     //contexto from-analog
     //a este contexto llegan la llamadas provenientes de los puertos analogicos
     $arrExt=array();
@@ -904,13 +1077,13 @@ function createExtAddtionals($domain=null){
     $arrExt[]=new paloExtensions("s",new ext_noop('Is a DAHDI Channel'),"n","dahdiok");
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:6}'));
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
-    $arrExt[]=new paloExtensions("s",new ext_macro(1,'${DID}','from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_macro('analog-did','${CHAN}'));
     $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro from-dahdi-${CHAN}'));
     $arrExt[]=new paloExtensions("s",new ext_goto(1,'${DID}',"from-pstn"));
     $arrExt[]=new paloExtensions("s",new ext_noop('Is a Zaptel Channel'),"n",'zapok');
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:4}'));
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
-    $arrExt[]=new paloExtensions("s",new ext_macro(1,'${DID}','from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_macro('analog-did','${CHAN}'));
     $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro from-dahdi-${CHAN}'));
     $arrExt[]=new paloExtensions("s",new ext_goto(1,'${DID}',"from-pstn"));
     
@@ -923,30 +1096,23 @@ function createExtAddtionals($domain=null){
         }
     }
     
-    $query="SELECT dd.did, dd.data, di.organization_domain from did_details dd join did di on dd.did=di.did where di.organization_domain IS NOT NULL and dd.keyword=? and di.type=?";
-    $result=$pDB->fetchTable($query,true,array("port","analog"));
-    if($result===false){
-        fprintf(STDERR, "ERR: Database connection did - %s\n", $pDB->errMsg);
-        return false;
-    }
-    foreach($result as $value){
-        $arrExt=array();
-        if(!empty($value["organization_domain"])){
-            if($value["organization_domain"]!=$domain){
-                $tmp=explode("/",$value["data"]);
-                if(count($tmp)==2){
-                    $arrExt[]=new paloExtensions("s",new ext_noop('Entering to macro from-dahdi-'.$tmp[1].' with DID == ${DID}'),"1");
-                    $arrExt[]=new paloExtensions("s",new ext_setvar("__FROM_DID",$value["did"]));
-                    $arrExt[]=new paloExtensions("s",new ext_goto("1",$value["did"],'from-pstn'));
-                    $contenido .="\n[from-dahdi-$tmp[1]]\n";
-                    if(is_array($arrExt)){
-                        foreach($arrExt as $extension){
-                            if(!is_null($extension) && is_object($extension))
-                                $contenido .=$extension->data."\n";
-                        }
-                    }
-                }
-            }
+    // macro analog-did
+    // este contexto se utiliza para setear un did a las llamadas provenientes desde puertos analogicos
+    // en contexto de llegada de esos puertos debe ser from analog
+    // ${ARG1}=PORT_ID
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("s",new ext_noop('Entering to macro analog-did from port_id: ${ARG1} with DID : ${DID}'),"1");
+    $arrExt[]=new paloExtensions("s",new ext_set('RETDID',''));
+    $arrExt[]=new paloExtensions("s",new ext_set('RETDID','${DID_ANALOGDID(${ARG1},${ARG2})}'));
+    $arrExt[]=new paloExtensions("s",new ext_execif('$["${RETDID}"=""]','MacroExit'));
+    $arrExt[]=new paloExtensions("s",new ext_setvar("__FROM_DID",'${RETDID}'));
+    $arrExt[]=new paloExtensions("s",new ext_goto("1",'${RETDID}','from-pstn'));
+    $contenido .="\n[macro-analog-did]\n";
+    $contenido .="include =>macro-analog-did-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
         }
     }
     
@@ -960,11 +1126,18 @@ function createExtAddtionals($domain=null){
         return false;
     }else{
         changeFilePermission($file);
-    }     
-    
-    return createFileDahdiChannelAdd($domain);
+    }
+    return true;
 }
 
+//esta funcion se usa para llamar a las funciones createExtGeneral
+//y createFileDahdiChannelAdd en una misma funcion y no invocar a elastix helper dos veces
+function createExtAddtionals($domain=null){
+    if(createExtGeneral()==true)
+        return createFileDahdiChannelAdd($domain=null);
+    else
+        return false;
+}
 
 function createFileDahdiChannelAdd($domain=null){
     $file="/etc/asterisk/chan_dahdi_additional.conf";
@@ -980,7 +1153,7 @@ function createFileDahdiChannelAdd($domain=null){
     //valido que exista el dominio y obtengo el code asociado a este
     $queryCode="SELECT code from organization where domain=?";
     
-    //obtenemos los puertos que han sido asinados a un did y que pertencen a una organizacion
+    //obtenemos los puertos que han sido asignados a un did y que pertencen a una organizacion
     $query="SELECT dd.did, dd.data, di.organization_domain from did_details dd join did di on dd.did=di.did where di.organization_domain IS NOT NULL and dd.keyword=? and di.type=?";
     $result=$pDB->fetchTable($query,true,array("port","analog"));
     if($result===false){
@@ -1015,42 +1188,56 @@ function createFileDahdiChannelAdd($domain=null){
         return false;
     }else{
         changeFilePermission($file);
+        $ret = $output = null;
+        exec("/usr/sbin/asterisk -r -x 'module reload chan_dahdi.so' 2>&1",$output,$ret);
+        if($ret!=0){
+            fwrite(STDERR, "Couldn't be reloaded module chan_dahdi.so. ".implode('', $output));
+            return false;
+        }
     }     
     
     return true;
 }
 
-function writeTechRegister(){
-    $query="SELECT tech,string_register from trunk where tech=? or tech=?";
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    $result=$pDB->fetchTable($query,true,array("sip","iax2"));
-    if($result===false){
-    }
-    
-    $file_sip=$file_iax="\n";
-    //obtenosmo los string de conneccion de las truncales que sean sip o iax
-    foreach($result as $value){
-        if(!empty($value["string_register"])){
-            if($value["tech"]=="sip"){
-                $file_sip .="register => ".$value["string_register"]."\n";
-            }elseif($value["tech"]=="iax2"){
-                $file_iax .="register => ".$value["string_register"]."\n";
+function writeTechRegister($tech){
+    if($tech=="sip" or $tech=="iax2"){
+        if($tech=="sip"){
+            $file="sip_register.conf";
+            $mode="chan_sip.so";
+        }else{
+            $file="iax_register.conf";
+            $mode="chan_iax2.so";
+        }
+            
+        $query="SELECT tech,string_register from trunk where tech=?";
+        $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+        $result=$pDB->fetchTable($query,true,array($tech));
+        if($result===false){
+            fprintf(STDERR, "ERR: Couldn't be written file - '/etc/asterisk/$file'. %s\n",$pDB->errMsg);
+            return false;
+        }
+        
+        $content="\n";
+        //obtenemos los string de conneccion de las truncales
+        foreach($result as $value){
+            if(!empty($value["string_register"])){
+                $content .="register => ".$value["string_register"]."\n";
             }
         }
-    }
-    
-    if(file_put_contents("/etc/asterisk/sip_register.conf", $file_sip)===false){
-        fprintf(STDERR, "ERR: Couldn't be written file - '/etc/asterisk/sip_register.conf'\n");
-        return false;
-    }else{
-        changeFilePermission("/etc/asterisk/sip_register.conf");
-    }
-    
-    if(file_put_contents("/etc/asterisk/iax_register.conf", $file_iax)===false){
-        fprintf(STDERR, "ERR: Couldn't be written file - '/etc/asterisk/iax_register.conf'\n");
-        return false;
-    }else{
-        changeFilePermission("/etc/asterisk/iax_register.conf");
+        
+        if(file_put_contents("/etc/asterisk/$file", $content)===false){
+            fprintf(STDERR, "ERR: Couldn't be written file - '/etc/asterisk/$file'\n");
+            return false;
+        }else{
+            changeFilePermission("/etc/asterisk/$file");
+        }
+        
+        $ret = $output = null;
+        exec("/usr/sbin/asterisk -r -x 'module reload $mode' 2>&1",$output,$ret);
+        if($ret!=0){
+            fwrite(STDERR, "Couldn't be reloaded module $mode. ".implode('', $output));
+            return false;
+        }
     }
     return true;
 }
@@ -1074,7 +1261,7 @@ function createDialplanTrunkPattern(){
                 $prepend=$value['prepend_digits'];
             if(isset($value['match_pattern_prefix'])){
                 $prefix=strtoupper($value['match_pattern_prefix']);
-                $len=($prefix=="")?"":":".count($prefix);
+                $len=($prefix=="")?"":":".strlen($prefix);
             }
             if(isset($value['match_pattern_pass']))
                 $pattern=strtoupper($value['match_pattern_pass']);

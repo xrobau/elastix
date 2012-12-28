@@ -288,12 +288,20 @@ class paloSantoTrunk extends paloAsteriskDB{
             $this->errMsg="Invalid CID Options";
             return false;
         }
+        if($arrProp["keepcid"]=="all"){
+            if(empty($arrProp["outcid"])){
+                $this->errMsg="Field 'Outbound Caller ID' can't be empty";
+                return false;
+            }
+        }
         
         //si existe un maximo numero de canales
         if($arrProp["max_chans"]!=""){
             if(!preg_match("/^[[:digit:]]+$/",$arrProp["max_chans"])){
                 $this->errMsg="Invalid value field Maximun Channels";
                 return false;
+            }else{
+                $arrProp["max_chans"]=$arrProp["max_chans"]+0;
             }
         }
 
@@ -355,12 +363,9 @@ class paloSantoTrunk extends paloAsteriskDB{
         if($this->trunkOrganization($trunkid,$arrProp["select_orgs"])==false){
             return false;
         }else{
-            if($arrProp["sec_call_time"]=="yes" || $arrProp["disabled"]=="on"){
-                if($this->setTrunkASTDB($trunkid,$arrProp["disabled"],$arrProp["sec_call_time"],$arrProp["period_time"],$arrProp["maxcalls_time"])==false){
-                    $this->errMsg=_tr("Trunk could not be updated.").$this->errMsg;
-                    return false;
-                }else
-                    return true;
+            if($this->setTrunkASTDB($trunkid,$arrProp)==false){
+                $this->errMsg=_tr("Trunk could not be updated.").$this->errMsg;
+                return false;
             }else
                 return true;
         }
@@ -413,8 +418,8 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        if(strlen($arrProp["secret"])<6 || !preg_match("/^[[:alnum:]]+$/",$arrProp["secret"])){
-            $error=_tr("Secret must be at least 6 characters and contain digits and letters");
+        if(!isStrongPassword($arrProp["secret"])){
+            $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
             return false;
         }
         
@@ -480,9 +485,14 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
     }
     
-    private function setTrunkASTDB($trunkid,$disabled,$set_security,$period_time,$max_calls){
-        $errorM="";
-        
+    private function setTrunkASTDB($trunkid,$arrProp){
+        //caracteristicas necesarias para activar caracteristica de seguridad
+        $disabled=$arrProp["disabled"];
+        $set_security=$arrProp["sec_call_time"];
+        $period_time=$arrProp["period_time"];
+        $max_calls=$arrProp["maxcalls_time"];
+    
+        $errorM="";    
         if($set_security!="yes"){
             $set_security="no";
         }
@@ -493,10 +503,30 @@ class paloSantoTrunk extends paloAsteriskDB{
             $this->errMsg=$errorM;
             return false;
         }else{
-            if($disabled=="on"){
-                $astMang->database_put("TRUNK/$trunkid","OUTDISABLE","on");
-            }else
-                $result=$astMang->database_del("TRUNK/$trunkid","OUTDISABLE");
+            //campos usados dentro del plan de marcado, estos antes eran globales
+            $tech=strtoupper($arrProp["tech"]);
+            $channelId=$arrProp["channelid"];
+            $outcid=isset($arrProp["outcid"])?$arrProp["outcid"]:"";
+            $maxchans=isset($arrProp["max_chans"])?$arrProp["max_chans"]:"";
+            $outprefix=isset($arrProp["dialoutprefix"])?$arrProp["dialoutprefix"]:"";
+            $disabled=isset($arrProp["disabled"])?$arrProp["disabled"]:"off";
+            $keepCid=isset($arrProp["keepcid"])?$arrProp["keepcid"]:"off";
+            $force=($keepCid=="all")?$arrProp["outcid"]:"";
+            $qPrefix="SELECT count(trunkid) from trunk_dialpatterns where trunkid=?";
+            $trunkPrefix=$this->_DB->getFirstRowQuery($qPrefix,false,array($trunkid));
+            if($trunkPrefix[0]!="0")
+                $prefix ="1";
+            else
+                $prefix ="";
+                
+            $astMang->database_put("TRUNK/$trunkid","OUT","$tech/$channelId");
+            $astMang->database_put("TRUNK/$trunkid","OUTCID",$outcid);
+            $astMang->database_put("TRUNK/$trunkid","OUTMAXCHANS",$maxchans);
+            $astMang->database_put("TRUNK/$trunkid","OUTPREFIX",$outprefix);
+            $astMang->database_put("TRUNK/$trunkid","OUTKEEPCID",$keepCid);
+            $astMang->database_put("TRUNK/$trunkid","FORCEDOUTCID",$force);
+            $astMang->database_put("TRUNK/$trunkid","PREFIX_TRUNK",$prefix);
+            $astMang->database_put("TRUNK/$trunkid","OUTDISABLE",$disabled);
                 
             if($set_security=="yes"){
                 if(!preg_match("/^[0-9]+$/",$max_calls)){
@@ -557,14 +587,21 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
 
-        if(!isset($arrProp["outcid"])){
-            $arrProp["outcid"]="";
-        }
-      
         //caller id options
         if(!preg_match("/^(on|off|cnum|all)$/",$arrProp["keepcid"])){
             $this->errMsg="Invalid CID Options";
             return false;
+        }
+        
+        if($arrProp["keepcid"]=="all"){
+            if(empty($arrProp["outcid"])){
+                $this->errMsg="Field 'Outbound Caller ID' can't be empty";
+                return false;
+            }
+        }
+        
+        if(empty($arrProp["outcid"])){
+            $arrProp["outcid"]="";
         }
         
         //si existe un maximo numero de canales
@@ -572,6 +609,8 @@ class paloSantoTrunk extends paloAsteriskDB{
             if(!preg_match("/^[[:digit:]]+$/",$arrProp["max_chans"])){
                 $this->errMsg="Invalid value field Maximun Channels";
                 return false;
+            }else{
+                $arrProp["max_chans"]=$arrProp["max_chans"]+0;
             }
         }
 
@@ -631,7 +670,7 @@ class paloSantoTrunk extends paloAsteriskDB{
         if($this->trunkOrganization($idTrunk,$arrProp["select_orgs"])==false){
             return false;
         }else{
-            if($this->setTrunkASTDB($idTrunk,$arrProp["disabled"],$arrProp["sec_call_time"],$arrProp["period_time"],$arrProp["maxcalls_time"])==false){
+            if($this->setTrunkASTDB($idTrunk,$arrProp)==false){
                 $this->errMsg=_tr("Trunk could not be updated.").$this->errMsg;
                 return false;
             }else
@@ -660,8 +699,8 @@ class paloSantoTrunk extends paloAsteriskDB{
         }
         
         if(isset($arrProp["secret"]) && $arrProp["secret"]!=""){
-            if(strlen($arrProp["secret"])<6 || !preg_match("/^[[:alnum:]]+$/",$arrProp["secret"])){
-                $error=_tr("Secret must be at least 6 characters and contain digits and letters");
+            if(!isStrongPassword($arrProp["secret"])){
+                $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
                 return false;
             }
             if($tech=="sip"){

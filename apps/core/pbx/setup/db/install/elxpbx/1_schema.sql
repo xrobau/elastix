@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `sip_general` (
       `session-refresher` enum('uac','uas') DEFAULT NULL,
       `t38pt_usertpsource` varchar(40) DEFAULT NULL,
       `regexten` varchar(40) DEFAULT NULL,
-      `qualify` varchar(40) DEFAULT NULL,
+      `qualify` varchar(40) DEFAULT 'yes',
       `rtptimeout` int(11) DEFAULT NULL,
       `rtpholdtimeout` int(11) DEFAULT NULL,
       `sendrpid` enum('yes','no') DEFAULT NULL,
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `iax_general` (
   `disallow` varchar(40) NULL, -- all/{list-of-codecs}
   `allow` varchar(40) NULL, -- all/{list-of-codecs}
   `codecpriority` varchar(40) NULL, 
-  `qualify` varchar(10) NULL, -- yes/no/{number of milliseconds}
+  `qualify` varchar(10) default 'yes', -- yes/no/{number of milliseconds}
   `qualifysmoothing` varchar(10) NULL, -- yes/no
   `qualifyfreqok` varchar(10) NULL, -- {number of milliseconds}|60000
   `qualifyfreqnotok` varchar(10) NULL, -- {number of milliseconds}|10000
@@ -410,17 +410,6 @@ CREATE TABLE IF NOT EXISTS voicemail (
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
-CREATE TABLE extensions_rt (
-    id int(11) NOT NULL auto_increment,
-    context varchar(20) NOT NULL default '',
-    exten varchar(20) NOT NULL default '',
-    priority tinyint(4) NOT NULL default '0',
-    app varchar(20) NOT NULL default '',
-    appdata varchar(128) NOT NULL default '',
-    PRIMARY KEY (`context`,`exten`,`priority`),
-    KEY `id` (`id`),
-    INDEX organization_domain (organization_domain)
-) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `extension` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -492,6 +481,7 @@ CREATE TABLE IF NOT EXISTS `trunk_organization` (
   `trunkid` int(11) NOT NULL,
   `organization_domain` varchar(50) NOT NULL,
   PRIMARY KEY  (`trunkid`,`organization_domain`),
+  INDEX organization_domain (organization_domain),
   FOREIGN KEY (`trunkid`) REFERENCES trunk(`trunkid`)
 ) ENGINE = INNODB;
 
@@ -591,7 +581,7 @@ CREATE TABLE IF NOT EXISTS `sip_settings` (
       `session-refresher` enum('uac','uas') DEFAULT NULL,
       `t38pt_usertpsource` varchar(40) DEFAULT NULL,
       `regexten` varchar(40) DEFAULT NULL,
-      `qualify` varchar(40) DEFAULT NULL,
+      `qualify` varchar(40) DEFAULT 'yes',
       `rtptimeout` int(11) DEFAULT NULL,
       `rtpholdtimeout` int(11) DEFAULT NULL,
       `sendrpid` enum('yes','no') DEFAULT NULL,
@@ -717,7 +707,7 @@ CREATE TABLE IF NOT EXISTS `voicemail_settings` (
 
 insert into sip_settings (faxdetect,vmexten,context,useragent,disallow,allow,port,host,qualify,type,deny,permit,dtmfmode,nat,
 callcounter) values ("no","*97","from-internal","elastix_3.0","all","ulaw;alaw;gsm","5060",
-"dynamic","no","friend","0.0.0.0/0.0.0.0","0.0.0.0/0.0.0.0","rfc2833","yes","yes");
+"dynamic","yes","friend","0.0.0.0/0.0.0.0","0.0.0.0/0.0.0.0","rfc2833","yes","yes");
 
 insert into iax_settings (deny,permit,transfer,context,host,type,qualify,disallow,allow,
 requirecalltoken) values (NULL,NULL,"no","from-internal","dynamic","friend","yes","all","ulaw,alaw,gsm","auto");
@@ -926,11 +916,14 @@ CREATE TABLE ivr_destination (
     FOREIGN KEY (ivr_id) REFERENCES ivr(id)
 ) ENGINE = INNODB;
 
+DROP TABLE IF EXISTS did_details;
 DROP TABLE IF EXISTS did;
+
 CREATE TABLE did (
     id int(11) NOT NULL AUTO_INCREMENT,
     did varchar(100) NOT NULL,
     organization_domain varchar(100),
+    organization_code varchar(100),
     country varchar(100) NOT NULL,
     city varchar(100) NOT NULL,
     country_code varchar(100) NOT NULL,
@@ -940,7 +933,6 @@ CREATE TABLE did (
     UNIQUE KEY did (did)
 ) ENGINE = INNODB;
 
-DROP TABLE IF EXISTS did_details;
 CREATE TABLE did_details (
     did varchar(100) NOT NULL,
     keyword varchar(50) NOT NULL,
@@ -973,7 +965,7 @@ CREATE TABLE inbound_route (
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY (id),
     INDEX organization_domain (organization_domain),
-    UNIQUE KEY route_in (did_number,cid_number)
+    UNIQUE KEY route_in (did_number,cid_number,organization_domain)
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS outbound_route;
@@ -988,7 +980,6 @@ CREATE TABLE outbound_route (
     seq int(11) NOT NULL,
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (mohsilence) REFERENCES musiconhold(name),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
@@ -1093,6 +1084,7 @@ CREATE TABLE meetme (
     -- options fuera de realtime
     name varchar(50) NOT NULL,
     ext_conf char(80) DEFAULT '0' NOT NULL,
+    intro_record int(10),
     organization_domain varchar(100) NOT NULL,
     index confno (confno,starttime,endtime),
     PRIMARY KEY (bookid),

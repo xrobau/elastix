@@ -291,20 +291,22 @@ class paloConference extends paloAsteriskDB{
         $optAd .=($arrProp['moderator_options_2']=="on")?"r":"";
         $optUser .=($arrProp['user_options_1']=="on")?"i":"";
         $optUser .=($arrProp['user_options_2']=="on")?"m":"";
-        $optUser .=($arrProp['user_options_2']=="on")?"w":"";
-        
-        if($arrProp['announce_intro']!=""){
-            $announ=$this->getFileRecordings($this->domain,$arrProp['announce_intro']);
-            if($announ!=false){
-                $optAd .="G($announ)";
-                $optUser .="G($announ)";
-            }
-        }
+        $optUser .=($arrProp['user_options_3']=="on")?"w":"";
         
         if($arrProp['moh']!=""){
             if($this->existMoHClass($arrProp['moh'],$this->domain)){
                 $optAd .="M({$arrProp['moh']})";
                 $optUser .="M({$arrProp['moh']})";
+            }
+        }
+        
+        if($arrProp['announce_intro']!=""){
+            $announ=$this->getFileRecordings($this->domain,$arrProp['announce_intro']);
+            if($announ!=false){
+                $query .="intro_record,";
+                $arrOpt[]=$arrProp['announce_intro'];
+                $optAd .="G($announ)";
+                $optUser .="G($announ)";
             }
         }
         
@@ -404,20 +406,24 @@ class paloConference extends paloAsteriskDB{
         $optAd .=($arrProp['moderator_options_2']=="on")?"r":"";
         $optUser .=($arrProp['user_options_1']=="on")?"i":"";
         $optUser .=($arrProp['user_options_2']=="on")?"m":"";
-        $optUser .=($arrProp['user_options_2']=="on")?"w":"";
-        
-        if($arrProp['announce_intro']!=""){
-            $announ=$this->getFileRecordings($this->domain,$arrProp['announce_intro']);
-            if($announ!=false){
-                $optAd .="G($announ)";
-                $optUser .="G($announ)";
-            }
-        }
+        $optUser .=($arrProp['user_options_3']=="on")?"w":"";
         
         if($arrProp['moh']!=""){
             if($this->existMoHClass($arrProp['moh'],$this->domain)){
                 $optAd .="M({$arrProp['moh']})";
                 $optUser .="M({$arrProp['moh']})";
+            }
+        }
+        
+        $query .="intro_record=?,";
+        $arrOpt[]=NULL;
+        if($arrProp['announce_intro']!=""){
+            $announ=$this->getFileRecordings($this->domain,$arrProp['announce_intro']);
+            if($announ!=false){
+                $query .="intro_record=?,";
+                $arrOpt[]=$arrProp['announce_intro'];
+                $optAd .="G($announ)";
+                $optUser .="G($announ)";
             }
         }
         

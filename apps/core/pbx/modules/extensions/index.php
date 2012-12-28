@@ -55,18 +55,18 @@ function _moduleContent(&$smarty, $module_name)
     $arrConf = array_merge($arrConf,$arrConfModule);
     $arrLang = array_merge($arrLang,$arrLangModule);
 
-	 //folder path for custom templates
+	//folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-	 //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
-	 //y borrar usuarios de todas las organizaciones
-     //los usuarios de tipo administrador estan en la capacidad crear usuarios solo de sus organizaciones
+    //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
+    //y borrar usuarios de todas las organizaciones
+    //los usuarios de tipo administrador estan en la capacidad crear usuarios solo de sus organizaciones
     $arrCredentiasls=getUserCredentials();
 	$userLevel1=$arrCredentiasls["userlevel"];
 	$userAccount=$arrCredentiasls["userAccount"];
 	$idOrganization=$arrCredentiasls["id_organization"];
-
+	
 	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     
 	$action = getAction();
@@ -147,25 +147,26 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $offset = $oGrid->calculateOffset();
-
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
-	
-	$arrGrid = array("title"    => _tr('Extensions List'),
-                "url"      => $url,
-                "width"    => "99%",
-                "start"    => ($total==0) ? 0 : $offset + 1,
-                "end"      => $end,
-                "total"    => $total,
-                'columns'   =>  array(
-                    array("name"      => _tr("Extension"),),
-                    array("name"      => _tr("Technology"),),
-                    array("name"      => _tr("Dial"),),
-					array("name"      => _tr("Context"),),
-                    array("name"      => _tr("User"),),
-                    array("name"      => _tr("Voicemail"),),
-                    array("name"      => _tr("Recording In")." / "._tr("Recording Out"),)
-                    ),
-                );
+
+    $oGrid->setTitle(_tr('Extensions List'));
+    //$oGrid->setIcon('url de la imagen');
+    $oGrid->setWidth("99%");
+    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
+    $oGrid->setEnd($end);
+    $oGrid->setTotal($total);
+    $oGrid->setURL($url);
+    
+    if($userLevel1=="superadmin")
+        $arrColum[]=_tr("Domain");
+    $arrColum[]=_tr("Extension");
+    $arrColum[]=_tr("Technology");
+    $arrColum[]=_tr("Device");
+    $arrColum[]=_tr("Context");
+    $arrColum[]=_tr("User");
+    $arrColum[]=_tr("Voicemail");
+    $arrColum[]=_tr("Recording In")." / "._tr("Recording Out");
+    $oGrid->setColumns($arrColum);
 
 	$arrExtens=array();
 	$arrData = array();
@@ -191,25 +192,31 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         //si es un usuario solo se ve su extension
         //si es un administrador ve todas las extensiones
         foreach($arrExtens as $exten) {
-            if($userLevel1=="superadmin")
-                $arrTmp[0] = $exten["exten"];
-            else
-                $arrTmp[0] = "&nbsp;<a href='?menu=extensions&action=view&id_exten=".$exten['id']."'>".$exten["exten"]."</a>";
-            $arrTmp[1] = strtoupper($exten['tech']);
-            $arrTmp[2] = $exten['dial'];
-            $arrTmp[3] = $exten['context'];
+            $arrTmp=array();
+            if($userLevel1=="superadmin"){
+                $arrTmp[] = $exten["organization_domain"];
+                $arrTmp[] = $exten["exten"];
+            }else
+                $arrTmp[] = "&nbsp;<a href='?menu=extensions&action=view&id_exten=".$exten['id']."'>".$exten["exten"]."</a>";
+            $arrTmp[] = strtoupper($exten['tech']);
+            $arrTmp[] = $exten['device'];
+            $arrTmp[] = $exten['context'];
             $query = "Select username from acl_user where extension=? and id_group in (select g.id from acl_group g join organization o on g.id_organization=o.id where o.domain=?)";
             $result=$pACL->_DB->getFirstRowQuery($query,false,array($exten["exten"],$exten["organization_domain"]));
             if($result!=false)
-                $arrTmp[4] = $result[0];
+                $arrTmp[] = $result[0];
             else
-                $arrTmp[4] = _tr("Nobody");
-            $arrTmp[5] = "no";
+                $arrTmp[] = _tr("Nobody");
+            
             if(isset($exten["voicemail"])){
                 if($exten["voicemail"]!="novm")
-                    $arrTmp[5] = "yes";
-            }
-            $arrTmp[6] = _tr($exten["record_in"])." / "._tr($exten["record_out"]);
+                    $arrTmp[] = "yes";
+                else
+                    $arrTmp[] = "no";
+            }else
+                $arrTmp[] = "no";
+                
+            $arrTmp[] = _tr($exten["record_in"])." / "._tr($exten["record_out"]);
             $arrData[] = $arrTmp;
         }
     }
@@ -241,7 +248,7 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         $smarty->assign("mb_message",$error);
 	}
 
-	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+	$contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
 	$mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $idOrganization);
 	$contenidoModulo = $mensaje.$contenidoModulo;
     return $contenidoModulo;
@@ -541,17 +548,10 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         return viewFormExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }else{
 		$secret=getParameter("secret");
-		if($secret=="" || strlen($secret)<6 || !preg_match("/^[[:alnum:]]+$/","$secret")){
-			$error=_tr("Secret can not be empty, must be at least 6 characters and contain digits and letters");
+		if(!isStrongPassword($secret)){
+			$error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
 			$continuar=false;
 		}
-		
-		/*if($userLevel1=="superadmin"){
-			if(!isset($domain) || $domain=="0"){
-				$error=_tr("You must select a organization");
-				$continuar=false;
-			}
-		}*/
 
 		$type=getParameter("technology");
 		if(!isset($type) || !($type=="sip" || $type=="iax2")){
@@ -695,10 +695,10 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 		$exten=$arrExten["exten"];
 		$secret=getParameter("secret");
 		if(isset($secret) && $secret!=""){
-			if(strlen($secret)<6 || !preg_match("/^[[:alnum:]]+$/","$secret")){
-				$error=_tr("Secret must be at least 6 characters and contain digits and letters");
-				$continuar=false;
-			}
+			if(!isStrongPassword($secret)){
+                $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
+                $continuar=false;
+            }
 		}
 
 		$type=$arrExten["technology"];

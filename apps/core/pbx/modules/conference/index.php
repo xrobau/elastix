@@ -128,18 +128,6 @@ function reportConference($smarty, $module_name, $local_templates_dir, &$pDB, $a
 {
 	$error = "";
 	$bSoporteWebConf = (file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php'));
-
-	$state_conf=getParameter("state_conf");
-	$name_conf=getParameter("name_conf");
-	$type_conf=getParameter("type_conf");
-	
-	if(empty($state_conf))
-        $state_conf="all";
-	if(empty($type_conf))
-        $type_conf="both";
-    if(is_null($name_conf))
-        $name_conf="";
-    $date=date("Y-m-d H:i");
     
     if($userLevel1=="superadmin"){
         $domain=getParameter("organization");
@@ -159,6 +147,26 @@ function reportConference($smarty, $module_name, $local_templates_dir, &$pDB, $a
         $total=$pconference->getTotalConference($domain,$date,$state_conf,$type_conf,$name_conf);
 	}
 	
+	$state_conf=getParameter("state_conf");
+    $name_conf=getParameter("name_conf");
+    $type_conf=getParameter("type_conf");
+    if(empty($state_conf)){
+        $state_conf="all";
+    }else
+        $url .="&$state_conf";
+        
+    if(empty($type_conf)){
+        $type_conf="both";
+    }else
+        $url .="&$type_conf";
+        
+    if(is_null($name_conf)){
+        $name_conf="";
+    }else
+        $url .="&$name_conf";
+    
+    $date=date("Y-m-d H:i");
+    
 	if($total===false){
         $error=$pconference->errMsg;
         $total=0;
@@ -431,7 +439,6 @@ function thereChanges($data){
         $arrData = $session['conference']["conf_list"];
     }
     $arraResult = array();
-    //print_r($session);
     foreach($arrData as $bookid => $value){
         $members = $value[0];
         $status = $value[1];
@@ -467,14 +474,15 @@ function viewFormConference($smarty, $module_name, $local_templates_dir, &$pDB, 
         return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
     }
     
+    $pConf = new paloConference($pDB,$domain);
+    $arrRecording=$pConf->getRecordingsSystem($domain);
     
 	$id_conf=getParameter("id_conf");
 	if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
 		if(!isset($id_conf)){
             $error=_tr("Invalid conference");
 		}else{
-            if($userLevel1=="admin"){
-                $pConf = new paloConference($pDB,$domain);
+            if($userLevel1=="admin"){            
                 $Conf = $pConf->getConferenceById($id_conf);
             }else{
                 $error=_tr("You are not authorized to perform this action");
@@ -499,8 +507,7 @@ function viewFormConference($smarty, $module_name, $local_templates_dir, &$pDB, 
                         $Conf["duration_min"]=floor(fmod($elap,3600)/60);
                     }
                     //adminopts
-                    preg_match_all("/^aAs(i){0,1}(r){0,1}(M\((.*)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["adminopts"],$match);
-                    
+                    preg_match_all("/^aAs(i){0,1}(r){0,1}(M\(([[:alnum:]_]+)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["adminopts"],$match);
                     $Conf["moderator_options_1"]=empty($match[1][0])?"off":"on";
                     $Conf["moderator_options_2"]=empty($match[2][0])?"off":"on";
                     
@@ -512,18 +519,19 @@ function viewFormConference($smarty, $module_name, $local_templates_dir, &$pDB, 
                     if(empty($match[5][0])){
                         $Conf["announce_intro"]="";
                     }else{
-                        $Conf["announce_intro"]=$match[6][0];
+                        $Conf["announce_intro"]=$Conf["intro_record"];
                     }
+                    
                     //useropts
-                    preg_match_all("/^(i){0,1}(m){0,1}(w){0,1}(M\((.*)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["opts"],$matchu);
+                    preg_match_all("/^(i){0,1}(m){0,1}(w){0,1}(M\(([[:alnum:]_]+)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["opts"],$matchu);
                     $Conf["user_options_1"]=empty($matchu[1][0])?"off":"on";
                     $Conf["user_options_2"]=empty($matchu[2][0])?"off":"on";
                     $Conf["user_options_3"]=empty($matchu[3][0])?"off":"on";
+                    
                 }
             }  
 		}
 	}else{
-        $pConf = new paloConference($pDB,$domain);
         $smarty->assign("SCHEDULE","on");
          //para que se muestren los destinos
         if(getParameter("create_conference")){
@@ -542,7 +550,7 @@ function viewFormConference($smarty, $module_name, $local_templates_dir, &$pDB, 
         return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
     }
     
-    $arrForm = createFieldForm($pConf->getRecordingsSystem($domain),$pConf->getMoHClass($domain));
+    $arrForm = createFieldForm($arrRecording,$pConf->getMoHClass($domain));
     $oForm = new paloForm($smarty,$arrForm);
 
 	if($action=="view"){

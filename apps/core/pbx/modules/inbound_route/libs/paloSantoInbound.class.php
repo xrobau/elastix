@@ -363,8 +363,8 @@ class paloSantoInbound extends paloAsteriskDB{
         }else
             $arrProp["cid_number"]="";
         
-        $q="Select id from inbound_route where id!=? and cid_number=? and did_number=?";
-        $result=$this->_DB->getFirstRowQuery($q,true,array($idInbound,$arrProp["cid_number"],$arrProp["did_number"]));
+        $q="Select id from inbound_route where id!=? and cid_number=? and did_number=? and organization_domain=?";
+        $result=$this->_DB->getFirstRowQuery($q,true,array($idInbound,$arrProp["cid_number"],$arrProp["did_number"],$this->domain));
         if($result===false || count($result)!=0){
             $this->errMsg=_("Already exist other inbound route with the same DID number and Caller ID number").$this->_DB->errMsg;
             return false;
@@ -569,6 +569,8 @@ class paloSantoInbound extends paloAsteriskDB{
                 if($value['fax_detect']=="yes"){
                     if(isset($value['fax_destiny'])){
                         if($value['fax_destiny']!=""){
+                            if($value['fax_destiny']=="any")
+                                $value['fax_destiny']="fax";
                             $arrExt[$context][]=new paloExtensions($exten, new ext_setvar('FAX_EXTEN',$value['fax_destiny']));
                             $arrExt[$context][]=new paloExtensions($exten, new ext_answer());
                             $faxDetect=new ext_wait($value['fax_time']);

@@ -74,7 +74,7 @@ class paloSantoOutbound extends paloAsteriskDB{
 			return $result[0];
     }
 
-	function getOutbounds($domain=null){
+	function getOutbounds($domain=null,$limit=null,$offset=null){
 		$where=$pagging="";
 		$arrParam=null;
 		if(isset($domain)){
@@ -155,7 +155,7 @@ class paloSantoOutbound extends paloAsteriskDB{
             $result=$this->_DB->fetchTable($query,false,array($idOutbound));
         $arrTrunk = array();
         if($result==false)
-        $this->errMsg=$this->errMsg;
+            $this->errMsg=$this->errMsg;
 
         foreach($result as $value){
             $arrTrunk[$value[0]]=$value[1]."/".strtoupper($value[2]);
@@ -820,7 +820,7 @@ class paloSantoOutbound extends paloAsteriskDB{
         }
         
         if(count($pattern)==0){
-            $pattern[0]["exten"]="_.";
+            $pattern[0]["exten"]="_X.";
             $pattern[0]["prefix"]="";
             $pattern[0]["prepend"]="";
         }

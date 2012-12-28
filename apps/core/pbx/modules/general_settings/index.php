@@ -985,7 +985,7 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 
 	if($continue){
 		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-		if($pAstConf->generateDialplan($domain)===false){
+		if($pAstConf->generateDialplan($domain,true)===false){
 			$pAstConf->setReloadDialplan($domain,true);
 			$smarty->assign("mb_title", _tr("ERROR"));
 			$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);

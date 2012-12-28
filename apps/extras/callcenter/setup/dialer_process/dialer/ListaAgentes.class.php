@@ -39,9 +39,9 @@ class ListaAgentes implements IteratorAggregate
 
     function numLlamadas() { return count($this->_agentes); }
     
-    function nuevoAgente($idAgente, $iNumero, $sNombre, $bEstatus)
+    function nuevoAgente($idAgente, $iNumero, $sNombre, $bEstatus, $sType = 'Agent')
     {
-        $o = new Agente($this, $idAgente, $iNumero, $sNombre, $bEstatus);
+        $o = new Agente($this, $idAgente, $iNumero, $sNombre, $bEstatus, $sType);
         $this->_agentes[] = $o;
         return $o;
     }

@@ -27,6 +27,7 @@ USE `call_center`;
 --
 CREATE TABLE IF NOT EXISTS `agent` (
   `id` int(10) unsigned NOT NULL auto_increment,
+  `type` enum('Agent','SIP','IAX2') NOT NULL default 'Agent',
   `number` varchar(40) NOT NULL,
   `name` varchar(250) NOT NULL,
   `password` varchar(250) NOT NULL,
@@ -792,6 +793,35 @@ DELIMITER ; ++
 
 CALL temp_campania_saliente_trunk_2012_12_07();
 DROP PROCEDURE IF EXISTS temp_campania_saliente_trunk_2012_12_07;
+
+/* Procedimiento para agregar tipo de agente para callback login */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_agente_tipo_2012_12_26 ++
+CREATE PROCEDURE temp_agente_tipo_2012_12_26 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_columna tinyint(1);
+    
+    SET l_existe_columna = 0;
+
+    /* Verificar existencia de columna agent.type que debe agregarse */
+    SELECT COUNT(*) INTO l_existe_columna 
+    FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_SCHEMA = 'call_center' 
+        AND TABLE_NAME = 'agent' 
+        AND COLUMN_NAME = 'type';
+    IF l_existe_columna = 0 THEN
+        ALTER TABLE agent
+        ADD COLUMN type enum('Agent','SIP','IAX2') DEFAULT 'Agent' NOT NULL AFTER id;
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_agente_tipo_2012_12_26();
+DROP PROCEDURE IF EXISTS temp_agente_tipo_2012_12_26;
 
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;

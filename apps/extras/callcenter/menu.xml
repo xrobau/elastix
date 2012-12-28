@@ -18,6 +18,7 @@
     <menuitem menuid="agentoptions"           desc="Agent Options"          parent="call_center"          module="yes" link="" order="4"></menuitem>
     <menuitem menuid="agents"                 desc="Agents"                 parent="agentoptions"         module="yes" link="" order="4"></menuitem>
     <menuitem menuid="eccp_users"             desc="ECCP Users"             parent="agentoptions"         module="yes" link="" order="4"></menuitem>
+    <menuitem menuid="cb_extensions"          desc="Callback Extensions"    parent="agentoptions"         module="yes" link="" order="4"></menuitem>
 
     <menuitem menuid="break_administrator"    desc="Breaks"                 parent="call_center"          module="yes" link="" order="5"></menuitem>
 

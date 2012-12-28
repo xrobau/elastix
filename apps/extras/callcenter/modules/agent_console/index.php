@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |f
+  | Elastix version 0.5                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -156,6 +156,9 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
         'ENTER_USER_PASSWORD'   =>  _tr('Please select your agent number and your extension'),
         'USERNAME'              =>  _tr('Agent Number'),
         'EXTENSION'             =>  _tr('Extension'),
+        'CALLBACK_LOGIN'        =>  _tr('Callback Login'),
+        'PASSWORD'              =>  _tr('Password'),        
+        'CALLBACK_EXTENSION'    =>  _tr('Callback Extension'),
         'LABEL_SUBMIT'          =>  _tr('Enter'),
         'LABEL_NOEXTENSIONS'    =>  _tr('There are no extensions available. At least one extension is required for agent login.'),
         'LABEL_NOAGENTS'        =>  _tr('There are no agents available. At least one agent is required for agent login.'),
@@ -165,13 +168,15 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
     
     $oPaloConsola = new PaloSantoConsola();
     $listaExtensiones = $oPaloConsola->listarExtensiones();
-    $listaAgentes = $oPaloConsola->listarAgentes();
+    $listaAgentes = $oPaloConsola->listarAgentes('static');
+    $listaExtensionesCallback = $oPaloConsola->listarAgentes('dynamic');
     $oPaloConsola->desconectarTodo();
     $oPaloConsola = NULL;
     
     $smarty->assign(array(
         'LISTA_EXTENSIONES' =>  $listaExtensiones,
         'LISTA_AGENTES'     =>  $listaAgentes,
+        'LISTA_EXTENSIONES_CALLBACK'     =>  $listaExtensionesCallback,
         'NO_EXTENSIONS'     =>  (count($listaExtensiones) == 0), 
         'NO_AGENTS'         =>  (count($listaAgentes) == 0), 
     ));
@@ -180,19 +185,20 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
     if (!is_null($_SESSION['callcenter']['agente']) &&
         !is_null($_SESSION['callcenter']['extension'])) {
         $smarty->assign(array(
-            'ID_AGENT'      =>  $_SESSION['callcenter']['agente'],
-            'ID_EXTENSION'  =>  $_SESSION['callcenter']['extension'],
+            'ID_AGENT'                  =>  $_SESSION['callcenter']['agente'],
+            'ID_EXTENSION'              =>  $_SESSION['callcenter']['extension'],
+            'ID_EXTENSION_CALLBACK'     =>  $_SESSION['callcenter']['agente'],
             'ESTILO_FILA_ESTADO_LOGIN'  =>  'style="visibility: visible; position: none;"',
-            'MSG_ESPERA'    =>  _tr('Logging agent in. Please wait...'),
-            'REANUDAR_VERIFICACION' =>  1,
+            'MSG_ESPERA'                =>  _tr('Logging agent in. Please wait...'),
+            'REANUDAR_VERIFICACION'     =>  1,
         ));
         
     } else {
     	/* Si el usuario Elastix logoneado coincide con el número de agente de
          * la lista, se coloca este agente como opción por omisión para login.
          */
-        if (isset($listaAgentes[$_SESSION['elastix_user']]))
-            $smarty->assign('ID_AGENT', $_SESSION['elastix_user']);
+        if (isset($listaAgentes['Agent/'.$_SESSION['elastix_user']]))
+            $smarty->assign('ID_AGENT', 'Agent/'.$_SESSION['elastix_user']);
         
         /* Si el usuario Elastix logoneado tiene una extensión y aparece en la
          * lista, se sugiere esta extension como la extensión a usar para 
@@ -205,6 +211,12 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
                 $sExtension = $tupla[0][3];
                 if (isset($listaExtensiones[$sExtension]))
                     $smarty->assign('ID_EXTENSION', $sExtension);
+                
+                foreach (array_keys($listaExtensionesCallback) as $k) {
+                	$regs = NULL;
+                    if (preg_match('|^(\w+)/(\d+)$|', $k, $regs) && $regs[2] == $sExtension)
+                        $smarty->assign('ID_EXTENSION_CALLBACK', $k);
+                }
             }
         }
     }
@@ -218,8 +230,17 @@ function manejarLogin_doLogin()
     $oPaloConsola = new PaloSantoConsola();
 
     // Acción AJAX para iniciar el login de agente
-    $sAgente = getParameter('agent');
-    $sExtension = getParameter('ext');
+    $bCallback = in_array(getParameter('callback'), array('true', 'checked'));
+    if ($bCallback) {
+        $sAgente = getParameter('ext_callback');
+        $sPasswordCallback = getParameter('pass_callback');
+        $regs = NULL;
+        $sExtension = (preg_match('|^(\w+)/(\d+)$|', $sAgente, $regs)) ? $regs[2]: NULL;
+    } else {
+        $sAgente = getParameter('agent');
+        $sExtension = getParameter('ext');
+        $sPasswordCallback = NULL;
+    }
 
     $respuesta = array(
         'status'    =>  FALSE,  // VERDADERO para éxito en iniciar timbrado
@@ -245,9 +266,11 @@ function manejarLogin_doLogin()
     // Verificar si el número de agente no está ya ocupado por otra extensión
     if ($bContinuar) {
         $oPaloConsola->desconectarTodo();
-        $oPaloConsola = new PaloSantoConsola('Agent/'.$sAgente);
+        $oPaloConsola = new PaloSantoConsola($sAgente);
 
-        $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension);
+        $estado = (!$bCallback || $oPaloConsola->autenticar($sAgente, $sPasswordCallback))
+            ? $oPaloConsola->estadoAgenteLogoneado($sExtension)
+            : array('estadofinal' => 'error');
         switch ($estado['estadofinal']) {
         case 'error':
         case 'mismatch':
@@ -255,8 +278,8 @@ function manejarLogin_doLogin()
             $respuesta['message'] = _tr('Cannot start agent login').' - '.$oPaloConsola->errMsg;
             break;
         case 'logged-out':
-            // No hay canal de login. Se inicia login a través de Originate
-            $bExito = $oPaloConsola->loginAgente($listaExtensiones[$sExtension]);
+            // No hay canal de login. Se inicia login a través de Originate para el caso de Agent/xxx
+            $bExito = $oPaloConsola->loginAgente($sExtension);
             if (!$bExito) {
                 $respuesta['status'] = FALSE;
                 $respuesta['message'] = _tr('Cannot start agent login').' - '.$oPaloConsola->errMsg;
@@ -265,8 +288,6 @@ function manejarLogin_doLogin()
             // En caso de éxito, se cuela al siguiente caso
         case 'logging':
         case 'logged-in':
-            $listaAgentes = $oPaloConsola->listarAgentes();
-
             // Ya está logoneado este agente. Se procede directamente a espera
             $_SESSION['callcenter']['estado_consola'] = 'logging';
             $_SESSION['callcenter']['agente'] = $sAgente;
@@ -279,8 +300,9 @@ function manejarLogin_doLogin()
                 // Esperar hasta 1 segundo para evento de fallo de login.
                 $sEstado = $oPaloConsola->esperarResultadoLogin();
                 if ($sEstado == 'logged-in') {
-                    // El agente ha podido logonearse. Se procede a mostrar el formulario
-                    $_SESSION['callcenter']['estado_consola'] = 'logged-in';
+                    /* El agente ha podido logonearse. Se delega el cambio de
+                     * estado_consola a logged-in a la verificación de 
+                     * manejarLogin_checkLogin() */ 
                 } elseif ($sEstado == 'logged-out') {
                     // El procedimiento de login ha fallado, sin causa conocida
                     $_SESSION['callcenter'] = generarEstadoInicial();
@@ -317,7 +339,7 @@ function manejarLogin_checkLogin()
     // Verificación rápida para saber si el canal es correcto
     $sAgente = $_SESSION['callcenter']['agente'];
     $sExtension = $_SESSION['callcenter']['extension'];
-    $oPaloConsola = new PaloSantoConsola('Agent/'.$sAgente);
+    $oPaloConsola = new PaloSantoConsola($sAgente);
 
     if ($bContinuar) {
         $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension);
@@ -420,7 +442,7 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
     // Se verifica si el agente sigue logoneado en la cola de Asterisk
     $sAgente = $_SESSION['callcenter']['agente'];
     $sExtension = $_SESSION['callcenter']['extension'];
-    $oPaloConsola = new PaloSantoConsola('Agent/'.$sAgente);
+    $oPaloConsola = new PaloSantoConsola($sAgente);
     $estado = $oPaloConsola->estadoAgenteLogoneado($sExtension);
     if ($estado['estadofinal'] != 'logged-in') {
         // Se marca el final de la sesión del agente en las tablas de auditoría
@@ -1112,7 +1134,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
     }
 
     // Ciclo de verificación para Server-sent Events
-    $sAgente = 'Agent/'.$_SESSION['callcenter']['agente'];
+    $sAgente = $_SESSION['callcenter']['agente'];
     $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
     $bReinicioSesion = FALSE;
     do {

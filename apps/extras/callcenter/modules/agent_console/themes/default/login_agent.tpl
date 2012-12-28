@@ -73,25 +73,41 @@
           </td>
         </tr>
         <tr>
-          <td>
-              <div align="right">{$USERNAME}:</div>
+          <td width="40%">
+              <div align="right" id="label_agent_user">{$USERNAME}:</div>
+              <div align="right" id="label_extension_callback">{$CALLBACK_EXTENSION}:</div>
           </td>
-          <td>
+          <td width="60%">
                 <select align="center" id="input_agent_user" name="input_agent_user">
                     {html_options options=$LISTA_AGENTES selected=$ID_AGENT}
+                </select>
+                <select align="center" id="input_extension_callback" name="input_extension_callback">
+                    {html_options options=$LISTA_EXTENSIONES_CALLBACK selected=$ID_EXTENSION_CALLBACK}
                 </select>
           </td>
         </tr>
         <tr>
-          <td>
-              <div align="right">{$EXTENSION}:</div>
+          <td width="40%">
+              <div align="right" id="label_extension">{$EXTENSION}:</div>
+              <div align="right" id="label_password_callback">{$PASSWORD}:</div>
           </td>
-          <td>
+          <td width="60%">
                 <select align="center" name="input_extension" id="input_extension">
                     {html_options options=$LISTA_EXTENSIONES selected=$ID_EXTENSION}
                 </select>
+		<input type="password" name="input_password_callback" id="input_password_callback">
           </td>
         </tr>
+<!-- Begin: CallbackLogin checkbox -->
+	<tr>
+          <td width="40%">
+              <div align="center">{$CALLBACK_LOGIN}:</div>
+          </td>
+          <td width="60%">               
+	      <input type="checkbox" name="input_callback" id="input_callback">
+          </td>
+        </tr>
+<!-- End: CallbackLogin checkbox -->
         <tr>
           <td colspan="2" align="center">
             <input type="button" id="submit_agent_login" name="submit_agent_login" value="{$LABEL_SUBMIT}" class="button" />

@@ -1,0 +1,76 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<p>La opción "Agents" del módulo "Call Center" en Elastix nos permite ingresar los datos de las personas que
+van a operar el sistema y que se les ha denominado
+agentes. Cada agente debe tener un número y clave
+asignado, para que por medio de esta se registre y reciba
+o realice llamadas.
+</p>
+<p>En la figura 1 podemos observar una  lista de los agentes.
+</p>
+<div><img src="../modules/{$node_id}/images/agent_list.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<table class="inline">
+  <tr>
+    <th>Campo</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Desconectar</td><td>Desconecta a un agente, que posee la sesión activa en la 
+        consola de agente.
+</td>
+  </tr>
+  <tr>
+    <td>Configuración</td><td><img src="../modules/{$node_id}/images/agent_list_ok.jpg" border="0">El agente se encuentra registrado en la base de datos y en 
+        Configuración el archivo de configuración de asterisk.<br/><br/>
+        <img src="../modules/{$node_id}/images/agent_list_error.jpg" border="0">Indica   que   hay   un   error   con   este   agente   y   los   errores 
+        pueden ser los siguientes:
+        <ul>
+              <li>Registrado en la base de datos pero no en el archivo  
+               de configuración de asterisk.</li>
+              <li>Registrado en el archivo de configuración de asterisk 
+               pero no  en la base de datos.</li>
+        </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>Número</td ><td align="Justify">Número asignado al agente.Es con este número que deberá ingresar a la consola de agente.</td>
+  </tr>
+  <tr>
+    <td>Nombre</td><td align="Justify">Nombre del Agente.</td>
+  </tr>
+<tr>
+    <td>Estado</td><td align="Justify">Conectado / Desconectado.</td>
+  </tr>
+<tr>
+    <td>Opciones</td><td align="Justify"><strong>Ver:</strong> Muestra la información del agente, el agente podrá ser 
+        Modificado ó Eliminado.<br/><strong>Reparar:</strong> Un  agente   será   reparado  si  se  encuentra   en  la 
+        siguientes situaciones:<br/>
+        <ul>
+        <li>No se registro en archivo de configuración de asterisk, así que será tomado de la base de datos y 
+        agregado.
+        </li>
+        <li>No se registro en la Base de Datos en tal caso se elimina del  archivo de configuración de asterisk.</li>
+        </ul>
+
+    </td>
+</tr>
+</table>
+
+<h2>New Agent</h2>
+<p>Esta opción nos permite ingresar un nuevo agente</p>
+<div><img src="../modules/{$node_id}/images/agent_new.jpg" border="0"></div>
+<div>Figura 2</div><br/><br/>
+<h2>View</h2>
+<p>Al dar click sobre  "View" dentro de "Agent List", nos llevará a una pantalla donde se mostrará los datos del Agente. A la vez en esta pantalla usted podra "Editar", "Eliminar" un Agente.</p>
+<div><img src="../modules/{$node_id}/images/agent_view.jpg" border="0"></div>
+<div>Figura 3</div><br/><br/>
+
+
+</body>
+</html>

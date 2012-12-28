@@ -267,6 +267,13 @@ class ECCPConn extends MultiplexConn
 
     // Implementación de parser expat: final
 
+    private function _parseAgent($sAgente)
+    {
+    	$regs = NULL;
+        return preg_match('#^(Agent|SIP|IAX2)/(\d+)$#', $sAgente, $regs)
+            ? array('type' => $regs[1], 'number' => $regs[2]) : NULL;
+    }
+    
     private function Request_getrequestlist($comando)
     {
         $xml_response = new SimpleXMLElement('<response />');
@@ -293,7 +300,7 @@ class ECCPConn extends MultiplexConn
         // El siguiente código asume formato Agent/9000
         if ($sAgente == 'any') {
             $sAgente = NULL;
-        } elseif (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        } elseif (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_filterbyagentResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
@@ -387,14 +394,11 @@ class ECCPConn extends MultiplexConn
             return FALSE;
         $sAgente = (string)$comando->agent_number;
         $sHashCliente = (string)$comando->agent_hash;
-        
-        // El siguiente código asume Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) return FALSE;
-        $sNumAgente = $regs[1];
 
         $recordset = $this->_db->prepare(
-            'SELECT number, eccp_password FROM agent WHERE estatus = "A" AND number = ?');
-        $recordset->execute(array($sNumAgente));
+            'SELECT number, eccp_password FROM agent '.
+            "WHERE estatus = 'A' AND CONCAT(type,'/',number) = ?");
+        $recordset->execute(array($sAgente));
         $tuplaAgente = $recordset->fetch(); $recordset->closeCursor();
         if (!$tuplaAgente) {
             // Agente no se ha encontrado en la base de datos
@@ -1027,13 +1031,13 @@ LEER_CAMPANIA;
         case 'incoming':
             $sDescCampania = 'entrante';
             $sPeticionSQL = 
-                'SELECT agent.number FROM call_entry, agent '.
+                'SELECT CONCAT(agent.type,"/",agent.number) AS agentchannel FROM call_entry, agent '.
                 'WHERE call_entry.id_agent = agent.id AND call_entry.id = ?';
             break;
         case 'outgoing':
             $sDescCampania = 'saliente';
             $sPeticionSQL = 
-                'SELECT agent.number FROM calls, agent '.
+                'SELECT CONCAT(agent.type,"/",agent.number) AS agentchannel FROM calls, agent '.
                 'WHERE calls.id_agent = agent.id AND calls.id = ?'; 
             break;
         default:
@@ -1042,7 +1046,7 @@ LEER_CAMPANIA;
         $recordset = $this->_db->prepare($sPeticionSQL);
         $recordset->execute(array($idLlamada));
         $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
-        return $tupla ? 'Agent/'.$tupla['number'] : NULL;
+        return $tupla ? $tupla['agentchannel'] : NULL;
     }
 
     private function Request_setcontact($comando)
@@ -1513,16 +1517,16 @@ LISTA_EXTENSIONES;
      */
     private function _listarAgentes()
     {
-        $sPeticion = "SELECT number, name FROM agent WHERE estatus = 'A' ORDER BY number";
+        $sPeticion = "SELECT type, number, name FROM agent WHERE estatus = 'A' ORDER BY number";
         foreach ($this->_db->query($sPeticion) as $tupla) {
-        	$listaAgentes['Agent/'.$tupla['number']] = $tupla['number'].' - '.$tupla['name'];
+        	$listaAgentes[$tupla['type'].'/'.$tupla['number']] = $tupla['number'].' - '.$tupla['name'];
         }
         return $listaAgentes;
     }
 
     /**
      * Método para iniciar el login del agente con la extensión y el número de
-     * agente que se indican. 
+     * agente que se indican. Se asume que el agente es válido en el sistema.
      *
      * @param   string  Extensión que está usando el agente, como "SIP/1064"
      * @param   string  Cadena del agente que se está logoneando: "Agent/9000"
@@ -1531,24 +1535,55 @@ LISTA_EXTENSIONES;
      */
     private function _loginAgente($sExtension, $sAgente)
     {
-        // Validar que sólo se use Agent/9000 como formato, y aislar el número de agente
-        $regs = NULL;
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs))
-            return NULL;
-        $sNumAgente = $regs[1];
         $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension);
-        $r = $this->_ami->Originate(
-            $sExtension,        // channel
-            NULL, NULL, NULL,   // extension, context, priority
-            'AgentLogin',       // application
-            $sNumAgente,        // data
-            NULL, NULL, NULL, NULL,
-            TRUE,               // async
-            'ECCP:1.0:'.posix_getpid().':AgentLogin:'.$sAgente     // action-id
-            );
+        $agentFields = $this->_parseAgent($sAgente);
+        if ($agentFields['type'] == 'Agent') {
+            $r = $this->_ami->Originate(
+                $sExtension,        // channel
+                NULL, NULL, NULL,   // extension, context, priority
+                'AgentLogin',       // application
+                $agentFields['number'],        // data
+                NULL, NULL, NULL, NULL,
+                TRUE,               // async
+                'ECCP:1.0:'.posix_getpid().':AgentLogin:'.$sAgente     // action-id
+                );
+        } else {
+            /* 
+             * Deben obtenerse las colas en las que la extension es Dynamic Member. 
+             * Las colas a continuación están quemadas por el momento. 
+             * La contraseña debe ingresarse desde un input en la interfaz de login y validarse en el servidor. 
+             * No es necesario que Asterisk genere una llamada a la extensión pra validar la contraseña.
+             */
+            $arrColas = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);
+    
+            // TODO: Falta validar, que ocurre si no hay colas habria que cancelarIntentoLogin
+            foreach($arrColas as $cola) {  
+                // Lo saco de todas las colas ...
+                $r = $this->_ami->QueueRemove($cola, $sAgente);
+        
+                // Para volverlos a agregar aqui.
+                $r = $this->_ami->QueueAdd($cola, $sAgente);
+            }
+        }
         if ($r['Response'] != 'Success')
             $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
         return $r;
+    }
+
+    private function _getQueuesGivenDynamicMember($sAgentType, $sAgentNumber)
+    {
+        // $key_input tomaría la forma agents/S100 (para SIP) ó agents/I110 (para IAX)
+        $extension = $sAgentType{0}.$sAgentNumber; 
+        $db_output = $this->_ami->database_showkey('agents/'.$extension); 
+    
+        $arrColas = array();
+        foreach($db_output as $k => $val){  
+            $preg_match_string = "|^/QPENALTY/(\d+)/agents/$extension$|";
+            if (preg_match($preg_match_string, $k, $regs)) {     
+                $arrColas[] = $regs[1];
+            }
+        }
+        return $arrColas;
     }
 
     /**
@@ -1606,9 +1641,9 @@ LISTA_EXTENSIONES;
         /* Ejecutar Agentlogoff. Esto asume que el agente está de la forma 
          * Agent/9000. La actualización de las bases de datos de auditoría y 
          * breaks se delega a los manejadores de eventos */
-        if (preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
-            $sNumAgente = $regs[1];
-            $r = $this->_ami->Agentlogoff($sNumAgente);
+        $agentFields = $this->_parseAgent($sAgente);
+        if ($agentFields['type'] == 'Agent') {
+            $r = $this->_ami->Agentlogoff($agentFields['number']);
             
             /* Si el agente todavía no ha introducido la clave, el Agentlogoff
              * anterior no tiene efecto, así que se manda a colgar el canal
@@ -1620,10 +1655,19 @@ LISTA_EXTENSIONES;
                 if (!is_null($sCanalExt)) $this->_ami->Hangup($sCanalExt);
             }
             return $this->Response_LogoutAgentResponse('logged-out');
+        } else {
+            // Si hay cliente conectado, le cierro el canal.
+            if (!is_null($infoAgente['clientchannel'])) {
+                $this->_ami->Hangup($infoAgente['clientchannel']);
+            }
+ 
+            // Lo saco de todas las colas ...
+            $arrColas = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);      
+            foreach ($arrColas as $cola) {  
+                $r = $this->_ami->QueueRemove($cola, $sAgente);
+            }
+            return $this->Response_LogoutAgentResponse('logged-out');       
         }
-
-        // No se ha implementado Agentlogoff para otros tipos de agente
-        return $this->_generarRespuestaFallo(501, 'Not Implemented');
     }
 
     // Función que encapsula la generación de la respuesta
@@ -1660,11 +1704,10 @@ LISTA_EXTENSIONES;
         $xml_pauseAgentResponse = $xml_response->addChild('pauseagent_response');
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
-        $sNumAgente = $regs[1];
 
         // Verificar que el agente está autorizado a realizar operación
         if (!$this->_hashValidoAgenteECCP($comando)) {
@@ -1760,11 +1803,10 @@ LISTA_EXTENSIONES;
         $xml_unpauseAgentResponse = $xml_response->addChild('unpauseagent_response');
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
-        $sNumAgente = $regs[1];
 
         // Verificar que el agente está autorizado a realizar operación
         if (!$this->_hashValidoAgenteECCP($comando)) {
@@ -1850,7 +1892,7 @@ LISTA_EXTENSIONES;
         $xml_getAgentStatusResponse = $xml_response->addChild('getagentstatus_response');
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $xml_getAgentStatusResponse->addChild('status', 'offline');
             $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 404, 'Invalid agent number');
             return $xml_response;
@@ -1987,7 +2029,9 @@ LISTA_EXTENSIONES;
 
         // Mandar a colgar la llamada usando el canal Agent/9000
         //$this->_log->output('DEBUG: se intenta colgar '.$sAgente.' conectado a '.$sCanalRemoto.' ...');
-        $r = $this->_ami->Hangup($sAgente);
+        $agentFields = $this->_parseAgent($sAgente);
+        $r = $this->_ami->Hangup(($agentFields['type'] == 'Agent')
+            ? $sAgente : $infoSeguimiento['clientchannel']);
         if ($r['Response'] != 'Success') {
             $this->_log->output('ERR: No se puede colgar la llamada para '.$sAgente.' - '.$r['Message']);
             //$this->_log->output('ERR: Estado de la cola al intentar colgado es: '.print_r($estadoCola, 1));
@@ -2228,11 +2272,10 @@ LEER_RESUMEN_CAMPANIA;
         $xml_scheduleResponse = $xml_response->addChild('schedulecall_response');
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_scheduleResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
-        $sNumAgente = $regs[1];
 
         // Verificar que el agente está autorizado a realizar operación
         if (!$this->_hashValidoAgenteECCP($comando)) {
@@ -2525,7 +2568,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         }
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_transferResponse, 404, 'Specified agent not found');
             return $xml_response;
         }
@@ -2603,7 +2646,8 @@ SQL_INSERTAR_AGENDAMIENTO;
         }
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        $agentFields = $this->_parseAgent($sAgente);
+        if (is_null($agentFields)) {
             $this->_agregarRespuestaFallo($xml_transferResponse, 404, 'Specified agent not found');
             return $xml_response;
         }
@@ -2628,7 +2672,9 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         // Mandar a transferir la llamada usando el canal Agent/9000
         $r = $this->_ami->Atxfer(
-            $sAgente,           // channel
+            (($agentFields['type'] == 'Agent')  // channel
+                ? $sAgente 
+                : $infoSeguimiento['clientchannel']),
             $sExtension,        // exten
             'from-internal',    // context
             1);                 // priority
@@ -2670,11 +2716,10 @@ SQL_INSERTAR_AGENDAMIENTO;
         $xml_holdResponse = $xml_response->addChild('hold_response');
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_holdResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
-        $sNumAgente = $regs[1];
 
         // Verificar que el agente está autorizado a realizar operación
         if (!$this->_hashValidoAgenteECCP($comando)) {
@@ -2851,11 +2896,10 @@ SQL_INSERTAR_AGENDAMIENTO;
         $xml_unholdResponse = $xml_response->addChild('unhold_response');
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_unholdResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
-        $sNumAgente = $regs[1];
 
         // Verificar que el agente está autorizado a realizar operación
         if (!$this->_hashValidoAgenteECCP($comando)) {
@@ -3009,9 +3053,10 @@ Privilege: Command
         $xml_getagentqueuesResponse = $xml_response->addChild('getagentqueues_response');
 
         // El siguiente código asume formato Agent/9000
+        $agentFields = $this->_parseAgent($sAgente);
         if ($sAgente == 'any') {
             $sAgente = NULL;
-        } elseif (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        } elseif (is_null($agentFields)) {
             $this->_agregarRespuestaFallo($xml_getagentqueuesResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
@@ -3029,6 +3074,13 @@ Privilege: Command
         // Reportar también las colas a las que está suscrito el agente
         if (is_array($listaColas)) foreach ($listaColas as $sCola) {
             $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
+        }
+
+        // Agregar además las colas a las cuales va a suscribirse el agente dinámico
+        $listaColasDyn = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);
+        if (is_array($listaColasDyn)) foreach ($listaColasDyn as $sCola) {
+            if (!in_array($sCola, $listaColas))
+                $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
         }
 
         return $xml_response;
@@ -3102,7 +3154,7 @@ Privilege: Command
 
         // Leer la información de los agentes conocidos y su historial de sesión
         $sPeticionSQL = <<<LEER_AGENTE_AUDIT
-SELECT agent.id, agent.number, agent.name, SUM(TIME_TO_SEC(duration)) AS total_login_time
+SELECT agent.id, agent.type, agent.number, agent.name, SUM(TIME_TO_SEC(duration)) AS total_login_time
 FROM agent
 LEFT JOIN audit 
     ON agent.id = audit.id_agent AND audit.id_break IS NULL 
@@ -3148,7 +3200,7 @@ LEER_ULTIMA_PAUSA;
         $recordset_ultimapausa = $this->_db->prepare($sPeticionSQL_ultimapausa);
         foreach ($listaAgentes as $infoAgente) {
         	$xml_agent = $xml_agents->addChild('agent');
-            $xml_agent->addChild('agentchannel', 'Agent/'.$infoAgente['number']);
+            $xml_agent->addChild('agentchannel', $infoAgente['type'].'/'.$infoAgente['number']);
             $xml_agent->addChild('agentname', str_replace('&', '&amp;', $infoAgente['name']));
             $xml_agent->addChild('logintime', is_null($infoAgente['total_login_time']) ? 0 : $infoAgente['total_login_time']);
 
@@ -3214,11 +3266,10 @@ LEER_ULTIMA_PAUSA;
         $xml_getchanvarsResponse = $xml_response->addChild('getchanvars_response');
 
         // El siguiente código asume formato Agent/9000
-        if (!preg_match('|^Agent/(\d+)$|', $sAgente, $regs)) {
+        if (is_null($this->_parseAgent($sAgente))) {
             $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
-        $sNumAgente = $regs[1];
 
         // Verificar que el agente está autorizado a realizar operación
         if (!$this->_hashValidoAgenteECCP($comando)) {

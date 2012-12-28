@@ -372,7 +372,7 @@ class CampaignProcess extends TuberiaProcess
     {
     	// El ORDER BY del query garantiza que estatus A aparece antes que I
         $recordset = $this->_db->query(
-            'SELECT id, number, name, estatus FROM agent ORDER BY number, estatus');
+            'SELECT id, number, name, estatus, type FROM agent ORDER BY number, estatus');
         $lista = array(); $listaNum = array();
         foreach ($recordset as $tupla) {
             if (!in_array($tupla['number'], $listaNum)) {
@@ -381,6 +381,7 @@ class CampaignProcess extends TuberiaProcess
                     'number'    =>  $tupla['number'],
                     'name'      =>  $tupla['name'],
                     'estatus'   =>  $tupla['estatus'],
+                    'type'      =>  $tupla['type'],
                 );
                 $listaNum[] = $tupla['number'];
             }

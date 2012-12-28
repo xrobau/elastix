@@ -300,26 +300,42 @@ oirá música de espera hasta que un agente se libere, en cuyo caso la llamada
 será enlazada con este agente.
 
 Los agentes pueden ser de tipo dinámico o estático. Los agentes dinámicos pueden
-asociarse arbitrariamente a una cola sin configuración previa de Asterisk. Los
-agentes estáticos se asocian como parte de la definición de la cola. Actualmente
-el CallCenter sólo puede usar agentes estáticos. Un agente estático tiene un 
-número asociado, que es independiente de la extensión telefónica usada para
-hacer uso de este agente. Por ejemplo, una cola puede tener un agente 9000, el
-cual es usado por la extensión 1064. Internamente en Asterisk, y por el resto
-del documento, un agente se lo identifica con la cadena de canal: Agent/9000.
-Un mismo agente puede pertenecer a múltiples colas.
+logonearse o deslogonearse de la cola arbitrariamente, y casi siempre son 
+extensiones reales de la central. Un agente estático siempre pertenece a la 
+cola, aunque puede estar en estado no-disponible. Para el funcionamiento actual
+del CallCenter, todos los agentes estáticos deben ser canales de tipo Agent/9000,
+en oposición a los agentes dinámicos, que son extensiones cuyos canales deben ser
+de tipo SIP/4321 o IAX2/4321. Estas cadenas (Agent/9000, SIP/4321, IAX2/4321) 
+identifican internamente al agente que puede atender llamadas. Tanto los agentes
+estáticos como dinámicos pueden pertenecer a múltiples colas.
 
-Para que una extensión haga uso de un agente estático, debe de completar el 
-procedimiento de 'login' a la cola. En Elastix, se ha configurado el número *8888
-como login de cola arbitraria. Al marcar este número, la extensión oye una 
-grabación para ingresar el número de agente que se va a usar. Luego de digitado,
-se reproduce otra grabación para que ingrese la contraseña del agente. Si se
-digita correctamente la contraseña, la extensión ingresa a la cola como un 
-agente, y la extensión reproduce música de espera hasta que se le asigne una
-llamada. Para finalizar el login a la cola, se cuelga la extensión, o se ejecuta
-el método Agentlogoff del AMI indicando el canal Agent/XXXX que desea terminar
-la sesión. Al realizar login y logout a través del CallCenter, el sistema lleva 
-la auditoría de cuánto tiempo ha estado logoneado cada agente.
+Un agente estático tiene un número asociado, que es independiente de la 
+extensión telefónica usada para hacer uso de este agente. Por ejemplo, una cola
+puede tener un agente 9000, el cual es usado por la extensión 1064. Para que una
+extensión haga uso de un agente estático, debe de completar el procedimiento de
+'login' a la cola. En Elastix, se ha configurado el número *8888 como login de
+cola arbitraria. Al marcar este número, la extensión oye una grabación para 
+ingresar el número de agente que se va a usar. Luego de digitado, se reproduce 
+otra grabación para que ingrese la contraseña del agente. Si se digita 
+correctamente la contraseña, la extensión ingresa a la cola como un agente, y la
+extensión reproduce música de espera hasta que se le asigne una llamada. Para 
+finalizar el login a la cola, se cuelga la extensión, o se ejecuta el método 
+Agentlogoff del AMI indicando el canal Agent/XXXX que desea terminar la sesión.
+Al realizar login y logout a través del CallCenter, el sistema lleva la 
+auditoría de cuánto tiempo ha estado logoneado cada agente.
+
+Un agente dinámico es una extensión ordinaria de tipo SIP o IAX2. El logoneo a
+la cola consiste en un QueueAdd a cada cola de interés, y no requiere una 
+contraseña internamente. Al agregarse a la cola, la extensión permanece colgada
+hasta que se asigna una llamada, en cuyo caso la extensión timbrará y el agente
+debe de contestar la llamada. Para finalizar el login a la cola, se ejecuta el
+método QueueRemove del AMI indicando el canal que desea deslogonearse. Al igual
+que con los agentes estáticos, el sistema lleva la auditoría de cuánto tiempo
+ha estado logoneado cada agente.
+
+En el resto del documento, toda instancia de Agent/XXXX (por ejemplo Agent/9000)
+debe entenderse que se refiere a cualquier tipo de agente, sea estático o 
+dinámico. Por lo tanto, también son aceptables SIP/4321 o IAX2/4321.
 
 El CallCenter soporta dos modos principales de operación: campañas salientes y
 campañas entrantes. Una campaña tiene asociada una cola, a través de la cual

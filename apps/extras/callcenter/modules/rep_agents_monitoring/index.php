@@ -159,7 +159,7 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
     $tuplaTotal = NULL;
     $sPrevQueue = NULL;
     foreach ($jsonData as $jsonKey => $jsonRow) {
-        list($d1, $sQueue, $d2, $sNumeroAgente) = explode('-', $jsonKey);
+        list($d1, $sQueue, $d2, $sTipoAgente, $sNumeroAgente) = explode('-', $jsonKey);
         
         $sEstadoTag = '(unimplemented)';
         switch ($jsonRow['status']) {
@@ -213,7 +213,7 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
         $tuplaTotal['sec_calls'] += $jsonRow['sec_calls'];
         $tupla = array(
             ($sPrevQueue == $sQueue) ? '' : $sQueue,
-            $sNumeroAgente,
+            $jsonRow['agentchannel'],
             htmlentities($jsonRow['agentname'], ENT_COMPAT, 'UTF-8'),
             $sEstadoTag,
             '<span id="'.$jsonKey.'-num_calls">'.$jsonRow['num_calls'].'</span>',
@@ -304,10 +304,7 @@ function construirDatosJSON(&$estadoMonitor)
         ksort($agentList);
         foreach ($agentList as $sAgentChannel => $infoAgente) {
             $iTimestampEstado = NULL;
-            $sNumeroAgente = $sAgentChannel;
-            if (substr($sNumeroAgente, 0, 6) == 'Agent/')
-                $sNumeroAgente = substr($sNumeroAgente, 6);
-            $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
+            $jsonKey = 'queue-'.$sQueue.'-member-'.strtolower(str_replace('/', '-', $sAgentChannel));
 
             switch ($infoAgente['agentstatus']) {
             case 'offline':
@@ -330,6 +327,7 @@ function construirDatosJSON(&$estadoMonitor)
 
             // Preparar estado inicial JSON
             $jsonData[$jsonKey] = array(
+                'agentchannel'      =>  $sAgentChannel,
                 'agentname'         =>  $infoAgente['agentname'],
                 'status'            =>  $infoAgente['agentstatus'],
                 'sec_laststatus'    =>  is_null($iTimestampEstado) ? NULL : ($iTimestampActual - $iTimestampEstado),
@@ -433,8 +431,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             $iTimestampActual = time();
             foreach ($listaEventos as $evento) {
                 $sNumeroAgente = $sCanalAgente = $evento['agent_number'];
-                if (substr($sNumeroAgente, 0, 6) == 'Agent/')
-                    $sNumeroAgente = substr($sNumeroAgente, 6);
+                $sNumeroAgente = strtolower(str_replace('/', '-', $sCanalAgente));
 
             	switch ($evento['event']) {
             	case 'agentloggedin':

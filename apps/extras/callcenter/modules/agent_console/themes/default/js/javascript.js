@@ -36,6 +36,12 @@ $(document).ready(function() {
 	$('#elastix-callcenter-error-message').hide();
 	$('#elastix-callcenter-info-message').hide();
 	$('#elastix-callcenter-agendar-llamada-error-message').hide();
+    
+    $('#label_extension_callback').hide();
+    $('#input_extension_callback').hide();
+    $('#label_password_callback').hide();
+    $('#input_password_callback').hide();    
+    
     $('#btn_hangup').button();
     $('#btn_togglebreak').button();
     $('#btn_transfer').button();
@@ -108,6 +114,33 @@ $(document).ready(function() {
     });
     $('#schedule_type_bydate').change(function() {
     	$('#schedule_date').show();
+    });
+    
+    $('#input_callback').click(function() {
+		var $this = $(this);
+		// $this will contain a reference to the checkbox   
+		if ($this.is(':checked')) {	    
+		    $('#input_extension').hide();	    
+		    $('#input_agent_user').hide();	    
+		    $('#label_extension').hide();
+		    $('#label_agent_user').hide();	
+		    
+		    $('#label_extension_callback').show();
+		    $('#input_extension_callback').show();
+		    $('#label_password_callback').show();
+		    $('#input_password_callback').show();
+		    
+		} else {
+		    $('#input_extension').show();
+		    $('#input_agent_user').show();
+		    $('#label_extension').show();
+		    $('#label_agent_user').show();
+		      
+		    $('#label_extension_callback').hide();
+		    $('#input_extension_callback').hide();
+		    $('#label_password_callback').hide();
+		    $('#input_password_callback').hide();   	    
+		}
     });
 });
 
@@ -256,7 +289,10 @@ function do_login()
 		rawmode:	'yes',
 		action:		'doLogin',
 		agent:		$('#input_agent_user').attr('value'),
-		ext:		$('#input_extension').attr("value")
+		ext:		$('#input_extension').attr('value'),
+		ext_callback: 	$('#input_extension_callback').attr('value'),
+        pass_callback: 	$('#input_password_callback').attr('value'),
+        callback:	$('#input_callback').attr('checked')
 	},
 	function(respuesta) {
         if (respuesta['status']) {

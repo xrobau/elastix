@@ -330,7 +330,9 @@ class Predictivo
                      case 'members':
                         $sLinea = trim($sLinea);
                         $regs = NULL;
-                        if (preg_match('|^Agent/(\d+)@?\s*(.*)$|', $sLinea, $regs)) {
+                        if (preg_match('|^Agent/(\d+)@?\s*(.*)$|', $sLinea, $regs) ||
+                            preg_match('|^SIP/(\d+)@?\s*(.*)$|', $sLinea, $regs) ||
+                            preg_match('|^IAX2/(\d+)@?\s*(.*)$|', $sLinea, $regs)) {
 
                             // Saltar fuera del switch y al final del foreach
                             if (!is_null($sNumAgenteFiltro) && $regs[1] != $sNumAgenteFiltro) continue 2; 

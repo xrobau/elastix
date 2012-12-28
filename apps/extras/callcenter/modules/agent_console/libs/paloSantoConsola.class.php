@@ -74,8 +74,8 @@ class PaloSantoConsola
                 $this->_errMsg = '(internal) Unable to create asterisk DB conn - '.$oDB->errMsg;
                 die($this->_errMsg);
             }
-            $this->_oDB_asterisk = $oDB;
-            return $this->_oDB_asterisk;
+            $this->_oDB_call_center = $oDB;
+            return $this->_oDB_call_center;
             break;
         case 'ECCP':
             if (!is_null($this->_eccp)) return $this->_eccp;
@@ -103,16 +103,11 @@ class PaloSantoConsola
             if (!is_null($this->_agent)) {
             	$oECCP->setAgentNumber($this->_agent);
                 
-                // El siguiente código asume agente Agent/9000
-                if (preg_match('|^Agent/(\d+)$|', $this->_agent, $regs))
-                    $sAgentNumber = $regs[1];
-                else $sAgentNumber = $this->_agent;
-                
                 /* Privilegio de localhost - se puede recuperar la clave del
                  * agente sin tener que pedirla explícitamente */                
                 $tupla = $dbConnCC->getFirstRowQuery(
-                    'SELECT eccp_password FROM agent WHERE number = ? AND estatus="A"', 
-                    FALSE, array($sAgentNumber));
+                        "SELECT eccp_password FROM agent WHERE CONCAT(type,'/',number) = ? AND estatus='A'", 
+                    FALSE, array($this->_agent));
                 if (!is_array($tupla))
                     throw new ECCPConnFailedException(_tr('Failed to retrieve agent password'));
                 if (count($tupla) <= 0)
@@ -251,14 +246,24 @@ LISTA_EXTENSIONES;
     
     /**
      * Método que lista todos los agentes registrados en la base de datos. La
-     * lista se devuelve de la forma (9000 => 'Over 9000!!!'), ...
+     * lista se devuelve de la forma ('Agent/9000' => 'Over 9000!!!'), ...
+     * 
+     * @param   string  $agenttype  Tipo de agente a listar
+     *      NULL    todos los agentes
+     *      'static'    Sólo los agentes Agent/XXXX (estáticos)
+     *      'dynamic'   Sólo los agentes SIP/xxxx o IAX2/xxxx (dinámicos)
      *
      * @return  mixed   La lista de agentes activos
      */
-    function listarAgentes()
+    function listarAgentes($agenttype = NULL)
     {
         $oDB = $this->_obtenerConexion('call_center');
-        $sPeticion = "SELECT number, name FROM agent WHERE estatus = 'A' ORDER BY number";
+        $listaWhere = array("estatus = 'A'");
+        if ($agenttype == 'static') $listaWhere[] = "type = 'Agent'";
+        if ($agenttype == 'dynamic') $listaWhere[] = "type <> 'Agent'";
+        $sPeticion =
+            "SELECT CONCAT(type,'/',number) AS number, name FROM agent ".
+            "WHERE ".implode(' AND ', $listaWhere)." ORDER BY number";
         $recordset = $oDB->fetchTable($sPeticion, TRUE);
         if (!is_array($recordset)) die('(internal) Cannot list agents - '.$oDB->errMsg);
         
@@ -268,6 +273,34 @@ LISTA_EXTENSIONES;
         }        
         return $listaAgentes;
     }
+
+    /** Método para autenticar la extensión callback con su respectiva contraseña en la tabla agent.
+      *      
+      * @param string  $sExtensionCallback: Extensión que está usando el agente, como "SIP/250"
+      * @param string  $sPassword: Contraseña de la extensión para hacer login al Callcenter en el modo Callback.
+      *
+      * @return VERDADERO en éxito, FALSE en error
+      */
+    function autenticar($sExtensionCallback, $sPassword)
+    {   
+        $oDB = $this->_obtenerConexion('call_center');      
+    
+        $sPeticion = "SELECT count(*) as cont
+                  FROM agent 
+                  WHERE CONCAT(type,'/',number) = ? 
+                  AND password = ?
+                  AND estatus = 'A' 
+                  ORDER BY number";
+            $recordset = $oDB->fetchTable($sPeticion, TRUE, array($sExtensionCallback, $sPassword));
+            if (!is_array($recordset)) die('(internal) Cannot execute query - '.$oDB->errMsg);
+          
+        if($recordset[0]['cont']==1){
+            return true;
+        }else{
+            $this->errMsg = "Wrong password.";
+            return false;    
+        }
+    } 
 
     /**
      * Método para iniciar el login del agente con la extensión y el número de
@@ -406,7 +439,7 @@ LISTA_EXTENSIONES;
             
             if ($estado['status'] == 'offline') {
             	$estado['estadofinal'] = is_null($estado['channel']) ? 'logged-out' : 'logging';
-            } elseif ($estado['extension'] != $sExtension) {
+            } elseif ($estado['extension'] != $sExtension && preg_match('|^Agent/(\d+)$|', $this->_agent, $regs)) {
                 $estado['estadofinal'] = 'mismatch';
                 $this->errMsg = _tr('Specified agent already connected to extension').
                     ': '.(string)$connStatus->extension;
@@ -896,6 +929,71 @@ LISTA_EXTENSIONES;
             return $chanvars;
     	} catch (Exception $e) {
     		$this->errMsg = '(internal) leerVariablesCanalLlamadaActiva'.$e->getMessage();
+            return NULL;
+    	}
+    }
+    
+    function leerListaCampanias()
+    {
+    	try {
+    		$oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->getcampaignlist();
+            $listaCampania = array();
+            foreach ($respuesta->campaigns->campaign as $xml_campaign) {
+            	$listaCampania[(int)$xml_campaign->id] = array(
+                    'id'        =>  (int)$xml_campaign->id,
+                    'type'      =>  (string)$xml_campaign->type,
+                    'name'      =>  (string)$xml_campaign->name,
+                    'status'    =>  (string)$xml_campaign->status,
+                );
+            }
+            return $listaCampania;
+    	} catch (Exception $e) {
+            $this->errMsg = '(internal) leerListaCampanias'.$e->getMessage();
+            return NULL;
+    	}
+    }
+    
+    function leerEstadoCampania($sCallType, $iCampaignId)
+    {
+    	try {
+    		$oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->getcampaignstatus($sCallType, $iCampaignId);
+            if (isset($respuesta->failure)) {
+                $this->errMsg = _tr('Unable to read campaign information').' - '.$this->_formatoErrorECCP($respuesta);
+                return NULL;
+            }
+            
+            $reporte = array(
+                'statuscount'   =>  array(),
+                'activecalls'   =>  array(),
+            );
+            foreach ($respuesta->children() as $xml_node) {
+                switch ($xml_node->getName()) {
+                case 'statuscount':
+                    foreach ($xml_node->children() as $xml_field) {
+                    	$reporte['statuscount'][$xml_field->getName()] = (int)$xml_field;
+                    }
+                    ksort($reporte['statuscount']);
+                    break;
+                case 'agents':
+                    // No implementado
+                    break;
+                case 'activecalls':
+                    foreach ($xml_node->activecall as $xml_activecall) {
+                    	$idCall = (int)$xml_activecall->callid;
+                        $reporte['activecalls'][$idCall] = array(
+                            'callid'        =>  $idCall,
+                            'callnumber'    =>  (string)$xml_activecall->callnumber,
+                            'callstatus'    =>  (string)$xml_activecall->callstatus,
+                        );
+                    }
+                    break;
+                }
+            }
+            return $reporte;
+        } catch (Exception $e) {
+            $this->errMsg = '(internal) leerEstadoCampania'.$e->getMessage();
             return NULL;
     	}
     }

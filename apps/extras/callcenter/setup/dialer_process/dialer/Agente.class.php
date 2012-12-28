@@ -42,6 +42,7 @@ class Agente
     private $_name = NULL;
     private $_number = NULL;
     private $_estatus = NULL;
+    private $_type = NULL;
 
     /*  Estado de la consola. Los valores posibles son 
         logged-out  No hay agente logoneado
@@ -93,12 +94,14 @@ class Agente
 
     var $llamada_agendada = NULL;
 
-    function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre, $bEstatus)
+    function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
+        $bEstatus, $sType = 'Agent')
     {
         $this->_listaAgentes = $lista;
-    	$this->_id_agent = (int)$idAgente;
+        $this->_id_agent = (int)$idAgente;
         $this->_name = (string)$sNombre;
         $this->_estatus = (bool)$bEstatus;
+        $this->_type = (string)$sType;
 
         // Se setea vía interfaz pública para invocar __set()
         $this->number = $iNumero;
@@ -109,7 +112,7 @@ class Agente
         switch ($s) {
         case 'id_agent':        return $this->_id_agent;
         case 'number':          return $this->_number;
-        case 'channel':         return is_null($this->_number) ? NULL : 'Agent/'.$this->_number;
+        case 'channel':         return is_null($this->_number) ? NULL : $this->_type.'/'.$this->_number;
         case 'name':            return $this->_name;
         case 'estatus':         return $this->_estatus;
         case 'estado_consola':  return $this->_estado_consola;

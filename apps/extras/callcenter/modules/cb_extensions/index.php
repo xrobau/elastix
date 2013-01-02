@@ -127,7 +127,6 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
         "All"       =>  _tr("All"),
         "Online"    =>  _tr("Online"),
         "Offline"   =>  _tr("Offline"),
-        "Repair"    =>  _tr("Repair"),
     );
     if (isset($_GET['cbo_estado'])) $sEstadoAgente = $_GET['cbo_estado'];
     if (isset($_POST['cbo_estado'])) $sEstadoAgente = $_POST['cbo_estado'];
@@ -135,10 +134,22 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
 
     $listaAgentes = $oAgentes->getAgents();
     
+    // Listar todos los agentes que están conectados
+    $listaOnline = $oAgentes->getOnlineAgents();
+    if (is_array($listaOnline)) {
+        foreach (array_keys($listaAgentes) as $k) {
+            $listaAgentes[$k]['online'] = in_array($listaAgentes[$k]['type'].'/'.$listaAgentes[$k]['number'], $listaOnline);
+        }
+    } else {
+        $smarty->assign("mb_title", 'Unable to read agent');
+        $smarty->assign("mb_message", 'Cannot read agent - '.$oAgentes->errMsg);
+        foreach (array_keys($listaAgentes) as $k) 
+            $listaAgentes[$k]['online'] = NULL;
+    }
+    
     // Filtrar los agentes conocidos según el estado que se requiera
-    function estado_Online($t)  { return ($t['sync'] == 'OK' && $t['online']); }
-    function estado_Offline($t) { return ($t['sync'] == 'OK' && !$t['online']); }
-    function estado_Repair($t)  { return ($t['sync'] != 'OK'); }
+    function estado_Online($t)  { return ($t['online']); }
+    function estado_Offline($t) { return (!$t['online']); }
     if ($sEstadoAgente != 'All') $listaAgentes = array_filter($listaAgentes, "estado_$sEstadoAgente");
     
     $arrData = array();

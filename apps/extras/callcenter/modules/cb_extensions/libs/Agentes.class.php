@@ -265,38 +265,26 @@ class Agentes
         if (is_null($astman)) {
             return NULL;
         } else {
-            $strAgentsOnline = $astman->Command("agent show online");
+            $strAgentsOnline = $astman->Command('queue show');
             $astman->disconnect();
             $data = $strAgentsOnline['data'];
             $lineas = explode("\n", $data);
             $listaAgentes = array();
 
+            $bMembers = FALSE;
             foreach ($lineas as $sLinea) {
-                // El primer número de la línea es el ID del agente a recuperar
-                $regs = NULL;
-                if (strpos($sLinea, 'agents online') === FALSE &&
-                    ereg('^([[:digit:]]+)[[:space:]]*', $sLinea, $regs)) {
-                    $listaAgentes[] = $regs[1];
+                if (strpos($sLinea, 'No Members') !== FALSE || strpos($sLinea, 'Members:') !== FALSE)
+                    $bMembers = TRUE;
+                elseif (strpos($sLinea, 'No Callers') !== FALSE || strpos($sLinea, 'Callers:') !== FALSE)
+                    $bMembers = FALSE;
+                elseif ($bMembers) {
+                	$regs = NULL;
+                    if (preg_match('/^\s*(\S+)/', $sLinea, $regs)) {
+                    	if (!in_array($regs[1], $listaAgentes)) $listaAgentes[] = $regs[1];
+                    }
                 }
             }
             return $listaAgentes;
-        }
-    }
-
-    function isAgentOnline($agentNum)
-    {
-        $astman = $this->_get_AGI_AsteriskManager();
-        if (is_null($astman)) {
-            return FALSE;
-        } else {
-            $strAgentsOnline = $astman->Command("agent show online");
-            $astman->disconnect();
-            $data = $strAgentsOnline['data'];
-            $res = explode($agentNum,$data);
-            if(is_array($res) && count($res)==2) {
-                return true;
-            }
-            return false;
         }
     }
 

@@ -336,7 +336,7 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
     }
 
     require_once("libs/paloSantoForm.class.php");
-    $arrFormElements = getFormAgent($smarty, $oAgentes);
+    $arrFormElements = getFormAgent($smarty, $oAgentes, $arrAgente);
     
     // Valores por omisión para primera carga
     if (is_null($id_agent)) {
@@ -349,7 +349,7 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
         if (!isset($_POST['eccpwd2']))      $_POST['eccpwd2'] = '';
     } else {
         // Modificación de agente existente
-        if (!isset($_POST['extension']))    $_POST['extension'] = $arrAgente['number'];
+        if (!isset($_POST['extension']))    $_POST['extension'] = $arrAgente['type'].'/'.$arrAgente['number'];
         if (!isset($_POST['description']))  $_POST['description'] = $arrAgente['name'];
         if (!isset($_POST['password1']))    $_POST['password1'] = $arrAgente['password'];
         if (!isset($_POST['password2']))    $_POST['password2'] = $arrAgente['password'];
@@ -434,7 +434,7 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
     return $contenidoModulo;
 }
 
-function getFormAgent(&$smarty, $oAgentes)
+function getFormAgent(&$smarty, $oAgentes, $arrAgente)
 {
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("CANCEL", _tr("Cancel"));
@@ -445,6 +445,11 @@ function getFormAgent(&$smarty, $oAgentes)
     $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
 
     $arrExtensions = $oAgentes->getUnusedExtensions();
+    if (!is_null($arrAgente)) {
+    	$sChannel = $arrAgente['type'].'/'.$arrAgente['number'];
+        $arrExtensions[$sChannel] = $sChannel;
+        asort($arrExtensions);
+    }
     
     $arrFormElements = array(
         "description" => array(

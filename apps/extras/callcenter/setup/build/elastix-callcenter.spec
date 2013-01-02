@@ -100,6 +100,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Jan 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agents, Callback Extensions: do not modify the audit or call tables 
+  from the module. Now that the dialer has exclusive responsibility over 
+  auditing on logoff, modification of audit tables on forced disconnection, as 
+  allowed by these modules, is actually harmful.
+
 * Fri Dec 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Dialer (ECCP): merge in-progress support for CallbackLogin-style agents.
   Currently the supported agents are SIP and IAX2 extensions. The agents must be

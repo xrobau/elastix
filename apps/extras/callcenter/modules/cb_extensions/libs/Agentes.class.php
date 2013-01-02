@@ -82,19 +82,17 @@ class Agentes
     function getAgents($id=null)
     {
         // CONSULTA DE LA BASE DE DATOS LA INFORMACIÓN DE LOS AGENTES
-        $paramQuery = array(); $where = array("estatus = 'A'"); $sWhere = '';
+        $paramQuery = array();
+        $where = array("estatus = 'A'", 'type <> "Agent"');
         if (!is_null($id)) {
         	$paramQuery[] = $id;
             $where[] = 'number = ?';
         }
-        if (count($where) > 0) $sWhere = 'WHERE type<>"Agent" AND '.join(' AND ', $where);
-	else $sWhere = 'WHERE type<>"Agent"';
-        $sQuery = 
-            "SELECT id, number, name, password, estatus, eccp_password ".
-            "FROM agent $sWhere ORDER BY number";
+        $sQuery =
+            'SELECT id, type, number, name, password, estatus, eccp_password '.
+            'FROM agent WHERE '.implode(' AND ', $where).' ORDER BY number';
 
         $arr_result =& $this->_DB->fetchTable($sQuery, true, $paramQuery);
-
 
         if (is_array($arr_result)) {
             if (is_null($id) || count($arr_result) <= 0) {
@@ -198,15 +196,17 @@ class Agentes
         // Asumir ninguna contraseña de ECCP (agente no será usable por ECCP)
         if (!isset($agent[3]) || $agent[3] == '') $agent[3] = NULL;
 
+        $typeExtension = explode("/",$agent[0]);
+
         // EDITAR EN BASE DE DATOS
-        $sPeticionSQL = 'UPDATE agent SET password = ?, name = ?';
-        $paramSQL = array($agent[1], $agent[2]);
+        $sPeticionSQL = 'UPDATE agent SET password = ?, name = ?, type = ?';
+        $paramSQL = array($agent[1], $agent[2], $typeExtension[0]);
         if (!is_null($agent[3])) {
         	$sPeticionSQL .= ', eccp_password = ?';
             $paramSQL[] = $agent[3];
         }
         $sPeticionSQL .= ' WHERE number = ?';
-        $paramSQL[] = $agent[0];
+        $paramSQL[] = $typeExtension[1];
 
         $this->_DB->genQuery("SET AUTOCOMMIT = 0");
         $result = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
@@ -222,7 +222,7 @@ class Agentes
         if (is_null($agent[3])) {
             $agent[3] = sha1(time().rand());
             $sPeticionSQL = 'UPDATE agent SET eccp_password = ? WHERE number = ? AND eccp_password IS NULL';
-            $paramSQL = array($agent[3], $agent[0]);
+            $paramSQL = array($agent[3], $typeExtension[1]);
             $result = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
             if (!$result) {
                 $this->errMsg = $this->_DB->errMsg;
@@ -234,34 +234,6 @@ class Agentes
 
         // Leer el archivo y buscar la línea del agente a modificar
         $bExito = TRUE;
-        $contenido = file($this->AGENT_FILE);
-        if (!is_array($contenido)) {
-            $bExito = FALSE;
-            $this->errMsg = '(internal) Unable to read agent file';
-        } else {
-            $sLineaAgente = "agent => {$agent[0]},{$agent[1]},{$agent[2]}\n";
-            $bModificado = FALSE;
-            for ($i = 0; $i < count($contenido); $i++) {
-                $regs = NULL;
-                if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),', $contenido[$i], $regs) &&
-                    $regs[1] == $agent[0]) {
-                    // Se ha encontrado la línea del agente modificado
-                    $contenido[$i] = $sLineaAgente;
-                    $bModificado = TRUE;
-                }
-            }
-            if (!$bModificado) $contenido[] = $sLineaAgente;
-
-            $hArchivo = fopen($this->AGENT_FILE, 'w');
-            if (!$hArchivo) {
-                $bExito = FALSE;
-                $this->errMsg = '(internal) Unable to write agent file';
-            } else {
-                foreach ($contenido as $sLinea) fwrite($hArchivo, $sLinea);
-                fclose($hArchivo);
-            }
-        }
-        
         if ($bExito) {
             $this->_DB->genQuery("COMMIT");
             $this->_DB->genQuery("SET AUTOCOMMIT = 1");

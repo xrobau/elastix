@@ -290,7 +290,6 @@ class Agentes
 
     function desconectarAgentes($arrAgentes)
     {
-        $datetime_end = date("Y-m-d H:i:s");
         $this->errMsg = NULL;
 
         if (!(is_array($arrAgentes) && count($arrAgentes) > 0)) {
@@ -303,165 +302,46 @@ class Agentes
             return FALSE;
         }
 
-        for ($i =0 ; $i < count($arrAgentes) ; $i++) {
-            $res = $this->Agentlogoff($astman, $arrAgentes[$i]);
-            $this->_private_registrarLogout($arrAgentes[$i], $datetime_end,$this->errMsg);
-            if ($res['Response']=='Error') {
-                $this->errMsg = "Error logoff ".$res['Message'];
-                $astman->disconnect();
-                return false;
-            } else {
-                sleep(1);
-                $tipoLlamada = $this->_private_getTipoLlamada($arrAgentes[$i]);
-                if(!is_null($tipoLlamada) && !empty($tipoLlamada)) { 
-                    $this->_private_actualizarTablas($tipoLlamada);
+        // Construir lista de colas a las que pertenece cada agente
+        $queuesByAgent = array();
+        $strAgentsOnline = $astman->Command('queue show');
+        $data = $strAgentsOnline['data'];
+        $lineas = explode("\n", $data);
+        $sCurQueue = NULL;
+        $bMembers = FALSE;
+        foreach ($lineas as $sLinea) {
+            $regs = NULL;
+            if (preg_match('/^(\w+) has \d+ calls/', $sLinea, $regs)) {
+            	$sCurQueue = $regs[1];
+            } elseif (strpos($sLinea, 'No Members') !== FALSE || strpos($sLinea, 'Members:') !== FALSE)
+                $bMembers = TRUE;
+            elseif (strpos($sLinea, 'No Callers') !== FALSE || strpos($sLinea, 'Callers:') !== FALSE)
+                $bMembers = FALSE;
+            elseif ($bMembers) {
+                if (preg_match('/^\s*(\S+)/', $sLinea, $regs)) {
+                    if (!isset($queuesByAgent[$regs[1]]))
+                        $queuesByAgent[$regs[1]] = array();
+                    $queuesByAgent[$regs[1]][] = $sCurQueue;
                 }
             }
         }
+
+        // Desconectar cada agente de todas sus colas
+        foreach ($arrAgentes as $sAgente) {
+            if (isset($queuesByAgent[$sAgente])) {
+            	foreach ($queuesByAgent[$sAgente] as $sQueue) {
+            		$res = $astman->QueueRemove($sQueue, $sAgente);
+                    if ($res['Response']=='Error') {
+                        $this->errMsg = "Error logoff ".$res['Message'];
+                        $astman->disconnect();
+                        return false;
+                    }
+            	}
+            }
+        }
+        
         $astman->disconnect();
         return true;
-    }
-
-    private function _private_actualizarTablas($tipoLlamada)
-    {
-        if( is_array($tipoLlamada) && count($tipoLlamada)>0 ) {
-            $tipo       = $tipoLlamada['tipo'];
-            $id_call    = $tipoLlamada['id'];
-            if($tipo == "ENTRANTE") {
-                $SQLUpdateEntrante = 
-                "
-                    update call_entry 
-                    set 
-                        datetime_end=datetime_init ,
-                        duration = 0
-                    where id={$id_call}
-                ";
-                $result = $this->_DB->genQuery($SQLUpdateEntrante);
-                if (!$result) {
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                } 
-                $SQLDeleteEntrante = "delete from current_call_entry where id_call_entry={$id_call} ";
-                $resDeleteEntrante = $this->_DB->genQuery($SQLDeleteEntrante);
-                if(!$resDeleteEntrante) {
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                } else {
-                    return true;
-                }
-
-            } else if($tipo == "SALIENTE") {
-
-                $SQLUpdateSaliente =
-                 "
-                    update calls 
-                    set 
-                        end_time=start_time ,
-                        duration = 0
-                    where id={$id_call}
-                ";
-                $result = $this->_DB->genQuery($SQLUpdateSaliente);
-                if (!$result) {
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                }
-                $SQLDeleteSaliente = "delete from current_calls where id_call={$id_call} ";
-                $resDeleteSaliente = $this->_DB->genQuery($SQLDeleteSaliente);
-                if(!$resDeleteSaliente) {
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        } else {
-            $this->errMsg = "No hay llamada";
-            return false;
-        }
-    }
-
-    /*
-        Esta funcion devuelve una tupla que contiene el tipo de llamada y el id respectivo del
-        tipo de llamada
-    */
-    private function _private_getTipoLlamada($agentNum)
-    {
-        // se hace consulta para saber si hay llamadas entrantes para el agente que esta en $agentNum
-        $SQLConsultaEntrante = "select cce.id_call_entry as id from agent as a,current_call_entry as cce where cce.id_agent=a.id and a.estatus='A' and a.number='$agentNum'";
-        $resConsultaEntrante = $this->_DB->getFirstRowQuery($SQLConsultaEntrante,true);
-        // si hay llamadas entrantes ingresa al if
-        if(is_array($resConsultaEntrante) && count($resConsultaEntrante)>0) {
-
-            $tipo = "ENTRANTE";
-            $id = $resConsultaEntrante['id'];
-            $arrValor = array( "tipo"=>$tipo ,"id"=>$id );
-            return $arrValor;
-        }
-        // se hace consulta para saber si hay llamadas salientes para el agente que esta en $agentNum
-        $SQLConsultaSaliente = "select id_call as id from current_calls  where agentnum='$agentNum'";
-        $resConsultaSaliente = $this->_DB->getFirstRowQuery($SQLConsultaSaliente,true);
-        // si hay llamadas salientes ingresa al if
-        if(is_array($resConsultaSaliente) && count($resConsultaSaliente)>0)  {
-
-            $tipo = "SALIENTE";
-            $id = $resConsultaSaliente['id'];
-            $arrValor = array( "tipo"=>$tipo ,"id"=>$id );
-            return $arrValor;
-        }
-        $this->errMsg = "No call";
-        return false;
-    }
-
-    private function _private_registrarLogout($agentNum, $datetime_end)
-    {
-        $id_audit = $this->_private_getLastIdLoginAgent($agentNum);
-        if(!$id_audit) {
-            return false;
-        } else {
-            $SQLUpdateAudit = 
-            "
-                update audit
-                set
-                    datetime_end='{$datetime_end}' ,
-                    duration=timediff('{$datetime_end}',datetime_init) 
-                where id ={$id_audit} 
-            ";
-            $resQLUpdateAudit = $this->_DB->genQuery($SQLUpdateAudit);
-            if(!$resQLUpdateAudit) {
-                $this->errMsg .= $this->_DB->errMsg;
-                return false;
-            }else {
-                return true;
-            }
-        }
-    }
-
-    function _private_getLastIdLoginAgent($agentNum)
-    {
-        $SQLConsultaIdAudit = 
-        "
-            select au.id as id
-            from audit au , agent ag  
-            where 
-                    ag.id=au.id_agent 
-                        and 
-                    id_break is null 
-                        and 
-                    datetime_end is null 
-                        and 
-                    ag.number='{$agentNum}'
-        ";
-
-        $resConsultaIdAudit = $this->_DB->getFirstRowQuery($SQLConsultaIdAudit,true);
-        if(is_array($resConsultaIdAudit) && count($resConsultaIdAudit)>0)  {
-            $id = $resConsultaIdAudit['id'];
-            return $id;
-        } elseif(is_array($resConsultaIdAudit)) {
-            $this->errMsg .= "Agente no ha iniciado sesion";
-        }else{
-            $this->errMsg .= $this->_DB->errMsg; 
-        }
-        return false;
     }
 
     /**

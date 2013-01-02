@@ -81,27 +81,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     $oAgentes = new Agentes($pDB);
 
     // Operaciones de manipulación de agentes
-    if (isset($_POST['reparar_db']) && ereg('^[[:digit:]]+$', $_POST['reparar_db'])) {
-        // Hay que agregar el agente al archivo de configuración de Asterisk
-        $infoAgente = $oAgentes->getAgents($_POST['reparar_db']);
-        if (!is_array($infoAgente)) {
-            $smarty->assign(array(
-                'mb_title'      =>  'DB Error',
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        } elseif (count($infoAgente) == 0) {
-            // Agente no existe en DB, no se hace nada
-        } elseif (!$oAgentes->addAgentFile(array(
-            $infoAgente['number'],
-            $infoAgente['password'],
-            $infoAgente['name'],
-            ))) {
-            $smarty->assign(array(
-                'mb_title'      =>  _tr("Error saving agent in file"),
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        }
-    } elseif (isset($_POST['delete']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
+    if (isset($_POST['delete']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
         // Borrar el agente indicado de la base de datos, y del archivo
         if (!$oAgentes->deleteAgent($_POST['agent_number'])) {
             $smarty->assign(array(
@@ -112,7 +92,8 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     } elseif (isset($_POST['disconnect']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
         // Desconectar agentes. El código en Agentes.class.php puede desconectar
         // varios agentes a la vez, pero aquí sólo se desconecta uno.
-        $arrAgentes = array($_POST['agent_number']);
+        $infoAgent = $oAgentes->getAgents($_POST['agent_number']);
+        $arrAgentes = array($infoAgent['type'].'/'.$infoAgent['number']);
         if (!$oAgentes->desconectarAgentes($arrAgentes)) {
             $smarty->assign(array(
                 'mb_title'      =>  'Unable to disconnect agent',

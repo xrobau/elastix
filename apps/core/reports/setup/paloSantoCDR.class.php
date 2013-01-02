@@ -63,6 +63,15 @@ class paloSantoCDR
         }
         $param = array_filter($param, '_construirWhereCDR_notempty');
 
+        if(isset($param['organization'])){
+            if(preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/",$param['organization'])){
+                $condSQL[] = 'cdr.organization_domain = ?';
+                $paramSQL[] = $param['organization'];
+            }else{
+                $this->errMsg = _tr('Invalid organization');
+                return NULL; 
+            }
+        }
         // Fecha y hora de inicio y final del rango
         $sRegFecha = '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/';
         if (isset($param['date_start'])) {
@@ -95,18 +104,27 @@ class paloSantoCDR
             $condSQL[] = '(src = ? OR dst = ?)';
             array_push($paramSQL, $param['extension'], $param['extension']);
         }
+        
+        if (isset($param['device_dial'])) {
+            $condSQL[] = '(src like ? OR dst like ?)';
+            array_push($paramSQL, $param['device_dial']."-%", $param['device_dial']."-%");
+        }
 
         // Grupo de timbrado
         if (isset($param['ringgroup'])) {
-        	$condSQL[] = 'grpnum = ?';
+        	$condSQL[] = 'elxpbx.rg.rg_number = ?';
+            $condSQL[] = 'elxpbx.rg.organization_domain = cdr.organization_domain';
             $paramSQL[] = $param['ringgroup'];
         }
         
         // Dirección de la llamada
         if (isset($param['calltype']) && 
             in_array($param['calltype'], array('incoming', 'outgoing'))) {
-            $sCampo = ($param['calltype'] == 'incoming') ? 'channel' : 'dstchannel';
-            $listaTroncales = array();
+            $sCampo = ($param['calltype'] == 'incoming') ? 'fromout' : 'toout';
+            $condSQL[] = "$sCampo = 1";
+            
+            /*$sCampo = ($param['calltype'] == 'incoming') ? 'channel' : 'dstchannel';
+                $listaTroncales = array();
             if (isset($param['troncales']) && is_array($param['troncales'])) {
                 $listaTroncales = $param['troncales'];
             }
@@ -116,7 +134,7 @@ class paloSantoCDR
             if (count($listaTroncales) > 0) {
                 /* Se asume que la lista de troncales es válida, y que todo canal
                    empieza con la troncal correspondiente */
-                if (!function_exists('_construirWhereCDR_troncal2like')) {
+          /*      if (!function_exists('_construirWhereCDR_troncal2like')) {
                     // Búsqueda por DAHDI/1 debe ser 'DAHDI/1-%'
                     function _construirWhereCDR_troncal2like($s) { return $s.'-%'; }
                 }
@@ -130,9 +148,9 @@ class paloSantoCDR
                    FIXME: no reconoce troncales si tienen caracteres no alfanuméricos
                    FIXME: no reconoce troncales custom (¿cómo se las busca?)
                  */
-                $sRegExpTroncal = '^(ZAP/.+|DAHDI/.+|(SIP|IAX|IAX2|H323)/([[:alnum:]]*[[:alpha:]][[:alnum:]]*))-';
+            /*    $sRegExpTroncal = '^(ZAP/.+|DAHDI/.+|(SIP|IAX|IAX2|H323)/([[:alnum:]]*[[:alpha:]][[:alnum:]]*))-';
                 $condSQL[] = "$sCampo REGEXP '$sRegExpTroncal'";
-            }
+            }*/
         }
 
         // field_name, field_pattern
@@ -169,6 +187,9 @@ class paloSantoCDR
      * filtrados aplicados.
      *
      * @param   mixed   $param  Lista de parámetros de filtrado:
+     *  organization    Dominio de la  organizacion de la que se quieren 
+     *                  obtener el registro de llamadas. Es NULL en caso
+     *                  de que el superadmin es el que esta revisando los registro
      *  date_start      Fecha y hora minima de la llamada, en formato 
      *                  yyyy-mm-dd hh:mm:ss. Si se omite, se lista desde la 
      *                  primera llamada.
@@ -179,13 +200,12 @@ class paloSantoCDR
      *                  Si se especifica, puede ser uno de los valores siguientes:
      *                  ANSWERED, NO ANSWER, BUSY, FAILED
      *  calltype        Tipo de llamada. Se puede indicar "incoming" o "outgoing".
-     *  troncales       Arreglo de troncales por el cual se debe filtrar las
-     *                  llamadas según el valor almacenado en la columna 'channel'
-     *                  o 'dstchannel', para calltype de tipo "incoming" o 
-     *                  "outgoing", respectivamente. Se ignora si se omite un
-     *                  valor para calltype.
+     *                  toout = 1 => "outgoing"
+     *                  fromout = 1 => "incoming"
      *  extension       Número de extensión para el cual filtrar los números. 
      *                  Este valor filtra por los campos 'src' y 'dst'.
+     *  device_dial     Dial de extensión del usuario para el cual filtrar 
+     *                  basado en srcchannel y dstchannel
      *  field_name
      *  field_pattern   Campo y subcadena para buscar dentro de los registros.
      *                  El valor de field_pattern puede ser un arreglo, o un
@@ -207,7 +227,8 @@ class paloSantoCDR
         if (is_null($sWhere)) return NULL;
         // Cuenta del total de registros recuperados
         $sPeticionSQL = 
-            'SELECT COUNT(*) FROM cdr '.
+            'SELECT COUNT(*) FROM cdr LEFT JOIN elxpbx.ring_group rg '.
+                'ON asteriskcdrdb.cdr.dst = elxpbx.rg.rg_number '.
             $sWhere;
         $r = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramSQL);
         if (!is_array($r)) {
@@ -223,8 +244,9 @@ class paloSantoCDR
         // Los datos de los registros, respetando limit y offset
         $sPeticionSQL = 
             'SELECT calldate, src, dst, channel, dstchannel, disposition, '.
-                "uniqueid, duration, billsec, accountcode, '', description ".
-            'FROM cdr '.
+               "uniqueid, duration, billsec, accountcode, rg.rg_name, cdr.organization_domain, toout, fromout FROM cdr ".
+            'LEFT JOIN elxpbx.ring_group rg '.
+               'ON asteriskcdrdb.cdr.dst =  elxpbx.rg.rg_number '.
             $sWhere.
             ' ORDER BY calldate DESC';
         if (!empty($limit)) {
@@ -240,7 +262,7 @@ class paloSantoCDR
     }
 
     /**
-     * Procedimiento para contar los CDRs desde la tabla asterisk.cdr con varios
+     * Procedimiento para contar los CDRs desde la tabla asteriskcdrdb.cdr con varios
      * filtrados aplicados. Véase listarCDRs para los parámetros conocidos.
      *
      * @param   mixed   $param  Lista de parámetros de filtrado.
@@ -254,7 +276,8 @@ class paloSantoCDR
 
         // Cuenta del total de registros recuperados
         $sPeticionSQL = 
-            'SELECT COUNT(*) FROM cdr '.
+            'SELECT COUNT(*) FROM cdr LEFT JOIN elxpbx.ring_group rg '.
+                'ON asteriskcdrdb.cdr.dst = elxpbx.rg.rg_number '.
             $sWhere;
         $r = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramSQL);
         if (!is_array($r)) {
@@ -269,30 +292,6 @@ class paloSantoCDR
     {
         $param = $this->getParam($date_start,$date_end,$field_name,$field_pattern,$status,$calltype,$troncales,$extension);
         return $this->contarCDRs($param);
-    }
-    
-    /**
-     * Procedimiento para borrar los CDRs en la tabla asterisk.cdr que coincidan
-     * con los filtros indicados.
-     * @param   mixed   $param  Lista de parámetros de filtrado. Véase listarCDRs
-     *                          para los parámetros permitidos.
-     *
-     * @return  bool    VERDADERO en caso de éxito, FALSO en caso de error.
-     */
-    function borrarCDRs($param)
-    {
-        list($sWhere, $paramSQL) = $this->_construirWhereCDR($param);
-        if (is_null($sWhere)) return NULL;
-
-        // Borrado de los registros seleccionados
-        $sPeticionSQL = 
-            'DELETE cdr FROM cdr '.
-            $sWhere;
-        $r = $this->_DB->genQuery($sPeticionSQL, $paramSQL);
-        if (!$r) {
-            $this->errMsg = '(internal) Failed to delete CDRs - '.$this->_DB->errMsg;
-        }
-        return $r;
     }
     
     /* Procedimiento que ayuda a empaquetar los parámetros de las funciones 
@@ -322,13 +321,6 @@ class paloSantoCDR
                 'Data'          =>  $r['cdrs'],
                 )
             : NULL;
-    }
-
-    // Función de compatibilidad para código antiguo
-    function Delete_All_CDRs($date_start="", $date_end="", $field_name="", $field_pattern="",$status="ALL",$calltype="",$troncales=NULL, $extension="")
-    {
-        $param = $this->getParam($date_start, $date_end, $field_name, $field_pattern,$status,$calltype,$troncales, $extension);
-        return $this->borrarCDRs($param);
     }
 }
 ?>

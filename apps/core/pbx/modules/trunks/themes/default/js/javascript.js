@@ -161,6 +161,8 @@ $('.delete').live('click', this, function(event) {
 function radio(id_radio){
     var alt=$("#content_"+id_radio).children("table").height();
     var alt_tab=alt+10;
+    if(id_radio=="tab-2")
+        var alt_tab=alt+45;
     $(".tabs").css({'height':alt_tab});
     $(".content").css({"z-index":"0"});
     $("div.tab > .content > *").css({"opacity":"0", "-moz-transform": "translateX(-100%)","-webkit-transform":"translateX(-100%)","-o-transform":"translateX(-100%)","-moz-transition":"all 0.6s ease","-webkit-transition":"all 0.6s ease","-o-transition":"all 0.6s ease"});

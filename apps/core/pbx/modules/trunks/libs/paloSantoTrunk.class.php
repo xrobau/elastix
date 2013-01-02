@@ -234,7 +234,7 @@ class paloSantoTrunk extends paloAsteriskDB{
 	
 	function existTrunk($tech,$name){
         $exist=true;
-        if(!preg_match("/^(sip|iax2|dahdi)$/",$tech)){
+        if(!preg_match("/^(sip|iax2|dahdi|custom)$/",$tech)){
             $this->errMsg="Invalid technology";
             return true;
         }
@@ -242,7 +242,8 @@ class paloSantoTrunk extends paloAsteriskDB{
         if($tech=="sip" || $tech=="iax2"){
             $msg=_tr("Peer Name can't be empty");
         }else{
-            $msg=_tr("DAHDI Identifier can't be empty");
+            $ttt=($tech=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
+            $msg=_tr("$ttt can't be empty");
         }
         if(!isset($name) || $name==""){
             $this->errMsg=$msg;
@@ -261,7 +262,7 @@ class paloSantoTrunk extends paloAsteriskDB{
 	
 	function createNewTrunk($arrProp,$arrDialPattern){
         //definimos el tipo de truncal que vamos a crear
-        if(!preg_match("/^(sip|iax2|dahdi)$/",$arrProp["tech"])){
+        if(!preg_match("/^(sip|iax2|dahdi|custom)$/",$arrProp["tech"])){
                 $this->errMsg="Invalid tech trunk";
                 return false;
         }
@@ -305,10 +306,10 @@ class paloSantoTrunk extends paloAsteriskDB{
             }
         }
 
-        //oupbound dial prefix
-        if($arrProp["dialout_prefix"]!=""){
-            if(!preg_match("/^[[:digit:]]+$/",$arrProp["dialout_prefix"])){
-                $this->errMsg="Invalid value field Outbound Prefix";
+        //outbound dial prefix
+        if($arrProp["dialout_prefix"]!==""){
+            if(!preg_match("/^[0-9w\\+#]+$/",$arrProp["dialout_prefix"])){
+                $this->errMsg="Invalid value field Outbound Dial Prefix";
                 return false;
             }
         }
@@ -317,20 +318,23 @@ class paloSantoTrunk extends paloAsteriskDB{
             $arrProp["register"]="";
         }
 
-        if($arrProp["tech"]=="dahdi"){
-            //no debe haber otra truncal de la misma tecnoligia con el mismo channelid
-            if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
-                $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
-                return false;
+        if($arrProp["tech"]=="dahdi" || $arrProp["tech"]=="custom"){
+            //no debe haber otra truncal de la misma tecnologia con el mismo channelid
+            $ttt=($arrProp["tech"]=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
+            if($arrProp["tech"]=="dahdi"){
+                if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
+                    $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
+                    return false;
+                }
             }
             if($this->existTrunk($arrProp["tech"],$arrProp["channelid"])==true){
-                $this->errMsg=_tr("Already Exist another DAHDI trunk with the same DAHDI Identifier. ").$this->errMsg;
+                $this->errMsg=_tr("Already Exist another {$arrProp["tech"]} trunk with the same $ttt. ").$this->errMsg;
                 return false;
             }
         }else{
             $TYPE=strtoupper($arrProp["tech"]);
             $arrProp["channelid"]=$arrProp["name"];
-            //no debe haber otra truncal de la misma tecnoligia con el mismo channelid
+            //no debe haber otra truncal con el mismo nombre de peer
             if($this->existTrunk($arrProp["tech"],$arrProp["name"])==true){
                 $this->errMsg=_tr("Already exist another $TYPE trunk with Peer Name. ").$this->errMsg;
                 return false;
@@ -341,9 +345,8 @@ class paloSantoTrunk extends paloAsteriskDB{
             }
         }
         
-        //$arrProp["dialout_prefix"]
         $query="INSERT INTO trunk (name,tech,outcid,keepcid,maxchans,dialoutprefix,channelid,disabled,string_register) values (?,?,?,?,?,?,?,?,?)";
-        $exito=$this->executeQuery($query,array($arrProp["trunk_name"],$arrProp["tech"],$arrProp["outcid"],$arrProp["keepcid"],$arrProp["max_chans"],"",$arrProp["channelid"],$arrProp["disabled"],$arrProp["register"]));
+        $exito=$this->executeQuery($query,array($arrProp["trunk_name"],$arrProp["tech"],$arrProp["outcid"],$arrProp["keepcid"],$arrProp["max_chans"],$arrProp["dialout_prefix"],$arrProp["channelid"],$arrProp["disabled"],$arrProp["register"]));
         
         if($exito==true){
             //si ahi dialpatterns se los procesa
@@ -508,7 +511,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             $channelId=$arrProp["channelid"];
             $outcid=isset($arrProp["outcid"])?$arrProp["outcid"]:"";
             $maxchans=isset($arrProp["max_chans"])?$arrProp["max_chans"]:"";
-            $outprefix=isset($arrProp["dialoutprefix"])?$arrProp["dialoutprefix"]:"";
+            $outprefix=isset($arrProp["dialout_prefix"])?$arrProp["dialout_prefix"]:"";
             $disabled=isset($arrProp["disabled"])?$arrProp["disabled"]:"off";
             $keepCid=isset($arrProp["keepcid"])?$arrProp["keepcid"]:"off";
             $force=($keepCid=="all")?$arrProp["outcid"]:"";
@@ -614,10 +617,9 @@ class paloSantoTrunk extends paloAsteriskDB{
             }
         }
 
-        //oupbound dial prefix
-        if($arrProp["dialout_prefix"]!=""){
-            if(!preg_match("/^[[:digit:]]+$/",$arrProp["dialout_prefix"])){
-                $this->errMsg="Invalid value field Outbound Prefix";
+        if($arrProp["dialout_prefix"]!==""){
+            if(!preg_match("/^[0-9w\\+#]+$/",$arrProp["dialout_prefix"])){
+                $this->errMsg="Invalid value field Outbound Dial Prefix";
                 return false;
             }
         }
@@ -626,11 +628,17 @@ class paloSantoTrunk extends paloAsteriskDB{
             $arrProp["register"]="";
         }
 
-        if($arrProp["tech"]=="dahdi"){
-            //no debe haber otra truncal de la misma tecnoligia con el mismo channelid
-            if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
-                $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
+        if($arrProp["tech"]=="dahdi" || $arrProp["tech"]=="custom"){
+            $ttt=($arrProp["tech"]=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
+            if(empty($arrProp["channelid"])){
+                $this->errMsg=_tr("Field $ttt can't be empty");
                 return false;
+            }
+            if($arrProp["tech"]=="dahdi"){
+                if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
+                    $this->errMsg=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
+                    return false;
+                }
             }
         }else{
             $TYPE=strtoupper($arrProp["tech"]);
@@ -786,7 +794,6 @@ class paloSantoTrunk extends paloAsteriskDB{
     private function createDialPattern($arrDialPattern,$trunkid)
     {
         $result=true;
-        
         if(is_array($arrDialPattern) && count($arrDialPattern)!=0){
             $temp=$arrDialPattern;
             $seq = 0;

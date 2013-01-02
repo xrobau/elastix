@@ -204,7 +204,7 @@ function reportTrunks($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $arrData[] = $arrTmp;
     }
     
-    $arrTech = array("sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"));
+    $arrTech = array("sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"), "custom"=>_tr("CUSTOM"));
      
     if($userLevel1 == "superadmin"){
         $oGrid->addComboAction($name_select="tech_trunk",_tr("Create New Trunk"), $arrTech, $selected=null, $task="create_trunk", $onchange_select=null);
@@ -459,7 +459,7 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         }
 	}
 
-	if(!preg_match("/^(sip|iax2|dahdi){1}$/",$tech)){
+	if(!preg_match("/^(sip|iax2|dahdi|custom){1}$/",$tech)){
         $error=_tr("Invalid Technology");
     }
 	
@@ -491,7 +491,11 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         }
     }
     
-    $smarty->assign("DAHDI_CHANNEL",_tr("DHADI Channel"));
+    if($tech=="dahdi")
+        $smarty->assign("NAME_CHANNEL",_tr("DHADI Channel"));
+    else
+        $smarty->assign("NAME_CHANNEL",_tr("CUSTOM Channel"));
+        
 	$smarty->assign("TECH",strtoupper($tech));
 	$smarty->assign("PEER_Details",_tr("Peer Details"));
 	$smarty->assign("ADV_OPTIONS",_tr("Advanced Settings"));
@@ -536,7 +540,7 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     }
 
     $tech  = getParameter("tech_trunk");
-    if(!preg_match("/^(sip|iax2|dahdi){1}$/",$tech)){
+    if(!preg_match("/^(sip|iax2|dahdi|custom){1}$/",$tech)){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("Invalid Trunk Technology"));
         return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -592,11 +596,18 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
             }
         }
         
-        if($tech=="dahdi"){
+        if($tech=="dahdi" || $tech=="custom"){
             $arrProp["channelid"]=getParameter("channelid");
-            if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
-                $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
+            $ttt=($tech=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
+            if(empty($arrProp["channelid"])){
+                $error=_tr("Field $ttt can't be empty");
                 $continue=false;
+            }
+            if($tech=="dahdi"){
+                if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
+                    $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number")._tr(" Ex: g0");
+                    $continue=false;
+                }
             }
         }elseif($tech=="sip" || $tech=="iax2"){
             $arrProp["secret"]=getParameter("secret");
@@ -703,11 +714,13 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
                 }
             }
             
-            if($tech=="dahdi"){
+            if($tech=="dahdi" || $tech=="custom"){
                 $arrProp["channelid"]=getParameter("channelid");
-                if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
-                    $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
-                    $continue=false;
+                if($tech=="dahdi"){
+                    if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
+                        $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
+                        $continue=false;
+                    }
                 }
             }elseif($tech=="sip" || $tech=="iax2"){
                 $arrProp["secret"]=getParameter("secret");
@@ -946,7 +959,7 @@ function createFieldForm($tech)
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "dialoutprefix" => array("LABEL"         => _tr("Outbound Dial Prefix"),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:100px"),
                                                     "VALIDATION_TYPE"        => "text",
@@ -966,7 +979,7 @@ function createFieldForm($tech)
                             "pattern_prefix__" => array("LABEL"               => _tr("pattern prefix"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:30px;text-align:center;"),
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:40px;text-align:center;"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "pattern_pass__" => array("LABEL"               => _tr("pattern pass"),
@@ -1000,8 +1013,9 @@ function createFieldForm($tech)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             );
-    if($tech=="dahdi"){
-        $arrFormElements["channelid"] = array("LABEL"                  => _tr("DAHDI Identifier"),
+    if($tech=="dahdi" || $tech=="custom"){
+        $ttt=($tech=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
+        $arrFormElements["channelid"] = array("LABEL"                  => $ttt,
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),

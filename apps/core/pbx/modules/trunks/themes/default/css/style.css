@@ -76,6 +76,11 @@ th{
   font-weight:bold;
 }
 
+#destine th{ 
+  text-align:center;
+  padding-left:4px;
+}
+
 .num_calls {
     cursor: pointer;
     display: inline;

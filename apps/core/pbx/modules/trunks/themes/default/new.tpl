@@ -65,8 +65,8 @@
                 <td>{$period_time.INPUT}</td>
             </tr>
             {/if}
-            {if $TECH eq 'DAHDI'}
-                <tr><th>{$DAHDI_CHANNEL}</th></tr>
+            {if $TECH eq 'DAHDI' | $TECH eq 'CUSTOM'}
+                <tr><th>{$NAME_CHANNEL}</th></tr>
                 <tr class="tech">
                     <td nowrap>{$channelid.LABEL}:</td>
                     <td >{$channelid.INPUT}</td>
@@ -96,16 +96,17 @@
    </div>
    <div class="tab" >
       <div class="content" id="content_tab-2">
-        <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm" id="destine">
+        <p style="margin-top: 0px; padding-left: 12px;">{$dialoutprefix.LABEL}: {$dialoutprefix.INPUT} </p>
+        <table width="80%" border="0" cellspacing="0" cellpadding="5px" class="tabForm" id="destine">
         <thead>
             <tr>
-                <th>{$PREPEND}</th>
-                <th></th>  
-                <th>{$PREFIX}</th>
-                <th></th>
-                    <th>{$MATCH_PATTERN}</th>
-                    <th>{if $mode ne 'view'}<div class="add" style="cursor:pointer; float: left"><img src='modules/ivr/images/add1.png' title='Add'/></div>{/if}</th>
-                 </tr>
+                <th >{$PREPEND}</th>
+                <th ></th>  
+                <th >{$PREFIX}</th>
+                <th ></th>
+                <th >{$MATCH_PATTERN}</th>
+                <th >{if $mode ne 'view'}<div class="add" style="cursor:pointer; float: left"><img src='modules/ivr/images/add1.png' title='Add'/></div>{/if}</th>
+            </tr>
         </thead>
         {if $mode eq 'view'}
 		   {foreach from=$items key=myId item=i}
@@ -132,7 +133,7 @@
             <tr class="content-destine" id="{$j}">
                 <td align="center" >(<input type="text" name="prepend_digit{$j}" value="{$i.3}" style="width:60px;text-align:center;">)</td>
                 <td align="center">+</td>
-                <td align="center" ><input type="text" name="pattern_prefix{$j}" value="{$i.1}" style="width:30px;text-align:center;"></td>
+                <td align="center" ><input type="text" name="pattern_prefix{$j}" value="{$i.1}" style="width:40px;text-align:center;"></td>
                 <td align="center">|</td>
                 <td align="center" ><input type="text" name="pattern_pass{$j}" value="{$i.2}" style="width:150px;text-align:center;"></td>
                 <td width="50px"><div class='delete' style='float:left; cursor:pointer;'><img src='modules/ivr/images/remove1.png' title='Remove'/></div></td>

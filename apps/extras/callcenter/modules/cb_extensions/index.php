@@ -101,14 +101,6 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
                 'mb_message'    =>  $oAgentes->errMsg,
             ));
         }
-    } elseif (isset($_POST['reparar_file']) && ereg('^[[:digit:]]+$', $_POST['reparar_file'])) {
-        // Hay que remover el agente del archivo de configuración de Asterisk
-        if (!$oAgentes->deleteAgentFile($_POST['reparar_file'])) {
-            $smarty->assign(array(
-                'mb_title'      =>  _tr("Error when deleting agent in file"),
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        }
     } elseif (isset($_POST['delete']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
         // Borrar el agente indicado de la base de datos, y del archivo
         if (!$oAgentes->deleteAgent($_POST['agent_number'])) {
@@ -141,43 +133,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     if (isset($_POST['cbo_estado'])) $sEstadoAgente = $_POST['cbo_estado'];
     if (!in_array($sEstadoAgente, array_keys($listaEstados))) $sEstadoAgente = 'All';
 
-    // Leer los agentes activos y comparar contra la lista de Asterisk
-    $listaAgentesCallCenter = $oAgentes->getAgents();
-    function get_agente_num($t) { return $t['number']; }
-    $listaNumAgentesCallCenter = array_map('get_agente_num', $listaAgentesCallCenter);
-    $listaNumAgentesAsterisk = $oAgentes->getAgentsFile();
-    $listaNumAgentesAsterisk = array(); // Parche: Seteo un array vacío
-    $listaNumSobrantes = array_diff($listaNumAgentesAsterisk, $listaNumAgentesCallCenter);
-    $listaNumFaltantes = array_diff($listaNumAgentesCallCenter, $listaNumAgentesAsterisk);
-    
-    /* La variable $listaNumSobrantes tiene ahora todos los IDs de agente que 
-       constan en Asterisk y no en la tabla call_center.agent como activos.
-       La variable $listaNumFaltantes tiene los agentes que constan en 
-       call_center.agent y no en Asterisk. El código posterior asume que el 
-       archivo de agentes de Asterisk debería cambiarse para que refleje la
-       tabla call_center.agent .
-    */
-    // Campo sync debe ser OK, o ASTERISK si consta en Asterisk pero no en 
-    // CallCenter, o CC si consta en CallCenter pero no en Asterisk.
-    foreach (array_keys($listaAgentesCallCenter) as $k) {
-        $listaAgentesCallCenter[$k]['sync'] =
-            in_array($listaAgentesCallCenter[$k]['number'], $listaNumFaltantes) 
-                ? 'CC' : 'OK';
-    }
-    
-    // Lista de todos los agentes conocidos, incluyendo los sobrantes.
-    $listaAgentes = $listaAgentesCallCenter;
-    foreach ($listaNumSobrantes as $idSobrante) {
-        $listaAgentes[] = array(
-            'id'        =>  NULL,
-            'number'    =>  $oAgentes->arrAgents[$idSobrante][0],
-            'name'      =>  $oAgentes->arrAgents[$idSobrante][2],
-            'password'  =>  $oAgentes->arrAgents[$idSobrante][1],
-            'estatus'   =>  NULL,
-            'sync'      =>  'ASTERISK',
-        );
-    }
-
+    $listaAgentes = $oAgentes->getAgents();
     
     // Filtrar los agentes conocidos según el estado que se requiera
     function estado_Online($t)  { return ($t['sync'] == 'OK' && $t['online']); }

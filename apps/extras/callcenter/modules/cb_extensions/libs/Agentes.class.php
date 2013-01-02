@@ -38,12 +38,11 @@ include_once("libs/paloSantoDB.class.php");
 
 class Agentes
 {
-    private $AGENT_FILE;
     var $arrAgents;
     private $_DB; // instancia de la clase paloDB
     var $errMsg;
 
-    function Agentes(&$pDB, $file = "/etc/asterisk/agents.conf")
+    function Agentes(&$pDB)
     {
         // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
@@ -62,7 +61,6 @@ class Agentes
         }
 
         $this->arrAgents = array();
-        $this->AGENT_FILE=$file;
     }
 
     /**
@@ -106,22 +104,6 @@ class Agentes
         }
     }
 
-
-    function existAgent($agent)
-    {
-        $this->_read_agents();
-        foreach ($this->arrAgents as $agente){
-            if ($agente[0] == $agent)
-                return $agente;
-        }
-        return false;
-    }
-
-    function getAgentsFile()
-    {
-        $this->_read_agents();
-        return array_keys($this->arrAgents);
-    }
 
     /**
      * Procedimiento para agregar un nuevo agente estático a la base de datos
@@ -237,8 +219,6 @@ class Agentes
         if ($bExito) {
             $this->_DB->genQuery("COMMIT");
             $this->_DB->genQuery("SET AUTOCOMMIT = 1");
-
-            return $this->_reloadAsterisk();
         } else {
             $this->_DB->genQuery("ROLLBACK");
             $this->_DB->genQuery("SET AUTOCOMMIT = 1");
@@ -257,84 +237,12 @@ class Agentes
 
         $sPeticionSQL = "UPDATE agent SET estatus='I' WHERE number=$id_agent";
 
-        $this->_DB->genQuery("SET AUTOCOMMIT = 0");
         $result = $this->_DB->genQuery($sPeticionSQL);
         if (!$result) {
             $this->errMsg = $this->_DB->errMsg;
-            $this->_DB->genQuery("ROLLBACK");
-            $this->_DB->genQuery("SET AUTOCOMMIT = 1");
             return false;
         }
-
-        $resp = $this->deleteAgentFile($id_agent);
-        if ($resp) {
-            $this->_DB->genQuery("COMMIT");
-        } else {
-            $this->_DB->genQuery("ROLLBACK");
-        }
-        $this->_DB->genQuery("SET AUTOCOMMIT = 1");
-
-        return $resp;
-    }
-
-    function deleteAgentFile($id_agent)
-    {
-        if (!ereg('^[[:digit:]]+$', $id_agent)) {
-            $this->errMsg = '(internal) Invalid agent ID';
-            return FALSE;
-        }
-
-        // Leer el archivo y buscar la línea del agente a eliminar
-        $bExito = TRUE;
-        $contenido = file($this->AGENT_FILE);
-        if (!is_array($contenido)) {
-            $bExito = FALSE;
-            $this->errMsg = '(internal) Unable to read agent file';
-        } else {
-            $bModificado = FALSE;
-            $contenidoNuevo = array();
-
-            // Filtrar las líneas, y setear bandera si se eliminó alguna
-            foreach ($contenido as $sLinea) {
-                $regs = NULL;
-                if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),', $sLinea, $regs) &&
-                    $regs[1] == $id_agent) {
-                    // Se ha encontrado la línea del agente eliminado
-                    $bModificado = TRUE;
-                } else {
-                    $contenidoNuevo[] = $sLinea;
-                }
-            }
-
-            if ($bModificado) {
-                $hArchivo = fopen($this->AGENT_FILE, 'w');
-                if (!$hArchivo) {
-                    $bExito = FALSE;
-                    $this->errMsg = '(internal) Unable to write agent file';
-                } else {
-                    foreach ($contenidoNuevo as $sLinea) fwrite($hArchivo, $sLinea);
-                    fclose($hArchivo);
-                }
-            }
-        }
-
-        return $this->_reloadAsterisk();
-    }
-
-    private function _read_agents()
-    {
-        $contenido = file($this->AGENT_FILE);
-        if (!is_array($contenido)) {
-            $bExito = FALSE;
-            $this->errMsg = '(internal) Unable to read agent file';
-        } else {
-            $this->arrAgents = array();
-            foreach ($contenido as $sLinea) {
-                if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),([[:digit:]]+),(.*)', trim($sLinea), $regs)) {
-                    $this->arrAgents[$regs[1]] = array($regs[1], $regs[2], $regs[3]);
-                }
-            }
-        }
+        return true;
     }
 
     private function _get_AGI_AsteriskManager()
@@ -348,19 +256,6 @@ class Agentes
             return NULL;
         } else {
             return $astman;
-        }
-    }
-
-    private function _reloadAsterisk()
-    {
-        $astman = $this->_get_AGI_AsteriskManager();
-        if (is_null($astman)) {
-            return FALSE;
-        } else {
-            // TODO: verify whether reload actually succeeded
-            $strReload = $astman->Command("module reload chan_agent.so");
-            $astman->disconnect();
-            return TRUE;
         }
     }
 

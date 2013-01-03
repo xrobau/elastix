@@ -1226,9 +1226,23 @@ class AMIEventProcess extends TuberiaProcess
                         }
                         $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
                     } elseif ($llamada->actualchannel != $params['Destination']) {
-                        $this->_log->output('WARN: '.__METHOD__.': canal remoto en '.
-                            'conflicto, anterior '.$llamada->actualchannel.' nuevo '.
-                            $params['Destination']);
+                        $regs = NULL;
+                        if (preg_match('|^(\w+/\d+)(\-\w+)?$|', $params['Destination'], $regs)) {
+                        	$sCanalPosibleAgente = $regs[1];
+                            $a = $this->_listaAgentes->buscar('agentchannel', $sCanalPosibleAgente);
+                            if (!is_null($a) && $a->estado_consola == 'logged-in') {
+                            	if ($this->DEBUG) {
+                            		$this->_log->output('DEBUG: '.__METHOD__.': canal remoto es agente, se ignora.');
+                            	}
+                            } else {
+                                $sCanalPosibleAgente = NULL;
+                            }
+                        }
+                        if (is_null($sCanalPosibleAgente)) {
+                            $this->_log->output('WARN: '.__METHOD__.': canal remoto en '.
+                                'conflicto, anterior '.$llamada->actualchannel.' nuevo '.
+                                $params['Destination']);
+                        }
                     }
                 }
             }

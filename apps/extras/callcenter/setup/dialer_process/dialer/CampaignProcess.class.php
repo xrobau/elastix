@@ -801,8 +801,8 @@ SQL_LLAMADA_COLOCADA;
             } else {
                 // Este código asume Agent/9000
                 $sExten = $tupla['agent']; $regs = NULL;
-                if (preg_match('|^Agent/(\d+)|', $sExten, $regs))
-                    $sExten = $regs[1];
+                if (preg_match('|^(\w+)/(\d+)|', $sExten, $regs))
+                    $sExten = $regs[2];
                 $resultado = $this->_ami->Originate(
                     $tupla['dialstring'], $sExten, 'llamada_agendada', 1,
                     NULL, NULL, $iTimeoutOriginate, 

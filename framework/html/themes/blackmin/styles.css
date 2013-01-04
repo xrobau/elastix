@@ -100,6 +100,9 @@ input.button, input.submit
 {
 	border: 1px solid #999999;
 	background-color: #ffffff;
+	background-image: url(../../images/bgGray.gif);
+    background-repeat: repeat-x;
+    background-position: bottom;
 }
 input:focus, textarea:focus, select:focus
 {
@@ -245,7 +248,7 @@ form.elx-blackmin-form-table>div
 }
 form.elx-blackmin-form-table>table
 {
-	border: 1px solid #000000;
+	border: 1px solid #999999;
 }
 form.elx-blackmin-form-table>table>thead
 {
@@ -254,8 +257,16 @@ form.elx-blackmin-form-table>table>thead
 }
 form.elx-blackmin-form-table>table>thead>tr.filterForm
 {
-    background: #bbbbbb;
     color: #000000;
+
+    background-color: #fafafa;
+    background-image: url(../../images/bggrisForm.gif);
+    background-repeat: repeat-x;
+    background-position: top;
+}
+form.elx-blackmin-form-table>table>thead>tr.filterForm td
+{
+    padding: 4px;
 }
 form.elx-blackmin-form-table>table>tbody>tr:hover
 {
@@ -264,10 +275,12 @@ form.elx-blackmin-form-table>table>tbody>tr:hover
 form.elx-blackmin-form-table>table>tbody>tr>td
 {
     border-bottom: 1px #eeeeee solid;
+    padding: 4px;
 } 
 form.elx-blackmin-form-table>table>tbody>tr>td.table_data_last_row
 {
     border-bottom: 1px #aaaaaa solid;
+    padding: 4px;
 } 
 
 form.elx-blackmin-form-table>table>tfoot
@@ -278,6 +291,8 @@ form.elx-blackmin-form-table>table>tfoot
 form.elx-blackmin-form-table>table>thead>tr>th
 {
     border-bottom: 1px #aaaaaa solid;
+    padding: 4px;
+    text-align: left;
 }
 table.tabForm
 {
@@ -285,9 +300,20 @@ table.tabForm
 	color: #000000;
 	border: 1px solid #999;
 	padding-left:5px;
+	background-image: url(../../images/bggrisForm.gif);
+    background-repeat: repeat-x;
+    background-position: top;
+}
+table.tabForm td
+{
+	padding: 4px;
 }
 .required {
     color: #ff0000;
+}
+table.table_navigation_text td
+{
+    padding: 4px;
 }
 
 /* Compatibilidad con funcionalidades requeridas */

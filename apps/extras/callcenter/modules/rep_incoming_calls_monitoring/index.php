@@ -75,7 +75,10 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($accion){
         default:
-            $content .= reportIncomingcallsmonitoring($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content .= 
+                '<div id="body_report">'.
+                reportIncomingcallsmonitoring($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang).
+                '</div>';
             break;
     }
     return $content;
@@ -153,11 +156,18 @@ function reportIncomingcallsmonitoring($smarty, $module_name, $local_templates_d
 
 
     $content = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    $smarty->assign("url", $url);
-    $smarty->assign("columns", $content);
-
-    $content = $oFilterForm->fetchForm("$local_templates_dir/main_monitoring.tpl","",$_POST);
-    //end grid parameters
+    if (strpos($content, '<form') === FALSE)
+        $content = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
+    $sReloadScript = <<<SCRIPT_RELOAD
+<script>
+function reload() {
+    xajax_create_report();
+    setTimeout("reload()",5000);
+}
+reload();
+</script>
+SCRIPT_RELOAD;
+    $content = $sReloadScript.$content;
 
     return $content;
 }

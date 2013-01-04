@@ -730,10 +730,11 @@ function saveDidAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
     
     if($exito){
         $smarty->assign("mb_title", _tr("MESSAGE"));
-        if(writeDidFile($error)==true)
+        if(writeDHADIDidFile($error)){
             $smarty->assign("mb_message",_tr("DID was assignment successfully"));
-        else
-            $smarty->assign("mb_message",_tr("DID was assignment. ").$error);
+        }else{
+            $smarty->assign("mb_message",_tr("DID was assignment successfully").$error);
+        }
         $content = reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }else{
         $smarty->assign("mb_title", _tr("ERROR"));
@@ -741,6 +742,18 @@ function saveDidAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
         $content = didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }
     return $content;
+}
+
+function writeDHADIDidFile(&$error){
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createFileDahdiChannelAdd 2>&1';
+    $output = $ret = NULL;
+    exec($sComando, $output, $ret);
+    if ($ret != 0) {
+        $error = _tr("Error writing did file").implode('', $output);
+        return FALSE;
+    }
+    
+    return true;
 }
 
 function createDidForn($arrDID){
@@ -752,26 +765,6 @@ function createDidForn($arrDID){
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         );
     return $arrFormElements;
-}
-
-function writeDidFile(&$error){
-    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals 2>&1';
-    $output = $ret = NULL;
-    exec($sComando, $output, $ret);
-    if ($ret != 0) {
-        $error = _tr("Error writing did file").implode('', $output);
-        return FALSE;
-    }
-    
-    $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
-    $output = $ret = NULL;
-    exec($sComando, $output, $ret);
-    if ($ret != 0){
-        $error = implode('', $output);
-        return FALSE;
-    }
-    
-    return true;
 }
 
 function getAction()

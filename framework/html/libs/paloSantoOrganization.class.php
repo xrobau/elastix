@@ -265,51 +265,66 @@ class paloSantoOrganization{
 		return $Exito;
 	}
 
-	function setOrganizationCode($idOrganization)
-	{
-        $query="select code from organization";
-        $result=$this->_DB->fetchTable($query, false);
-        if($result===false){
-            $this->errMsg=_tr("Error setting code for organizacion");
+    private function getNewCode($domain)
+    {
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+            $this->errMsg=_tr("Invalid domain format");
             return false;
-        }else{
-            if(count($result)=="1")
-                $code="1";
-            else{
-                $lastcd = 0;
-                foreach($result as $value){
-                    $cd=substr($value[0],12)+0;
-                    if(($cd-$lastcd)>1){
-                        $code=$lastcd+1;
-                        break;
-                    }
-                    $lastcd++;
-                }
-            }
         }
         
-        if(!isset($code))
-            $code=$lastcd;
+        //el code esta fromado por el dominio de la prganizacion sin caracteres especiales 
+        //y debe tener una longitud de 15 caracteres. En caso de que el dominio tenga menos de 
+        //15 caracteres a este se le agrega un codigo para completar dicha longitud
+        $chars = "abcdefghijkmnpqrstuvwxyz23456789";
+        $existCode=false;
+        $inicode=str_replace(array("-","."),"",$domain);
+        $len=strlen($inicode);
+        do{
+            srand((double)microtime()*1000000);
+            //la primera vez esto es falso. Si llega a ser verdad 
+            //la variable code estaria seteada y tendria 15 caracteres
+            if($existCode){
+                $code=substr($code, 0, 10);
+                $len=10;
+            }else{
+                $code=$inicode;
+            }
             
-		if($code<9)
-			$code="00".$code;
-		elseif($code>9 && $code<100)
-			$code="0".$code;
-        
-		$code="organization".$code;
-		$query="update organization set code=? where id=?";
-		$result=$this->_DB->genQuery($query,array($code,$idOrganization));
-		return $result;
-	}
+            if($len>=15){
+                $code=substr($inicode, 0, 15);
+            }else{        
+                // Genero los caracteres faltantes
+                while (strlen($code) < 15) {
+                        $num = rand() % 33;
+                        $tmp = substr($chars, $num, 1);
+                        $code .= $tmp;
+                }
+            }
+            $existCode = $this->existCode($code);
+        }while ($existCode);
 
-	function getOrganizationCode($domain)
-	{
-		$query="select code from organization where domain=?";
-		$result=$this->_DB->getFirstRowQuery($query,true,array($domain));
-		if($result==FALSE)
-			$this->errMsg = $this->_DB->errMsg;
-		return $result;
-	}
+        return $code;
+    }
+    
+    private function existCode($org_code){
+        $query="select 1 from organizacion where code=?";
+        $result=$this->_DB->fetchTable($query, false);
+        if($result==false){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+
+    function getOrganizationCode($domain)
+    {
+        $query="select code from organization where domain=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($domain));
+        if($result==FALSE)
+            $this->errMsg = $this->_DB->errMsg;
+        return $result;
+    }
 
     /**
       *  Procedimiento para crear una entidad
@@ -443,87 +458,81 @@ class paloSantoOrganization{
         $flag=false;
         $error_domain="";
         $address=isset($address)? $address : "";
-		$pEmail = new paloEmail($this->_DB);
+        $pEmail = new paloEmail($this->_DB);
         //contrumios la nueva entidad
-		//antes que todo debemos validar que no exista el dominio que queremos crear en el sistema
-		$resOrgz=$this->getOrganizationByDomain_Name($domain);
-		if(array($resOrgz) && count($resOrgz)==0){
-			$this->_DB->beginTransaction();
-            $query="INSERT INTO organization (name,domain,country,city,address, email_contact) values(?,?,?,?,?,?);";
-            $arr_params = array($name,$domain,$country,$city,$address,$email_contact);
+        //antes que todo debemos validar que no exista el dominio que queremos crear en el sistema
+        $resOrgz=$this->getOrganizationByDomain_Name($domain);
+        if(array($resOrgz) && count($resOrgz)==0){
+            $this->_DB->beginTransaction();
+            //obtenemos el codigo de la organizacion
+            //se valida que el dominio de la organizacion tenga un formato valido
+            $org_code=$this->getNewCode($domain);
+            if($org_code==false)
+                return false;
+            $query="INSERT INTO organization (name,domain,code,country,city,address,email_contact) values(?,?,?,?,?,?,?);";
+            $arr_params = array($name,$domain,$org_code,$country,$city,$address,$email_contact);
             $result=$this->_DB->genQuery($query,$arr_params);
             if($result==FALSE){
                 $this->_DB->rollBAck();
                 $this->errMsg=$this->_DB->errMsg;    
-			}else{
-				$resultOrgz=$this->getOrganizationByDomain_Name($domain);
-				//seteamos el codigo de la organizacion
-				if($this->setOrganizationCode($resultOrgz['id'])){
-					//seteamos los valores de organization_properties correspondientes a la categoria system
-					$proExito=$this->setOrganizationPropSys($resultOrgz['id']);
-					//seteamos las demas propiedades de la organization
-					$cExito=$this->setOrganizationProp($resultOrgz['id'],"country_code",$country_code,"fax");
-					$aExito=$this->setOrganizationProp($resultOrgz['id'],"area_code",$area_code,"fax");
-					$eExito=$this->setOrganizationProp($resultOrgz['id'],"email_quota",$quota,"email");
+            }else{
+                //obtenemos la organizacion recien creada
+                $resultOrgz=$this->getOrganizationByDomain_Name($domain);
+                //seteamos los valores de organization_properties correspondientes a la categoria system
+                $proExito=$this->setOrganizationPropSys($resultOrgz['id']);
+                //seteamos las demas propiedades de la organization
+                $cExito=$this->setOrganizationProp($resultOrgz['id'],"country_code",$country_code,"fax");
+                $aExito=$this->setOrganizationProp($resultOrgz['id'],"area_code",$area_code,"fax");
+                $eExito=$this->setOrganizationProp($resultOrgz['id'],"email_quota",$quota,"email");
 
-					if($proExito && $cExito && $aExito && $eExito){
-						//se asignan los recursos a la organizacion
-						//se crean los grupos
-						//se asignan los recursos a los grupos
-						$gExito=$this->assignResource($resultOrgz['id']);
-						if($gExito==false){
-							$error = _tr("Error trying create organization groups.");
-							$this->_DB->rollBAck();
-						}else{
-							//procedo a crear el plan de marcado para la organizacion
-							$resCode=$this->getOrganizationCode($domain);
-							if($resCode!=false){
-								$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-								$pDB->beginTransaction();
-								$pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
-								//procedo a setear las configuaraciones generales del plan de marcado por cad organizacion
-								if($pAstConf->createOrganizationAsterisk($domain,$country)){
-									//procedo a crear el nuevo dominio
-									if(!($pEmail->createDomain($domain,$error_domain))){
-										//no se puede crear el dominio
-										$this->errMsg=$error_domain;
-										$this->_DB->rollBAck();
-										$pAstConf->_DB->rollBAck();
-										$pAstConf->delete_dialplanfiles($domain);
-									}else{
-										if(!$this->createFolderFaxOrg($domain)){
-											$this->_DB->rollBAck();
-											$pAstConf->_DB->rollBAck();
-											$pAstConf->delete_dialplanfiles($domain);
-										}else{
-											$flag=true;
-											$this->_DB->commit();
-											$pAstConf->_DB->commit();
-										}
-									}
-								}else{
-									$error=_tr("Errors trying created dialplan for new organization").$pAstConf->errMsg;
-									$this->_DB->rollBAck();
-									$pAstConf->_DB->rollBAck();
-									$pAstConf->delete_dialplanfiles($domain);
-								}
-							}else{
-								$error=_tr("Errors trying created dialplan for new organization");
-								$this->_DB->rollBAck();
-							}
-						}
-					}else{
-						$error=_tr("Errors trying set organization properties");
-						$this->_DB->rollBAck();
-					}
-				}else{
-					$this->_DB->rollBAck();
-					$this->errMsg=$this->_DB->errMsg;    
-				}
-			}
-		}else{
-			$error=_tr("Already exist other organization with the same domain");
-		}
+                if($proExito && $cExito && $aExito && $eExito){
+                    //se asignan los recursos a la organizacion
+                    //se crean los grupos
+                    //se asignan los recursos a los grupos
+                    $gExito=$this->assignResource($resultOrgz['id']);
+                    if($gExito==false){
+                        $error = _tr("Error trying create organization groups.");
+                        $this->_DB->rollBAck();
+                    }else{
+                        //procedo a crear el plan de marcado para la organizacion
+                        $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+                        $pDB->beginTransaction();
+                        $pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
+                        //procedo a setear las configuaraciones generales del plan de marcado por cada organizacion
+                        if($pAstConf->createOrganizationAsterisk($domain,$country)){
+                            //procedo a crear el nuevo dominio
+                            if(!($pEmail->createDomain($domain,$error_domain))){
+                                //no se puede crear el dominio
+                                $this->errMsg=$error_domain;
+                                $this->_DB->rollBAck();
+                                $pAstConf->_DB->rollBAck();
+                                $pAstConf->delete_dialplanfiles($domain);
+                            }else{
+                                if(!$this->createFolderFaxOrg($domain)){
+                                    $this->_DB->rollBAck();
+                                    $pAstConf->_DB->rollBAck();
+                                    $pAstConf->delete_dialplanfiles($domain);
+                                }else{
+                                    $flag=true;
+                                    $this->_DB->commit();
+                                    $pAstConf->_DB->commit();
+                                }
+                            }
+                        }else{
+                            $error=_tr("Errors trying created dialplan for new organization").$pAstConf->errMsg;
+                            $this->_DB->rollBAck();
+                            $pAstConf->_DB->rollBAck();
+                            $pAstConf->delete_dialplanfiles($domain);
+                        }
+                    }
+                }else{
+                    $error=_tr("Errors trying set organization properties");
+                    $this->_DB->rollBAck();
+                }
+            }
+        }else{
+            $error=_tr("Already exist other organization with the same domain");
+        }
 
         return $flag;
     }
@@ -1320,7 +1329,7 @@ class paloSantoOrganization{
         $arrExten=$pDevice->getExtension($arrUser[0][5]);
         $arrFaxExten=$pDevice->getFaxExtension($arrUser[0][6]);
         
-		$ruta_destino="/var/www/users_images";
+		$ruta_destino="/var/www/elastixdir/users_images";
 		$this->_DB->beginTransaction();
 		$pDB2->beginTransaction();
 		//tomamos un backup de las extensiones que se van a eliminar de la base astDB por si algo sale mal

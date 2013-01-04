@@ -165,9 +165,9 @@ class paloACL {
 				if (!is_array($arr_result2) || count($arr_result2)==0) {
 					$this->errMsg = _tr("Can't get extension user").$pDB2->errMsg;
 				}
-				return $arr_result2;
 			}
 		}
+		return $arr_result2;
 	}
 
 	/**

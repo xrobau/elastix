@@ -199,11 +199,13 @@ class paloAsteriskDB {
         }
         
         $recordings=array();
-        $query="Select uniqueid,name,filename from recordings where organization_domain=?";
-        $result=$this->getResultQuery($query,array($domain),true,"Don't exist any recording created");
+        $query="Select uniqueid,name,organization_domain from recordings where organization_domain=? or organization_domain=?";
+        $result=$this->getResultQuery($query,array($domain,""),true,"");
         if($result!=false){
             foreach($result as $value){
                 $recordings[$value["uniqueid"]]=$value["name"];
+                if($value["organization_domain"]=="")
+                    $recordings[$value["uniqueid"]]=$value["name"]."- system";
             }
         }
         return $recordings; 
@@ -218,10 +220,13 @@ class paloAsteriskDB {
             return null;
         }
         
-        $query="SELECT filename,source from recordings where organization_domain=? and uniqueid=?";
-        $result=$this->getFirstResultQuery($query,array($domain,$key),true);
+        $query="SELECT filename,source from recordings where (organization_domain=? or organization_domain=?) and uniqueid=?";
+        $result=$this->getFirstResultQuery($query,array($domain,"",$key),true);
         if($result!=false){
-            $path="\\/var\\/lib\\/asterisk\\/sounds\\/$domain\\/".$result["source"]."\\/";
+            if($result["source"]=="custom")
+                $path="\\/var\\/lib\\/asterisk\\/sounds\\/custom\\/";
+            else
+                $path="\\/var\\/lib\\/asterisk\\/sounds\\/$domain\\/".$result["source"]."\\/";
             if(preg_match_all("/^($path(\w|-|\.|\(|\)|\s)+)\.(wav|WAV|Wav|gsm|GSM|Gsm|Wav49|wav49|WAV49)$/",$result["filename"],$match))
                 $file=$match[1][0];
         }
@@ -940,11 +945,11 @@ class paloSip extends paloAsteriskDB {
 	//esto es para los numeros de extensiones internas
 	function validateName($deviceName)
 	{
-		if(preg_match("/^(organization[[:digit:]]{3}){1}_[[:digit:]]+$/", $deviceName)){
-			return true;
-		}else{
-			return false;
-		}
+		if(preg_match("/^[[:alnum:]_]+$/", $deviceName)){
+            return true;
+        }else{
+            return false;
+        }
 	}
 
 }
@@ -1221,7 +1226,7 @@ class paloIax extends paloAsteriskDB {
 	//esto es para los numeros de extensiones internas
 	function validateName($deviceName)
 	{
-		if(preg_match("/^(organization[[:digit:]]{3}){1}_[[:digit:]]+$/", $deviceName)){
+		if(preg_match("/^[[:alnum:]_]+$/", $deviceName)){
 			return true;
 		}else{
 			return false;
@@ -1737,8 +1742,8 @@ class paloDevice{
 		//validamos que la instacia del objeto haya sido creada correctamente
 		if(!$this->validatePaloDevice())
 			return false;
-
-		if(!preg_match("/^organization[[:digit:]]{3}$/", $this->code)){
+        
+		if(!preg_match("/^[[:alnum:]_]+$/", $this->code)){
 			$this->errMsg="Invalid code format";
 			return false;
 		}

@@ -892,13 +892,13 @@ function writeAsteriskFile(&$error,$tech){
         }
     }
     
-    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtGeneral 2>&1';
+   $sComando = '/usr/bin/elastix-helper asteriskconfig createExtGeneral 2>&1';
     $output = $ret = NULL;
     exec($sComando, $output, $ret);
     if ($ret != 0) {
         $error = _tr("Error writing extensions_additionals file").implode('', $output);
         return FALSE;
-    }
+    
     
     $sComando = '/usr/bin/elastix-helper asteriskconfig dialplan-reload 2>&1';
     $output = $ret = NULL;

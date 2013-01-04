@@ -506,31 +506,61 @@ class paloSantoTrunk extends paloAsteriskDB{
             $this->errMsg=$errorM;
             return false;
         }else{
+            //borramos todos los campos anteriores de la truncal
+            $result=$astMang->database_delTree("TRUNK/$trunkid");
+            
             //campos usados dentro del plan de marcado, estos antes eran globales
             $tech=strtoupper($arrProp["tech"]);
             $channelId=$arrProp["channelid"];
-            $outcid=isset($arrProp["outcid"])?$arrProp["outcid"]:"";
-            $maxchans=isset($arrProp["max_chans"])?$arrProp["max_chans"]:"";
+            $astMang->database_put("TRUNK/$trunkid","OUT","$tech/$channelId");
+            
+            $outcid="";
+            if(isset($arrProp["outcid"])){
+                if($arrProp["outcid"]!=""){
+                    $outcid="\"".$arrProp["outcid"]."\"";
+                    $astMang->database_put("TRUNK/$trunkid","OUTCID",$outcid);
+                }
+            }
+            
+            if(preg_match("/^[0-9]$/",$arrProp["max_chans"]))
+                $astMang->database_put("TRUNK/$trunkid","OUTMAXCHANS",$arrProp["max_chans"]);
+                
             $outprefix=isset($arrProp["dialout_prefix"])?$arrProp["dialout_prefix"]:"";
-            $disabled=isset($arrProp["disabled"])?$arrProp["disabled"]:"off";
-            $keepCid=isset($arrProp["keepcid"])?$arrProp["keepcid"]:"off";
-            $force=($keepCid=="all")?$arrProp["outcid"]:"";
+            $astMang->database_put("TRUNK/$trunkid","OUTPREFIX",$outprefix);
+            
+            $disabled="off";
+            if(isset($arrProp["disabled"])){
+                if($arrProp["disabled"]=="on")
+                    $disabled="on";
+            }
+            $astMang->database_put("TRUNK/$trunkid","OUTDISABLE",$disabled);
+            
+            $keepCid="off";
+            if(isset($arrProp["keepcid"])){
+                switch($arrProp["keepcid"]){
+                    case "on":
+                        $keepCid="on";
+                        break;
+                    case "cnum":
+                        $keepCid="cnum";
+                        break;
+                    case "all":
+                        $keepCid="all";
+                        break;
+                }
+            }
+            $astMang->database_put("TRUNK/$trunkid","OUTKEEPCID",$keepCid);
+            
+            if($keepCid=="all")
+                $astMang->database_put("TRUNK/$trunkid","FORCEDOUTCID",$outcid);
+            
             $qPrefix="SELECT count(trunkid) from trunk_dialpatterns where trunkid=?";
             $trunkPrefix=$this->_DB->getFirstRowQuery($qPrefix,false,array($trunkid));
             if($trunkPrefix[0]!="0")
-                $prefix ="1";
-            else
-                $prefix ="";
-                
-            $astMang->database_put("TRUNK/$trunkid","OUT","$tech/$channelId");
-            $astMang->database_put("TRUNK/$trunkid","OUTCID",$outcid);
-            $astMang->database_put("TRUNK/$trunkid","OUTMAXCHANS",$maxchans);
-            $astMang->database_put("TRUNK/$trunkid","OUTPREFIX",$outprefix);
-            $astMang->database_put("TRUNK/$trunkid","OUTKEEPCID",$keepCid);
-            $astMang->database_put("TRUNK/$trunkid","FORCEDOUTCID",$force);
-            $astMang->database_put("TRUNK/$trunkid","PREFIX_TRUNK",$prefix);
-            $astMang->database_put("TRUNK/$trunkid","OUTDISABLE",$disabled);
-                
+                $astMang->database_put("TRUNK/$trunkid","PREFIX_TRUNK",$prefix);
+            
+            
+            //security max call by period of time
             if($set_security=="yes"){
                 if(!preg_match("/^[0-9]+$/",$max_calls)){
                     $this->errMsg=_tr("Field 'Max Num Calls' can't be empty");
@@ -550,14 +580,11 @@ class paloSantoTrunk extends paloAsteriskDB{
                     
                 $start_time = time();
                 $count=0;    
-                $result=$astMang->database_delTree($family);
                 $astMang->database_put($family,"PERIOD",$period);
                 $astMang->database_put($family,"COUNT",0);
                 $astMang->database_put($family,"MAX",$max_calls);
                 $astMang->database_put($family,"NUM_PERIOD",0);
                 $astMang->database_put($family,"START_TIME",$start_time);
-            }else{
-                $result=$astMang->database_delTree($family);
             }
         }
         

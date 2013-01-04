@@ -49,6 +49,10 @@
                 <td>{$mohsilence.LABEL}</td>
                 <td>{$mohsilence.INPUT}</td>  
             </tr>
+            <tr class="extension">
+                <td>{$time_group_id.LABEL}</td>
+                <td>{$time_group_id.INPUT}</td>
+            </tr>
          </table>
        </div>       
    </div>

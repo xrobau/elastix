@@ -237,39 +237,42 @@ class paloSantoOutbound extends paloAsteriskDB{
                $this->errMsg="Route Name is already used by another Outbound Route"; 
             else{
                $query .="routename,";
-               $arrOpt[count($arrOpt)]=$arrProp["routename"];
+               $arrOpt[]=$arrProp["routename"];
             }
         }
 
         //si se define un callerid 
         if(isset($arrProp["outcid"])){
             $query .="outcid,";
-            $arrOpt[count($arrOpt)]=$arrProp["outcid"];
+            $arrOpt[]=$arrProp["outcid"];
         }
 
         if(isset($arrProp["outcid_mode"])){
             $query .="outcid_mode,";
-            $arrOpt[count($arrOpt)]=$arrProp["outcid_mode"];
+            $arrOpt[]=$arrProp["outcid_mode"];
         }
       
         //si se define un password
         if(isset($arrProp["routepass"])){
             $query .="routepass,";
-            $arrOpt[count($arrOpt)]=$arrProp["routepass"];
+            $arrOpt[]=$arrProp["routepass"];
         }
         
-         if(isset($arrProp["time_group_id"])){
-            $query .="time_group_id,";
-            $arrOpt[count($arrOpt)]=$arrProp["time_group_id"];
+        if(!empty($arrProp["time_group_id"])){
+            $result=$this->_DB->fetchTable("SELECT 1 from time_group where organization_domain=? and id=?",true,array($this->domain,$arrProp["time_group_id"]));
+            if($result!=false){
+                $query .="time_group_id,";
+                $arrOpt[]=$arrProp["time_group_id"];
+            }
         }
         
         if(isset($arrProp["mohsilence"])){
             $query .="mohsilence,";
-            $arrOpt[count($arrOpt)]=$arrProp["mohsilence"];
+            $arrOpt[]=$arrProp["mohsilence"];
         }
         
         $query .="seq";
-        $arrOpt[count($arrOpt)]=$this->gatMaxSeq($domain)+1;
+        $arrOpt[]=$this->gatMaxSeq($domain)+1;
      
         $query .=")";
         $qmarks = "(";
@@ -280,7 +283,6 @@ class paloSantoOutbound extends paloAsteriskDB{
         $query = $query." values".$qmarks;
         if($this->errMsg==""){
             $exito=$this->createOutbound($query,$arrOpt,$arrProp);
-            
         }else{
             return false;
         }
@@ -356,32 +358,37 @@ class paloSantoOutbound extends paloAsteriskDB{
         //si se define un callerid 
         if(isset($arrProp["outcid"])){
             $query .="outcid=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["outcid"];
+            $arrOpt[]=$arrProp["outcid"];
         }
       
         if(isset($arrProp["outcid_mode"])){
             $query .="outcid_mode=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["outcid_mode"];
+            $arrOpt[]=$arrProp["outcid_mode"];
         }
       
         //si se define un password
         if(isset($arrProp["routepass"])){
             $query .="routepass=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["routepass"];
+            $arrOpt[]=$arrProp["routepass"];
         }
 
-        if(isset($arrProp["time_group_id"])){
-            $query .="time_group_id=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["time_group_id"];
-        }
+        $query .="time_group_id=?,";
+        if(!empty($arrProp["time_group_id"])){
+            $result=$this->_DB->fetchTable("SELECT 1 from time_group where organization_domain=? and id=?",true,array($this->domain,$arrProp["time_group_id"]));
+            if($result==false){
+                $arrOpt[]=NULL;
+            }else
+                $arrOpt[]=$arrProp["time_group_id"];
+        }else
+            $arrOpt[]=NULL;
         
         if(isset($arrProp["mohsilence"])){
             $query .="mohsilence=?";
-            $arrOpt[count($arrOpt)]=$arrProp["mohsilence"];
+            $arrOpt[]=$arrProp["mohsilence"];
         }
                 
         $query = $query." WHERE id=?";
-            $arrOpt[count($arrOpt)]=$idOutbound;
+            $arrOpt[]=$idOutbound;
         if($this->errMsg==""){
             $exito=$this->updateOutbound($query,$arrOpt,$arrProp);
         }else{
@@ -719,10 +726,17 @@ class paloSantoOutbound extends paloAsteriskDB{
             foreach($arrOut as $route){
                 $out_id=$route["id"];
                 $context="outrt-$out_id";
-                //falta hacer la validacion tomando en cuenta los timegroups
-                /*if(isset($route["time_group_id"])) 
-                    $arrInclude[]=$context;*/
-                $arrInclude[]["name"]=$context;
+                //en caso de que se haya seleccionado un time_group para la ruta
+                //ahi que incluir tanta veces como dondiciones de tiempo tenga el time:group asignado
+                $arrtg=$this->getTimeConditions($route["time_group_id"]);
+                if($arrtg!=false){
+                    foreach($arrtg as $key => $value){
+                        $arrInclude[$key]["name"]=$context;
+                        $arrInclude[$key]["extra"]=",$value";
+                    }
+                }else{
+                    $arrInclude[]["name"]=$context;
+                } 
                 $arrPattern=$this->getPattern($out_id);
                 $arrTrunk=$this->getArrTrunkPriority($out_id);
                 if($arrTrunk!=false){
@@ -733,7 +747,7 @@ class paloSantoOutbound extends paloAsteriskDB{
                         if(isset($route["mohsilence"]) && $route["mohsilence"]!=""){
                             $arrExt[$context][]=new paloExtensions($exten,new ext_set("MOHCLASS", '${IF($["${MOHCLASS}"=""]?'.$route['mohsilence'].':${MOHCLASS})}'));
                         }
-                        if (isset($route['outcid']) &&  $route['outcid']!= '') {
+                        if (isset($route['outcid']) && $route['outcid']!= '') {
                             if ($route['outcid_mode'] == "on") {
                                 $arrExt[$context][]=new paloExtensions($exten,new ext_execif('$["${KEEPCID}"!="TRUE" & ${LEN(${TRUNKCIDOVERRIDE})}=0]','Set','TRUNKCIDOVERRIDE='.$route['outcid']));
                             } else {
@@ -778,6 +792,20 @@ class paloSantoOutbound extends paloAsteriskDB{
             
             return $arrContext;
         }
+    }
+    
+    private function getTimeConditions($tg_id){
+        $arrTg=false;
+        if(!preg_match("/^[0-9]$/",$tg_id))
+            return false;
+        $query="SELECT * from tg_parameters join time_group on id=id_tg where id_tg=? and organization_domain=?";
+        $result=$this->_DB->fetchTable($query,true,array($tg_id,$this->domain));
+        if($result!=false){
+            foreach($result as $value){
+                $arrTg[]=$value["tg_hour"].",".$value["tg_day_w"].",".$value["tg_day_m"].",".$value["tg_month"];
+            }
+        }
+        return $arrTg;
     }
     
     private function getPattern($out_id){

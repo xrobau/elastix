@@ -227,6 +227,9 @@ class paloSantoTG extends paloAsteriskDB{
                         $Fhour[$key][]=$fhour;
                         $Smin[$key][]=$smin;
                         $Fmin[$key][]=$fmin;
+                        
+                        $smin=($smin=="0")?"00":$smin;
+                        $fmin=($fmin=="0")?"00":$fmin;
                         if($fhour!=$shour)
                             $cond .=$shour.":".$smin."-".$fhour.":".$fmin;
                         else

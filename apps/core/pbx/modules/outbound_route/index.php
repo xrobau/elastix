@@ -110,44 +110,44 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization,$reorderRoute=false)
 {
-	$error = "";
-	//conexion elastix.db
+    $error = "";
+    //conexion elastix.db
     $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pORGZ = new paloSantoOrganization($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB2);
 
-	$domain=getParameter("organization");
-	if($userLevel1=="superadmin"){
-		if(!empty($domain)){
-			$url = "?menu=$module_name&organization=$domain";
-		}else{
-			$domain = "all";
-			$url = "?menu=$module_name";
-		}
-	}else{
-		$arrOrg=$pORGZ->getOrganizationById($idOrganization);
-		$domain=$arrOrg["domain"];
-		$url = "?menu=$module_name";
-	}
-	
-	if($userLevel1=="superadmin"){
-	  if(isset($domain) && $domain!="all"){
-	      $pOutbound = new paloSantoOutbound($pDB,$domain);
-	      $total=$pOutbound->getNumOutbound($domain);
-	  }else{
-	      $pOutbound = new paloSantoOutbound($pDB,"");
-	      $total=$pOutbound->getNumOutbound();
-	  }
-	}else{
-	    $pOutbound = new paloSantoOutbound($pDB,$domain);
-	    $total=$pOutbound->getNumOutbound($domain);
-	}
+    $domain=getParameter("organization");
+    if($userLevel1=="superadmin"){
+        if(!empty($domain)){
+            $url = "?menu=$module_name&organization=$domain";
+        }else{
+            $domain = "all";
+            $url = "?menu=$module_name";
+        }
+    }else{
+        $arrOrg=$pORGZ->getOrganizationById($idOrganization);
+        $domain=$arrOrg["domain"];
+        $url = "?menu=$module_name";
+    }
 
-	if($total===false){
-		$error=$pOutbound->errMsg;
-		$total=0;
-	}
+    if($userLevel1=="superadmin"){
+        if(isset($domain) && $domain!="all"){
+            $pOutbound = new paloSantoOutbound($pDB,$domain);
+            $total=$pOutbound->getNumOutbound($domain);
+        }else{
+            $pOutbound = new paloSantoOutbound($pDB,"");
+            $total=$pOutbound->getNumOutbound();
+        }
+    }else{
+        $pOutbound = new paloSantoOutbound($pDB,$domain);
+        $total=$pOutbound->getNumOutbound($domain);
+    }
 
-	$limit=20;
+    if($total===false){
+        $error=$pOutbound->errMsg;
+        $total=0;
+    }
+
+    $limit=20;
 
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->setLimit($limit);
@@ -155,8 +155,8 @@ function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $offset = $oGrid->calculateOffset();
 
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
-	
-	$arrGrid = array("title"    => _tr('Outbound Routes List'),
+
+    $arrGrid = array("title"    => _tr('Outbound Routes List'),
                 "url"      => $url,
                 "width"    => "99%",
                 "start"    => ($total==0) ? 0 : $offset + 1,
@@ -175,24 +175,24 @@ function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $arrColumns[]=_tr("Time Group");
     $oGrid->setColumns($arrColumns);
     
-	$arrOutbound=array();
-	$arrData = array();
-	if($userLevel1=="superadmin"){
-	    if($domain!="all")
+    $arrOutbound=array();
+    $arrData = array();
+    if($userLevel1=="superadmin"){
+        if($domain!="all")
             $arrOutbound = $pOutbound->getOutbounds($domain,$limit,$offset);
-	    else
+        else
             $arrOutbound = $pOutbound->getOutbounds(null,$limit,$offset);
-	}else{
+    }else{
         if($userLevel1=="admin")
             $arrOutbound = $pOutbound->getOutbounds($domain,$limit,$offset);
     }
 
-	if($arrOutbound===false){
-		$error=_tr("Error to obtain outbounds").$pOutbound->errMsg;
+    if($arrOutbound===false){
+        $error=_tr("Error to obtain outbounds").$pOutbound->errMsg;
         $arrOutbound=array();
-	}
-	
-	foreach($arrOutbound as $outbound) {
+    }
+
+    foreach($arrOutbound as $outbound) {
         $arrTmp=array();
         if($userLevel1=="superadmin"){
             $arrTmp[] = $outbound["seq"];
@@ -204,40 +204,45 @@ function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
         }
         $arrTmp[]=$outbound["outcid"];
         $arrTmp[]=$outbound["routepass"];
-        $arrTmp[]=$outbound["time_group_id"];
+        if(isset($outbound["time_group_id"])){
+            $query="SELECT name from time_group where id=?";
+            $result=$pDB->getFirstRowQuery($query,true,array($outbound["time_group_id"]));
+            if($result!=false){
+                $arrTmp[]=$result["name"];
+            }else
+                $arrTmp[]="";
+        }
         $arrData[] = $arrTmp;
     }
-	
-	$arrTech = array("sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"));
-			 ;
-	if($pORGZ->getNumOrganization() > 1){
-		if($userLevel1 == "admin")
-			$oGrid->addNew("create_outbound",_tr("Create New Outbound Route"));
 
-		if($userLevel1 == "superadmin"){
-			$arrOrgz=array("all"=>"all");
-			foreach(($pORGZ->getOrganization()) as $value){
-				if($value["id"]!=1)
-					$arrOrgz[$value["domain"]]=$value["name"];
-			}
-			$arrFormElements = createFieldFilter($arrOrgz);
-			$oFilterForm = new paloForm($smarty, $arrFormElements);
-			$_POST["organization"]=$domain;
-			$oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$domain], $_POST, array("organization" => "all"),true);
-			$htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-			$oGrid->showFilter(trim($htmlFilter));
-		}
-	}else{
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create new Outbound Route"));
-	}
+    if($pORGZ->getNumOrganization() > 1){
+        if($userLevel1 == "admin")
+            $oGrid->addNew("create_outbound",_tr("Create New Outbound Route"));
 
-	if($error!=""){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",$error);
-	}
-	
-	$contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+        if($userLevel1 == "superadmin"){
+            $arrOrgz=array("all"=>"all");
+            foreach(($pORGZ->getOrganization()) as $value){
+                if($value["id"]!=1)
+                    $arrOrgz[$value["domain"]]=$value["name"];
+            }
+            $arrFormElements = createFieldFilter($arrOrgz);
+            $oFilterForm = new paloForm($smarty, $arrFormElements);
+            $_POST["organization"]=$domain;
+            $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$domain], $_POST, array("organization" => "all"),true);
+            $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+            $oGrid->showFilter(trim($htmlFilter));
+        }
+    }else{
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create new Outbound Route"));
+    }
+
+    if($error!=""){
+        $smarty->assign("mb_title", _tr("MESSAGE"));
+        $smarty->assign("mb_message",$error);
+    }
+
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
     $mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $idOrganization);
     $contenidoModulo = $mensaje.$contenidoModulo;
     return $contenidoModulo;
@@ -749,7 +754,15 @@ function createFieldForm($pDB,$domain)
         
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
    
-    //var_dump($arrTrunks);
+    //time_group
+    $query="SELECT name,id from time_group where organization_domain=?";
+    $result=$pDB->fetchTable($query,true,array($domain));
+    $arrtg=array(""=>"-- Permanent Route --");
+    if($result!=false){
+        foreach($result as $value){
+            $arrtg[$value["id"]]=$value["name"];
+        }
+    }
     $arrLang=getLanguagePBX();
     $arrFormElements = array("routename"	=> array("LABEL"             => _tr('Route Name'),
                                                     "REQUIRED"               => "yes",
@@ -778,7 +791,7 @@ function createFieldForm($pDB,$domain)
                             "time_group_id" 	=> array("LABEL"         => _tr("Time Group"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array(""=>"-- Permanent Route --"),
+                                                    "INPUT_EXTRA_PARAM"      => $arrtg,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "prepend_digit__" 	=> array("LABEL"               => _tr("prepend digit"),

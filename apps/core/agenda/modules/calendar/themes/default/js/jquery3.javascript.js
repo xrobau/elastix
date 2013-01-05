@@ -178,7 +178,7 @@ $(document).ready(function(){
 				return false;
 			}
 		}
-        //hideModalPopUP();
+       // hideModalPopUP();
        /* var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#lblSending').val()+"</span></div></div>";
         $.blockUI({ message: urlImaLoading });*/
         return true;
@@ -263,7 +263,7 @@ $(document).ready(function(){
 		$("#table_box textarea").resizable({
 			alsoResize: '#neo-modal-elastix-popup-content',
 			minHeight: 36,
-			handles: 's',
+			handles: 's'
 		});
 		$("#table_box textarea" ).parent("div.ui-wrapper").css("padding-top","0px");
 		$("#table_box textarea").parent("div.ui-wrapper").css("padding-bottom","0px");
@@ -948,7 +948,7 @@ $(document).ready(function(){
 					$("#table_box textarea").resizable({
 						alsoResize: '#neo-modal-elastix-popup-content',
 						minHeight: 36,
-						handles: 's',
+						handles: 's'
 					});
 					$("#table_box textarea" ).parent("div.ui-wrapper").css("padding-top","0px");
 					$("#table_box textarea").parent("div.ui-wrapper").css("padding-bottom","0px");

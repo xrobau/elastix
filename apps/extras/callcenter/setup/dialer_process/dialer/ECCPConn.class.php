@@ -2662,7 +2662,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         // Mandar a transferir la llamada usando el canal Agent/9000
         $r = $this->_ami->Atxfer(
             $infoLlamada['agentchannel'],
-            $sExtension,        // exten
+            $sExtension.'#',    // exten
             'from-internal',    // context
             1);                 // priority
         if ($r['Response'] != 'Success') {

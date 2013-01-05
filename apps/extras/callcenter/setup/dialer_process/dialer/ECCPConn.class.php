@@ -2672,15 +2672,13 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         // Mandar a transferir la llamada usando el canal Agent/9000
         $r = $this->_ami->Atxfer(
-            (($agentFields['type'] == 'Agent')  // channel
-                ? $sAgente 
-                : $infoSeguimiento['clientchannel']),
+            $infoLlamada['agentchannel'],
             $sExtension,        // exten
             'from-internal',    // context
             1);                 // priority
         if ($r['Response'] != 'Success') {
             $this->_log->output('ERR: '.__METHOD__.': al transferir llamada: no se puede transferir '.
-                $sCanalRemoto.' a '.$sExtension.' - '.$r['Message']);
+                $infoLlamada['agentchannel'].' a '.$sExtension.' - '.$r['Message']);
             $this->_agregarRespuestaFallo($xml_transferResponse, 500, 'Unable to transfer call');
             return $xml_response;
         } else {

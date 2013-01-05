@@ -2648,20 +2648,13 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
 
-        $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
-        if (is_null($infoSeguimiento)) {
+        // Obtener la información de la llamada atendida por el agente
+        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
+        if (is_null($infoLlamada)) {
             $this->_agregarRespuestaFallo($xml_transferResponse, 404, 'Specified agent not found');
             return $xml_response;
         }
-        $sCanalRemoto = $infoSeguimiento['clientchannel'];
-        if (is_null($sCanalRemoto)) {
-            $this->_agregarRespuestaFallo($xml_transferResponse, 417, 'Agent not in call');
-            return $xml_response;
-        }
-
-        // Obtener la información de la llamada atendida por el agente
-        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
-        if (is_null($infoLlamada) || is_null($infoLlamada['currentcallid'])) {
+        if (is_null($infoLlamada['agentchannel'])) {
             $this->_agregarRespuestaFallo($xml_transferResponse, 417, 'Agent not in call');
             return $xml_response;
         }

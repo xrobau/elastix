@@ -2016,25 +2016,21 @@ LISTA_EXTENSIONES;
             return $xml_response;
         }
 
-        $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
-        if (is_null($infoSeguimiento)) {
+        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
+        if (is_null($infoLlamada)) {
             $this->_agregarRespuestaFallo($xml_hangupResponse, 404, 'Specified agent not found');
             return $xml_response;
         }
-        $sCanalRemoto = $infoSeguimiento['clientchannel'];
-        if (is_null($sCanalRemoto)) {
+        if (is_null($infoLlamada['agentchannel'])) {
             $this->_agregarRespuestaFallo($xml_hangupResponse, 417, 'Agent not in call');
             return $xml_response;
         }
 
         // Mandar a colgar la llamada usando el canal Agent/9000
-        //$this->_log->output('DEBUG: se intenta colgar '.$sAgente.' conectado a '.$sCanalRemoto.' ...');
-        $agentFields = $this->_parseAgent($sAgente);
-        $r = $this->_ami->Hangup(($agentFields['type'] == 'Agent')
-            ? $sAgente : $infoSeguimiento['clientchannel']);
+        $r = $this->_ami->Hangup($infoLlamada['agentchannel']);
         if ($r['Response'] != 'Success') {
-            $this->_log->output('ERR: No se puede colgar la llamada para '.$sAgente.' - '.$r['Message']);
-            //$this->_log->output('ERR: Estado de la cola al intentar colgado es: '.print_r($estadoCola, 1));
+            $this->_log->output('ERR: No se puede colgar la llamada para '.$sAgente.
+                ' ('.$infoLlamada['agentchannel'].') - '.$r['Message']);
             $this->_agregarRespuestaFallo($xml_hangupResponse, 500, 'Cannot hangup agent call');
             return $xml_response;
         }

@@ -100,6 +100,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Sat Jan 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix two javascript warnings in IE6.
+
 * Wed Jan 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agents, Callback Extensions: do not modify the audit or call tables 
   from the module. Now that the dialer has exclusive responsibility over 

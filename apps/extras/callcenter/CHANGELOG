@@ -1,3 +1,4 @@
+* Agent Console: fix two javascript warnings in IE6.
 * Agents, Callback Extensions: do not modify the audit or call tables from the
   module. Now that the dialer has exclusive responsibility over auditing on 
   logoff, modification of audit tables on forced disconnection, as allowed by

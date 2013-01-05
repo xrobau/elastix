@@ -441,7 +441,7 @@ function do_transfer()
 		rawmode:	'yes',
 		action:		'transfer',
 		extension:	$('#transfer_extension').val(),
-		atxfer: 	$('#transfer_type_attended').attr('checked'),
+		atxfer: 	$('#transfer_type_attended').attr('checked')
 	},
 	function (respuesta) {
         if (respuesta['action'] == 'error') {
@@ -715,7 +715,7 @@ function abrir_url_externo(urlopentype, url)
 		case 'jsonp':
 			$.ajax(url, {
 				dataType: 'jsonp',
-				context:	document,
+				context:	document
 			});
 			break;
 		case 'window':

@@ -173,12 +173,15 @@ function manejarLogin_HTML($module_name, &$smarty, $sDirLocalPlantillas)
     $oPaloConsola->desconectarTodo();
     $oPaloConsola = NULL;
     
+    $bNoHayAgentes = (count($listaAgentes) == 0 && count($listaExtensionesCallback) == 0);
+    if (count($listaAgentes) == 0) $listaAgentes[] = _tr('(no agents)');
+    if (count($listaExtensionesCallback) == 0) $listaExtensionesCallback[] = _tr('(no agents)');
     $smarty->assign(array(
         'LISTA_EXTENSIONES' =>  $listaExtensiones,
         'LISTA_AGENTES'     =>  $listaAgentes,
         'LISTA_EXTENSIONES_CALLBACK'     =>  $listaExtensionesCallback,
         'NO_EXTENSIONS'     =>  (count($listaExtensiones) == 0), 
-        'NO_AGENTS'         =>  (count($listaAgentes) == 0), 
+        'NO_AGENTS'         =>  $bNoHayAgentes, 
     ));
     
     // Restaurar el estado de espera en caso de que se refresque la página

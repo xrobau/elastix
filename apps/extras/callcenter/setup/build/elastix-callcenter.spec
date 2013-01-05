@@ -101,6 +101,7 @@ fi
 
 %changelog
 * Sat Jan 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix behavior when no callback extensions exist.
 - FIXED: Agent Console: fix two javascript warnings in IE6.
 
 * Wed Jan 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>

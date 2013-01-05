@@ -7,14 +7,48 @@
 
 <h1>{$node_name}</h1>
 
-<p>La opción "Dashboard" del  Menu “System” en Elastix es una herramienta de visualización que nos muestra un resumen de las últimas
-acciones realizadas con el fin de permitir una respuesta más rapida a los cambios tales como "Calls", "Faxes", "Emails", "Calendar", "Voicemails", "System".
+<p>The option "Dashboard" of menu "System" in Elastix is a visualization tool that shows a general view of the system and gives a faster access to administrative actions in order to allow the user an easy administration of the server such as "System Resources", "Processes Status", "Hard Drives", "Performance Graphics", "Communication Activity", and so on. Below a short description of each one.
 </p>
-<div><img src="../modules/{$node_id}/images/help/dashboard.png" border="0"></div>
-<div>Figura 1</div>
+<p><span style="font-weight:bold">System Resources: </span>Here shows general information about the system where Elastix is running.</p>
+<div><img src="../modules/{$node_id}/images/help/system_resources.png" border="0"></div>
+<div>Figure 1</div>
+<p><span style="font-weight:bold">Processes Status: </span>It shows the enabled and disabled processes. Here you can start, stop and restart these processes.</p>
+<div><img src="../modules/{$node_id}/images/help/processes_status.png" border="0"></div>
+<div>Figure 2</div>
+<p><span style="font-weight:bold">Hard Drives: </span>Hard Drives shows the free and used space of the hard drives installed on your server.</p>
+<div><img src="../modules/{$node_id}/images/help/hard_drives.png" border="0"></div>
+<div>Figure 3</div>
+<p><span style="font-weight:bold">Performance Graphic: </span>It allows to check out the history of CPU and Memory usage as well as simultaneous calls over the time.</p>
+<div><img src="../modules/{$node_id}/images/help/performance_graphic.png" border="0"></div>
+<div>Figure 4</div>
+<p><span style="font-weight:bold">News: </span>Keep track of the latest news about Elastix from www.elastix.org</p>
+<div><img src="../modules/{$node_id}/images/help/news.png" border="0"></div>
+<div>Figure 5</div>
+<p><span style="font-weight:bold">Communication Activity: </span>This applet shows the number of extensions, trunks and calls currently on Elastix server.</p>
+<div><img src="../modules/{$node_id}/images/help/communication_activity.png" border="0"></div>
+<div>Figure 6</div>
+<p><span style="font-weight:bold">Calendar: </span>It shows the schedule of activities for the logged user</p>
+<div><img src="../modules/{$node_id}/images/help/calendar.png" border="0"></div>
+<div>Figure 7</div>
+<p><span style="font-weight:bold">Calls: </span>It is a history of calls with time and duration related to the extension of the logged user.</p>
+<div><img src="../modules/{$node_id}/images/help/calls.png" border="0"></div>
+<div>Figure 8</div>
+<p><span style="font-weight:bold">Emails: </span>The logged user can see when he receives emails.</p>
+<div><img src="../modules/{$node_id}/images/help/emails.png" border="0"></div>
+<div>Figure 9</div>
+<p><span style="font-weight:bold">Faxes: </span>It shows the received faxes on the extension of the logged user.</p>
+<div><img src="../modules/{$node_id}/images/help/faxes.png" border="0"></div>
+<div>Figure 10</div>
+<p><span style="font-weight:bold">Voicemails: </span>This applet inform when the extension of the logged user has voicemails.</p>
+<div><img src="../modules/{$node_id}/images/help/voicemails.png" border="0"></div>
+<div>Figure 11</div>
+<p><span style="font-weight:bold">System: </span>It shows the assigned space on hard drive to the logged user.</p>
+<div><img src="../modules/{$node_id}/images/help/system.png" border="0"></div>
+<div>Figure 12</div>
+<p><span style="font-weight:bold">Telephony Hardware: </span>It shows a general view of the installed telephony devices on Elastix server.</p>
+<div><img src="../modules/{$node_id}/images/help/telephony_hardware.png" border="0"></div>
+<div>Figure 13</div>
 <p></p>
-<p>.
-</p>
 <br />
 </body>
 </html>

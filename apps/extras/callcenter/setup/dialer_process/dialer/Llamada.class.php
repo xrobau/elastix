@@ -125,6 +125,12 @@ class Llamada
      *          si no lo hizo.
      */
     private $_status = NULL;
+
+    /* Canal completo del lado de agente. Para agentes estáticos (Agent/xxxx)
+     * este valor es idéntico al Agent/xxxx del agente asignado. Para agentes
+     * dinámicos, es de la forma (SIP|IAX2)/xxxx-zzzz . Este valor es requerido
+     * para realizar la transferencia asistida. */ 
+    private $_agentchannel = NULL;
     
     var $phone;     // Número marcado para llamada saliente o Caller-ID para llamada entrante
     var $id_current_call;   // ID del registro correspondiente en current_call[_entry]
@@ -170,6 +176,7 @@ class Llamada
         case 'uniqueid':        return $this->_uniqueid;
         case 'channel':         return $this->_channel;
         case 'actualchannel':   return $this->_actualchannel;
+        case 'agentchannel':    return $this->_agentchannel;
         case 'trunk':           return $this->_trunk;
         case 'status':          return $this->_status;
         case 'actionid':        return $this->_actionid;
@@ -357,6 +364,7 @@ class Llamada
             'datetime_enterqueue'   => date('Y-m-d H:i:s', $this->timestamp_enterqueue),
             'datetime_linkstart'    => date('Y-m-d H:i:s', $this->timestamp_link),
             'queuenumber'           =>  $this->_queuenumber,
+            'agentchannel'          =>  $this->_agentchannel,
         );
         if (is_null($resumen['queuenumber']) && !is_null($this->campania)) {
         	$resumen['queuenumber'] = $this->campania->queue;
@@ -529,13 +537,15 @@ class Llamada
         }
     }
     
-    public function llamadaEnlazadaAgente($timestamp, $agent, $sRemChannel, $uniqueid_agente)
+    public function llamadaEnlazadaAgente($timestamp, $agent, $sRemChannel,
+        $uniqueid_agente, $sAgentChannel)
     {
         $this->agente = $agent;
         $this->agente->asignarLlamadaAtendida($this, $uniqueid_agente);
         $this->agente_agendado = NULL;
         $this->agente->llamada_agendada = NULL;
     	
+        $this->_agentchannel = $sAgentChannel;
         $this->status = 'Success';
         $this->timestamp_link = $timestamp;
         if (!is_null($this->campania) && $this->campania->tipo_campania == 'outgoing')
@@ -619,7 +629,7 @@ class Llamada
                 $this->agente->number, $this->tipo_llamada, $this->uniqueid);
     }
     
-    public function llamadaRegresaHold($iTimestamp, $uniqueid_nuevo = NULL)
+    public function llamadaRegresaHold($iTimestamp, $uniqueid_nuevo = NULL, $sAgentChannel = NULL)
     {
         if (is_null($uniqueid_nuevo)) $uniqueid_nuevo = $this->_uniqueid;
         if (is_null($this->_uniqueid) || $uniqueid_nuevo != $this->_uniqueid) {
@@ -628,6 +638,7 @@ class Llamada
             $this->_uniqueid = $uniqueid_nuevo;
             $this->_listaLlamadas->agregarIndice('uniqueid', $this->_uniqueid, $this);
         }
+        if (!is_null($sAgentChannel)) $this->_agentchannel = $sAgentChannel;
         
         if (!is_null($this->agente)) {
             $a = $this->agente;
@@ -684,6 +695,7 @@ class Llamada
         }
 
     	$this->timestamp_hangup = $timestamp;
+        $this->_agentchannel = NULL;
         
         // Mandar a borrar el registro de current_calls
         if (!is_null($this->id_current_call)) {

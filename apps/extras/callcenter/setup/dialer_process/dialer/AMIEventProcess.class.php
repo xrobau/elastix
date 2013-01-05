@@ -1411,26 +1411,29 @@ class AMIEventProcess extends TuberiaProcess
         $regs = NULL;
         $sAgentNum = NULL;
         $sChannel = NULL;
+        $sAgentChannel = NULL;
         $sRemChannel = NULL;
         if (preg_match('|^Agent/(\d+)$|', $params['Channel1'], $regs)) {
             $sAgentNum = $regs[1];
-            $sChannel = $params['Channel1'];
+            $sChannel = $sAgentChannel = $params['Channel1'];
             $sRemChannel = $params['Channel2'];
         } elseif (  preg_match('|^(SIP/(\d+))\-\w+$|',  $params['Channel1'], $regs) || 
                     preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel1'], $regs)) {        
             $sAgentNum   = $regs[2];
             $sChannel    = $regs[1];
             $sRemChannel = $params['Channel2'];
+            $sAgentChannel = $params['Channel1'];
         }
         if (preg_match('|^Agent/(\d+)$|', $params['Channel2'], $regs)) {
             $sAgentNum = $regs[1];
-            $sChannel = $params['Channel2'];
+            $sChannel = $sAgentChannel = $params['Channel2'];
             $sRemChannel = $params['Channel1'];
         } elseif(   preg_match('|^(SIP/(\d+))\-\w+$|', $params['Channel2'], $regs) || 
                     preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel2'], $regs)) {
             $sAgentNum = $regs[2];         
             $sChannel  = $regs[1];                    
             $sRemChannel = $params['Channel1']; // Remote Channel
+            $sAgentChannel = $params['Channel2'];
         }
 
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid1']);
@@ -1487,7 +1490,8 @@ class AMIEventProcess extends TuberiaProcess
                     $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada que regresa de HOLD ".
                         "{$llamada->channel}, cambiado Uniqueid a {$sNuevo_Uniqueid} ");
                 }
-                $llamada->llamadaRegresaHold($params['local_timestamp_received'], $sNuevo_Uniqueid);
+                $llamada->llamadaRegresaHold($params['local_timestamp_received'],
+                    $sNuevo_Uniqueid, $sAgentChannel);
                 return FALSE;
             } elseif (!is_null($llamada->agente_agendado) && $llamada->agente_agendado->channel == $sChannel) {
                 if ($this->DEBUG) {
@@ -1516,7 +1520,8 @@ class AMIEventProcess extends TuberiaProcess
             } else {
                 $llamada->llamadaEnlazadaAgente(
                     $params['local_timestamp_received'], $a, $sRemChannel,
-                    ($llamada->uniqueid == $params['Uniqueid1']) ? $params['Uniqueid2'] : $params['Uniqueid1']);
+                    ($llamada->uniqueid == $params['Uniqueid1']) ? $params['Uniqueid2'] : $params['Uniqueid1'],
+                    $sAgentChannel);
             }
         } else {
         	/* El Link de la pata auxiliar con otro canal puede indicar el 

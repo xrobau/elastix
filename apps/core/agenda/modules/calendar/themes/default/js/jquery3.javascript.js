@@ -263,7 +263,7 @@ $(document).ready(function(){
 		$("#table_box textarea").resizable({
 			alsoResize: '#neo-modal-elastix-popup-content',
 			minHeight: 36,
-			handles: 's',
+			handles: 's'
 		});
 		$("#table_box textarea" ).parent("div.ui-wrapper").css("padding-top","0px");
 		$("#table_box textarea").parent("div.ui-wrapper").css("padding-bottom","0px");
@@ -948,7 +948,7 @@ $(document).ready(function(){
 					$("#table_box textarea").resizable({
 						alsoResize: '#neo-modal-elastix-popup-content',
 						minHeight: 36,
-						handles: 's',
+						handles: 's'
 					});
 					$("#table_box textarea" ).parent("div.ui-wrapper").css("padding-top","0px");
 					$("#table_box textarea").parent("div.ui-wrapper").css("padding-bottom","0px");

@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Mon Jan 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Dialer (ECCP): modify many of the ECCP example scripts to get agent and 
+  password from the command line.
 - Dialer (ECCP): fix error message for hangup request when agent exists but is 
   not handling a call.
 - Dialer (ECCP): add required campaign ID when starting hold.

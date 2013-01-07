@@ -1,15 +1,20 @@
 #!/usr/bin/php
 <?php
 require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
+
+if (count($argv) < 4) die("Use: {$argv[0]} agentchannel agentpassword extension\n");
+$agentname = $argv[1];
+$agentpass = $argv[2];
+
 $x = new ECCP();
 try {
 	print "Connect...\n";
 	$x->connect("localhost", "agentconsole", "agentconsole");
-	$x->setAgentNumber("Agent/9000");
-	$x->setAgentPass("gatito");
+	$x->setAgentNumber($agentname);
+	$x->setAgentPass($agentpass);
 	print_r($x->getAgentStatus());
 	print "Login agent\n";
-	$r = $x->loginagent("1064");
+	$r = $x->loginagent($argv[3]);
 	print_r($r);
 	$bFalloLogin = FALSE;
 	if (!isset($r->failure) && !isset($r->loginagent_response->failure)) while (!$bFalloLogin) {

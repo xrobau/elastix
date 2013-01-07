@@ -1,12 +1,13 @@
 #!/usr/bin/php
 <?php
 require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
+
+if (count($argv) < 2) die("Use: {$argv[0]} [agentchannel]\n");
+
 $x = new ECCP();
 try {
 	print "Connect...\n";
 	$x->connect("localhost", "agentconsole", "agentconsole");
-	$x->setAgentNumber("Agent/9000");
-	$x->setAgentPass("gatito");
 	print_r($x->getagentqueues(count($argv) > 1 ? $argv[1] : NULL));
 	print "Disconnect...\n";
 	$x->disconnect();

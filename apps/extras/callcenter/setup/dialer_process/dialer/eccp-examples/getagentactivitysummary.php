@@ -5,8 +5,6 @@ $x = new ECCP();
 try {
     print "Connect...\n";
     $x->connect("localhost", "agentconsole", "agentconsole");
-    $x->setAgentNumber("Agent/9000");
-    $x->setAgentPass("gatito");
     print_r($x->getagentactivitysummary(
         count($argv) > 1 ? $argv[1] : NULL,
         count($argv) > 2 ? $argv[2] : NULL));

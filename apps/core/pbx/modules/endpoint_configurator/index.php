@@ -164,6 +164,7 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
             if(is_array($arrEndpointsMap) && count($arrEndpointsMap)>0){
 		$cont=0;
                 foreach($arrEndpointsMap as $key => $endspoint){
+		    $flag=0;
                     $cont++;
                     if(isset($endspoint['model_no']) && $endspoint['model_no'] != ""){
                         if($paloEndPoint->modelSupportIAX($endspoint['model_no']))
@@ -230,6 +231,16 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
                         $_SESSION['endpoint_model'][$endspoint['mac_adress']] = $endspoint["model_no"];
                     }
                     else{
+			if($endspoint["name_vendor"] == "Grandstream"){
+			 $arr = $paloFileEndPoint->getModelElastix("admin","admin",$endspoint['ip_adress'],2);
+			 if($arr){
+			       $flag=1;
+			       $endpointElastix = $paloEndPoint->getVendorByName("Elastix");
+			       $endspoint['name_vendor'] = $endpointElastix["name"]; 
+			       $endspoint['desc_vendor'] = $endpointElastix["description"];
+			       $endspoint['id_vendor']	 = $endpointElastix["id"];
+			 }
+			}
                         $arrTmp[0] = "<input type='checkbox' name='epmac_{$endspoint['mac_adress']}'  />";
                         $arrTmp[1] = $unset;
                         $arrTmp[5] = "<select name='id_model_device_{$endspoint['mac_adress']}' onchange='getDevices(this,\"$macWithout2Points\");'>".combo($paloEndPoint->getAllModelsVendor($endspoint['name_vendor']),$endspoint['model_no'])."</select>";
@@ -242,9 +253,9 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
                    
                     $arrTmp[2] = $endspoint['mac_adress'];
                     //$arrTmp[3] = "<div class='chkbox' id=".$cont." style='width:135px;'><div class='resp_".$cont."'><a href='http://{$endspoint['ip_adress']}/' target='_blank' id='a_".$cont."' style='float:left;'>{$endspoint['ip_adress']}</a><input type='hidden' name='ip_adress_endpoint_{$endspoint['mac_adress']}' id='hid_".$cont."' value='{$endspoint['ip_adress']}' />"."<input type='checkbox' id='chk_".$cont."' name='{$endspoint['mac_adress']}' style='margin-top:1px;' /></div></div>";
-                     $arrTmp[3] = "<a href='http://{$endspoint['ip_adress']}/' target='_blank'>{$endspoint['ip_adress']}</a><input type='hidden' name='ip_adress_endpoint_{$endspoint['mac_adress']}' value='{$endspoint['ip_adress']}' />";
+                    $arrTmp[3] = "<a href='http://{$endspoint['ip_adress']}/' target='_blank'>{$endspoint['ip_adress']}</a><input type='hidden' name='ip_adress_endpoint_{$endspoint['mac_adress']}' value='{$endspoint['ip_adress']}' />";
                     $arrTmp[4] = $endspoint['name_vendor']." / ".$endspoint['desc_vendor']."&nbsp;<input type='hidden' name='id_vendor_device_{$endspoint['mac_adress']}' value='{$endspoint['id_vendor']}' />&nbsp;<input type='hidden' name='name_vendor_device_{$endspoint['mac_adress']}' value='{$endspoint['name_vendor']}' />";
-
+		
                     $arrData[] = $arrTmp;
                     $_SESSION["endpoint_ip"][$endspoint['mac_adress']] = $endspoint['ip_adress'];
                 }
@@ -377,6 +388,7 @@ function endpointConfiguratedSet($smarty, $module_name, $local_templates_dir, $d
 
         return buildReport($_SESSION['elastix_endpoints'],$smarty,$module_name, $endpoint_mask);
     }
+   
     foreach($_POST as $key => $values){
         if(substr($key,0,6) == "epmac_"){ //encontre una mac seleccionada entoces por forma empirica con ayuda del mac_adress obtego los parametros q se relacionan con esa mac.
             $tmpMac = substr($key,6);
@@ -420,9 +432,10 @@ function endpointConfiguratedSet($smarty, $module_name, $local_templates_dir, $d
                         "arrParameters"=> $tmpEndpoint['arrParameters'],
                         "tech"         => $tech
                         );
-
+		
                 //Falta si hay error en la creacion de un archivo, ya esta para saber q error es, el problema es como manejar un error o los errores dentro del este lazo (foreach).
                 //ejemplo: if($paloFile->createFiles($ArrayData)==false){ $paloFile->errMsg  (mostrar error con smarty)}
+		
                 if(!$paloFileEndPoint->createFiles($ArrayData)){
                     if(isset($paloFileEndPoint->errMsg))
                         $error .= $paloFileEndPoint->errMsg."<br />";
@@ -487,7 +500,16 @@ function validateParameterEndpoint($arrParameters, $module_name, $dsnAsterisk, $
                 $tmpModelsVendor = $paloEndPoint->getAllModelsVendor($tmpVendor);
                 if(!array_key_exists($tmpModel,$tmpModelsVendor))
                     $error .= "The model entered does not exist or does not belong to this vendor. <br />";
-                $dataVendor = $paloEndPoint->getVendor(substr($tmpMac,0,8));
+					  
+                if ($tmpVendor == "Elastix") 
+		{
+		    $endpointElastix = $paloEndPoint->getVendorByName("Grandstream");
+		    $tmpVendor	     = $endpointElastix["name"];
+		    $tmpidVendor     = $endpointElastix["id"];
+		}
+		  
+		$dataVendor = $paloEndPoint->getVendor(substr($tmpMac,0,8));
+		
                 if(!isset($dataVendor["name"]) || $dataVendor["name"] != $tmpVendor || !isset($dataVendor["id"]) || $dataVendor["id"] != $tmpidVendor)
                     $error .= "The id or/and name of vendor do not match with the mac address. <br />";
                 if(isset($tmpModel) && $tmpModel != ""){

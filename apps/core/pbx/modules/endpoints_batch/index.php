@@ -198,6 +198,15 @@ function load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo_csv, $base_dir,
                         }
                         
                         $dataVendor = $paloEndPoint->getVendor(substr($MAC,0,8));
+			if($dataVendor["name"]=="Grandstream"){
+			   $arr = $paloFileEndPoint->getModelElastix("admin","admin",$currentEndpointIP,2);
+			   if($arr){
+			      $endpointElastix   = $paloEndPoint->getVendorByName("Elastix");
+			      $dataVendor["id"]  = $endpointElastix["id"];
+			      $dataVendor["name"]= $endpointElastix["name"];
+			   }
+
+			}
                         $dataModel  = $paloEndPoint->getModelByVendor($dataVendor["id"],$name_model);
 
                         if(!(is_array($dataVendor) && count($dataVendor)>0)){

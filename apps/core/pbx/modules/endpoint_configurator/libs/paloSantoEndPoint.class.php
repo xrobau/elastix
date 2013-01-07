@@ -542,6 +542,19 @@ class paloSantoEndPoint
         return array();
     }
 
+    function getVendorByName($vendor)
+    {
+    $pDB = $this->connectDataBase("sqlite","endpoint");
+        if($pDB==false)
+            return false;
+    $query = "select * from vendor where name=?";
+    $result = $pDB->getFirstRowQuery($query,true,array($vendor));
+    if(is_array($result))
+        return $result;
+    else
+        return array();
+    }
+
     function getAllModelsVendor($nameVendor)
     {
         global $arrLang;

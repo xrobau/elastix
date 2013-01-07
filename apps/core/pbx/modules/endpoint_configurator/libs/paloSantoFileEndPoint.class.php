@@ -91,7 +91,7 @@ class PaloSantoFileEndPoint
     {
         include_once "vendors/{$ArrayData['vendor']}.cfg.php";
     $return = false;
-        switch($ArrayData['vendor']){
+	switch($ArrayData['vendor']){
             case 'Polycom':
                 //Header Polycom
                 $contentHeader = HeaderFilePolycom($ArrayData['data']['filename']);
@@ -211,7 +211,41 @@ class PaloSantoFileEndPoint
 		}
 	        break;
 
-            case 'Snom':
+	     case 'Damall':
+                if($ArrayData['data']['model'] == "D-3310"){
+		   if ($contentFileDamall = PrincipalFileDamallD3310($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['filename'],$ArrayData['data']['ip_endpoint']))
+		   {
+		       if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileDamall)){
+			      if(set_update_conf($ArrayData['data']['ip_endpoint'],"admin","admin",$this->ipAdressServer,$ArrayData['data']['filename']))
+				 {
+				    $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
+				    $result      = $this->AsteriskManagerAPI('Command',$parameters);
+				    if($result) $return = true;
+				    else $return = false;
+				 }
+			       else
+				    $return = false;  
+  			}
+			else 
+			    $return = false;
+		    }else $return = false;
+		}
+                break;
+	    
+	    case 'Elastix':
+		if($ArrayData['data']['model'] == "LXP200"){
+		  $contentFileElastix = PrincipalFileElastixLXP200($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['model']);
+		  $sConfigBin = elastix_encode_config($ArrayData['data']['filename'], $contentFileElastix);
+		  if($this->createFileConf($this->directory, "cfg{$ArrayData['data']['filename']}", $sConfigBin))
+		  {
+		     $result = $this->configElastixPhone($ArrayData['data']['ip_endpoint'],"admin",2);
+          	     if($result) $return = true;
+                     else $return = false;
+		  }else $return = false;
+		}
+		break;
+            
+	    case 'Snom':
                 $contentFileSnom = PrincipalFileSnom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
                 if($this->createFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm", $contentFileSnom))
                     $return = true;
@@ -323,6 +357,24 @@ class PaloSantoFileEndPoint
     return $return;
     }
       
+    function getModelElastix($user,$password,$ip,$sw){
+      if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+      {
+	      $result = $this->read($fsock,$sw);
+	      fclose ($fsock);
+	      $result = preg_replace('([^A-Za-z0-9])','', $result);
+	      if(preg_match("/^Elastix/",$result,$arrTokens)){
+		 return true;
+	      }else
+		 return false;
+	    
+      }else{
+	      $this->errMsg = _tr("Unable to telnet to ").$ip;
+	      return false;
+      }
+
+    }
+
     function buildPattonConfFile($arrData,$tone_set)
     {
     include_once "vendors/Patton.cfg.php";
@@ -678,7 +730,15 @@ class PaloSantoFileEndPoint
 	    case 'Escene':
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".xml");
                 break;
-
+	    
+	    case 'Damall':
+                return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
+                break;  
+	  
+	    case 'Elastix':
+                return $this->deleteFileConf($this->directory, "cfg".$ArrayData['data']['filename']);
+                break; 
+	    
             case 'Snom':
                 return $this->deleteFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm");
                 break;
@@ -795,6 +855,20 @@ class PaloSantoFileEndPoint
                 $this->createFileConf($this->directory, "ES000000.xml", $contentFileEscene);
                 return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
                 break;
+	    
+	    case 'Damall':
+                //Creando archivos de ejemplo.
+                $contentFileDamall = templatesFileDamall($this->ipAdressServer);
+                $this->createFileConf($this->directory, "Damall00.cfg", $contentFileDamall);
+                return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
+                break;
+	    
+	    case 'Elastix':
+                //Creando archivos de ejemplo.
+                $contentFileElastix = templatesFileElastix($this->ipAdressServer);
+                $this->createFileConf($this->directory, "cfgElastix.template", $contentFileElastix);
+                return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
+                break;
 
             case 'Snom':
                 //Creando archivos de ejemplo.
@@ -850,6 +924,32 @@ class PaloSantoFileEndPoint
                 
         }
     }
+    
+    function configElastixPhone($ip,$password,$sw)
+    {
+        if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+        {
+	    $this->read($fsock,$sw);
+	    fputs($fsock, "$password\r");
+	    $this->read($fsock,$sw);
+	    fputs($fsock, "upgrade\r");
+	    $this->read($fsock,$sw);
+	    fputs($fsock, "upgrade\r");
+	    $this->read($fsock,$sw);
+	    fputs($fsock, "y\r");
+	    stream_set_blocking($fsock, TRUE);
+	    while(true) {
+		$char = fgetc($fsock);
+		if(empty($char)) break;
+	    }
+	    fclose($fsock);
+            return true;
+        }
+        else{
+            $this->errMsg = _tr("Unable to telnet to ").$ip;
+            return false;
+        }
+    }
 
    function telnet($ip, $user, $password, $arrComandos, $sw=1)
     {
@@ -867,8 +967,8 @@ class PaloSantoFileEndPoint
                 }
                 foreach($arrComandos as $comando => $valor)
                 {
-                    $line = $comando;
-                    if($valor!="")
+		    $line = $comando;
+		    if($valor!="")
                         $line = "$comando $valor";
 		    fputs($fsock, "$line\r");
                     $this->read($fsock,$sw);

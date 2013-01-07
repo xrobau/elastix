@@ -1,3 +1,6 @@
+* Dialer (ECCP): fix error message for hangup request when agent exists but is 
+  not handling a call
+* Dialer (ECCP): add required campaign ID when starting hold.
 * Agent Console: fix behavior when no callback extensions exist.
 * Agent Console: fix two javascript warnings in IE6.
 * Agents, Callback Extensions: do not modify the audit or call tables from the

@@ -2017,11 +2017,7 @@ LISTA_EXTENSIONES;
         }
 
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
-        if (is_null($infoLlamada)) {
-            $this->_agregarRespuestaFallo($xml_hangupResponse, 404, 'Specified agent not found');
-            return $xml_response;
-        }
-        if (is_null($infoLlamada['agentchannel'])) {
+        if (is_null($infoLlamada) || is_null($infoLlamada['agentchannel'])) {
             $this->_agregarRespuestaFallo($xml_hangupResponse, 417, 'Agent not in call');
             return $xml_response;
         }
@@ -2829,7 +2825,13 @@ SQL_INSERTAR_AGENDAMIENTO;
                 'datetime_entry'    =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
                 'new_status'        =>  'OnHold',
             );
-            $paramProgreso[($infoLlamada['calltype'] == 'incoming') ? 'id_call_incoming' : 'id_call_outgoing'] = $infoLlamada['callid'];
+            if ($infoLlamada['calltype'] == 'incoming') {
+                $paramProgreso['id_campaign_incoming'] = $infoLlamada['campaign_id'];
+                $paramProgreso['id_call_incoming'] = $infoLlamada['callid'];
+            } else {
+                $paramProgreso['id_campaign_outgoing'] = $infoLlamada['campaign_id'];
+                $paramProgreso['id_call_outgoing'] = $infoLlamada['callid'];
+            }
             $this->_eccpProcess->notificarProgresoLlamada($paramProgreso);
             
             $this->_db->commit();

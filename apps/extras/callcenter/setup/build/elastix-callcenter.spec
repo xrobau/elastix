@@ -100,6 +100,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Jan 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Dialer (ECCP): fix error message for hangup request when agent exists but is 
+  not handling a call.
+- Dialer (ECCP): add required campaign ID when starting hold.
+
 * Sat Jan 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fix behavior when no callback extensions exist.
 - FIXED: Agent Console: fix two javascript warnings in IE6.

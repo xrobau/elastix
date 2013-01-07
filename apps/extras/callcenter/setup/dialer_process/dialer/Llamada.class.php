@@ -492,7 +492,7 @@ class Llamada
         $this->timestamp_enterqueue = $timestamp;
         $this->_queuenumber = $sQueueNumber;
         if (is_null($this->channel)) $this->channel = $channel;
-        if (in_array($this->status, array('Placing', 'Ringing')))
+        if (is_null($this->status) || in_array($this->status, array('Placing', 'Ringing')))
             $this->status = 'OnQueue';
         
         if ($this->tipo_llamada == 'outgoing') {

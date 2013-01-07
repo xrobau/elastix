@@ -2053,7 +2053,7 @@ LISTA_EXTENSIONES;
         }
 
         // Leer información de las llamadas en curso para la campaña
-        $statusCampania_AMI = $this->_tuberia->AMIEventProcess_reportarInfoLlamadasCampania($idCampania);
+        $statusCampania_AMI = $this->_tuberia->AMIEventProcess_reportarInfoLlamadasCampania($sTipoCampania, $idCampania);
         
         // Leer resumen de llamadas completadas desde la base de datos
         switch ($sTipoCampania) {
@@ -2142,6 +2142,8 @@ LISTA_EXTENSIONES;
                 $xml_activecall->addChild('dialend', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialend']));
             if (isset($infoLlamada['datetime_enterqueue']))
                 $xml_activecall->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_enterqueue']));
+            if (isset($infoLlamada['trunk']))
+                $xml_activecall->addChild('trunk', $infoLlamada['trunk']);
         }
         
         return $xml_response;

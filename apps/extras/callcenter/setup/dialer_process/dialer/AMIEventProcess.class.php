@@ -317,13 +317,15 @@ class AMIEventProcess extends TuberiaProcess
      * Procedimiento que reporta la información sobre todas las llamadas que
      * pertenecen a la campaña indicada por $idCampania. 
      */
-    private function _reportarInfoLlamadasCampania($idCampania)
+    private function _reportarInfoLlamadasCampania($sTipoCampania, $idCampania)
     {
         // Información sobre llamadas que ya están conectadas
         $estadoCola = array();
         $llamadasPendientes = array();
         foreach ($this->_listaLlamadas as $llamada) {
-        	if (!is_null($llamada->campania) && $llamada->campania->id == $idCampania) {
+            if (!is_null($llamada->campania) &&
+                $llamada->campania->tipo_campania == $sTipoCampania &&
+                $llamada->campania->id == $idCampania) {
                 if (!is_null($llamada->agente)) {
             		$a = $llamada->agente;
                     $sAgente = $a->channel;
@@ -350,6 +352,8 @@ class AMIEventProcess extends TuberiaProcess
                         $callStatus['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
                     if (!is_null($llamada->timestamp_enterqueue))
                         $callStatus['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
+                    if (!is_null($llamada->trunk))
+                        $callStatus['trunk'] = $llamada->trunk;
                     
                     $llamadasPendientes[] = $callStatus;
             	}

@@ -5,8 +5,6 @@ $x = new ECCP();
 try {
     print "Connect...\n";
     $x->connect("localhost", "agentconsole", "agentconsole");
-    $x->setAgentNumber("Agent/9000");
-    $x->setAgentPass("gatito");
     $a = time(); $i = 0;
     while (true) {
         try {

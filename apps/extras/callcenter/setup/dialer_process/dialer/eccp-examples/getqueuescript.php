@@ -1,13 +1,14 @@
 #!/usr/bin/php
 <?php
 require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
+
+if (count($argv) < 2) die("Use: {$argv[0]} incomingqueue\n");
+
 $x = new ECCP();
 try {
     print "Connect...\n";
     $x->connect("localhost", "agentconsole", "agentconsole");
-    $x->setAgentNumber("Agent/9000");
-    $x->setAgentPass("gatito");
-    $r = $x->getqueuescript(8001);
+    $r = $x->getqueuescript($argv[1]);
     print_r($r);
     print "Disconnect...\n";
     $x->disconnect();

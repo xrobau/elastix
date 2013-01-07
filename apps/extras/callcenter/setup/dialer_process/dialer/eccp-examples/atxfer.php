@@ -1,15 +1,20 @@
 #!/usr/bin/php
 <?php
 require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
+
+if (count($argv) < 4) die("Use: {$argv[0]} agentchannel agentpassword extension\n");
+$agentname = $argv[1];
+$agentpass = $argv[2];
+
 $x = new ECCP();
 try {
 	print "Connect...\n";
 	$x->connect("localhost", "agentconsole", "agentconsole");
-        $x->setAgentNumber("Agent/9000");
-        $x->setAgentPass("gatito");
+    $x->setAgentNumber($agentname);
+    $x->setAgentPass($agentpass);
 	print_r($x->getAgentStatus());
 	print "Iniciando transferencia atendida...\n";
-	$r = $x->atxfercall($argv[1]);
+	$r = $x->atxfercall($argv[3]);
 	print_r($r);
 	print "Disconnect...\n";
 	$x->disconnect();

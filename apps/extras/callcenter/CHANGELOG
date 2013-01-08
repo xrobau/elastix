@@ -1,3 +1,6 @@
+* Dialer (ECCP): add and document new request 'campaignlog'. This request allows
+  to retrieve the event log for a particular campaign.
+* Dialer (ECCP): emit queue on callprogress event.
 * Dialer (ECCP): getcampaignstatus: propagate trunk for each call. Display all
   agents, not just the ones handling a call.
 * Dialer (ECCP): fix validation that prevented incoming calls from entering

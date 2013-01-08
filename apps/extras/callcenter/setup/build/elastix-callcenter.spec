@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Tue Jan 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Dialer (ECCP): add and document new request 'campaignlog'. This request
+  allows to retrieve the event log for a particular campaign.
+- CHANGED: Dialer (ECCP): emit queue on callprogress event.
 - FIXED: Dialer (ECCP): getcampaignstatus: propagate trunk for each call. 
   Display all agents, not just the ones handling a call.
 

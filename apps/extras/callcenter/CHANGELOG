@@ -1,3 +1,5 @@
+* Dialer (ECCP): getcampaignstatus: propagate trunk for each call. Display all
+  agents, not just the ones handling a call.
 * Dialer (ECCP): fix validation that prevented incoming calls from entering
   OnQueue state.
 * Dialer (ECCP): fix forgotten specification of campaign type on implementation

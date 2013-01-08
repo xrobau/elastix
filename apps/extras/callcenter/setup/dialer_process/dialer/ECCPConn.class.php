@@ -3388,6 +3388,97 @@ LEER_ULTIMA_PAUSA;
         return $xml_response;
     }
 
+    private function Request_campaignlog($comando)
+    {
+        // Fechas de inicio y fin
+        $sFechaInicio = $sFechaFin = date('Y-m-d');
+        if (isset($comando->datetime_start)) {
+            $sFechaInicio = (string)$comando->datetime_start;
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaInicio))
+                return $this->_generarRespuestaFallo(400, 'Bad request - invalid start date');
+        }
+        if (isset($comando->datetime_end)) {
+            $sFechaFin = (string)$comando->datetime_end;
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaFin))
+                return $this->_generarRespuestaFallo(400, 'Bad request - invalid end date');
+        }
+        if (!is_null($sFechaInicio) && !is_null($sFechaFin) && $sFechaFin < $sFechaInicio) {
+            $t = $sFechaInicio;
+            $sFechaInicio = $sFechaFin;
+            $sFechaFin = $t;
+        }
+        
+        // Verificar que id y tipo está presente
+        $idCampania = $sCola = NULL;
+        if (!isset($comando->campaign_type))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        $sTipoCampania = (string)$comando->campaign_type;
+        if (!in_array($sTipoCampania, array('incoming', 'outgoing')))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        if (isset($comando->campaign_id)) $idCampania = (int)$comando->campaign_id;
+        if (isset($comando->queue)) $sCola = $idCampania = (string)$comando->queue;
+        if ($sTipoCampania == 'outgoing' && is_null($idCampania))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        if ($sTipoCampania == 'incoming' && (is_null($idCampania) && is_null($sCola)))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        if (!is_null($idCampania)) $sCola = NULL;
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_campaignlogResponse = $xml_response->addChild('campaignlog_response');
+
+        if ($sTipoCampania == 'incoming') {
+    	   $sPeticionSQL_leerLog = <<<LOG_CAMPANIA_ENTRANTE
+SELECT call_progress_log.id, call_progress_log.datetime_entry, 
+    call_entry.callerid AS phone, queue_call_entry.queue,
+    "incoming" AS campaign_type, call_progress_log.id_campaign_incoming AS campaign_id, 
+    call_progress_log.id_call_incoming AS call_id, call_progress_log.new_status,
+    call_progress_log.retry, call_progress_log.uniqueid, call_progress_log.trunk,
+    call_progress_log.duration,
+    CONCAT(agent.type, "/", agent.number) AS agentchannel
+FROM (call_progress_log, call_entry, queue_call_entry)
+LEFT JOIN (agent) ON (call_progress_log.id_agent = agent.id)
+WHERE (id_campaign_incoming = ? OR (? IS NULL AND id_campaign_incoming IS NULL))
+    AND (? IS NULL OR queue_call_entry.queue = ?)
+    AND call_progress_log.id_call_incoming = call_entry.id
+    AND call_entry.id_queue_call_entry = queue_call_entry.id
+    AND call_progress_log.datetime_entry BETWEEN ? AND ?
+ORDER BY id
+LOG_CAMPANIA_ENTRANTE;
+            $paramSQL = array($idCampania, $idCampania, $sCola, $sCola,
+                $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59');
+        } else {
+            $sPeticionSQL_leerLog = <<<LOG_CAMPANIA_SALIENTE
+SELECT call_progress_log.id, call_progress_log.datetime_entry,
+    calls.phone AS phone, campaign.queue,"outgoing" AS campaign_type,
+    call_progress_log.id_campaign_outgoing AS campaign_id,
+    call_progress_log.id_call_outgoing AS call_id,
+    call_progress_log.new_status, call_progress_log.retry,
+    call_progress_log.uniqueid, call_progress_log.trunk,
+    call_progress_log.duration,
+    CONCAT(agent.type, "/", agent.number) AS agentchannel
+FROM (call_progress_log, calls, campaign)
+LEFT JOIN (agent) ON (call_progress_log.id_agent = agent.id)
+WHERE id_campaign_outgoing = ?
+    AND call_progress_log.id_call_outgoing = calls.id
+    AND calls.id_campaign = campaign.id
+    AND call_progress_log.datetime_entry BETWEEN ? AND ?
+ORDER BY id
+LOG_CAMPANIA_SALIENTE;
+            $paramSQL = array($idCampania, $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59');
+        }
+        
+        $sth = $this->_db->prepare($sPeticionSQL_leerLog);
+        $sth->execute($paramSQL);
+        $xml_logentries = $xml_campaignlogResponse->addChild('logentries');
+        while ($tupla = $sth->fetch(PDO::FETCH_ASSOC)) {
+            $xml_logentry = $xml_logentries->addChild('logentry');
+        	foreach ($tupla as $k => $v) if (!is_null($v)) {
+        		$xml_logentry->addChild($k, str_replace('&', '&amp;', $v));
+        	}
+        }
+        return $xml_response;
+    }
+
     /***************************** EVENTOS *****************************/
     
     function notificarEvento_AgentLogin($sAgente, $bExitoLogin)

@@ -566,5 +566,23 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getchanvars_response;
     }
+    
+    public function campaignlog($campaign_type, $campaign_id = NULL, $queue = NULL,
+        $datetime_start = NULL, $datetime_end = NULL)
+    {
+    	$xml_request = new SimpleXMLElement('<request />');
+        $xml_cmdRequest = $xml_request->addChild('campaignlog');
+        $xml_cmdRequest->addChild('campaign_type', str_replace('&', '&amp;', $campaign_type));
+        if (!is_null($campaign_id))
+            $xml_cmdRequest->addChild('campaign_id', str_replace('&', '&amp;', $campaign_id));
+        if (!is_null($queue))
+            $xml_cmdRequest->addChild('queue', str_replace('&', '&amp;', $queue));
+        if (!is_null($datetime_start))
+            $xml_cmdRequest->addChild('datetime_start', str_replace('&', '&amp;', $datetime_start));
+        if (!is_null($datetime_end))
+            $xml_cmdRequest->addChild('datetime_end', str_replace('&', '&amp;', $datetime_end));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->campaignlog_response;
+    }
 }
 ?>

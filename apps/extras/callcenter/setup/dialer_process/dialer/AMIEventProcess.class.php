@@ -340,6 +340,7 @@ class AMIEventProcess extends TuberiaProcess
                         $estadoCola[$sAgente]['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
                     $estadoCola[$sAgente]['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
                     $estadoCola[$sAgente]['datetime_linkstart'] = date('Y-m-d H:i:s', $llamada->timestamp_link);
+                    if (!is_null($llamada->trunk)) $estadoCola[$sAgente]['trunk'] = $llamada->trunk;
             	} elseif (in_array($llamada->status, array('Placing', 'Ringing', 'OnQueue'))) {
                     $callStatus = array(
                         'dialnumber'    =>  $llamada->phone,
@@ -352,8 +353,7 @@ class AMIEventProcess extends TuberiaProcess
                         $callStatus['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
                     if (!is_null($llamada->timestamp_enterqueue))
                         $callStatus['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
-                    if (!is_null($llamada->trunk))
-                        $callStatus['trunk'] = $llamada->trunk;
+                    if (!is_null($llamada->trunk)) $callStatus['trunk'] = $llamada->trunk;
                     
                     $llamadasPendientes[] = $callStatus;
             	}

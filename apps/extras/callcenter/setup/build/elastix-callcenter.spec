@@ -100,6 +100,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Jan 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): getcampaignstatus: propagate trunk for each call. 
+  Display all agents, not just the ones handling a call.
+
 * Mon Jan 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): fix validation that prevented incoming calls from 
   entering OnQueue state.

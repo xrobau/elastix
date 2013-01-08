@@ -1560,6 +1560,8 @@ Respuesta:
     Sólo definido si el agente está atendiendo una llamada.
   * linkstart: Hora en la que la llamada fue conectada con el agente. Sólo
     definido si el agente está atendiendo una llamada.
+  * trunk: Troncal a través de la cual se recibe llamada entrante, o se realiza
+    la llamada saliente. Sólo definido si el agente está atendiendo una llamada.
 * activecalls: Llamadas de la campaña que todavía no han sido asignadas a un 
   agente. Este elemento es una lista que contiene múltiples elementos 'activecall'.
   Cada elemento contiene los siguientes atributos:
@@ -1575,6 +1577,8 @@ Respuesta:
     'ringing' o 'onqueue'.
   * queuestart: Hora en la que la llamada ingresó a la cola. Sólamente definido
     para campañas salientes, y si el estado en 'callstatus' es 'onqueue'.
+  * trunk: Troncal a través de la cual se recibe llamada entrante, o se realiza
+    la llamada saliente.
 
 Ejemplo:
 <request id="7">

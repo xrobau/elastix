@@ -2080,52 +2080,72 @@ LISTA_EXTENSIONES;
         foreach ($statusCampania_DB['status'] as $statusKey => $statusCount)
             $xml_statusCount->addChild(strtolower($statusKey), $statusCount);
             
+        if (!function_exists('_getcampaignstatus_setagent')) {
+            function _getcampaignstatus_setagent($xml_agent, $infoAgente)
+            {
+                if ($infoAgente['num_pausas'] > 0) {
+                    $xml_agent->addChild('status', 'paused');
+                } elseif ($infoAgente['oncall']) {
+                    $xml_agent->addChild('status', 'oncall');
+                } elseif ($infoAgente['estado_consola'] == 'logged-in') {
+                    $xml_agent->addChild('status', 'online');
+                } else {
+                    $xml_agent->addChild('status', 'offline');
+                }
+                if (isset($infoAgente['callid']))
+                    $xml_agent->addChild('callid', $infoAgente['callid']);
+                if (isset($infoAgente['dialnumber']))
+                    $xml_agent->addChild('callnumber', $infoAgente['dialnumber']);
+                if (isset($infoAgente['clientchannel']))
+                    $xml_agent->addChild('callchannel', str_replace('&', '&amp;', $infoAgente['clientchannel']));
+                if (isset($infoAgente['datetime_dialstart']))
+                    $xml_agent->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialstart']));
+                if (isset($infoAgente['datetime_dialend']))
+                    $xml_agent->addChild('dialend', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialend']));
+                if (isset($infoAgente['datetime_enterqueue']))
+                    $xml_agent->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_enterqueue']));
+                if (isset($infoAgente['datetime_linkstart']))
+                    $xml_agent->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_linkstart']));
+                if (isset($infoAgente['trunk']))
+                    $xml_agent->addChild('trunk', $infoAgente['trunk']);
+    
+                if (!is_null($infoAgente['id_break'])) {
+                    $xml_agent->addChild('pauseid', $infoAgente['id_break']);
+                    $recordset = $this->_db->prepare(
+                        'SELECT audit.datetime_init, break.name, break.id '.
+                        'FROM audit, break WHERE audit.id_break = break.id AND audit.id = ?');
+                    $recordset->execute(array($infoAgente['id_audit_break']));
+                    $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
+                    $recordset->closeCursor();
+                    if ($tupla) {
+                        $xml_agent->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
+                        $xml_agent->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
+                    }
+                }
+            }
+        }
+        
         // Estado de los agentes
         $xml_agents = $xml_GetCampaignStatusResponse->addChild('agents');
         foreach ($statusCampania_AMI['queuestatus'] as $sAgente => $infoAgente) {
             // Este código asume agentes de formato Agent/9000
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
-            if ($infoAgente['num_pausas'] > 0) {
-                $xml_agent->addChild('status', 'paused');
-                $bEstadoConocido = TRUE;
-            } elseif ($infoAgente['oncall']) {
-                $xml_agent->addChild('status', 'oncall');
-                $bEstadoConocido = TRUE;
-            } elseif ($infoAgente['estado_consola'] == 'logged-in') {
-                $xml_agent->addChild('status', 'online');
-                $bEstadoConocido = TRUE;
-            } else {
-                $xml_agent->addChild('status', 'offline');
-                $bEstadoConocido = TRUE;
-            }
-            if (isset($infoAgente['callid']))
-                $xml_agent->addChild('callid', $infoAgente['callid']);
-            if (isset($infoAgente['dialnumber']))
-                $xml_agent->addChild('callnumber', $infoAgente['dialnumber']);
-            if (isset($infoAgente['clientchannel']))
-                $xml_agent->addChild('callchannel', str_replace('&', '&amp;', $infoAgente['clientchannel']));
-            if (isset($infoAgente['datetime_dialstart']))
-                $xml_agent->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialstart']));
-            if (isset($infoAgente['datetime_dialend']))
-                $xml_agent->addChild('dialend', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialend']));
-            if (isset($infoAgente['datetime_enterqueue']))
-                $xml_agent->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_enterqueue']));
-            if (isset($infoAgente['datetime_linkstart']))
-                $xml_agent->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_linkstart']));
-
-            if (!is_null($infoAgente['id_break'])) {
-                $xml_agent->addChild('pauseid', $infoAgente['id_break']);
-                $recordset = $this->_db->prepare(
-                    'SELECT audit.datetime_init, break.name, break.id '.
-                    'FROM audit, break WHERE audit.id_break = break.id AND audit.id = ?');
-                $recordset->execute(array($infoAgente['id_audit_break']));
-                $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
-                $recordset->closeCursor();
-                if ($tupla) {
-                	$xml_agent->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
-                    $xml_agent->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
-                }
+            
+            _getcampaignstatus_setagent($xml_agent, $infoAgente);
+        }
+        
+        // Estado de los agentes logoneados en la cola
+        $listaAgentes = array_unique(array_merge(
+            $this->_listarAgentesLogoneadosCola($statusCampania_DB['queue']),
+            $this->_listarAgentesDinamicosCola($statusCampania_DB['queue'])));
+        foreach ($listaAgentes as $sAgente) if (!isset($statusCampania_AMI['queuestatus'][$sAgente])) {
+        	$infoAgente = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
+            if (!is_null($infoAgente)) {
+                $xml_agent = $xml_agents->addChild('agent');
+                $xml_agent->addChild('agentchannel', $sAgente);
+            
+                _getcampaignstatus_setagent($xml_agent, $infoAgente);
             }
         }
 
@@ -3114,6 +3134,52 @@ Privilege: Command
                 }
             }
             return $listaColas;
+        } else {
+            $this->_log->output('ERR: lost synch with Asterisk AMI ("queue show" response lacks "data").');
+            return NULL;
+        }
+    }
+
+    private function _listarAgentesLogoneadosCola($sCola)
+    {
+    	$respuestaCola = $this->_ami->Command('queue show '.$sCola);
+        if (isset($respuestaCola['data'])) {
+            $listaAgentes = array();
+            $lineasRespuesta = explode("\n", $respuestaCola['data']);
+            $bSeccionMiembros = FALSE;
+            foreach ($lineasRespuesta as $sLinea) {
+                $regs = NULL;
+                if (strpos($sLinea, 'Members:') !== FALSE)
+                    $bSeccionMiembros = TRUE;
+                elseif (strpos($sLinea, 'Callers') !== FALSE)
+                    $bSeccionMiembros = FALSE;
+                elseif (preg_match('|^\s+(\w+/\d+)\s+|', $sLinea, $regs)) {
+                	$listaAgentes[] = $regs[1];
+                }
+            }
+            return $listaAgentes;
+        } else {
+            $this->_log->output('ERR: lost synch with Asterisk AMI ("queue show" response lacks "data").');
+            return NULL;
+        }
+    }
+
+    private function _listarAgentesDinamicosCola($sCola)
+    {
+        $respuestaCola = $this->_ami->Command('database show QPENALTY/'.$sCola.'/agents');
+        if (isset($respuestaCola['data'])) {
+            $listaAgentes = array();
+            $lineasRespuesta = explode("\n", $respuestaCola['data']);
+            foreach ($lineasRespuesta as $sLinea) {
+                $regs = NULL;
+                if (preg_match('|/QPENALTY/\d+/agents/(\w)(\d+)|', $sLinea, $regs)) {
+                	switch ($regs[1]) {
+                	case 'I':  $listaAgentes[] = 'IAX2/'.$regs[2]; break;
+                    case 'S':  $listaAgentes[] = 'SIP/'.$regs[2]; break;
+                	}
+                }
+            }
+            return $listaAgentes;
         } else {
             $this->_log->output('ERR: lost synch with Asterisk AMI ("queue show" response lacks "data").');
             return NULL;

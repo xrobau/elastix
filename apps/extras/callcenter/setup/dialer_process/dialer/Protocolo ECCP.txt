@@ -580,6 +580,10 @@ Elementos informativos:
   valor de call_type (y campaign_id para llamadas salientes), el código cliente
   puede identificar la llamada a procesar para formularios.
 * phone: El número que fue marcado, o el Caller-ID que fue recibido.
+* datetime_linkend: Fecha y hora en que la llamada fue desconectada del agente.
+* duration: Duración en segundos de la llamada.
+* shortcall: Bandera puesta a 1 si la llamada es demasiado corta según la 
+  configuración del sistema, o 0 si es una llamada de duración normal.
 
 Ejemplo:
 <event>
@@ -589,6 +593,9 @@ Ejemplo:
         <campaign_id>1</campaign_id>
         <call_id>13</call_id>
         <phone>1065</phone>
+        <datetime_linkend>2011-01-31 18:46:59</datetime_linkend>
+        <duration>216</duration>
+        <shortcall>0</shortcall>
     </agentunlinked>
 </event>
 
@@ -1573,8 +1580,8 @@ Respuesta:
   * callid: ID en la base de datos de la llamada conectada al cliente
   * callnumber: Número telefónico de la llamada conectada al cliente
   * callstatus: Estado de la llamada de la campaña. Puede ser uno de los valores
-    'placing' (sólo campañas salientes), 'ringing' (sólo campañas salientes),
-    'onqueue' (campañas entrantes o salientes)
+    'Placing' (sólo campañas salientes), 'Ringing' (sólo campañas salientes),
+    'OnQueue' (campañas entrantes o salientes)
   * dialstart: Hora en la que inició la marcación de la llamada. Solamente
     definido para campañas salientes.
   * dialend: Hora en la que se terminó la marcación de la llamada. Sólamente

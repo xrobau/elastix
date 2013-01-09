@@ -2155,7 +2155,7 @@ LISTA_EXTENSIONES;
             $xml_activecall = $xml_activecalls->addChild('activecall');
             $xml_activecall->addChild('callnumber', $infoLlamada['dialnumber']);
             $xml_activecall->addChild('callid', $infoLlamada['callid']);
-            $xml_activecall->addChild('callstatus', strtolower($infoLlamada['callstatus']));
+            $xml_activecall->addChild('callstatus', $infoLlamada['callstatus']);
             if (isset($infoLlamada['datetime_dialstart']))
                 $xml_activecall->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialstart']));
             if (isset($infoLlamada['datetime_dialend']))

@@ -100,6 +100,14 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Jan 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): add debug tracking to msg_QueueMemberRemoved. 
+- CHANGED: Dialer (ECCP): getcampaignstatus: callstatus is now camelcased 
+  (internal representation) instead of lowercase. Fix documentation to reflect
+  this.
+- CHANGED: Dialer (ECCP): agentunlinked event was modified with three new 
+  fields. Fix documentation to reflect this.
+
 * Tue Jan 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Dialer (ECCP): add and document new request 'campaignlog'. This request
   allows to retrieve the event log for a particular campaign.

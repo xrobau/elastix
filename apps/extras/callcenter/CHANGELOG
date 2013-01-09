@@ -1,3 +1,5 @@
+* Agent Console: add support for new request "callprogress".
+* Agent Console: add support for the three new fields in agentunlinked event.
 * Dialer (ECCP): add debug tracking to msg_QueueMemberRemoved. 
 * Dialer (ECCP): getcampaignstatus: callstatus is now camelcased (internal 
   representation) instead of lowercase. Fix documentation to reflect this.

@@ -584,5 +584,14 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->campaignlog_response;
     }
+    
+    public function callprogress($enable)
+    {
+        $xml_request = new SimpleXMLElement('<request />');
+        $xml_cmdRequest = $xml_request->addChild('callprogress');
+        $xml_cmdRequest->addChild('enable', $enable ? 1 : 0);
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->callprogress_response;
+    } 
 }
 ?>

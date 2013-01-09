@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Jan 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: add support for new request "callprogress".
+- CHANGED: Agent Console: add support for the three new fields in agentunlinked 
+  event.
 - CHANGED: Dialer (ECCP): add debug tracking to msg_QueueMemberRemoved. 
 - CHANGED: Dialer (ECCP): getcampaignstatus: callstatus is now camelcased 
   (internal representation) instead of lowercase. Fix documentation to reflect

@@ -825,6 +825,9 @@ LISTA_EXTENSIONES;
                     $evento['call_survey'] = isset($evt->call_survey) ? $this->_traducirCallSurvey($evt->call_survey) : NULL;
                     // Cae al siguiente caso
                 case 'agentunlinked':
+                    if (isset($evt->datetime_linkend)) $evento['datetime_linkend'] = (string)$evt->datetime_linkend;
+                    if (isset($evt->duration)) $evento['duration'] = (int)$evt->duration;
+                    if (isset($evt->shortcall)) $evento['shortcall'] = ((int)$evt->shortcall != 0);
                     $evento['call_type'] = (string)$evt->calltype;
                     $evento['campaign_id'] = isset($evt->campaign_id) ? (int)$evt->campaign_id : NULL;
                     $evento['call_id'] = (int)$evt->call_id;
@@ -839,6 +842,18 @@ LISTA_EXTENSIONES;
                     $evento['pause_type'] = isset($evt->pause_type) ? (int)$evt->pause_type : NULL;
                     $evento['pause_name'] = isset($evt->pause_name) ? (string)$evt->pause_name : NULL;
                     $evento['pause_start'] = (string)$evt->pause_start;
+                    break;
+                case 'callprogress':
+                    $evento['datetime_entry'] = (string)$evt->datetime_entry;
+                    $evento['call_type'] = (string)$evt->campaign_type;
+                    $evento['campaign_id'] = isset($evt->campaign_id) ? (int)$evt->campaign_id : NULL;
+                    $evento['call_id'] = (int)$evt->call_id;
+                    $evento['new_status'] = (string)$evt->new_status;
+                    $evento['retry'] = (int)$evt->retry;
+                    $evento['uniqueid'] = isset($evt->uniqueid) ? (string)$evt->uniqueid : NULL;
+                    $evento['trunk'] = isset($evt->trunk) ? (string)$evt->trunk : NULL;
+                    $evento['phone'] = (string)$evt->phone;
+                    $evento['queue'] = isset($evt->queue) ? (string)$evt->queue : NULL;
                     break;
                 }
                 $listaEventos[] = $evento;
@@ -967,6 +982,7 @@ LISTA_EXTENSIONES;
             $reporte = array(
                 'statuscount'   =>  array(),
                 'activecalls'   =>  array(),
+                'agents'        =>  array(),
             );
             foreach ($respuesta->children() as $xml_node) {
                 switch ($xml_node->getName()) {
@@ -977,7 +993,17 @@ LISTA_EXTENSIONES;
                     ksort($reporte['statuscount']);
                     break;
                 case 'agents':
-                    // No implementado
+                    foreach ($xml_node->agent as $xml_agent) {
+                    	$sAgente = (string)$xml_agent->agentchannel;
+                        $reporte['agents'][$sAgente] = array();
+                        foreach (array('agentchannel', 'status', 'callid', 'callnumber',
+                            'callchannel', 'dialstart', 'dialend', 'queuestart',
+                            'linkstart', 'pauseid', 'pausename', 'pausestart',
+                            'trunk') as $k) 
+                            $reporte['agents'][$sAgente][$k] = 
+                                isset($xml_agent->$k) ? (string) $xml_agent->$k : NULL;
+                    }
+                    ksort($reporte['agents']);
                     break;
                 case 'activecalls':
                     foreach ($xml_node->activecall as $xml_activecall) {
@@ -986,6 +1012,10 @@ LISTA_EXTENSIONES;
                             'callid'        =>  $idCall,
                             'callnumber'    =>  (string)$xml_activecall->callnumber,
                             'callstatus'    =>  (string)$xml_activecall->callstatus,
+                            'dialstart'     =>  isset($xml_activecall->dialstart) ? (string)$xml_activecall->dialstart : NULL,
+                            'dialend'       =>  isset($xml_activecall->dialend) ? (string)$xml_activecall->dialend : NULL,
+                            'queuestart'    =>  isset($xml_activecall->queuestart) ? (string)$xml_activecall->queuestart : NULL,
+                            'trunk'         =>  isset($xml_activecall->trunk) ? (string)$xml_activecall->trunk : NULL,
                         );
                     }
                     break;
@@ -995,6 +1025,44 @@ LISTA_EXTENSIONES;
         } catch (Exception $e) {
             $this->errMsg = '(internal) leerEstadoCampania'.$e->getMessage();
             return NULL;
+    	}
+    }
+    
+    function leerLogCampania($sCallType, $iCampaignId)
+    {
+    	try {
+            $oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->campaignlog($sCallType, $iCampaignId);
+            if (isset($respuesta->failure)) {
+                $this->errMsg = _tr('Unable to read campaign log').' - '.$this->_formatoErrorECCP($respuesta);
+                return NULL;
+            }
+            
+            $reporte = array();
+            if (isset($respuesta->logentries->logentry)) {
+                foreach ($respuesta->logentries->logentry as $xml_logentry) {
+                    $logentry = array();
+                    foreach (array('id', 'datetime_entry', 'phone', 'queue',
+                        'campaign_type', 'campaign_id', 'call_id', 'new_status',
+                        'retry', 'uniqueid', 'trunk', 'agentchannel', 'duration') as $k)
+                        $logentry[$k] = isset($xml_logentry->$k) ? (string) $xml_logentry->$k : NULL;
+                    $reporte[] = $logentry;
+                }
+            }
+            return $reporte;
+    	} catch (Exception $e) {
+            $this->errMsg = '(internal) leerLogCampania'.$e->getMessage();
+            return NULL;
+    	}
+    }
+    
+    function escucharProgresoLlamada($bHabilitar)
+    {
+    	try {
+    		$oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->callprogress($bHabilitar);
+        } catch (Exception $e) {
+            $this->errMsg = '(internal) leerLogCampania'.$e->getMessage();
     	}
     }
 }

@@ -718,12 +718,16 @@ INFO_FORMULARIOS;
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
 
-        list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada, $sPhone) = $datos;
+        list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada, $sPhone,
+            $sFechaFin, $iDuracion, $bShortFlag) = $datos;
         $this->_multiplex->notificarEvento_AgentUnlinked($sAgente, array(
             'calltype'      =>  $sTipoLlamada,
             'campaign_id'   =>  $idCampaign,
             'call_id'       =>  $idLlamada,
             'phone'         =>  $sPhone,
+            'datetime_linkend'  =>  $sFechaFin,
+            'duration'      =>  $iDuracion,
+            'shortcall'     =>  $bShortFlag ? 1 : 0,
         ));
     }
 
@@ -842,7 +846,7 @@ INFO_FORMULARIOS;
             /* Emitir el evento a las conexiones ECCP. Para mantener la 
              * consistencia con el resto del API, se quitan los valores de 
              * id_call_* y id_campaign_*, y se sintetiza tipo_llamada. */
-            if (!in_array($tuplaAnterior['new_status'], array('Success', 'Hangup'))) {
+            if (!in_array($tuplaAnterior['new_status'], array('Success', 'Hangup', 'ShortCall'))) {
                 // Todavía no se soporta emitir agente conectado para OnHold/OffHold
                 unset($tuplaAnterior['id_agent']);
                 

@@ -1299,7 +1299,6 @@ class AMIEventProcess extends TuberiaProcess
     // Nueva función
     public function msg_QueueMemberAdded($sEvent, $params, $sServer, $iPort)
     {  
-
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
@@ -1337,6 +1336,13 @@ class AMIEventProcess extends TuberiaProcess
 
     public function msg_QueueMemberRemoved($sEvent, $params, $sServer, $iPort)
     {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+        
         $a = $this->_listaAgentes->buscar('agentchannel', $params['Location']);
 
         if (is_null($a)) {

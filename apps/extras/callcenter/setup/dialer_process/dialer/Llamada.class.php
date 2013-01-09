@@ -775,7 +775,10 @@ class Llamada
             if (!is_null($this->agente)) {
                 $this->_tuberia->msg_ECCPProcess_AgentUnlinked(
                     $this->agente->channel, $this->tipo_llamada, 
-                    is_null($this->campania) ? NULL : $this->campania->id, $this->id_llamada, $this->phone);
+                    is_null($this->campania) ? NULL : $this->campania->id,
+                    $this->id_llamada, $this->phone, 
+                    date('Y-m-d H:i:s', $this->timestamp_hangup),
+                    $this->duration, ($this->status == 'ShortCall'));
             }
         }
         

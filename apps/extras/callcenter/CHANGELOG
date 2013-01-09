@@ -1,3 +1,8 @@
+* Dialer (ECCP): add debug tracking to msg_QueueMemberRemoved. 
+* Dialer (ECCP): getcampaignstatus: callstatus is now camelcased (internal 
+  representation) instead of lowercase. Fix documentation to reflect this.
+* Dialer (ECCP): agentunlinked event was modified with three new fields. Fix
+  documentation to reflect this.
 * Dialer (ECCP): add and document new request 'campaignlog'. This request allows
   to retrieve the event log for a particular campaign.
 * Dialer (ECCP): emit queue on callprogress event.

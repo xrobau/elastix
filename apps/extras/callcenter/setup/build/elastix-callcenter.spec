@@ -100,7 +100,7 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Thu Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-7.beta
 - Bump version for release.
 - ADDED: Campaign Monitoring: added new module. This module displays a 
   campaign-centric view of the callcenter activity. This module displays basic 
@@ -144,7 +144,7 @@ fi
 - FIXED: Agent Console: fix behavior when no callback extensions exist.
 - FIXED: Agent Console: fix two javascript warnings in IE6.
 
-* Wed Jan 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Jan 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agents, Callback Extensions: do not modify the audit or call tables 
   from the module. Now that the dialer has exclusive responsibility over 
   auditing on logoff, modification of audit tables on forced disconnection, as 

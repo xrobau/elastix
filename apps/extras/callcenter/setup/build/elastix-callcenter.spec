@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 6.alpha
+Release: 7.beta
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,7 +100,8 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Thu Jan 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Bump version for release.
 - ADDED: Campaign Monitoring: added new module. This module displays a 
   campaign-centric view of the callcenter activity. This module displays basic 
   information on the campaign, and counters of call states. Additionally there 
@@ -110,7 +111,7 @@ fi
   the call-related activities with timestamps. All of this information is 
   updated in realtime using ECCP events.
 
-* Wed Jan 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Jan 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: add support for new request "callprogress".
 - CHANGED: Agent Console: add support for the three new fields in agentunlinked 
   event.
@@ -121,14 +122,14 @@ fi
 - CHANGED: Dialer (ECCP): agentunlinked event was modified with three new 
   fields. Fix documentation to reflect this.
 
-* Tue Jan 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Tue Jan 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Dialer (ECCP): add and document new request 'campaignlog'. This request
   allows to retrieve the event log for a particular campaign.
 - CHANGED: Dialer (ECCP): emit queue on callprogress event.
 - FIXED: Dialer (ECCP): getcampaignstatus: propagate trunk for each call. 
   Display all agents, not just the ones handling a call.
 
-* Mon Jan 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Jan 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): fix validation that prevented incoming calls from 
   entering OnQueue state.
 - FIXED: Dialer (ECCP): fix forgotten specification of campaign type on 
@@ -139,7 +140,7 @@ fi
   not handling a call.
 - FIXED: Dialer (ECCP): add required campaign ID when starting hold.
 
-* Sat Jan 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Sat Jan 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fix behavior when no callback extensions exist.
 - FIXED: Agent Console: fix two javascript warnings in IE6.
 

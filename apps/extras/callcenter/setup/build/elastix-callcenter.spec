@@ -50,12 +50,6 @@ mv CHANGELOG $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{versio
 # Run installer script to fix up ACLs and add module to Elastix menus.
 elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
 
-# Workaround for missing elastix-menuremove in old Elastix versions (before 2.0.0-20)
-if [ -e /usr/bin/elastix-menuremove ] ; then
-  # TODO: Remove this when campaign_monitoring is actually implemented
-  elastix-menuremove campaign_monitoring
-fi
-
 # The installer script expects to be in /tmp/new_module
 mkdir -p /tmp/new_module/%{modname}
 cp -r /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/* /tmp/new_module/%{modname}/

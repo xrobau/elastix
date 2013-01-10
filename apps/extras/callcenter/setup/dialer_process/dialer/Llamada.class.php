@@ -231,7 +231,8 @@ class Llamada
                             is_null($this->campania) ? NULL : $this->campania->id,
                             $this->id_llamada, $this->agente->channel, 
                             is_null($this->actualchannel) ? $this->channel : $this->actualchannel,
-                            date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent']);
+                            date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
+                            $this->trunk);
                     }
                     if (isset($this->_actualizacionesPendientes['sqlinsertcurrentcalls'])) {
                         $this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, insertando current_call_entry...');
@@ -611,7 +612,8 @@ class Llamada
             $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada, 
                 is_null($this->campania) ? NULL : $this->campania->id, 
                 $this->id_llamada, $this->agente->channel, $sRemChannel, 
-                date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent']);
+                date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
+                $this->trunk);
         } else {
         	/* En el caso de llamadas entrantes, puede ocurrir que el evento 
              * Link se reciba ANTES de haber recibido el ID de inserción en

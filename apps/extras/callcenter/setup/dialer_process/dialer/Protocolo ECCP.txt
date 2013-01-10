@@ -413,8 +413,8 @@ Elementos informativos:
 * datetime_join: Fecha y hora en que la llamada ingresó a la cola.
 * datetime_linkstart: Fecha y hora en que la llamada fue enlazada al agente.
 * retries: (Opcional) Número de veces que la llamada ha sido reintentada.
-* trunk: (Sólo llamada entrante) Troncal a través de la cual se recibió la llamada.
-  Por ejemplo: DAHDI/4 o SIP/unatroncal
+* trunk: Troncal a través de la cual se recibió la llamada. Por ejemplo: 
+  DAHDI/4 o SIP/unatroncal
 * queue: (Sólo llamada entrante) Cola que recibió la llamada
 * call_attributes: (Opcional) Atributos asociados a la llamada en la base de 
   datos. Esta es una lista que contiene múltiples elementos 'attribute'. Cada

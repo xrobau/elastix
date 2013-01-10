@@ -416,7 +416,7 @@ SELECT 'outgoing' AS calltype, calls.id AS call_id, id_campaign AS campaign_id, 
     duration, datetime_originate, fecha_llamada AS datetime_originateresponse, 
     datetime_entry_queue AS datetime_join, start_time AS datetime_linkstart, 
     end_time AS datetime_linkend, retries, failure_cause, failure_cause_txt,
-    agent.number AS agent_number 
+    agent.number AS agent_number, trunk
 FROM (calls) 
 LEFT JOIN agent ON agent.id = calls.id_agent 
 WHERE id_campaign = ? AND calls.id = ?
@@ -679,7 +679,7 @@ INFO_FORMULARIOS;
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
 
-        list($sTipoLlamada, $idCampania, $idLlamada, $sChannel, $sRemChannel, $sFechaLink, $id_agent) = $datos;
+        list($sTipoLlamada, $idCampania, $idLlamada, $sChannel, $sRemChannel, $sFechaLink, $id_agent, $trunk) = $datos;
         try {
         	$infoLlamada = $this->leerInfoLlamada($sTipoLlamada, $idCampania, $idLlamada);
             /* Ya que la escritura a la base de datos es asíncrona, puede 
@@ -690,6 +690,8 @@ INFO_FORMULARIOS;
             if ($infoLlamada['calltype'] == 'outgoing')
                 $infoLlamada['status'] = 'Success';
             $infoLlamada['datetime_linkstart'] = $sFechaLink;
+            if (!isset($infoLlamada['trunk']) || is_null($infoLlamada['trunk']))
+                $infoLlamada['trunk'] = $trunk;
             $this->_multiplex->notificarEvento_AgentLinked($sChannel, $sRemChannel, $infoLlamada);
 
             // Notificar el progreso de la llamada

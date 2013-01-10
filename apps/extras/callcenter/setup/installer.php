@@ -169,8 +169,8 @@ function instalarContextosEspeciales()
     	fputs(STDERR, "ERR: no se puede localizar correctamente segmento de contextos de Call Center\n");
     } else {
     	$contenido[] = $sInicioContenido;
-        $contenido[] = <<<CONTEXTOS_CALLCENTER
-
+        $contenido[] =
+'
 [llamada_agendada]
 exten => _X.,1,NoOP("Elastix CallCenter: AGENTCHANNEL=${AGENTCHANNEL}")
 exten => _X.,n,NoOP("Elastix CallCenter: QUEUE_MONITOR_FORMAT=${QUEUE_MONITOR_FORMAT}")
@@ -181,8 +181,7 @@ exten => _X.,n,Set(CDR(userfield)=audio:${CALLFILENAME}.${MIXMON_FORMAT})
 exten => _X.,n(skiprecord),Dial(${AGENTCHANNEL},300,tw)
 exten => h,1,Macro(hangupcall,)
 
-
-CONTEXTOS_CALLCENTER;
+';
         $contenido[] = $sFinalContenido;
         file_put_contents($sArchivo, $contenido);
         chown($sArchivo, 'asterisk'); chgrp($sArchivo, 'asterisk');

@@ -182,6 +182,13 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
                 $respuesta['message'] = $oPaloConsola->errMsg;
             }
         }
+        if ($respuesta['status'] == 'success') {
+        	$logCampania = $oPaloConsola->leerLogCampania($sTipoCampania, $sIdCampania);
+            if (!is_array($logCampania)) {
+                $respuesta['status'] = 'error';
+                $respuesta['message'] = $oPaloConsola->errMsg;
+            }
+        }
     }
     if ($respuesta['status'] == 'success') {
     	$respuesta['campaigndata'] = array(
@@ -193,17 +200,37 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
             'retries'                   =>  (int)$infoCampania['retries'],
         );
         
-        $respuesta['update'] = array(
-            'statuscount'   =>  $estadoCampania['statuscount'],
-        );
+        // Traducción de estado de las llamadas no conectadas
+        $estadoCampaniaLlamadas = array();
+        foreach ($estadoCampania['activecalls'] as $activecall) {
+            $estadoCampaniaLlamadas[] = formatoLlamadaNoConectada($activecall);
+        }
+        
+        // Traducción de estado de los agentes
+        $estadoCampaniaAgentes = array();
+        foreach ($estadoCampania['agents'] as $agent) {
+            $estadoCampaniaAgentes[] = formatoAgente($agent);
+        }
+        
+        // Traducción de log de la campaña
+        $logFinalCampania = array();
+        foreach ($logCampania as $entradaLog) {
+        	$logFinalCampania[] = formatoLogCampania($entradaLog);
+        }
+        
+        // Se arma la respuesta JSON y el estado final del cliente
+        $respuesta = array_merge($respuesta, crearRespuestaVacia());
+        $respuesta['statuscount']['update'] = $estadoCampania['statuscount'];
+        $respuesta['activecalls']['add'] = $estadoCampaniaLlamadas;
+        $respuesta['agents']['add'] = $estadoCampaniaAgentes;
+        $respuesta['log'] = $logFinalCampania;
         $estadoCliente = array(
             'campaignid'    =>  $sIdCampania,
             'campaigntype'  =>  $sTipoCampania,
             'statuscount'   =>  $estadoCampania['statuscount'],
+            'activecalls'   =>  $estadoCampania['activecalls'],
+            'agents'        =>  $estadoCampania['agents'],
         );
-        
-        // TODO: llamadas en curso y log de campaña        
-        // TODO: lista de agentes que pueden atender la llamada
         
         $respuesta['estadoClienteHash'] = generarEstadoHash($module_name, $estadoCliente);
     }
@@ -215,8 +242,447 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
 
 function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas)
 {
+    $respuesta = array();
+    
+    ignore_user_abort(true);
+    set_time_limit(0);
+
+    // Estado del lado del cliente
+    $estadoHash = getParameter('clientstatehash');
+    if (!is_null($estadoHash)) {
+        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente']) 
+            ? $_SESSION[$module_name]['estadoCliente'] 
+            : array();        
+    } else {
+        $estadoCliente = getParameter('clientstate');
+        if (!is_array($estadoCliente)) return;
+    }
+
+    // Modo a funcionar: Long-Polling, o Server-sent Events
+    $sModoEventos = getParameter('serverevents');
+    $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
+    if ($bSSE) {
+        Header('Content-Type: text/event-stream');
+        printflush("retry: 1\n");
+    } else {
+        Header('Content-Type: application/json');
+    }
+    
+    // Verificar hash correcto
+    if (!is_null($estadoHash) && $estadoHash != $_SESSION[$module_name]['estadoClienteHash']) {
+        $respuesta['estadoClienteHash'] = 'mismatch';
+        jsonflush($bSSE, $respuesta);
+        return;
+    }
+
     $oPaloConsola = new PaloSantoConsola();
-	//
+	
+    // Estado del lado del servidor
+    $estadoCampania = $oPaloConsola->leerEstadoCampania($estadoCliente['campaigntype'], $estadoCliente['campaignid']);
+    if (!is_array($estadoCampania)) {
+        $respuesta['error'] = $oPaloConsola->errMsg;
+        jsonflush($bSSE, $respuesta);
+        $oPaloConsola->desconectarTodo();
+        return;
+    }
+
+    // Acumular inmediatamente las filas que son distintas en estado
+    $respuesta = crearRespuestaVacia();
+    
+    // Cuenta de estados
+    foreach (array_keys($estadoCliente['statuscount']) as $k) {
+        // Actualización de valores de contadores
+    	if ($estadoCliente['statuscount'][$k] != $estadoCampania['statuscount'][$k]) {
+    		$respuesta['statuscount']['update'][$k] = $estadoCampania['statuscount'][$k];
+            $estadoCliente['statuscount'][$k] = $estadoCampania['statuscount'][$k];
+    	}
+    }
+    
+    // Estado de llamadas no conectadas
+    foreach (array_keys($estadoCliente['activecalls']) as $k) {
+    	// Llamadas que cambiaron de estado o ya no están sin agente
+        if (!isset($estadoCampania['activecalls'][$k])) {
+        	// Llamada ya no está esperando agente
+            $respuesta['activecalls']['remove'][] = array('callid' => $estadoCliente['activecalls'][$k]['callid']);
+            unset($estadoCliente['activecalls'][$k]);
+        } elseif ($estadoCliente['activecalls'][$k] != $estadoCampania['activecalls'][$k]) {
+        	// Llamada ha cambiado de estado
+            $respuesta['activecalls']['update'][] = formatoLlamadaNoConectada($estadoCampania['activecalls'][$k]);
+            $estadoCliente['activecalls'][$k] = $estadoCampania['activecalls'][$k];
+        }
+    }
+    foreach (array_keys($estadoCampania['activecalls']) as $k) {
+    	// Llamadas nuevas
+        if (!isset($estadoCliente['activecalls'][$k])) {
+            $respuesta['activecalls']['add'][] = formatoLlamadaNoConectada($estadoCampania['activecalls'][$k]);
+            $estadoCliente['activecalls'][$k] = $estadoCampania['activecalls'][$k];
+        }
+    }
+    
+    // Estado de agentes de campaña
+    foreach (array_keys($estadoCliente['agents']) as $k) {
+    	// Agentes que cambiaron de estado o desaparecieron (???)
+        if (!isset($estadoCampania['agents'][$k])) {
+        	// Agente ya no aparece (???)
+            $respuesta['agents']['remove'][] = array('agent' => $estadoCliente['agents'][$k]['agentchannel']);
+            unset($estadoCliente['agents'][$k]);
+        } elseif ($estadoCliente['agents'][$k] != $estadoCampania['agents'][$k]) {
+        	// Agente ha cambiado de estado
+            $respuesta['agents']['update'][] = formatoAgente($estadoCampania['agents'][$k]);
+            $estadoCliente['agents'][$k] = $estadoCampania['agents'][$k];
+        }
+    }
+    foreach (array_keys($estadoCampania['agents']) as $k) {
+        // Agentes nuevos (???)
+        if (!isset($estadoCliente['agents'][$k])) {
+            $respuesta['agents']['add'][] = formatoAgente($estadoCampania['agents'][$k]);
+            $estadoCliente['agents'][$k] = $estadoCampania['agents'][$k];
+        }
+    }
+
+    unset($estadoCampania);
+
+    $oPaloConsola->escucharProgresoLlamada(TRUE);
+    $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
+    do {
+        $oPaloConsola->desconectarEspera();
+        
+        // Se inicia espera larga con el navegador...
+        session_commit();
+        $iTimestampInicio = time();
+        
+        while (connection_status() == CONNECTION_NORMAL && esRespuestaVacia($respuesta) 
+            && time() - $iTimestampInicio <  $iTimeoutPoll) {
+
+            $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
+            if (is_null($listaEventos)) {
+                $respuesta['error'] = $oPaloConsola->errMsg;
+                jsonflush($bSSE, $respuesta);
+                $oPaloConsola->desconectarTodo();
+                return;
+            }
+            
+            $iTimestampActual = time();
+            foreach ($listaEventos as $evento) {
+                $sCanalAgente = isset($evento['agent_number']) ? $evento['agent_number'] : NULL;
+
+                switch ($evento['event']) {
+                case 'agentloggedin':
+                    if (isset($estadoCliente['agents'][$sCanalAgente])) {
+                    	/* Se ha logoneado agente que atiende a esta campaña.
+                         * ATENCIÓN: sólo se setean suficientes campos para la
+                         * visualización. Otros campos quedan con sus valores
+                         * antiguos, si tenían */
+                        $estadoCliente['agents'][$sCanalAgente]['status'] = 'online';
+                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
+                        
+                        $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
+                    }
+                    break;
+                case 'agentloggedout':
+                    if (isset($estadoCliente['agents'][$sCanalAgente])) {
+                        /* Se ha deslogoneado agente que atiende a esta campaña.
+                         * ATENCIÓN: sólo se setean suficientes campos para la
+                         * visualización. Otros campos quedan con sus valores
+                         * antiguos, si tenían */
+                        $estadoCliente['agents'][$sCanalAgente]['status'] = 'offline';
+                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
+                        
+                        $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
+                    }
+                    break;
+                case 'callprogress':
+                    if ($estadoCliente['campaignid'] == $evento['campaign_id'] && 
+                        $estadoCliente['campaigntype'] == $evento['call_type']) {
+                    	// Llamada corresponde a cola monitoreada
+                        $callid = $evento['call_id'];
+
+                        if (in_array($evento['new_status'], array('Failure', 'Abandoned', 'NoAnswer'))) {
+                            if (isset($estadoCliente['activecalls'][$callid])) {
+                                restarContadorLlamada($estadoCliente['activecalls'][$callid]['callstatus'], $estadoCliente, $respuesta);
+                                agregarContadorLlamada($evento['new_status'], $estadoCliente, $respuesta);
+                                
+                                // Quitar de las llamadas que esperan un agente
+                                $respuesta['activecalls']['remove'][] = array('callid' => $callid);
+                                unset($estadoCliente['activecalls'][$callid]);
+                            }
+                        } elseif (in_array($evento['new_status'], array('OnHold', 'OffHold'))) {
+                        	// Se supone que una llamada en hold ya fue asignada a un agente
+                        } else {
+                            if (isset($estadoCliente['activecalls'][$callid])) {
+                                restarContadorLlamada($estadoCliente['activecalls'][$callid]['callstatus'], $estadoCliente, $respuesta);
+                            	
+                                $estadoCliente['activecalls'][$callid]['callstatus'] = $evento['new_status'];
+                                $estadoCliente['activecalls'][$callid]['trunk'] = $evento['trunk'];
+                                if ($evento['new_status'] == 'OnQueue')
+                                    $estadoCliente['activecalls'][$callid]['queuestart'] = $evento['datetime_entry'];                                
+                                $respuesta['activecalls']['update'][] =
+                                    formatoLlamadaNoConectada($estadoCliente['activecalls'][$callid]);
+                            } else {
+                            	// Valores sólo para satisfacer formato
+                                $estadoCliente['activecalls'][$callid] = array(
+                                    'callid'        =>  $callid,
+                                    'callnumber'    =>  $evento['phone'],
+                                    'callstatus'    =>  $evento['new_status'],
+                                    'dialstart'     =>  $evento['datetime_entry'],
+                                    'dialend'       =>  NULL,
+                                    'queuestart'    =>  $evento['datetime_entry'],
+                                    'trunk'         =>  $evento['trunk'],
+                                );
+                                $respuesta['activecalls']['add'][] =
+                                    formatoLlamadaNoConectada($estadoCliente['activecalls'][$callid]);
+                            }
+
+                            agregarContadorLlamada($evento['new_status'], $estadoCliente, $respuesta);
+                        }
+
+                        $respuesta['log'][] = formatoLogCampania(array(
+                            'new_status'        =>  $evento['new_status'],
+                            'datetime_entry'    =>  $evento['datetime_entry'],
+                            'campaign_type'     =>  $evento['call_type'],
+                            'campaign_id'       =>  $evento['campaign_id'],
+                            'call_id'           =>  $evento['call_id'],
+                            'retry'             =>  $evento['retry'],
+                            'uniqueid'          =>  $evento['uniqueid'],
+                            'trunk'             =>  $evento['trunk'],
+                            'phone'             =>  $evento['phone'],
+                            'queue'             =>  $evento['queue'],
+                            'agentchannel'      =>  $sCanalAgente,
+                            'duration'          =>  NULL,
+                        ));
+                    }
+                    break;
+                case 'pausestart':
+                    if (isset($estadoCliente['agents'][$sCanalAgente])) {
+                        // Agente ha entrado en pausa
+                        $estadoCliente['agents'][$sCanalAgente]['status'] = 'paused';
+                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = $evento['pause_start'];
+                        
+                        $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
+                    }
+                    break;
+                case 'pauseend':
+                    if (isset($estadoCliente['agents'][$sCanalAgente])) {
+                        // Agente ha salido de pausa
+                        $estadoCliente['agents'][$sCanalAgente]['status'] =
+                            is_null($estadoCliente['agents'][$sCanalAgente]['linkstart']) ? 'online' : 'oncall';
+                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
+                        
+                        $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
+                    }
+                    break;
+                case 'agentlinked':
+                    // Si la llamada estaba en lista activa, quitarla
+                    $callid = $evento['call_id'];
+                    if (isset($estadoCliente['activecalls'][$callid])) {
+                        restarContadorLlamada($estadoCliente['activecalls'][$callid]['callstatus'], $estadoCliente, $respuesta);
+                        $respuesta['activecalls']['remove'][] = array('callid' => $estadoCliente['activecalls'][$callid]['callid']);
+                        unset($estadoCliente['activecalls'][$callid]);
+                    }
+                
+                    // Si el agente es uno de los de la campaña, modificar
+                    if (isset($estadoCliente['agents'][$sCanalAgente])) {
+                        $estadoCliente['agents'][$sCanalAgente]['status'] = is_null($estadoCliente['agents'][$sCanalAgente]['pausestart']) ? 'oncall' : 'paused';
+                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = $evento['phone'];
+                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = $evento['datetime_linkstart'];
+                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = $evento['trunk'];
+
+                        $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
+                        $respuesta['log'][] = formatoLogCampania(array(
+                            'new_status'        =>  'Success',
+                            'datetime_entry'    =>  $evento['datetime_linkstart'],
+                            'campaign_type'     =>  $evento['call_type'],
+                            'campaign_id'       =>  $evento['campaign_id'],
+                            'call_id'           =>  $evento['call_id'],
+                            'retry'             =>  $evento['retries'],
+                            'uniqueid'          =>  $evento['uniqueid'],
+                            'trunk'             =>  $evento['trunk'],
+                            'phone'             =>  $evento['phone'],
+                            'queue'             =>  $evento['queue'],
+                            'agentchannel'      =>  $sCanalAgente,
+                            'duration'          =>  NULL,
+                        ));
+
+                        agregarContadorLlamada('Success', $estadoCliente, $respuesta);
+                    }
+                    break;
+                case 'agentunlinked':
+                    // Si el agente es uno de los de la campaña, modificar
+                    if (isset($estadoCliente['agents'][$sCanalAgente])) {
+                        /* Es posible que se reciba un evento agentunlinked luego
+                         * del evento agentloggedout si el agente se desconecta con
+                         * una llamada activa. */ 
+                        if ($estadoCliente['agents'][$sCanalAgente]['status'] != 'offline') {
+                            $estadoCliente['agents'][$sCanalAgente]['status'] =
+                                is_null($estadoCliente['agents'][$sCanalAgente]['pausestart']) ? 'online' : 'paused';
+                        }
+                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
+                        
+                        $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
+                        $respuesta['log'][] = formatoLogCampania(array(
+                            'new_status'        =>  $evento['shortcall'] ? 'ShortCall' : 'Hangup',
+                            'datetime_entry'    =>  $evento['datetime_linkend'],
+                            'campaign_type'     =>  $evento['call_type'],
+                            'campaign_id'       =>  $evento['campaign_id'],
+                            'call_id'           =>  $evento['call_id'],
+                            'retry'             =>  NULL,
+                            'uniqueid'          =>  NULL,
+                            'trunk'             =>  NULL,
+                            'phone'             =>  $evento['phone'],
+                            'queue'             =>  NULL,
+                            'agentchannel'      =>  $sCanalAgente,
+                            'duration'          =>  $evento['duration'],
+                        ));
+                        
+                        if ($evento['call_type'] == 'incoming') {
+                        	restarContadorLlamada('Success', $estadoCliente, $respuesta);
+                            agregarContadorLlamada('Finished', $estadoCliente, $respuesta);
+                            agregarContadorLlamada('Total', $estadoCliente, $respuesta);
+                        } else {
+                        	if ($evento['shortcall']) {
+                        		restarContadorLlamada('Success', $estadoCliente, $respuesta);
+                                agregarContadorLlamada('ShortCall', $estadoCliente, $respuesta);
+                        	}
+                        }
+                    }
+                    break;
+                }
+            }
+            
+            
+        }
+        if (!esRespuestaVacia($respuesta)) {
+            @session_start();
+            $estadoHash = generarEstadoHash($module_name, $estadoCliente);
+            $respuesta['estadoClienteHash'] = $estadoHash;
+            session_commit();
+        }
+        jsonflush($bSSE, $respuesta);
+        
+        $respuesta = crearRespuestaVacia();
+
+    } while ($bSSE && connection_status() == CONNECTION_NORMAL);
+    $oPaloConsola->desconectarTodo();
+}
+
+function crearRespuestaVacia()
+{
+    return array(
+        'statuscount'   =>  array('update' => array()),
+        'activecalls'   =>  array('add' => array(), 'update' => array(), 'remove' => array()),
+        'agents'        =>  array('add' => array(), 'update' => array(), 'remove' => array()),
+        'log'           =>  array(),
+    );
+}
+
+function esRespuestaVacia(&$respuesta)
+{
+	return count($respuesta['statuscount']['update']) == 0
+        && count($respuesta['activecalls']['add']) == 0
+        && count($respuesta['activecalls']['update']) == 0
+        && count($respuesta['activecalls']['remove']) == 0
+        && count($respuesta['agents']['add']) == 0
+        && count($respuesta['agents']['update']) == 0
+        && count($respuesta['agents']['remove']) == 0
+        && count($respuesta['log']) == 0;
+}
+
+// Restar del contador Placing/Dialing/Ringing/OnQueue según corresponda
+function restarContadorLlamada($old_status, &$estadoCliente, &$respuesta)
+{
+    $k = strtolower($old_status);
+    if ($k == 'dialing') $k = 'placing';
+    if (isset($estadoCliente['statuscount'][$k]) && $estadoCliente['statuscount'][$k] > 0) {
+        $estadoCliente['statuscount'][$k]--;
+        $respuesta['statuscount']['update'][$k] = $estadoCliente['statuscount'][$k];
+    }
+}
+
+// Agregar al contador correspondiente de progreso
+function agregarContadorLlamada($new_status, &$estadoCliente, &$respuesta)
+{
+    $k = strtolower($new_status);
+    if ($k == 'dialing') $k = 'placing';
+    if (isset($estadoCliente['statuscount'][$k])) {
+        $estadoCliente['statuscount'][$k]++;
+        $respuesta['statuscount']['update'][$k] = $estadoCliente['statuscount'][$k];
+    }
+}
+
+function formatoLlamadaNoConectada($activecall)
+{
+    $sFechaHoy = date('Y-m-d');
+    $sDesde = (!is_null($activecall['queuestart'])) 
+        ? $activecall['queuestart'] : $activecall['dialstart'];
+    if (strpos($sDesde, $sFechaHoy) === 0)
+        $sDesde = substr($sDesde, strlen($sFechaHoy) + 1);
+    $sEstado = ($activecall['callstatus'] == 'placing' && !is_null($activecall['trunk'])) 
+        ? _tr('dialing') : _tr($activecall['callstatus']);
+    return array(
+        'callid'        =>  $activecall['callid'],
+        'callnumber'    =>  $activecall['callnumber'],
+        'trunk'         =>  $activecall['trunk'],
+        'callstatus'    =>  $sEstado,
+        'desde'         =>  $sDesde,
+    );
+}
+
+function formatoAgente($agent)
+{
+    $sFechaHoy = date('Y-m-d');
+    $sDesde = '-';
+    if ($agent['status'] == 'paused')
+        $sDesde = $agent['pausestart'];
+    elseif ($agent['status'] == 'oncall')
+        $sDesde = $agent['linkstart'];
+    if (strpos($sDesde, $sFechaHoy) === 0)
+        $sDesde = substr($sDesde, strlen($sFechaHoy) + 1);
+    return array(
+        'agent'         =>  $agent['agentchannel'],
+        'status'        =>  _tr($agent['status']),
+        'callnumber'    =>  is_null($agent['callnumber']) ? '-' : $agent['callnumber'],
+        'trunk'         =>  is_null($agent['trunk']) ? '-' : $agent['trunk'],
+        'desde'         =>  $sDesde,
+    );
+}
+
+function formatoLogCampania($entradaLog)
+{
+    $listaMsg = array(
+        'Placing'   =>  _tr('LOG_FMT_PLACING'),
+        'Dialing'   =>  _tr('LOG_FMT_DIALING'),
+        'Ringing'   =>  _tr('LOG_FMT_RINGING'),
+        'OnQueue'   =>  _tr('LOG_FMT_ONQUEUE'),
+        'Success'   =>  _tr('LOG_FMT_SUCCESS'),
+        'Hangup'    =>  _tr('LOG_FMT_HANGUP'),
+        'OnHold'    =>  _tr('LOG_FMT_ONHOLD'),
+        'OffHold'   =>  _tr('LOG_FMT_OFFHOLD'),
+        'Failure'   =>  _tr('LOG_FMT_FAILURE'),
+        'Abandoned' =>  _tr('LOG_FMT_ABANDONED'),
+        'ShortCall' =>  _tr('LOG_FMT_SHORTCALL'),
+        'NoAnswer'  =>  _tr('LOG_FMT_NOANSWER'),
+    );
+    $sMensaje = $listaMsg[$entradaLog['new_status']];
+    foreach ($entradaLog as $k => $v) {
+        if ($k == 'duration') $v = sprintf('%02d:%02d:%02d', 
+                ($v - ($v % 3600)) / 3600, 
+                (($v - ($v % 60)) / 60) % 60, 
+                $v % 60);
+        $sMensaje = str_replace('{'.$k.'}', $v, $sMensaje);
+    }
+
+    return array(
+        'timestamp' =>  $entradaLog['datetime_entry'],
+        'mensaje'   =>  $sMensaje,
+    );
 }
 
 function modificarReferenciasLibreriasJS($smarty)
@@ -291,78 +757,4 @@ function generarEstadoHash($module_name, $estadoCliente)
     return $estadoHash;
 }
 
-
-/*
-    // Conexión a la base de datos CallCenter
-    $pDB = new paloDB($arrConf['cadena_dsn']);
-    if ($pDB->connStatus) die("ERR: ".$pDB->errMsg);
-
-    // Si se llega hasta aquí, se genera el contenido original del monitor
-    $oMonitor = new paloMonitorCampania($pDB);
-
-    // Listar las campañas disponibles y verificar cuál está elegida
-    $idCampania = NULL;
-    $listaCampanias = $oMonitor->listarCampanias();
-    $smartyListaCampanias = array();
-    if (count($listaCampanias) > 0) $idCampania = $listaCampanias[0]['id'];
-    foreach ($listaCampanias as $tuplaCampania) {
-        $smartyListaCampanias[$tuplaCampania['id']] = $tuplaCampania['name'];
-        if (isset($_POST['id_campaign']) && $_POST['id_campaign'] == $tuplaCampania['id'])
-            $idCampania = $tuplaCampania['id'];
-    }
-    $smarty->assign('curr_id_campaign', $idCampania);
-    $smarty->assign('lista_campaign', $smartyListaCampanias);
-
-    // Leer la información de resumen de la campaña elegida
-    if (!is_null($idCampania)) {
-        $infoCampania = $oMonitor->leerResumenCampania($idCampania);
-        $iTotalLlamadas = array_sum($infoCampania['status']);
-        
-        $smarty->assign(array(
-            'FECHA_INICIO_CAMPANIA'     =>  $infoCampania['datetime_init'],
-            'FECHA_FINAL_CAMPANIA'      =>  $infoCampania['datetime_end'],
-            'HORARIO_INICIO_CAMPANIA'   =>  $infoCampania['daytime_init'],
-            'HORARIO_FINAL_CAMPANIA'    =>  $infoCampania['daytime_end'],
-            'COLA_CAMPANIA'             =>  $infoCampania['queue'],
-            'MAX_INTENTOS_CAMPANIA'     =>  $infoCampania['retries'],
-            'CAMPANIA_LLAMADAS_TOTAL'   =>  $iTotalLlamadas,
-            'CAMPANIA_LLAMADAS_PENDIENTES' =>  $infoCampania['status']['Pending'],
-            'CAMPANIA_LLAMADAS_FALLIDAS' =>  $infoCampania['status']['Failure'] + $infoCampania['status']['NoAnswer'] + $infoCampania['status']['Abandoned'],
-            'CAMPANIA_LLAMADAS_CORTAS' =>  $infoCampania['status']['ShortCall'],
-            'CAMPANIA_LLAMADAS_EXITO' =>  $infoCampania['status']['Success'] + $infoCampania['status']['OnHold'],
-            'CAMPANIA_LLAMADAS_MARCANDO' =>  $infoCampania['status']['Placing'] + $infoCampania['status']['Ringing'],
-            'CAMPANIA_LLAMADAS_COLA' =>  $infoCampania['status']['OnQueue'],
-        ));
-    }
-
-    // Leer la configuración de Asterisk Manager para consultar el AMI
-    $estadoCola = $oMonitor->leerEstadoCola($infoCampania['queue']);
-    ksort($estadoCola['members']);
-    //$debug .= print_r($estadoCola, 1);
-    $listaAgentes = array();
-    foreach ($estadoCola['members'] as $sNumAgente => $infoAgente) {
-        $tuplaAgente = array(
-            'id'        =>  $sNumAgente,    // El ID del agente
-            'estado'    =>  _tr('Not Logged In'),    // No logon, Ocupado, Break/Pausa, Libre
-            'numero'    =>  '--',           // El número con el que está hablando
-            'troncal'   =>  '--',           // Troncal a través de la que salió la llamada
-            'desde'     =>  '--',           // Instante desde el que empezó a hablar
-        );
-        if ($infoAgente['status'] == 'canBeCalled')
-            $tuplaAgente['estado'] = _tr('Free');
-        if ($infoAgente['status'] == 'inUse') {
-            $tuplaAgente['estado'] = _tr('Busy');
-            // TODO: obtener número, troncal, tiempo de hablado
-            $tuplaAgente['numero'] = $infoAgente['dialnumber'];
-            $tuplaAgente['troncal'] = $infoAgente['clientchannel'];
-            $tuplaAgente['desde'] = str_replace(date('Y-m-d '), '', $infoAgente['datetime_init']);
-        }
-        if (in_array('paused', $infoAgente['attributes'])) {
-            $tuplaAgente['estado'] = _tr('Break').': '.$infoAgente['break_name'];
-            $tuplaAgente['desde'] = str_replace(date('Y-m-d '), '', $infoAgente['datetime_init']);
-        }
-        $listaAgentes[] = $tuplaAgente;
-    }
-    $smarty->assign('agentes_cola', $listaAgentes);
-*/
 ?>

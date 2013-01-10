@@ -88,5 +88,37 @@ $arrLangModule=array(
     =>  'Since',
 'Campaign log'
     =>  'Campaign log',
+'Placing'   =>  'Placing',
+'Dialing'   =>  'Dialing',
+'Ringing'   =>  'Ringing',
+'OnQueue'   =>  'On queue',
+'online'    =>  'Free',
+'offline'   =>  'Logged out',
+'oncall'    =>  'Busy',
+'paused'    =>  'On break',
+'LOG_FMT_PLACING'
+    =>  'Placing phone call to {phone} (retry {retry})',
+'LOG_FMT_DIALING'
+    =>  'Dialing {phone}, trunk is {trunk} ...',
+'LOG_FMT_RINGING'
+    =>  'Ringing {phone}, waiting for answer ...',
+'LOG_FMT_ONQUEUE'
+    =>  'Phone call to {phone} connected to queue {queue}, waiting for agent ...',    
+'LOG_FMT_SUCCESS'
+    =>  'Phone call to {phone} handled by agent {agentchannel}',
+'LOG_FMT_HANGUP'
+    =>  'Phone call to {phone} disconnected from agent {agentchannel}, duration was {duration}',
+'LOG_FMT_ONHOLD'
+    =>  'Agent {agentchannel} put call to {phone} on hold',
+'LOG_FMT_OFFHOLD'
+    =>  'Agent {agentchannel} took call to {phone} off hold',
+'LOG_FMT_FAILURE'
+    =>  'Phone call to {phone} failed to be placed',
+'LOG_FMT_ABANDONED'
+    =>  'Phone call to {phone} on queue {queue} disconnected and was never handled',    
+'LOG_FMT_SHORTCALL'
+    =>  'Short phone call to {phone} disconnected from agent {agentchannel}, duration was {duration}',    
+'LOG_FMT_NOANSWER'
+    =>  'Phone call to {phone} disconnected before entering queue',
 );
 ?>

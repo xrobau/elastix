@@ -100,6 +100,16 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Jan 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Campaign Monitoring: added new module. This module displays a 
+  campaign-centric view of the callcenter activity. This module displays basic 
+  information on the campaign, and counters of call states. Additionally there 
+  is a panel of agents that handle calls, with current state and the phone 
+  number that is being handled. Another panel shows in-progress calls that are 
+  being placed and do not yet have an assigned agent. A log view displays all of
+  the call-related activities with timestamps. All of this information is 
+  updated in realtime using ECCP events.
+
 * Wed Jan 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: add support for new request "callprogress".
 - CHANGED: Agent Console: add support for the three new fields in agentunlinked 

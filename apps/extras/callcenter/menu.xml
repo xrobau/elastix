@@ -39,6 +39,7 @@
     <menuitem menuid="rep_agents_monitoring"  desc="Agents Monitoring"      parent="reports_ingoing_call" module="yes" link="" order="711"></menuitem>
     <menuitem menuid="rep_trunks_used_per_hour" desc="Trunks used per hour" parent="reports_ingoing_call" module="yes" link="" order="712"></menuitem>
     <menuitem menuid="rep_incoming_calls_monitoring" desc="Incoming calls monitoring" parent="reports_ingoing_call" module="yes" link="" order="714"></menuitem>
+    <menuitem menuid="campaign_monitoring" desc="Campaign monitoring" parent="reports_ingoing_call" module="yes" link="" order="715"></menuitem>
 
     <menuitem menuid="callcenter_config"      desc="Configuration"          parent="call_center"          module="yes" link="" order="8"></menuitem>
   </menulist>

@@ -1,3 +1,8 @@
+* Callback Extensions: fixed multiple bugs in a single function: 1) removed
+  incorrect attempt to use database root user for ordinary module operation.
+  2) fixed incorrect assumption that selected database user can read both the
+  'call_center' and the 'asterisk' databases. 3) added missing error reporting
+  so that database failures are not hidden.
 * Campaign Monitoring: added new module. This module displays a campaign-centric
   view of the callcenter activity. This module displays basic information on the
   campaign, and counters of call states. Additionally there is a panel of agents

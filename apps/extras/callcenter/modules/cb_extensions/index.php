@@ -52,6 +52,7 @@ function _moduleContent(&$smarty, $module_name)
 
     // Conexión a la base de datos CallCenter y Asterisk (se utiliza root para pruebas)        
     $pDB = new paloDB($cadena_dsn); // $cadena_dsn está ubicado en configs/default.conf.php
+    if ($pDB->connStatus) return "ERR: failed to connect to database: ".$pDB->errMsg;
     
     // Mostrar pantalla correspondiente
     $contenidoModulo = '';
@@ -393,6 +394,12 @@ function getFormAgent(&$smarty, $oAgentes, $arrAgente)
     $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
 
     $arrExtensions = $oAgentes->getUnusedExtensions();
+    if (!is_array($arrExtensions)) {
+    	$smarty->assign(array(
+            'mb_title' => 'Fallo al leer extensiones', 
+            'mb_message' => $oAgentes->errMsg));
+        $arrExtensions = array('Unavailable extensions.');
+    }
     if (!is_null($arrAgente)) {
     	$sChannel = $arrAgente['type'].'/'.$arrAgente['number'];
         $arrExtensions[$sChannel] = $sChannel;

@@ -52,7 +52,7 @@ class Agentes
             $dsn = (string)$pDB;
             $this->_DB = new paloDB($dsn);
 
-            if (!$this->_DB->connStatus) {
+            if ($this->_DB->connStatus) {
                 $this->errMsg = $this->_DB->errMsg;
                 // debo llenar alguna variable de error
             } else {
@@ -349,21 +349,42 @@ class Agentes
     */    
     public function getUnusedExtensions()
     {
-	$query = "SELECT data FROM (SELECT data FROM asterisk.sip WHERE keyword = 'Dial' UNION 
-				    SELECT data FROM asterisk.iax WHERE keyword = 'Dial') 
-				    AS union_extensiones WHERE data NOT IN (
-				    SELECT concat(type,'/',number) 
-				    FROM call_center.agent WHERE type<>'Agent') ORDER BY data";
-	$result = $this->_DB->fetchTable($query,true);
-	if($result == FALSE){
-	    $this->_DB->errMsg;
-	    return array("Unavailable extensions.");
-	}
-
-	foreach($result as $k => $array){
-	    $arrResult[$array['data']] = $array['data'];
-	}	
-	return $arrResult;
+        // Consultar todas las extensiones disponibles
+        $sPwdFreepbx = obtenerClaveConocidaMySQL('asteriskuser');
+        if (is_null($sPwdFreepbx)) {
+        	$this->errMsg = 'No se puede leer clave DB para FreePBX';
+            return NULL;
+        }
+        
+        // BUG del framework: para asteriskuser se devuelve un array
+        if (is_array($sPwdFreepbx)) $sPwdFreepbx = $sPwdFreepbx['valor'];
+        
+        $dsn = "mysql://asteriskuser:{$sPwdFreepbx}@localhost/asterisk";
+        $dbFreepbx = new paloDB($dsn);
+        if ($dbFreepbx->connStatus) {
+            $this->errMsg = 'No se puede conectar a DB para FreePBX';
+        	return NULL;
+        }
+        $extensiones = array();
+        $recordset = $dbFreepbx->fetchTable(
+            'SELECT data FROM sip WHERE keyword = "Dial" UNION '.
+            'SELECT data FROM iax WHERE keyword = "Dial"',
+            TRUE);
+        if (!is_array($recordset)) {
+            $this->errMsg = 'No se pueden consultar extensiones en FreePBX - '.$dbFreepbx->errMsg;
+        	return NULL;
+        }
+        foreach ($recordset as $tupla) $extensiones[$tupla['data']] = $tupla['data'];
+        $dbFreepbx = NULL;
+        
+        // Quitar de la lista las extensiones ya registradas
+        $listaAgentes = $this->getAgents();
+        if (!is_array($listaAgentes)) return NULL;
+        foreach ($listaAgentes as $agente) {
+        	$k = $agente['type'].'/'.$agente['number'];
+            if (isset($extensiones[$k])) unset($extensiones[$k]);
+        }
+        return $extensiones;
     }
 
     /* FUNCIONES DEL AGI*/

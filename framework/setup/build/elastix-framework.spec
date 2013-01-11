@@ -313,6 +313,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Jan 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework: elastixneo theme : fix syntax for javascript object 
+  rejected by IE6.
+  SVN Rev[4578]
+
 * Fri Jan 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework: improve readability on blackmin theme
   SVN Rev[4546]

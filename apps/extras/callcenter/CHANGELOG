@@ -1,3 +1,6 @@
+* Campaign Monitoring: fix javascript syntax rejected by IE. Also, work around
+  IE issue that collapses JSON members that contain only empty objects or arrays
+  into nulls.
 * Dialer (ECCP): getcampaignstatus: fix callstatus lowercase, use camelcase.
 * Dialer (ECCP): getcampaignstatus: fix crashing bug when fetching status of a
   campaign with at least one logged-in static agent.

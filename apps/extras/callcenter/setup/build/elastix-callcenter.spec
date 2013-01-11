@@ -95,6 +95,9 @@ fi
 
 %changelog
 * Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Monitoring: fix javascript syntax rejected by IE. Also, work 
+  around IE issue that collapses JSON members that contain only empty objects or
+  arrays into nulls.
 - FIXED: Dialer (ECCP): getcampaignstatus: fix callstatus lowercase, use 
   camelcase.
 

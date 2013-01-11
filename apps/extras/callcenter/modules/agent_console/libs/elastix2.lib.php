@@ -89,7 +89,7 @@ function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
         $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
         $listaParam = $pConfig->leer_configuracion(FALSE);
         if (isset($listaParam['AMPDBPASS']))
-            return $listaParam['AMPDBPASS'];
+            return $listaParam['AMPDBPASS']['valor'];
         break;
     }
     return NULL;

@@ -1,3 +1,5 @@
+* Dialer (ECCP): getcampaignstatus: fix crashing bug when fetching status of a
+  campaign with at least one logged-in static agent.
 * Callback Extensions: fixed multiple bugs in a single function: 1) removed
   incorrect attempt to use database root user for ordinary module operation.
   2) fixed incorrect assumption that selected database user can read both the

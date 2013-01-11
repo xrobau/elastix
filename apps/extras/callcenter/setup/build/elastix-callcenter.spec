@@ -96,6 +96,8 @@ fi
 %changelog
 * Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-8.beta
 - Bump version for release
+- FIXED: Dialer (ECCP): getcampaignstatus: fix crashing bug when fetching status
+  of a campaign with at least one logged-in static agent.
 - FIXED: Callback Extensions: fixed multiple bugs in a single function: 
   1) removed incorrect attempt to use database root user for ordinary module 
   operation. 2) fixed incorrect assumption that selected database user can read

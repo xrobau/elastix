@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 7.beta
+Release: 8.beta
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -94,6 +94,14 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-8.beta
+- Bump version for release
+- FIXED: Callback Extensions: fixed multiple bugs in a single function: 
+  1) removed incorrect attempt to use database root user for ordinary module 
+  operation. 2) fixed incorrect assumption that selected database user can read
+  both the 'call_center' and the 'asterisk' databases. 3) added missing error 
+  reporting so that database failures are not hidden.
+
 * Thu Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-7.beta
 - Bump version for release.
 - ADDED: Campaign Monitoring: added new module. This module displays a 

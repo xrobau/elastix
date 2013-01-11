@@ -215,7 +215,7 @@
         $("#neo-table1").colResizable({
             liveDrag:true,
             marginLeft:"1px",
-            onDrag: onDrag,
+            onDrag: onDrag
         });
     });
 

@@ -345,7 +345,7 @@ class AMIEventProcess extends TuberiaProcess
                     $callStatus = array(
                         'dialnumber'    =>  $llamada->phone,
                         'callid'        =>  $llamada->id_llamada,
-                        'callstatus'    =>  strtolower($llamada->status),
+                        'callstatus'    =>  $llamada->status,
                     );
                     if (!is_null($llamada->timestamp_originatestart))
                         $callStatus['datetime_dialstart'] = date('Y-m-d H:i:s', $llamada->timestamp_originatestart);

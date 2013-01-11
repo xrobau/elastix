@@ -94,6 +94,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): getcampaignstatus: fix callstatus lowercase, use 
+  camelcase.
+
 * Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-8.beta
 - Bump version for release
 - FIXED: Dialer (ECCP): getcampaignstatus: fix crashing bug when fetching status

@@ -2080,51 +2080,6 @@ LISTA_EXTENSIONES;
         foreach ($statusCampania_DB['status'] as $statusKey => $statusCount)
             $xml_statusCount->addChild(strtolower($statusKey), $statusCount);
             
-        if (!function_exists('_getcampaignstatus_setagent')) {
-            function _getcampaignstatus_setagent($xml_agent, $infoAgente)
-            {
-                if ($infoAgente['num_pausas'] > 0) {
-                    $xml_agent->addChild('status', 'paused');
-                } elseif ($infoAgente['oncall']) {
-                    $xml_agent->addChild('status', 'oncall');
-                } elseif ($infoAgente['estado_consola'] == 'logged-in') {
-                    $xml_agent->addChild('status', 'online');
-                } else {
-                    $xml_agent->addChild('status', 'offline');
-                }
-                if (isset($infoAgente['callid']))
-                    $xml_agent->addChild('callid', $infoAgente['callid']);
-                if (isset($infoAgente['dialnumber']))
-                    $xml_agent->addChild('callnumber', $infoAgente['dialnumber']);
-                if (isset($infoAgente['clientchannel']))
-                    $xml_agent->addChild('callchannel', str_replace('&', '&amp;', $infoAgente['clientchannel']));
-                if (isset($infoAgente['datetime_dialstart']))
-                    $xml_agent->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialstart']));
-                if (isset($infoAgente['datetime_dialend']))
-                    $xml_agent->addChild('dialend', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialend']));
-                if (isset($infoAgente['datetime_enterqueue']))
-                    $xml_agent->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_enterqueue']));
-                if (isset($infoAgente['datetime_linkstart']))
-                    $xml_agent->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_linkstart']));
-                if (isset($infoAgente['trunk']))
-                    $xml_agent->addChild('trunk', $infoAgente['trunk']);
-    
-                if (!is_null($infoAgente['id_break'])) {
-                    $xml_agent->addChild('pauseid', $infoAgente['id_break']);
-                    $recordset = $this->_db->prepare(
-                        'SELECT audit.datetime_init, break.name, break.id '.
-                        'FROM audit, break WHERE audit.id_break = break.id AND audit.id = ?');
-                    $recordset->execute(array($infoAgente['id_audit_break']));
-                    $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
-                    $recordset->closeCursor();
-                    if ($tupla) {
-                        $xml_agent->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
-                        $xml_agent->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
-                    }
-                }
-            }
-        }
-        
         // Estado de los agentes
         $xml_agents = $xml_GetCampaignStatusResponse->addChild('agents');
         foreach ($statusCampania_AMI['queuestatus'] as $sAgente => $infoAgente) {
@@ -2132,7 +2087,7 @@ LISTA_EXTENSIONES;
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
             
-            _getcampaignstatus_setagent($xml_agent, $infoAgente);
+            $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
         
         // Estado de los agentes logoneados en la cola
@@ -2145,7 +2100,7 @@ LISTA_EXTENSIONES;
                 $xml_agent = $xml_agents->addChild('agent');
                 $xml_agent->addChild('agentchannel', $sAgente);
             
-                _getcampaignstatus_setagent($xml_agent, $infoAgente);
+                $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
             }
         }
 
@@ -2168,7 +2123,49 @@ LISTA_EXTENSIONES;
         
         return $xml_response;
     }
-    
+
+    private function _getcampaignstatus_setagent($xml_agent, $infoAgente)
+    {
+        if ($infoAgente['num_pausas'] > 0) {
+            $xml_agent->addChild('status', 'paused');
+        } elseif ($infoAgente['oncall']) {
+            $xml_agent->addChild('status', 'oncall');
+        } elseif ($infoAgente['estado_consola'] == 'logged-in') {
+            $xml_agent->addChild('status', 'online');
+        } else {
+            $xml_agent->addChild('status', 'offline');
+        }
+        if (isset($infoAgente['callid']))
+            $xml_agent->addChild('callid', $infoAgente['callid']);
+        if (isset($infoAgente['dialnumber']))
+            $xml_agent->addChild('callnumber', $infoAgente['dialnumber']);
+        if (isset($infoAgente['clientchannel']))
+            $xml_agent->addChild('callchannel', str_replace('&', '&amp;', $infoAgente['clientchannel']));
+        if (isset($infoAgente['datetime_dialstart']))
+            $xml_agent->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialstart']));
+        if (isset($infoAgente['datetime_dialend']))
+            $xml_agent->addChild('dialend', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialend']));
+        if (isset($infoAgente['datetime_enterqueue']))
+            $xml_agent->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_enterqueue']));
+        if (isset($infoAgente['datetime_linkstart']))
+            $xml_agent->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_linkstart']));
+        if (isset($infoAgente['trunk']))
+            $xml_agent->addChild('trunk', $infoAgente['trunk']);
+
+        if (!is_null($infoAgente['id_break'])) {
+            $xml_agent->addChild('pauseid', $infoAgente['id_break']);
+            $recordset = $this->_db->prepare(
+                'SELECT audit.datetime_init, break.name, break.id '.
+                'FROM audit, break WHERE audit.id_break = break.id AND audit.id = ?');
+            $recordset->execute(array($infoAgente['id_audit_break']));
+            $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
+            $recordset->closeCursor();
+            if ($tupla) {
+                $xml_agent->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
+                $xml_agent->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
+            }
+        }
+    }
 
     /**
      * Método que devuelve un resumen de la información de una campaña saliente

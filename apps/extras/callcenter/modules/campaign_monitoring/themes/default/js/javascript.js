@@ -143,7 +143,7 @@ function do_getCampaigns()
 					desc_campaign:	cp.desc_campaign,
 					type:			cp.type,
 					status:			cp.status,
-					key_campaign:	cp.type + '-' + cp.id_campaign,
+					key_campaign:	cp.type + '-' + cp.id_campaign
 				}));
 			}
 			App.campaniasDisponibles.set('key_campaign',
@@ -271,12 +271,15 @@ function manejarRespuestaStatus(respuesta)
 		'finished':		'terminadas',
 		'losttrack':	'sinrastro'
 	};
+	
+	if (respuesta.statuscount != null && respuesta.statuscount.update != null)
 	for (var k in respuesta.statuscount.update) {
 		if (mapStatusCount[k] != null) App.campaniaActual.llamadas.set(
 			mapStatusCount[k], respuesta.statuscount.update[k]);
 	}
 	
 	// Lista de las llamadas activas sin agente asignado
+	if (respuesta.activecalls != null && respuesta.activecalls.add != null)
 	for (var i = 0; i < respuesta.activecalls.add.length; i++) {
 		var llamada = respuesta.activecalls.add[i];
 		App.campaniaActual.llamadasMarcando.addObject(Ember.Object.create({
@@ -289,6 +292,7 @@ function manejarRespuestaStatus(respuesta)
 			reciente:	true
 		}));
 	}
+	if (respuesta.activecalls != null && respuesta.activecalls.update != null)
 	for (var i = 0; i < respuesta.activecalls.update.length; i++) {
 		var llamada = respuesta.activecalls.update[i];
 		for (var j = 0; j < App.campaniaActual.llamadasMarcando.length; j++) {
@@ -302,6 +306,7 @@ function manejarRespuestaStatus(respuesta)
 			}
 		}
 	}
+	if (respuesta.activecalls != null && respuesta.activecalls.remove != null)
 	for (var i = 0; i < respuesta.activecalls.remove.length; i++) {
 		var callid = respuesta.activecalls.remove[i].callid;
 		for (var j = 0; j < App.campaniaActual.llamadasMarcando.length; j++) {
@@ -312,6 +317,7 @@ function manejarRespuestaStatus(respuesta)
 	}
 	
 	// Lista de los agentes que atienden llamada
+	if (respuesta.agents != null && respuesta.agents.add != null)
 	for (var i = 0; i < respuesta.agents.add.length; i++) {
 		var agente = respuesta.agents.add[i];
 		App.campaniaActual.agentes.addObject(Ember.Object.create({
@@ -324,6 +330,7 @@ function manejarRespuestaStatus(respuesta)
 			reciente:	true
 		}));
 	}
+	if (respuesta.agents != null && respuesta.agents.update != null)
 	for (var i = 0; i < respuesta.agents.update.length; i++) {
 		var agente = respuesta.agents.update[i];
 		for (var j = 0; j < App.campaniaActual.agentes.length; j++) {
@@ -337,6 +344,7 @@ function manejarRespuestaStatus(respuesta)
 			}
 		}
 	}
+	if (respuesta.agents != null && respuesta.agents.remove != null)
 	for (var i = 0; i < respuesta.agents.remove.length; i++) {
 		var agentchannel = respuesta.agents.remove[i].agent;
 		for (var j = 0; j < App.campaniaActual.agentes.length; j++) {
@@ -347,6 +355,7 @@ function manejarRespuestaStatus(respuesta)
 	}
 	
 	// Registro de los eventos de la llamada
+	if (respuesta.log != null)
 	for (var i = 0; i < respuesta.log.length; i++) {
 		var registro = respuesta.log[i];
 		App.campaniaActual.registro.addObject({
@@ -389,4 +398,3 @@ function mostrar_mensaje_error(s)
 		}, 5000);
 	});
 }
-

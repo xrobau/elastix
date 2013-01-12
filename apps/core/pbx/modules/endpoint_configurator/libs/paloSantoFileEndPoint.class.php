@@ -244,6 +244,24 @@ class PaloSantoFileEndPoint
 		  }else $return = false;
 		}
 		break;
+
+	     case 'Atlinks':
+               if($ArrayData['data']['model'] == "ALCATEL Temporis IP800"){
+                  $contentFileAlacatel =PrincipalFileAlcatelTemporisIP800($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
+          	  if(set_provision_server($ArrayData['data']['ip_endpoint'],"admin","admin",$this->ipAdressServer,$ArrayData['data']['filename']))
+		  {
+		      if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileAlacatel)){
+			  $parameters  = array('Command'=>'sip notify reboot-yealink '.$ArrayData['data']['ip_endpoint']);
+			  $result      = $this->AsteriskManagerAPI('Command',$parameters);
+			  if($result===false)
+			    $return = false;
+			  else
+			    $return = true;
+		      }else $return = false;
+		  }
+		  else $return = false;
+	       }
+               break;
             
 	    case 'Snom':
                 $contentFileSnom = PrincipalFileSnom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
@@ -739,6 +757,10 @@ class PaloSantoFileEndPoint
                 return $this->deleteFileConf($this->directory, "cfg".$ArrayData['data']['filename']);
                 break; 
 	    
+	    case 'Atlinks':
+                return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
+                break; 
+	    
             case 'Snom':
                 return $this->deleteFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm");
                 break;
@@ -867,6 +889,13 @@ class PaloSantoFileEndPoint
                 //Creando archivos de ejemplo.
                 $contentFileElastix = templatesFileElastix($this->ipAdressServer);
                 $this->createFileConf($this->directory, "cfgElastix.template", $contentFileElastix);
+                return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
+                break;
+	    
+	    case 'Atlinks':
+                //Creando archivos de ejemplo.
+                $contentFileYealink = templatesAlcatel($this->ipAdressServer);
+                $this->createFileConf($this->directory, "alcatel.template.cfg", $contentFileYealink);
                 return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
                 break;
 

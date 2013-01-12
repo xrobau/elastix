@@ -566,7 +566,7 @@ class paloSantoEndPoint
         $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base endpoints
         $arrModels = array();
         if(is_array($result) && count($result)>0){
-            $arrModels['unselected'] = "-- {$arrLang['Unselected']} --";
+            $arrModels['unselected'] = "-- "._tr("Select a model")." --";
             foreach($result as $key => $model)
                 $arrModels[$model['id']] = $model['name'];
         }

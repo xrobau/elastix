@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-	$(":checkbox").iButton({
+	$('[name="chkoldstatus"]').iButton({
         labelOn: "On",
         labelOff: "Off",
         change: function ($input) {

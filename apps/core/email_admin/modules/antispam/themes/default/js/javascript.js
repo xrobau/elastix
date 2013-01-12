@@ -1,7 +1,7 @@
 $(document).ready(function (){
     verifySieve();
 
-    $(":checkbox").iButton({
+    $('[name="chkoldstatus"]').iButton({
         labelOn: "On",
         labelOff: "Off",
         change: function ($input){

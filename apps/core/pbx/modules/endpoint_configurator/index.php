@@ -173,7 +173,7 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
                             $comboDevices = combo($arrDeviceFreePBX,$endspoint['account']);
                     }
                     else
-                        $comboDevices = combo(array("Select a model" => _tr("Select a model")),"");
+                        $comboDevices = combo(array("Unselected" => _tr("Unselected")),"");
                     if($endspoint['configurated']){
                         $unset  = "<input type='checkbox' name='epmac_{$endspoint['mac_adress']}'  />";
                         $report = $paloEndPoint->compareDevicesAsteriskSqlite($endspoint['account']);
@@ -283,7 +283,7 @@ function getDevices($dsnAsterisk,$dsnSqlite)
     $paloEndPoint  = new paloSantoEndPoint($dsnAsterisk,$dsnSqlite);
     $idModel       = getParameter("id_model");
     if($idModel == "unselected")
-        $jsonObject->set_message(array("Select a model" => _tr("Select a model")));
+        $jsonObject->set_message(array("Unselected" => _tr("Unselected")));
     else{
         $iaxSupport        = $paloEndPoint->modelSupportIAX($idModel);
         if($iaxSupport === null)

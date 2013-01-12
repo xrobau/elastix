@@ -4,3 +4,7 @@ insert into mac (id_vendor,value,description)values((select id from vendor where
 
 insert into vendor (name,description)values("Elastix","PaloSanto Solution");
 insert into model (name,description,id_vendor,iax_support)values("LXP200","LXP200",(select id from vendor where name="Elastix"),'0');
+
+insert into vendor (name,description)values("Atlinks","Atlinks");
+insert into model (name,description,id_vendor,iax_support)values("ALCATEL Temporis IP800","ALCATEL Temporis IP800",(select id from vendor where name="Atlinks"),'0');
+insert into mac (id_vendor,value,description)values((select id from vendor where name="Atlinks"),"74:65:D1","Atlinks");

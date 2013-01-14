@@ -98,6 +98,7 @@ fi
 
 %changelog
 * Mon Jan 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Information: fix some misspellings and awkward phrasings  
 - FIXED: Remove now obsolete "Agent Connection Time" item from Elastix menu.
 
 * Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>

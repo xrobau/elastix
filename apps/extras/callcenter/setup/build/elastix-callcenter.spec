@@ -68,6 +68,9 @@ chown -R asterisk.asterisk /opt/elastix/dialer
 # To update smarty (tpl updates)
 rm -rf /var/www/html/var/templates_c/*
 
+# Remove obsolete modules
+elastix-menuremove rep_agent_connection_time
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -94,6 +97,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Jan 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Remove now obsolete "Agent Connection Time" item from Elastix menu.
+
 * Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Campaign Monitoring: fix javascript syntax rejected by IE. Also, work 
   around IE issue that collapses JSON members that contain only empty objects or

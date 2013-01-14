@@ -1,3 +1,4 @@
+* Agent Information: fix some misspellings and awkward phrasings  
 * Campaign Monitoring: fix javascript syntax rejected by IE. Also, work around
   IE issue that collapses JSON members that contain only empty objects or arrays
   into nulls.

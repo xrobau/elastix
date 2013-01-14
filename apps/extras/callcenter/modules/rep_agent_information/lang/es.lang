@@ -31,7 +31,7 @@ $arrLangModule = array(
     'Time Conecction'=>'Tiempo de Conexion',
     'Count Conecction'=>'Conteo de Conexiones',
     'Calls Entry'=>'Llamadas Entrantes',
-    'Reason No Ready'=>'Motivos No Listo',
+    'Reason No Ready'=>'Motivo No-Disponibilidad',
     'Break'=>'Receso',
     'Bathroom'=>'Banio',
     'Call'=>'Llamada',
@@ -40,7 +40,7 @@ $arrLangModule = array(
     'Time Call Entry'=>'Tiempo Llamadas entrantes',
     'Average Calls Entry'=>'Media Llamadas entrantes',
 
-    'Porcent compare whit time not ready'=> 'Porcentaje comparado con tiempo no listo',
+    'Porcent compare whit time not ready'=> 'Porcentaje de no-disponibilidad',
     'Count'=>'Conteo',
     'Hour'=>'Hora',
     'Monitored' => 'Monitoreadas',

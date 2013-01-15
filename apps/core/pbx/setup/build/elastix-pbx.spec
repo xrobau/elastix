@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 18
+Release: 19
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,6 +298,42 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-19
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Sat Jan 12 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: The behavior of the checkbox in the sticky-notes its now normal,
+  showing the checkbox instead of the ON-OFF slider button. Fixes Elastix BUG
+  #1424 - item 3
+  SVN Rev[4582]
+
+* Sat Jan 12 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - endpoint_configurator: Add support to set new Vendor
+  Atlinks model Alcatel Temporis IP800 and fix Label Select a Model and
+  Unselected in Endpoint Configurator grid
+  SVN Rev[4581]
+
+* Mon Jan 07 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - endpoint_configurator - endpoints_batch: Add support to set
+  new Vendors and models  Damall D3310 and Elastix LXP200.
+  SVN Rev[4560]
+
+* Thu Dec 27 2012 Sergio Broncano <sbroncano@palosanto.com>
+- CHANGED: module extensions_batch, Secret field validation must be minimum 6
+  alphanumeric characters, including upper and lowercase.
+  SVN Rev[4532]
+
+* Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: module endpoint configurator, default DTMF mode was audio, now default
+  DTMF is RFC. Grandstream model GXV280. Ported to new endpoint configurator.
+  SVN Rev[4528]
+
+* Thu Dec 20 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: module endpoint configurator, default DTMF mode was audio, now default
+  DTMF is RFC. Grandstream model GXV280.
+  SVN Rev[4527]
+
 * Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Elastix Operator Panel: assign dummy logger to silence logging spam on
   httpd error logfile. Fixes Elastix bug #1426.
@@ -308,9 +344,16 @@ fi
   assume from-internal. Fixes Elastix bug #854.
   SVN Rev[4509]
 
+* Tue Dec 04 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: modules - file_editor - sec_weak_keys: Fixed item 4 and 5 from bug
+  1416, keep search filter in file_editor and change Reason for Status in
+  sec_weak_keys.
+  SVN Rev[4503]
+
 * Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-18
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4494]
 
 * Mon Dec 03 2012 German Macas <gmacas@palosanto.com>
 - CHANGE: modules - endpoint_configurator: Add Support to set new model Escene

@@ -40,6 +40,7 @@ case 'check-update':
     $args[] = $argv[1];
     break;
 case 'install':
+case 'update':
 case 'remove':
     $args[] = '-y';
     $args[] = $argv[1];

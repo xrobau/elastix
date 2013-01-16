@@ -32,7 +32,8 @@ include_once("libs/paloSantoDB.class.php");
 class PaloSantoPackages
 {
     var $errMsg;
-
+    var $fn = '/tmp/list-update-packages.txt';
+ 
     function PaloSantoPackages()
     {
 
@@ -187,32 +188,82 @@ class PaloSantoPackages
     }
 
     function checkUpdate()
-    {
+    { 
         global $arrLang;
         $respuesta = $retorno = NULL;
-        exec('/usr/bin/elastix-helper ryum check-update', $respuesta, $retorno);
-
+        exec('/usr/bin/elastix-helper ryum check-update ', $respuesta, $retorno);
+        $tmp = array();
         if(is_array($respuesta)){
             foreach($respuesta as $key => $linea){
-                //Es algo no muy concreto si hay alguna manera de saber las posibles salidas hay que cambiar esta condicion para buscar el error
+		//Es algo no muy concreto si hay alguna manera de saber las posibles salidas hay que cambiar esta condicion para buscar el error
                 if(preg_match("/(\[Errno [[:digit:]]{1,}\])/",$linea,$reg))
-                    return $linea;
+                    return false;
+		elseif((!preg_match("/^Excluding/",$linea,$reg))&&(!preg_match("/^Finished/",$linea,$reg))&&(!preg_match("/^Loaded/",$linea,$reg))&&(!preg_match("/^\ /",$linea,$reg))&&(!preg_match("/^Loading/",$linea,$reg))&&($linea!=""))
+		    {     
+			  $var = explode(".",$linea);
+			  $tmp[] = $var[0];
+		    }
+		   
             }
-            if($retorno==1) //Error debido a los repositorios de elastix
+	    if($retorno==1) //Error debido a los repositorios de elastix
                 return $arrLang["ERROR"].": url don't open.";
-            else if($retorno==100 || $retorno == 0) //codigo 100 de q hay paquetes para actualizar y 0 que no hay. (ver man yum )
-                return $arrLang["Satisfactory Update"];
+            else if($retorno==100 || $retorno == 0){ //codigo 100 de q hay paquetes para actualizar y 0 que no hay. (ver man yum )
+                 if($this->writeTempFile($tmp))
+		    return $arrLang["Satisfactory Update"];
+	         else
+		    return "";
+	    }
             else //por si acaso se presenta algo desconocido
                 return "";
         }
+	
     }
 
-    function installPackage($package)
+    function writeTempFile($arr){
+      if ($f = fopen ($this->fn, 'w+'))
+      {
+	 foreach($arr as $key => $value){
+	    fwrite($f,$value);
+	    fwrite($f,"\n");
+	 }
+	    fclose($f);
+	    return true;  
+      }else return false;
+	
+    }
+
+    function readTempFile(){
+    global $arrLang;
+      $fn = $this->fn;
+      if (file_exists($fn)){ 
+	  if($fh = fopen($fn,"r")){ 
+	      while (!feof($fh)){ 
+		$arr[] = trim(fgets($fh)); 
+	      } 
+	  fclose($fh); 
+	  return $arr;
+	  }else
+	      return false;
+      }else{
+	    if($this->checkUpdate()==$arrLang["Satisfactory Update"]){
+	       $this->readTempFile();
+	       return true;
+	    }
+	    else
+	        return false;
+      }
+    }
+    
+    function installPackage($package,$val)
     {
         global $arrLang;
         $respuesta = $retorno = NULL;
-        exec('/usr/bin/elastix-helper ryum install '.escapeshellarg($package), $respuesta, $retorno);
-        $indiceInicial = $indiceFinal = 0;
+	if($val==0)
+	  exec('/usr/bin/elastix-helper ryum install '.escapeshellarg($package), $respuesta, $retorno);
+        else
+	  exec('/usr/bin/elastix-helper ryum update '.escapeshellarg($package), $respuesta, $retorno);
+   	
+	$indiceInicial = $indiceFinal = 0;
         $terminado = array();
         $paquetesIntall = false;
         $paquetesIntallDependen = false;
@@ -225,10 +276,10 @@ class PaloSantoPackages
                     $paquetesUpdateDependen = false;
                 }
                 // 1 paquetes a instalar
-                if(preg_match("/^Installing:/",$linea)){
+                if((preg_match("/^Installing:/",$linea))||(preg_match("/^Updating:/",$linea))){
                     $paquetesIntall = true;
                 }
-                //2 paquetes a instalar por dependencias
+		//2 paquetes a instalar por dependencias
                 else if(preg_match("/^Installing for dependencies:/",$linea)){
                     $paquetesIntallDependen = true;
                     $paquetesIntall = false;
@@ -242,7 +293,7 @@ class PaloSantoPackages
                 else if($paquetesIntall){
                     $terminado['Installing'][] = $linea;
                 }
-                else if($paquetesIntallDependen){
+		else if($paquetesIntallDependen){
                     $terminado['Installing for dependencies'][] = $linea;
                 }
                 else if($paquetesUpdateDependen){
@@ -251,28 +302,33 @@ class PaloSantoPackages
                 //4 fin
                 else if(preg_match("/^Transaction Summary/",$linea)){
                     // Procesamiento de los datos recolectados
-                    return $this->procesarDatos($terminado);
+                    return $this->procesarDatos($terminado,$val);
                 }
-            }return $arrLang['ERROR']; //error
+            }
+	    return $arrLang['ERROR']; //error
         }
     }
 
-    function procesarDatos($datos)
+    function procesarDatos($datos,$val)
     {
         global $arrLang;
         $respuesta = "";
         $total = 0;
         if(isset($datos['Installing'])){
             $total = $total + count($datos['Installing']);
-            $respuesta .= $arrLang['Installing']."\n";
-            for($i=0; $i<count($datos['Installing']); $i++){
+	    if($val==0)  
+	      $respuesta .= $arrLang['Installing']."\n";
+            else
+	      $respuesta .= _tr("Updating")."\n";
+	    for($i=0; $i<count($datos['Installing']); $i++){
                 $linea = trim($datos['Installing'][$i]);
                 if(preg_match("/^([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([-\+\.\:[:alnum:]]+)[[:space:]]+([\.[:digit:]]+[[:space:]]+[[:alpha:]]{1})/", $linea, $arrReg)) {
                     $respuesta .= ($i+1)." .- ".trim($arrReg[1])." -- ".trim($arrReg[3])."\n";
                 }
             }
         }
-        $respuesta .= "\n";
+
+	$respuesta .= "\n";
         if(isset($datos['Installing for dependencies'])){
             $total = $total + count($datos['Installing for dependencies']);
             $respuesta .= $arrLang['Installing for dependencies']."\n";
@@ -295,7 +351,10 @@ class PaloSantoPackages
             }
         }
         $respuesta .= $arrLang['Total Packages']." = $total";
-        return $respuesta;
+	if($val==1) 
+	   $this->checkUpdate();
+
+	return $respuesta;
     }
 
 function uninstallPackage($package)

@@ -35,19 +35,25 @@
         }
         else alert("{/literal}{$accionEnProceso}{literal}");
     }
-    function installaPackage(paquete)
+    function installaPackage(paquete,val)
     {   
         var estatus = $("#estaus_reloj").val();
         if(estatus=='apagado'){
+	      
             $("#estaus_reloj").val('prendido');
             $("#relojArena").html("");
-            $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$InstallPackage}{literal}: "+ paquete +"...</font>");
-            $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
+	    if(val==0)
+	      $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$InstallPackage}{literal}: "+ paquete +"...</font>");
+            else
+	      $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$UpdatePackage}{literal}: "+ paquete +"...</font>");
+            
+	    $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
             $("#neo-tabla-header-row-filter-1").click();
 		var arrAction                    = new Array();
 		arrAction["action"]      = "install";
 		arrAction["menu"]        = "packages";
 		arrAction["paquete"]	 = paquete;
+		arrAction["val"]	 = val;
 		arrAction["rawmode"]     = "yes";
 		request("index.php",arrAction,false,
          	    function(arrData,statusResponse,error){
@@ -93,6 +99,11 @@
 function confirmDelete(paquete) {
   if (confirm("{/literal}{$msgConfirmDelete}{literal}")) {
              uninstallPackage(paquete);
+  }
+}
+function confirmUpdate(paquete) {
+  if (confirm("{/literal}{$msgConfirmUpdate}{literal}")) {
+             installaPackage(paquete,1);
   }
 }
 </script>

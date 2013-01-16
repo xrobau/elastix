@@ -63,7 +63,7 @@ function _moduleContent(&$smarty, $module_name)
             $contenidoModulo = actualizarRepositorios();
             break;
         case "install":
-            $contenidoModulo = installPaquete($paquete);
+            $contenidoModulo = installPaquete();
             break;
         case "uninstall":
             $contenidoModulo = uninstallPaquete($paquete);
@@ -114,25 +114,37 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
     $smarty->assign("msgConfirmDelete", _tr("You will uninstall package along with everything what it depends on it. System can lose important functionalities or become unstable! Are you sure want to Uninstall?") ); 
     $smarty->assign("msgConfirmInstall", _tr("Are you sure want to Install this package?") );
     $smarty->assign("UninstallPackage",_tr("Uninstalling Package") );
+    $smarty->assign("msgConfirmUpdate", _tr("Are you sure want to Update this package?") ); 
     $arrData = array();
-    if (is_array($arrPaquetes)) {
-        for($i=0;$i<count($arrPaquetes);$i++){
+    $strErrorMsg = "";
+     if(!$resultado = $oPackages->readTempFile())
+	$strErrorMsg = _tr("Can't read list Packages to update");
+     
+     if (is_array($arrPaquetes)) {
+      for($i=0;$i<count($arrPaquetes);$i++){
             $estado_paquete = $oPackages->estaPaqueteInstalado($arrPaquetes[$i]['name']);
             $instalar = "";//$arrLang['Updated'];
             $tmpPaquete = $arrPaquetes[$i]['name'];
-            $desinstalar = "<a href='#'  onclick="."confirmDelete('$tmpPaquete')".">"._tr("Uninstall")."</a>";
+	    if ((!empty($resultado))&&(is_array($resultado))){
+	      if (in_array($arrPaquetes[$i]['name'], $resultado)) 
+		  $update = "<a href='#'  onclick="."confirmUpdate('$tmpPaquete')".">["._tr("Update")."]</a>";
+	      else
+		  $update =_tr("Installed");
+	    }else
+		  $update =_tr("Installed");
+            
+	    $desinstalar = "<a href='#'  onclick="."confirmDelete('$tmpPaquete')".">["._tr("Uninstall")."]</a>";
             if(!$estado_paquete){
-                $instalar = "<a href='#'  onclick="."installaPackage('$tmpPaquete')".">{$arrLang['Install']}</a>";
+                $instalar = "<a href='#'  onclick="."installaPackage('$tmpPaquete',0)".">[{$arrLang['Install']}]</a>";
                 $desinstalar = "";
+		$update = "";
             }
-            $arrData[] = array(
+	    $arrData[] = array(
                             $arrPaquetes[$i]['name'],
                             $arrPaquetes[$i]['summary'],
-                            $arrPaquetes[$i]['version'],
-                            $arrPaquetes[$i]['release'],
+                            $arrPaquetes[$i]['version']." / ".$arrPaquetes[$i]['release'],
                             $arrPaquetes[$i]['repositorio'],
-                            (($estado_paquete)?$arrLang["Package Installed"]:"")." $instalar",
-                            $desinstalar,
+                            $update."  ".$instalar." "."$desinstalar",
                             );
         }
     }
@@ -147,16 +159,13 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
                                        "property1" => ""),
                             1 => array("name"      => $arrLang["Package Info"],
                                        "property1" => ""),
-                            2 => array("name"      => $arrLang["Package Version"],
+                            2 => array("name"      => $arrLang["Package Version"]." / ".$arrLang["Package Release"],
                                        "property1" => ""),
-                            3 => array("name"      => $arrLang["Package Release"],
+                            3 => array("name"      => $arrLang["Repositor Place"],
                                        "property1" => ""),
-                            4 => array("name"      => $arrLang["Repositor Place"],
+                            4 => array("name"     => $arrLang["Status"],
                                        "property1" => ""),
-                            5 => array("name"     => $arrLang["Status"],
-                                       "property1" => ""),
-                            6 => array("name"      => $arrLang["Package Delete"],
-                                       "property1" => ""),));
+                            ));
 
     /*Inicion Parte del Filtro*/
     $arrFilter = filterField();
@@ -184,6 +193,7 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
    // $smarty->assign("AllPackage",$arrLang['All Package']);
     $smarty->assign("UpdatingRepositories",$arrLang['Updating Repositories']);
     $smarty->assign("InstallPackage",$arrLang['Installing Package']);
+    $smarty->assign("UpdatePackage",_tr("Updating Package"));
     $smarty->assign("accionEnProceso",$arrLang['There is an action in process']);
 
 	if($actualizar){
@@ -200,6 +210,10 @@ function listPackages($smarty, $module_name, $local_templates_dir,$arrConf) {
     $oGrid->showFilter($contenidoFiltro);
     /*Fin Parte del Filtro*/
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+    if($strErrorMsg!=""){
+      $smarty->assign("mb_title", _tr("Error"));
+      $smarty->assign("mb_message", $strErrorMsg);
+    }
     return $contenidoModulo;
 }
 
@@ -228,7 +242,7 @@ function actualizarRepositorios()
 {
     $oPackages = new PaloSantoPackages();
     $resultado = $oPackages->checkUpdate();
-
+    
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status($resultado);
     return $jsonObject->createJSON();
@@ -238,7 +252,8 @@ function installPaquete()
 {
     $oPackages = new PaloSantoPackages();
     $paquete = getParameter("paquete");
-    $resultado = $oPackages->installPackage($paquete);
+    $val  = getParameter("val");
+    $resultado = $oPackages->installPackage($paquete,$val);
 
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status($resultado);

@@ -120,5 +120,9 @@ $arrLangModule=array(
     =>  'Short phone call to {phone} disconnected from agent {agentchannel}, duration was {duration}',    
 'LOG_FMT_NOANSWER'
     =>  'Phone call to {phone} disconnected before entering queue',
+'outgoing'  =>  'Outgoing campaign',
+'incoming'  =>  'Incoming campaign',
+'incomingqueue' =>  'Incoming queue',
+'N/A' => 'N/A', /* Not Available */
 );
 ?>

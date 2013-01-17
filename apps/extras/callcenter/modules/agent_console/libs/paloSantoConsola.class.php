@@ -581,7 +581,17 @@ LISTA_EXTENSIONES;
     
     function leerInfoCampania($sCallType, $iCampaignId)
     {
-        try {
+        if ($sCallType == 'incomingqueue') {
+        	return array(
+                'queue'                     =>  $iCampaignId,
+                'type'                      =>  'incoming',
+                'startdate'                 =>  NULL,
+                'enddate'                   =>  NULL,
+                'working_time_starttime'    =>  NULL,
+                'working_time_endtime'      =>  NULL,
+                'retries'                   =>  NULL,
+            );
+        } else try {
             $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = $oECCP->getcampaigninfo($sCallType, $iCampaignId);
             if (isset($respuesta->failure)) {
@@ -947,6 +957,26 @@ LISTA_EXTENSIONES;
             return NULL;
     	}
     }
+
+    function leerListaColasEntrantes()
+    {
+        try {
+            $oECCP = $this->_obtenerConexion('ECCP');
+            $respuesta = $oECCP->getincomingqueuelist();
+            $listaColas = array();
+            foreach ($respuesta->queues->queue as $xml_queue) {
+                $listaColas[(int)$xml_queue->id] = array(
+                    'id'        =>  (int)$xml_queue->id,
+                    'queue'     =>  (string)$xml_queue->queue,
+                    'status'    =>  (string)$xml_queue->status,
+                );
+            }
+            return $listaColas;
+        } catch (Exception $e) {
+            $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
+            return NULL;
+        }
+    }
     
     function leerListaCampanias()
     {
@@ -964,7 +994,7 @@ LISTA_EXTENSIONES;
             }
             return $listaCampania;
     	} catch (Exception $e) {
-            $this->errMsg = '(internal) leerListaCampanias'.$e->getMessage();
+            $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
             return NULL;
     	}
     }
@@ -973,7 +1003,9 @@ LISTA_EXTENSIONES;
     {
     	try {
     		$oECCP = $this->_obtenerConexion('ECCP');
-            $respuesta = $oECCP->getcampaignstatus($sCallType, $iCampaignId);
+            $respuesta = ($sCallType == 'incomingqueue') 
+                ? $oECCP->getincomingqueuestatus($iCampaignId)
+                : $oECCP->getcampaignstatus($sCallType, $iCampaignId);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to read campaign information').' - '.$this->_formatoErrorECCP($respuesta);
                 return NULL;
@@ -1023,7 +1055,7 @@ LISTA_EXTENSIONES;
             }
             return $reporte;
         } catch (Exception $e) {
-            $this->errMsg = '(internal) leerEstadoCampania'.$e->getMessage();
+            $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
             return NULL;
     	}
     }
@@ -1032,7 +1064,9 @@ LISTA_EXTENSIONES;
     {
     	try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $respuesta = $oECCP->campaignlog($sCallType, $iCampaignId);
+            $respuesta = ($sCallType == 'incomingqueue') 
+                ? $oECCP->campaignlog('incoming', NULL, $iCampaignId)
+                : $oECCP->campaignlog($sCallType, $iCampaignId);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to read campaign log').' - '.$this->_formatoErrorECCP($respuesta);
                 return NULL;
@@ -1051,7 +1085,7 @@ LISTA_EXTENSIONES;
             }
             return $reporte;
     	} catch (Exception $e) {
-            $this->errMsg = '(internal) leerLogCampania'.$e->getMessage();
+            $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
             return NULL;
     	}
     }
@@ -1062,7 +1096,7 @@ LISTA_EXTENSIONES;
     		$oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = $oECCP->callprogress($bHabilitar);
         } catch (Exception $e) {
-            $this->errMsg = '(internal) leerLogCampania'.$e->getMessage();
+            $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
     	}
     }
 }

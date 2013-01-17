@@ -1,3 +1,5 @@
+* Campaign Monitoring: add support for monitoring of incoming calls without an
+  incoming campaign, by selection of raw queue. Add some i18n to labels.
 * Dialer (ECCP): add support for new requests "getincomingqueuestatus" and 
   "getincomingqueuelist" required for monitoring incoming calls with no 
   associated campaign.

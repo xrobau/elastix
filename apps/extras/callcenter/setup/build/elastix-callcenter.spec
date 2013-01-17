@@ -97,7 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Thu Jan 17
+* Thu Jan 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: add support for monitoring of incoming calls
+  without an incoming campaign, by selection of raw queue. Add some i18n to 
+  labels.
 - CHANGED: Dialer (ECCP): add support for new requests "getincomingqueuestatus" 
   and "getincomingqueuelist" required for monitoring incoming calls with no 
   associated campaign.

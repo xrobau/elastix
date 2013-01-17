@@ -122,7 +122,23 @@ function manejarMonitoreo_getCampaigns($module_name, $smarty, $sDirLocalPlantill
     if (!is_array($listaCampanias)) {
     	$respuesta['status'] = 'error';
         $respuesta['message'] = $oPaloConsola->errMsg;
-    } else {
+    } 
+    $listaColas = $oPaloConsola->leerListaColasEntrantes();
+    if (!is_array($listaColas)) {
+        $respuesta['status'] = 'error';
+        $respuesta['message'] = $oPaloConsola->errMsg;
+    } 
+    if (is_array($listaCampanias) && is_array($listaColas)) {
+        foreach ($listaColas as $q) {
+        	$listaCampanias[] = array(
+                'id'        =>  $q['queue'],
+                'type'      =>  'incomingqueue',
+                'name'      =>  $q['queue'],
+                'status'    =>  $q['status'],
+            );
+        }
+        
+        
         /* Para la visualización se requiere que primero se muestren las campañas 
          * activas, con el ID mayor primero (probablemente la campaña más reciente)
          * seguido de las campañas inactivas, y luego las terminadas */
@@ -136,10 +152,10 @@ function manejarMonitoreo_getCampaigns($module_name, $smarty, $sDirLocalPlantill
         }
         usort($listaCampanias, 'manejarMonitoreo_getCampaigns_sort');
         $respuesta['campaigns'] = array();
-        foreach ($listaCampanias as $c) /*if ($c['status'] != 'inactive')*/ { 
+        foreach ($listaCampanias as $c) { 
             $respuesta['campaigns'][] = array(
                 'id_campaign'   => $c['id'],
-                'desc_campaign' => '('.$c['type'].') '.$c['name'],
+                'desc_campaign' => '('._tr($c['type']).') '.$c['name'],
                 'type'          =>  $c['type'],
                 'status'        =>  $c['status'],
             );
@@ -160,7 +176,7 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
     
     $sTipoCampania = getParameter('campaigntype');
     $sIdCampania = getParameter('campaignid');
-    if (is_null($sTipoCampania) || !in_array($sTipoCampania, array('incoming', 'outgoing'))) {
+    if (is_null($sTipoCampania) || !in_array($sTipoCampania, array('incoming', 'outgoing', 'incomingqueue'))) {
         $respuesta['status'] = 'error';
         $respuesta['message'] = _tr('Invalid campaign type');
     } elseif (is_null($sIdCampania) || !ctype_digit($sIdCampania)) {
@@ -192,12 +208,22 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
     }
     if ($respuesta['status'] == 'success') {
     	$respuesta['campaigndata'] = array(
-            'startdate'                 =>  $infoCampania['startdate'],
-            'enddate'                   =>  $infoCampania['enddate'],
-            'working_time_starttime'    =>  $infoCampania['working_time_starttime'],
-            'working_time_endtime'      =>  $infoCampania['working_time_endtime'],
+            'startdate'                 =>
+                is_null($infoCampania['startdate']) 
+                ? _tr('N/A') : $infoCampania['startdate'],
+            'enddate'                   =>
+                is_null($infoCampania['enddate']) 
+                ? _tr('N/A') : $infoCampania['enddate'],
+            'working_time_starttime'    =>
+                is_null($infoCampania['working_time_starttime']) 
+                ? _tr('N/A') : $infoCampania['working_time_starttime'],
+            'working_time_endtime'      =>
+                is_null($infoCampania['working_time_endtime']) 
+                ? _tr('N/A') : $infoCampania['working_time_endtime'],
             'queue'                     =>  $infoCampania['queue'],
-            'retries'                   =>  (int)$infoCampania['retries'],
+            'retries'                   => 
+                is_null($infoCampania['retries'])
+                ? _tr('N/A') : (int)$infoCampania['retries'],
         );
         
         // Traducción de estado de las llamadas no conectadas
@@ -365,7 +391,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             $iTimestampActual = time();
             foreach ($listaEventos as $evento) {
                 $sCanalAgente = isset($evento['agent_number']) ? $evento['agent_number'] : NULL;
-
+file_put_contents('/tmp/debug-campaignmonitoring.txt', print_r($evento, 1), FILE_APPEND);
                 switch ($evento['event']) {
                 case 'agentloggedin':
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
@@ -398,8 +424,12 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     }
                     break;
                 case 'callprogress':
-                    if ($estadoCliente['campaignid'] == $evento['campaign_id'] && 
-                        $estadoCliente['campaigntype'] == $evento['call_type']) {
+                    $bProcesar = ($estadoCliente['campaigntype'] == 'incomingqueue')
+                        ? ( $estadoCliente['campaignid'] == $evento['queue'] &&
+                            is_null($evento['campaign_id']))
+                        : ( $estadoCliente['campaignid'] == $evento['campaign_id'] && 
+                            $estadoCliente['campaigntype'] == $evento['call_type']);
+                    if ($bProcesar) {
                     	// Llamada corresponde a cola monitoreada
                         $callid = $evento['call_id'];
 

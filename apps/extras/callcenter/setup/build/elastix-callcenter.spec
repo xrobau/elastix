@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 8.beta
+Release: 9.beta
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,7 +97,14 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Thu Jan 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Jan 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-9.beta
+- FIXED: Campaign Monitoring: add cancelling of long polling when switching 
+  campaigns in the absence of SSE (Internet Explorer). Otherwise multiple 
+  pollings may accumulate. Additionally, invalidate the polling on server-side 
+  when the monitored campaign is changed. Loosen up one call status comparison 
+  that otherwise resulted in unnecessary refreshings in non-SSE mode. Update 
+  total counter properly when receiving incoming calls. Remove stray debugging 
+  statement.
 - CHANGED: Campaign Monitoring: add support for monitoring of incoming calls
   without an incoming campaign, by selection of raw queue. Add some i18n to 
   labels.

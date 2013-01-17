@@ -120,5 +120,9 @@ $arrLangModule=array(
     =>  'Llamada corta a {phone} desconectada del agente {agentchannel}, duración fue {duration}',    
 'LOG_FMT_NOANSWER'
     =>  'Llamada a {phone} desconectada antes de entrar a una cola',
+'outgoing'  =>  'Campaña saliente',
+'incoming'  =>  'Campaña entrante',
+'incomingqueue' =>  'Cola entrante',
+'N/A' => 'N/D', /* No Disponible */
 );
 ?>

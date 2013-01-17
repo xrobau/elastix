@@ -593,5 +593,23 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->callprogress_response;
     } 
+
+    public function getincomingqueuestatus($queue)
+    {
+        $xml_request = new SimpleXMLElement('<request />');
+        $xml_cmdRequest = $xml_request->addChild('getincomingqueuestatus');
+        $xml_cmdRequest->addChild('queue', str_replace('&', '&amp;', $queue));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->getincomingqueuestatus_response;
+    }
+
+    public function getincomingqueuelist()
+    {
+        $xml_request = new SimpleXMLElement('<request />');
+        $xml_cmdRequest = $xml_request->addChild('getincomingqueuelist');
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->getincomingqueuelist_response;
+    }
+    
 }
 ?>

@@ -1,3 +1,7 @@
+* Dialer (ECCP): add support for new requests "getincomingqueuestatus" and 
+  "getincomingqueuelist" required for monitoring incoming calls with no 
+  associated campaign.
+* Dialer (ECCP): add ECCP authentication to several requests that missed it.
 * Agent Information: fix some misspellings and awkward phrasings  
 * Campaign Monitoring: fix javascript syntax rejected by IE. Also, work around
   IE issue that collapses JSON members that contain only empty objects or arrays

@@ -97,6 +97,13 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Jan 17
+- CHANGED: Dialer (ECCP): add support for new requests "getincomingqueuestatus" 
+  and "getincomingqueuelist" required for monitoring incoming calls with no 
+  associated campaign.
+- FIXED: Dialer (ECCP): add ECCP authentication to several requests that missed 
+  it.
+
 * Mon Jan 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Information: fix some misspellings and awkward phrasings  
 - FIXED: Remove now obsolete "Agent Connection Time" item from Elastix menu.

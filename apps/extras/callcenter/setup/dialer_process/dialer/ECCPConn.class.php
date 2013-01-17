@@ -289,6 +289,9 @@ class ECCPConn extends MultiplexConn
 
     private function Request_filterbyagent($comando)
     {
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
         // Verificar que agente está presente
         if (!isset($comando->agent_number)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -444,6 +447,9 @@ class ECCPConn extends MultiplexConn
 
     private function Request_getcampaignlist($comando)
     {
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
         // Tipo de campaña 
         $sTipoCampania = NULL;
         if (isset($comando->campaign_type)) {
@@ -575,6 +581,51 @@ class ECCPConn extends MultiplexConn
             $xml_campaign->addChild('status', $descEstados[$tupla['status']]);
         }
 
+        return $xml_response;
+    }
+
+    private function Request_getincomingqueuelist($comando)
+    {
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+    	
+        // Offset y límite
+        $iOffset = NULL; $iLimite = NULL;
+        if (isset($comando->limit)) {
+            $iLimite = (int)$comando->limit;
+            $iOffset = 0;
+        }
+        if (isset($comando->offset)) $iOffset = (int)$comando->offset;
+        if (!is_null($iOffset) && is_null($iLimite))
+            return $this->_generarRespuestaFallo(400, 'Bad request - offset without limit');
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_ListResponse = $xml_response->addChild('getincomingqueuelist_response');
+
+        $sPeticionSQL = 'SELECT id, queue, estatus FROM queue_call_entry ORDER BY id';
+        $paramSQL = array();
+        if (!is_null($iLimite)) {
+            $sPeticionSQL .= ' LIMIT ? OFFSET ?';
+            $paramSQL[] = $iLimite;
+            $paramSQL[] = $iOffset;
+        }
+
+        $recordset = $this->_db->prepare($sPeticionSQL);
+        $recordset->execute($paramSQL);
+
+        $descEstados = array(
+            'A' =>  'active',
+            'I' =>  'inactive',
+            'T' =>  'finished',
+        );
+
+        $xml_queues = $xml_ListResponse->addChild('queues');
+        foreach ($recordset as $tupla) {
+            $xml_queue = $xml_queues->addChild('queue');
+            $xml_queue->addChild('id', $tupla['id']);
+            $xml_queue->addChild('queue', $tupla['queue']);
+            $xml_queue->addChild('status', $descEstados[$tupla['estatus']]);
+        }
         return $xml_response;
     }
 
@@ -2052,9 +2103,6 @@ LISTA_EXTENSIONES;
             $sTipoCampania = (string)$comando->campaign_type;
         }
 
-        // Leer información de las llamadas en curso para la campaña
-        $statusCampania_AMI = $this->_tuberia->AMIEventProcess_reportarInfoLlamadasCampania($sTipoCampania, $idCampania);
-        
         // Leer resumen de llamadas completadas desde la base de datos
         switch ($sTipoCampania) {
         case 'outgoing':
@@ -2068,20 +2116,59 @@ LISTA_EXTENSIONES;
         }
 
         $xml_response = new SimpleXMLElement('<response />');
-        $xml_GetCampaignStatusResponse = $xml_response->addChild('getcampaignstatus_response');
+        $xml_statusresponse = $xml_response->addChild('getcampaignstatus_response');
         if (count($statusCampania_DB) <= 0) {
-            $this->_agregarRespuestaFallo($xml_GetCampaignStatusResponse, 404, 'Campaign not found');
+            $this->_agregarRespuestaFallo($xml_statusresponse, 404, 'Campaign not found');
             return $xml_response;
         }
 
+        // Leer información de las llamadas en curso para la campaña
+        $statusCampania_AMI = $this->_tuberia->AMIEventProcess_reportarInfoLlamadasCampania($sTipoCampania, $idCampania);
+        
+        $this->_getcampaignstatus_format($xml_statusresponse, $statusCampania_DB, $statusCampania_AMI);
+        return $xml_response;
+    }
+
+    private function Request_getincomingqueuestatus($comando)
+    {
+        if (is_null($this->_ami))
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
+        // Verificar que id y tipo está presente
+        if (!isset($comando->queue)) 
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        $sCola = (string)$comando->queue;
+        
+        // Leer resumen de llamadas completadas sin campaña desde la base de datos
+        $statusCampania_DB = $this->_leerResumenColaEntrante($sCola);
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_statusresponse = $xml_response->addChild('getincomingqueuestatus_response');
+        if (count($statusCampania_DB) <= 0) {
+            $this->_agregarRespuestaFallo($xml_statusresponse, 404, 'Queue not found');
+            return $xml_response;
+        }
+
+        // Leer información de las llamadas en curso para la campaña
+        $statusCampania_AMI = $this->_tuberia->AMIEventProcess_reportarInfoLlamadasColaEntrante($sCola);
+        
+        $this->_getcampaignstatus_format($xml_statusresponse, $statusCampania_DB, $statusCampania_AMI);
+        return $xml_response;
+    }
+
+    private function _getcampaignstatus_format($xml_statusresponse, &$statusCampania_DB, &$statusCampania_AMI)
+    {
         // Cuentas de estados de llamadas realizadas
-        $xml_statusCount = $xml_GetCampaignStatusResponse->addChild('statuscount');
+        $xml_statusCount = $xml_statusresponse->addChild('statuscount');
         $xml_statusCount->addChild('total', array_sum($statusCampania_DB['status']));
         foreach ($statusCampania_DB['status'] as $statusKey => $statusCount)
             $xml_statusCount->addChild(strtolower($statusKey), $statusCount);
             
         // Estado de los agentes
-        $xml_agents = $xml_GetCampaignStatusResponse->addChild('agents');
+        $xml_agents = $xml_statusresponse->addChild('agents');
         foreach ($statusCampania_AMI['queuestatus'] as $sAgente => $infoAgente) {
             // Este código asume agentes de formato Agent/9000
             $xml_agent = $xml_agents->addChild('agent');
@@ -2095,7 +2182,7 @@ LISTA_EXTENSIONES;
             $this->_listarAgentesLogoneadosCola($statusCampania_DB['queue']),
             $this->_listarAgentesDinamicosCola($statusCampania_DB['queue'])));
         foreach ($listaAgentes as $sAgente) if (!isset($statusCampania_AMI['queuestatus'][$sAgente])) {
-        	$infoAgente = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
+            $infoAgente = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
             if (!is_null($infoAgente)) {
                 $xml_agent = $xml_agents->addChild('agent');
                 $xml_agent->addChild('agentchannel', $sAgente);
@@ -2105,7 +2192,7 @@ LISTA_EXTENSIONES;
         }
 
         // Estado de las llamadas pendientes de enlazar
-        $xml_activecalls = $xml_GetCampaignStatusResponse->addChild('activecalls');
+        $xml_activecalls = $xml_statusresponse->addChild('activecalls');
         foreach ($statusCampania_AMI['activecalls'] as $infoLlamada) {
             $xml_activecall = $xml_activecalls->addChild('activecall');
             $xml_activecall->addChild('callnumber', $infoLlamada['dialnumber']);
@@ -2120,8 +2207,6 @@ LISTA_EXTENSIONES;
             if (isset($infoLlamada['trunk']))
                 $xml_activecall->addChild('trunk', $infoLlamada['trunk']);
         }
-        
-        return $xml_response;
     }
 
     private function _getcampaignstatus_setagent($xml_agent, $infoAgente)
@@ -2235,6 +2320,50 @@ LEER_RESUMEN_CAMPANIA;
         $sPeticionSQL = 'SELECT COUNT(*) AS n, status FROM call_entry WHERE id_campaign = ? GROUP BY status';
         $recordset = $this->_db->prepare($sPeticionSQL);
         $recordset->execute(array($idCampania));
+        $recordset->setFetchMode(PDO::FETCH_ASSOC);
+        $tupla['status'] = array(
+            //'Pending'   =>  0,  // Llamada no ha sido realizada todavía
+
+            //'Placing'   =>  0,  // Originate realizado, no se recibe OriginateResponse
+            //'Ringing'   =>  0,  // Se recibió OriginateResponse, no entra a cola
+            'OnQueue'   =>  0,  // Entró a cola, no se asigna a agente todavía
+            'Success'   =>  0,  // Conectada y asignada a un agente
+            'OnHold'    =>  0,  // Llamada fue puesta en espera por agente
+            //'Failure'   =>  0,  // No se puede conectar llamada
+            //'ShortCall' =>  0,  // Llamada conectada pero duración es muy corta
+            //'NoAnswer'  =>  0,  // Llamada estaba Ringing pero no entró a cola
+            'Abandoned' =>  0,  // Llamada estaba OnQueue pero no habían agentes
+            'Finished'  =>  0,  // Llamada ha terminado luego de ser conectada a agente
+            'LostTrack' =>  0,  // Programa fue terminado mientras la llamada estaba activa            
+        );
+        $mapaEstados = array(
+            'en-cola'       =>  'OnQueue',
+            'activa'        =>  'Success',
+            'hold'          =>  'OnHold',
+            'abandonada'    =>  'Abandoned',             
+            'terminada'     =>  'Finished',
+            'fin-monitoreo' =>  'LostTrack',
+        );
+        foreach ($recordset as $tuplaStatus) {
+            $tupla['status'][$mapaEstados[$tuplaStatus['status']]] = $tuplaStatus['n'];
+        }
+
+        return $tupla;
+    }
+
+    private function _leerResumenColaEntrante($sCola)
+    {
+        $tupla['queue'] = $sCola;
+
+        // Leer la clasificación por estado de las llamadas de la campaña
+        $sPeticionSQL = 
+            'SELECT COUNT(*) AS n, status FROM call_entry, queue_call_entry '.
+            'WHERE call_entry.id_campaign IS NULL '.
+                'AND call_entry.id_queue_call_entry = queue_call_entry.id '.
+                'AND queue_call_entry.queue = ? '.
+            'GROUP BY status';
+        $recordset = $this->_db->prepare($sPeticionSQL);
+        $recordset->execute(array($sCola));
         $recordset->setFetchMode(PDO::FETCH_ASSOC);
         $tupla['status'] = array(
             //'Pending'   =>  0,  // Llamada no ha sido realizada todavía
@@ -3049,6 +3178,9 @@ Privilege: Command
 
     private function Request_getagentqueues($comando)
     {
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
@@ -3185,6 +3317,9 @@ Privilege: Command
 
     private function Request_getagentactivitysummary($comando)
     {
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
         // Fechas de inicio y fin
         $sFechaInicio = $sFechaFin = date('Y-m-d');
         if (isset($comando->datetime_start)) {
@@ -3387,6 +3522,9 @@ LEER_ULTIMA_PAUSA;
 
     private function Request_campaignlog($comando)
     {
+        if (is_null($this->_sUsuarioECCP))
+            return $this->_generarRespuestaFallo(401, 'Unauthorized');
+
         // Fechas de inicio y fin
         $sFechaInicio = $sFechaFin = date('Y-m-d');
         if (isset($comando->datetime_start)) {
@@ -3413,7 +3551,7 @@ LEER_ULTIMA_PAUSA;
         if (!in_array($sTipoCampania, array('incoming', 'outgoing')))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         if (isset($comando->campaign_id)) $idCampania = (int)$comando->campaign_id;
-        if (isset($comando->queue)) $sCola = $idCampania = (string)$comando->queue;
+        if (isset($comando->queue)) $sCola = (string)$comando->queue;
         if ($sTipoCampania == 'outgoing' && is_null($idCampania))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         if ($sTipoCampania == 'incoming' && (is_null($idCampania) && is_null($sCola)))

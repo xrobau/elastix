@@ -3065,3 +3065,161 @@ En caso de éxito:
   </logentries>
 </campaignlog_response>
 </response>
+
+
+Requerimiento "getincomingqueuelist"
+Este requerimiento lista las colas entrantes disponibles en el sistema.
+
+Atributos o argumentos:
+* offset: Opcional. Si se especifica, debe también indicarse limit. Se devuelven
+  registros a partir del número indicado, con el primer registro siendo 0. Se 
+  asume 0 por omisión en caso de especificar limit sin offset.
+* limit: Opcional. Si se especifica, se devuelve como máximo el número de 
+  registros indicado por el parámetro. Si no se especifica, se devuelven todos
+  los registros posibles.
+  
+
+Respuesta:
+* queues: lista de elementos de tipo queue. Cada elemento queue tiene los
+  siguientes campos:
+  * id: ID interno de identificación de la cola entrante
+  * queue: Número de la cola entrante
+  * status: Uno de los valores 'active' o 'inactive'
+
+Ejemplo:
+<request id="4">
+<getincomingqueuelist />
+</request> 
+
+Respuesta:
+<response id="4">
+<getincomingqueuelist_response>
+  <queues>
+    <queue>
+      <id>1</id>
+      <queue>8001</queue>
+      <status>active</status>
+    </queue>
+    <queue>
+      <id>2</id>
+      <queue>6000</queue>
+      <status>active</status>
+    </queue>
+    <queue>
+      <id>4</id>
+      <queue>11627</queue>
+      <status>inactive</status>
+    </queue>
+  </queues>
+</getincomingqueuelist_response>
+</response>
+
+
+Requerimiento "getincomingqueuestatus"
+
+Este requerimiento recupera información dinámica o volátil sobre la cola 
+entrante indicada. Esta información incluye el estado de los agentes disponibles
+en la cola de la campaña activa, el número de llamadas en los varios estados 
+reconocidos, y las llamadas activas que todavía no han sido asignadas a agentes. 
+En este aspecto, este requerimiento es parecido a getcampaignstatus. Sin
+embargo, este requerimiento devuelve información sobre las llamadas que entraron
+a la cola pero no fueron asignadas como pertenecientes a una campaña entrante.
+
+Atributos o argumentos:
+* queue: Número de la cola entrante
+
+Respuesta:
+* statuscount: elemento que contiene los siguientes atributos:
+    * total: Total de llamadas que se han recibido hasta el momento en la cola.
+    * onqueue: Cantidad de llamadas conectadas que esperan en la cola a ser 
+      asignadas a un agente.
+    * success: Cantidad de llamadas que fueron asignadas a un agente.
+    * onhold: Para llamadas salientes o entrantes, cantidad de llamadas que han
+      sido puestas en espera.
+    * abandoned: Cantidad de llamadas que se desconectaron luego de haber 
+      entrado a una cola, pero antes de ser asignadas a un agente.
+    * finished: Cantidad de llamadas ya terminadas luego de ser atendidas por un
+      agente.
+    * losttrack: Para llamadas entrantes, cantidad de llamadas que no pudieron
+      ser vigiladas hasta terminar porque se reinició el marcador.
+* agents: Agentes asociados a la cola de la campaña. Este elemento es una lista
+  que contiene múltiples elementos 'agent'. Cada elemento contiene los siguientes
+  atributos:
+  * agentchannel: Canal del agente de la cola (normalmente Agent/NNNN)
+  * status: Estado del agente. Puede ser 'online', 'offline', 'oncall', 'paused'
+    como se describe en la respuesta del requerimiento 'getagentstatus'
+  * callid: ID en la base de datos de la llamada que atiende el agente. Sólo está
+    definido si el agente está logoneado y atendiendo alguna llamada.
+  * callnumber: Número telefónico del cliente al que se conecta la llamada. Sólo
+    está definido si el agente está logoneado y atendiendo alguna llamada.
+  * callclient: Canal asignado a la llamada del cliente atendido. Sólo está
+    definido si el agente está logoneado y atendiendo alguna llamada.
+  * pausename: Nombre de la pausa en la que está el agente. Sólo está definido
+    si el agente está en pausa.
+  * pauseid: ID de la pausa en la que está el agente. Sólo está definido si el 
+    agente está en pausa.
+  * pausestart: Hora en la que inició la pausa, en formato HH:MM:SS de 24 horas.
+    Sólo está definido si el agente está en pausa.
+  * queuestart: Hora en la que entró en la cola la llamada atendida por el agente.
+    Sólo definido si el agente está atendiendo una llamada.
+  * linkstart: Hora en la que la llamada fue conectada con el agente. Sólo
+    definido si el agente está atendiendo una llamada.
+  * trunk: Troncal a través de la cual se recibe llamada entrante. Sólo definido
+    si el agente está atendiendo una llamada.
+* activecalls: Llamadas de la campaña que todavía no han sido asignadas a un 
+  agente. Este elemento es una lista que contiene múltiples elementos 'activecall'.
+  Cada elemento contiene los siguientes atributos:
+  * callid: ID en la base de datos de la llamada conectada al cliente
+  * callnumber: Número telefónico de la llamada conectada al cliente
+  * callstatus: Estado de la llamada de la campaña. Puede ser uno de los valores
+    'OnQueue' (campañas entrantes o salientes)
+  * queuestart: Hora en la que la llamada ingresó a la cola. Sólamente definido
+    para campañas salientes, y si el estado en 'callstatus' es 'onqueue'.
+  * trunk: Troncal a través de la cual se recibe llamada entrante, o se realiza
+    la llamada saliente.
+
+Ejemplo:
+<request id="7">
+    <getincomingqueuestatus>
+        <queue>8001</queue>
+    </getincomingqueuestatus>
+</request>
+
+Respuesta:
+Campaña saliente:
+<response id="7">
+<getincomingqueuestatus_response>
+  <statuscount>
+    <total>29</total>
+    <onqueue>1</onqueue>
+    <success>0</success>
+    <onhold>0</onhold>
+    <abandoned>2</abandoned>
+    <finished>22</finished>
+    <losttrack>4</losttrack>
+  </statuscount>
+  <agents>
+    <agent>
+      <agentchannel>Agent/9003</agentchannel>
+      <status>offline</status>
+    </agent>
+    <agent>
+      <agentchannel>Agent/9000</agentchannel>
+      <status>offline</status>
+    </agent>
+    <agent>
+      <agentchannel>SIP/1064</agentchannel>
+      <status>offline</status>
+    </agent>
+  </agents>
+  <activecalls>
+    <activecall>
+      <callnumber>1064</callnumber>
+      <callid>229</callid>
+      <callstatus>OnQueue</callstatus>
+      <queuestart>17:50:28</queuestart>
+      <trunk>SIP/1064</trunk>
+    </activecall>
+  </activecalls>
+</getincomingqueuestatus_response>
+</response>

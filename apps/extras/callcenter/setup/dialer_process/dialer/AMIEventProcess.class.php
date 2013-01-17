@@ -78,7 +78,7 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente', 
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
-            'cancelarIntentoLoginAgente') as $k)
+            'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante') as $k)
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -326,37 +326,7 @@ class AMIEventProcess extends TuberiaProcess
             if (!is_null($llamada->campania) &&
                 $llamada->campania->tipo_campania == $sTipoCampania &&
                 $llamada->campania->id == $idCampania) {
-                if (!is_null($llamada->agente)) {
-            		$a = $llamada->agente;
-                    $sAgente = $a->channel;
-                    $estadoCola[$sAgente] = $a->resumenSeguimiento();
-
-                    // Agregar información básica sobre la llamada
-                    $estadoCola[$sAgente]['dialnumber'] = $llamada->phone;
-                    $estadoCola[$sAgente]['callid'] = $llamada->id_llamada;
-                    if (!is_null($llamada->timestamp_originatestart))
-                        $estadoCola[$sAgente]['datetime_dialstart'] = date('Y-m-d H:i:s', $llamada->timestamp_originatestart);
-                    if (!is_null($llamada->timestamp_originateend))
-                        $estadoCola[$sAgente]['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
-                    $estadoCola[$sAgente]['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
-                    $estadoCola[$sAgente]['datetime_linkstart'] = date('Y-m-d H:i:s', $llamada->timestamp_link);
-                    if (!is_null($llamada->trunk)) $estadoCola[$sAgente]['trunk'] = $llamada->trunk;
-            	} elseif (in_array($llamada->status, array('Placing', 'Ringing', 'OnQueue'))) {
-                    $callStatus = array(
-                        'dialnumber'    =>  $llamada->phone,
-                        'callid'        =>  $llamada->id_llamada,
-                        'callstatus'    =>  $llamada->status,
-                    );
-                    if (!is_null($llamada->timestamp_originatestart))
-                        $callStatus['datetime_dialstart'] = date('Y-m-d H:i:s', $llamada->timestamp_originatestart);
-                    if (!is_null($llamada->timestamp_originateend))
-                        $callStatus['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
-                    if (!is_null($llamada->timestamp_enterqueue))
-                        $callStatus['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
-                    if (!is_null($llamada->trunk)) $callStatus['trunk'] = $llamada->trunk;
-                    
-                    $llamadasPendientes[] = $callStatus;
-            	}
+                $this->_agregarInfoLlamadaCampania($llamada, $estadoCola, $llamadasPendientes);
             }
         }
         ksort($estadoCola);
@@ -364,6 +334,66 @@ class AMIEventProcess extends TuberiaProcess
             'queuestatus'   =>  $estadoCola,
             'activecalls'   =>  $llamadasPendientes,
         );        
+    }
+
+    /**
+     * Procedimiento que reporta la información sobre todas las llamadas que
+     * pertenecen a la cola entrante indicada por $sCola y que no pertenecen a
+     * una campaña entrante específica.
+     */
+    private function _reportarInfoLlamadasColaEntrante($sCola)
+    {
+        // Información sobre llamadas que ya están conectadas
+        $estadoCola = array();
+        $llamadasPendientes = array();
+        if (isset($this->_colasEntrantes[$sCola])) {
+            foreach ($this->_listaLlamadas as $llamada) {
+                if (is_null($llamada->campania) && 
+                    $llamada->id_queue_call_entry == $this->_colasEntrantes[$sCola]['id_queue_call_entry']) {
+                    $this->_agregarInfoLlamadaCampania($llamada, $estadoCola, $llamadasPendientes);
+                }
+            }
+        }
+        ksort($estadoCola);
+        return array(
+            'queuestatus'   =>  $estadoCola,
+            'activecalls'   =>  $llamadasPendientes,
+        );        
+    }
+
+    private function _agregarInfoLlamadaCampania($llamada, &$estadoCola, &$llamadasPendientes)
+    {
+        if (!is_null($llamada->agente)) {
+            $a = $llamada->agente;
+            $sAgente = $a->channel;
+            $estadoCola[$sAgente] = $a->resumenSeguimiento();
+
+            // Agregar información básica sobre la llamada
+            $estadoCola[$sAgente]['dialnumber'] = $llamada->phone;
+            $estadoCola[$sAgente]['callid'] = $llamada->id_llamada;
+            if (!is_null($llamada->timestamp_originatestart))
+                $estadoCola[$sAgente]['datetime_dialstart'] = date('Y-m-d H:i:s', $llamada->timestamp_originatestart);
+            if (!is_null($llamada->timestamp_originateend))
+                $estadoCola[$sAgente]['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
+            $estadoCola[$sAgente]['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
+            $estadoCola[$sAgente]['datetime_linkstart'] = date('Y-m-d H:i:s', $llamada->timestamp_link);
+            if (!is_null($llamada->trunk)) $estadoCola[$sAgente]['trunk'] = $llamada->trunk;
+        } elseif (in_array($llamada->status, array('Placing', 'Ringing', 'OnQueue'))) {
+            $callStatus = array(
+                'dialnumber'    =>  $llamada->phone,
+                'callid'        =>  $llamada->id_llamada,
+                'callstatus'    =>  $llamada->status,
+            );
+            if (!is_null($llamada->timestamp_originatestart))
+                $callStatus['datetime_dialstart'] = date('Y-m-d H:i:s', $llamada->timestamp_originatestart);
+            if (!is_null($llamada->timestamp_originateend))
+                $callStatus['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
+            if (!is_null($llamada->timestamp_enterqueue))
+                $callStatus['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
+            if (!is_null($llamada->trunk)) $callStatus['trunk'] = $llamada->trunk;
+            
+            $llamadasPendientes[] = $callStatus;
+        }
     }
 
     private function _manejarLlamadaEspecialECCP($params)
@@ -950,6 +980,16 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_agentesAgendables'), $datos));
     }
 
+    public function rpc_reportarInfoLlamadasColaEntrante($sFuente, $sDestino, 
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_reportarInfoLlamadasColaEntrante'), $datos));
+    }
+    
     /**************************************************************************/
 
     public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje, 

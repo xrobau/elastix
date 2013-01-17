@@ -1,3 +1,10 @@
+* Campaign Monitoring: add cancelling of long polling when switching campaigns
+  in the absence of SSE (Internet Explorer). Otherwise multiple pollings may 
+  accumulate. Additionally, invalidate the polling on server-side when the 
+  monitored campaign is changed. Loosen up one call status comparison that 
+  otherwise resulted in unnecessary refreshings in non-SSE mode. Update total
+  counter properly when receiving incoming calls. Remove stray debugging 
+  statement.
 * Campaign Monitoring: add support for monitoring of incoming calls without an
   incoming campaign, by selection of raw queue. Add some i18n to labels.
 * Dialer (ECCP): add support for new requests "getincomingqueuestatus" and 

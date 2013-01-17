@@ -331,7 +331,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
         	// Llamada ya no está esperando agente
             $respuesta['activecalls']['remove'][] = array('callid' => $estadoCliente['activecalls'][$k]['callid']);
             unset($estadoCliente['activecalls'][$k]);
-        } elseif ($estadoCliente['activecalls'][$k] != $estadoCampania['activecalls'][$k]) {
+        } elseif ($estadoCliente['activecalls'][$k]['callstatus'] != $estadoCampania['activecalls'][$k]['callstatus']) {
         	// Llamada ha cambiado de estado
             $respuesta['activecalls']['update'][] = formatoLlamadaNoConectada($estadoCampania['activecalls'][$k]);
             $estadoCliente['activecalls'][$k] = $estadoCampania['activecalls'][$k];
@@ -374,15 +374,27 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
         $oPaloConsola->desconectarEspera();
         
         // Se inicia espera larga con el navegador...
-        session_commit();
         $iTimestampInicio = time();
         
         while (connection_status() == CONNECTION_NORMAL && esRespuestaVacia($respuesta) 
             && time() - $iTimestampInicio <  $iTimeoutPoll) {
 
+            session_commit();
             $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
             if (is_null($listaEventos)) {
                 $respuesta['error'] = $oPaloConsola->errMsg;
+                jsonflush($bSSE, $respuesta);
+                $oPaloConsola->desconectarTodo();
+                return;
+            }
+            @session_start();
+
+            /* Si el navegador elige otra campaña mientras se espera la primera
+             * campaña, entonces esta espera es inválida, y el navegador ya ha
+             * iniciado otra sesión comet. */
+            if (!($estadoCliente['campaigntype'] === $_SESSION[$module_name]['estadoCliente']['campaigntype'] &&
+                 $estadoCliente['campaignid'] === $_SESSION[$module_name]['estadoCliente']['campaignid'])) {
+                $respuesta['estadoClienteHash'] = 'invalidated';
                 jsonflush($bSSE, $respuesta);
                 $oPaloConsola->desconectarTodo();
                 return;
@@ -391,7 +403,6 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             $iTimestampActual = time();
             foreach ($listaEventos as $evento) {
                 $sCanalAgente = isset($evento['agent_number']) ? $evento['agent_number'] : NULL;
-file_put_contents('/tmp/debug-campaignmonitoring.txt', print_r($evento, 1), FILE_APPEND);
                 switch ($evento['event']) {
                 case 'agentloggedin':
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
@@ -433,6 +444,11 @@ file_put_contents('/tmp/debug-campaignmonitoring.txt', print_r($evento, 1), FILE
                     	// Llamada corresponde a cola monitoreada
                         $callid = $evento['call_id'];
 
+                        // Para llamadas entrantes, cada llamada en cola aumenta el total
+                        if ($evento['call_type'] == 'incoming' && $evento['new_status'] == 'OnQueue') {
+                        	agregarContadorLlamada('total', $estadoCliente, $respuesta);
+                        }
+                        
                         if (in_array($evento['new_status'], array('Failure', 'Abandoned', 'NoAnswer'))) {
                             if (isset($estadoCliente['activecalls'][$callid])) {
                                 restarContadorLlamada($estadoCliente['activecalls'][$callid]['callstatus'], $estadoCliente, $respuesta);
@@ -589,12 +605,9 @@ file_put_contents('/tmp/debug-campaignmonitoring.txt', print_r($evento, 1), FILE
             
             
         }
-        if (!esRespuestaVacia($respuesta)) {
-            @session_start();
-            $estadoHash = generarEstadoHash($module_name, $estadoCliente);
-            $respuesta['estadoClienteHash'] = $estadoHash;
-            session_commit();
-        }
+
+        $estadoHash = generarEstadoHash($module_name, $estadoCliente);
+        $respuesta['estadoClienteHash'] = $estadoHash;
         jsonflush($bSSE, $respuesta);
         
         $respuesta = crearRespuestaVacia();

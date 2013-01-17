@@ -1,6 +1,9 @@
 var module_name = 'campaign_monitoring';
 var App = null;
 
+// Objeto de POST largo
+var longPoll = null;
+
 //Objeto EventSource, si está soportado por el navegador
 var evtSource = null;
 
@@ -122,6 +125,10 @@ $(window).unload(function() {
 		evtSource.close();
 		evtSource = null;
 	}
+	if (longPoll != null) {
+		longPoll.abort();
+		longPoll = null;
+	}
 });
 
 function do_getCampaigns()
@@ -158,6 +165,10 @@ function do_loadCampaign()
 	if (evtSource != null) {
 		evtSource.close();
 		evtSource = null;
+	}
+	if (longPoll != null) {
+		longPoll.abort();
+		longPoll = null;
 	}
 
 	var key_campaign = App.campaniasDisponibles.get('key_campaign');
@@ -228,12 +239,12 @@ function do_checkstatus()
 			manejarRespuestaStatus($.parseJSON(event.data));
 		}
 	} else {
-		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,
+		longPoll = $.post('index.php?menu=' + module_name + '&rawmode=yes', params,
 		function (respuesta) {
-			manejarRespuestaStatus(respuesta);
-			
-			// Lanzar el método de inmediato
-			setTimeout(do_checkstatus, 1);
+			if (manejarRespuestaStatus(respuesta)) {
+				// Lanzar el método de inmediato
+				setTimeout(do_checkstatus, 1);
+			}
 		});
 	}
 }
@@ -244,17 +255,20 @@ function manejarRespuestaStatus(respuesta)
 	if (respuesta.error != null) {
 		window.alert(respuesta.error);
 		location.reload();
-		return;
+		return false;
 	}
 
 	// Verificar el hash del estado del cliente
+	if (respuesta.estadoClienteHash == 'invalidated') {
+		// Espera ha sido invalidada por cambio de campaña a monitorear
+		return false;
+	}
 	if (respuesta.estadoClienteHash == 'mismatch') {
 		// Ha ocurrido un error y se ha perdido sincronía
 		location.reload();
-		return;
-	} else {
-		App.campaniaActual.set('estadoClienteHash', respuesta.estadoClienteHash);
+		return false;
 	}
+	App.campaniaActual.set('estadoClienteHash', respuesta.estadoClienteHash);
 	
 	// Estado de los contadores de la campaña
 	var mapStatusCount = {
@@ -363,6 +377,8 @@ function manejarRespuestaStatus(respuesta)
 			mensaje: 	registro.mensaje
 		});
 	}
+	
+	return true;
 }
 
 function do_actualizarReciente()

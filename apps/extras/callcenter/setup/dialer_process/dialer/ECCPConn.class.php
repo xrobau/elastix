@@ -54,11 +54,36 @@ class ECCPConn extends MultiplexConn
     // Si VERDADERO, cliente está interesado en eventos de progreso de llamada
     private $_bProgresoLlamada = FALSE;
 
+    /* Lista de atributos de funciones (decorator). Actualmente se usa para
+     * abstraer la autenticación sin tener que repetirla para cada función
+     * que la requiera */
+    private $_peticionesAttr = array();
+
     function __construct($oMainLog, $tuberia)
     {
         $this->_log = $oMainLog;
         $this->_tuberia = $tuberia;
         $this->_resetParser();
+        
+        // Recolectar atributos de los requerimientos
+        foreach (get_class_methods(get_class($this)) as $sMetodo) {
+        	$regs = NULL;
+            if (preg_match('/^Request_(.+)$/i', $sMetodo, $regs)) {
+        		$sRequerimiento = $regs[1];
+                $atributos = array(
+                    'method'    => $sMetodo,
+                    'eccpauth'  =>  FALSE,  // Método requiere autenticación ECCP
+                    'agentauth' =>  FALSE,  // Método requiere auth ECCP y de agente
+                );
+                foreach (array('eccpauth', 'agentauth') as $decorator) {
+                    if (preg_match("/^(.*){$decorator}_(.+)$/", $sRequerimiento, $regs)) {
+                    	$atributos[$decorator] = TRUE;
+                        $sRequerimiento = $regs[1].$regs[2];
+                    }                	
+                }
+                $this->_peticionesAttr[$sRequerimiento] = $atributos;
+        	}
+        }
     }
 
     function setAstConn($astConn)
@@ -104,6 +129,7 @@ class ECCPConn extends MultiplexConn
     function procesarPaquete()
     {
         $request = array_shift($this->_listaReq);
+        $response = NULL;
         if (is_object($request)) {
             // Petición es un request, procesar
             if (count($request) != 1) {
@@ -129,13 +155,55 @@ class ECCPConn extends MultiplexConn
                     foreach ($request->children() as $c) $comando = $c;
                     $iTimestampInicio = microtime(TRUE);
                     $sRequerimiento = (string)$comando->getName();
-                    $sMetodoImplementacion = "request_$sRequerimiento";
-                    if (!method_exists($this, $sMetodoImplementacion)) {
+                    if (!isset($this->_peticionesAttr[$sRequerimiento])) {
                         $this->_log->output('ERR: (interno) no existe implementación para método: '.$sRequerimiento);
                         $response = $this->_generarRespuestaFallo(501, 'Not Implemented');
                     } else {
+                        $sMetodoImplementacion = $this->_peticionesAttr[$sRequerimiento]['method'];
+                        
+                        // Autenticación según las decoraciones de la petición
+                        
+                        // Verificación de usuario ECCP válido
+                        if (is_null($response) && 
+                            ($this->_peticionesAttr[$sRequerimiento]['eccpauth'] || 
+                            $this->_peticionesAttr[$sRequerimiento]['agentauth'])) {
+                            if (is_null($this->_sUsuarioECCP))
+                                $response = $this->_generarRespuestaFallo(401, 'Unauthorized');
+                        }
                         try {
-                    	   $response = $this->$sMetodoImplementacion($comando);
+                            // Verificación de que agente existe y tiene contraseña válida
+                            if (is_null($response) && $this->_peticionesAttr[$sRequerimiento]['agentauth']) {
+                                // Verificar que agente está presente
+                                if (!isset($comando->agent_number)) { 
+                                    $response = $this->_generarRespuestaFallo(400, 'Bad request');
+                                } else {
+                                    $sAgente = (string)$comando->agent_number;
+                                    
+                                    $xml_response = new SimpleXMLElement('<response />');
+                                    $xml_reqresponse = $xml_response->addChild($sRequerimiento.'_response');
+
+                                    // El siguiente código asume formato Agent/9000
+                                    if (is_null($this->_parseAgent($sAgente))) {
+                                        $this->_agregarRespuestaFallo($xml_reqresponse, 417, 'Invalid agent number');
+                                        $response = $xml_response;
+                                    } else {
+                                        // Verificar que el agente sea válido en el sistema
+                                        $listaAgentes = $this->_listarAgentes();
+                                        if (!in_array($sAgente, array_keys($listaAgentes))) {
+                                            $this->_agregarRespuestaFallo($xml_reqresponse, 404, 'Specified agent not found');
+                                            $response = $xml_response;
+                                        } elseif (!$this->_hashValidoAgenteECCP($comando)) {
+                                        	$this->_agregarRespuestaFallo($xml_reqresponse, 401, 'Unauthorized agent');
+                                            $response = $xml_response;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Verificaciones realizadas, ejecutar método
+                            if (is_null($response)) {
+                            	$response = $this->$sMetodoImplementacion($comando);
+                            }
                         } catch (PDOException $e) {
                         	$response = $this->_generarRespuestaFallo(503, 'Internal server error - database failure');
                             $this->_log->output('ERR: '.__METHOD__.
@@ -280,18 +348,13 @@ class ECCPConn extends MultiplexConn
         $xml_getRequestListResponse = $xml_response->addChild('getrequestlist_response');
         
         $xml_requests = $xml_getRequestListResponse->addChild('requests');
-        foreach (get_class_methods($this) as $sImplMetodo) {
-        	if (substr($sImplMetodo, 0, 8) == 'Request_')
-                $xml_requests->addChild('request', substr($sImplMetodo, 8));
-        }
+        foreach (array_keys($this->_peticionesAttr) as $sPeticion)
+            $xml_requests->addChild('request', $sPeticion);
         return $xml_response;
     }
 
-    private function Request_filterbyagent($comando)
+    private function Request_eccpauth_filterbyagent($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Verificar que agente está presente
         if (!isset($comando->agent_number)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -417,11 +480,8 @@ class ECCPConn extends MultiplexConn
         return ($sHashEsperado == $sHashCliente);
     }
 
-    private function Request_getqueuescript($comando)
+    private function Request_eccpauth_getqueuescript($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Verificar que queue está presente
         if (!isset($comando->queue)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -445,11 +505,8 @@ class ECCPConn extends MultiplexConn
         return $xml_response;
     }
 
-    private function Request_getcampaignlist($comando)
+    private function Request_eccpauth_getcampaignlist($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Tipo de campaña 
         $sTipoCampania = NULL;
         if (isset($comando->campaign_type)) {
@@ -584,11 +641,8 @@ class ECCPConn extends MultiplexConn
         return $xml_response;
     }
 
-    private function Request_getincomingqueuelist($comando)
+    private function Request_eccpauth_getincomingqueuelist($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-    	
         // Offset y límite
         $iOffset = NULL; $iLimite = NULL;
         if (isset($comando->limit)) {
@@ -629,11 +683,8 @@ class ECCPConn extends MultiplexConn
         return $xml_response;
     }
 
-    private function Request_getcampaignqueuewait($comando)
+    private function Request_eccpauth_getcampaignqueuewait($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Verificar que id y tipo está presente
         if (!isset($comando->campaign_id)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -723,11 +774,8 @@ class ECCPConn extends MultiplexConn
      *          <form id="3">...</form>
      *      </getcampaigninfo_response> 
      */
-    private function Request_getcampaigninfo($comando)
+    private function Request_eccpauth_getcampaigninfo($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Verificar que id y tipo está presente
         if (!isset($comando->campaign_id)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -987,11 +1035,8 @@ LEER_CAMPANIA;
         }
     }
 
-    private function Request_getcallinfo($comando)
+    private function Request_eccpauth_getcallinfo($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Si no hay un tipo de campaña, se asume saliente
         $sTipoCampania = 'outgoing';
         if (isset($comando->campaign_type)) {
@@ -1100,11 +1145,8 @@ LEER_CAMPANIA;
         return $tupla ? $tupla['agentchannel'] : NULL;
     }
 
-    private function Request_setcontact($comando)
+    private function Request_agentauth_setcontact($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Verificar que id de llamada está presente
         if (!isset($comando->call_id)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -1119,14 +1161,6 @@ LEER_CAMPANIA;
         $xml_setContactResponse = $xml_response->addChild('setcontact_response');
 
         $bExito = TRUE;
-
-        // Verificar que el agente está autorizado a realizar operación
-        if ($bExito) {
-            if (!$this->_hashValidoAgenteECCP($comando)) {
-                $this->_agregarRespuestaFallo($xml_setContactResponse, 401, 'Unauthorized agent');
-                $bExito = FALSE;
-            }
-        }
 
         // Verificar que existe realmente la llamada entrante
         if ($bExito) {
@@ -1174,19 +1208,14 @@ LEER_CAMPANIA;
     }
 
     /*    
-    private function Request_dial($comando)
+    private function Request_eccpauth_dial($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
         return $this->_generarRespuestaFallo(501, 'Not Implemented');
     }
     */
     
-    private function Request_saveformdata($comando)
+    private function Request_agentauth_saveformdata($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Si no hay un tipo de campaña, se asume saliente
         $sTipoCampania = 'outgoing';
         if (isset($comando->campaign_type)) {
@@ -1220,12 +1249,6 @@ LEER_CAMPANIA;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_saveFormDataResponse = $xml_response->addChild('saveformdata_response');
-
-        // Verificar que el agente está autorizado a realizar operación
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         // Verificar que el agente declarado realmente atendió esta llamada
         $sAgenteLlamada = $this->_leerAgenteLlamada($sTipoCampania, $idLlamada);
@@ -1329,11 +1352,8 @@ LEER_CAMPANIA;
         return $xml_response;
     }
 
-    private function Request_getpauses($comando)
+    private function Request_eccpauth_getpauses($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         $xml_response = new SimpleXMLElement('<response />');
         $xml_getPausesResponse = $xml_response->addChild('getpauses_response');
 
@@ -1390,13 +1410,10 @@ LEER_CAMPANIA;
      *          <failure>mensaje</failure>
      *      </loginagent_response>
      */
-    private function Request_loginagent($comando)
+    private function Request_eccpauth_loginagent($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
-
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
 
         // Verificar que agente y extensión están presentes
         if (!isset($comando->agent_number) || !isset($comando->extension)) 
@@ -1662,13 +1679,10 @@ LISTA_EXTENSIONES;
      *          <failure>mensaje</failure>
      *      </logoutagent_response>
      */
-    private function Request_logoutagent($comando)
+    private function Request_eccpauth_logoutagent($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
-
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
 
         // Verificar que agente está presentes
         if (!isset($comando->agent_number)) 
@@ -1733,17 +1747,11 @@ LISTA_EXTENSIONES;
         return $xml_response;           
     }
 
-    private function Request_pauseagent($comando)
+    private function Request_agentauth_pauseagent($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
-        // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         // Verificar que ID de break está presente
@@ -1753,18 +1761,6 @@ LISTA_EXTENSIONES;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_pauseAgentResponse = $xml_response->addChild('pauseagent_response');
-
-        // El siguiente código asume formato Agent/9000
-        if (is_null($this->_parseAgent($sAgente))) {
-            $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 417, 'Invalid agent number');
-            return $xml_response;
-        }
-
-        // Verificar que el agente está autorizado a realizar operación
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         // Verificar si el agente está siendo monitoreado y que no esté en pausa
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
@@ -1837,33 +1833,15 @@ LISTA_EXTENSIONES;
         return $xml_response;
     }
 
-    private function Request_unpauseagent($comando)
+    private function Request_agentauth_unpauseagent($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
-        // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_unpauseAgentResponse = $xml_response->addChild('unpauseagent_response');
-
-        // El siguiente código asume formato Agent/9000
-        if (is_null($this->_parseAgent($sAgente))) {
-            $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 417, 'Invalid agent number');
-            return $xml_response;
-        }
-
-        // Verificar que el agente está autorizado a realizar operación
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         // Verificar si el agente está siendo monitoreado
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
@@ -1924,16 +1902,13 @@ LISTA_EXTENSIONES;
      *          <failure>mensaje</failure>
      *      </getagentstatus_response>
      */
-    private function Request_getagentstatus($comando)
+    private function Request_eccpauth_getagentstatus($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
         $iTimestampInicio = microtime(TRUE);
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-        
         // Verificar que agente está presentes
         if (!isset($comando->agent_number)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -2038,34 +2013,16 @@ LISTA_EXTENSIONES;
         return $xml_response;
     }
 
-    private function Request_hangup($comando)
+    private function Request_agentauth_hangup($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Verificar que agente está presentes
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_hangupResponse = $xml_response->addChild('hangup_response');
-
-        // Verificar que el agente sea válido en el sistema
-        $listaAgentes = $this->_listarAgentes();
-        if (!in_array($sAgente, array_keys($listaAgentes))) {
-            $this->_agregarRespuestaFallo($xml_hangupResponse, 404, 'Specified agent not found');
-            return $xml_response;
-        }
-
-        // Verificar el hash del agente
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_hangupResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
         if (is_null($infoLlamada) || is_null($infoLlamada['agentchannel'])) {
@@ -2086,13 +2043,10 @@ LISTA_EXTENSIONES;
         return $xml_response;
     }
     
-    private function Request_getcampaignstatus($comando)
+    private function Request_eccpauth_getcampaignstatus($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
-
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
 
         // Verificar que id y tipo está presente
         if (!isset($comando->campaign_id)) 
@@ -2129,13 +2083,10 @@ LISTA_EXTENSIONES;
         return $xml_response;
     }
 
-    private function Request_getincomingqueuestatus($comando)
+    private function Request_eccpauth_getincomingqueuestatus($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
-
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
 
         // Verificar que id y tipo está presente
         if (!isset($comando->queue)) 
@@ -2395,33 +2346,16 @@ LEER_RESUMEN_CAMPANIA;
         return $tupla;
     }
 
-    private function Request_schedulecall($comando)
+    private function Request_agentauth_schedulecall($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_scheduleResponse = $xml_response->addChild('schedulecall_response');
-
-        // El siguiente código asume formato Agent/9000
-        if (is_null($this->_parseAgent($sAgente))) {
-            $this->_agregarRespuestaFallo($xml_scheduleResponse, 417, 'Invalid agent number');
-            return $xml_response;
-        }
-
-        // Verificar que el agente está autorizado a realizar operación
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_scheduleResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         // Verificar si el agente está siendo monitoreado
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
@@ -2673,17 +2607,11 @@ SQL_INSERTAR_AGENDAMIENTO;
         }        
     }
 
-    private function Request_transfercall($comando)
+    private function Request_agentauth_transfercall($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
-        // Verificar que agente está presentes
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         // Verificar que número de extensión está presente
@@ -2693,19 +2621,6 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_transferResponse = $xml_response->addChild('transfercall_response');
-
-        // Verificar que el agente sea válido en el sistema
-        $listaAgentes = $this->_listarAgentes();
-        if (!in_array($sAgente, array_keys($listaAgentes))) {
-            $this->_agregarRespuestaFallo($xml_transferResponse, 404, 'Specified agent not found');
-            return $xml_response;
-        }
-
-        // Verificar el hash del agente
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_transferResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         // El siguiente código asume formato Agent/9000
         if (is_null($this->_parseAgent($sAgente))) {
@@ -2751,17 +2666,11 @@ SQL_INSERTAR_AGENDAMIENTO;
         return $xml_response;
     }
 
-    private function Request_atxfercall($comando)
+    private function Request_agentauth_atxfercall($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
-        // Verificar que agente está presentes
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         // Verificar que número de extensión está presente
@@ -2771,26 +2680,6 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_transferResponse = $xml_response->addChild('atxfercall_response');
-
-        // Verificar que el agente sea válido en el sistema
-        $listaAgentes = $this->_listarAgentes();
-        if (!in_array($sAgente, array_keys($listaAgentes))) {
-            $this->_agregarRespuestaFallo($xml_transferResponse, 404, 'Specified agent not found');
-            return $xml_response;
-        }
-
-        // Verificar el hash del agente
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_transferResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
-
-        // El siguiente código asume formato Agent/9000
-        $agentFields = $this->_parseAgent($sAgente);
-        if (is_null($agentFields)) {
-            $this->_agregarRespuestaFallo($xml_transferResponse, 404, 'Specified agent not found');
-            return $xml_response;
-        }
 
         // Obtener la información de la llamada atendida por el agente
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
@@ -2830,33 +2719,15 @@ SQL_INSERTAR_AGENDAMIENTO;
         $sth->execute(array($sExtension, $infoLlamada['callid']));
     }
 
-    private function Request_hold($comando)
+    private function Request_agentauth_hold($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
-        // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_holdResponse = $xml_response->addChild('hold_response');
-
-        // El siguiente código asume formato Agent/9000
-        if (is_null($this->_parseAgent($sAgente))) {
-            $this->_agregarRespuestaFallo($xml_holdResponse, 417, 'Invalid agent number');
-            return $xml_response;
-        }
-
-        // Verificar que el agente está autorizado a realizar operación
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_holdResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         /* Verificar si existe una extensión de parqueo. Por omisión el FreePBX
          * de Elastix NO HABILITA soporte de extensión de parqueo */ 
@@ -3016,33 +2887,15 @@ SQL_INSERTAR_AGENDAMIENTO;
         return $xml_response;
     }
 
-    private function Request_unhold($comando)
+    private function Request_agentauth_unhold($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
-        // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_unholdResponse = $xml_response->addChild('unhold_response');
-
-        // El siguiente código asume formato Agent/9000
-        if (is_null($this->_parseAgent($sAgente))) {
-            $this->_agregarRespuestaFallo($xml_unholdResponse, 417, 'Invalid agent number');
-            return $xml_response;
-        }
-
-        // Verificar que el agente está autorizado a realizar operación
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_unholdResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         /* Verificar si existe una extensión de parqueo. Por omisión el FreePBX
          * de Elastix NO HABILITA soporte de extensión de parqueo */ 
@@ -3176,11 +3029,8 @@ Privilege: Command
         return NULL;
     }
 
-    private function Request_getagentqueues($comando)
+    private function Request_eccpauth_getagentqueues($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
@@ -3315,11 +3165,8 @@ Privilege: Command
         }
     }
 
-    private function Request_getagentactivitysummary($comando)
+    private function Request_eccpauth_getagentactivitysummary($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Fechas de inicio y fin
         $sFechaInicio = $sFechaFin = date('Y-m-d');
         if (isset($comando->datetime_start)) {
@@ -3438,33 +3285,15 @@ LEER_ULTIMA_PAUSA;
         return $xml_response;
     }
 
-    private function Request_getchanvars($comando)
+    private function Request_agentauth_getchanvars($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
-        // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
-            return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_getchanvarsResponse = $xml_response->addChild('getchanvars_response');
-
-        // El siguiente código asume formato Agent/9000
-        if (is_null($this->_parseAgent($sAgente))) {
-            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 417, 'Invalid agent number');
-            return $xml_response;
-        }
-
-        // Verificar que el agente está autorizado a realizar operación
-        if (!$this->_hashValidoAgenteECCP($comando)) {
-            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 401, 'Unauthorized agent');
-            return $xml_response;
-        }
 
         // Verificar si el agente está siendo monitoreado
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
@@ -3507,11 +3336,8 @@ LEER_ULTIMA_PAUSA;
         return $xml_response;
     }
 
-    private function Request_callprogress($comando)
+    private function Request_eccpauth_callprogress($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         $xml_response = new SimpleXMLElement('<response />');
         $xml_callprogress = $xml_response->addChild('callprogress_response');
 
@@ -3520,11 +3346,8 @@ LEER_ULTIMA_PAUSA;
         return $xml_response;
     }
 
-    private function Request_campaignlog($comando)
+    private function Request_eccpauth_campaignlog($comando)
     {
-        if (is_null($this->_sUsuarioECCP))
-            return $this->_generarRespuestaFallo(401, 'Unauthorized');
-
         // Fechas de inicio y fin
         $sFechaInicio = $sFechaFin = date('Y-m-d');
         if (isset($comando->datetime_start)) {

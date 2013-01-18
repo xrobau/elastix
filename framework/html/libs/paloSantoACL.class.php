@@ -394,8 +394,8 @@ class paloACL {
 					return false;
 				}
 
-                $sPeticionSQL = "INSERT into acl_user (username,name,md5_password,id_group,extension,fax_extension,estado) VALUES (?,?,?,?,?,?,?)";
-                $arrParam = array($username,$name,$md5_password,$id_group,$extension, $fax_extension, "active");
+                $sPeticionSQL = "INSERT into acl_user (username,name,md5_password,id_group,extension,fax_extension) VALUES (?,?,?,?,?,?)";
+                $arrParam = array($username,$name,$md5_password,$id_group,$extension, $fax_extension);
                 if ($this->_DB->genQuery($sPeticionSQL,$arrParam)) {
                     $bExito = TRUE;
                 } else {
@@ -498,7 +498,8 @@ class paloACL {
                 "DELETE FROM user_properties WHERE id_user = ?",
                 "DELETE FROM user_shortcut WHERE id_user = ?",
 				"DELETE FROM sticky_note WHERE id_user = ?",
-				"DELETE FROM acl_user WHERE id = ?",
+				"DELETE FROM messages_vacations where account = (SELECT username FROM acl_user where id=?)",
+				"DELETE FROM acl_user WHERE id = ?"
             );
 
             $bExito = TRUE;
@@ -829,16 +830,23 @@ INFO_AUTH_MODULO;
 			}
 
 			//comprobamos que el usuario exista, que la clave de login del usuario sea la correcta y que se encuentre relacionado
-			//con una organizacion
-            $sql = "SELECT id FROM acl_user WHERE username = ? AND md5_password = ? AND estado!='inactive'";
+			//con una organizacion y que esta organizacion este activa en el sistema
+            $sql = "SELECT id FROM acl_user WHERE username = ? AND md5_password = ?";
             $arr = $this->_DB->getFirstRowQuery($sql,false,array($user,$pass));
             if (is_array($arr)) {
                 if(count($arr) > 0){
 					$idOrganization = $this->getIdOrganizationUser($arr[0]);
 					if($idOrganization==false)
 						return false;
-					else
-						return true;
+					else{
+                        $query="Select 1 from organization where id=? and state=?";
+                        $res = $this->_DB->getFirstRowQuery($query,false,array($idOrganization,"active"));
+                        if($res==false){
+                            $this->errMsg=_tr("User is part a no-active Organization in the System");
+                            return FALSE;
+                        }else
+                            return true;
+                    }
 				 }else{
 					return FALSE;
 				 }

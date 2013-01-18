@@ -392,7 +392,8 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             /* Si el navegador elige otra campaña mientras se espera la primera
              * campaña, entonces esta espera es inválida, y el navegador ya ha
              * iniciado otra sesión comet. */
-            if (!($estadoCliente['campaigntype'] === $_SESSION[$module_name]['estadoCliente']['campaigntype'] &&
+            if (isset($_SESSION[$module_name]) && 
+                !($estadoCliente['campaigntype'] === $_SESSION[$module_name]['estadoCliente']['campaigntype'] &&
                  $estadoCliente['campaignid'] === $_SESSION[$module_name]['estadoCliente']['campaignid'])) {
                 $respuesta['estadoClienteHash'] = 'invalidated';
                 jsonflush($bSSE, $respuesta);

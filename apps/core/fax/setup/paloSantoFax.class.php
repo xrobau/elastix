@@ -542,15 +542,28 @@ class paloFax {
         return TRUE;
     }
 
-	function restartService(){
-		$sComando ='/usr/bin/elastix-helper faxconfig restartService  2>&1';
-		$output = $ret = NULL;
+    function restartService(){
+        $sComando ='/usr/bin/elastix-helper faxconfig restartService  2>&1';
+        $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
             $this->errMsg = implode('', $output);
             return FALSE;
         }
         return TRUE;
-	}
+    }
+
+    // esta funcion es utilizada para escribir los archivos
+    // /etc/init/elastix_fax.config y /var/spool/hylafax/etc/FaxDispatch
+    function writeFilesFax(){
+        $sComando ='/usr/bin/elastix-helper faxconfig rewriteFileFax 2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0) {
+            $this->errMsg = implode('', $output);
+            return FALSE;
+        }
+        return TRUE;
+    }
 }
 ?>

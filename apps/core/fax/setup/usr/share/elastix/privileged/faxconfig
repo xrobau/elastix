@@ -70,6 +70,15 @@ switch($argv[1]){
 		}else
 			error_exit("Missing arguments",1);
 		break;
+    case 'deleteFaxsByOrg':
+        if(isset($argv[2])){
+            exit(deleteFaxsByOrg($argv[2]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments",1);
+        break;
+    case 'rewriteFileFax':
+        exit(rewriteFileFax() ? 0 : 1);
+        break;
 	case 'getfaxhosts':
 		break;
 	case 'setfaxhosts':
@@ -146,22 +155,40 @@ function newFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,$
         array_merge(
             glob(CONFIGDIR_IAXMODEM.'/iaxmodem-cfg.ttyIAX'.$dev_id),
             glob(CONFIGDIR_HYLAFAX.'/config.ttyIAX'.$dev_id)));
+            
+    $arrDev=array();
+    // get devId of the current faxes
+    try {
+        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        // Read all the fax configuration information
+        $sth = $conn->query('SELECT value FROM user_properties WHERE property = "dev_id"');
+        while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
+            if(!empty($tupla->value))
+                $arrDev[]=$tupla->value;
+        }
+    } catch (PDOException $e) {
+        fprintf(STDERR, "ERR: failed to query fax - %s\n", $e->getMessage());
+        return FALSE;
+    }
 
-	 // Update the fax configuration in /etc/inittab
-    if(writeElastixFAxInit($dev_id,"add")==false)
+    //add the list of current devId faxes the new devId fax
+    $devList=array_unique(array_merge($arrDev, array($dev_id)));
+    
+    // Write file configuration for new fax
+    if(writeIaxmodemConfig($faxData)==false)
+        return false;
+        
+    if(writeHylafaxConfig($faxData)==false)
+        return false;
+	
+	// Update the fax configuration in /etc/inittab
+    if(writeElastixFAxInit($devList)==false)
         return false;
 
     // Update /var/spool/hylafax/etc/FaxDispatch
     if(writeFaxDispatch($faxData)==false)
         return false;
 
-    // Write file configuration for new fax
-	if(writeIaxmodemConfig($faxData)==false)
-        return false;
-        
-	if(writeHylafaxConfig($faxData)==false)
-        return false;
-	
 	//hacemos leer la linea tty al dispositivo especifico
 	exec("initctl start faxgetty TTY=ttyIAX".$dev_id);
 	
@@ -171,20 +198,21 @@ function newFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,$
 function restartService(){
 	// Restart all relevant services
 	$ret = $output = null;
+	$flag = true;
     exec('/sbin/service iaxmodem restart > /dev/null 2>&1',$output,$ret);
     if($ret!=0){
-        fwrite(STDERR, "Iaxmodem couldn't be reloaded. ".implode('', $output));
-        return false;
+        fwrite(STDERR, "Iaxmodem couldn't be reloaded. ".implode('', $output)).".\n";
+        $flag = false;
     }
     
     $ret = $output = null;
     exec('/sbin/service hylafax restart > /dev/null 2>&1');
     if($ret!=0){
-        fwrite(STDERR, "Hylafax couldn't be reloaded. ".implode('', $output));
-        return false;
+        fwrite(STDERR, "Hylafax couldn't be reloaded. ".implode('', $output)).".\n";
+        $flag = false;
     }
     
-    return true;
+    return $flag;
 }
 
 function deleteFax($dev_id){
@@ -198,16 +226,80 @@ function deleteFax($dev_id){
         array_merge(
             glob(CONFIGDIR_IAXMODEM.'/iaxmodem-cfg.ttyIAX'.$dev_id),
             glob(CONFIGDIR_HYLAFAX.'/config.ttyIAX'.$dev_id)));
-
+    
+    $arrDev=array();
+    // get devId of the current faxes
+    try {
+        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        // Read all the fax configuration information
+        $sth = $conn->query('SELECT value FROM user_properties WHERE property = "dev_id"');
+        while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
+            if(!empty($tupla->value))
+                $arrDev[]=$tupla->value;
+        }
+    } catch (PDOException $e) {
+        fprintf(STDERR, "ERR: failed to query fax - %s\n", $e->getMessage());
+        return FALSE;
+    }
+    
+    $listDev=array_diff($arrDev,$dev_id);
+            
 	 // Update /var/spool/hylafax/etc/FaxDispatch
     if(deleteFaxDispatch($dev_id)==false)
         return false;
         
     // Update the fax configuration in /etc/inittab
-    if(writeElastixFAxInit($dev_id,"delete")==false)
+    if(writeElastixFAxInit($listDev)==false)
         return false;
     
     exec("initctl stop faxgetty TTY=ttyIAX".$dev_id);
+    return true;
+}
+
+
+// funcion que elimina todos los faxes asociados con una organizacion
+// recibe como parametro el id de la organizacion de los faxes a eliminar
+// despues de ejecutada esta funcion ahi que reescribir los archivo 
+// /var/spool/hylafax/etc/FaxDispatch y /etc/inittab 
+// ademas ejecutar la funcion restartService()
+function deleteFaxsByOrg($id_org){
+    $delFaxs=$faxs=array();
+    
+    if(!preg_match('/^[0-9]+$/',$id_org)){
+        error_exit("Invalid Organization ID");
+    }
+    
+    try {
+        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        // Read all faxes asociated with the organization
+        $query="SELECT value, user.id_organization as idOrg FROM user_properties join (SELECT u.id,g.id_organization FROM acl_user u inner join acl_group g on u.id_group = g.id) as user on id_user=user.id WHERE property='dev_id'";
+        $sth = $conn->query($query);
+    } catch (PDOException $e) {
+        fprintf(STDERR, "ERR: failed to query fax - %s\n", $e->getMessage());
+        return FALSE;
+    }
+    
+    while($tupla = $sth->fetch(PDO::FETCH_OBJ)){
+        if($tupla->idOrg==$id_org){
+            $delFaxs[]=$tupla->value;
+        }else
+            $faxs[]=$tupla->value;
+    }
+    
+    //no existen faxes por eliminar pertenecientes a la organizacion
+    if(count($delFaxs)==0)
+        return true;
+    
+    $tmpDelFaxs=$delFaxs;
+    foreach($tmpDelFaxs as $value){
+        // Remove if exist old file with the same dev_id, they shouldn't be exist
+        array_map('unlink',
+            array_merge(
+                glob(CONFIGDIR_IAXMODEM.'/iaxmodem-cfg.ttyIAX'.$value),
+                glob(CONFIGDIR_HYLAFAX.'/config.ttyIAX'.$value))
+            );
+        exec("initctl stop faxgetty TTY=ttyIAX".$value);
+    }
     return true;
 }
 
@@ -249,38 +341,53 @@ function editFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,
     return $bExito;
 }
 
-function writeElastixFAxInit($dev_id,$action){
-    // Read current value of faxmaster
+// esta funcion es utilizada para escribir los archivos
+// /etc/init/elastix_fax.config y /var/spool/hylafax/etc/FaxDispatch
+function rewriteFileFax(){
+    $arrDev=array();
+    
+    //fDispatch contiene el contenido del archivo /var/spool/hylafax/etc/FaxDispatch
+    $fDispatch[] = "SENDTO=root;\n";
+    $fDispatch[] = "FILETYPE=pdf;\n\n";
+    $fDispatch[] = "case \"\$DEVICE\" in\n";
+    
     try {
         $conn = new PDO('sqlite:/var/www/db/elastix.db');
-
         // Read all the fax configuration information
-        $sth = $conn->query('SELECT value FROM user_properties WHERE property = "dev_id"');
+        $sth = $conn->query('SELECT up.value,u.username FROM user_properties up JOIN acl_user u ON up.id_user=u.id WHERE up.property = "dev_id"');       
+        while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
+            if(!empty($tupla->value))
+                $arrDev[]=$tupla->value;
+                $fDispatch[]="  ttyIAX".$tupla->value.") SENDTO=".$tupla->username.";;\n";
+        }
     } catch (PDOException $e) {
         fprintf(STDERR, "ERR: failed to query fax - %s\n", $e->getMessage());
         return FALSE;
     }
-    
-    $iaxDevice=array();
-    while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
-        if(!empty($tupla->value))
-            $iaxDevice[]=$tupla->value;
+    $fDispatch[]="esac\n";
+    $sRutaArchivo="/var/spool/hylafax/etc/FaxDispatch";
+    if(file_put_contents($sRutaArchivo, $fDispatch)===false){
+        error_exit("File $sRutaArchivo couldn't be written");
     }
+    //se setea los permisos especiales al archivo en caso de que no exista
+    chown($sRutaArchivo, 'uucp'); 
+    chgrp($sRutaArchivo, 'uucp');
+    chmod($sRutaArchivo, 0644);
     
-    if($action=="add"){
-        if(in_array($dev_id,$iaxDevice)===false){
-            $iaxDevice[]=$dev_id;
-        }
-    }else{
-        $index=array_search($dev_id,$iaxDevice);
-        if($index!==false){    
-            $iaxDevice[$index]=null;
-        }
+    //ahora escribimos el archivo /etc/init/elastix_fax.config
+    if(writeElastixFAxInit($arrDev)==false){
+        return false;
     }
-    
+ 
+    return true;
+}
+
+//escribe el archivo /etc/init/elastix_fax.config
+//arrDev -> array -> contiene los devId de los faxes dentro del servidor
+function writeElastixFAxInit($arrDev){
     $list_dev="";
-    foreach($iaxDevice as $value){
-        if(!is_null($value))
+    foreach($arrDev as $value){
+        if(preg_match('/[[:alnum:]]{3}/',$value))
             $list_dev .="ttyIAX$value ";
     }
     $list_dev=trim($list_dev);
@@ -329,19 +436,29 @@ function writeFaxDispatch($faxData)
 }
 
 function deleteFaxDispatch($dev_id){
-	$lineas = array();
-	$sRutaArchivo='/var/spool/hylafax/etc/FaxDispatch';
-	if(file_exists($sRutaArchivo) && filesize($sRutaArchivo)!=0){
-		foreach (file($sRutaArchivo) as $sLinea) {
-			// Remover el fax anterior
-			$cadena="  ttyIAX".$dev_id."\) SENDTO";
-			if (!preg_match("/$cadena/", $sLinea)) {
-				$lineas[] = $sLinea;
-			}
-		}
-		file_put_contents($sRutaArchivo, $lineas);
-	}
-	return true;
+    //el dev_id debe ser de 3 caracteres, y solo pueden se numeros y letras
+    if(!preg_match('/[[:alnum:]]{3}/',$dev_id)){
+        error_exit("Device Id not valid");
+    }
+    
+    $lineas = array();
+    $sRutaArchivo='/var/spool/hylafax/etc/FaxDispatch';
+    if(file_exists($sRutaArchivo) && filesize($sRutaArchivo)!=0){
+        $content=file($sRutaArchivo);
+        $cadena="^\s*ttyIAX".$dev_id."\) SENDTO";
+        for($i=0;$content<count($content);$i++){
+            if(preg_match("/$cadena/", $content[$i])){
+                $lineas[] =  $content[$i];
+                break;
+            }
+        }
+        if(file_put_contents($sRutaArchivo, array_diff($content,$lineas))==false){
+            error_exit("File /var/spool/hylafax/etc/FaxDispatch couldn't be written.");
+        }
+    }else
+        error_exit("File /var/spool/hylafax/etc/FaxDispatch doesn't exist.");
+        
+    return true;
 }
 
 function writeIaxmodemConfig($tupla)

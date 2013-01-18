@@ -120,22 +120,23 @@ class paloSantoASteriskConfig{
     */
 	function includeInExtensions_conf($action="add",$orgzDomain)
 	{
-		$query="SELECT 1 from organization where domain=?";
-        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain));
-        if($result===false){
-            $this->errMsg = $this->_DBSQLite->errMsg;
-            return false;
-        }
-        
-        if($action=="add"){
-            if(count($result)==0){
-                $this->errMsg = _tr("Organization doesn't exist");
+        if($action=="add" || $action=="delete"){
+            $query="SELECT 1 from organization where domain=?";
+            $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain));
+            if($result===false){
+                $this->errMsg = $this->_DBSQLite->errMsg;
                 return false;
             }
-        }else{
-            if(count($result)=="1"){
-                $this->errMsg = _tr("Can't delete organization from extensions.conf");
-                return false;
+            if($action=="add"){
+                if(count($result)==0){
+                    $this->errMsg = _tr("Organization doesn't exist");
+                    return false;
+                }
+            }else{
+                if(count($result)=="1"){
+                    $this->errMsg = _tr("Can't delete organization from extensions.conf");
+                    return false;
+                }
             }
         }
         
@@ -150,47 +151,29 @@ class paloSantoASteriskConfig{
         return true;
 	}
 
-	//borra el plan de marcado de una organizacion especifica
-	//esto se hace cuando se elimina una organizacion del sistema
-	//antes de llamar a esta funcion ya se debio haber eliminado
-	//a la organizacion de la base sqlite elastix.db
-	function delete_dialplanfiles($orgzDomain)
-	{
-		$path="/etc/asterisk/organizations/";
-		$arrCredentiasls=getUserCredentials();
+    //borra el plan de marcado de una organizacion especifica
+    //esto se hace cuando se elimina una organizacion del sistema
+    //antes de llamar a esta funcion ya se debio haber eliminado
+    //a la organizacion de la base sqlite elastix.db
+    function delete_dialplanfiles($orgzDomain)
+    {
+        $path="/etc/asterisk/organizations/";
+        $arrCredentiasls=getUserCredentials();
         $userLevel1=$arrCredentiasls["userlevel"];
         if($userLevel1!="superadmin"){
             $this->errMsg =_tr("You are no authorized to perform this action");
             return false;
         }
         
-		//reescribimos los archivos extensions.conf, extensions_globals.conf y extensions_did.conf con las configuraciones correctas
-		if($this->createExtensionsGlobals("delete",$orgzDomain)===false){
-			$this->errMsg=_tr("Error when trying write asterisk config file").$this->errMsg;
-			return false;
-		}else{
-			if($this->includeInExtensions_conf("delete",$orgzDomain)!==false){
-                $sComando = '/usr/bin/elastix-helper asteriskconfig deleteFileOrgAst '.$orgzDomain.' 2>&1';
-                $output = $ret = NULL;
-                exec($sComando, $output, $ret);
-                if ($ret != 0){
-                    $this->errMsg = implode('', $output);
-                    return false;
-                }
-                
-				$sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
-				$output = $ret = NULL;
-				exec($sComando, $output, $ret);
-				if ($ret != 0){
-                    $this->errMsg = implode('', $output);
-                }
-				return true;
-			}else{
-				$this->errMsg=_tr("Error when trying write asterisk config file").$this->errMsg;
-				return false;
-			}
-		}
-	}
+        $sComando = '/usr/bin/elastix-helper asteriskconfig deleteFileOrgAst '.$orgzDomain.' 2>&1';
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0){
+            $this->errMsg = implode('', $output);
+            return false;
+        }
+        return true;
+    }
 
 	//Si se falla la momento de crear los archivos, ahi que deshacer los cambios desde donde se llame a esta funcion
 	function createOrganizationAsterisk($domain,$country){
@@ -219,13 +202,6 @@ class paloSantoASteriskConfig{
                     if($pFC->createFeatureFile()){
                         if($this->setReloadDialplan($domain)){
                             if($this->createExtensionsGlobals("add",$domain)!==false && $this->includeInExtensions_conf("add",$domain)!==false){
-                                //recargamos la configuracion de asterisk
-                               /* $sComando = '/usr/bin/elastix-helper asteriskconfig reload 2>&1';
-                                $output = $ret = NULL;
-                                exec($sComando, $output, $ret);
-                                if ($ret != 0){
-                                    $this->errMsg = implode('', $output);
-                                }*/
                                 return true;
                             }else{
                                 $this->errMsg=_tr("Error trying created configuartion file in asterisk").$this->errMsg;}
@@ -244,7 +220,7 @@ class paloSantoASteriskConfig{
 	}
 
 	
-	function deleteOrganizationAsterisk($domain,$code){
+	function deleteOrganizationPBX($domain,$code){
 		// 2. Eliminar de la base de datos elxpbx todo lo que tenga que ver con la organizacion
 	    //    Esto falta de ver cual es la mejor forma - en todas las tablas el campo que hace referencia a la organization
 		//    se llama organization_domain
@@ -340,7 +316,6 @@ class paloSantoASteriskConfig{
 				}
 				$result=$this->_DB->genQuery($queryDel,array($domain));
 				if(!$result){
-                    //print_r($queryDel);
 					$this->errMsg=$this->_DB->errMsg;
 					return false;
 				}
@@ -372,27 +347,9 @@ class paloSantoASteriskConfig{
 			$result=$astMang->database_delTree("QPENALTY/".$code);
 		}
 		
-		//reescribimos los arcgivos extensions_did.conf y chan_dahdi_additional.conf
-		//por si la organizacion tenia asociado alguno
-        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals '."$domain".' 2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = _tr("Error writitn did file").implode('', $output);
-            return FALSE;
-        }
-        
 		$exito=$this->delete_dialplanfiles($domain);
 		if(!$exito){
-			$this->errMsg=_tr("Error deleting dialplan files of organization")."$domain. ".$this->errMsg;
-			//reescribimos los archivos extensions_did.conf y chan_dahdi_additional.conf
-			$sComando = '/usr/bin/elastix-helper asteriskconfig createExtAddtionals  2>&1';
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0) {
-                $this->errMsg = _tr("Error writing did file").implode('', $output);
-                return FALSE;
-            }
+			$this->errMsg=_tr("Error deleting dialplan files of organization with")."$domain. ".$this->errMsg;
         }
         
 		return $exito;
@@ -401,11 +358,11 @@ class paloSantoASteriskConfig{
 	//se crean la varias globales del sistema, antes esto estaba dentro de extensions_additionals
     //ahora sera un archivo aparte
     //se sobreescribe este archivo cada vez que se crea una nueva organizacion
-    private function createExtensionsGlobals($action="add", $orgzDomain){
+    function createExtensionsGlobals($action="add", $orgzDomain){
         global $arrConf;
        
-        $query="SELECT 1 from organization where domain=?";
-        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain));
+        $query="SELECT 1 from organization where domain=? and state=?";
+        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain,"active"));
         if($result===false){
             $this->errMsg = $this->_DBSQLite->errMsg;
             return false;

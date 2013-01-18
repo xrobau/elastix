@@ -103,7 +103,7 @@ class paloAsteriskDB {
 		$result=$pDB->getFirstRowQuery($query,true,array($domain));
 		if($result===false)
 			$this->errMsg=$pDB->errMsg;
-		elseif(count($result)==0)
+		elseif(count($result)==0 || empty($result["code"]))
 			$this->errMsg=_tr("Organization doesn't exist");
 		return $result;
 	}
@@ -661,11 +661,9 @@ class paloSip extends paloAsteriskDB {
 	public $parkinglot;
 	public $hasvoicemail;
 	public $subscribemwi;
-	public $autoframing;
 	public $rtpkeepalive;
 	public $call_limit; //nombre del campo en la tabla call-limit
 	public $g726nonstandard;
-	public $canreinvite; 
 	public $organization_domain;
 
 	function paloSip(&$pDB)
@@ -1532,6 +1530,36 @@ class paloDevice{
             $this->errMsg=$this->tecnologia->errMsg;
         return $result;
     }
+    
+    function getTotalExtensions(){
+        $query="Select count(id) from extension where organization_domain=?";
+        $result=$this->tecnologia->getFirstResultQuery($query,array($this->domain),false,"Don't exist extensions for this domain");
+        if($result===false){ 
+            return false;
+        }else
+            return $result[0];
+    }
+    
+    //retorna verdadero si se ha alcanzado el maximo numero se extensiones por organizacion
+    function maxMunExtensionByOrg(){
+        global $arrConf;
+        $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+        $qOrg="SELECT value from organization_properties where key=? and category=? and id_organization=(SELECT id from organization where domain=?)";
+        $res_num_exten=$pDB->getFirstRowQuery($qOrg,false,array("max_num_exten","limit",$this->domain));
+        if($res_num_exten!=false){
+            $max_num_exten=$res_num_exten[0];
+            if(ctype_digit($max_num_exten)){
+                if($max_num_exten!=0){
+                    $numExten=$this->getTotalExtensions();
+                    if($numExten>=$max_num_exten){
+                        $this->errMsg=_tr("Err: You can't create new extensions because you have reached the max numbers of  extensions permitted")." Contact with the server's admin.";
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 	/**
 		funcion utilizada para crear una nueva extension en asterisk
 		crea el peer y hace el correspondiente registro de la extension
@@ -1548,12 +1576,15 @@ class paloDevice{
             $this->tecnologia=new paloSip($this->tecnologia->_DB);
         else{
             $this->errMsg=_tr("Invalid Technology");
-            $continuar=false;
+            return false;
+        }
+        
+        if($this->maxMunExtensionByOrg()){
+            return false;
         }
         
 		$device=$this->code."_".$arrProp['name'];
 		if(!$this->existExtension($arrProp['name'],$type)){//se verifica que no exista otra extension y dispositivo igual
-            
 			$arrProp['dial'] = strtoupper($type)."/".$device;
 
 			//validamos que se haya ingresado un secret para el dispositivo

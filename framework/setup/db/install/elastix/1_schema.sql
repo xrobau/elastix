@@ -1,192 +1,252 @@
 CREATE TABLE organization
 (
-       id                INTEGER  NOT NULL,
-       name              VARCHAR(150) NOT NULL,
-       domain            VARCHAR(100) NOT NULL,
-       email_contact     VARCHAR(100),
-       country           VARCHAR(100) NOT NULL,
-       city              VARCHAR(150) NOT NULL,
-       address           VARCHAR(255),
-       code              VARCHAR(20),   
-       PRIMARY KEY (id)
+    id                INTEGER  NOT NULL,
+    name              VARCHAR(150) NOT NULL,
+    domain            VARCHAR(100) NOT NULL,
+    email_contact     VARCHAR(100),
+    country           VARCHAR(100) NOT NULL,
+    city              VARCHAR(150) NOT NULL,
+    address           VARCHAR(255),
+    --codigo de la organizacion usado en asterisk como identificador
+    code              VARCHAR(20) NOT NULL, 
+    --codigo unico de la orgnizacion usado para identificarla de manera unica dentro del sistema
+    idcode            VARCHAR(50) NOT NULL,   
+    state             VARCHAR(20) default "active",  
+    PRIMARY KEY (id)
 );
 create unique index domain on organization (domain);
+create unique index code on organization (code);
+create unique index idcode on organization (idcode);
 
 CREATE TABLE organization_properties
 (
-       id_organization         INTEGER     NOT NULL,
-       key               varchar(50) NOT NULL,
-       value             varchar(50) NOT NULL,
-       category         varchar(50),
-       PRIMARY KEY (id_organization,key),
-       FOREIGN KEY (id_organization) REFERENCES organization(id)
+    id_organization         INTEGER     NOT NULL,
+    key               varchar(50) NOT NULL,
+    value             varchar(50) NOT NULL,
+    category         varchar(50),
+    PRIMARY KEY (id_organization,key),
+    FOREIGN KEY (id_organization) REFERENCES organization(id)
 );
+
+--tabla org_email_template contiene
+--los parametros usados en el envio
+--de un mail a las organizaciones desde
+--el servidor elastix al momento de 
+--crear, eleminar o suspender 
+--una organizacion
+CREATE TABLE org_email_template(
+    from_email varchar(250) NOT NULL,
+    from_name varchar(250) NOT NULL,
+    subject varchar(250) NOT NULL,
+    content TEXT NOT NULL,
+    host_ip varchar(250) default "",
+    host_domain varchar(250) default "",
+    host_name varchar(250) default "",
+    category varchar(250) NOT NULL,
+    PRIMARY KEY (category)
+);
+
+insert into org_email_template (from_email,from_name,subject,content,category) values("elastix@example.com","Elastix Admin","Create Company in Elastix Server",'Welcome to Elastix Server.\nYour company {COMPANY_NAME} with domain {DOMAIN} has been created.\nTo start to configurate you elastix server go to {HOST_IP} and login into elastix as:\nUsername: admin@{DOMAIN}\nPassword: {USER_PASSWORD}',"create");
+
+insert into org_email_template (from_email,from_name,subject,content,category) values("elastix@example.com","Elastix Admin","Deleted Company in Elastix Server","","delete");
+
+insert into org_email_template (from_email,from_name,subject,content,category) values("elastix@example.com","Elastix Admin","Suspended Company in Elastix Server","","suspend");
+
+--tabla creada con propositos de auditoria que guarda las acciones tomadas
+--con respecto a una organizacion dentro del sistema
+--entiendese por acciones el crear, suspender, reactivar o eliminar una organizacion del sistema
+CREATE TABLE org_history_events(
+    id INTEGER  NOT NULL,
+    --create,suspend,unsuspend,delete,
+    event varchar(100) NOT NULL,
+    --codigo unico generado  para la organizacion 
+    --este codigo no se puede repetir dentro del sistema
+    org_idcode VARCHAR(50),
+    --fecha en que ocurrio el evento
+    event_date DATETIME NOT NULL,
+    PRIMARY KEY (id)
+);
+
+--esta tabla contiene informacion de todas las organizaciones creadas en algun
+--momento dentro del sistema
+CREATE TABLE org_history_register(
+    id INTEGER  NOT NULL,
+    org_domain VARCHAR(100) NOT NULL, 
+    org_code VARCHAR(20) NOT NULL, 
+    --codigo unico generado  para la organizacion 
+    --este codigo no se puede repetir dentro del sistema
+    org_idcode VARCHAR(50) NOT NULL,
+    --fecha en que ocurrio el evento
+    create_date DATETIME NOT NULL,
+    delete_date DATETIME default NULL,
+    PRIMARY KEY (id)
+);
+create unique index orgIdcode on org_history_register (org_idcode);
 
 CREATE TABLE acl_resource
 (
-       id varchar(50) NOT NULL, --menuid , es el unico identficador del recurso
-       description varchar(100),
-       IdParent varchar(50),
-       Link varchar(250),
-       Type varchar(20),
-       order_no INTEGER,
-       PRIMARY KEY (id)
+    id varchar(50) NOT NULL, --menuid , es el unico identficador del recurso
+    description varchar(100),
+    IdParent varchar(50),
+    Link varchar(250),
+    Type varchar(20),
+    order_no INTEGER,
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE organization_resource
 (
-       id INTEGER NOT NULL,
-       id_organization INTEGER NOT NULL,
-       id_resource varchar(50) NOT NULL,
-       PRIMARY KEY (id),
-       FOREIGN KEY (id_organization) REFERENCES organization(id),
-       FOREIGN KEY (id_resource) REFERENCES acl_resource(id)
+    id INTEGER NOT NULL,
+    id_organization INTEGER NOT NULL,
+    id_resource varchar(50) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_organization) REFERENCES organization(id),
+    FOREIGN KEY (id_resource) REFERENCES acl_resource(id)
 );
 create unique index permission_org on organization_resource (id_organization,id_resource);
 
 CREATE TABLE acl_group
 (
-       id INTEGER NOT NULL,
-       name VARCHAR(200),
-       description TEXT,
-       id_organization INTEGER NOT NULL,
-       PRIMARY KEY (id),
-       FOREIGN KEY (id_organization) REFERENCES organization(id)
+    id INTEGER NOT NULL,
+    name VARCHAR(200),
+    description TEXT,
+    id_organization INTEGER NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_organization) REFERENCES organization(id)
 );
 create unique index name_group on acl_group (id_organization,name);
 
 CREATE TABLE group_resource
 (
-       id INTEGER NOT NULL,
-       id_group INTEGER NOT NULL,
-       id_org_resource INTEGER NOT NULL,
-       PRIMARY KEY (id),
-       FOREIGN KEY (id_group) REFERENCES acl_group(id),
-       FOREIGN KEY (id_org_resource) REFERENCES organization_resource(id)
+    id INTEGER NOT NULL,
+    id_group INTEGER NOT NULL,
+    id_org_resource INTEGER NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_group) REFERENCES acl_group(id),
+    FOREIGN KEY (id_org_resource) REFERENCES organization_resource(id)
 );
 create unique index permission_group on group_resource (id_group,id_org_resource);
 
 CREATE TABLE acl_user
 (
-       id INTEGER NOT NULL,
-       username VARCHAR(150) NOT NULL,
-       name VARCHAR(150),
-       md5_password VARCHAR(100) NOT NULL,
-       id_group INTEGER NOT NULL,
-       extension VARCHAR(20),
-       fax_extension VARCHAR(20),
-       picture varchar(50),
-       estado VARCHAR(20),
-       PRIMARY KEY (id),
-       FOREIGN KEY (id_group) REFERENCES acl_group(id)
+    id INTEGER NOT NULL,
+    username VARCHAR(150) NOT NULL,
+    name VARCHAR(150),
+    md5_password VARCHAR(100) NOT NULL,
+    id_group INTEGER NOT NULL,
+    extension VARCHAR(20),
+    fax_extension VARCHAR(20),
+    picture varchar(50),
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_group) REFERENCES acl_group(id)
 );
 create unique index username on acl_user (username);
 
 CREATE TABLE user_shortcut
 (
-       id           INTEGER     NOT NULL,
-       id_user      INTEGER     NOT NULL,
-       id_resource  varchar(50) NOT NULL,
-       type         VARCHAR(50) NOT NULL,
-       description  VARCHAR(50),
-       PRIMARY KEY (id)
-       FOREIGN KEY (id_user) REFERENCES acl_user(id),
-       FOREIGN KEY (id_resource) REFERENCES acl_resource(id)
+    id           INTEGER     NOT NULL,
+    id_user      INTEGER     NOT NULL,
+    id_resource  varchar(50) NOT NULL,
+    type         VARCHAR(50) NOT NULL,
+    description  VARCHAR(50),
+    PRIMARY KEY (id)
+    FOREIGN KEY (id_user) REFERENCES acl_user(id),
+    FOREIGN KEY (id_resource) REFERENCES acl_resource(id)
 );
 
 CREATE TABLE sticky_note
 (
-       id           INTEGER     NOT NULL,
-       id_user      INTEGER     NOT NULL,
-       id_resource  varchar(50) NOT NULL,
-       date_edit    DATETIME    NOT NULL,
-       description  TEXT,
-       auto_popup   INTEGER NOT NULL DEFAULT '0',
-       PRIMARY KEY (id)
+    id           INTEGER     NOT NULL,
+    id_user      INTEGER     NOT NULL,
+    id_resource  varchar(50) NOT NULL,
+    date_edit    DATETIME    NOT NULL,
+    description  TEXT,
+    auto_popup   INTEGER NOT NULL DEFAULT '0',
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE user_properties
 (
-       id_user   INTEGER     NOT NULL,
-       property     VARCHAR(100) NOT NULL,
-       value        VARCHAR(150) NOT NULL,
-       category     VARCHAR(50),
-       PRIMARY KEY (id_user,property,category),
-       FOREIGN KEY (id_user) REFERENCES acl_user(id)
+    id_user   INTEGER     NOT NULL,
+    property     VARCHAR(100) NOT NULL,
+    value        VARCHAR(150) NOT NULL,
+    category     VARCHAR(50),
+    PRIMARY KEY (id_user,property,category),
+    FOREIGN KEY (id_user) REFERENCES acl_user(id)
 );
 
 CREATE TABLE email_list
 (
-        id               INTEGER,
-        id_organization  INTEGER,
-        listname    VARCHAR(50),
-        password    VARCHAR(15),
-        mailadmin   VARCHAR(150),
-        PRIMARY KEY (id),
-        FOREIGN KEY (id_organization) REFERENCES organization(id)
+    id               INTEGER,
+    id_organization  INTEGER,
+    listname    VARCHAR(50),
+    password    VARCHAR(15),
+    mailadmin   VARCHAR(150),
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_organization) REFERENCES organization(id)
 );
 
 CREATE TABLE member_list
 (
-        id              INTEGER NOT null,
-        mailmember      VARCHAR(150),
-        id_emaillist    INTEGER,
-        namemember      VARCHAR(50),
-        PRIMARY KEY (id),
-        FOREIGN KEY(id_emaillist) REFERENCES email_list(id)
+    id              INTEGER NOT null,
+    mailmember      VARCHAR(150),
+    id_emaillist    INTEGER,
+    namemember      VARCHAR(50),
+    PRIMARY KEY (id),
+    FOREIGN KEY(id_emaillist) REFERENCES email_list(id)
 );
 
 CREATE TABLE messages_vacations
 (
-        id          INTEGER NOT NULL,
-        account     varchar(150) NOT NULL,
-        subject     varchar(150) NOT NULL,
-        body        text,
-        vacation varchar(5) default 'no',
-        ini_date date NOT NULL,
-        end_date date NOT NULL,
-        PRIMARY KEY (id),
-        FOREIGN KEY (account) REFERENCES email_account(account)
+    id          INTEGER NOT NULL,
+    account     varchar(150) NOT NULL,
+    subject     varchar(150) NOT NULL,
+    body        text,
+    vacation varchar(5) default 'no',
+    ini_date date NOT NULL,
+    end_date date NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (account) REFERENCES acl_user(username)
 );
 
 CREATE TABLE email_statistics(
-        id                 integer not null,
-        date               datetime,
-        unix_time          integer,
-        total              integer,
-        type               integer,
-        id_organization    integer,
-        PRIMARY KEY (id),
-        FOREIGN KEY (id_organization) REFERENCES organization(id)
+    id                 integer not null,
+    date               datetime,
+    unix_time          integer,
+    total              integer,
+    type               integer,
+    id_organization    integer,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_organization) REFERENCES organization(id)
 );
 
 CREATE TABLE settings
 (
-       property               varchar(32) NOT NULL,
-       value             varchar(32) NOT NULL,
-       PRIMARY KEY (property)
+    property               varchar(32) NOT NULL,
+    value             varchar(32) NOT NULL,
+    PRIMARY KEY (property)
 );
 
 CREATE TABLE fax_docs
 (
-        id             integer          PRIMARY KEY,
-        pdf_file       varchar(255)     NOT NULL DEFAULT '',
-        modemdev       varchar(255)     NOT NULL DEFAULT '',
-        status         varchar(255)     NOT NULL DEFAULT '',
-        commID         varchar(255)     NOT NULL DEFAULT '',
-        errormsg       varchar(255)     NOT NULL DEFAULT '',
-        company_name   varchar(255)     NOT NULL DEFAULT '',
-        company_fax    varchar(255)     NOT NULL DEFAULT '',
-        date           timestamp        NOT NULL,
-        type           varchar(3)       default 'in',
-        faxpath        varchar(255)     default '',
-        id_user        integer          not null,
-        FOREIGN KEY    (id_user) REFERENCES acl_user(id)
+    id             integer          PRIMARY KEY,
+    pdf_file       varchar(255)     NOT NULL DEFAULT '',
+    modemdev       varchar(255)     NOT NULL DEFAULT '',
+    status         varchar(255)     NOT NULL DEFAULT '',
+    commID         varchar(255)     NOT NULL DEFAULT '',
+    errormsg       varchar(255)     NOT NULL DEFAULT '',
+    company_name   varchar(255)     NOT NULL DEFAULT '',
+    company_fax    varchar(255)     NOT NULL DEFAULT '',
+    date           timestamp        NOT NULL,
+    type           varchar(3)       default 'in',
+    faxpath        varchar(255)     default '',
+    id_user        integer          not null,
+    FOREIGN KEY    (id_user) REFERENCES acl_user(id)
 );
 
 INSERT INTO "settings" VALUES('elastix_version_release', '2.3.0-6');
 
-INSERT INTO "organization" VALUES(1,'NONE','','','','','','organization001');
+INSERT INTO "organization" VALUES(1,'NONE','','','','','','','','active');
 
 INSERT INTO "organization_properties" VALUES(1,'language','en','system');
 INSERT INTO "organization_properties" VALUES(1,'default_rate',0.50,'system');
@@ -199,7 +259,7 @@ INSERT INTO "acl_group" VALUES( 1,'administrator','total access',1);
 INSERT INTO "acl_group" VALUES( 2,'operator','Operator',1);
 INSERT INTO "acl_group" VALUES( 3,'extension','extension user',1);
 
-INSERT INTO "acl_user" VALUES(1,'admin','admin','7a5210c173ea40c03205a5de7dcd4cb0',0,'','','','active');
+INSERT INTO "acl_user" VALUES(1,'admin','admin','7a5210c173ea40c03205a5de7dcd4cb0',0,'','','');
 
 INSERT INTO "acl_resource" VALUES('system', 'System', '', '', '', 0);
 INSERT INTO "acl_resource" VALUES('usermgr', 'Users', 'system', '', 'module', 4);
@@ -266,7 +326,6 @@ INSERT INTO "acl_resource" VALUES('dhcp_by_mac', 'Assign IP Address to Host', 'n
 INSERT INTO "acl_resource" VALUES('shutdown', 'Shutdown', 'system', '', 'module', 6);
 INSERT INTO "acl_resource" VALUES('hardware_configuration', 'Hardware Configuration', 'system', '', 'module', 7);
 INSERT INTO "acl_resource" VALUES('hardware_detector', 'Hardware Detector', 'hardware_configuration', '', 'module', 71);
-INSERT INTO "acl_resource" VALUES('did', 'DID Assign', 'hardware_configuration', '', 'module', 72);
 INSERT INTO "acl_resource" VALUES('updates', 'Updates', 'system', '', 'module', 8);
 INSERT INTO "acl_resource" VALUES('packages', 'Packages', 'updates', '', 'module', 82);
 INSERT INTO "acl_resource" VALUES('repositories', 'Repositories', 'updates', '', 'module', 81);
@@ -286,19 +345,21 @@ INSERT INTO "acl_resource" VALUES('file_editor', 'Asterisk File Editor', 'tools'
 INSERT INTO "acl_resource" VALUES('text_to_wav', 'Text to Wav', 'tools', '', 'module', 83);
 INSERT INTO "acl_resource" VALUES('festival', 'Festival', 'tools', '', 'module', 84);
 INSERT INTO "acl_resource" VALUES('fop', 'Flash Operator Panel', 'pbxconfig', 'panel', 'framed', 9);
-INSERT INTO "acl_resource" VALUES('extensions', 'Extensions', 'pbxadmin', '', 'module', 11);
-INSERT INTO "acl_resource" VALUES('queues', 'Queues', 'pbxadmin', '', 'module', 16);
-INSERT INTO "acl_resource" VALUES('trunks', 'Trunks', 'pbxadmin', '', 'module', 12);
-INSERT INTO "acl_resource" VALUES('ivr', 'IVR', 'pbxadmin', '', 'module', 15);
-INSERT INTO "acl_resource" VALUES('features_code', 'Features Codes', 'pbxadmin', '', 'module', 17);
-INSERT INTO "acl_resource" VALUES('general_settings', 'General Settings', 'pbxadmin', '', 'module', 18);
-INSERT INTO "acl_resource" VALUES('inbound_route', 'Inbound Routes', 'pbxadmin', '', 'module', 14);
-INSERT INTO "acl_resource" VALUES('outbound_route', 'Outbound Routes', 'pbxadmin', '', 'module', 13);
-INSERT INTO "acl_resource" VALUES('ring_group', 'Ring Groups', 'pbxadmin', '', 'module', 19);
-INSERT INTO "acl_resource" VALUES('time_group', 'Time Group', 'pbxadmin', '', 'module', 20);
-INSERT INTO "acl_resource" VALUES('time_conditions', 'Time Conditions', 'pbxadmin', '', 'module', 21);
-INSERT INTO "acl_resource" VALUES('musiconhold', 'Music On Hold', 'pbxadmin', '', 'module', 22);
-INSERT INTO "acl_resource" VALUES('recordings', 'Recordings', 'pbxadmin', '', 'module', 23);
+INSERT INTO "acl_resource" VALUES('trunks', 'Trunks', 'pbxadmin', '', 'module', 11);
+INSERT INTO "acl_resource" VALUES('did', 'DID Assign', 'pbxadmin', '', 'module', 12);
+INSERT INTO "acl_resource" VALUES('general_settings_admin', 'General Settings', 'pbxadmin', '', 'module', 13);
+INSERT INTO "acl_resource" VALUES('extensions', 'Extensions', 'pbxadmin', '', 'module', 14);
+INSERT INTO "acl_resource" VALUES('queues', 'Queues', 'pbxadmin', '', 'module', 18);
+INSERT INTO "acl_resource" VALUES('ivr', 'IVR', 'pbxadmin', '', 'module', 17);
+INSERT INTO "acl_resource" VALUES('features_code', 'Features Codes', 'pbxadmin', '', 'module', 19);
+INSERT INTO "acl_resource" VALUES('general_settings', 'General Settings', 'pbxadmin', '', 'module', 20);
+INSERT INTO "acl_resource" VALUES('inbound_route', 'Inbound Routes', 'pbxadmin', '', 'module', 16);
+INSERT INTO "acl_resource" VALUES('outbound_route', 'Outbound Routes', 'pbxadmin', '', 'module', 15);
+INSERT INTO "acl_resource" VALUES('ring_group', 'Ring Groups', 'pbxadmin', '', 'module', 21);
+INSERT INTO "acl_resource" VALUES('time_group', 'Time Group', 'pbxadmin', '', 'module', 22);
+INSERT INTO "acl_resource" VALUES('time_conditions', 'Time Conditions', 'pbxadmin', '', 'module', 23);
+INSERT INTO "acl_resource" VALUES('musiconhold', 'Music On Hold', 'pbxadmin', '', 'module', 24);
+INSERT INTO "acl_resource" VALUES('recordings', 'Recordings', 'pbxadmin', '', 'module', 25);
 
 INSERT INTO "organization_resource" VALUES(1, 1, 'usermgr');
 INSERT INTO "organization_resource" VALUES(2, 1, 'organization');
@@ -388,6 +449,7 @@ INSERT INTO "organization_resource" VALUES(99, 1, 'musiconhold');
 INSERT INTO "organization_resource" VALUES(100, 1,'time_group');
 INSERT INTO "organization_resource" VALUES(101, 1,'time_conditions');
 INSERT INTO "organization_resource" VALUES(102, 1,'recordings');
+INSERT INTO "organization_resource" VALUES(103, 1,'general_settings_admin');
 
 INSERT INTO "group_resource" VALUES(1, 0, 1);
 INSERT INTO "group_resource" VALUES(2, 0, 2);
@@ -458,6 +520,8 @@ INSERT INTO "group_resource" VALUES(98, 0, 98);
 INSERT INTO "group_resource" VALUES(99, 0, 99);
 INSERT INTO "group_resource" VALUES(100, 0, 100);
 INSERT INTO "group_resource" VALUES(238, 0, 101);
+INSERT INTO "group_resource" VALUES(239, 0, 102);
+INSERT INTO "group_resource" VALUES(240, 0, 103);
 
 INSERT INTO "group_resource" VALUES(101, 1, 1);
 INSERT INTO "group_resource" VALUES(102, 1, 2);

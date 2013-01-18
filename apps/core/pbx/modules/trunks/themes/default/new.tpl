@@ -237,8 +237,8 @@
                         <td >{$trustrpid.INPUT}</td>
                     </tr>
                     <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$canreinvite.LABEL}: </td>
-                        <td>{$canreinvite.INPUT}</td>
+                        <td nowrap>{$directmedia.LABEL}: </td>
+                        <td>{$directmedia.INPUT}</td>
                         <td nowrap>{$useragent.LABEL}: </td>
                         <td>{$useragent.INPUT}</td>
                     </tr>

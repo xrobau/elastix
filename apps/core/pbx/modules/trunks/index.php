@@ -892,13 +892,13 @@ function writeAsteriskFile(&$error,$tech){
         }
     }
     
-   $sComando = '/usr/bin/elastix-helper asteriskconfig createExtGeneral 2>&1';
+    $sComando = '/usr/bin/elastix-helper asteriskconfig createExtGeneral 2>&1';
     $output = $ret = NULL;
     exec($sComando, $output, $ret);
     if ($ret != 0) {
         $error = _tr("Error writing extensions_additionals file").implode('', $output);
         return FALSE;
-    
+    }
     
     $sComando = '/usr/bin/elastix-helper asteriskconfig dialplan-reload 2>&1';
     $output = $ret = NULL;
@@ -1143,7 +1143,7 @@ function createFieldForm($tech)
 function createSipFrom(){
     $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update');
+    $arrMedia=array("noset"=>"",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
     $arrFormElements = array("fromuser" => array("LABEL"             => _tr("fromuser"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
@@ -1168,12 +1168,6 @@ function createSipFrom(){
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "canreinvite"   => array( "LABEL"                  => _tr("canreinvite"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                             "directmedia"   => array( "LABEL"              => _tr("directmedia"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",

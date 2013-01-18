@@ -30,12 +30,15 @@
   $Id: asteriskconfig,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
 
+ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+
 include_once "/var/www/html/libs/misc.lib.php";
 include_once "/var/www/html/configs/default.conf.php";
 
 require_once 'Console/Getopt.php';
 require_once "/var/www/html/libs/paloSantoPBX.class.php";
 require_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
+require_once "/var/www/html/libs/paloSantoOrganization.class.php";
 require_once "/var/www/html/modules/queues/libs/paloSantoQueues.class.php";
 require_once "/var/www/html/modules/ivr/libs/paloSantoIVR.class.php";
 require_once "/var/www/html/modules/inbound_route/libs/paloSantoInbound.class.php";
@@ -120,6 +123,12 @@ switch($argv[1]){
         }else
             error_exit("Missing arguments \n");
         break;
+    case "deleteFolderOrganization":
+        if(isset($argv[2])){
+            exit(deleteFolderOrganization($argv[2]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
+        break;
 	default:
 		error_exit("No action specified \n");
 		break;
@@ -143,7 +152,7 @@ function reload(){
     $ret = $output = null;
 	exec("/usr/sbin/asterisk -r -x 'core reload' 2>&1",$output,$ret);
 	if($ret!=0){
-        fwrite(STDERR, "Asterisk couldn't be reloaded. ".implode('', $output));
+        fwrite(STDERR, "Asterisk couldn't be reloaded. ".implode('', $output)).".\n";
         return false;
 	}
 	return true;
@@ -153,7 +162,7 @@ function dialplanReload(){
     $ret = $output = null;
 	exec("/usr/sbin/asterisk -r -x 'dialplan reload' 2>&1",$output,$ret);
 	if($ret!=0){
-        fwrite(STDERR, "Couldn't be reloaded asterisk dialplan. ".implode('', $output));
+        fwrite(STDERR, "Couldn't be reloaded asterisk dialplan. ".implode('', $output)).".\n";
         return false;
     }
     return true;
@@ -184,7 +193,131 @@ function deleteFileOrgAst($domain){
             }
         }
     }
+    
     return true;
+}
+
+/*
+    Esta funcion eliminara toda la informacion de una organizacion
+    dentro del servidor. Usese con cuidado. 
+    Esta funcion asume que la organizacion ya ha sido borrada de la 
+    base de datos (tabla organization)
+    @param $idcode string codigo unico dentro del sistema d ela organizacion
+*/
+function deleteFolderOrganization($idcode){
+    if(!preg_match("/^[[:alnum:]]+$/",$idcode)){
+         error_exit("ERR: Invalid Organization.\n");
+    }
+
+    $pathlib="/var/lib/asterisk/";
+    $pathspool="/var/spool/asterisk/";
+    $pathelxdir="/var/www/elastixdir/";
+    
+    $arrDir[] = array($pathspool."monitor/",false,"monitor"); //grabaciones llamadas 
+    $arrDir[] = array($pathspool."meetme/",false,"meetme"); //grabaciones llamadas meetme
+    $arrDir[] = array($pathspool."tmp/",false,"tmp");
+    $arrDir[] = array($pathlib."sounds/",true,"sounds"); //recordings
+    $arrDir[] = array($pathlib."moh/",true,"moh"); //musica en espera
+    
+    $arrDir[]=array($pathelxdir."faxdocs/",true,"faxdocs"); //faxes recibidos y enviados
+    $arrDir[]=array($pathelxdir."backup/",true,"backup"); //backup del sistema
+    
+    //TODO: antiguo directorio de faxes. Esto debe ser borrado
+    //luego que se actualiace el modulo fax para que los faxes enviados 
+    //y recibidos queden bajo el directorio /var/www/elastixdir/faxdocs
+    $arrDir[]=array("/var/www/faxes/",true,"faxes");
+    
+    try{
+        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        //obtenemos los datos de la organizacion eliminada de la tabla org_history_register
+        $sOrgData = $conn->prepare('SELECT org_code,org_domain FROM org_history_register WHERE org_idcode = ?');
+        $sOrgData->execute(array($idcode));
+        $orgData = $sOrgData->fetchAll(PDO::FETCH_ASSOC);
+        if($orgData==false)
+            error_exit("Err: Couldn't get information about organization with idcode: ").$idcode;
+        
+        $code=$orgData[0]["org_code"];
+        $domain=$orgData[0]["org_domain"];
+        
+        //comprobamos que la organizacion ya haya sido borrada de la base
+        $sOrgExist = $conn->prepare("SELECT 1 from organization where idcode=?");
+        $sOrgExist->execute(array($idcode));
+        $orgExist = $sOrgExist->fetchAll(PDO::FETCH_ASSOC);
+        if(count($orgExist)!=0)
+            error_exit("Err: Organization exist yet. Domain: ").$domain;
+    }catch(PDOException $e){
+        error_exit("ERR: failed to delete organization data in Elastix - ".$e->getMessage()."\n");
+    }
+    
+    $error="";
+    //carpeta que contendra la data de la organizacion que no pueda ser eliminada
+    $repOrg=$pathelxdir."oldOrganizations/$idcode";
+    if(!is_dir($pathelxdir."oldOrganizations")){
+        mkdir($pathelxdir."oldOrganizations");
+        exec("chmod 755 $pathelxdir"."oldOrganizations");
+    }else{
+        //comprobamos permisos de escritura del directorio
+        if(!is_writable($pathelxdir."oldOrganizations")){
+            exec("chmod 755 $pathelxdir"."oldOrganizations");
+        }
+    }
+    if(!is_dir($repOrg)){
+        mkdir($repOrg);
+        exec("chmod 755 $repOrg");
+    }
+    
+    foreach($arrDir as $value){
+        if(is_dir($value["0"].$domain)){
+            if(!_delTree($value["0"].$domain,$value["1"])){
+                rename($value["0"].$domain,"$repOrg/$value[2]_$domain");
+                $error="\nFailed to delete: ".$value["0"].$domain;
+            }
+        }
+    }
+    
+    //borramos los voicemail de la organizacion
+    $vmdirs = glob($pathspool."voicemail/$code*");
+    foreach($vmdirs as $file){
+        if(!_delTree($file,true)){
+            if(!is_dir("$repOrg/voicemail"))
+                mkdir("$repOrg/voicemail");
+            $nfile=strpos($pathspool."voicemail",$file);
+            $error .="\nFailed to delete voicemail directory: $file";
+            
+            if(!rename($file,"$repOrg/voicemail/$nfile"))
+                $error .="\nFailed to move voicemail directory: $file";
+        }
+    }
+    
+    if($error=="" && is_dir($repOrg)){
+        rmdir($repOrg);
+    }
+    
+    if($error!=""){
+        return false;
+    }else
+        return true;
+}
+
+//funcion que elimina un directorio y su contenido
+//@param dir string  nombre del directorio a aliminar
+//@param $callback  bool  si es verdadero la funcion eliminara 
+//                         el directorio a pesar de que este tenga otros 
+//                         directorios en su interior
+function _delTree($dir,$callback=false) {
+    $files = array_diff(scandir($dir), array('.','..')); 
+    foreach ($files as $file) {
+        if(is_dir("$dir/$file")){
+            print("$dir/$file");
+            if($callback)
+                _delTree("$dir/$file",$callback);
+        }else{
+            unlink("$dir/$file");
+        }
+    } 
+    return rmdir($dir); 
 }
 
 function createMoHDir($class,$domain=null){
@@ -257,9 +390,9 @@ function createDirOrganization($domain){
     $astlibsound = $pathlib."/sounds";
     
     $arrDir=array($astmonitor,$astmeetme,$astlibsound,$astspooltmp);
+    $date=date("YMd_His");
     foreach($arrDir as $dir){
         if(is_dir("$dir/$domain")){
-            $date=date("YMd_His");
             rename("$dir/$domain","$dir/$domain"."_".$date);
         }
         
@@ -296,15 +429,10 @@ exten => h,1,Hangup()
 EXTENSIONS_CONFIG;
     
     $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
-    $query="Select domain from organization";
-    $result=$pDB->fetchTable($query,false);
+    $query="Select domain from organization where state=?";
+    $result=$pDB->fetchTable($query,false,array("active"));
     if($result===false){
         fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDB->errMsg);
-        return false;
-    }
-    
-    if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $orgdomain)){
-        fprintf(STDERR, "Invalid domain format");
         return false;
     }
        
@@ -314,11 +442,18 @@ EXTENSIONS_CONFIG;
         $arrDomain[]=$domain[0];
     }
     
+    if($action=="add" || $action=="delete"){
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $orgdomain)){
+            fprintf(STDERR, "Invalid domain format");
+            return false;
+        }
+    }
+    
     if($action=="add"){
         if(in_array($orgdomain,$arrDomain)===false){
             $arrDomain[]=$orgdomain;
         }
-    }else{
+    }elseif($action=="delete"){
         $index=array_search($orgdomain,$arrDomain);
         if($index!==false){    
             $arrDomain[$index]=null;
@@ -345,7 +480,7 @@ EXTENSIONS_CONFIG;
         $content .="#include extensions_general.conf\n";
         
     foreach($arrDomain as $value){
-        if(isset($value) && $value!=""){
+        if(!empty($value)){
             if(!is_file("/etc/asterisk/organizations/extensions_".$value.".conf")){
                 if(file_put_contents("/etc/asterisk/organizations/extensions_".$value.".conf","")!==false){
                     $content .="#include organizations/extensions_".$value.".conf\n";
@@ -374,8 +509,8 @@ function createExtensionGlobals($action,$orgdomain){
     $content = "";
     
     $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
-    $query="Select domain from organization";
-    $result=$pDB->fetchTable($query,false);
+    $query="Select domain from organization where state=?";
+    $result=$pDB->fetchTable($query,false,array("active"));
     if($result===false){
         fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDB->errMsg);
         return false;
@@ -419,46 +554,11 @@ function createExtensionGlobals($action,$orgdomain){
         return false;
     }
     
-/*    //las globales correspondientes a las truncales
-    $pDBpbx=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    $queryTrunk="SELECT * from trunk";
-    $trunks=$pDBpbx->fetchTable($queryTrunk,true,array());
-    if($trunks===false){
-        fprintf(STDERR, "ERR: Database connection elxppbx - %s\n", $pDBpbx->errMsg);
-        return false;
-    }elseif(count($trunks)!=0){
-        foreach($trunks as $arrtemp){
-            $trunkid=$arrtemp["trunkid"];
-            $tech=$arrtemp["tech"];
-            $channelId=$arrtemp["channelid"];
-            $outcid=isset($arrtemp["outcid"])?$arrtemp["outcid"]:"";
-            $maxchans=isset($arrtemp["maxchans"])?$arrtemp["maxchans"]:"";
-            $outprefix=isset($arrtemp["dialoutprefix"])?$arrtemp["dialoutprefix"]:"";
-            $disabled=isset($arrtemp["disabled"])?$arrtemp["disabled"]:"off";
-            $keepCid=isset($arrtemp["keepcid"])?$arrtemp["keepcid"]:"off";
-            $force=($keepCid=="all")?"1":"";
-
-            $content .="OUT_$trunkid = $tech/$channelId\n";
-            $content .="OUTCID_$trunkid = $outcid\n";
-            $content .="OUTMAXCHANS_$trunkid = $maxchans\n";
-            $content .="OUTPREFIX_$trunkid = $outprefix\n";
-            $content .="OUTKEEPCID_$trunkid = $keepCid\n";
-            $content .="FORCEDOUTCID_$trunkid = $force\n";
-
-            $qPrefix="SELECT count(trunkid) from trunk_dialpatterns where trunkid=?";
-            $trunkPrefix=$pDBpbx->getFirstRowQuery($qPrefix,false,array($trunkid));
-            if($trunkPrefix[0]!="0")
-                $content .="PREFIX_TRUNK_$trunkid = 1\n";
-            else
-                $content .="PREFIX_TRUNK_$trunkid = \n";
-        }
-    }*/
-    
     if(count($arrDomain)!=0){
         $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
         foreach($arrDomain as $value)
         {
-            if(isset($value) && $value!=""){
+            if(!empty($value)){
                 //antes de incluir el archivo validamos que el mismo exista
                 //ya que si no existe y lo incluimos esto provocara que asterisk crash
                 //en caso de no existir el archivo se lo inteta crear
@@ -1078,13 +1178,13 @@ function createExtGeneral(){
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:6}'));
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
     $arrExt[]=new paloExtensions("s",new ext_macro('analog-did','${CHAN}'));
-    $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro analog-did'));
     $arrExt[]=new paloExtensions("s",new ext_goto(1,'${DID}',"from-pstn"));
     $arrExt[]=new paloExtensions("s",new ext_noop('Is a Zaptel Channel'),"n",'zapok');
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CHANNEL:4}'));
     $arrExt[]=new paloExtensions("s",new ext_setvar("CHAN",'${CUT(CHAN,-,1)}'));
     $arrExt[]=new paloExtensions("s",new ext_macro('analog-did','${CHAN}'));
-    $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro from-dahdi-${CHAN}'));
+    $arrExt[]=new paloExtensions("s",new ext_noop('Returned from Macro analog-did'));
     $arrExt[]=new paloExtensions("s",new ext_goto(1,'${DID}',"from-pstn"));
     
     $contenido .="\n[from-analog]\n";
@@ -1134,7 +1234,7 @@ function createExtGeneral(){
 //y createFileDahdiChannelAdd en una misma funcion y no invocar a elastix helper dos veces
 function createExtAddtionals($domain=null){
     if(createExtGeneral()==true)
-        return createFileDahdiChannelAdd($domain=null);
+        return createFileDahdiChannelAdd($domain);
     else
         return false;
 }
@@ -1157,7 +1257,8 @@ function createFileDahdiChannelAdd($domain=null){
     $query="SELECT dd.did, dd.data, di.organization_domain from did_details dd join did di on dd.did=di.did where di.organization_domain IS NOT NULL and dd.keyword=? and di.type=?";
     $result=$pDB->fetchTable($query,true,array("port","analog"));
     if($result===false){
-        fprintf(STDERR, "ERR: Database connection did - %s\n", $pDB->errMsg);
+        fprintf(STDERR, "ERR: Database connection did - %s.\n", $pDB->errMsg);
+        fprintf(STDERR, "ERR: Couln't be rewritten file chan_dahdi_additional.conf.\n");
         return false;
     }
     
@@ -1263,8 +1364,12 @@ function createDialplanTrunkPattern(){
                 $prefix=strtoupper($value['match_pattern_prefix']);
                 $len=($prefix=="")?"":":".strlen($prefix);
             }
-            if(isset($value['match_pattern_pass']))
-                $pattern=strtoupper($value['match_pattern_pass']);
+            if(isset($value['match_pattern_pass'])){
+                if($value['match_pattern_pass']=="")
+                    $pattern=".";
+                else
+                    $pattern=strtoupper($value['match_pattern_pass']);
+            }
                 
             $expression = str_replace(
                 array('X','Z','N','.','*','+'),
@@ -1296,5 +1401,5 @@ function createDialplanTrunkPattern(){
         }
     }
     return $contenido;
-}   
+}
 ?>

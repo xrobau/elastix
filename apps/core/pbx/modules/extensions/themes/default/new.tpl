@@ -228,8 +228,8 @@
                     <td>{$allow.INPUT}</td>
                 </tr>
                 <tr class="sip_settings">
-                    <td nowrap>{$canreinvite.LABEL}: </td>
-                    <td>{$canreinvite.INPUT}</td>
+                    <td nowrap>{$directmedia.LABEL}: </td>
+                    <td>{$directmedia.INPUT}</td>
                     <td nowrap>{$allowtransfer.LABEL}: </td>
                     <td>{$allowtransfer.INPUT}</td>
                 </tr>
@@ -270,8 +270,8 @@
                 <tr class="sip_settings show_more" {$SHOW_MORE}>
                     <td nowrap>{$useragent.LABEL}:</td>
                     <td>{$useragent.INPUT}</td>
-                    <td nowrap>{$directmedia.LABEL}:</td>
-                    <td>{$directmedia.INPUT}</td>
+                    <td nowrap>{$g726nonstandard.LABEL}:</td>
+                    <td>{$g726nonstandard.INPUT}</td>
                 </tr>
                 <tr class="sip_settings show_more" {$SHOW_MORE}>
                     <td nowrap>{$callcounter.LABEL}: </td>
@@ -300,8 +300,6 @@
                 <tr class="sip_settings show_more" {$SHOW_MORE}>
                     <td nowrap>{$progressinband.LABEL}:</td>
                     <td>{$progressinband.INPUT}</td>
-                    <td nowrap>{$g726nonstandard.LABEL}:</td>
-                    <td>{$g726nonstandard.INPUT}</td>
                 </tr>
               {/if}
             </table>

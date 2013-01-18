@@ -29,6 +29,7 @@
     include_once "/var/www/html/libs/paloSantoACL.class.php";
 	include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
 	include_once "/var/www/html/libs/paloSantoPBX.class.php";
+	include_once "/var/www/html/libs/paloSantoOrganization.class.php";
 	global $arrConf;
 class paloQueuePBX extends paloAsteriskDB{
     protected $code;
@@ -258,6 +259,24 @@ class paloQueuePBX extends paloAsteriskDB{
         if(empty($arrProp["name"])){
             $this->errMsg="Field queue can't be empty";
             return false;
+        }
+        
+        //validamos que no se haya alcanzado el maximo numero de colas en el servidor
+        global $arrConf;
+        $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+        $qOrg="SELECT value from organization_properties where key=? and category=? and id_organization=(SELECT id from organization where domain=?)";
+        $res_num_queues=$pDB->getFirstRowQuery($qOrg,false,array("max_num_queues","limit",$this->domain));
+        if($res_num_queues!=false){
+            $max_num_queues=$res_num_queues[0];
+            if(ctype_digit($max_num_queues)){
+                if($max_num_queues!=0){
+                    $numQueues=$this->getTotalQueues();
+                    if($numQueues>=$max_num_queues){
+                        $this->errMsg=_tr("Err: You can't create new queues because you have reached the max numbers of  queues permitted")." ($numQueues) "." Contact with the server's admin";
+                        return false;
+                    }
+                }
+            }
         }
         
         $arrProp["organization_domain"]=$this->domain;

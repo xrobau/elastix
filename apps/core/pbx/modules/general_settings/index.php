@@ -296,7 +296,6 @@ function getParameterGeneralSettings(){
         $arrPropSip['nat']=getParameter("sip_nat");
         $arrPropSip['disallow']=getParameter("sip_disallow");
         $arrPropSip['allow']=getParameter("sip_allow");
-        $arrPropSip['canreinvite']=getParameter("sip_canreinvite");
         $arrPropSip['allowtransfer']=getParameter("sip_allowtransfer");
         $arrPropSip["vmexten"]=getParameter("sip_vmexten");
         $arrPropSip['mohinterpret']=getParameter("sip_mohinterpret");
@@ -435,14 +434,14 @@ function createFieldForm($arrTone)
 }
 
 function createSipForm(){
-    $arrNat=array("yes"=>"Yes","no"=>"No","never"=>"never","route"=>"route");
+    $arrNat=array("yes"=>"yes","no"=>"no","force_rport"=>"force_rport","comedia"=>"comedia");
     $arrCallingpres=array('allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
-    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNo=array("yes"=>"yes","no"=>"no");
     $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
-    $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update');
-    $arrFormElements = array("sip_type"  => array("LABEL"                  => _tr("type"),
+    $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
+    $arrFormElements = array( "sip_type"  => array("LABEL"                  => _tr("type"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
                                                 "INPUT_EXTRA_PARAM"      => $arrType,
@@ -496,30 +495,13 @@ function createSipForm(){
                                                     "INPUT_EXTRA_PARAM"      => $arrDtmf,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "sip_canreinvite"   => array( "LABEL"                  => _tr("canreinvite"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                             "sip_vmexten" => array("LABEL"             => _tr("vmexten"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "sip_mohinterpret"   => array( "LABEL"                  => _tr("mohinterpret"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "sip_mohsuggest" => array("LABEL"             => _tr("mohsuggest"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            
                             "sip_allowtransfer"   => array( "LABEL"              => _tr("allowtransfer"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",

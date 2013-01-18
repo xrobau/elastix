@@ -129,25 +129,8 @@ function reportConference($smarty, $module_name, $local_templates_dir, &$pDB, $a
 	$error = "";
 	$bSoporteWebConf = (file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php'));
     
-    if($userLevel1=="superadmin"){
-        $domain=getParameter("organization");
-        if(!empty($domain)){
-            $url = "?menu=$module_name&organization=$domain";
-            $pconference = new paloConference($pDB,$domain);
-            $total=$pconference->getTotalConference($domain,$date,$state_conf,$type_conf,$name_conf);
-        }else{
-            $domain = null;
-            $url = "?menu=$module_name";
-            $pconference = new paloConference($pDB,null);
-            $total=$pconference->getTotalConference(null,$date,$state_conf,$type_conf,$name_conf);
-        }
-	}else{
-        $url = "?menu=$module_name";
-        $pconference = new paloConference($pDB,$domain);
-        $total=$pconference->getTotalConference($domain,$date,$state_conf,$type_conf,$name_conf);
-	}
-	
-	$state_conf=getParameter("state_conf");
+    $date=date("Y-m-d H:i");
+    $state_conf=getParameter("state_conf");
     $name_conf=getParameter("name_conf");
     $type_conf=getParameter("type_conf");
     if(empty($state_conf)){
@@ -165,12 +148,30 @@ function reportConference($smarty, $module_name, $local_templates_dir, &$pDB, $a
     }else
         $url .="&$name_conf";
     
-    $date=date("Y-m-d H:i");
+    if($userLevel1=="superadmin"){
+        $domain=getParameter("organization");
+        if(!empty($domain)){
+            $url = "?menu=$module_name&organization=$domain";
+            $pconference = new paloConference($pDB,$domain);
+            $total=$pconference->getTotalConference($domain,$date,$state_conf,$type_conf,$name_conf);
+        }else{
+            $domain = null;
+            $url = "?menu=$module_name";
+            $pconference = new paloConference($pDB,null);
+            $total=$pconference->getTotalConference(null,$date,$state_conf,$type_conf,$name_conf);
+        }
+    }else{
+        $url = "?menu=$module_name";
+        $pconference = new paloConference($pDB,$domain);
+        $total=$pconference->getTotalConference($domain,$date,$state_conf,$type_conf,$name_conf);
+    }
     
 	if($total===false){
         $error=$pconference->errMsg;
         $total=0;
     }
+    
+    
 
     $limit=20;
 

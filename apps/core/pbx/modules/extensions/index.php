@@ -801,7 +801,6 @@ function propersParamByTech($tech){
 		$arrProp['accountcode']=getParameter("accountcode");
 		$arrProp['disallow']=getParameter("disallow");
 		$arrProp['allow']=getParameter("allow");
-		$arrProp['canreinvite']=getParameter("canreinvite");
 		$arrProp['allowtransfer']=getParameter("allowtransfer");
 		$arrProp['callgroup']=getParameter("callgroup");
 		$arrProp['pickupgroup']=getParameter("pickupgroup");
@@ -1147,13 +1146,13 @@ function createFieldForm($arrOrgz,$tech=null)
 }
 
 function createSipForm(){
-	$arrNat=array("yes"=>"Yes","no"=>"No","never"=>"never","route"=>"route");
-	$arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-	$arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
-	$arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
-	$arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
-	$arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update');
-	$arrAmaflag=array("noset"=>"noset","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
+    $arrNat=array("yes"=>"Yes","no"=>"No","force_rport"=>"force_rport","comedia"=>"comedia");
+    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
+    $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
+    $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
+    $arrAmaflag=array("noset"=>"noset","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
 	$arrFormElements = array("type"  => array("LABEL"                  => _tr("type"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "SELECT",
@@ -1214,12 +1213,6 @@ function createSipForm(){
 													"INPUT_EXTRA_PARAM"      => $arrDtmf,
 													"VALIDATION_TYPE"        => "text",
 													"VALIDATION_EXTRA_PARAM" => ""),
-							"canreinvite"   => array( "LABEL"                  => _tr("canreinvite"),
-													"REQUIRED"               => "no",
-													"INPUT_TYPE"             => "SELECT",
-													"INPUT_EXTRA_PARAM"      => $arrYesNo,
-													"VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
 							"callgroup"   => array( "LABEL"                  => _tr("callgroup"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "TEXT",

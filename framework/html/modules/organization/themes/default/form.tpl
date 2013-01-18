@@ -1,12 +1,12 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
     <tr class="letra12">
         {if $mode eq 'input'}
-        <td align="left">
+        <td >
             <input class="button" type="submit" name="save_new" value="{$SAVE}">&nbsp;&nbsp;
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
         {elseif $mode eq 'view'}
-        <td align="left">
+        <td >
             <input class="button" type="submit" name="edit" value="{$EDIT}">
             {if $level_user eq 'super_admin'}
             <input class="button" type="submit" name="delete" value="{$DELETE}" onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
@@ -14,7 +14,7 @@
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
         {elseif $mode eq 'edit'}
-        <td align="left">
+        <td >
             <input class="button" type="submit" name="save_edit" value="{$APLICAR_CAMBIOS}">&nbsp;&nbsp;
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
@@ -26,46 +26,69 @@
 </table>
 <table class="tabForm" style="font-size: 14px" width="100%" cellpadding="4" align="center">
     <tr>
-        <td width="14%" align="left">{$name.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-        <td width="31%" align="left">{$name.INPUT}</td>
-		{if !$isMainOrg}
-			{if $edit_entity}
-				<td width="19%" align="left">{$domain.LABEL}: <b>{if $mode ne 'view'} <span  class="required">*</span>{/if}</b></td>
-				<td width="31%" align="left">{$domain_name}</td>
-			{else}
-				<td width="19%" align="left">{$domain.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-				<td width="31%" align="left">{$domain.INPUT}</td>
-			{/if}
-		{else}
-			<td width="19%" align="left">{$email_contact.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-			<td width="31%" align="left">{$email_contact.INPUT} </td>
-		{/if}
+        <td width="14%" >{$name.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+        <td width="31%" >{$name.INPUT}</td>
+        <td width="19%" >{$domain.LABEL}: <b>{if $mode ne 'view'} <span  class="required">*</span>{/if}</b></td>
+        {if $edit_entity}
+            <td width="31%" >{$domain_name}</td>
+        {else}
+            <td width="31%" >{$domain.INPUT}</td>
+        {/if}
     </tr>
     <tr>
-        <td align="left">{$country.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-        <td align="left">{$country.INPUT}</td>
-        <td align="left">{$city.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-        <td align="left">{$city.INPUT}</td>
+        <td >{$country.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+        <td >{$country.INPUT}</td>
+        <td >{$city.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+        <td >{$city.INPUT}</td>
     </tr>
     <tr>
-        <td align="left">{$address.LABEL}: </td>
-        <td align="left" colspan="3" width="74%">{$address.INPUT}</td>
+        <td >{$address.LABEL}: </td>
+        <td  colspan="3" width="74%">{$address.INPUT}</td>
     </tr>
-	{if !$isMainOrg}
     <tr>
-        <td align="left">{$country_code.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-        <td align="left">{$country_code.INPUT} </td>
-        <td align="left">{$area_code.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-        <td align="left">{$area_code.INPUT} </td>
+        <td >{$country_code.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+        <td >{$country_code.INPUT} </td>
+        <td >{$area_code.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+        <td >{$area_code.INPUT} </td>
     </tr>
-	{/if}
-	{if !$isMainOrg}
     <tr>
-		<td align="left">{$email_contact.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-        <td align="left">{$email_contact.INPUT} </td>
-        <td align="left">{$quota.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-        <td align="left">{$quota.INPUT} </td>
+        <td >{$email_contact.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+        <td >{$email_contact.INPUT} </td>
     </tr>
-	{/if}
 </table>
-<input class="button" type="hidden" name="id" value="{$ID}" />
+<table class="tabForm" style="font-size: 14px" width="100%" cellpadding="4" align="center">
+    <th >{$ORG_RESTRINCTION}</th>
+    {if $USERLEVEL eq 'superadmin'}
+        <tr>
+            <td width="20%">{$max_num_user.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+            <td>{$max_num_user.INPUT} <input type="checkbox" name="max_num_user_chk" class='org_chk_limits' {$CHECK_U} onclick="org_chk_limit('max_num_user');"> {$UNLIMITED}</td>
+        </tr>
+        <tr>
+            <td >{$max_num_exten.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+            <td>{$max_num_exten.INPUT} <input type="checkbox" name="max_num_exten_chk" class='org_chk_limits' {$CHECK_E}  onclick="org_chk_limit('max_num_exten');"> {$UNLIMITED}</td>
+        </tr>
+        <tr>
+            <td >{$max_num_queues.LABEL}:<b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b> </td>
+            <td>{$max_num_queues.INPUT} <input type="checkbox" name="max_num_queues_chk" class='org_chk_limits' {$CHECK_Q} onclick="org_chk_limit('max_num_queues');"> {$UNLIMITED}</td>
+        </tr>
+    {else}
+        <tr>
+            <td width="20%">{$max_num_user.LABEL}: </td>
+            <td> {$CHECK_U}</td>
+        </tr>
+        <tr>
+            <td >{$max_num_exten.LABEL}: </td>
+            <td> {$CHECK_E}</td>
+        </tr>
+        <tr>
+            <td >{$max_num_queues.LABEL}:  </td>
+            <td> {$CHECK_Q}</td>
+        </tr>
+    {/if}
+    <tr>
+        <td >{$quota.LABEL}: <b>{if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+        <td >{$quota.INPUT} </td>
+    </tr>
+</table>
+<input type="hidden" name="id" value="{$ID}" />
+<input type="hidden" name="org_mode" value="{$mode}" />

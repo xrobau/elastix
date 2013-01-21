@@ -97,6 +97,14 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Jan 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agents, Callback Extensions: multiple fixes. Enforce uniqueness of 
+  agent number across Agent and Callback agents on agent creation. Verify that 
+  agent number that is being modified actually exists. Fix removed successful 
+  return from agent modification. Agent modification screens may not longer 
+  change the agent number onscreen, as doing so has no effect on the actual 
+  record.
+
 * Thu Jan 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-9.beta
 - FIXED: Campaign Monitoring: add cancelling of long polling when switching 
   campaigns in the absence of SSE (Internet Explorer). Otherwise multiple 

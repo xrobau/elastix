@@ -125,17 +125,19 @@ class Agentes
             return FALSE;
         }
 
-        $infoAgente = $this->getAgents($agent[0]);
-        if (!is_null($infoAgente) && count($infoAgente) > 0) {
-            $this->errMsg = 'Agent already exists';
+        $typeExtension = explode("/",$agent[0]);
+
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM agent WHERE estatus = "A" AND number = ?',
+            FALSE, array($typeExtension[1]));
+        if ($tupla[0] > 0) {
+            $this->errMsg = _tr('Agent already exists');
             return FALSE;
         }
         
         /* Se debe de autogenerar una contraseña ECCP si no se especifica. 
          * La contraseña será legible por la nueva consola de agente */
         if (!isset($agent[3]) || $agent[3] == '') $agent[3] = sha1(time().rand());
-
-	$typeExtension = explode("/",$agent[0]);
 
         // GRABAR EN BASE DE DATOS
         $sPeticionSQL = 'INSERT INTO agent (type, number, password, name, eccp_password) VALUES (?, ?, ?, ?, ?)';
@@ -175,10 +177,19 @@ class Agentes
             return FALSE;
         }
 
+        $typeExtension = explode("/",$agent[0]);
+
+        // Verificar que el agente referenciado existe
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM agent WHERE estatus = "A" AND number = ?',
+            FALSE, array($typeExtension[1]));
+        if ($tupla[0] <= 0) {
+            $this->errMsg = _tr('Agent not found');
+            return FALSE;
+        }        
+
         // Asumir ninguna contraseña de ECCP (agente no será usable por ECCP)
         if (!isset($agent[3]) || $agent[3] == '') $agent[3] = NULL;
-
-        $typeExtension = explode("/",$agent[0]);
 
         // EDITAR EN BASE DE DATOS
         $sPeticionSQL = 'UPDATE agent SET password = ?, name = ?, type = ?';
@@ -219,6 +230,7 @@ class Agentes
         if ($bExito) {
             $this->_DB->genQuery("COMMIT");
             $this->_DB->genQuery("SET AUTOCOMMIT = 1");
+            return TRUE;
         } else {
             $this->_DB->genQuery("ROLLBACK");
             $this->_DB->genQuery("SET AUTOCOMMIT = 1");

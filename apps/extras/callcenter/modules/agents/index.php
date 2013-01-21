@@ -354,7 +354,7 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
     }
 
     require_once("libs/paloSantoForm.class.php");
-    $arrFormElements = getFormAgent($smarty);
+    $arrFormElements = getFormAgent($smarty, !is_null($id_agent));
 
     // Valores por omisión para primera carga
     if (is_null($id_agent)) {
@@ -445,7 +445,7 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
     return $contenidoModulo;
 }
 
-function getFormAgent(&$smarty)
+function getFormAgent(&$smarty, $bEdit)
 {
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("CANCEL", _tr("Cancel"));
@@ -469,6 +469,7 @@ function getFormAgent(&$smarty)
             "EDITABLE"               => "yes",
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "TEXT",
+            'EDITABLE'              => $bEdit ? 'no' : 'yes',
             "INPUT_EXTRA_PARAM"      => "",
             "VALIDATION_TYPE"        => "numeric",
             "VALIDATION_EXTRA_PARAM" => ""),

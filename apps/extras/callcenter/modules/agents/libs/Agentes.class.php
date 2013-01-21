@@ -140,9 +140,11 @@ class Agentes
             return FALSE;
         }
 
-        $infoAgente = $this->getAgents($agent[0]);
-        if (!is_null($infoAgente) && count($infoAgente) > 0) {
-            $this->errMsg = 'Agent already exists';
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM agent WHERE estatus = "A" AND number = ?',
+            FALSE, array($agent[0]));
+        if ($tupla[0] > 0) {
+            $this->errMsg = _tr('Agent already exists');
             return FALSE;
         }
         
@@ -192,6 +194,15 @@ class Agentes
             $this->errMsg = 'Invalid agent data';
             return FALSE;
         }
+
+        // Verificar que el agente referenciado existe
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM agent WHERE estatus = "A" AND number = ?',
+            FALSE, array($agent[0]));
+        if ($tupla[0] <= 0) {
+            $this->errMsg = _tr('Agent not found');
+            return FALSE;
+        }        
 
         // Asumir ninguna contraseña de ECCP (agente no será usable por ECCP)
         if (!isset($agent[3]) || $agent[3] == '') $agent[3] = NULL;

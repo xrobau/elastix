@@ -1,3 +1,8 @@
+* Agents, Callback Extensions: multiple fixes. Enforce uniqueness of agent 
+  number across Agent and Callback agents on agent creation. Verify that agent
+  number that is being modified actually exists. Fix removed successful return
+  from agent modification. Agent modification screens may not longer change the
+  agent number onscreen, as doing so has no effect on the actual record.
 * Campaign Monitoring: add cancelling of long polling when switching campaigns
   in the absence of SSE (Internet Explorer). Otherwise multiple pollings may 
   accumulate. Additionally, invalidate the polling on server-side when the 

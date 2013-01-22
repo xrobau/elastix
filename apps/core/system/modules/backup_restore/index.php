@@ -629,7 +629,8 @@ function showAlert($path_backup, $smarty, $arrLang, $backup_file, $module_name, 
                 if($parameter == 0){
                     if(count($compare)>=1 && $compare!=null){
                         $warning = $arrLang["Warning"];
-                        $outMessage = $warning." <a href='?menu=$module_name&action=detail&rawmode=yes&file_name=$backup_file' rel='facebox'>".$arrLang["details"]."</a>";
+                        $pag = '"?menu='.$module_name.'&action=detail&rawmode=yes&file_name='.$backup_file.'"';
+                        $outMessage = $warning." <a href='javascript:popup_dif($pag);'>".$arrLang["details"]."</a>";
                         $smarty->assign("mb_message", $outMessage);
                     }
                     exec("rm $ruta_restaurar -rf");
@@ -644,31 +645,31 @@ function showAlert($path_backup, $smarty, $arrLang, $backup_file, $module_name, 
     }
 }
 
-function boxAlert($module_name, $arrLang, $programs, $external, $compare){
-    $html = "<table id='version' width='750px' align='center'>".
-             "<tr class='moduleTitle'><td class='moduleTitle' align='center' valign='middle' colspan=5>".$arrLang['warning_details']."</td></tr>
-             <tr class='tabForm'>
-                <td class='tabForm'><b>".$arrLang['programs']."</b></td>
-                <td class='tabForm'><b>".$arrLang['Package']."</b></td>
-                <td class='tabForm' colspan='2'>
-                    <table>
-                        <tr align='center'><td width='130px' colspan='2' style='border-bottom: solid 1px #AAAAAA; font-weight: bold; color: #333333; font-family: verdana,arial,helvetica,sans-serif;'>"._tr("Version")."</td></tr>
-                        <tr align='center'>
-                            <td style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'><b>".$arrLang['local_version']."</b></td>
-                            <td style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'><b>".$arrLang['external_version']."</b></td>
+function boxAlert($module_name, $arrLang, $programs, $external, $compare){   
+    $html = "<body bgcolor='#f2f2f2'><table id='version' width='750px' align='center' border='0' cellspacing='0' cellpadding='4' style='font-weight:normal;'>".
+             "<tr><td class='neo-module-name' align='left' valign='middle' colspan=5'>".$arrLang['warning_details']."</td></tr>
+             <tr style='font-size: 13px; color: #EEE; background-color: #555;'>
+                <td align='center' style='font-size: 12px; font-family: verdana,arial,helvetica,sans-serif;'>".$arrLang['programs']."</td>
+                <td align='center' style='font-size: 12px; font-family: verdana,arial,helvetica,sans-serif;'>".$arrLang['Package']."</td>
+                <td colspan='2' style='font-size: 13px; color: #EEE; background-color: #555;'>
+                    <table class='neo-table-title-row' align='center'>
+                        <tr align='center'><td width='130px' colspan='2' style='border-bottom: solid 1px #AAAAAA; font-size: 13px; color: #EEE; font-family: verdana,arial,helvetica,sans-serif;'>"._tr("Version")."</td></tr>
+                        <tr align='center' style='font-size: 13px; font-family: verdana,arial,helvetica,sans-serif;'>
+                            <td style='color: #EEE; font-size: 13px;'>".$arrLang['local_version']."</td>
+                            <td style='color: #EEE; font-size: 13px;'>".$arrLang['external_version']."</td>
                         </tr>
                     </table>
                 </td>
-                <td class='tabForm'>
+                <td class='neo-module-name'>
                     <table align='center'>
-                        <tr align='center'><td colspan='6' style='border-bottom: solid 1px #AAAAAA; font-weight: bold; color: #333333; font-family: verdana,arial,helvetica,sans-serif;'>"._tr("Options Backup")."</td></tr>
-                        <tr align='center'>
-                            <td width='60px' style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'>&nbsp;"._tr("Endpoint")."&nbsp;</td>
-                            <td width='60px' style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'>&nbsp;"._tr("Fax")."&nbsp;</td>
-                            <td width='60px' style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'>&nbsp;"._tr("Email")."&nbsp;</td>
-                            <td width='60px' style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'>&nbsp;"._tr("Asterisk")."&nbsp;</td>
-                            <td width='60px' style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'>&nbsp;"._tr("Others")."&nbsp;</td>
-                            <td width='60px' style='color: #333333; font-weight: bold; font-family: verdana,arial,helvetica,sans-serif;'>&nbsp;"._tr("Others new")."&nbsp;</td>
+                        <tr class='neo-module-name' align='center'><td colspan='6' style='border-bottom: solid 1px #AAAAAA; font-size: 13px; color: #EEE; font-family: verdana,arial,helvetica,sans-serif;'>"._tr("Options Backup")."</td></tr>
+                        <tr align='center' style='font-size: 12px; color: #EEE;'>
+                            <td width='60px' >&nbsp;"._tr("Endpoint")."&nbsp;</td>
+                            <td width='60px' >&nbsp;"._tr("Fax")."&nbsp;</td>
+                            <td width='60px' >&nbsp;"._tr("Email")."&nbsp;</td>
+                            <td width='60px' >&nbsp;"._tr("Asterisk")."&nbsp;</td>
+                            <td width='60px' >&nbsp;"._tr("Others")."&nbsp;</td>
+                            <td width='60px' >&nbsp;"._tr("Others new")."&nbsp;</td>
                         </tr>
                     </table>
                 </td>
@@ -689,14 +690,14 @@ function boxAlert($module_name, $arrLang, $programs, $external, $compare){
 
         $arrVal = getValueofBackupOption($key);
 
-        $html .="<tr onmouseout=\"this.style.backgroundColor='#ffffff';\" onmouseover=\"this.style.backgroundColor='#f2f2f2';\">
-                        <td class='tdStyle'>"._tr($key)."</td>
-                        <td class='tdStyle'>$key</td>
-                        <td class='tdStyle'>$programsValues</td>
-                        <td class='tdStyle'>$externalValues</td>
+        $html .="<tr class='neo-table-data-row' onmouseout=\"this.style.backgroundColor='#f2f2f2';\" onmouseover=\"this.style.backgroundColor='#e0e0e0';\" style='color: #555; font-size: 11px; background-color: #f2f2f2; font-family: verdana,arial,helvetica,sans-serif;'>
+                        <td class='tdStyle' align='center'>"._tr($key)."</td>
+                        <td class='tdStyle' align='center'>$key</td>
+                        <td class='tdStyle' align='center'>$programsValues</td>
+                        <td class='tdStyle' align='center'>$externalValues</td>
                         <td class='tdStyle'>
-                            <table>
-                                <tr align='center'>
+                            <table align='center'>
+                                <tr align='center' style='font-size: 11px;'>
                                     <td width='60px' class='tdStyle'>".$arrVal['endpoint']."</td>
                                     <td width='60px' class='tdStyle'>".$arrVal['fax']."</td>
                                     <td width='60px' class='tdStyle'>".$arrVal['email']."</td>
@@ -706,9 +707,10 @@ function boxAlert($module_name, $arrLang, $programs, $external, $compare){
                                 </tr>
                             </table>
                         <td>
-                    </tr>";
+                    </tr>
+            </table>";
     }
-    $html .="</table>";
+    $html .="</body>";
     return $html;
 }
 
@@ -747,7 +749,9 @@ function viewDetail($smarty, $module_name, $local_templates_dir, $arrLang, $path
     $parameter = 1;
     $backup_file = getParameter("file_name");
    $htmlForm = showAlert($path_backup, $smarty, $arrLang, $backup_file, $module_name, $parameter);
-    $content  = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
+    $header = "<head><link rel='stylesheet' href='themes/elastixneo/styles.css'>
+             <link rel='stylesheet' href='themes/elastixneo/table.css'>";
+    $content  = $header."<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form></head>";
     return $content;
 }
 

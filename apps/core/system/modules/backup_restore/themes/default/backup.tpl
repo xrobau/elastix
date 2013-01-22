@@ -37,6 +37,15 @@ function VerificarCheck(chkbox, id)
         document.getElementById('backup_total').checked = chkbox.checked;
     }
 }
+function popup_dif(content_popup)
+{
+	var ancho = 800;
+        var alto = 110;
+	var winiz = (screen.width-ancho)/2;
+	var winal = (screen.height-alto)/2;	
+	my_window = window.open(content_popup,"my_window","width="+ancho+",height="+alto+",top="+winal+",left="+winiz+",location=no,status=no,resizable=no,scrollbars=no,fullscreen=no,toolbar=no,directories=no");
+        my_window.document.close();
+}
 </script>
 {/literal}
 <form method="POST" enctype="multipart/form-data" id="backup_form">

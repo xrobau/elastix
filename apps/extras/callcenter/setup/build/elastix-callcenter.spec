@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Jan 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calls per Hour, Graphic Calls per Hour: queue dropdown selection has
+  never worked. Fixed. Also, synchronize code between the two modules. Fixes
+  Elastix bug #1452.
+
 * Mon Jan 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agents, Callback Extensions: multiple fixes. Enforce uniqueness of 
   agent number across Agent and Callback agents on agent creation. Verify that 

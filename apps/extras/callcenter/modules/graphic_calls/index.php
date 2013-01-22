@@ -32,6 +32,30 @@ require_once "libs/misc.lib.php";
 require_once "libs/paloSantoConfig.class.php";
 require_once "libs/paloSantoGrid.class.php";
 
+if (!function_exists('_tr')) {
+    function _tr($s)
+    {
+        global $arrLang;
+        return isset($arrLang[$s]) ? $arrLang[$s] : $s;
+    }
+}
+if (!function_exists('load_language_module')) {
+    function load_language_module($module_id, $ruta_base='')
+    {
+        $lang = get_language($ruta_base);
+        include_once $ruta_base."modules/$module_id/lang/en.lang";
+        $lang_file_module = $ruta_base."modules/$module_id/lang/$lang.lang";
+        if ($lang != 'en' && file_exists("$lang_file_module")) {
+            $arrLangEN = $arrLangModule;
+            include_once "$lang_file_module";
+            $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+        }
+
+        global $arrLang;
+        global $arrLangModule;
+        $arrLang = array_merge($arrLang,$arrLangModule);
+    }
+}
 function _moduleContent(&$smarty, $module_name)
 {
     require_once "modules/$module_name/libs/paloSantoCallsHour.class.php";
@@ -41,21 +65,12 @@ function _moduleContent(&$smarty, $module_name)
     $lang=get_language();
     $script_dir=dirname($_SERVER['SCRIPT_FILENAME']);
 
-    // Include language file for EN, then for local, and merge the two.
-    $arrLangModule = NULL;
-    include_once("modules/$module_name/lang/en.lang");
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$script_dir/$lang_file")) {
-        $arrLangModuleEN = $arrLangModule;
-        include_once($lang_file);
-        $arrLangModule = array_merge($arrLangModuleEN, $arrLangModule);
-    }
+    load_language_module($module_name);
     
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
 
     global $arrConf;
-    global $arrLang;
     global $arrConfig;
 
     //folder path for custom templates
@@ -88,12 +103,11 @@ function sumar($a, $b) { return $a + $b; }
 function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
 {
     global $arrLang;
-    global $arrLangModule;
 
     // Tipo de llamada
     $comboTipos = array(
-        "E" => $arrLangModule["Ingoing"],
-        "S" => $arrLangModule["Outgoing"]
+        "E" => _tr("Ingoing"),
+        "S" => _tr("Outgoing")
     );
     $sTipoLlamada = 'E';
     if (isset($_GET['tipo'])) $sTipoLlamada = $_GET['tipo'];
@@ -104,11 +118,11 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     
     // Estado de la llamada
     $comboEstados = array(
-        'T' =>  $arrLangModule['All'],
-        'E' =>  $arrLangModule['Completed'],
-        'A' =>  $arrLangModule['Abandoned'],
+        'T' =>  _tr('All'),
+        'E' =>  _tr('Completed'),
+        'A' =>  _tr('Abandoned'),
     );
-    if ($sTipoLlamada == 'S') $comboEstados['N'] = $arrLangModule['No answer/Short call'];
+    if ($sTipoLlamada == 'S') $comboEstados['N'] = _tr('No answer/Short call');
     $sEstadoLlamada = 'T';
     if (isset($_GET['estado'])) $sEstadoLlamada = $_GET['estado'];
     if (isset($_POST['estado'])) $sEstadoLlamada = $_POST['estado'];
@@ -133,7 +147,7 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
 
     // TODO: manejar error al obtener llamadas
     if (!is_array($arrCalls)) {
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
+        $smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $oCalls->errMsg);
         $arrCalls = array();
     }
@@ -142,7 +156,7 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     // por la lista de datos.
     $listaColas = array_keys($arrCalls);
     $comboColas = array(
-        ''  =>  $arrLangModule['All'],
+        ''  =>  _tr('All'),
     );
     if (count($listaColas) > 0) 
         $comboColas += array_combine($listaColas, $listaColas);
@@ -165,37 +179,39 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     $arrData = array();
     $arrTodos = array_fill(0, 24, 0);
     foreach ($arrCalls as $sQueue => $hist) {
-        $arrData[] = array_merge(
-            array($sQueue),
-            $hist,
-            array(array_sum($hist))
-        );
-        $arrTodos = array_map('sumar', $arrTodos, $hist);
+        if (empty($sColaElegida) || $sColaElegida == $sQueue) {
+            $arrData[] = array_merge(
+                array($sQueue),
+                $hist,
+                array(array_sum($hist))
+            );
+            $arrTodos = array_map('sumar', $arrTodos, $hist);
+        }
     }
     $arrData[] = array_merge(
-        array($arrLangModule['All']),
+        array(_tr('All')),
         $arrTodos,
         array(array_sum($arrTodos))
     );
 
     $smarty->assign('MODULE_NAME', $module_name);
-    $smarty->assign('LABEL_FIND', $arrLangModule['Find']);
+    $smarty->assign('LABEL_FIND', _tr('Find'));
     $formFilter = getFormFilter($comboTipos, $comboEstados, $comboColas);
     $oForm = new paloForm($smarty, $formFilter);
 
     //Llenamos las cabeceras
     $url = construirURL(array('menu' => $module_name), array('nav', 'start'));
-    $arrGrid = array("title"    => $arrLangModule["Graphic Calls per hour"],
+    $arrGrid = array("title"    => _tr("Graphic Calls per hour"),
         "url"      => $url,
         "icon"     => "images/list.png",
         "width"    => "99%",
         "start"    => 0,
         "end"      => 0,
         "total"    => 0,
-        "columns"  => array(0 => array("name"      => $arrLangModule["Cola"],
+        "columns"  => array(0 => array("name"      => _tr("Cola"),
                                        "property1" => ""),
                             // 1..24 se llenan con el bucle de abajo
-                            25 => array("name"     => $arrLangModule["Total Calls"], 
+                            25 => array("name"     => _tr("Total Calls"), 
                                        "property1" => ""),
 
                         ));
@@ -235,11 +251,9 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
 
 function getFormFilter($arrDataTipo, $arrDataEstado, $arrDataQueues)
 {
-    global $arrLangModule;
-
     $formCampos = array(
         "fecha_ini"       => array(
-            "LABEL"                  => $arrLangModule["Date Init"],
+            "LABEL"                  => _tr("Date Init"),
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "DATE",
             "INPUT_EXTRA_PARAM"      => array("TIME" => false, "FORMAT" => "%d %b %Y"),
@@ -247,7 +261,7 @@ function getFormFilter($arrDataTipo, $arrDataEstado, $arrDataQueues)
             "VALIDATION_EXTRA_PARAM" => '^[[:digit:]]{2}[[:space:]]+[[:alpha:]]{3}[[:space:]]+[[:digit:]]{4}$'
         ),
         "fecha_fin"       => array(
-            "LABEL"                  => $arrLangModule["Date End"],
+            "LABEL"                  => _tr("Date End"),
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "DATE",
             "INPUT_EXTRA_PARAM"      => array("TIME" => false, "FORMAT" => "%d %b %Y"),
@@ -255,7 +269,7 @@ function getFormFilter($arrDataTipo, $arrDataEstado, $arrDataQueues)
             "VALIDATION_EXTRA_PARAM" => '^[[:digit:]]{2}[[:space:]]+[[:alpha:]]{3}[[:space:]]+[[:digit:]]{4}$'
         ),
         "tipo" => array(
-            "LABEL"                  => $arrLangModule["Tipo"],
+            "LABEL"                  => _tr("Tipo"),
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "SELECT",
             "INPUT_EXTRA_PARAM"      => $arrDataTipo,
@@ -263,7 +277,7 @@ function getFormFilter($arrDataTipo, $arrDataEstado, $arrDataQueues)
             "VALIDATION_EXTRA_PARAM" => ""
         ),
         "estado" => array(
-            "LABEL"                  => $arrLangModule["Estado"],
+            "LABEL"                  => _tr("Estado"),
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "SELECT",
             "INPUT_EXTRA_PARAM"      => $arrDataEstado,
@@ -271,7 +285,7 @@ function getFormFilter($arrDataTipo, $arrDataEstado, $arrDataQueues)
             "VALIDATION_EXTRA_PARAM" => ""
         ),
         "queue" => array(
-            "LABEL"                  => $arrLangModule["Cola"],
+            "LABEL"                  => _tr("Cola"),
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "SELECT",
             "INPUT_EXTRA_PARAM"      => $arrDataQueues,
@@ -285,9 +299,6 @@ function getFormFilter($arrDataTipo, $arrDataEstado, $arrDataQueues)
 
 function graphHistogram($pDB, $smarty, $module_name, $local_templates_dir)
 {
-    global $arrLangModule;
-    global $arrLang;
-
     include ("libs/jpgraph/jpgraph.php");
     include ("libs/jpgraph/jpgraph_line.php");
 
@@ -353,7 +364,7 @@ function graphHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     $graph->SetFrame(true);
     $graph->SetMargin(60,50,30,30);
 
-    $graph->title->Set($arrLangModule['Calls']);
+    $graph->title->Set(_tr('Calls'));
 
     $graph->yaxis->HideZeroLabel();
     $graph->ygrid->SetFill(true,'#EFEFEF@0.5','#BBCCFF@0.5');
@@ -364,21 +375,21 @@ function graphHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     // Create the first line
     $p1 = new LinePlot($graphdata['todas']);
     $p1->SetColor("navy");
-    $p1->SetLegend($arrLangModule['All']);
+    $p1->SetLegend(_tr('All'));
     $p1->SetWeight(7);
     $graph->Add($p1);
 
     // Create the second line
     $p2 = new LinePlot($graphdata['exitosas']);
     $p2->SetColor("red");
-    $p2->SetLegend($arrLangModule['Completed']);
+    $p2->SetLegend(_tr('Completed'));
     $p2->SetWeight(3);
     $graph->Add($p2);
 
     // Create the third line
     $p3 = new LinePlot($graphdata['abandonadas']);
     $p3->SetColor("orange");
-    $p3->SetLegend($arrLangModule['Abandoned']);
+    $p3->SetLegend(_tr('Abandoned'));
     $p3->SetWeight(3);
     $graph->Add($p3);
 

@@ -177,12 +177,14 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     $arrData = array();
     $arrTodos = array_fill(0, 24, 0);
     foreach ($arrCalls as $sQueue => $hist) {
-        $arrData[] = array_merge(
-            array($sQueue),
-            $hist,
-            array(array_sum($hist))
-        );
-        $arrTodos = array_map('sumar', $arrTodos, $hist);
+        if (empty($sColaElegida) || $sColaElegida == $sQueue) {
+            $arrData[] = array_merge(
+                array($sQueue),
+                $hist,
+                array(array_sum($hist))
+            );
+            $arrTodos = array_map('sumar', $arrTodos, $hist);
+        }
     }
     $arrData[] = array_merge(
         array(_tr('All')),

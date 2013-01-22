@@ -26,12 +26,13 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoOrganization.class.php,v 1.1 2012-02-07 11:02:13 Rocio Mera rmera@palosanto.com Exp $ */
-    include_once "libs/paloSantoEmail.class.php";
-    include_once "libs/paloSantoACL.class.php";
-    include_once "libs/paloSantoFax.class.php";
-	include_once "libs/paloSantoAsteriskConfig.class.php";
-	include_once "libs/paloSantoPBX.class.php";
-	
+$documentRoot = $_SERVER["DOCUMENT_ROOT"];
+include_once "$documentRoot/libs/paloSantoEmail.class.php";
+include_once "$documentRoot/libs/paloSantoACL.class.php";
+include_once "$documentRoot/libs/paloSantoFax.class.php";
+include_once "$documentRoot/libs/paloSantoAsteriskConfig.class.php";
+include_once "$documentRoot/libs/paloSantoPBX.class.php";
+
 class paloSantoOrganization{
     var $_DB;
     var $errMsg;
@@ -522,28 +523,6 @@ class paloSantoOrganization{
         return false;
     }
 
-    /**
-      *  Procedimiento para crear una entidad
-      *  @param string $dominio nuevo dominio al que perteneceràn todos los mienbros de una misma entidad
-                       y sera creado un nuevo dominio a nivel de mails
-      *  @param string $name nombre de la organizacion o empresa que crea la entidad
-      *  @param string $country pais donde reside la empresa dueña de la entidad
-      *  @param string $state estado o ciudad donde reside la empresa dueña de la entidad
-    */
-    function createOrganization($name,$dominio,$country,$state,$address,$country_code,$area_code,$quota, $email_contact,$max_num_user,$max_num_exten,$max_num_queues,&$error)
-    {
-        $flag=false;
-            $arr_result = $this->getOrganizationByName($name);
-			if ($arr_result!==FALSE){ //SIGNIFICA QUE NO HAY PROBLEMAS DE CONEXION
-				if (is_array($arr_result) && count($arr_result)>0 ) {
-					$this->errMsg = _tr("Organization name already exists");
-				}elseif($this->insertOrganizationDB($name,$dominio,$country,$state,$address,$country_code,$area_code, $quota, $email_contact,$max_num_user,$max_num_exten,$max_num_queues,$error)){
-					$flag=true;
-				}
-			}
-        return $flag;
-    }
-
 
 	private function assignResource($idOrganization){
 		$rInsert=true;
@@ -649,7 +628,7 @@ class paloSantoOrganization{
     }
     
 
-    private function insertOrganizationDB($name,$domain,$country,$city,$address,$country_code,$area_code, $quota, $email_contact,$max_num_user,$max_num_exten,$max_num_queues,&$error)
+    function createOrganization($name,$domain,$country,$city,$address,$country_code,$area_code, $quota, $email_contact,$max_num_user,$max_num_exten,$max_num_queues,&$error)
     {
         global $arrConf;
         $flag=false;
@@ -727,7 +706,7 @@ class paloSantoOrganization{
                                 }
                             }
                         }else{
-                            $error=_tr("Errors trying created dialplan for new organization").$pAstConf->errMsg;
+                            $error=_tr("Error have ocurred to create dialplan for new organization. ").$pAstConf->errMsg;
                             $this->_DB->rollBAck();
                             $pAstConf->_DB->rollBAck();
                             $pAstConf->delete_dialplanfiles($domain);
@@ -755,6 +734,39 @@ class paloSantoOrganization{
             return FALSE;
         }
         return TRUE;
+    }
+    
+    //esta funcion es usada para crear al usuario administrado de la organizacion 
+    //una vez que la organizacion ha sido creada
+    function createAdminUserOrg($domain,$email_contact,$password,$country_code,$area_code,$quota,$sendEmail=false){
+        //procedemos a crear al usuario administrador de la entidad
+        $newOrg=$this->getOrganizationByDomain_Name($domain);
+        if($newOrg!=false){
+            $md5password=md5($password);
+            $pACL=new paloACL($this->_DB);
+            $idGrupo=$pACL->getIdGroup("administrator",$newOrg["id"]);
+            $exito=$this->createUserOrganization($newOrg["id"], "admin", "admin", $md5password, $password, $idGrupo, "100", "200",$country_code, $area_code, "200", "admin", $quota, $lastid);
+            if($exito){
+                //mostramos el mensaje para crear los archivos de configuracion dentro de asterisk
+                $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+                $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$this->_DB);
+                $pAstConf->setReloadDialplan($domain,true);
+                //enviamos un email a la nueva organizacion creada
+                if($sendEmail==true){
+                    if(!$this->sendEmail($password,$newOrg["name"],$domain,$email_contact,"create",$error)){
+                        $this->errMsg="<br />"._tr("Mail to new admin user couldn't be sent. ").$error;
+                    }else
+                        $this->errMsg="<br />"._tr("A email with the password for admin@$domain user has been sent to ").$email_contact;
+                }
+                return true;
+            }else{
+                //mensaje en caso de que no se pueda crear el usuario administrador de la organizaion
+               $this->errMsg="<br />Error: ".$this->errMsg;
+            }
+        }else{
+            $this->errMsg="<br />"._tr("Error: couldn't get just created organization's data").$this->_DB->errMsg;
+        }
+        return false;
     }
 
     //a una entidad no se le puede editar el dominio

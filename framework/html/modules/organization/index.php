@@ -27,9 +27,11 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1 2012-02-07 11:02:12 Rocio Mera rmera@palosanto.com Exp $ */
 //include elastix framework
-include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoForm.class.php";
-include_once "libs/paloSantoJSON.class.php";
+
+$documentRoot = $_SERVER["DOCUMENT_ROOT"];
+include_once "$documentRoot/libs/paloSantoGrid.class.php";
+include_once "$documentRoot/libs/paloSantoForm.class.php";
+include_once "$documentRoot/libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -484,13 +486,13 @@ function saveNewOrganization($smarty, $module_name, $local_templates_dir, &$pDB,
         }
         
         if(!isset($_POST["max_num_user_chk"]) && (!ctype_digit($num_user) || ($num_user+0)==0)){
-            $error=_tr("Field ")._tr("Max. # of User Accounts")._tr(" must be a integer > 0");
-        }else
-            $num_user=$num_user+0;
-        
+                $error=_tr("Field ")._tr("Max. # of User Accounts")._tr(" must be a integer > 0");
+            }else
+                $num_user=$num_user+0;
+            
         if(!isset($_POST["max_num_exten_chk"]) && (!ctype_digit($num_exten) || ($num_exten+0)==0)){
             $error=_tr("Field '")._tr("Max. # of extensions")._tr(" must be a integer > 0");
-        }elseif($num_exten<=$num_user){
+        }elseif(($num_exten<$num_user && $num_exten!=0)  || ($num_user==0 && $num_exten!=0)){
             $error=_tr("Field ")._tr("Max. # of extensions")._tr(" must be greater than Field ")._tr("Max. # of User Accounts");
         }else
             $num_exten=$num_exten+0;
@@ -509,33 +511,15 @@ function saveNewOrganization($smarty, $module_name, $local_templates_dir, &$pDB,
         $exito=$pOrganization->createOrganization($name,$domain,$country,$state,$address,$country_code,$area_code,$quota,$email_contact,$num_user,$num_exten,$num_queues,$error);
         if($exito){
             //procedemos a crear al usuario administrador de la entidad
-            $newOrg=$pOrganization->getOrganizationByDomain_Name($domain);
-            if($newOrg!=false){
-                $password1=generatePassword();
-                $md5password=md5($password1);
-                $pACL=new paloACL($pDB);
-                $idGrupo=$pACL->getIdGroup("administrator",$newOrg["id"]);
-                $exito=$pOrganization->createUserOrganization($newOrg["id"], "admin", "admin", $md5password, $password1, $idGrupo, "100", "200",$country_code, $area_code, "200", "admin", $quota, $lastid);
-                if($exito){
-                    //mostramos el mensaje para crear los archivos de configuracion dentro de asterisk
-                    $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-                    $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
-                    $pAstConf->setReloadDialplan($domain,true);
-                    //enviamos un email a la nueva organizacion creada
-                    if(!$pOrganization->sendEmail($password1,$name,$domain,$email_contact,"create",$error)){
-                        $msg="\n"._tr("Mail to new admin user couldn't be sent. ").$error;
-                    }else
-                        $msg="\n"._tr("A email with the password for admin@$domain user has been sent to ").$email_contact;
-                    $msg .="\n"._tr("To admin the new organization login to elastix as admin@$domain");
-                    
-                }else{
-                    //mensaje en caso de que no se pueda crear el usuario administrador de la organizaion
-                    $msg="\n"._tr("Error creating admin user to new organization. To create Organization's Admin User go modules Users > Users");
-                    $msg .="\nError: ".$pOrganization->errMsg;
-                }
-            }
+            $password=generatePassword();
+            $exito=$pOrganization->createAdminUserOrg($domain,$email_contact,$password,$country_code,$area_code,$quota,true);
+            if($exito==false){
+                $msg="<span style='color:red'><br />"._tr("Error creating admin user to new organization. To create Organization's Admin User go modules Users > Users")."<span />".$pOrganization->errMsg;
+            }else
+                $msg="<br />"._tr("To admin the new organization login to elastix as admin@$domain").$pOrganization->errMsg;
+                
             $smarty->assign("mb_title", _tr("Message"));
-            $smarty->assign("mb_message", _tr("The organization was created successfully").$msg);
+            $smarty->assign("mb_message", _tr("The organization was created").$msg);
             return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
         }else{
             $smarty->assign("mb_title", _tr("Error"));
@@ -615,7 +599,7 @@ function saveEditOrganization($smarty, $module_name, $local_templates_dir, &$pDB
             
             if(!isset($_POST["max_num_exten_chk"]) && (!ctype_digit($num_exten) || ($num_exten+0)==0)){
                 $error=_tr("Field '")._tr("Max. # of extensions")._tr(" must be a integer > 0");
-            }elseif(($num_exten<=$num_user && $num_exten!=0)  || ($num_user==0 && $num_exten!=0)){
+            }elseif(($num_exten<$num_user && $num_exten!=0)  || ($num_user==0 && $num_exten!=0)){
                 $error=_tr("Field ")._tr("Max. # of extensions")._tr(" must be greater than Field ")._tr("Max. # of User Accounts");
             }else
                 $num_exten=$num_exten+0;

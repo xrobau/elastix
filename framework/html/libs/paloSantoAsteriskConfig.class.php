@@ -158,12 +158,6 @@ class paloSantoASteriskConfig{
     function delete_dialplanfiles($orgzDomain)
     {
         $path="/etc/asterisk/organizations/";
-        $arrCredentiasls=getUserCredentials();
-        $userLevel1=$arrCredentiasls["userlevel"];
-        if($userLevel1!="superadmin"){
-            $this->errMsg =_tr("You are no authorized to perform this action");
-            return false;
-        }
         
         $sComando = '/usr/bin/elastix-helper asteriskconfig deleteFileOrgAst '.$orgzDomain.' 2>&1';
         $output = $ret = NULL;
@@ -214,7 +208,7 @@ class paloSantoASteriskConfig{
 			}else
 				$this->errMsg=_tr("Error trying set Features Codes").$pFC->errMsg;
 		}else{
-			$this->errMsg=_tr("Error trying set general settings asterisk").$this->errMsg;}
+			$this->errMsg=_tr("Error trying set general settings asterisk. ").$this->errMsg;}
 
 		return false;
 	}
@@ -406,6 +400,7 @@ class paloSantoASteriskConfig{
 			return false;
 		}
 		
+		
 		$pGlobals=new paloGlobalsPBX($this->_DB,$domain);
 		$res=$pGlobals->insertDBGlobals($country,$this->_DBSQLite);
         if($res==false){
@@ -417,7 +412,6 @@ class paloSantoASteriskConfig{
         if($reslng!=false){
             $language=$reslng;
         }
-        
         
 		$arrGeneral=array("sip","iax","voicemail");
 		foreach($arrGeneral as $type){

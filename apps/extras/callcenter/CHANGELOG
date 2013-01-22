@@ -1,3 +1,6 @@
+* Calls per Hour, Graphic Calls per Hour: queue dropdown selection has never 
+  worked. Fixed. Also, synchronize code between the two modules. Fixes Elastix 
+  bug #1452.
 * Agents, Callback Extensions: multiple fixes. Enforce uniqueness of agent 
   number across Agent and Callback agents on agent creation. Verify that agent
   number that is being modified actually exists. Fix removed successful return

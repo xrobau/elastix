@@ -289,7 +289,6 @@ function load_theme($ruta_base='')
     include_once $ruta_base."libs/paloSantoDB.class.php";
 	$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-	//print_r($arrConf);
 	if(empty($pDB->errMsg)) {
         if($user==""){
 			$theme=getOrganizationProp(1,'theme',$pDB);
@@ -297,10 +296,8 @@ function load_theme($ruta_base='')
 			$theme=getUserProp($user,'theme',$pDB);
 		}
     }
-
     //si no se encuentra setear el tema por default
     if (empty($theme) || $theme==false){
-		print("them empty ");
 		if($user!=""){
 			setUserProp($user,'theme',"elastixneo","system",$pDB);}
         return "elastixneo";
@@ -1252,7 +1249,7 @@ function AsteriskManagerConnect(&$error) {
 
 	$password = $arrConfig['MGPASSWORD']['valor'];
 	$host = $arrConfig['DBHOST']['valor'];
-	$user = $arrConfig['MGUSER']['valor'];;
+	$user = $arrConfig['MGUSER']['valor'];
 	$astman = new AGI_AsteriskManager();
 
 	if (!$astman->connect("$host", "$user" , "$password")) {
@@ -1315,17 +1312,20 @@ function getUserCredentials(){
 function getOrgDomainUser(){
     global $arrConf;
     $credentials=getUserCredentials();
-    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $query="SELECT domain from organization where id=?";
-    $result=$pDB->getFirstRowQuery($query,false,array($credentials["id_organization"]));
-    if($result==false){
-        return false;
-    }else{
-        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $result[0]))
-            return false;
-        else
-            return $result[0];
+    return $credentials["domain"];
+}
+
+function isStrongPassword($password){
+    if(strlen($password)>=10){
+        if(preg_match("/[a-z]+/",$password)){
+            if(preg_match("/[A-Z]+/",$password)){
+                if(preg_match("/[0-9]+/",$password)){
+                    return true;
+                }
+            }
+        }
     }
+    return false;
 }
 
 /**
@@ -1915,20 +1915,4 @@ function getCountrySettings($country){
     }else
         return false;
 }
-
-
-// Create a new Smarty object and initialize template directories
-function getSmarty($mainTheme, $basedir = '/var/www/html')
-{
-    require_once("$basedir/libs/smarty/libs/Smarty.class.php");
-    $smarty = new Smarty();
-    
-    $smarty->template_dir = "$basedir/themes/$mainTheme";
-    $smarty->config_dir =   "$basedir/configs/";
-    $smarty->compile_dir =  "$basedir/var/templates_c/";
-    $smarty->cache_dir =    "$basedir/var/cache/";
-
-    return $smarty;
-}
-
 ?>

@@ -20,15 +20,19 @@ $(document).ready(function(){
         }
     });
 
-	var id_event = $('#id').val();
+    var id_event = $('#id').val();
     if(id_event != ""){
         openBoxById(id_event);
     }
-
+       
+    $("#toggleleftcolumn, #neo-lengueta-minimized").click(function(){
+	$(window).trigger("resize");
+    });
+    
     $(window).resize(function(){
-		changeHeight();
-	});
-
+  	changeHeight();
+    });
+ 
 });
 
 	function funcionesVarias(){

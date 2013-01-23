@@ -1327,23 +1327,26 @@ function createAudioFiles($asterisk_call,$ext,$call_to,$pDB,$id_event,$arrLang,$
     }*/
 
     if($result!=FALSE){
-        /*$sContenido =   //"Channel: $sTrunk/$tuplaTelf[phone]\n".
+       /*$sContenido =   //"Channel: $sTrunk/$tuplaTelf[phone]\n".
                         //"Channel: {$result['dial']}\n".
                         "Channel: Local/{$result['number']}@from-internal\n".
-                        "CallerID: Calendar Event <{$result['id']}>\n".
+                        "CallerID: Calendar Event <{$result['number']}>\n".
                         "MaxRetries: $iRetries\n".
                         "RetryTime: 60\n".
                         "WaitTime: 30\n".
+			//"Application: Festival\n".
                         "Context: calendar-event\n".
-                        "Extension: *7899\n".
+                        "Extension: {$result['number']}\n\n".
                         "Priority: 1\n".
-                        "Set: FILE_CALL=custom/{$result['id']}/$recording\n".
-                        "Set: ID_EVENT_CALL=$id_event\n";
-        */
-        $sContenido =   //"Channel: $sTrunk/$tuplaTelf[phone]\n".
+                        "Set: FILE_CALL=$sDirectorioBase/test\n".
+                        "Set: ID_EVENT_CALL=$id_event\n";*/
+
+
+        
+         $sContenido =   //"Channel: $sTrunk/$tuplaTelf[phone]\n".
                         //"Channel: {$result['dial']}\n".
                         "Channel: Local/{$result['number']}@from-internal\n".
-                        "CallerID: Calendar Event <{$result['id']}>\n".
+                        "CallerID: Calendar Event <{$result['number']}>\n".
                         "MaxRetries: $iRetries\n".
                         "RetryTime: 60\n".
                         "WaitTime: 30\n".
@@ -1353,6 +1356,7 @@ function createAudioFiles($asterisk_call,$ext,$call_to,$pDB,$id_event,$arrLang,$
                         "Priority: 1\n".
                         "Data: $recording\n".
                         "Set: TTS=$recording\n";
+		
     }
 
     if($sContenido!=""){

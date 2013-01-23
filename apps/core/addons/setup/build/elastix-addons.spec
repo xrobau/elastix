@@ -3,11 +3,11 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
-Source0: %{modname}_%{version}-%{release}.tgz
-#Source0: %{modname}_%{version}-3.tgz
+#Source0: %{modname}_%{version}-%{release}.tgz
+Source0: %{modname}_%{version}-1.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 3.0.0-1
@@ -80,8 +80,14 @@ elif [ $1 -eq 2 ]; then #update
     /sbin/service elastix-updaterd restart
 fi
 
-# import the GPG-key
-/bin/rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
+ARCH=`uname -m`
+if [ "$ARCH" != "i386" ] && [ "$ARCH" != "i686" ] && [ "$ARCH" != "x86_64" ] ; then
+        rm -rf /etc/yum.repos.d/pgdg-91-centos.repo
+        rm -rf /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
+else
+        # import the GPG-key
+        /bin/rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
+fi
 
 # The installer script expects to be in /tmp/new_module
 mkdir -p /tmp/new_module/%{modname}
@@ -119,6 +125,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Jan 23 2013 Alberto Santos <asantos@palosanto.com> 3.0.0-2
+- CHANGED: In spec file, added validation to remove postgresql repo for
+  architectures different to i386, i686 and x86_64
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

@@ -133,7 +133,7 @@ function change_state(){
                 $('.neo-modal-elastix-popup-close').css("display","block");
                 $("#org_change_status").html("Process Finished");
                 if(error!=""){
-                    $("#org_change_result").html(error);
+                    $("#org_change_error").html(error);
                 }else{
                     $("#org_change_result").html(arrData);
                 }
@@ -176,7 +176,7 @@ function delete_orgs(){
                 $('.neo-modal-elastix-popup-close').css("display","block");
                 $("#org_change_status").html("Process Finished");
                 if(error!=""){
-                    $("#org_change_error").html(error);
+                    $("#org_change_result").html(error);
                 }else{
                     $("#org_change_result").html(arrData);
                 }

@@ -506,7 +506,7 @@ class paloSantoOrganization{
         //cambiar de estado, un id por linea
         $validOrg=array();
         foreach($arrOrg as $ids){
-            if(preg_match("/^[0-9]$/",$ids) && $ids!="1"){
+            if(preg_match("/^[0-9]+$/",$ids) && $ids!="1"){
                 $validOrg[]=$ids."\n";
             }
         }

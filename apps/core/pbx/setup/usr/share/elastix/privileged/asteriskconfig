@@ -32,20 +32,20 @@
 
 ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
 
-include_once "/var/www/html/libs/misc.lib.php";
-include_once "/var/www/html/configs/default.conf.php";
+include_once "libs/misc.lib.php";
+include_once "configs/default.conf.php";
 
 require_once 'Console/Getopt.php';
-require_once "/var/www/html/libs/paloSantoPBX.class.php";
-require_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
-require_once "/var/www/html/libs/paloSantoOrganization.class.php";
-require_once "/var/www/html/modules/queues/libs/paloSantoQueues.class.php";
-require_once "/var/www/html/modules/ivr/libs/paloSantoIVR.class.php";
-require_once "/var/www/html/modules/inbound_route/libs/paloSantoInbound.class.php";
-require_once "/var/www/html/modules/outbound_route/libs/paloSantoOutbound.class.php";
-require_once "/var/www/html/modules/ring_group/libs/paloSantoRG.class.php";
-require_once "/var/www/html/modules/time_conditions/libs/paloSantoTC.class.php";
-require_once "/var/www/html/modules/conference/libs/paloSantoConference.class.php";
+require_once "libs/paloSantoPBX.class.php";
+require_once "libs/paloSantoAsteriskConfig.class.php";
+require_once "libs/paloSantoOrganization.class.php";
+require_once "modules/queues/libs/paloSantoQueues.class.php";
+require_once "modules/ivr/libs/paloSantoIVR.class.php";
+require_once "modules/inbound_route/libs/paloSantoInbound.class.php";
+require_once "modules/outbound_route/libs/paloSantoOutbound.class.php";
+require_once "modules/ring_group/libs/paloSantoRG.class.php";
+require_once "modules/time_conditions/libs/paloSantoTC.class.php";
+require_once "modules/conference/libs/paloSantoConference.class.php";
 
 if(!isset($argv[1]))
     exit(1);
@@ -126,6 +126,12 @@ switch($argv[1]){
     case "deleteFolderOrganization":
         if(isset($argv[2])){
             exit(deleteFolderOrganization($argv[2]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
+        break;
+    case "changeOrgsState":
+        if(isset($argv[2]) && isset($argv[3])){
+            exit(changeStateOrganization($argv[2],$argv[3]) ? 0 : 1);
         }else
             error_exit("Missing arguments \n");
         break;
@@ -1401,5 +1407,88 @@ function createDialplanTrunkPattern(){
         }
     }
     return $contenido;
+}
+
+function changeStateOrganization($filename,$state){
+    $error="";
+    
+    if(!($state=="suspend" || $state=="unsuspend" || $state=="terminate")){
+        fprintf(STDERR, "ERR: Invalid Organization State.\n");
+        return false;
+    }
+    
+    $state_org=$state;
+    if($state=="unsuspend"){
+        $state_org="active";
+    }
+    
+    $arrExito=array();
+    
+    $arrOrg = file("/tmp/$filename");
+    if($arrOrg === FALSE){
+        error_exit("ERR: failed to load /tmp/$filename for organization update\n");
+    }
+    
+    
+    //creamos una nueva instanacia de la clase paloSantoOrganization
+    $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
+    $pOrg=new paloSantoOrganization($pDB);
+    $pOrg->_DB->beginTransaction();
+    
+    foreach($arrOrg as $id){
+        //validamos el id de la organizacion
+        if(!preg_match("/^[0-9]+$/",$id) || $id=="1"){
+            continue;
+        }
+        //comprobamos que la organizacion exista
+        $query="Select idcode,domain,state from organization where id=?";
+        $org=$pOrg->_DB->getFirstRowQuery($query,true,array((int)$id));
+        if($org!=false){
+            if($org["state"]==$state_org){
+                continue;
+            }
+            //cambiamos el estado de la organizacion en la tabla organization
+            $query="Update organization set state=? where id=?";
+            if(!$pOrg->_DB->genQuery($query,array($state_org,(int)$id))){
+                $error=$pOrg->_DB->errMsg;
+                break;
+            }
+            //registramos el evento
+            if(!$pOrg->registerEvent($state,$org["idcode"])){
+                $error=$pOrg->errMsg;
+                break;
+            }
+            $arrExito[]=$id;
+        }else{
+            continue;
+        }   
+    }
+    
+    if(is_file("/tmp/$filename"))
+        unlink("/tmp/$filename");
+    
+    if($error!=""){
+        $pOrg->_DB->rollBack();
+        fprintf(STDERR,$error);
+        return false;
+    }
+    
+    if(count($arrExito)!=0){
+        if(createExtensionFile("","")){
+            if(dialplanReload()){
+                $pOrg->_DB->commit();
+                return true;
+            }else{
+                $pOrg->_DB->rollBack();
+                return false;
+            }
+        }else{
+            $pOrg->_DB->rollBack();
+            return false;
+        }
+    }else//no se realizo ninguna transaccion
+        $pOrg->_DB->rollBack();
+        
+    return true;
 }
 ?>

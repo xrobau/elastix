@@ -272,7 +272,7 @@ function change_state($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     $pOrg = new paloSantoOrganization($pDB);
     
     if($pOrg->changeStateOrganization($arrOrgs,$state)){
-        $jsonObject->set_message($pOrg->errMsg);
+        $jsonObject->set_message(_tr("State of selected organizations have been updated successfully"));
     }else{
         $jsonObject->set_error($pOrg->errMsg);
     }
@@ -509,7 +509,8 @@ function saveNewOrganization($smarty, $module_name, $local_templates_dir, &$pDB,
         }
         
         $exito=$pOrganization->createOrganization($name,$domain,$country,$state,$address,$country_code,$area_code,$quota,$email_contact,$num_user,$num_exten,$num_queues,$error);
-        if($exito){
+        if($exito!==false){
+            //exito contine el id de la organizacion recien creada
             //procedemos a crear al usuario administrador de la entidad
             $password=generatePassword();
             $exito=$pOrganization->createAdminUserOrg($domain,$email_contact,$password,$country_code,$area_code,$quota,true);

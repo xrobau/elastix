@@ -43,13 +43,14 @@ class organization
         $uriObject = NULL;
         if(count($this->resourcePath)>0){
             $param=array_shift($this->resourcePath);
-            if($param=="status"){
+            if($param=="state"){
+                // /state/id1[;id2;id3]
                 if(count($this->resourcePath)>0)
-                    $uriObject = new orgStatus(array_shift($this->resourcePath)); //GET - PUT
+                    $uriObject = new orgStatus(explode(";",array_shift($this->resourcePath))); //GET - PUT 
                 else
                     $uriObject = new orgStatus(); //GET
             }else
-                $uriObject = new orgActions(explode(";",$param)); //PUT - GET -DELETE /id1[;id2;id3]
+                $uriObject = new orgActions(explode(";",$param)); //GET /id1[;id2;id3]
         }else
             $uriObject = new orgActions(); //POST - GET(todas)
             
@@ -200,36 +201,6 @@ class orgActions extends orgREST{
         }
     }
     
- /*   function HTTP_DELETE(){
-        global $arrConf;
-        $jsonObject = new PaloSantoJSON();
-        
-        if($this->arrIdOrgs==null){
-            $this->methodNoAllowed(array("GET","POST"));
-            exit;
-        }
-        
-        //solo usuario superadmin puede borrar una organization
-        if(!$this->isSuperAdmin()){
-            $this->invalidCredentials($jsonObject);
-            return $jsonObject->createJSON();
-        }
-        
-        $validOrgs=array();
-        //validamos el uri de la peticion solo tengas id validos
-        foreach($this->arrIdOrgs as $idOrg){
-            if($this->validateIdOrg($idOrg)){
-                $validOrgs[]=$idOrg;
-            }
-        }
-    }
-    
-    function HTTP_PUT(){
-        if($this->arrIdOrgs==null){
-            $this->methodNoAllowed(array("GET","POST"));
-        }
-    }*/
-    
     function HTTP_POST(){
         global $arrConf;
         $jsonObject = new PaloSantoJSON();
@@ -249,8 +220,8 @@ class orgActions extends orgREST{
         }
         
         $pOrg = new paloSantoOrganization($arrConf['elastix_dsn']["elastix"]);
-        $exito=$pOrg->createOrganization($arrParam["name"],$arrParam["domain"],$arrParam["country"],$arrParam["city"],$arrParam["address"],$arrParam["country_code"],$arrParam["area_code"],$arrParam["quota"],$arrParam["email_contact"],$arrParam["numUser"],$arrParam["numExtensions"],$arrParam["numQueues"],$error);
-        if($exito==false){
+        $idOrg=$pOrg->createOrganization($arrParam["name"],$arrParam["domain"],$arrParam["country"],$arrParam["city"],$arrParam["address"],$arrParam["country_code"],$arrParam["area_code"],$arrParam["quota"],$arrParam["email_contact"],$arrParam["numUser"],$arrParam["numExtensions"],$arrParam["numQueues"],$error);
+        if($idOrg===false){
             header("HTTP/1.1 500 Internal Server Error");
             $jsonObject->set_status("ERROR");
             $jsonObject->set_message(array("organization"=>false,"user"=>false));
@@ -259,12 +230,13 @@ class orgActions extends orgREST{
             //procedemos a crear al usuario administrador de la entidad
             $exito=$pOrg->createAdminUserOrg($arrParam["domain"],$arrParam["email_contact"],$arrParam["org_user_pswd"],$arrParam["country_code"],$arrParam["area_code"],$arrParam["quota"],$arrParam["send_email"]);
             if($exito==false){
-                header('HTTP/1.1 201 Created');
+                header('HTTP/1.1 203 Created');
                 $jsonObject->set_status("ERROR");
                 $jsonObject->set_message(array("organization"=>true,"user"=>false));
                 $jsonObject->set_error(_tr("Error creating admin user to new organization").$pOrg->errMsg);
             }else{
                 header('HTTP/1.1 201 Created');
+                Header('Location: '.$this->requestURL()."/$idOrg");
                 $jsonObject->set_status("OK");
                 $jsonObject->set_message(array("organization"=>true,"user"=>true));
             }
@@ -379,19 +351,128 @@ class orgActions extends orgREST{
 
 class orgStatus extends orgREST
 {
-    protected $idOrgs;
+    protected $arrIdOrgs;
     
-    function orgStatus($idOrgs=null){
+    function orgStatus($arrIdOrgs=null){
         parent::__construct();
-        $this->idOrgs=$idOrgs;
+        $this->arrIdOrgs=$arrIdOrgs;
     } 
     
     function HTTP_GET(){
+        global $arrConf;
+        $jsonObject = new PaloSantoJSON();
         
+        if(!$this->isSuperAdmin()){
+            $this->invalidCredentials($jsonObject);
+            return $jsonObject->createJSON();
+        }
+        $this->setSession();
+        
+        $validOrgs=array();
+        if(is_array($this->arrIdOrgs)){
+            foreach($this->arrIdOrgs as $idOrg){
+                if($this->validateIdOrg($idOrg) && $idOrg!="1"){
+                    $validOrgs[]=$idOrg;
+                }
+            }
+        }
+        
+        if(is_array($this->arrIdOrgs)){
+            if(count($validOrgs)==0){ //ningun id pasado en la peticion es valido. Devolvemos 404 not found
+                $this->resourceNotExis($jsonObject);
+                return $jsonObject->createJSON();
+            }
+        }else
+            $validOrgs=null;
+        
+        $arrOrg=array();
+        $pOrg = new paloSantoOrganization($arrConf['elastix_dsn']["elastix"]);
+        $sBaseUrl = $this->requestURL();
+        $result=$pOrg->getbunchOrganizationState($validOrgs);
+        if($result===false){
+            $this->error=$pOrg->errMsg;
+            $this->errSever($jsonObject);
+            return $jsonObject->createJSON();
+        }else{       
+            foreach($result as $x => $res){
+                $arrOrg["organization"][$x]["id"]=$res["id"];
+                $arrOrg["organization"][$x]["state"]=$res["state"];
+                $arrOrg["organization"][$x]["since"]=$res["since"];
+                $arrOrg["organization"][$x]["url"]=$sBaseUrl."/".$res["id"];
+            }
+        }
+        
+        if(count($arrOrg)==0){
+            $this->resourceNotExis($jsonObject);
+            return $jsonObject->createJSON();
+        }else{
+            $json = new Services_JSON();
+            return $json->encode($arrOrg);
+        }
     }
     
     function HTTP_PUT(){
+        global $arrConf;
+        $jsonObject = new PaloSantoJSON();
         
+        if(!$this->isSuperAdmin()){
+            $this->invalidCredentials($jsonObject);
+            return $jsonObject->createJSON();
+        }
+        $this->setSession();
+        
+        if(!$this->validateContentType($jsonObject)){
+            return $jsonObject->createJSON();
+        }
+        
+        $validOrgs=array();
+        if(is_array($this->arrIdOrgs)){
+            foreach($this->arrIdOrgs as $idOrg){
+                if($this->validateIdOrg($idOrg) && $idOrg!="1"){
+                    $validOrgs[]=$idOrg;
+                }
+            }
+        }else{
+            $this->methodNoAllowed(array("GET"));
+            exit;
+        }
+        
+        if(count($validOrgs)==0){ //ningun id pasado en la peticion es valido. Devolvemos 404 not found
+            $this->resourceNotExis($jsonObject);
+            return $jsonObject->createJSON();
+        }
+        
+        $putvars=$state=null;
+        parse_str(file_get_contents('php://input'), $putvars);
+        if(isset($putvars["state"])){
+            if($putvars["state"]=="suspend" || $putvars["state"]=="unsuspend" || $putvars["state"]=="terminate"){
+                $state=$putvars["state"];
+            }
+        }
+        
+        if(is_null($state)){
+            $this->errMsg="Field state bad value. Supported values are (suspend|unsuspend|terminate)";
+            $this->badRequest($jsonObject);
+            return $jsonObject->createJSON();
+        }
+        
+        $pOrg=new paloSantoOrganization($arrConf['elastix_dsn']["elastix"]);
+        if($pOrg->getbunchOrganizationState($validOrgs)==false){
+            $this->resourceNotExis($jsonObject);
+            return $jsonObject->createJSON();
+        }
+        
+        $result=$pOrg->changeStateOrganization($validOrgs,$state);
+        if($result==false){
+            $this->error=$pOrg->errMsg;
+            $this->errSever($jsonObject);
+            return $jsonObject->createJSON();
+        }else{
+            header('HTTP/1.1 200 Ok');
+            $jsonObject->set_status("OK");
+            $jsonObject->set_message("State of request organizations have been updated successfully");
+            return $jsonObject->createJSON();
+        }
     }
 }
 ?>

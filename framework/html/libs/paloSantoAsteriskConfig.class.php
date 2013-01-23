@@ -33,11 +33,11 @@ if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 
 global $arrConf;
 
-include_once "/var/www/html/libs/paloSantoConfig.class.php";
-include_once "/var/www/html/libs/paloSantoPBX.class.php";
-include_once "/var/www/html/libs/misc.lib.php";
-include_once "/var/www/html/modules/features_code/libs/paloSantoFeaturesCode.class.php";
-include_once "/var/www/html/modules/general_settings/libs/paloSantoGlobalsPBX.class.php";
+include_once "libs/paloSantoConfig.class.php";
+include_once "libs/paloSantoPBX.class.php";
+include_once "libs/misc.lib.php";
+include_once "modules/features_code/libs/paloSantoFeaturesCode.class.php";
+include_once "modules/general_settings/libs/paloSantoGlobalsPBX.class.php";
 
 class paloSantoASteriskConfig{
     public $errMsg;

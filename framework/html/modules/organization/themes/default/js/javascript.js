@@ -176,7 +176,7 @@ function delete_orgs(){
                 $('.neo-modal-elastix-popup-close').css("display","block");
                 $("#org_change_status").html("Process Finished");
                 if(error!=""){
-                    $("#org_change_result").html(error);
+                    $("#org_change_error").html(error);
                 }else{
                     $("#org_change_result").html(arrData);
                 }
@@ -189,8 +189,9 @@ function delete_orgs(){
 function htmlModal(msn){
     var html="<p>"+msn+"<p>";
     html +="<p>This process can take several minutes<p>";
-    html +="<p style='color: green' id='org_change_status'><p>";
+    html +="<p style='color: green; font-weight:bold; text-align:center;' id='org_change_status'><p>";
     html +="<p id='org_change_result'><p>";
+    html +="<p id='org_change_error' style='color: red;'><p>";
     return html;
 }
 

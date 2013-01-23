@@ -26,12 +26,12 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoOrganization.class.php,v 1.1 2012-02-07 11:02:13 Rocio Mera rmera@palosanto.com Exp $ */
-$documentRoot = $_SERVER["DOCUMENT_ROOT"];
-include_once "$documentRoot/libs/paloSantoEmail.class.php";
-include_once "$documentRoot/libs/paloSantoACL.class.php";
-include_once "$documentRoot/libs/paloSantoFax.class.php";
-include_once "$documentRoot/libs/paloSantoAsteriskConfig.class.php";
-include_once "$documentRoot/libs/paloSantoPBX.class.php";
+include_once "libs/paloSantoEmail.class.php";
+include_once "libs/paloSantoACL.class.php";
+include_once "libs/paloSantoFax.class.php";
+include_once "libs/paloSantoAsteriskConfig.class.php";
+include_once "libs/paloSantoPBX.class.php";
+
 
 class paloSantoOrganization{
     var $_DB;
@@ -395,7 +395,7 @@ class paloSantoOrganization{
         
         $result=$this->_DB->genQuery($query,$param);
         if($result==false){
-            $this->errMsg=_tr("Problem trying register the Organization. ").$this->_DB->errMsg;
+            $this->errMsg=_tr("Problem had happened to try register the Organization. ").$this->_DB->errMsg;
             return false;
         }else
             return true;
@@ -414,11 +414,68 @@ class paloSantoOrganization{
         $param=array($event,$idcode,$date);
         $result=$this->_DB->genQuery($query,$param);
         if($result==false){
-            $this->errMsg=_tr("Problem trying register event in Organization. ").$this->_DB->errMsg;
+            $this->errMsg=_tr("Problem had happened to try register event in Organization. ").$this->_DB->errMsg;
             return false;
         }else
             return true;
     }
+    
+    /**
+    * Funcion que retorna el estado de una organizacion dado sus id
+    * @param $idorg => idOrg
+    * @return $orgState => (id => id, state => state , since => since)
+    */
+    function getOrganizationState($idorg){
+        $query="SELECT idcode,state from organization where id=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($idorg));
+        if($result==false){
+            $this->errMsg=($result===false)?$this->_DB-errMsg:_tr("Organization doesn't exist");
+            return $result;
+        }
+    
+        $query="SELECT max(event_date) from org_history_events where org_idcode=?";
+        $event=$this->_DB->getFirstRowQuery($query,false,array($result["idcode"]));
+        if($event==false){
+            $this->errMsg=($event===false)?$this->_DB-errMsg:_tr("Organization doesn't exist");
+            return $event;
+        }
+        
+        $orgState=array("id"=>$idorg,"state"=>$result["state"],"since"=>$event[0]);
+        return $orgState; 
+    }
+    
+    /**
+    * Funcion que retorna el estado de todas las organizaciones
+    * @return $orgState => (id => id, state => state , since => since)
+    */
+    function getbunchOrganizationState($arrIds=null){
+        $where="";
+        if(is_array($arrIds)){
+            $q=substr(str_repeat("?,",count($arrIds)),0,-1);
+            $where="where id in ($q)";
+        }
+    
+        $query="SELECT id,idcode,state from organization $where";
+        $result=$this->_DB->fetchTable($query,true,$arrIds);
+        if($result==false){
+            $this->errMsg=($result===false)?$this->_DB-errMsg:_tr("Organizations don't exist");
+            return $result;
+        }
+    
+        $orgState=array();
+        foreach($result as $x => $value){
+            $query="SELECT max(event_date) from org_history_events where org_idcode=?";
+            $event=$this->_DB->getFirstRowQuery($query,false,array($value["idcode"]));
+            if($event===false){
+                $this->errMsg=$this->_DB->errMsg;
+                return false;
+            }elseif(!empty($event[0]))
+                $orgState[$x]=array("id"=>$value["id"],"state"=>$value["state"],"since"=>$event[0]);
+        }
+        
+        return $orgState; 
+    }
+    
     
     /**
     * Funcion que cambia el estado de un (unas) organizacion dado
@@ -430,15 +487,8 @@ class paloSantoOrganization{
     * @param $state => srting -> estado que tomara la organizacion (suspend,unsuspend,terminate) 
     */
     function changeStateOrganization($arrOrg,$state){
-        $arrCredentiasls=getUserCredentials();
-        $userLevel1=$arrCredentiasls["userlevel"];
-        if($userLevel1!="superadmin"){
-            $this->errMsg =_tr("You are no authorized to perform this action");
-            return false;
-        }
-        
-        if(!is_array($arrOrg) || count($arrOrg)==false){
-            $this->errMsg=_tr("Invalid Organization");
+        if(!is_array($arrOrg) || count($arrOrg)==0){
+            $this->errMsg=_tr("Invalid Organization(s)");
             return false;
         }
         
@@ -447,80 +497,38 @@ class paloSantoOrganization{
             return false;
         }
         
-        $state_org=$state;
-        if($state=="unsuspend"){
-            $state_org="active";
+        srand((double)microtime()*1000000);
+        do{
+            $file="orgToChange".rand();
+        }while(is_file("/tmp/$file"));
+        
+        //escribimos un archivo que en contiene el id de las organizaciones que deseamos 
+        //cambiar de estado, un id por linea
+        $validOrg=array();
+        foreach($arrOrg as $ids){
+            if(preg_match("/^[0-9]$/",$ids) && $ids!="1"){
+                $validOrg[]=$ids."\n";
+            }
         }
         
-        $arrExito=array();
-        foreach($arrOrg as $id){
-            $error="";
-            if(!preg_match("/^[0-9]$/",$id) || $id=="1"){
-                $error .=_tr("Invalid organization with id").": $id<br />";
-                continue;
-            }
-            
-            //comprobamos que la organizacion exista
-            $query="Select idcode,domain,state from organization where id=?";
-            $org=$this->_DB->getFirstRowQuery($query,true,array($id));
-            if($org!=false){
-                $this->_DB->beginTransaction();
-                
-                //cambiamos el estado de la organizacion en la tabla organization
-                $query="Update organization set state=? where id=?";
-                if(!$this->_DB->genQuery($query,array($state_org,$id))){
-                    $error .=_tr("Can't update state in organization with domain ").$org["domain"]." ".$this->_DB->errMsg."<br />";
-                    $this->_DB->rollBack();
-                    continue;
-                }
-                
-                //registramos el evento
-                if(!$this->registerEvent($state,$org["idcode"])){
-                    $error .=_tr("Can't update state in organization with domain ").$org["domain"]." ".$this->errMsg."<br />";
-                    $this->_DB->rollBack();
-                    continue;
-                }
-                
-                $this->_DB->commit();
-                $arrExito[]=$org["domain"];
-            }else{
-                $error .=_tr("Doesn't exist organization with id").": $id<br />";
-                continue;
-            }   
+        if(count($validOrg)==0){
+            $this->errMsg=_tr("Invalid Organization(s)");
+            return false;
         }
         
-        
-        if($error!=""){
-            $this->errMsg="<span style='color: red'>"._tr("Error(s) has ocurred to update the organization(s) state:")."</span><br />";
-            $this->errMsg .=$error;
+        if(file_put_contents("/tmp/$file",$validOrg)===false){
+            $this->errMsg=_tr("Couldn't be written file /tmp/$file");
+            return false;
         }
         
-        if(count($arrExito)!=0){
-            $this->errMsg .="<span style='color: red'>"._tr("Message:")."</span><br />";
-            $this->errMsg .=_tr("The organizations with the followings domains were updated successfully: ");
-            $this->errMsg .=implode(",",$arrExito)."<br />";
-            
-            //reescribimos el archvo extensions.conf para no incluir el plan de marcado relacionado
-            //con la organizacion
-            $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-            $pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
-            if(!$pAstConf->includeInExtensions_conf("none","none")){
-                $this->errMsg .="<span style='color: red'>"._tr("Err: File extensions.conf couldn't be updated. ")."</span>".$pAstConf->errMsg."<br />";
-                return false;
-            }
-            
-            //recargamos el plan de amrcado para incluir los cambios
-            $sComando = '/usr/bin/elastix-helper asteriskconfig dialplan-reload 2>&1';
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0){
-                $this->errMsg .="<span style='color: red'>".implode('', $output)."</span>"."<br />";
-                $this->errMsg .="<span style='color: red; font-weight:bold;'>"._tr("You need reload asterisk dialplan in order to the changing take effect")."</span>"."<br />";
-                return false;
-            }
+        $sComando = "/usr/bin/elastix-helper asteriskconfig changeOrgsState $file $state 2>&1";
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0){
+            $this->errMsg .=implode('',$output);
+            return false;
+        }else
             return true;
-        }
-        return false;
     }
 
 
@@ -700,7 +708,7 @@ class paloSantoOrganization{
                                     $pAstConf->_DB->rollBAck();
                                     $pAstConf->delete_dialplanfiles($domain);
                                 }else{
-                                    $flag=true;
+                                    $flag=$resultOrgz['id'];
                                     $this->_DB->commit();
                                     $pAstConf->_DB->commit();
                                 }

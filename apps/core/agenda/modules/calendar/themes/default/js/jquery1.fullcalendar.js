@@ -828,7 +828,7 @@ $.fn.fullCalendar = function(options) {
 								view.trigger('windowResize', _element);
 							}
 						}
-					}, 200);
+					}, 1);
 				}else{
 					render(); // render for first time
 					// was probably in a 0x0 iframe that has just been resized

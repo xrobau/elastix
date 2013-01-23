@@ -3,11 +3,11 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
-Source0: %{modname}_%{version}-%{release}.tgz
-#Source0: %{modname}_%{version}-3.tgz
+#Source0: %{modname}_%{version}-%{release}.tgz
+Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-5
@@ -80,8 +80,14 @@ elif [ $1 -eq 2 ]; then #update
     /sbin/service elastix-updaterd restart
 fi
 
-# import the GPG-key
-/bin/rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
+ARCH=`uname -m`
+if [ "$ARCH" != "i386" ] && [ "$ARCH" != "i686" ] && [ "$ARCH" != "x86_64" ] ; then
+        rm -rf /etc/yum.repos.d/pgdg-91-centos.repo
+        rm -rf /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
+else
+        # import the GPG-key
+        /bin/rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
+fi
 
 # The installer script expects to be in /tmp/new_module
 mkdir -p /tmp/new_module/%{modname}
@@ -118,6 +124,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Jan 23 2013 Alberto Santos <asantos@palosanto.com> 2.3.0-8
+- CHANGED: In spec file, added validation in post section to remove
+  postgresql repo for architectures different to i386, i686 and x86_64
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com>
 - FIXED: Addons - Build/elastix-addons.spec: Corrected some isues in the spec
   file about ownership of the commits.

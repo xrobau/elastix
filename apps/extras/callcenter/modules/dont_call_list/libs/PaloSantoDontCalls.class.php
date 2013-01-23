@@ -122,7 +122,7 @@ class PaloSantoDontCalls{
         // convieto el arreglo en un tipo mas apropiado para la busqueda de la funcion in_array de php
         $dataDontCall = $this->convertir_array($dataDontCall_original);
         // si el arreglo tiene datos continuo sino no hago nada
-        if( count($dataCall)>0 ){
+        if(TRUE /*count($dataCall)>0*/ ){
             // leo el listado de llamadas y recorro registro a registro
 	    foreach($dataCall as $phone){
                 // obtengo el numero de la llamada del registro actual

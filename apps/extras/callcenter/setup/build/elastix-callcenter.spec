@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Jan 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Do not Call List: The action "Apply" had no effect if there were no 
+  pending calls. This scenario could happen if the DNC is loaded prior to 
+  defining the first outgoing call. Fixed.
+
 * Tue Jan 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calls per Hour, Graphic Calls per Hour: queue dropdown selection has
   never worked. Fixed. Also, synchronize code between the two modules. Fixes

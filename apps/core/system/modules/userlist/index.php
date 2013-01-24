@@ -498,7 +498,7 @@ function applyChanges($userAccount,$pACL,$smarty,$arrLang,$idUserAccount,$userLe
 
 	    $pACL->updateUser($_POST['id_user'], $username, $_POST['description'],$_POST['extension']);
 	    //si se ha puesto algo en passwor se actualiza el password
-	    if (!empty($_POST['password1'])){
+	    if ((!empty($_POST['password1'])) && ($_POST['password1'] != '********')){
 			$resultOp = $pACL->changePassword($_POST['id_user'], md5($_POST['password1']));
 			if($resultOp){
 				$uidCurrent = $pACL->getIdUser($userAccount);
@@ -515,6 +515,9 @@ function applyChanges($userAccount,$pACL,$smarty,$arrLang,$idUserAccount,$userLe
 	    );
 
 	    if (empty($_POST['webmailpassword1'])) unset($nuevasPropiedades['password']);
+        if ((!empty($_POST['webmailpassword1'])) && ($_POST['webmailpassword1'] == '********')){
+            $nuevasPropiedades['password'] = $listaPropiedades['password'];
+        }
 	    $bExito = actualizarPropiedades($pDB, $smarty, $_POST['id_user'], 'webmail', 'default', $nuevasPropiedades);
 	    $result["success"] = true;
 	    return $result;
@@ -586,10 +589,13 @@ function editUser($userAccount,$pACL,$pDB,$arrFormElements,$smarty,$local_templa
     $arrFormElements['password2']['REQUIRED']='no';
     $oForm = new paloForm($smarty, $arrFormElements);
 
+    $arrFillUser['password1']='********';
+    $arrFillUser['password2']='********';
+
     $listaPropiedades = leerPropiedadesWebmail($pDB, $smarty, $id_user);
     if (isset($listaPropiedades['login'])) $arrFillUser['webmailuser'] = $listaPropiedades['login'];
     if (isset($listaPropiedades['domain'])) $arrFillUser['webmaildomain'] = $listaPropiedades['domain'];
-    if (isset($listaPropiedades['password'])) $arrFillUser['webmailpassword1'] = $listaPropiedades['password'];
+    if (isset($listaPropiedades['password'])) $arrFillUser['webmailpassword1'] = '********';
     //if (isset($listaPropiedades['imapsvr'])) $arrFillUser['webmailimapsvr'] = $listaPropiedades['imapsvr'];
 
     $oForm->setEditMode();

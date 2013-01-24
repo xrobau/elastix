@@ -26,9 +26,9 @@
 <input type="hidden" name="action_apply" value="{$action_apply}">
 <input type="hidden" name="start_apply" value="{$start_apply}">
 {literal}
-  <script type="text/javascript">
+<script type="text/javascript">
     $(document).ready(function() {
-      $("td.neo-table-title-row,td.table_title_row, th").css("width","50%");
+        $("td.neo-table-title-row").css("width","50%");
     });
-  </script>
+</script>
 {/literal}

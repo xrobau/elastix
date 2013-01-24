@@ -6,8 +6,17 @@
     <tr class="letra12">
         <td width="5%" align="right">{$filter_resource.LABEL}:&nbsp;&nbsp;</td>
         <td width="10%" align="left">{$filter_resource.INPUT}</td>
-        <td align="left"><input class="button" type="submit" name="show" value="{$SHOW}" /><td>
+		{if $userLevel ne 'superadmin'}
+			<td align="left"><input class="button" type="submit" name="show" value="{$SHOW}" /><td>
+		{/if}
     </tr>
+	{if $userLevel eq 'superadmin'}
+	<tr class="letra12">
+        <td width="5%" align="right">{$idOrganization.LABEL}:&nbsp;&nbsp;</td>
+        <td width="10%" align="left">{$idOrganization.INPUT}</td>
+		<td align="left"><input class="button" type="submit" name="show" value="{$SHOW}" /><td>
+    </tr>
+	{/if}
 </table>
 
 <input type="hidden" name="resource_apply" value="{$resource_apply}">
@@ -19,7 +28,7 @@
 {literal}
   <script type="text/javascript">
     $(document).ready(function() {
-      $("td.neo-table-title-row").css("width","50%");
+      $("td.neo-table-title-row,td.table_title_row, th").css("width","50%");
     });
   </script>
 {/literal}

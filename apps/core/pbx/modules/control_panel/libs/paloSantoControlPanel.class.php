@@ -33,12 +33,6 @@ require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
 require_once $arrConf['basePath']."/libs/paloSantoTrunk.class.php";
 
-/* Esta clase sólo sirve para tragarse el mensaje de error para que no se 
- * escriba permanentemente en el log de httpd */ 
-class dummy_pagi {
-    function conlog($a, $b) {}
-}
-
 class paloSantoControlPanel {
     var $_DB1;
     var $_DB2;
@@ -79,7 +73,6 @@ class paloSantoControlPanel {
         $astman_pwrd = obtenerClaveAMIAdmin();
 
         $astman = new AGI_AsteriskManager();
-        $astman->pagi = new dummy_pagi;
 
         if (!$astman->connect("$astman_host", "$astman_user" , "$astman_pwrd")) {
             $this->errMsg = _tr("Error when connecting to Asterisk Manager");
@@ -146,20 +139,30 @@ class paloSantoControlPanel {
         if(is_array($arrChannels) & count($arrChannels)>0){
             foreach($arrChannels as $key => $line){
                 $tmp = explode("!",$line);
-                if(count($tmp) > 10)
-                    $arrData[$tmp[7]] = array(
-                        'context' => $tmp[1],//para ver si es macro-dialout-trunk
-                        'state' => $tmp[4],
-                        'data' => $tmp[6],//para ver la troncal que es casi igual a tmp[11]
-                        //'callerid' => $tmp[8],
-                        'time' => $this->Sec2HHMMSS($tmp[11]),
-                        'dstn' => $tmp[12],
-                        'ext' => $tmp[2]
-                        //'brigedto' => $tmp[12],
-                    );
+                if(count($tmp) > 10){
+                    //$tmp[0] channel que orginina la llamada TECHNOLOGY/USER-uniquecode
+                    $dev=explode("/",$tmp[0]);
+                    if(is_array($dev) && count($dev)==2){
+                        if($dev[0]!="Local"){
+                            $pos=strpos($dev[1],"-");
+                            if($pos!==false){
+                                $user=substr($dev[1],0,$pos);
+                                $arrData[$user] = array(
+                                    'context' => $tmp[1],//para ver si es macro-dialout-trunk
+                                    'state' => $tmp[4],
+                                    'data' => $tmp[6],//para ver la troncal que es casi igual a tmp[11]
+                                    //'callerid' => $tmp[8],
+                                    'time' => $this->Sec2HHMMSS($tmp[11]),
+                                    'dstn' => $tmp[12],
+                                    'ext' => $tmp[2]
+                                    //'brigedto' => $tmp[12],
+                                );
+                            }
+                        }
+                    }
+                }
             }
         }
- 
         return $arrData;
     }
 

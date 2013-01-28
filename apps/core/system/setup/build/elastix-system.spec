@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 15
+Release: 16
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,33 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-16
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Jan 24 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: system - userlist/index.php: Regardless of the length of the
+  password, now 8 hidden characters are displayed in editing view. This occurs
+  in the fields: password, retype password and password webmail.
+  SVN Rev[4619]
+
+* Tue Jan 22 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: system - backup_restore/backup.tpl , backup_restore/index.php: The
+  popup that apears when a restore of a previous backup its about to be
+  performed and a difference exists in the version of a package, now follows
+  the schema of unified style for popups in Elastix.
+  SVN Rev[4607]
+
+* Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
+* Sat Jan 05 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: help module dashboard, dashboard help module was updated.
+  SVN Rev[4557]
+
 * Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: new implementation introduced by SVN commit 3955 introduced
   a regression in which an empty pid list confused the code into reporting a

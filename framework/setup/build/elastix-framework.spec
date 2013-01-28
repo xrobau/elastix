@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.3.0
-Release: 16
+Release: 17
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -308,15 +308,34 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
-* Fri Jan 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Jan 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-17
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Mon Jan 28 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: framework - elastixneo theme, slogan elastix, was updated because
+  there was a mistake.
+  SVN Rev[4622]
+
+* Thu Jan 24 2013 German Macas <gmacas@palosanto.com>
+- FIXED: modules: group_permission: Fixed columns width in grid in all themes
+  SVN Rev[4618]
+
+* Thu Jan 24 2013 German Macas <gmacas@palosanto.com>
+- FIXED: modules: group_permission: Fixed columns width in grid
+  SVN Rev[4617]
+
+* Fri Jan 11 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework: elastixneo theme : fix syntax for javascript object 
   rejected by IE6.
   SVN Rev[4578]
+
+* Fri Jan 11 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: readout of FreePBX database password incorrectly returned an
   array instead of a scalar. Fixed.
   SVN Rev[4575]
 
-* Fri Jan 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Jan 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework: improve readability on blackmin theme
   SVN Rev[4546]
 
@@ -334,6 +353,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-16
 - FIXED: framework - Build/elastix-framework.spec: Put in correct order the
   procedure of delete a group of dirs in the spec.
+  SVN Rev[4498]
 
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework: round up three duplicates of smarty creation into a single method,

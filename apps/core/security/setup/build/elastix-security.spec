@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -127,6 +127,26 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Dec 04 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: modules - file_editor - sec_weak_keys: Fixed item 4 and 5 from bug
+  1416, keep search filter in file_editor and change Reason for Status in
+  sec_weak_keys
+  SVN Rev[4503]
+
+* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: security - Build/elastix-security.spec: Corrected the copy of files,
+  now we move them in order to erase the dir container.
+  SVN Rev[4368]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: security - Build/elastix-security.spec: Directory its not empty so, we
+  cannot use rmdir, instead we use rm -rf
+  SVN Rev[4366]
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Changed release in specfile.

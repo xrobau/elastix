@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.3.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,9 +92,19 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
 * Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4495]
 
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Summary by Extension: do not use or add number of calls on URL. Read

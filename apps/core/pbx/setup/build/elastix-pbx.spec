@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 19
+Release: 20
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,9 +298,26 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-20
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Jan 24 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: In module Control_Planel was made changes in function
+  showChannels in order to fix bugs in wich the call made through a sip trunk
+  have not been displayed in control panel
+  SVN Rev[4615]
+
+* Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
 * Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-19
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4586]
 
 * Sat Jan 12 2013 Luis Abarca <labarca@palosanto.com>
 - FIXED: The behavior of the checkbox in the sticky-notes its now normal,

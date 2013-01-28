@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
-Version: 3.0.0
-Release: 1
+Version: 2.3.0
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,30 +102,52 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Jan 09 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: A minor correction in the commit 4564 where the Cancel option
+  appears only when command change-password is used.
+  SVN Rev[4565]
+
+* Tue Jan 08 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: The Cancel option that used to appear in the dialog_password was
+  removed, because if someone pressed, it no allows to continue configuring
+  passwords.
+  SVN Rev[4564]
+
 * Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-firstboot: Revert SVN commit 4161 and fix the proper way.
   Original bug was caused by forgotten blanking of password after regexp failed.
   SVN Rev[4526]
+- CHANGED: elastix-firstboot: Remove ampersand from accepted characters in 
+  passwords, since freePBX update chokes on these. Fixes Elastix bug #1432.
+  SVN Rev[4525]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
+* Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4177]
 
-* Thu Aug 30 2012 German Macas <gmacas@palosanto.com>
-- FIXED: elastix-admin-passwords: Fixed bug when enter a not allowed character
-  in password
+* Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
+- FIXED: elastix-admin-passwords: Fixed bug when enter a not allowed character in password
   SVN Rev[4161]
+
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4023]
 
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Optimization: do not attempt to start mysql unconditionally. It 
   should be started only when a database configuration is required. Also, since
   elastix-admin-passwords starts mysql if required, there is no need to start
   it on the init script too.
-- FIXED: elastix-firstboot: do not attempt to start mysql on system shutdown.
   SVN Rev[4006]
 
 * Mon May 07 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7
-- CHANGED: Changed in specfile, updated release to 7
+- CHANGED: Changed in specfile, updated release to 7.
   SVN Rev[3934]
 
 * Fri May 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>

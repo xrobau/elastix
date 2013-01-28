@@ -1,48 +1,43 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-Codificación: UTF-8
-+----------------------------------------------------------------------+
-| Elastix version 0.5                                                  |
-| http://www.elastix.org                                               |
-+----------------------------------------------------------------------+
-| Copyright (c) 2006 Palosanto Solutions S. A.                         |
-+----------------------------------------------------------------------+
-| Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
-| Telfs. 2283-268, 2294-440, 2284-356                                  |
-| Guayaquil - Ecuador                                                  |
-| http://www.palosanto.com                                             |
-+----------------------------------------------------------------------+
-| The contents of this file are subject to the General Public License  |
-| (GPL) Version 2 (the "License"); you may not use this file except in |
-| compliance with the License. You may obtain a copy of the License at |
-| http://www.opensource.org/licenses/gpl-license.php                   |
-|                                                                      |
-| Software distributed under the License is distributed on an "AS IS"  |
-| basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
-| the License for the specific language governing rights and           |
-| limitations under the License.                                       |
-+----------------------------------------------------------------------+
-| The Original Code is: Elastix Open Source.                           |
-| The Initial Developer of the Original Code is PaloSanto Solutions    |
-+----------------------------------------------------------------------+
-$Id: paloSantoEmail.class.php,v 1.1.1.1 2007/07/06 21:31:55 gcarrillo Exp $ */
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: paloSantoEmail.class.php,v 1.1.1.1 2007/07/06 21:31:55 gcarrillo Exp $ */
 
 if (isset($arrConf['basePath'])) {
     include_once($arrConf['basePath'] . "/libs/paloSantoDB.class.php");
-    include_once($arrConf['basePath'] . "/libs/paloSantoConfig.class.php");
     include_once($arrConf['basePath'] . "/libs/misc.lib.php");
-    include_once($arrConf['basePath'] . "/libs/cyradm.php");
 } else {
     include_once("libs/paloSantoDB.class.php");
-    include_once("libs/paloSantoConfig.class.php");
     include_once("libs/misc.lib.php");
-    include_once("libs/cyradm.php");
 }
-
 
 class paloEmail {
 
-    var $_DB; // instancia de la clase paloDB
+    private $_DB; // instancia de la clase paloDB
     var $errMsg;
 
     function paloEmail(&$pDB)
@@ -65,80 +60,164 @@ class paloEmail {
     }
 
     /**
-    * Procedimiento para obtener el listado de los dominios existentes. 
-    *
-    * @param int   $idOrganization    Si != NULL, indica el id de la organization del que se quiere obtener el dominio   *
-    * @return array    Listado de dominios en el siguiente formato, o FALSE en caso de error:
-    *  array(
-    *      array(id, domain_name),
-    *      ...
-    *  )
-    */
-    function getDomains($idOrganization = NULL)
+     * Procedimiento para obtener el listado de los dominios existentes. Si
+     * se especifica el id de dominio, el listado contendrá únicamente el dominio
+     * indicado por su respectivo. De otro modo, se listarán todos los dominios.
+     *
+     * @param int   $id_domain    Si != NULL, indica el id del dominio a recoger
+     *
+     * @return array    Listado de dominios en el siguiente formato, o FALSE en caso de error:
+     *  array(
+     *      array(id, domain_name),
+     *      ...
+     *  )
+     */
+    function getDomains($id_domain = NULL)
     {
+        $this->errMsg = '';
         $arr_result = FALSE;
-        $where="";
-        $arrParams = array();
-        
-        if(!is_null($idOrganization)){
-            if(!preg_match('/^[[:digit:]]+$/', $idOrganization)) {
-                $this->errMsg = _tr("Organization ID is not valid");
-                return false;
-            }else{
-                $where = "where id=?";
-                $arrParams[] = $idOrganization;
-            }    
+        if (!is_null($id_domain) && !ctype_digit("$id_domain")) {
+            $this->errMsg = "Domain ID is not valid";
+        } else {
+            $sPeticionSQL = 'SELECT id, domain_name FROM domain';
+            $paramSQL = array();
+            if (!is_null($id_domain)) {
+            	$sPeticionSQL .= ' WHERE id = ?';
+                $paramSQL[] = $id_domain;
+            }
+            $sPeticionSQL .= ' ORDER BY domain_name';
+            $arr_result =& $this->_DB->fetchTable($sPeticionSQL, FALSE, $paramSQL);
+            if (!is_array($arr_result)) {
+                $arr_result = FALSE;
+                $this->errMsg = $this->_DB->errMsg;
+            }
         }
-        
-        $sPeticionSQL = "SELECT id, domain FROM organization $where ORDER BY domain";
-        $arr_result =& $this->_DB->fetchTable($sPeticionSQL,true,$arrParams);
-        if (!is_array($arr_result)) {
-            $this->errMsg = $this->_DB->errMsg;
-        }
-
         return $arr_result;
     }
 
     /**
-    * Procedimiento saber si un dominio existe 
-    *
-    * @param string    $domain_name       nombre para el dominio
-    * @return bool     VERDADERO si el dominio existe, FALSO caso contrario
-    */
-    function domainExist($domain)
+     * Procedimiento para crear un nuevo dominio. La ejecución del script 
+     * privilegiado ya se encarga de actualizar la base de datos así que no es
+     * necesario hacerlo aquí.
+     *
+     * @param string    $domain_name       nombre para el dominio
+     *
+     * @return bool     VERDADERO si el dominio se crea correctamente, FALSO en error
+     */
+    function createDomain($domain_name)
     {
-        $bExito = FALSE;
-        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-            $error=_tr("Invalid domain format");
-            return false;
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --createdomain '.
+            escapeshellarg($domain_name).' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+                $regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+                    $this->errMsg = $regs[1];
+                }
+            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+            return FALSE;
         }
-        
-        //el campo ya viene validado del formulario
-        //verificar que no exista ya un dominio con ese nombre en la base
-        $sPeticionSQL = "SELECT 1 FROM organization WHERE domain = ?";
-        $arr_result =$this->_DB->fetchTable($sPeticionSQL,false,array($domain));
+        return TRUE;
+    }
+
+    /**
+     * Procedimiento para borrar un dominio y todas sus cuentas asociadas.
+     *
+     * @param string    $domain_name       nombre para el dominio
+     *
+     * @return bool     VERDADERO si el dominio se borra correctamente, FALSO en error
+     */
+    function deleteDomain($domain_name)
+    {
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --deletedomain '.
+            escapeshellarg($domain_name).' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+                $regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+                    $this->errMsg = $regs[1];
+                }
+            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    function getNumberOfAccounts($id_domain)
+    {
+        $number =0;
+        $arr_result =& $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM accountuser WHERE id_domain = ?',
+            FALSE, array($id_domain));
         if (is_array($arr_result) && count($arr_result)>0) {
-            $bExito = true;
-            $this->errMsg = _tr("Domain name already exists");
+            $number=$arr_result[0];
         }
-        return $bExito;
+        return $number;
     }
 
-
-    function accountExists($account)
+    function getAccount($username)
     {
-        $query = "SELECT 1 FROM acl_user WHERE username=?";
-        $result = $this->_DB->getFirstRowQuery($query,false,array($account));
-        if($result===FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return true;
-        }
-        if($result[0] > 0)
-            return true;
+        $arr_result = FALSE;
+        $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
+        $regularExpresion = "";
+        if($configPostfix2)
+           $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
         else
-            return false;
+           $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+        if (!is_null($username) && !preg_match($regularExpresion, "$username")) {
+            $this->errMsg = "Username is not valid";
+        } 
+        else {
+            $this->errMsg = "";
+            $sPeticionSQL = 'SELECT username, password, id_domain, quota FROM accountuser';
+            $paramSQL = array();
+            if (!is_null($username)) {
+            	$sPeticionSQL .= ' WHERE username = ?';
+                $paramSQL[] = $username;
+            }
+            $sPeticionSQL .= ' ORDER BY username';
+            $arr_result =& $this->_DB->fetchTable($sPeticionSQL, FALSE, $paramSQL);
+            if (!is_array($arr_result) && count($arr_result)>0) {
+                $arr_result = FALSE;
+                $this->errMsg = $this->_DB->errMsg;
+            }
+        }
+        return $arr_result;
     }
-    
+
+    function getAccountsByDomain($id_domain)
+    {
+        $this->errMsg = '';
+        $arr_result = FALSE;
+        if (!ctype_digit("$id_domain")) {
+            $this->errMsg = "Domain ID is not valid";
+        } else {
+            $sPeticionSQL = 'SELECT username, password, id_domain, quota FROM accountuser';
+            $paramSQL = array();
+            if (!is_null($id_domain)) {
+                $sPeticionSQL .= ' WHERE id_domain = ?';
+                $paramSQL[] = $id_domain;
+            }
+            $sPeticionSQL .= ' ORDER BY username';
+            $arr_result = $this->_DB->fetchTable($sPeticionSQL, FALSE, $paramSQL);
+            if (!is_array($arr_result)) {
+                $arr_result = FALSE;
+                $this->errMsg = $this->_DB->errMsg;
+            }
+        }
+        return $arr_result;
+    }
+
     /**
      * Procedimiento para crear una nueva cuenta en la base de datos y en el 
      * sistema.
@@ -148,7 +227,7 @@ class paloEmail {
      * @param   string  $password   Password inicial para la cuenta de correo
      * @param   int     $quota      Cuota inicial de la cuenta de correo
      * 
-     * @return  bool    VERDADERO en Ã©xito, FALSO en error
+     * @return  bool    VERDADERO en éxito, FALSO en error
      */
     function createAccount($domain, $username, $password, $quota)
     {
@@ -174,114 +253,15 @@ class paloEmail {
         }
         return TRUE;
     }
-    
-     /**
-     * Procedimiento para borrar completamente una cuenta de la base de datos y
-     * del sistema.
-     * 
-     * @param   string  $username   Usuario completo usuario@dominio.com
-     * 
-     * @return  bool    VERDADERO en Ã©xito, FALSO en error
-     */
-    function deleteAccount($username)
-    {
-        $this->errMsg = '';
-        $output = $retval = NULL;
-        $sComando = '/usr/bin/elastix-helper email_account --deleteaccount --username '.
-            escapeshellarg($username).' 2>&1';
-        exec($sComando, $output, $retval);
-        if ($retval != 0) {
-            foreach ($output as $s) {
-                $regs = NULL;
-                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
-                    $this->errMsg = $regs[1];
-                }
-            }
-            if ($this->errMsg == '')
-                $this->errMsg = implode('<br/>', $output);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-
-    function edit_email_account($username,$password,$quota)
-    {
-        global $CYRUS;
-        global $arrLang;
-        $bExito=TRUE;
-        
-        $virtual = FALSE;
-        if(!$this->updateQuota($old_quota,$quota)){
-            $bExito=false;
-        }
-        
-        if(!empty($password)){
-            if(!$this->setAccountPassword($username, $password))
-                $bExito=false;
-        }
-        return $bExito;
-    }
-    
-    /**
-     * Obtener la cuota del correo del usuario indicado.
-     * 
-     * @param string    $username   Correo completo usuario@dominio.com
-     * 
-     * @return mixed    Arreglo (used,qmax) o NULL en caso de error
-     */
-    function getAccountQuota($username)
-    {
-        $this->errMsg = '';
-        $regexp = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
-        if (!preg_match($regexp, $username)) {
-            $this->errMsg = _tr('Username is not valid');
-            return NULL;
-        }
-
-        $cyr_conn = new cyradm;
-        if (!$cyr_conn->imap_login()) {
-            $this->errMsg = _tr('Failed to login to IMAP');
-            return NULL;
-        }
-        $quota = $cyr_conn->getquota('user/'.$username);
-        $cyr_conn->imap_logout();
-        return $quota;
-    }
-
-
-    //esta funcion actualiza la quota en el sistema
-    function updateQuota($old_quota,$quota,$username)
-    {
-        $bExito=true;
-        if(!preg_match('/^[[:digit:]]+$/', "$old_quota")) {
-            $this->errMsg=_tr("Quota must be numeric");
-            $bExito=false;
-        }elseif(!preg_match('/^[[:digit:]]+$/', "$quota")){
-            $this->errMsg=_tr("Quota must be numeric");
-            $bExito=false;
-        }
-
-        if($old_quota!=$quota){
-            $cyr_conn = new cyradm;
-            $cyr_conn->imap_login();
-            $bContinuar=$cyr_conn->setmbquota("user" . "/".$username, $quota);
-            if (!$bContinuar){
-                $this->errMsg=_tr("Quota could not be changed.")." ".$cyr_conn->getMessage();
-                $bExito=FALSE;
-            }
-        }
-        return $bExito;
-    }
 
     /**
-     * Procedimiento para actualizar la contraseÃ±a de una cuenta de correo en
+     * Procedimiento para actualizar la contraseña de una cuenta de correo en
      * el sistema y en la base de datos.
      * 
      * @param   string  $username   Usuario completo usuario@dominio.com
      * @param   string  $password   Password nuevo para la cuenta de correo
      * 
-     * @return  bool    VERDADERO en Ã©xito, FALSO en error
+     * @return  bool    VERDADERO en éxito, FALSO en error
      */
     function setAccountPassword($username, $password)
     {
@@ -306,54 +286,162 @@ class paloEmail {
         return TRUE;
     }
 
+    /**
+     * Procedimiento para borrar completamente una cuenta de la base de datos y
+     * del sistema.
+     * 
+     * @param   string  $username   Usuario completo usuario@dominio.com
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function deleteAccount($username)
+    {
+        $this->errMsg = '';
+        $output = $retval = NULL;
+        $sComando = '/usr/bin/elastix-helper email_account --deleteaccount --username '.
+            escapeshellarg($username).' 2>&1';
+        exec($sComando, $output, $retval);
+        if ($retval != 0) {
+            foreach ($output as $s) {
+                $regs = NULL;
+                if (preg_match('/^ERR: (.+)$/', trim($s), $regs)) {
+                    $this->errMsg = $regs[1];
+                }
+            }
+            if ($this->errMsg == '')
+                $this->errMsg = implode('<br/>', $output);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    //***** new functions from email_functions.lib.php ***************************************************************/
+
+    function getListByDomain($id_domain)
+    {
+         $number = 0;
+         $data = array($id_domain);
+         $sPeticionSQL = "SELECT id FROM email_list WHERE id_domain = ?";
+         $arr_result = $this->_DB->fetchTable($sPeticionSQL,TRUE,$data);
+         if (is_array($arr_result) && count($arr_result)>0) {
+             $number=$arr_result[0];
+         }
+         return $number;
+    }
+
+    function accountExists($account)
+    {
+        $query = "SELECT COUNT(*) FROM accountuser WHERE username=?";
+        $result = $this->_DB->getFirstRowQuery($query,false,array($account));
+        if($result==FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }
+        if($result[0] > 0)
+            return true;
+        else
+            return false;
+    }
+
     function resconstruirMailBox($username)
     {
         $output = $retval = NULL;
+
         $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
         $regularExpresion = "";
         if($configPostfix2)
-        $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
+           $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
         else
-        $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+           $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
 
-        if(!is_null($username)){
-        if(!preg_match($regularExpresion,$username)){
-                $this->errMsg = _tr("Username is not valid");
-        }else{
+        if (!is_null($username)) {
+            if(!preg_match($regularExpresion,$username)){
+                $this->errMsg = "Username format is not valid";
+            } else {
                 exec('/usr/bin/elastix-helper email_account --reconstruct_mailbox  --mailbox '.escapeshellarg($username).' 2>&1', $output, $retval);
-        }
-        }else{
-        $this->errMsg = _tr("Username can't be empty");
+            }
+        } else {
+            $this->errMsg = "Username must not be null";
         }
 
         if ($retval != 0) {
             $this->errMsg = implode('', $output);
             return FALSE;
         }
-
         return TRUE;
     }
-    
-    function reloadPostfix(){
-        $sComando = '/usr/bin/elastix-helper email_account --reloadPostfix 2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0){
-            $this->errMsg = implode('', $output);
-            return false;
+
+    /**
+     * Obtener la cuota del correo del usuario indicado.
+     * 
+     * @param string    $username   Correo completo usuario@dominio.com
+     * 
+     * @return mixed    Arreglo (used,qmax) o NULL en caso de error
+     */
+    function getAccountQuota($username)
+    {
+        $this->errMsg = '';
+        $bPostfixElastix2 = isPostfixToElastix2();
+        $regexp = $bPostfixElastix2
+            ? '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/'
+            : '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+        if (!preg_match($regexp, $username)) {
+            $this->errMsg = _tr('Username is not valid');
+        	return NULL;
         }
-        return true;
+
+        $cyr_conn = new cyradm;
+        if (!$cyr_conn->imap_login()) {
+            $this->errMsg = _tr('Failed to login to IMAP');
+            return NULL;
+        }
+        $quota = $cyr_conn->getquota('user/'.$username);
+        $cyr_conn->imap_logout();
+        return $quota;
     }
     
-    function writePostfixMain(){
-        $sComando = '/usr/bin/elastix-helper email_account --writePostfixMain 2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0){
-            $this->errMsg = implode('', $output);
-            return false;
+    /**
+     * Actualizar la cuota del usuario indicado, tanto en cyrus como en la DB.
+     * 
+     * @param string    $username   Correo completo usuario@dominio.com
+     * @param int       $newquota   Nueva cuota de correo a asignar
+     * 
+     * @return bool     VERDADERO en caso de éxito, FALSO en caso de error.
+     */
+    function setAccountQuota($username, $newquota)
+    {
+        $this->errMsg = '';
+        $bPostfixElastix2 = isPostfixToElastix2();
+        $regexp = $bPostfixElastix2
+            ? '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/'
+            : '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+        if (!preg_match($regexp, $username)) {
+            $this->errMsg = _tr('Username is not valid');
+            return FALSE;
         }
-        return true;
+
+        $cyr_conn = new cyradm;
+        if (!$cyr_conn->imap_login()) {
+            $this->errMsg = _tr('Failed to login to IMAP');
+            return NULL;
+        }
+
+        $this->_DB->beginTransaction();
+        $sPeticionSQL = 'UPDATE accountuser SET quota = ? WHERE username = ?';
+        $bExito = $this->_DB->genQuery($sPeticionSQL, array($newquota, $username));
+        if (!$bExito) {
+        	$this->errMsg = $this->_DB->errMsg;
+        } else {
+            $bExito = $cyr_conn->setmbquota('user/'.$username, $newquota);
+            if (!$bExito) $this->errMsg = $cyr_conn->getMessage();
+        }
+        if ($bExito) {
+            $this->_DB->commit();
+        } else {
+        	$this->_DB->rollback();
+        }
+        $cyr_conn->imap_logout();
+        return $bExito;
     }
 }
 ?>

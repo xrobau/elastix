@@ -30,6 +30,7 @@
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoFax.class.php";
+require_once 'libs/paloSantoJSON.class.php';
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -57,12 +58,8 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
- //conexion resource
-    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-
-	//obtenemos las credenciales del usuario
-	$arrCredentials=getUserCredentials();
-
+    //conexion resource
+    $pDB = new paloDB($arrConf['dsn_conn_database']);
 
     //actions
     $action = getAction();
@@ -70,28 +67,24 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         case "save_new":
-            $content = sendNewSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
+            $content = sendNewSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            break;
+        case 'checkFaxStatus':
+            $content = checkFaxStatus();
             break;
         default: // view_form
-            $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
+            $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
             break;
     }
     return $content;
 }
 
-function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization)
+function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
 {
     $pSendFax = new paloSantoSendFax($pDB);
     $pFaxList = new paloFax($pDB);
 
-	if($userLevel1=="other"){
-		$pACL = new paloACL($pDB);
-		$idUser=$pACL->getIdUser($userAccount);
-	}else{
-		$idUser=null;
-	}
-
-    $faxes      = $pFaxList->getFaxList($idOrganization,$idUser);
+    $faxes      = $pFaxList->getFaxList();
     $arrFaxList = array("none"=>'-- '.$arrLang["Select a Fax Device"].' --');
     foreach($faxes as $values){
         $arrFaxList["ttyIAX".$values['dev_id']] = $values['clid_name']." / ".$values['extension'];
@@ -117,13 +110,6 @@ function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
     $smarty->assign("icon", "/modules/$module_name/images/fax_virtual_fax_send_fax.png");
-
-	if($userLevel1=="other"){
-		$smarty->assign("isOther", false);
-		$smarty->assign("FAX_USER",array_pop($arrFaxList));
-	}else{
-		$smarty->assign("isOther", true);
-	}
     //News
     $smarty->assign("file_upload", $arrLang["File Upload"]);
     $smarty->assign("text_area", $arrLang["Text Information"]);
@@ -136,21 +122,12 @@ function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     return $content;
 }
 
-function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization)
+function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
 {
     $pSendFax = new paloSantoSendFax($pDB);
     $pFaxList = new paloFax($pDB);
     $ruta_archivo = "";
-    
-	if($userLevel1=="other"){
-		$pACL = new paloACL($pDB);
-		$idUser=$pACL->getIdUser($userAccount);
-		$_POST["from"]="ttyIAX".$pACL->getUserProp($idUser,"dev_id");
-	}else{
-		$idUser=null;
-	}
-
-	$faxes      = $pFaxList->getFaxList($idOrganization,$idUser);
+    $faxes      = $pFaxList->getFaxList();
     $arrFaxList = array("none"=>'-- '.$arrLang["Select a Fax Device"].' --');
     foreach($faxes as $values){
         $arrFaxList["ttyIAX".$values['dev_id']] = $values['clid_name']." / ".$values['extension'];
@@ -169,7 +146,7 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
                 $strErrorMsg .= "$k, ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
-        return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
+        return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
     }
     else{
         $destine      = getParameter("to");
@@ -179,7 +156,7 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
         if($faxexten == "none"){
             $smarty->assign("mb_title", $arrLang["Validation Error"]);
             $smarty->assign("mb_message", $arrLang["Please, select a valid Fax Device"]);
-            return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
+            return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
         }
 
         if(getParameter("option_fax")=="by_file"){
@@ -188,7 +165,7 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             } else {
                 $smarty->assign("mb_title", $arrLang["Validation Error"]);
                 $smarty->assign("mb_message", $arrLang["File to upload is empty"]);
-                return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
+                return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
             }
         }else{
             if (!empty($data_content)) {
@@ -207,21 +184,53 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             } else {
                 $smarty->assign("mb_title", $arrLang["Validation Error"]);
                 $smarty->assign("mb_message", $arrLang["Text to send is empty"]);
-                return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
+                return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
             }
         }
     
-        $bExito = $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
-        if (!$bExito) {
+        $jobid = $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
+        if (is_null($jobid)) {
             $smarty->assign("mb_title", _tr('Validation Error'));
             $smarty->assign("mb_message", _tr('Failed to submit job').': '.$pSendFax->errMsg);
         } else {
             $smarty->assign("SEND_FAX_SUCCESS",_tr('Fax has been sent correctly'));
             $smarty->assign("SENDING_FAX",_tr('Sending Fax...'));
+            $smarty->assign('JOBID', $jobid);
         }
         if (file_exists($ruta_archivo)) unlink($ruta_archivo);
-        return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $userLevel1, $userAccount, $idOrganization);
+        return $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
     }
+}
+
+function checkFaxStatus()
+{
+    session_commit();
+	$jobid = getParameter('jobid');
+    $modem = getParameter('modem');
+    $oldhash = getParameter('outputhash');
+
+    $startTime = time();
+    do {
+        $faxinfo = paloFax::getFaxStatus();
+        $faxstatus = array(
+            'state' => 'F',
+            'modemstatus' => '(invalid modem)',
+            'status' => '(invalid jobid)'
+        );
+        if (isset($faxinfo['modems'][$modem]))
+            $faxstatus['modemstatus'] = $modem.': '.$faxinfo['modems'][$modem];
+        if (isset($faxinfo['jobs'][$jobid]))
+            $faxstatus = array_merge($faxstatus, $faxinfo['jobs'][$jobid]);
+
+        $newhash = md5(serialize($faxstatus));
+        if ($oldhash == $newhash) usleep(2 * 1000000);
+    } while($oldhash == $newhash && time() - $startTime < 30);
+
+    $jsonObject = new PalosantoJSON();
+    $jsonObject->set_status(($oldhash != $newhash) ? 'CHANGED' : 'NOCHANGED');
+    $jsonObject->set_message(array('faxstatus' => $faxstatus, 'outputhash' => $newhash));
+    Header('Content-Type: application/json');
+    return $jsonObject->createJSON();
 }
 
 function createFieldForm($arrLang, $arrFaxList)
@@ -259,6 +268,8 @@ function getAction()
 {
     if(getParameter("save_new")) //Get parameter by POST (submit)
         return "save_new";
+    elseif (getParameter('action') == 'checkFaxStatus')
+        return 'checkFaxStatus';
     else
         return "report"; //cancel
 }

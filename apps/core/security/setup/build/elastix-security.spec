@@ -2,15 +2,16 @@
 
 Summary: Elastix Security 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 1
+Version: 2.3.0
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-6.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.3.0-5
+Prereq: freePBX >= 2.8.1-2
 Prereq: iptables
 Requires: elastix-system
 Requires: php-mcrypt
@@ -126,6 +127,30 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Dec 04 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: modules - file_editor - sec_weak_keys: Fixed item 4 and 5 from bug
+  1416, keep search filter in file_editor and change Reason for Status in
+  sec_weak_keys
+  SVN Rev[4503]
+
+* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: security - Build/elastix-security.spec: Corrected the copy of files,
+  now we move them in order to erase the dir container.
+  SVN Rev[4368]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: security - Build/elastix-security.spec: Directory its not empty so, we
+  cannot use rmdir, instead we use rm -rf
+  SVN Rev[4366]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
@@ -139,21 +164,19 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: security - Build/elastix-security.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-- CHANGED: In spec file changed Prereq elastix-framework to
-  elastix-framework >= 3.0.0-1
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Thu Aug 09 2012 German Macas <gmacas@palosanto.com>
 - FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
-  Fixed graphic bug in ON/OFF Button
-  SVN Rev[4102]
+  Fixed graphic bug in ON/OFF Button.
+  SVN Rev[4101]
 
 * Wed Aug 08 2012 German Macas <gmacas@palosanto.com>
 - sec_rules - Fixed graphic bug in edition of New Rule of Firewall and improve
   design
-  SVN Rev[4099]
+  SVN Rev[4098]
 
 * Fri Jul 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Port Knocking: trim padding of null bytes from end of plaintext.
@@ -167,6 +190,11 @@ fi
   - New crontab job for authorization cleanup
   SVN Rev[4031]
 
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4027]
+
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Define Ports, Audit, Weak Keys: Remove XSS vulnerability.
   SVN Rev[4010]
@@ -176,6 +204,7 @@ fi
   reference the source directly. This allows the module to work properly with
   the fixes made for Fedora 17. Also, remove an unneeded reference to 
   paloSantoConfig. 
+  SVN Rev[3996]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-5
 - CHANGED: Security - Build/elastix-security.spec: update specfile with latest

@@ -2,15 +2,15 @@
 
 Summary: Elastix Module Reports 
 Name:    elastix-reports
-Version: 3.0.0
-Release: 1
+Version: 2.3.0
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.3.0-5
 Prereq: asterisk
 
 %description
@@ -92,10 +92,29 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
+* Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4495]
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Summary by Extension: do not use or add number of calls on URL. Read
   this number from the database instead. Fixes part 2 of Elastix bug #1416.
   SVN Rev[4482]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4362]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -108,27 +127,28 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
-  SVN Rev[4347]
+- Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
+  SVN Rev[4354]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: reports - Build/elastix-reports.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-- CHANGED: In spec file changed Prereq elastix-framework to
-  elastix-framework >= 3.0.0-1
+* Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4178]
 
 * Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
-- CHANGED: module - billing_rates: Change text information when edit a rate
+- CHANGED: module - billing_rates: Change text information when edit a rate.
   SVN Rev[4163]
 
-* Tue Jun 12 2012 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: elastix - /: The svn repository was reconstructed for better use and
-  management.
-  SVN Rev[3997]
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-5
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4026]
 
 * Mon May 07 2012 German Macas <gmacas@palosanto.com>
-- NEW: Missed Calls Module
-  SVN Rev[3932]
 - CHANGED: Reports - Missed Calls: change application form Filter and spanish words in lang
+  SVN Rev[3932]
+- NEW: Missed Calls Module
   SVN Rev[3931]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4

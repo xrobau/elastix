@@ -774,7 +774,7 @@ $(document).ready(function(){
         $('#pageup').keypress(keyPressed);
         $('#pagedown').keypress(keyPressed);
     }
-
+    	
     //*****************************************/
     $(".close_image_box").click(function(){
             $("#boxRPM").attr("style","display: none;");
@@ -873,19 +873,17 @@ $(document).ready(function(){
 			}
 	});
       
-      var menu = getParameterByName("menu");
-       if(typeof  menu!== "undefined" && menu){
-        var lblmenu = menu.split("_");
-
-        if(lblmenu["0"]=="a2b"){
-          $('#myframe').load(function() {
-              $(".topmenu-right-button a",myframe.document).attr("target","_self");
-          });
-        }
-      }
-
-          
-
+         var menu = getParameterByName("menu");
+	       if(typeof  menu!== "undefined" && menu){
+	        var lblmenu = menu.split("_");
+	
+	        if(lblmenu["0"]=="a2b"){
+	          $('#myframe').load(function() {
+	              $(".topmenu-right-button a",myframe.document).attr("target","_self");
+	          });
+	        }
+	      }
+	
 });
 
 //Si se presiona enter se hace un submit al formulario para que se aplica el filtro
@@ -896,10 +894,10 @@ function keyPressed(e)
     else if (e) keycode = e.which;
     else return true;
         
-    if (keycode == 13) {
-        $("form").submit();
-        return false;
-    }
+	if (keycode == 13) {
+		$("form").submit();
+		return false;
+	}
 }
 
 // implement JSON.parse de-serialization

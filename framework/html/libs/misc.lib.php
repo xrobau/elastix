@@ -239,7 +239,6 @@ function translateDate($dateOrig)
         return false;
     }
 }
-
 function get_key_settings($pDB,$key)
 {
     $r = $pDB->getFirstRowQuery(
@@ -247,7 +246,6 @@ function get_key_settings($pDB,$key)
         FALSE, array($key));
     return ($r && count($r) > 0) ? $r[0] : '';
 }
-
 function set_key_settings($pDB,$key,$value)
 {
     // Verificar si existe el valor de configuración
@@ -270,7 +268,7 @@ function load_version_elastix($ruta_base='')
     include_once $ruta_base."libs/paloSantoDB.class.php";
 
     //conectarse a la base de settings para obtener la version y release del sistema elastix
-    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
     if(empty($pDB->errMsg)) {
         $theme=get_key_settings($pDB,'elastix_version_release');
     }
@@ -287,66 +285,18 @@ function load_theme($ruta_base='')
     require_once $ruta_base."configs/default.conf.php";
     global $arrConf;
     include_once $ruta_base."libs/paloSantoDB.class.php";
-	$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-	if(empty($pDB->errMsg)) {
-        if($user==""){
-			$theme=getOrganizationProp(1,'theme',$pDB);
-		}else{
-			$theme=getUserProp($user,'theme',$pDB);
-		}
+
+    //conectarse a la base de settings para obtener el thema actual
+    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+    if(empty($pDB->errMsg)) {
+        $theme=get_key_settings($pDB,'theme');
     }
     //si no se encuentra setear el tema por default
-    if (empty($theme) || $theme==false){
-		if($user!=""){
-			setUserProp($user,'theme',"elastixneo","system",$pDB);}
-        return "elastixneo";
-    }else{
-		return $theme;
-	}
-}
-
-
-function update_theme()
-{
-	//actualizo el tema personalizado del usuario
-	global $arrConf;
-	$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/");
-	$documentRoot = $arrConf['basePath'];
-	exec("rm -rf $documentRoot/var/templates_c/*",$arrConsole,$flagStatus);
-	//STEP 2: Update menus elastix permission.
-	if(isset($_SESSION['elastix_user_permission']))
-		unset($_SESSION['elastix_user_permission']);
-}
-
-function getUserProp($username,$key,&$pdB){
-	$bQuery = "select value from user_properties where id_user=(Select id from acl_user where username=?) and property=?";
-	$bResult=$pdB->getFirstRowQuery($bQuery,false, array($username,$key));
-	if($bResult==false){
-		return false;
-	}else{
-		return $bResult[0];
-	}
-}
-
-function getOrganizationProp($id,$key,&$pDB){
-	$bQuery = "select value from organization_properties where id_organization=? and key=?";
-	$bResult=$pDB->getFirstRowQuery($bQuery,false, array($id,$key));
-	if($bResult==false){
-		return false;
-	}else{
-		return $bResult[0];
-	}
-}
-
-function setUserProp($username,$key,$value,$category="",&$pDB){
-	$query="INSERT INTO user_properties values ((Select id from acl_user where username=?),?,?,?)";
-	$arrParams=array($username,$key,$value,$category);
-	$result=$pDB->genQuery($query, $arrParams);
-	if($result==false){
-		return false;
-	}else
-		return true;
+    if (empty($theme)){
+        set_key_settings($pDB,'theme','default');
+        return "default";
+    }
+    else return $theme;
 }
 
 function load_language($ruta_base='')
@@ -389,27 +339,17 @@ function get_language($ruta_base='')
 {
     require_once $ruta_base."configs/default.conf.php";
     include $ruta_base."configs/languages.conf.php";
-    include_once "/var/www/html/libs/paloSantoOrganization.class.php";
 
     global $arrConf;
     $lang="";
 
-	$pdB = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pdB);
-	$pOrgz =new paloSantoOrganization($pdB);
-	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $uid = $pACL->getIdUser($user);
-
-	if(empty($pDB->errMsg)) {
-        if($uid===false){
-			$lang=$pOrgz->getOrganizationProp(1,'language');
-		}else{
-			$lang=$pACL->getUserProp($uid,'language');
-		}
+    //conectarse a la base de settings para obtener el idioma actual
+    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+    if(empty($pDB->errMsg)) {
+        $lang=get_key_settings($pDB,'language');
     }
-
     //si no se encuentra tomar del archivo de configuracion
-    if (empty($lang) || $lang===false) $lang=isset($arrConf['language'])?$arrConf['language']:"en";
+    if (empty($lang)) $lang=isset($arrConf['language'])?$arrConf['language']:"en";
 
     //verificar que exista en el arreglo de idiomas, sino por defecto en
     if (!array_key_exists($lang,$languages)) $lang="en";
@@ -537,10 +477,10 @@ function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
         else return 'eLaStIx.2oo7'; // Compatibility for updates where /etc/elastix.conf is not available
         break;
     case 'asteriskuser':
-        $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
+        $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
         $listaParam = $pConfig->leer_configuracion(FALSE);
-        if (isset($listaParam['DBUSER']))
-            return $listaParam['DBPASSWORD'];
+        if (isset($listaParam['AMPDBPASS']))
+            return $listaParam['AMPDBPASS']['valor'];
         break;
     }
     return NULL;
@@ -578,19 +518,19 @@ function obtenerClaveAMIAdmin($ruta_base='')
  */
 function generarDSNSistema($sNombreUsuario, $sNombreDB, $ruta_base='')
 {
-    require_once '/var/www/html/libs/paloSantoConfig.class.php';
+    require_once $ruta_base.'libs/paloSantoConfig.class.php';
     switch ($sNombreUsuario) {
     case 'root':
         $sClave = obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base);
         if (is_null($sClave)) return NULL;
         return 'mysql://root:'.$sClave.'@localhost/'.$sNombreDB;
     case 'asteriskuser':
-        $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
+        $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
         $listaParam = $pConfig->leer_configuracion(FALSE);
-        return "mysql://".
-               $listaParam['DBUSER']['valor']. ":".
-               $listaParam['DBPASSWORD']['valor']. "@".
-               $listaParam['DBHOST']['valor']. "/".$sNombreDB;
+        return $listaParam['AMPDBENGINE']['valor']."://".
+               $listaParam['AMPDBUSER']['valor']. ":".
+               $listaParam['AMPDBPASS']['valor']. "@".
+               $listaParam['AMPDBHOST']['valor']. "/".$sNombreDB;
     }
     return NULL;
 }
@@ -610,16 +550,16 @@ function obtenerDetallesRPMS()
     exec($comando1, $output1, $retval);
     $label = NULL;
     foreach ($output1 as $s) {
-        if (substr($s, 0, 3) == 'RPM') {
+    	if (substr($s, 0, 3) == 'RPM') {
             $arrPro[$label = substr($s, 4)] = array();
-        } else {
+    	} else {
             $regs = NULL;
             if (preg_match('/package (.+) is not installed/', $s, $regs)) {
                 $arrPro[$label][] = array($regs[1], '(not installed)', ' ');
             } else {
                 $arrPro[$label][] = explode(' ', $s);
             }
-        }
+    	}
     }
     return $arrPro;
 }
@@ -640,11 +580,11 @@ function isPostfixToElastix2(){
     return $band;
 }
 
-// Esta función revisa las bases de datos del framework (elastix.db, register.db, samples.db) en caso de que no existan y se encuentre su equivalente pero con extensión .rpmsave entonces se las renombra.
+// Esta función revisa las bases de datos del framework (acl.db, menu.db, register.db, settings.db, samples.db) en caso de que no existan y se encuentre su equivalente pero con extensión .rpmsave entonces se las renombra.
 // Esto se lo hace exclusivamente debido a la migración de las bases de datos .db del framework a archivos .sql ya que el último rpm generado que contenía las bases como .db las renombra a .rpmsave
 function checkFrameworkDatabases($dbdir)
 {
-    $arrFrameWorkDatabases = array("elastix.db","register.db","samples.db");
+    $arrFrameWorkDatabases = array("acl.db","menu.db","register.db","samples.db","settings.db");
     foreach($arrFrameWorkDatabases as $database){
         if(!file_exists("$dbdir/$database") || filesize("$dbdir/$database")==0){
             if(file_exists("$dbdir/$database.rpmsave"))
@@ -723,7 +663,7 @@ function setUserPassword()
 
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     global $arrConf;
-    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
 	if($uid===FALSE)
@@ -747,7 +687,6 @@ function setUserPassword()
 	return $arrResult;
 }
 
-//pendiente
 function searchModulesByName()
 {
 	include_once "libs/JSON.php";
@@ -763,12 +702,12 @@ function searchModulesByName()
 
 	// obteniendo los id de los menus permitidos
     global $arrConf;
-    $pACL = new paloACL($arrConf['elastix_dsn']['elastix']);
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($arrConf['elastix_dsn']['acl']);
+    $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
     $arrSessionPermissions = $pMenu->filterAuthorizedMenus($pACL->getIdUser($_SESSION['elastix_user']));
 	$arrIdMenues = array();
 	foreach($arrSessionPermissions as $key => $value){
-		$arrIdMenues[] = $value['id']; // id, IdParent, Link,  Type, order_no, HasChild
+		$arrIdMenues[] = $value['id']; // id, IdParent, Link, Name, Type, order_no, HasChild
 	}
 
 	$parameter_to_find = array(); // arreglo con los valores del name dada la busqueda
@@ -789,41 +728,53 @@ function searchModulesByName()
 
 	// buscando en la base de datos acl.db tabla acl_resource con el campo description
 	if(empty($parameter_to_find))
-		$arrResult = $pACL->getListResources(25, 0, $name);
+		$arrResult = $pGroupPermission->ObtainResources(25, 0, $name);
 	else
-    	$arrResult = $pACL->getListResources(25, 0, $parameter_to_find);
+    	$arrResult = $pGroupPermission->ObtainResources(25, 0, $parameter_to_find);
 
 	foreach($arrResult as $key2 => $value2){
 		// leyendo el resultado del query
-		if(in_array($value2["id"], $arrIdMenues)){
+		if(in_array($value2["name"], $arrIdMenues)){
 			$arrMenu['caption'] = _tr($value2["description"]);
-			$arrMenu['value']   = $value2["id"];
+			$arrMenu['value']   = $value2["name"];
 			$result[] = $arrMenu;
 		}
 	}
 
 	header('Content-Type: application/json');
 	return $json->encode($result);
-}
 
+}
 
 function getMenuColorByMenu()
 {
 	include_once "libs/paloSantoACL.class.php";
 	global $arrConf;
-    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
     $pACL = new paloACL($pdbACL);
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $uid = $pACL->getIdUser($user);
 	$color = "#454545";
-	$sPeticionPropiedades = "SELECT property, value FROM user_properties WHERE id_user = ? AND property = ?";
-	$tabla = $pdbACL->getFirstRowQuery($sPeticionPropiedades, FALSE, array($uid,"menuColor"));
-	if ($tabla === FALSE) {
+	$id_profile = "";
+	$sPeticionID = "SELECT id_profile FROM acl_user_profile WHERE id_user = ?";
+	$tupla = $pdbACL->getFirstRowQuery($sPeticionID, FALSE, array($uid));
+	if ($tupla === FALSE) {
 		$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
+	} elseif (count($tupla) == 0) {
+		$id_profile = NULL;
 	} else {
-		if(count($tabla) > 0)
-			if($tabla[0] == "menuColor")
-				$color = $tabla[1];
+		$id_profile = $tupla[0];
+	}
+	if(isset($id_profile) && $id_profile != ""){
+		$sPeticionPropiedades = "SELECT property, value FROM acl_profile_properties WHERE id_profile = ? AND property = ?";
+		$tabla = $pdbACL->getFirstRowQuery($sPeticionPropiedades, FALSE, array($id_profile,"menuColor"));
+		if ($tabla === FALSE) {
+		  $arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
+		} else {
+			if(count($tabla) > 0)
+				if($tabla[0] == "menuColor")
+					$color = $tabla[1];
+		}
 	}
 	return $color;
 }
@@ -842,19 +793,63 @@ function changeMenuColorByUser()
 
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     global $arrConf;
-    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
 
 	if($uid===FALSE)
         $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
 	else{
-		//si el usuario no tiene un color establecido entonces se crea el nuevo registro caso contrario se lo actualiza
-		if(!$pACL->setUserProp($uid,"menuColor",$color,"profile")){
-			$arrResult['msg'] = _tr("ERROR DE DB: ").$pACL->errMsg;
-		}else{
-			$arrResult['status'] = TRUE;
-			$arrResult['msg'] = _tr("OK");
+		//si el usuario no tiene un color establecido entonces se crea el nuevo registro caso contrario se lo inserta
+		//obteniendo el id profile del usuario
+
+		$id_profile = "";
+		$sPeticionID = "SELECT id_profile FROM acl_user_profile WHERE id_user = ?";
+		$tupla = $pdbACL->getFirstRowQuery($sPeticionID, FALSE, array($uid));
+		if ($tupla === FALSE) {
+			$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
+			return $arrResult;
+		} elseif (count($tupla) == 0) {
+			$id_profile = NULL;
+		} else {
+			$id_profile = $tupla[0];
+		}
+
+		if (is_null($id_profile) || $id_profile == "") {
+			// Crear el nuevo perfil para el usuario indicado...
+			$sPeticionNuevoPerfil = 'INSERT INTO acl_user_profile (id_user, id_resource, profile) VALUES (?, ?, ?)';
+			$r = $pdbACL->genQuery($sPeticionNuevoPerfil, array($uid, "19", "default"));
+			if (!$r) {
+				$arrResult['msg'] = _tr("ERROR DE DB: ").$pDB->errMsg;
+			}
+			$id_profile = $pdbACL->getLastInsertId();
+		}
+		if(isset($id_profile) && $id_profile != ""){
+		  $sPeticionPropiedades = "SELECT property, value FROM acl_profile_properties WHERE id_profile = ?";
+		  $existColor = false;
+		  $tabla = $pdbACL->fetchTable($sPeticionPropiedades, FALSE, array($id_profile));
+		  if ($tabla === FALSE) {
+			$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
+		  } else {
+			foreach ($tabla as $tupla) {
+				if($tupla[0] == "menuColor")
+				  $existColor = true;
+			}
+			if ($existColor) {
+				$sPeticionSQL = 'UPDATE acl_profile_properties SET value = ? WHERE id_profile = ? AND property = ?';
+				$params = array($color, $id_profile, "menuColor");
+			} else {
+				$sPeticionSQL = 'INSERT INTO acl_profile_properties (id_profile, property, value) VALUES (?, ?, ?)';
+				$params = array($id_profile, "menuColor", $color);
+			}
+			$r = $pdbACL->genQuery($sPeticionSQL, $params);
+			if (!$r) {
+				$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
+			}else{
+				$arrResult['status'] = TRUE;
+				$arrResult['msg'] = _tr("OK");
+			}
+		  }
 		}
 	}
 	return $arrResult;
@@ -867,14 +862,14 @@ function putMenuAsHistory($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
 			//verificar de que ya no este en la base de datos
-			//$id_resource = $pACL->getIdResource($menu);
+			$id_resource = $pACL->getResourceId($menu);
 			$exist = false;
-			$history = "SELECT aus.id AS id, ar.id AS id_menu, ar.description AS description FROM user_shortcut aus, acl_resource ar WHERE id_user = ? AND aus.type = 'history' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
+			$history = "SELECT aus.id AS id, ar.id AS id_menu, ar.name AS name, ar.description AS description FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'history' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
 			
 			$arr_result1 = $pdbACL->fetchTable($history, TRUE, array($uid));
 			if($arr_result1 !== FALSE){
@@ -884,7 +879,7 @@ function putMenuAsHistory($menu)
 				foreach($arr_result1 as $key => $value){
 					$arrNew[] = $value;
 					$arrIDS[] = $value['id'];
-					if($value['id_menu'] == $menu){
+					if($value['name'] == $menu){
 						$exist = true;
 						if($i==0) return true;
 					}
@@ -892,8 +887,8 @@ function putMenuAsHistory($menu)
 				}
 				if(!$exist && count($arr_result1) <= 4){
 					$pdbACL->beginTransaction();
-					$query = "INSERT INTO user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
-					$r = $pdbACL->genQuery($query, array($uid, $menu, "history"));
+					$query = "INSERT INTO acl_user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
+					$r = $pdbACL->genQuery($query, array($uid, $id_resource, "history"));
 					if(!$r){
 						$pdbACL->rollBack();
 						return false;
@@ -905,7 +900,7 @@ function putMenuAsHistory($menu)
 					$pdbACL->beginTransaction();
 					$success = true;
 					$tmp = "";
-					$query = "UPDATE user_shortcut SET id_resource = ? WHERE id_user = ? AND id = ? AND type = ?";
+					$query = "UPDATE acl_user_shortcut SET id_resource = ? WHERE id_user = ? AND id = ? AND type = ?";
 					for($i=0; $i<count($arrIDS); $i++){
 						$id = $arrIDS[$i];
 						$id_menu = $arrNew[$i]["id_menu"];
@@ -913,10 +908,10 @@ function putMenuAsHistory($menu)
 						$r = true;
 						if($i==0){
 							$tmp = $id_menu;
-							$r = $pdbACL->genQuery($query, array($menu, $uid, $id, "history"));
+							$r = $pdbACL->genQuery($query, array($id_resource, $uid, $id, "history"));
 						}else{
-							if($id_menu != $menu){
-								if($tmp != $menu && $tmp != ""){
+							if($id_menu != $id_resource){
+								if($tmp != $id_resource && $tmp != ""){
 									$r = $pdbACL->genQuery($query, array($tmp, $uid, $id, "history"));
 									$tmp = $id_menu;
 								}else
@@ -949,36 +944,36 @@ function putMenuAsBookmark($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
-			//$id_resource = $pACL->getIdResource($menu);
-			$resource = $pACL->getResources($menu);
+			$id_resource = $pACL->getResourceId($menu);
+			$resource = $pACL->getResources($id_resource);
 			$exist = false;
-			$bookmarks = "SELECT aus.id AS id, ar.id AS id_menu,  ar.description AS description FROM user_shortcut aus, acl_resource ar WHERE id_user = ? AND aus.type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
+			$bookmarks = "SELECT aus.id AS id, ar.id AS id_menu, ar.name AS name, ar.description AS description FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
 			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
 			if($arr_result1 !== FALSE){
 				$i = 0;
 				$arrIDS = array();
 				foreach($arr_result1 as $key => $value){
-					if($value['id_menu'] == $menu)
+					if($value['id_menu'] == $id_resource)
 						$exist = true;
 				}
 				if($exist){
 					$pdbACL->beginTransaction();
-					$query = "DELETE FROM user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
-					$r = $pdbACL->genQuery($query, array($uid, $menu, "bookmark"));
+					$query = "DELETE FROM acl_user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
+					$r = $pdbACL->genQuery($query, array($uid, $id_resource, "bookmark"));
 					if(!$r){
 						$pdbACL->rollBack();
 						$arrResult['status'] = FALSE;
-						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][1]), "idmenu" => $menu, "menu_session" => $menu);
+						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource, "menu_session" => $menu);
 						$arrResult['msg'] = _tr("Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error: ").$pdbACL->errMsg;
 						return $arrResult;
 					}else{
 						$pdbACL->commit();
 						$arrResult['status'] = TRUE;
-						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][1]), "idmenu" => $menu,  "menu_session" => $menu);
+						$arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu);
 						$arrResult['msg'] = _tr("Bookmark has been removed.");
 						return $arrResult;
 					}
@@ -988,17 +983,17 @@ function putMenuAsBookmark($menu)
 					$arrResult['msg'] = _tr("The bookmark maximum is 5. Please uncheck one in order to add this bookmark");
 				}else{
 					$pdbACL->beginTransaction();
-					$query = "INSERT INTO user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
-					$r = $pdbACL->genQuery($query, array($uid, $menu, "bookmark"));
+					$query = "INSERT INTO acl_user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
+					$r = $pdbACL->genQuery($query, array($uid, $id_resource, "bookmark"));
 					if(!$r){
 						$pdbACL->rollBack();
 						$arrResult['status'] = FALSE;
-						$arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][1]), "idmenu" => $menu,  "menu_session" => $menu );
+						$arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu );
 						$arrResult['msg'] = _tr("Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error: ").$pdbACL->errMsg;
 					}else{
 						$pdbACL->commit();
 						$arrResult['status'] = TRUE;
-					    $arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][1]), "idmenu" => $menu,  "menu_session" => $menu );
+					    $arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu );
 						$arrResult['msg'] = _tr("Bookmark has been added.");
 						return $arrResult;
 					}
@@ -1015,13 +1010,13 @@ function menuIsBookmark($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
-			//$id_resource = $pACL->getIdResource($menu);
-			$bookmarks = "SELECT id FROM user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
-			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid,$menu,"bookmark"));
+			$id_resource = $pACL->getResourceId($menu);
+			$bookmarks = "SELECT id FROM acl_user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
+			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid,$id_resource,"bookmark"));
 			if($arr_result1 !== FALSE){
 				if(count($arr_result1) > 0)
 					return true;
@@ -1042,19 +1037,19 @@ function saveNeoToggleTabByUser($menu, $action_status)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
 		if($uid!==FALSE){
 			$exist = false;
-			$togglesTabs = "SELECT * FROM user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
+			$togglesTabs = "SELECT * FROM acl_user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
 			$arr_result1 = $pdbACL->getFirstRowQuery($togglesTabs, TRUE, array($uid));
 			if($arr_result1 !== FALSE && count($arr_result1) > 0)
 				$exist = true;
 
 			if($exist){
 				$pdbACL->beginTransaction();
-				$query = "UPDATE user_shortcut SET description = ? WHERE id_user = ? AND type = ?";
+				$query = "UPDATE acl_user_shortcut SET description = ? WHERE id_user = ? AND type = ?";
 				$r = $pdbACL->genQuery($query, array($action_status, $uid, "NeoToggleTab"));
 				if(!$r){
 					$pdbACL->rollBack();
@@ -1069,8 +1064,8 @@ function saveNeoToggleTabByUser($menu, $action_status)
 				}
 			}else{
 				$pdbACL->beginTransaction();
-				$query = "INSERT INTO user_shortcut(id_user, id_resource, type, description) VALUES(?, ?, ?, ?)";
-				$r = $pdbACL->genQuery($query, array($uid, $menu, "NeoToggleTab", $action_status));
+				$query = "INSERT INTO acl_user_shortcut(id_user, id_resource, type, description) VALUES(?, ?, ?, ?)";
+				$r = $pdbACL->genQuery($query, array($uid, $uid, "NeoToggleTab", $action_status));
 				if(!$r){
 					$pdbACL->rollBack();
 					$arrResult['status'] = FALSE;
@@ -1094,10 +1089,10 @@ function getStatusNeoTabToggle()
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 	global $arrConf;
 	$exist = false;
-	$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+	$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
 	$pACL = new paloACL($pdbACL);
 	$uid = $pACL->getIdUser($user);
-	$togglesTabs = "SELECT * FROM user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
+	$togglesTabs = "SELECT * FROM acl_user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
 	$arr_result1 = $pdbACL->getFirstRowQuery($togglesTabs, TRUE, array($uid));
 	if($arr_result1 !== FALSE && count($arr_result1) > 0)
 		$exist = true;
@@ -1125,15 +1120,15 @@ function getStickyNote($menu)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
 		$pACL = new paloACL($pdbACL);
-		//$id_resource = $pACL->getIdResource($menu);
+		$id_resource = $pACL->getResourceId($menu);
 		$uid = $pACL->getIdUser($user);
 		$date_edit = date("Y-m-d h:i:s");
 		if($uid!==FALSE){
 			$exist = false;
 			$query = "SELECT * FROM sticky_note WHERE id_user = ? AND id_resource = ?";
-			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $menu));
+			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $id_resource));
 			if($arr_result1 !== FALSE && count($arr_result1) > 0)
 				$exist = true;
 
@@ -1172,22 +1167,22 @@ function saveStickyNote($menu, $description, $popup)
 	if($menu != ""){
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+		$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
 		$pACL = new paloACL($pdbACL);
-		//$id_resource = $pACL->getIdResource($menu);
+		$id_resource = $pACL->getResourceId($menu);
 		$uid = $pACL->getIdUser($user);
 		$date_edit = date("Y-m-d h:i:s");
 		if($uid!==FALSE){
 			$exist = false;
 			$query = "SELECT * FROM sticky_note WHERE id_user = ? AND id_resource = ?";
-			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $menu));
+			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $id_resource));
 			if($arr_result1 !== FALSE && count($arr_result1) > 0)
 				$exist = true;
 
 			if($exist){
 				$pdbACL->beginTransaction();
 				$query = "UPDATE sticky_note SET description = ?, date_edit = ?, auto_popup = ? WHERE id_user = ? AND id_resource = ?";
-				$r = $pdbACL->genQuery($query, array($description, $date_edit, $popup, $uid, $menu));
+				$r = $pdbACL->genQuery($query, array($description, $date_edit, $popup, $uid, $id_resource));
 				if(!$r){
 					$pdbACL->rollBack();
 					$arrResult['status'] = FALSE;
@@ -1202,7 +1197,7 @@ function saveStickyNote($menu, $description, $popup)
 			}else{
 				$pdbACL->beginTransaction();
 				$query = "INSERT INTO sticky_note(id_user, id_resource, date_edit, description, auto_popup) VALUES(?, ?, ?, ?, ?)";
-				$r = $pdbACL->genQuery($query, array($uid, $menu, $date_edit, $description, $popup));
+				$r = $pdbACL->genQuery($query, array($uid, $id_resource, $date_edit, $description, $popup));
 				if(!$r){
 					$pdbACL->rollBack();
 					$arrResult['status'] = FALSE;
@@ -1238,681 +1233,18 @@ function load_default_timezone()
     date_default_timezone_set($sDefaultTimezone);
 }
 
-//funcion que crea una conexion a asterisk manager
-function AsteriskManagerConnect(&$error) {
-	global $arrConf;
-	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
-	require_once $arrConf['basePath'].'/libs/paloSantoConfig.class.php';
-
-	$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
-	$arrConfig = $pConfig->leer_configuracion(false);
-
-	$password = $arrConfig['MGPASSWORD']['valor'];
-	$host = $arrConfig['DBHOST']['valor'];
-	$user = $arrConfig['MGUSER']['valor'];
-	$astman = new AGI_AsteriskManager();
-
-	if (!$astman->connect("$host", "$user" , "$password")) {
-		$error = _tr("Error when connecting to Asterisk Manager");
-	} else{
-		return $astman;
-	}
-	return false;
-}
-
-/**
- funcion que sirve para comprobar las credenciales de usuario
- identificar si es usuario superadmin, admin o other
- identificar a que organizacion pertenece
- @return
-	Array => ( userAccount => (UserName or ""),
-			   id_organization => (ID_ORG or false),
-			   userlevel => (superadmin,admin or other),
-				)
-*/
-function getUserCredentials(){
-	global $arrConf;
-	$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pdbACL);
-
-	$userLevel1 = "other";
-    $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-	//verificar que tipo de usurio es: superadmin, admin o other
-	if($userAccount!=""){
-		$idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
-		if($pACL->isUserSuperAdmin($userAccount)){
-			$userLevel1 = "superadmin";
-		}else{
-			if($pACL->isUserAdministratorGroup($userAccount))
-				$userLevel1 = "admin";
-			else
-				$userLevel1 = "other";
-		}
-	}else
-		$idOrganization=false;
-
-	if($idOrganization==false){
-		header("Location: index.php");
-	}
-
-	$query="SELECT domain from organization where id=?";
-    $result=$pdbACL->getFirstRowQuery($query,false,array($idOrganization));
-    if($result==false){
-        $domain=false;
-    }else{
-        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $result[0]))
-            $domain=false;
-        else
-            $domain=$result[0];
-    }
+// Create a new Smarty object and initialize template directories
+function getSmarty($mainTheme, $basedir = '/var/www/html')
+{
+    require_once("$basedir/libs/smarty/libs/Smarty.class.php");
+    $smarty = new Smarty();
     
-	return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
+    $smarty->template_dir = "$basedir/themes/$mainTheme";
+    $smarty->config_dir =   "$basedir/configs/";
+    $smarty->compile_dir =  "$basedir/var/templates_c/";
+    $smarty->cache_dir =    "$basedir/var/cache/";
+
+    return $smarty;
 }
 
-function getOrgDomainUser(){
-    global $arrConf;
-    $credentials=getUserCredentials();
-    return $credentials["domain"];
-}
-
-function isStrongPassword($password){
-    if(strlen($password)>=10){
-        if(preg_match("/[a-z]+/",$password)){
-            if(preg_match("/[A-Z]+/",$password)){
-                if(preg_match("/[0-9]+/",$password)){
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-/**
-    Funcion que devuelve un arreglo que contiene una lista de paises
-    @return array(country_name=>country_name,country_name=>country_name,...)
-*/
-function getCountry(){
-    $arrCountry = array();
-    $arrCountry["Afghanistan"] = "Afghanistan";
-    $arrCountry["Akrotiri"] = "Akrotiri";
-    $arrCountry["Albania"] = "Albania";
-    $arrCountry["Algeria"] = "Algeria";
-    $arrCountry["American Samoa"] = "American Samoa";
-    $arrCountry["Andorra"] = "Andorra";
-    $arrCountry["Angola"] = "Angola";
-    $arrCountry["Anguilla"] = "Anguilla";
-    $arrCountry["Antarctica"] = "Antarctica";
-    $arrCountry["Antigua and Barbuda"] = "Antigua and Barbuda";
-    $arrCountry["Arctic Ocean"] = "Arctic Ocean";
-    $arrCountry["Argentina"] = "Argentina";
-    $arrCountry["Armenia"] = "Armenia";
-    $arrCountry["Aruba"] = "Aruba";
-    $arrCountry["Ashmore and Cartier Islands"] = "Ashmore and Cartier Islands";
-    $arrCountry["Atlantic Ocean"] = "Atlantic Ocean";
-    $arrCountry["Australia"] = "Australia";
-    $arrCountry["Austria"] = "Austria";
-    $arrCountry["Azerbaijan"] = "Azerbaijan";
-    $arrCountry["Bahamas"] = "Bahamas";
-    $arrCountry["Bahrain"] = "Bahrain";
-    $arrCountry["Baker Island"] = "Baker Island";
-    $arrCountry["Bangladesh"] = "Bangladesh";
-    $arrCountry["Barbados"] = "Barbados";
-    $arrCountry["Bassas da India"] = "Bassas da India";
-    $arrCountry["Belarus"] = "Belarus";
-    $arrCountry["Belgium"] = "Belgium";
-    $arrCountry["Belize"] = "Belize";
-    $arrCountry["Benin"] = "Benin";
-    $arrCountry["Bermuda"] = "Bermuda";
-    $arrCountry["Bhutan"] = "Bhutan";
-    $arrCountry["Bolivia"] = "Bolivia";
-    $arrCountry["Bosnia and Herzegovina"] = "Bosnia and Herzegovina";
-    $arrCountry["Botswana"] = "Botswana";
-    $arrCountry["Bouvet Island"] = "Bouvet Island";
-    $arrCountry["Brazil"] = "Brazil";
-    $arrCountry["British Indian Ocean Territory"] = "British Indian Ocean Territory";
-    $arrCountry["British Virgin Islands"] = "British Virgin Islands";
-    $arrCountry["Brunei"] = "Brunei";
-    $arrCountry["Bulgaria"] = "Bulgaria";
-    $arrCountry["Burkina Faso"] = "Burkina Faso";
-    $arrCountry["Burma"] = "Burma";
-    $arrCountry["Burundi"] = "Burundi";
-    $arrCountry["Cambodia"] = "Cambodia";
-    $arrCountry["Cameroon"] = "Cameroon";
-    $arrCountry["Canada"] = "Canada";
-    $arrCountry["Cape Verde"] = "Cape Verde";
-    $arrCountry["Cayman Islands"] = "Cayman Islands";
-    $arrCountry["Central African Republic"] = "Central African Republic";
-    $arrCountry["Chad"] = "Chad";
-    $arrCountry["Chile"] = "Chile";
-    $arrCountry["China"] = "China";
-    $arrCountry["Christmas Island"] = "Christmas Island";
-    $arrCountry["Clipperton Island"] = "Clipperton Island";
-    $arrCountry["Cocos (Keeling) Islands"] = "Cocos (Keeling) Islands";
-    $arrCountry["Colombia"] = "Colombia";
-    $arrCountry["Comoros"] = "Comoros";
-    $arrCountry["Democratic Republic of the Congo"] = "Democratic Republic of the Congo";
-    $arrCountry["Cook Islands"] = "Cook Islands";
-    $arrCountry["Coral Sea Islands"] = "Coral Sea Islands";
-    $arrCountry["Costa Rica"] = "Costa Rica";
-    $arrCountry["Cote d'Ivoire"] = "Cote d'Ivoire";
-    $arrCountry["Croatia"] = "Croatia";
-    $arrCountry["Cuba"] = "Cuba";
-    $arrCountry["Cyprus"] = "Cyprus";
-    $arrCountry["Czech Republic"] = "Czech Republic";
-    $arrCountry["Denmark"] = "Denmark";
-    $arrCountry["Dhekelia"] = "Dhekelia";
-    $arrCountry["Djibouti"] = "Djibouti";
-    $arrCountry["Dominica"] = "Dominica";
-    $arrCountry["Dominican Republic"] = "Dominican Republic";
-    $arrCountry["East Timor"] = "East Timor";
-    $arrCountry["Ecuador"] = "Ecuador";
-    $arrCountry["Egypt"] = "Egypt";
-    $arrCountry["El Salvador"] = "El Salvador";
-    $arrCountry["Equatorial Guinea"] = "Equatorial Guinea";
-    $arrCountry["Eritrea"] = "Eritrea";
-    $arrCountry["Estonia"] = "Estonia";
-    $arrCountry["Ethiopia"] = "Ethiopia";
-    $arrCountry["Europa Island"] = "Europa Island";
-    $arrCountry["Falkland Islands (Islas Malvinas)"] = "Falkland Islands (Islas Malvinas)";
-    $arrCountry["Faroe Islands"] = "Faroe Islands";
-    $arrCountry["Fiji"] = "Fiji";
-    $arrCountry["Finland"] = "Finland";
-    $arrCountry["France"] = "France";
-    $arrCountry["French Guiana"] = "French Guiana";
-    $arrCountry["French Polynesia"] = "French Polynesia";
-    $arrCountry["French Southern and Antarctic Lands"] = "French Southern and Antarctic Lands";
-    $arrCountry["Gabon"] = "Gabon";
-    $arrCountry["Gambia, The"] = "Gambia, The";
-    $arrCountry["Gaza Strip"] = "Gaza Strip";
-    $arrCountry["Georgia"] = "Georgia";
-    $arrCountry["Germany"] = "Germany";
-    $arrCountry["Ghana"] = "Ghana";
-    $arrCountry["Gibraltar"] = "Gibraltar";
-    $arrCountry["Glorioso Islands"] = "Glorioso Islands";
-    $arrCountry["Greece"] = "Greece";
-    $arrCountry["Greenland"] = "Greenland";
-    $arrCountry["Grenada"] = "Grenada";
-    $arrCountry["Guadeloupe"] = "Guadeloupe";
-    $arrCountry["Guam"] = "Guam";
-    $arrCountry["Guatemala"] = "Guatemala";
-    $arrCountry["Guernsey"] = "Guernsey";
-    $arrCountry["Guinea"] = "Guinea";
-    $arrCountry["Guinea-Bissau"] = "Guinea-Bissau";
-    $arrCountry["Guyana"] = "Guyana";
-    $arrCountry["Haiti"] = "Haiti";
-    $arrCountry["Heard Island and McDonald Islands"] = "Heard Island and McDonald Islands";
-    $arrCountry["Holy See (Vatican City)"] = "Holy See (Vatican City)";
-    $arrCountry["Honduras"] = "Honduras";
-    $arrCountry["Hong Kong"] = "Hong Kong";
-    $arrCountry["Howland Island"] = "Howland Island";
-    $arrCountry["Hungary"] = "Hungary";
-    $arrCountry["Iceland"] = "Iceland";
-    $arrCountry["India"] = "India";
-    $arrCountry["Indian Ocean"] = "Indian Ocean";
-    $arrCountry["Indonesia"] = "Indonesia";
-    $arrCountry["Iran"] = "Iran";
-    $arrCountry["Iraq"] = "Iraq";
-    $arrCountry["Ireland"] = "Ireland";
-    $arrCountry["Isle of Man"] = "Isle of Man";
-    $arrCountry["Israel"] = "Israel";
-    $arrCountry["Italy"] = "Italy";
-    $arrCountry["Jamaica"] = "Jamaica";
-    $arrCountry["Jan Mayen"] = "Jan Mayen";
-    $arrCountry["Japan"] = "Japan";
-    $arrCountry["Jarvis Island"] = "Jarvis Island";
-    $arrCountry["Jersey"] = "Jersey";
-    $arrCountry["Johnston Atoll"] = "Johnston Atoll";
-    $arrCountry["Jordan"] = "Jordan";
-    $arrCountry["Juan de Nova Island"] = "Juan de Nova Island";
-    $arrCountry["Kazakhstan"] = "Kazakhstan";
-    $arrCountry["Kenya"] = "Kenya";
-    $arrCountry["Kingman Reef"] = "Kingman Reef";
-    $arrCountry["Kiribati"] = "Kiribati";
-    $arrCountry["Korea, North"] = "Korea, North";
-    $arrCountry["Korea, South"] = "Korea, South";
-    $arrCountry["Kuwait"] = "Kuwait";
-    $arrCountry["Kyrgyzstan"] = "Kyrgyzstan";
-    $arrCountry["Laos"] = "Laos";
-    $arrCountry["Latvia"] = "Latvia";
-    $arrCountry["Lebanon"] = "Lebanon";
-    $arrCountry["Lesotho"] = "Lesotho";
-    $arrCountry["Liberia"] = "Liberia";
-    $arrCountry["Libya"] = "Libya";
-    $arrCountry["Liechtenstein"] = "Liechtenstein";
-    $arrCountry["Lithuania"] = "Lithuania";
-    $arrCountry["Luxembourg"] = "Luxembourg";
-    $arrCountry["Macau"] = "Macau";
-    $arrCountry["Macedonia"] = "Macedonia";
-    $arrCountry["Madagascar"] = "Madagascar";
-    $arrCountry["Malawi"] = "Malawi";
-    $arrCountry["Malaysia"] = "Malaysia";
-    $arrCountry["Maldives"] = "Maldives";
-    $arrCountry["Mali"] = "Mali";
-    $arrCountry["Malta"] = "Malta";
-    $arrCountry["Marshall Islands"] = "Marshall Islands";
-    $arrCountry["Martinique"] = "Martinique";
-    $arrCountry["Mauritania"] = "Mauritania";
-    $arrCountry["Mauritius"] = "Mauritius";
-    $arrCountry["Mayotte"] = "Mayotte";
-    $arrCountry["Mexico"] = "Mexico";
-    $arrCountry["Micronesia, Federated States of"] = "Micronesia, Federated States of";
-    $arrCountry["Midway Islands"] = "Midway Islands";
-    $arrCountry["Moldova"] = "Moldova";
-    $arrCountry["Monaco"] = "Monaco";
-    $arrCountry["Mongolia"] = "Mongolia";
-    $arrCountry["Montserrat"] = "Montserrat";
-    $arrCountry["Morocco"] = "Morocco";
-    $arrCountry["Mozambique"] = "Mozambique";
-    $arrCountry["Namibia"] = "Namibia";
-    $arrCountry["Nauru"] = "Nauru";
-    $arrCountry["Navassa Island"] = "Navassa Island";
-    $arrCountry["Nepal"] = "Nepal";
-    $arrCountry["Netherlands"] = "Netherlands";
-    $arrCountry["Netherlands Antilles"] = "Netherlands Antilles";
-    $arrCountry["New Caledonia"] = "New Caledonia";
-    $arrCountry["New Zealand"] = "New Zealand";
-    $arrCountry["Nicaragua"] = "Nicaragua";
-    $arrCountry["Niger"] = "Niger";
-    $arrCountry["Nigeria"] = "Nigeria";
-    $arrCountry["Niue"] = "Niue";
-    $arrCountry["Norfolk Island"] = "Norfolk Island";
-    $arrCountry["Northern Mariana Islands"] = "Northern Mariana Islands";
-    $arrCountry["Norway"] = "Norway";
-    $arrCountry["Oman"] = "Oman";
-    $arrCountry["Pacific Ocean"] = "Pacific Ocean";
-    $arrCountry["Pakistan"] = "Pakistan";
-    $arrCountry["Palau"] = "Palau";
-    $arrCountry["Palmyra Atoll"] = "Palmyra Atoll";
-    $arrCountry["Panama"] = "Panama";
-    $arrCountry["Papua New Guinea"] = "Papua New Guinea";
-    $arrCountry["Paracel Islands"] = "Paracel Islands";
-    $arrCountry["Paraguay"] = "Paraguay";
-    $arrCountry["Peru"] = "Peru";
-    $arrCountry["Philippines"] = "Philippines";
-    $arrCountry["Pitcairn Islands"] = "Pitcairn Islands";
-    $arrCountry["Poland"] = "Poland";
-    $arrCountry["Portugal"] = "Portugal";
-    $arrCountry["Puerto Rico"] = "Puerto Rico";
-    $arrCountry["Qatar"] = "Qatar";
-    $arrCountry["Reunion"] = "Reunion";
-    $arrCountry["Romania"] = "Romania";
-    $arrCountry["Russia"] = "Russia";
-    $arrCountry["Rwanda"] = "Rwanda";
-    $arrCountry["Saint Helena"] = "Saint Helena";
-    $arrCountry["Saint Kitts and Nevis"] = "Saint Kitts and Nevis";
-    $arrCountry["Saint Lucia"] = "Saint Lucia";
-    $arrCountry["Saint Pierre and Miquelon"] = "Saint Pierre and Miquelon";
-    $arrCountry["Saint Vincent and the Grenadines"] = "Saint Vincent and the Grenadines";
-    $arrCountry["Samoa"] = "Samoa";
-    $arrCountry["San Marino"] = "San Marino";
-    $arrCountry["Sao Tome and Principe"] = "Sao Tome and Principe";
-    $arrCountry["Saudi Arabia"] = "Saudi Arabia";
-    $arrCountry["Senegal"] = "Senegal";
-    $arrCountry["Serbia and Montenegro"] = "Serbia and Montenegro";
-    $arrCountry["Seychelles"] = "Seychelles";
-    $arrCountry["Sierra Leone"] = "Sierra Leone";
-    $arrCountry["Singapore"] = "Singapore";
-    $arrCountry["Slovakia"] = "Slovakia";
-    $arrCountry["Slovenia"] = "Slovenia";
-    $arrCountry["Solomon Islands"] = "Solomon Islands";
-    $arrCountry["Somalia"] = "Somalia";
-    $arrCountry["South Africa"] = "South Africa";
-    $arrCountry["South Georgia and the South Sandwich Islands"] = "South Georgia and the South Sandwich Islands";
-    $arrCountry["Southern Ocean"] = "Southern Ocean";
-    $arrCountry["Spain"] = "Spain";
-    $arrCountry["Spratly Islands"] = "Spratly Islands";
-    $arrCountry["Sri Lanka"] = "Sri Lanka";
-    $arrCountry["Sudan"] = "Sudan";
-    $arrCountry["Suriname"] = "Suriname";
-    $arrCountry["Svalbard"] = "Svalbard";
-    $arrCountry["Swaziland"] = "Swaziland";
-    $arrCountry["Sweden"] = "Sweden";
-    $arrCountry["Switzerland"] = "Switzerland";
-    $arrCountry["Syria"] = "Syria";
-    $arrCountry["Taiwan"] = "Taiwan";
-    $arrCountry["Tajikistan"] = "Tajikistan";
-    $arrCountry["Tanzania"] = "Tanzania";
-    $arrCountry["Thailand"] = "Thailand";
-    $arrCountry["Togo"] = "Togo";
-    $arrCountry["Tokelau"] = "Tokelau";
-    $arrCountry["Tonga"] = "Tonga";
-    $arrCountry["Trinidad and Tobago"] = "Trinidad and Tobago";
-    $arrCountry["Tromelin Island"] = "Tromelin Island";
-    $arrCountry["Tunisia"] = "Tunisia";
-    $arrCountry["Turkey"] = "Turkey";
-    $arrCountry["Turkmenistan"] = "Turkmenistan";
-    $arrCountry["Turks and Caicos Islands"] = "Turks and Caicos Islands";
-    $arrCountry["Tuvalu"] = "Tuvalu";
-    $arrCountry["Uganda"] = "Uganda";
-    $arrCountry["Ukraine"] = "Ukraine";
-    $arrCountry["United Arab Emirates"] = "United Arab Emirates";
-    $arrCountry["United Kingdom"] = "United Kingdom";
-    $arrCountry["United States"] = "United States";
-    $arrCountry["United States Pacific Island Wildlife Refuges"] = "United States Pacific Island Wildlife Refuges";
-    $arrCountry["Uruguay"] = "Uruguay";
-    $arrCountry["Uzbekistan"] = "Uzbekistan";
-    $arrCountry["Vanuatu"] = "Vanuatu";
-    $arrCountry["Venezuela"] = "Venezuela";
-    $arrCountry["Vietnam"] = "Vietnam";
-    $arrCountry["Virgin Islands, BRITISH"] = "Virgin Islands, BRITISH";
-    $arrCountry["Virgin Islands, U.S"] = "Virgin Islands, U.S";
-    $arrCountry["Wake Island"] = "Wake Island";
-    $arrCountry["Wallis and Futuna"] = "Wallis and Futuna";
-    $arrCountry["West Bank"] = "West Bank";
-    $arrCountry["Western Sahara"] = "Western Sahara";
-    $arrCountry["Yemen"] = "Yemen";
-    $arrCountry["Zambia"] = "Zambia";
-    $arrCountry["Zimbabwe"] = "Zimbabwe";
-    return $arrCountry;
-}
-
-/**
-    Funcion que devuelve un arreglo que contiene los lenguages soportados en el servidor por asterisk
-    @return array(country_name=>country_name,country_name=>country_name,...)
-*/
-function getLanguagePBX(){
-    $arrLang=array();
-    $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
-    $arrConfig = $pConfig->leer_configuracion(false);
-    
-    $astlibsound = $arrConfig['ASTVARLIBDIR']['valor']."/sounds";
-    $listDir=scandir($astlibsound);
-    if($listDir!==false){
-        foreach($listDir as $value){
-            if ($value != "." && $value != "..") {
-                if(is_dir($astlibsound."/".$value)){
-                    if(preg_match("/^[a-z]{2}(-[A-Z]{2})*$/",$value)==true){
-                        $list=scandir($astlibsound."/".$value);
-                        if($list!==false && count($list)>2)
-                            $arrLang[$value]=$value;
-                    }
-                }
-            }
-        }
-    }else{
-        return false;
-    }
-    return $arrLang;
-}
-
-//esta function devuelve el country code, lenguage
-//de una pais dado el nombre del pais
-function getCountrySettings($country){
-    $arrCountry=array();
-    $arrCountry["Afghanistan"] = array("code"=>"93","language"=>"ps","tonezone"=>"af");
-    $arrCountry["Akrotiri"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Albania"] = array("code"=>"355","language"=>"sq","tonezone"=>"al");
-    $arrCountry["Algeria"] = array("code"=>"213","language"=>"tzm","tonezone"=>"dz");
-    $arrCountry["American Samoa"] = array("code"=>"1 684","language"=>"en","tonezone"=>"as");
-    $arrCountry["Andorra"] = array("code"=>"376","language"=>"","tonezone"=>"ad");
-    $arrCountry["Angola"] = array("code"=>"244","language"=>"kg","tonezone"=>"ao");
-    $arrCountry["Anguilla"] = array("code"=>"1 264","language"=>"","tonezone"=>"ai");
-    $arrCountry["Antarctica"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Antigua and Barbuda"] = array("code"=>"1 268","language"=>"","tonezone"=>"ag");
-    $arrCountry["Arctic Ocean"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Argentina"] = array("code"=>"54","language"=>"es","tonezone"=>"ar");
-    $arrCountry["Armenia"] = array("code"=>"7","language"=>"hy","tonezone"=>"am");
-    $arrCountry["Aruba"] = array("code"=>"297","language"=>"nl","tonezone"=>"aw");
-    $arrCountry["Ashmore and Cartier Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Atlantic Ocean"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Australia"] = array("code"=>"61","language"=>"en","tonezone"=>"au");
-    $arrCountry["Austria"] = array("code"=>"43","language"=>"hu","tonezone"=>"at");
-    $arrCountry["Azerbaijan"] = array("code"=>"994","language"=>"az","tonezone"=>"az");
-    $arrCountry["Bahamas"] = array("code"=>"1 242","language"=>"en","tonezone"=>"bs");
-    $arrCountry["Bahrain"] = array("code"=>"973","language"=>"ar","tonezone"=>"bh");
-    $arrCountry["Baker Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Bangladesh"] = array("code"=>"880","language"=>"bn","tonezone"=>"bd");
-    $arrCountry["Barbados"] = array("code"=>"1 246","language"=>"en","tonezone"=>"bb");
-    $arrCountry["Bassas da India"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Belarus"] = array("code"=>"375","language"=>"be","tonezone"=>"by");
-    $arrCountry["Belgium"] = array("code"=>"32","language"=>"en","tonezone"=>"be");
-    $arrCountry["Belize"] = array("code"=>"501","language"=>"en","tonezone"=>"bz");
-    $arrCountry["Benin"] = array("code"=>"229","language"=>"fr","tonezone"=>"bj");
-    $arrCountry["Bermuda"] = array("code"=>"1 441","language"=>"en","tonezone"=>"bm");
-    $arrCountry["Bhutan"] = array("code"=>"975","language"=>"dz","tonezone"=>"bt");
-    $arrCountry["Bolivia"] = array("code"=>"591","language"=>"es","tonezone"=>"bo");
-    $arrCountry["Bosnia and Herzegovina"] = array("code"=>"387","language"=>"bs","tonezone"=>"ba");
-    $arrCountry["Botswana"] = array("code"=>"267","language"=>"en","tonezone"=>"bw");
-    $arrCountry["Bouvet Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Brazil"] = array("code"=>"55","language"=>"pt","tonezone"=>"br");
-    $arrCountry["British Indian Ocean Territory"] = array("code"=>"246","language"=>"en","tonezone"=>"io");
-    $arrCountry["British Virgin Islands"] = array("code"=>"","language"=>"en","tonezone"=>"");
-    $arrCountry["Brunei"] = array("code"=>"673","language"=>"en","tonezone"=>"bn");
-    $arrCountry["Bulgaria"] = array("code"=>"359","language"=>"bg","tonezone"=>"bg");
-    $arrCountry["Burkina Faso"] = array("code"=>"226","language"=>"bm","tonezone"=>"bf");
-    $arrCountry["Burma"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Burundi"] = array("code"=>"257","language"=>"","tonezone"=>"bi");
-    $arrCountry["Cambodia"] = array("code"=>"855","language"=>"","tonezone"=>"kh");
-    $arrCountry["Cameroon"] = array("code"=>"237","language"=>"","tonezone"=>"cm");
-    $arrCountry["Canada"] = array("code"=>"1","language"=>"en","tonezone"=>"ca");
-    $arrCountry["Cape Verde"] = array("code"=>"238","language"=>"pt","tonezone"=>"");
-    $arrCountry["Cayman Islands"] = array("code"=>"1 345","language"=>"en","tonezone"=>"ky");
-    $arrCountry["Central African Republic"] = array("code"=>"236","language"=>"fr","tonezone"=>"cf");
-    $arrCountry["Chad"] = array("code"=>"235","language"=>"ar","tonezone"=>"td");
-    $arrCountry["Chile"] = array("code"=>"56","language"=>"es","tonezone"=>"cl");
-    $arrCountry["China"] = array("code"=>"86","language"=>"zh","tonezone"=>"");
-    $arrCountry["Christmas Island"] = array("code"=>"61","language"=>"ms","tonezone"=>"cn");
-    $arrCountry["Clipperton Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Cocos (Keeling) Islands"] = array("code"=>"61","language"=>"ms","tonezone"=>"cc");
-    $arrCountry["Colombia"] = array("code"=>"57","language"=>"es","tonezone"=>"co");
-    $arrCountry["Comoros"] = array("code"=>"269","language"=>"fr","tonezone"=>"km");
-    $arrCountry["Democratic Republic of the Congo"] = array("code"=>"243","language"=>"fr","tonezone"=>"cd");
-    $arrCountry["Cook Islands"] = array("code"=>"682","language"=>"en","tonezone"=>"ck");
-    $arrCountry["Coral Sea Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Costa Rica"] = array("code"=>"506","language"=>"es","tonezone"=>"cr");
-    $arrCountry["Cote d'Ivoire"] = array("code"=>"225","language"=>"fr","tonezone"=>"ci");
-    $arrCountry["Croatia"] = array("code"=>"385","language"=>"hr","tonezone"=>"hr");
-    $arrCountry["Cuba"] = array("code"=>"53","language"=>"es","tonezone"=>"cu");
-    $arrCountry["Cyprus"] = array("code"=>"357","language"=>"el","tonezone"=>"cy");
-    $arrCountry["Czech Republic"] = array("code"=>"420","language"=>"cs","tonezone"=>"cz");
-    $arrCountry["Denmark"] = array("code"=>"45","language"=>"da","tonezone"=>"dk");
-    $arrCountry["Dhekelia"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Djibouti"] = array("code"=>"253","language"=>"fr","tonezone"=>"dj");
-    $arrCountry["Dominica"] = array("code"=>"1 767","language"=>"en","tonezone"=>"dm");
-    $arrCountry["Dominican Republic"] = array("code"=>"1 809","language"=>"es","tonezone"=>"do");
-    $arrCountry["East Timor"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Ecuador"] = array("code"=>"593","language"=>"es","tonezone"=>"ec");
-    $arrCountry["Egypt"] = array("code"=>"20","language"=>"ar","tonezone"=>"eg");
-    $arrCountry["El Salvador"] = array("code"=>"503","language"=>"es","tonezone"=>"sv");
-    $arrCountry["Equatorial Guinea"] = array("code"=>"240","language"=>"es","tonezone"=>"gq");
-    $arrCountry["Eritrea"] = array("code"=>"291","language"=>"en","tonezone"=>"er");
-    $arrCountry["Estonia"] = array("code"=>"372","language"=>"et","tonezone"=>"ee");
-    $arrCountry["Ethiopia"] = array("code"=>"251","language"=>"en","tonezone"=>"et");
-    $arrCountry["Europa Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Falkland Islands (Islas Malvinas)"] = array("code"=>"500","language"=>"en","tonezone"=>"fk");
-    $arrCountry["Faroe Islands"] = array("code"=>"298","language"=>"da","tonezone"=>"fo");
-    $arrCountry["Fiji"] = array("code"=>"679","language"=>"en","tonezone"=>"fj");
-    $arrCountry["Finland"] = array("code"=>"358","language"=>"fi","tonezone"=>"fi");
-    $arrCountry["France"] = array("code"=>"33","language"=>"fr","tonezone"=>"fr");
-    $arrCountry["French Guiana"] = array("code"=>"594","language"=>"fr","tonezone"=>"gf");
-    $arrCountry["French Polynesia"] = array("code"=>"689","language"=>"fr","tonezone"=>"pf");
-    $arrCountry["French Southern and Antarctic Lands"] = array("code"=>"","language"=>"fr","tonezone"=>"");
-    $arrCountry["Gabon"] = array("code"=>"241","language"=>"fr","tonezone"=>"ga");
-    $arrCountry["Gambia, The"] = array("code"=>"220","language"=>"en","tonezone"=>"gm");
-    $arrCountry["Gaza Strip"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Georgia"] = array("code"=>"995","language"=>"ka","tonezone"=>"ge");
-    $arrCountry["Germany"] = array("code"=>"49","language"=>"de","tonezone"=>"de");
-    $arrCountry["Ghana"] = array("code"=>"233","language"=>"en","tonezone"=>"gh");
-    $arrCountry["Gibraltar"] = array("code"=>"350","language"=>"en","tonezone"=>"gi");
-    $arrCountry["Glorioso Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Greece"] = array("code"=>"30","language"=>"el","tonezone"=>"gr");
-    $arrCountry["Greenland"] = array("code"=>"299","language"=>"da","tonezone"=>"gl");
-    $arrCountry["Grenada"] = array("code"=>"1 473","language"=>"en","tonezone"=>"gd");
-    $arrCountry["Guadeloupe"] = array("code"=>"590","language"=>"fr","tonezone"=>"gp");
-    $arrCountry["Guam"] = array("code"=>"1 671","language"=>"en","tonezone"=>"gu");
-    $arrCountry["Guatemala"] = array("code"=>"502","language"=>"es","tonezone"=>"gt");
-    $arrCountry["Guernsey"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Guinea"] = array("code"=>"224","language"=>"fr","tonezone"=>"gn");
-    $arrCountry["Guinea-Bissau"] = array("code"=>"245","language"=>"pt","tonezone"=>"gw");
-    $arrCountry["Guyana"] = array("code"=>"592","language"=>"en","tonezone"=>"gy");
-    $arrCountry["Haiti"] = array("code"=>"509","language"=>"fr","tonezone"=>"ht");
-    $arrCountry["Heard Island and McDonald Islands"] = array("code"=>"672","language"=>"","tonezone"=>"");
-    $arrCountry["Holy See (Vatican City)"] = array("code"=>"","language"=>"it","tonezone"=>"va");
-    $arrCountry["Honduras"] = array("code"=>"504","language"=>"es","tonezone"=>"hn");
-    $arrCountry["Hong Kong"] = array("code"=>"852","language"=>"zh","tonezone"=>"hk");
-    $arrCountry["Howland Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Hungary"] = array("code"=>"36","language"=>"de","tonezone"=>"hu");
-    $arrCountry["Iceland"] = array("code"=>"354","language"=>"is","tonezone"=>"is");
-    $arrCountry["India"] = array("code"=>"91","language"=>"hi","tonezone"=>"in");
-    $arrCountry["Indian Ocean"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Indonesia"] = array("code"=>"92","language"=>"id","tonezone"=>"id");
-    $arrCountry["Iran"] = array("code"=>"98","language"=>"ku","tonezone"=>"ir");
-    $arrCountry["Iraq"] = array("code"=>"964","language"=>"ar","tonezone"=>"iq");
-    $arrCountry["Ireland"] = array("code"=>"353","language"=>"en","tonezone"=>"ie");
-    $arrCountry["Isle of Man"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Israel"] = array("code"=>"972","language"=>"he","tonezone"=>"il");
-    $arrCountry["Italy"] = array("code"=>"39","language"=>"it","tonezone"=>"it");
-    $arrCountry["Jamaica"] = array("code"=>"1 876","language"=>"en","tonezone"=>"jm");
-    $arrCountry["Jan Mayen"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Japan"] = array("code"=>"81","language"=>"ja","tonezone"=>"jp");
-    $arrCountry["Jarvis Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Jersey"] = array("code"=>"44","language"=>"","tonezone"=>"");
-    $arrCountry["Johnston Atoll"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Jordan"] = array("code"=>"962","language"=>"ar","tonezone"=>"jo");
-    $arrCountry["Juan de Nova Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Kazakhstan"] = array("code"=>"7","language"=>"av","tonezone"=>"kz");
-    $arrCountry["Kenya"] = array("code"=>"245","language"=>"so","tonezone"=>"ke");
-    $arrCountry["Kingman Reef"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Kiribati"] = array("code"=>"686","language"=>"en","tonezone"=>"ki");
-    $arrCountry["Korea, North"] = array("code"=>"850","language"=>"ko","tonezone"=>"kp");
-    $arrCountry["Korea, South"] = array("code"=>"82","language"=>"ko","tonezone"=>"kr");
-    $arrCountry["Kuwait"] = array("code"=>"965","language"=>"ar","tonezone"=>"kw");
-    $arrCountry["Kyrgyzstan"] = array("code"=>"996","language"=>"ky","tonezone"=>"kg");
-    $arrCountry["Laos"] = array("code"=>"856","language"=>"","tonezone"=>"");
-    $arrCountry["Latvia"] = array("code"=>"371","language"=>"lv","tonezone"=>"lv");
-    $arrCountry["Lebanon"] = array("code"=>"961","language"=>"ar","tonezone"=>"lb");
-    $arrCountry["Lesotho"] = array("code"=>"266","language"=>"st","tonezone"=>"ls");
-    $arrCountry["Liberia"] = array("code"=>"231","language"=>"en","tonezone"=>"lr");
-    $arrCountry["Libya"] = array("code"=>"218","language"=>"ar","tonezone"=>"ly");
-    $arrCountry["Liechtenstein"] = array("code"=>"423","language"=>"de","tonezone"=>"li");
-    $arrCountry["Lithuania"] = array("code"=>"370","language"=>"lt","tonezone"=>"lt");
-    $arrCountry["Luxembourg"] = array("code"=>"352","language"=>"lb","tonezone"=>"lu");
-    $arrCountry["Macau"] = array("code"=>"853","language"=>"","tonezone"=>"");
-    $arrCountry["Macedonia"] = array("code"=>"389","language"=>"mk","tonezone"=>"mk");
-    $arrCountry["Madagascar"] = array("code"=>"261","language"=>"fr","tonezone"=>"mg");
-    $arrCountry["Malawi"] = array("code"=>"265","language"=>"en","tonezone"=>"mw");
-    $arrCountry["Malaysia"] = array("code"=>"60","language"=>"jv","tonezone"=>"my");
-    $arrCountry["Maldives"] = array("code"=>"960","language"=>"dv","tonezone"=>"mv");
-    $arrCountry["Mali"] = array("code"=>"223","language"=>"fr","tonezone"=>"ml");
-    $arrCountry["Malta"] = array("code"=>"356","language"=>"en","tonezone"=>"mt");
-    $arrCountry["Marshall Islands"] = array("code"=>"692","language"=>"en","tonezone"=>"mh");
-    $arrCountry["Martinique"] = array("code"=>"596","language"=>"fr","tonezone"=>"mq");
-    $arrCountry["Mauritania"] = array("code"=>"222","language"=>"","tonezone"=>"mr");
-    $arrCountry["Mauritius"] = array("code"=>"230","language"=>"en","tonezone"=>"mu");
-    $arrCountry["Mayotte"] = array("code"=>"269","language"=>"fr","tonezone"=>"yt");
-    $arrCountry["Mexico"] = array("code"=>"52","language"=>"es","tonezone"=>"mx");
-    $arrCountry["Micronesia, Federated States of"] = array("code"=>"691","language"=>"en","tonezone"=>"fm");
-    $arrCountry["Midway Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Moldova"] = array("code"=>"373","language"=>"tr","tonezone"=>"md");
-    $arrCountry["Monaco"] = array("code"=>"377","language"=>"fr","tonezone"=>"mc");
-    $arrCountry["Mongolia"] = array("code"=>"976","language"=>"mn","tonezone"=>"mn");
-    $arrCountry["Montserrat"] = array("code"=>"1 664","language"=>"en","tonezone"=>"ms");
-    $arrCountry["Morocco"] = array("code"=>"212","language"=>"ar","tonezone"=>"ma");
-    $arrCountry["Mozambique"] = array("code"=>"258","language"=>"pt","tonezone"=>"mz");
-    $arrCountry["Namibia"] = array("code"=>"264","language"=>"en","tonezone"=>"na");
-    $arrCountry["Nauru"] = array("code"=>"674","language"=>"en","tonezone"=>"nr");
-    $arrCountry["Navassa Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Nepal"] = array("code"=>"977","language"=>"ne","tonezone"=>"mp");
-    $arrCountry["Netherlands"] = array("code"=>"31","language"=>"nl","tonezone"=>"an");
-    $arrCountry["Netherlands Antilles"] = array("code"=>"599","language"=>"nl","tonezone"=>"an");
-    $arrCountry["New Caledonia"] = array("code"=>"687","language"=>"fr","tonezone"=>"nc");
-    $arrCountry["New Zealand"] = array("code"=>"64","language"=>"en","tonezone"=>"nz");
-    $arrCountry["Nicaragua"] = array("code"=>"505","language"=>"es","tonezone"=>"ni");
-    $arrCountry["Niger"] = array("code"=>"227","language"=>"fr","tonezone"=>"ne");
-    $arrCountry["Nigeria"] = array("code"=>"234","language"=>"en","tonezone"=>"ng");
-    $arrCountry["Niue"] = array("code"=>"683","language"=>"en","tonezone"=>"nu");
-    $arrCountry["Norfolk Island"] = array("code"=>"","language"=>"en","tonezone"=>"nf");
-    $arrCountry["Northern Mariana Islands"] = array("code"=>"1 670","language"=>"en","tonezone"=>"mp");
-    $arrCountry["Norway"] = array("code"=>"47","language"=>"no","tonezone"=>"no");
-    $arrCountry["Oman"] = array("code"=>"968","language"=>"ar","tonezone"=>"om");
-    $arrCountry["Pacific Ocean"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Pakistan"] = array("code"=>"92","language"=>"ur","tonezone"=>"pk");
-    $arrCountry["Palau"] = array("code"=>"680","language"=>"en","tonezone"=>"pw");
-    $arrCountry["Palmyra Atoll"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Panama"] = array("code"=>"507","language"=>"es","tonezone"=>"pa");
-    $arrCountry["Papua New Guinea"] = array("code"=>"675","language"=>"en","tonezone"=>"pg");
-    $arrCountry["Paracel Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Paraguay"] = array("code"=>"595","language"=>"es","tonezone"=>"py");
-    $arrCountry["Peru"] = array("code"=>"51","language"=>"es","tonezone"=>"pe");
-    $arrCountry["Philippines"] = array("code"=>"63","language"=>"en","tonezone"=>"ph");
-    $arrCountry["Pitcairn Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Poland"] = array("code"=>"48","language"=>"pl","tonezone"=>"pl");
-    $arrCountry["Portugal"] = array("code"=>"351","language"=>"pt","tonezone"=>"pt");
-    $arrCountry["Puerto Rico"] = array("code"=>"1","language"=>"es","tonezone"=>"pr");
-    $arrCountry["Qatar"] = array("code"=>"974","language"=>"ar","tonezone"=>"qa");
-    $arrCountry["Reunion"] = array("code"=>"262","language"=>"fr","tonezone"=>"re");
-    $arrCountry["Romania"] = array("code"=>"40","language"=>"hu","tonezone"=>"ro");
-    $arrCountry["Russia"] = array("code"=>"7","language"=>"ru","tonezone"=>"ru");
-    $arrCountry["Rwanda"] = array("code"=>"250","language"=>"fr","tonezone"=>"rw");
-    $arrCountry["Saint Helena"] = array("code"=>"290","language"=>"en","tonezone"=>"sh");
-    $arrCountry["Saint Kitts and Nevis"] = array("code"=>"1 869","language"=>"en","tonezone"=>"kn");
-    $arrCountry["Saint Lucia"] = array("code"=>"1 758","language"=>"en","tonezone"=>"lc");
-    $arrCountry["Saint Pierre and Miquelon"] = array("code"=>"508","language"=>"fr","tonezone"=>"pm");
-    $arrCountry["Saint Vincent and the Grenadines"] = array("code"=>"1 784","language"=>"en","tonezone"=>"vc");
-    $arrCountry["Samoa"] = array("code"=>"685","language"=>"en","tonezone"=>"ws");
-    $arrCountry["San Marino"] = array("code"=>"378","language"=>"it","tonezone"=>"sm");
-    $arrCountry["Sao Tome and Principe"] = array("code"=>"239","language"=>"pt","tonezone"=>"st");
-    $arrCountry["Saudi Arabia"] = array("code"=>"966","language"=>"ar","tonezone"=>"sa");
-    $arrCountry["Senegal"] = array("code"=>"221","language"=>"wo","tonezone"=>"sn");
-    $arrCountry["Serbia and Montenegro"] = array("code"=>"381","language"=>"sr","tonezone"=>"cs");
-    $arrCountry["Seychelles"] = array("code"=>"248","language"=>"en","tonezone"=>"sc");
-    $arrCountry["Sierra Leone"] = array("code"=>"232","language"=>"en","tonezone"=>"sl");
-    $arrCountry["Singapore"] = array("code"=>"65","language"=>"zh","tonezone"=>"sg");
-    $arrCountry["Slovakia"] = array("code"=>"421","language"=>"hu","tonezone"=>"sk");
-    $arrCountry["Slovenia"] = array("code"=>"386","language"=>"hu","tonezone"=>"si");
-    $arrCountry["Solomon Islands"] = array("code"=>"677","language"=>"en","tonezone"=>"sb");
-    $arrCountry["Somalia"] = array("code"=>"252","language"=>"ar","tonezone"=>"so");
-    $arrCountry["South Africa"] = array("code"=>"27","language"=>"en","tonezone"=>"za");
-    $arrCountry["South Georgia and the South Sandwich Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Southern Ocean"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Spain"] = array("code"=>"34","language"=>"es","tonezone"=>"es");
-    $arrCountry["Spratly Islands"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Sri Lanka"] = array("code"=>"94","language"=>"si","tonezone"=>"lk");
-    $arrCountry["Sudan"] = array("code"=>"249","language"=>"ar","tonezone"=>"sd");
-    $arrCountry["Suriname"] = array("code"=>"597","language"=>"jv","tonezone"=>"sr");
-    $arrCountry["Svalbard"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Swaziland"] = array("code"=>"268","language"=>"en","tonezone"=>"sz");
-    $arrCountry["Sweden"] = array("code"=>"46","language"=>"sv","tonezone"=>"se");
-    $arrCountry["Switzerland"] = array("code"=>"41","language"=>"de","tonezone"=>"ch");
-    $arrCountry["Syria"] = array("code"=>"963","language"=>"ar","tonezone"=>"sy");
-    $arrCountry["Taiwan"] = array("code"=>"886","language"=>"zh","tonezone"=>"tw");
-    $arrCountry["Tajikistan"] = array("code"=>"992","language"=>"os","tonezone"=>"tj");
-    $arrCountry["Tanzania"] = array("code"=>"255","language"=>"sw","tonezone"=>"tz");
-    $arrCountry["Thailand"] = array("code"=>"66","language"=>"th","tonezone"=>"th");
-    $arrCountry["Togo"] = array("code"=>"228","language"=>"fr","tonezone"=>"tg");
-    $arrCountry["Tokelau"] = array("code"=>"690","language"=>"en","tonezone"=>"tk");
-    $arrCountry["Tonga"] = array("code"=>"676","language"=>"en","tonezone"=>"to");
-    $arrCountry["Trinidad and Tobago"] = array("code"=>"1 868","language"=>"en","tonezone"=>"tt");
-    $arrCountry["Tromelin Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Tunisia"] = array("code"=>"216","language"=>"ar","tonezone"=>"tn");
-    $arrCountry["Turkey"] = array("code"=>"90","language"=>"tr","tonezone"=>"tr");
-    $arrCountry["Turkmenistan"] = array("code"=>"993","language"=>"os","tonezone"=>"tm");
-    $arrCountry["Turks and Caicos Islands"] = array("code"=>"1 649","language"=>"en","tonezone"=>"tc");
-    $arrCountry["Tuvalu"] = array("code"=>"688","language"=>"gil","tonezone"=>"tv");
-    $arrCountry["Uganda"] = array("code"=>"256","language"=>"en","tonezone"=>"ug");
-    $arrCountry["Ukraine"] = array("code"=>"380","language"=>"ru","tonezone"=>"ua");
-    $arrCountry["United Arab Emirates"] = array("code"=>"971","language"=>"ar","tonezone"=>"ae");
-    $arrCountry["United Kingdom"] = array("code"=>"44","language"=>"en","tonezone"=>"gb");
-    $arrCountry["United States"] = array("code"=>"1","language"=>"en","tonezone"=>"us");
-    $arrCountry["United States Pacific Island Wildlife Refuges"] = array("code"=>"","language"=>"en","tonezone"=>"um");
-    $arrCountry["Uruguay"] = array("code"=>"598","language"=>"es","tonezone"=>"uy");
-    $arrCountry["Uzbekistan"] = array("code"=>"998","language"=>"uz","tonezone"=>"uz");
-    $arrCountry["Vanuatu"] = array("code"=>"678","language"=>"en","tonezone"=>"vu");
-    $arrCountry["Venezuela"] = array("code"=>"58","language"=>"es","tonezone"=>"ve");
-    $arrCountry["Vietnam"] = array("code"=>"84","language"=>"vi","tonezone"=>"vn");
-    $arrCountry["Virgin Islands, BRITISH"] = array("code"=>"1 284","language"=>"en","tonezone"=>"vg");
-    $arrCountry["Virgin Islands, U.S."] = array("code"=>"1 340","language"=>"en","tonezone"=>"vi");
-    $arrCountry["Wake Island"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Wallis and Futuna"] = array("code"=>"681","language"=>"fr","tonezone"=>"wf");
-    $arrCountry["West Bank"] = array("code"=>"","language"=>"","tonezone"=>"");
-    $arrCountry["Western Sahara"] = array("code"=>"212","language"=>"","tonezone"=>"");
-    $arrCountry["Yemen"] = array("code"=>"967","language"=>"ar","tonezone"=>"ye");
-    $arrCountry["Zambia"] = array("code"=>"260","language"=>"en","tonezone"=>"zm");
-    $arrCountry["Zimbabwe"] = array("code"=>"263","language"=>"en","tonezone"=>"zw");
-    if(isset($arrCountry[$country])){
-        return $arrCountry[$country];
-    }else
-        return false;
-}
 ?>

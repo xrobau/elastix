@@ -27,241 +27,214 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoFax.class.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
-include_once "libs/paloSantoACL.class.php";
+/*-
+CREATE TABLE fax 
+(
+    clid_name varchar(60), 
+    clid_number varchar(60), 
+    date_creation varchar(20), 
+    dev_id varchar(20), 
+    email varchar(120), 
+    extension varchar(20), 
+    id INTEGER PRIMARY KEY, 
+    name varchar(60), 
+    port varchar(60), 
+    secret varchar(20)
+);
+
+CREATE TABLE SysLog (
+  syslogid INTEGER PRIMARY KEY ,
+  logdate timestamp NOT NULL ,
+  logtext varchar(255) NOT NULL 
+);
+
+CREATE TABLE configuration_fax_mail (
+  id         integer      primary key,
+  remite     varchar(255) NOT NULL,
+  remitente  varchar(255) NOT NULL,
+  subject    varchar(255) NOT NULL,
+  content    varchar(255)
+);
+*/
 
 class paloFax {
 
-    public $dirIaxmodemConf;
-    public $dirHylafaxConf;
-    public $rutaDB;
-    public $firstPort;
-    public $_DB;
-    public $errMsg;
+    var $dirIaxmodemConf;
+    var $dirHylafaxConf;
+    var $rutaDB;
+    var $firstPort;
+    //var $rutaFaxDispatch;
+    //var $rutaInittab;
+    //var $usuarioWeb;
+    //var $grupoWeb;
+    var $_db;
+    var $errMsg;
 
-    function paloFax(&$pDB)
+    function paloFax()
     {
         global $arrConf;
         
         $this->dirIaxmodemConf = "/etc/iaxmodem";
         $this->dirHylafaxConf  = "/var/spool/hylafax/etc";
-        $this->rutaDB = $arrConf['elastix_dsn']['elastix'];
+        $this->rutaDB = "$arrConf[elastix_dbdir]/fax.db";
         $this->firstPort=40000;
-        
-        if (is_object($pDB)) {
-            $this->_DB=& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        } else {
-            $dsn = (string)$pDB;
-            $this->_DB= new paloDB($dsn);
-
-            if (!$this->_DB->connStatus) {
-                $this->errMsg = $this->_DB->errMsg;
-                // debo llenar alguna variable de error
-            } else {
-                // debo llenar alguna variable de error
-            }
+        //instanciar clase paloDB
+        $pDB = new paloDB("sqlite3:///".$this->rutaDB);
+        if(!empty($pDB->errMsg)) {
+                echo "$this->rutaDB: $pDB->errMsg <br>";
+        } else{
+           $this->_db = $pDB;
         }
     }
 
-    function createFax($idUser,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email, $nextPort, $devId=null)
+    function createFaxExtension($virtualFaxName, $extNumber, $extSecret, 
+        $destinationEmail, $CIDName="", $CIDNumber="", $countryCode, $areaCode)
     {
-		$pACL=new paloACL($this->_DB);
-        // 1) Averiguar el numero de dispositivo que se puede usar
-		if(is_null($devId))
-			$devId = $this->getNewDevID();
+        // 1) Averiguar el numero de dispositivo que se puede usar y el numero de puerto
+        $devId = $this->_getNextAvailableDevId();
+        $nextPort=$this->_getNextAvailablePort(); 
 
-		// 2) seteo la propiedades de fax que corresponde a port y dev_id. Esatas propiedades de setean en
-		//user_properties
-		$arrayProp = array("port"=>$nextPort,"dev_id"=>$devId);
-		foreach($arrayProp as $key => $value){
-			$bExito = $pACL->setUserProp($idUser,$key,$value,"fax");
-			if($bExito===false)
-			{
-				$this->errMsg=$pACL->errMsg;
-				break;
-			}
-		}
+        // 2) Creo la extension en la base de datos
+        $bExito = $this->_createFaxIntoDB($virtualFaxName, $extNumber, 
+            $extSecret, $destinationEmail, $devId, $CIDName, $CIDNumber, 
+            $nextPort, $countryCode, $areaCode);
+        if (!$bExito) return FALSE;
 
-        // 3) Añadir el fax a los archivos de configuración
-		if($bExito===false){
-			return false;
-		}else{
-			 if($this->addFaxConfiguration($nextPort,$devId,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email))
-				return true;
-			 else{
-				$this->errMsg=_tr("Error refreshing configuration")." ".$this->errMsg;
-				return false;
-			 }
-		}
+        // 3) Refrescar la configuración
+        return $this->refreshFaxConfiguration();
     }
 
-	//esta funcion se utiliza para obetener todos los faxes configurados en el sistema
-    function getFaxList($idOrganization=null,$idUser=null, $offset=null, $limit=null)
+    function getTotalFax()
+    {
+        $query  = 'SELECT count(*) cnt FROM fax';
+
+        $arrReturn = $this->_db->getFirstRowQuery($query, true);
+        if(is_array($arrReturn) && count($arrReturn)>0) {
+            if(isset($arrReturn['cnt']))
+                return $arrReturn['cnt'];
+            else{
+                $this->errMsg = $this->_db->errMsg;
+                return null;
+            }
+        }
+        else{
+            $this->errMsg = $this->_db->errMsg;
+            return null;
+        }
+    }
+
+    function getFaxList($offset=null, $limit=null)
     {
         $OFFSET = $LIMIT = "";
+
         if($offset!=null) $OFFSET = "OFFSET $offset";
         if($limit!=null) $LIMIT = "LIMIT $limit";
-		$param=array();
-		$where="";
-		$whereU="";
 
-		if(isset($idUser)){
-			if(preg_match("/^[[:digit:]]+$/","$idUser")){
-				$whereU=" and id=?";
-				$param[]=$idUser;
-			}else{
-				$this->errMsg = _tr("User ID is not valid");
-				return false;
-			}
-		}
+        $query  =
+            'SELECT id, name, extension, secret, clid_name, clid_number, '.
+                'dev_id, date_creation, email, country_code, area_code '.
+            "FROM fax $LIMIT $OFFSET";
 
-		if(isset($idOrganization)){
-			if(preg_match("/^[[:digit:]]+$/","$idOrganization")){
-				$where="where ag.id_organization=?";
-				$param[]=$idOrganization;
-			}else{
-				$this->errMsg = _tr("Organization ID is not valid");
-				return false;
-			}
-		}
-
-		$query = "SELECT id, fax_extension as extension, username as email from acl_user JOIN user_properties on id=id_user where property='dev_id' $whereU INTERSECT select au.id, au.fax_extension as extension, au.username as email from acl_user as au JOIN acl_group ag on ag.id=au.id_group $where $LIMIT $OFFSET";
-
-		$arrReturn = $this->_DB->fetchTable($query, true, $param);
-		$arrtmp=$arrReturn;
-        if($arrReturn === FALSE) {
-            $this->errMsg = $this->_DB->errMsg;
-			return $arrReturn; 
-        }else if(count($arrReturn)==0){
-			$this->errMsg = _tr("Don't exist fax created");
-			return $arrReturn;
-		}else{
-			foreach ($arrtmp as $key => $valor) {
-				$query="SELECT property, value from user_properties where category='fax' and id_user=?";
-				$recordProp = $this->_DB->fetchTable($query, true,array($valor['id']));
-				if(count($recordProp)>0){
-					foreach($recordProp as $arrayProp){
-							$arrReturn[$key][$arrayProp["property"]]=$arrayProp["value"];
-					}
-				}
-			}
-		}
+        $arrReturn = $this->_db->fetchTable($query, true);
+        if($arrReturn == FALSE) {
+            $this->errMsg = $this->_db->errMsg;
+            return array();
+        }
         return $arrReturn;
     }
-
-	function getTotalFax($idOrganization=null){
-		$param=array();
-		$where="";
-
-		if(isset($idOrganization)){
-			if(preg_match("/^[[:digit:]]+$/","$idOrganization")){
-				$where="where ag.id_organization=?";
-				$param[0]=$idOrganization;
-			}else{
-				$this->errMsg = _tr("Organization ID is not valid");
-				return false;
-			}
-		}
-
-		$query = "SELECT id from acl_user JOIN user_properties on id=id_user where property='dev_id' INTERSECT select au.id from acl_user as au JOIN acl_group ag on ag.id=au.id_group $where";
-		$arrReturn = $this->_DB->getFirstRowQuery($query, false, $param);
-		if($arrReturn === FALSE) {
-			$this->errMsg = $this->_DB->errMsg;
-			return $arrReturn;
-		}else{
-			return count($arrReturn);
-		}
-	}
 
     function getFaxById($id)
     {
-		$pACL = new paloACL($this->_DB);
-		$faxParameters=array("country_code","area_code","clid_name","clid_number","dev_id");
+        // El id es mayor a cero?
+        if ($id <= 0) return false;
 
-		$query = "SELECT id, name, fax_extension as extension, md5_password as secret, username as email from acl_user where id=?";
-		$arrReturn = $this->_DB->fetchTable($query, true,array($id));
-        if($arrReturn === FALSE) {
-            $this->errMsg = $this->_DB->errMsg;
-			return $arrReturn;
-        }else if(count($arrReturn)==0){
-			$this->errMsg = _tr("Don't exist fax created");
-			return $arrReturn;
-		}else{
-			foreach($faxParameters as $key){
-				$valor=$pACL->getUserProp($id,$key);
-				if($valor!==false){
-					$arrReturn[0][$key]=$valor;
-				}
-			}
-		}
+        $arrReturn = $this->_db->getFirstRowQuery(
+            'SELECT id, name, extension, secret, clid_name, clid_number, '.
+                'dev_id, date_creation, email, port, country_code, area_code '.
+            'FROM fax WHERE id = ?',
+            true, array($id));
+        if($arrReturn == FALSE) {
+            $this->errMsg = $this->_db->errMsg;
+            return array();
+        }
         return $arrReturn;
     }
    
-    function deleteFax($devId)
+    function deleteFaxExtensionById($idFax)
     {
-        return $this->deleteFaxConfiguration($devId);
+        $this->_deleteFaxFromDB($idFax);
+        return $this->refreshFaxConfiguration();
     }
 
-	function editFax($idUser,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email)
+    // Esta funcion compara los archivos de configuracion de iaxmodem y hylafax
+    // y sugiere un ID entero que puede usarse.
+    // TODO: Debo hacer mejor manejo de errores
+    private function _getNextAvailableDevId()
     {
-		$pACL = new paloACL($this->_DB);
-		$devId=$pACL->getUserProp($idUser,"dev_id");
-		$Port=$pACL->getUserProp($idUser,"port");
-        return $this->editFaxConfiguration($Port,$devId,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email);
-    }
-	
+        $arrConfIaxmodem = $this->_getConfigFiles($this->dirIaxmodemConf, "iaxmodem-cfg.ttyIAX");
+        $arrConfHylafax  = $this->_getConfigFiles($this->dirHylafaxConf, "config.ttyIAX");
 
-	private function getNewDevID()
+        if(is_array($arrConfIaxmodem) and is_array($arrConfHylafax)) {
+            $arrIds = array_merge($arrConfIaxmodem, $arrConfHylafax);
+            sort($arrIds);
+
+            $lastId = 0;
+            $id = 0;
+            foreach($arrIds as $id) {
+                $incremento = $id - $lastId;
+                //Si hubo salto >1 significa q hay al menos un eliminado => retornar ese hueco
+                if($incremento>1)
+                    return $lastId+1;
+
+                $lastId = $id;
+            }
+            //Si no hubo hueco retorna el ultimo +1
+            return $id+1;
+        } else {
+            return 0;
+        }
+    }
+
+    // TODO: Hacer mejor manejo de errores 
+    private function _createFaxIntoDB($name, $extension, $secret, $email,
+        $devId, $clidname, $clidnumber, $port, $countryCode, $areaCode)
     {
-		$chars = "abcdefghijkmnpqrstuvwxyz23456789";
-		$existDevId=false;
-		do{
-			srand((double)microtime()*1000000);
-			$pass="";
-			// Genero los 10 caracteres mas
-			while (strlen($pass) < 3) {
-					$num = rand() % 33;
-					$tmp = substr($chars, $num, 1);
-					$pass .= $tmp;
-			}
-		$existDevId = false; //$this->existsDevId($pass);
-		}while ($existDevId);
-
-		return $pass;
+        $bExito = $this->_db->genQuery(
+            'INSERT INTO fax (name, extension, secret, clid_name, clid_number, '.
+                'dev_id, date_creation, email, port, country_code, area_code) '.
+                'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            array($name, $extension, $secret, $clidname, $clidnumber, $devId, 
+                date('Y-m-d H:i:s'), $email, $port, $countryCode, $areaCode));
+        if (!$bExito) {
+            $this->errMsg = $this->_db->errMsg;
+            return false;
+        }
+        return true;
     }
-
-	function existsDevId($devId){
-		$query="Select count(id_user) from user_properties where property='dev_id' and value=?";
-		$result=$this->_DB->getFirstRowQuery($query,false,array($devId));
-		if($result===false){
-			$this->errMsg=$this->_DB->errMsg;
-			return true;
-		}if($result[0]==1){
-			return true;
-		}else{
-			//comprobamos que no exista en el archivo inittab un dev con ese id
-			foreach (file('/etc/inittab') as $sLinea) {
-				$cadena='/^f'.$devId.':2345:respawn/';
-				if((preg_match("$cadena", $sLinea))){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
    
+    private function _deleteFaxFromDB($idFax)
+    {
+        $bExito = $this->_db->genQuery(
+            'DELETE FROM fax WHERE id = ?', 
+            array($idFax));
+        if (!$bExito) {
+            $this->errMsg = $this->_db->errMsg;
+            return false;
+        }
+        return true;
+    }
 
     private function _getConfigFiles($folder, $filePrefix)
     {
         $arrReg    = array();
         $arrSalida = array();
-        $pattern   = "^" . str_replace(".", "\.", $filePrefix) . "([[:alnum:]]+)";
+        $pattern   = "^" . str_replace(".", "\.", $filePrefix) . "([[:digit:]]+)";
     
         // TODO: Falta revisar si tengo permisos para revisar este directorio
     
         if($handle = opendir($folder)) {
             while (false !== ($file = readdir($handle))) {
-                if(preg_match("/^(iaxmodem-cfg\.ttyIAX([[:alnum:]]+))/", $file, $arrReg)) {
+                if(preg_match("/^(iaxmodem-cfg\.ttyIAX([[:digit:]]+))/", $file, $arrReg)) {
                     $arrSalida[$arrReg[1]] = $arrReg[2];
                 }
             }
@@ -273,7 +246,7 @@ class paloFax {
 
     // TODO: Por ahora busco siempre el puerto mayor pero tambien tengo que
     //       buscar si existen huecos.
-    function getNextAvailablePort()
+    private function _getNextAvailablePort()
     {
         $arrPorts=array();
 
@@ -282,7 +255,7 @@ class paloFax {
 
         if($handle = opendir($this->dirIaxmodemConf)) {
             while (false !== ($file = readdir($handle))) {
-                if(preg_match("/^iaxmodem-cfg\.ttyIAX([[:alnum:]]+)/", $file)) {
+                if(preg_match("/^iaxmodem-cfg\.ttyIAX([[:digit:]]+)/", $file)) {
                     // Abro el archivo $file
                     if($fh=@fopen("$this->dirIaxmodemConf/$file", "r")) {
                         while($linea=fgets($fh, 10240)) {
@@ -313,18 +286,18 @@ class paloFax {
 
             return $puertoDisponible;
         } else {
-			$this->errMsg = _tr("Don't exist directory iaxmodem");
             return false;
         }
     }
 
+/*
     function getFaxStatus()
     {
         $arrStatus = array();
         exec("/usr/bin/faxstat", $arrOutCmd);
 
         foreach($arrOutCmd as $linea) {
-            if(preg_match("/^Modem (ttyIAX[[:alnum:]]{1,3})/", $linea, $arrReg)) {
+            if(preg_match("/^Modem (ttyIAX[[:digit:]]{1,3})/", $linea, $arrReg)) {
                 list($modem, $status) = explode(":", $linea);
                 $arrStatus[$arrReg[1]] = $status; 
             }
@@ -332,231 +305,123 @@ class paloFax {
 
         return $arrStatus;
     }
-
-    //Obtener estado en el momento de enviar Fax
-    function getSendStatus($destine)
+*/
+    /**
+     * Procedimiento para reportar el estado completo de la cola de faxes.
+     * 
+     * @return  mixed   Arreglo con el siguiente formato:
+     *  array(
+     *      'modems' => array(
+     *          'ttyIAX1' => 'Running and idle',
+     *          'ttyIAX2' => 'Running and idle',
+     *      ),
+     *      'jobs'  =>  array(
+     *          ...
+     *      ),     
+     * 
+     *  )
+     */
+    function getFaxStatus()
     {
-        $arrStatus = array();
-        $status = array();
-        $cont = 0;
+        /*
+        [root@elx2 ~]# faxstat -s -d
+        HylaFAX scheduler on localhost: Running
+        Modem ttyIAX1 (): Running and idle
+        Modem ttyIAX2 (): Running and idle
         
-        exec("/usr/bin/faxstat -s", $arrOutCmd);
-
-        foreach($arrOutCmd as $linea) {
-                 if($linea==""||(preg_match("/^Modem/", $linea, $arrReg))||(preg_match("/^HylaFAX/", $linea, $arrReg))||(preg_match("/^JID/", $linea, $arrReg))) {
-                 }else{
-                        $tmpstatus = explode(" ",$linea);
-                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
-                        if($arrDestine[4]==$destine){
-                        $status["dial"][] = $arrDestine[6];
-                        $status["jid"][] = $arrDestine[0];
-                        $status["status"][]=$arrDestine[8]." ".$arrDestine[9]." ".$arrDestine[10];
-               }
-
-               }
-            }
-
-        return $status;
-    }
-    
-    //Obtener El estado de un fax dado el jid
-    function getStateFax($jid)
-    {
-        $arrStatus = array();
-        $status = array();
-        $cont = 0;
-
-        exec("/usr/bin/faxstat -sdl output", $arrOutCmd);
-
-        foreach($arrOutCmd as $linea) {
-                 if($linea==""||(preg_match("/^Modem/", $linea, $arrReg))||(preg_match("/^HylaFAX/", $linea, $arrReg))||(preg_match("/^JID/", $linea, $arrReg))) {
-                 }else{
-                        $tmpstatus = explode(" ",$linea);
-                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
-                        if($arrDestine[0]==$jid){
-                           $status["state"][]=$arrDestine;
-                        }
-
-               }
-            }
-
-        return $status;
-    }
-     //Obtener el estado de todos los faxes enviados
-    function setFaxMsg()
-    {
-        $arrStatus = array();
-        $status = array();
-        $cont = 0;
-
-        exec("/usr/bin/faxstat -d", $arrOutCmd);
-
-        foreach($arrOutCmd as $linea) {
-                 if($linea==""||(preg_match("/^Modem/", $linea, $arrReg))||(preg_match("/^HylaFAX/", $linea, $arrReg))||(preg_match("/^JID/", $linea, $arrReg))) {
-                 }else{
-                        $tmpstatus = explode(" ",$linea);
-                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
-                        $id = $arrDestine[0];
-                        // if($arrDestine[0]==$jid){
-                           $status["state"][$id]=$arrDestine;
-                       // }
-
-               }
-            }
-        //$status["jid"][]=$jid;
-        return $status;
-    }
-    //Obtener el Estado de los IAX2
-    function checkFaxStatus($destine){
-        global $arrConf;
-        
-        $apDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-        $pACL = new paloACL($apDB);   
-        $adestine = explode(",",$destine);   
-        foreach ($adestine  as $destine){
-            $query="select name from iax where cid_number=?";
-            $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
-            $status = array();
-            $iaxname[] = $arrReturn['name'];
+        JID  Pri S  Owner Number       Pages Dials     TTS Status
+        28   125 S asteri 1099          0:1   2:12   17:27 Busy signal detected
+         */
+        $status = array('modems' => array(), 'jobs' => array());
+        $regexpModem = '/^Modem (ttyIAX\d+).*?:\s*(.*)/';
+        $regexpJob = '/^(\d+)\s+(\d+)\s+(\w+)\s+(\S+)\s+(\S+)\s+(\d+):(\d+)\s+(\d+):(\d+)\s*(\d+:\d+)?\s*(.*)/';    
+        $output = $retval = NULL;
+        exec('/usr/bin/faxstat -sdl', $output, $retval);
+        foreach ($output as $s) {
+        	$regs = NULL;
+            if (preg_match($regexpModem, $s, $regs)) {
+        		$status['modems'][$regs[1]] = $regs[2];
+        	} elseif (preg_match($regexpJob, $s, $regs)) {
+        		$status['jobs'][(int)$regs[1]] = array(
+                    'jobid'         =>  $regs[1],
+                    'priority'      =>  $regs[2],
+                    'state'         =>  $regs[3],
+                    'owner'         =>  $regs[4],
+                    'outnum'        =>  $regs[5],
+                    'sentpages'     =>  $regs[6],
+                    'totalpages'    =>  $regs[7],
+                    'retries'       =>  $regs[8],
+                    'totalretries'  =>  $regs[9],
+                    'timetosend'    =>  $regs[10],
+                    'status'        =>  $regs[11],
+                );
+        	}
         }
- 
-        //   $arrReturn = $pACL->_DB->getFirstRowQuery($query,true,array($destine));     
-        //   $status = array();
-        //   $iaxname = $arrReturn['name'];
-        foreach($iaxname as $iaxname2){
-            exec("/usr/sbin/asterisk -rx 'iax2 show peer $iaxname2'", $output, $retval);
-
-            foreach($output as $linea) {
-                //if((preg_match("/^Status/", $linea, $arrReg))) {
-
-                // }else{
-                        $flag = explode("_", $iaxname2);
-                        $tmpstatus = explode(" ",$linea);
-                        $arrDestine = array_values(array_diff($tmpstatus, array('')));
-                        $sizeArr = count($arrDestine);
-                        if(isset($arrDestine[0]))
-
-                        if($arrDestine[0]=="Status")
-                            $status[$flag[1]]="Fax ".$arrDestine[2]."_". $iaxname2; 
-                //      }
-                    }
-        }
-       return $status;
+        ksort($status['jobs']);
+        return $status;
     }
 
-    function getConfigurationSendingFaxMail($id_user)
+    function editFaxExtension($idFax,$virtualFaxName, $extNumber, $extSecret, $destinationEmail, $CIDName, $CIDNumber, $devId, $port,$countryCode, $areaCode)
     {
-		$arrayProp = array("fax_subject","fax_content");
-		$pACL = new paloACL($this->_DB);
-		$query="select name as remitente, username as remite from acl_user where id=?";
-        $arrReturn = $this->_DB->getFirstRowQuery($query,true,array($id_user));
-        if($arrReturn === FALSE) {
-            $this->errMsg = $this->_DB->errMsg;
+        // 2) Editar la extension en la base de datos 
+        $bExito = $this->_editFaxInDB($idFax,$virtualFaxName, $extNumber, $extSecret, $destinationEmail, $devId, $CIDName, $CIDNumber, $port,$countryCode, $areaCode);
+        if (!$bExito) return FALSE;
+        return $this->refreshFaxConfiguration();
+    }
+
+    private function _editFaxInDB($idFax, $name, $extension, $secret, $email, 
+        $devId, $clidname, $clidnumber, $port, $countryCode, $areaCode)
+    {
+        $bExito = $this->_db->genQuery(
+            'UPDATE fax SET name = ?, extension = ?, secret = ?, clid_name = ?, '.
+                'clid_number = ?, dev_id = ?, email = ?, port = ?, '.
+                'area_code = ?, country_code = ? '.
+            'WHERE id = ?', 
+            array($name, $extension, $secret, $clidname, $clidnumber, $devId, 
+                $email, $port, $areaCode, $countryCode, $idFax));
+        if (!$bExito) {
+            $this->errMsg = $this->_db->errMsg;
+            return false;
+        }
+        return TRUE;
+    }
+
+    function getConfigurationSendingFaxMail()
+    {
+        $arrReturn = $this->_db->getFirstRowQuery(
+            'SELECT remite, remitente, subject, content '.
+            'FROM configuration_fax_mail WHERE id = 1', true);
+        if($arrReturn == FALSE) {
+            $this->errMsg = $this->_db->errMsg;
             return array();
-        }else if(count($arrReturn)==0){
-			$this->errMsg = _tr("Don't exist configuration fax associated with this user");
-		}else{
-			foreach($arrayProp as $key){
-				$valor=$pACL->getUserProp($id_user,$key);
-				if($valor!==false){
-					$arrReturn[$key]=$valor;
-				}
-			}
-		}
+        }
         return $arrReturn;
     }
 
-	//se actualiza los campos en user_properties con key fax_subject y fax_content pertenecientes
-	//a la categoria fax_content
-	//los campos anterioeres llamados remite y remitente se obtienen de los campos name y username de
-	//la tabla acl_usr
-    function setConfigurationSendingFaxMail($id_user, $subject, $content)
+    function setConfigurationSendingFaxMail($remite, $remitente, $subject, $content)
     {
         $bExito = false;
-		$pACL = new paloACL($this->_DB);
-		$arrayProp = array("fax_subject"=>$subject,"fax_content"=>$content);
-		foreach($arrayProp as $key => $value){
-			$bExito = $pACL->setUserProp($id,$key,$value,"fax");
-			if($bExito===false)
-			{
-				break;
-			}
-		}
+        $bExito = $this->_db->genQuery(
+            'UPDATE configuration_fax_mail SET remite = ?, remitente = ?, '.
+                'subject = ?, content = ? WHERE id = 1',
+            array($remite, $remitente, $subject, $content));
+        if (!$bExito) {
+            $this->errMsg = $this->_db->errMsg;
+        }
         return $bExito; 
     }
 
     /**
      * Procedimiento que llama al ayudante faxconfig para que modifique la
-     * información de faxes virtuales creando uno nuevo con los datos dados
+     * información de faxes virtuales para que se ajuste a lo almacenado en la
+     * base de datos.
      * 
      * @return bool VERDADERO en caso de éxito, FALSO en error
      */
-    function addFaxConfiguration($nextPort,$devId,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email)
+    function refreshFaxConfiguration()
     {
         $this->errMsg = '';
-        $sComando = '/usr/bin/elastix-helper faxconfig add '."$devId $nextPort $country_code $area_code $clid_number $extension $secret $email $clid_name".' 2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-	 /**
-     * Procedimiento que llama al ayudante faxconfig para que modifique la
-     * información de faxes virtuales creando uno nuevo con los datos dados
-     *
-     * @return bool VERDADERO en caso de éxito, FALSO en error
-     */
-    function editFaxConfiguration($nextPort,$devId,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email)
-    {
-        $this->errMsg = '';
-        $sComando = '/usr/bin/elastix-helper faxconfig edit '."$devId $nextPort $country_code $area_code $clid_number $extension $secret $email $clid_name".' 2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-	/**
-     * Procedimiento que llama al ayudante faxconfig para que modifique la
-     * información de faxes virtuales para borrar un fax dado su dev_id
-     *
-     * @return bool VERDADERO en caso de éxito, FALSO en error
-     */
-    function deleteFaxConfiguration($dev_id)
-    {
-        $this->errMsg = '';
-        $sComando = '/usr/bin/elastix-helper faxconfig delete '.$dev_id.'  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-    function restartService(){
-        $sComando ='/usr/bin/elastix-helper faxconfig restartService  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-    // esta funcion es utilizada para escribir los archivos
-    // /etc/init/elastix_fax.config y /var/spool/hylafax/etc/FaxDispatch
-    function writeFilesFax(){
-        $sComando ='/usr/bin/elastix-helper faxconfig rewriteFileFax 2>&1';
+        $sComando = '/usr/bin/elastix-helper faxconfig --refresh 2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {

@@ -48,5 +48,9 @@ $arrLangModule=array(
 "out" => "out",
 "ERROR" => "ERROR",
 "Type" => "Type",
+'done' => 'Done',
+'failed' => 'Failed',
+'killed' => 'Killed',
+'timedout' => 'Timed Out',
 );
 ?>

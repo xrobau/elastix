@@ -30,8 +30,6 @@
 include_once "libs/paloSantoFax.class.php";
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoJSON.class.php";
-include_once "libs/paloSantoOrganization.class.php";
-include_once "libs/paloSantoForm.class.php";
 
 function _moduleContent($smarty, $module_name)
 {
@@ -58,120 +56,62 @@ function _moduleContent($smarty, $module_name)
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-	//conexion resource
-    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-
-	//obtenemos las credenciales del usuario
-	$arrCredentials=getUserCredentials();
-
     $accion = getAction();
     switch($accion){
         case "checkFaxStatus":
             $contenidoModulo = checkFaxStatus("faxListStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang);
             break;
-         case "checkFaxStatus2":
-            $contenidoModulo = faxListStatus2("faxListStatus2",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
-            break;
-        case "checkSendStatus":
-            $contenidoModulo = faxSendStatus("faxSendStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
-            break;
-        case "stateFax":
-            $contenidoModulo = stateFax("stateFax",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
-            break;
-        case "setFaxMsg":
-            $contenidoModulo = setFaxMsg("setFaxMsg",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB);
-            break;
         default:
-            $contenidoModulo = listFax($pDB, $smarty, $module_name, $local_templates_dir, $arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
+            $contenidoModulo = listFax($smarty, $module_name, $local_templates_dir);
             break;
     }
     return $contenidoModulo;
 }
 
-function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1, $userAccount, $idOrganization)
+function listFax($smarty, $module_name, $local_templates_dir)
 {
     $limit = 30;
-    $oFax  = new paloFax($pDB);
-	$pACL = new paloACL($pDB);
-	$pORGZ = new paloSantoOrganization($pDB);
+    $oFax  = new paloFax();
+    $total = $oFax->getTotalFax();
 
-	$idOrgFil=getParameter("idOrganization");
-
-	if($userLevel1=="superadmin"){
-		if(isset($idOrgFil)){
-			$url = "?menu=$module_name&idOrganization=$idOrgFil";
-			if($idOrgFil=="all")
-				$idOrgFil=null;
-		}else
-			$url = "?menu=$module_name&idOrganization=all";
-	}else{
-		$idOrgFil=$idOrganization;
-		$url = "?menu=$module_name&idOrganization=$idOrgFil";
-	}
-
-	if($userLevel1!="other"){
-		$total = $oFax->getTotalFax($idOrgFil);
-		$idUser = null;
-	}else{
-		$total = 1;
-		$idUser=$pACL->getIdUser($userAccount);
-	}	
-
-   $oGrid = new paloSantoGrid($smarty);
+    $oGrid = new paloSantoGrid($smarty);
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $oGrid->pagingShow(true);
-    $oGrid->setURL($url);
+    $oGrid->setURL("?menu=faxlist");
     $oGrid->setTitle(_tr("Virtual Fax List"));
     $oGrid->setIcon("/modules/$module_name/images/fax_virtual_fax_list.png");
 
-     $arrColumns = array(
+    $arrColumns = array(
+        _tr("Virtual Fax Name"),
         _tr("Fax Extension"),
+        _tr("Secret"),
         _tr("Destination Email"),
         _tr("Caller ID Name"),
         _tr("Caller ID Number"),
-        _tr("Status"),
-        "");
+        _tr("Status"));
     $oGrid->setColumns($arrColumns);
     $offset = $oGrid->calculateOffset();
 
-	$arrFax = $oFax->getFaxList($idOrgFil,$idUser,$offset,$limit);
+    $arrFax       = $oFax->getFaxList($offset,$limit);
     $arrFaxStatus = $oFax->getFaxStatus();
 
     $arrData = array();
     foreach($arrFax as $fax) {
-			$arrTmp    = array();
-			$arrTmp[0] = $fax['extension'];
-			$arrTmp[1] = $fax['email'];
-			$arrTmp[2] = $fax['clid_name'] . "&nbsp;";
-			$arrTmp[3] = $fax['clid_number'] . "&nbsp;";
-			$arrTmp[4] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
-            $arrTmp[5] = "<div class='load' id='".$fax['extension']."' style='text-align: center;'><strong>?</strong></div>";
-
-			$arrData[] = $arrTmp;
+        $arrTmp    = array();
+        $arrTmp[0] = "&nbsp;<a href='?menu=faxnew&action=view&id=".$fax['id']."'>".$fax['name']."</a>";
+        $arrTmp[1] = $fax['extension'];
+        $arrTmp[2] = $fax['secret'];
+        $arrTmp[3] = $fax['email'];
+        $arrTmp[4] = $fax['clid_name'] . "&nbsp;";
+        $arrTmp[5] = $fax['clid_number'] . "&nbsp;";
+        $arrTmp[6] = $arrFaxStatus['modems']['ttyIAX' . $fax['dev_id']].' on ttyIAX' . $fax['dev_id'];
+        $arrData[] = $arrTmp;
     }
 
     $session = getSession();
     $session['faxlist']['faxListStatus'] = $arrData;
     putSession($session);
-
-    if($userLevel1 == "superadmin"){
-		$arrOrgz=array("all"=>"all");
-		foreach(($pORGZ->getOrganization()) as $value){
-			if($value["id"]!=1)
-				$arrOrgz[$value["id"]]=$value["name"];
-		}
-		$arrFormElements = createFieldFilter($arrOrgz);
-		$oFilterForm = new paloForm($smarty, $arrFormElements);
-		if(isset($idOrgFil))
-			$_POST["idOrganization"]=$idOrgFil;
-		else{
-			$_POST["idOrganization"]="all";
-		}
-		$oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$_POST["idOrganization"]], $_POST, array("idOrganization" => "all"),true);
-		$htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-		$oGrid->showFilter(trim($htmlFilter));
-	}
 
     $oGrid->setData($arrData);
     return $oGrid->fetchGrid();
@@ -195,8 +135,6 @@ function checkFaxStatus($function, $smarty, $module_name, $local_templates_dir, 
         $i++;
         sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
     }
-	$return = $function($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang);
-	$data   = $return['data'];
    return $data;
 }
 
@@ -209,14 +147,15 @@ function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $a
     $arrFaxStatus = $oFax->getFaxStatus();
     $arrData    = array();
     foreach($arrFax as $fax) {
-        $arrData[$fax['extension']] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
+        $arrData[$fax['extension']] = $arrFaxStatus['modems']['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
     }
 
     $statusArr    = thereChanges($arrData);
     if(empty($statusArr))
         $status = FALSE;
     $jsonObject = new PaloSantoJSON();
-    if($status){
+    if($status){ //este status es true solo cuando el tecnico acepto al customer (al hacer click)
+        //sleep(2); //por si acaso se desincroniza en la tabla customer el campo attended y llenarse los datos de id_chat y id_chat_time
         $msgResponse["faxes"] = $statusArr;
         $jsonObject->set_status("CHANGED");
         $jsonObject->set_message($msgResponse);
@@ -224,7 +163,7 @@ function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $a
         $jsonObject->set_status("NOCHANGED");
     }
 
-    return array("there_was_change" => true,
+    return array("there_was_change" => $status,
                  "data" => $jsonObject->createJSON());
 }
 
@@ -236,101 +175,17 @@ function thereChanges($data){
         $arrData = $session['faxlist']['faxListStatus'];
     $arraResult = array();
     foreach($arrData as $key => $value){
-        $fax = $value[0];
-        $status = $value[4];
+        $fax = $value[1];
+        $status = $value[6];
         if(isset($data[$fax]) & $data[$fax] != $status){
             $arraResult[$fax] = $data[$fax];
-            $arrData[$key][4] = $data[$fax];
+            $arrData[$key][6] = $data[$fax];
         }
     }
     $session['faxlist']['faxListStatus'] = $arrData;
     putSession($session);
     return $arraResult;
 }
-//Verifica el Tono del Fax
-function faxListStatus2($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB)
-{
-    $oFax    = new paloFax($pDB);
-    $arrFax  = $oFax->getFaxList();
-    $status  = TRUE;
-    $end = count($arrFax);
-    //$arrFaxStatus = $oFax->getFaxStatus();
-    //$arrFaxStatus    = array();
-    $ext = getParameter('ext');
-    $arrFaxStatus = $oFax->checkFaxStatus($ext);
-    $statusArr =  "Fax";
-
-    $jsonObject = new PaloSantoJSON();
-    $msgResponse["faxes"] = $arrFaxStatus;
-
-    $jsonObject->set_status($statusArr);
-    $jsonObject->set_message($msgResponse);
-
-    return $jsonObject->createJSON();
-}
-//Verificar el Estado del Envío del fax
-function faxSendStatus($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB)
-{
-    $oFax    = new paloFax($pDB);
-    $arrFax  = $oFax->getFaxList();
-    $status  = TRUE;
-    $end = count($arrFax);
-    //$arrFaxStatus = $oFax->getFaxStatus();
-    //$arrFaxStatus    = array();
-    $ext = getParameter('ext');
-    $arrFaxStatus = $oFax->getSendStatus($ext);
-    $statusArr =  "Fax";
-
-    $jsonObject = new PaloSantoJSON();
-    $msgResponse = $arrFaxStatus;
-
-    $jsonObject->set_status($statusArr);
-    $jsonObject->set_message($msgResponse);
-
-    return $jsonObject->createJSON();
-}
-//Verificar si el fax se  Envío o canceló
-function stateFax($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB)
-{
-    $oFax    = new paloFax($pDB);
-    $arrFax  = $oFax->getFaxList();
-    $status  = TRUE;
-    $end = count($arrFax);
-    //$arrFaxStatus = $oFax->getFaxStatus();
-    //$arrFaxStatus    = array();
-    $jid = getParameter('jid');
-    $arrFaxStatus = $oFax->getStateFax($jid);
-    $statusArr =  "Fax";
-
-    $jsonObject = new PaloSantoJSON();
-    $msgResponse = $arrFaxStatus;
-
-    $jsonObject->set_status($statusArr);
-    $jsonObject->set_message($msgResponse);
-
-    return $jsonObject->createJSON();
-}
-
-//Obtener Estado del Fax en Faxviewer: Enviado o Error  
-function setFaxMsg($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB)
-{
-    $oFax    = new paloFax($pDB);
-    $arrFax  = $oFax->getFaxList();
-    $status  = TRUE;
-    $end = count($arrFax);
-    $arrFaxStatus = $oFax->setFaxMsg();
-    $statusArr =  "Fax";
-
-    $jsonObject = new PaloSantoJSON();
-    $msgResponse = $arrFaxStatus;
-
-    $jsonObject->set_status($statusArr);
-    $jsonObject->set_message($msgResponse);
-
-    return $jsonObject->createJSON();
-}
-
-
 
 function getSession()
 {
@@ -353,32 +208,10 @@ function putSession($data)//data es un arreglo
     }
 }
 
-function createFieldFilter($arrOrgz)
-{
-    $arrFormElements = array(
-			"idOrganization" => array( "LABEL"                  => _tr("Organization"),
-                                        "REQUIRED"               => "no",
-                                        "INPUT_TYPE"             => "SELECT",
-                                        "INPUT_EXTRA_PARAM"      => $arrOrgz,
-                                        "VALIDATION_TYPE"        => "text",
-                                        "VALIDATION_EXTRA_PARAM" => "",
-										"ONCHANGE"	       => "javascript:submit();"),
-                    );
-    return $arrFormElements;
-}
-
 function getAction()
 {
     if(getParameter("action")=="checkFaxStatus")
         return "checkFaxStatus";
-     if(getParameter("action")=="checkFaxStatus2")
-        return "checkFaxStatus2";
-    if(getParameter("action")=="checkSendStatus")
-        return "checkSendStatus";
-    if(getParameter("action")=="stateFax")
-        return "stateFax";
-    if(getParameter("action")=="setFaxMsg")
-        return "setFaxMsg";
     else
         return "default";
 }

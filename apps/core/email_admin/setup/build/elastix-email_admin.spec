@@ -2,15 +2,16 @@
 
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 1
+Version: 2.3.0
+Release: 12
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.3.0-5
+Prereq: RoundCubeMail
 Prereq: php-imap
 Prereq: postfix, spamassassin, cyrus-imapd
 Requires: mailman >= 2.1.9
@@ -194,10 +195,60 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
-* Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
+* Sat Jan 12 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: The behavior of the checkbox in the sticky-notes its now normal,
+  showing the checkbox instead of the ON-OFF slider button. Fixes Elastix BUG
+  #1424 - item 3
+  SVN Rev[4582]
+
+* Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4497]
+
+* Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email Accounts: do not display the "Export Accounts" link until an
+  email domain is selected. Fixes part 7 of Elastix bug #1416.
+  SVN Rev[4481]
+
+* Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email Accounts: do not attempt to erase an account in case of errors
+  while creating or updating an account. Account creation was affected if new
+  account name collided with an existing one.
+  SVN Rev[4454]
+- FIXED: Email_admin: (regression) privileged script for domain creation would
+  not add the key virtual_mailbox_domains if the key was missing in main.cf.
+  SVN Rev[4452]
+
+* Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4441]
+
+* Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - CHANGED: Email_admin: comment out statement that logs every single IMAP 
   command, inherited from the Stickgate project.
   SVN Rev[4420] 
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4356]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -212,36 +263,129 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: email_admin - Build/elastix-email_admin.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
+* Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email Relay: create new helper script 'relayconfig' and use it to 
+  reimplement the modification of the email relay list. This removes the last
+  four sudo chown instances in the Elastix core packages.
+  SVN Rev[4336] 
+- CHANGED: Email List: extend helper script 'mailman_config' to add action to 
+  check main.cf, and use it to reimplement the check. This removes one indirect 
+  use of sudo chown via escribir_configuracion.
+  SVN Rev[4334] 
+- CHANGED: SMTP Relay: create new helper script 'remotesmtp' and use it to 
+  reimplement administration of SMTP relay. This removes six instances of sudo
+  chown, two uses of sudo to restart services, and one indirect use of sudo 
+  chown via escribir_configuracion.
+  SVN Rev[4333]
+- CHANGED: SMTP Relay: mark some methods as private, and some cleanup.
+  SVN Rev[4332]
+
+* Fri Oct  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: extend spamconfig helper to refresh spam filter on request
+  and reimplement checkSpamFolder.php on top of this. This unifies the 
+  implementation of the spam script refresh and simplifies the antispam API.
+  SVN Rev[4328]
+- CHANGED: Antispam: reimplement GUI operations via the spamconfig helper 
+  module. This manages to remove a large amount of instances of sudo chown.
+  SVN Rev[4327]
+- CHANGED: Antispam: the spam removal interval is empty if antispam cronfile 
+  does not exist. Take advantage of this to simplify display logic and remove 
+  one sudo chown.
+  SVN Rev[4326]
+- ADDED: New helper script 'spamconfig'. This script enables and disables spam
+  filters for the Antispam module.
+  SVN Rev[4325]
+
+* Thu Sep 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: methods uploadScriptSieve and deleteScriptSieve are used
+  only when enabling spam filtering, so the calls to the methods are now 
+  integrated to activateSpamFilter. Now the two methods can become private.
+  SVN Rev[4219]
+
+* Tue Sep 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: mark some methods in paloSantoAntispam as private. Comment
+  out what appears to be dead code. Replace tabs with spaces.
+  SVN Rev[4218]
+
+* Mon Sep 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Accounts: reimplement creation and update of email accounts via the
+  'email_account' privileged script. This achieves the following:
+  The paloEmail API gets cleaned up and becomes more consistent.
+  Removes the need for granting sudo access to saslpasswd2.
+  Removes the need for granting sudo access to postmap (though one unprivileged
+  use remains in remote_smtp).
+  Removes some uses of sudo chown, and some indirect uses via paloConfig.
+- CHANGED: Accounts: fix remaining methods in paloEmail to use SQL parameters.
+  SVN Rev[4216]
+- CHANGED: Accounts: extend email_account helper script to change the password
+  of a single mail account. Rework invocation of saslpasswd2 to use popen 
+  instead of echo via the shell.
+  SVN Rev[4215]
+
+* Fri Sep 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Accounts: reimplement account removal using the email_account helper
+  script. Temporarily rename methods that use conflicting names.
+  SVN Rev[4214]
+- CHANGED: Accounts: introduce methods getAccountQuota() and setAccountQuota()
+  in paloSantoEmail, use them to clean up quota management.
+- CHANGED: Accounts: replace tabs with spaces and clean up indentation.
+  SVN Rev[4212]
+- CHANGED: Domains: Clean up and simplify domain manipulation API and usage.
+- CHANGED: Domains: use SQL placeholders on domain account listing.
+  SVN Rev[4211]
+
+* Thu Sep 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Accounts: extend email_account helper script to add and remove 
+  individual mail accounts.
+  SVN Rev[4210]
+
+* Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Domains: extend email_account helper script to add and remove 
+  mail domains. Domain operations are now reimplemented on top of the extended
+  email_account helper. This removes some uses of paloSantoConfig (indirect
+  sudo chown) and removes the need to grant sudo access to /usr/sbin/postfix.
+  SVN Rev[4199]
+
+* Tue Sep 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email Admin: remove one method that is not used anywhere, and make
+  a few other methods private in paloSantoEmail.
+  SVN Rev[4196]
 
 * Wed Sep 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: remove privilege escalation vulnerability on privileged
   script for mailbox rebuild.
   SVN Rev[4182]
 
-* Thu Aug 9 2012 German Macas <gmacas@palosanto.com>
-- FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
-  Fixed graphic bug in ON/OFF Button
-  SVN Rev[4102]
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
-* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Email_admin - Setup/PalosantoEmail: Where changed lib
-  paloSantoEmail.class.php to support multitenant
-  SVN Rev[4043]
+* Thu Aug 09 2012 German Macas <gmacas@palosanto.com>
+- FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
+  Fixed graphic bug in ON/OFF Button.
+  SVN Rev[4101]
+
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4021]
 
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email List: Fix XSS vulnerability.
-  SVN Rev[4011]
+  SVN REV[4011]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Remote SMTP: only check authentication on activation, not deactivation.
-  SVN Rev[3987]
+  SVN REV[3987]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Postfix Stats: the cron job should explicitly set the default timezone.
-  SVN Rev[3966]
+  SVN REV[3966]
+
+* Fri Apr 13 2012 Luis Abarca <labarca@palosanto.com>
+- ADDED: Build - SPEC's: The spec files were added to the corresponding modules 
+  and the framework.
+  SVN REV[3849]
 
 * Mon Apr 02 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-6
 - CHANGED: Email_Admin - Remote_Smtp: Changed in index.php and remote.js to 

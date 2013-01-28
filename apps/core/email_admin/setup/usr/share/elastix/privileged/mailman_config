@@ -62,6 +62,9 @@ switch($argv[1]){
 	    exit(1);
 	remove_members($argv[2],$argv[3]);
 	break;
+    case 'check_postfix_file':
+	check_postfix_file();
+	break;
     default:
 	exit(1);
 	break;
@@ -220,5 +223,41 @@ function remove_members($members,$listName)
     }
     else
 	exit(1);
+}
+
+function check_postfix_file()
+{
+    // Write fixed properties to /etc/postfix/main.cf
+    $sConfigFile = '/etc/postfix/main.cf'; 
+    $lines = file($sConfigFile);
+    if (!is_array($lines)) {
+        fwrite(STDERR, "ERR: failed to read $sConfigFile\n");
+        exit(1);
+    }
+    $bModified = FALSE;
+    for ($i = 0; $i < count($lines); $i++) {
+    	$regs = NULL;
+        if (preg_match('/^(\w+)\s*=\s*(.*)/', $lines[$i], $regs)) {
+            switch ($regs[1]) {
+            case 'alias_maps':
+                if ($regs[2] != 'hash:/etc/aliases') {
+                    $lines[$i] = "alias_maps = hash:/etc/aliases\n";
+                    $bModified = TRUE;
+                }
+                break;
+            case 'virtual_alias_maps':
+                if ($regs[2] != 'hash:/etc/postfix/virtual') {
+                    $lines[$i] = "virtual_alias_maps = hash:/etc/postfix/virtual\n";
+                    $bModified = TRUE;
+                }
+                break;
+            }
+        }
+    }
+    if ($bModified && FALSE === file_put_contents($sConfigFile, $lines)) {
+        fwrite(STDERR, "ERR: failed to write $sConfigFile\n");
+        exit(1);
+    }
+    exit(0);
 }
 ?>

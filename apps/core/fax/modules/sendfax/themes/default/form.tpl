@@ -6,7 +6,7 @@
             <input class="button" type="submit" name="save_new" value="{$SEND}">&nbsp;&nbsp;
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
-	<td align="center" width='50%'><div id="statusFax" style="font-size:13px;color:red;"></div><div id="success_fax" style="display:block; color: blue; text-transform:uppercase;"></div><div id="sending_fax" style="display:block; color: red;">{$SENDING_FAX}</div></td>
+	<td align="center"><div id="statusFax" style="font-size:13px;color:red;"></div><div id="success_fax" style="display:none; color: blue; text-transform:uppercase;">{$SEND_FAX_SUCCESS}</div><div id="sending_fax" style="display:block; color: red;">{$SENDING_FAX}</div></td>
         {elseif $mode eq 'view'}
         <td align="left">
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
@@ -23,11 +23,7 @@
 <table class="tabForm" style="font-size: 16px;" width="100%" >
     <tr class="letra12">
         <td align="left" width="180"><b>{$from.LABEL}: <span  class="required">*</span></b></td>
-		{if !$isOther }
-			<td>{$FAX_USER}</td>
-		{else}
-			<td>{$from.INPUT}</td>
-		{/if}
+        <td>{$from.INPUT}</td>
     </tr>
 
     <tr class="letra12">
@@ -58,10 +54,9 @@
     </tr>
 
 </table>
-<input type='hidden' name='jid' id='jid' value='' />
 <input class="button" type="hidden" name="id" value="{$ID}" />
 <input type='hidden' name='filename' value='{$filename}' />
-
+<input type='hidden' name='jobid' id='jobid' value='{$JOBID}' />
 {literal}
     <script type="text/javascript">
         Activate_Option_Fax();

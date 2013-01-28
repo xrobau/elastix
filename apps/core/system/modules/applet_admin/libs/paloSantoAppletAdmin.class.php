@@ -39,10 +39,10 @@ class paloSantoAppletAdmin {
         global $arrConf;
         $dsn = "sqlite3:///$arrConf[elastix_dbdir]/dashboard.db";
         $pDB  = new paloDB($dsn);
-        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+        $pDB2 = new paloDB($arrConf['elastix_dsn']['acl']);
         $pACL = new paloACL($pDB2);
 
-        if($pACL->isUserSuperAdmin($user))
+        if($pACL->isUserAdministratorGroup($user))
             $typeUser = "admin";
         else
             $typeUser = "no_admin";
@@ -93,10 +93,10 @@ class paloSantoAppletAdmin {
         $pDB  = new paloDB($dsn);
 
         if(is_array($arrIDs_DAU) & count($arrIDs_DAU)>0){
-            $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
+            $pDB2 = new paloDB($arrConf['elastix_dsn']['acl']);
             $pACL = new paloACL($pDB2);
 
-            if($pACL->isUserSuperAdmin($user))
+            if($pACL->isUserAdministratorGroup($user))
                 $typeUser = "admin";
             else
                 $typeUser = "no_admin";

@@ -46,7 +46,8 @@ $(document).ready(
                     var order = 'menu=' + module_name + '&action=updateOrder&rawmode=yes&ids_applet=' + ids_applet;
                     $.post("index.php", order,function(theResponse){});
                 }
-        });
+
+  });
 
 		// Toggle Single Portlet
 		/*$('a.toggle').click(function()
@@ -132,79 +133,50 @@ $(document).ready(
 	}
 );
 
-function saveRegister(id_card)
+function saveRegister()
 {
     var vendor = document.getElementById("manufacturer").value;
     var num_se = document.getElementById("noSerie").value;
-
+    var id_card = $("#idCard").val();
+    var urlImaLoading = "<img src='images/loading.gif' height='20px' /><span style='font-size: 14px; position: relative; top: -10px; left: -5px; '></span>";
+   
     if(vendor != "" && num_se != ""){
         var order = 'menu=' + module_name + '&action=saveRegister&rawmode=yes&num_serie=' + num_se + '&hwd=' + id_card + '&vendor=' + vendor ;
-
+	 $('.loading').html(urlImaLoading);   
+	  
         $.post("index.php", order,
             function(theResponse){
-                alert("Card has been registered");
-                $("#layerCM").hide();
-                window.open("index.php?menu=dashboard","_self");
+              //  alert("Card has been registered");
+	       $('.message').css('color', 'blue');
+               $('.message').html("Card has been Registered"); 
+	       $('.loading').html("");   
+               window.open("index.php?menu=dashboard","_self");
         });
     }
     else{
-        alert("The data input are blank");
+        //alert("The data input are blank");
+	 $('.message').css('color', 'red');
+	$('.message').html("The data input are blank"); 
     }
 }
 
-function getDataCard(id_card)
+function getDataCard()
 {
+    var id_card = $("#idCard").val();
     var order = 'menu=' + module_name + '&action=getRegister&rawmode=yes&hwd=' + id_card;
 
     $.post("index.php", order,
         function(theResponse){
             salida = theResponse.split(',');
-            openWndMan2(salida[0],salida[1]);
+  	    $('#lman').css('padding-left',10);	
+	    $('#lser').css('padding-left',10);	
+	    $('#lman').append('<label>'+salida[0]+'</label>');
+            $('#lser').append('<label>'+salida[1]+'</label>');
+	   
+            
+		
     });
 }
-
-function openWndMan1(id_card)
-{
-     html = "<div class='div_content_bubble'><table align='center'>" +
-                "<tr>" +
-                    "<td colspan='2' style='font-size: 11px'>" +
-                        "<font style='color:red'>Card has not been Registered</font>" +
-                    "</td>" +
-                "</tr>" +
-                "<tr>" +
-                    "<td><label style='font-size: 11px'>Vendor: (ex. digium)</label></td>" +
-                    "<td><input type='text' value='' name='manufacturer' id='manufacturer' /></td>" +
-                "</tr> <tr>" +
-                    "<td><label style='font-size: 11px'>Serial Number:</label></td>" +
-                    "<td><input type='text' value='' name='noSerie' id='noSerie' /></td>" +
-                "</tr> <tr>" +
-                    "<td align='center' colspan='2'>" +
-                        "<input type='button' value='Save' class='boton'onclick='saveRegister(\"" + id_card + "\");' />" +
-                    "</td>" +
-                "</tr>" +
-            "</table></div>";
-
-    document.getElementById("layerCM_content").innerHTML = html;
-}
-
-
-function openWndMan2(vendor,num_serie)
-{
-     html = "<div class='div_content_bubble'><table align='center'>" +
-                "<tr>" +
-                    "<td colspan='2' style='font-size: 11px'>" +
-                        "<font style='color:green'>Card has been Registered</font>" +
-                    "</td>" +
-                "</tr>" +
-                "<tr>" +
-                    "<td><label style='font-size: 11px'>Vendor: "+ vendor + "</label></td>" +
-                "</tr> <tr>" +
-                    "<td><label style='font-size: 11px'>Serial Number: " + num_serie + "</label></td>" +
-                "</tr>" +
-            "</table></div>";
-    document.getElementById("layerCM_content").innerHTML = html;
-}
-
 
 function changeArrow(urlimg,id){
   var sal = "";
@@ -254,16 +226,40 @@ function jfunction(id)
 {
     var arrID = id.split("_"); 
     var a_id_card = arrID[1];
-    if(arrID[0]=="editMan1") openWndMan1(a_id_card);
-    else getDataCard(a_id_card);
-    document.getElementById("layerCM").style.left= "160px";
-    document.getElementById("layerCM").style.top= "30px";
-    $("#layerCM").show();
-    
-    $('#closeCM').click(function() {
-            $("#layerCM").hide();
-    });
-    $('#layerCM').draggable();
+    if(arrID[0]=="editMan1"){
+	var arrAction = new Array();
+    	arrAction["action"]  = "saveRegisterForm";
+    	arrAction["rawmode"] = "yes";
+	//var id = $(this).attr('id');
+    	request("index.php",arrAction,false,
+          function(arrData,statusResponse,error)
+          {
+  	      ShowModalPopUP(arrData['title'],285,120,arrData['html']);
+	      $("#idCard").val(a_id_card);
+          }
+   	 );
+    }//openWndMan1(a_id_card);
+    else{
+	var arrAction = new Array();
+    	arrAction["action"]  = "saveRegisterForm";
+    	arrAction["rawmode"] = "yes";
+	//var id = $(this).attr('id');
+    	request("index.php",arrAction,false,
+          function(arrData,statusResponse,error)
+          {
+  	      ShowModalPopUP(arrData['title'],290,60,arrData['html']);
+	      $("#idCard").val(a_id_card);
+	      $('.message').css('color', 'blue');
+	      $('.message').html(""); 
+	      $('.viewButton').remove();
+	      $('#manufacturer').remove();
+	      $('#noSerie').remove();	
+	      getDataCard();
+	      
+          }
+   	 );
+	}
+   
 }
 
 function refresh(element)

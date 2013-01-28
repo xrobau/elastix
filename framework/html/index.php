@@ -33,15 +33,13 @@ include_once "libs/paloSantoNavigation.class.php";
 include_once "libs/paloSantoDB.class.php";
 include_once "libs/paloSantoMenu.class.php";
 include_once("libs/paloSantoACL.class.php");// Don activate unless you know what you are doing. Too risky!
-include_once "libs/paloSantoOrganization.class.php";
+
 load_default_timezone();
 
 $developerMode=false;
 
 session_name("elastixSession");
 session_start();
-
-$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/");
 
 if(isset($_GET['logout']) && $_GET['logout']=='yes') {
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"unknown";
@@ -63,7 +61,7 @@ if(file_exists("langmenus/$lang.lang")){
     $arrLang = array_merge($arrLang,$arrLangMenu);
 }
 
-$pACL = new paloACL($arrConf['elastix_dsn']['elastix']);
+$pACL = new paloACL($arrConf['elastix_dsn']['acl']);
 
 if(!empty($pACL->errMsg)) {
     echo "ERROR DE DB: $pACL->errMsg <br>";
@@ -76,13 +74,12 @@ $smarty = getSmarty($arrConf['mainTheme']);
 //-            autentico al usuario y lo ingreso a la sesion
 
 if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
-    $pass_md5 = md5(trim($_POST['input_pass']));
+    $pass_md5 = md5($_POST['input_pass']);
     if($pACL->authenticateUser($_POST['input_user'], $pass_md5)) {
-        $_SESSION['elastix_user'] = trim($_POST['input_user']);
+        $_SESSION['elastix_user'] = $_POST['input_user'];
         $_SESSION['elastix_pass'] = $pass_md5;
          header("Location: index.php");
         writeLOG("audit.log", "LOGIN $_POST[input_user]: Web Interface login successful. Accepted password for $_POST[input_user] from $_SERVER[REMOTE_ADDR].");
-		update_theme();
         exit;
     } else {
         $user = urlencode(substr($_POST['input_user'],0,20));
@@ -99,12 +96,10 @@ if (isset($_SESSION['elastix_user']) &&
     isset($_SESSION['elastix_pass']) && 
     $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass']) 
     or $developerMode==true) {
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
-	//print_r($_SESSION);
-    $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
-	$id_organization = $pACL->getIdOrganizationUser($idUser);
-    $_SESSION['elastix_organization'] = $id_organization;
+    
+    $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
 
+    $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
 
     $arrMenuFiltered = $developerMode 
         ? $pMenu->cargar_menu()
@@ -114,7 +109,7 @@ if (isset($_SESSION['elastix_user']) &&
 
     //traducir el menu al idioma correspondiente
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
-        $arrMenuFiltered[$idMenu]['description'] = _tr($arrMenuItem['description']);
+        $arrMenuFiltered[$idMenu]['Name'] = _tr($arrMenuItem['Name']);
     }
     $oPn = new paloSantoNavigation($arrConf, $arrMenuFiltered, $smarty);
 
@@ -316,12 +311,12 @@ if (isset($_SESSION['elastix_user']) &&
     $rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes') {
          // Autorizacion
-        if($pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu) or $developerMode==true) {
+        if($pACL->isUserAuthorizedById($idUser, "access", $oPn->currSubMenu) or $developerMode==true) {
             echo $oPn->showContent();
         }
     } else {
        // Autorizacion
-        if($pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu) or $developerMode==true) {
+        if($pACL->isUserAuthorizedById($idUser, "access", $oPn->currSubMenu) or $developerMode==true) {
             $smarty->assign("CONTENT",   $oPn->showContent());
 
             if (count($arrMenuFiltered)>0){

@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version: 2.0                                           |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,29 +25,33 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   |                                                                      |
-  | Translate by: Chavdar Iliev                                          |
-  | Email: chavdar_75@yahoo.com                                          |
+  | Translate by:Chavdar Iliev                                             |
+  | Email: chavdar_75@yahoo.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.7 2008/02/18 09:48:00 bmacias Exp $ */
+  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Create New User" => "Създай Нов Потребител",
-"Name" => "Име",
-"Login" => "Потребителско Име",
-"Password" => "Парола",
-"Retype password" => "Повторете паролата",
-"New User" => "Нов Потребител",
-"Edit User" => "Редактирай Потребител",
-"The passwords are empty or don't match" => "Липсва парола или не съвпада",
-"The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user." => "Потребител admin не може да бъде изтрит защото е администратор на Еластикс по подразбиране. Всеки друг потребител може да бъде изтрит.",
-"User List" => "Списък на Потребителите",
-"Real Name" => "Име",
-"Extension" => "Вътрешен Номер",
+$arrLangModule=array(  
+"Create New User" => "Create New User",
+"Name" => "Name",
+"Login" => "Login",
+"Password" => "Password",
+"Retype password" => "Retype password",
+"New User" => "New User",
+"Edit User" => "Edit User",
+"The passwords are empty or don't match" => "The passwords are empty or don't match",
+"The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user." => "The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user.",
+"User List" => "User List",
+"Real Name" => "Real Name",
+"Extension" => "Extension",
 "(Ex. John Doe)" => "(Ex. John Doe)",
-"Webmail User" => "eMail Акаунт",
-"Webmail Domain" => "eMail Домейн",
-"Webmail Password" => "eMail Парола",
-"Retype Webmail password" => "Повторете eMail паролата",
-"Mail Profile" => "eMail Профил",
+"Webmail User" => "Webmail User",
+"Webmail Domain" => "Webmail Domain",
+"Webmail Password" => "Webmail Password",
+"Retype Webmail password" => "Retype Webmail password",
+"Mail Profile" => "Mail Profile",
+"No extension associated" => "No extension associated",
+"userNoAllowed" => "User is not allowed to do this action",
+"You are not authorized to access to information of that user" => "You are not authorized to access to information of that user",
+"no extension" => "no extension"
 );
 ?>

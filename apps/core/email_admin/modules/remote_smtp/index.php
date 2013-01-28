@@ -140,26 +140,32 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
         $arrData['status']          = rtrim(getParameter('status'));
         $arrData['autentification'] = getParameter('autentification');
 
-	$SMTP_Server = rtrim(getParameter('SMTP_Server'));
-	if($SMTP_Server != "custom"){
-	    if($arrData['user'] == "" || $arrData['password'] == ""){
-		$varErrors = ""; 
-		if($arrData['user'] == "")
-		    $varErrors = _tr("Username").", ";
-		if($arrData['password'] == "")
-		    $varErrors .= " "._tr("Password");
-
-		$strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/> ".$varErrors;
-		$smarty->assign("mb_message", $strErrorMsg);
-		$content = viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf,$arrLang);
-		return $content;
-	    }
-	}
+        $SMTP_Server = rtrim(getParameter('SMTP_Server'));
+        if($SMTP_Server != "custom"){
+            if($arrData['user'] == "" || $arrData['password'] == ""){
+        	$varErrors = ""; 
+        	if($arrData['user'] == "")
+        	    $varErrors = _tr("Username").", ";
+        	if($arrData['password'] == "")
+        	    $varErrors .= " "._tr("Password");
+        
+        	$strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/> ".$varErrors;
+        	$smarty->assign("mb_message", $strErrorMsg);
+        	$content = viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf,$arrLang);
+        	return $content;
+            }
+        }
 
         $tls_enabled  = ($arrData['autentification']=="on")?true:false;
         $auth_enabled = ($arrData['user']!="" && $arrData['password']!="");
         $isOK = ($arrData['status'] == 'on') 
-            ? $pEmailRelay->checkSMTP($arrData['relayhost'] , $arrData['port'], $arrData['user'], $arrData['password'], $auth_enabled, $tls_enabled)
+            ? $pEmailRelay->checkSMTP(
+                $arrData['relayhost'] ,
+                $arrData['port'],
+                $arrData['user'],
+                $arrData['password'],
+                $auth_enabled,
+                $tls_enabled)
             : true;
 
         if(is_array($isOK)){ //hay errores al tratar de verificar datos
@@ -171,27 +177,14 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
         }
 
         $pEmailRelay->setStatus($arrData['status']);
-        $ok=false;
-        if($arrData['autentification']=="on"){
-            $ok = $pEmailRelay->processUpdateConfiguration($arrData);
-            if($ok){
-                $smarty->assign("mb_title", $arrLang["Result transaction"]);
-                $smarty->assign("mb_message", $arrLang["Configured successful"]);
-            }
-            else {
-                $smarty->assign("mb_title", $arrLang["ERROR"]);
-                $smarty->assign("mb_message", $pEmailRelay->errMsg);
-            }
-        }else{
-            $ok = $pEmailRelay->processUpdateConfiguration($arrData);
-            if($ok){
-                $smarty->assign("mb_title", $arrLang["Result transaction"]);
-                $smarty->assign("mb_message", $arrLang["Configured successful"]);
-            }
-            else{
-                $smarty->assign("mb_title", $arrLang["ERROR"]);
-                $smarty->assign("mb_message", $pEmailRelay->errMsg);
-            }
+        $ok = $pEmailRelay->processUpdateConfiguration($arrData);
+        if($ok){
+            $smarty->assign("mb_title", $arrLang["Result transaction"]);
+            $smarty->assign("mb_message", $arrLang["Configured successful"]);
+        }
+        else{
+            $smarty->assign("mb_title", $arrLang["ERROR"]);
+            $smarty->assign("mb_message", $pEmailRelay->errMsg);
         }
     }
     $content= viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf,$arrLang);
@@ -201,7 +194,11 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
 function createFieldForm($arrLang)
 {
 
-    $arrServers = array("custom"=>_tr("OTHER"), "smtp.gmail.com"=>"GMAIL", "smtp.live.com"=>"HOTMAIL", "smtp.mail.yahoo.com" => "YAHOO");
+    $arrServers = array(
+        "custom"=>_tr("OTHER"),
+        "smtp.gmail.com"=>"GMAIL",
+        "smtp.live.com"=>"HOTMAIL",
+        "smtp.mail.yahoo.com" => "YAHOO");
 
     $arrFields = array(
             "status"   => array(      "LABEL"                  => $arrLang["Status"],

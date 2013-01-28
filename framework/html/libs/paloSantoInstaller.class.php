@@ -23,9 +23,9 @@
   $Id: paloSantoInstaller.class.php,v 1.1 2007/09/05 00:25:25 gcarrillo Exp $
 */
 
-require_once "/var/www/html/libs/paloSantoDB.class.php";
-require_once "/var/www/html/libs/paloSantoModuloXML.class.php";
-require_once "/var/www/html/libs/misc.lib.php";
+require_once "paloSantoDB.class.php";
+require_once "paloSantoModuloXML.class.php";
+require_once "misc.lib.php";
 
 // La presencia de MYSQL_ROOT_PASSWORD es parte del API global.
 define('MYSQL_ROOT_PASSWORD', obtenerClaveConocidaMySQL('root', '/var/www/html/'));
@@ -40,6 +40,33 @@ class Installer
 
     }
 
+    function addMenu($oMenu,$arrTmp){
+    //verificar si tiene que crear un nuevo menu raiz
+
+    $parentId = isset($arrTmp['parent'])?$arrTmp['parent']:"";
+    $link     = isset($arrTmp['link'])?$arrTmp['link']:"";
+    $order    = isset($arrTmp['order'])?$arrTmp['order']:"-1";
+    $tag      = isset($arrTmp['tag'])?$arrTmp['tag']:"";
+    $menuid   = isset($arrTmp['menuid'])?$arrTmp['menuid']:"";
+
+    if ($parentId=="")
+        $type="";
+    else{
+        if($link=="")
+          $type="module";
+        else
+          $type="framed";
+    }
+   
+    //creo el menu
+    $bExito = $oMenu->createMenu($menuid,$tag,$parentId,$type,$link,$order);
+    if (!$bExito){
+            $this->_errMsg = $oMenu->errMsg;
+            return false;
+        }
+    return true;
+    }
+
  /*****************************************************************************************************/
 // funcion para actualizar un item de menu
     function UpdateMenu($oMenu,$arrTmp){
@@ -47,7 +74,7 @@ class Installer
         $link     = isset($arrTmp['link'])?$arrTmp['link']:"";
         $order    = isset($arrTmp['order'])?$arrTmp['order']:"-1";
         $tag      = isset($arrTmp['tag'])?$arrTmp['tag']:"";
-        $mName   = isset($arrTmp['mName'])?$arrTmp['mName']:"";
+        $menuid   = isset($arrTmp['menuid'])?$arrTmp['menuid']:"";
     
         if ($parentId=="")
             $type="";
@@ -59,7 +86,7 @@ class Installer
         }
     
         //creo el menu
-        $bExito = $oMenu->updateItemMenu($mName,$tag,$parentId,$type,$link,$order);
+        $bExito = $oMenu->updateItemMenu($menuid,$tag,$parentId,$type,$link,$order);
         if (!$bExito){
                 $this->_errMsg = $oMenu->errMsg;
                 return false;
@@ -67,52 +94,52 @@ class Installer
         return true;
     }
 
+    function updateResourceMembership($oACL,$arrTmp, $arrGroup=array()){
+        $oACL->_DB->beginTransaction();
+        $bExito = $oACL->createResource($arrTmp['menuid'], $arrTmp['tag']);
+        if ($bExito){
+			$oACL->_DB->commit();
+        }else
+            $oACL->_DB->rollBack();
+        $this->_errMsg = $oACL->errMsg;
+        return $bExito;
+    }
+
 /*****************************************************************************************************/
 
-    function addResource($oACL,$arrTmp, $arrGroup=array()){
-		//esto se hace para obtener poder cogeer lo campos que se usan para crear los menus
-		$parent = isset($arrTmp['parent'])?$arrTmp['parent']:"";
-		$link     = isset($arrTmp['link'])?$arrTmp['link']:"";
-		$order    = isset($arrTmp['order'])?$arrTmp['order']:"-1";
-		$tag      = isset($arrTmp['tag'])?$arrTmp['tag']:"";
-		$mName   = isset($arrTmp['mName'])?$arrTmp['mName']:"";
-
-		if ($parent=="")
-			$type="";
-		else{
-			if($link=="")
-			$type="module";
-			else
-			$type="framed";
-		}
-
+    function addResourceMembership($oACL,$arrTmp, $arrGroup=array()){
         $oACL->_DB->beginTransaction();
-        $bExito = $oACL->createResource($mName, $tag, $parent, $type, $link, $order);
+        $bExito = $oACL->createResource($arrTmp['menuid'], $arrTmp['tag']);
         if ($bExito){
-            //inserto permiso en group_permission
+            //inserto en acl_group_permission
             //recupero el id del recurso insertado
-            $resource_id=$mName;
+            $resource_id= $oACL->getResourceId($arrTmp['menuid']);
             $bExito = false;
-            if (isset($resource_id) && $resource_id!=false)
+            if (!is_null($resource_id))
             {
                 if(is_array($arrGroup) & !empty($arrGroup)){
                     foreach($arrGroup as $key => $value){
                         $idGroup   = $value['id'];
                         $nameGroup = $value['name'];
                         $descGroup = $value['desc'];
-						if(is_null($oACL->getGroupNameByid($idGroup))){// no existe el grupo se lo crea y pertence a mainOrganization
-							$bExito = $oACL->createGroup($nameGroup, $descGroup, 1);
-							if(!$bExito){
-								$oACL->_DB->rollBack();
-								$this->_errMsg = $oACL->errMsg;
-								return $bExito;
-							}
-							$idGroup = $oACL->_DB->getLastInsertId();
-						}
-						$bExito = $oACL->saveGroupPermissions($idGroup,array($resource_id));
+                        $idGroupTmp = $oACL->getIdGroup($nameGroup);// obtiene el id del grupo dado su nombre
+                        if($idGroupTmp){
+                           $bExito = $oACL->saveGroupPermission($idGroupTmp,array($resource_id));
+                        }else{
+                           if(is_null($oACL->getGroupNameByid($idGroup))){// no existe el grupo
+                                $bExito = $oACL->createGroup($nameGroup, $descGroup);
+                                if(!$bExito){
+                                    $oACL->_DB->rollBack();
+                                    $this->_errMsg = $oACL->errMsg;
+                                    return $bExito;
+                                }
+                                $idGroup = $oACL->_DB->getLastInsertId();
+                           }
+                           $bExito = $oACL->saveGroupPermission($idGroup,array($resource_id));
+                        }
                     }
                 }else
-                    $bExito = $oACL->saveGroupPermissions(1,array($resource_id));
+                    $bExito = $oACL->saveGroupPermission(1,array($resource_id));
                 if($bExito)
                     $oACL->_DB->commit();
                 else
@@ -130,7 +157,6 @@ class Installer
         exec($comando,$output,$retval);
         return $retval;
     }
-
     function createNewDatabaseMySQL($path_script_db, $db_name, $datos_conexion)
     {
         $root_password = MYSQL_ROOT_PASSWORD;

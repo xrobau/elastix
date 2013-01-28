@@ -109,7 +109,7 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         "menu"         =>  $module_name,
         "filter_type"  =>  $field_type,
         "filter_txt"   =>  $field_pattern
-    );
+    );    
     $oGrid->setURL($url);
 
     $arrData = null;

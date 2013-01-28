@@ -2,20 +2,15 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version: 2.0                                           |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2008 Palosanto Solutions S. A.                         |
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
   | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com 						                     |
-  |                                                                      |
-  | Translated by: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |   Revision 1.0-17 by Gregory BOUZINAC - GMixon                       | 
-  | greg@gmixon.com                                                      |
+  | http://www.palosanto.com                                             |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,27 +24,34 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang,v 1.8 2008/05/20 00:36:42 bmacias Exp $ */
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Create New User" => "Créer un nouvel utilisateur",
-"Name" => "Nom",
-"Login" => "Connexion",
-"Password" => "Mot de passe",
-"Retype password" => "Re-saisissez le mot de passe",
-"New User" => "Nouvel utilisateur",
-"Edit User" => "Editer utilisateur",
-"The passwords are empty or don't match" => "Les mots de passe sont vides ou diffèrent",
-"The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user." => "L'utilisateur Admin ne peut pas être supprimé car c'est l'administrateur par défaut de Elastix. Vous pouvez supprimer les autres",
-"User List" => "Liste des utilisateurs",
-"Real Name" => "Nom",
-"Extension" => "Numéro de Poste",
+$arrLangModule=array(  
+"Create New User" => "Create New User",
+"Name" => "Name",
+"Login" => "Login",
+"Password" => "Password",
+"Retype password" => "Retype password",
+"New User" => "New User",
+"Edit User" => "Edit User",
+"The passwords are empty or don't match" => "The passwords are empty or don't match",
+"The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user." => "The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user.",
+"User List" => "User List",
+"Real Name" => "Real Name",
+"Extension" => "Extension",
 "(Ex. John Doe)" => "(Ex. John Doe)",
-"Webmail User" => "Utililsateur Webmail",
-"Webmail Domain" => "Domaine Webmail",
-"Webmail Password" => "Mot de passe Webmail",
-"Retype Webmail password" => "Retapez le mot de passe Webmail",
-"Mail Profile" => "Profile du mail",
+"Webmail User" => "Webmail User",
+"Webmail Domain" => "Webmail Domain",
+"Webmail Password" => "Webmail Password",
+"Retype Webmail password" => "Retype Webmail password",
+"Mail Profile" => "Mail Profile",
+"No extension associated" => "No extension associated",
+"userNoAllowed" => "User is not allowed to do this action",
+"You are not authorized to access to information of that user" => "You are not authorized to access to information of that user",
+"no extension" => "no extension"
 );
 ?>

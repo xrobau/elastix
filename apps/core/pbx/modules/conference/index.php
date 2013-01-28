@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 1.0                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,22 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1.1.1 2012/09/07 Rocio Mera rmera@palosanto.com Exp $ */
-include_once "/var/www/html/libs/paloSantoJSON.class.php";
+  $Id: index.php,v 1.1 2008/01/30 15:55:57 afigueroa Exp $ */
 
 function _moduleContent(&$smarty, $module_name)
 {
-    include_once "/var/www/html/modules/$module_name/configs/default.conf.php";
-    include_once "/var/www/html/modules/$module_name/libs/paloSantoConference.class.php";
-    include_once "/var/www/html/libs/paloSantoDB.class.php";
-    include_once "/var/www/html/libs/paloSantoConfig.class.php";
-    include_once "/var/www/html/libs/paloSantoGrid.class.php";
-    include_once "/var/www/html/libs/paloSantoForm.class.php";
-    include_once "/var/www/html/libs/paloSantoOrganization.class.php";
-    
-    
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
+    //include elastix framework
+    include_once "libs/paloSantoGrid.class.php";
+    include_once "libs/paloSantoValidar.class.php";
+    include_once "libs/paloSantoConfig.class.php";
+    include_once "libs/misc.lib.php";
+    include_once "libs/paloSantoForm.class.php";
+
+    //include module files
+    include_once "modules/$module_name/configs/default.conf.php";
+    include_once "modules/$module_name/libs/paloSantoConference.php";
+
     $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $lang_file="modules/$module_name/lang/$lang.lang";
@@ -55,1190 +54,332 @@ function _moduleContent(&$smarty, $module_name)
     $arrConf = array_merge($arrConf,$arrConfModule);
     $arrLang = array_merge($arrLang,$arrLangModule);
 
-	 //folder path for custom templates
+
+    //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-	 //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
-	 //y borrar usuarios de todas las organizaciones
-     //los usuarios de tipo administrador estan en la capacidad crear usuarios solo de sus organizaciones
-    $arrCredentiasls=getUserCredentials();
-	$userLevel1=$arrCredentiasls["userlevel"];
-	$userAccount=$arrCredentiasls["userAccount"];
-	$idOrganization=$arrCredentiasls["id_organization"];
-	$domain=$arrCredentiasls["domain"];
+    $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
+    $arrConfig = $pConfig->leer_configuracion(false);
 
-	if($userLevel1=="superadmin"){
-        header("Location: index.php?menu=system");
-    }
-    
-	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    
-	$action = getAction();
+    $dsnMeetme =  $arrConfig['AMPDBENGINE']['valor'] . "://".
+                  $arrConfig['AMPDBUSER']['valor'] . ":".
+                  $arrConfig['AMPDBPASS']['valor'] . "@".
+                  $arrConfig['AMPDBHOST']['valor'] . "/meetme";
+
+    $dsn_agi_manager['password'] = $arrConfig['AMPMGRPASS']['valor'];
+    $dsn_agi_manager['host'] = $arrConfig['AMPDBHOST']['valor'];
+    $dsn_agi_manager['user'] = 'admin';
+
+    //solo para obtener los devices (extensiones) creadas.
+    $dsnAsterisk = $arrConfig['AMPDBENGINE']['valor']."://".
+                   $arrConfig['AMPDBUSER']['valor']. ":".
+                   $arrConfig['AMPDBPASS']['valor']. "@".
+                   $arrConfig['AMPDBHOST']['valor']."/asterisk";
+
+    $pDB     = new paloDB($dsnMeetme);
+
+    if(isset($_POST["new_conference"])) $accion = "new_conference";
+    else if(isset($_POST["add_conference"])) $accion = "add_conference";
+    else if(isset($_POST["cancel"])) $accion = "cancel";
+    else if(isset($_POST["new_open"])) $accion = "new_conference";
+    else if(isset($_POST["delete_conference"])) $accion = "delete_conference";
+    else if(isset($_POST["caller_invite"])) $accion = "caller_invite";
+    else if(isset($_POST["callers_mute"])) $accion = "callers_mute";
+    else if(isset($_POST["callers_kick"])) $accion = "callers_kick";
+    else if(isset($_POST["callers_kick_all"])) $accion = "callers_kick_all";
+    else if(isset($_POST["update_show_callers"])) $accion = "update_show_callers";
+    else if(isset($_GET["accion"]) && $_GET["accion"]=="show_callers") $accion = "show_callers";
+    else if(isset($_GET["accion"]) && $_GET["accion"]=="view_conference") $accion = "view_conference";
+
+    // Las siguientes dos opciones funcionan al integrar conferencias Web
+    else if(isset($_GET["action"]) && $_GET["action"] == "list_guests") $accion = "list_guests";
+    else if(isset($_GET["action"]) && $_GET["action"] == "list_chatlog") $accion = "list_chatlog";
+
+    else $accion ="report_conference";
     $content = "";
-	switch($action){
+    switch($accion)
+    {
         case "new_conference":
-            $content = viewFormConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
+            $content = new_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig,$dsnAsterisk);
             break;
-        case "view":
-            $content = viewFormConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
+        case "add_conference":
+            $content = add_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig,$dsnAsterisk);
             break;
-        case "view_edit":
-            $content = viewFormConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
+        case "cancel":
+            header("Location: ?menu=$module_name");
             break;
-        case "save_new":
-            $content = saveNewConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
+        case "delete_conference":
+            $content = delete_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk);
             break;
-        case "save_edit":
-            $content = saveEditConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
+        case "show_callers":
+            $content = show_callers($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
-        case "delete":
-            $content = deleteConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
+        case "callers_mute":
+            $content = callers_mute($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
-        case "getConferenceMemb":
-            $content = conferenceStatus($smarty,$pDB,$userLevel1,$module_name,$domain);
+        case "callers_kick":
+            $content = callers_kick($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
-        case "inviteCaller":
-            $content = inviteCaller($smarty,$pDB,$userLevel1,$module_name,$domain);
+        case "view_conference":
+            $content = view_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig,$dsnAsterisk);
             break;
-        case "muteCallers":
-            $content = muteCallers($smarty,$pDB,$userLevel1,$module_name,$domain);
+        case "callers_kick_all":
+            $content = callers_kick_all($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
-        case "kickCallers":
-            $content = kickCallers($smarty,$pDB,$userLevel1,$module_name,$domain);
+        case "caller_invite":
+            $content = caller_invite($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
-        case "showCallers":
-            $content = showCallers($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
+        case "update_show_callers":
+            $room = getParameter('roomNo');
+            header("location: ?menu=$module_name&accion=show_callers&roomNo=$room");
             break;
-        case "updateShowCallers":
-            $content=statusShowCallers($smarty,&$pDB,$userLevel1,$module_name,$domain,"updateShowCallers");
+        case 'list_guests': // Para caso de conferencias web
+            $content = embedded_webConf_mostrarListaInvitados($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
-        case "reloadAasterisk":
-            $content = reloadAasterisk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userLevel1, $idOrganization, $domain);
+        case 'list_chatlog': // Para caso de conferencias web
+            $content = embedded_webConf_mostrarChatlog($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
-        default: // report
-            $content = reportConference($smarty, $module_name, $local_templates_dir, $pDB,$arrConf, $userLevel1, $userAccount, $domain);
+        default:
+            $content = report_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
             break;
     }
-    return $content;
 
+    return $content;
 }
 
-function reportConference($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $domain)
+function report_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang2, $arrConfig, $dsn_agi_manager, $dsnAsterisk)
 {
-	$error = "";
-	$bSoporteWebConf = (file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php'));
-    
-    $date=date("Y-m-d H:i");
-    $state_conf=getParameter("state_conf");
-    $name_conf=getParameter("name_conf");
-    $type_conf=getParameter("type_conf");
-    if(empty($state_conf)){
-        $state_conf="all";
-    }else
-        $url .="&$state_conf";
-        
-    if(empty($type_conf)){
-        $type_conf="both";
-    }else
-        $url .="&$type_conf";
-        
-    if(is_null($name_conf)){
-        $name_conf="";
-    }else
-        $url .="&$name_conf";
-    
-    if($userLevel1=="superadmin"){
-        $domain=getParameter("organization");
-        if(!empty($domain)){
-            $url = "?menu=$module_name&organization=$domain";
-            $pconference = new paloConference($pDB,$domain);
-            $total=$pconference->getTotalConference($domain,$date,$state_conf,$type_conf,$name_conf);
-        }else{
-            $domain = null;
-            $url = "?menu=$module_name";
-            $pconference = new paloConference($pDB,null);
-            $total=$pconference->getTotalConference(null,$date,$state_conf,$type_conf,$name_conf);
-        }
-    }else{
-        $url = "?menu=$module_name";
-        $pconference = new paloConference($pDB,$domain);
-        $total=$pconference->getTotalConference($domain,$date,$state_conf,$type_conf,$name_conf);
-    }
-    
-	if($total===false){
-        $error=$pconference->errMsg;
-        $total=0;
-    }
-    
-    
+    global $arrLang;
+    global $arrConf;
 
-    $limit=20;
+    $bSoporteWebConf = (file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php'));
+    $arrConference = array("Past_Conferences" => $arrLang["Past Conferences"], "Current_Conferences" => $arrLang["Current Conferences"], "Future_Conferences" => $arrLang["Future Conferences"]);
 
-    $oGrid = new paloSantoGrid($smarty);
-    $oGrid->setLimit($limit);
-    $oGrid->setTotal($total);
-    $offset = $oGrid->calculateOffset();
+    $arrFormElements = array(
+                                "conference"  => array(  "LABEL"                  => $arrLang["State"],
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrConference,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => "",
+                                                    "EDITABLE"               => "no",
+                                                    "SIZE"                   => "1"),
 
-    $end = ($offset+$limit)<=$total ? $offset+$limit : $total;
-	
-	$oGrid->setTitle(_tr('Conference'));
-    //$oGrid->setIcon('url de la imagen');
-    $oGrid->setWidth("99%");
-    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
-    $oGrid->setEnd($end);
-    $oGrid->setTotal($total);
-    $oGrid->setURL($url);
+                                "filter" => array(  "LABEL"                  => $arrLang["Filter"],
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("id" => "filter_value"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                                );
 
-    $arrColum=array(); 
-    if($userLevel1 == "admin"){ 
-        $arrColum[]=_tr("");
-    }
-    $arrColum[]=_tr("Name");
-    $arrColum[]=_tr("Room Number");
-    $arrColum[]=_tr("Period");
-    $arrColum[]=_tr("Participants / MaxUsers");
-    $arrColum[]=_tr("Status");
-    
-    if ($bSoporteWebConf) {
-        $arrColum[]=_tr("Topic");
-        $arrColum[]=_tr("# Guest");
-        $arrColum[]=_tr("# Docs");
-        $arrColum[]=_tr("Options");
-    }
-    
-    $oGrid->setColumns($arrColum);
-           
-    $arrData = array();
-    $arrconference = array();
-    if($total!=0){
-        $arrconference=$pconference->getConferesPagging($domain,$date,$limit,$offset,$state_conf,$type_conf,$name_conf);
-    }
-
-    $session = getSession();
-    if($arrconference===false){
-        $error=_tr("Error getting conference data.").$pconference->errMsg;
-    }else{
-        foreach($arrconference as $conf) {
-            $arrTmp=array();
-            if($userLevel1 == "admin"){ 
-                $arrTmp[] = "<input type='checkbox' name='confdel_{$conf['bookid']}'  />";
-                $arrTmp[] = "<a href='?menu=$module_name&action=view&id_conf=".$conf['bookid']."'>".$conf["name"]."</a>";
-            }else{
-                $arrTmp[]=$conf["name"];
-            }
-            $arrTmp[]=$conf["ext_conf"];
-            $perid="No Set";
-            
-            if(!empty($conf["startTime"]) && $conf["startTime"]!="1900-01-01 12:00:00"){
-               $perid=$conf["startTime"]." - ".$conf["endtime"];
-            }
-            $arrTmp[]=$perid;
-            $max=empty($conf["maxusers"])?"unlimited":$conf["maxusers"];
-            $participants="<spam class='conf_memb' id='{$conf['bookid']}'>".$conf["members"]." / $max </spam>";
-            $status="<spam class='conf_status'></spam>";
-            if($perid!="No Set"){
-                $date=time();
-                if($date>=strtotime($conf["startTime"]) && $date<=strtotime($conf["endtime"])){
-                    if($userLevel1 == "admin"){ 
-                        $participants="<a href='?menu=$module_name&action=current_conf&id_conf={$conf['bookid']}' class='conf_memb' id='{$conf['bookid']}'>".$conf["members"]." / $max</a>";
-                    }
-                        $status="<spam class='conf_status' style='color:green'/>"._tr("In Progress")."</spam>";
-                }else{
-                    if($date<strtotime($conf["startTime"]))
-                        $status="<spam class='conf_status'>"._tr("Future")."</spam>";
-                    else
-                        $status="<spam class='conf_status'>"._tr("Past")."</spam>";
-                }
-            }else{
-                if($userLevel1 == "admin"){ 
-                    $participants="<a href='?menu=$module_name&action=current_conf&id_conf={$conf['bookid']}' class='conf_memb' id='{$conf['bookid']}'>".$conf["members"]." / $max</a>";
-                }
-            }
-                
-            $arrTmp[]=$participants;
-            $arrTmp[]=$status;
-            $arrData[] = $arrTmp;
-            //se usa para comprobar si ha habido cambios en el estado de las conferencias
-            $session['conference']["conf_list"][$conf['bookid']]=array($participants,$status);
-        }
-    }
-
-    //se escribe en session el estado actual de las conferencias
-    putSession($session);
-    //filters
-    if($userLevel1 == "admin"){
-        $oGrid->addNew("create_conference",_tr("Create New conference"));
-        $oGrid->deleteList(_tr("Are you sure you wish to delete conference (es)?"),"delete_conference",_tr("Delete"));
-    }
-	
-	//arreglo usado para formar los elementos del filtro
-	$arrState=array("all"=>_tr("All"),"past"=>_tr("Past Conference"),"current"=>_tr("Current  Conference"),"future"=>_tr("Future Conference"));
-    $arrType=array("both"=>_tr("Both"),"yes"=>_tr("Schedule"),"no"=>_tr("No Schedule"));
-	
-	$oGrid->addFilterControl(_tr("Filter applied: ")._tr("State")." = ".$arrState[$state_conf], $state_conf, array("state_conf" => "all"),true);
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Name")." = ".$name_conf, $name_conf, array("name_conf" => ""));
-    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Type")." = ".$arrType[$type_conf], $type_conf, array("type_conf" => "both"),true);
-    
-    $smarty->assign("SHOW", _tr("Show"));
-	$arrFormElements = createFieldFilter($arrState,$arrType);
     $oFilterForm = new paloForm($smarty, $arrFormElements);
-    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-    $oGrid->showFilter(trim($htmlFilter));
-    
-    if($error!=""){
-        $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",$error);
-    }
-    $contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
-    $contenidoModulo .="<input type='hidden' name='grid_limit' id='grid_limit' value='$limit'>";
-    $contenidoModulo .="<input type='hidden' name='grid_offset' id='grid_offset' value='$offset'>";
-    $contenidoModulo .="<input type='hidden' name='conf_action' id='conf_action' value='report'>";
-    $mensaje=showMessageReload($module_name, $arrConf, $pDB, $userLevel1, $userAccount, $domain);
-    $contenidoModulo = $mensaje.$contenidoModulo;
-    return $contenidoModulo;
-}
+    $smarty->assign("SHOW", $arrLang["Show"]);
+   // $smarty->assign("NEW_CONFERENCE", $arrLang["New Conference"]);
 
-function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccount, $org_domain){
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-    $params=array();
-    $msgs="";
+    $startDate = $endDate = date("Y-m-d H:i:s");
 
-    $query = "SELECT domain, id from organization";
-    //si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de mnarcada
-    if($userLevel1!="superadmin"){
-        $query .= " where domain=?";
-        $params[]=$org_domain;
-    }
+    $conference = getParameter("conference");
+    $field_pattern = getParameter("filter");
+    if($conference)
+        $_POST['conference'] = $conference;
+    else $_POST['conference'] = "Current_Conferences";
 
-    $mensaje=_tr("Click here to reload dialplan");
-    $result=$pDB2->fetchTable($query,false,$params);
-    if(is_array($result)){
-        foreach($result as $value){
-            if($value[1]!=1){
-                $showmessage=$pAstConf->getReloadDialplan($value[0]);
-                if($showmessage=="yes"){
-                    $append=($userLevel1=="superadmin")?" $value[0]":"";
-                    $msgs .= "<div id='msg_status_$value[1]' class='mensajeStatus'><a href='?menu=$module_name&action=reloadAsterisk&organization_id=$value[1]'/><b>".$mensaje.$append."</b></a></div>";
-                }
-            }
-        }
-    }
-    return $msgs;
-}
+    $oGrid  = new paloSantoGrid($smarty);
 
-function getSession()
-{
-    session_commit();
-    ini_set("session.use_cookies","0");
-    if(session_start()){
-        $tmp = $_SESSION;
-        session_commit();
-    }
-    return $tmp;
-}
+    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("State")." = ".$arrConference[$_POST['conference']], $_POST, array("conference" => "Current_Conferences"),true);
+    $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Conference Name")." = $field_pattern", $_POST, array("filter" => ""));
+    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/conference.tpl", "", $_POST);
 
-function putSession($data)//data es un arreglo
-{
-    session_commit();
-    ini_set("session.use_cookies","0");
-    if(session_start()){
-        $_SESSION = $data;
-        session_commit();
-    }
-}
+    $pConference = new paloSantoConference($pDB);
+    $total_datos =$pConference->ObtainNumConferences($startDate, $endDate, "confDesc", $field_pattern, $conference);
 
-function getConferenceMemb($smarty,&$pDB,$userLevel1,$module_name,$domain){
-    $error=$pagging="";
-    $jsonObject=new PaloSantoJSON();
-    $change=false;
-    //parametros necesarios para obtener las conferencias
-    $state_conf=getParameter("state_conf");
-    $name_conf=getParameter("name_conf");
-    $type_conf=getParameter("type_conf");
-    $limit=(int)getParameter("limit");
-    $offset=(int)getParameter("offset");
-    
-    if($userLevel1=="superadmin")
-        $domain=null;
-    
-    $date=date("Y-m-d H:i");
-    $pConf = new paloConference($pDB,$domain);
-    $conf=$pConf->getConferesPagging($domain,$date,$limit,$offset,$state_conf,$type_conf,$name_conf);
-    
-    $data=array();
-    if($conf==false){
-        if($conf===false){
-            $jsonObject->set_error($pDB->errMsg);
-            $change=true;
-        }
-    }else{
-        $date=time();
-        foreach($conf as $value){
-            $max=empty($value["maxusers"])?"unlimited":$value["maxusers"];
-            $participants="<spam class='conf_memb' id='{$value['bookid']}'>".$value["members"]." / $max </spam>";
-            $status="<spam class='conf_status'></spam>";
-            if(!empty($value["startTime"]) && $value["startTime"]!="1900-01-01 12:00:00"){            
-                if($date>=strtotime($value["startTime"]) && $date<=strtotime($value["endtime"])){
-                    if($userLevel1 == "admin"){ 
-                        $participants="<a href='?menu=$module_name&action=current_conf&id_conf={$value['bookid']}' class='conf_memb' id='{$value['bookid']}'>".$value["members"]." / $max</a>";
-                    }
-                        $status="<spam class='conf_status' style='color:green'>"._tr("In Progress")."</spam>";
-                }else{
-                    if($date<strtotime($value["startTime"]))
-                        $status="<spam class='conf_status'>"._tr("Future")."</spam>";
-                    else
-                        $status="<spam class='conf_status'>"._tr("Past")."</spam>";
-                }
-            }else{
-                if($userLevel1 == "admin"){ 
-                    $participants="<a href='?menu=$module_name&action=current_conf&id_conf={$value['bookid']}' class='conf_memb' id='{$value['bookid']}'>".$value["members"]." / $max</a>";
-                }
-            }
-            $data[$value["bookid"]]["count"]=$participants;
-            $data[$value["bookid"]]["status"]=$status;
-        }
-    }
-    
-    $result=thereChanges($data);
-    if(is_array($result) && count($result)>0){
-        $jsonObject->set_status("CHANGED");
-        $jsonObject->set_message($result);
-        $change=true;
-    }else{
-        $jsonObject->set_status("NO CHANGED");
-    }
-    
-    return array('there_was_change'=>$change,"data"=>$jsonObject->createJSON());
-}
-
-function conferenceStatus($smarty,&$pDB,$userLevel1,$module_name,$domain){
-    $executed_time = 1; //en segundos
-    $max_time_wait = 30; //en segundos
-    $data          = null;
-
-    $i = 1;
-    while(($i*$executed_time) <= $max_time_wait){
-        $return = getConferenceMemb($smarty,$pDB,$userLevel1,$module_name,$domain);
-        $data   = $return['data'];
-        if($return['there_was_change']){
-            break;
-        }
-        $i++;
-        sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
-    }
-    return $data;
-}
-
-
-function thereChanges($data){
-    $session = getSession();
-    $arrData = array();
-    
-    if (isset($session['conference']["conf_list"]) && is_array($session['conference']["conf_list"])){
-        $arrData = $session['conference']["conf_list"];
-    }
-    $arraResult = array();
-    foreach($arrData as $bookid => $value){
-        $members = $value[0];
-        $status = $value[1];
-        if(isset($data[$bookid])){
-            if((isset($data[$bookid]["count"]) && $data[$bookid]["count"] != $members) || $data[$bookid]["status"] != $status){
-                $arraResult[$bookid]["count"] = $data[$bookid]["count"];
-                $arraResult[$bookid]["status"] = $data[$bookid]["status"];
-                $arrData[$bookid][0] = $data[$bookid]["count"];
-                $arrData[$bookid][1] = $data[$bookid]["status"];
-            }
-        }
-    }
-    
-    $session['conference']["conf_list"] = $arrData;
-    putSession($session);
-    return $arraResult;
-}
-
-function viewFormConference($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $domain){
-	$error = "";
-    $arrConf=array();
-    $action = getParameter("action");
-	
-	if($userLevel1!="admin"){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    
-    if($domain==false){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    
-    $pConf = new paloConference($pDB,$domain);
-    $arrRecording=$pConf->getRecordingsSystem($domain);
-    
-	$id_conf=getParameter("id_conf");
-	if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
-		if(!isset($id_conf)){
-            $error=_tr("Invalid conference");
-		}else{
-            if($userLevel1=="admin"){            
-                $Conf = $pConf->getConferenceById($id_conf);
-            }else{
-                $error=_tr("You are not authorized to perform this action");
-            }
-            
-            if($Conf===false){
-                $error=$pConf->errMsg;
-            }else{
-                $Conf["confno"]=$Conf["ext_conf"];
-                $smarty->assign("CONFNO",$Conf["ext_conf"]);
-                if(!empty($Conf["startTime"]) && $Conf["startTime"]!="1900-01-01 12:00:00"){
-                    $smarty->assign("SCHEDULE","on");
-                    $Conf["schedule"]="on";
-                }
-                if(getParameter("save_edit"))
-                    $Conf=$_POST;
-                else{
-                    if(!empty($Conf["startTime"]) && $Conf["startTime"]!="1900-01-01 12:00:00"){
-                        $elap=strtotime($Conf["endtime"])-strtotime($Conf["startTime"]);
-                        $Conf["start_time"]=substr($Conf["startTime"],0,-3);
-                        $Conf["duration"]=floor($elap/3600);
-                        $Conf["duration_min"]=floor(fmod($elap,3600)/60);
-                    }
-                    //adminopts
-                    preg_match_all("/^aAs(i){0,1}(r){0,1}(M\(([[:alnum:]_]+)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["adminopts"],$match);
-                    $Conf["moderator_options_1"]=empty($match[1][0])?"off":"on";
-                    $Conf["moderator_options_2"]=empty($match[2][0])?"off":"on";
-                    
-                    if(empty($match[3][0])){
-                        $Conf["moh"]="";
-                    }else{
-                        $Conf["moh"]=$match[4][0];
-                    }
-                    if(empty($match[5][0])){
-                        $Conf["announce_intro"]="";
-                    }else{
-                        $Conf["announce_intro"]=$Conf["intro_record"];
-                    }
-                    
-                    //useropts
-                    preg_match_all("/^(i){0,1}(m){0,1}(w){0,1}(M\(([[:alnum:]_]+)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["opts"],$matchu);
-                    $Conf["user_options_1"]=empty($matchu[1][0])?"off":"on";
-                    $Conf["user_options_2"]=empty($matchu[2][0])?"off":"on";
-                    $Conf["user_options_3"]=empty($matchu[3][0])?"off":"on";
-                    
-                }
-            }  
-		}
-	}else{
-        $smarty->assign("SCHEDULE","on");
-         //para que se muestren los destinos
-        if(getParameter("create_conference")){
-            $Conf["schedule"]="off";
-            $Conf["duration"]="1";
-            $Conf["duration_min"]="0";
-            $Conf['start_time'] = date("Y-m-d H:i",strtotime(date("Y-m-d H:i")." + 5 minutes"));
-        }else{
-            $Conf=$_POST;
-        }
-    }
-    
-    if($error!=""){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    
-    $arrForm = createFieldForm($arrRecording,$pConf->getMoHClass($domain));
-    $oForm = new paloForm($smarty,$arrForm);
-
-	if($action=="view"){
-        $oForm->setViewMode();
-    }else if($action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
-        $oForm->setEditMode();
-    }
-
-    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    $smarty->assign("CANCEL", _tr("Cancel"));
-    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
-    $smarty->assign("SAVE", _tr("Save"));
-    $smarty->assign("EDIT", _tr("Edit"));
-    $smarty->assign("DELETE", _tr("Delete"));
-    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
-    $smarty->assign("MODULE_NAME",$module_name);
-    $smarty->assign("id_conf", $id_conf);
-    $smarty->assign("userLevel",$userLevel1);
-    $smarty->assign("announce", _tr("Announce Join/Leave"));
-    $smarty->assign("record", _tr("Record"));
-    $smarty->assign("listen_only", _tr("Listen Only"));
-    $smarty->assign("wait_for_leader", _tr("Wait for Leader"));
-    
-    
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("Conference"), $Conf);
-    $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
-
-    return $content;
-}
-
-function saveNewConference($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $org_domain){
-	$error = "";
-	//conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$success=false;
-
-	if($userLevel1!="admin"){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }
-    
-    $domain=$org_domain;
-    if($domain==false){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }
-
-	$pConf = new paloConference($pDB,$domain);
-	
-    $arrForm = createFieldForm($pConf->getRecordingsSystem($domain),$pConf->getMoHClass($domain));
-    $oForm = new paloForm($smarty,$arrForm);
-    
-	if(!$oForm->validateForm($_POST)){
-        // Validation basic, not empty and VALIDATION_TYPE
-        $smarty->assign("mb_title", _tr("Validation Error"));
-        $arrErrores = $oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>"._tr("The following fields contain errors").":</b><br/>";
-        if(is_array($arrErrores) && count($arrErrores) > 0){
-            foreach($arrErrores as $k=>$v)
-                $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
-        }
-        $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }else{
-        //seteamos un arreglo con los parametros configurados
-        $arrProp=array();
-        $arrProp["name"]=getParameter("name");
-        $arrProp['confno']=getParameter("confno");
-        $arrProp['adminpin']=getParameter("adminpin");
-        $arrProp['pin']=getParameter("pin");
-        $arrProp['maxusers']=getParameter("maxusers");
-        $arrProp['schedule']=getParameter("schedule");
-        $arrProp['start_time']=getParameter("start_time");
-        $arrProp['duration']=getParameter("duration");
-        $arrProp['duration_min']=getParameter("duration_min");
-        $arrProp['announce_intro']=getParameter("announce_intro");
-        $arrProp['moh']=getParameter("moh");
-        $arrProp['moderator_options_1']=getParameter("moderator_options_1"); //announce join/leave
-        $arrProp['moderator_options_2']=getParameter("moderator_options_2"); //record
-        $arrProp['user_options_1']=getParameter("user_options_1"); //announce join/leave
-        $arrProp['user_options_2']=getParameter("user_options_2"); //mute
-        $arrProp['user_options_3']=getParameter("user_options_3"); //waitlider
-        
-        if($arrProp['schedule']=="on"){
-            if(!preg_match("/^(([1-2][0,9][0-9][0-9])-((0[1-9])|(1[0-2]))-((0[1-9])|([1-2][0-9])|(3[0-1]))) (([0-1][0-9]|2[0-3]):[0-5][0-9])$/",$arrProp['start_time']))
-                $error=_tr("Invalid Format Start Time YYYY-MM-DD HH:MM");
-            else{
-                if(strtotime($arrProp['start_time']."+ 1 minutes")<time()){
-                    $error=_tr("Start Time can't less than current time");
-                }
-            } 
-        }
-        
-        if($arrProp['user_options_3']=="on" && $arrProp['adminpin']==""){
-            $error=_tr("Field 'Moderator PIN' can't be empty if feature 'Wait Lider' is on");
-        }
-        
-        if($error==""){
-            $pDB->beginTransaction();
-            $success=$pConf->createNewConf($arrProp);
-            if($success)
-                $pDB->commit();
-            else
-                $pDB->rollBack();
-            $error .=$pConf->errMsg;
-        }
-	}
-
-	if($success){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("conference has been created successfully."));
-		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-        $pAstConf->setReloadDialplan($domain,true);
-		$content = reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}else{
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",$error);
-		$content = viewFormConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-	}
-	return $content;
-}
-
-function saveEditConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain){
-    $error="";
-    //conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pDB2);
-    $success=false;
-
-    $id_conf=getParameter("id_conf");
-
-    if($userLevel1!="admin"){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    
-    if($domain==false){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    
-    $pConf=new paloConference($pDB,$domain);
-    $conference=$pConf->getConferenceById($id_conf);
-    if($conference==false){
-        $error=$pConf->errMsg;
-    }elseif($conference["members"]!="0"){
-        $error=_tr("Conference can't be edited because It has already started");
-    }else{
-        //seteamos un arreglo con los parametros configurados
-        $arrProp=array();
-        $arrProp["name"]=getParameter("name");
-        $arrProp["id_conf"]=$id_conf;
-        $arrProp['adminpin']=getParameter("adminpin");
-        $arrProp['pin']=getParameter("pin");
-        $arrProp['maxusers']=getParameter("maxusers");
-        $arrProp['announce_intro']=getParameter("announce_intro");
-        $arrProp['moh']=getParameter("moh");
-        $arrProp['moderator_options_1']=getParameter("moderator_options_1"); //announce join/leave
-        $arrProp['moderator_options_2']=getParameter("moderator_options_2"); //record
-        $arrProp['user_options_1']=getParameter("user_options_1"); //announce join/leave
-        $arrProp['user_options_2']=getParameter("user_options_2"); //mute
-        $arrProp['user_options_3']=getParameter("user_options_3"); //waitlider
-        $arrProp['schedule']=getParameter("schedule");
-        
-        if($arrProp['schedule']=="on"){
-            $arrProp['start_time']=getParameter("start_time");
-            $arrProp['duration']=getParameter("duration");
-            $arrProp['duration_min']=getParameter("duration_min");
-            if(!preg_match("/^(([1-2][0,9][0-9][0-9])-((0[1-9])|(1[0-2]))-((0[1-9])|([1-2][0-9])|(3[0-1]))) (([0-1][0-9]|2[0-3]):[0-5][0-9])$/",$arrProp['start_time']))
-                $error=_tr("Invalid Format Start Time YYYY-MM-DD HH:MM");
-            else{
-                if(strtotime($arrProp['start_time']."+ 1 minutes")<time()){
-                    $error=_tr("Start Time can't less than current time");
-                }
-            }
-        }
-        
-        if($arrProp['user_options_3']=="on" && $arrProp['adminpin']==""){
-            $error=_tr("Field 'Moderator PIN' can't be empty if feature 'Wait Lider' is on");
-        }
-        
-        if($error==""){
-            $pDB->beginTransaction();
-            $success=$pConf->updateConference($arrProp);
-            if($success)
-                $pDB->commit();
-            else
-                $pDB->rollBack();
-            $error .=$pConf->errMsg;
-        }
-    }
-
-    $smarty->assign("id_conf", $id_conf);
-
-    if($success){
-        $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",_tr("Conference has been edited successfully"));
-        $content = reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }else{
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",$error);
-        $content = viewFormConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    return $content;
-}
-
-function deleteConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain){
-    $error=$del=$msg="";
-    //conexion elastix.db
-
-    if($userLevel1!="admin"){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }
-    
-    $domain=$org_domain;
-    $pConf=new paloConference($pDB,$domain);
-    foreach($_POST as $key => $values){
-        if(substr($key,0,8) == "confdel_"){
-            $tmpBookID = substr($key, 8);
-            if(!empty($tmpBookID)){
-                $success = $pConf->deleteConference($tmpBookID);
-                if(!$success)
-                    $error .="<li>"._tr("Conference id:").$tmpBookID._tr(" .Error: ").$pConf->errMsg."</li>";
-                else
-                    $del .="<li>"._tr("Conference id:").$tmpBookID."</li>";
-            }
-        }
-    }
-    
-    if($error==""){
-        $msg=_tr("The conference(s) were deleted successfully");
-    }else{
-        if($del!=""){
-            $msg=_tr("Conference(s) were deleted:<br>")."<ul style='magin:0;padding-left:20px;'>".$del."</ul>";
-            $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-            $pAstConf->setReloadDialplan($domain,true);
-        }
-        $msg .=_tr("Conference(s) were not deleted:<br>")."<ul style='magin:0;padding-left:20px;'>".$error."</ul>";
-    }
-    
-    $smarty->assign("mb_title", _tr("MESSAGE"));
-    $smarty->assign("mb_message",$msg);
-    return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);;
-}
-
-function showCallers($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain){
-    $error="";
-    $success=false;
-
-    $id_conf=getParameter("id_conf");
-    if($userLevel1!="admin"){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    if($domain==false){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Invalid Action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-
-    $pConf=new paloConference($pDB,$domain);
-    $conference=$pConf->getConferenceById($id_conf);
-    if($conference==false){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",$pConf->errMsg);
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }else{
-        $date=time();
-        if(($date>=strtotime($conference["startTime"]) && $date<=strtotime($conference["endtime"])) 
-            || $conference["startTime"]=="1900-01-01 12:00:00"){
-            $room=$conference["confno"];
-            $total=$conference["members"];
-        }else{
-            $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message",_tr("Conference out of Time"));
-            return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-        }
-    }
-    
-    $limit=20;
-    $oGrid = new paloSantoGrid($smarty);
+    //Paginacion
+    $limit  = 8;
+    $total  = $total_datos[0];
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $offset = $oGrid->calculateOffset();
-    $end = ($offset+$limit)<=$total ? $offset+$limit : $total;
-    
-    $oGrid->setTitle(_tr('Conference').": {$conference['name']} ({$conference['ext_conf']})");
-    //$oGrid->setIcon('url de la imagen');
-    $oGrid->setWidth("99%");
-    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
-    $oGrid->setEnd($end);
-    $oGrid->setTotal($total);
-    $oGrid->setURL($url = "?menu=$module_name&action=current_conf&id_conf=$id_conf");
 
-    $arrColum=array(); 
-    $arrColum[]=_tr("Orden Join");
-    $arrColum[]=_tr("CallerId");
-    $arrColum[]=_tr("Time in Conference");
-    $arrColum[]=_tr("Mode");
-    $arrColum[]="<input type='button' name='mute_caller' value="._tr("Mute")." class='button' onclick='javascript:muteCaller()'/>";
-    $msgKill=_tr("Are you sure you wish to Kick all caller (s)?");
-    $arrColum[]="<input type='button' name='kick_caller' value="._tr("Kick")." class='button' onclick=\"javascript:kickCaller('$msgKill');\"/>";
-    
-    $oGrid->setColumns($arrColum);
-           
-    $arrData = array();
-    $arrMemb = array();
-    if($total!=0){
-        $arrMemb=$pConf->ObtainCallers($room);
-    }
+    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+    $url = array('menu' => $module_name, 'conference' => $conference, 'filter' => $field_pattern);
+    //Fin Paginacion
 
-    $session = getSession();
-    if($arrMemb===false){
-        $error=_tr("Error getting conference data.").$pConf->errMsg;
-    }else{
-        $membPagg=array_slice($arrMemb,$offset,$limit);
-        foreach($membPagg as $memb) {
-            $arrTmp=array();
-            $arrTmp[0] = $memb['userId'];
-            $arrTmp[1] = trim($memb['callerId']);
-            $arrTmp[2] = $memb['duration'];
-            $arrTmp[3] = (empty($memb['mode']))?"user":"admin";
-            $status = strstr($memb['status'], "Muted"); //falso si no encuentra la palabra en el arreglo
-            $checked = (empty($status))?"":"checked";
-            $arrTmp[4] = "<input type='checkbox' name=mute_{$memb['userId']} class='conf_mute' $checked>";
-            $arrTmp[5] = "<input type='checkbox' name=kick_{$memb['userId']} class='conf_kick'>";
+    $arrResult =$pConference->ObtainConferences($limit, $offset, $startDate, $endDate, "confDesc", $field_pattern, $conference);
+
+    $pConfWeb = NULL;
+    if ($bSoporteWebConf) $pConfWeb = embedded_prepareWebConfLister();
+    $arrData = null;
+    if(is_array($arrResult) && $total>0){
+
+        // En caso de haber soporte de conferencias web, se recoge el ID de
+        // conferencia telefónica asociada a la conferencia web, y se construye
+        // la lista de datos para las columnas adicionales
+        $listaWebConf = array();
+        if (!is_null($pConfWeb)) {
+            $pACL = new paloACL($arrConf['elastix_dsn']['acl']);
+            $listaWC = $pConfWeb->listarConferencias($pACL->isUserAdministratorGroup($_SESSION['elastix_user']));
+            foreach ($listaWC as $tuplaConf) {
+                if (!is_null($tuplaConf['id_cbmysql_conference']))
+                    $listaWebConf[$tuplaConf['id_cbmysql_conference']] = $tuplaConf;
+            }
+        }
+
+        foreach($arrResult as $key => $conference){
+            $arrTmp[0]  = "<input type='checkbox' name='conference_{$conference['bookId']}'  />";
+            $arrTmp[1] = "<a href='?menu=$module_name&accion=view_conference&conferenceId=".$conference['bookId']."'>".htmlentities($conference['confDesc'], ENT_COMPAT, "UTF-8")."</a>";
+            $arrTmp[2] = $conference['roomNo'];
+            $arrTmp[3] = $conference['startTime'].' - '.$conference['endTime'];
+            if($_POST['conference'] == "Current_Conferences")
+            {
+                $arrCallers = $pConference->ObtainCallers($dsn_agi_manager, $conference['roomNo']);
+                $numCallers = count($arrCallers);
+                $arrTmp[4] = "<a href='?menu=$module_name&accion=show_callers&roomNo=".$conference['roomNo']."'>{$numCallers} / {$conference['maxUser']}</a>";
+            }
+            else
+                $arrTmp[4] = $conference['maxUser'];
+
+            if ($bSoporteWebConf) {
+                $arrTmp[5] = '';
+                $arrTmp[6] = '';
+                $arrTmp[7] = '';
+                $arrTmp[8] = '';
+                if (isset($listaWebConf[$conference['bookId']])) {
+                    $tuplaConf = $listaWebConf[$conference['bookId']];
+                    $arrTmp[5] = htmlentities($tuplaConf['tema'], ENT_COMPAT, "UTF-8");
+                    $arrTmp[6] = $tuplaConf['num_invitados'];
+                    $arrTmp[7] = $tuplaConf['num_documentos'];
+                    $arrTmp[8] =
+                        "<a href=\"?menu=$module_name&amp;action=list_guests&amp;id_conference=$tuplaConf[id_conferencia]\">[{$arrLang['List guests']}]</a>&nbsp;".
+                        "<a href=\"?menu=$module_name&amp;action=list_chatlog&amp;id_conference=$tuplaConf[id_conferencia]\">[{$arrLang['Chatlog']}]</a>";
+                }
+            }
+
             $arrData[] = $arrTmp;
-            //se usa para comprobar si ha habido cambios en el estado de las conferencias
-            $session['conference']["current_conf"][$memb['userId']]=$memb['callerId'];
         }
     }
-    
-    //se escribe en session el estado actual de las conferencias
-    if(!isset($session['conference']["current_conf"]))
-        $session['conference']["current_conf"]=array();
-    putSession($session);
-    
-    //filters
-    $extens=$pConf->getAllDevice($domain);
-    $arrExten=array(""=>"--unselected--");
-    if($extens!=false){
-        $astMang=AsteriskManagerConnect($errorM);
-        $result=$pConf->getCodeByDomain($domain);
-        foreach($extens as $value){
-            $cidname="";
-            if($astMang!=false && $result!=false){
-                $cidname=$astMang->database_get("EXTUSER/".$result["code"]."/".$value["exten"], "cidname");
-            } 
-            $arrExten[$value["dial"]]=isset($cidname)?$cidname." <{$value["exten"]}>":$value["exten"]." ({$value["dial"]})";
-        }
+
+    $arrGrid = array("title"    => $arrLang["Conference"],
+                        "url"      => $url,
+                        "icon"     => "/modules/$module_name/images/pbx_conference.png",
+                        "width"    => "99%",
+                        "start"    => ($total==0) ? 0 : $offset + 1,
+                        "end"      => $end,
+                        "total"    => $total,
+                        'columns'   =>  array(
+                            array('name' => ""),
+                            array("name"      => $arrLang["Conference Name"],),
+                            array("name"      => $arrLang["Conference #"],),
+                            array('name'        => 'Period'),
+                            array('name'        => $arrLang["Participants"],),
+                        ),
+                    );
+
+    if ($bSoporteWebConf) {
+        $arrGrid['columns'][] = array('name' => $arrLang['Topic']);
+        $arrGrid['columns'][] = array('name' => $arrLang['# Guests']);
+        $arrGrid['columns'][] = array('name' => $arrLang['# Docs']);
+        $arrGrid['columns'][] = array('name' => $arrLang['Options']);
     }
-    if($userLevel1 == "admin"){
-        $oGrid->addComboAction("invite_caller",_tr("Invite Caller"),$arrExten,"Invite Caller to Conference", "invite_caller", "javascript:inviteCaller()");
-        $oGrid->addButtonAction("kick_all", $alt="Kick All Callers", "images/delete5.png", "javascript:kickAll('$msgKill')");
-        $oGrid->addButtonAction("mute_all", $alt="Mute All Callers", null, "javascript:muteAll()");
-    }
-    
-    if($error!=""){
-        $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",$error);
-    }
-    $smarty->assign("id_conf", $id_conf);
-    $contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
-    $contenidoModulo .="<input type='hidden' name='id_conf' id='id_conf' value='$id_conf'>";
-    $contenidoModulo .="<input type='hidden' name='grid_limit' id='grid_limit' value='$limit'>";
-    $contenidoModulo .="<input type='hidden' name='grid_offset' id='grid_offset' value='$offset'>";
-    $contenidoModulo .="<input type='hidden' name='conf_action' id='conf_action' value='showCallers'>";
+    $oGrid->addNew("new_conference",_tr('New Conference'));
+    $oGrid->deleteList(_tr("Are you sure you wish to delete conference (es)?"),"delete_conference",_tr("Delete"));
+    $oGrid->showFilter(trim($htmlFilter));
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+
     return $contenidoModulo;
 }
 
-function statusShowCallers($smarty,&$pDB,$userLevel1,$module_name,$domain,$function){
-    $executed_time = 1; //en segundos
-    $max_time_wait = 15; //en segundos
-    $data          = null;
+function new_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk)
+{
+    $bSoporteWebConf = (file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php'));
 
-    $i = 1;
-    while(($i*$executed_time) <= $max_time_wait){
-        $return = $function($smarty,$pDB,$userLevel1,$module_name,$domain);
-        $data   = $return['data'];
-        if($return['there_was_change']){
+    $arrFormConference = createFieldForm($arrLang);
+    $oForm = new paloForm($smarty,$arrFormConference);
+
+    $smarty->assign("Show", 1);
+    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+    $smarty->assign("SAVE", $arrLang["Save"]);
+    $smarty->assign("CANCEL", $arrLang["Cancel"]);
+    $smarty->assign("icon","/modules/$module_name/images/pbx_conference.png");
+    $smarty->assign("announce", $arrLang["Announce"]);
+    $smarty->assign("record", $arrLang["Record"]);
+    $smarty->assign("listen_only", $arrLang["Listen Only"]);
+    $smarty->assign("wait_for_leader", $arrLang["Wait for Leader"]);
+
+    $pConference = new paloSantoConference($pDB);
+    while(true)
+    {
+        $number = rand(0,99999);
+        $existe = $pConference->ConferenceNumberExist($number);
+        if(!$existe)
+        {
+            $_POST['conference_number'] = $number;
             break;
         }
-        $i++;
-        sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
     }
-    return $data;
+
+    if (!isset($_POST['max_participants'])) $_POST['max_participants'] = 10;
+    if (!isset($_POST['duration'])) $_POST['duration'] = 1;
+    if (!isset($_POST['duration_min'])) $_POST['duration_min'] = 0;
+
+
+    // Si se detecta que hay soporte para crear conferencias web, se muestra
+    // también la interfaz correspondiente
+    $content = '';
+    if ($bSoporteWebConf) {
+        $content = embedded_viewFormCreateConference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk);
+    }
+
+    if (isset($_POST['enable_webconf'])) {
+        $smarty->assign('WEBCONF_SELECTED', 'checked="checked"');
+    }
+    $smarty->assign('WEBCONF_CONTENT', $content);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/new_conference.tpl", $arrLang["Conference"], $_POST);
+    $contenidoModulo = "<form  method='post' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
+
+    return $contenidoModulo;
 }
 
-function updateShowCallers($smarty,&$pDB,$userLevel1,$module_name,$domain){
-    $id_conf=getParameter("id_conf");
-    $offset=getParameter("offset");
-    $limit=getParameter("limit");
-    $error="";
-    $change=false;
-    
-    $jsonObject=new PaloSantoJSON();
-    
-    if($userLevel1!="admin"){
-        $error=_tr("You are not authorized to perform this action");
-    }elseif($domain==false){
-        $error=_tr("Invalid Action");
-    }else{
-        $pConf=new paloConference($pDB,$domain);
-        $conference=$pConf->getConferenceById($id_conf);
-        if($conference==false){
-            $error=_tr($pConf->errMsg);
-        }else{
-            $room=$conference["confno"];
-            $date=time();
-            if(($date>=strtotime($conference["startTime"]) && $date<=strtotime($conference["endtime"])) || $conference["startTime"]=="1900-01-01 12:00:00"){
-                $total=$conference["members"];    
-                $arrData = array();
-                $arrMemb = array();
-                $data = array();
-                if($total!=0){
-                    $arrMemb=$pConf->ObtainCallers($room);
-                    if($arrMemb===false){
-                        $error=_tr("Error getting conference data.").$pConf->errMsg;
-                    }else{
-                        $membPagg=array_slice($arrMemb,$offset,$limit);
-                        foreach($membPagg as $memb) {
-                            $arrTmp=array();
-                            $arrTmp[0] = $memb['userId'];
-                            $arrTmp[1] = trim($memb['callerId']);
-                            $arrTmp[2] = $memb['duration'];
-                            $arrTmp[3] = (empty($memb['mode']))?"user":"admin";
-                            $status = strstr($memb['status'], "Muted"); //falso si no encuentra la palabra en el arreglo
-                            $checked = (empty($status))?"":"checked";
-                            $arrTmp[4] = "<input type='checkbox' name=mute_{$memb['userId']} class='conf_mute' $checked>";
-                            $arrTmp[5] = "<input type='checkbox' name=kick_{$memb['userId']} class='conf_kick'>";
-                            $arrData[] = $arrTmp;
-                            $data[$memb['userId']]=$memb['callerId'];
-                        }
-                    }
-                }
-            }else{
-                $error=_tr("Conference out of Time");
-            }
-        }
-    }
-    
-    if($error==""){
-        if(thereChangesShowCallers($data)==true){
-            $jsonObject->set_status("CHANGED");
-            $jsonObject->set_message($arrData);
-            $change=true;
-        }else{
-            $jsonObject->set_status("NO CHANGED");
-        }
-    }else{
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",$error);
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $domain);
-    }
-    
-    return array('there_was_change'=>$change,"data"=>$jsonObject->createJSON());
-}
+function createFieldForm($arrLang)
+{
+/*
+    $arrReoccurs_period = array("Daily" => $arrLang["Daily"], "Weekly" => $arrLang["Weekly"], "Bi-weekly" => $arrLang["Bi-weekly"]);
+    $arrReoccurs_days = array("2" => "2 ".$arrLang["days"], "3" => "3 ".$arrLang["days"],
+                              "4" => "4 ".$arrLang["days"], "5" => "5 ".$arrLang["days"],
+                              "6" => "6 ".$arrLang["days"], "7" => "7 ".$arrLang["days"],
+                              "8" => "8 ".$arrLang["days"], "9" => "9 ".$arrLang["days"],
+                              "10" => "10 ".$arrLang["days"], "11" => "11 ".$arrLang["days"],
+                              "12" => "12 ".$arrLang["days"], "13" => "13 ".$arrLang["days"],
+                              "14" => "14 ".$arrLang["days"]);
+*/
 
-function thereChangesShowCallers($data){
-    $session = getSession();
-    $arrData = array();
-    $flag=false;
-    
-    if (isset($session['conference']["current_conf"]) && is_array($session['conference']["current_conf"])){
-        $arrData = $session['conference']["current_conf"];
-    }
-    $arraResult = array();
-    if(count($data)!=count($arrData))
-        $flag=true;
-    else{
-        //data[userid]=callerid
-        foreach($data as $userid => $value){
-            if(isset($arrData[$userid])){
-                if($arrData[$userid]!=$value){
-                    $flag=true;
-                    break;
-                }
-            }else{
-                $flag=true;
-                break;
-            }
-        }
-    }
-    
-    $session['conference']["current_conf"] = $data;
-    putSession($session);
-    return $flag;
-}
-
-function inviteCaller($smarty,&$pDB,$userLevel1,$module_name,$domain){
-    $exten=getParameter("exten");
-    $id_conf=getParameter("id_conf");
-    $jsonObject=new PaloSantoJSON();
-    
-    if(is_null($exten) || $exten==""){
-        $jsonObject->set_error(_tr("Invalid Exten"));
-    }elseif($userLevel1!="admin"){
-        $jsonObject->set_error(_tr("You are not authorized to perform this action"));
-    }elseif($domain==false){
-        $jsonObject->set_error(_tr("Invalid Action"));
-    }else{
-        $pConf=new paloConference($pDB,$domain);
-        $conference=$pConf->getConferenceById($id_conf);
-        if($conference==false){
-            $jsonObject->set_error(_tr($pConf->errMsg));
-        }else{
-            $room=$conference["confno"];
-            $room_exten=$conference["ext_conf"];
-            $callerId = _tr('Conference'). "<{$conference["ext_conf"]}>";
-            $date=time();
-            if(($date>=strtotime($conference["startTime"]) && $date<=strtotime($conference["endtime"])) || $conference["startTime"]=="1900-01-01 12:00:00"){
-                $result=$pConf->InviteCaller($room, $room_exten, $exten, $callerId);
-                if($result==false)
-                    $jsonObject->set_error(_tr("Exten couldn't be added to the conference"));
-                else
-                    $jsonObject->set_message(_tr("Exten $exten has been invited"));
-            }else{
-                $jsonObject->set_error(_tr("Conference out of Time"));
-            }
-        }
-    }
-    return $jsonObject->createJSON();
-}
-
-function muteCallers($smarty,&$pDB,$userLevel1,$module_name,$domain){
-    $id_conf=getParameter("id_conf");
-    $type_mute=getParameter("type");
-    $jsonObject=new PaloSantoJSON();
-    
-    if($userLevel1!="admin"){
-        $jsonObject->set_error(_tr("You are not authorized to perform this action"));
-    }elseif($domain==false){
-        $jsonObject->set_error(_tr("Invalid Action"));
-    }else{
-        $pConf=new paloConference($pDB,$domain);
-        $conference=$pConf->getConferenceById($id_conf);
-        if($conference==false){
-            $jsonObject->set_error(_tr($pConf->errMsg));
-        }else{
-            $room=$conference["confno"];
-            $date=time();
-            if(($date>=strtotime($conference["startTime"]) && $date<=strtotime($conference["endtime"])) || $conference["startTime"]=="1900-01-01 12:00:00"){
-                if($type_mute=="all")
-                    $result=$pConf->MuteCaller($room, "all", "on");
-                else{
-                    $keys=array_keys($_POST);
-                    foreach($keys as $value){
-                        if(preg_match("/^mute_[0-9]+$/",$value)){
-                            $userid=substr($value,5);
-                            $result=$pConf->MuteCaller($room, $userid,$_POST[$value]);
-                        }
-                    }
-                }
-                $jsonObject->set_message(_tr("Changes has been applied"));
-            }else{
-                $jsonObject->set_error(_tr("Conference out of Time"));
-            }
-        }
-    }
-    return $jsonObject->createJSON();
-}
-
-function KickCallers($smarty,&$pDB,$userLevel1,$module_name,$domain){
-    $id_conf=getParameter("id_conf");
-    $type_kick=getParameter("type");
-    $jsonObject=new PaloSantoJSON();
-    
-    if($userLevel1!="admin"){
-        $jsonObject->set_error(_tr("You are not authorized to perform this action"));
-    }elseif($domain==false){
-        $jsonObject->set_error(_tr("Invalid Action"));
-    }else{
-        $pConf=new paloConference($pDB,$domain);
-        $conference=$pConf->getConferenceById($id_conf);
-        if($conference==false){
-            $jsonObject->set_error(_tr($pConf->errMsg));
-        }else{
-            $room=$conference["confno"];
-            $date=time();
-            if(($date>=strtotime($conference["startTime"]) && $date<=strtotime($conference["endtime"])) || $conference["startTime"]=="1900-01-01 12:00:00"){
-                if($type_kick=="all")
-                    $result=$pConf->KickCaller($room, "all");
-                else{
-                    $keys=array_keys($_POST);
-                    foreach($keys as $value){
-                        if(preg_match("/^kick_[0-9]+$/",$value)){
-                            $result=$pConf->KickCaller($room, $_POST[$value]);
-                        }
-                    }
-                }
-                $jsonObject->set_message(_tr("Changes has been applied"));
-            }else{
-                $jsonObject->set_error(_tr("Conference out of Time"));
-            }
-        }
-    }
-    return $jsonObject->createJSON();
-}
-
-function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization,$org_domain){
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pDB2);
-    $continue=false;
-
-    if($userLevel1=="other"){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }
-
-    if($userLevel1=="superadmin"){
-        $idOrganization = getParameter("organization_id");
-    }
-
-    if($idOrganization=="1"){
-        return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-    }
-
-    $query="select domain from organization where id=?";
-    $result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
-    if($result===false){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
-    }elseif(count($result)==0){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. "));
-    }else{
-        $domain=$result[0];
-        $continue=true;
-    }
-
-    if($continue){
-        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
-        if($pAstConf->generateDialplan($domain)===false){
-            $pAstConf->setReloadDialplan($domain,true);
-            $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);
-            $showMsg=true;
-        }else{
-            $pAstConf->setReloadDialplan($domain);
-            $smarty->assign("mb_title", _tr("MESSAGE"));
-            $smarty->assign("mb_message",_tr("Asterisk was reloaded correctly. "));
-        }
-    }
-
-    return reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $org_domain);
-}
-
-function createFieldForm($recordings,$music){
-    $arrMusic=array(""=>"--no music--");
-    if(is_array($music)){
-        foreach($music as $key => $value){
-            $arrMusic[$key]=$value;
-        }
-    }
-    $arrRecording=array(""=>"--no announcement--");
-    if(is_array($recordings)){
-        foreach($recordings as $key => $value){
-            $arrRecording[$key]=$value;
-        }
-    }
-    $arrFields =       array("name"  => array("LABEL"              => _tr('Conference Name'),
+    $arrFields =       array("conference_name"  => array("LABEL"              => $arrLang['Conference Name'],
+                                                     "REQUIRED"               => "yes",
+                                                     "INPUT_TYPE"             => "TEXT",
+                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:300px;"),
+                                                     "VALIDATION_TYPE"        => "text",
+                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                             "conference_owner" => array("LABEL"              => $arrLang['Conference Owner'],
+                                                     "REQUIRED"               => "no",
+                                                     "INPUT_TYPE"             => "TEXT",
+                                                     "INPUT_EXTRA_PARAM"      => "",
+                                                     "VALIDATION_TYPE"        => "text",
+                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                            "conference_number" => array("LABEL"              => $arrLang['Conference Number'],
                                                      "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "TEXT",
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "text",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                             "confno" => array("LABEL"              => _tr('Conference Number'),
-                                                     "REQUIRED"               => "yes",
-                                                     "INPUT_TYPE"             => "TEXT",
-                                                     "INPUT_EXTRA_PARAM"      => "",
-                                                     "VALIDATION_TYPE"        => "numeric",
-                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "adminpin"     => array("LABEL"              => _tr('Moderator PIN'),
+                            "moderator_pin"     => array("LABEL"              => $arrLang['Moderator PIN'],
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "TEXT",
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "numeric",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "moderator_options_1" => array("LABEL"            => _tr('Moderator Options'),
+                            "moderator_options_1" => array("LABEL"            => $arrLang['Moderator Options'],
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "CHECKBOX",
                                                      "INPUT_EXTRA_PARAM"      => "",
@@ -1250,13 +391,13 @@ function createFieldForm($recordings,$music){
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "pin"             => array("LABEL"                => _tr('User PIN'),
+                            "user_pin"          => array("LABEL"              => $arrLang['User PIN'],
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "TEXT",
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "numeric",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "user_options_1"    => array("LABEL"              => _tr('User Options'),
+                            "user_options_1"    => array("LABEL"              => $arrLang['User Options'],
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "CHECKBOX",
                                                      "INPUT_EXTRA_PARAM"      => "",
@@ -1274,109 +415,637 @@ function createFieldForm($recordings,$music){
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "start_time"        => array("LABEL"              => _tr('Start Time (PST/PDT)'),
-                                                     "REQUIRED"               => "no",
+                            "start_time"        => array("LABEL"              => $arrLang['Start Time (PST/PDT)'],
+                                                     "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "DATE",
-                                                     "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "%Y-%m-%d %H:%M","TIMEFORMAT" => "24"),
-                                                     "VALIDATION_TYPE"        => "",
-                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "duration"          => array("LABEL"              => _tr('Duration (HH:MM)'),
-                                                     "REQUIRED"               => "no",
+                                                     "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "%Y-%m-%d %H:%M","TIMEFORMAT" => "12"),
+                                                     "VALIDATION_TYPE"        => "ereg",
+                                                     "VALIDATION_EXTRA_PARAM" => "^(([1-2][0,9][0-9][0-9])-((0[1-9])|(1[0-2]))-((0[1-9])|([1-2][0-9])|(3[0-1]))) (([0-1][0-9]|2[0-3]):[0-5][0-9])$"),
+                            "duration"          => array("LABEL"              => $arrLang['Duration (HH:MM)'],
+                                                     "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "TEXT",
-                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:30px;text-align:center","maxlength" =>"2"),
+                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:20px;text-align:center","maxlength" =>"2"),
                                                      "VALIDATION_TYPE"        => "numeric",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "duration_min"      => array("LABEL"              => "",
-                                                     "REQUIRED"               => "no",
+                            "duration_min"      => array("LABEL"              => $arrLang['Duration (HH:MM)'],
+                                                     "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "TEXT",
-                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:30px;text-align:center","maxlength" =>"2"),
+                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:20px;text-align:center","maxlength" =>"2"),
                                                      "VALIDATION_TYPE"        => "numeric",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "maxusers"  => array("LABEL"              => _tr('Max Participants'),
-                                                     "REQUIRED"               => "no",
-                                                     "INPUT_TYPE"             => "TEXT",
-                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:50px;"),
-                                                     "VALIDATION_TYPE"        => "numeric",
-                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "announce_intro"    => array("LABEL"              => _tr('Join Conference Message'),
-                                                     "REQUIRED"               => "no",
-                                                     "INPUT_TYPE"             => "SELECT",
-                                                     "INPUT_EXTRA_PARAM"      => $arrRecording,
-                                                     "VALIDATION_TYPE"        => "text",
-                                                     "VALIDATION_EXTRA_PARAM" => ""), 
-                            "moh"              => array("LABEL"              => _tr('Music on Hold'),
-                                                     "REQUIRED"               => "no",
-                                                     "INPUT_TYPE"             => "SELECT",
-                                                     "INPUT_EXTRA_PARAM"      => $arrMusic,
-                                                     "VALIDATION_TYPE"        => "text",
-                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "schedule"        => array("LABEL"              => "Schedule Conference",
+/*
+                            "recurs"            => array("LABEL"              => $arrLang['Recurs'],
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "CHECKBOX",
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            );
-	return $arrFields;
+                            "reoccurs_period"   => array("LABEL"              => $arrLang["Reoccurs"],
+                                                     "REQUIRED"               => "no",
+                                                     "INPUT_TYPE"             => "SELECT",
+                                                     "INPUT_EXTRA_PARAM"      => $arrReoccurs_period,
+                                                     "VALIDATION_TYPE"        => "text",
+                                                     "VALIDATION_EXTRA_PARAM" => "",
+                                                     "EDITABLE"               => "no",
+                                                     "SIZE"                   => "1"),
+                            "reoccurs_days"     => array("LABEL"              => $arrLang["for"],
+                                                     "REQUIRED"               => "no",
+                                                     "INPUT_TYPE"             => "SELECT",
+                                                     "INPUT_EXTRA_PARAM"      => $arrReoccurs_days,
+                                                     "VALIDATION_TYPE"        => "text",
+                                                     "VALIDATION_EXTRA_PARAM" => "",
+                                                     "EDITABLE"               => "no",
+                                                     "SIZE"                   => "1"),
+*/
+                            "max_participants"  => array("LABEL"              => $arrLang['Max Participants'],
+                                                     "REQUIRED"               => "yes",
+                                                     "INPUT_TYPE"             => "TEXT",
+                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:50px;"),
+                                                     "VALIDATION_TYPE"        => "numeric",
+                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                        );
+    return $arrFields;
 }
 
+function add_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk)
+{
+    $bSoporteWebConf = (file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php'));
 
+    $arrFormConference = createFieldForm($arrLang);
+    $oForm = new paloForm($smarty, $arrFormConference);
 
-function createFieldFilter($arrState,$arrType){
-    $arrFormElements = array("state_conf" => array("LABEL"                => _tr("State"),
-                                                   "REQUIRED"               => "yes",
-                                                   "INPUT_TYPE"             => "SELECT",
-                                                   "INPUT_EXTRA_PARAM"      => $arrState,
-                                                   "VALIDATION_TYPE"        => "text",
-                                                   "VALIDATION_EXTRA_PARAM" => "",
-                                                   "ONCHANGE"         => "javascript:submit();"),
-                            "name_conf"   => array("LABEL"                 => _tr("Name"),
-                                                   "REQUIRED"               => "no",
-                                                   "INPUT_TYPE"             => "TEXT",
-                                                   "INPUT_EXTRA_PARAM"      => array("id" => "name_conf"),
-                                                   "VALIDATION_TYPE"        => "text",
-                                                   "VALIDATION_EXTRA_PARAM" => ""),
-                            "type_conf" => array("LABEL"                => _tr("Type"),
-                                                  "REQUIRED"               => "yes",
-                                                  "INPUT_TYPE"             => "SELECT",
-                                                  "INPUT_EXTRA_PARAM"      => $arrType,
-                                                  "VALIDATION_TYPE"        => "text",
-                                                  "VALIDATION_EXTRA_PARAM" => "",
-                                                  "ONCHANGE"         => "javascript:submit();"),
-                            );
-    return $arrFormElements;
+    $bandera = true;
+    if(!empty($_POST['moderator_pin']) && !empty($_POST['user_pin']) &&  $_POST['moderator_pin']==$_POST['user_pin'])
+        $bandera = false;
+
+    $bValidoConfWeb = TRUE;
+    if ($bSoporteWebConf && isset($_POST['enable_webconf'])) $bValidoConfWeb = validarWebConf($smarty, $arrLang);
+    $bValidoForm = $oForm->validateForm($_POST);
+
+    if(!$bValidoForm || !$bandera || !$bValidoConfWeb) {
+        // Falla la validación básica del formulario
+        if (!$bValidoForm || !$bandera) {
+            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $arrErrores = $oForm->arrErroresValidacion;
+            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/>";
+            if(is_array($arrErrores) && count($arrErrores) > 0){
+                foreach($arrErrores as $k=>$v) {
+                    $strErrorMsg .= "$k : {$v['mensaje']}";
+                }
+            }
+            if(!$bandera)
+                $strErrorMsg .= $arrLang['Moderator and user PINs must not be equal'];
+            $smarty->assign("mb_message", $strErrorMsg);
+        } else {
+            // Variables ya están asignadas en validarWebConf
+        }
+        $contenidoModulo = new_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk);
+        return $contenidoModulo;
+    }
+
+    $pConference = new paloSantoConference($pDB);
+    $id_cbmysql_conference = $pConference->CreateConference($_POST['conference_name'],
+        $_POST['conference_number'], $_POST['start_time'], 
+        ($_POST['duration'] * 3600) + ($_POST['duration_min'] * 60),
+        $_POST['max_participants'],
+        array(
+            'confOwner'         =>  empty($_POST['conference_owner']) ? '' : $_POST['conference_owner'],
+            'silPass'           =>  empty($_POST['moderator_pin']) ? '' : $_POST['moderator_pin'],
+            'moderatorAnnounce' =>  ($_POST['moderator_options_1'] == 'on'),
+            'moderatorRecord'   =>  ($_POST['moderator_options_2'] == 'on'),
+            'roomPass'          =>  empty($_POST['user_pin']) ? '' : $_POST['user_pin'],
+            'userAnnounce'      =>  ($_POST['user_options_1'] == 'on'),
+            'userListenOnly'    =>  ($_POST['user_options_2'] == 'on'),
+            'userWaitLeader'    =>  ($_POST['user_options_3'] == 'on'),
+        ));
+    if (is_null($id_cbmysql_conference)) {
+        $smarty->assign("mb_message", _tr('Unable to create conference').': '.$pConference->errMsg);
+        $contenidoModulo = new_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk);
+        return $contenidoModulo;
+    }
+    if (!($bSoporteWebConf && isset($_POST['enable_webconf']))) {
+        header("Location: ?menu=$module_name");
+    } else {
+        $_POST['id_cbmysql_conference'] = $id_cbmysql_conference;
+        $result = ejecutarCreacionWebConf($smarty, $arrLang);
+        if ($result[0]) {
+            return $result[1];
+        } else {
+            return new_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk);
+        }
+    }
 }
 
-function getAction(){
-    if(getParameter("create_conference"))
-        return "new_conference";
-    else if(getParameter("save_new")) //Get parameter by POST (submit)
-        return "save_new";
-    else if(getParameter("save_edit"))
-        return "save_edit";
-    else if(getParameter("edit"))
-        return "view_edit";
-    else if(getParameter("delete_conference"))
-        return "delete";
-    else if(getParameter("action")=="view")      //Get parameter by GET (command pattern, links)
-        return "view";
-    else if(getParameter("action")=="view_edit")
-        return "view_edit";
-    else if(getParameter("action")=="getConferenceMemb")
-        return "getConferenceMemb";
-    else if(getParameter("action")=="current_conf")
-        return "showCallers";
-    else if(getParameter("action")=="inviteCaller")
-        return "inviteCaller";
-    else if(getParameter("action")=="muteCallers")
-        return "muteCallers";
-    else if(getParameter("action")=="kickCallers")
-        return "kickCallers";
-    else if(getParameter("action")=="updateShowCallers")
-        return "updateShowCallers";
-    else if(getParameter("action")=="reloadAsterisk")
-        return "reloadAasterisk";
-    else
-        return "report"; //cancel
+function delete_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk)
+{
+    $bSoporteWebConf = (file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php'));
+    $pWebConf = NULL;
+    if ($bSoporteWebConf) {
+        $pWebConf = embedded_prepareWebConfCreator();
+    }
+
+    $pConference = new paloSantoConference($pDB);
+
+    foreach($_POST as $key => $values){
+        if(substr($key,0,11) == "conference_")
+        {
+            $tmpBookID = substr($key, 11);
+
+            if (!is_null($pWebConf)) {
+                $idWebConf = $pWebConf->getConfIDFromMeetmeID($tmpBookID);
+                if (!is_null($idWebConf)) {
+                    $pWebConf->deleteConference($idWebConf);
+                }
+            }
+            $result = $pConference->DeleteConference($tmpBookID);
+        }
+    }
+    $content = report_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk);
+
+    return $content;
+}
+
+function show_callers($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk)
+{
+    $pConference = new paloSantoConference($pDB);
+    $room = getParameter("roomNo");
+    $arrCallers = $pConference->ObtainCallers($dsn_agi_manager, $room);
+    $arrDevices = $pConference->getDeviceFreePBX($dsnAsterisk);
+    $arrData = array();
+
+    if(is_array($arrCallers) && count($arrCallers)>0){
+        foreach($arrCallers as $key => $caller){
+            $arrTmp[0] = $caller['userId'];
+            $arrTmp[1] = isset($arrDevices[$caller['callerId']])?$arrDevices[$caller['callerId']]:$caller['callerId'];
+            $arrTmp[2] = $caller['duration'];
+            $mode = strstr($caller['mode'], "Muted");
+            if(!$mode)
+            {
+                $arrTmp[3] = $arrLang["UnMuted"];
+                $checked = 'off';
+            }
+            else{
+                $arrTmp[3] = $arrLang["Muted"];
+                $checked = 'on';
+            }
+            $arrTmp[4] = checkbox("mute_".$caller['userId'], $checked);
+            $arrTmp[5] = checkbox("kick_".$caller['userId']);
+            $arrData[] = $arrTmp;
+        }
+    }
+    $total = count($arrCallers);
+    //Paginacion
+    $limit  = 10;
+    $oGrid  = new paloSantoGrid($smarty);
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+
+    $inicio = ($total == 0) ? 0 : $offset + 1;
+    $fin = ($offset+$limit) <= $total ? $offset+$limit : $total;
+    $leng = $fin - $inicio;
+
+    $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
+
+    $url = array(
+        'menu'      =>  $module_name,
+        'accion'    =>  'show_callers',
+        'roomNo'    =>  $_GET['roomNo'],
+    );    
+
+    $arrGrid = array("title"    => $arrLang["Conference"],
+                        "icon"     => "/modules/$module_name/images/pbx_conference.png",
+                        "url"      => $url,
+                        "width"    => "99%",
+                        "start"    => $inicio,
+                        "end"      => $fin,
+                        "total"    => $total,
+                        "columns"  => array(0 => array("name"      => $arrLang["Id"],
+                                                    "property1" => ""),
+                                            1 => array("name"      => $arrLang["CallerId"],
+                                                    "property1" => ""),
+                                            2 => array("name"      => $arrLang["Duration"],
+                                                    "property1" => ""),
+                                            3 => array("name"      => $arrLang["Status"],
+                                                    "property1" => ""),
+                                            4 => array("name"      => "<input type='submit' name='callers_mute' value='{$arrLang["Mute"]}' class='button' onclick=\" return confirmSubmit('{$arrLang["Are you sure you wish to Mute caller (s)?"]}');\" />",
+                                                    "property1" => ""),
+                                            5 => array("name"      => "<input type='submit' name='callers_kick' value='{$arrLang["Kick"]}' class='button' onclick=\" return confirmSubmit('{$arrLang["Are you sure you wish to Kick caller (s)?"]}');\" />",
+                                                    "property1" => "")
+                                        )
+                    );
+
+    $smarty->assign("INVITE_CALLER", $arrLang["Invite Caller"]);
+    $smarty->assign("KICK_ALL", $arrLang["Kick All"]);
+    $smarty->assign("UPDATE", $arrLang["Update"]);
+    $smarty->assign("CANCEL", $arrLang["Cancel"]);
+    $smarty->assign("accion", "show_callers");
+
+    $arrFormElements = array(
+                            "device"  => array(     "LABEL"                  => "DEVICE",
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrDevices,
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => "")
+                                );
+
+    $oFilterForm = new paloForm($smarty, $arrFormElements);
+    $_POST['device']="unselected";
+    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/conference.tpl", "", $_POST);
+    $oGrid->showFilter(trim($htmlFilter),true);
+
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrDatosGrid,$arrLang);
+    return $contenidoModulo;
+}
+
+function callers_mute($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk)
+{
+    $pConference = new paloSantoConference($pDB);
+
+    $room = getParameter('roomNo');
+    foreach($_POST as $key => $values)
+    {
+        if(substr($key,0,5) == "mute_")
+        {
+            $tmpCallerId = substr($key, 5);
+            $arrCallers = $pConference->MuteCaller($dsn_agi_manager, $room, $tmpCallerId, $_POST["$key"]);
+        }
+    }
+
+    header("location: ?menu=$module_name&accion=show_callers&roomNo=$room");
+}
+
+function callers_kick($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk)
+{
+    $pConference = new paloSantoConference($pDB);
+
+    $room = getParameter('roomNo');
+    foreach($_POST as $key => $values)
+    {
+        if(substr($key,0,5) == "kick_")
+        {
+            $tmpCallerId = substr($key, 5);
+            if($_POST["$key"] == "on")
+                $arrCallers = $pConference->KickCaller($dsn_agi_manager, $room, $tmpCallerId);
+        }
+    }
+    sleep(3);
+    header("location: ?menu=$module_name&accion=show_callers&roomNo=$room");
+}
+
+function callers_kick_all($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk)
+{
+    $pConference = new paloSantoConference($pDB);
+
+    $room = getParameter('roomNo');
+
+    $pConference->KickAllCallers($dsn_agi_manager, $room);
+
+    sleep(3);
+    header("location: ?menu=$module_name");
+}
+
+function caller_invite($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager, $dsnAsterisk)
+{
+    $pConference = new paloSantoConference($pDB);
+
+    $room = getParameter('roomNo');
+
+    $device = getParameter("device");
+
+    if($device != null)
+    {
+        if(eregi('^[0-9]+$', $device))
+        {
+            $callerId = $arrLang['Conference']. "<$room>";
+            $result = $pConference->InviteCaller($dsn_agi_manager, $room, $device, $callerId);
+            if(!$result)
+            {
+                $smarty->assign("mb_title", $arrLang['ERROR'].":");
+                $smarty->assign("mb_message", $arrLang["The device couldn't be added to the conference"]);
+            }else sleep(3);
+        }else{
+            $smarty->assign("mb_title", $arrLang['ERROR'].":");
+            $smarty->assign("mb_message", $arrLang["The device must be numeric"]);
+        }
+    }
+    else{
+        $smarty->assign("mb_title", $arrLang['ERROR'].":");
+        $smarty->assign("mb_message", $arrLang["The device wasn't write"]);
+    }
+
+    return show_callers($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk);
+}
+
+function view_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk)
+{
+    $arrFormConference = createFieldForm($arrLang);
+    $oForm = new paloForm($smarty,$arrFormConference);
+
+    $smarty->assign("Show", 0);
+    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+    $smarty->assign("CANCEL", $arrLang["Cancel"]);
+    $smarty->assign("announce", $arrLang["Announce"]);
+    $smarty->assign("record", $arrLang["Record"]);
+    $smarty->assign("listen_only", $arrLang["Listen Only"]);
+    $smarty->assign("wait_for_leader", $arrLang["Wait for Leader"]);
+
+    $pConference = new paloSantoConference($pDB);
+    $conferenceId = isset($_GET['conferenceId'])?$_GET['conferenceId']:"";
+
+    $conferenceData = $pConference->ObtainConferenceData($conferenceId);
+
+    $arrData['conference_number'] = $conferenceData['roomNo'];
+    $arrData['conference_owner'] = $conferenceData['confOwner'];
+    $arrData['conference_name'] = $conferenceData['confDesc'];
+    $arrData['moderator_pin'] = $conferenceData['silPass'];
+    $arrData['user_pin'] = $conferenceData['roomPass'];
+    $arrData['start_time'] = $conferenceData['startTime'];
+    $arrData['max_participants'] = $conferenceData['maxUser'];
+    if(strpos($conferenceData['aFlags'], 'i', 4))
+        $arrData['moderator_options_1'] = 'on';
+    if(strpos($conferenceData['aFlags'], 'r', 4))
+        $arrData['moderator_options_2'] = 'on';
+
+    if(strpos($conferenceData['uFlags'], 'i', 1))
+        $arrData['user_options_1'] = 'on';
+    if(strpos($conferenceData['uFlags'], 'm', 1))
+        $arrData['user_options_2'] = 'on';
+    if(strpos($conferenceData['uFlags'], 'w', 1))
+        $arrData['user_options_3'] = 'on';
+
+    $fecha_ini = strtotime($conferenceData['startTime']);
+    $fecha_fin = strtotime($conferenceData['endTime']);
+    $duracion = $fecha_fin - $fecha_ini;
+
+    $arrData['duration'] = number_format($duracion/3600, 0, ",", "");
+    $arrData['duration_min'] = ($duracion%3600)/60;
+
+    $oForm->setViewMode();
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/new_conference.tpl", $arrLang["Conference"], $arrData);
+
+    $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
+
+    return $contenidoModulo;
+}
+
+/******* Funciones creadas para ayudar a integración de conferencias web ********/
+
+function embedded_prepareWebConfCreator()
+{
+    $module_plugin = 'conferenceroom_list';
+    include_once "modules/$module_plugin/configs/default.conf.php";
+    include_once "modules/$module_plugin/libs/conferenceActions.lib.php";
+    include_once "modules/$module_plugin/libs/paloSantoCreateConference.class.php";
+
+    global $arrLangModule;
+    global $arrConf;
+    global $arrLang;
+    global $arrConfModule;
+
+    //include file language agree to elastix configuration
+    //if file language not exists, then include language by default (en)
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_plugin/lang/$lang.lang";
+    include_once "modules/$module_plugin/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEN = $arrLangModule;
+        include_once "$lang_file";
+        $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+    }
+
+    $arrConf = array_merge($arrConf,$arrConfModule);
+    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['dsn_conn_database']);
+    return new paloSantoCreateConference($pDB);
+}
+
+function embedded_viewFormCreateConference($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsnAsterisk)
+{
+    $module_plugin = 'conferenceroom_list';
+    include_once "modules/$module_plugin/configs/default.conf.php";
+    include_once "modules/$module_plugin/libs/conferenceActions.lib.php";
+
+    global $arrLangModule;
+    global $arrConf;
+    global $arrLang;
+    global $arrConfModule;
+
+    //include file language agree to elastix configuration
+    //if file language not exists, then include language by default (en)
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_plugin/lang/$lang.lang";
+    include_once "modules/$module_plugin/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEN = $arrLangModule;
+        include_once "$lang_file";
+        $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+    }
+
+    $arrConf = array_merge($arrConf,$arrConfModule);
+    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    //folder path for custom templates
+    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
+    $local_templates_dir="$base_dir/modules/$module_plugin/".$templates_dir.'/'.$arrConf['theme'];
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['dsn_conn_database']);
+    return viewFormCreateConference($smarty, $module_plugin, $local_templates_dir, $pDB, $arrConf, $arrLang, TRUE);
+}
+
+function embedded_prepareWebConfLister()
+{
+    $module_plugin = 'conferenceroom_list';
+    include_once "modules/$module_plugin/configs/default.conf.php";
+    include_once "modules/$module_plugin/libs/conferenceActions.lib.php";
+    include_once "modules/$module_plugin/libs/paloSantoListConference.class.php";
+
+    global $arrLangModule;
+    global $arrConf;
+    global $arrLang;
+    global $arrConfModule;
+
+    //include file language agree to elastix configuration
+    //if file language not exists, then include language by default (en)
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_plugin/lang/$lang.lang";
+    include_once "modules/$module_plugin/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEN = $arrLangModule;
+        include_once "$lang_file";
+        $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+    }
+
+    $arrConf = array_merge($arrConf,$arrConfModule);
+    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['dsn_conn_database']);
+    return new paloSantoListConference($pDB);
+}
+
+function embedded_webConf_mostrarListaInvitados($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk)
+{
+    if (!file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php')) {
+        Header('Location: ?menu='.$module_name);
+        return '';
+    }
+
+    $module_plugin = 'conferenceroom_list';
+    include_once "modules/$module_plugin/configs/default.conf.php";
+    include_once "modules/$module_plugin/libs/conferenceActions.lib.php";
+
+    global $arrLangModule;
+    global $arrConf;
+    global $arrLang;
+    global $arrConfModule;
+
+    //include file language agree to elastix configuration
+    //if file language not exists, then include language by default (en)
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_plugin/lang/$lang.lang";
+    include_once "modules/$module_plugin/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEN = $arrLangModule;
+        include_once "$lang_file";
+        $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+    }
+
+    $arrConf = array_merge($arrConf,$arrConfModule);
+    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    //folder path for custom templates
+    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
+    $local_templates_dir="$base_dir/modules/$module_plugin/".$templates_dir.'/'.$arrConf['theme'];
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['dsn_conn_database']);
+    return mostrarListaInvitados($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+}
+
+function embedded_webConf_mostrarChatLog($smarty, $module_name, $local_templates_dir, $pDB, $arrLang, $arrConfig, $dsn_agi_manager,$dsnAsterisk)
+{
+    if (!file_exists('modules/conferenceroom_list/libs/conferenceActions.lib.php')) {
+        Header('Location: ?menu='.$module_name);
+        return '';
+    }
+
+    $module_plugin = 'conferenceroom_list';
+    include_once "modules/$module_plugin/configs/default.conf.php";
+    include_once "modules/$module_plugin/libs/conferenceActions.lib.php";
+
+    global $arrLangModule;
+    global $arrConf;
+    global $arrLang;
+    global $arrConfModule;
+
+    //include file language agree to elastix configuration
+    //if file language not exists, then include language by default (en)
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_plugin/lang/$lang.lang";
+    include_once "modules/$module_plugin/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEN = $arrLangModule;
+        include_once "$lang_file";
+        $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+    }
+
+    $arrConf = array_merge($arrConf,$arrConfModule);
+    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    //folder path for custom templates
+    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
+    $local_templates_dir="$base_dir/modules/$module_plugin/".$templates_dir.'/'.$arrConf['theme'];
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['dsn_conn_database']);
+    return mostrarChatLog($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+}
+
+// Esto sólo se ejecuta si se tiene soporte de conferencia web
+function validarWebConf($smarty, $arrLang)
+{
+    $module_plugin = 'conferenceroom_list';
+    include_once "modules/$module_plugin/configs/default.conf.php";
+    include_once "modules/$module_plugin/libs/conferenceActions.lib.php";
+
+    //include file language agree to elastix configuration
+    //if file language not exists, then include language by default (en)
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_plugin/lang/$lang.lang";
+    include_once "modules/$module_plugin/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEN = $arrLangModule;
+        include_once "$lang_file";
+        $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+    }
+
+    global $arrConfModule;
+    global $arrLangModule;
+    $arrConf = array_merge($arrConf,$arrConfModule);
+    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    $listaTraduccion = array(
+        array('conference_name', 'room_name'),
+        array('duration', 'duration_hours'),
+    );
+    foreach ($listaTraduccion as $tuplaTraduccion) {
+        if (isset($_POST[$tuplaTraduccion[0]])) $_POST[$tuplaTraduccion[1]] = $_POST[$tuplaTraduccion[0]];
+    }
+    return validate_saveNewCreateConference($smarty, $arrLang);
+}
+
+// Esto sólo se ejecuta si se tiene soporte de conferencia web
+function ejecutarCreacionWebConf($smarty, $arrLang)
+{
+    $module_plugin = 'conferenceroom_list';
+    include_once "modules/$module_plugin/configs/default.conf.php";
+    include_once "modules/$module_plugin/libs/conferenceActions.lib.php";
+
+    global $arrConfModule;
+    global $arrLangModule;
+    global $arrLang;
+    global $arrConf;
+
+    //include file language agree to elastix configuration
+    //if file language not exists, then include language by default (en)
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$module_plugin/lang/$lang.lang";
+    include_once "modules/$module_plugin/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEN = $arrLangModule;
+        include_once "$lang_file";
+        $arrLangModule = array_merge($arrLangEN, $arrLangModule);
+    }
+
+    $arrConf = array_merge($arrConf,$arrConfModule);
+    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    //folder path for custom templates
+    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
+    $local_templates_dir="$base_dir/modules/$module_plugin/".$templates_dir.'/'.$arrConf['theme'];
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['dsn_conn_database']);
+
+    $listaTraduccion = array(
+        array('conference_name', 'room_name'),
+        array('duration', 'duration_hours'),
+    );
+    foreach ($listaTraduccion as $tuplaTraduccion) {
+        if (isset($_POST[$tuplaTraduccion[0]])) $_POST[$tuplaTraduccion[1]] = $_POST[$tuplaTraduccion[0]];
+    }
+    return execute_saveNewCreateConference($smarty, $module_plugin, $local_templates_dir, $pDB, $arrConf, $arrLang, TRUE);
 }
 ?>

@@ -30,6 +30,8 @@
 
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
+include_once "libs/paloSantoGrid.class.php";
+include_once "libs/paloSantoACL.class.php";
 
 function _moduleContent($smarty, $module_name)
 {
@@ -70,11 +72,14 @@ function _moduleContent($smarty, $module_name)
     $session = getSession();
     $arrPaneles = $oPalo->getAppletsActivated($session['elastix_user']);
     switch($action){
+        case "saveRegisterForm":
+            $content = viewSaveRegisterForm($smarty, $module_name, $local_templates_dir, $pDB, $arrConf); // para configurar card register            
+            return $content;
+            break;
         case "saveRegister":
             $hwd = getParameter("hwd");
             $num_serie = getParameter("num_serie");
             $vendor = getParameter("vendor");
-
             ini_set("soap.wsdl_cache_enabled", "0");
             $client = new SoapClient($arrConf['dir_WebServices']);
 
@@ -137,6 +142,26 @@ function _moduleContent($smarty, $module_name)
     $smarty->assign("APPLET_ADMIN",$app);
 
     return $smarty->fetch("file:$local_templates_dir/applets.tpl");
+}
+
+
+
+function viewSaveRegisterForm($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
+{
+     
+    $oForm = new paloForm($smarty,array());
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("Card_Register", _tr("Card Register"));
+    $hwd = getParameter("hwd");
+    $jsonObject   = new PaloSantoJSON();
+
+    $response['html']  = $oForm->fetchForm("$local_templates_dir/_register.tpl","", "");
+    $response['title'] = _tr('Card Register');
+
+    $jsonObject->set_message($response);
+    return $jsonObject->createJSON();
+
 }
 
 function processControl($action)
@@ -240,10 +265,8 @@ function executeImage($module_name, $sImg)
 {
     $listaImgs = array(
         'CallsMemoryCPU'                                =>  array(null, 'functionCallback'),
-        'ObtenerInfo_CPU_Usage'                         =>  array(array('size'), null),
-        'ObtenerInfo_MemUsage'                          =>  array(array('size'), null),
-        'ObtenerInfo_SwapUsage'                         =>  array(array('size'), null),
         'ObtenerInfo_Particion'                         =>  array(array('percent'), null),
+        'rbgauge'                                       =>  array(array('percent', 'size'), null),
     );
     if (isset($listaImgs[$sImg])) {
         $arrParameters = array();

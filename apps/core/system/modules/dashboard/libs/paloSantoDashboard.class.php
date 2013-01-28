@@ -241,19 +241,19 @@ class paloSantoDashboard {
     {
         global $arrConf;
         //consulto datos del usuario logoneado
-        $dbAcl = new paloDB($arrConf["elastix_dsn"]["elastix.db"]);
+        $dbAcl = new paloDB($arrConf["elastix_dsn"]["acl"]);
         $pACL  = new paloACL($dbAcl);
 
         $arrData = null;
         //paso 1: consulta de los datos de webmail si existen
         $userId  = $pACL->getIdUser($nameUser);
-        /*$arrData = $this->leerPropiedadesWebmail($dbAcl,$userId);
+        $arrData = $this->leerPropiedadesWebmail($dbAcl,$userId);
         if(!$arrData)
-        {*/
+        {
             $arrData['login'] = '';
             $arrData['domain'] = '';
             $arrData['password'] = '';
-        //}
+        }
 
         //paso 2: consulta de la extension si tiene asignada
         $extension = $pACL->getUserExtension($nameUser);

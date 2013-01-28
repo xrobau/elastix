@@ -49,5 +49,9 @@ $arrLangModule=array(
 "Webmail Password" => "Webmail Password",
 "Retype Webmail password" => "Retype Webmail password",
 "Mail Profile" => "Mail Profile",
+"No extension associated" => "No extension associated",
+"userNoAllowed" => "User is not allowed to do this action",
+"You are not authorized to access to information of that user" => "You are not authorized to access to information of that user",
+"no extension" => "no extension"
 );
 ?>

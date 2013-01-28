@@ -24,7 +24,7 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
+  |                                                                     |
   | Translate by: Haamed Kouhfallah                                      |
   | Email: haamed@cytco.net                                              |                                                                    |
   +----------------------------------------------------------------------+
@@ -49,5 +49,9 @@ $arrLangModule=array(
 "Webmail Password" => "رمز ایمیل ",
 "Retype Webmail password" => "رمز ایمیل تحت وب را دوباره وارد کنید",
 "Mail Profile" => "پروفایل ایمیل",
+"No extension associated" => "هيچ داخلي اضافه نشده",
+"userNoAllowed" => "User is not allowed to do this action",
+"You are not authorized to access to information of that user" => "You are not authorized to access to information of that user",
+"no extension" => "no extension"
 );
 ?>

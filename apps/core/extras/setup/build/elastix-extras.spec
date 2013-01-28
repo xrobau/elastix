@@ -2,15 +2,15 @@
 
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
-Version: 3.0.0
+Version: 2.3.0
 Release: 1
 License: GPL
 Group:   Applications/System
-Source0: %{modname}_%{version}-%{release}.tgz
-#Source0: %{modname}_2.0.4-4.tgz
+#Source0: %{modname}_%{version}-%{release}.tgz
+Source0: %{modname}_2.0.4-4.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.2.0-18
 Requires: yum
 
 %description
@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-1
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Changed release in specfile.
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
@@ -75,10 +79,6 @@ fi
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
   SVN Rev[4347]
-
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: In spec file changed Prereq elastix to
-  elastix-framework >= 3.0.0-1
 
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-1
 - CHANGED: In spec file changed Prereq elastix to

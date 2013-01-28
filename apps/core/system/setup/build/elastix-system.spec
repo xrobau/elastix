@@ -2,16 +2,16 @@
 
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 1
+Version: 2.3.0
+Release: 16
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
-Prereq: elastix-fax >= 3.0.0-1 
+Prereq: elastix-framework >= 2.3.0-9
+Prereq: elastix-fax >= 2.2.0-4 
 Prereq: php-soap
 Prereq: dahdi
 Conflicts: elastix-agenda < 2.2.0-1
@@ -46,9 +46,6 @@ rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
 # ** Dahdi files **#
 mkdir -p $RPM_BUILD_ROOT/etc/dahdi
 mkdir -p $RPM_BUILD_ROOT/usr/sbin/
-
-# ** hardware_detector file ** #
-mv setup/usr/sbin/hardware_detector           $RPM_BUILD_ROOT/usr/sbin/
 
 # ** switch_wanpipe_media file ** #
 mv setup/usr/sbin/switch_wanpipe_media        $RPM_BUILD_ROOT/usr/sbin/
@@ -128,15 +125,51 @@ fi
 /usr/share/elastix/module_installer/*
 /var/www/backup/automatic_backup.php
 %defattr(755, root, root)
-/usr/sbin/hardware_detector
 /usr/sbin/switch_wanpipe_media
 /usr/share/elastix/privileged/*
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-16
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Jan 24 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: system - userlist/index.php: Regardless of the length of the
+  password, now 8 hidden characters are displayed in editing view. This occurs
+  in the fields: password, retype password and password webmail.
+  SVN Rev[4619]
+
+* Tue Jan 22 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: system - backup_restore/backup.tpl , backup_restore/index.php: The
+  popup that apears when a restore of a previous backup its about to be
+  performed and a difference exists in the version of a package, now follows
+  the schema of unified style for popups in Elastix.
+  SVN Rev[4607]
+
+* Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
+* Sat Jan 05 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: help module dashboard, dashboard help module was updated.
+  SVN Rev[4557]
+
+* Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: new implementation introduced by SVN commit 3955 introduced
+  a regression in which an empty pid list confused the code into reporting a
+  process was active. Fixed. Fixes Elastix bug #1431.
+  SVN Rev[4524]
+
 * Tue Dec 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Network Parameters: allow optional quote before dhcp keyword.
   SVN Rev[4500]
+
+* Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-15
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: mailbox quotas need to be repaired after a mailbox 
@@ -158,15 +191,25 @@ fi
   virtual domains. Fixed.
   SVN Rev[4453]
 
+* Thu Oct 25 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-14
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4383]
+
 * Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: actually use root mysql password instead of hardcoded
   default when reading schemata. Print PDO exception message in case of failure
   to read schemata. Pass around level tag to display on error message.
-  SVN Rev[4378]  
+  SVN Rev[4378]
 
-* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Network: (trival) fix typo in DNS template. Fixes Elastix bug #1400.
-  SVN Rev[4376] 
+  SVN Rev[4376]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-13
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4352]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -179,12 +222,25 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
+- Endpoint Configurator: install new configurator properly instead of leaving 
+  it at module_installer/MODULE/setup
   SVN Rev[4347]
 
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: implemented new helper script 'ryum' and use it to replace 
   invocations of 'sudo yum' with the helper script.
   SVN Rev[4342]
+
+* Wed Oct 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Hardware Detector: move hardware_detector script to the privileged
+  script directory, and invoke it through elastix-helper. This is required to
+  remove hardware_detector from /etc/sudoers.
+  SVN Rev[4338]
+
+* Tue Oct 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Hardware Detector: remove hardcoded default in previous commit, as
+  well as some dead code.
+  SVN Rev[4331]
 
 * Mon Oct 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Hardware Detector: implement switching on/off of CRC4 checksum for E1
@@ -195,12 +251,6 @@ fi
   is part of FreePBX. Check whether /usr/sbin/amportal exists in 
   hardware_detector and use asterisk script instead if necessary.
   SVN Rev[4329]
-
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: system - Build/elastix-system.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-- CHANGED: In spec file changed Prereq elastix-framework to
-  elastix-framework >= 3.0.0-1
 
 * Fri Sep 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: fix up Spanish translation.
@@ -239,16 +289,20 @@ fi
   backup/restore functionality.
   SVN Rev[4183]
 
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Wed Aug 15 2012 German Macas <gmacas@palosanto.com>
 - CHANGE: modules - packages: Add option to uninstall packages and change
   deprecated function
-  SVN Rev[4108]
+  SVN Rev[4107]
 
-* Mon Aug 06 2012 German Macas <gmacas@palosanto.com>
+* Fri Aug 09 2012 German Macas <gmacas@palosanto.com>
 - Fixed bug 0001318, bug 0001338: fixed in Asterisk File Editor return last
   query in Back link, fixed Popups, position and design, add in Dashboard
   Applet Admin option to check all
-  SVN Rev[4092]
+  SVN Rev[4088]
 
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server (dhcpconfig): implement new option --phonesonly. If 
@@ -274,14 +328,25 @@ fi
   Cisco phones to find the integrated TFTP server.
   SVN Rev[4063]
 
+* Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4031]
+
 * Fri Jun 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Add Requires: dhcp to specfile
   SVN Rev[4030]
+
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4028]
 
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Remove openfire dependency, moved to elastix-im.
 - Remove wanpipe-util dependency. The hardware_detector script is supposed to
   detect that wanpipe-util is installed and disable Sangoma detection if not.
+  SVN Rev[4008]
 
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: DHCP Server: Several fixes for Fedora 17 compatibility:

@@ -2,7 +2,7 @@
 
 Summary: Elastix IM 
 Name:    elastix-%{modname}
-Version: 3.0.0
+Version: 2.3.0
 Release: 1
 License: GPL
 Group:   Applications/System
@@ -10,7 +10,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-1.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.2.0-18
 Requires: yum
 Requires: openfire
 
@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-1
+- CHANGED: im - Build/elastix-im.spec: update specfile with latest 
+  SVN history. Changed release in specfile.
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
@@ -76,13 +80,11 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: im - Build/elastix-im.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-- CHANGED: In spec file changed Prereq elastix-framework to
-  elastix-framework >= 3.0.0-1
+* Fri Jun 29 2012 Luis Abarca <labarca@palosanto.com> 2.2.0-3
+- CHANGED: im - Build/elastix-im.spec: update specfile with latest 
+  SVN history. Changed release in specfile.
 
-* Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - Bring openfire dependency here, removed from elastix-system.
   SVN Rev[4007]
 

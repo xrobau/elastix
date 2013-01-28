@@ -2,15 +2,15 @@
 
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 2
+Version: 2.3.0
+Release: 8
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-%{release}.tgz
-Source0: %{modname}_%{version}-1.tgz
+Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.3.0-5
 Prereq: chkconfig, php-soap
 Requires: yum
 
@@ -115,19 +115,26 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-%defattr(-, root, root)
 /etc/init.d/elastix-updaterd
 /opt/elastix/elastix-updater
 /etc/pki/rpm-gpg/*
 /etc/yum.repos.d/*
 
 %changelog
-* Wed Jan 23 2013 Alberto Santos <asantos@palosanto.com> 3.0.0-2
-- CHANGED: In spec file, added validation to remove postgresql repo for
-  architectures different to i386, i686 and x86_64
+* Wed Jan 23 2013 Alberto Santos <asantos@palosanto.com> 2.3.0-8
+- CHANGED: In spec file, added validation in post section to remove
+  postgresql repo for architectures different to i386, i686 and x86_64
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: Addons - Build/elastix-addons.spec: Corrected some isues in the spec
+  file about ownership of the commits.
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Changed release in specfile
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -149,28 +156,32 @@ fi
   #1397.
   SVN Rev[4345]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: Addons - Build/elastix-addons.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Changed release in specfile
 
-* Wed Aug 29 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: addons - Build/elastix-addons.spec: update specfile with latest SVN
-  history.
-  SVN Rev[4158]
-
-* Wed Aug 29 2012 Alberto Santos <asantos@palosanto.com>
-- ADDED: module addons, added the repo pgdg-91-centos.repo and the
-  gpg-key RPM-GPG-KEY-PGDG-91 for Postgresql91
-  SVN Rev[4157]
-
-* Wed Aug 15 2012 Alberto Santos <asantos@palosanto.com>
+* Wed Aug 15 2012 Alberto Santos <asantos87@palosanto.com>
 - CHANGED: module addons_availables, an informative chart is displayed for the
   upgrades indicating which are the main features of the upgrade
-  SVN Rev[4109]
+  SVN Rev[4110]
 
-* Tue Aug 7 2012 German Macas <gmacas@palosanto.com>
+* Wed Aug 08 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module addons, added the repo pgdg-91-centos.repo and the gpg-key
+  RPM-GPG-KEY-PGDG-91 for Postgresql91
+  SVN Rev[4097]
+
+* Tue Aug 07 2012 German Macas <gmacas@palosanto.com>
 - Addons - Add pagination and navigation in the footer page
-  SVN Rev[4096]
+  SVN Rev[4095]
+
+* Mon Aug 06 2012 Alberto Santos <asantos@palosanto.com>
+- ADDED: module addons, added the repo pgdg-91-centos.repo and the gpg-key
+  RPM-GPG-KEY-PGDG-91 for Postgresql91.
+  SVN Rev[4019] 
+
+* Wed Jun 27 2012 Luis Abarca <rmera@palosanto.com> 2.3.0-5
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Changed release in specfile
 
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Explicitly return exit code in startup script
@@ -179,7 +190,7 @@ fi
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Elastix Updater: remove lone call to deprecated ereg().
-  SVN Rev[3965]
+  SVN Rev[3977]
 
 * Mon Jun 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Elastix Updater: remove E_STRICT from error_reporting to silence
@@ -189,7 +200,6 @@ fi
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Changed release in specfile
-  SVN Rev[3898]
 
 * Thu Apr 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: the elastix updater daemon should explicitly set the default 

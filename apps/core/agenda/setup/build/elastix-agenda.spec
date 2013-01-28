@@ -2,8 +2,8 @@
 
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 1
+Version: 2.3.0
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -12,7 +12,8 @@ Source1: calendarEvent.gsm
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: asterisk
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: freePBX >= 2.8.1-1
+Prereq: elastix-framework >= 2.3.0-5
 
 %description
 Elastix Module Agenda
@@ -28,13 +29,6 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # Additional (module-specific) files that can be handled by RPM
-
-mkdir -p $RPM_BUILD_ROOT/opt/elastix/
-mv setup/elastix-synchronizer $RPM_BUILD_ROOT/opt/elastix/
-mkdir -p $RPM_BUILD_ROOT/etc/init.d/
-mv $RPM_BUILD_ROOT/opt/elastix/elastix-synchronizer/elastix-synchronizerd $RPM_BUILD_ROOT/etc/init.d/
-chmod +x $RPM_BUILD_ROOT/etc/init.d/elastix-synchronizerd
-
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
 #mv setup/dialer
 
@@ -75,14 +69,13 @@ elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{relea
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
     elastix-dbprocess "install" "$pathModule/setup/db"
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
-    # restart daemon
-    /sbin/service elastix-synchronizerd restart
 fi
 
 # The installer script expects to be in /tmp/new_module
@@ -92,9 +85,6 @@ chown -R asterisk.asterisk /tmp/new_module/%{modname}
 
 php /tmp/new_module/%{modname}/setup/installer.php
 rm -rf /tmp/new_module
-
-chkconfig --add elastix-synchronizerd
-chkconfig --level 2345 elastix-synchronizerd on
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -117,18 +107,29 @@ fi
 /var/lib/asterisk/sounds/custom
 /var/lib/asterisk/sounds/custom/calendarEvent.gsm
 /var/lib/asterisk/sounds/custom/*
-/opt/elastix/elastix-synchronizer
-/opt/elastix/elastix-synchronizer/*
-/etc/init.d/elastix-synchronizerd
 
 %changelog
-#Se debe poner como prerequisito la version del framework nueva que se genere
-* Tue Dec 04 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: In spec file, added asterisk user as owner of folder
-  /opt/elastix/elastix-synchronizer
-- CHANGED: added function daemon_load_default_timezone to avoid php date/time
-  warnings. Also replaced the deprecated ereg function to preg_match
-  SVN Rev[4501]
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Jan 23 2013 German Macas <gmacas@palosanto.com>
+- FIXED: modules: calendar: Fixed CallerId in calendar event and resize of
+  calendar
+  SVN Rev[4611]
+
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
+* Sat Jan 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar (trivial): fix javascript warnings in IE6.
+  SVN Rev[4550]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: Agenda - Build/elastix-agenda.spec: Changed release in specfile.
+  SVN Rev[4373]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -143,41 +144,33 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
-* Wed Jul 11 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: daemon elastix-synchronizer, added a default color for events on a
-  synchronization
-  SVN Rev[4059]
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- CHANGED: Agenda - build/elastix-agenda.spec: Changed specfile, updated with 
+  the latest information.
+  SVN Rev[3981]
 
-* Tue Jul 10 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: module calendar, added a new field called "new" to indicate if an
-  eventis new or not in a synchronization
-  SVN Rev[4058]
-
-* Tue Jul 10 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: module address_book, added a new field called "new" to indicate if a
-  contact is new or not in a synchronization
-  SVN Rev[4057]
-
-* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Remove stray print_r()
-  SVN Rev[4016]
-
-* Fri Jun 08 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: modules agenda, the daemon elastix-synchronizerd
-  does not need root privileges. Changing to asterisk user privileges
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- CHANGED: modules agenda, the daemon elastix-synchronizerd does not need root
+  privileges. Changing to asterisk user privileges.
   SVN Rev[3976]
-- ADDED: module agenda, added a new daemon called elastix-synchronizerd
-  which handle the contacts and events synchronization
+
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module agenda, added a new daemon called elastix-synchronizerd which
+  handle the contacts and events synchronization.
   SVN Rev[3975]
-- ADDED: module calendar, added new rest resources for events
-  synchronization and data integrity verification
+
+* Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module calendar, added new rest resources for events synchronization 
+  and data integrity verification.
   SVN Rev[3973]
-- ADDED: modules address_book, added new rest resources for 
-  synchronitation and data verification integrity
+
+* Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: modules address_book, added new rest resources for synchronitation 
+  and data verification integrity.
   SVN Rev[3972]
 
 * Mon May 28 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7

@@ -393,7 +393,7 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter_adress_book.tpl", "", $arrFilter);
 
     if($directory_type=='external')
-        $total = $padress_book->getAddressBook($id_user, NULL,NULL,$field,$pattern,TRUE);
+        $total = $padress_book->getAddressBook(NULL,NULL,$field,$pattern,TRUE,$id_user);
     else
         $total = $padress_book->getDeviceFreePBX($dsnAsterisk, NULL,NULL,$field,$pattern,TRUE);
 
@@ -414,7 +414,7 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
     //Fin Paginacion
 
     if($directory_type=='external')
-        $arrResult = $padress_book->getAddressBook($id_user, $limit, $offset, $field, $pattern, FALSE);
+        $arrResult = $padress_book->getAddressBook($limit, $offset, $field, $pattern, FALSE, $id_user);
     else
         $arrResult = $padress_book->getDeviceFreePBX($dsnAsterisk, $limit,$offset,$field,$pattern);
 
@@ -1103,7 +1103,7 @@ function backup_contacts($pDB, $pDB_2, $arrLang)
     $fields = "name, last_name, telefono, email";
     $pACL         = new paloACL($pDB_2);
     $id_user      = $pACL->getIdUser($_SESSION["elastix_user"]);
-    $arrResult = $pAdressBook->getAddressBookByCsv($id_user, null, null, $fields, null, null);
+    $arrResult = $pAdressBook->getAddressBookByCsv(null, null, $fields, null, null, $id_user);
 
     if(!$arrResult)
     {

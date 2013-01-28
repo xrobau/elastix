@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.8                                                  |
+  | Elastix version 1.0                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,8 +25,8 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
-    global $arrConfModule;
-    $arrConfModule['module_name'] = 'conference';
-    $arrConfModule['templates_dir'] = 'themes';
+  $Id: default.conf.php,v 1.1 2008/01/04 15:55:57 afigueroa Exp $ */
+global $arrConfModule;
+$arrConfModule['module_name'] = 'webmeetme';
+$arrConfModule['templates_dir'] = 'themes';
 ?>

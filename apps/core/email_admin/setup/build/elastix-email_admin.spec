@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 11
+Release: 12
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -195,9 +195,31 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-12
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
+* Sat Jan 12 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: The behavior of the checkbox in the sticky-notes its now normal,
+  showing the checkbox instead of the ON-OFF slider button. Fixes Elastix BUG
+  #1424 - item 3
+  SVN Rev[4582]
+
 * Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-11
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4497]
 
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: do not display the "Export Accounts" link until an

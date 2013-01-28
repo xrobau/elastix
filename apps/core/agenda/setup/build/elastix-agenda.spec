@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,8 +109,27 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Jan 23 2013 German Macas <gmacas@palosanto.com>
+- FIXED: modules: calendar: Fixed CallerId in calendar event and resize of
+  calendar
+  SVN Rev[4611]
+
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
+* Sat Jan 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar (trivial): fix javascript warnings in IE6.
+  SVN Rev[4550]
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
 - CHANGED: Agenda - Build/elastix-agenda.spec: Changed release in specfile.
+  SVN Rev[4373]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 

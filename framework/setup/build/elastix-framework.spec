@@ -308,11 +308,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
-* Mon Jan 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-17
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-17
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile.
 
-* Mon Jan 28 2012 Bruno Macias <bmacias@palosanto.com>
+* Mon Jan 28 2013 Bruno Macias <bmacias@palosanto.com>
 - FIXED: framework - elastixneo theme, slogan elastix, was updated because
   there was a mistake.
   SVN Rev[4622]

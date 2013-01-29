@@ -247,7 +247,6 @@ $BACKUP_PLAN = array(
                     'parentdir'     =>  '/var/spool',
                     'dirname'       =>  'imap',
                     'backupfile'    =>  'var.spool.imap.tgz',
-                    
                     /* Previous backup implementation changed ownership to 
                      * asterisk:asterisk before backup and this change got
                      * embedded into the tarball. */
@@ -258,7 +257,10 @@ $BACKUP_PLAN = array(
                     'parentdir'     =>  '/var/lib/imap',
                     'dirname'       =>  'domain',
                     'backupfile'    =>  'var.lib.imap.tgz',
-                    
+                    /* Campo mustExist determina si mandar una alerta de error en caso 
+                     * de que al momento de realizar el backup o el restore no se encuentre 
+                     * el directorio listado.*/
+                    'mustExist'      =>  'no', 
                     /* Previous backup implementation changed ownership to 
                      * asterisk:asterisk before backup and this change got
                      * embedded into the tarball. */
@@ -795,8 +797,18 @@ function backupComponent_file($sLevelTag, &$backupComponent, $sWorkingDir)
 
 function backupComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
 {
-	/* Directory change cannot be done with tar -C for all cases, because
-     * pathlist might need shell expansion relative to target directory. */
+    if(is_dir($backupComponent['parentdir']."/".$backupComponent['dirname'])===false){
+        if(isset($backupComponent['mustExist'])){
+            if($backupComponent['mustExist']=="no"){
+                return TRUE;
+            }
+        }
+        fwrite(STDERR, "ERR: $sLevelTag: failed to create tarball ".$backupComponent['backupfile']." on destination $sWorkingDir\n");
+        return FALSE;
+    }
+    
+    /* Directory change cannot be done with tar -C for all cases, because
+    * pathlist might need shell expansion relative to target directory. */
     $sCommand = 'cd '.escapeshellarg($backupComponent['parentdir']).
         '&& tar -czf '.escapeshellarg($sWorkingDir.'/'.$backupComponent['backupfile']).' '.
         (isset($backupComponent['pathlist']) 
@@ -806,7 +818,7 @@ function backupComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
     exec($sCommand, $output, $retval);
     if ($retval != 0) {
         fwrite(STDERR, "ERR: $sLevelTag: failed to create tarball ".$backupComponent['backupfile']." on destination $sWorkingDir\n");
-    	return FALSE;
+        return FALSE;
     }
     return TRUE;
 }
@@ -1137,6 +1149,19 @@ function restoreComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
         }
     }
     
+    //comprobamos si el archivo del backup existing
+    //puede que no exista en caso de que tenga configurado el
+    //parametro mustExist = no
+    if(file_exists($sWorkingDir.'/'.$backupComponent['backupfile'])===false){
+        if(isset($backupComponent['mustExist'])){
+            if($backupComponent['mustExist']=="no"){
+                return TRUE;
+            }
+        }
+        fwrite(STDERR, "ERR: $sLevelTag: failed to unpack tarball ".$backupComponent['backupfile']." from source $sWorkingDir\n");
+        return FALSE;
+    }
+    
     // Restore inside parentdir
     $sCommand = 'tar -C '.escapeshellarg($backupComponent['parentdir']).
         ' -xvf '.escapeshellarg($sWorkingDir.'/'.$backupComponent['backupfile']);
@@ -1434,6 +1459,8 @@ function prerestore_em_db($sLevelTag, &$backupComponent, $sWorkingDir)
     $cyr_conn->imap_logout();
     return $bSuccess;
 }
+
+
 
 // Custom processing after restoring email database.
 function postrestore_em_db($sLevelTag, &$backupComponent, $sWorkingDir)

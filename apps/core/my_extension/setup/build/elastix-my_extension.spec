@@ -2,7 +2,7 @@
 
 Summary: Elastix My Extension 
 Name:    elastix-%{modname}
-Version: 2.3.0
+Version: 2.4.0
 Release: 1
 License: GPL
 Group:   Applications/System
@@ -84,6 +84,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: my_extension - Build/elastix-my_extension.spec: Changed Version and Release in 
+  specfile according to the current branch.
+
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-1
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Changed release in specfile.

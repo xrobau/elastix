@@ -103,7 +103,7 @@ function changeStatusFestival()
         $arrMessage["mb_title"] = _tr("Message").":<br/>";
         switch ($pFestival->activateFestival()) {
         case 1:     // Servicio iniciado, se modificó archivo
-            $arrMessage["mb_message"] = _tr("The file /usr/share/festival/festival.scm was modified").". ";
+            $arrMessage["mb_message"] = _tr("");
         // cae al siguiente caso
         case 0:     // Servicio iniciado, sin modificación
             $arrMessage["mb_message"] .= _tr("Festival has been successfully activated");

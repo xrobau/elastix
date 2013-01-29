@@ -2,8 +2,8 @@
 
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 16
+Version: 2.4.0
+Release: 1
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: system - Build/elastix-system.spec: Changed Version and Release in 
+  specfile according to the current branch.
+
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-16
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

@@ -2,12 +2,12 @@
 
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 8
+Version: 2.4.0
+Release: 1
 License: GPL
 Group:   Applications/System
-#Source0: %{modname}_%{version}-%{release}.tgz
-Source0: %{modname}_%{version}-7.tgz
+Source0: %{modname}_%{version}-%{release}.tgz
+#Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-5
@@ -124,6 +124,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: Addons - Build/elastix-addons.spec: Changed Version and Release in 
+  specfile according to the current branch.
+
 * Wed Jan 23 2013 Alberto Santos <asantos@palosanto.com> 2.3.0-8
 - CHANGED: In spec file, added validation in post section to remove
   postgresql repo for architectures different to i386, i686 and x86_64

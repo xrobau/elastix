@@ -2,8 +2,8 @@
 
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 7
+Version: 2.4.0
+Release: 1
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -192,6 +192,10 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: Fax - Build/elastix-fax.spec: Changed Version and Release in 
+  specfile according to the current branch. 
+
 * Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
 - CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
   SVN history. Changed release in specfile.  

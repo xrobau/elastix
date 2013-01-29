@@ -253,6 +253,17 @@ $BACKUP_PLAN = array(
                      * embedded into the tarball. */
                     'restoreown'    =>  array('cyrus', 'mail'),
                 ),
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/lib/imap',
+                    'dirname'       =>  'domain',
+                    'backupfile'    =>  'var.lib.imap.tgz',
+                    
+                    /* Previous backup implementation changed ownership to 
+                     * asterisk:asterisk before backup and this change got
+                     * embedded into the tarball. */
+                    'restoreown'    =>  array('cyrus', 'mail'),
+                ),
             ),
             'postrestore'   =>  'postrestore_em_mailbox',
         ),
@@ -1554,7 +1565,7 @@ function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
             if (count($fields) > 1) {
                 $username = $fields[0].'@'.$row['domain_name'];
                 $sMailboxPath = escapeshellarg("user/$username");
-                $sCmdReconstruct = escapeshellarg("/usr/lib/cyrus-imapd/reconstruct -rf $sMailboxPath");
+                $sCmdReconstruct = escapeshellarg("/usr/lib/cyrus-imapd/reconstruct -r -f $sMailboxPath");
                 $sCmdSu = "su - cyrus -c $sCmdReconstruct";
                 //print "$sCmdSu\n";
                 $output = $retval = NULL;
@@ -1578,6 +1589,8 @@ function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
         fwrite(STDERR, "ERR: $sLevelTag: failed to repair quotas for mailboxes\n");
         $bSuccess = FALSE;
     }
+    
+    exec("/etc/init.d/cyrus-imapd restart", $output, $ret);
 
     return $bSuccess;
 }

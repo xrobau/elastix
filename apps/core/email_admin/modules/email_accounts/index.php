@@ -144,8 +144,6 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $smarty->assign("SHOW", $arrLang["Show"]);
     $smarty->assign("CREATE_ACCOUNT", $arrLang["Create Account"]);
 
-
-
    // $oGrid->pagingShow(true);
     $url = array("menu" => $module_name);
     if($id_domain == 0)
@@ -168,8 +166,12 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 
     if ($id_domain>0){
         $arrAccounts = $pEmail->getAccountsByDomain($id_domain);
-//username, password, id_domain, quota
-
+    }else{
+        $arrAccounts = $pEmail->getAccountsByDomain();
+    }
+        
+    if(is_array($arrAccounts)){    
+        //username, password, id_domain, quota
         $end = count($arrAccounts);
         //$configPostfix2 = isPostfixToElastix2();// in misc.lib.php
         foreach($arrAccounts as $account) {
@@ -184,9 +186,13 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
             //$arrTmp[3]=$link_agregar_direccion."&nbsp;&nbsp; ".$link_modificar_direccion;
             $arrData[] = $arrTmp;
         }
+    }else{
+        $smarty->assign("mb_title", _tr("Error"));
+        $smarty->assign("mb_message", $pEmail->errMsg);
     }
 
-    $total = count($arrData); $limit = 20;
+    $total = count($arrData); 
+    $limit = 20;
 
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
@@ -197,12 +203,6 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $leng = $fin - $inicio;
 
     $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
-
-    if ($id_domain != 0) {
-        $smarty->assign("id_domain",$id_domain);
-        $smarty->assign("LINK", "?menu=$module_name&action=export&domain=$id_domain&rawmode=yes");
-        $smarty->assign("EXPORT", _tr("Export Accounts"));
-    }
 
     if($isAdministrator)
         $oGrid->setColumns(array(_tr("Account Name"),_tr("Used Space"),_tr("Reconstruct MailBox")));
@@ -216,10 +216,12 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         "total"    => $total,
             );
 
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Domain")." = ".$arrDominios[$id_domain], $_POST, array("domain" => 0));
-    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/accounts_filter.tpl", "", $_POST);
-    $oGrid->addNew("submit_create_account",_tr("Create Account"));
-    $oGrid->showFilter(trim($htmlFilter));
+    $oGrid->addComboAction("domain",_tr("Create Account"), $arrDominios,$id_domain,"submit_create_account", "this.form.submit();");
+    if ($id_domain != 0) {
+        $oGrid->addLinkAction("?menu=$module_name&action=export&domain=$id_domain&rawmode=yes", _tr("Export Accounts"));
+        $smarty->assign("id_domain",$id_domain);
+    }
+    
     $content = $oGrid->fetchGrid($arrGrid,$arrDatosGrid,$arrLang);
     return $content;
 }

@@ -195,25 +195,28 @@ class paloEmail {
         return $arr_result;
     }
 
-    function getAccountsByDomain($id_domain)
+    function getAccountsByDomain($id_domain=null)
     {
         $this->errMsg = '';
         $arr_result = FALSE;
-        if (!ctype_digit("$id_domain")) {
-            $this->errMsg = "Domain ID is not valid";
-        } else {
-            $sPeticionSQL = 'SELECT username, password, id_domain, quota FROM accountuser';
-            $paramSQL = array();
-            if (!is_null($id_domain)) {
-                $sPeticionSQL .= ' WHERE id_domain = ?';
-                $paramSQL[] = $id_domain;
+        if (!is_null($id_domain)) {
+            if (!ctype_digit("$id_domain")) {
+                $this->errMsg = "Domain ID is not valid";
+                return false;
             }
+        }
+        
+        $sPeticionSQL = 'SELECT username, password, id_domain, quota FROM accountuser';
+        $paramSQL = array();
+        if (!is_null($id_domain)) {
+            $sPeticionSQL .= ' WHERE id_domain = ? ORDER BY id_domain';
+            $paramSQL[] = $id_domain;
+        }else
             $sPeticionSQL .= ' ORDER BY username';
-            $arr_result = $this->_DB->fetchTable($sPeticionSQL, FALSE, $paramSQL);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
+        $arr_result = $this->_DB->fetchTable($sPeticionSQL, FALSE, $paramSQL);
+        if (!is_array($arr_result)) {
+            $arr_result = FALSE;
+            $this->errMsg = $this->_DB->errMsg;
         }
         return $arr_result;
     }

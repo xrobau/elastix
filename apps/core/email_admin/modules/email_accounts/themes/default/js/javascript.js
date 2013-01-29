@@ -19,3 +19,9 @@ function Activate_Option()
 	}
     }
 }
+
+$(document).ready(function(){
+    $('#domain').change(function() {
+        $(this).closest('form').submit();
+    });
+});

@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
-Version: 2.3.0
-Release: 10
+Version: 2.4.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,6 +102,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in 
+  specfile according to the current branch.
+
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-10
 - CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
   SVN history. Changed release in specfile.

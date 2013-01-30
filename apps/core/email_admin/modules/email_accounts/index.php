@@ -612,7 +612,12 @@ function exportAccounts($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     else
         $domainName = "no_domain";
     $text = "";
-    if(is_array($arrAccounts) && count($arrAccounts)>0){
+    
+    if($arrAccounts===false){
+        $text = $domainName.","._tr("A Error has ocurred when tryed to obtain emails accounts data. ").$pEmail->errMsg;
+    }elseif(count($arrAccounts)==0){
+        $text = $domainName.","._tr("There aren't emails accounts associted with the domain");
+    }else{
         foreach($arrAccounts as $account){
             if($text != "")
                 $text .= "\n";
@@ -620,6 +625,8 @@ function exportAccounts($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             $text .= $user[0].",".$account[1].",".$account[3];
         }
     }
+    
+        
     header("Pragma: public");
     header("Expires: 0");
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");

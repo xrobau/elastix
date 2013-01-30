@@ -147,5 +147,7 @@ $arrLangModule=array(
 'Start process' => 'Start process',
 'Stop process' => 'Stop process',
 'Restart process' => 'Restart process',
+'Enable process' => 'Enable process',
+'Disable process' => 'Disable process',
 );
 ?>

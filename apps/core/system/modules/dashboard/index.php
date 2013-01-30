@@ -102,10 +102,6 @@ function _moduleContent($smarty, $module_name)
             $content = loadAppletData($pDataApplets,$arrPaneles,$session);
             return $content;
             break;
-        case "getImageLoading":
-            $content = getImageLoading($module_name);
-            return $content;
-            break;
         case "refreshDataApplet":
             $content = refreshDataApplet($pDataApplets);
             return $content;
@@ -113,6 +109,8 @@ function _moduleContent($smarty, $module_name)
         case 'processcontrol_stop':
         case 'processcontrol_start':
         case 'processcontrol_restart':
+	case 'processcontrol_activate':
+        case 'processcontrol_deactivate':
             return processControl($action);
             break;
         default:
@@ -134,7 +132,7 @@ function _moduleContent($smarty, $module_name)
     $AppletsPanels = createApplesTD($arrPaneles, $pDataApplets);
     $smarty->assign("module_name",  $module_name);
     $smarty->assign("AppletsPanels",$AppletsPanels);
-
+    $smarty->assign("loading",_tr("Loading"));
     $action = getParameter("save_new");
     if(isset($action))
      $app = saveApplets_Admin();
@@ -248,15 +246,6 @@ function refreshDataApplet($pDataApplets)
 	$message = $pDataApplets->$function();
     else
 	$message = _tr("Error, the following code does not exist").": $code";
-    $jsonObject->set_message($message);
-    return $jsonObject->createJSON();
-}
-
-function getImageLoading($module_name)
-{
-    $jsonObject = new PaloSantoJSON();
-    $message = "<img class='ima' src='modules/{$module_name}/images/loading.gif' border='0' align='absmiddle' />&nbsp;
-                        "._tr('Loading');
     $jsonObject->set_message($message);
     return $jsonObject->createJSON();
 }

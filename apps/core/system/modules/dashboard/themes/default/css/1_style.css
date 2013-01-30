@@ -589,3 +589,13 @@ div.neo-applet-processes-menu {
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
 }
+.neo_applet_process{
+      width: 120px;
+      display: block;
+      cursor: pointer;
+}
+.neo_applet_process:hover{
+      background: #E4E2E2;
+      color:#000;
+}
+

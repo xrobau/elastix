@@ -192,13 +192,18 @@ PLANTILLA_RSS_ROW;
         $sMsgStart = _tr('Start process');
         $sMsgStop = _tr('Stop process');
         $sMsgRestart = _tr('Restart process');
+	$sMsgActivate = _tr('Enable process');
+	$sMsgDeactivate = _tr('Disable process');
         $sListaServicios = <<<PLANTILLA_POSICIONABLE
 <div class="neo-applet-processes-menu">
 <input type="hidden" id="neo_applet_selected_process" value="" />
 <div id="neo-applet-processes-controles">
-<input style="width: 120px; display: block;" type="button" id="neo_applet_process_stop" value="$sMsgStop" />
-<input style="width: 120px; display: block;" type="button" id="neo_applet_process_start" value="$sMsgStart" />
-<input style="width: 120px; display: block;" type="button" id="neo_applet_process_restart" value="$sMsgRestart" />
+<input type="button" class="neo_applet_process" name="processcontrol_stop" id="neo_applet_process_stop" value="$sMsgStop" />
+<input type="button" class="neo_applet_process" name="processcontrol_start" id="neo_applet_process_start" value="$sMsgStart" />
+<input type="button" class="neo_applet_process" name="processcontrol_restart" id="neo_applet_process_restart" value="$sMsgRestart" />
+<input type="button" class="neo_applet_process" name="processcontrol_activate" id="neo_applet_process_activate" value="$sMsgActivate" />
+<input type="button" class="neo_applet_process" name="processcontrol_deactivate" id="neo_applet_process_deactivate" value="$sMsgDeactivate" />
+
 </div>
 <img id="neo-applet-processes-processing" src="modules/{$this->module_name}/images/loading.gif" style="display: none;" alt="" />
 </div>
@@ -221,7 +226,8 @@ PLANTILLA_POSICIONABLE;
     <div class="neo-applet-processes-row-menu">
         <input type="hidden" name="key-servicio" id="key-servicio" value="%s" />
         <input type="hidden" name="status-servicio" id="status-servicio" value="%s" />
-        <img src="modules/dashboard/images/%s" width="15" height="15" alt="menu" />
+        <input type="hidden" name="activate-process" id="activate-process" value="%s" />
+        <img src="modules/dashboard/images/%s" style="cursor:%s; width="15" height="15" alt="menu" />
     </div>
     <div class="neo-applet-processes-row-status-msg" style="color: %s">%s</div>
     <div class="neo-applet-processes-row-status-icon"></div></div>
@@ -248,7 +254,9 @@ PLANTILLA_PROCESS_ROW;
                 _tr($infoServicio['name_service']),
                 $sServicio,
                 $infoServicio['status_service'],
+		$infoServicio['activate'],
                 (in_array($infoServicio['status_service'], array('OK', 'Shutdown'))) ? 'icon_arrowdown.png' : 'icon_arrowdown-disabled.png',
+		(in_array($infoServicio['status_service'], array('OK', 'Shutdown'))) ? 'pointer' : '',
                 $sColorStatus,
                 strtoupper($sDescStatus));
         }

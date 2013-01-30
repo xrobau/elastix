@@ -3,6 +3,7 @@
             {$AppletsPanels}
     </tr>
 </table>
+<input type="hidden" id="loading" value="{$loading}"/>
 <script language="javascript" type = "text/javascript">
     loadAppletData();
 </script>

@@ -108,6 +108,8 @@ function _moduleContent($smarty, $module_name)
         case 'processcontrol_stop':
         case 'processcontrol_start':
         case 'processcontrol_restart':
+	case 'processcontrol_activate':
+        case 'processcontrol_deactivate':
             return processControl($action);
             break;
         default:
@@ -129,7 +131,7 @@ function _moduleContent($smarty, $module_name)
     $AppletsPanels = createApplesTD($arrPaneles, $pDataApplets);
     $smarty->assign("module_name",  $module_name);
     $smarty->assign("AppletsPanels",$AppletsPanels);
-
+    $smarty->assign("loading",_tr("Loading"));
     $action = getParameter("save_new");
     if(isset($action))
      $app = saveApplets_Admin();
@@ -150,8 +152,7 @@ function processControl($action)
     if (!empty($pACL->errMsg)) {
         return "ERROR DE ACL: $pACL->errMsg";
     }
-    $isAdministrator = $pACL->isUserAdministratorGroup($_SESSION['elastix_user']);
-    
+    $isAdministrator = $pACL->isUserSuperAdmin($_SESSION['elastix_user']);
     $message = 'success';
     if (!$isAdministrator) {
         $message = _tr('Process control restricted to administrators');
@@ -163,7 +164,6 @@ function processControl($action)
     $jsonObject->set_message($message);
     Header('Content-Type: application/json');
     return $jsonObject->createJSON();
-
 }
 
 function createApplesTD($arrPaneles, $pDataApplets){

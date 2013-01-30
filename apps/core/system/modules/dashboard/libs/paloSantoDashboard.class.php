@@ -26,7 +26,7 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoDashboard.class.php,v 1.1.1.1 2008/01/31 21:31:55  Exp $ */
-
+include_once "paloSantoSysInfo.class.php";
 class paloSantoDashboard {
     var $_DB;
     var $errMsg;
@@ -389,11 +389,14 @@ class paloSantoDashboard {
    }
    
     function controlServicio($sServicio, $sAccion)
-    {
+    {   $oPalo = new paloSantoSysInfo();
+	$flag = 0;
         $acciones = array(
             'processcontrol_start'      =>  'start',
             'processcontrol_restart'    =>  'restart',
             'processcontrol_stop'       =>  'stop',
+	    'processcontrol_activate'   =>  'on',
+	    'processcontrol_deactivate' =>  'off',
         );
         $servicios = array(
             'Asterisk'  =>  'asterisk',
@@ -407,7 +410,18 @@ class paloSantoDashboard {
         if (!in_array($sServicio, array_keys($servicios))) return FALSE;
         if (!in_array($sAccion, array_keys($acciones))) return FALSE;
         $output = $retval = NULL;
-        exec('sudo -u root service generic-cloexec '.$servicios[$sServicio].' '.$acciones[$sAccion].' 1>/dev/null 2>/dev/null');
+        if(($sAccion=="processcontrol_deactivate")||($sAccion=="processcontrol_activate")){
+	   //  exec('sudo -u root chkconfig --level 3 '.escapeshellarg($servicios[$sServicio]).' '.escapeshellarg($acciones[$sAccion]),$output,$retval);
+	    exec('/usr/bin/elastix-helper rchkconfig --level 3 '.escapeshellarg($servicios[$sServicio]).' '.escapeshellarg($acciones[$sAccion]),$output,$retval);    
+	    
+	    $arrServices = $oPalo->getStatusServices();  
+	    if((($arrServices[$sServicio]["status_service"]=="Shutdown")&&($sAccion=="processcontrol_activate"))||(($arrServices[$sServicio]["status_service"]=="OK")&&($sAccion=="processcontrol_deactivate")))
+		$sAccion = ($sAccion=="processcontrol_deactivate")?'processcontrol_stop':'processcontrol_start';
+	    else
+		$flag = 1;
+	}
+	if($flag!=1)		
+        	exec('sudo -u root service generic-cloexec '.$servicios[$sServicio].' '.$acciones[$sAccion].' 1>/dev/null 2>/dev/null');
         return TRUE;
     }
 }

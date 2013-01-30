@@ -232,6 +232,16 @@ class paloSantoSysInfo
     {
         return Date('H:i', $value);
     }
+    
+    function _isActivate($process){
+    exec("ls /etc/rc3.d/ | grep \"$process\" ",$arrConsle,$flatStatus);
+    if($flatStatus==0){
+      if(preg_match("/^S/",$arrConsle[0]))
+	 return 1;
+      else
+         return 0;
+    }else return 0;
+    }
 
     function getStatusServices()
     {   // file pid service asterisk    is /var/run/asterisk/asterisk.pid
@@ -244,27 +254,34 @@ class paloSantoSysInfo
         // file pid service call_center is /opt/elastix/dialer/dialerd.pid
 
         $arrSERVICES["Asterisk"]["status_service"] = $this->_existPID_ByFile("/var/run/asterisk/asterisk.pid","asterisk");
-        $arrSERVICES["Asterisk"]["name_service"]   = "Telephony Service";
+        $arrSERVICES["Asterisk"]["activate"] = $this->_isActivate("asterisk");
+	$arrSERVICES["Asterisk"]["name_service"]   = "Telephony Service";
 
         $arrSERVICES["OpenFire"]["status_service"] = $this->_existPID_ByFile("/var/run/openfire.pid","openfire");
+	$arrSERVICES["OpenFire"]["activate"] = $this->_isActivate("openfire");
         $arrSERVICES["OpenFire"]["name_service"]   = "Instant Messaging Service";
 
         $arrSERVICES["Hylafax"]["status_service"]  = $this->getStatusHylafax();
+	$arrSERVICES["Hylafax"]["activate"] 	   = $this->_isActivate("hylafax");
         $arrSERVICES["Hylafax"]["name_service"]    = "Fax Service";
 /*
         $arrSERVICES["IAXModem"]["status_service"] = $this->_existPID_ByFile("/var/run/iaxmodem.pid","iaxmodem");
         $arrSERVICES["IAXModem"]["name_service"]   = "IAXModem Service";
 */
         $arrSERVICES["Postfix"]["status_service"]  = $this->_existPID_ByCMD("master","postfix");
+	$arrSERVICES["Postfix"]["activate"] 	   = $this->_isActivate("postfix");
         $arrSERVICES["Postfix"]["name_service"]    = "Email Service";
 
         $arrSERVICES["MySQL"]["status_service"]    = $this->_existPID_ByCMD("mysqld","mysqld");
+	$arrSERVICES["MySQL"]["activate"] 	   = $this->_isActivate("mysqld");
         $arrSERVICES["MySQL"]["name_service"]      = "Database Service";
 
         $arrSERVICES["Apache"]["status_service"]   = $this->_existPID_ByFile("/var/run/httpd.pid","httpd");
+	$arrSERVICES["Apache"]["activate"] 	   = $this->_isActivate("httpd");
         $arrSERVICES["Apache"]["name_service"]     = "Web Server";
 
         $arrSERVICES["Dialer"]["status_service"]   = $this->_existPID_ByFile("/opt/elastix/dialer/dialerd.pid","elastixdialer");
+	$arrSERVICES["Dialer"]["activate"] 	   = $this->_isActivate("elastixdialer");
         $arrSERVICES["Dialer"]["name_service"]     = "Elastix Call Center Service";
 
         return $arrSERVICES;

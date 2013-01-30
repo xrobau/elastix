@@ -271,28 +271,21 @@ function refresh(element)
     code = $(element).attr("id");
     code = code.split("refresh_");
     code = code[1];
+    loading = $("#loading").val();
     // Se obtiene la imagen loading con su texto traducido
-    var arrAction	 = new Array();
-    arrAction["action"]  = "getImageLoading";
-    arrAction["rawmode"] = "yes";
-    request("index.php",arrAction,false,
-	  function(arrData,statusResponse,error)
-	  {
-	      $("#"+code).html(arrData);
-	      
-	      // Se realiza la petición para obtener los datos del applet
-	      var arrAction	 = new Array();
-	      arrAction["action"]  = "refreshDataApplet";
-	      arrAction["code"]    = code;
-	      arrAction["rawmode"] = "yes";
-	      request("index.php",arrAction,false,
-		    function(arrData,statusResponse,error)
-		    {
-			$("#"+code).html(arrData);
-		    }
-	      );
-	  }
-    );
+        $("#"+code).html("<img class='ima' src='modules/"+module_name+"/images/loading.gif' border='0' align='absmiddle' />&nbsp;"+loading);
+  
+    // Se realiza la petición para obtener los datos del applet
+     var arrAction	 = new Array();
+     arrAction["action"]  = "refreshDataApplet";
+     arrAction["code"]    = code;
+     arrAction["rawmode"] = "yes";
+     request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+		$("#"+code).html(arrData);
+        }
+      );
 }
 
 function neoAppletProcesses_esconderMenu()
@@ -308,6 +301,7 @@ function neoAppletProcesses_esconderMenu()
 function neoAppletProcesses_manejarMenu(event)
 {
 	sCurrState = $(this).children('#status-servicio').val();
+	isActivate = $(this).children('#activate-process').val();
 	sProc = $(this).children('#key-servicio').val();
 	if (sCurrState != 'OK' && sCurrState != 'Shutdown') return;
 	
@@ -328,48 +322,19 @@ function neoAppletProcesses_manejarMenu(event)
 		$('#neo-applet-processes-controles').show();
 		$('#neo-applet-processes-processing').hide();
 		
-		$('#neo_applet_process_stop').unbind('click');
-		$('#neo_applet_process_start').unbind('click');
-		$('#neo_applet_process_restart').unbind('click');
+                $('.neo_applet_process').unbind('click');
 	
 		module_name = 'dashboard';
-		$('#neo_applet_process_stop').click(function() {
+		$('.neo_applet_process').click(function() {
 			$('#neo-applet-processes-controles').hide();
 			$('#neo-applet-processes-processing').show();
 			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
 				menu:		module_name, 
 				rawmode:	'yes',
-				action:		'processcontrol_stop',
+				action:		$(this).attr('name'),
 				process:	$('#neo_applet_selected_process').val()
 			},
-			function (respuesta) {
-				neoAppletProcesses_esconderMenu();
-				refresh($('#refresh_Applet_ProcessesStatus').get(0));
-			});
-		});
-		$('#neo_applet_process_start').click(function() {
-			$('#neo-applet-processes-controles').hide();
-			$('#neo-applet-processes-processing').show();
-			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-				menu:		module_name, 
-				rawmode:	'yes',
-				action:		'processcontrol_start',
-				process:	$('#neo_applet_selected_process').val()
-			},
-			function (respuesta) {
-				neoAppletProcesses_esconderMenu();
-				refresh($('#refresh_Applet_ProcessesStatus').get(0));
-			});
-		});
-		$('#neo_applet_process_restart').click(function() {
-			$('#neo-applet-processes-controles').hide();
-			$('#neo-applet-processes-processing').show();
-			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-				menu:		module_name, 
-				rawmode:	'yes',
-				action:		'processcontrol_restart',
-				process:	$('#neo_applet_selected_process').val()
-			},
+			
 			function (respuesta) {
 				neoAppletProcesses_esconderMenu();
 				refresh($('#refresh_Applet_ProcessesStatus').get(0));
@@ -377,6 +342,7 @@ function neoAppletProcesses_manejarMenu(event)
 		});
 
 		$('.neo-applet-processes-menu').show();
+		$('.neo-applet-processes-menu').css("position","fixed");
 		$('.neo-applet-processes-menu').position({
 			of: $(this),
 			my: "right top",
@@ -393,6 +359,14 @@ function neoAppletProcesses_manejarMenu(event)
 			$('#neo_applet_process_stop').hide();
 			$('#neo_applet_process_restart').hide();
 			$('#neo_applet_process_start').show();
+		}
+		if(isActivate == '1')
+		{
+			$('#neo_applet_process_activate').hide();
+			$('#neo_applet_process_deactivate').show(); 
+		}else{
+			$('#neo_applet_process_activate').show();
+			$('#neo_applet_process_deactivate').hide();
 		}
 	}
 }

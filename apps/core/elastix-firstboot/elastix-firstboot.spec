@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-firstboot: make update of password in manager.conf more 
+  robust in the case it falls out of sync with /etc/elastix.conf.
+  SVN Rev[4658]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in 
   specfile according to the current branch.

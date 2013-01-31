@@ -202,7 +202,9 @@ $BACKUP_PLAN = array(
                 array(
                     'type'          =>  'sqlitedb',
                     'path'          =>  '/var/www/db/fax.db',
-                    'restoreperm'   =>  0644,
+                    /* This particular file is updated by hylafax under user 
+                     * uucp, therefore needs to be world writable. */
+                    'restoreperm'   =>  0666,
                     'restoreown'    =>  array('asterisk', 'asterisk'),
                 ),
             ),

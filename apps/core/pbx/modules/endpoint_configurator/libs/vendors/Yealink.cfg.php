@@ -5,7 +5,7 @@
 function PrincipalFileYealink($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer)
 {
     $configNetwork = "";
-    $ByDHCP = existsValue($arrParameters,'By_DHCP',1); echo $ByDHCP;
+    $ByDHCP = existsValue($arrParameters,'By_DHCP',1); 
     $ByDHCP = ($ByDHCP == 1)?0:2; // 0 indica que es por DHCP y 2 por estatico
     if($ByDHCP==2){
         $configNetwork ="
@@ -753,10 +753,79 @@ TEMP;
 }
 function PrincipalFileYealinkVP530($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer)
 {
+
+$ByDHCP = existsValue($arrParameters,'By_DHCP',""); 
+$time = existsValue($arrParameters,'Time_Zone',12);
+$pcportmode= existsValue($arrParameters,'Bridge',1);
+
+
+$timezone = <<<TEMP
+#######################################################################################
+##         	                   Time Settings                                         ##
+#######################################################################################
+#Configure the time zone and time zone name. The time zone ranges from -11 to +12, the default value is +8. 
+local_time.time_zone = $time
+TEMP;
+
+
+$pcport= <<<TEMP
+#Configure the PC port type; 0-Router, 1-Bridge (default);
+#Require reboot;
+network.bridge_mode = $pcportmode
+TEMP;
+
+
+
+switch ($ByDHCP){
+    case '' : 
+		$configNetwork= "";
+		break;
+  
+    case 0  :
+		$dns  = existsValue($arrParameters,'DNS1',''); 
+		$dns2 = existsValue($arrParameters,'DNS2','');
+		$ip   = existsValue($arrParameters,'IP','');
+		$mask = existsValue($arrParameters,'Mask','');
+		$gw   = existsValue($arrParameters,'GW','');
+		$configNetwork= <<<TEMP
+#######################################################################################
+##                          Network                                                  ## 
+#######################################################################################
+
+#Configure the WAN port type; 0-DHCP (default), 1-PPPoE, 2-Static IP Address;
+#Require reboot;
+network.internet_port.type =  2
+#Configure the static IP address, subnet mask, gateway and DNS server;
+#Require Reboot;
+network.internet_port.ip = $ip
+network.internet_port.mask = $mask
+network.internet_port.gateway = $gw
+network.primary_dns= $dns
+network.secondary_dns = $dns2
+TEMP;
+		break;
+    case 1: 
+		$configNetwork= <<<TEMP
+#######################################################################################
+##                          Network                                                  ## 
+#######################################################################################
+
+#Configure the WAN port type; 0-DHCP (default), 1-PPPoE, 2-Static IP Address;
+#Require reboot;
+network.internet_port.type =  0
+TEMP;
+		break;
+
+   
+
+}
+
     $content= <<<TEMP
 ﻿#!version:1.0.0.1
 
 ##File header "#!version:1.0.0.1" can not be edited or deleted.##
+
+$configNetwork
 
 #######################################################################################
 ##                           Account1 Settings                                       ##                                                                          
@@ -784,6 +853,10 @@ account.1.sip_server_host = $ipAdressServer
 account.1.sip_server_port = 5060
 auto_provision.server.url = tftp://$ipAdressServer:69
 
+$pcport
+
+$timezone
+
 TEMP;
 
     return $content;
@@ -797,5 +870,25 @@ function existsValue($arr, $key, $default)
         else return $default;
     }
     else return $default;
+}
+
+function  setServerURL($ip_endpoint,$user,$passwd,$ip_server,$model){
+    if($model=="VP530")
+       $options = array(CURLOPT_POSTFIELDS => 'command=regSetString("/config/system/system.ini","AutoProvision","strServerURL","tftp://'.$ip_server.'")'); 
+    elseif($model=="SIP-T38G")
+       $options = array(CURLOPT_POSTFIELDS => 'command=regSetString("/phone/config/system.ini","AutoProvision","strServerURL","tftp://'.$ip_server.'")'); 
+    else
+       return FALSE;
+
+    if($ch = curl_init("http://$user:$passwd@$ip_endpoint/cgi-bin/cgiServer.exx")) 
+    {
+      curl_setopt_array($ch, $options);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+      $output = curl_exec($ch);
+      curl_close($ch);
+      return TRUE;
+    }else
+      return FALSE;
+
 }
 ?>

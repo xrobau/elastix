@@ -131,6 +131,13 @@ fi
 
 %changelog
 * Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: some restore operations overwrite known passwords, such
+  as the root mysql password and the ami manager password. If passwords are
+  changed between a backup and a restore on the same system, or a backup is 
+  restored on a system with different passwords, the freepbx interface will 
+  break due to password mismatch. Fix by restoring passwords from elastix.conf.
+  Fixes Elastix bug #1462.
+  SVN Rev[4660]
 - FIXED: Backup/Restore: Due to unintended bug-for-bug compatibility with the
   previous backup/restore implementation, the backupengine script restored 
   fax.db with chmod 644, which resulted in fax notifications breaking for any 

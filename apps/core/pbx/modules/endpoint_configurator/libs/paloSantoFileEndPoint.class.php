@@ -310,11 +310,13 @@ class PaloSantoFileEndPoint
             break;
 
             case 'Yealink':
-               if($ArrayData['data']['model']== "VP530"){
+               if($ArrayData['data']['model']== "VP530"||$ArrayData['data']['model']== "SIP-T38G"){
                      $contentFileYealink =PrincipalFileYealinkVP530($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
-               }
+		     if(!setServerURL($ArrayData['data']['ip_endpoint'],"admin","admin",$this->ipAdressServer,$ArrayData['data']['model']))
+		        $return = false;
 
-               if($ArrayData['data']['model'] == "SIP-T20/T20P" || $ArrayData['data']['model'] == "SIP-T22/T22P" || $ArrayData['data']['model'] == "SIP-T26/T26P" || $ArrayData['data']['model'] == "SIP-T28/T28P"){
+	       }
+	       if($ArrayData['data']['model'] == "SIP-T20/T20P" || $ArrayData['data']['model'] == "SIP-T22/T22P" || $ArrayData['data']['model'] == "SIP-T26/T26P" || $ArrayData['data']['model'] == "SIP-T28/T28P"){
                     $contentFileYealink =PrincipalFileYealink($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
                }
                if($this->createFileConf($this->directory, $ArrayData['data']['filename'].".cfg", $contentFileYealink)){
@@ -376,7 +378,7 @@ class PaloSantoFileEndPoint
     }
       
     function getModelElastix($user,$password,$ip,$sw){
-      if ($fsock = fsockopen($ip, 23, $errno, $errstr, 10))
+      if ($fsock = @fsockopen($ip, 23, $errno, $errstr, 10))
       {
 	      $result = $this->read($fsock,$sw);
 	      fclose ($fsock);

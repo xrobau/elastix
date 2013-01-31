@@ -74,6 +74,7 @@ require_once 'Console/Getopt.php';
  * operation to fix up configurations.
  */
 define('DEFAULT_BACKUP_DIR', '/var/www/backup');
+define('PASSWD_PATH', '/etc/elastix.conf');
 $BACKUP_PLAN = array(
     'asterisk'  =>  array(
         'as_db'             =>  array(
@@ -339,6 +340,8 @@ $BACKUP_PLAN = array(
                     'backupfile'=>  'mysql_mysql.tgz',
                 ),
             ),
+            'prerestore'    =>  'prerestore_mysql_db',
+            'postrestore'   =>  'postrestore_mysql_db',
         ),
         'menus_permissions' =>  array(
             'desc'          =>  'Menus and Permissions',
@@ -356,6 +359,7 @@ $BACKUP_PLAN = array(
                     'restoreown'    =>  array('asterisk', 'asterisk'),
                 ),
             ),
+            'postrestore'   =>  'postrestore_menu_permissions',
         ),
         'fop_config'        =>  array(
             'desc'          =>  'Flash Operator Panel Config Files',
@@ -493,13 +497,29 @@ function loadCyrusPassword()
             'ADMIN' =>  'cyrus',
             'PASS'  =>  'palosanto',
         );
-        foreach (file('/etc/elastix.conf') as $s) {
+        /*
+        foreach (file(PASSWD_PATH) as $s) {
             $regs = NULL;
             if (preg_match('/^cyrususerpwd\s*=\s*(.+)/', trim($s), $regs)) {
                 $CYRUS['PASS'] = $regs[1];
             }
-        }
+        }*/
+        $passwords = load_keys();
+        if (isset($passwords['cyrususerpwd'])) $CYRUS['PASS'] = $passwords['cyrususerpwd'];
     }
+}
+
+// Need custom function to load conf file, odd characters choke parse_ini_file()
+function load_keys()
+{
+	$keys = array();
+    if (file_exists(PASSWD_PATH)) foreach (file(PASSWD_PATH) as $s) {
+    	$s = rtrim($s, "\r\n");
+        $regs = NULL;
+        if (preg_match('/^(\w+)=(.*)$/', $s, $regs))
+            $keys[$regs[1]] = $regs[2];
+    }
+    return $keys;
 }
 
 // Parse and validate known command-line options
@@ -834,10 +854,10 @@ function prepareMysqlData($sLevelTag)
     global $sMysqlRootPass;
     global $mysqlSchemata;
     if (is_null($sMysqlRootPass)) {
-        if (!file_exists('/etc/elastix.conf')) {
+        if (!file_exists(PASSWD_PATH)) {
             $sMysqlRootPass = 'eLaStIx.2oo7';
         } else {
-            foreach (file('/etc/elastix.conf') as $s) {
+            foreach (file(PASSWD_PATH) as $s) {
                 $regs = NULL;
                 if (preg_match('/^mysqlrootpwd\s*=\s*(.+)$/', trim($s), $regs)) {
                     $sMysqlRootPass = $regs[1];
@@ -1188,7 +1208,7 @@ function restoreComponent_mysqldb($sLevelTag, &$backupComponent, $sWorkingDir)
     global $sMysqlRootPass;
 
     // Load mysql password if required
-    prepareMysqlData();
+    prepareMysqlData($sLevelTag);
     
     $sSchemaPath = $sWorkingDir.'/'.$backupComponent['database'].'.sql';
     if (!is_null($backupComponent['backupfile'])) {
@@ -1284,6 +1304,15 @@ function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
             $fpbxConf['AMPDBUSER'], $fpbxConf['AMPDBPASS']);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->query("UPDATE admin SET value = 'false' WHERE variable = 'need_reload'");
+        
+        // Restore the admin password from /etc/elastix.conf
+        $passwords = load_keys();
+        if (isset($passwords['amiadminpwd'])) {
+            $sth = $conn->prepare('UPDATE asterisk.ampusers SET password_sha1 = SHA1(?) WHERE username = ?');
+            $sth->execute(array($passwords['amiadminpwd'], 'admin'));
+            $sth = NULL;
+        }
+        
         $conn = NULL;
     } catch (PDOException $e) {
         fwrite(STDERR, "WARN: $sLevelTag: failed to reset FreePBX update flag!\n");
@@ -1317,7 +1346,83 @@ function postrestore_as_config_files($sLevelTag, &$backupComponent, $sWorkingDir
         file_put_contents($sFilePath, $s);
     }
     
+    // Restore password from /etc/elastix.conf into each known location.
+    // The following list is taken from elastix-admin-passwords.
+    $passwords = load_keys();
+    foreach (array(
+                array(
+                    '/etc/asterisk/res_mysql.conf',
+                    '^dbpass\s*=\s*',
+                    'dbpass = '.$passwords['amiadminpwd'],
+                ),
+                array(
+                    '/etc/asterisk/res_config_mysql.conf',
+                    '^dbpass\s*=\s*',
+                    'dbpass = '.$passwords['amiadminpwd'],
+                ),
+                array(
+                    '/etc/asterisk/cbmysql.conf',
+                    '^password=',
+                    'password='.$passwords['amiadminpwd'],
+                ),
+                array(
+                    '/etc/asterisk/cdr_mysql.conf',
+                    '^password\s*=\s*',
+                    'password = '.$passwords['amiadminpwd'],
+                ),
+                array(
+                    '/etc/asterisk/extensions_additional.conf',
+                    '^AMPDBPASS =',
+                    'AMPDBPASS ='.$passwords['amiadminpwd'],
+                ),
+                array(
+                    '/etc/asterisk/manager.conf',
+                    array(
+                        'custom', 'change_ami_password'
+                    ),
+                    'secret = '.$passwords['amiadminpwd'],
+                ),
+                array(
+                    '/etc/asterisk/extensions_additional.conf',
+                    '^AMPMGRPASS =',
+                    'AMPMGRPASS ='.$passwords['amiadminpwd'],
+                ),
+        ) as $fileinfo) {
+        if (file_exists($fileinfo[0])) {
+            $content = file($fileinfo[0]);
+            if (is_array($fileinfo[1])) {
+                switch ($fileinfo[1][0]) {
+                case 'custom':
+                    if (function_exists($fileinfo[1][1]))
+                        $fileinfo[1][1]($content, $passwords['amiadminpwd']);
+                    break;
+                }
+            } else {
+                for ($i = 0; $i < count($content); $i++) {
+                    if (preg_match("/".$fileinfo[1]."/", rtrim($content[$i], "\r\n"))) {
+                        $content[$i] = $fileinfo[2]."\n";
+                        break;
+                    }
+                }
+            }
+            file_put_contents($fileinfo[0], $content);
+        }
+    }
+    
     return TRUE;
+}
+
+function change_ami_password(&$content, $sNewPassword)
+{
+    $bAdmin = FALSE;
+    for ($i = 0; $i < count($content); $i++) {
+        $regs = NULL;
+        if (preg_match('/^\[(\w+)\]/', $content[$i], $regs)) {
+            $bAdmin = ($regs[1] == 'admin');
+        } elseif ($bAdmin && preg_match('/^secret\s*=\s*/', $content[$i])) {
+            $content[$i] = "secret = $sNewPassword\n";
+        }
+    }
 }
 
 // Custom processing after restoring fax database
@@ -1622,5 +1727,84 @@ function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
     exec("/etc/init.d/cyrus-imapd restart", $output, $ret);
 
     return $bSuccess;
+}
+
+/* Custom processing before restoring mysql database. The mysql schema contains
+   the root mysql password, which is also present in /etc/elastix.conf. If the
+   root password has been changed, the act of restoring will impose the root
+   password of the backed-up system on the restored system. To counter that,
+   the root password will be restored. A mysql connection will be opened here
+   and left open through the restore, so that it can be used to GRANT the 
+   password again. See Elastix bug #1462.
+ */
+$rootconn = NULL;
+function prerestore_mysql_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    global $rootconn;
+    global $sMysqlRootPass;
+    
+    try {
+        $rootconn = new PDO('mysql:host=localhost;dbname=mysql', 'root', $sMysqlRootPass);
+        $rootconn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return TRUE;
+    } catch (PDOException $e) {
+        error_exit("FATAL: $sLevelTag: failed to open MySQL connection: ".$e->getMessage()."\n");
+    }
+}
+
+// Custom processing after restoring mysql database. 
+function postrestore_mysql_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    global $rootconn;
+    global $sMysqlRootPass;
+    
+    $bSuccess = TRUE;
+    try {
+        $quotedPwd = $rootconn->quote($sMysqlRootPass);
+        if ($quotedPwd === FALSE) {
+            fwrite(STDERR, 'FATAL: failed to quote MySQL password');
+        	return FALSE;
+        }
+        $rootconn->exec("GRANT USAGE ON *.* TO root@localhost IDENTIFIED BY $quotedPwd");
+        $rootconn->exec("GRANT USAGE ON *.* TO root IDENTIFIED BY $quotedPwd");
+        
+        /* In addition to the root password, the asteriskuser password must 
+           also be restored. */
+        $passwords = load_keys();
+        if (isset($passwords['amiadminpwd'])) {
+            $quotedPwd = $rootconn->quote($passwords['amiadminpwd']);
+            if ($quotedPwd === FALSE) {
+                fwrite(STDERR, 'FATAL: failed to quote new AMPDBPASS password');
+            	return FALSE;
+            }
+            $rootconn->exec("GRANT USAGE ON *.* TO asteriskuser@localhost IDENTIFIED BY $quotedPwd");
+        } else {
+            fwrite(STDERR, "ERR: $sLevelTag: failed to find amiadminpwd in elastix.conf\n");
+            $bSuccess = FALSE;
+        }
+        
+        $rootconn->exec('FLUSH PRIVILEGES');
+        $rootconn = NULL;
+        return $bSuccess;
+    } catch (PDOException $e) {
+        error_exit("FATAL: $sLevelTag: failed to restore MySQL root password: ".$e->getMessage()."\n");
+    }
+}
+
+// Custom processing after restoring acl databases
+function postrestore_menu_permissions($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    $passwords = load_keys();
+    try {
+        $conn = new PDO('sqlite:/var/www/db/acl.db');
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $sth = $conn->prepare('UPDATE acl_user SET md5_password = ? WHERE name = ?');
+        $sth->execute(array(md5($passwords['amiadminpwd']), 'admin'));
+        $conn = NULL;
+        return TRUE;
+    } catch (PDOException $e) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to restore admin password for Elastix\n");
+        return FALSE;
+    }
 }
 ?>

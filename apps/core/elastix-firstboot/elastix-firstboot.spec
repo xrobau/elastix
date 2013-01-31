@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-firstboot: make update of password in manager.conf more 
+  robust in the case it falls out of sync with /etc/elastix.conf.
+  SVN Rev[4658]
+
 * Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-firstboot: Revert SVN commit 4161 and fix the proper way.
   Original bug was caused by forgotten blanking of password after regexp failed.

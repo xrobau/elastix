@@ -134,6 +134,14 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: Due to unintended bug-for-bug compatibility with the
+  previous backup/restore implementation, the backupengine script restored 
+  fax.db with chmod 644, which resulted in fax notifications breaking for any 
+  fax sent or received after a restore that included fax information. Fixed.
+  This fixes part 8 of Elastix bug #1461.
+  SVN Rev[4657]
+
 * Tue Dec 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Network Parameters: allow optional quote before dhcp keyword.
   SVN Rev[4500]

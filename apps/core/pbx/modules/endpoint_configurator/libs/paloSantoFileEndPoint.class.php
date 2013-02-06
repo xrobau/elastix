@@ -168,20 +168,25 @@ class PaloSantoFileEndPoint
                 break;
 	    
 	    case 'Fanvil':
-                if($ArrayData['data']['model'] == "C62"){
-		    $currentVersion = getVersionConfigFileFANVIL($ArrayData['data']['ip_endpoint'],"admin","admin");
-                    $tmpVersion['versionCfg'] = $currentVersion;
+                if($ArrayData['data']['model'] == "C62"||$ArrayData['data']['model'] == "C60"||$ArrayData['data']['model'] == "C58/C58P"||$ArrayData['data']['model'] == "C56/C56P"){
+	          if($ArrayData['data']['model'] == "C56/C56P")
+		     $currentVersion = getVersionConfigFileFANVILC56($ArrayData['data']['ip_endpoint'],"admin","admin"); 
+		  else
+		     $currentVersion = getVersionConfigFileFANVIL($ArrayData['data']['ip_endpoint'],"admin","admin");  
+		   
+		    $tmpVersion['versionCfg'] = $currentVersion;
                     $newVersion = $this->updateArrParameters("Fanvil", $ArrayData['data']['model'], $tmpVersion);
                     $ArrayData['data']['arrParameters']['versionCfg'] = $newVersion['versionCfg'];
                     $version = $ArrayData['data']['arrParameters']['versionCfg'];
-		    
+		   
                     if($ArrayData['data']['tech'] == "iax2")
                        $contentFileFanvil = PrincipalFileFanvilC62IAX($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['filename'],$version);
                     else
                        $contentFileFanvil = PrincipalFileFanvilC62SIP($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['filename'],$version);
-                   
+                    
 		    $result = $this->telnet($ArrayData['data']['ip_endpoint'], "admin", "admin", $contentFileFanvil);
-                    if($result) $return = true;
+                   
+		    if($result) $return = true;
                     else $return = false;
                 }
 		if($this->createFileConf($this->directory,$ArrayData['data']['filename'].".cfg", $contentFileFanvil)) {
@@ -1060,7 +1065,7 @@ class PaloSantoFileEndPoint
                 }
                 break;
 	    case 'Fanvil':
-                if($model == 'C62'){
+                if($model == 'C62'||$model == 'C60'||$model == 'C58/C58P'||$model == 'C56/C56P'){
                     if(isset($arrParametersOld['versionCfg'])){
                         $arrParametersOld['versionCfg'] = $arrParametersOld['versionCfg'] + 0.0001;
 			    if(strlen($arrParametersOld['versionCfg']) == 1)

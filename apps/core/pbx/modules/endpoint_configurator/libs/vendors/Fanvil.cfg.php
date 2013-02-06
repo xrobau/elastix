@@ -490,7 +490,6 @@ function arrFanvil($ipAdressServer, $macAdress)
         "download"  => "tftp -ip $ipAdressServer -file $macAdress.cfg",
         "save"      => "",
 	"reload"    => "",
-
     );
 
     return $arrFanvil;
@@ -500,22 +499,42 @@ function arrFanvil($ipAdressServer, $macAdress)
 function getVersionConfigFileFANVIL($ip, $user, $passwd)
 {
     $nonce = getNonceFANVIL($ip);
-
     usleep(500000);
     $fileC = getConfigFileFANVIL($ip,$nonce,$user,$passwd,true);
-
     usleep(500000);
     $logou = logoutFANVIL($ip,$nonce);
-
     return $fileC;
+}
+
+function getVersionConfigFileFANVILC56($ip, $user, $passwd)
+{
+    $nonce = getNonceFANVILC56($ip);
+    usleep(500000);
+    $fileC = getConfigFileFANVIL($ip,$nonce,$user,$passwd,true);
+    usleep(500000);
+    $logou = logoutFANVIL($ip,$nonce);
+    return $fileC;
+}
+
+
+function getNonceFANVILC56($ip)
+{
+    $headers = array();
+    $url = "http://$ip";
+    $headers = (get_headers($url, 1));
+    $nonce = $headers["Set-Cookie"];
+    $nonce = explode("auth=",$nonce);
+    $nonce = explode(";",$nonce[1]);
+    return $nonce[0];
 }
 
 function getNonceFANVIL($ip)
 {
-    $token = null;
+   
+   $token = null;
     while(true){
         $home_html = file_get_contents("http://$ip");
-        if($home_html === false) break;
+	if($home_html === false) break;
 
         if(preg_match("/<input type=\"hidden\" name=\"nonce\" value=\"([0-9a-zA-Z]+)\">/",$home_html,$arrTokens)){
             if(isset($arrTokens[1])){
@@ -539,8 +558,9 @@ function logoutFANVIL($ip, $nonce)
        fputs($conexion,$headerRequest.$dataSend);
 
        while(($r = fread($conexion,2048)) != "")
-           $respuesta .= $r;
-       fclose($conexion);
+     	  $respuesta .= $r;
+     
+      fclose($conexion);
     }
     else
        echo "Error Conección $ip\n";
@@ -559,7 +579,7 @@ function getConfigFileFANVIL($ip, $nonce, $user, $passwd, $getOnlyVersion = fals
        $dataLenght = strlen($dataSend);
        $headerRequest = createHeaderHttp($ip,"/config.txt",$dataLenght,$nonce);
        fputs($conexion,$headerRequest.$dataSend);
-
+    
        while(($r = fread($conexion,2048)) != ""){
             if($getOnlyVersion){
                 if(preg_match("/<<VOIP CONFIG FILE>>Version:([2-9]{1}\.[0-9]{4})/",$r,$arrTokens)){

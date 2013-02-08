@@ -195,6 +195,15 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
+- FIXED: Apps - Email_Admin: Was fixed in module email_account bug 1461 item 4.
+  SVN Rev[4654]
+
+* Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Email_Admin: Was made changes in the module email_account in
+  order to better interaction at moment to create a new email account
+  SVN Rev[4648]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in 
   specfile according to the current branch.

@@ -411,6 +411,9 @@ class orgStatus extends orgREST
         }
     }
     
+    //este metodo cambia el estado de un conjunto de organizaciones dado su id o dominio
+    //id y dominios separados por ';'
+    //curl -X PUT -k -d state=suspend -u user:password https://host/rest.php/organization/organization/state/id1[;id2;dominio2;domino3;id3]
     function HTTP_PUT(){
         global $arrConf;
         $jsonObject = new PaloSantoJSON();
@@ -426,20 +429,18 @@ class orgStatus extends orgREST
         }
         
         $validOrgs=array();
+        $domainOrgs=array();
         if(is_array($this->arrIdOrgs)){
             foreach($this->arrIdOrgs as $idOrg){
                 if($this->validateIdOrg($idOrg) && $idOrg!="1"){
                     $validOrgs[]=$idOrg;
+                }elseif(preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $idOrg)){
+                    $domainOrgs[]=$idOrg;
                 }
             }
         }else{
             $this->methodNoAllowed(array("GET"));
             exit;
-        }
-        
-        if(count($validOrgs)==0){ //ningun id pasado en la peticion es valido. Devolvemos 404 not found
-            $this->resourceNotExis($jsonObject);
-            return $jsonObject->createJSON();
         }
         
         $putvars=$state=null;
@@ -457,6 +458,20 @@ class orgStatus extends orgREST
         }
         
         $pOrg=new paloSantoOrganization($arrConf['elastix_dsn']["elastix"]);
+        if(count($domainOrgs)>0){
+            foreach($domainOrgs as $domain){
+                $result=$pOrg->getIdOrgByDomain($domain);
+                if($result!=false){
+                    $validOrgs=$result["id"];
+                }
+            }
+        }
+        
+        if(count($validOrgs)==0){ //ningun id pasado en la peticion es valido. Devolvemos 404 not found
+            $this->resourceNotExis($jsonObject);
+            return $jsonObject->createJSON();
+        }
+        
         if($pOrg->getbunchOrganizationState($validOrgs)==false){
             $this->resourceNotExis($jsonObject);
             return $jsonObject->createJSON();

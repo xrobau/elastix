@@ -361,6 +361,17 @@ class paloSantoOrganization{
         return $result;
     }
     
+    
+    function getIdOrgByDomain($domain){
+        $query="SELECT id from organization where domain=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($domain));
+        if($result===false)
+            $this->errMsg=$this->_DB->errMsg;
+        elseif(count($result)==0 || empty($result["code"]))
+            $this->errMsg=_tr("Organization doesn't exist");
+        return $result;
+    }
+    
     //funcion que crea una entrada en la tabla org_hystory_register haciendo constancia
     //de la creacion o eliminacion de una organizacion dentro del sistema
     //esta tabla solo es escrita dos veces
@@ -1405,9 +1416,10 @@ class paloSantoOrganization{
         $arrProp["callwaiting"]="no";
         $arrProp["rt"]=$pGPBX->getGlobalVar("RINGTIMER");
         $arrProp["create_vm"]=$pGPBX->getGlobalVar("CREATE_VM");
-        
         $result=$pDevice->tecnologia->getDefaultSettings($domain);
         $arrOpt=array_merge($result,$arrProp);
+        if(empty($arrOpt["context"]))
+            $arrProp["context"]="from-internal";
         return $arrOpt;
     }
 
@@ -1434,9 +1446,11 @@ class paloSantoOrganization{
         $arrProp["record_out"]="on_demand";
         $arrProp["callwaiting"]="no";
         $arrProp["rt"]=$pGPBX->getGlobalVar("RINGTIMER");
-
+        
         $result=$pDevice->tecnologia->getDefaultSettings($domain);
         $arrOpt=array_merge($result,$arrProp);
+        if(empty($arrOpt["context"]))
+            $arrProp["context"]="from-internal";
         return $arrOpt;
     }
 
@@ -1761,7 +1775,7 @@ class paloSantoOrganization{
             //poder crear las extensiones con la clave correcta
             if($cExten || $cFExten){
                 if(is_null($md5password) || $md5password=="" || is_null($password1) || $password1==""){
-                    $this->errMsg=_tr("Need fill field password");
+                    $this->errMsg=_tr("Please set a password");
                     return false;
                 }
             }

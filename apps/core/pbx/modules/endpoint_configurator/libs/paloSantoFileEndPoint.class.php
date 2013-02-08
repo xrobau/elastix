@@ -269,9 +269,16 @@ class PaloSantoFileEndPoint
                break;
             
 	    case 'Snom':
-                $contentFileSnom = PrincipalFileSnom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
-                if($this->createFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm", $contentFileSnom))
-                    $return = true;
+                if($ArrayData['data']['model'] == "821"){
+		   $contentFileSnom = PrincipalFileSnom821($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
+		   if(!set_provision_server($ArrayData['data']['ip_endpoint'],$this->ipAdressServer))
+		      $return = false;
+		}
+         	else
+		   $contentFileSnom = PrincipalFileSnom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
+                
+		if($this->createFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm", $contentFileSnom))
+                   $return = true;
                 else $return = false;
 
                 break;

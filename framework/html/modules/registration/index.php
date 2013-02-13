@@ -187,7 +187,7 @@ function saveRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	$msgResponse  = array();
 	$str_error    = "";
     // proceso de validacion de datos
-    if(!preg_match("/^[A-Za-z\_\-\.\sñÑ]+$/",$contact_name)){
+    if($contact_name == ''){
         $str_error .= _tr("* Contact Name: Only text ")."\n";
 	}
     if(!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/",$email)){
@@ -196,10 +196,10 @@ function saveRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     if(!preg_match("/^[0-9\(\)\+-]+\d$/",$phone)){
         $str_error .= _tr("* Phone: text or number ")."\n";
 	}
-	if(!preg_match("/^[A-Za-z\_\-\.\sñÑ]+$/",$company)){
+	if($company == ''){
         $str_error .= _tr("* Company: text ")."\n";
 	}
-    if(!preg_match("/^[A-Za-z\_\-\.\sñÑ]+$/",$city)){
+    if($city == ''){
         $str_error .= _tr("* City: text ")."\n";
 	}
     if(!preg_match("/^.+$/",$country)){

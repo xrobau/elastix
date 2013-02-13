@@ -308,6 +308,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Feb 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: framework: allow registration process to accept arbitrary strings for
+  Contact Name, Company, City. Fixes Elastix bug #1476.
+  SVN Rev[4665]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - FIXED: framework - Build/elastix-framework.spec: Changed Version and Release in 
   specfile according to the current branch.

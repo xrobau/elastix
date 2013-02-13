@@ -313,12 +313,17 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
-* Fri Jan 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Feb 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: framework: allow registration process to accept arbitrary strings for
+  Contact Name, Company, City. Fixes Elastix bug #1476.
+  SVN Rev[4665]
+
+* Fri Jan 11 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework: elastixneo theme : fix syntax for javascript object 
   rejected by IE6.
   SVN Rev[4578]
 
-* Fri Jan 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Jan 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework: improve readability on blackmin theme
   SVN Rev[4546]
 

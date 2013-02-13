@@ -262,7 +262,7 @@ function registration(){
 
     error = false;
     txtError = "Please fill the correct values in fields: \n";
-    if(!(/^[\w\_\-\.\s\xF1\xD1]+$/.test(contactName)) || contactName == ""){ /*solo letras*/
+    if(contactName == ""){ /*solo letras*/
         error = true;
         txtError += "* Contact Name: Only text \n";
     }
@@ -274,7 +274,7 @@ function registration(){
         error = true;
         txtError += "* Phone: text or number \n";
     }
-    if(!(/^[A-Za-z0-9\_\-\.\s\xF1\xD1]+$/.test(company)) || company == ""){
+    if(company == ""){
         error = true;
         txtError += "* Company: text \n";
     }
@@ -282,7 +282,7 @@ function registration(){
         error = true;
         txtError += "* Address: text \n";
     }*/
-    if(!(/^[A-Za-z\_\-\.\s\xF1\xD1]+$/.test(city)) || city == ""){
+    if(city == ""){
         error = true;
         txtError += "* City: text \n";
     }

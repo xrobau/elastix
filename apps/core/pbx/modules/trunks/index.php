@@ -459,9 +459,9 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         }
 	}
 
-	if(!preg_match("/^(sip|iax2|dahdi|custom){1}$/",$tech)){
+/*	if(!preg_match("/^(sip|iax2|dahdi|custom){1}$/",$tech)){
         $error=_tr("Invalid Technology");
-    }
+    }*/
 	
     if($error!=""){
         $smarty->assign("mb_title", _tr("Error"));
@@ -791,7 +791,7 @@ function getSipIaxParam($tech,$edit=false){
             $arrProp["fromuser"]=getParameter("fromuser");
             $arrProp["fromdomain"]=getParameter("fromdomain");
             $arrProp["sendrpid"]=getParameter("sendrpid");
-            $arrProp["canreinvite"]=getParameter("canreinvite");
+            $arrProp["directmedia"]=getParameter("directmedia");
             $arrProp["useragent"]=getParameter("useragent");
             $arrProp["videosupport"]=getParameter("videosupport");
             $arrProp["maxcallbitrate"]=getParameter("maxcallbitrate");

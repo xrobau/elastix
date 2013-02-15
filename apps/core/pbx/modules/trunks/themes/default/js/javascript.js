@@ -165,9 +165,9 @@ function radio(id_radio){
         var alt_tab=alt+45;
     $(".tabs").css({'height':alt_tab});
     $(".content").css({"z-index":"0"});
-    $("div.tab > .content > *").css({"opacity":"0", "-moz-transform": "translateX(-100%)","-webkit-transform":"translateX(-100%)","-o-transform":"translateX(-100%)","-moz-transition":"all 0.6s ease","-webkit-transition":"all 0.6s ease","-o-transition":"all 0.6s ease"});
+    $("div.tab > .content > *").css({"opacity":"0"});
     $("#content_"+id_radio).css({"z-index":"1"});
-    $("#content_"+id_radio+" > *").css({"opacity":"1", "-moz-transform":"translateX(0)", "-webkit-transform":"translateX(0)", "-o-transform":"translateX(0)", "-ms-transform":"translateX(0)"});
+    $("#content_"+id_radio+" > *").css({"opacity":"1"});
     //div de las tabs
     var d_label=$("#"+id_radio).parent();
     $(".neo-table-header-row-filter").css("background","none");

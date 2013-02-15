@@ -66,7 +66,8 @@ function _moduleContent(&$smarty, $module_name)
 	$userLevel1=$arrCredentiasls["userlevel"];
 	$userAccount=$arrCredentiasls["userAccount"];
 	$idOrganization=$arrCredentiasls["id_organization"];
-
+    $orgDomain=$arrCredentiasls["domain"];
+	
 	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     
 	$action = getAction();
@@ -95,7 +96,7 @@ function _moduleContent(&$smarty, $module_name)
             $content = reloadAasterisk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userLevel1, $idOrganization);
                 break;
         case "get_destination_category":
-            $content = get_destination_category($smarty, $module_name, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
+            $content = get_destination_category($smarty, $module_name, $pDB, $arrConf, $userLevel1, $userAccount, $orgDomain);
             break;
         default: // report
             $content = reportIVR($smarty, $module_name, $local_templates_dir, $pDB,$arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -612,6 +613,11 @@ function saveEditIVR($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
             $tmp_destine[]=array("0",$option,$goto,$destine,$val);
         }
         
+        if($arrProp["name"]=="" || !isset($arrProp["name"])){
+            $error="Field "._tr('Display Name')." can't be empty";
+            $continue=false;
+        }
+        
         if(!preg_match("/^[0-9]+$/",$arrProp['timeout'])){
             $error=_tr("Invalid field Timeout");
             $continue=false;
@@ -717,23 +723,15 @@ function deleteIVR($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, 
 	return reportIVR($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);;
 }
 
-function get_destination_category($smarty, $module_name, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
+function get_destination_category($smarty, $module_name, $pDB, $arrConf, $userLevel1, $userAccount, $orgDomain){
     $jsonObject = new PaloSantoJSON();
     $categoria=getParameter("option");
-    //conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pORGZ = new paloSantoOrganization($pDB2);
-    $resultO=$pORGZ->getOrganizationById($idOrganization);
-    if($resultO==FALSE){
-        $jsonObject->set_error(_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg));
+    $pIVR=new paloIvrPBX($pDB,$orgDomain);
+    $arrDestine=$pIVR->getDefaultDestination($orgDomain,$categoria);
+    if($arrDestine==FALSE){
+        $jsonObject->set_error(_tr($pIVR->errMsg));
     }else{
-        $pIVR=new paloIvrPBX($pDB,$resultO["domain"]);
-        $arrDestine=$pIVR->getDefaultDestination($resultO["domain"],$categoria);
-        if($arrDestine==FALSE){
-            $jsonObject->set_error(_tr($pIVR->errMsg));
-        }else{
-            $jsonObject->set_message($arrDestine);
-        }
+        $jsonObject->set_message($arrDestine);
     }
     return $jsonObject->createJSON();
 }

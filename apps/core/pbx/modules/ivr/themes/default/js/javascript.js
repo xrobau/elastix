@@ -1,22 +1,14 @@
 $(document).ready(function(){
-	
 	//if($("#mode_input").val()=="input")
 	   //add();
     $("select.goto").trigger('change');
 	$("#arrDestine").val(getArrRows()); 
-
 });
-
-
 $(window).load(function () {
     $("div.neo-module-content").attr("style","");
 });
-
-
 if($("#mode_input").val()=="input")
    var index=0;
-
-
 function getArrRows(){
   var rows =0;
   var lastRow = getNumRows();
@@ -32,7 +24,6 @@ function getArrRows(){
   return valIndex;
    
 }
-
 function getNumRows(){
         var rows =0;
  	$('table#destine tr.content-destine').each(function() {
@@ -40,7 +31,6 @@ function getNumRows(){
 	}); 
 	return rows;
 }
-
 var add = function() {
      index ++;
      if(isNaN(index))
@@ -52,30 +42,26 @@ var add = function() {
      var row = $('table#destine tr#test').html();
      if(typeof  row!== "undefined" && row)
      {
-	var arrDestine = $("#arrDestine").val();
-	if(index==1)
-	  arrDestine = index;
-	else{
-	  arrDestine = arrDestine+","+index;
-	  arrDestine = arrDestine.replace(",,",",");
-	}
-	$("#arrDestine").val(arrDestine);
-	$("#mostra_adv").val("val");
-	
-	row = row.replace(/\__/g, index);
-	var val = "<tr id="+index+">"+row+"</tr>"; 
-	$('table#destine tbody').append(val);
-	$("#goto"+index).addClass("goto");
-	$("#"+index).addClass("content-destine");
-	
+        var arrDestine = $("#arrDestine").val();
+        if(index==1)
+            arrDestine = index;
+        else{
+            arrDestine = arrDestine+","+index;
+            arrDestine = arrDestine.replace(",,",",");
+        }
+        $("#arrDestine").val(arrDestine);
+        $("#mostra_adv").val("val");
+
+        row = row.replace(/\__/g, index);
+        var val = "<tr id="+index+">"+row+"</tr>"; 
+        $('table#destine tbody').append(val);
+        $("#goto"+index).addClass("goto");
+        $("#"+index).addClass("content-destine");
      }
 };
-
 $('.add').live('click', this, function(event) {
     add();
-    $("select.goto").trigger('change');
 });
-
 $('.delete').live('click', this, function(event) {
      //var index = $('table#destine tbody tr').length;    
      //if (index!=2){
@@ -88,8 +74,6 @@ $('.delete').live('click', this, function(event) {
 	$("#arrDestine").val(arrDestine);
     // }
 });
-
-
 $(".goto").live('change', this, function(event) {
     var name = $(this).attr("name");
     var id = name.split("goto");
@@ -119,7 +103,6 @@ $(".goto").live('change', this, function(event) {
         }
     });       
 });
-
 function radio(id_radio){
     var alt=$("#content_"+id_radio).children("table").height();
     var alt_tab=alt+10;
@@ -127,9 +110,9 @@ function radio(id_radio){
     $(".content").css({'height':'0'});
     $("#content_"+id_radio).css({'height':''});
     $(".content").css({"z-index":"0"});
-    $("div.tab > .content > *").css({"opacity":"0", "-moz-transform": "translateX(-100%)","-webkit-transform":"translateX(-100%)","-o-transform":"translateX(-100%)","-moz-transition":"all 0.6s ease","-webkit-transition":"all 0.6s ease","-o-transition":"all 0.6s ease"});
+    $("div.tab > .content > *").css({"opacity":"0"});
     $("#content_"+id_radio).css({"z-index":"1"});
-    $("#content_"+id_radio+" > *").css({"opacity":"1", "-moz-transform":"translateX(0)", "-webkit-transform":"translateX(0)", "-o-transform":"translateX(0)", "-ms-transform":"translateX(0)"});
+    $("#content_"+id_radio+" > *").css({"opacity":"1"});
     //div de las tabs
     var d_label=$("#"+id_radio).parent();
     $(".neo-table-header-row-filter").css("background","none");

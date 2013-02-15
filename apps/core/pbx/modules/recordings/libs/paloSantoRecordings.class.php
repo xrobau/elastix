@@ -79,7 +79,7 @@ class paloSantoRecordings extends paloAsteriskDB{
 		
 		$query="SELECT count(uniqueid) from recordings $where";
 		$result=$this->_DB->getFirstRowQuery($query,false,$arrParam);
-               if($result==false){
+        if($result==false){
 			$this->errMsg=$this->_DB->errMsg;
 			return false;
 		}else

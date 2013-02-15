@@ -228,22 +228,26 @@
                     <td>{$allow.INPUT}</td>
                 </tr>
                 <tr class="sip_settings">
-                    <td nowrap>{$directmedia.LABEL}: </td>
-                    <td>{$directmedia.INPUT}</td>
-                    <td nowrap>{$allowtransfer.LABEL}: </td>
-                    <td>{$allowtransfer.INPUT}</td>
-                </tr>
-                <tr class="sip_settings">
-                    <td nowrap>{$callgroup.LABEL}: </td>
-                    <td>{$callgroup.INPUT}</td>
-                    <td nowrap>{$pickupgroup.LABEL}: </td>
-                    <td>{$pickupgroup.INPUT}</td>
-                </tr>
-                <tr class="sip_settings">
                     <td nowrap>{$mailbox.LABEL}: </td>
                     <td>{$mailbox.INPUT}</td>
                     <td nowrap>{$vmexten.LABEL}: </td>
                     <td>{$vmexten.INPUT}</td>
+                </tr>
+                <tr class="sip_settings">
+                    <td nowrap>{$allowtransfer.LABEL}: </td>
+                    <td>{$allowtransfer.INPUT}</td>
+                    <td nowrap>{$directmedia.LABEL}: </td>
+                    <td>{$directmedia.INPUT}</td>
+                </tr>
+                <tr class="sip_settings">
+                    <td nowrap>{$trustrpid.LABEL}: </td>
+                    <td>{$trustrpid.INPUT}</td>
+                    <td nowrap>{$sendrpid.LABEL}: </td>
+                    <td>{$sendrpid.INPUT}</td>
+                </tr>
+                <tr class="sip_settings">
+                    <td nowrap>{$transport.LABEL}: </td>
+                    <td>{$transport.INPUT}</td>
                 </tr>
              {if $mode eq 'edit'}
                 <tr>
@@ -315,7 +319,7 @@
             <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4><b>{$VM_OPTIONS}</b></td>
         </tr>
         <tr>
-            <td style="padding-left: 12px;" colspan=4><input id="create_vm" type="checkbox" class="create_vm" name="create_vm" {$CHECKED} {$VALVM}/>{$CREATE_VM}</td>
+            <td style="padding-left: 12px;" colspan=4><input id="create_vm" type="checkbox" class="create_vm" name="create_vm" {$CHECKED} {$VALVM} {if $mode eq 'view'}disabled{/if}/>{$CREATE_VM}</td>
         </tr>
         <tr class="voicemail">
             <td width="15%" nowrap>{$vmpassword.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
@@ -340,6 +344,14 @@
             <td>{$vmcontext.INPUT}</td>
         </tr>
         <tr class="voicemail">
+            <td>{$vmemailsubject.LABEL}:</td>
+            <td colspan=3>{$vmemailsubject.INPUT}</td>
+        </tr>
+        <tr class="voicemail">
+            <td>{$vmemailbody.LABEL}:</td>
+            <td colspan=3>{$vmemailbody.INPUT}</td>
+        </tr>
+        <tr class="voicemail">
             <td width="15%" nowrap>{$vmoptions.LABEL}: </td> <td colspan=3>{$vmoptions.INPUT}</td>
         </tr>
         <tr>
@@ -360,6 +372,8 @@
         <tr class="voicemail vm_locator">
             <td nowrap>{$vmx_extension_1.LABEL}:</td>
             <td>{$vmx_extension_1.INPUT}</td>
+        </tr>
+        <tr class="voicemail vm_locator">
             <td nowrap>{$vmx_extension_2.LABEL}:</td>
             <td>{$vmx_extension_2.INPUT}</td>
         </tr>

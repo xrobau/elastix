@@ -190,6 +190,12 @@ class paloSantoExtensions{
 							case "context":
 								$arrExtension["vmcontext"]=$value;
 								break;
+                            case "emailsubject":
+                                $arrExtension["vmemailsubject"]=$value;
+                                break;
+                            case "emailbody":
+                                $arrExtension["vmemailbody"]=$value;
+                                break;
 							case "mailbox":
 								break;
                             case "fullname":
@@ -215,8 +221,8 @@ class paloSantoExtensions{
 				$queryDev .="codecpriority,qualifysmoothing,qualifyfreqok,qualifyfreqnotok,encryption,timezone,sendani,adsi from iax where name=? and organization_domain=?";
 			}elseif($result["tech"]=="sip"){
 				$queryDev="SELECT context,dial,host,type,allow,disallow,port,qualify,accountcode,deny,permit,language,amaflags,";
-				$queryDev .="defaultip,username,mohinterpret,mohsuggest,dtmfmode,nat,canreinvite,allowtransfer,callgroup,pickupgroup,";
-				$queryDev .="mailbox,vmexten,defaultuser,useragent,directmedia,callcounter,busylevel,videosupport,maxcallbitrate,";
+				$queryDev .="defaultip,username,mohinterpret,mohsuggest,dtmfmode,nat,allowtransfer,callgroup,pickupgroup,";
+				$queryDev .="mailbox,vmexten,defaultuser,useragent,directmedia,sendrpid,trustrpid,transport,callcounter,busylevel,videosupport,maxcallbitrate,";
 				$queryDev .="qualifyfreq,rtptimeout,rtpholdtimeout,rtpkeepalive,progressinband,g726nonstandard,vmexten from sip where name=?   and organization_domain=?";
 			}else{
 				$this->errMsg .=_tr("Invalid Technology");
@@ -288,7 +294,7 @@ class paloSantoExtensions{
 
 	function getDefaultSettings($domain,$tech){
 		$arrExtension=array();
-		$queryV="SELECT attach,context,deletevoicemail,saycid,envelope from voicemail_general where organization_domain=?";
+		$queryV="SELECT attach,context,deletevoicemail,saycid,envelope,emailsubject,emailbody from voicemail_settings where organization_domain=?";
 		$resultV=$this->_DB->getFirstRowQuery($queryV,true,array($domain));
 		if($resultV==false){
 			$this->errMsg .=_tr("Error getting voicemail default settings").$this->_DB->errMsg;
@@ -298,6 +304,8 @@ class paloSantoExtensions{
 			$arrExtension["vmdelete"]=isset($resultV["deletevoicemail"])?$resultV["deletevoicemail"]:null;
 			$arrExtension["vmsaycid"]=isset($resultV["saycid"])?$resultV["saycid"]:null;
 			$arrExtension["vmenvelope"]=isset($resultV["envelope"])?$resultV["envelope"]:null;
+			$arrExtension["vmemailsubject"]=isset($resultV["emailsubject"])?$resultV["emailsubject"]:null;
+            $arrExtension["vmemailbody"]=isset($resultV["emailbody"])?$resultV["emailbody"]:null;
 		}
 		$arrExtension["vmx_locator"]="disabled";
 		$arrExtension["vmx_use"]="both";
@@ -312,7 +320,7 @@ class paloSantoExtensions{
 	
 	function getVMdefault($domain){
         $arrVM=array();
-        $queryV="SELECT attach,context,deletevoicemail,saycid,envelope from voicemail_general where organization_domain=?";
+        $queryV="SELECT attach,context,deletevoicemail,saycid,envelope,emailsubject,emailbody from voicemail_settings where organization_domain=?";
         $resultV=$this->_DB->getFirstRowQuery($queryV,true,array($domain));
         if($resultV==false){
             $this->errMsg .=_tr("Error getting voicemail default settings").$this->_DB->errMsg;
@@ -322,6 +330,8 @@ class paloSantoExtensions{
             $arrVM["vmdelete"]=isset($resultV["deletevoicemail"])?$resultV["deletevoicemail"]:null;
             $arrVM["vmsaycid"]=isset($resultV["saycid"])?$resultV["saycid"]:null;
             $arrVM["vmenvelope"]=isset($resultV["envelope"])?$resultV["envelope"]:null;
+            $arrVM["vmemailsubject"]=isset($resultV["emailsubject"])?$resultV["emailsubject"]:null;
+            $arrVM["vmemailbody"]=isset($resultV["emailbody"])?$resultV["emailbody"]:null;
         }
         return $arrVM;
 	}

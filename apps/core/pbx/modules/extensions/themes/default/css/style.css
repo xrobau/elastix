@@ -32,7 +32,7 @@ padding-top: 5px;
 float: left;
 }
 
-.tab label { /* la parte superior con el título de la pestaña */
+.neo-table-header-row-filter label { /* la parte superior con el título de la pestaña */
 /*border-radius: 5px 5px 0 0;
 box-shadow: -3px 3px 2px #678 inset;*/
 float: left;
@@ -50,7 +50,6 @@ position: relative;
 .content {
 bottom: 0;
 left: 0;
-overflow: hidden;
 padding: 5px;
 position: absolute;
 right: 0;
@@ -59,12 +58,4 @@ top: 10px;
 /* y un poco de animación */
 .content > * {
 opacity: 0;
-
--moz-transform: translateX(-100%);
--webkit-transform: translateX(-100%);
--o-transform: translateX(-100%);
-
--moz-transition: all 0.6s ease;
--webkit-transition: all 0.6s ease;
--o-transition: all 0.6s ease;
 }

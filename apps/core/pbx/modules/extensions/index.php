@@ -405,6 +405,8 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                         $arrExten["vmdelete"]=$arrVM["vmdelete"];
                         $arrExten["vmsaycid"]=$arrVM["vmsaycid"];
                         $arrExten["vmenvelope"]=$arrVM["vmenvelope"];
+                        $arrExten["vmemailsubject"]=$arrVM["vmemailsubject"];
+                        $arrExten["vmemailbody"]=$arrVM["vmemailbody"];
                         $arrExten["vmx_locator"]="enabled";
                         $arrExten["vmx_use"]="both";
                         $arrExten["vmx_operator"]="on";
@@ -593,6 +595,8 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 					$arrProp["vmenvelope"]=getParameter("vmenvelope");
 					$arrProp["vmcontext"]=getParameter("vmcontext");
 					$arrProp["vmoptions"]=getParameter("vmoptions");
+					$arrProp["vmemailsubject"]=getParameter("vmemailsubject");
+					$arrProp["vmemailbody"]=getParameter("vmemailbody");
 					//vmx_locator settings
 					$arrProp["vmx_locator"]=getParameter("vmx_locator");
                     $arrProp["vmx_use"]=getParameter("vmx_use");
@@ -741,6 +745,8 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 					$arrProp["vmenvelope"]=getParameter("vmenvelope");
 					$arrProp["vmcontext"]=getParameter("vmcontext");
 					$arrProp["vmoptions"]=getParameter("vmoptions");
+					$arrProp["vmemailsubject"]=getParameter("vmemailsubject");
+                    $arrProp["vmemailbody"]=getParameter("vmemailbody");
 					//vmx_locator settings
                     $arrProp["vmx_locator"]=getParameter("vmx_locator");
                     $arrProp["vmx_use"]=getParameter("vmx_use");
@@ -802,8 +808,6 @@ function propersParamByTech($tech){
 		$arrProp['disallow']=getParameter("disallow");
 		$arrProp['allow']=getParameter("allow");
 		$arrProp['allowtransfer']=getParameter("allowtransfer");
-		$arrProp['callgroup']=getParameter("callgroup");
-		$arrProp['pickupgroup']=getParameter("pickupgroup");
 		$arrProp['deny']=getParameter("deny");
 		$arrProp['permit']=getParameter("permit");
 		$arrProp['mailbox']=getParameter("mailbox");
@@ -816,6 +820,9 @@ function propersParamByTech($tech){
 		$arrProp['mohsuggest']=getParameter("mohsuggest");
 		$arrProp['useragent']=getParameter("useragent");
 		$arrProp['directmedia']=getParameter("directmedia");
+		$arrProp['trustrpid']=getParameter("trustrpid");
+		$arrProp['sendrpid']=getParameter("sendrpid");
+		$arrProp['transport']=getParameter("transport");
 		$arrProp['callcounter']=getParameter("callcounter");
 		$arrProp['busylevel']=getParameter("busylevel");
 		$arrProp['videosupport']=getParameter("videosupport");
@@ -950,7 +957,7 @@ function createFieldForm($arrOrgz,$tech=null)
     array(""=>_tr("Default"),"1"=>1,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"11"=>11,"12"=>12,"13"=>13,"14"=>14,"15"=>15,"16"=>16,"17"=>17,"18"=>18,"19"=>19,"20"=>20,"21"=>21,"22"=>22,"23"=>23,"24"=>24,"25"=>25,"26"=>26,"27"=>27,"28"=>28,"29"=>29,"30"=>30,"31"=>31,"32"=>32,"33"=>33,"34"=>34,"35"=>35,"36"=>36,"37"=>37,"38"=>38,"39"=>39,"40"=>40,"41"=>41,"42"=>42,"43"=>43,"44"=>44,"45"=>45,"46"=>46,"47"=>47,"48"=>48,"49"=>49,"50"=>50,"51"=>51,"52"=>52,"53"=>53,"54"=>54,"55"=>55,"56"=>56,"57"=>57,"58"=>58,"59"=>59,"60"=>60,"61"=>61,"62"=>62,"63"=>63,"64"=>64,"65"=>65,"66"=>66,"67"=>67,"68"=>68,"69"=>69,"70"=>70,"71"=>71,"72"=>72,"73"=>73,"74"=>74,"75"=>75,"76"=>76,"77"=>77,"78"=>78,"79"=>79,"80"=>80,"81"=>81,"82"=>82,"83"=>83,"84"=>84,"85"=>85,"86"=>86,"87"=>87,"88"=>88,"89"=>89,"90"=>90,"91"=>91,"92"=>92,"93"=>93,"94"=>94,"95"=>95,"96"=>96,"97"=>97,"98"=>98,"99"=>99,"100"=>100,"101"=>101,"102"=>102,"103"=>103,"104"=>104,"105"=>105,"106"=>106,"107"=>107,"108"=>108,"109"=>109,"
 110"=>110,"111"=>111,"112"=>112,"113"=>113,"114"=>114,"115"=>115,"116"=>116,"117"=>117,"118"=>118,"119"=>119,"120"=>120);*/
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-	$arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+	$arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrWait=array("no"=>_tr("Disabled"),"yes"=>_tr("Enabled"));
     $arrRecord=array("on_demand"=>_tr("On demand"),"always"=>_tr("Always"),"never"=>_tr("Never"));
 	$arrScreen=array("no"=>"disabled","memory"=>"memory","nomemory"=>"nomemory");
@@ -1061,6 +1068,22 @@ function createFieldForm($arrOrgz,$tech=null)
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmemailsubject"   => array("LABEL"               => _tr("Email Subject"),
+                                                    "DESCRIPTION"            => _tr("Email subject used at moment to send the email."),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:300px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vmemailbody"   => array("LABEL"               => _tr("Email Body"),
+                                                    "DESCRIPTION"            => _tr("Email Body. Until 512 characters"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXTAREA",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:500px;resize:none"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => "",
+                                                    "ROWS"                   => "4",
+                                                    "COLS"                   => "1"),
                             "clid_name"   => array("LABEL"               => _tr("CID Name"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
@@ -1148,11 +1171,12 @@ function createFieldForm($arrOrgz,$tech=null)
 function createSipForm(){
     $arrNat=array("yes"=>"Yes","no"=>"No","force_rport"=>"force_rport","comedia"=>"comedia");
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
-    $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
-    $arrAmaflag=array("noset"=>"noset","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
+    $arrMedia=array("noset"=>"",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
+    $arrAmaflag=array("noset"=>"","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
+    $transport=array("noset"=>"","udp"=>"UDP Only","tcp"=>"TCP Only","tls"=>"TLS Only","udp,tcp,tls"=>strtoupper("udp,tcp,tls"),"udp,tls,tcp"=>strtoupper("udp,tls,tcp"),"tcp,udp,tls"=>strtoupper("tcp,udp,tls"),"tcp,tls,udp"=>strtoupper("tcp,tls,udp"),"tls,udp,tcp"=>strtoupper("tls,udp,tcp"),"tls,tcp,udp"=>strtoupper("tls,tcp,udp"));
 	$arrFormElements = array("type"  => array("LABEL"                  => _tr("type"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "SELECT",
@@ -1213,18 +1237,27 @@ function createSipForm(){
 													"INPUT_EXTRA_PARAM"      => $arrDtmf,
 													"VALIDATION_TYPE"        => "text",
 													"VALIDATION_EXTRA_PARAM" => ""),
-							"callgroup"   => array( "LABEL"                  => _tr("callgroup"),
-													"REQUIRED"               => "no",
-													"INPUT_TYPE"             => "TEXT",
-													"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
-							"pickupgroup" => array("LABEL"             => _tr("pickupgroup"),
-													"REQUIRED"               => "no",
-													"INPUT_TYPE"             => "TEXT",
-													"INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-													"VALIDATION_TYPE"        => "text",
-													"VALIDATION_EXTRA_PARAM" => ""),
+							"trustrpid"    =>  array("LABEL"        => _tr("trustrpid"),
+                                                "DESCRIPTION"            => _tr("If Remote-Party-ID should be trusted"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                "VALIDATION_TYPE"        => "text", //yes
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sendrpid"    =>  array("LABEL"        => _tr("sendrpid"),
+                                                "DESCRIPTION"            => _tr("If Remote-Party-ID should be sent"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no","yes"=>"yes", "pai"=>"pai","yes,pai"=>"yes,pai"),
+                                                "VALIDATION_TYPE"        => "text", //no
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "transport"    =>  array("LABEL"        => _tr("transport"),
+                                                "DESCRIPTION"            => _tr("This sets the default transport type for outgoing.\nThe order determines the primary default transport.\nThe default transport type is only used for\noutbound messages until a Registration takes place.  During the\npeer Registration the transport type may change to another supported\ntype if the peer requests so"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $transport,
+                                                "VALIDATION_TYPE"        => "text", //no
+                                                "VALIDATION_EXTRA_PARAM" => ""),
 							"mailbox"   => array( "LABEL"                  => _tr("mailbox"),
 													"REQUIRED"               => "no",
 													"INPUT_TYPE"             => "TEXT",
@@ -1358,12 +1391,12 @@ function createSipForm(){
 function createIaxForm(){
 	$arrTrans=array("yes"=>"yes","no"=>"no","mediaonly"=>"mediaonly");
 	$arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-	$arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+	$arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
 	$arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
 	$arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
-	$arrCodecPrio=array("noset"=>"noset","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
-	$encryption=array("noset"=>"noset","aes128"=>"aes128","yes"=>"yes","no"=>"no");
-    $arrAmaflag=array("noset"=>"noset","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
+	$arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
+	$encryption=array("noset"=>"","aes128"=>"aes128","yes"=>"yes","no"=>"no");
+    $arrAmaflag=array("noset"=>"","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
 	$arrFormElements = array("transfer"  => array("LABEL"                  => _tr("transfer"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "SELECT",

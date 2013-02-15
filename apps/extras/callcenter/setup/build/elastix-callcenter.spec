@@ -97,6 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Feb 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Agent Console: apparently a jQuery update now sends null variables in 
+  javascript structs as empty strings instead of not-set variables in a 
+  $.post() request. This causes the non-SSE mode of the Agent Console to spin
+  endlessly. Fixed. Fixes Elastix bug #1479.
+
 * Wed Jan 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Do not Call List: The action "Apply" had no effect if there were no 
   pending calls. This scenario could happen if the DNC is loaded prior to 

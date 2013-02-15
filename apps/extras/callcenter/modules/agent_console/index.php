@@ -1032,7 +1032,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
         ? ($estadoCliente['onhold'] == 'true') 
         : false;
     foreach (array('break_id', 'calltype', 'campaign_id', 'callid') as $k) {
-        if (!isset($estadoCliente[$k]) || $estadoCliente[$k] == 'null') 
+        if (!isset($estadoCliente[$k]) || $estadoCliente[$k] == 'null' || $estadoCliente[$k] == '') 
             $estadoCliente[$k] = NULL;
     }
     if (is_null($estadoCliente['calltype'])) {

@@ -4,7 +4,6 @@ $(document).ready(function(){
 	$("#arrDestine").val(getArrRows()); 
 	$("#arrTrunks").val(getIdTrunks()); 
     
-    
     $('td select[class=seq_route]').live("change",function(){
         var id=$(this).attr("id");
         var out_id=id.substring(6);
@@ -67,17 +66,12 @@ $(function() {
   })
 });
 
-
-
-
 $(window).load(function () {
     $("div.neo-module-content").attr("style","");
 });
 
-
 if($("#mode_input").val()=="input")
    var index=0;
-
 
 function getIdTrunks(){
   var rows =0;
@@ -165,10 +159,9 @@ function radio(id_radio){
     $(".content").css({'height':'0'});
     $("#content_"+id_radio).css({'height':''});
     $(".content").css({"z-index":"0"});
-    $("div.tab > .content > *").css({"opacity":"0", "-moz-transform": "translateX(-100%)","-webkit-transform":"translateX(-100%)","-o-transform":"translateX(-100%)","-moz-transition":"all 0.6s ease","-webkit-transition":"all 0.6s ease","-o-transition":"all 0.6s ease"});
+    $("div.tab > .content > *").css({"opacity":"0"});
     $("#content_"+id_radio).css({"z-index":"1"});
-    $("#content_"+id_radio+" > *").css({"opacity":"1", "-moz-transform":"translateX(0)", "-webkit-transform":"translateX(0)", "-o-transform":"translateX(0)", "-ms-transform":"translateX(0)"});
-    
+    $("#content_"+id_radio+" > *").css({"opacity":"1"});
     //div de las tabs
     var d_label=$("#"+id_radio).parent();
     $(".neo-table-header-row-filter").css("background","none");

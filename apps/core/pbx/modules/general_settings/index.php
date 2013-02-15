@@ -145,7 +145,8 @@ function viewGeneralSetting($smarty, $module_name, $local_templates_dir, &$pDB, 
         $domain=$resultO["domain"];
         $pGPBX = new paloGlobalsPBX($pDB,$domain);
         $arrTone = $pGPBX->getToneZonePBX();
-        $arrForm = createFieldForm($arrTone);
+        $arrMOH = $pGPBX->getMoHClass($domain);
+        $arrForm = createFieldForm($arrTone,$arrMOH,$pGPBX->getVoicemailTZ());
         $oForm = new paloForm($smarty,$arrForm);
         $arrSettings = $pGPBX->getGeneralSettings();
         if($arrSettings==false){
@@ -216,7 +217,8 @@ function applyChanges($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $domain=$resultO["domain"];
         $pGPBX = new paloGlobalsPBX($pDB,$domain);
         $arrTone = $pGPBX->getToneZonePBX();
-        $arrForm = createFieldForm($arrTone);
+        $arrMOH = $pGPBX->getMoHClass($domain);
+        $arrForm = createFieldForm($arrTone,$arrMOH,$pGPBX->getVoicemailTZ());
         $oForm = new paloForm($smarty,$arrForm);
         
         if(!$oForm->validateForm($_POST)){
@@ -304,6 +306,9 @@ function getParameterGeneralSettings(){
         $arrPropSip['directmedia']=getParameter("sip_directmedia");
         $arrPropSip['callcounter']=getParameter("sip_callcounter");
         $arrPropSip['busylevel']=getParameter("sip_busylevel");
+        $arrPropSip['trustrpid']=getParameter("sip_trustrpid");
+        $arrPropSip['sendrpid']=getParameter("sip_sendrpid");
+        $arrPropSip['transport']=getParameter("sip_transport");
         $arrPropSip['videosupport']=getParameter("sip_videosupport");
         $arrPropSip['qualifyfreq']=getParameter("sip_qualifyfreq");
         $arrPropSip['rtptimeout']=getParameter("sip_rtptimeout");
@@ -345,6 +350,8 @@ function getParameterGeneralSettings(){
         $arrPropVM["envelope"]=getParameter("vm_envelope");
         $arrPropVM["context"]=getParameter("vm_context");
         $arrPropVM["tz"]=getParameter("vm_tz");
+        $arrPropVM["emailsubject"]=getParameter("vm_emailsubject");
+        $arrPropVM["emailbody"]=getParameter("vm_emailbody");
         $arrPropVM["review"]=getParameter("vm_review");
         $arrPropVM["operator"]=getParameter("vm_operator");
         $arrPropVM["forcename"]=getParameter("vm_forcename");
@@ -354,11 +361,11 @@ function getParameterGeneralSettings(){
     return array("gen"=>$arrPropGen,"sip"=>$arrPropSip,"iax"=>$arrPropIax,"vm"=>$arrPropVM);
 }
 
-function createFieldForm($arrTone)
+function createFieldForm($arrTone,$arrMOH,$arrZoneMessage)
 {
     $arrRCstat=array("ENABLED"=>_tr("Enabled"),"DISABLED"=>_tr("Disabled"));
-    $arrRings=array(""=>_tr("Default"),"1"=>1,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"11"=>11,"12"=>12,"13"=>13,"14"=>14,"15"=>15,"16"=>16,"17"=>17,"18"=>18,"19"=>19,"20"=>20,"21"=>21,"22"=>22,"23"=>23,"24"=>24,"25"=>25,"26"=>26,"27"=>27,"28"=>28,"29"=>29,"30"=>30,"31"=>31,"32"=>32,"33"=>33,"34"=>34,"35"=>35,"36"=>36,"37"=>37,"38"=>38,"39"=>39,"40"=>40,"41"=>41,"42"=>42,"43"=>43,"44"=>44,"45"=>45,"46"=>46,"47"=>47,"48"=>48,"49"=>49,"50"=>50,"51"=>51,"52"=>52,"53"=>53,"54"=>54,"55"=>55,"56"=>56,"57"=>57,"58"=>58,"59"=>59,"60"=>60,"61"=>61,"62"=>62,"63"=>63,"64"=>64,"65"=>65,"66"=>66,"67"=>67,"68"=>68,"69"=>69,"70"=>70,"71"=>71,"72"=>72,"73"=>73,"74"=>74,"75"=>75,"76"=>76,"77"=>77,"78"=>78,"79"=>79,"80"=>80,"81"=>81,"82"=>82,"83"=>83,"84"=>84,"85"=>85,"86"=>86,"87"=>87,"88"=>88,"89"=>89,"90"=>90,"91"=>91,"92"=>92,"93"=>93,"94"=>94,"95"=>95,"96"=>96,"97"=>97,"98"=>98,"99"=>99,"100"=>100,"101"=>101,"102"=>102,"103"=>103,"104"=>104,"105"=>105,"106"=>106,"107"=>107,"108"=>108,"109"=>109,"
-110"=>110,"111"=>111,"112"=>112,"113"=>113,"114"=>114,"115"=>115,"116"=>116,"117"=>117,"118"=>118,"119"=>119,"120"=>120);
+    $arrRings=array(""=>_tr("Default")) + range(1,120);
+    
     //TODO: obtener la lista de codecs de audio soportados por el servidor
     //se los puede hacer con el comando en consola de asterisk "module show like format" or "core show codecs audio"
     //por ahora se pone los que vienes con la instalacion de asterisk
@@ -415,7 +422,7 @@ function createFieldForm($arrTone)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "DIRECTORY_OPT_EXT" => array("LABEL"            => _tr('Say Extension with name'),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => array("e" => "Yes", "" => "No"),
                                                     "VALIDATION_TYPE"        => "text",
@@ -427,21 +434,28 @@ function createFieldForm($arrTone)
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
                         );
-    $arrFormElements = array_merge(createSipForm(),$arrFormElements);
+    $arrFormElements = array_merge(createSipForm($arrMOH),$arrFormElements);
     $arrFormElements = array_merge(createIaxForm(),$arrFormElements);
-    $arrFormElements = array_merge(createVMForm(),$arrFormElements);
+    $arrFormElements = array_merge(createVMForm($arrZoneMessage),$arrFormElements);
     return $arrFormElements;
 }
 
-function createSipForm(){
+function createSipForm($arrMOH){
     $arrNat=array("yes"=>"yes","no"=>"no","force_rport"=>"force_rport","comedia"=>"comedia");
-    $arrCallingpres=array('allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
+    $arrCallingpres=array(""=>"",'allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
     $arrYesNo=array("yes"=>"yes","no"=>"no");
-    $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
-    $arrMedia=array("noset"=>"noset",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
-    $arrFormElements = array( "sip_type"  => array("LABEL"                  => _tr("type"),
+    $arrMedia=array("noset"=>"",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
+    $transport=array("noset"=>"","udp"=>"UDP Only","tcp"=>"TCP Only","tls"=>"TLS Only","udp,tcp,tls"=>strtoupper("udp,tcp,tls"),"udp,tls,tcp"=>strtoupper("udp,tls,tcp"),"tcp,udp,tls"=>strtoupper("tcp,udp,tls"),"tcp,tls,udp"=>strtoupper("tcp,tls,udp"),"tls,udp,tcp"=>strtoupper("tls,udp,tcp"),"tls,tcp,udp"=>strtoupper("tls,tcp,udp"));
+    
+    $arrMusic=array(""=>"");
+    foreach($arrMOH as $key => $value){
+        $arrMusic[$key]=$value;
+    }
+    
+    $arrFormElements = array("sip_type"  => array("LABEL"                  => _tr("type"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
                                                 "INPUT_EXTRA_PARAM"      => $arrType,
@@ -501,7 +515,6 @@ function createSipForm(){
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            
                             "sip_allowtransfer"   => array( "LABEL"              => _tr("allowtransfer"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
@@ -586,6 +599,39 @@ function createSipForm(){
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_mohinterpret"   => array( "LABEL"              => _tr("mohinterpret"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrMusic,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_mohsuggest"   => array( "LABEL"              => _tr("mohsuggest"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrMusic,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_trustrpid"    =>  array("LABEL"        => _tr("trustrpid"),
+                                                "DESCRIPTION"            => _tr("If Remote-Party-ID should be trusted"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                "VALIDATION_TYPE"        => "text", //yes
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_sendrpid"    =>  array("LABEL"        => _tr("sendrpid"),
+                                                "DESCRIPTION"            => _tr("If Remote-Party-ID should be sent"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no","yes"=>"yes", "pai"=>"pai","yes,pai"=>"yes,pai"),
+                                                "VALIDATION_TYPE"        => "text", //no
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_transport"    =>  array("LABEL"        => _tr("transport"),
+                                                "DESCRIPTION"            => _tr("This sets the default transport type for outgoing.\nThe order determines the primary default transport.\nThe default transport type is only used for\noutbound messages until a Registration takes place.  During the\npeer Registration the transport type may change to another supported\ntype if the peer requests so"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $transport,
+                                                "VALIDATION_TYPE"        => "text", //no
+                                                "VALIDATION_EXTRA_PARAM" => ""),
     );
     return $arrFormElements;
 }
@@ -710,8 +756,8 @@ function createIaxForm(){
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrCodecPrio,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                                                    "VALIDATION_TYPE"        => "",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
                             "iax_qualifysmoothing" => array("LABEL"             => _tr("qualifysmoothing"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
@@ -734,14 +780,14 @@ function createIaxForm(){
     return $arrFormElements;
 }
 
-function createVMForm()
+function createVMForm($arrZoneMessage)
 {
     $arrVMesg=array(""=>_tr("Default"),"u"=>_tr("Unavailable"),"b"=>_tr("Busy"),"s"=>("No Message"));
     $arrYesNo=array("yes"=>"Yes","no"=>"No");
     $arrOptions=array(""=>_tr("Standard Message"),"s"=>_tr("Beep only"));
     $arrTries=array("1","2","3","4");
     $arrTime=array("1","2","3","4","5","6","7","8","9","10");
-    $arrZoneMessage = array();
+    $arrZoneMessage = ($arrZoneMessage===false)?array():$arrZoneMessage;
     
     $arrFormElements = array("VM_PREFIX" => array("LABEL"                  => _tr('Voicemail Prefix'),
                                                     "REQUIRED"               => "yes",
@@ -869,6 +915,22 @@ function createVMForm()
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                            "vm_emailsubject"   => array("LABEL"               => _tr("Email Subject"),
+                                                    "DESCRIPTION"            => _tr("Email subject used at moment to send the email."),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:300px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "vm_emailbody"   => array("LABEL"               => _tr("Email Body"),
+                                                    "DESCRIPTION"            => _tr("Email Body. Until 512 characters"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXTAREA",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:500px;resize:none"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => "",
+                                                    "ROWS"                   => "4",
+                                                    "COLS"                   => "1"),
                             "vm_saycid"   => array("LABEL"               => _tr("Play CID"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",

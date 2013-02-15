@@ -97,8 +97,8 @@
                 <tr class="sip_settings">
                     <td nowrap>{$sip_nat.LABEL}: </td>
                     <td>{$sip_nat.INPUT}</td>
-                    <td nowrap>{$sip_directmedia.LABEL}:</td>
-                    <td>{$sip_directmedia.INPUT}</td>
+                    <td nowrap>{$sip_allowtransfer.LABEL}: </td>
+                    <td>{$sip_allowtransfer.INPUT}</td>
                 </tr>
                 <tr class="sip_settings">
                     <td nowrap>{$sip_port.LABEL}: </td>
@@ -157,10 +157,16 @@
                     <td style="padding-left: 2px; color: #E35332; font-weight: bold;" colspan=4>{$OTHER}</td>
                 </tr>
                 <tr class="sip_settings">
-                    <td nowrap>{$sip_canreinvite.LABEL}: </td>
-                    <td>{$sip_canreinvite.INPUT}</td>
-                    <td nowrap>{$sip_allowtransfer.LABEL}: </td>
-                    <td>{$sip_allowtransfer.INPUT}</td>
+                    <td nowrap>{$sip_directmedia.LABEL}: </td>
+                    <td>{$sip_directmedia.INPUT}</td>
+                    <td nowrap>{$sip_transport.LABEL}: </td>
+                    <td>{$sip_transport.INPUT}</td>
+                </tr>
+                <tr class="sip_settings">
+                    <td nowrap>{$sip_trustrpid.LABEL}: </td>
+                    <td>{$sip_trustrpid.INPUT}</td>
+                    <td nowrap>{$sip_sendrpid.LABEL}: </td>
+                    <td>{$sip_sendrpid.INPUT}</td>
                 </tr>
                 <tr class="sip_settings">
                     <td nowrap>{$sip_useragent.LABEL}:</td>
@@ -287,6 +293,14 @@
                 <tr class="voicemail">
                     <td nowrap>{$OPERATOR_XTN.LABEL}:</td>
                     <td>{$OPERATOR_XTN.INPUT}</td>
+                </tr>
+                <tr class="voicemail">
+                    <td>{$vm_emailsubject.LABEL}:</td>
+                    <td colspan="3">{$vm_emailsubject.INPUT}</td>
+                </tr>
+                <tr class="voicemail">
+                    <td>{$vm_emailbody.LABEL}:</td>
+                    <td colspan="3">{$vm_emailbody.INPUT}</td>
                 </tr>
                 <tr class="voicemail">
                     <td nowrap>{$vm_attach.LABEL}:</td>

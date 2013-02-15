@@ -82,12 +82,8 @@ class paloGlobalsPBX extends paloAsteriskDB{
 	*/
     function getToneZonePBX(){
         $arrTZ=array();
-        $arrCountry=getCountry();
         
-        $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
-        $arrConfig = $pConfig->leer_configuracion(false);
-        
-        $astIndications = $arrConfig['ASTETCDIR']['valor']."/indications.conf";
+        $astIndications = "/etc/asterisk/indications.conf";
         $content=file($astIndications);
         if($content===false){
             return false;

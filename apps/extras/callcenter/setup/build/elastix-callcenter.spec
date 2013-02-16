@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 9.beta
+Release: 10.beta
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,7 +97,7 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Fri Feb 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Feb 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-10.beta
 - Agent Console: apparently a jQuery update now sends null variables in 
   javascript structs as empty strings instead of not-set variables in a 
   $.post() request. This causes the non-SSE mode of the Agent Console to spin

@@ -1925,7 +1925,7 @@ class paloSantoOrganization{
                         $pFax->editFax($idUser,$org_countryCode,$org_areaCode,$org_cldiName,$org_clidNumber,$arrFaxExtUser["device"],$arrUser[0][3],$username);
                     }
                     if($cExten==true){
-                        $pDevice->deleteAstDBExt($extension,$arrOrgz["code"]."_".$extension);
+                        $pDevice->deleteAstDBExt($extension,$arrOrgz["code"]."_".$extension,"sip");
                         $pDevice->restoreBackupAstDBEXT($arrBackup);
                     }
                 }

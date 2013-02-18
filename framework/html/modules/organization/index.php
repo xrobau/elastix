@@ -75,7 +75,7 @@ function _moduleContent(&$smarty, $module_name)
     $userLevel1=$arrCredentiasls["userlevel"];
     $userAccount=$arrCredentiasls["userAccount"];
     $idOrganization=$arrCredentiasls["id_organization"];
-
+    
 	if($userLevel1=="other"){
         header("Location: index.php?menu=system");
     }
@@ -657,14 +657,6 @@ function viewUsersOrganization($smarty, $module_name, $local_templates_dir, $pDB
     }
 
     $total=$pOrganization->getNumUserByOrganization($id);
-    $arrOrgz=$pOrganization->getOrganizationById($id);
-    if($arrOrgz==FALSE){
-        $smarty->assign("mb_title", _tr("Error"));
-        $smarty->assign("mb_message", _tr($pOrganization->errMsg));
-        return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-    }
-
-    $domainOrgz=$arrOrgz['domain'];
     $limit=20;
 
     $oGrid = new paloSantoGrid($smarty);
@@ -682,13 +674,12 @@ function viewUsersOrganization($smarty, $module_name, $local_templates_dir, $pDB
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message",_tr($pOrganization->errMsg));
     }
-
+    
     foreach($arrayUsrOrgz as $value)
     {
         $arrTmp = array();
         $arrTmp[0] = $value['username'];
         $arrTmp[1] = $value['name'];
-        $arrTmp[2] = $domainOrgz;
         if($value['extension']=="" || $value['extension']==NULL)
             $ext= "Don't extension associated";
         else{
@@ -699,7 +690,7 @@ function viewUsersOrganization($smarty, $module_name, $local_templates_dir, $pDB
             $ext_fax .= "Don't fax extension associated";
         else
 			$ext_fax = $value['fax_extension'];
-        $arrTmp[3] = $ext[1]." / ".$ext_fax[1];
+        $arrTmp[2] = $ext." / ".$ext_fax;
         $arrDatosGrid[] = $arrTmp;
     }
 
@@ -712,7 +703,6 @@ function viewUsersOrganization($smarty, $module_name, $local_templates_dir, $pDB
                     'columns'   =>  array(
                         array("name"      => _tr("User Name"),),
                         array("name"      => _tr("Name"),),
-                        array("name"      => _tr("Organization Domain"),),
                         array("name"      => _tr("Extension / fax extension"),)
                     ),
                 );

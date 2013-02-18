@@ -298,7 +298,7 @@ class orgActions extends orgREST{
         }else
             $arrParam["org_user_pswd"]=$_POST["org_user_pswd"];
             
-        $arrParam["name"]=empty($_POST["name"])?"no set":$_POST["name"];
+        $arrParam["name"]=empty($_POST["name"])?$arrParam["domain"]:$_POST["name"];
         $arrParam["country"]=isset($_POST["country"])?$_POST["country"]:"";
         $arrParam["city"]=isset($_POST["city"])?$_POST["city"]:"";
         $arrParam["address"]=isset($_POST["address"])?$_POST["address"]:"";

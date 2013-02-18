@@ -184,7 +184,7 @@ class paloSantoASteriskConfig{
 		$pFC=new paloFeatureCodePBX($this->_DB,$domain);
 
 		// 1.-Seateamos las configuracions generales para la organizacion en la base de datos
-		//	  (sip_general,iax_general,voicemail_general,globals,features_codes)
+		//	  (sip_settings,iax_settings,voicemail_settings,globals,features_codes)
 		// 2.-Creamos dentro de asterisk directorios que van a ser usados por la organizacion
 		// 3.-Inclumos los archivos recien creados en con la sentencias include dentro del archivo
         //    extensions.conf y extensions_globals.conf
@@ -223,7 +223,7 @@ class paloSantoASteriskConfig{
 
 		//arreglo que contiene las tablas dentro de elxpbx que no tienen el campo
         //organization_domian
-		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_settings","sip_settings","voicemail_settings","queue_member","ivr_destination","did_details","did","tg_parameters");
+		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_general","sip_general","voicemail_general","queue_member","ivr_destination","did_details","did","tg_parameters");
 
 		//obtenemos una lista de las tablas dentro de la base elxpbx
 		$queryShow="show tables from elxpbx";
@@ -386,23 +386,24 @@ class paloSantoASteriskConfig{
 
 
     private function setGeneralSettingFirstTime($domain,$country)
-	{
-		global $arrConf;
-		$source_file="/var/www/elastixdir/asteriskconf/globals.conf";
-		//verificamos que exista el dominio
-		$query="SELECT count(domain) from organization where domain=?";
-		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
-		if($result===false){
-			$this->errMsg = $pDB->errMsg;
-			return false;
-		}elseif($result[0]==0){
-			$this->errMsg = _tr("Organization dosen't exist");
-			return false;
-		}
-		
-		
-		$pGlobals=new paloGlobalsPBX($this->_DB,$domain);
-		$res=$pGlobals->insertDBGlobals($country,$this->_DBSQLite);
+    {
+        global $arrConf;
+        $source_file="/var/www/elastixdir/asteriskconf/globals.conf";
+        //verificamos que exista el dominio
+        $query="SELECT code from organization where domain=?";
+        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
+        if($result===false){
+            $this->errMsg = $pDB->errMsg;
+            return false;
+        }elseif(empty($result[0])){
+            $this->errMsg = _tr("Organization dosen't exist");
+            return false;
+        }else
+            $codeOrg=$result[0];
+        
+        
+        $pGlobals=new paloGlobalsPBX($this->_DB,$domain);
+        $res=$pGlobals->insertDBGlobals($country,$this->_DBSQLite);
         if($res==false){
             $this->errMsg = $pGlobals->errMsg;
             return false;
@@ -413,47 +414,57 @@ class paloSantoASteriskConfig{
             $language=$reslng;
         }
         
-		$arrGeneral=array("sip","iax","voicemail");
-		foreach($arrGeneral as $type){
-            $queryg="Select * from ".$type."_settings";
-            $arrConfig=$this->_DB->getFirstRowQuery($queryg,true);
+        
+        //sip , iax , voicemail 
+        //llenado de tablas tech_settings usando como referencia lo configurado en tech_general
+        $psip=new paloSip($this->_DB);
+        $piax=new paloIax($this->_DB);
+        $pvoicemail=new paloVoicemail($this->_DB);
+        foreach(array("sip","iax","voicemail") as $tech){
+            if($tech=="voicemail"){
+                $query="SELECT * from ".$tech."_general";
+                $arrConfig=$this->_DB->getFirstRowQuery($query,true);
+            }else{
+                $query="SELECT property_name, property_val from ".$tech."_general";
+                $arrConfig=$this->_DB->fetchTable($query,true);
+            }
+            
             if($arrConfig===false){
                 $this->errMsg=$this->_DB->errMsg;
                 return false;
-            }elseif($arrConfig==false){
-                $this->errMsg=_tr("Don't exist default parameters ").$type."_settings";
+            }elseif(count($arrConfig)==0){
+                $this->errMsg=_tr("Don't exist default parameters ").$tech."_general";
                 return false;
             }
-                
-			$questions="(?,";
-			$prop="(organization_domain,";
-			$arrValues=array($domain);
-			$i=1;
-			foreach($arrConfig as $key => $value){
-                if($key=="language" && !empty($language)){
-                    $value=$language;
+            
+            $arrSettings=array();
+            foreach($arrConfig as $key => $value){
+                if($tech=="voicemail"){
+                    if(isset($value) && $value!="")
+                        $arrSettings[$key]=$value;
+                }else{
+                    if(isset($value["property_val"]) && $value["property_val"]!="")
+                        $arrSettings[$value["property_name"]]=$value["property_val"];
                 }
-                if(isset($value) && $key!="id"){
-                    $arrValues[$i]=$value;
-                    $prop .="$key,";
-                    $questions .="?,";
-                    $i++;
-                }
-			}
-			$questions=substr($questions,0,-1).")";
-			$prop=substr($prop,0,-1).")";
-			$query="INSERT INTO ".$type."_general $prop values $questions";
-			if($this->_DB->genQuery($query,$arrValues)==false){
-                $this->errMsg=$this->_DB->errMsg;
-				return false;
-			}
-		}
-		
-		//settings de la organizacion que crearan cierto plan de marcado por default
-		
-		//una ruta de salida por default
-		$query="insert into outbound_route (routename,outcid_mode,mohsilence,seq,organization_domain) VALUES (?,?,?,?,?)";
-		if($this->_DB->genQuery($query,array("out_9","off","default","1",$domain))==false){
+            }
+            
+            $arrSettings["organization_domain"]=$domain;
+            $arrSettings["code"]=$codeOrg;
+            if(!empty($language)){
+                $arrSettings["language"]=$language;
+            }
+            $result = ${"p".$tech}->insertDefaultSettings($arrSettings);
+            if($result==false){
+                $this->errMsg=${"p".$tech}->errMsg;
+                return false;
+            }
+        }
+                    
+        //settings de la organizacion que crearan cierto plan de marcado por default
+        
+        //una ruta de salida por default
+        $query="insert into outbound_route (routename,outcid_mode,mohsilence,seq,organization_domain) VALUES (?,?,?,?,?)";
+        if($this->_DB->genQuery($query,array("out_9","off","default","1",$domain))==false){
             $this->errMsg="Error creating outbound_route. ".$this->_DB->errMsg;
             return false;
         }

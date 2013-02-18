@@ -1,3 +1,16 @@
+p {
+	text-align: justify;
+}
+div.hlp_figures img{
+	display: block;
+	margin: auto;
+}
+div.hlp_figures p{
+	font-weight:bold;
+	font-style:italic;
+	text-align:center;
+
+}
 /* inline tables */
 table.inline {
   background-color: #ffffff;

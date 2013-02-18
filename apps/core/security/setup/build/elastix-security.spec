@@ -126,6 +126,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Mon Feb 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Firewall Rules: change layout on New Rule form to be more compatible
+  across browsers. Fixes Elastix bug #1481.
+  SVN Rev[4683]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

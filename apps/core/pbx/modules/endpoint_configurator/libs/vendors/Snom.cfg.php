@@ -219,6 +219,137 @@ TEMP;
     return $content;
 }
 
+function PrincipalFileSnom_m9($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer)
+{
+$ByDHCP = existsValue($arrParameters,'By_DHCP',""); 
+
+$time = existsValue($arrParameters,'Time_Zone',"301");
+
+  $timezone = <<<TEMP
+<zone_desc perm="RW">GMT $time</zone_desc>
+TEMP;
+$refresh = "<settings_refresh_timer perm= \"RW\">0</settings_refresh_timer>";
+
+switch ($ByDHCP){
+    case '' : 
+		$configNetwork= "";
+		break;
+  
+    case 0  :
+		$dns  = existsValue($arrParameters,'DNS1',''); 
+		$dns2 = existsValue($arrParameters,'DNS2','');
+		$ip   = existsValue($arrParameters,'IP','');
+		$mask = existsValue($arrParameters,'Mask','');
+		$gw   = existsValue($arrParameters,'GW','');
+		$configNetwork= <<<TEMP
+<dhcp perm="RW">false</dhcp>
+<ip_adr perm="RW">$ip</ip_adr>
+<netmask perm="RW">$mask</netmask>
+<dns_server1 perm="RW">$dns</dns_server1>
+<dns_server2 perm="">$dns2</dns_server2>
+<gateway perm="RW">$gw</gateway>
+TEMP;
+		break;
+    case 1: 
+		
+		   $configNetwork= <<<TEMP
+<dhcp perm="RW" />
+<ip_adr perm="RW"></ip_adr>
+<netmask perm="RW"></netmask>
+<dns_server1 perm="RW"></dns_server1>
+<dns_server2 perm=""></dns_server2>
+<gateway perm="RW"></gateway>
+
+TEMP;
+break;
+}
+
+ $content= <<<TEMP
+<?xml version="1.0" encoding="utf-8"?>
+<settings>
+ <phone-settings>
+  <action_setup_url perm="RW" />
+  <allow_check_sync perm="RW">false</allow_check_sync>
+  <asset_id perm="RW" />
+  <base_name perm="RW">snom-m9</base_name>
+  <setting_server perm="RW">tftp://$ipAdressServer</setting_server>
+  $configNetwork
+  <dst_offset perm="RW">0</dst_offset>
+  <dst_start_day perm="RW">0</dst_start_day>
+  <dst_start_day_of_week perm="RW">0</dst_start_day_of_week>
+  <dst_start_month perm="RW">0</dst_start_month>
+  <dst_start_time perm="RW">0</dst_start_time>
+  <dst_start_week_of_month perm="RW">0</dst_start_week_of_month>
+  <dst_stop_day perm="RW">0</dst_stop_day>
+  <dst_stop_day_of_week perm="RW">0</dst_stop_day_of_week>
+  <dst_stop_month perm="RW">0</dst_stop_month>
+  <dst_stop_time perm="RW">0</dst_stop_time>
+  <dst_stop_week_of_month perm="RW">0</dst_stop_week_of_month>
+  <emergency_numbers perm="RW" />
+  <emergency_proxy perm="RW" />
+  <ethernet_replug perm="RW">reregister</ethernet_replug>
+  <gmt_offset perm="RW">0</gmt_offset>
+   $refresh
+  <language perm="RW" />
+  <log perm="RW" idx="1">5</log>
+  <ntp_server perm="RW">ntp.snom.com</ntp_server>
+  <outbound_method perm="RW" />
+  <outbound_tcp perm="RW">100</outbound_tcp>
+  <outbound_udp perm="RW">20</outbound_udp>
+  <packet_length perm="RW" idx="1">20</packet_length>
+  <pcap_on_bootup perm="RW">false</pcap_on_bootup>
+  <pin_change_prompt perm="RW">true</pin_change_prompt>
+  <propose_length perm="RW" idx="1">false</propose_length>
+  <qos_publish_uri perm="RW" />
+  <read_status perm="RW">false</read_status>
+  <reject_msg perm="RW">486 Busy Here</reject_msg>
+  <repeater perm="RW">false</repeater>
+  <retry_t1 perm="RW">500</retry_t1>
+  <ring_duration perm="RW">60</ring_duration>
+  <rtcp_dup_rle perm="RW">true</rtcp_dup_rle>
+  <rtcp_loss_rle perm="RW">true</rtcp_loss_rle>
+  <rtcp_rcpt_times perm="RW">true</rtcp_rcpt_times>
+  <rtcp_rcvr_rtt perm="RW">true</rtcp_rcvr_rtt>
+  <rtcp_stat_summary perm="RW">true</rtcp_stat_summary>
+  <rtcp_voip_metrics perm="RW">true</rtcp_voip_metrics>
+  <rtp_port_end perm="RW">65534</rtp_port_end>
+  <rtp_port_start perm="RW">49152</rtp_port_start>
+  <session_timeout perm="RW">360</session_timeout>
+  <setting_server perm="RW" />
+  <settings_refresh_timer perm="RW">86400</settings_refresh_timer>
+  <short_form perm="RW">false</short_form>
+  <sip_port perm="RW">0</sip_port>
+  <stun_interval perm="RW">5</stun_interval>
+  <stun_server perm="RW" />
+  <telnet_enabled perm="RW">false</telnet_enabled>
+  <tones perm="RW">1</tones>
+  <tos_rtp perm="RW">160</tos_rtp>
+  <tos_sip perm="RW">160</tos_sip>
+  <user_active idx="1" perm="">on</user_active>
+  <user_realname idx="1" perm="">$DisplayName</user_realname>
+  <user_name idx="1" perm="">$id_device</user_name>
+  <user_host idx="1" perm="">$ipAdressServer</user_host>
+  <user_pname idx="1" perm=""></user_pname>
+  <user_pass idx="1" perm="">$secret</user_pass>
+  <user_allow_call_waiting perm="RW" idx="1">true</user_allow_call_waiting>
+  <user_allow_line_switching perm="RW" idx="1">false</user_allow_line_switching>
+  <user_ear_protection perm="RW" idx="1">false</user_ear_protection>
+  <user_enable_e164_substitution perm="RW" idx="1">false</user_enable_e164_substitution>
+  <user_expiry perm="RW" idx="1">3600</user_expiry>
+  <user_forward_mode perm="RW" idx="1">0</user_forward_mode>
+  <user_forward_number perm="RW" idx="1" />
+  <user_forward_timeout perm="RW" idx="1">10</user_forward_timeout>
+  <vlan_id perm="RW">0</vlan_id>
+  <vlan_prio perm="RW">0</vlan_prio>
+  $timezone
+  </phone-settings>
+</settings>          
+
+TEMP;
+
+return $content;
+}
+
 /*
     The function creates content of general settings file for SNOM 3XX. 
  */
@@ -276,5 +407,45 @@ function set_provision_server($ip_endpoint,$ip_server){
     }else
       return FALSE;
 }
+
+function set_by_curl($url,$parameters){
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+curl_setopt($ch, CURLOPT_COOKIEFILE, "/tmp/cookieSnom_m9");
+curl_setopt($ch, CURLOPT_URL,$url);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+$buf2 = curl_exec ($ch);
+curl_close ($ch);
+unset($ch);
+}
+
+function set_provision_server_m9($ip_endpoint,$ip_server){
+ 
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_COOKIEJAR, "/tmp/cookieSnom_m9");
+curl_setopt($ch, CURLOPT_URL,"http://$ip_endpoint/index.htm");
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, "username=admin&password=password&link=index.htm&submit=Login");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+ob_start();      
+$buf2 = curl_exec ($ch); 
+ob_end_clean();  
+
+
+if(preg_match("/<input type=\"radio\" name=\"eula\" value=\"([0-9]+)\">/",$buf2,$arrTokens)){
+            if(isset($arrTokens[1])){
+                $eula = $arrTokens[1];
+            }
+        }
+curl_close ($ch);
+unset($ch);
+if(isset($eula))
+  set_by_curl("http://$ip_endpoint/index.htm","eula=$eula&save=Submit");
+  set_by_curl("http://$ip_endpoint/network.htm","setting_server=tftp://$ip_server&save=Save");
+  set_by_curl("http://$ip_endpoint/update.htm","reboot=Reboot");
+
+}
+
 
 ?>

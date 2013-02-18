@@ -273,15 +273,27 @@ class PaloSantoFileEndPoint
 		   $contentFileSnom = PrincipalFileSnom821($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
 		   if(!set_provision_server($ArrayData['data']['ip_endpoint'],$this->ipAdressServer))
 		      $return = false;
+		   if($this->createFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm", $contentFileSnom))
+                      $return = true;
+                   else $return = false;
+ 
 		}
-         	else
+		elseif ($ArrayData['data']['model'] == "m9"){
+		   $contentFileSnom = PrincipalFileSnom_m9($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
+		   if(!set_provision_server_m9($ArrayData['data']['ip_endpoint'],$this->ipAdressServer))
+		      $return = false;
+		    if($this->createFileConf($this->directory, "snom-".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".xml", $contentFileSnom))
+		      $return = true;
+		    else $return = false;
+		}
+         	else{
 		   $contentFileSnom = PrincipalFileSnom($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
-                
-		if($this->createFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm", $contentFileSnom))
-                   $return = true;
-                else $return = false;
-
-                break;
+		     if($this->createFileConf($this->directory, "snom".$ArrayData['data']['model']."-".strtoupper($ArrayData['data']['filename']).".htm", $contentFileSnom))
+                        $return = true;
+	             else $return = false;
+	       }
+               
+               break;
 
             case 'Grandstream':
                 $contentFileGrandstream = PrincipalFileGrandstream($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['model']);

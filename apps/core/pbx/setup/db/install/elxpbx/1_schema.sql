@@ -26,30 +26,193 @@ CREATE TABLE IF NOT EXISTS `reload_dialplan` (
   PRIMARY KEY  (`organization_domain`)
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS `sip_general` (
+
+-- esta tabla contiene las configuraciones generales del 
+-- archivo sip.conf y referentes a la creacion de dispositivos
+-- con tecnologia sip. Es configurada por el superadmin
+DROP TABLE IF EXISTS sip_general;
+CREATE TABLE `sip_general` (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    property_name varchar(250),
+    property_val varchar(250),
+    cathegory varchar(250),
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `property_name` (`property_name`)
+) ENGINE = INNODB;
+
+insert into sip_general (property_name,property_val,cathegory) values ('default_context','default','general');
+insert into sip_general (property_name,property_val,cathegory) values ('allowguest','no','general');
+insert into sip_general (property_name,property_val,cathegory) values ('allowoverlap','no','general');
+insert into sip_general (property_name,property_val,cathegory) values ('allowtransfer','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('srvlookup','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('maxexpiry','3600','general');
+insert into sip_general (property_name,property_val,cathegory) values ('minexpiry','60','general');
+insert into sip_general (property_name,property_val,cathegory) values ('defaultexpiry','120','general');
+insert into sip_general (property_name,property_val,cathegory) values ('qualifyfreq','60','general');
+insert into sip_general (property_name,property_val,cathegory) values ('qualifygap','100','general');
+insert into sip_general (property_name,property_val,cathegory) values ('registertimeout','20','general');
+insert into sip_general (property_name,property_val,cathegory) values ('registerattempts','0','general');
+insert into sip_general (property_name,property_val,cathegory) values ('rtptimeout','60','general');
+insert into sip_general (property_name,property_val,cathegory) values ('rtpholdtimeout','300','general');
+insert into sip_general (property_name,property_val,cathegory) values ('rtpkeepalive','','general');
+insert into sip_general (property_name,property_val,cathegory) values ('videosupport','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('maxcallbitrate','384','general');
+insert into sip_general (property_name,property_val,cathegory) values ('faxdetect','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('t38pt_udptl','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('directmedia','no','general');
+insert into sip_general (property_name,property_val,cathegory) values ('notifyringing','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('notifyhold','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('dtmfmode','auto','general');
+insert into sip_general (property_name,property_val,cathegory) values ('relaxdtmf','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('trustrpid','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('sendrpid','no','general');
+insert into sip_general (property_name,property_val,cathegory) values ('useragent','Elastix 3.0','general');
+insert into sip_general (property_name,property_val,cathegory) values ('vmexten','*97','general');
+insert into sip_general (property_name,property_val,cathegory) values ('language','en','general');
+insert into sip_general (property_name,property_val,cathegory) values ('contactdeny','','general');
+insert into sip_general (property_name,property_val,cathegory) values ('contactpermit','','general');
+insert into sip_general (property_name,property_val,cathegory) values ('disallow','all','general');
+insert into sip_general (property_name,property_val,cathegory) values ('allow','ulaw,alaw,gsm','general');
+insert into sip_general (property_name,property_val,cathegory) values ('g726nonstandard','en','general');
+insert into sip_general (property_name,property_val,cathegory) values ('preferred_codec_only','','general');
+insert into sip_general (property_name,property_val,cathegory) values ('nat','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('nat_type','public','general');
+
+
+-- seccion general archivo iax.conf
+-- editable solo por el superadmin
+DROP TABLE IF EXISTS iax_general;
+CREATE TABLE `iax_general` (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    property_name varchar(250),
+    property_val varchar(250),
+    cathegory varchar(250),
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `property_name` (`property_name`)
+)ENGINE = INNODB;
+
+insert into iax_general (property_name,property_val,cathegory) values ('delayreject','yes','general');
+insert into iax_general (property_name,property_val,cathegory) values ('bindport','','general');
+insert into iax_general (property_name,property_val,cathegory) values ('bindaddr','','general');
+insert into iax_general (property_name,property_val,cathegory) values ('language','en','general');
+insert into iax_general (property_name,property_val,cathegory) values ('jitterbuffer','no','general');
+insert into iax_general (property_name,property_val,cathegory) values ('forcejitterbuffer','no','general');
+insert into iax_general (property_name,property_val,cathegory) values ('maxjitterbuffer','200','general');
+insert into iax_general (property_name,property_val,cathegory) values ('resyncthreshold','1000','general');
+insert into iax_general (property_name,property_val,cathegory) values ('maxjitterinterps','10','general');
+insert into iax_general (property_name,property_val,cathegory) values ('maxexpiry','1300','general');
+insert into iax_general (property_name,property_val,cathegory) values ('minexpiry','60','general');
+insert into iax_general (property_name,property_val,cathegory) values ('disallow','all','general');
+insert into iax_general (property_name,property_val,cathegory) values ('allow','ulaw,alaw,gsm','general');
+insert into iax_general (property_name,property_val,cathegory) values ('codecpriority','host','general');
+insert into iax_general (property_name,property_val,cathegory) values ('bandwidth','','general');
+-- seccion general archivo voicemail.conf
+-- editable solo por el superadmin
+DROP TABLE IF EXISTS voicemail_general;
+CREATE TABLE voicemail_general (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    -- Formats for writing Voicemail
+    format CHAR(80) default 'wav49|gsm|wav',
+    -- Send email from this address
+    serveremail CHAR(80) default "vm@asterisk",
+    -- Prompts in alternative language
+    language CHAR(20),
+    -- Attach sound file to email - YES/no
+    attach enum ('yes','no') default 'yes',
+    -- Maximum messages in a folder (100 if not specified)
+    -- Maximum value for this option is 9999.  If set to 0, a  mailbox will be greetings-only
+    maxmsg INT(5) default 100,
+    -- Maximum length of a voicemail message in seconds
+    maxsecs INT(5) ,
+    -- Minimum length of a voicemail message in seconds
+    minsecs INT(5),
+    -- Maximum length of greetings in seconds
+    maxgreet INT(5),
+    -- How many milliseconds to skip forward/back when rew/ff in message playback
+    skipms INT(5) default 3000,
+    -- How many seconds of silence before we end the recording
+    maxsilence INT(5) default 5,
+    -- Silence threshold (what we consider silence: the lower, the more sensitive)
+    silencethreshold INT(5) default 128,
+    -- Max number of failed login attempts
+    maxlogins INT(5) default 3,
+    -- Move heard messages to the 'Old' folder automagically.  Defaults to on.
+    moveheard enum ('yes','no') default 'yes',
+    -- Forward an urgent message as an urgent message. 
+    forward_urgent_auto enum ('yes','no'),
+    -- External script to verify password
+    externpasscheck varchar(250),
+    -- Skip the "[PBX]:" string from the message title
+    pbxskip enum('yes','no') default 'yes',
+    -- Change the From: string
+    fromstring varchar(250) default "Asterisk Voicemail",
+    -- Permit finding entries for forward/compose from the directory
+    usedirectory enum ('yes','no'),
+    -- Voicemail can be stored in a database using the ODBC driver.
+    odbcstorage varchar(250),
+    -- The default table for ODBC voicemail storage is voicemessages.
+    odbctable varchar(250),
+    -- VM_NAME, VM_DUR, VM_MSGNUM, VM_MAILBOX, VM_CALLERID, VM_CIDNUM, VM_CIDNAME, VM_DATE
+    emailsubject varchar(512) default 'New message ${VM_MSGNUM} in mailbox ${VM_MAILBOX}',
+    emailbody varchar(512) default 'Dear ${VM_NAME}:\\n\\n\\tjust wanted to let you know you were just left a ${VM_DUR} long message (number ${VM_MSGNUM})\\nin mailbox ${VM_MAILBOX} from ${VM_CALLERID}, on ${VM_DATE}.\\n\\nDial *98 to access your voicemail by phone.\\n',
+    -- You can override the default program to send e-mail if you wish, too
+    mailcmd varchar(512),
+    pollmailboxes enum ('yes','no'),
+    pollfreq int(5),
+    tz varchar(250) default 'central',
+    saycid enum ('yes','no'),
+    sayduration enum ('yes','no') default 'yes',
+    saydurationm int(5) default 2,
+    -- Allow sender to review/rerecord their message before saving it OFF by default
+    review enum ('yes','no') default 'yes', 
+    -- Allow sender to hit 0 before/after/during leaving a voicemail to reach an operator
+    operator enum ('yes','no') default 'yes',
+    -- Turn on/off envelope playback before message playback. [ON by default]
+    envelope enum ('yes','no') default 'yes',      
+    -- Skips to the next message after hitting 7 or 9 to delete/save current message.
+    nextaftercmd enum ('yes','no') default 'yes',
+    -- Forces a new user to record their name.
+    forcename enum ('yes','no') default 'yes',
+    -- Increase DB gain on recorded message by this amount (0.0 means none)
+    volgain DECIMAL(5,2),
+    -- Remind the user that their temporary greeting is set
+    tempgreetwarn enum ('yes','no'),
+    -- Enforce minimum password length
+    minpassword int(5),
+    messagewrap enum ('yes','no'),
+    PRIMARY KEY (`id`)
+)ENGINE = INNODB;
+
+insert into voicemail_general(serveremail) values ("vm@asterisk");
+
+-- esta tabla se usa para que el administrador de cada organizacion 
+-- configure los parametros por default al momento de crear una extension 
+-- de tipo sip
+DROP TABLE IF EXISTS sip_settings;
+CREATE TABLE IF NOT EXISTS `sip_settings` (
       `organization_domain` varchar(50) NOT NULL, 
-      `port` int(5) DEFAULT NULL,
+      `port` int(5) DEFAULT '5060',
       `defaultuser` varchar(10) DEFAULT NULL,
-      `useragent` varchar(20) DEFAULT NULL,
+      `useragent` varchar(20) DEFAULT 'elastix_3.0',
       `host` varchar(40) NULL default 'dynamic',
       `type` enum('friend','user','peer') default 'friend',
-      `context` varchar(40) DEFAULT NULL,
-      `deny` varchar(40) DEFAULT NULL,
-      `permit` varchar(40) DEFAULT NULL,
+      `context` varchar(40) DEFAULT 'from-internal',
+      `deny` varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
+      `permit` varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
       `transport` enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
-      `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT NULL,
-      `directmedia` enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT NULL,
+      `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT 'auto',
+      `directmedia` enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT 'no',
       `nat` enum('yes','no','force_rport','comedia') DEFAULT NULL,
       `language` varchar(40) DEFAULT NULL,
       `tonezone` varchar(3) DEFAULT NULL,
-      `disallow` varchar(40) DEFAULT NULL,
-      `allow` varchar(40) DEFAULT NULL,
-      `trustrpid` enum('yes','no') DEFAULT NULL,
+      `disallow` varchar(40) DEFAULT 'all',
+      `allow` varchar(40) DEFAULT 'ulaw,alaw,gsm',
+      `trustrpid` enum('yes','no') DEFAULT 'yes',
       `progressinband` enum('yes','no','never') DEFAULT NULL,
       `promiscredir` enum('yes','no') DEFAULT NULL,
       `useclientcode` enum('yes','no') DEFAULT NULL,
       `accountcode` varchar(40) DEFAULT NULL,
-      `callcounter` enum('yes','no') DEFAULT NULL,
+      `callcounter` enum('yes','no') DEFAULT 'yes',
       `busylevel` int(11) DEFAULT NULL,
       `allowoverlap` enum('yes','no') DEFAULT NULL,
       `allowsubscribe` enum('yes','no') DEFAULT NULL,
@@ -65,7 +228,7 @@ CREATE TABLE IF NOT EXISTS `sip_general` (
       `qualify` varchar(40) DEFAULT 'yes',
       `rtptimeout` int(11) DEFAULT NULL,
       `rtpholdtimeout` int(11) DEFAULT NULL,
-      `sendrpid` enum('yes','no') DEFAULT NULL,
+      `sendrpid` enum('yes','no','pai','yes,pai') DEFAULT 'no',
       `outboundproxy` varchar(40) DEFAULT NULL,
       `callbackextension` varchar(40) DEFAULT NULL,
       `timert1` int(11) DEFAULT NULL,
@@ -74,7 +237,7 @@ CREATE TABLE IF NOT EXISTS `sip_general` (
       `constantssrc` enum('yes','no') DEFAULT NULL,
       `usereqphone` enum('yes','no') DEFAULT NULL,
       `textsupport` enum('yes','no') DEFAULT NULL,
-      `faxdetect` enum('yes','no') DEFAULT NULL,
+      `faxdetect` enum('yes','no') DEFAULT 'yes',
       `buggymwi` enum('yes','no') DEFAULT NULL,
       `cid_number` varchar(40) DEFAULT NULL,
       `callingpres` enum('allowed_not_screened','allowed_passed_screen','allowed_failed_screen','allowed','prohib_not_screened','prohib_passed_screen','prohib_failed_screen','prohib') DEFAULT NULL,
@@ -83,19 +246,23 @@ CREATE TABLE IF NOT EXISTS `sip_general` (
       `parkinglot` varchar(40) DEFAULT NULL,
       `hasvoicemail` enum('yes','no') DEFAULT NULL,
       `subscribemwi` enum('yes','no') DEFAULT NULL,
-      `vmexten` varchar(40) DEFAULT NULL,
+      `vmexten` varchar(40) DEFAULT '*97',
       `rtpkeepalive` int(11) DEFAULT NULL,
-      `call-limit` int(11) DEFAULT NULL,
       `g726nonstandard` enum('yes','no') DEFAULT NULL,
       `ignoresdpversion` enum('yes','no') DEFAULT NULL,
       `allowtransfer` enum('yes','no') DEFAULT NULL,
       PRIMARY KEY (`organization_domain`)
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS `iax_general` (
+
+-- esta tabla se usa para que el administrador de cada organizacion 
+-- configure los parametros por default al momento de crear una extension 
+-- de tipo iax
+DROP TABLE IF EXISTS iax_settings;
+CREATE TABLE IF NOT EXISTS `iax_settings` (
   `organization_domain` varchar(50) NOT NULL, 
   `type` varchar(10) NOT NULL default 'friend', -- friend/user/peer
-  `context` varchar(40) NOT NULL,
+  `context` varchar(40) default 'from-internal',
   `host` varchar(40) NOT NULL default 'dynamic',
   `ipaddr` varchar(40) NULL, -- Must be updateable by Asterisk user
   `port` int(5) NULL, -- Must be updateable by Asterisk user
@@ -111,13 +278,13 @@ CREATE TABLE IF NOT EXISTS `iax_general` (
   `language` varchar(10) NULL, 
   `sendani` varchar(10) NULL, -- yes/no
   `maxauthreq` varchar(5) NULL, -- Maximum outstanding AUTHREQ calls {1-32767}
-  `requirecalltoken` varchar(4) NULL, -- yes/no/auto
+  `requirecalltoken` varchar(4) DEFAULT 'auto', -- yes/no/auto
   `encryption` varchar(20) NULL, -- aes128/yes/no
   `transfer` varchar(10) NULL, -- mediaonly/yes/no
   `jitterbuffer` varchar(3) NULL, -- yes/no
   `forcejitterbuffer` varchar(3) NULL, -- yes/no
-  `disallow` varchar(40) NULL, -- all/{list-of-codecs}
-  `allow` varchar(40) NULL, -- all/{list-of-codecs}
+  `disallow` varchar(40) DEFAULT 'all', -- all/{list-of-codecs}
+  `allow` varchar(40) DEFAULT 'ulaw,alaw,gsm', -- all/{list-of-codecs}
   `codecpriority` varchar(40) NULL, 
   `qualify` varchar(10) default 'yes', -- yes/no/{number of milliseconds}
   `qualifysmoothing` varchar(10) NULL, -- yes/no
@@ -127,45 +294,49 @@ CREATE TABLE IF NOT EXISTS `iax_general` (
   `adsi` varchar(10) NULL, -- yes/no
   `amaflags` varchar(20) NULL, 
   `setvar` varchar(200) NULL, 
-  `permit` varchar(40) DEFAULT NULL,
-  `deny` varchar(40) DEFAULT NULL,
+  `permit` varchar(40) NULL,
+  `deny` varchar(40) NULL,
   PRIMARY KEY (`organization_domain`)
 )ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS `voicemail_general` (
+
+DROP TABLE IF EXISTS voicemail_settings;
+CREATE TABLE `voicemail_settings` (
     organization_domain varchar(100) NOT NULL, 
     -- Mailbox context.
     context CHAR(80) NOT NULL DEFAULT 'default',
     -- Attach sound file to email - YES/no
-    attach CHAR(3),
+    attach CHAR(3) DEFAULT 'yes',
     -- Send email from this address
-    serveremail CHAR(80),
+    serveremail CHAR(80) DEFAULT 'vm@asterisk',
     -- Prompts in alternative language
     language CHAR(20),
     -- Alternative timezone, as defined in voicemail.conf
     tz CHAR(30),
     -- Delete voicemail from server after sending email notification - yes/NO
-    deletevoicemail CHAR(3),
+    deletevoicemail enum ('yes','no') DEFAULT 'no',
     -- Read back CallerID information during playback - yes/NO
-    saycid CHAR(3),
+    saycid enum ('yes','no'),
     -- Allow user to send voicemail from within VoicemailMain - YES/no
-    sendvoicemail CHAR(3),
+    sendvoicemail enum ('yes','no'),
+    emailsubject varchar(512),
+    emailbody varchar(512),
     -- Listen to voicemail and approve before sending - yes/NO
-    review CHAR(3),
+    review enum ('yes','no') DEFAULT 'yes',
     -- Warn user a temporary greeting exists - yes/NO
-    tempgreetwarn CHAR(3),
+    tempgreetwarn enum ('yes','no'),
     -- Allow '0' to jump out during greeting - yes/NO
-    operator CHAR(3),
+    operator enum ('yes','no') DEFAULT 'yes',
     -- Hear date/time of message within VoicemailMain - YES/no
-    envelope CHAR(3),
+    envelope enum ('yes','no'),
     -- Hear length of message within VoicemailMain - yes/NO
-    sayduration CHAR(3),
+    sayduration enum ('yes','no'),
     -- Minimum duration in minutes to say
     saydurationm INT(3),
     -- Force new user to record name when entering voicemail - yes/NO
-    forcename CHAR(3),
+    forcename enum ('yes','no') DEFAULT 'yes',
     -- Force new user to record greetings when entering voicemail - yes/NO
-    forcegreetings CHAR(3),
+    forcegreetings enum ('yes','no'),
     -- Context in which to dial extension for callback
     callback CHAR(80),
     -- Context in which to dial extension (from advanced menu)
@@ -173,16 +344,13 @@ CREATE TABLE IF NOT EXISTS `voicemail_general` (
     -- Context in which to execute 0 or * escape during greeting
     exitcontext CHAR(80),
     -- Maximum messages in a folder (100 if not specified)
-    maxmsg INT(5),
+    maxmsg INT(5) DEFAULT '100',
     -- Increase DB gain on recorded message by this amount (0.0 means none)
     volgain DECIMAL(5,2),
-    -- IMAP user for authentication (if using IMAP storage)
-    imapuser VARCHAR(80),
-    -- IMAP password for authentication (if using IMAP storage)
-    imappassword VARCHAR(80),
     PRIMARY KEY (`organization_domain`)
 ) ENGINE = INNODB;
 
+DROP TABLE IF EXISTS sip;
 CREATE TABLE IF NOT EXISTS `sip` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `name` varchar(40) NOT NULL,
@@ -225,7 +393,7 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `defaultuser` varchar(10) NOT NULL DEFAULT '',
       `dial` varchar(50) DEFAULT NULL,
       `trustrpid` enum('yes','no') DEFAULT NULL,
-      `sendrpid` enum('yes','no') DEFAULT NULL,
+      `sendrpid` enum('yes','no','pai','yes,pai') DEFAULT NULL,
       `progressinband` enum('yes','no','never') DEFAULT NULL,
       `promiscredir` enum('yes','no') DEFAULT NULL,
       `useclientcode` enum('yes','no') DEFAULT NULL,
@@ -235,7 +403,7 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `allowsubscribe` enum('yes','no') DEFAULT NULL,
       `allowtransfer` enum('yes','no') DEFAULT 'no',
       `lastms` int(11) NOT NULL DEFAULT '0',
-      `useragent` varchar(20) NOT NULL DEFAULT '',
+      `useragent` varchar(20) NOT NULL DEFAULT 'elastix_3.0',
       `regseconds` int(11) NOT NULL DEFAULT '0',
       `regserver` varchar(100) NOT NULL DEFAULT '',
       `videosupport` enum('yes','no') DEFAULT NULL,
@@ -269,7 +437,6 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `subscribemwi` enum('yes','no') DEFAULT NULL,
       `vmexten` varchar(40) DEFAULT NULL,
       `rtpkeepalive` int(11) DEFAULT NULL,
-      `call-limit` int(11) DEFAULT NULL,
       `g726nonstandard` enum('yes','no') DEFAULT NULL,
       `ignoresdpversion` enum('yes','no') DEFAULT NULL,
       `organization_domain` varchar(50) NOT NULL,
@@ -280,7 +447,8 @@ CREATE TABLE IF NOT EXISTS `sip` (
       INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS `iax` (
+DROP TABLE IF EXISTS iax;
+CREATE TABLE `iax` (
   `organization_domain` varchar(50) NOT NULL,
   `name` varchar(40) NOT NULL default '',
   `type` varchar(10) NOT NULL default 'friend', -- friend/user/peer
@@ -340,7 +508,8 @@ CREATE TABLE IF NOT EXISTS `iax` (
   INDEX organization_domain (organization_domain)
 )ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS voicemail (
+DROP TABLE IF EXISTS voicemail;
+CREATE TABLE voicemail (
     -- All of these column names are very specific, including "uniqueid".  Do not change them if you wish voicemail to work.
     uniqueid INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     -- Mailbox context.
@@ -371,6 +540,8 @@ CREATE TABLE IF NOT EXISTS voicemail (
     saycid CHAR(3),
     -- Allow user to send voicemail from within VoicemailMain - YES/no
     sendvoicemail CHAR(3),
+    emailsubject varchar(512),
+    emailbody varchar(512),
     -- Listen to voicemail and approve before sending - yes/NO
     review CHAR(3),
     -- Warn user a temporary greeting exists - yes/NO
@@ -540,176 +711,6 @@ insert into `features_code_settings` (name,default_code,description,estado) valu
 insert into `features_code_settings` (name,default_code,description,estado) values("disconnect_call","**","In-Call Asterisk Disconnect Code","enabled"); 
 
 
-CREATE TABLE IF NOT EXISTS `sip_settings` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `port` int(5) DEFAULT NULL,
-      `defaultuser` varchar(10) DEFAULT NULL,
-      `useragent` varchar(20) DEFAULT NULL,
-      `host` varchar(40) NULL default 'dynamic',
-      `type` enum('friend','user','peer') default 'friend',
-      `context` varchar(40) DEFAULT NULL,
-      `deny` varchar(40) DEFAULT NULL,
-      `permit` varchar(40) DEFAULT NULL,
-      `directmedia` enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT 'no',
-      `transport` enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
-      `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT NULL,
-      `nat` enum('yes','no','force_rport','comedia') DEFAULT NULL,
-      `language` varchar(40) DEFAULT NULL,
-      `tonezone` varchar(3) DEFAULT NULL,
-      `disallow` varchar(40) DEFAULT NULL,
-      `allow` varchar(40) DEFAULT NULL,
-      `trustrpid` enum('yes','no') DEFAULT NULL,
-      `progressinband` enum('yes','no','never') DEFAULT NULL,
-      `promiscredir` enum('yes','no') DEFAULT NULL,
-      `useclientcode` enum('yes','no') DEFAULT NULL,
-      `accountcode` varchar(40) DEFAULT NULL,
-      `callcounter` enum('yes','no') DEFAULT NULL,
-      `busylevel` int(11) DEFAULT NULL,
-      `allowoverlap` enum('yes','no') DEFAULT NULL,
-      `allowsubscribe` enum('yes','no') DEFAULT NULL,
-      `videosupport` enum('yes','no') DEFAULT NULL,
-      `maxcallbitrate` int(11) DEFAULT NULL,
-      `rfc2833compensate` enum('yes','no') DEFAULT NULL,
-      `session-timers` enum('accept','refuse','originate') DEFAULT NULL,
-      `session-expires` int(11) DEFAULT NULL,
-      `session-minse` int(11) DEFAULT NULL,
-      `session-refresher` enum('uac','uas') DEFAULT NULL,
-      `t38pt_usertpsource` varchar(40) DEFAULT NULL,
-      `regexten` varchar(40) DEFAULT NULL,
-      `qualify` varchar(40) DEFAULT 'yes',
-      `rtptimeout` int(11) DEFAULT NULL,
-      `rtpholdtimeout` int(11) DEFAULT NULL,
-      `sendrpid` enum('yes','no') DEFAULT NULL,
-      `outboundproxy` varchar(40) DEFAULT NULL,
-      `callbackextension` varchar(40) DEFAULT NULL,
-      `timert1` int(11) DEFAULT NULL,
-      `timerb` int(11) DEFAULT NULL,
-      `qualifyfreq` int(11) DEFAULT NULL,
-      `constantssrc` enum('yes','no') DEFAULT NULL,
-      `usereqphone` enum('yes','no') DEFAULT NULL,
-      `textsupport` enum('yes','no') DEFAULT NULL,
-      `faxdetect` enum('yes','no') DEFAULT NULL,
-      `buggymwi` enum('yes','no') DEFAULT NULL,
-      `cid_number` varchar(40) DEFAULT NULL,
-      `callingpres` enum('allowed_not_screened','allowed_passed_screen','allowed_failed_screen','allowed','prohib_not_screened','prohib_passed_screen','prohib_failed_screen','prohib') DEFAULT NULL,
-      `mohinterpret` varchar(40) DEFAULT NULL,
-      `mohsuggest` varchar(40) DEFAULT NULL,
-      `parkinglot` varchar(40) DEFAULT NULL,
-      `hasvoicemail` enum('yes','no') DEFAULT NULL,
-      `subscribemwi` enum('yes','no') DEFAULT NULL,
-      `vmexten` varchar(40) DEFAULT NULL,
-      `rtpkeepalive` int(11) DEFAULT NULL,
-      `call-limit` int(11) DEFAULT NULL,
-      `g726nonstandard` enum('yes','no') DEFAULT NULL,
-      `ignoresdpversion` enum('yes','no') DEFAULT NULL,
-      `allowtransfer` enum('yes','no') DEFAULT NULL,
-      PRIMARY KEY (`id`)
-) ENGINE = INNODB;
-
-
-CREATE TABLE IF NOT EXISTS `iax_settings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `type` varchar(10) NOT NULL default 'friend', -- friend/user/peer
-  `context` varchar(40) NOT NULL,
-  `host` varchar(40) NOT NULL default 'dynamic',
-  `ipaddr` varchar(40) NULL, -- Must be updateable by Asterisk user
-  `port` int(5) NULL, -- Must be updateable by Asterisk user
-  `sourceaddress` varchar(20) NULL,
-  `mask` varchar(20) NULL,
-  `regexten` varchar(40) NULL,
-  `regseconds` int(11) NULL, -- Must be updateable by Asterisk user
-  `accountcode` varchar(20) NULL, 
-  `mohinterpret` varchar(20) NULL, 
-  `mohsuggest` varchar(20) NULL, 
-  `inkeys` varchar(40) NULL, 
-  `outkey` varchar(40) NULL, 
-  `language` varchar(10) NULL, 
-  `sendani` varchar(10) NULL, -- yes/no
-  `maxauthreq` varchar(5) NULL, -- Maximum outstanding AUTHREQ calls {1-32767}
-  `requirecalltoken` varchar(4) NULL, -- yes/no/auto
-  `encryption` varchar(20) NULL, -- aes128/yes/no
-  `transfer` varchar(10) NULL, -- mediaonly/yes/no
-  `jitterbuffer` varchar(3) NULL, -- yes/no
-  `forcejitterbuffer` varchar(3) NULL, -- yes/no
-  `disallow` varchar(40) NULL, -- all/{list-of-codecs}
-  `allow` varchar(40) NULL, -- all/{list-of-codecs}
-  `codecpriority` varchar(40) NULL, 
-  `qualify` varchar(10) NULL, -- yes/no/{number of milliseconds}
-  `qualifysmoothing` varchar(10) NULL, -- yes/no
-  `qualifyfreqok` varchar(10) NULL, -- {number of milliseconds}|60000
-  `qualifyfreqnotok` varchar(10) NULL, -- {number of milliseconds}|10000
-  `timezone` varchar(20) NULL, 
-  `adsi` varchar(10) NULL, -- yes/no
-  `amaflags` varchar(20) NULL, 
-  `setvar` varchar(200) NULL, 
-  `permit` varchar(40) DEFAULT NULL,
-  `deny` varchar(40) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-)ENGINE = INNODB;
-
-
-CREATE TABLE IF NOT EXISTS `voicemail_settings` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    -- Mailbox context.
-    context CHAR(80) NOT NULL DEFAULT 'default',
-    -- Attach sound file to email - YES/no
-    attach CHAR(3),
-    -- Send email from this address
-    serveremail CHAR(80),
-    -- Prompts in alternative language
-    language CHAR(20),
-    -- Alternative timezone, as defined in voicemail.conf
-    tz CHAR(30),
-    -- Delete voicemail from server after sending email notification - yes/NO
-    deletevoicemail CHAR(3),
-    -- Read back CallerID information during playback - yes/NO
-    saycid CHAR(3),
-    -- Allow user to send voicemail from within VoicemailMain - YES/no
-    sendvoicemail CHAR(3),
-    -- Listen to voicemail and approve before sending - yes/NO
-    review CHAR(3),
-    -- Warn user a temporary greeting exists - yes/NO
-    tempgreetwarn CHAR(3),
-    -- Allow '0' to jump out during greeting - yes/NO
-    operator CHAR(3),
-    -- Hear date/time of message within VoicemailMain - YES/no
-    envelope CHAR(3),
-    -- Hear length of message within VoicemailMain - yes/NO
-    sayduration CHAR(3),
-    -- Minimum duration in minutes to say
-    saydurationm INT(3),
-    -- Force new user to record name when entering voicemail - yes/NO
-    forcename CHAR(3),
-    -- Force new user to record greetings when entering voicemail - yes/NO
-    forcegreetings CHAR(3),
-    -- Context in which to dial extension for callback
-    callback CHAR(80),
-    -- Context in which to dial extension (from advanced menu)
-    dialout CHAR(80),
-    -- Context in which to execute 0 or * escape during greeting
-    exitcontext CHAR(80),
-    -- Maximum messages in a folder (100 if not specified)
-    maxmsg INT(5),
-    -- Increase DB gain on recorded message by this amount (0.0 means none)
-    volgain DECIMAL(5,2),
-    -- IMAP user for authentication (if using IMAP storage)
-    imapuser VARCHAR(80),
-    -- IMAP password for authentication (if using IMAP storage)
-    imappassword VARCHAR(80),
-    PRIMARY KEY (`id`)
-) ENGINE = INNODB;
-
-insert into sip_settings (faxdetect,vmexten,context,useragent,disallow,allow,port,host,qualify,type,deny,permit,dtmfmode,nat,
-callcounter) values ("yes","*97","from-internal","elastix_3.0","all","ulaw;alaw;gsm","5060",
-"dynamic","yes","friend","0.0.0.0/0.0.0.0","0.0.0.0/0.0.0.0","rfc2833","yes","yes");
-
-insert into iax_settings (deny,permit,transfer,context,host,type,qualify,disallow,allow,
-requirecalltoken) values (NULL,NULL,"no","from-internal","dynamic","friend","yes","all","ulaw,alaw,gsm","auto");
-
-insert into voicemail_settings (attach,context,serveremail,review,operator,maxmsg,deletevoicemail,saycid,
-envelope,forcename,forcegreetings) values ("yes","default","vm@asterisk","yes","yes","100","no","no","no","yes","no");
-
-
 INSERT INTO globals_settings VALUES("DIAL_OPTIONS","tr");
 INSERT INTO globals_settings VALUES("TRUNK_OPTIONS","");
 INSERT INTO globals_settings VALUES("RECORDING_STATE","ENABLED");
@@ -750,6 +751,7 @@ INSERT INTO globals_settings VALUES("OPERATOR","");
 INSERT INTO globals_settings VALUES("PARKNOTIFY","SIP/200");
 INSERT INTO globals_settings VALUES("RECORDEXTEN","");
 INSERT INTO globals_settings VALUES("CREATE_VM","yes");
+INSERT INTO globals_settings VALUES("ALLOW_CODEC","ulaw,alaw,gsm");
 
 DROP TABLE IF EXISTS queue;
 CREATE TABLE queue (

@@ -6,21 +6,22 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>The option “Network” of the Menu “System” in Elastix lets us view and configure the parameters of the network of the server.</p>
-
-<p>Within this option we have two sections:</p>
+<p>The option “Network” of the Menu “System” in Elastix lets us view and configure the network parameters of the server.</p>
 
 <h3>Network Parameters</h3>
 
-<div><img src="../modules/{$node_id}/images/network_1.png" border="0"></div>
-<div>Figure 1</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_network_1.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
 <p>This corresponds to the general network parameters of the server:</p>
 
 <table class="inline">
   <tr>
-    <th>Host</th><th>Server Name, for example: pbx.subdomain.com</th>
+    <th>Name</th><th>Description</td>
+  </tr>
+  <tr>
+    <td>Host</td><td>Server Name, for example: pbx.subdomain.com</td>
   </tr>
   <tr>
     <td>Default Gateway</td><td>IP Address of the Port of Connection (Default Gateway)</td>
@@ -29,27 +30,29 @@
     <td>Primary DNS</td><td>IP Address of the Primary Domain Name Server (DNS)</td>
   </tr>
   <tr>
-    <td>Secundary DNS</td><td>IP Address of the Secondary or Alternative Domain Name Server (DNS)</td>
+    <td>Secondary DNS</td><td>IP Address of the Secondary or Alternative Domain Name Server (DNS)</td>
   </tr>
 </table>
 <br />
 
-<p>To change any of these parameters, click on the button “Edit Network Parameters”.</p>
+<p>To edit any of these parameters, click on the button “Edit Network Parameters”.</p>
 
-<h3>Ethernet Interfaces List</h3>
+<p>Here also shows a list of available Interfaces on the server. Below the details: </p>
 
-<p>This shows the list of network interfaces available on the server, with the following data: </p>
-
-<div><img src="../modules/{$node_id}/images/network_2.png" border="0"></div>
-<div>Figure 2</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_network_2.png" border="0" />
+<p>Figure 2</p></div>
+<br />
 <br />
 
 <table class="inline">
-  <tr>
-    <th>Device</th><th>Name of the Operating System that is assigned to the Interface</th>
-  </tr>
-  <tr>
-    <td>Type</td><td>The type of IP address that the Interface has, which could be STATIC when the IP address is fixed or DHCP when the IP address is obtained automatically when the equipment is booted up. To use the second option, there should be a DHCP server in the network.</td>
+	<tr>
+   		<th>Name</th><th>Description</th>
+  	</tr>  	
+	<tr>
+   		<td>Device</td><td>Name of the Ethernet interface</td>
+  	</tr>
+  	<tr>
+    		<td>Type</td><td>The type of IP address that the Interface has, which could be STATIC when the IP address is fixed or DHCP when the IP address is obtained automatically from a DHCP server.</td>
 	</tr>
 	<tr>
 		<td>IP</td><td>IP Address assigned to the Interface</td>
@@ -62,18 +65,18 @@
 		<td>MAC Address</td><td>Physical Address of the network Interface</td>
 	</tr>
 	<tr>
-		<td>HW Info</td><td>Additional information about the network interface</td>
+		<td>HW Info</td><td>Additional information about the network Interface</td>
 
 	</tr>
 	<tr>
 		<td>Status </td><td>Shows the physical status of the Interface, if it’s connected or not</td>
 	</tr>
 </table>
+<br />
+<p>To edit the parameters Type, IP or Mask, click on the name of the device. The rest of parameters cannot be changed.</p>
 
-<p>To change the parameters of any of the Interfaces, click on the name of the device. The only values that can be changed are: Type, IP and Mask</p>
-
-<div><img src="../modules/{$node_id}/images/network_3.jpg" border="0"></div>
-<div>Figure 3</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_network_3.png" border="0" />
+<p>Figure 3</p></div>
 <br />
 
 </body>

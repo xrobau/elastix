@@ -6,45 +6,46 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>La opción "Conferencia" del Elastix nos permite Administrar varias conferencias.</p>
+<p>The option "DHCP Server" allows configuring Elastix so it can assign IP addresses in the network.</p>
 
-<div><img src="../modules/{$node_id}/images/dhcp_server.jpg" border="0"></div>
-<div>Figure 1</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_dhcp_server.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
-<p>El módulo "Servidor DHCP" nos permite configurar el elastix para que nos permita asignar direcciones IP en la red.</p>
-
-<p>Los campos requeridos son:</p>
+<p>Here the description of each field:</p>
 
 <table class="inline">
   <tr>
-    <th>Campo</th><th>Descripción</th>
+    <th>Name</th><th>Description</th>
   </tr>
   <tr>
-    <td>Estado</td><td>Indica si el servicio DHCP está activo o inactivo.</td>
+    <td>Status</td><td>It indicates if the DHCP service is enabled or disabled.</td>
   </tr>
   <tr>
-    <td>Inicio de rango de IPs</td><td>Desde esta IP en adelante se proporcionarán las IP.</td>
+    <td>Starting IP Address</td><td>This will be the beginning of the IP range that the server will provide. </td>
   </tr>
   <tr>
-    <td>Fin de rango de IPs</td><td>Hasta esta IP se proporcionarán las IP.</td>
+    <td>Ending IP Address</td><td>This will be the ending of the IP range that the server will provide.</td>
   </tr>
   <tr>
-    <td>Tiempo de refrescamiento</td><td>Después de cuanto tiempo se volverá a pedir las IP y proveer a quienes no lo tengan.</td>
+    <td>Lease time</td><td>Amount of time the IP address will be assigned to devices in the network.</td>
   </tr>
   <tr>
-    <td>DNS 1</td><td>Servidor DNS.</td>
+    <td>DNS 1</td><td>This address is the Primary DNS that the server will provide.</td>
   </tr>
   <tr>
-    <td>WINS</td><td>Proveer IPs a Windows.</td>
+    <td>DNS 2</td><td>This address is the Secondary DNS that the server will provide.</td>
   </tr>
   <tr>
-    <td>Gateway</td><td></td>
+    <td>WINS</td><td>It is the IP of the WINS Server that will be given to Windows machines.</td>
+  </tr>
+  <tr>
+    <td>Gateway</td><td>This is the address the server will provide as Gateway.</td>
   </tr>
 </table>
 <br />
 
-<p>Una vez llene los campos requeridos de click en el botón "Iniciar Servicio".</p>
-
+<p>To save changes just click on the button "Save/Update". The service can be started by clicking on "Enable DHCP".</p>
+<br />
 </body>
 </html>

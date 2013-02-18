@@ -307,6 +307,8 @@ CREATE TABLE `voicemail_settings` (
     context CHAR(80) NOT NULL DEFAULT 'default',
     -- Attach sound file to email - YES/no
     attach CHAR(3) DEFAULT 'yes',
+    -- Which sound format to attach
+    attachfmt CHAR(10),
     -- Send email from this address
     serveremail CHAR(80) DEFAULT 'vm@asterisk',
     -- Prompts in alternative language

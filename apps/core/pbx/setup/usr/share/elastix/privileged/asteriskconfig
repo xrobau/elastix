@@ -135,6 +135,15 @@ switch($argv[1]){
         }else
             error_exit("Missing arguments \n");
         break;
+    case "writeSIPGeneralFile":
+        exit(writeSIPGeneralFile() ? 0 : 1);  
+        break;
+    case "writeIAXGeneralFile":
+        exit(writeIAXGeneralFile() ? 0 : 1);  
+        break;
+    case "writeVMGeneralFile":
+        exit(writeVMGeneralFile() ? 0 : 1);  
+        break;
 	default:
 		error_exit("No action specified \n");
 		break;
@@ -467,6 +476,15 @@ EXTENSIONS_CONFIG;
     }
     
     $content .="\n; BEGIN ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";
+        
+    if(!is_file("/etc/asterisk/extensions_general.conf")){
+        if(createExtGeneral()!==false){
+            $content .="#include extensions_general.conf\n";
+        }
+    }else
+        $content .="#include extensions_general.conf\n";
+        
+    $content .="#include extensions_globals.conf\n";
     
     if(!is_file("/etc/asterisk/extensions_custom.conf")){
         if(file_put_contents("/etc/asterisk/extensions_custom.conf","")!==false){
@@ -475,15 +493,6 @@ EXTENSIONS_CONFIG;
         }
     }else
         $content .="#include extensions_custom.conf\n";
-        
-    $content .="#include extensions_globals.conf\n";
-    
-    if(!is_file("/etc/asterisk/extensions_general.conf")){
-        if(createExtGeneral()!==false){
-            $content .="#include extensions_general.conf\n";
-        }
-    }else
-        $content .="#include extensions_general.conf\n";
         
     foreach($arrDomain as $value){
         if(!empty($value)){
@@ -1490,5 +1499,269 @@ function changeStateOrganization($filename,$state){
         $pOrg->_DB->rollBack();
         
     return true;
+}
+
+
+function writeSIPGeneralFile(){
+    $query="Select * from sip_general where cathegory!=? and property_name!=? and property_name!=?";
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $result=$pDB->fetchTable($query,true,array("nat","nat","nat_type"));
+    if($result===false){
+        fprintf(STDERR, "ERR: Error getting SIP general settings %s.\n",$pDB->errMsg);
+        return false;
+    }else{
+        foreach($result as $prop){
+            if(!empty($prop["property_name"])){
+                if(isset($prop["property_val"])){
+                    if($prop["property_val"]!=""){
+                        if($prop["property_name"]=="default_context"){
+                            $arrItem[]="context=".$prop["property_val"]."\n";   
+                        }elseif($prop["property_name"]=="allow" || $prop["property_name"]=="sendrpid"){
+                            $codes=explode(",",$prop["property_val"]);
+                            foreach($codes as $value){
+                                $arrItem[]=$prop["property_name"]."=$value\n";
+                            }
+                        }else
+                            $arrItem[]=$prop["property_name"]."=".$prop["property_val"]."\n";
+                    }
+                }
+            }
+        }
+    }
+    
+    //nat settings
+    $query="SELECT property_name,property_val,cathegory from sip_general where cathegory=? or property_name=?";
+    $arrRes=$pDB->fetchTable($query,true,array("nat","nat"));
+    $localNet=array("ip"=>array(),"mask"=>array());
+    if($arrRes===false){
+        fprintf(STDERR, "ERR: Error getting SIP general settings %s.\n",$pDB->errMsg);
+        return false;
+    }else{
+        foreach($arrRes as $prop){
+            if(isset($prop["property_val"])){
+                if(preg_match("/^localnetip_[0-9]+$/",$prop["property_name"])){
+                    $localNet["ip"][]=$prop["property_val"];
+                }elseif(preg_match("/^localnetmask_[0-9]+$/",$prop["property_name"])){
+                    $localNet["mask"][]=$prop["property_val"];
+                }else{
+                    $arrItem[]=$prop["property_name"]."=".$prop["property_val"]."\n";
+                }
+            }
+        }
+    }
+    foreach($localNet["ip"] as $key => $value){
+        $arrItem[]="localnet=$value/{$localNet["mask"][$key]}\n";
+    }
+    
+    $default[]="[general]\n";
+    $default[]="tos_sip=cs3\n";
+    $default[]="tos_audio=ef\n";
+    $default[]="tos_video=af41\n";
+    $default[]="rtcachefriends=yes\n";
+    $default[]="callcounter=yes\n";
+    $default[]="alwaysauthreject=yes\n";
+    
+    $arrFile=$default+$arrItem;
+    $arrFile[]="\n";
+    //antes de incluir los archivos comprobamos de que estos existan, si no existen deben ser creados
+    $files=array("sip_general_custom.conf","sip_register.conf","sip_custom.conf");
+    foreach($files as $file){
+        if(!is_file("/etc/asterisk/$file")){
+            if(file_put_contents("/etc/asterisk/$file","")!==false){
+                $arrFile[]="#include $file\n";
+                changeFilePermission("/etc/asterisk/$file");
+            }
+        }else
+            $arrFile[]="#include $file\n";
+    }
+    
+    if(file_put_contents("/etc/asterisk/sip.conf", $arrFile)!==false){
+        changeFilePermission("/etc/asterisk/sip.conf");
+        exec("/usr/sbin/asterisk -r -x 'module show like chan_sip.so' 2>&1",$output,$ret);
+        if(preg_match('/[1-9] modules loaded/', implode('',$output))){
+            $comand="module reload chan_sip.so";
+        }else{
+            $comand="module load chan_sip.so";
+        }
+        $ret=$output=null;
+        exec("/usr/sbin/asterisk -r -x '$comand' 2>&1",$output,$ret);
+        if($ret!=0){
+            fwrite(STDERR, "Module chan_sip.so couldn't be reloaded. ".implode('', $output)).".\n";
+            return false;
+        }
+        return true;
+    }else{
+        fprintf(STDERR, "ERR: File $file couldn't be written");
+        return false;
+    }   
+}
+
+
+function writeIAXGeneralFile(){
+    $query="Select * from iax_general";
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $result=$pDB->fetchTable($query,true);
+    if($result===false){
+        fprintf(STDERR, "ERR: Error getting IAX general settings %s.\n",$pDB->errMsg);
+        return false;
+    }else{
+        foreach($result as $prop){
+            if(!empty($prop["property_name"])){
+                if(isset($prop["property_val"])){
+                    if($prop["property_val"]!=""){
+                        if($prop["property_name"]=="allow"){
+                            $codes=explode(",",$prop["property_val"]);
+                            foreach($codes as $value){
+                                $arrItem[]=$prop["property_name"]."=$value\n";
+                            }
+                        }else
+                            $arrItem[]=$prop["property_name"]."=".$prop["property_val"]."\n";
+                    }
+                }
+            }
+        }
+    }
+    
+    $default[]="[general]\n";
+    $default[]="tos_audio=ef\n";
+    $default[]="rtcachefriends=yes\n";
+    $default[]="maxregexpire=1300\n";
+    $default[]="calltokenoptional=127.0.0.1/255.255.255.0\n";
+    $default[]="mailboxdetail=yes\n";
+    
+    $arrFile=$default+$arrItem;
+    $arrFile[]="\n";
+    //antes de incluir los archivos comprobamos de que estos existan, si no existen deben ser creados
+    $files=array("iax_general_custom.conf","iax_register.conf","iax_custom.conf");
+    foreach($files as $file){
+        if(!is_file("/etc/asterisk/$file")){
+            if(file_put_contents("/etc/asterisk/$file","")!==false){
+                $arrFile[]="#include $file\n";
+                changeFilePermission("/etc/asterisk/$file");
+            }
+        }else
+            $arrFile[]="#include $file\n";
+    }
+    
+    if(file_put_contents("/etc/asterisk/iax.conf", $arrFile)!==false){
+        changeFilePermission("/etc/asterisk/iax.conf");
+        exec("/usr/sbin/asterisk -r -x 'module show like chan_iax2.so' 2>&1",$output,$ret);
+        if(preg_match('/[1-9] modules loaded/', implode('',$output))){
+            $comand="module reload chan_iax2.so";
+        }else{
+            $comand="module load chan_iax2.so";
+        }
+        $ret=$output=null;
+        exec("/usr/sbin/asterisk -r -x '$comand' 2>&1",$output,$ret);
+        if($ret!=0){
+            fwrite(STDERR, "Module chan_iax2.so couldn't be reloaded. ".implode('', $output)).".\n";
+            return false;
+        }
+        return true;
+    }else{
+        fprintf(STDERR, "ERR: File $file couldn't be written");
+        return false;
+    }   
+}
+
+function writeVMGeneralFile(){
+    $query="Select * from voicemail_general";
+    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $result=$pDB->getFirstRowQuery($query,true);
+    if($result===false){
+        fprintf(STDERR, "ERR: Error getting Voicemail general settings %s.\n",$pDB->errMsg);
+        return false;
+    }else{
+        foreach($result as $key => $prop){
+            if(isset($prop)){
+                if($prop!=""){
+                    $arrItem[]="$key=$prop\n";
+                }
+            }
+        }
+    }
+    
+    $default[]="[general]\n";
+    $default[]="emaildateformat=%A, %B %d, %Y at %r\n";
+    $default[]="pagerdateformat=%A, %B %d, %Y at %r\n";
+    
+    $arrFile=$default+$arrItem;
+    $arrFile[]="\n";
+    //antes de incluir los archivos comprobamos de que estos existan, si no existen deben ser creados
+
+    $files=array("vm_general_custom.conf","vm_zonemessages.conf");    
+    foreach($files as $file){
+        if(!is_file("/etc/asterisk/$file")){
+            $content=($file=="vm_zonemessages.conf")?createVMzonemessages():"";
+            if(file_put_contents("/etc/asterisk/$file",$content)!==false){
+                $arrFile[]="#include $file\n";
+                changeFilePermission("/etc/asterisk/$file");
+            }
+        }else
+            $arrFile[]="#include $file\n";
+    }
+    
+    if(file_put_contents("/etc/asterisk/voicemail.conf", $arrFile)!==false){
+        changeFilePermission("/etc/asterisk/voicemail.conf");
+        exec("/usr/sbin/asterisk -r -x 'module show like app_voicemail.so' 2>&1",$output,$ret);
+        if(preg_match('/[1-9] modules loaded/', implode('',$output))){
+            $comand="module reload app_voicemail.so";
+        }else{
+            $comand="module load app_voicemail.so";
+        }
+        $ret=$output=null;
+        exec("/usr/sbin/asterisk -r -x '$comand' 2>&1",$output,$ret);
+        if($ret!=0){
+            fwrite(STDERR, "Module app_voicemail.so couldn't be reloaded. ".implode('', $output)).".\n";
+            return false;
+        }
+        return true;
+    }else{
+        fprintf(STDERR, "ERR: File voicemail.conf couldn't be written");
+        return false;
+    }
+    
+}
+
+function createVMzonemessages(){
+    $file[]="[zonemessages]\n";
+    $file[]="; Users may be located in different timezones, or may have different\n";
+    $file[]="; message announcements for their introductory message when they enter\n";
+    $file[]="; the voicemail system. Set the message and the timezone each user\n";
+    $file[]="; hears here. Set the user into one of these zones with the tz= attribute\n";
+    $file[]="; in the options field of the mailbox. Of course, language substitution\n";
+    $file[]="; still applies here so you may have several directory trees that have\n";
+    $file[]="; alternate language choices.\n";
+    $file[]=";\n";
+    $file[]="; Look in /usr/share/zoneinfo/ for names of timezones.\n";
+    $file[]="; Look at the manual page for strftime for a quick tutorial on how the\n";
+    $file[]="; variable substitution is done on the values below.\n";
+    $file[]=";\n";
+    $file[]="; Supported values:\n";
+    $file[]="; 'filename'    filename of a soundfile (single ticks around the filename\n";
+    $file[]=";               required)\n";
+    $file[]='; ${VAR}        variable substitution\n';
+    $file[]="; A or a        Day of week (Saturday, Sunday, ...)\n";
+    $file[]="; B or b or h   Month name (January, February, ...)\n";
+    $file[]="; d or e        numeric day of month (first, second, ..., thirty-first)\n";
+    $file[]="; Y             Year\n";
+    $file[]="; I or l        Hour, 12 hour clock\n";
+    $file[]="; H             Hour, 24 hour clock (single digit hours preceded by 'oh')\n";
+    $file[]="; k             Hour, 24 hour clock (single digit hours NOT preceded by 'oh')\n";
+    $file[]="; M             Minute, with 00 pronounced as o'clock\n";
+    $file[]="; N             Minute, with 00 pronounced as 'hundred' (US military time)\n";
+    $file[]="; P or p        AM or PM\n";
+    $file[]="; Q             'today', 'yesterday' or ABdY\n";
+    $file[]=";               (*note: not standard strftime value)\n";
+    $file[]="; q             '' (for today), 'yesterday', weekday, or ABdY\n";
+    $file[]=";               (*note: not standard strftime value)\n";
+    $file[]="; R             24 hour time, including minute\n";
+    $file[]=";\n";
+    $file[]="eastern=America/New_York|'vm-received' Q 'digits/at' IMp\n";
+    $file[]="central=America/Chicago|'vm-received' Q 'digits/at' IMp\n";
+    $file[]="central24=America/Chicago|'vm-received' q 'digits/at' H N 'hours'\n";
+    $file[]="military=Zulu|'vm-received' q 'digits/at' H N 'hours' 'phonetic/z_p'\n";
+    $file[]="european=Europe/Copenhagen|'vm-received' a d b 'digits/at' HM\n";
+    return $file;
 }
 ?>

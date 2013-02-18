@@ -256,37 +256,26 @@ fi
 # The following files must exist (even if empty) for asterisk 1.6.x to work correctly.
 # This does not belong in %%install because these files are dynamically created.
 touch /etc/asterisk/manager_additional.conf
-touch /etc/asterisk/sip_general_custom.conf
-touch /etc/asterisk/sip_nat.conf
-touch /etc/asterisk/sip_custom.conf
-touch /etc/asterisk/sip_additional.conf
-touch /etc/asterisk/sip_custom_post.conf
 touch /etc/asterisk/features_general_additional.conf
-touch /etc/asterisk/sip_general_additional.conf
-touch /etc/asterisk/queues_general_additional.conf
 touch /etc/asterisk/dahdi-channels.conf
-touch /etc/asterisk/sip_general_additional.conf
-touch /etc/asterisk/iax_general_additional.conf
 touch /etc/asterisk/musiconhold_custom.conf
-touch /etc/asterisk/extensions_additional.conf
 touch /etc/asterisk/features_general_custom.conf
-touch /etc/asterisk/queues_custom_general.conf
 touch /etc/asterisk/chan_dahdi_additional.conf
 touch /etc/asterisk/features_applicationmap_additional.conf
-touch /etc/asterisk/queues_custom.conf
 touch /etc/asterisk/features_applicationmap_custom.conf
-touch /etc/asterisk/queues_additional.conf
-touch /etc/asterisk/iax_custom.conf
 touch /etc/asterisk/features_featuremap_additional.conf
-touch /etc/asterisk/queues_post_custom.conf
-touch /etc/asterisk/iax_additional.conf
 touch /etc/asterisk/features_featuremap_custom.conf
-touch /etc/asterisk/iax_custom_post.conf
+touch /etc/asterisk/extensions_globals.conf
 touch /etc/asterisk/sip_notify_additional.conf
 touch /etc/asterisk/sip_notify_custom.conf
+touch /etc/asterisk/sip_general_custom.conf
 touch /etc/asterisk/sip_register.conf
+touch /etc/asterisk/sip_custom.conf
+touch /etc/asterisk/iax_general_custom.conf
 touch /etc/asterisk/iax_register.conf
+touch /etc/asterisk/iax_custom.conf
 touch /etc/asterisk/meetme_custom.conf
+touch /etc/asterisk/queues_custom.conf
 
 chown -R asterisk.asterisk /etc/asterisk/*
 
@@ -352,6 +341,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Feb 18 2013 Rocio Mera Suarez <rmera@palosanto.com>
+- CHANGED: Now the spec create files sip_general_custom,iax_general_custom,
+  extensions_globals.conf. Also was deleted the creation of unnecessary files
+  in folder etc/asterisk like sip_additional.conf,iax_additional.conf.
+  
 * Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Elastix Operator Panel: assign dummy logger to silence logging spam on
   httpd error logfile. Fixes Elastix bug #1426.

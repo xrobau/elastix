@@ -127,6 +127,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Mon Feb 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Firewall Rules: change layout on New Rule form to be more compatible
+  across browsers. Fixes Elastix bug #1481.
+  SVN Rev[4683]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: security - Build/elastix-security.spec: Changed Version and Release in 
   specfile according to the current branch.

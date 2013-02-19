@@ -5,13 +5,13 @@
     </header>
     <body>
         <h1>{$node_name}</h1>
-        <p align="Justify">El módulo "Email Stats" muestra gráficos estadísticos sobre los correos entrantes.</p>
-	<p align="Justify">El primer gráfico muestra la cantidad de correos entrantes por hora, mostrando datos hasta 26 horas atras de la hora actual, este gráfico se va actualizando cada hora y empezará a mostrarse el gráfico a partir de máximo 3 horas después de haberse instalado este módulo.</p>
-	<p align="Justify">El segundo gráfico muestra la cantidad de correos entrantes por día, mostrando datos hasta 7 días atrás, este gráfico se va actualizando cada 6 horas y empezará a mostrarse el gráfico a partir de máximo 13 horas despúes de haberse instalado este módulo.</p>
-	<p align="Justify">Y el último gráfico muestra la cantidad de correos entrantes por mes, mostrando datos hasta 12 meses atrás, este gráfico se va actualizando aproximadamente cada 15 días y empezará a mostrarse el gráfico a partir de aproximadamente 1 mes después de haberse instalado éste módulo.</p>
-	<p align="Justify">El hecho de que se muestre el mensaje "Nada que mostrar todavía", en lugar del gráfico, indica que aún no se ha recolectado la suficiente cantidad de datos como para poder realizar el mismo</p>
-	<div><img src="../modules/{$node_id}/images/email_stats.png" border="0"></div>
-        <div>Figure 1</div>
+	<p>The module "Email Stats" shows statistic graphics of the quantity of incoming emails.</p>
+	<p>The first graphic shows the amount of incoming emails of the last 26 hours and it is updated every hour. You will see this graphic from 3 hours later of installing this module.</p>
+	<p>The second graphic shows the amount of incoming emails of the last 7 days and it is updated every 6 hours. You will see this graphic from 13 hours later of installing this module.</p>
+	<p>The third graphic shows the amount of incoming emails of the last 12 months and it is updated every 15 days. You will see this graphic from 1 month later of installing this module.</p>
+	<p>The message "Nothing to show yet" means that Elastix doesn't have the enough information to show these statistics.</p>
+	<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_stats.png" border="0" />
+        <p>Figure 1</p></div>
 	<br />
     </body>
 </html>

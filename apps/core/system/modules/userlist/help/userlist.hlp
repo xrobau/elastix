@@ -6,13 +6,15 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>The option “Users” allows us to create and modify the users who will have access to the Elastix Web Interface.</p>
+<p>The option “Users” allows creating and modifying users who will have access to the Elastix Web Interface. </p>
 
-<div><img src="../modules/{$node_id}/images/userlist.jpg" border="0"></div>
-<div>Figure 1</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_userlist.png" border="0" />
+<p>Figure 1</p></div>
 <br />
-
-<p>Un usuario deberá pertenecer a un Grupo, esto será indicado al crear un nuevo usuario, pero podrá ser movido de grupo por medio de la opción Editar.</p>
-
+<p>The users belong to a group which gives them privileges on Elastix Web Interface. They can be associated with an extension and email. Click on a user to see, delete or edit the information of the user.</p>
+<p>To create a new user, click on the button "Create New User" and fill out the required information.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_userlist_new.png" border="0" />
+<p>Figure 2</p></div>
+<br />
 </body>
 </html>

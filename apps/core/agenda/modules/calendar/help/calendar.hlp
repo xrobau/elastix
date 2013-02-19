@@ -6,46 +6,51 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>La opción Calendar permite crear y modificar eventos tales como recordatorios que se pueden organizar por día, semana o mes.</p>
+<p>The option "Calendar" allows you to organize your day, week and month by creating events and reminders.</p>
 
-<div><img src="../modules/{$node_id}/images/calendar.png" border="0"></div>
-<div>Figure 1</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_calendar.png" border="0" />
+<p>Figure 1</p></div>
 <br />
-<p>Cada evento puede ser creado y modificado de la manera mas facil en tan solo un par de clicks.</p>
+<p>To export the calendar, click on "Download ical calendar" link. <i>(Figure 2)</i></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_export_ical.png" border="0" />
+<p>Figure 2</p></div>
 <br />
-<p>Por ejemplo si se quiere crear un nuevo evento:</p>
-<div align="center"><img src="../modules/{$node_id}/images/newEvent1.png" border="0"></div>
-<div align="center">Figure 2</div>
+<h2>Create a new event</h2>
+<p>To create a new event click on "Create New Event" button and fill out the required fields. If all the information is correct click on "Save". <i>(Figure 3)</i></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_newEvent.png" border="0" />
+<p>Figure 3</p></div>
 <br />
-<div align="center"><img src="../modules/{$node_id}/images/newEvent2.png" border="0"></div>
-<div align="center">Figure 3</div>
+<p>Here the description of each field:</p>
+<table class="inline">
+<tr><th>Name</th><th>Description</th></tr>
+<tr><td>Name</td><td>Name of the event</td></tr>
+<tr><td>Description</td><td>A brief description of the event</td></tr>
+<tr><td>Start</td><td>Time at which the event will begin</td></tr>
+<tr><td>End</td><td>Time at which the event will end</td></tr>
+<tr><td>Color</td><td>Set a color to the event</td></tr>
+<tr><td>Call to</td><td>When the event begins, this extension will start ringing.</td></tr>
+<tr><td>Reminder</td><td>A reminder before the event starts.</td></tr>
+<tr><td>Text to speech</td><td>Write the message you want to hear when Elastix calls to the extension for the event.</td></tr>
+<tr><td>Emails to Notify</td><td>Elastix will automatically send an email to this list before the event starts.</td></tr>
+</table>
 <br />
-<div align="center"><img src="../modules/{$node_id}/images/newEvent3.png" border="0"></div>
-<div align="center">Figure 4</div>
+<h2>Edit/Delete an existing event</h2>
+<p>To edit or delete an existing event, just click on the event from the calendar and the click on "Edit" or "Delete" button. <i>(Figure 4 and 5)</i></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_newEvent2.png" border="0" />
+<p>Figure 4</p></div>
 <br />
-<div align="center"><img src="../modules/{$node_id}/images/newEvent4.png" border="0"></div>
-<div align="center">Figure 5</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_viewEvent.png" border="0" />
+<p>Figure 5</p></div>
 <br />
-<p>Si necesita actualizar un evento existente se puede acceder al evento o hacer uso del mouse tan solo alargado hacia el tiempo deseao:</p>
-<p><b>Usando el Mouse</b></p>
-<div align="center"><img src="../modules/{$node_id}/images/monthEvent.png" border="0"></div>
-<div align="center">Figure 6</div>
+<p>Another way to edit an event is by clicking on the edge of the event and drag horizontally (if you are seeing the vents by month) or vertically (if you are seeing the events by week or day). Below are some examples.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_monthEvent.png" border="0" />
+<p>Figure 6</p></div>
 <br />
-<div align="center"><img src="../modules/{$node_id}/images/weekShow.png" border="0"></div>
-<div align="center">Figure 7</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_weekEvent.png" border="0" />
+<p>Figure 7</p></div>
 <br />
-<div align="center"><img src="../modules/{$node_id}/images/dayShow.png" border="0"></div>
-<div align="center">Figure 8</div>
-<br />
-<p><b>Dando click en el evento</b></p>
-<div align="center"><img src="../modules/{$node_id}/images/updateEvent1.png" border="0"></div>
-<div align="center">Figure 9</div>
-<br />
-<div align="center"><img src="../modules/{$node_id}/images/updateEvent2.png" border="0"></div>
-<div align="center">Figure 10</div>
-<br />
-<div align="center"><img src="../modules/{$node_id}/images/updateEvent3.png" border="0"></div>
-<div align="center">Figure 11</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_dayEvent.png" border="0" />
+<p>Figure 8</p></div>
 <br />
 <br />
 </body>

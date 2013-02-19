@@ -6,23 +6,23 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>The “Groups” option allows you to create and modify all group that will have access to the Elastix Web Interfase. There are 3 default groups of users as follows:</p>
+<p>The option “Groups” allows you to create and modify all groups that will have access to the Elastix Web Interface. There are 3 default groups of users as follows:</p>
 
   <ul>
       <li>Administrator</li>
       <li>Operator</li>
-      <li>Telephone User</li>
+      <li>Extension</li>
   </ul>
 
-<div><img src="../modules/{$node_id}/images/grouplist.jpg" border="0"></div>
-<div>Figure 1</div>
+<div  class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_grouplist.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
-<p>Each one of these groups represents different levels of access to the Elastix Web Interfase. These levels are associated with a set of menus to which a given user will have access. The various access permissions to the menus are better illustrated in the following table:</p>
+<p>Each one of these groups represents different levels of access to the Elastix Web Interface. These levels are associated with a set of menus to which a given user will have access. The various access permissions to the menus are better illustrated in the following table:</p>
 
 <table class="inline">
 	<tr>
-		<th> Menu </th><th> Administrator </th><th> Operator </th><th> Telephone User </th>
+		<th> Menu </th><th> Administrator </th><th> Operator </th><th> Extension </th>
 	</tr>
 
 	<tr>
@@ -123,5 +123,12 @@
 		<td> Fax Utilities </td><td> Yes </td><td> Yes </td><td> Yes </td>
 	</tr>
 </table>
+<br />
+<h2>Create a new group</h2>
+<p>To create a new group, click on the button "Create New Group" and fill out the required information.</p>
+<div  class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_grouplist_new.png" border="0" />
+<p>Figure 2</p></div>
+<br />
+<p>To assign or modify permissions to a group go to the module "Group Permissions".</p>
 </body>
 </html>

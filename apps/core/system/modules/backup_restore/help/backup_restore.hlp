@@ -7,73 +7,60 @@
 
 <h1>{$node_name}</h1>
 
-<div><img src="../modules/{$node_id}/images/help_backup_restore.png" border="0"></div>
-<div>Figura 1</div>
+<p>The option "Backup/Restore" of the menu "System" allows you to back up and restore the configuration of Elastix. If you have made a backup any time before this will appear in the list <i>(Figure 1)</i>. To download a backup from the list, just click on the name of the tar file. </p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_backup_restore.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
-<p>La opción "Backup/Restore" del menú "Sistema" de lastix permite respaldar y restaurar los datos de configuración de Elastix. Inicialmente se mostrará una lista de todos los archivos de formato .tar que corresponde a cada respaldo realizado. Para poder descargarse algún respaldo realizado, simplemente hay que hacer click en el nombre del archivo de formato .tar al que pertenece dicho respaldo.</p>
+<h2>Perform a Backup</h2>
 
-
-<h1>Respaldar una configuración</h1>
-
-<div><img src="../modules/{$node_id}/images/help_backup.png" border="0"></div>
-<div>Figura 2</div>
+<p>To create a backup just click on "Perform a Backup" button. Select all the configurations you want to back up from Elastix and click on "Process" button.</p>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_backup.png" border="0" />
+<p>Figure 2</p></div>
 <br />
 
-<p>Para poder realizar un respaldo de la configuración de Elastix, hay que hacer click en el botón "Desarrollar un respaldo...", después, en la nueva ventana (Figura 2), seleccionar todas las opciones que se desean respaldar y finalmente hacer click en el botón "Procesar".</p>
-<p>Entre las categorías de configuraciones que se pueden respaldar se encuentran: Endpoint, Fax, Email, Asterisk y Otros. </p>
+<h2>Restore a Backup</h2>
+
+<p>In the list of backups <i>(Figure 1)</i> click on "Restore" button locate on the right of the backup you want to restore. Then select the configuration to restore and click on "Process" button <i>(Figure 3)</i>.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_restore.png" border="0" />
+<p>Figure 3</p></div>
 <br />
 
-<h1>Restaurar una configuración</h1>
+<h2>FTP Backup</h2>
 
-<div><img src="../modules/{$node_id}/images/help_backup.png" border="0"></div>
-<div>Figura 3</div>
+<p>To use a FTP Server to upload and download backups just click on "FTP Backup" button <i>(Figure 1)</i>. First, fill out the required information to connect with your FTP Server and then click on "Save" button to save changes.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_FTP1.png" border="0" />
+<p>Figure 4</p></div>
+<br />
+<h3>Uploading files to FTP server</h3>
+<p>To upload backups to the FTP server you must drag the backup file from Local section to Server FTP section.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_FTP2.png" border="0" />
+<p>Figure 5</p></div>
 <br />
 
-<p>Para restaurar una configuración de Elastix, hay que hacer click en el botón "Restaurar" que se encuentra al lado derecho de cada respaldo listado en la pantalla principal de esta opción (Backup/Restore), después, en la nueva ventana (Figura 3), seleccionar todas las opciones que se desean restaurar y finalmente hacer click en el botón "Procesar".</p>
-<p>Entre las categorías de configuraciones que se pueden respaldar se encuentran: Endpoint, Fax, Email, Asterisk y Otros. </p>
-
-<h1>Respaldar/Restaurar una configuración FTP</h1>
-
-<p>La opción "FTP Backup/Restore" del menú "Sistema" de Elastix permite respaldar y restaurar los datos de configuración de Elastix de un Servidor FTP.</p>
-
-<p>Primero necesitamos configurar el Servidor FTP.</p>
-<div><img src="../modules/{$node_id}/images/FTP0.png" border="0"></div>
-<div>Figura 4</div>
-<br />
-<p>Escriba en los campos de texto el IP del servidor FTP, y su respectivo usuario y contraseña.</p>
-<p>Después, en el servidor FTP, es necesario editar el archivo vsftpd.conf que se encuentra en /etc/vsftpd/vsftpd.conf y cambiar los siguientes parámetros:</p>
-
-<p>#idle_session_timeout=600</p> <p>cambiar a     idle_session_timeout=600</p>
-#data_connection_timeout=120 <p>cambiar a     data_connection_timeout=120</p>
-#anon_upload_enable=YES      <p>cambiar a     anon_upload_enable=YES</p>
-#chown_uploads=YES           <p>cambiar a     chown_uploads=YES </p>
-#chown_username=whoever      <p>cambiar a     chown_username=root   *si el usuario es root*</p>
-<p>Si existe un parámetro como userlist_enable=YES, entonces necesitamos editar user_list en /etc/vsftpd/user_list para remover root en ese archivo, si usamos root como usuario para conectar , caso contrario, si el usuario no aparece ahí, no es necesario editar ese archivo.</p>
-
-<p>Ahora necesitamos crear un directorio, en donde será subido el respaldo. Esto debe ser en el home del usuario, por ejemplo si el usuario es root entonces la carpeta debe ser /root/backup, o si el usario es elastix, entonces la carpeta debe ser /home/elastix/backup donde backup es el nombre del directorio en donde se subirán los archivos de respaldo.</p>
-
-<p>Finalmente reiniciar el proceso vsftpd con el comando: service vsftpd restart.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_FTP3.png" border="0" />
+<p>Figure 6</p></div>
 <br />
 
-<div><img src="../modules/{$node_id}/images/FTP1.png" border="0"></div>
-<div>Figure 5</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_FTP4.png" border="0" />
+<p>Figure 7</p></div>
+<br />
+<h3>Downloading files from FTP server</h3>
+<p>To download backup files to Elastix Server just drag the file from Server FTP section to Local section.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_FTP5.png" border="0" />
+<p>Figure 8</p></div>
 <br />
 
-<p>Si todo está correcto, entonces podremos realizar subidas y descargas.</p>
-
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_FTP6.png" border="0" />
+<p>Figure 9</p></div>
 <br />
 
-<div><img src="../modules/{$node_id}/images/FTP2.png" border="0"></div>
-<div>Figure 6</div>
-<br />
-
-<div><img src="../modules/{$node_id}/images/FTP3.png" border="0"></div>
-<div>Figure 7</div>
-<br />
-
-<div><img src="../modules/{$node_id}/images/FTP4.png" border="0"></div>
-<div>Figure 8</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_FTP7.png" border="0" />
+<p>Figure 10</p></div>
 <br />
 </body>
 </html>

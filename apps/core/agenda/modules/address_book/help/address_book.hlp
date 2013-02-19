@@ -6,40 +6,46 @@
 <body>
 
 <h1>{$node_name}</h1>
-
-<p align="Justify">La opci&oacute;n "Address Book" del men&uacute; "Agenda" en Elastix nos permite tener una visualizaci&oacute;n del directorio telef&oacute;nico de todas las extensiones que existan dentro(Internal) y fuera(External) de la central con la caracter&iacute;stica que adem&aacute;s nos permite realizar la llamada con tan solo dar click
- en el icono del telefono en la columna "Call". Cabe recalcar que el usuario debe estar obligatoriamente registrado y asignado a una extensi&oacute;n  (m&oacute;dulo System/UserManagement/Users) si deseamos el &oacute;ptimo funcionamiento caso contrario no podr&aacute; 
-ejecutar la acci&oacute;n de llamar "Call". Adem&aacute;s se puede ver un icono que indica que es un contacto grupal no editable en la columna tipo de contacto(Type Contact).</p>
-
-<div><img src="../modules/{$node_id}/images/address1.png" border="0"></div>
-<div>Figura 1</div><br/>
-
-<p>Como podr&aacute;n observar en la Figura 2 cuando nosotros escogemos la opci&oacute;n de filtrado "External" nos presenta un listado de nombres con sus respectivos numeros telef&oacute;nicos ya sean estos fijos
-o m&oacute;viles, ademas nos permite la eliminaci&oacute;n del mismo ya que estos fueron creados por la opci&oacute;n "New Contact" del m&oacute;dulo "Agenda",no es el caso con el listado interno(Internal) que fueron creados por el m&oacute;dulo "Users" del submenu "UserManagement" en el men&uacute; "System".
-Los icono estan representados como:
-<ul>
-<li>contactos p&uacute;blico no editables creados por otro usuario pero que lo crea como p&uacute;blico <img src="../modules/{$node_id}/images/public.png" border="0"></li>
-<li>contactos p&uacute;blico y editables por el usuario que lo creo <img src="../modules/{$node_id}/images/public_edit.png" border="0"></li>
-<li>contactos privados editables por el usuario que lo creo <img src="../modules/{$node_id}/images/contact.png" border="0"></li>
-</ul>
+<p>The option "Address Book" of the menu "Agenda" shows a phone directory that contains internal and external phone numbers. The internal extensions are the ones that have been created in PBX module and they cannot be edited from this module. The external extension are the ones that has been created by the users from this module and don't belong to Elastix. To create an external extension click on "New Contact" button.</p>
+<p>The following figure shows a list of internal extensions:</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_address1.png" border="0" />
+<p>Figure 1</p></div>
+<br/>
+<p>The figure 2 shows a list of external telephone numbers. Notice that you can edit or delete these extensions:</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_address2.png" border="0" />
+<p>Figure 2</p></div>
 <br />
-</p>
 
-<div><img src="../modules/{$node_id}/images/address2.png" border="0"></div>
-<div>Figura 2</div>
+<p>The description of each field is detailed as follows:</p>
+<table class="inline">
+<tr><th>Name</th><th>Description</th></tr>
+<tr><td>Name</td><td>Name of the extension</td></tr>
+<tr><td>Phone number</td><td>Number of the extension</td></tr>
+<tr><td>Email</td><td>Electronic contact</td></tr>
+<tr><td>Call</td><td>Click here to call to the extension. Remember that the currently user must be associate an extension number to his account in order to make calls from here. You can do this in the module "System => Users"</td></tr>
+<tr><td>Transfer</td><td>Transfer the call to other extension</td></tr>
+<tr>
+	<td>Type Contact</td>
+	<td>
+		<p><img src="../modules/{$node_id}/images/public.png" border="0" /> Public contact: Created by other user (non editable)</p>
+		<p><img src="../modules/{$node_id}/images/public_edit.png" border="0" /> Public contact: Editable by the user who created it.</p>
+		<p><img src="../modules/{$node_id}/images/contact.png" border="0" /> Private contact: Editable by the user who created it.</p>
+	</td>
+</tr>
+</table>
 <br />
-<p>La opci&oacute;n "New Contact" del modulo "Address Book", nos permite el ingreso de nuevos contactos externos a la central es decir que no posean una extensi&oacute;n dentro de la organizaci&oacute;n. Como podr&aacute;n observar el ingreso de la informaci&oacute;n es campo a campo(Figura 3). </p>
-
-<div><img src="../modules/{$node_id}/images/address3.png" border="0"></div>
-<div>Figura 3</div>
+<h2>Create a new contact</h2>
+<p>To create an external new contact, just click on "New Contact" button and fill out the form. These contacts are not considered internal extensions. <i>Figure 3</i></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_address3.png" border="0" />
+<p>Figure 3</p></div>
 <br />
-<div><img src="../modules/{$node_id}/images/address4.png" border="0"></div>
-<div>Figura 4</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_address4.png" border="0" />
+<p>Figure 4</p></div>
 <br />
-<p>Si el proceso de ingresar la informaci&oacute;n campo a campo le parece poco productivo el m&oacute;dulo "Address Book" nos permite importar un archivo .CSV que contenga la informaci&oacute;n detallada de sus contactos en tres columnas con el siguiente formato: Nombre,Apellido,Número Telefónico. Adem&aacute;s tambi&eacute;n nos permite descargar el directorio telef&oacute;nico existente con solo dar click en el enlace "Download Address book". </p>
-
-<div><img src="../modules/{$node_id}/images/address5.jpg" border="0"></div>
-<div>Figura 5</div>
+<p>You can also add new contacts by importing a csv file with the information of the contacts in three columns. This file must be separated by comma and the required fields are: Name, Last Name, Phone Number. The names of the fields must be in the first line of the file.</p>
+<p>Also you can export your current external contacts list by clicking on "Download Address Book" button.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_address5.png" border="0" />
+<p>Figure 5</p></div>
 <br />
 
 

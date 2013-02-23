@@ -1,0 +1,20 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The option "Endpoint Configurator" allows configuring automatically the endpoints for Elastix Server</p>
+
+<p>Currently we have many models implemented for this support. In the future this support will grow with more devices.</p>
+<p>Enter the network and host portion to make a sweep of IP Addresses and click on "Discover Endpoints in this Network" button. This will scan the network and show up a list of available endpoints. Select the checkbox corresponding to the endpoint, the Model and Extension to Assign and click on "Set" button to start the autoprovisioning. This will create a configuration file hosted in Elastix Server so that  the endpoint can download this file for auto configuration.</p>
+<p>If you want to configure manually, click on the blue IP Address to go to the endpoint's administration web interface.</p>
+
+<p>To delete the configuration file from the Elastix Server, select the checkbox corresponding to the endpoint en click on "Unset" button. This action will not erase the configuration that is set in the endpoint.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_endpoint_configurator.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+

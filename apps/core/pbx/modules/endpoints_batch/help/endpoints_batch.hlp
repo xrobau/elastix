@@ -5,44 +5,54 @@
     </header>
     <body>
         <h1>{$node_name}</h1>
-        <p align="Justify">La opción "Configuración de Endpoint en Lote" del Elastix nos permite establecer la configuración adecuada de cada uno de nuestros "Endpoint" teniendo como entrada un archivo ".CSV" .</p>
+        <p>The option "Batch of Endpoints" in Elastix allows configuring many phones automatically by uploading a CSV file. It's recommended that all the phones in the file belong to the same. This file must contain at least 4 columns that are "Vendor","Model","MAC" and "Ext".</p>
 
-        <div><img src="../modules/{$node_id}/images/endpoints_batch.jpg" border="0"></div>
-        <div>Figura 1</div>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_endpoints_batch.png" border="0" />
+        <p>Figure 1</p></div>
         <br />
-        <!-- Form to add images -->
-        <!--<div><img src="../modules/{$node_id}/images/images.png" border="0"></div> -->
-        <p>Actualmente Soporta Tecnología "SIP" y marcas como :</p>
-
-        <p>
-            <ul>
-                <li>ATCOM</li>
-                <li>YEALINK</li>
-            </ul>
-        </p>
-        
-        <p>Todos los teléfonos a ser configurados deben estar conectados en la misma RED</p>
-        <p>La IP es obligatoria, con su respectiva mascara de subred. Por defecto se configura la subred donde se encuentra el servidor</p>
-        
-        <p>El archivo "*.CSV" debe tener mínimo cuatro columnas (Vendor - Model - MAC - Ext)</p>
-
-        <div><img src="../modules/{$node_id}/images/file_csv.jpg" border="0"></div>
-        <div>Figura 2</div>
+        <p>Before starting the process make sure all the phones you want to configure belong to the same network than Elastix Server. The <i>Figure 2</i> shows an example of the structure of a CSV file with all available fields. The first four fields are mandatory.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_file_csv.png" border="0" />
+        <p>Figure 2</p></div>
         <br />
-
-        <p>Otra de las columnas de este archivo, es la IP a configurar. Si la columna se encuentra vacia la configuración del Endpoint se realizará por DHCP.</p>
-
-        <p>Caso contrario si la IP ha sido ingresada, esta será validada y el Endpoint será configurado mediante IP estática</p>
-
-        <p>De esta manera podremos configurar Endpoints por lote, siguiendo las recomendaciones descritas anteriormente.</p>
-
-        <!--<table class="inline">
-            <tr>
-                <th></th>
-            </tr>
-            <tr>
-                <td></td>
-            </tr>
-        </table>-->
+	<p>Below a description of each column:</p>
+	<br />
+        <table class="inline">
+		<tr>
+			<th>Name</th><th>Description</th>
+		</tr>
+		<tr>
+			<td>Vendor</td><td>The name of the phone's manufacturer.</td>
+		</tr>
+		<tr>
+			<td>Model</td><td>The model's name of the phone.</td>
+		</tr>
+		<tr>
+			<td>MAC</td><td>The physical address of the phone to identify it.</td>
+		</tr>
+		<tr>
+			<td>Ext</td><td>The extension that will be configured in the phone.</td>
+		</tr>
+		<tr>
+			<td>IP</td><td>The IP address that will be configured in the phone. If this field is empty, the DHCP takes over.</td>
+		</tr>
+		<tr>
+			<td>Mask</td><td>The netmask that will be configured in the phone.</td>
+		</tr>
+		<tr>
+			<td>GW</td><td>The gateway address that will be configured in the phone.</td>
+		</tr>
+		<tr>
+			<td>DNS1</td><td>The primary DNS</td>
+		</tr>
+		<tr>
+			<td>DNS2</td><td>The secondary DNS</td>
+		</tr>
+		<tr>
+			<td>Bridge</td><td>If you want the phone to act as a bridge then set this field to 1 otherwise set it to 0</td>
+		</tr>
+		<tr>
+			<td>Time Zone</td><td>Here you can set the time of the phone.</td>
+		</tr>
+        </table>
     </body>
 </html>

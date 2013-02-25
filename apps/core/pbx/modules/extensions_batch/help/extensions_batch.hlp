@@ -6,70 +6,93 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>La opción "Lotes de Extensiones" del Menú "PBX" del Elastix permite crear extensiones a partir de un archivo csv, además se puede generar un archivo csv a partir de las extensiones ya creadas, de esta forma se facilita la migración de datos.</p>
-
-<div><img src="../modules/{$node_id}/images/extensions_batch.jpg" border="0"></div>
-<div>Figure 1</div>
+<p>The option "Batch of Extensions" from the menu "PBX" in Elastix allows creating extensions from a CSV file. Also you can download a CSV file with all the extensions that are currently configured in Elastix Server. This makes it easy the migration of data.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_extensions_batch.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
-<p>Para crear las extensiones a partir de un archivo csv, de click en examinar busque el archivo y finalmente de click en el botón "Guardar".</p>
+<p>To download a CSV file with all the extensions created in Elastix, click on the "Download" link and save the file into your local hard drive.</p>
 
-<p>Para crear un archivo csv con todas las extensiones creadas en Elastix, de click sobre el link "Descargar Extensiones", y proceda a guardar este archivo localmente.
+<p>To upload a CSV with the extensions you want to create, click on "Examine" button, select the CSV file and click on "Upload CSV File" button.</p>
 
-<p><b>Tomar en consideración:</b></p>
+<p><b>Make sure the following indications are taken into account:</b></p>
 <p>
     <ul>
-        <li>No pueden existir extensiones repetidas.</li>
-        <li>Si usted a creado el archivo csv manualmente recuerde que este archivo debe tener en la primera línea las cabeceras (descritas a continuación).</li>
-        <li>Cada fila de datos debe tener al menos 3 campos (columnas, descritas a continuación)</li>
-        <li>Usted puede crear o abrir este tipo de archivos en una hoja de cálculos como OpenOffice Calc, Excel, entre otros, al guardar el documento recuerde que la extensión del archivo debe ser .csv</li>
-        <li>Recuerde que el separador usado en este módulo es , (coma).</li>
+        <li>Duplicated extensions are not allowed.</li>
+        <li>The first line of the CSV file must contain the headers of the columns.</li>
+        <li>The file must have at minimum four columns.</li>
+        <li>This type of file can be created and opened with any text editor or spreadsheets such as Open Office Calc, Excel, etc.</li>
+        <li>The separator of the columns is the comma.</li>
     </ul>
 </p>
-
-<p><b>Cabeceras:</b></p>
+<br />
+<p>The four mandatory parameters are the following:</p>
 
 <table class="inline">
   <tr>
-    <th>Cabecera</th><th>Campo Obligatorio</th><th>Dato</th>
+    <th>Header</th><th>Type of data</th>
   </tr>
   <tr>
-    <td>Display Name</td><td>Si</td><td>Texto</td>
+    <td>Display Name</td><td>Text</td>
   </tr>
   <tr>
-    <td>User Extension</td><td>Si</td><td>Numérico</td>
+    <td>User Extension</td><td>Number</td>
   </tr>
   <tr>
-    <td>Direct DID</td><td>No</td><td>Numérico</td>
+    <td>Secret</td><td>Text</td>
   </tr>
   <tr>
-    <td>Call Waiting</td><td>No</td><td>Enabled, Disabled</td>
+    <td>Tech</td><td>Text</td>
+  </tr>
+</table>
+
+<p>These parameters are also supported in the CSV file:</p>
+<table class="inline">
+  <th colspan="2">Parameters</th>  
+  <tr>
+    <td>Direct DID</td><td>Call Waiting</td>
   </tr>
   <tr>
-    <td>Secret</td><td>Si</td><td>Texto</td>
+    <td>Voicemail Status</td><td>Voicemail Password</td>
   </tr>
   <tr>
-    <td>Voicemail Status</td><td>No</td><td>Enabled, Disabled</td>
+    <td>VM Options</td><td>Outbound CID</td>
   </tr>
   <tr>
-    <td>Voicemail Password</td><td>No</td><td>Texto</td>
+    <td>VM Email Address</td><td>VM Pager Email Address</td>
   </tr>
   <tr>
-    <td>VM Options</td><td>No</td><td>Texto</td>
+    <td>VM Email Attachment</td><td>VM Play CID</td>
+  </tr>
+  <tr>
+    <td>VM Play Envelope</td><td>VM Delete Vmail</td>
+  </tr>
+  <tr>
+    <td>Context</td><td>Callgroup</td>
+  </tr>
+  <tr>
+    <td>Pickupgroup</td><td>Disallow</td>
+  </tr>
+  <tr>
+    <td>Allow</td><td>Deny</td>
+  </tr>
+  <tr>
+    <td>Permit</td><td>Record Incoming</td>
+  </tr>
+  <tr>
+    <td>Record Outgoing</td><td></td>
   </tr>
 </table>
 <br />
-
-<p>Ejemplo de un archivo csv generado con este módulo y abierto en un editor de texto:</p>
-
-<div><img src="../modules/{$node_id}/images/extensions_batch_csv.jpg" border="0"></div>
-<div>Figure 2</div>
+<p>Below an example of a CSV file opened with a simple text editor.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_extensions_batch_csv.png" border="0" />
+<p>Figure 2</p></div>
 <br />
 
-<p>El mismo archivo csv abierto desde una hoja de cálculo:</p>
+<p>The same file opened with a spreadsheet:</p>
 
-<div><img src="../modules/{$node_id}/images/extensions_batch_calc.jpg" border="0"></div>
-<div>Figure 3</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_extensions_batch_calc.png" border="0" />
+<p>Figure 3</p></div>
 <br />
 
 </body>

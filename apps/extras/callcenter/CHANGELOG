@@ -1,3 +1,4 @@
+* Login Logout: fix English translations for titles. Fixes Elastix bug #1491.
 * Agent Console: apparently a jQuery update now sends null variables in 
   javascript structs as empty strings instead of not-set variables in a 
   $.post() request. This causes the non-SSE mode of the Agent Console to spin

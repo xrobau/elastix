@@ -97,8 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Feb 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
+- FIXED: Login Logout: fix English translations for titles. Fixes Elastix bug #1491.
+
 * Fri Feb 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-10.beta
-- Agent Console: apparently a jQuery update now sends null variables in 
+- FIXED: Agent Console: apparently a jQuery update now sends null variables in 
   javascript structs as empty strings instead of not-set variables in a 
   $.post() request. This causes the non-SSE mode of the Agent Console to spin
   endlessly. Fixed. Fixes Elastix bug #1479.

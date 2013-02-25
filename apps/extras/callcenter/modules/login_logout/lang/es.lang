@@ -49,5 +49,7 @@ $arrLangModule = array(
 "General"                           => "General",
 'Incoming Queue'                    => 'Cola Entrante',
 'All'                               => 'Todas',
+'Llamadas entrantes'                =>  'Llamadas entrantes',
+'Llamadas salientes'                =>  'Llamadas salientes',
 );
 ?>

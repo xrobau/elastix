@@ -50,5 +50,7 @@ $arrLangModule=array(
 "General"                           => "General",
 'Incoming Queue'                    => 'Incoming Queue',
 'All'                               => 'All',
+'Llamadas entrantes'                =>  'Incoming calls',
+'Llamadas salientes'                =>  'Outgoing calls',
 );
 ?>

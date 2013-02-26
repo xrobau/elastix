@@ -985,7 +985,7 @@ LISTA_EXTENSIONES;
             $respuesta = $oECCP->getcampaignlist();
             $listaCampania = array();
             foreach ($respuesta->campaigns->campaign as $xml_campaign) {
-            	$listaCampania[(int)$xml_campaign->id] = array(
+            	$listaCampania[] = array(
                     'id'        =>  (int)$xml_campaign->id,
                     'type'      =>  (string)$xml_campaign->type,
                     'name'      =>  (string)$xml_campaign->name,

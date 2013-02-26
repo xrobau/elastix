@@ -98,6 +98,8 @@ fi
 
 %changelog
 * Tue Feb 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
+- FIXED: Campaign Monitoring: append available campaigns to report list instead 
+  of indexing by ID. Fixes Elastix bug #1496.
 - FIXED: Dialer: Check whether the agent is on break before deciding that it 
   should receive a scheduled call. Fixes Elastix bug #1497.
 

@@ -6,68 +6,79 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>La opción "Conferencia" del Elastix nos permite Administrar varias conferencias.</p>
 
-<div><img src="../modules/{$node_id}/images/conference_report.jpg" border="0"></div>
-<div>Figure 1</div>
+<p>The option "Conference" in Elastix allows creating and managing conferences at any time. Here you can see all the current conferences. Use the filter to find past and future conferences.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_report.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
-<p>Al ingresar a conferencia podremos observar todas las conferencias concurrentes. Para ver las conferencias pasadas o futuras seleccione esta opción en "Estado" y de click en "Mostrar". Además se provee de un filtro usado para los nombres de las conferencias.</p>
+<p>If you want to see the details of any conference, click directly on the name. The parameters of the conference can't be edited.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_view.png" border="0" />
+<p>Figure 2</p></div>
 
-<p>Para poder eliminar alguna o varias conferencias debemos seleccionarlas y dar click sobre el botón Eliminar.</p>
+<p>To delete a conference just select the checkbox located next to the conference's name and click on "Delete" button. </p>
+<br />
+<h2>Creating a new Conference</h2>
+<p>To create a new conference click on "New Conference" button and fill out the required fields. <i>(Figure 3)</i></p>
 
-<p>Si desea agregar una nueva conferencia de click sobre el botón "Nueva Conferencia".</p>
-
-<div><img src="../modules/{$node_id}/images/conference_new.jpg" border="0"></div>
-<div>Figure 2</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_new.png" border="0" />
+<p>Figure 3</p></div>
 <br />
 
-<p>Los campos requeridos para agregar una conferencia son:</p>
+<p>Below a description of each parameter:</p>
 
 <table class="inline">
   <tr>
-    <th>Campo</th><th>Descripción</th>
+    <th>Name</th><th>Mandatory</th><th>Description</th>
   </tr>
   <tr>
-    <td>Nombre de la Conferencia</td><td>Necesario para identificar la conferencia.</td>
+    <td>Conference Name</td><td>Yes</td><td>This is the name of the conference. It helps to identify it.</td>
   </tr>
   <tr>
-    <td>Número de la conferencia</td><td>Se provee un número aleatorio para la conferencia usted puede cambiarlo si no está siendo usado por otra conferencia</td>
+    <td>Moderator PIN</td><td>No</td><td></td>
   </tr>
   <tr>
-    <td>Tiempo Inicio  (PST/PDT)</td><td></td>
+    <td>User PIN</td><td>No</td><td></td>
   </tr>
   <tr>
-    <td>Máximo Participantes</td><td>No se podrán invitar más participantes una vez se completo el número máximo de participantes.</td>
+    <td>Start Time (PST/PDT)</td><td>Yes</td><td></td>
+  </tr>
+  <tr>
+    <td>Conference Number</td><td>Yes</td><td>When you create a conference a random number is generated automatically in this field.<br />You can change this number if you want but make sure this is not being used already.</td>
+  </tr>
+  <tr>
+    <td>Conference Owner</td><td>No</td><td>The user who is in charge of the conference.</td>
+  </tr>
+  <tr>
+    <td>Moderator Options</td><td>No</td><td></td>
+  </tr>
+  <tr>
+    <td>User Options</td><td>No</td><td></td>
+  </tr>
+  <tr>
+    <td>Duration (HH:MM)</td><td>No</td><td></td>
+  </tr>
+  <tr>
+    <td>Max Participants</td><td>Yes</td><td>The number of users that can participate in the conference simultaneously.</td>
   </tr>
 </table>
 <br />
 
-<p>Para ver los detalles sobre una conferencia puede dar click sobre el nombre de la conferencia.</p>
+<h2>Administration of Conferences</h2>
+<p>To manage a particular conference, click on the Participants link from the Current Conferences list. Here you can Invite, Kick or Mute the participants of the Conference and also see the time elapsed of each user..</p>
 
-<div><img src="../modules/{$node_id}/images/conference_view.jpg" border="0"></div>
-<div>Figure 3</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_callers.png" border="0" />
+<p>Figure 4</p></div>
 <br />
+<p>To invite a user to the conference, select the extension number from the dropdown list and click on "Invite Caller". Immediately the user's phone will start to ring. When the user answers the phone he will be part of the conference.</p>
 
-<p>Si desea administrar una conferencia concurrente, de click sobre el enlace de participantes correspondiente a dicha conferencia.</p>
+<p>If you want to silence a user, just select the checkbox from the mute column and click on "Mute". If you want to terminate a call, select the checkbox from Kick column and click on "Kick".</p>
 
-<div><img src="../modules/{$node_id}/images/conference_callers.jpg" border="0"></div>
-<div>Figure 4</div>
-<br />
+<p>If you want to terminate all the calls, just click on "Kick All" button.</p>
 
-<p>Para invitar a alguien a la conferencia debe escogerlo de la lista proporcionada (lista de extensiones disponibles) y dar click sobre el botón "Llamada a invitar", deberá esperar hasta que se conteste la llamada.</p>
 
-<p>Una vez haya invitado a alguien a la conferencia irán apareciendo en el reporte, si desea Silenciar a uno o varios invitados seleccionelos en la columna "Callado" y de click sobre este botón ("Callado").</p>
-
-<p>Además puede botar de la conferencia a uno o varios invitados seleccionándolos en la columna "Botar" y de click sobre este botón ("Botar").</p>
-
-<p>Si desea botar a todos los invitados de la conferencia de click sobre "Botar a Todos".</p>
-
-<p>Si alguien a quien invitó no se muestra en la lista de invitados, o alguien a quien botó aun se muestra, de click en el botón "Actualizar". Este botón también actualizará el tiempo que lleva cada invitado en la conferencia.</p>
-
-<p>Note que una vez de click sobre el botón "Callado", se actualizará el Estado del invitado, los estados posibles son: Muted (Callado), UnMuted (No Callado).</p>
-
-<p>Para regresar a la interfaz de administración de todas las conferencias de click en Cancelar.</p>
+<p>To update the list of the current participants of the conference click on "Update" button. If you want to go back to the list of conferences, click on "Cancel" button (This will not cancel the current conference).</p>
 
 </body>
 </html>

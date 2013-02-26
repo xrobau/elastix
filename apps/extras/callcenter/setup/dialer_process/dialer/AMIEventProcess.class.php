@@ -712,7 +712,13 @@ class AMIEventProcess extends TuberiaProcess
                 }
             }
             
-            if ($a->reservado && is_null($a->llamada) && is_null($a->llamada_agendada))
+            /* Un agente ocioso para agendamiento debe estar reservado, sin 
+             * llamada activa, sin llamada agendada, y sin ninguna otra pausa.
+             */
+            if ($a->reservado && 
+                is_null($a->llamada) && 
+                is_null($a->llamada_agendada) &&
+                $a->num_pausas == 1)
                 $ociosos[] = $sAgente;
     	}
         return array(

@@ -98,6 +98,8 @@ fi
 
 %changelog
 * Tue Feb 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calls per hour, Graphics Calls per hour: transpose the rows and columns
+  of the report so that the report is thinner. Fixes Elastix bug #1494.
 - CHANGED: Campaign Monitoring: place incoming queue calls as the last items in 
   the drop-down list.
 - FIXED: Campaign Monitoring: append available campaigns to report list instead 

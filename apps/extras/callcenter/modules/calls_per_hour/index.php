@@ -171,26 +171,37 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
         'queue'     =>  $sColaElegida,
         'fecha_ini' =>  $sFechaInicial,
         'fecha_fin' =>  $sFechaFinal,
-    ));
+    ), array('nav', 'start'));
+    $smarty->assign('url', $url);
 
     // Construir el arreglo como debe mostrarse en la tabla desglose
     $arrData = array();
-    $arrTodos = array_fill(0, 24, 0);
-    foreach ($arrCalls as $sQueue => $hist) {
-        if (empty($sColaElegida) || $sColaElegida == $sQueue) {
-            $arrData[] = array_merge(
-                array($sQueue),
-                $hist,
-                array(array_sum($hist))
-            );
-            $arrTodos = array_map('sumar', $arrTodos, $hist);
-        }
+    for ($i = 0; $i < 24; $i++) {
+        $arrData[$i] = array(sprintf('%02d:00', $i));
     }
-    $arrData[] = array_merge(
-        array(_tr('All')),
-        $arrTodos,
-        array(array_sum($arrTodos))
+    $arrData[24] = array(_tr('Total Calls'));
+    $arrCols = array(
+        0   =>  array('name' => _tr('Hour')),
     );
+    $arrTodos = array_fill(0, 24, 0);
+    foreach ($arrCalls as $sQueue => $hist)    
+    if (empty($sColaElegida) || $sColaElegida == $sQueue){
+        $arrCols[] = array('name' => $sQueue);
+        $iTotalCola = 0;
+        foreach ($hist as $i => $iNumCalls) {
+            $arrData[$i][] = $iNumCalls;
+            $arrTodos[$i] += $iNumCalls;
+            $iTotalCola += $iNumCalls;
+        }
+        $arrData[24][] = $iTotalCola;
+    }
+    $arrCols[] = array('name' => _tr('All'));
+    $iTotalCola = 0;
+    foreach ($arrTodos as $i => $iNumCalls) {
+        $arrData[$i][] = $iNumCalls;
+        $iTotalCola += $iNumCalls;
+    }
+    $arrData[24][] = $iTotalCola;
 
     $smarty->assign('MODULE_NAME', $module_name);
     $smarty->assign('LABEL_FIND', _tr('Find'));
@@ -205,16 +216,7 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
         "start"    => 0,
         "end"      => 0,
         "total"    => 0,
-        "columns"  => array(0 => array("name"      => _tr("Cola"),
-                                       "property1" => ""),
-                            // 1..24 se llenan con el bucle de abajo
-                            25 => array("name"     => _tr("Total Calls"), 
-                                       "property1" => ""),
-
-                        ));
-    for ($i = 1; $i <= 24; $i++) {
-        $arrGrid['columns'][$i] = array('name' => sprintf('%02d:00', $i - 1), 'property1' => '');
-    }
+        "columns"  => $arrCols);
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->showFilter(
         $oForm->fetchForm(

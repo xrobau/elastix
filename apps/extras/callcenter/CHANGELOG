@@ -1,3 +1,5 @@
+* Campaign Monitoring: append available campaigns to report list instead of 
+  indexing by ID. Fixes Elastix bug #1496.
 * Dialer: Check whether the agent is on break before deciding that it should
   receive a scheduled call. Fixes Elastix bug #1497.
 * Login Logout: fix English translations for titles. Fixes Elastix bug #1491.

@@ -98,6 +98,8 @@ fi
 
 %changelog
 * Tue Feb 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: place incoming queue calls as the last items in 
+  the drop-down list.
 - FIXED: Campaign Monitoring: append available campaigns to report list instead 
   of indexing by ID. Fixes Elastix bug #1496.
 - FIXED: Dialer: Check whether the agent is on break before deciding that it 

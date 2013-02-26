@@ -145,7 +145,11 @@ function manejarMonitoreo_getCampaigns($module_name, $smarty, $sDirLocalPlantill
         if (!function_exists('manejarMonitoreo_getCampaigns_sort')) {
             function manejarMonitoreo_getCampaigns_sort($a, $b)
             {
-            	if ($a['status'] != $b['status'])
+            	if ($a['type'] != $b['type']) {
+            		if ($a['type'] == 'incomingqueue') return 1;
+                    if ($b['type'] == 'incomingqueue') return -1;
+            	}
+                if ($a['status'] != $b['status'])
                     return strcmp($a['status'], $b['status']);
                 return $b['id'] - $a['id'];
             }

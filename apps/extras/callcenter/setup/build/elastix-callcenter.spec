@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Feb 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
+- FIXED: Dialer: Check whether the agent is on break before deciding that it 
+  should receive a scheduled call. Fixes Elastix bug #1497.
+
 * Mon Feb 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - FIXED: Login Logout: fix English translations for titles. Fixes Elastix bug #1491.
 

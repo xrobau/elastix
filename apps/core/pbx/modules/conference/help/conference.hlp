@@ -16,7 +16,7 @@
 <p>If you want to see the details of any conference, click directly on the name. The parameters of the conference can't be edited.</p>
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_view.png" border="0" />
 <p>Figure 2</p></div>
-
+<br />
 <p>To delete a conference just select the checkbox located next to the conference's name and click on "Delete" button. </p>
 <br />
 <h2>Creating a new Conference</h2>
@@ -42,7 +42,7 @@
     <td>User PIN</td><td>No</td><td></td>
   </tr>
   <tr>
-    <td>Start Time (PST/PDT)</td><td>Yes</td><td></td>
+    <td>Start Time (PST/PDT)</td><td>Yes</td><td>Select the date and time in which the conference will start.</td>
   </tr>
   <tr>
     <td>Conference Number</td><td>Yes</td><td>When you create a conference a random number is generated automatically in this field.<br />You can change this number if you want but make sure this is not being used already.</td>
@@ -57,7 +57,7 @@
     <td>User Options</td><td>No</td><td></td>
   </tr>
   <tr>
-    <td>Duration (HH:MM)</td><td>No</td><td></td>
+    <td>Duration (HH:MM)</td><td>No</td><td>The duration of the conference</td>
   </tr>
   <tr>
     <td>Max Participants</td><td>Yes</td><td>The number of users that can participate in the conference simultaneously.</td>
@@ -76,7 +76,6 @@
 <p>If you want to silence a user, just select the checkbox from the mute column and click on "Mute". If you want to terminate a call, select the checkbox from Kick column and click on "Kick".</p>
 
 <p>If you want to terminate all the calls, just click on "Kick All" button.</p>
-
 
 <p>To update the list of the current participants of the conference click on "Update" button. If you want to go back to the list of conferences, click on "Cancel" button (This will not cancel the current conference).</p>
 

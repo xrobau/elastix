@@ -163,6 +163,9 @@ function do_loadCampaign()
 {
 	// Cancelar Server Sent Events de campaña anterior
 	if (evtSource != null) {
+		evtSource.onmessage = function(event) {
+			console.warn("This evtSource was closed but still receives messages!");
+		}
 		evtSource.close();
 		evtSource = null;
 	}
@@ -264,8 +267,19 @@ function manejarRespuestaStatus(respuesta)
 		return false;
 	}
 	if (respuesta.estadoClienteHash == 'mismatch') {
-		// Ha ocurrido un error y se ha perdido sincronía
-		location.reload();
+		/* Ha ocurrido un error y se ha perdido sincronía. Si el hash que 
+		 * recibió es distinto a App.campaniaActual.get('estadoClienteHash') 
+		 * entonces esta es una petición vieja. Si es idéntico debe de recargase
+		 * la página.
+		 */
+		if (respuesta.hashRecibido == App.campaniaActual.get('estadoClienteHash')) {
+			// Realmente se ha perdido sincronía
+			console.error("Lost synchronization with server, reloading page...");
+			location.reload();
+		} else {
+			// Se ha recibido respuesta luego de que supuestamente se ha parado
+			console.warn("Received mismatch from stale SSE session, ignoring...");
+		}
 		return false;
 	}
 	App.campaniaActual.set('estadoClienteHash', respuesta.estadoClienteHash);

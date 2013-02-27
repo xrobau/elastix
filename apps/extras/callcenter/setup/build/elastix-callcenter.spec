@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Feb 27 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: in case of client state hash mismatch, only 
+  reload if the request hash is identical to the one stored by the web client.
+
 * Tue Feb 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calls per hour, Graphics Calls per hour: transpose the rows and columns
   of the report so that the report is thinner. Fixes Elastix bug #1494.

@@ -301,6 +301,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     // Verificar hash correcto
     if (!is_null($estadoHash) && $estadoHash != $_SESSION[$module_name]['estadoClienteHash']) {
         $respuesta['estadoClienteHash'] = 'mismatch';
+        $respuesta['hashRecibido'] = $estadoHash;
         jsonflush($bSSE, $respuesta);
         return;
     }

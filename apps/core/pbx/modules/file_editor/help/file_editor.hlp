@@ -7,19 +7,20 @@
 
 <h1>{$node_name}</h1>
 
-<p>The option “File Editor” of the Menu “PBX” in Elastix lets us edit the files of the configuration of Elastix.</p>
-
-<div><img src="../modules/{$node_id}/images/file_editor.jpg" border="0"></div>
-<div>Figure 1</div>
+<p>The option "Asterisk File Editor" of the Menu "PBX" in Elastix lets us edit easily the configuration files of Elastix. The path of the files you can modify is /etc/asterisk/.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_file_editor.png" border="0" />
+<p>Figure 1</p></div>
 <br />
-
-<p>To edit a file, click on the file and the file will appear in edit mode:</p>
-
-<div><img src="../modules/{$node_id}/images/file_editor_users.jpg" border="0"></div>
-<div>Figure 2</div>
+<h2>Editing a file</h2>
+<p>You can find a file by entering the name in the filter field. To edit the file, click on the name to go to the edit mode. Click on "Save" button to save changes and "Reload Asterisk"  if necessary.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_file_editor_sip.png" border="0" />
+<p>Figure 2</p></div>
 <br />
+<h2>Creating a file</h2>
+<p>Also you can create a new file by clicking on "New File" button. This file will be created with the extension ".conf" in /etc/asterisk/.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_file_editor_new.png" border="0" />
+<p>Figure 3</p></div>
 
-<p>Proceed to edit the file of configuration, and after it is complete, click on the “Saved” button to save the new configuration. To return without saving the changes, click on the “Back” button.</p>
 
 </body>
 </html>

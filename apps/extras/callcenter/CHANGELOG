@@ -1,3 +1,5 @@
+* Campaign Monitoring: in case of client state hash mismatch, only reload if
+  the request hash is identical to the one stored by the web client.
 * Calls per hour, Graphics Calls per hour: transpose the rows and columns of the
   report so that the report is thinner. Fixes Elastix bug #1494.
 * Campaign Monitoring: place incoming queue calls as the last items in the 

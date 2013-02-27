@@ -6,19 +6,11 @@
 <body>
 
 <h1>{$node_name}</h1>
+<p>The option "Text to Wav" of the Menu "PBX" in Elastix allows transforming text to Audio. The output format of the file can be ".wav" or ".gsm". Write the message you want to transform, select the output format and click on "Generate Audio File" button. Automatically you will be asked to save the file in a location of your hard drive.</p>
 
-<p>La opción "Text to Wav" del  Menu “Extras” en Elastix es una utilidad que nos permite crear archivos .wav y/o .gsm, solo tienes que escribir en el area de texto escoger el tipo de formato despues dar click en el boton "Generate"(Figura 1)</p>
-
-<div><img src="../modules/{$node_id}/images/ttw1.jpg" border="0"></div>
-<div>Figura 1</div><br/ >
-
-<p>y automaticamente creera el archivo de audio luego procedemos a descargarlo(Figura 2).
-</p>
-
-<div><img src="../modules/{$node_id}/images/ttw2.jpg" border="0"></div>
-<div>Figura 2</div>
-<br />
-
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_text_to_wav.png" border="0" />
+<p>Figure 1</p></div>
+<br/ >
 
 </body>
 </html>

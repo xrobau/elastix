@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.1.99
-Release: 10.beta
+Release: 11.beta
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,6 +97,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Mar 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-11.beta
+- Bump version for release
+
 * Wed Feb 27 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Monitoring: in case of client state hash mismatch, only 
   reload if the request hash is identical to the one stored by the web client.

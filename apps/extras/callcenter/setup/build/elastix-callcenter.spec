@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Mar 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: Specify a proper CallerID string as 'Agent/XXXX Login' to 
+  prevent the softphones from displaying confusing strings as the CallerID.
+
 * Mon Mar 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-11.beta
 - Bump version for release
 

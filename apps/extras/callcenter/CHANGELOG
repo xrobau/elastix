@@ -1,3 +1,5 @@
+* Dialer: Specify a proper CallerID string as 'Agent/XXXX Login' to prevent 
+  the softphones from displaying confusing strings as the CallerID.
 * Campaign Monitoring: in case of client state hash mismatch, only reload if
   the request hash is identical to the one stored by the web client.
 * Calls per hour, Graphics Calls per hour: transpose the rows and columns of the

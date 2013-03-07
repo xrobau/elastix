@@ -1611,7 +1611,9 @@ LISTA_EXTENSIONES;
                 NULL, NULL, NULL,   // extension, context, priority
                 'AgentLogin',       // application
                 $agentFields['number'],        // data
-                NULL, NULL, NULL, NULL,
+                NULL,
+                $sAgente.' Login', // CallerID
+                NULL, NULL,
                 TRUE,               // async
                 'ECCP:1.0:'.posix_getpid().':AgentLogin:'.$sAgente     // action-id
                 );

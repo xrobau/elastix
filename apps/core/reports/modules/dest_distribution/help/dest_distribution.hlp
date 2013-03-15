@@ -6,9 +6,12 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>The “Destination Distribution” option of the “Billing” Menu in Elastix lets us view graphically the distribution of the outgoing calls grouped by rate. The graph will change depending the values of the filter:</p>
+<p>The “Destination Distribution” option of the “Billing” Menu in Elastix lets us view graphically the distribution of the outgoing calls grouped by rate. The graph will change depending on the values of the filter:</p>
 
 <table class="inline">
+	<tr>
+		<th>Name</th><th>Description</th>
+	</tr>
 	<tr>
 		<td>Start Date</td><td>The start date for calls to be selected.</td>
 	</tr>
@@ -23,22 +26,22 @@
 
 <br />
 
-<p>Distribution by Time</p>
-
-<div><img src="../modules/{$node_id}/images/dest_distrib_time.jpg" border="0"></div>
-<div>Figure 1</div>
+<h3>Distribution by Time</h3>
+ 
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_dest_distrib_time.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
-<p>Distribution by Number of Calls</p>
+<h3>Distribution by Number of Calls</h3>
 
-<div><img src="../modules/{$node_id}/images/dest_distrib_calls.jpg" border="0"></div>
-<div>Figure 2</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_dest_distrib_calls.png" border="0" />
+<p>Figure 2</p></div>
 <br />
 
-<p>Distribution by Cost</p>
+<h3>Distribution by Cost</h3>
 
-<div><img src="../modules/{$node_id}/images/dest_distrib_cost.jpg" border="0"></div>
-<div>Figure 3</div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_dest_distrib_cost.png" border="0" />
+<p>Figure 3</p></div>
 <br />
 
 </body>

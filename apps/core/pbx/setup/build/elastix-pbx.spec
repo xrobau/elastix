@@ -298,6 +298,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Batch of Extensions: relax extension secret validation to match the 
+  validations performed by the FreePBX javascript checks. Fixes part of Elastix
+  bug #1435.
+  SVN Rev[4754]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: pbx - Build/elastix-pbx.spec: Changed Version and Release in 
   specfile according to the current branch.

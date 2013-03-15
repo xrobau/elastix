@@ -236,20 +236,20 @@ function load_extension_from_csv($smarty, $ruta_archivo, $base_dir, $pDB, $arrAS
                 $Record_Incoming = strtolower($Record_Incoming);
                 $Record_Outgoing = strtolower($Record_Outgoing);
         
-                if(preg_match("/^(on demand|adhoc)/",$Record_Incoming)){
+                if(preg_match("/^(on demand|adhoc)/i",$Record_Incoming)){
                     $Record_Incoming = "Adhoc";
-                }elseif(preg_match("/^always/",$Record_Incoming)){
-                    $Record_Incoming = "always";
-                }elseif(preg_match("/^never/",$Record_Incoming)){
-                    $Record_Incoming = "never";
+                }elseif(preg_match("/^always/i",$Record_Incoming)){
+                    $Record_Incoming = "Always";
+                }elseif(preg_match("/^never/i",$Record_Incoming)){
+                    $Record_Incoming = "Never";
                 }
 
-                if(preg_match("/(on demand|adhoc)/",$Record_Outgoing)){
+                if(preg_match("/(on demand|adhoc)/i",$Record_Outgoing)){
                     $Record_Outgoing = "Adhoc";
-                }elseif(preg_match("/^always/",$Record_Outgoing)){
-                    $Record_Outgoing = "always";
-                }elseif(preg_match("/^never/",$Record_Outgoing)){
-                    $Record_Outgoing = "never";
+                }elseif(preg_match("/^always/i",$Record_Outgoing)){
+                    $Record_Outgoing = "Always";
+                }elseif(preg_match("/^never/i",$Record_Outgoing)){
+                    $Record_Outgoing = "Never";
                 }
                     
 //////////////////////////////////////////////////////////////////////////////////

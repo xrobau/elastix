@@ -871,30 +871,23 @@ class paloSantoLoadExtension {
         return true;
     }
 
+    /**
+     * Procedimiento para validar un Secret de cuenta de SIP/IAX. La regla usada
+     * por FreePBX es: el secreto debe ser de al menos 6 caracteres, y debe de
+     * tener al menos dos dígitos y dos letras. Pero se admiten caracteres 
+     * arbitrarios fuera de estas restricciones.  
+     * 
+     * @param   string  $Secret Secreto a validar
+     * 
+     * @return  VERDADERO si el secreto es válido, FALSO si no.
+     */
     function valida_password($Secret)
     {
         if(strlen($Secret) <= 5)
             return false;
             
-        if (!preg_match("/[[:alnum:]]/", $Secret))
-            return false;
-            
-        if (preg_match("/[[:space:]]/", $Secret))
-            return false;    
-        
-        if (preg_match("/[[:punct:]]/", $Secret))
-            return false;
-        
-        if (!preg_match("/[a-z]/", $Secret))
-            return false;
-            
-        if (!preg_match("/[A-Z]/", $Secret))
-            return false;
-            
-        if (!preg_match("/[0-9]/", $Secret))
-            return false;
-
-        return true;
+        return (preg_match('/[[:alpha:]].*[[:alpha:]]/', $Secret) 
+            && preg_match('/[[:digit:]].*[[:digit:]]/', $Secret));
     }
 
     function validarIpMask($ipMask)

@@ -341,6 +341,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Batch of Extensions: relax extension secret validation to match the 
+  validations performed by the FreePBX javascript checks. Fixes part of Elastix
+  bug #1435.
+  SVN Rev[4754]
+
 * Mon Feb 18 2013 Rocio Mera Suarez <rmera@palosanto.com>
 - CHANGED: Now the spec create files sip_general_custom,iax_general_custom,
   extensions_globals.conf. Also was deleted the creation of unnecessary files

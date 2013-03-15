@@ -342,6 +342,10 @@ fi
 
 %changelog
 * Thu Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Batch of Extensions: the keywords that encode the recording options 
+  must be written to the database with capital first letter. Fixes rest of
+  Elastix bug #1435. 
+  SVN Rev[4755]
 - FIXED: Batch of Extensions: relax extension secret validation to match the 
   validations performed by the FreePBX javascript checks. Fixes part of Elastix
   bug #1435.

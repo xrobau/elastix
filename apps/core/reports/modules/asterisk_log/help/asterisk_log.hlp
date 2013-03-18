@@ -5,37 +5,26 @@
 </header>
 <body>
 <h1>{$node_name}</h1>
-<p align="Justify">La opción "Asterisk Logs" del módulo "Reports" nos permite visualizar
-el contenido del log del Asterisk para monitorear cada suceso.
-</p>
+<p>The option "Asterisk Logs" of the "Reports" module allows visualizing the content of Asterisk logs for monitoring the events. You can filter the results by date or strings that are in the content of the logs </p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_asterisk_log.png" border="0" />
+<p>Figure 1</p></div>
+
+<p>Below a description of each column.</p>
 <table class="inline">
   <tr>
-    <th>Parámetro</th><th>Descripción</th>
+    <th>Column</th><th>Description</th>
   </tr>
   <tr>
-    <td>Date</td><td>Parámetro para buscar por una fecha dada el contenido del log</td>
+    <td>Date</td><td>The date of the event.</td>
   </tr>
   <tr>
-    <td>Search string</td><td>Parámetro utilizado para filtrar el contenido del log, este se    	muestra sombreado de un color amarrillo</td>
-  </tr>
-</table><br/>
-<div><img src="../modules/{$node_id}/images/asterisk_log.jpg" border="0"></div>
-<div>Figura 1</div><br/><br/>
-<table class="inline">
-  <tr>
-    <th>Columna</th><th>Descripción</th>
+    <td>Type</td><td>The type of the event.</td>
   </tr>
   <tr>
-    <td>Date</td><td>Nos indica la fecha del suceso.</td>
+    <td>Source</td><td>Where the event comes from.</td>
   </tr>
   <tr>
-    <td>Type</td><td>Nos indica de que tipo fué el suceso.</td>
-  </tr>
-  <tr>
-    <td>Source</td><td>Nos indica la fuente del suceso(Ubicación).</td>
-  </tr>
-  <tr>
-    <td>Message</td><td>Descripción del suceso.</td>
+    <td>Message</td><td>The description of the event.</td>
   </tr>
 </table>
 

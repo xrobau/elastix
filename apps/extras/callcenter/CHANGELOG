@@ -1,3 +1,4 @@
+* Calls per Agent: make call type specification case-insensitive
 * Dialer: Specify a proper CallerID string as 'Agent/XXXX Login' to prevent 
   the softphones from displaying confusing strings as the CallerID.
 * Campaign Monitoring: in case of client state hash mismatch, only reload if

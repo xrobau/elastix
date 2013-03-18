@@ -151,6 +151,7 @@ function _moduleContent(&$smarty, $module_name)
     $offset = 0;
     $limit = 20;
 
+    if (isset($fieldPat['type'])) $fieldPat['type'] = array_map('strtoupper', $fieldPat['type']);
     $arrCallsAgentTmp = $oCallsAgent->obtenerCallsAgent($date_start, $date_end, $fieldPat);
     if (!is_array($arrCallsAgentTmp)) {
         $smarty->assign(array(

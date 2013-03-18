@@ -97,6 +97,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Mar 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calls per Agent: make call type specification case-insensitive
+
 * Thu Mar 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: Specify a proper CallerID string as 'Agent/XXXX Login' to 
   prevent the softphones from displaying confusing strings as the CallerID.

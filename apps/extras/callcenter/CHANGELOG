@@ -1,3 +1,4 @@
+* Dialer: add code to repair corrupted audit entries on dialer startup.
 * Agent Console: modify connect function in order to return result of login
   command, and use this to check whether ECCP login succeeded. 
 * Calls per Agent: make call type specification case-insensitive

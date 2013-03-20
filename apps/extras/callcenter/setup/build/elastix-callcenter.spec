@@ -98,6 +98,7 @@ fi
 
 %changelog
 * Wed Mar 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add code to repair corrupted audit entries on dialer startup.
 - CHANGED: Agent Console: modify connect function in order to return result of 
   login command, and use this to check whether ECCP login succeeded. 
 

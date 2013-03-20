@@ -71,7 +71,9 @@
 	        <button id="btn_hangup" class="elastix-callcenter-boton-activo">{$BTN_COLGAR_LLAMADA}</button>
 	        <button id="btn_togglebreak" class="{$CLASS_BOTON_BREAK}" >{$BTN_BREAK}</button>
 	        <button id="btn_transfer" class="elastix-callcenter-boton-activo" >{$BTN_TRANSFER}</button>
+{if $BTN_VTIGERCRM}
 	        <button id="btn_vtigercrm" class="elastix-callcenter-boton-activo">{$BTN_VTIGERCRM}</button>
+{/if}
 	        <button id="btn_logout" class="elastix-callcenter-boton-activo">{$BTN_FINALIZAR_LOGIN}</button>
 	    </div> {* elastix-callcenter-controles *}
 	    {* El panel que aparece a la derecha como área principal del módulo *}

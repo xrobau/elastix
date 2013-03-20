@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Mar 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: modify connect function in order to return result of 
+  login command, and use this to check whether ECCP login succeeded. 
+
 * Mon Mar 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calls per Agent: make call type specification case-insensitive
 

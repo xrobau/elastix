@@ -4,7 +4,8 @@ require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
 $x = new ECCP();
 try {
     print "Connect...\n";
-    $x->connect("localhost", "agentconsole", "agentconsole");
+	$cr = $x->connect("localhost", "agentconsole", "agentconsole");
+	if (isset($cr->failure)) die('Failed to connect to ECCP - '.$cr->failure->message."\n");
     print_r($x->getrequestlist());
     print "Disconnect...\n";
     $x->disconnect();

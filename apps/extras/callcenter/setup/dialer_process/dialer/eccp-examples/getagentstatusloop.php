@@ -8,7 +8,8 @@ $agentname = $argv[1];
 $x = new ECCP();
 try {
     print "Connect...\n";
-    $x->connect("localhost", "agentconsole", "agentconsole");
+	$cr = $x->connect("localhost", "agentconsole", "agentconsole");
+	if (isset($cr->failure)) die('Failed to connect to ECCP - '.$cr->failure->message."\n");
     $x->setAgentNumber($agentname);
     print_r($x->getAgentStatus());
     $a = microtime(TRUE); $i = 0;

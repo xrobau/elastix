@@ -9,7 +9,8 @@ $agentpass = $argv[2];
 $x = new ECCP();
 try {
     print "Connect...\n";
-    $x->connect("localhost", "agentconsole", "agentconsole");
+	$cr = $x->connect("localhost", "agentconsole", "agentconsole");
+	if (isset($cr->failure)) die('Failed to connect to ECCP - '.$cr->failure->message."\n");
     $x->setAgentNumber($agentname);
     $x->setAgentPass($agentpass);
     print_r($x->getchanvars(count($argv) > 3 ? $argv[3] : NULL));

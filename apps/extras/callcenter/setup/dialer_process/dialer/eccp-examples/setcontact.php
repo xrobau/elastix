@@ -4,9 +4,10 @@ require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
 $x = new ECCP();
 try {
 	print "Connect...\n";
-	$x->connect("localhost", "agentconsole", "agentconsole");
-        $x->setAgentNumber("Agent/9000");
-        $x->setAgentPass("gatito");
+	$cr = $x->connect("localhost", "agentconsole", "agentconsole");
+	if (isset($cr->failure)) die('Failed to connect to ECCP - '.$cr->failure->message."\n");
+    $x->setAgentNumber("Agent/9000");
+    $x->setAgentPass("gatito");
 	print_r($x->getAgentStatus());
 	print "Seteando contacto...\n";
 	$r = $x->setcontact($argv[1], $argv[2]);

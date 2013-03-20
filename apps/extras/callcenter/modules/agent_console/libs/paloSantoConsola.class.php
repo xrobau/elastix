@@ -99,7 +99,10 @@ class PaloSantoConsola
             $oECCP = new ECCP();
             
             // TODO: configurar credenciales
-            $oECCP->connect("localhost", $sUsernameECCP, $sPasswordECCP);
+            $cr = $oECCP->connect("localhost", $sUsernameECCP, $sPasswordECCP);
+            if (isset($cr->failure)) {
+            	throw new ECCPUnauthorizedException(_tr('Failed to authenticate to ECCP').': '.((string)$cr->failure->message));
+            }
             if (!is_null($this->_agent)) {
             	$oECCP->setAgentNumber($this->_agent);
                 

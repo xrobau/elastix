@@ -7,7 +7,8 @@ if (count($argv) < 2) die("Use: {$argv[0]} [agentchannel]\n");
 $x = new ECCP();
 try {
 	print "Connect...\n";
-	$x->connect("localhost", "agentconsole", "agentconsole");
+	$cr = $x->connect("localhost", "agentconsole", "agentconsole");
+	if (isset($cr->failure)) die('Failed to connect to ECCP - '.$cr->failure->message."\n");
 	print_r($x->getagentqueues(count($argv) > 1 ? $argv[1] : NULL));
 	print "Disconnect...\n";
 	$x->disconnect();

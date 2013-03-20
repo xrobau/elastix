@@ -85,7 +85,7 @@ class ECCP
         $this->_hConn = @stream_socket_client($sUrlConexion, $errno, $errstr);
         if (!$this->_hConn) throw new ECCPConnFailedException("$sUrlConexion: ($errno) $errstr", $errno);
         
-        $this->login($username, $secret);
+        return $this->login($username, $secret);
     }
 
     public function setAgentNumber($sAgentNumber) { $this->_agentNumber = $sAgentNumber; }

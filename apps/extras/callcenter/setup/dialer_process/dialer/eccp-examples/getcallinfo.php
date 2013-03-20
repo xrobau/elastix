@@ -9,7 +9,8 @@ require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
 $x = new ECCP();
 try {
     print "Connect...\n";
-    $x->connect("localhost", "agentconsole", "agentconsole");
+	$cr = $x->connect("localhost", "agentconsole", "agentconsole");
+	if (isset($cr->failure)) die('Failed to connect to ECCP - '.$cr->failure->message."\n");
     print "Pidiendo información de llamada...\n";
     $r = $x->getcallinfo($argv[1], (($argv[2] == '') ? NULL : $argv[2]), $argv[3]);
     print_r($r);

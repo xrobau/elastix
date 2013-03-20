@@ -7,7 +7,8 @@ if (count($argv) < 2) die("Uso: {$argv[0]} campaigntype [campaignid [queue [star
 
 try {
     print "Connect...\n";
-    $x->connect("localhost", "agentconsole", "agentconsole");
+	$cr = $x->connect("localhost", "agentconsole", "agentconsole");
+	if (isset($cr->failure)) die('Failed to connect to ECCP - '.$cr->failure->message."\n");
     print_r($x->campaignlog(
         $argv[1],
         (count($argv) > 2 && trim($argv[2]) != '') ? $argv[2] : NULL,

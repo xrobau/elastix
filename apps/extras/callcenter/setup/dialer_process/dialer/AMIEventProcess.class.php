@@ -1572,7 +1572,10 @@ class AMIEventProcess extends TuberiaProcess
             
             $a = $this->_listaAgentes->buscar('agentchannel', $sChannel);
             if (is_null($a)) {
-            	$this->_log->output("ERR: no se puede identificar agente asignado a llamada!");
+            	$this->_log->output("ERR: ".__METHOD__.": no se puede identificar agente ".
+                    "asignado a llamada. Se dedujo que el canal de agente era $sChannel ".
+                    "a partir de params=".print_r($params, 1).
+                    "\nResumen de llamada asociada es: ".print_r($llamada->resumenLlamada(), 1));
             } else {
                 $llamada->llamadaEnlazadaAgente(
                     $params['local_timestamp_received'], $a, $sRemChannel,

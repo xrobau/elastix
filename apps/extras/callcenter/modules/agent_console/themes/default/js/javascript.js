@@ -303,6 +303,9 @@ function do_login()
             // Ha ocurrido un error
             login_estado_error(respuesta['message']);
         }
+	})
+	.fail(function() {
+		login_estado_error('Failed to connect to server for agent login!');
 	});
 }
 
@@ -324,6 +327,9 @@ function do_hangup()
         
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 }
 
@@ -348,6 +354,9 @@ function do_checklogin()
 	            // Login de agente ha tenido éxito, se refresca para mostrar formulario
 	            window.open('index.php?menu=' + module_name, "_self");
 	        }
+    	})
+    	.fail(function() {
+    		login_estado_error('Failed to connect to server to check for agent login!');
     	});
 }
 
@@ -366,6 +375,9 @@ function do_logout()
 
         // Se asume que a pesar del error, el agente está deslogoneado
         window.open('index.php?menu=' + module_name, "_self");
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 }
 
@@ -412,6 +424,9 @@ function do_break()
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
         // TODO: definir evento agentbreakenter y agentbreakexit
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 }
 
@@ -431,6 +446,9 @@ function do_unbreak()
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
         // TODO: definir evento agentbreakenter y agentbreakexit
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 }
 
@@ -450,6 +468,9 @@ function do_transfer()
         
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 }
 
@@ -468,6 +489,9 @@ function do_confirm_contact()
         	mostrar_mensaje_info(respuesta['message']);
         }
         
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 }
 
@@ -507,6 +531,9 @@ function do_schedule()
         	mostrar_mensaje_info(respuesta['message']);
         }
         
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 	return true;
 }
@@ -528,6 +555,9 @@ function do_save_forms()
         	mostrar_mensaje_info(respuesta['message']);
         }
         
+	})
+	.fail(function() {
+		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
 }
 
@@ -545,6 +575,9 @@ function do_checkstatus()
 		evtSource.onmessage = function(event) {
 			manejarRespuestaStatus($.parseJSON(event.data));
 		}
+		evtSource.onerror = function(event) {
+			mostrar_mensaje_error('Lost connection to server (SSE), retrying...');
+		}
 	} else {
 		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,
 		function (respuesta) {
@@ -552,6 +585,9 @@ function do_checkstatus()
 			
 			// Lanzar el método de inmediato
 			setTimeout(do_checkstatus, 1);
+		}).fail(function() {
+			mostrar_mensaje_error('Lost connection to server (Long-Polling), retrying...');
+			setTimeout(do_checkstatus, 5000);
 		});
 	}
 }

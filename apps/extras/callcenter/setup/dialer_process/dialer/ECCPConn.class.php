@@ -1420,6 +1420,14 @@ LEER_CAMPANIA;
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
         $sExtension = (string)$comando->extension;
+        $iTimeout = NULL;
+        if (isset($comando->timeout)) {
+            if (!preg_match('/^\d+/', (string)$comando->timeout))
+                return $this->_generarRespuestaFallo(400, 'Bad request');
+            $iTimeout = (int)$comando->timeout;
+            if ($iTimeout <= 0)
+                return $this->_generarRespuestaFallo(400, 'Bad request');
+        }
 
         // Verificar que la extensión y el agente son válidos en el sistema
         $listaExtensiones = $this->_listarExtensiones();
@@ -1462,7 +1470,7 @@ LEER_CAMPANIA;
         	}
         } else {
             // No hay canal de login. Se inicia login a través de Originate
-            $r = $this->_loginAgente($listaExtensiones[$sExtension], $sAgente);
+            $r = $this->_loginAgente($listaExtensiones[$sExtension], $sAgente, $iTimeout);
             return $this->Response_LoginAgentResponse('logging');            
         }
     }
@@ -1598,14 +1606,16 @@ LISTA_EXTENSIONES;
      *
      * @param   string  Extensión que está usando el agente, como "SIP/1064"
      * @param   string  Cadena del agente que se está logoneando: "Agent/9000"
+     * @param   int     NULL si no aplica timeout, o máxima inactividad en segundos
      *
      * @return  VERDADERO en éxito, FALSE en error
      */
-    private function _loginAgente($sExtension, $sAgente)
+    private function _loginAgente($sExtension, $sAgente, $iTimeout)
     {
-        $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension);
+        $r = NULL;
         $agentFields = $this->_parseAgent($sAgente);
         if ($agentFields['type'] == 'Agent') {
+            $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout);
             $r = $this->_ami->Originate(
                 $sExtension,        // channel
                 NULL, NULL, NULL,   // extension, context, priority
@@ -1617,6 +1627,8 @@ LISTA_EXTENSIONES;
                 TRUE,               // async
                 'ECCP:1.0:'.posix_getpid().':AgentLogin:'.$sAgente     // action-id
                 );
+            if ($r['Response'] != 'Success')
+                $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
         } else {
             /* 
              * Deben obtenerse las colas en las que la extension es Dynamic Member. 
@@ -1626,17 +1638,22 @@ LISTA_EXTENSIONES;
              */
             $arrColas = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);
     
-            // TODO: Falta validar, que ocurre si no hay colas habria que cancelarIntentoLogin
-            foreach($arrColas as $cola) {  
-                // Lo saco de todas las colas ...
-                $r = $this->_ami->QueueRemove($cola, $sAgente);
-        
-                // Para volverlos a agregar aqui.
-                $r = $this->_ami->QueueAdd($cola, $sAgente);
+            if (count($arrColas) > 0) {
+                $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout);
+                foreach($arrColas as $cola) {  
+                    // Lo saco de todas las colas ...
+                    $r = $this->_ami->QueueRemove($cola, $sAgente);
+            
+                    // Para volverlos a agregar aqui.
+                    $r = $this->_ami->QueueAdd($cola, $sAgente);
+                }
+                if ($r['Response'] != 'Success')
+                    $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
+            } else {
+            	// Este agente no tiene colas asociadas
+                $this->_log->output('WARN: agente dinámico '.$sAgente.' no es miembro dinámico de ninguna cola, no se puede realizar login.');
             }
         }
-        if ($r['Response'] != 'Success')
-            $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
         return $r;
     }
 
@@ -1721,7 +1738,6 @@ LISTA_EXTENSIONES;
                 if (is_null($sCanalExt)) $sCanalExt = $infoAgente['extension'];
                 if (!is_null($sCanalExt)) $this->_ami->Hangup($sCanalExt);
             }
-            return $this->Response_LogoutAgentResponse('logged-out');
         } else {
             // Si hay cliente conectado, le cierro el canal.
             if (!is_null($infoAgente['clientchannel'])) {
@@ -1733,8 +1749,8 @@ LISTA_EXTENSIONES;
             foreach ($arrColas as $cola) {  
                 $r = $this->_ami->QueueRemove($cola, $sAgente);
             }
-            return $this->Response_LogoutAgentResponse('logged-out');       
         }
+        return $this->Response_LogoutAgentResponse('logged-out');
     }
 
     // Función que encapsula la generación de la respuesta
@@ -1832,6 +1848,19 @@ LISTA_EXTENSIONES;
         ));
 
         $xml_pauseAgentResponse->addChild('success');        
+        return $xml_response;
+    }
+
+    private function Request_agentauth_pingagent($comando)
+    {
+        $sAgente = (string)$comando->agent_number;
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_pingAgentResponse = $xml_response->addChild('pingagent_response');
+        $r = $this->_tuberia->AMIEventProcess_pingAgente($sAgente);
+        if (!$r)
+    	   $this->_agregarRespuestaFallo($xml_pingAgentResponse, 404, 'Specified agent not found');
+        else $xml_pingAgentResponse->addChild('success');        
         return $xml_response;
     }
 

@@ -92,6 +92,12 @@ class Agente
      * cero. Por ahora se usa para break y para hold. */
     private $_num_pausas = 0;
 
+    /* Si no es NULL, máximo intervalo de inactividad, en segundos */
+    private $_max_inactivo = NULL;
+    
+    /* Timestamp de la última actividad del agente */
+    private $_ultima_actividad;
+
     var $llamada_agendada = NULL;
 
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
@@ -102,6 +108,7 @@ class Agente
         $this->_name = (string)$sNombre;
         $this->_estatus = (bool)$bEstatus;
         $this->_type = (string)$sType;
+        $this->resetTimeout();
 
         // Se setea vía interfaz pública para invocar __set()
         $this->number = $iNumero;
@@ -113,6 +120,7 @@ class Agente
         case 'id_agent':        return $this->_id_agent;
         case 'number':          return $this->_number;
         case 'channel':         return is_null($this->_number) ? NULL : $this->_type.'/'.$this->_number;
+        case 'type':            return $this->_type;
         case 'name':            return $this->_name;
         case 'estatus':         return $this->_estatus;
         case 'estado_consola':  return $this->_estado_consola;
@@ -129,6 +137,8 @@ class Agente
         case 'num_pausas':      return $this->_num_pausas;
         case 'en_pausa':        return ($this->_num_pausas > 0);
         case 'reservado':       return $this->_reservado;
+        case 'max_inactivo':    return $this->_max_inactivo;
+        case 'timeout_inactivo':return (!is_null($this->_max_inactivo) && (time() >= $this->_ultima_actividad + $this->_max_inactivo));
         default:
             die(__METHOD__.' - propiedad no implementada: '.$s);
         }
@@ -141,6 +151,7 @@ class Agente
         case 'id_sesion':       $this->_id_sesion = is_null($v) ? NULL : (int)$v; break;
         case 'name':            $this->_name = (string)$v; break;
         case 'estatus':         $this->_estatus = (bool)$v; break;
+        case 'max_inactivo':    $this->_max_inactivo = is_null($v) ? NULL : (int)$v; break;
         case 'number':          
             if (ctype_digit("$v")) {
                 $v = (string)$v;
@@ -169,6 +180,8 @@ class Agente
         }
     }
     
+    public function resetTimeout() { $this->_ultima_actividad = time(); }
+    
     public function setBreak($id_break, $id_audit_break)
     {
     	if (!is_null($id_break) && !is_null($id_audit_break)) {
@@ -178,6 +191,7 @@ class Agente
     	} else {
             $this->clearBreak();
     	}
+        $this->resetTimeout();
     }
     
     public function clearBreak()
@@ -185,6 +199,7 @@ class Agente
         $this->_id_break = NULL;
         $this->_id_audit_break = NULL;
         if ($this->_num_pausas >= 0) $this->_num_pausas--;
+        $this->resetTimeout();
     }
 
     public function setHold($id_hold, $id_audit_hold)
@@ -198,6 +213,7 @@ class Agente
         } else {
             $this->clearHold();
         }
+        $this->resetTimeout();
     }
     
     public function clearHold()
@@ -209,6 +225,7 @@ class Agente
             $this->_llamada->request_hold = FALSE;
             $this->_llamada->status = 'Success';
         }
+        $this->resetTimeout();
     }
     
     public function iniciarLoginAgente($sExtension)
@@ -248,6 +265,7 @@ class Agente
     public function completarLoginAgente()
     {
     	$this->_estado_consola = 'logged-in';
+        $this->resetTimeout();
     }
     
     // Se llama en Agentlogoff
@@ -265,6 +283,7 @@ class Agente
             $this->_listaAgentes->removerIndice('extension', $this->_extension);
         $this->_extension = NULL;
         $this->_id_sesion = NULL;
+        $this->resetTimeout();
     }
     
     public function resumenSeguimiento()
@@ -292,6 +311,7 @@ class Agente
             $this->_listaAgentes->removerIndice('uniqueidlink', $this->_UniqueidAgente);
         $this->_UniqueidAgente = $uniqueid_agente;
         $this->_listaAgentes->agregarIndice('uniqueidlink', $uniqueid_agente, $this);
+        $this->resetTimeout();
     }
     
     public function quitarLlamadaAtendida()
@@ -301,6 +321,7 @@ class Agente
         if (!is_null($this->_UniqueidAgente))
             $this->_listaAgentes->removerIndice('uniqueidlink', $this->_UniqueidAgente);
         $this->_UniqueidAgente = NULL;
+        $this->resetTimeout();
     }
 }
 ?>

@@ -98,6 +98,7 @@ fi
 
 %changelog
 * Mon Mar 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): add support for inactivity timeout in web agent console.
 - CHANGED: Agent Console: add minimal error handling to javascript ajax methods.
 
 * Wed Mar 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>

@@ -1165,6 +1165,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
         
         $respuestaEventos = array();
     	
+        $oPaloConsola->pingAgente();
         while (connection_status() == CONNECTION_NORMAL && 
             count($respuestaEventos) <= 0 && count($respuesta) <= 0 
             && time() - $iTimestampInicio <  $iTimeoutPoll) {

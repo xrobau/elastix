@@ -257,7 +257,7 @@ class ECCP
         return TRUE;
     }
     
-    public function loginagent($extension, $password = NULL)
+    public function loginagent($extension, $password = NULL, $timeout = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
         $xml_cmdRequest = $xml_request->addChild('loginagent');
@@ -266,6 +266,8 @@ class ECCP
         $xml_cmdRequest->addChild('extension', str_replace('&', '&amp;', $extension));
         if (!is_null($password))
             $xml_cmdRequest->addChild('password', str_replace('&', '&amp;', $password));
+        if (!is_null($timeout))
+            $xml_cmdRequest->addChild('timeout', str_replace('&', '&amp;', $timeout));
         $xml_response = $this->send_request($xml_request);
         return $xml_response->loginagent_response;
     }
@@ -611,5 +613,15 @@ class ECCP
         return $xml_response->getincomingqueuelist_response;
     }
     
+    public function pingagent()
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('pingagent');
+        $xml_cmdRequest->addChild('agent_number', $this->_agentNumber);
+        $xml_cmdRequest->addChild('agent_hash', $this->agentHash($this->_agentNumber, $this->_agentPass));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->pingagent_response;
+    }
+
 }
 ?>

@@ -1122,7 +1122,11 @@ logoneado a la cola, y se emite el evento "agentloggedin". Si no se contesta
 la llamada, o si la contraseña se digita incorrectamente, se emite el evento
 "agentfailedlogin". La respuesta a este requerimiento indica únicamente que la
 llamada hacia el agente ha sido iniciada, no que el agente haya sido aceptado
-en la cola
+en la cola. Opcionalmente, se puede especificar un intervalo máximo de 
+inactividad. Si el agente no tiene actividad alguna desde un login exitoso hasta
+que transcurre el intervalo, el dialer deslogonea automáticamente al agente. 
+Para mantener activa una sesión de agente con un timeout, véase el requerimiento
+pingagent.
 
 Atributos o argumentos:
 * agent_number: El número de agente a logonear. Este identificador está de la 
@@ -1130,6 +1134,7 @@ Atributos o argumentos:
 * agent_hash: Hash de autenticación para el agente.
 * extension: El número de extensión a ingresar bajo la identidad del agente.
 * password: (opcional) Clave telefónica del agente (no se usa en la implementación actual)
+* timeout: (opcional) Intervalo máximo de inactividad, en segundos.
 
 Ejemplo:
 <request id="2">
@@ -3223,3 +3228,31 @@ Campaña saliente:
   </activecalls>
 </getincomingqueuestatus_response>
 </response>
+
+
+Requerimiento "pingagent"
+Este requerimiento reinicia el contador de inactividad de un agente específico.
+Si se usa la característica de intervalo de inactividad de login, este 
+requerimiento debe de invocarse regularmente para indicar que el cliente está
+todavía activo.
+
+Atributos o argumentos:
+* agent_number: Agente que va a agendar la llamada. Este identificador está de la
+  forma 'Agent/9000'.
+* agent_hash: Hash de autenticación para el agente.
+
+Ejemplo:
+<request id="14">
+    <pingagent>
+        <agent_number>Agent/9000</agent_number>
+        <agent_hash>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</agent_hash>
+    </pingagent>
+</request>
+
+Respuesta:
+<response id="14">
+    <pingagent_response>
+        <success/>
+    </pingagent_response>
+</response>
+

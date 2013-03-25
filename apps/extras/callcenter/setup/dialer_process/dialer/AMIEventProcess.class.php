@@ -78,7 +78,8 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente', 
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
-            'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante') as $k)
+            'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
+            'pingAgente') as $k)
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -144,6 +145,7 @@ class AMIEventProcess extends TuberiaProcess
         else $this->_multiplex->procesarActividad(1);
         
         $this->_limpiarLlamadasViejasEspera();
+        $this->_limpiarAgentesTimeout();
         
     	return TRUE;
     }
@@ -223,10 +225,13 @@ class AMIEventProcess extends TuberiaProcess
         return (is_null($a)) ? NULL : $a->resumenSeguimiento();
     }
     
-    private function _agregarIntentoLoginAgente($sAgente, $sExtension)
+    private function _agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) $a->iniciarLoginAgente($sExtension);
+        if (!is_null($a)) {
+            $a->max_inactivo = $iTimeout;
+        	$a->iniciarLoginAgente($sExtension);
+        }
         return !is_null($a);
     }
     
@@ -697,6 +702,18 @@ class AMIEventProcess extends TuberiaProcess
             // TODO: actualizar current_calls con canal remoto
         }
     }
+
+    private function _pingAgente($sAgente)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (!is_null($a)) {
+            if ($this->DEBUG) {
+                $this->_log->output('DEBUG: '.__METHOD__.': '.$sAgente);
+            }
+            $a->resetTimeout();
+        }
+        return !is_null($a);
+    }
     
     private function _agentesAgendables($listaAgendables)
     {
@@ -794,6 +811,17 @@ class AMIEventProcess extends TuberiaProcess
             }
             
             $this->_iTimestampVerificacionLlamadasViejas = $iTimestamp;
+        }
+    }
+
+    private function _limpiarAgentesTimeout()
+    {
+        foreach ($this->_listaAgentes as $a) {
+            if ($a->estado_consola == 'logged-in' && is_null($a->llamada) && $a->num_pausas <= 0 && $a->timeout_inactivo) {
+            	$this->_log->output('INFO: deslogoneando a '.$a->channel.' debido a inactividad...');
+                $a->resetTimeout();
+                $this->_forzarLogoffAgente($a);
+            }
         }
     }
 
@@ -996,6 +1024,16 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_reportarInfoLlamadasColaEntrante'), $datos));
     }
     
+    public function rpc_pingAgente($sFuente, $sDestino, 
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_pingAgente'), $datos));
+    }
+    
     /**************************************************************************/
 
     public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje, 
@@ -1131,7 +1169,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_finalizandoPrograma = TRUE;
         foreach ($this->_listaAgentes as $a) {
         	if ($a->estado_consola != 'logged-out') {
-                if (!is_null($this->_ami)) $this->_ami->Agentlogoff($a->number);
+                if (!is_null($this->_ami)) $this->_forzarLogoffAgente($a);
             }
         }
         $this->_log->output('INFO: esperando a que finalicen todas las llamadas monitoreadas...');
@@ -1828,9 +1866,31 @@ class AMIEventProcess extends TuberiaProcess
                     $this->_log->output('DEBUG: '.__METHOD__.' se detecta desregistro de '.
                         $params['Peer'].' - deslogoneando Agent/'.$a->number);
                 }
-                $r = $this->_ami->Agentlogoff($a->number);
+                $this->_forzarLogoffAgente($a);
             }
     	}
+    }
+    
+    private function _forzarLogoffAgente($a)
+    {
+    	if ($a->type == 'Agent')
+            $this->_ami->Agentlogoff($a->number);
+        else {
+            $sAgentType = $a->type;
+            $sAgentNumber = $a->number;
+            
+            // $key_input tomaría la forma agents/S100 (para SIP) ó agents/I110 (para IAX)
+            $extension = $sAgentType{0}.$sAgentNumber; 
+            $db_output = $this->_ami->database_showkey('agents/'.$extension); 
+        
+            $arrColas = array();
+            foreach($db_output as $k => $val){  
+                $preg_match_string = "|^/QPENALTY/(\d+)/agents/$extension$|";
+                if (preg_match($preg_match_string, $k, $regs)) {     
+                    $this->_ami->QueueRemove($regs[1], $a->channel);
+                }
+            }
+        }
     }
 }
 ?>

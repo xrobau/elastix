@@ -322,7 +322,7 @@ LISTA_EXTENSIONES;
         else $sNumero = $sExtension;
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $loginResponse = $oECCP->loginagent($sNumero);
+            $loginResponse = $oECCP->loginagent($sNumero, NULL, 15 * 60);
             if (isset($loginResponse->failure))
                 $this->errMsg = '(internal) loginagent: '.$this->_formatoErrorECCP($loginResponse);
             return ($loginResponse->status == 'logged-in' || $loginResponse->status == 'logging');
@@ -1102,6 +1102,20 @@ LISTA_EXTENSIONES;
             $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
     	}
     }
+
+
+    function pingAgente($sTransferExt, $bAtxfer = FALSE)
+    {
+        try {
+            $oECCP = $this->_obtenerConexion('ECCP');
+            $oECCP->pingagent();
+            return TRUE;
+        } catch (Exception $e) {
+            $this->errMsg = '(internal) pingagent: '.$e->getMessage();
+            return FALSE;
+        }
+    }
+    
 }
 
 ?>

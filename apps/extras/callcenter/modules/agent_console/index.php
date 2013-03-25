@@ -62,7 +62,10 @@ function _moduleContent(&$smarty, $module_name)
     generarRutaJQueryModulo($smarty, $module_name);
 
     // Estado inicial de la consola del Call Center
-    if (!isset($_SESSION['callcenter'])) $_SESSION['callcenter'] = generarEstadoInicial();
+    if (!isset($_SESSION['callcenter']) || 
+        !is_array($_SESSION['callcenter']) || 
+        !isset($_SESSION['callcenter']['estado_consola']))
+        $_SESSION['callcenter'] = generarEstadoInicial();
 
     /* Al iniciar la sesión del agente, se asignan las variables elastix_agent_user y elastix_extension  */
     if ($_SESSION['callcenter']['estado_consola'] == 'logged-in') {
@@ -124,6 +127,19 @@ function manejarLogin($module_name, &$smarty, $sDirLocalPlantillas)
     $sContenido = '';
 
     $sAction = getParameter('action');
+    
+    /* Si el método está entre estos, pero el estado es de login, entonces se
+     * ha perdido un estado de callcenter anterior. */
+    if (in_array($sAction, array('checkStatus', 'agentLogout', 'hangup', 
+        'break', 'unbreak', 'transfer', 'confirm_contact', 'schedule', 
+        'saveforms'))) {
+        $json = new Services_JSON();
+        Header('Content-Type: application/json');
+        return $json->encode(array(
+            'action'    =>  'error',
+            'message'   =>  _tr('(internal) Action valid only while logged-in, agent session lost or not started')));
+    }
+    
     if (!in_array($sAction, array('', 'doLogin', 'checkLogin')))
         $sAction = '';
 
@@ -1048,7 +1064,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
     $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
     if ($bSSE) {
         Header('Content-Type: text/event-stream');
-        printflush("retry: 1\n");
+        printflush("retry: 5000\n");
     } else {
     	Header('Content-Type: application/json');
     }

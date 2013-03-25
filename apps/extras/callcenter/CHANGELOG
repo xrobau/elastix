@@ -1,3 +1,4 @@
+* Agent Console: add minimal error handling to javascript ajax methods.
 * Agent Console: display VtigerCRM button only if VtigerCRM is installed
 * Dialer: add code to repair corrupted audit entries on dialer startup.
 * Agent Console: modify connect function in order to return result of login

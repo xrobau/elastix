@@ -97,6 +97,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Mar 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: add minimal error handling to javascript ajax methods.
+
 * Wed Mar 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: display VtigerCRM button only if VtigerCRM is installed
 - CHANGED: Dialer: add code to repair corrupted audit entries on dialer startup.

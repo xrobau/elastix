@@ -1862,10 +1862,8 @@ class AMIEventProcess extends TuberiaProcess
             $a = $this->_listaAgentes->buscar('extension', $params['Peer']);
             if (!is_null($a)) {
             	// La extensión usada para login se ha desregistrado - deslogonear al agente
-                if ($this->DEBUG) {
-                    $this->_log->output('DEBUG: '.__METHOD__.' se detecta desregistro de '.
-                        $params['Peer'].' - deslogoneando Agent/'.$a->number);
-                }
+                $this->_log->output('INFO: '.__METHOD__.' se detecta desregistro de '.
+                    $params['Peer'].' - deslogoneando '.$a->channel.'...');
                 $this->_forzarLogoffAgente($a);
             }
     	}

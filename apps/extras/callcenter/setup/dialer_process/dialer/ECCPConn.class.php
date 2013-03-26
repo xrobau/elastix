@@ -155,6 +155,10 @@ class ECCPConn extends MultiplexConn
                     foreach ($request->children() as $c) $comando = $c;
                     $iTimestampInicio = microtime(TRUE);
                     $sRequerimiento = (string)$comando->getName();
+                    if ($this->DEBUG) {
+                        $this->_log->output('DEBUG: '.__METHOD__.': procesando requerimiento '.
+                            $sRequerimiento.' params: '.print_r($comando, TRUE));
+                    }
                     if (!isset($this->_peticionesAttr[$sRequerimiento])) {
                         $this->_log->output('ERR: (interno) no existe implementación para método: '.$sRequerimiento);
                         $response = $this->_generarRespuestaFallo(501, 'Not Implemented');

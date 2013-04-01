@@ -6,10 +6,10 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>The option “Softphones” lets us download Xten Lite or Idefisk, which are software for the simulation of a conventional phone on a computer.</p>
+<p>The option "Softphones" of the menu "Downloads" lets us download X-Lite and Zoiper, which are softwares for the simulation of a conventional phone on a computer.</p>
 
-<div><img src="../images/help/extras/softphones.jpg" border="0"></div>
-<div>Figure 1</div>
+<div class="hlp_figures"><img src="../images/help/extras/hlp_softphones.png" border="0" />
+<p>Figure 1</p></div>
 <br />
 
 <p>To download one of these Softphones, click on the link corresponding to each software.</p>

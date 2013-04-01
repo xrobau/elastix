@@ -7,7 +7,7 @@
 
 <h1>{$node_name}</h1>
 
-<p>The option “Fax Utilities” lets us download JHylaFax or Winprint Hylafax, software for sending and receiving faxes in a fast and easy manner.</p>
+<p>The option "Fax Utilities" lets us download JHylaFax or Winprint Hylafax, software for sending and receiving faxes in a fast and easy manner.</p>
 
 <div class="hlp_figures"><img src="../images/help/extras/fax_utilities.jpg" border="0" />
 <p>Figure 1</p></div>

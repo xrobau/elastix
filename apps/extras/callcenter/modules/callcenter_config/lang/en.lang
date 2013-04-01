@@ -55,5 +55,6 @@ $arrLangModule=array(
 'Service percent' => 'Service percent',
 'Enable predictive dialer behavior' => 'Enable predictive dialer behavior',
 'Per-call dial timeout' => 'Per-call dial timeout',
+'Agent inactivity timeout' => 'Agent inactivity timeout',
 );
 ?>

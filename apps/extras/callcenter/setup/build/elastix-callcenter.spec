@@ -97,6 +97,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Apr 01 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: allow inactivity timeout to be configurable
+
 * Mon Mar 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): add support for inactivity timeout in web agent console.
 - CHANGED: Agent Console: add minimal error handling to javascript ajax methods.

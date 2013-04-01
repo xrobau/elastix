@@ -35,6 +35,10 @@
 			</tr>
             <tr class="letra12">
                 <td align="right">{$asterisk_duracion_sesion.LABEL}:</td><td align="left">{$asterisk_duracion_sesion.INPUT}</td>
+                <td align="right">{$dialer_timeout_inactivity.LABEL}:</td><td align="left">{$dialer_timeout_inactivity.INPUT}</td>
+            </tr>
+            <tr class="letra12">
+                <td colspan="2">&nbsp;</td>
                 <td align="right">{$dialer_debug.LABEL}:</td><td align="left">{$dialer_debug.INPUT}</td>
             </tr>
             <tr class="letra12">

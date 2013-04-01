@@ -11,7 +11,8 @@
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_myex_config.png" border="0" />
 <p>Figure 1</p></div>
 <br />
-<p>Below a description of each option:</p>
+<p>Select the options you want to enable and then click on "Save Configuration" button. Below a description of each option:</p>
+<br />
 <table class="inline">
     <tr>
         <th>Name</th><th>Description</th>

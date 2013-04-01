@@ -6,7 +6,7 @@
 <body>
 <h1>{$node_name}</h1>
 
-<p>The option "Softphones" of the menu "Downloads" lets us download X-Lite and Zoiper, which are softwares for the simulation of a conventional phone on a computer.</p>
+<p>The option "Softphones" of the menu "Downloads" lets us download X-Lite and Zoiper, which are software for the simulation of a conventional phone on a computer.</p>
 
 <div class="hlp_figures"><img src="../images/help/extras/hlp_softphones.png" border="0" />
 <p>Figure 1</p></div>

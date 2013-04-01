@@ -316,13 +316,22 @@ LISTA_EXTENSIONES;
      */
     function loginAgente($sExtension)
     {
+        // Leer el valor del timeout del agente por inactividad
+        $oDB = $this->_obtenerConexion('call_center');
+        $tupla = $oDB->getFirstRowQuery(
+            'SELECT config_value FROM valor_config WHERE config_key = ?', 
+            TRUE, array('dialer.timeout_inactivity'));
+        if (!is_array($tupla) || count($tupla) <= 0)
+            $iTimeoutMin = 15;
+        else $iTimeoutMin = (int)$tupla['config_value'];
+
         $regs = NULL;
         if (preg_match('|^\w+/(\d+)$|', $sExtension, $regs))
             $sNumero = $regs[1];
         else $sNumero = $sExtension;
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $loginResponse = $oECCP->loginagent($sNumero, NULL, 15 * 60);
+            $loginResponse = $oECCP->loginagent($sNumero, NULL, $iTimeoutMin * 60);
             if (isset($loginResponse->failure))
                 $this->errMsg = '(internal) loginagent: '.$this->_formatoErrorECCP($loginResponse);
             return ($loginResponse->status == 'logged-in' || $loginResponse->status == 'logging');

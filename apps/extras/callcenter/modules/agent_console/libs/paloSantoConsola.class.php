@@ -1113,7 +1113,7 @@ LISTA_EXTENSIONES;
     }
 
 
-    function pingAgente($sTransferExt, $bAtxfer = FALSE)
+    function pingAgente()
     {
         try {
             $oECCP = $this->_obtenerConexion('ECCP');

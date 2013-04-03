@@ -9,7 +9,7 @@
         <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_audit.png" border="0" />
         <p>Figure 1</p></div>
         <br />
-	<p>The results of the search can be downloaded in diferent formats such as PDF, XML and CSV by clicking on the "Download" button.</p>
+	<p>The results of the search can be downloaded in different formats such as PDF, XML and CSV by clicking on the "Download" button.</p>
         <br />
     </body>
 </html>

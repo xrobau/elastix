@@ -5,53 +5,28 @@
     </header>
     <body>
         <h1>{$node_name}</h1>
-        <p align="Justify">El módulo Services/Network Ports permite crear, eliminar, observar o editar puertos. Estos puertos pueden ser de los siguientes protocolos: TCP, UDP, ICMP o IP.</p>
-        <div><img src="../modules/{$node_id}/images/sec_ports.png" border="0"></div>
-        <div>Figure 1</div>
+	<p>The module "Define Ports" of the menu "Security" in Elastix allows creating, editing, and deleting ports that are used for the module "Firewall Rules". These ports can be from the protocols TCP, UDP, ICMP and IP. This module shows a list of all the existing ports and the results can be filtered by name and protocol.</p>        
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_defineports.png" border="0" />
+        <p>Figure 1</p></div>
         <br />
-        <p align="Justify">Este módulo cuenta también con una opción de filtrado, por nombre o por protocolo.</p>
+	<h2>Define Port</h2> 
+	<p>To define a new port, click on the "Define Port" button and a form will appear with some parameters to fill out. The form can vary depending on the parameters you select for the field Protocol (See Figure 2). Once the information is filled, click on "Save" button.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_defineports_new.png" border="0" />
+        <p>Figure 2</p></div>
         <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event4.png" border="0"></div>
-        <div>Figure 2</div>
+	<h2>View Port</h2>
+	<p>To view an existing port, click on the "View" link located in the row corresponding to the port. Here you can see the information of the port and edit it if needed. (See figure 3)</p>        
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_defineports_view.png" border="0" />
+        <p>Figure 3</p></div>
         <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event5.png" border="0"></div>
-        <div>Figure 3</div>
+	<h2>Edit Port</h2>
+        <p>To edit a port, click on the "View" link corresponding to the port you want to modify and then click on "Edit" button. A form will appear with the parameters of the port ready to be modified. (See Figure 4)</p>
         <br />
-        <p align="Justify">Si se desea crear un nuevo puerto debemos hacer click en el botón Define Port, luego de lo cual nos aparece un formulario para llenar los datos del nuevo puerto.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_defineports_edit.png" border="0" />
+        <p>Figure 4</p></div>
         <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event1.png" border="0"></div>
-        <div>Figure 4</div>
-        <br />
-        <p align="Justify">En la figura 4 se observa el caso de un formulario para un puerto con protocolo TCP que es el mismo formulario que para UDP. Pero hay dos formularios distintos que son para protocolos ICMP y para IP, que se muestran al seleccionar uno de estos protocolos, tal como se muestra en las figuras 5 y 6.</p>
-        <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event2.png" border="0"></div>
-        <div>Figure 5</div>
-        <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event3.png" border="0"></div>
-        <div>Figure 6</div>
-        <br />
-        <p align="Justify">Una vez llenado los datos damos click en save y los datos del puerto se guardarán en la base de datos.</p>
-        <br />
-        <p align="Justify">Si deseamos observar los datos de un puerto en especifico debemos dar click en el link que dice view junto al puerto.</p>
-        <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event6.png" border="0"></div>
-        <div>Figure 7</div>
-        <br />
-        <p align="Justify">Con esto nos aparece una pantalla con la siguiente vista:</p>
-        <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event7.png" border="0"></div>
-        <div>Figure 8</div>
-        <br />
-        <p align="Justify">Ahora si queremos editar los datos del puerto seleccionado, debemos hacer click en el botón Edit, con lo cual nos aparecerá un formulario como el de las figuras 4, 5 o 6 pero con los datos del puerto elegido y listos para ser editados.</p>
-        <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event8.png" border="0"></div>
-        <div>Figure 9</div>
-        <br />
-        <p align="Justify">Finalmente si deseamos eliminar los datos de un puerto del registro de la base de datos, debemos hacer click en el checkbox que se encuentra al lado izquierdo y luego damos click en Delete.</p>
-        <br />
-        <div align="center"><img src="../modules/{$node_id}/images/new_Event9.png" border="0"></div>
-        <div>Figure 10</div>
-        <br />
+	<h2>Delete a port</h2>
+	<p>To delete a port just select the checkbox located at the left side corresponding to the port and click on "Delete" button.</p>
         <br />
     </body>
 </html>

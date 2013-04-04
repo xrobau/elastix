@@ -20,7 +20,7 @@
 <p>To delete a conference just select the checkbox located next to the conference's name and click on "Delete" button. </p>
 <br />
 <h2>Creating a new Conference</h2>
-<p>To create a new conference click on "New Conference" button and fill out the required fields <i>(Figure 3). If you want to take control of a static conference created from the module "PBX Configuration", replace the "Conference Number" by the number of the static conference.</i></p>
+<p>To create a new conference click on "New Conference" button and fill out the required fields <i>(Figure 3)</i>. If you want to take control of a static conference created from the module "PBX Configuration", replace the "Conference Number" by the number of the static conference.</p>
 
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_new.png" border="0" />
 <p>Figure 3</p></div>
@@ -66,7 +66,7 @@
 <br />
 
 <h2>Administration of Conferences</h2>
-<p>To manage a particular conference, click on the Participants link from the Current Conferences list. Here you can Invite, Kick or Mute the participants of the Conference and also see the time elapsed of each user..</p>
+<p>To manage a particular conference, click on the Participants link from the Current Conferences list. Here you can Invite, Kick or Mute the participants of the Conference and also see the elapsed time of each user..</p>
 
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_callers.png" border="0" />
 <p>Figure 4</p></div>

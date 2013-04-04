@@ -20,7 +20,7 @@
 <p>To delete a conference just select the checkbox located next to the conference's name and click on "Delete" button. </p>
 <br />
 <h2>Creating a new Conference</h2>
-<p>To create a new conference click on "New Conference" button and fill out the required fields. <i>(Figure 3)</i></p>
+<p>To create a new conference click on "New Conference" button and fill out the required fields <i>(Figure 3). If you want to take control of a static conference created from the module "PBX Configuration", replace the "Conference Number" by the number of the static conference.</i></p>
 
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_new.png" border="0" />
 <p>Figure 3</p></div>
@@ -36,10 +36,10 @@
     <td>Conference Name</td><td>Yes</td><td>This is the name of the conference. It helps to identify it.</td>
   </tr>
   <tr>
-    <td>Moderator PIN</td><td>No</td><td></td>
+    <td>Moderator PIN</td><td>No</td><td>A key that the moderator has to enter to join to the conference.</td>
   </tr>
   <tr>
-    <td>User PIN</td><td>No</td><td></td>
+    <td>User PIN</td><td>No</td><td>A key that the user has to enter to join to the conference.</td>
   </tr>
   <tr>
     <td>Start Time (PST/PDT)</td><td>Yes</td><td>Select the date and time in which the conference will start.</td>
@@ -51,10 +51,10 @@
     <td>Conference Owner</td><td>No</td><td>The user who is in charge of the conference.</td>
   </tr>
   <tr>
-    <td>Moderator Options</td><td>No</td><td></td>
+    <td>Moderator Options</td><td>No</td><td>Differente options for the moderator.</td>
   </tr>
   <tr>
-    <td>User Options</td><td>No</td><td></td>
+    <td>User Options</td><td>No</td><td>Different options for the user.</td>
   </tr>
   <tr>
     <td>Duration (HH:MM)</td><td>No</td><td>The duration of the conference</td>

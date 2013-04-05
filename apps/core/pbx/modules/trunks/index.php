@@ -919,7 +919,7 @@ function createFieldForm($tech)
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrAmaflag=array("noset"=>"noset","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
     $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
-    $arrNat=array("yes"=>"Yes","no"=>"No","never"=>"never","route"=>"route");
+    $arrNat=array("no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrType=array("friend"=>"friend","peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
     $arrPeriod=array(5=>"5 min",10=>"10 min",15=>"15 min",30=>"30 min",45=>"45",60=>"1 hora",120=>"2 horas",180=>"3 horas",240=>"4 horas",300=>"5 horas",360=>"6 horas",600=>"10 horas",720=>"12 horas",900=>"15 horas",1200=>"20 horas",1440=>"1 dia");

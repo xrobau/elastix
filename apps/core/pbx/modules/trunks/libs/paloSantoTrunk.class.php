@@ -214,7 +214,7 @@ class paloSantoTrunk extends paloAsteriskDB{
         if($tech=="sip"){
             $arrTrunk["insecure"]="port,invite";
             $arrTrunk["host"]="dynamic";
-            $arrTrunk["nat"]="no";
+            $arrTrunk["nat"]="noset";
             $arrTrunk["dtmfmode"]="auto";
             $arrTrunk["sendrpid"]="no";
             $arrTrunk["trustrpid"]="no";

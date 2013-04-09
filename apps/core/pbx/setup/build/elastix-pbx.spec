@@ -115,6 +115,8 @@ mv setup/usr/share/elastix/endpoint-vendors $RPM_BUILD_ROOT/usr/share/elastix/
 
 rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
 
+mv setup/etc/odbc.ini 	$RPM_BUILD_ROOT/etc/
+
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 

@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -194,6 +194,29 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: email_admin - Build/elastix-email_admin.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Fri Jan 18 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Modules/Email_Admin: Was made changing in libs
+  paloSantoEmail.class.php. Now function are implement using the provaliged
+  script email_account. This was made in order to eliminate the use of sudo in
+  code
+  SVN Rev[4601]
+
+* Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
+* Sat Jan 12 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: The behavior of the checkbox in the sticky-notes its now normal,
+  showing the checkbox instead of the ON-OFF slider button. Fixes Elastix BUG
+  #1424 - item 3
+  SVN Rev[4582]
+
 * Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Email_admin: comment out statement that logs every single IMAP 
   command, inherited from the Stickgate project.
@@ -212,9 +235,15 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com>
+- CHANGED: email_admin - Build/elastix-email_admin.spec: The prereq
+  Roundcubemail were deleted.
+  SVN Rev[4236]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: email_admin - Build/elastix-email_admin.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4224]
 
 * Wed Sep 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: remove privilege escalation vulnerability on privileged

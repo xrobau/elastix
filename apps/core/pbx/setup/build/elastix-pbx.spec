@@ -118,8 +118,6 @@ mv setup/usr/share/elastix/endpoint-vendors $RPM_BUILD_ROOT/usr/share/elastix/
 
 rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
 
-mv setup/etc/odbc.ini 	$RPM_BUILD_ROOT/etc/
-
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -362,8 +360,7 @@ fi
 /usr/share/elastix/privileged/*
 /var/lib/asterisk/agi-bin/*
 /etc/cron.daily/asterisk_cleanup
-%defattr(655, root, root)
-/etc/odbc.ini
+
 %changelog
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest

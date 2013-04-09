@@ -358,21 +358,58 @@ fi
 /etc/cron.daily/asterisk_cleanup
 %defattr(655, root, root)
 /etc/odbc.ini
-
 %changelog
-* Thu Apr 09 2013 Rocio Mera <rmera@palosanto.com>
-- CHANGED: pbx - Build/elastix-pbx.spec: Was added sounds files that
-  are used by conference module
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
 
-* Thu Apr 09 2013 Rocio Mera <rmera@palosanto.com>
-- CHANGED: pbx - Build/elastix-pbx.spec: Changed version and release 
-  in specfile.
-  
+* Tue Apr 09 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Apps - PBX: Was updated spec file in order to set appropiate
+  permission to file odbc.ini that was added in commit 4802.
+  SVN Rev[4803]
+
+* Tue Apr 09 2013 Rocio Mera <rmera@palosanto.com>
+- ADDED: Apps - PBX: Was added file odbc.ini to /etc directory. In this file
+  are configured the connection to database. The connection define here are
+  used for asterisk
+  SVN Rev[4802]
+
+* Tue Apr 09 2013 Rocio Mera <rmera@palosanto.com>
+- ADD: APPS - PBX: Was added files res_odbc.conf and func_odbc.conf to
+  /etc/asterisk. The file res_odbc.conf contains the dsn conection to elxpbx
+  database. The conetion defined there is used by the file extconfig.conf and
+  func_odbc.conf
+  CHANGED: APPS - PBX: File extconfig.conf was edited in order to use odbc
+  connection to connect elxpbx to use realtime.
+  SVN Rev[4801]
+
+* Fri Apr 05 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changes in module Trunk. Was deleted
+  restriction in username field that made this field can't be empty
+  SVN Rev[4797]
+
+* Fri Apr 05 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changes in module Trunk. At the moment to
+  create a trunk the defautl values to parameters nat and dtmfmod. The dedault
+  value of these settings are nat=no and dtmfomde=auto
+  SVN Rev[4796]
+
+* Tue Apr 02 2013 Rocio Mera <rmera@palosanto.com>
+- DELETE: Apps - PBX: Was deleted file extensions_globals.conf that was added
+  in the commit 4784
+  SVN Rev[4785]
+
+* Tue Apr 02 2013 Rocio Mera <rmera@palosanto.com>
+- ADDED: Apps - PBX: Was added file extensions_globals.conf
+  SVN Rev[4784]
+
 * Thu Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: the keywords that encode the recording options 
   must be written to the database with capital first letter. Fixes rest of
   Elastix bug #1435. 
   SVN Rev[4755]
+
+* Thu Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: relax extension secret validation to match the 
   validations performed by the FreePBX javascript checks. Fixes part of Elastix
   bug #1435.
@@ -382,7 +419,216 @@ fi
 - CHANGED: Now the spec create files sip_general_custom,iax_general_custom,
   extensions_globals.conf. Also was deleted the creation of unnecessary files
   in folder etc/asterisk like sip_additional.conf,iax_additional.conf.
-  
+
+* Mon Feb 18 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add suppor to set new model Snom m9
+  SVN Rev[4692]
+
+* Mon Feb 18 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changes in priviliged script
+  asteriskconfig.conf. This changes permit the creation of file sip.conf and
+  iax.conf using the information saved in table sip_general.conf and
+  iax_general.conf.
+  ADD: Apps - PBX: Was addded file extensions.conf and extensions_general.conf
+  to astect directory. This file contain a basic dialplan that is used in the
+  PBX
+  CHANGES: Apps - PBX: Was modified files sip.conf, iax.conf and
+  voiceamil.conf. This file contain the general configurations of sip,iax and
+  voicemail
+  SVN Rev[4679]
+
+* Mon Feb 18 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changes in database elxpbx. The format of table
+  sip_general, iax_general and voicemail_general was modified. It was made in
+  order to support implementation of new module general_settings_admin.
+  SVN Rev[4678]
+
+* Sat Feb 16 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Reverting commit 4675 in which module conference was
+  deleted
+  SVN Rev[4677]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- DELETED: Apps - PBX: Was deleted module conference in order to add a new
+  implementation
+  SVN Rev[4675]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was fixed in module recordings some minor bugs
+  SVN Rev[4674]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changed in modules queues,outbound_route and
+  trunks. Was modified the effect at moment to change fron one tab to other
+  inside the module
+  SVN Rev[4673]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changed in modules queues,outbound_route and
+  trunks. Was modified the effect at moment to change fron one tab to other
+  inside the module
+  SVN Rev[4672]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was fixed in module ring_group bug that permit at the
+  moment to edit a ring_group set its name to empty. Also was improve the
+  javascript that permit select valid destinations inside the ivr
+  SVN Rev[4670]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: In module extensions was changed some parameters at the
+  moment to create a extension that use SIP technology. Was added the
+  parameters transport,sendrpdi,trusrpdi. In addition was added the parameters
+  emailbody and emailsubject to Vociemail section
+  SVN Rev[4669]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was fixed in module ring_group bug that permit at the
+  moment to edit a ring_group set its name to empty
+  SVN Rev[4668]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- Changed: Apps - PBX: Was made changed in module general_settings. Was added
+  new configuration options in SIP and Voicemail sections
+  SVN Rev[4667]
+
+* Fri Feb 15 2013 Rocio Mera <rmera@palosanto.com>
+- ADD: Apps - PBX: Was added to PBX module general_settings_admin. This module
+  permit to superadmin set general configurations in the PBX. This
+  configurations are related with SIP, IAX, Voicemail technologies
+  SVN Rev[4666]
+
+* Fri Feb 08 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add support to set new model Snom 821
+  SVN Rev[4664]
+
+* Wed Feb 06 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add support to set new Fanvil models
+  C56/C56P C58/C58P and C60
+  SVN Rev[4661]
+
+* Thu Jan 31 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add support to set new Yealink model
+  SIP-T38G and automatic provision in VP530 model
+  SVN Rev[4659]
+
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com>
+- REMOVED: pbx - modules/index.php: It were removed innecesary information when
+  Festival is activated.
+  SVN Rev[4652]
+
+* Thu Jan 24 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: In module Control_Planel was made changes in function
+  showChannels in order to fix bugs in wich the call made through a sip trunk
+  have not been displayed in control panel
+  SVN Rev[4616]
+
+* Wed Jan 23 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changes in priviliged script asteriskConfig.
+  Thi was made in order to add function changeStateOrganization
+  SVN Rev[4613]
+
+* Fri Jan 18 2013 Rocio Mera <rmera@palosanto.com>
+- =CHANGED: Apps - PBX : In modules Extensions y Queues was added a restriction
+  that limit the number of extensions and queues that a organization can
+  create. This is based in the max numbers of extensions and queues setting at
+  the moment to create such organization
+  SVN Rev[4595]
+
+* Wed Jan 16 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
+* Sat Jan 12 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules : endpoint_configurator : endpoint_configurator: Add support
+  to set new Vendor Atlinks model Alcatel Temporis IP800 and fix Label Select a
+  Model and Unselected in Endpoint Configurator grid
+  SVN Rev[4583]
+
+* Sat Jan 12 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: The behavior of the checkbox in the sticky-notes its now normal,
+  showing the checkbox instead of the ON-OFF slider button. Fixes Elastix BUG
+  #1424 - item 3
+  SVN Rev[4582]
+
+* Sat Jan 12 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - endpoint_configurator: Add support to set new Vendor
+  Atlinks model Alcatel Temporis IP800 and fix Label Select a Model and
+  Unselected in Endpoint Configurator grid
+  SVN Rev[4581]
+
+* Mon Jan 07 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - endpoint_configurator - endpoints_batch: Add support to set
+  new Vendors and models  Damall D3310 and Elastix LXP200
+  SVN Rev[4560]
+
+* Fri Jan 04 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was added support in module outbound_route to add
+  time_group conditions in the settings at the moment to create or updated a
+  route. In module trunk was fixed a issue that happened when updated a trunk,
+  some parameters weren't saved with incorrects values in astDB base
+  SVN Rev[4549]
+
+* Wed Jan 02 2013 Rocio Mera <rmera@palosanto.com>
+- Apps - Modules/Trunk: Was added support to create custom trunk in module
+  trunk
+  SVN Rev[4541]
+
+* Fri Dec 28 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made chances in priviliged script asteriskconfing
+  and generic_extensions.conf to set CDR record organization. Also was improve
+  the dialplan to avoid the needed to reload the dialplan when is created a new
+  did. To this is necesary add support for odbc functions. The file
+  /etc/asterisk/sip.conf was added new globlas parameters to support fax
+  detection and increase security
+  SVN Rev[4536]
+
+* Thu Dec 27 2012 Sergio Broncano <sbroncano@palosanto.com>
+- CHANGED: module extensions_batch, Secret field validation must be minimum 6
+  alphanumeric characters, including upper and lowercase.
+  SVN Rev[4532]
+
+* Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: module endpoint configurator, default DTMF mode was audio, now default
+  DTMF is RFC. Grandstream model GXV280. Ported to new endpoint configurator.
+  SVN Rev[4528]
+
+* Thu Dec 20 2012 Bruno Macias <bmacias@palosanto.com>
+- FIXED: module endpoint configurator, default DTMF mode was audio, now default
+  DTMF is RFC. Grandstream model GXV280
+  SVN Rev[4527]
+
+* Mon Dec 17 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: modules - Recordings: Add superadmin access to manage recordings
+  SVN Rev[4519]
+
+* Fri Dec 14 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Now Module Ring_Group don't permit to modified the
+  ring_group number once time a ring_group has been created, this was made to
+  avoid missing destination if the ring_group is been used as a destination
+  inside the dialplan
+  SVN Rev[4518]
+
+* Fri Dec 14 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was added to database elxpbx table meetme. This table
+  contains the information necesary to create conference with realtime
+  technology. Also was modified file extensions_generic.conf to record
+  correctly the recodings made in the conferences.  Was modified file
+  meetme.conf and spec file to add support to new models of conferences
+  SVN Rev[4517]
+
+* Fri Dec 14 2012 Bruno Macias <bmacias@palosanto.com>
+- NEW: module conference: new implementation, now support schedule and not
+  schedule conference with realtime.
+  SVN Rev[4515]
+
+* Fri Dec 14 2012 Bruno Macias <bmacias@palosanto.com>
+- DELETED: module conference, Conference module was deleted by new
+  implementation.
+  SVN Rev[4514]
+
 * Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Elastix Operator Panel: assign dummy logger to silence logging spam on
   httpd error logfile. Fixes Elastix bug #1426.
@@ -396,6 +642,7 @@ fi
 * Wed Dec 05 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4506]
 
 * Wed Dec 05 2012 Rocio Mera <rmera@palosanto.com>
 - CHANGED: Apps - PBX: Was modified dialplan generated by module ivr. Was set

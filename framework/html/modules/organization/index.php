@@ -177,8 +177,8 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
         $arrColumns[]="";
     }
     
-    $arrColumns[]=_tr("Organization");
     $arrColumns[]=_tr("Domain");
+    $arrColumns[]=_tr("Name");
     $arrColumns[]=_tr("State");
     $arrColumns[]=_tr("Number of Users");
     $arrColumns[]=_tr("Country Code")." / "._tr("Area Code");
@@ -200,8 +200,8 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
                         $arrTmp[] = "<input type='checkbox' class='chk_id' value='{$value['id']}' />";
                         $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=assignDIDs&id=".$value['id']."'>"._tr("Assign DIDs")."</a>";
                     }
-					$arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".$value['name']."</a>";
-					$arrTmp[] = ($value['domain']==false)?_tr("NONE"):$value['domain'];
+					$arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".$value['domain']."</a>";
+					$arrTmp[] = $value['name'];
 					if($value['domain']!=false)
                         $arrTmp[] =_tr($value['state']);
 					if($pOrganization->getNumUserByOrganization($value['id'])>0)

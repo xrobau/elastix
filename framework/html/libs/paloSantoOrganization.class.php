@@ -136,7 +136,7 @@ class paloSantoOrganization{
 			return false;
         }
 
-        $query   = "SELECT u.id, u.username, u.name, u.md5_password, u.id_group, u.extension, u.fax_extension, u.estado, u.picture FROM acl_user u inner join acl_group g on u.id_group = g.id where g.id_organization=?;";
+        $query   = "SELECT u.id, u.username, u.name, u.md5_password, u.id_group, u.extension, u.fax_extension, u.picture FROM acl_user u inner join acl_group g on u.id_group = g.id where g.id_organization=?";
         $result=$this->_DB->fetchTable($query, true, array($id));
 
         if($result==FALSE){

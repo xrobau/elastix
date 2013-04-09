@@ -75,7 +75,7 @@ insert into sip_general (property_name,property_val,cathegory) values ('disallow
 insert into sip_general (property_name,property_val,cathegory) values ('allow','ulaw,alaw,gsm','general');
 insert into sip_general (property_name,property_val,cathegory) values ('g726nonstandard','en','general');
 insert into sip_general (property_name,property_val,cathegory) values ('preferred_codec_only','','general');
-insert into sip_general (property_name,property_val,cathegory) values ('nat','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('nat','force_rport','general');
 insert into sip_general (property_name,property_val,cathegory) values ('nat_type','public','general');
 
 

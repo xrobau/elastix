@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -276,6 +276,8 @@ touch /etc/asterisk/iax_register.conf
 touch /etc/asterisk/iax_custom.conf
 touch /etc/asterisk/meetme_custom.conf
 touch /etc/asterisk/queues_custom.conf
+#
+
 
 chown -R asterisk.asterisk /etc/asterisk/*
 
@@ -284,6 +286,11 @@ chown -R asterisk.asterisk /etc/asterisk/*
 if [ ! -e /var/lib/asterisk/sounds/custom/ ] ; then
     mkdir -p /var/lib/asterisk/sounds/custom/
     chown -R asterisk.asterisk /var/lib/asterisk/sounds/custom/
+fi
+
+if [ ! -e /var/lib/asterisk/sounds/tss/ ] ; then
+    mkdir -p /var/lib/asterisk/sounds/tss/
+    chown -R asterisk.asterisk /var/lib/asterisk/sounds/tss/
 fi
 
 # Copy any unaccounted files from moh to mohmp3
@@ -339,8 +346,13 @@ fi
 /usr/share/elastix/privileged/*
 /var/lib/asterisk/agi-bin/*
 /etc/cron.daily/asterisk_cleanup
-
+%defattr(655, root, root)
+/etc/odbc.ini
 %changelog
+* Thu Apr 09 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: pbx - Build/elastix-pbx.spec: Changed version and release 
+  in specfile.
+  
 * Thu Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: the keywords that encode the recording options 
   must be written to the database with capital first letter. Fixes rest of

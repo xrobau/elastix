@@ -115,7 +115,7 @@ switch($argv[1]){
         if(isset($argv[2])){
             exit(deleteFileOrgAst($argv[2]) ? 0 : 1);
         }else
-            exit(deleteFileOrgAst() ? 0 : 1);
+            error_exit("Missing arguments \n");
         break;
     case "createMoHDir":
         if(isset($argv[2])){
@@ -187,7 +187,7 @@ function dialplanReload(){
 /**
     funcion usada para eliminar los archivos de configuracion
     de asterisk de una organizacion dentro del servidor elastix
-    @param string domain -> dominio de la organizacion de la queç
+    @param string domain -> dominio de la organizacion de la que
                             se van a eliminar los archivos
 */
 function deleteFileOrgAst($domain){
@@ -710,10 +710,12 @@ function generateDialPlan($domain,$reload=false){
         return false;
     }
     
-    //escribir las variables globales
-    if(createExtensionGlobalsDomainFile($domain,$code)==false){
-        fprintf(STDERR, "ERR: Globlas variables couldn't be written.\n");
-        return false;
+    if($reload==true){
+        //escribir las variables globales
+        if(createExtensionGlobalsDomainFile($domain,$code)==false){
+            fprintf(STDERR, "ERR: Globlas variables couldn't be written.\n");
+            return false;
+        }
     }
     
     //genero plan de marcado relacionado con los irvs

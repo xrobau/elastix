@@ -14,6 +14,7 @@ Prereq: elastix-framework >= 3.0.0-1
 Prereq: elastix-system >= 3.0.0-1
 Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
+Prereq: mysql-connector-odbc
 Requires: festival >= 1.95
 
 %description

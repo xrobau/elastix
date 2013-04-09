@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -126,10 +126,25 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: security - Build/elastix-security.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Mon Feb 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Firewall Rules: change layout on New Rule form to be more compatible
   across browsers. Fixes Elastix bug #1481.
   SVN Rev[4683]
+
+* Tue Dec 04 2012 German Macas <gmacas@palosanto.com>
+ CHANGED: modules - file_editor - sec_weak_keys: Fixed item 4 and 5 from bug
+  1416, keep search filter in file_editor and change Reason for Status in
+  sec_weak_keys
+  SVN Rev[4503]
+
+* Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: security - Build/elastix-security.spec: Corrected the copy of files,
+  now we move them for later erase de dir container.
+  SVN Rev[4372]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -142,13 +157,27 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
+- Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
   SVN Rev[4347]
+
+* Tue Sep 25 2012 Bruno Macias <bmacias@palosanto.com>
+- UPDATED: module sec_advanced_settings, freepbx configuration its not
+  necessary.
+  SVN Rev[4295]
+
+* Mon Sep 24 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: anonymoussip privileged file, was fixed error whe file
+  /etc/asterisk/sip_general_custom.conf not exists, validation was added for
+  it.
+  SVN Rev[4265]
 
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: security - Build/elastix-security.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
 - CHANGED: In spec file changed Prereq elastix-framework to
   elastix-framework >= 3.0.0-1
+  SVN Rev[4231]
 
 * Thu Aug 09 2012 German Macas <gmacas@palosanto.com>
 - FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:

@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-%{release}.tgz
@@ -125,9 +125,14 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: Addons - Build/elastix-addons.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Wed Jan 23 2013 Alberto Santos <asantos@palosanto.com> 3.0.0-2
 - CHANGED: In spec file, added validation to remove postgresql repo for
   architectures different to i386, i686 and x86_64
+  SVN Rev[4609]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -140,6 +145,8 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
+- Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
   SVN Rev[4347]
 
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -152,6 +159,7 @@ fi
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: Addons - Build/elastix-addons.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4221]
 
 * Wed Aug 29 2012 Alberto Santos <asantos@palosanto.com>
 - CHANGED: addons - Build/elastix-addons.spec: update specfile with latest SVN

@@ -59,6 +59,12 @@ mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/
 mv setup/elastixdir/*      $RPM_BUILD_ROOT/var/www/elastixdir/
 rmdir setup/elastixdir
 
+# **Recordings use by Conference Module
+mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+mv setup/build/conf-call-recorded.wav             $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+mv setup/build/conf-has-not-started.wav           $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+mv setup/build/conf-will-end-in.wav               $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p      $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -332,6 +338,10 @@ fi
 /var/lib/asterisk/*
 /var/lib/asterisk/agi-bin
 /var/log/festival
+/var/lib/asterisk/sounds/
+/var/lib/asterisk/sounds/conf-call-recorded.wav
+/var/lib/asterisk/sounds/conf-has-not-started.wav
+/var/lib/asterisk/sounds/conf-will-end-in.wav
 /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
@@ -349,7 +359,11 @@ fi
 %defattr(655, root, root)
 /etc/odbc.ini
 %changelog
-* Thu Apr 09 2012 Rocio Mera <rmera@palosanto.com>
+* Thu Apr 09 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: pbx - Build/elastix-pbx.spec: Was added sounds files that
+  are used by conference module
+
+* Thu Apr 09 2013 Rocio Mera <rmera@palosanto.com>
 - CHANGED: pbx - Build/elastix-pbx.spec: Changed version and release 
   in specfile.
   

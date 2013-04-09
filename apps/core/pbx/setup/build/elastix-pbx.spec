@@ -338,7 +338,7 @@ fi
 /var/lib/asterisk/*
 /var/lib/asterisk/agi-bin
 /var/log/festival
-/var/lib/asterisk/sounds/
+/var/lib/asterisk/sounds
 /var/lib/asterisk/sounds/conf-call-recorded.wav
 /var/lib/asterisk/sounds/conf-has-not-started.wav
 /var/lib/asterisk/sounds/conf-will-end-in.wav
@@ -358,6 +358,7 @@ fi
 /etc/cron.daily/asterisk_cleanup
 %defattr(655, root, root)
 /etc/odbc.ini
+
 %changelog
 * Thu Apr 09 2013 Rocio Mera <rmera@palosanto.com>
 - CHANGED: pbx - Build/elastix-pbx.spec: Was added sounds files that

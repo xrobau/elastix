@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -207,7 +207,26 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
-* Fri Nov  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Fri Jan 18 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Modules/Fax: Was made changing in lib paloSantoFax.class.php
+  to add new funtions use at the moment to delete a organization
+  SVN Rev[4602]
+
+* Thu Nov 29 2012 Rocio Mera <rmera@palosanto.com>
+- FIXED: Apps - Fax/SendFax: Was fixed bug introduce in commit 4477. Was
+  removed a print_r() function
+  SVN Rev[4480]
+
+* Thu Nov 29 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changed in module ivr to add support to
+  reproduce the recordings in the dialplan
+  SVN Rev[4477]
+
+* Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Send Fax: check whether text to send as fax is entirely ASCII, and 
   attempt to convert to ISO-8859-15 if not, before converting to PostScript
   directly. Fixes Elastix bug #446.
@@ -246,18 +265,41 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
+- Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
   SVN Rev[4347]
 
-* Thu Sep 25 2012 Rocio Mera <rmera@palosanto.com> 3.0.0-1
+* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
+- FIXED: Conflicts between files provided by hylafax and elastix-fax rpm.
+  SVN Rev[4311]
+
+* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Fax: Spec fiel was modified to solve conflicts FaxDispatch
+  file with hylafax
+  SVN Rev[4310]
+
+* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Fax/elastix-fax.spec: Was necesary modified spec file to move
+  file faxgetty.conf to /etc/init directory
+  SVN Rev[4308]
+
+* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Fax: Was modified file hylifax/bin/includes/functions.php.
+  This file use a privileged script to insert recived fax in table fax_docs
+  SVN Rev[4303]
+
+* Thu Sep 25 2012 Rocio Mera <rmera@palosanto.com>
 - CHANGED: fax - Build/elastix-fax.spec: Was added in spec 
   FaxDispatch file. It necesary is file be moved to 
   /var/spool/hylafax/etc
+  SVN Rev[4298]
   
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
 - CHANGED: In spec file changed Prereq elastix-framework to
   elastix-framework >= 3.0.0-1
+  SVN Rev[4226]
 
 * Thu Aug 30 2012 German Macas <gmacas@palosanto.com>
 - CHANGED: modules - faxlist: Fixed process to check Fax status

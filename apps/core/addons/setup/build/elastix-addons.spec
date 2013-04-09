@@ -125,7 +125,7 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: Addons - Build/elastix-addons.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
 

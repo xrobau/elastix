@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,41 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: reports - Build/elastix-reports.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
+* Wed Jan 02 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - Reports: Was made changes in libs paloSantoCDR.class.php to
+  add support to multitenant architecture
+  SVN Rev[4539]
+
+* Wed Jan 02 2013 Rocio Mera <rmera@palosanto.com>
+- DELETED: Apps - Reports/asteriskcdrdb: was removed sql file
+  2.0.4-15.sql-3.0.0-0.sql added in commit 4537
+  SVN Rev[4538]
+
+* Wed Jan 02 2013 Rocio Mera <rmera@palosanto.com>
+- ADD: Apps - Reports: Was add file 2_2.0.4-15_3.0.0-0.sql. This file add
+  columns orgation_domain toout fromout to  cdr table
+  SVN Rev[4537]
+
+* Fri Dec 28 2012 Rocio Mera <rmera@palosanto.com>
+- ADDED: Apps - Reports: Was added new implementation of cdrreports module.
+  This module implement support to query the cdr for calltype and organization.
+  Was remove support to soap until new implementations
+  SVN Rev[4535]
+
+* Fri Dec 28 2012 Rocio Mera <rmera@palosanto.com>
+- DELETE: Apps - Reports: Was delete ,module cdrreport. This module will be
+  replace with a new implementation
+  SVN Rev[4534]
+
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Summary by Extension: do not use or add number of calls on URL. Read
   this number from the database instead. Fixes part 2 of Elastix bug #1416.
@@ -110,11 +145,17 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
+* Tue Sep 25 2012 Rocio Mera <rmera@palosanto.com>
+- FIXED: module cdrreport, querys to asterisk database, ringgroups now are
+  solved
+  SVN Rev[4294]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: reports - Build/elastix-reports.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
 - CHANGED: In spec file changed Prereq elastix-framework to
   elastix-framework >= 3.0.0-1
+  SVN Rev[4230]
 
 * Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
 - CHANGED: module - billing_rates: Change text information when edit a rate

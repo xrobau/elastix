@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -122,6 +122,19 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Wed Jan 23 2013 German Macas <gmacas@palosanto.com>
+- FIXED: modules: calendar: Fixed CallerId in calendar event and resize of
+  calendar
+  SVN Rev[4611]
+
+* Sat Jan 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar (trivial): fix javascript warnings in IE6.
+  SVN Rev[4550]
+
 #Se debe poner como prerequisito la version del framework nueva que se genere
 * Tue Dec 04 2012 Alberto Santos <asantos@palosanto.com>
 - CHANGED: In spec file, added asterisk user as owner of folder
@@ -143,9 +156,14 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
+* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com>
+- CHANGED: Agenda - Build/elastix-agenda.spec: The prereq freepbx were deleted.
+  SVN Rev[4235]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4222]
 
 * Wed Jul 11 2012 Alberto Santos <asantos@palosanto.com>
 - CHANGED: daemon elastix-synchronizer, added a default color for events on a

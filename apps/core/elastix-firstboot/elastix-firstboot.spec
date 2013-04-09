@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,19 +102,72 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Tue Apr 09 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - elastix-firstboot: Was edited file elastix-admin-passwords in
+  order to set the password to database elxpbx in file
+  /etc/asterisk/res_odbc.conf and /etc/odbc.ini. This file was added to add
+  support asterisk to use odbc to connect with mysql databases
+  SVN Rev[4804]
+
 * Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-firstboot: make update of password in manager.conf more 
   robust in the case it falls out of sync with /etc/elastix.conf.
   SVN Rev[4658]
+
+* Wed Jan 09 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: A minor correction in the commit 4564 where the Cancel option
+  appears only when command change-password is used.
+  SVN Rev[4565]
+
+* Tue Jan 08 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: The Cancel option that used to appear in the dialog_password was
+  removed, because if someone pressed, it no allows to continue configuring
+  passwords.
+  SVN Rev[4564]
 
 * Thu Dec 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-firstboot: Revert SVN commit 4161 and fix the proper way.
   Original bug was caused by forgotten blanking of password after regexp failed.
   SVN Rev[4526]
 
+* Thu Nov 29 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: firstboot - elastix-admin-passwords: Now the password in the file
+  cdr_mysql.conf will be set correctly.
+  SVN Rev[4467]
+
+* Thu Nov 29 2012 Luis Abarca <labarca@palosanto.com>
+- CHANGED: Now the RHGB feature it will be shown after the first boot in the
+  machine
+  SVN Rev[4463]
+
+* Wed Sep 26 2012 Luis Abarca <labarca@palosanto.com>
+- CHANGED: The message for updates of passwords now are diferent.
+  SVN Rev[4309]
+
+* Tue Sep 25 2012 Luis Abarca <labarca@palosanto.com>
+- CHANGED: The message for the elastix web admin is now elastix web superadmin.
+  SVN Rev[4278]
+
+* Tue Sep 25 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: A symbol was wrong now its corrected.
+  SVN Rev[4275]
+
+* Mon Sep 24 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: Not needed anymore restart amportal.
+  SVN Rev[4262]
+
+* Mon Sep 24 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: Now the elastix admin password is updated.
+  SVN Rev[4261]
+
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4223]
 
 * Thu Aug 30 2012 German Macas <gmacas@palosanto.com>
 - FIXED: elastix-admin-passwords: Fixed bug when enter a not allowed character

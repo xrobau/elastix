@@ -8,6 +8,9 @@ License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-20.tgz
+Source1: conf-call-recorded.wav
+Source2: conf-has-not-started.wav
+Source3: conf-will-end-in.wav
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 3.0.0-1
@@ -62,9 +65,9 @@ rmdir setup/elastixdir
 
 # **Recordings use by Conference Module
 mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
-mv setup/build/conf-call-recorded.wav             $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
-mv setup/build/conf-has-not-started.wav           $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
-mv setup/build/conf-will-end-in.wav               $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+cp %{SOURCE1}             	$RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+cp %{SOURCE2}           	$RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+cp %{SOURCE3}               	$RPM_BUILD_ROOT/var/lib/asterisk/sounds/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.

@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -134,6 +134,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: system - Build/elastix-system.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: some restore operations overwrite known passwords, such
   as the root mysql password and the ami manager password. If passwords are
@@ -148,6 +152,42 @@ fi
   fax sent or received after a restore that included fax information. Fixed.
   This fixes part 8 of Elastix bug #1461.
   SVN Rev[4657]
+
+* Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGE: modules: dashboard: Add options to active o inactive services when
+  reboot system in Process Status Applet
+  SVN Rev[4656]
+
+* Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - System: In priviliged script backupengine was made changed to
+  add validations in case that no exist a file that pretend to backup.
+  SVN Rev[4653]
+
+* Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
+- FIXED: Apps - System: Was made changed in priviliged script backupengine in
+  order to fix bug 1445 item 7. At the moment to restore mailboxs the message
+  showed as unread
+  SVN Rev[4649]
+
+* Tue Jan 22 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: system - backup_restore/backup.tpl , backup_restore/index.php: The
+  popup that apears when a restore of a previous backup its about to be
+  performed and a difference exists in the version of a package, now follows
+  the schema of unified style for popups in Elastix.
+  SVN Rev[4607]
+
+* Fri Jan 18 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - System: Was modified module userlist in order to add
+  restriction to the max numbers of users account that can exist by
+  organization
+  SVN Rev[4599]
+
+* Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
+- CHANGE: modules - packages - festival -antispam: Change grid view and add
+  option to Update packages in Package module - Fixed bug in StickyNote
+  checkbox in festival and antispam modules
+  SVN Rev[4588]
+
 
 * Tue Dec 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Network Parameters: allow optional quote before dhcp keyword.
@@ -172,6 +212,11 @@ fi
   virtual_mailbox_domains if the key is missing prior to a restore that includes
   virtual domains. Fixed.
   SVN Rev[4453]
+
+* Mon Oct 29 2012 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - System/Modules: Was fixed type of did that superadmin can
+  create
+  SVN Rev[4391]
 
 * Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: actually use root mysql password instead of hardcoded
@@ -216,6 +261,7 @@ fi
   SVN history. Changed version and release in specfile.
 - CHANGED: In spec file changed Prereq elastix-framework to
   elastix-framework >= 3.0.0-1
+  SVN Rev[4232]
 
 * Fri Sep 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: fix up Spanish translation.

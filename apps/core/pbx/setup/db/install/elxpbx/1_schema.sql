@@ -162,7 +162,7 @@ CREATE TABLE voicemail_general (
     tz varchar(250) default 'central',
     saycid enum ('yes','no'),
     sayduration enum ('yes','no') default 'yes',
-    saydurationm int(5) default 2,
+    saydurationm int(5) default '',
     -- Allow sender to review/rerecord their message before saving it OFF by default
     review enum ('yes','no') default 'yes', 
     -- Allow sender to hit 0 before/after/during leaving a voicemail to reach an operator

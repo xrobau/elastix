@@ -24,6 +24,52 @@ $(document).ready(function() {
 		key_campaign: null
 	});
 	App.campaniasDisponibles.addObserver('key_campaign', do_loadCampaign);
+	App.StatLlamadas = Ember.Object.extend({
+		// Estados en común para todas las campañas
+		total:		0,
+		encola:		0,
+		conectadas:	0,
+		abandonadas:0,
+		max_duration:0,
+		total_sec:  0,
+		fmttime: function(p) {
+			var tiempo = [0, 0, 0];
+			tiempo[0] = p;
+			tiempo[1] = (tiempo[0] - (tiempo[0] % 60)) / 60;
+			tiempo[0] %= 60;
+			tiempo[2] = (tiempo[1] - (tiempo[1] % 60)) / 60;
+			tiempo[1] %= 60;
+			var i = 0;
+			for (i = 0; i < 3; i++) { if (tiempo[i] <= 9) tiempo[i] = "0" + tiempo[i]; }
+			return tiempo[2] + ':' + tiempo[1] + ':' + tiempo[0];
+		},
+		fmtpromedio: function() {
+			var p, s;
+			if (this.get('terminadas') > 0)
+				p = this.get('total_sec') / this.get('terminadas');
+			else if (this.get('conectadas') > 0)
+				p = this.get('total_sec') / this.get('conectadas');
+			else p = 0;
+			p = Math.round(p);
+			return this.fmttime(p);
+			
+		}.property('total_sec', 'terminadas', 'conectadas'),
+		fmtmaxduration: function() {
+			return this.fmttime(this.get('max_duration'));
+		}.property('max_duration'),
+
+		// Estados válidos sólo para campañas salientes
+		pendientes:	0,
+		marcando:	0,
+		timbrando:	0,
+		fallidas:	0,
+		nocontesta: 0,
+		cortas:		0,
+		
+		// Estados válidos sólo para campañas entrantes
+		terminadas: 0,
+		sinrastro:	0
+	});
 	App.campaniaActual = Ember.Object.create({
 		estadoClienteHash: null,		
 		outgoing:		false,
@@ -33,25 +79,7 @@ $(document).ready(function() {
 		horaFinal:		'...',
 		cola:			'...',
 		maxIntentos:	'...',
-		llamadas:		Ember.Object.create({
-			// Estados en común para todas las campañas
-			total:		0,
-			encola:		0,
-			conectadas:	0,
-			abandonadas:0,
-
-			// Estados válidos sólo para campañas salientes
-			pendientes:	0,
-			marcando:	0,
-			timbrando:	0,
-			fallidas:	0,
-			nocontesta: 0,
-			cortas:		0,
-			
-			// Estados válidos sólo para campañas entrantes
-			terminadas: 0,
-			sinrastro:	0
-		}),
+		llamadas:       App.StatLlamadas.create(),
 		llamadasMarcando:	[
 			/*
 				Ember.Object.create({
@@ -390,6 +418,17 @@ function manejarRespuestaStatus(respuesta)
 			timestamp:	registro.timestamp,
 			mensaje: 	registro.mensaje
 		});
+	}
+	
+	// Estadísticas de la campaña
+	if (respuesta.stats != null) {
+		App.campaniaActual.llamadas.set('max_duration', respuesta.stats.update.max_duration);
+		App.campaniaActual.llamadas.set('total_sec', respuesta.stats.update.total_sec);
+	} else if (respuesta.duration != null) {
+		var m = App.campaniaActual.llamadas.get('max_duration');
+		if (m < respuesta.duration)
+			App.campaniaActual.llamadas.set('max_duration', respuesta.duration);
+		App.campaniaActual.llamadas.set('total_sec', App.campaniaActual.llamadas.get('total_sec') + respuesta.duration);
 	}
 	
 	return true;

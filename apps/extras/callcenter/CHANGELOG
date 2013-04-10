@@ -1,3 +1,7 @@
+* Campaign Monitoring, Dialer (ECCP): extend the getcampaignstatus and 
+  getincomingqueuestatus requests to report statistic values for the queried
+  campaign or queue. Use these to implement display of average and maximum call 
+  duration in Campaign Monitoring realtime display. 
 * Agent Console: allow inactivity timeout to be configurable
 * Dialer (ECCP): add support for inactivity timeout in web agent console.
 * Agent Console: add minimal error handling to javascript ajax methods.

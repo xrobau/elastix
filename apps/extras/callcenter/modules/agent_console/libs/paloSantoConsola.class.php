@@ -1028,6 +1028,7 @@ LISTA_EXTENSIONES;
                 'activecalls'   =>  array(),
                 'agents'        =>  array(),
             );
+            $iNumLlamadasAtendidas = 0;
             foreach ($respuesta->children() as $xml_node) {
                 switch ($xml_node->getName()) {
                 case 'statuscount':
@@ -1035,6 +1036,12 @@ LISTA_EXTENSIONES;
                     	$reporte['statuscount'][$xml_field->getName()] = (int)$xml_field;
                     }
                     ksort($reporte['statuscount']);
+                    break;
+                case 'stats':
+                    foreach ($xml_node->children() as $xml_field) {
+                        $reporte['stats'][$xml_field->getName()] = (int)$xml_field;
+                    }
+                    ksort($reporte['stats']);
                     break;
                 case 'agents':
                     foreach ($xml_node->agent as $xml_agent) {
@@ -1046,6 +1053,7 @@ LISTA_EXTENSIONES;
                             'trunk') as $k) 
                             $reporte['agents'][$sAgente][$k] = 
                                 isset($xml_agent->$k) ? (string) $xml_agent->$k : NULL;
+                        if (isset($xml_agent->callnumber)) $iNumLlamadasAtendidas++;
                     }
                     ksort($reporte['agents']);
                     break;
@@ -1064,6 +1072,10 @@ LISTA_EXTENSIONES;
                     }
                     break;
                 }
+            }
+            if (!isset($reporte['statuscount']['finished'])) {
+                $reporte['statuscount']['finished'] = $reporte['statuscount']['success'] - $iNumLlamadasAtendidas;
+            	ksort($reporte['statuscount']);
             }
             return $reporte;
         } catch (Exception $e) {

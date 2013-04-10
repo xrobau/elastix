@@ -1596,6 +1596,11 @@ Respuesta:
     para campañas salientes, y si el estado en 'callstatus' es 'onqueue'.
   * trunk: Troncal a través de la cual se recibe llamada entrante, o se realiza
     la llamada saliente.
+* stats: Contadores globales de la campaña Este elemento contiene los siguientes
+  atributos:
+  * total_sec: Suma de todas las duraciones en segundos de todas las llamadas
+    completadas.
+  * max_duration: Máxima duración de llamada en la campaña.
 
 Ejemplo:
 <request id="7">
@@ -1636,6 +1641,10 @@ Campaña saliente:
                 <dialstart>18:24:54</dialstart>
             </activecall>
         </activecalls>
+        <stats>
+            <total_sec>34786</total_sec>
+            <max_duration>195</max_duration>
+        </stats>
     </getcampaignstatus_response>
 </response>
 
@@ -3182,6 +3191,11 @@ Respuesta:
     para campañas salientes, y si el estado en 'callstatus' es 'onqueue'.
   * trunk: Troncal a través de la cual se recibe llamada entrante, o se realiza
     la llamada saliente.
+* stats: Contadores globales de la cola Este elemento contiene los siguientes
+  atributos:
+  * total_sec: Suma de todas las duraciones en segundos de todas las llamadas
+    completadas.
+  * max_duration: Máxima duración de llamada en la cola.
 
 Ejemplo:
 <request id="7">
@@ -3226,6 +3240,10 @@ Campaña saliente:
       <trunk>SIP/1064</trunk>
     </activecall>
   </activecalls>
+    <stats>
+        <total_sec>34786</total_sec>
+        <max_duration>195</max_duration>
+    </stats>
 </getincomingqueuestatus_response>
 </response>
 

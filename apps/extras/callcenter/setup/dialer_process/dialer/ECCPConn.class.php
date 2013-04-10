@@ -2193,6 +2193,11 @@ LISTA_EXTENSIONES;
             if (isset($infoLlamada['trunk']))
                 $xml_activecall->addChild('trunk', $infoLlamada['trunk']);
         }
+        
+        // Contadores para estadísticas
+        $xml_stats = $xml_statusresponse->addChild('stats');
+        foreach ($statusCampania_DB['stat'] as $statKey => $statCount)
+            $xml_stats->addChild(strtolower($statKey), $statCount);
     }
 
     private function _getcampaignstatus_setagent($xml_agent, $infoAgente)
@@ -2284,6 +2289,19 @@ LEER_RESUMEN_CAMPANIA;
             else $tupla['status'][$tuplaStatus['status']] = $tuplaStatus['n'];
         }
 
+        // Leer estadísticas de la campaña
+        $sPeticionSQL = <<<LEER_STATS_CAMPANIA
+SELECT SUM(duration) AS total_sec, MAX(duration) AS max_duration FROM calls
+WHERE id_campaign = ? AND status = 'Success' AND end_time IS NOT NULL
+LEER_STATS_CAMPANIA;
+        $recordset = $this->_db->prepare($sPeticionSQL);
+        $recordset->execute(array($idCampania));
+        $recordset->setFetchMode(PDO::FETCH_ASSOC);
+        $tupla['stat'] = array();
+        foreach ($recordset as $tuplaStat) {
+        	foreach ($tuplaStat as $k => $v) $tupla['stat'][$k] = is_null($v) ? 0 : (int)$v;
+        }
+
         return $tupla;
     }
 
@@ -2334,6 +2352,19 @@ LEER_RESUMEN_CAMPANIA;
             $tupla['status'][$mapaEstados[$tuplaStatus['status']]] = $tuplaStatus['n'];
         }
 
+        // Leer estadísticas de la campaña
+        $sPeticionSQL = <<<LEER_STATS_CAMPANIA
+SELECT SUM(duration) AS total_sec, MAX(duration) AS max_duration FROM call_entry
+WHERE id_campaign = ? AND status = 'terminada' and datetime_end IS NOT NULL
+LEER_STATS_CAMPANIA;
+        $recordset = $this->_db->prepare($sPeticionSQL);
+        $recordset->execute(array($idCampania));
+        $recordset->setFetchMode(PDO::FETCH_ASSOC);
+        $tupla['stat'] = array();
+        foreach ($recordset as $tuplaStat) {
+            foreach ($tuplaStat as $k => $v) $tupla['stat'][$k] = is_null($v) ? 0 : (int)$v;
+        }
+
         return $tupla;
     }
 
@@ -2376,6 +2407,22 @@ LEER_RESUMEN_CAMPANIA;
         );
         foreach ($recordset as $tuplaStatus) {
             $tupla['status'][$mapaEstados[$tuplaStatus['status']]] = $tuplaStatus['n'];
+        }
+
+        // Leer estadísticas de la campaña
+        $sPeticionSQL = <<<LEER_STATS_CAMPANIA
+SELECT SUM(duration) AS total_sec, MAX(duration) AS max_duration
+FROM call_entry, queue_call_entry
+WHERE id_campaign IS NULL AND id_queue_call_entry = queue_call_entry.id
+    AND queue_call_entry.queue = ? AND status = 'terminada'
+    AND datetime_end IS NOT NULL
+LEER_STATS_CAMPANIA;
+        $recordset = $this->_db->prepare($sPeticionSQL);
+        $recordset->execute(array($sCola));
+        $recordset->setFetchMode(PDO::FETCH_ASSOC);
+        $tupla['stat'] = array();
+        foreach ($recordset as $tuplaStat) {
+            foreach ($tuplaStat as $k => $v) $tupla['stat'][$k] = is_null($v) ? 0 : (int)$v;
         }
 
         return $tupla;

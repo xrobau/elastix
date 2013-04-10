@@ -355,7 +355,7 @@ function createFieldForm($arrTZ){
 }
 
 function createSipForm($arrLang){
-    $arrNat=array("yes"=>"yes","no"=>"no","force_rport"=>"force_rport","comedia"=>"comedia");
+    $arrNat=array("no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrYesNo=array("yes"=>"yes","no"=>"no");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
     $arrMedia=array('yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
@@ -810,13 +810,6 @@ function createVMForm($arrLang,$arrTz)
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
                             "vm_sayduration"   => array("LABEL"               => _tr("Say Duration"),
                                                     "DESCRIPTION"            => _tr("Turn on/off the duration information before the message."),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNoU,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
-                            "vm_saydurationm"   => array("LABEL"               => _tr("Say Duration Minimum"),
-                                                    "DESCRIPTION"            => _tr("Specify the minimum duration to say. Default is 2 minutes."),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNoU,

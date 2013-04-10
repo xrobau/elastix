@@ -319,10 +319,6 @@
                 <td>{$vm_sayduration.INPUT}</td>
             </tr>
             <tr class="vm_settings">
-                <td>{$vm_saydurationm.LABEL}:</td>
-                <td>{$vm_saydurationm.INPUT}</td>
-            </tr>
-            <tr class="vm_settings">
                 <td>{$vm_tempgreetwarn.LABEL}:</td>
                 <td>{$vm_tempgreetwarn.INPUT}</td>
             </tr>

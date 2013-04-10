@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -362,9 +362,27 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Apr 10 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Wed Apr 10 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - PBX: Was made changed in module general_settings admin to
+  delete saydurationm from voicemail parameters.
+  SVN Rev[4830]
+- CHANGED: Apps - PBX: Was made changed in module inbound_route to fix bug at
+  the moment to report all the inbound_routes.
+  SVN Rev[4829]
+- CHANGED: Apps - PBX: Was made changed in the deafult configuration that exist
+  in files iax.conf and voicemail.conf. In voicemail.conf was deleted parameter
+  saydurationm because it causes problems at the moment to call VoiceMailMain
+  application.
+  SVN Rev[4828]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4807]
 
 * Tue Apr 09 2013 Rocio Mera <rmera@palosanto.com> 
 - CHANGED: Apps - PBX: Was updated spec file in order to set appropiate

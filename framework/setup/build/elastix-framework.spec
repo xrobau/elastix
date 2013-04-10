@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -313,6 +313,24 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Apr 10 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Wed Apr 10 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Framework - Libs: Was made chaned in lib extension.class.php. Class
+  ext_return was added attribute return_value. Also was made changed in libs
+  paloSantoASteriskConfig in order to set nat=yes in the default configurations
+  at the moment to create a sip account
+  SVN Rev[4827]
+
+* Tue Apr 09 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - elastix-firstboot: Was edited file elastix-admin-passwords in
+  order to set the password to database elxpbx in file
+  /etc/asterisk/res_odbc.conf and /etc/odbc.ini. This file was added to add
+  support asterisk to use odbc to connect with mysql databases
+  SVN Rev[4805]
+
 * Wed Feb 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: framework: allow registration process to accept arbitrary strings for
   Contact Name, Company, City. Fixes Elastix bug #1476.

@@ -46,12 +46,14 @@
                 <td width="20%" nowrap>{$keepcid.LABEL}</td>
                 <td width="30%">{$keepcid.INPUT}</td>
             </tr>
+            <tr class="tech">
+                <td nowrap>{$disabled.LABEL}</td>
+                <td>{$disabled.INPUT}</td>
+            </tr>
             <tr><th>{$SEC_SETTINGS}</th></tr>
             <tr class="tech">
                 <td nowrap>{$maxchans.LABEL}</td>
                 <td>{$maxchans.INPUT}</td>
-                <td nowrap>{$disabled.LABEL}</td>
-                <td>{$disabled.INPUT}</td>
             </tr>
             <tr class="tech">
                 <td nowrap>{$sec_call_time.LABEL}</td>

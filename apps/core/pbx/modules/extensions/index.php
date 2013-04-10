@@ -1169,7 +1169,7 @@ function createFieldForm($arrOrgz,$tech=null)
 }
 
 function createSipForm(){
-    $arrNat=array("yes"=>"Yes","no"=>"No","force_rport"=>"force_rport","comedia"=>"comedia");
+    $arrNat=array("noset"=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");

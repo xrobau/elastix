@@ -441,7 +441,7 @@ function createFieldForm($arrTone,$arrMOH,$arrZoneMessage)
 }
 
 function createSipForm($arrMOH){
-    $arrNat=array("yes"=>"yes","no"=>"no","force_rport"=>"force_rport","comedia"=>"comedia");
+    $arrNat=array("noset"=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrCallingpres=array(""=>"",'allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
     $arrYesNo=array("yes"=>"yes","no"=>"no");
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));

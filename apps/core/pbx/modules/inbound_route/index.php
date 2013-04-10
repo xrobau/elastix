@@ -195,7 +195,7 @@ function reportInbound($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
             $did=$inbound["did_number"];
         }
         if($inbound["cid_number"]!=""){
-            $cid=$inbound["did_number"];
+            $cid=$inbound["cid_number"];
         }
         $arrTmp[1] = $did." / ".$cid;
         $arrTmp[2] = $inbound["cid_prefix"];

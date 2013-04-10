@@ -66,8 +66,15 @@ class ext_gosub extends extension {
 }
 
 class ext_return extends extension {
+    var $return_value;
+    
+    function ext_return($return=""){
+        if(isset($return))
+            $this->return_value = $return;
+    }
+    
 	function output() {
-		return "Return()";
+		return "Return(".$this->return_value.")";
 	}
 }
 
@@ -276,7 +283,10 @@ class ext_waitexten extends extension {
 	}
 
 	function output() {
-		return "WaitExten(".$this->seconds.",".$this->options.")";
+        if($this->options="")
+            return "WaitExten(".$this->seconds.",".$this->options.")";
+        else
+            return "WaitExten(".$this->seconds.")";
 	}
 }
 
@@ -518,7 +528,9 @@ class ext_meetme {
 	}
 
 	function output() {
-		return "MeetMe(".$this->confno.",".$this->options.",".$this->pin.")";
+        $this->options=(empty($this->options))?"":",".$this->options;
+		$this->options=(empty($this->pin))?"":",".$this->pin;
+		return "MeetMe(".$this->confno."".$this->options."".$this->pin.")";
 	}
 }
 

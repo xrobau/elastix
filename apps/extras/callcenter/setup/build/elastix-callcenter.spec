@@ -2,8 +2,8 @@
 
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
-Version: 2.1.99
-Release: 11.beta
+Version: 2.2.0
+Release: 0
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,6 +97,13 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Apr 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0
+- Bump version for release.
+- CHANGED: Campaign Monitoring, Dialer (ECCP): extend the getcampaignstatus and 
+  getincomingqueuestatus requests to report statistic values for the queried
+  campaign or queue. Use these to implement display of average and maximum call 
+  duration in Campaign Monitoring realtime display.
+
 * Mon Apr 01 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: allow inactivity timeout to be configurable
 

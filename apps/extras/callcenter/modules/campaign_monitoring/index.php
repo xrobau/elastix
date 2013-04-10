@@ -251,6 +251,7 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
         // Se arma la respuesta JSON y el estado final del cliente
         $respuesta = array_merge($respuesta, crearRespuestaVacia());
         $respuesta['statuscount']['update'] = $estadoCampania['statuscount'];
+        $respuesta['stats']['update'] = $estadoCampania['stats'];
         $respuesta['activecalls']['add'] = $estadoCampaniaLlamadas;
         $respuesta['agents']['add'] = $estadoCampaniaAgentes;
         $respuesta['log'] = $logFinalCampania;
@@ -260,6 +261,7 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
             'statuscount'   =>  $estadoCampania['statuscount'],
             'activecalls'   =>  $estadoCampania['activecalls'],
             'agents'        =>  $estadoCampania['agents'],
+            'stats'         =>  $estadoCampania['stats'],
         );
         
         $respuesta['estadoClienteHash'] = generarEstadoHash($module_name, $estadoCliente);
@@ -598,11 +600,21 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         	restarContadorLlamada('Success', $estadoCliente, $respuesta);
                             agregarContadorLlamada('Finished', $estadoCliente, $respuesta);
                             agregarContadorLlamada('Total', $estadoCliente, $respuesta);
+                            $respuesta['duration'] = $evento['duration'];
                         } else {
                         	if ($evento['shortcall']) {
                         		restarContadorLlamada('Success', $estadoCliente, $respuesta);
                                 agregarContadorLlamada('ShortCall', $estadoCliente, $respuesta);
+                        	} else {
+                        		// Se actualiza Finished para actualizar estadísticas
+                                agregarContadorLlamada('Finished', $estadoCliente, $respuesta);
+                                $respuesta['duration'] = $evento['duration'];
                         	}
+                        }
+                        if (isset($respuesta['duration'])) {
+                        	$estadoCliente['stats']['total_sec'] += $respuesta['duration'];
+                            if ($estadoCliente['stats']['max_duration'] < $respuesta['duration'])
+                                $estadoCliente['stats']['max_duration'] = $respuesta['duration'];
                         }
                     }
                     break;

@@ -75,6 +75,12 @@
 <td>{literal}{{App.campaniaActual.llamadas.terminadas}}{/literal}</td>
 </tr>
 {literal}{{/if}}{/literal}
+<tr>
+<td><b>Average Call Duration:</b></td>
+<td>{literal}{{App.campaniaActual.llamadas.fmtpromedio}}{/literal}</td>
+<td><b>Maximum Call Duration:</b></td>
+<td>{literal}{{App.campaniaActual.llamadas.fmtmaxduration}}{/literal}</td>
+</tr>
 </table>
 
 <table width="100%" ><tr><td width="50%" style="vertical-align: top;">

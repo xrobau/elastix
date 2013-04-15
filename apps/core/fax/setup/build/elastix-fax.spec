@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -192,13 +192,54 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: Fax - Build/elastix-fax.spec: Changed Version and Release in 
+  specfile according to the current branch.
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: email_template module, help section was updated.
+  SVN Rev[4725]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxviewer module, help section was updated.
+  SVN Rev[4723]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxclients module, help section was updated.
+  SVN Rev[4722]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: master module, help section was updated.
+  SVN Rev[4721]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxqueue module, help section was updated.
+  SVN Rev[4720]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxqueue module, help section was updated.
+  SVN Rev[4719]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sendfax module, help section was updated.
+  SVN Rev[4718]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxnew module, help section was updated.
+  SVN Rev[4717]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxlist module, help section was updated.
+  SVN Rev[4716]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: Fax - Build/elastix-fax.spec: Changed Version and Release in 
   specfile according to the current branch. 
 
 * Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
 - CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
-  SVN history. Changed release in specfile.  
+  SVN history. Changed release in specfile.
+  SVN Rev[4442]  
 
 * Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Fax: pick up notification email from submitted fax job in addition to

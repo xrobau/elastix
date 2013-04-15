@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,13 +92,59 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Mar 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: missed_calls module, help section was updated.
+  SVN Rev[4770]
+
+* Thu Mar 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: summary_by_extension module, help section was updated.
+  SVN Rev[4769]
+
+* Thu Mar 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: graphic_report module, help section was updated.
+  SVN Rev[4768]
+
+* Mon Mar 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: asterisk_log module, help section was updated.
+  SVN Rev[4758]
+
+* Fri Mar 15 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: billing_setup module, help section was updated.
+  SVN Rev[4757]
+
+* Fri Mar 15 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: dest_distribution module, help section was updated.
+  SVN Rev[4756]
+
+* Tue Mar 05 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: billing_report module, help section was updated.
+  SVN Rev[4752]
+
+* Tue Mar 05 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: billing_rates module, help section was updated.
+  SVN Rev[4751]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: channelusage module, help section was updated.
+  SVN Rev[4749]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: cdrreport module, help section was updated.
+  SVN Rev[4748]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: reports - Build/elastix-reports.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4643]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4628]
 
 * Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
 - FIXED: Its no more necesary to resize the popups in certain windows of

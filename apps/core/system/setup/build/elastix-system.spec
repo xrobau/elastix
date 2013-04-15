@@ -134,6 +134,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Apr 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: replace remote filelist filter implementation with 
+  a more compact version using regexps, with note about assumed workaround in
+  previous implementation.
+  SVN Rev[4834]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: system - Build/elastix-system.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

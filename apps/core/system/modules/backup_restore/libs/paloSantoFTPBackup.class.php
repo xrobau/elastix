@@ -104,26 +104,20 @@ class paloSantoFTPBackup {
     }
 
     function getOnlyTar($contents){
-        $new_list ="";
-        $j = 0;
-        for($i=0 ; $i<count($contents); $i++){
-            $band=strpos($contents[$i],".tar");
-            $content = explode(" ",$contents[$i]);
-            $size = count($content);
-            $file = "";
-            if($size > 1 && is_array($content)){
-                $file = $content[$size-1];
-            }else{
-                $file = $content[$size];
-            }
-            if($band != false){
-                if($file=="")
-                    $new_list[$j] = $contents[$i];
-                else
-                    $new_list[$j] = $file;
-                $j++;
+        $new_list = array();
+        foreach ($contents as $fileline) {
+        	$regs = NULL;
+            /* Recolectar nombres de archivo sin espacios que contengan .tar .
+             * Aparentemente esto no es necesario ya que $fileline debería tener
+             * la totalidad del nombre de archivo, pero da la impresión de que
+             * el código anterior se encontró con un caso en que la entrada 
+             * tenía información que no era parte del nombre de archivo. */
+            if (preg_match('/(\S*\.tar\S*)/', $fileline, $regs)) {
+            	$new_list[] = $regs[1];
             }
         }
+        
+        if (count($new_list) <= 0) $new_list = '';
         return $new_list;
     }
 

@@ -302,11 +302,11 @@ fi
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
 
-* Thu Apr 24 2013 Jose Briones <jbriones@palosanto.com>
+* Thu Apr 04 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: conference module, help section was updated.
   SVN Rev[4793]
 
-* Thu Apr 24 2013 Jose Briones <jbriones@palosanto.com>
+* Thu Apr 04 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: conference module, help section was updated.
   SVN Rev[4792]
 

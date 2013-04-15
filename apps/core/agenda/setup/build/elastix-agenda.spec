@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,7 +109,7 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
-* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: Agenda - Build/elastix-agenda.spec: Changed Version and Release in 
   specfile according to the current branch.
 

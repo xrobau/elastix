@@ -110,12 +110,30 @@ fi
 
 %changelog
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Feb 27 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: calendar module, help section was updated.
+  SVN Rev[4741]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: address_book module, help section was updated.
+  SVN Rev[4706]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: calendar module, help section was updated.
+  SVN Rev[4704]
+
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: Agenda - Build/elastix-agenda.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4635]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-10
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4624]
 
 * Wed Jan 23 2013 German Macas <gmacas@palosanto.com>
 - FIXED: modules: calendar: Fixed CallerId in calendar event and resize of

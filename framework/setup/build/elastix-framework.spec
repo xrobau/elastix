@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -308,18 +308,112 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Mon Apr 08 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: calling_cards help section was updated.
+  SVN Rev[4799]
+
+* Mon Apr 08 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: calling_cards help section was updated.
+  SVN Rev[4798]
+
+* Thu Apr 04 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: im help section was updated.
+  SVN Rev[4795]
+
+* Thu Apr 04 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: openfire help section was updated.
+  SVN Rev[4794]
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: instantmessaging module help section was updated.
+  SVN Rev[4778]
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sphones module help section was updated.
+  SVN Rev[4777]
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxutils module help section was updated.
+  SVN Rev[4776]
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sphones module help section was updated.
+  SVN Rev[4775]
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sphones module help section was updated.
+  SVN Rev[4774]
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: a2b help section was updated.
+  SVN Rev[4772]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: vtiger help section was updated.
+  SVN Rev[4771]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: openfire, help section was updated.
+  SVN Rev[4747]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: openfire module, help section was updated.
+  SVN Rev[4746]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: fop module, help section was updated.
+  SVN Rev[4745]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: webmail module, help section was updated.
+  SVN Rev[4710]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: themes_system module, help section was updated.
+  SVN Rev[4703]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: language module, help section was updated.
+  SVN Rev[4701]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: grouplist module, help section was updated.
+  SVN Rev[4695]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: group_permission module, help section was updated.
+  SVN Rev[4694]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: help css file, help style file was updated.
+  SVN Rev[4685]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: help css file, help style file was updated.
+  SVN Rev[4684]
+
 * Wed Feb 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: framework: allow registration process to accept arbitrary strings for
   Contact Name, Company, City. Fixes Elastix bug #1476.
   SVN Rev[4665]
 
+* Tue Jan 29 2013 Bruno Macias <bmacias@palosanto.com>
+- UPDATED: framework - themes, elastix theme was updated
+  SVN Rev[4650]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - FIXED: framework - Build/elastix-framework.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4633]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-17
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4623]
 
 * Mon Jan 28 2013 Bruno Macias <bmacias@palosanto.com>
 - FIXED: framework - elastixneo theme, slogan elastix, was updated because

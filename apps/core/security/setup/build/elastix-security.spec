@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -127,6 +127,34 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_sec_advanced_settings module, help section was updated.
+  SVN Rev[4791]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_weak_keys module, help section was updated.
+  SVN Rev[4790]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_accessaudit module, help section was updated.
+  SVN Rev[4789]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_accessaudit module, help section was updated.
+  SVN Rev[4788]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_ports module, help section was updated.
+  SVN Rev[4787]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_rules module, help section was updated.
+  SVN Rev[4786]
+
 * Mon Feb 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Firewall Rules: change layout on New Rule form to be more compatible
   across browsers. Fixes Elastix bug #1481.
@@ -135,10 +163,12 @@ fi
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: security - Build/elastix-security.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4644]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4629]
 
 * Thu Dec 04 2012 German Macas <gmacas@palosanto.com>
 - CHANGED: modules - file_editor - sec_weak_keys: Fixed item 4 and 5 from bug

@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -195,6 +195,42 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: vacations module, help section was updated.
+  SVN Rev[4715]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: email_stats module, help section was updated.
+  SVN Rev[4714]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: email_list module, help section was updated.
+  SVN Rev[4713]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: remote_smtp module, help section was updated.
+  SVN Rev[4712]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: antispam module, help section was updated.
+  SVN Rev[4711]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: email_relay module, help section was updated.
+  SVN Rev[4709]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: email_accounts module, help section was updated.
+  SVN Rev[4708]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: email_domains module, help section was updated.
+  SVN Rev[4707]
+
 * Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
 - FIXED: Apps - Email_Admin: Was fixed in module email_account bug 1461 item 4.
   SVN Rev[4654]
@@ -207,10 +243,12 @@ fi
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4636]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-12
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4626]
 
 * Wed Jan 16 2013 German Macas <gmacas@palosanto.com>
 - CHANGE: modules - packages - festival -antispam: Change grid view and add

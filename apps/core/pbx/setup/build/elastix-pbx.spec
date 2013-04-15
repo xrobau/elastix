@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,6 +298,18 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Apr 24 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: conference module, help section was updated.
+  SVN Rev[4793]
+
+* Thu Apr 24 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: conference module, help section was updated.
+  SVN Rev[4792]
+
 * Thu Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Batch of Extensions: the keywords that encode the recording options 
   must be written to the database with capital first letter. Fixes rest of
@@ -308,13 +320,90 @@ fi
   bug #1435.
   SVN Rev[4754]
 
+* Wed Feb 27 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: recordings module, help section was updated.
+  SVN Rev[4743]
+
+* Wed Feb 27 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: festival module, help section was updated.
+  SVN Rev[4742]
+
+* Wed Feb 27 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: text_to_wav module, help section was updated.
+  SVN Rev[4740]
+
+* Wed Feb 27 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: conference module, help section was updated.
+  SVN Rev[4739]
+
+* Wed Feb 27 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: file_editor module, help section was updated.
+  SVN Rev[4738]
+
+* Tue Feb 26 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: asterisk_cli module, help section was updated.
+  SVN Rev[4734]
+
+* Tue Feb 26 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: conference module, help section was updated.
+  SVN Rev[4733]
+
+* Mon Feb 25 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: extensions_batch module, help section was updated.
+  SVN Rev[4730]
+
+* Sat Feb 23 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: endpoints_batch module, help section was updated.
+  SVN Rev[4729]
+
+* Sat Feb 23 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: endpoint_configurator module, help section was updated.
+  SVN Rev[4728]
+
+* Fri Feb 22 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: monitoring module, help section was updated.
+  SVN Rev[4727]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: voicemail module, help section was updated.
+  SVN Rev[4726]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: pbxadmin module, help section was updated.
+  SVN Rev[4724]
+
+* Mon Feb 18 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add suppor to set new model Snom m9
+  SVN Rev[4692]
+
+* Fri Feb 08 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add support to set new model Snom 821
+  SVN Rev[4664]
+
+* Wed Feb 06 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add support to set new Fanvil models
+  C56/C56P C58/C58P and C60
+  SVN Rev[4661]
+
+* Thu Jan 31 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: endpoint_configurator: Add support to set new Yealink model
+  SIP-T38G and automatic provision in VP530 model
+  SVN Rev[4659]
+
+* Thu Jan 31 2013 Luis Abarca <labarca@palosanto.com>
+- REMOVED: pbx - modules/index.php: It were removed innecesary information when
+  Festival is activated.
+  SVN Rev[4652]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: pbx - Build/elastix-pbx.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4642]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-20
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4627]
 
 * Thu Jan 24 2013 Rocio Mera <rmera@palosanto.com>
 - CHANGED: Apps - PBX: In module Control_Planel was made changes in function

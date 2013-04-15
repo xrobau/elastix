@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -124,21 +124,33 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Changed release in specfile
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: addons_availables module, help section was updated.
+  SVN Rev[4780]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: Addons - Build/elastix-addons.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4634]
 
 * Wed Jan 23 2013 Alberto Santos <asantos@palosanto.com> 2.3.0-8
 - CHANGED: In spec file, added validation in post section to remove
   postgresql repo for architectures different to i386, i686 and x86_64
+  SVN Rev[4608]
 
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com>
 - FIXED: Addons - Build/elastix-addons.spec: Corrected some isues in the spec
   file about ownership of the commits.
+  SVN Rev[4361]
 
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Changed release in specfile
+  SVN Rev[4353]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 

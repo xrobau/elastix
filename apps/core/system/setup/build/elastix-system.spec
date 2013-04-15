@@ -135,10 +135,14 @@ fi
 
 %changelog
 * Mon Apr 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: work around a jQueryUI Droppable bug in which an <ul>
+  list of initial height 0 will not trigger drop event if dragged element 
+  triggers a resize of the list. Fixes Elastix bug #1526.
+  SVN Rev[4846]
 - CHANGED: Backup/Restore: replace remote filelist filter implementation with 
   a more compact version using regexps, with note about assumed workaround in
   previous implementation.
-  SVN Rev[4834]
+  SVN Rev[4844]
 
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: system - Build/elastix-system.spec: Update specfile with latest

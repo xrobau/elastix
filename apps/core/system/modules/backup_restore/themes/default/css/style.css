@@ -123,3 +123,9 @@ li{
     background-repeat: repeat-x;
     background-position: top;
 }
+
+/* Arreglo temporal para droppable que no recibe elemento en lista vacía de 
+altura 0 (Elastix bug #1526) */
+.droptrue, .droptrue2 {
+    min-height: 20px;
+}

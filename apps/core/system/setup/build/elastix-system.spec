@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,67 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: currency module, help section was updated.
+  SVN Rev[4705]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: time_config module, help section was updated.
+  SVN Rev[4702]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: backup_restore module, help section was updated.
+  SVN Rev[4700]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: packages module, help section was updated.
+  SVN Rev[4699]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: repositories module, help section was updated.
+  SVN Rev[4698]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: hardware_detector module, help section was updated.
+  SVN Rev[4697]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: shutdown module, help section was updated.
+  SVN Rev[4696]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: userlist module, help section was updated.
+  SVN Rev[4693]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: dhcp_by_mac module, help section was updated.
+  SVN Rev[4691]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: dhcp clientlist module, help section was updated.
+  SVN Rev[4690]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: dhcp server module, help section was updated.
+  SVN Rev[4689]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: network parameters module, help section was updated.
+  SVN Rev[4688]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: applet admin module, help section was updated.
+  SVN Rev[4687]
+
+* Mon Feb 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: dashboard module, help section was updated.
+  SVN Rev[4686]
+
+
 * Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: some restore operations overwrite known passwords, such
   as the root mysql password and the ami manager password. If passwords are
@@ -145,13 +206,31 @@ fi
   This fixes part 8 of Elastix bug #1461.
   SVN Rev[4657]
 
+* Wed Jan 30 2013 German Macas <gmacas@palosanto.com>
+- ADD: modules: dashboard: Add options to active o inactive services when
+  reboot system in Process Status Applet
+  SVN Rev[4655]
+
+* Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
+- CHANGED: Apps - System: In priviliged script backupengine was made changed to
+  add validations in case that no exist a file that pretend to backup.
+  SVN Rev[4651]
+
+* Tue Jan 29 2013 Rocio Mera <rmera@palosanto.com>
+- FIXED: Apps - System: Was made changed in priviliged script backupengine in
+  order to fix bug 1445 item 7. At the moment to restore mailboxs the message
+  showed as unread
+  SVN Rev[4647]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: system - Build/elastix-system.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4645]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-16
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4630]
 
 * Thu Jan 24 2013 Luis Abarca <labarca@palosanto.com>
 - CHANGED: system - userlist/index.php: Regardless of the length of the

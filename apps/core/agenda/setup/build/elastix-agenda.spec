@@ -109,6 +109,12 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Wed Apr 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: fix broken user filtering in main listing of contacts that
+  resulted in private contacts from other users being visible. Fixes Elastix 
+  bug #1529.
+  SVN Rev[4847]
+
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Changed release in specfile.

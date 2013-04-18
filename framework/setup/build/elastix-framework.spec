@@ -314,6 +314,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: Every single request to PHP code tried to access a file
+  /etc/asterisk/vm_email.inc from FreePBX that no longer exists in Elastix 3.
+  Removed offending code.
+  SVN Rev[4850] 
 - FIXED: Framework: SVN commit #4051 changed elastixneo theme to run with 
   updated menus, but blackmin/giox themes were forgotten. Fixed.
   SVN Rev[4849]

@@ -110,8 +110,6 @@ if (isset($_SESSION['elastix_user']) &&
         ? $pMenu->cargar_menu()
         : $pMenu->filterAuthorizedMenus($idUser);
 
-    verifyTemplate_vm_email(); // para cambiar el template del email ue se envia al recibir un voicemail
-
     //traducir el menu al idioma correspondiente
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
         $arrMenuFiltered[$idMenu]['description'] = _tr($arrMenuItem['description']);

@@ -667,38 +667,6 @@ function writeLOG($logFILE, $log)
         echo "The file $logFILE couldn't be opened";
 }
 
-function verifyTemplate_vm_email()
-{
-   $ip = $_SERVER['SERVER_ADDR'];
-   $login = "?login=\${VM_MAILBOX}";
-   $file = "/etc/asterisk/vm_email.inc";
-   //http://AMPWEBADDRESS/recordings/index.php?login=${VM_MAILBOX}
-   $file_string = file_get_contents($file);
-   if($file_string){
-      $file_string_new = str_replace("*98","*97", $file_string);
-
-      if(preg_match("/https?:\/\/(.*)\/recordings\/index\.php/",$file_string_new,$arrVar)){
-         if(is_array($arrVar) && count($arrVar) > 1){
-             $ip_old = $arrVar[1];
-             if($ip_old != $ip)
-                $file_string_new = str_replace($ip_old, $ip, $file_string_new);
-         }
-      }
-
-      if(preg_match("/https?:\/\/.*\/recordings\/index\.php(\s|\?login=\$\{VM_MAILBOX\})/",$file_string_new,$arrVar)){
-         if(is_array($arrVar) && count($arrVar) > 1){
-             $login_old  = $arrVar[1];
-             if($login_old != $login)
-                $file_string_new = str_replace("index.php","index.php$login", $file_string_new);
-         }
-      }
-
-      if($file_string != $file_string_new)
-         file_put_contents($file, $file_string_new);
-   }
-}
-
-
 function setUserPassword()
 {
 	include_once "libs/paloSantoACL.class.php";

@@ -200,8 +200,8 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
                         $arrTmp[] = "<input type='checkbox' class='chk_id' value='{$value['id']}' />";
                         $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=assignDIDs&id=".$value['id']."'>"._tr("Assign DIDs")."</a>";
                     }
-					$arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".$value['domain']."</a>";
-					$arrTmp[] = $value['name'];
+					$arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".htmlentities($value['domain'], ENT_COMPAT, 'UTF-8')."</a>";
+					$arrTmp[] = htmlentities($value['name'], ENT_COMPAT, 'UTF-8');
 					if($value['domain']!=false)
                         $arrTmp[] =_tr($value['state']);
 					if($pOrganization->getNumUserByOrganization($value['id'])>0)

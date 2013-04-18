@@ -313,6 +313,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Apr 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Userlist: remove XSS bug through user-supplied orgname/username/address.
+  SVN Rev[4848]
+
 * Wed Apr 10 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

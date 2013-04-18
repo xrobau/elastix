@@ -183,8 +183,8 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     foreach($arrUsers as $user) {
         $arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=$user[0]'>".$user[1]."</a>";    
         $arrOgz=$pORGZ->getOrganizationById($user[4]);
-        $arrTmp[1] = $arrOgz["name"];
-        $arrTmp[2] = $user[2];
+        $arrTmp[1] = htmlentities($arrOgz["name"], ENT_COMPAT, 'UTF-8');
+        $arrTmp[2] = htmlentities($user[2], ENT_COMPAT, 'UTF-8');
         $gpTmp = $pACL->getGroupNameByid($user[7]);
         $arrTmp[3]=$gpTmp==("superadmin")?_tr("NONE"):$gpTmp;
         if(!isset($user[5]) || $user[5]==""){
@@ -289,7 +289,7 @@ function viewFormUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         foreach($orgTmp as $value){
             $arrOrgz[$value["id"]]=$value["name"];
         }
-        $smarty->assign("ORGANIZATION",$orgTmp[0]["name"]);
+        $smarty->assign("ORGANIZATION",htmlentities($orgTmp[0]["name"], ENT_COMPAT, 'UTF-8'));
     }
 
 
@@ -338,7 +338,7 @@ function viewFormUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
                 $arrFill["extension"]=$extu;
                 $arrFill["fax_extension"]=$extf;
             }
-            $smarty->assign("ORGANIZATION",$arrOrgz[$arrFill["organization"]]);
+            $smarty->assign("ORGANIZATION",htmlentities($arrOrgz[$arrFill["organization"]], ENT_COMPAT, 'UTF-8'));
             $smarty->assign("USERNAME",$arrFill["username"]);
             $nGroup=$pACL->getGroupNameByid($arrFill["group"]);
             if($nGroup=="superadmin");

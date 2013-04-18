@@ -134,6 +134,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Apr 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Userlist: remove XSS bug through user-supplied orgname/username/address.
+  SVN Rev[4848]
+
 * Mon Apr 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: work around a jQueryUI Droppable bug in which an <ul>
   list of initial height 0 will not trigger drop event if dragged element 

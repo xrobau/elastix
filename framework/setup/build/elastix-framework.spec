@@ -314,6 +314,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: SVN commit #4051 changed elastixneo theme to run with 
+  updated menus, but blackmin/giox themes were forgotten. Fixed.
+  SVN Rev[4849]
 - FIXED: Userlist: remove XSS bug through user-supplied orgname/username/address.
   SVN Rev[4848]
 

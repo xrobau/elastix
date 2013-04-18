@@ -659,26 +659,26 @@ function reportUserList($arrLang, $pACL, $idUserAccount, $smarty, $userLevel1, $
         //$arrTmp[0] = "&nbsp;<a href='?menu=usernew&action=view&id=" . $user['id'] . "'>" . $user['name'] . "</a>";
         //$arrTmp[1] = $user['description'];
         if($idUserAccount){
-            $arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=" . $user[0] . "'>" . $user[1] . "</a>";
-            $arrTmp[1] = $user[2];
-            $arrTmp[2] = $group;
+            $arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=" . $user[0] . "'>" . htmlentities($user[1], ENT_COMPAT, 'UTF-8') . "</a>";
+            $arrTmp[1] = htmlentities($user[2], ENT_COMPAT, 'UTF-8');
+            $arrTmp[2] = htmlentities($group, ENT_COMPAT, 'UTF-8');
             if( ($user[3] == '') || is_null($user[3]) )
                 $arrTmp[3] = _tr("No extension associated");
             else
-                $arrTmp[3] = $user[3];
+                $arrTmp[3] = htmlentities($user[3], ENT_COMPAT, 'UTF-8');
             $arrData[] = $arrTmp;
             $smarty->assign("usermode","admin");
             $typeUser = "admin";
             $end++;
         }else{
             if($user[1] == $userAccount){
-                $arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=" . $user[0] . "'>" . $user[1] . "</a>";
-                $arrTmp[1] = $user[2];
-                $arrTmp[2] = $group;
+                $arrTmp[0] = "&nbsp;<a href='?menu=userlist&action=view&id=" . $user[0] . "'>" . htmlentities($user[1], ENT_COMPAT, 'UTF-8') . "</a>";
+                $arrTmp[1] = htmlentities($user[2], ENT_COMPAT, 'UTF-8');
+                $arrTmp[2] = htmlentities($group, ENT_COMPAT, 'UTF-8');
                 if( ($user[3] == '') || is_null($user[3]) )
                     $arrTmp[3] = _tr("No extension associated");
                 else
-                    $arrTmp[3] = $user[3];
+                    $arrTmp[3] = htmlentities($user[3], ENT_COMPAT, 'UTF-8');
                 $arrData[] = $arrTmp;
                 $smarty->assign("usermode","other");
                 $typeUser = "other";

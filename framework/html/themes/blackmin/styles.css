@@ -77,6 +77,13 @@ input
     border-left: 1px #999999 solid; 
     border-bottom: 1px #cccccc solid; 
     border-right: 1px #cccccc solid; 
+    font-family: verdana, arial, helvetica, sans-serif;
+    text-decoration: none;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    font-size:12px;
+    min-height: 22px;
 }
 textarea
 {
@@ -86,6 +93,12 @@ textarea
     border-left: 1px #999999 solid; 
     border-bottom: 1px #cccccc solid; 
     border-right: 1px #cccccc solid; 
+    font-family: verdana, arial, helvetica, sans-serif;
+    text-decoration: none;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    font-size:12px;
 }
 select
 {
@@ -95,6 +108,13 @@ select
     border-left: 1px #999999 solid; 
     border-bottom: 1px #cccccc solid; 
     border-right: 1px #cccccc solid; 
+    font-family: verdana, arial, helvetica, sans-serif;
+    text-decoration: none;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    font-size:12px;
+    min-height: 26px;
 }
 input.button, input.submit
 {

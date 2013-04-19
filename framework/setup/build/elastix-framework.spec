@@ -308,6 +308,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Apr 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: (trivial) Make input widgets for blackmin rounded like 
+  they are for elastixneo.
+- CHANGED: Framework: Display no-data placeholder on list template for blackmin.
+  SVN Rev[4851] 
+
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile.

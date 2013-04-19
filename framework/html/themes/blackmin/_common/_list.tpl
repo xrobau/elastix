@@ -129,6 +129,7 @@
             </tr>
         </thead>
         <tbody>
+            {if $numData > 0}
             {foreach from=$arrData key=k item=data name=filas}
                 {if $data.ctrl eq 'separator_line'}
                     <tr>
@@ -152,6 +153,9 @@
                     </tr>
                 {/if}
             {/foreach}
+            {else}
+                <tr><td class="table_data" colspan="{$numColumns}" align="center">{$NO_DATA_FOUND}</td></tr>
+            {/if}
         </tbody>
         <tfoot>
             <tr><td colspan="{$numColumns}">

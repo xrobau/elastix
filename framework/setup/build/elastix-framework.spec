@@ -313,6 +313,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Apr 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: (trivial) Make input widgets for blackmin rounded like 
+  they are for elastixneo.
+- CHANGED: Framework: Display no-data placeholder on list template for blackmin.
+  SVN Rev[4851] 
+
 * Thu Apr 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: Every single request to PHP code tried to access a file
   /etc/asterisk/vm_email.inc from FreePBX that no longer exists in Elastix 3.

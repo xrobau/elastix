@@ -1,3 +1,6 @@
+* Incoming Campaign: fix assignment to incorrect template variable leading to
+  visualization of New Campaign form when there are no incoming queues. Fixes
+  Elastix bug #1533.
 * Campaign Monitoring, Dialer (ECCP): extend the getcampaignstatus and 
   getincomingqueuestatus requests to report statistic values for the queried
   campaign or queue. Use these to implement display of average and maximum call 

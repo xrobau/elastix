@@ -1,12 +1,12 @@
 {if $no_queues}
-<p><b>No queues have been defined</b></p>
-<p>For an outgoing campaign to be created, it is necessary to configure at least one queue. You can add queues <a href="?menu=pbxconfig&amp;display=queues">here</a>.</p>
+<p><b>No incoming queues have been defined</b></p>
+<p>For an incoming campaign to be created, it is necessary to configure at least one incoming queue. You can add queues <a href="?menu=pbxconfig&amp;display=queues">here</a> and configure them as incoming queues <a href="?menu=queues">here</a>.</p>
 {elseif $no_incoming_queues }
 <p><b>No remaining queues for incoming campaings</b></p>
-<p>No queues are currently reserved for incoming campaigns. For an incoming campaign to be created, it is necessary to have at least one reserved queue. You can add queues <a href="?menu=pbxconfig&amp;display=queues">here</a>.</p>
+<p>No queues are currently reserved for incoming campaigns. For an incoming campaign to be created, it is necessary to have at least one reserved queue. You can add queues <a href="?menu=pbxconfig&amp;display=queues">here</a> and configure them as incoming queues <a href="?menu=queues">here</a>.</p>
 {elseif $no_forms }
 <p><b>No active forms available</b></p>
-<p>For an outgoing campaign to be created, it is necessary to have at least one active form. You can add forms <a href="?menu=form_designer">here</a>.</p>
+<p>For an incoming campaign to be created, it is necessary to have at least one active form. You can add forms <a href="?menu=form_designer">here</a>.</p>
 {else}
 <script language="JavaScript" type="text/javascript" src="{$relative_dir_rich_text}/richtext/html2xhtml.js"></script>
 <script language="JavaScript" type="text/javascript" src="{$relative_dir_rich_text}/richtext/richtext_compressed.js"></script>

@@ -330,7 +330,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
     } elseif (count($arrDataQueues) <= 0) {
         $formCampos = getFormCampaign($arrDataQueues, NULL, NULL, NULL);
         $oForm = new paloForm($smarty, $formCampos);
-        $smarty->assign('no_outgoing_queues', 1);
+        $smarty->assign('no_incoming_queues', 1);
     } elseif (count($arrDataForm) <= 0) {
         $formCampos = getFormCampaign($arrDataQueues, NULL, NULL, NULL);
         $oForm = new paloForm($smarty, $formCampos);

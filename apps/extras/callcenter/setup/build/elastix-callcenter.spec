@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Apr 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Incoming Campaign: fix assignment to incorrect template variable 
+  leading to visualization of New Campaign form when there are no incoming 
+  queues. Fixes Elastix bug #1533.
+
 * Wed Apr 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0
 - Bump version for release.
 - CHANGED: Campaign Monitoring, Dialer (ECCP): extend the getcampaignstatus and 

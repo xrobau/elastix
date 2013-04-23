@@ -96,10 +96,11 @@ class CampaignProcess extends TuberiaProcess
         try {
             $this->_db->query('DELETE FROM current_calls WHERE 1');
             $this->_db->query('DELETE FROM current_call_entry WHERE 1');
+            $this->_db->query("UPDATE call_entry SET status = 'fin-monitoreo' WHERE datetime_end IS NULL AND status <> 'fin-monitoreo'");
         } catch (PDOException $e) {
             $this->_log->output("FATAL: error al limpiar tablas current_calls - ".$e->getMessage());
         	return FALSE;
-        }        
+        }
 
         // Detectar capacidades de FreePBX y de call_center
         $this->_detectarTablaTrunksFPBX();

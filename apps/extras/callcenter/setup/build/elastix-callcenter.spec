@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Apr 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: tag all incoming calls with no end timestamp as LostTrack on 
+  startup. This sanity check was lost on the multiple-process rewrite. May fix 
+  part of Elastix bug #1531.
+
 * Mon Apr 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Incoming Campaign: fix assignment to incorrect template variable 
   leading to visualization of New Campaign form when there are no incoming 

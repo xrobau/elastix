@@ -62,21 +62,20 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         case "save_new":
-            $content = saveApplets_Admin();
+            $content = saveApplets_Admin($module_name);
             break;
         default: // view_form
-            $content = showApplets_Admin();
+            $content = showApplets_Admin($module_name);
             break;
     }
     return $content;
 }
 
-function showApplets_Admin()
+function showApplets_Admin($module_name)
 {
     global $smarty;
     global $arrLang;
     global $arrConf;
-    $module_name = $_SESSION["menu"];
 
     $pAppletAdmin = new paloSantoAppletAdmin();
     $oForm = new paloForm($smarty,array());
@@ -100,12 +99,11 @@ function showApplets_Admin()
     return $content;
 }
 
-function saveApplets_Admin()
+function saveApplets_Admin($module_name)
 {
     global $smarty;
     global $arrLang;
     $arrIDs_DAU = null;
-    $module_name = $_SESSION["menu"];
 
     if(is_array($_POST) & count($_POST)>0){
         foreach($_POST as $key => $value){
@@ -126,7 +124,7 @@ function saveApplets_Admin()
             $smarty->assign("mb_message", $pAppletAdmin->errMsg);
         }
     }
-    return showApplets_Admin();
+    return showApplets_Admin($module_name);
 }
 
 function getAction()

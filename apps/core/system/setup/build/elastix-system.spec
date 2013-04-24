@@ -134,6 +134,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Applet Admin: use supplied module_name instead of getting variable
+  from session. The package elastix-framework needs a Conflicts with previous
+  versions of elastix-system.
+  SVN Rev[4857]
+
 * Thu Apr 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Userlist: remove XSS bug through user-supplied orgname/username/address.
   SVN Rev[4848]

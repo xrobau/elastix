@@ -16,7 +16,7 @@ Prereq: perl
 Prereq: elastix-firstboot >= 3.0.0-1
 Obsoletes: elastix-additionals
 Provides: elastix-additionals
-Conflicts: elastix-system < 2.0.4-18
+Conflicts: elastix-system <= 3.0.0-2
 Conflicts: elastix-callcenter <= 2.0.0-16
 Conflicts: elastix-pbx <= 2.2.0-16
 Conflicts: elastix-fax <= 2.2.0-5 
@@ -314,6 +314,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Applet Admin: use supplied module_name instead of getting variable
+  from session. The package elastix-framework needs a Conflicts with previous
+  versions of elastix-system.
+  SVN Rev[4857]
 - CHANGED: Framework: remove useless developerMode variable
   SVN Rev[4856]
 - CHANGED: Framework: make some variables of paloSantoNavigation private.

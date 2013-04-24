@@ -36,8 +36,6 @@ include_once("libs/paloSantoACL.class.php");// Don activate unless you know what
 include_once "libs/paloSantoOrganization.class.php";
 load_default_timezone();
 
-$developerMode=false;
-
 session_name("elastixSession");
 session_start();
 
@@ -97,8 +95,7 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
 // 2) Autentico usuario
 if (isset($_SESSION['elastix_user']) && 
     isset($_SESSION['elastix_pass']) && 
-    $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass']) 
-    or $developerMode==true) {
+    $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass'])) {
     $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
 	//print_r($_SESSION);
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
@@ -106,9 +103,7 @@ if (isset($_SESSION['elastix_user']) &&
     $_SESSION['elastix_organization'] = $id_organization;
 
 
-    $arrMenuFiltered = $developerMode 
-        ? $pMenu->cargar_menu()
-        : $pMenu->filterAuthorizedMenus($idUser);
+    $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);
 
     //traducir el menu al idioma correspondiente
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
@@ -131,9 +126,6 @@ if (isset($_SESSION['elastix_user']) &&
     	$smarty->assign("ColorRegister", "#008800");
     }
 
-    /*agregado para register*/
-	$menuColor = getMenuColorByMenu();
-
     $smarty->assign("md_message_title", _tr('md_message_title'));
     $smarty->assign("currentyear",date("Y"));
 	if($arrConf['mainTheme']=="elastixwave" || $arrConf['mainTheme']=="elastixneo"){
@@ -149,7 +141,7 @@ if (isset($_SESSION['elastix_user']) &&
 		$smarty->assign("NEW_PASSWORD", _tr("New Password"));
 		$smarty->assign("RETYPE_PASSWORD", _tr("Retype New Password"));
 		$smarty->assign("CHANGE_PASSWORD_BTN", _tr("Change"));
-		$smarty->assign("MENU_COLOR", $menuColor);
+		$smarty->assign("MENU_COLOR", getMenuColorByMenu());
 		$smarty->assign("MODULES_SEARCH", _tr("Search modules"));
 		$smarty->assign("viewMenuTab", getStatusNeoTabToggle());
 		$smarty->assign("ADD_BOOKMARK", _tr("Add Bookmark"));
@@ -309,26 +301,22 @@ if (isset($_SESSION['elastix_user']) &&
 	}else
 		$smarty->assign("STATUS_STICKY_NOTE", "false");
 
+    // Obtener contenido del módulo, si usuario está autorizado a él
+    $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu); 
+    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';    
+    
     // rawmode es un modo de operacion que pasa directamente a la pantalla la salida
     // del modulo. Esto es util en ciertos casos.
     $rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes') {
-         // Autorizacion
-        if($pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu) or $developerMode==true) {
-            echo $oPn->showContent();
-        }
+        echo $sModuleContent;
     } else {
        // Autorizacion
-        if($pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu) or $developerMode==true) {
-            $smarty->assign("CONTENT",   $oPn->showContent());
-
-            if (count($arrMenuFiltered)>0){
-                $menu_html = $smarty->fetch("_common/_menu.tpl");
-                $smarty->assign("MENU",$menu_html);
-            }
-            else{
-                $smarty->assign("MENU","No modules");
-            }
+        if ($bModuleAuthorized) {
+            $smarty->assign("CONTENT", $sModuleContent);
+            $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 
+                ? $smarty->fetch("_common/_menu.tpl") 
+                : _tr('No modules'));
         }
         $smarty->display("_common/index.tpl");
     }

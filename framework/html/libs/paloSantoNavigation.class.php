@@ -29,13 +29,13 @@
 
 class paloSantoNavigation {
 
-    var $defaultMenu;
-    var $arrMenu;
-    var $smarty;
-    var $currMainMenu;
+    private $defaultMenu;
+    private $arrMenu;
+    private $smarty;
+    private $currMainMenu;
     var $currSubMenu;
-    var $currSubMenu2;
-    var $currSubMenuByParents;
+    private $currSubMenu2;
+    private $currSubMenuByParents;
 
     function paloSantoNavigation($arrConf, $arrMenu, &$smarty)
     {

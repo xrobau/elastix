@@ -313,6 +313,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: make some methods of paloSantoNavigation private.
+  SVN Rev[4854]
+
 * Fri Apr 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: (trivial) Make input widgets for blackmin rounded like 
   they are for elastixneo.

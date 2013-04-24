@@ -52,7 +52,7 @@ class paloSantoNavigation {
     }
 
 
-    function getArrParentIds($idMenuSelected)
+    private function getArrParentIds($idMenuSelected)
     {
         $idMenuActual = $this->getIdParentMenu($idMenuSelected);
         $limite=10;
@@ -74,7 +74,7 @@ class paloSantoNavigation {
        return $arrResult;
     }
 
-    function getArrChildrenIds($idMenuSelected)
+    private function getArrChildrenIds($idMenuSelected)
     {
         $limite=10;
         $arrResult = array();
@@ -265,7 +265,7 @@ class paloSantoNavigation {
     }
 
 
-    function getIdParentMenu($id)
+    private function getIdParentMenu($id)
     {
         // verificar que $this->arrMenu[$id] exista
 		if(isset($this->arrMenu[$id]))
@@ -274,7 +274,7 @@ class paloSantoNavigation {
 			return NULL;
     }
 
-    function isValidMenu($id)
+    private function isValidMenu($id)
     {
         return array_key_exists($id, $this->arrMenu);
     }
@@ -292,7 +292,7 @@ class paloSantoNavigation {
     }
 
 // added by eduardo
-    function getArrSubMenuByParents($idParent)
+    private function getArrSubMenuByParents($idParent)
     {
         $arrSubMenu = array();
 		global $arrConf;
@@ -315,7 +315,7 @@ class paloSantoNavigation {
         return $arrSubMenu;
     }
 
-    function getIdFirstSubMenu($idParent)
+    private function getIdFirstSubMenu($idParent)
     {
         $arrSubMenu=$this->getArrSubMenu($idParent);
         if($arrSubMenu==false) return false;
@@ -357,7 +357,7 @@ class paloSantoNavigation {
         return $retVar;
     }
 
-    function includeModule($module)
+    private function includeModule($module)
     {
         if(file_exists("modules/$module/index.php")) {
             include "modules/$module/index.php";
@@ -391,7 +391,7 @@ class paloSantoNavigation {
     * e-mail:
     *   ecueva@palosanto.com
     */
-    function putHEAD_MODULE_HTML($menuLibs)  // add by eduardo
+    private function putHEAD_MODULE_HTML($menuLibs)  // add by eduardo
     {
         // get the header with scripts and links(css)
         $documentRoot = $_SERVER["DOCUMENT_ROOT"];
@@ -475,7 +475,7 @@ class paloSantoNavigation {
     * e-mail:
     *   ecueva@palosanto.com
     */
-    function obtainFiles($dir,$type){
+    private function obtainFiles($dir,$type){
 		$files =  glob($dir."/{*.$type}",GLOB_BRACE);
 		$names ="";
 		foreach ($files as $ima)
@@ -484,7 +484,7 @@ class paloSantoNavigation {
 		return $names;
     }
 
-	function loadShortcut()
+	private function loadShortcut()
 	{
 		include_once "libs/paloSantoACL.class.php";
 		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";

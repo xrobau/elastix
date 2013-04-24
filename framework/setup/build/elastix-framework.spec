@@ -309,6 +309,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove useless developerMode variable
+  SVN Rev[4856]
 - CHANGED: Framework: make some variables of paloSantoNavigation private.
   SVN Rev[4855]
 - CHANGED: Framework: make some methods of paloSantoNavigation private.

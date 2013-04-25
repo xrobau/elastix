@@ -535,35 +535,6 @@ function generarDSNSistema($sNombreUsuario, $sNombreDB, $ruta_base='')
     return NULL;
 }
 
-/**
- * Función para obtener un detalle de los rpms que se encuentran instalados en el sistema.
- *
- *
- * @return  mixed   NULL si no se reconoce usuario, o el DNS con clave resuelta
- */
-function obtenerDetallesRPMS()
-{
-    $comando1  = "/bin/bash /usr/bin/versionPaquetes.sh";
-
-    $arrPro = array();
-    $output1 = $retval = NULL;
-    exec($comando1, $output1, $retval);
-    $label = NULL;
-    foreach ($output1 as $s) {
-    	if (substr($s, 0, 3) == 'RPM') {
-            $arrPro[$label = substr($s, 4)] = array();
-    	} else {
-            $regs = NULL;
-            if (preg_match('/package (.+) is not installed/', $s, $regs)) {
-                $arrPro[$label][] = array($regs[1], '(not installed)', ' ');
-            } else {
-                $arrPro[$label][] = explode(' ', $s);
-            }
-    	}
-    }
-    return $arrPro;
-}
-
 function isPostfixToElastix2(){
     $pathImap    = "/etc/imapd.conf";
     $vitualDomain = "virtdomains: yes";

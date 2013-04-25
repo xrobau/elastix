@@ -115,11 +115,9 @@ mv $RPM_BUILD_DIR/elastix-framework/framework/setup/ 	                          
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-menumerge            $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-menuremove           $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-dbprocess            $RPM_BUILD_ROOT/usr/bin/
-mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/versionPaquetes.sh           $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/compareVersion		   $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/search_ami_admin_pwd             $RPM_BUILD_ROOT/usr/bin/
 chmod 755 $RPM_BUILD_ROOT/usr/bin/compareVersion
-chmod 755 $RPM_BUILD_ROOT/usr/bin/versionPaquetes.sh
 chmod 755 $RPM_BUILD_ROOT/usr/bin/search_ami_admin_pwd
 
 # ** Moving elastix_helper
@@ -289,7 +287,6 @@ rm -rf $RPM_BUILD_ROOT
 /usr/sbin/close-on-exec.pl
 /usr/bin/elastix-menumerge
 /usr/bin/elastix-menuremove
-/usr/bin/versionPaquetes.sh
 /usr/bin/elastix-dbprocess
 /usr/bin/elastix-helper
 /usr/bin/compareVersion
@@ -308,6 +305,17 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Apr 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: introduce hidden module _elastixutils. This module will 
+  contain various utilities for widgets in the Elastix Web GUI. This allows
+  a cleanup of index.php, by removing functionality that does not belong in
+  the router and authorization code. As a proof of concept, the package version
+  query was moved to _elastixutils. In the process, the query was reimplemented
+  to issue a single rpm command instead of multiple ones, and achieving a 50%
+  speedup. This also makes /usr/bin/versionPaquetes.sh obsolete so it is now
+  removed.
+  SVN Rev[4858]
+
 * Wed Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Applet Admin: use supplied module_name instead of getting variable
   from session. The package elastix-framework needs a Conflicts with previous

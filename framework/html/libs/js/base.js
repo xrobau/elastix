@@ -654,7 +654,7 @@ function saveToggleTab(){
 
 //***Genera la Tabla de los Detalles de la Versión
 function loadDetails(){
-        var order = "action=versionRPM&rawmode=yes";
+        var order = "menu=_elastixutils&action=versionRPM&rawmode=yes";
         $.post("index.php", order, function(theResponse){
             $("#loadingRPM").hide();
             $("#changeMode").show();

@@ -83,4 +83,52 @@ function obtenerDetallesRPMS()
     return $result;
 }
 
+function setUserPassword()
+{
+    include_once "libs/paloSantoACL.class.php";
+
+    $old_pass   = getParameter("oldPassword");
+    $new_pass   = getParameter("newPassword");
+    $new_repass = getParameter("newRePassword");
+    $arrResult  = array();
+    $arrResult['status'] = FALSE;
+    if($old_pass == ""){
+      $arrResult['msg'] = _tr("Please write your current password.");
+      return $arrResult;
+    }
+    if($new_pass == "" || $new_repass == ""){
+      $arrResult['msg'] = _tr("Please write the new password and confirm the new password.");
+      return $arrResult;
+    }
+    if($new_pass != $new_repass){
+      $arrResult['msg'] = _tr("The new password doesn't match with retype new password.");
+      return $arrResult;
+    }
+
+    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    global $arrConf;
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pdbACL);
+    $uid = $pACL->getIdUser($user);
+    if($uid===FALSE)
+        $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
+    else{
+        // verificando la clave vieja
+        $val = $pACL->authenticateUser ($user, md5($old_pass));
+        if($val === TRUE){
+            $status = $pACL->changePassword($uid, md5($new_pass));
+            if($status){
+                $arrResult['status'] = TRUE;
+                $arrResult['msg'] = _tr("Elastix password has been changed.");
+                $_SESSION['elastix_pass'] = md5($new_pass);
+            }else{
+                $arrResult['msg'] = _tr("Impossible to change your Elastix password.");
+            }
+        }else{
+            $arrResult['msg'] = _tr("Impossible to change your Elastix password. User does not exist or password is wrong");
+        }
+    }
+    return $arrResult;
+}
+
 ?>

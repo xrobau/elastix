@@ -460,6 +460,7 @@ function saveNewPasswordElastix(){
 	  return;
 	}
 
+	arrAction["menu"]          = '_elastixutils';
 	arrAction["action"]        = "changePasswordElastix";
 	arrAction["oldPassword"]   = oldPass;
 	arrAction["newPassword"]   = newPass;

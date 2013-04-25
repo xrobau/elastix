@@ -176,19 +176,6 @@ if (isset($_SESSION['elastix_user']) &&
 
     $_SESSION['menu']=$menu;
 
-	if(getParameter("action")=="changePasswordElastix"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$output = setUserPassword();
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("true");
-		}else
-		  $jsonObject->set_status("false");
-		$jsonObject->set_error($output['msg']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
 	if(getParameter("action")=="search_module"){
 		echo searchModulesByName();
 		return;

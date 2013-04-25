@@ -311,6 +311,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move changePasswordElastix functionality to elastixutils.
+  SVN Rev[4859]
 - ADDED: Framework: introduce hidden module _elastixutils. This module will 
   contain various utilities for widgets in the Elastix Web GUI. This allows
   a cleanup of index.php, by removing functionality that does not belong in

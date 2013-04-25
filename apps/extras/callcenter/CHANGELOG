@@ -1,3 +1,4 @@
+* Agent Console: filter breaks to remove inactive breaks from list.
 * Dialer: tag all incoming calls with no end timestamp as LostTrack on startup.
   This sanity check was lost on the multiple-process rewrite. May fix part of
   Elastix bug #1531.

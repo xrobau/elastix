@@ -520,7 +520,8 @@ LISTA_EXTENSIONES;
             }
             $listaPausas = array();
             foreach ($respuesta->pause as $xml_pause) {
-            	$listaPausas[(int)$xml_pause['id']] = (string)$xml_pause->name.' - '.(string)$xml_pause->description;
+                if ($xml_pause->status == 'A')
+            	   $listaPausas[(int)$xml_pause['id']] = (string)$xml_pause->name.' - '.(string)$xml_pause->description;
             }
             return $listaPausas;
         } catch (Exception $e) {

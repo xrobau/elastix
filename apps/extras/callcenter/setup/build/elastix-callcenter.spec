@@ -97,6 +97,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: filter breaks to remove inactive breaks from list.
+
 * Tue Apr 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: tag all incoming calls with no end timestamp as LostTrack on 
   startup. This sanity check was lost on the multiple-process rewrite. May fix 

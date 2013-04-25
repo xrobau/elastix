@@ -176,13 +176,6 @@ if (isset($_SESSION['elastix_user']) &&
 
     $_SESSION['menu']=$menu;
 
-	if(getParameter("action")=="versionRPM"){
-        $arrDetails = obtenerDetallesRPMS(); // obtain RPMs Details
-        require_once("libs/JSON.php");
-        $json = new Services_JSON(); 
-        echo $json->encode($arrDetails);
-        return;
-    }
 	if(getParameter("action")=="changePasswordElastix"){
 		include_once "libs/paloSantoJSON.class.php";
 		$jsonObject = new PaloSantoJSON();
@@ -300,6 +293,16 @@ if (isset($_SESSION['elastix_user']) &&
 			$smarty->assign("STATUS_STICKY_NOTE", "false");
 	}else
 		$smarty->assign("STATUS_STICKY_NOTE", "false");
+
+    /* El módulo _elastixutils sirve para contener las utilidades json que
+     * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
+     * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
+    // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
+    if ($menu == '_elastixutils' && file_exists('modules/_elastixutils/index.php')) {
+        require_once 'modules/_elastixutils/index.php';
+        echo _moduleContent($smarty, $menu);
+        return;
+    }
 
     // Obtener contenido del módulo, si usuario está autorizado a él
     $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu); 

@@ -306,6 +306,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move remainder of requests to elastixutils module. Handle
+  elastixutils before entering paloSantoNavigation to prevent assignment to 
+  session variable.
+  SVN Rev[4868]
 - CHANGED: Framework: the following requests now send the current module ID and
   attempt to route to the elastixutils module: addBookmark, deleteBookmark,
   save_sticky_note, get_sticky_note, saveNeoToggleTab.

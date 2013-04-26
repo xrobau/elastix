@@ -96,14 +96,13 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
 if (isset($_SESSION['elastix_user']) && 
     isset($_SESSION['elastix_pass']) && 
     $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass'])) {
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
-	//print_r($_SESSION);
+    
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
-	$id_organization = $pACL->getIdOrganizationUser($idUser);
-    $_SESSION['elastix_organization'] = $id_organization;
-
-
+    $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
     $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);
+
+    $id_organization = $pACL->getIdOrganizationUser($idUser);
+    $_SESSION['elastix_organization'] = $id_organization;
 
     //traducir el menu al idioma correspondiente
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
@@ -168,11 +167,21 @@ if (isset($_SESSION['elastix_user']) &&
 	$smarty->assign("MSG_SAVE_NOTE", _tr("Saving Note"));
 	$smarty->assign("MSG_GET_NOTE", _tr("Loading Note"));
 	$smarty->assign("LBL_NO_STICKY", _tr("Click here to leave a note."));
-    //$menu= (isset($_GET['menu']))?$_GET['menu']:'';
+
     if (isset($_POST['menu'])) $menu = $_POST['menu'];
     elseif (isset($_GET['menu'])) $menu=$_GET['menu'];
     elseif(empty($menu) and !empty($_SESSION['menu'])) $menu=$_SESSION['menu'];
     else $menu='';
+
+    /* El módulo _elastixutils sirve para contener las utilidades json que
+     * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
+     * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
+    // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
+    if ($menu == '_elastixutils' && file_exists('modules/_elastixutils/index.php')) {
+        require_once 'modules/_elastixutils/index.php';
+        echo _moduleContent($smarty, $menu);
+        return;
+    }
 
     $_SESSION['menu']=$menu;
 
@@ -181,74 +190,12 @@ if (isset($_SESSION['elastix_user']) &&
         $oPn->showMenu($menu);
 
 	$menuBookmark = $oPn->getFirstChildOfMainMenuByBookmark($_SESSION['menu']);
-	if(getParameter("action") == "addBookmark" || getParameter("action") == "deleteBookmark"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$id_menu = getParameter("id_menu");
-		$output = "";
-		if(isset($id_menu) && $id_menu !=""){
-			$output  = putMenuAsBookmark($id_menu);
-			$output["data"]["menu_url"] = $oPn->getFirstChildOfMainMenuByBookmark($_SESSION['menu']);
-		}else
-			$output = putMenuAsBookmark($menuBookmark);
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("true");
-		}else
-			$jsonObject->set_status("false");
-		$jsonObject->set_error($output['msg']);
-		$jsonObject->set_message($output['data']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
-	if(getParameter("action") == "save_sticky_note"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$description_note = getParameter("description");
-        $popup_note = getParameter("popup");    
-	    $output = saveStickyNote($menuBookmark, $description_note, $popup_note);
-	    if($output['status'] === TRUE){
-			$jsonObject->set_status("OK");
-		}else
-			$jsonObject->set_status("ERROR");
-		$jsonObject->set_error($output['msg']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
-	if(getParameter("action") == "get_sticky_note"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$output = getStickyNote($menuBookmark);
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("OK");
-		}else
-			$jsonObject->set_status("ERROR");
-		$jsonObject->set_error($output['msg']);
-		$jsonObject->set_message($output['data']);
-		echo $jsonObject->createJSON();
-		return;
-	}
 
 	if(menuIsBookmark($menuBookmark))
 		$smarty->assign("IMG_BOOKMARKS", "bookmarkon.png");
 	else
 		$smarty->assign("IMG_BOOKMARKS", "bookmark.png");
 
-
-	if(getParameter("action") == "saveNeoToggleTab"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$statusTab  = getParameter("statusTab");
-		$output = saveNeoToggleTabByUser($menuBookmark, $statusTab);
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("true");
-		}else
-			$jsonObject->set_status("false");
-		$jsonObject->set_error($output['msg']);
-		echo $jsonObject->createJSON();
-		return;
-	}
 
 	$statusStickyNote = getStickyNote($menuBookmark); // se obtiene si ese menu tiene una nota agregada
 	
@@ -262,16 +209,6 @@ if (isset($_SESSION['elastix_user']) &&
 			$smarty->assign("STATUS_STICKY_NOTE", "false");
 	}else
 		$smarty->assign("STATUS_STICKY_NOTE", "false");
-
-    /* El módulo _elastixutils sirve para contener las utilidades json que
-     * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
-     * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
-    // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
-    if ($menu == '_elastixutils' && file_exists('modules/_elastixutils/index.php')) {
-        require_once 'modules/_elastixutils/index.php';
-        echo _moduleContent($smarty, $menu);
-        return;
-    }
 
     // Obtener contenido del módulo, si usuario está autorizado a él
     $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu); 
@@ -292,7 +229,6 @@ if (isset($_SESSION['elastix_user']) &&
         }
         $smarty->display("_common/index.tpl");
     }
-
 } else {
 	$rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes'){

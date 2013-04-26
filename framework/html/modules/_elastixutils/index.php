@@ -78,4 +78,76 @@ function handleJSON_changeColorMenu($smarty, $module_name)
     $jsonObject->set_error($output['msg']);
     return $jsonObject->createJSON();
 }
+
+function handleJSON_addBookmark($smarty, $module_name)
+{
+    $jsonObject = new PaloSantoJSON();
+    $id_menu = getParameter("id_menu");
+    if (empty($id_menu)) {
+        $jsonObject->set_status('false');
+        $jsonObject->set_error(_tr('Module not specified'));
+    } else {
+        $output = putMenuAsBookmark($id_menu);
+        if(getParameter('action') == 'deleteBookmark') $output["data"]["menu_url"] = $id_menu;
+        $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
+        $jsonObject->set_error($output['msg']);
+        $jsonObject->set_message($output['data']);
+    }
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_deleteBookmark($smarty, $module_name)
+{
+    // La función subyacente agrega el bookmark si no existe, o lo quita si existe
+    return handleJSON_addBookmark($smarty, $module_name);
+}
+
+function handleJSON_save_sticky_note($smarty, $module_name)
+{
+    $jsonObject = new PaloSantoJSON();
+    $id_menu = getParameter("id_menu");
+    if (empty($id_menu)) {
+        $jsonObject->set_status('ERROR');
+        $jsonObject->set_error(_tr('Module not specified'));
+    } else {
+        $description_note = getParameter("description");
+        $popup_note = getParameter("popup");    
+        $output = saveStickyNote($id_menu, $description_note, $popup_note);
+        $jsonObject->set_status(($output['status'] === TRUE) ? 'OK' : 'ERROR');
+        $jsonObject->set_error($output['msg']);
+    }
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_get_sticky_note($smarty, $module_name)
+{
+    $jsonObject = new PaloSantoJSON();
+    $id_menu = getParameter("id_menu");
+    if (empty($id_menu)) {
+        $jsonObject->set_status('ERROR');
+        $jsonObject->set_error(_tr('Module not specified'));
+    } else {
+        $output = getStickyNote($id_menu);
+        $jsonObject->set_status(($output['status'] === TRUE) ? 'OK' : 'ERROR');
+        $jsonObject->set_error($output['msg']);
+        $jsonObject->set_message($output['data']);
+    }
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_saveNeoToggleTab($smarty, $module_name)
+{
+    $jsonObject = new PaloSantoJSON();
+    $id_menu = getParameter("id_menu");
+    if (empty($id_menu)) {
+        $jsonObject->set_status('false');
+        $jsonObject->set_error(_tr('Module not specified'));
+    } else {
+        $statusTab  = getParameter("statusTab");
+        $output = saveNeoToggleTabByUser($id_menu, $statusTab);
+        $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
+        $jsonObject->set_error($output['msg']);
+    }
+    return $jsonObject->createJSON();
+}
 ?>

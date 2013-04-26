@@ -310,6 +310,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: unify paloSantoNavigation implementations as much as
+  possible between 2.4.0 and trunk for easier analysis.
+  SVN Rev[4861] 
+
 * Thu Apr 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: move changePasswordElastix functionality to elastixutils.
   SVN Rev[4859]

@@ -27,6 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoNavigation.class.php,v 1.2 2007/09/07 00:20:03 gcarrillo Exp $ */
 
+define('MENUTAG', 'Name');
+
 class paloSantoNavigation {
 
     private $defaultMenu;
@@ -39,14 +41,13 @@ class paloSantoNavigation {
 
     function paloSantoNavigation($arrConf, $arrMenu, &$smarty)
     {
-        // El defaultManu deberia ser el primer submenu
+        // El defaultMenu deberia ser el primer submenu
         foreach($arrMenu as $idMenu=>$arrMenuItem) {
             if(empty($arrMenuItem['IdParent'])) {
                 $this->defaultMenu = $idMenu;
                 break;
             }
         }
-        //$this->defaultMenu = $arrConf['defaultMenu'];
         $this->arrMenu = $arrMenu;
         $this->smarty  = &$smarty;
     }
@@ -119,7 +120,6 @@ class paloSantoNavigation {
                 }
             }
 
-            //print_r($arrIds);
             // En este punto $arrIds deberia contener los Ids activos de cada menu para los n niveles
             // Como por ahora manejamos hasta 3 niveles unicamente voy a mapear los 3 primeros elementos
 
@@ -155,37 +155,35 @@ class paloSantoNavigation {
         $this->currSubMenu2 = $currSubMenu2;
         $this->currSubMenuByParents  = $currSubMenuByParents;
 
-
-
         // Get the main menu
         $arrMainMenu = $this->getArrSubMenu("");
 
 		/************* para elastixneo**********/
-		// modificando las posiciones de los menus para el thema elastixNeo
-		//obteniendo el menu de la posicion 7 y luego
 		global $arrConf;
 		if($arrConf['mainTheme']=="elastixneo"){
-			$i = 0;
-			$mainMenues = array();
-			$secondMenues = array();
-			$isMainMenu = false;
-			foreach($arrMainMenu as $key => $value){
-				if($i <= 6 && $currMainMenu == $key){
-					$mainMenues["$key"] = $value;
-					$isMainMenu = true;
-				}elseif($i == 6 && !$isMainMenu && $currMainMenu != $key){
-					$secondMenues["$key"] = $value;
-				}elseif($i <= 6 && $currMainMenu != $key){
-					$mainMenues["$key"] = $value;
-				}elseif($i > 6 && $currMainMenu == $key){
-					$mainMenues["$key"] = $value;
-					$isMainMenu = true;
-				}else{
-					$secondMenues["$key"] = $value;
-				}
-				$i++;
-			}
-			$arrMainMenu = array_merge($mainMenues, $secondMenues);
+            /* El tema elastixneo muestra hasta 7 items de menú de primer nivel,
+             * y coloca el resto en una lista desplegable a la derecha del último
+             * item. Se debe de garantizar que el item actualmente seleccionado
+             * aparezca en un menú de primer nivel que esté entre los 7 primeros,
+             * reordenando los items si es necesario. */
+            $MAX_ITEMS_VISIBLES = 7;
+            if (count($arrMainMenu) > $MAX_ITEMS_VISIBLES) {
+                // Se transfiere a arreglo numérico para manipular orden de enumeración
+                $tempMenulist = array();
+                $idxMainMenu = NULL;
+                foreach ($arrMainMenu as $key => $value) {
+                    if ($key == $currMainMenu) $idxMainMenu = count($tempMenulist); 
+                    $tempMenulist[] = array($key, $value);
+                }
+                if (!is_null($idxMainMenu) && $idxMainMenu >= $MAX_ITEMS_VISIBLES) {
+                    $menuitem = array_splice($tempMenulist, $idxMainMenu, 1);
+                    array_splice($tempMenulist, $MAX_ITEMS_VISIBLES - 1, 0, $menuitem);
+                    $arrMainMenu = array();
+                    foreach ($tempMenulist as $menuitem) $arrMainMenu[$menuitem[0]] = $menuitem[1];
+                }
+                unset($tempMenulist);
+            }
+
 			if(!isset($_SESSION['menu']) || $_SESSION['menu'] == "")
 				$_SESSION['menu'] = $currMainMenu;
 
@@ -228,14 +226,14 @@ class paloSantoNavigation {
         $this->smarty->assign("idMainMenuSelected",   $currMainMenu);
         $this->smarty->assign("idSubMenuSelected",    $currSubMenu);
         $this->smarty->assign("idSubMenu2Selected",    $currSubMenu2);
-        $this->smarty->assign("nameMainMenuSelected", $arrMainMenu[$currMainMenu]['Name']);
-        $this->smarty->assign("nameSubMenuSelected",  $arrSubMenu[$currSubMenu]['Name']);
-        $this->smarty->assign("nameSubMenu2Selected",  $arrSubMenu2[$currSubMenu2]['Name']);
+        $this->smarty->assign("nameMainMenuSelected", $arrMainMenu[$currMainMenu][MENUTAG]);
+        $this->smarty->assign("nameSubMenuSelected",  $arrSubMenu[$currSubMenu][MENUTAG]);
+        $this->smarty->assign("nameSubMenu2Selected",  $arrSubMenu2[$currSubMenu2][MENUTAG]);
 		$this->smarty->assign("isThirdLevel", $isThirdLevel);//////////////////////////////////////////////////////////
 
 	if(isset($_GET) && count($_GET) == 1 && isset($_GET['menu'])){
-	  $navigation  = $arrMainMenu[$currMainMenu]['Name']." >> ".$arrSubMenu[$currSubMenu]['Name'];
-	  $navigation .= isset($arrSubMenu2[$currSubMenu2])?" >> ".$arrSubMenu2[$currSubMenu2]['Name']:"";
+	  $navigation  = $arrMainMenu[$currMainMenu][MENUTAG]." >> ".$arrSubMenu[$currSubMenu][MENUTAG];
+	  $navigation .= isset($arrSubMenu2[$currSubMenu2])?" >> ".$arrSubMenu2[$currSubMenu2][MENUTAG]:"";
 
 	  $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"unknown";
 	  writeLOG("audit.log","NAVIGATION $user: User $user visited \"{$navigation}\" from $_SERVER[REMOTE_ADDR].");
@@ -254,16 +252,14 @@ class paloSantoNavigation {
                 $idSub = $valorSub['id'];
                 //ALL: with this function getArrSubMenu our can to add the third level.
                 $arrTmp2 =$this->getArrSubMenu($idSub);
-                if($arrTmp2)$valorSub['Name'] = $valorSub['Name'].'...';
+                if($arrTmp2)$valorSub[MENUTAG] = $valorSub[MENUTAG].'...';
                 $arrMenuTotal[$idMenu] .= "<tr><td>";
-                $arrMenuTotal[$idMenu] .= "<a href=\"index.php?menu={$valorSub['id']}\">{$valorSub['Name']}</a>";
+                $arrMenuTotal[$idMenu] .= "<a href=\"index.php?menu={$valorSub['id']}\">{$valorSub[MENUTAG]}</a>";
                 $arrMenuTotal[$idMenu] .= "</td></tr>";
             }
             $this->smarty->assign("arrMenuTotal", $arrMenuTotal);
         }
         /*************** Submenus para template elastix wine ********************/
-
-        //return $this->smarty->fetch("_common/_menu.tpl");
     }
 
 
@@ -306,7 +302,7 @@ class paloSantoNavigation {
 						$img = "<img alt='' src='images/miniArrowDown.png' align='absmiddle' style='border:0;'/>";
 					else
 						$img = "";
-                    $element['Name'] = $element['Name']." ".$img;
+                    $element[MENUTAG] = $element[MENUTAG]." ".$img;
                     $arrSubMenu[$id] = $element;
                 }else{
                     $arrSubMenu[$id] = $element;
@@ -347,12 +343,11 @@ class paloSantoNavigation {
             return $this->includeModule($ultimoMenu);
         }
         else {
-			$title = $bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2]['Name']:$this->arrMenu[$this->currSubMenu]['Name'];
+			$title = $bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2][MENUTAG]:$this->arrMenu[$this->currSubMenu][MENUTAG];
 			$this->smarty->assign("title",$title);
 			$link=$bSubMenu2Framed?$this->arrMenu[$this->currSubMenu2]['Link']:$this->arrMenu[$this->currSubMenu]['Link'];
             $link = str_replace("{NAME_SERVER}", $_SERVER['SERVER_NAME'], $link);
             $link = str_replace("{IP_SERVER}", $_SERVER['SERVER_ADDR'], $link);
-
             $retVar  = "<iframe marginwidth=\"0\" marginheight=\"0\" class=\"frameModule\"";
             $retVar .= "\" src=\"" . $link . "\" name=\"myframe\" id=\"myframe\" frameborder=\"0\"";
             $retVar .= " width=\"100%\" onLoad=\"calcHeight();\"></iframe>";

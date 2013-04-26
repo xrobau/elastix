@@ -311,6 +311,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: giox theme displayed help link incorrectly for third-level
+  modules. Fixed.
+  SVN Rev[4864]
 - CHANGED: Framework: move changeColorMenu functionality to elastixutils.
   SVN Rev[4863]
 - CHANGED: Framework: move search_module functionality to elastixutils.

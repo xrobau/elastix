@@ -55,6 +55,7 @@ function handleJSON_versionRPM($smarty, $module_name)
 	$json = new Services_JSON();
     return $json->encode(obtenerDetallesRPMS());
 }
+
 function handleJSON_changePasswordElastix($smarty, $module_name)
 {
     $jsonObject = new PaloSantoJSON();
@@ -62,5 +63,10 @@ function handleJSON_changePasswordElastix($smarty, $module_name)
     $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
     $jsonObject->set_error($output['msg']);
     return $jsonObject->createJSON();
+}
+
+function handleJSON_search_module($smarty, $module_name)
+{
+    return searchModulesByName();
 }
 ?>

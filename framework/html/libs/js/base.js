@@ -810,7 +810,7 @@ $(document).ready(function(){
 					$("#neo-cmenu-showbox-search").removeClass("neo-display-none");}
 				);
 				$.ajax({
-					url: 'index.php?action=search_module&rawmode=yes',
+					url: 'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
 					dataType: "json",
 					data: {
 						name_module_search: ((request.term).split( /,\s*/ ) ).pop()

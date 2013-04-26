@@ -638,66 +638,6 @@ function writeLOG($logFILE, $log)
         echo "The file $logFILE couldn't be opened";
 }
 
-//pendiente
-function searchModulesByName()
-{
-	include_once "libs/JSON.php";
-	include_once "modules/group_permission/libs/paloSantoGroupPermission.class.php";
-	$json = new Services_JSON();
-
-	$pGroupPermission = new paloSantoGroupPermission();
-	$name = getParameter("name_module_search");
-	$result = array();
-	$arrIdMenues = array();
-	$lang=get_language();
-    global $arrLang;
-
-	// obteniendo los id de los menus permitidos
-    global $arrConf;
-    $pACL = new paloACL($arrConf['elastix_dsn']['elastix']);
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
-    $arrSessionPermissions = $pMenu->filterAuthorizedMenus($pACL->getIdUser($_SESSION['elastix_user']));
-	$arrIdMenues = array();
-	foreach($arrSessionPermissions as $key => $value){
-		$arrIdMenues[] = $value['id']; // id, IdParent, Link,  Type, order_no, HasChild
-	}
-
-	$parameter_to_find = array(); // arreglo con los valores del name dada la busqueda
-	// el metodo de busqueda de por nombre sera buscando en el arreglo de lenguajes y obteniendo su $key para luego buscarlo en la base de
-	// datos menu.db
-    if($lang != "en"){ // entonces se adjunta la busqueda con el arreglo de lenguajes en ingles
-	    foreach($arrLang as $key=>$value){
-            $langValue    = strtolower(trim($value));
-            $filter_value = strtolower(trim($name));
-            if($filter_value!=""){
-                if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-                    if(preg_match("/$filter_value/",$langValue))
-			            $parameter_to_find[] = $key;
-            }
-	    }
-    }
-	$parameter_to_find[] = $name;
-
-	// buscando en la base de datos acl.db tabla acl_resource con el campo description
-	if(empty($parameter_to_find))
-		$arrResult = $pACL->getListResources(25, 0, $name);
-	else
-    	$arrResult = $pACL->getListResources(25, 0, $parameter_to_find);
-
-	foreach($arrResult as $key2 => $value2){
-		// leyendo el resultado del query
-		if(in_array($value2["id"], $arrIdMenues)){
-			$arrMenu['caption'] = _tr($value2["description"]);
-			$arrMenu['value']   = $value2["id"];
-			$result[] = $arrMenu;
-		}
-	}
-
-	header('Content-Type: application/json');
-	return $json->encode($result);
-}
-
-
 function getMenuColorByMenu()
 {
 	include_once "libs/paloSantoACL.class.php";

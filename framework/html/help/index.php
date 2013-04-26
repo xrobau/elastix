@@ -30,6 +30,8 @@
 include_once("../libs/misc.lib.php");
 include_once "../configs/default.conf.php";
 
+load_default_timezone();
+
 session_name("elastixSession");
 session_start();
 

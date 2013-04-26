@@ -35,6 +35,8 @@ include_once("../libs/misc.lib.php");
 include_once("../configs/default.conf.php");
 include_once("../libs/paloSantoMenu.class.php");
 
+load_default_timezone();
+
 session_name("elastixSession");
 session_start();
 

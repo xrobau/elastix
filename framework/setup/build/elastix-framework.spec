@@ -306,6 +306,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: main theme needs to be explicitly queried, which broke help
+  navigation. Fixed. Also load default timezone on help scripts.
+  SVN Rev[4865]
 - FIXED: Framework: giox theme displayed help link incorrectly for third-level
   modules. Fixed.
   SVN Rev[4864]

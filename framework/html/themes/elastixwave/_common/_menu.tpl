@@ -81,7 +81,11 @@
                             <span class="menuguion">*</span>&nbsp;
                             <span><a class="logout" href="javascript:mostrar();">{$ABOUT_ELASTIX2}</a></span>&nbsp;
                             <span class="menuguion">*</span>&nbsp;
-                            <span><a class="logout" href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">{$HELP}</a></span>&nbsp;
+                            <span>{if !empty($idSubMenu2Selected)}
+					            <a class="logout" href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
+					          {else}
+					            <a class="logout" href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
+					          {/if}{$HELP}</a></span>&nbsp;
                             <span class="menuguion">*</span>&nbsp;
                             <span><a class="logout" href="?logout=yes">{$LOGOUT} (<font color='#c0d0e0'>{$USER_LOGIN}</font>)</a></span>&nbsp;
                         </div>
@@ -109,7 +113,13 @@
                         </td>
                         <td align="right" valign="middle">
 							<img src="themes/{$THEMENAME}/images/tab_notes_bottom.png" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />&nbsp;
-							<a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')"><img alt=""
+							{if !empty($idSubMenu2Selected)}
+			                    <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
+			                    <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
+			                {else}
+			                    <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
+			                    <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
+			                {/if}<img alt=""
                             src="themes/{$THEMENAME}/images/help_bottom.gif" border="0" /></a>&nbsp;&nbsp;<a href="javascript:changeMenu()"><img alt=""
                             src="themes/{$THEMENAME}/images/arrow_top.gif" border="0" /></a>&nbsp;&nbsp;</td>
                     </tr>
@@ -125,7 +135,11 @@
       <td align="right" class="letra_gris" valign="middle">{$nameMainMenuSelected} &rarr; {$nameSubMenuSelected} {if !empty($idSubMenu2Selected)} &rarr; {$nameSubMenu2Selected} {/if}
 		  &nbsp;&nbsp;<img src="themes/{$THEMENAME}/images/tab_notes_bottom.png" alt="tabnotes" id="togglestickynote2" class="togglestickynote" style="cursor: pointer;" border="0"
           align="absmiddle" />
-          &nbsp;&nbsp;<a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')"><img alt="" src="themes/{$THEMENAME}/images/help_bottom.gif" border="0" 
+          &nbsp;&nbsp;{if !empty($idSubMenu2Selected)}
+            <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
+          {else}
+            <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
+          {/if}<img alt="" src="themes/{$THEMENAME}/images/help_bottom.gif" border="0" 
           align="absmiddle" /></a>
           &nbsp;&nbsp;<a href="javascript:changeMenu()"><img alt="" src="themes/{$THEMENAME}/images/arrow_bottom.gif" border="0" align="absmiddle" /></a>&nbsp;&nbsp;
       </td>

@@ -306,6 +306,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: many legacy themes displayed help link incorrectly for 
+  third level modules. Fixed. 
+- ADDED: Framework: add hidden input tag elastix_framework_module_id that 
+  contains the ID of the current module displayed.
+  SVN Rev[4866] 
 - FIXED: Framework: main theme needs to be explicitly queried, which broke help
   navigation. Fixed. Also load default timezone on help scripts.
   SVN Rev[4865]

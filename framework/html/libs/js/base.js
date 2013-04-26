@@ -480,6 +480,8 @@ function saveNewPasswordElastix(){
 
 function addBookmark(){
 	var arrAction = new Array();
+	arrAction["menu"] = "_elastixutils";
+	arrAction["id_menu"] = getCurrentElastixModule();
 	arrAction["action"]  = "addBookmark";
 	arrAction["rawmode"] = "yes";
 	var srcimg = $('#neo-logobox').find('img:first').attr("src");
@@ -554,6 +556,7 @@ function deleteBookmarkByEquis(ref){
 	var arrLinkMenu = linkMenu.split("menu=",2);
 	var id_menu = arrLinkMenu[1];
 	var arrAction = new Array();
+	arrAction["menu"] = "_elastixutils";
 	arrAction["action"]  = "deleteBookmark";
 	arrAction["rawmode"] = "yes";
 	arrAction["id_menu"] = id_menu;
@@ -613,6 +616,8 @@ function deleteBookmarkByEquis(ref){
 
 function saveToggleTab(){
 	var arrAction = new Array();
+	arrAction["menu"] = "_elastixutils";
+	arrAction["id_menu"] = getCurrentElastixModule();
 	arrAction["action"]  = "saveNeoToggleTab";
 	if($('#neo-lengueta-minimized').hasClass('neo-display-none'))
 		arrAction["statusTab"]  = "true";
@@ -934,4 +939,10 @@ function getParameterByName(name) {
                     .exec(window.location.search);
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 
+}
+
+// Recoger el valor del módulo activo a partir de elastix_framework_module_id
+function getCurrentElastixModule()
+{
+	return $('#elastix_framework_module_id').val();
 }

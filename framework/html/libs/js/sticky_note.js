@@ -50,6 +50,8 @@ var note = function() {
 	
 	if($("#neo-sticky-note").data("neo-sticky-note-status")=="hidden") {
 		var arrAction = new Array();
+		arrAction["menu"] = "_elastixutils";
+		arrAction["id_menu"] = getCurrentElastixModule();
 		arrAction["action"]  = "get_sticky_note";
 		arrAction["rawmode"] = "yes";
 		var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#get_note_label').val()+"</span></div></div>";
@@ -128,6 +130,8 @@ function showCharCount() {
  */
 function send_sticky_note(){
 	var arrAction = new Array();
+	arrAction["menu"] = "_elastixutils";
+	arrAction["id_menu"] = getCurrentElastixModule();
 	arrAction["action"]  = "save_sticky_note";
 	arrAction["description"]  = $("#neo-sticky-note-textarea").val();
 	var checkeado=$("#neo-sticky-note-auto-popup").attr("checked");

@@ -306,6 +306,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: the following requests now send the current module ID and
+  attempt to route to the elastixutils module: addBookmark, deleteBookmark,
+  save_sticky_note, get_sticky_note, saveNeoToggleTab.
+  SVN Rev[4867]
 - FIXED: Framework: many legacy themes displayed help link incorrectly for 
   third level modules. Fixed. 
 - ADDED: Framework: add hidden input tag elastix_framework_module_id that 

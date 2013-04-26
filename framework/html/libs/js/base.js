@@ -918,6 +918,7 @@ function changeColorMenu()
 		color = "#454545";
 	}
 
+	arrAction["menu"] = "_elastixutils";
 	arrAction["action"] = "changeColorMenu";
 	arrAction["menuColor"]  = color;
 	request("index.php",arrAction,false,

@@ -69,4 +69,13 @@ function handleJSON_search_module($smarty, $module_name)
 {
     return searchModulesByName();
 }
+
+function handleJSON_changeColorMenu($smarty, $module_name)
+{
+    $jsonObject = new PaloSantoJSON();
+    $output = changeMenuColorByUser();
+    $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
+    $jsonObject->set_error($output['msg']);
+    return $jsonObject->createJSON();
+}
 ?>

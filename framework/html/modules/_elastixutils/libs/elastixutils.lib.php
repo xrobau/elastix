@@ -189,4 +189,36 @@ function searchModulesByName()
     header('Content-Type: application/json');
     return $json->encode($result);
 }
+
+function changeMenuColorByUser()
+{
+    include_once "libs/paloSantoACL.class.php";
+
+    $color = getParameter("menuColor");
+    $arrResult  = array();
+    $arrResult['status'] = FALSE;
+
+    if($color == ""){
+       $color = "#454545";
+    }
+
+    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    global $arrConf;
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pdbACL);
+    $uid = $pACL->getIdUser($user);
+
+    if($uid===FALSE)
+        $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
+    else{
+        //si el usuario no tiene un color establecido entonces se crea el nuevo registro caso contrario se lo actualiza
+        if(!$pACL->setUserProp($uid,"menuColor",$color,"profile")){
+            $arrResult['msg'] = _tr("ERROR DE DB: ").$pACL->errMsg;
+        }else{
+            $arrResult['status'] = TRUE;
+            $arrResult['msg'] = _tr("OK");
+        }
+    }
+    return $arrResult;
+}
 ?>

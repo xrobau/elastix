@@ -176,19 +176,6 @@ if (isset($_SESSION['elastix_user']) &&
 
     $_SESSION['menu']=$menu;
 
-	if(getParameter("action")=="changeColorMenu"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$output = changeMenuColorByUser();
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("true");
-		}else
-		  $jsonObject->set_status("false");
-		$jsonObject->set_error($output['msg']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
     // Inicializa el objeto palosanto navigation
     if (count($arrMenuFiltered)>0)
         $oPn->showMenu($menu);
@@ -296,7 +283,7 @@ if (isset($_SESSION['elastix_user']) &&
     if(isset($rawmode) && $rawmode=='yes') {
         echo $sModuleContent;
     } else {
-       // Autorizacion
+        // Autorizacion
         if ($bModuleAuthorized) {
             $smarty->assign("CONTENT", $sModuleContent);
             $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 

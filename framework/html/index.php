@@ -173,19 +173,6 @@ if (isset($_SESSION['elastix_user']) &&
 
     $_SESSION['menu']=$menu;
 
-	if(getParameter("action")=="changeColorMenu"){
-		include_once "libs/paloSantoJSON.class.php";
-		$jsonObject = new PaloSantoJSON();
-		$output = changeMenuColorByUser();
-		if($output['status'] === TRUE){
-			$jsonObject->set_status("true");
-		}else
-		  $jsonObject->set_status("false");
-		$jsonObject->set_error($output['msg']);
-		echo $jsonObject->createJSON();
-		return;
-	}
-
     // Inicializa el objeto palosanto navigation
     if (count($arrMenuFiltered)>0)
         $oPn->showMenu($menu);
@@ -278,7 +265,7 @@ if (isset($_SESSION['elastix_user']) &&
      * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
     // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
     if ($menu == '_elastixutils' && file_exists('modules/_elastixutils/index.php')) {
-    	require_once 'modules/_elastixutils/index.php';
+        require_once 'modules/_elastixutils/index.php';
         echo _moduleContent($smarty, $menu);
         return;
     }

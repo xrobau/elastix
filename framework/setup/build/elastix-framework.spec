@@ -306,6 +306,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move changeColorMenu functionality to elastixutils.
+  SVN Rev[4863]
 - CHANGED: Framework: move search_module functionality to elastixutils.
   SVN Rev[4862]
 - CHANGED: Framework: unify paloSantoNavigation implementations as much as

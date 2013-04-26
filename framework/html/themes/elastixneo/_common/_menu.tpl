@@ -521,6 +521,7 @@ function oneClickEvent()
 		  {/if}
 	      <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
 	      <img src="images/icon-help.png" width="24" height="24" alt="help" title="{$HELP}" class="neo-picker" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
+          <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
 	      <div class="neo-module-content">
 	{else}
 	<div id="neo-contentbox-leftcolumn" class="neo-contentbox-leftcolumn-minimized">
@@ -548,6 +549,7 @@ function oneClickEvent()
 		  {/if}
 	      <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
 	      <img src="images/icon-help.png" width="24" height="24" alt="help" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
+          <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
 	 <div class="neo-module-content">
 	{/if}
 

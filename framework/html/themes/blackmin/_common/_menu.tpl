@@ -13,11 +13,14 @@
 	        {foreach from=$arrSubMenu2 key=idSubMenu2 item=subMenu2}
                 <li {if $idSubMenu2 eq $idSubMenu2Selected}class="selected"{/if}><a href="index.php?menu={$idSubMenu2}">{$subMenu2.description}</a>
 				{if $idSubMenu2 eq $idSubMenu2Selected}
+                <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
 				{else}
 				{/if}
                 </li>
 	        {/foreach}
 	        </ul>
+        {else}
+        <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
         {/if}
     {else}
     {/if}

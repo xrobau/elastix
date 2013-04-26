@@ -93,8 +93,10 @@
 				<img src="themes/{$THEMENAME}/images/tab_notes.png" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />&nbsp;
 				{if !empty($idSubMenu2Selected)}
                     <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
+                    <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
                 {else}
                     <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
+                    <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
                 {/if}<img
                 src="themes/{$THEMENAME}/images/help_top.gif" border="0"></a>&nbsp;&nbsp;<a href="javascript:changeMenu()"><img
                 src="themes/{$THEMENAME}/images/arrow_top.gif" border="0"></a>&nbsp;&nbsp;</td>

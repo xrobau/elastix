@@ -173,11 +173,6 @@ if (isset($_SESSION['elastix_user']) &&
 
     $_SESSION['menu']=$menu;
 
-	if(getParameter("action")=="search_module"){
-		echo searchModulesByName();
-		return;
-	}
-
 	if(getParameter("action")=="changeColorMenu"){
 		include_once "libs/paloSantoJSON.class.php";
 		$jsonObject = new PaloSantoJSON();

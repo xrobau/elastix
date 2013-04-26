@@ -29,11 +29,13 @@
 include_once("../libs/misc.lib.php");
 include_once "../configs/default.conf.php";
 
+load_default_timezone();
 
 session_name("elastixSession");
 session_start();
 
 // Load smarty
+$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/");
 $smarty = getSmarty($arrConf['mainTheme']);
 $smarty->assign("THEMENAME", $arrConf['mainTheme']);
 

@@ -35,6 +35,8 @@ include_once("../libs/misc.lib.php");
 include_once("../configs/default.conf.php");
 include_once("../libs/paloSantoMenu.class.php");
 
+load_default_timezone();
+
 session_name("elastixSession");
 session_start();
 
@@ -42,7 +44,7 @@ global $arrConf;
 
 $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
 
-$pDBMenu = new paloDB($arrConf['elastix_dsn']['menu']);
+$pDBMenu = new paloDB($arrConf['elastix_dsn']['elastix']);
 $pMenu = new paloMenu($pDBMenu);
 $arrMenu = $pMenu->cargar_menu();
 
@@ -97,7 +99,7 @@ foreach($arrMenuFiltered as $id => $menu) {
         $arrTmp['id_parent'] = $menu['IdParent'];
     }
     $arrTmp['orden']     = 1;
-    $arrTmp['nombre']    = $menu['Name'];
+    $arrTmp['nombre']    = $menu['description'];
     $arrTmp['url']       = $id . "." . $menu['IdParent'] . "hlp.htm";
     $arrTmp['keywords']  = "";
 

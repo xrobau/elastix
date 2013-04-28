@@ -485,40 +485,36 @@ class paloSantoNavigation {
 		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
 		$pACL = new paloACL($pdbACL);
 		$uid = $pACL->getIdUser($user);
-		$htmlData = "";
-		$menu = "";
-		if($uid===FALSE)
-			$htmlData = "";
-		else{
-			$bookmarks = "SELECT us.id AS id, ar.description AS name, ar.id AS id_menu FROM user_shortcut us, acl_resource ar WHERE id_user = ? AND us.type = 'bookmark' AND ar.id = us.id_resource ORDER BY us.id DESC";
-			$history   = "SELECT us.id AS id, ar.description AS name, ar.id AS id_menu FROM user_shortcut us, acl_resource ar WHERE id_user = ? AND us.type = 'history' AND ar.id = us.id_resource ORDER BY us.id DESC";
 
-			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
-			if ($arr_result1 !== FALSE && count($arr_result1) > 0) {
-				$htmlData .= "<div id='neo-bookmarkID' class='neo-historybox-tabon'>"._tr("Bookmarks")."</div>";
-				$cont = 1;
-				foreach($arr_result1 as $key => $value){
-					if($cont < count($arr_result1))
-						$htmlData .= "<div class='neo-historybox-tab' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['id_menu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-					else
-						$htmlData .= "<div class='neo-historybox-tabmid' id='menu".$value['id_menu']."' ><a href='index.php?menu=".$value['id_menu']."' >"._tr($value['name'])."</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-					$cont++;
-				}
-			}else{
-				$htmlData .= "<div id='neo-bookmarkID' class='neo-historybox-tabon' style='display: none'>"._tr("Bookmarks")."</div>";
-			}
+        if($uid === FALSE) return '';
+        $sql = <<<SQL_BOOKMARKS_HISTORY
+SELECT us.id AS id, ar.description AS name, ar.id AS id_menu
+FROM user_shortcut us, acl_resource ar
+WHERE id_user = ? AND us.type = ? AND ar.id = us.id_resource
+ORDER BY us.id DESC
+SQL_BOOKMARKS_HISTORY;
 
-			$arr_result2 = $pdbACL->fetchTable($history, TRUE, array($uid));
-			if ($arr_result2 !== FALSE && count($arr_result2) > 0) {
-				$htmlData .= "<div id='neo-historyID' class='neo-historybox-tabon'>"._tr("History")."</div>";
-				foreach($arr_result2 as $key2 => $value2){
-					$htmlData .= "<div class='neo-historybox-tab'><a href='index.php?menu=".$value2['id_menu']."' >"._tr($value2['name'])."</a></div>";
-				}
-			}else{
-				$htmlData .= "<div id='neo-historyID' class='neo-historybox-tabon'>"._tr("History")."</div>";
-			}
-		}
-		return $htmlData;
+        $bookmarks = $pdbACL->fetchTable($sql, TRUE, array($uid, 'bookmark'));
+        if (is_array($bookmarks) && count($bookmarks) >= 0)
+        foreach (array_keys($bookmarks) as $i) {
+            $bookmarks[$i]['name'] = _tr($bookmarks[$i]['name']); 
+        } else $bookmarks = NULL;
+        $this->smarty->assign(array(
+            'SHORTCUT_BOOKMARKS' => $bookmarks,
+            'SHORTCUT_BOOKMARKS_LABEL' => _tr('Bookmarks'),
+        ));
+
+        $history = $pdbACL->fetchTable($sql, TRUE, array($uid, 'history'));
+        if (is_array($history) && count($history) >= 0)
+        foreach (array_keys($history) as $i) {
+            $history[$i]['name'] = _tr($history[$i]['name']); 
+        } else $history = NULL;
+        $this->smarty->assign(array(
+            'SHORTCUT_HISTORY' => $history,
+            'SHORTCUT_HISTORY_LABEL' => _tr('History'),
+        ));
+        
+        return $this->smarty->fetch('_common/_shortcut.tpl');
 	}
 
 	function getFirstChildOfMainMenuByBookmark($menu_session)

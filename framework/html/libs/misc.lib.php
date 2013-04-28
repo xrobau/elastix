@@ -845,4 +845,43 @@ function getSmarty($mainTheme, $basedir = '/var/www/html')
     return $smarty;
 }
 
+function loadShortcut(&$smarty)
+{
+    include_once "libs/paloSantoACL.class.php";
+    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    global $arrConf;
+    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+    $pACL = new paloACL($pdbACL);
+    $uid = $pACL->getIdUser($user);
+
+    if($uid === FALSE) return '';
+    $sql = <<<SQL_BOOKMARKS_HISTORY
+SELECT aus.id AS id, ar.description AS name, ar.id AS id_menu, ar.name AS namemenu
+FROM acl_user_shortcut aus, acl_resource ar
+WHERE id_user = ? AND type = ? AND ar.id = aus.id_resource
+ORDER BY aus.id DESC
+SQL_BOOKMARKS_HISTORY;
+
+    $bookmarks = $pdbACL->fetchTable($sql, TRUE, array($uid, 'bookmark'));
+    if (is_array($bookmarks) && count($bookmarks) >= 0)
+    foreach (array_keys($bookmarks) as $i) {
+        $bookmarks[$i]['name'] = _tr($bookmarks[$i]['name']); 
+    } else $bookmarks = NULL;
+    $smarty->assign(array(
+        'SHORTCUT_BOOKMARKS' => $bookmarks,
+        'SHORTCUT_BOOKMARKS_LABEL' => _tr('Bookmarks'),
+    ));
+
+    $history = $pdbACL->fetchTable($sql, TRUE, array($uid, 'history'));
+    if (is_array($history) && count($history) >= 0)
+    foreach (array_keys($history) as $i) {
+        $history[$i]['name'] = _tr($history[$i]['name']); 
+    } else $history = NULL;
+    $smarty->assign(array(
+        'SHORTCUT_HISTORY' => $history,
+        'SHORTCUT_HISTORY_LABEL' => _tr('History'),
+    ));
+    
+    return $smarty->fetch('_common/_shortcut.tpl');
+}
 ?>

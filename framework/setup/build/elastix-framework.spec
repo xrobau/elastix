@@ -306,6 +306,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sun Apr 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move implementation of loadShortcut out of 
+  paloSantoNavigation and into misc.lib.php, thus making paloSantoNavigation
+  almost identical between 2.4.0 and trunk.
+  SNV Rev[4870]
 - CHANGED: Framework: push out bookmark/history shortcut layout into a separate
   template, moving this layout concern out of paloSantoNavigation.
   SVN Rev[4869]

@@ -305,6 +305,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sun Apr 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: push out bookmark/history shortcut layout into a separate
+  template, moving this layout concern out of paloSantoNavigation.
+  SVN Rev[4869]
+
 * Fri Apr 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: move remainder of requests to elastixutils module. Handle
   elastixutils before entering paloSantoNavigation to prevent assignment to 

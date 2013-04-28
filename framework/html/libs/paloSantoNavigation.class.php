@@ -204,7 +204,7 @@ class paloSantoNavigation {
 				}
 			}
 			putMenuAsHistory($menuBookmark);
-			$this->smarty->assign("SHORTCUT",$this->loadShortcut($currMainMenu));///////////////////////////
+			$this->smarty->assign("SHORTCUT", loadShortcut($this->smarty));///////////////////////////
 		}
 		/************* para elastixneo**********/
 
@@ -476,46 +476,6 @@ class paloSantoNavigation {
 		if(!$names) return false;
 		return $names;
     }
-
-	private function loadShortcut()
-	{
-		include_once "libs/paloSantoACL.class.php";
-		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-		$pACL = new paloACL($pdbACL);
-		$uid = $pACL->getIdUser($user);
-
-        if($uid === FALSE) return '';
-        $sql = <<<SQL_BOOKMARKS_HISTORY
-SELECT us.id AS id, ar.description AS name, ar.id AS id_menu
-FROM user_shortcut us, acl_resource ar
-WHERE id_user = ? AND us.type = ? AND ar.id = us.id_resource
-ORDER BY us.id DESC
-SQL_BOOKMARKS_HISTORY;
-
-        $bookmarks = $pdbACL->fetchTable($sql, TRUE, array($uid, 'bookmark'));
-        if (is_array($bookmarks) && count($bookmarks) >= 0)
-        foreach (array_keys($bookmarks) as $i) {
-            $bookmarks[$i]['name'] = _tr($bookmarks[$i]['name']); 
-        } else $bookmarks = NULL;
-        $this->smarty->assign(array(
-            'SHORTCUT_BOOKMARKS' => $bookmarks,
-            'SHORTCUT_BOOKMARKS_LABEL' => _tr('Bookmarks'),
-        ));
-
-        $history = $pdbACL->fetchTable($sql, TRUE, array($uid, 'history'));
-        if (is_array($history) && count($history) >= 0)
-        foreach (array_keys($history) as $i) {
-            $history[$i]['name'] = _tr($history[$i]['name']); 
-        } else $history = NULL;
-        $this->smarty->assign(array(
-            'SHORTCUT_HISTORY' => $history,
-            'SHORTCUT_HISTORY_LABEL' => _tr('History'),
-        ));
-        
-        return $this->smarty->fetch('_common/_shortcut.tpl');
-	}
 
 	function getFirstChildOfMainMenuByBookmark($menu_session)
 	{

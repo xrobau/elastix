@@ -659,84 +659,82 @@ function getMenuColorByMenu()
 	return $color;
 }
 
-function putMenuAsHistory($menu)
+/**
+ * Procedimiento que almacena el item de menú como parte del historial de 
+ * navegación del usuario indicado por $uid. El historial del usuario debe 
+ * cumplir las siguientes propiedades:
+ * - El historial es una lista con un máximo número de items (5), parecido, pero
+ *   no idéntico, a una cola FIFO.
+ * - Los items están ordenados por su ID de inserción. El item más reciente es
+ *   el item de mayor número de inserción.
+ * - Repetidas llamadas sucesivas a esta función con el mismo valor de $uid y 
+ *   $menu deben dejar la lista inalterada, asumiendo que no hayan otras 
+ *   ventanas de navegación abierta.
+ * - Si la lista tiene su número máximo de items y se agrega un nuevo item que
+ *   no estaba previamente presente en la lista, el item más antiguo se olvida.
+ * - Si el item resulta idéntico en menú a uno que ya existe, debe de quitarse
+ *   de su posición actual y colocarse en la parte superior de la lista. El 
+ *   número de items debe quedar inalterado.
+ * 
+ * @param   object  $pdbACL     Objeto paloDB conectado a las tablas de ACL.
+ * @param   object  $pACL       Objeto paloACL para consultar IDs de menú.
+ * @param   integer $uid        ID de usuario para el historial
+ * @param   string  $id_resource Item de menú a insertar en el historial
+ * 
+ * @return  bool    VERDADERO si se inserta el item, FALSO en error.  
+ */
+function putMenuAsHistory($pdbACL, $pACL, $uid, $id_resource)
 {
-	include_once "libs/paloSantoACL.class.php";
-	$success = false;
-	if($menu != ""){
-		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-		$pACL = new paloACL($pdbACL);
-		$uid = $pACL->getIdUser($user);
-		if($uid!==FALSE){
-			//verificar de que ya no este en la base de datos
-			//$id_resource = $pACL->getIdResource($menu);
-			$exist = false;
-			$history = "SELECT aus.id AS id, ar.id AS id_menu, ar.description AS description FROM user_shortcut aus, acl_resource ar WHERE id_user = ? AND aus.type = 'history' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
-			
-			$arr_result1 = $pdbACL->fetchTable($history, TRUE, array($uid));
-			if($arr_result1 !== FALSE){
-				// verificar si ya existe menu en tabla acl_user_shortcut con ese usuario
-				$i = 0;
-				$arrIDS = array();
-				foreach($arr_result1 as $key => $value){
-					$arrNew[] = $value;
-					$arrIDS[] = $value['id'];
-					if($value['id_menu'] == $menu){
-						$exist = true;
-						if($i==0) return true;
-					}
-					$i++;
-				}
-				if(!$exist && count($arr_result1) <= 4){
-					$pdbACL->beginTransaction();
-					$query = "INSERT INTO user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
-					$r = $pdbACL->genQuery($query, array($uid, $menu, "history"));
-					if(!$r){
-						$pdbACL->rollBack();
-						return false;
-					}else{
-						$pdbACL->commit();
-						return true;
-					}
-				}else{
-					$pdbACL->beginTransaction();
-					$success = true;
-					$tmp = "";
-					$query = "UPDATE user_shortcut SET id_resource = ? WHERE id_user = ? AND id = ? AND type = ?";
-					for($i=0; $i<count($arrIDS); $i++){
-						$id = $arrIDS[$i];
-						$id_menu = $arrNew[$i]["id_menu"];
-						
-						$r = true;
-						if($i==0){
-							$tmp = $id_menu;
-							$r = $pdbACL->genQuery($query, array($menu, $uid, $id, "history"));
-						}else{
-							if($id_menu != $menu){
-								if($tmp != $menu && $tmp != ""){
-									$r = $pdbACL->genQuery($query, array($tmp, $uid, $id, "history"));
-									$tmp = $id_menu;
-								}else
-									$tmp = "";
-							}else{
-								$r = $pdbACL->genQuery($query, array($tmp, $uid, $id, "history"));
-								$tmp = $id_menu;
-							}
-						}
-						if(!$r)
-							$success = false;
-					}
-					if($success)
-						$pdbACL->commit();
-					else
-						$pdbACL->rollBack();
-				}
-			}
-		}
-	}
-	return $success;
+    // Leer historial actual. El item 0 es el más reciente
+    $sqlselect = <<<SQL_LEER_HISTORIAL
+SELECT aus.id AS id, ar.id AS id_menu FROM user_shortcut aus, acl_resource ar
+WHERE id_user = ? AND aus.type = 'history' AND ar.id = aus.id_resource
+ORDER BY aus.id DESC
+SQL_LEER_HISTORIAL;
+    $historial = $pdbACL->fetchTable($sqlselect, TRUE, array($uid));
+    if (!is_array($historial)) return FALSE;
+    if (count($historial) > 0 && $historial[0]['id_menu'] == $id_resource)
+        return TRUE;    // Idempotencia
+    for ($i = 0; $i < count($historial); $i++) $historial[$i]['modified'] = FALSE;
+        
+    // Procesar la lista según las reglas requeridas
+    $shiftindex = NULL;
+    for ($i = 0; $i < count($historial); $i++) {
+        if ($historial[$i]['id_menu'] == $id_resource) {
+            $shiftindex = $i;
+            break;
+        }
+    }
+    if (is_null($shiftindex) && count($historial) >= 5)
+        $shiftindex = count($historial);
+    
+    // Insertar nuevo item al inicio, corriendo los items si es necesario
+    if (!is_null($shiftindex)) {
+        for ($i = $shiftindex; $i > 0; $i--) if ($i < count($historial)) {
+            $historial[$i]['id_menu'] = $historial[$i - 1]['id_menu'];
+            $historial[$i]['modified'] = TRUE;
+        }
+        $historial[0]['id_menu'] = $id_resource;
+        $historial[0]['modified'] = TRUE;
+    } else array_unshift($historial, array('id' => NULL, 'id_menu' => $id_resource, 'modified' => TRUE));
+    
+    // Guardar en la DB todas las modificaciones
+    $pdbACL->beginTransaction();
+    foreach ($historial as $item) if ($item['modified']) {
+        if (is_null($item['id'])) {
+            $sqlupdate = 'INSERT INTO user_shortcut(id_resource, id_user, type) VALUES(?, ?, ?)';
+            $paramsql = array($item['id_menu'], $uid, 'history');
+        } else {
+            $sqlupdate = 'UPDATE user_shortcut SET id_resource = ? WHERE id_user = ? AND type = ? AND id = ?';
+            $paramsql = array($item['id_menu'], $uid, 'history', $item['id']);
+        }
+        if (!$pdbACL->genQuery($sqlupdate, $paramsql)) {
+            $pdbACL->rollBack();
+            return FALSE;
+        }
+    }
+    $pdbACL->commit();
+    return TRUE;
 }
 
 function menuIsBookmark($menu)

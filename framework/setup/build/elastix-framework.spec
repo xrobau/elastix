@@ -311,6 +311,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Apr 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: reimplement putMenuAsBookmark to receive additional 
+  parameters of database connections, instead of opening duplicates.
+  SVN Rev[4872]
 - CHANGED: Framework: reorganization of menu management and theme encapsulation:
   - The implementation of paloSantoNavigation has been rewritten and 
     considerably simplified. The previous implementation maintained the menu

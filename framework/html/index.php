@@ -61,7 +61,8 @@ if(file_exists("langmenus/$lang.lang")){
     $arrLang = array_merge($arrLang,$arrLangMenu);
 }
 
-$pACL = new paloACL($arrConf['elastix_dsn']['elastix']);
+$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+$pACL = new paloACL($pdbACL);
 
 if(!empty($pACL->errMsg)) {
     echo "ERROR DE DB: $pACL->errMsg <br>";
@@ -159,7 +160,8 @@ if (isset($_SESSION['elastix_user']) &&
 
     // Guardar historial de la navegación
     // TODO: también para rawmode=yes ?
-    putMenuAsHistory($selectedMenu);
+    //putMenuAsHistory($selectedMenu);
+    putMenuAsHistory($pdbACL, $pACL, $idUser, $selectedMenu);
 
     // Obtener contenido del módulo, si usuario está autorizado a él
     $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $selectedMenu);

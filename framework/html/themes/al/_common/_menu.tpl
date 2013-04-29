@@ -31,7 +31,9 @@
               <input type="hidden" id="idMenu" value=""></input>
               <div class="vertical_menu_oculto" id="{$idMenu}">
                 <table cellpadding=0 cellspacing=0>
-                    {$arrMenuTotal.$idMenu}
+                    {foreach from=$menu.children item=menuchild }
+                        <tr><td><a href="index.php?menu={$menuchild.id}">{$menuchild.Name}{if $menuchild.HasChild}...{/if}</a></td></tr>
+                    {/foreach}
                 </table>
               </div>
               <table cellSpacing="0" cellPadding="2" height="29" border="0">

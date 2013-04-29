@@ -428,7 +428,7 @@ function oneClickEvent()
 	</div>
 	<div id="neo-smenubox"> <!-- mostrando contenido del menu secundario -->
 	  <div id="neo-smenubox-innerdiv">
-		{foreach from=$arrSubMenuByParents key=idSubMenu item=subMenu}
+		{foreach from=$arrSubMenu key=idSubMenu item=subMenu}
 		  {if $idSubMenu eq $idSubMenuSelected}
 			<div class="neo-tabvon"><a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.Name}</a></div>
 		  {else}

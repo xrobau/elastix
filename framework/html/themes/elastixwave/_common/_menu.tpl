@@ -99,13 +99,13 @@
                         <td><!--{$arrMenuTotalChildren}-->
                             <table cellspacing="1" cellpadding="5" border="0">
                                 <tr>
-                                {foreach from=$arrSubMenuByParents key=idSubMenu item=subMenu}
+                                {foreach from=$arrSubMenu key=idSubMenu item=subMenu}
                                 {if $idSubMenu eq $idSubMenuSelected}
                                 <td title="" class="botonon">
-                                        <a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.Name}</a>
+                                        <a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.Name}{if $subMenu.HasChild }<img alt='' src='images/miniArrowDown.png' align='absmiddle' style='border:0;'/>{/if}</a>
                                 </td>
                                 {else}
-                                <td title="" class="botonoff"><a href="index.php?menu={$idSubMenu}">{$subMenu.Name}</a></td>
+                                <td title="" class="botonoff"><a href="index.php?menu={$idSubMenu}">{$subMenu.Name}{if $subMenu.HasChild }<img alt='' src='images/miniArrowDown.png' align='absmiddle' style='border:0;'/>{/if}</a></td>
                                 {/if}
                                 {/foreach}
                                 </tr>

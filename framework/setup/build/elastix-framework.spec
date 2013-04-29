@@ -305,6 +305,39 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Apr 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: reorganization of menu management and theme encapsulation:
+  - The implementation of paloSantoNavigation has been rewritten and 
+    considerably simplified. The previous implementation maintained the menu
+    items as a simple list with parents weakly linked through the IdParent
+    property, and every query of the children of such items required a walk of
+    the entire node list. This walk, as well as the walk required to choose the
+    module to display given the menu item, were open-coded through the 
+    implementation and involved several node copies. The new implementation 
+    builds references between parents and children in the constructor, and then
+    relies mainly on these references to select the module to display. This 
+    allows the menu walk to be implemented once, to be shorter, and the overall
+    code to be considerably simplified.
+  - The menu walking code does not assume a maximum menu depth. This removes 
+    several kludges (mainly in showContent) that stemmed from the previous 
+    implementation assuming a two-level menu and then hurriedly adapted to 
+    support three-level menus. 
+  - The menu node assignment has been unified. Since the nodes have children
+    lists and the HasChild property is actively maintained, themes no longer
+    require a separate menu list for second-level menu decorations. This affects
+    the elastixneo and elastixwave themes.
+  - Second-level popup menu tables have been pushed into the themes where they 
+    belong. This affects the following themes: al elastixwine giox slashdot.
+  - Theme-specific menu manipulation (elastixneo) has been abstracted out of
+    paloSantoNavigation and into a new per-theme library inside themesetup.php.
+  - Several widget-rendering operations that require database access have also
+    been abstracted out of paloSantoNavigation and index.php. Since the only 
+    theme that makes use of these widgets is elastixneo, the calls have been
+    moved into its themesetup.php file.
+  - The modified index.php no longer assigns the selected menu item to a session
+    variable. This may break some addons that depend on this.
+  SVN Rev[4871] 
+
 * Sun Apr 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: move implementation of loadShortcut out of 
   paloSantoNavigation and into misc.lib.php, thus making paloSantoNavigation

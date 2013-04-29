@@ -430,7 +430,7 @@ function oneClickEvent()
 	</div>
 	<div id="neo-smenubox"> <!-- mostrando contenido del menu secundario -->
 	  <div id="neo-smenubox-innerdiv">
-		{foreach from=$arrSubMenuByParents key=idSubMenu item=subMenu}
+		{foreach from=$arrSubMenu key=idSubMenu item=subMenu}
 		  {if $idSubMenu eq $idSubMenuSelected}
 			<div class="neo-tabvon"><a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.description}</a></div>
 		  {else}
@@ -519,7 +519,7 @@ function oneClickEvent()
 		  {else}
 		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
+	      <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
 	      <img src="images/icon-help.png" width="24" height="24" alt="help" title="{$HELP}" class="neo-picker" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
           <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
 	      <div class="neo-module-content">
@@ -547,7 +547,7 @@ function oneClickEvent()
 		  {else}
 		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
+	      <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
 	      <img src="images/icon-help.png" width="24" height="24" alt="help" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
           <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
 	 <div class="neo-module-content">

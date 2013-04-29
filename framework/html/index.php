@@ -78,9 +78,9 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
     if($pACL->authenticateUser($_POST['input_user'], $pass_md5)) {
         $_SESSION['elastix_user'] = trim($_POST['input_user']);
         $_SESSION['elastix_pass'] = $pass_md5;
-         header("Location: index.php");
+        header("Location: index.php");
         writeLOG("audit.log", "LOGIN $_POST[input_user]: Web Interface login successful. Accepted password for $_POST[input_user] from $_SERVER[REMOTE_ADDR].");
-		update_theme();
+        update_theme();
         exit;
     } else {
         $user = urlencode(substr($_POST['input_user'],0,20));
@@ -108,7 +108,6 @@ if (isset($_SESSION['elastix_user']) &&
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
         $arrMenuFiltered[$idMenu]['description'] = _tr($arrMenuItem['description']);
     }
-    $oPn = new paloSantoNavigation($arrConf, $arrMenuFiltered, $smarty);
 
     $smarty->assign("THEMENAME", $arrConf['mainTheme']);
 
@@ -118,43 +117,15 @@ if (isset($_SESSION['elastix_user']) &&
     $smarty->assign("lblRegisterCm", _tr("Register"));
     $smarty->assign("lblRegisteredCm", _tr("Registered"));
     if(!is_file("/etc/elastix.key")){
-	$smarty->assign("Registered", _tr("Register"));
+        $smarty->assign("Registered", _tr("Register"));
     	$smarty->assign("ColorRegister", "#FF0000"); 
-    }else{
-	$smarty->assign("Registered", _tr("Registered"));
+    } else {
+        $smarty->assign("Registered", _tr("Registered"));
     	$smarty->assign("ColorRegister", "#008800");
     }
 
     $smarty->assign("md_message_title", _tr('md_message_title'));
     $smarty->assign("currentyear",date("Y"));
-	if($arrConf['mainTheme']=="elastixwave" || $arrConf['mainTheme']=="elastixneo"){
-		$smarty->assign("ABOUT_ELASTIX2", _tr('About Elastix2'));
-    	$smarty->assign("HELP", _tr('HELP'));
-        $smarty->assign("USER_LOGIN",$_SESSION['elastix_user']);
-		$smarty->assign("CHANGE_PASSWORD", _tr("Change Password"));
-		$smarty->assign("CURRENT_PASSWORD_ALERT", _tr("Please write your current password."));
-		$smarty->assign("NEW_RETYPE_PASSWORD_ALERT", _tr("Please write the new password and confirm the new password."));
-		$smarty->assign("PASSWORDS_NOT_MATCH", _tr("The new password doesn't match with retype password."));
-		$smarty->assign("CHANGE_PASSWORD", _tr("Change Elastix Password"));
-		$smarty->assign("CURRENT_PASSWORD", _tr("Current Password"));
-		$smarty->assign("NEW_PASSWORD", _tr("New Password"));
-		$smarty->assign("RETYPE_PASSWORD", _tr("Retype New Password"));
-		$smarty->assign("CHANGE_PASSWORD_BTN", _tr("Change"));
-		$smarty->assign("MENU_COLOR", getMenuColorByMenu());
-		$smarty->assign("MODULES_SEARCH", _tr("Search modules"));
-		$smarty->assign("viewMenuTab", getStatusNeoTabToggle());
-		$smarty->assign("ADD_BOOKMARK", _tr("Add Bookmark"));
-		$smarty->assign("REMOVE_BOOKMARK", _tr("Remove Bookmark"));
-		$smarty->assign("ADDING_BOOKMARK", _tr("Adding Bookmark"));
-		$smarty->assign("REMOVING_BOOKMARK", _tr("Removing Bookmark"));
-		$smarty->assign("HIDING_IZQTAB", _tr("Hiding left panel"));
-		$smarty->assign("SHOWING_IZQTAB", _tr("Loading left panel"));
-		$smarty->assign("HIDE_IZQTAB", _tr("Hide left panel"));
-		$smarty->assign("SHOW_IZQTAB", _tr("Load left panel"));
-	}
-	else{
-		$smarty->assign("ABOUT_ELASTIX", _tr('About Elastix')." ".$arrConf['elastix_version']);
-	}
     $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
     $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
     $smarty->assign("LOGOUT", _tr('Logout'));
@@ -167,51 +138,31 @@ if (isset($_SESSION['elastix_user']) &&
 	$smarty->assign("MSG_SAVE_NOTE", _tr("Saving Note"));
 	$smarty->assign("MSG_GET_NOTE", _tr("Loading Note"));
 	$smarty->assign("LBL_NO_STICKY", _tr("Click here to leave a note."));
+    $smarty->assign("ABOUT_ELASTIX", _tr('About Elastix')." ".$arrConf['elastix_version']);
 
-    if (isset($_POST['menu'])) $menu = $_POST['menu'];
-    elseif (isset($_GET['menu'])) $menu=$_GET['menu'];
-    elseif(empty($menu) and !empty($_SESSION['menu'])) $menu=$_SESSION['menu'];
-    else $menu='';
+    $selectedMenu = getParameter('menu');
 
     /* El módulo _elastixutils sirve para contener las utilidades json que
      * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
      * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
     // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
-    if ($menu == '_elastixutils' && file_exists('modules/_elastixutils/index.php')) {
+    if (!is_null($selectedMenu) && $selectedMenu == '_elastixutils' && 
+        file_exists('modules/_elastixutils/index.php')) {
         require_once 'modules/_elastixutils/index.php';
-        echo _moduleContent($smarty, $menu);
+        echo _moduleContent($smarty, $selectedMenu);
         return;
     }
 
-    $_SESSION['menu']=$menu;
-
     // Inicializa el objeto palosanto navigation
-    if (count($arrMenuFiltered)>0)
-        $oPn->showMenu($menu);
+    $oPn = new paloSantoNavigation($arrMenuFiltered, $smarty, $selectedMenu);
+    $selectedMenu = $oPn->getSelectedModule();
 
-	$menuBookmark = $oPn->getFirstChildOfMainMenuByBookmark($_SESSION['menu']);
-
-	if(menuIsBookmark($menuBookmark))
-		$smarty->assign("IMG_BOOKMARKS", "bookmarkon.png");
-	else
-		$smarty->assign("IMG_BOOKMARKS", "bookmark.png");
-
-
-	$statusStickyNote = getStickyNote($menuBookmark); // se obtiene si ese menu tiene una nota agregada
-	
-	if($statusStickyNote['status'] === TRUE){
-		if($statusStickyNote['data'] != ""){
-			$smarty->assign("STATUS_STICKY_NOTE", "true");
-            if($statusStickyNote['popup']==1)
-                $smarty->assign("AUTO_POPUP", "1");
-        }
-		else
-			$smarty->assign("STATUS_STICKY_NOTE", "false");
-	}else
-		$smarty->assign("STATUS_STICKY_NOTE", "false");
+    // Guardar historial de la navegación
+    // TODO: también para rawmode=yes ?
+    putMenuAsHistory($selectedMenu);
 
     // Obtener contenido del módulo, si usuario está autorizado a él
-    $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $oPn->currSubMenu); 
+    $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $selectedMenu);
     $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';    
     
     // rawmode es un modo de operacion que pasa directamente a la pantalla la salida
@@ -220,6 +171,13 @@ if (isset($_SESSION['elastix_user']) &&
     if(isset($rawmode) && $rawmode=='yes') {
         echo $sModuleContent;
     } else {
+        $oPn->renderMenuTemplates();
+
+        if (file_exists('themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
+        	require_once('themes/'.$arrConf['mainTheme'].'/themesetup.php');
+            themeSetup($smarty, $selectedMenu);
+        }
+
         // Autorizacion
         if ($bModuleAuthorized) {
             $smarty->assign("CONTENT", $sModuleContent);
@@ -240,7 +198,7 @@ if (isset($_SESSION['elastix_user']) &&
         echo $jsonObject->createJSON();
     }
     else{
-		$oPn = new paloSantoNavigation($arrConf, array(), $smarty);
+        $oPn = new paloSantoNavigation(array(), $smarty);
 		$oPn->putHEAD_JQUERY_HTML();
 		$smarty->assign("THEMENAME", $arrConf['mainTheme']);
 		$smarty->assign("currentyear",date("Y"));

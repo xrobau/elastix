@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.3 2007/07/17 00:03:42 gcarrillo Exp $ */
 
-function themeSetup(&$smarty, $selectedMenu)
+function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
 {
     $smarty->assign(array(
         "ABOUT_ELASTIX2"    =>  _tr('About Elastix2'),

@@ -127,7 +127,13 @@ function handleJSON_get_sticky_note($smarty, $module_name)
         $jsonObject->set_status('ERROR');
         $jsonObject->set_error(_tr('Module not specified'));
     } else {
-        $output = getStickyNote($id_menu);
+        global $arrConf;
+        
+        $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+        $pACL = new paloACL($pdbACL);
+        $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
+
+        $output = getStickyNote($pdbACL, $idUser, $id_menu);
         $jsonObject->set_status(($output['status'] === TRUE) ? 'OK' : 'ERROR');
         $jsonObject->set_error($output['msg']);
         $jsonObject->set_message($output['data']);

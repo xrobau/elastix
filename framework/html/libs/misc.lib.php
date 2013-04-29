@@ -638,25 +638,13 @@ function writeLOG($logFILE, $log)
         echo "The file $logFILE couldn't be opened";
 }
 
-function getMenuColorByMenu()
+function getMenuColorByMenu($pdbACL, $uid)
 {
-	include_once "libs/paloSantoACL.class.php";
-	global $arrConf;
-    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pdbACL);
-	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $uid = $pACL->getIdUser($user);
-	$color = "#454545";
-	$sPeticionPropiedades = "SELECT property, value FROM user_properties WHERE id_user = ? AND property = ?";
-	$tabla = $pdbACL->getFirstRowQuery($sPeticionPropiedades, FALSE, array($uid,"menuColor"));
-	if ($tabla === FALSE) {
-		$arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-	} else {
-		if(count($tabla) > 0)
-			if($tabla[0] == "menuColor")
-				$color = $tabla[1];
-	}
-	return $color;
+    $sql = <<<SQL_PROFILE_MENUCOLOR
+SELECT value FROM user_properties WHERE id_user = ? AND property = ?
+SQL_PROFILE_MENUCOLOR;
+    $tupla = $pdbACL->getFirstRowQuery($sql, FALSE, array($uid, 'menuColor'));
+    return (is_array($tupla) && count($tupla) > 0) ? $tupla[0] : '#454545';
 }
 
 /**
@@ -737,49 +725,20 @@ SQL_LEER_HISTORIAL;
     return TRUE;
 }
 
-function menuIsBookmark($menu)
+function menuIsBookmark($pdbACL, $uid, $menu)
 {
-	include_once "libs/paloSantoACL.class.php";
-	if($menu != ""){
-		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-		$pACL = new paloACL($pdbACL);
-		$uid = $pACL->getIdUser($user);
-		if($uid!==FALSE){
-			//$id_resource = $pACL->getIdResource($menu);
-			$bookmarks = "SELECT id FROM user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
-			$arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid,$menu,"bookmark"));
-			if($arr_result1 !== FALSE){
-				if(count($arr_result1) > 0)
-					return true;
-				else
-					return false;
-			}else
-				return false;
-		}
-	}
-	return false;
+    $tupla = $pdbACL->getFirstRowQuery(
+        'SELECT COUNT(id) FROM user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?',
+        FALSE, array($uid, $menu, 'bookmark'));
+    return (is_array($tupla) && ($tupla[0] > 0));
 }
 
-function getStatusNeoTabToggle()
+function getStatusNeoTabToggle($pdbACL, $uid)
 {
-	include_once "libs/paloSantoACL.class.php";
-	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-	global $arrConf;
-	$exist = false;
-	$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pdbACL);
-	$uid = $pACL->getIdUser($user);
-	$togglesTabs = "SELECT * FROM user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'";
-	$arr_result1 = $pdbACL->getFirstRowQuery($togglesTabs, TRUE, array($uid));
-	if($arr_result1 !== FALSE && count($arr_result1) > 0)
-		$exist = true;
-	if($exist){
-		return $arr_result1['description'];
-	}else{
-	  return "none";
-	}
+    $tupla = $pdbACL->getFirstRowQuery(
+        "SELECT description FROM user_shortcut WHERE id_user = ? AND type = 'NeoToggleTab'",
+        TRUE, array($uid));
+    return (is_array($tupla) && count($tupla) > 0) ? $tupla['description'] : 'none';
 }
 
 /**
@@ -791,41 +750,26 @@ function getStatusNeoTabToggle()
  * @author Eduardo Cueva
  * @author ecueva@palosanto.com
  */
-function getStickyNote($menu)
+function getStickyNote($pdbACL, $uid, $menu)
 {
-	include_once "libs/paloSantoACL.class.php";
-	$arrResult['status'] = FALSE;
-	$arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
-	if($menu != ""){
-		$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-		global $arrConf;
-		$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-		$pACL = new paloACL($pdbACL);
-		//$id_resource = $pACL->getIdResource($menu);
-		$uid = $pACL->getIdUser($user);
-		$date_edit = date("Y-m-d h:i:s");
-		if($uid!==FALSE){
-			$exist = false;
-			$query = "SELECT * FROM sticky_note WHERE id_user = ? AND id_resource = ?";
-			$arr_result1 = $pdbACL->getFirstRowQuery($query, TRUE, array($uid, $menu));
-			if($arr_result1 !== FALSE && count($arr_result1) > 0)
-				$exist = true;
+    $arrResult = array(
+        'status'    =>  FALSE,
+        'msg'       =>  'no_data',
+        'data'      =>  _tr("Click here to leave a note."),
+    );
+    $tupla = $pdbACL->getFirstRowQuery(
+        'SELECT * FROM sticky_note WHERE id_user = ? AND id_resource = ?',
+        TRUE, array($uid, $menu));
+    if (is_array($tupla) && count($tupla) > 0) {
+        $arrResult = array(
+            'status'    =>  TRUE,
+            'msg'       =>  '',
+            'data'      =>  $tupla['description'],
+            'popup'     =>  $tupla['auto_popup'],
+        );
+    }
 
-			if($exist){
-				$arrResult['status'] = TRUE;
-				$arrResult['msg'] = "";
-				$arrResult['data'] = $arr_result1['description'];
-                $arrResult['popup'] = $arr_result1['auto_popup'];
-				return $arrResult;
-			}else{
-				$arrResult['status'] = FALSE;
-				$arrResult['msg'] = "no_data";
-				$arrResult['data'] = _tr("Click here to leave a note.");
-				return $arrResult;
-			}
-		}
-	}
-	return $arrResult;
+    return $arrResult;
 }
 
 // Set default timezone from /etc/sysconfig/clock for PHP 5.3+ compatibility
@@ -1538,15 +1482,8 @@ function getSmarty($mainTheme, $basedir = '/var/www/html')
     return $smarty;     
 }
 
-function loadShortcut(&$smarty)
+function loadShortcut($pdbACL, $uid, &$smarty)
 {
-    include_once "libs/paloSantoACL.class.php";
-    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    global $arrConf;
-    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pdbACL);
-    $uid = $pACL->getIdUser($user);
-
     if($uid === FALSE) return '';
     $sql = <<<SQL_BOOKMARKS_HISTORY
 SELECT us.id AS id, ar.description AS name, ar.id AS id_menu

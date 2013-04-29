@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.3 2007/07/17 00:03:42 gcarrillo Exp $ */
 
-function themeSetup(&$smarty, $selectedMenu)
+function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
 {
     /* El tema elastixneo muestra hasta 7 items de menú de primer nivel, y 
      * coloca el resto en una lista desplegable a la derecha del último item. 
@@ -77,15 +77,15 @@ function themeSetup(&$smarty, $selectedMenu)
         "HIDE_IZQTAB"               =>  _tr("Hide left panel"),
         "SHOW_IZQTAB"               =>  _tr("Load left panel"),
 
-        'viewMenuTab'               =>  getStatusNeoTabToggle(),
-        'MENU_COLOR'                =>  getMenuColorByMenu(),
-        'IMG_BOOKMARKS'             =>  menuIsBookmark($selectedMenu) ? 'bookmarkon.png' : 'bookmark.png',
-        'SHORTCUT'                  =>  loadShortcut($smarty),
+        'viewMenuTab'               =>  getStatusNeoTabToggle($pdbACL, $idUser),
+        'MENU_COLOR'                =>  getMenuColorByMenu($pdbACL, $idUser),
+        'IMG_BOOKMARKS'             =>  menuIsBookmark($pdbACL, $idUser, $selectedMenu) ? 'bookmarkon.png' : 'bookmark.png',
+        'SHORTCUT'                  =>  loadShortcut($pdbACL, $idUser, $smarty),
         'STATUS_STICKY_NOTE'        =>  'false',
     ));
 
     // se obtiene si ese menu tiene una nota agregada
-    $statusStickyNote = getStickyNote($selectedMenu);
+    $statusStickyNote = getStickyNote($pdbACL, $idUser, $selectedMenu);
     if ($statusStickyNote['status'] && $statusStickyNote['data'] != "") {
         $smarty->assign('STATUS_STICKY_NOTE', 'true');
         if ($statusStickyNote['popup'] == 1)

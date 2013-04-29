@@ -311,6 +311,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Apr 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: reimplement several widget helper methods to receive the
+  database connection used for authentication instead of opening a duplicate.
+  SVN Rev[4873]
 - CHANGED: Framework: reimplement putMenuAsBookmark to receive additional 
   parameters of database connections, instead of opening duplicates.
   SVN Rev[4872]

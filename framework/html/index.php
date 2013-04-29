@@ -160,7 +160,6 @@ if (isset($_SESSION['elastix_user']) &&
 
     // Guardar historial de la navegación
     // TODO: también para rawmode=yes ?
-    //putMenuAsHistory($selectedMenu);
     putMenuAsHistory($pdbACL, $pACL, $idUser, $selectedMenu);
 
     // Obtener contenido del módulo, si usuario está autorizado a él
@@ -177,7 +176,7 @@ if (isset($_SESSION['elastix_user']) &&
 
         if (file_exists('themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
         	require_once('themes/'.$arrConf['mainTheme'].'/themesetup.php');
-            themeSetup($smarty, $selectedMenu);
+            themeSetup($smarty, $selectedMenu, $pdbACL, $pACL, $idUser);
         }
 
         // Autorizacion

@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,6 +97,9 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Apr 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-1
+- Bump version for release.
+
 * Thu Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: filter breaks to remove inactive breaks from list.
 

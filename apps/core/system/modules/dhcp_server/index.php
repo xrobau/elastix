@@ -57,12 +57,6 @@ function _moduleContent(&$smarty, $module_name)
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    //print_r($_SESSION);
-    // se conecta a la base
-    $pDB = new paloDB($arrConf['dsn_conn_database']);
-    if(!empty($pDB->errMsg)) {
-        $smarty->assign("mb_message", $arrLang["Error when connecting to database"]."<br/>".$pDB->errMsg);
-    }
 
     $arrFormDHCP = createFieldForm($arrLang);
     $oForm = new paloForm($smarty,$arrFormDHCP);
@@ -89,16 +83,16 @@ function _moduleContent(&$smarty, $module_name)
     $content = "";
     switch($accion){
         case "service_start":
-            $content = serviceStartDHCP($smarty, $module_name, $local_templates_dir, $pDB, $oForm, $arrLang);
+            $content = serviceStartDHCP($smarty, $module_name, $local_templates_dir, $oForm, $arrLang);
             break;
         case "service_stop":
-            $content = serviceStopDHCP($smarty, $module_name, $local_templates_dir, $pDB, $oForm, $arrLang);
+            $content = serviceStopDHCP($smarty, $module_name, $local_templates_dir, $oForm, $arrLang);
             break;
         case "service_update":
-            $content = serviceUpdateDHCP($smarty, $module_name, $local_templates_dir, $pDB, $oForm, $arrLang);
+            $content = serviceUpdateDHCP($smarty, $module_name, $local_templates_dir, $oForm, $arrLang);
             break;
         default: //service_show
-            $content = serviceShowDHCP($smarty, $module_name, $local_templates_dir, $pDB, $oForm, $arrLang);
+            $content = serviceShowDHCP($smarty, $module_name, $local_templates_dir, $oForm, $arrLang);
             break;
     }
     return $content;
@@ -283,9 +277,9 @@ function createFieldForm($arrLang)
     return $arrFields;
 }
 
-function serviceStartDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$oForm, $arrLang)
+function serviceStartDHCP($smarty, $module_name, $local_templates_dir, &$oForm, $arrLang)
 {
-    $paloDHCP = new PaloSantoDHCP($pDB);
+    $paloDHCP = new PaloSantoDHCP();
     if(!$paloDHCP->startServiceDHCP()){
         $smarty->assign("mb_title",$arrLang['Information']);
         $smarty->assign("mb_message",$arrLang["The Service dhcpd can't start"]);
@@ -304,10 +298,10 @@ function serviceStartDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$o
     header("Location: /?menu=$module_name");
 }
 
-function serviceStopDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$oForm, $arrLang)
+function serviceStopDHCP($smarty, $module_name, $local_templates_dir, &$oForm, $arrLang)
 {
     // Intentar terminar el servicio
-    $paloDHCP = new PaloSantoDHCP($pDB);
+    $paloDHCP = new PaloSantoDHCP();
     if(!$paloDHCP->stopServiceDHCP()){
         $smarty->assign("mb_title",$arrLang['Information']);
         $smarty->assign("mb_message",$arrLang["The Service dhcpd can't stop"]);
@@ -326,9 +320,9 @@ function serviceStopDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$oF
     header("Location: /?menu=$module_name");
 }
 
-function serviceShowDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$oForm, $arrLang)
+function serviceShowDHCP($smarty, $module_name, $local_templates_dir, &$oForm, $arrLang)
 {
-    $paloDHCP = new PaloSantoDHCP($pDB);
+    $paloDHCP = new PaloSantoDHCP();
     $arrConfiguration = $paloDHCP->getConfigurationDHCP();
     $statusDHCP = $paloDHCP->getStatusServiceDHCP();
 
@@ -350,7 +344,7 @@ function serviceShowDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$oF
     return $oForm->fetchForm("$local_templates_dir/dhcp.tpl", $arrLang["DHCP Configuration"], $arrTmp);
 }
 
-function serviceUpdateDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$oForm, $arrLang)
+function serviceUpdateDHCP($smarty, $module_name, $local_templates_dir, &$oForm, $arrLang)
 {
     $in_ip_ini_1 = trim($_POST['in_ip_ini_1']); $in_ip_ini_2 = trim($_POST['in_ip_ini_2']); 
     $in_ip_ini_3 = trim($_POST['in_ip_ini_3']); $in_ip_ini_4 = trim($_POST['in_ip_ini_4']); 
@@ -392,7 +386,7 @@ function serviceUpdateDHCP($smarty, $module_name, $local_templates_dir, $pDB, &$
     //obtener las interfaces del sistema y verificar que el rango de ips pertenecen a alguna de las interfases
  
     $paloNet = new paloNetwork();
-    $paloDHCP = new PaloSantoDHCP($pDB);
+    $paloDHCP = new PaloSantoDHCP();
     $interfazEncontrada=FALSE;
     $configuracion_de_red_actual = array();
 

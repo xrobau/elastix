@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu May  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Server: since DHCP server configuration is done entirely via the
+  privileged script, the database parameter for the constructor to PaloSantoDHCP
+  is unnecessary and has been removed.
+  SVN Rev[4876]
+
 * Wed Apr 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Applet Admin: use supplied module_name instead of getting variable
   from session. The package elastix-framework needs a Conflicts with previous

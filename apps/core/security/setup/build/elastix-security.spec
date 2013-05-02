@@ -126,6 +126,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Tue May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Advanced Settings: remove bogus attempt to read nonexistent FreePBX
+  blocking status.
+  SVN Rev[4880]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: security - Build/elastix-security.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

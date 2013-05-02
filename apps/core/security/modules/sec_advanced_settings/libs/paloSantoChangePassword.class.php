@@ -121,19 +121,6 @@ class paloSantoAdvancedSecuritySettings{
         return $arrResult;
    }
 
-   function updateStatusFreePBXFrontend($status_fpbx_frontend)
-   {
-      //Actualizar la clave ActivatedFreePBX.
-      $pDBSettings = new paloDB($this->arrConf['elastix_dsn']["settings"]);
-      return (set_key_settings($pDBSettings,"activatedFreePBX",$status_fpbx_frontend));
-   }
-
-   function isActivatedFreePBXFrontend()
-   {
-      $pDBSettings = new paloDB($this->arrConf['elastix_dsn']["settings"]);
-      return (get_key_settings($pDBSettings,"activatedFreePBX"));
-   }
-
     function isActivatedAnonymousSIP()
     {
         $bValorPrevio = TRUE;   // allowguest es yes hasta encontrar seteo

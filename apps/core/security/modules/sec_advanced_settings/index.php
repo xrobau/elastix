@@ -69,9 +69,6 @@ function _moduleContent(&$smarty, $module_name)
         case "update_advanced_security_settings":
             $content = updateAdvancedSecuritySettings($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
-        case "update_status_fpbx_frontend":
-            $content = updateStatusFreePBXFrontend($arrConf);
-            break;
         case "update_status_anonymous_sip":
             $content = updateStatusAnonymousSIP($arrConf);
             break;
@@ -85,7 +82,6 @@ function _moduleContent(&$smarty, $module_name)
 function viewFormAdvancedSecuritySettings($smarty, $module_name, $local_templates_dir, $arrConf)
 {
     $pAdvancedSecuritySettings       = new paloSantoAdvancedSecuritySettings($arrConf);
-    $value_fpbx_frontend             = $pAdvancedSecuritySettings->isActivatedFreePBXFrontend();
     $value_anonymous_sip             = $pAdvancedSecuritySettings->isActivatedAnonymousSIP();
     $arrFormAdvancedSecuritySettings = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormAdvancedSecuritySettings);
@@ -93,38 +89,12 @@ function viewFormAdvancedSecuritySettings($smarty, $module_name, $local_template
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("subtittle1", _tr("Enable access"));
     $smarty->assign("subtittle2", _tr("Change Password"));
-    $smarty->assign("value_fpbx_frontend", $value_fpbx_frontend);
     $smarty->assign("value_anonymous_sip", $value_anonymous_sip);
     $smarty->assign("icon", "modules/".$module_name."/images/security_advanced_settings.png");
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Advanced Security Settings"), $_POST);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
     return $content;
-}
-
-function updateStatusFreePBXFrontend($arrConf)
-{
-    $pAdvanceSecuritySettings = new paloSantoAdvancedSecuritySettings($arrConf);
-    $jsonObject               = new PaloSantoJSON();
-    $statusFreePBXFrontend    = getParameter("new_status_fpbx_frontend");
-    $result = $pAdvanceSecuritySettings->updateStatusFreePBXFrontend($statusFreePBXFrontend);
-    $arrData['result']       = $result;
-    $arrData['button_title'] = _tr("Dismiss");
-    if($statusFreePBXFrontend == "1")
-	$word = "enabled";
-    else
-	$word = "disabled";
-    if($result){
-	$arrData['message_title'] = _tr("Information").":<br/>";
-	$arrData['message']       = _tr("Access direct to FreePBX has been $word.");
-    }
-    else{
-	$arrData['message_title'] = _tr("Error").":<br/>";
-	$arrData['message']       = _tr("Access direct to FreePBX has not been $word.");
-    }
-    $jsonObject->set_message($arrData);
-    Header('Content-Type: application/json');
-    return $jsonObject->createJSON();
 }
 
 function updateStatusAnonymousSIP($arrConf)

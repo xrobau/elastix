@@ -305,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use strpos instead of dynamic regexp in module search
+  SVN Rev[4882]
+
 * Thu May 02 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - FIXED: framework - Build/elastix-framework.spec: Changed release in specfile.
 

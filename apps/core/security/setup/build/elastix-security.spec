@@ -127,6 +127,8 @@ fi
 
 %changelog
 * Tue May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Weak Keys: expose database errors for later debugging.
+  SVN Rev[4882]
 - CHANGED: Weak Keys: hardcode /etc instead of using missing ASTETCDIR.
   SVN Rev[4881]
 - CHANGED: Advanced Settings: remove bogus attempt to read nonexistent FreePBX

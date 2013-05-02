@@ -102,7 +102,7 @@ class paloSantoDhcpClienList {
 	    $data = array();
 	    $fp = fopen($FILE,'r');
         
-        while($line = fgets($fp, filesize($FILE)))
+        while($line = fgets($fp))
         {
             // Saltarse los comentarios
             if (preg_match('/^\s*#/', $line)) continue;

@@ -130,11 +130,15 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Currency: remove dead code. Elastix 3 requires an reimplementation
+  using the organization properties table.
+  SVN Rev[4879]
+
 * Thu May 02 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
 
-* Thu May  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Client List: remove unnecessary call to filesize() on lease list
   file. It causes problems on a zero size lease list.
   SVN Rev[4877]

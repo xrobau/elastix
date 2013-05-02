@@ -49,42 +49,6 @@ class paloSantoCurrency {
         }
     }
 
-    /*HERE YOUR FUNCTIONS*/
-
-    function ObtainNumCurrency()
-    {
-        //Here your implementation
-        $query   = "SELECT COUNT(*) FROM ";
-        /*
-        $result=$this->_DB->getFirstRowQuery($query);
-        if($result==FALSE)
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result[0];
-        */
-
-        /*THIS LINE SHOULD BE ERASE*/ return 0; /*THIS LINE SHOULD BE ERASE*/
-    }
-
-    function ObtainCurrency($limit, $offset, $field_pattern)
-    {
-        //Here your implementation
-        $query   = "SELECT * FROM ";
-        /*
-        $result=$this->_DB->fetchTable($query, true);
-        if($result==FALSE)
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-        return $result;
-        */
-
-        /*THIS LINE SHOULD BE ERASE*/ return array(); /*THIS LINE SHOULD BE ERASE*/
-    }
-
     function loadCurrency()
     {
         $query = "SELECT * FROM settings WHERE key='currency'";

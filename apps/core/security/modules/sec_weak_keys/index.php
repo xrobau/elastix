@@ -121,6 +121,9 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     );
     $oGrid -> setURL($url);
     $arrResult =$pWeakKeys->getWeakKeys($limit,$offset,$filter_field,$filter_value);
+    if (!is_array($arrResult) && $pWeakKeys->errMsg != "") {
+        $smarty->assign("mb_message", $pWeakKeys->errMsg);
+    }
     $arrData = null;
     //$arrResult =$pWeakKeys->getWeakKeysChecker();
     $arrColumns = array(_tr("Extension"),_tr("Description"),_tr("Status"));

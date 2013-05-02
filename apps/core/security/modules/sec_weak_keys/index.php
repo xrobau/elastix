@@ -66,7 +66,7 @@ function _moduleContent(&$smarty, $module_name)
     $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
     $arrAMP  = $pConfig->leer_configuracion(false);
 
-    $pConfig = new paloConfig($arrAMP['ASTETCDIR']['valor'], "asterisk.conf", "=", "[[:space:]]*=[[:space:]]*");
+    $pConfig = new paloConfig('/etc', "asterisk.conf", "=", "[[:space:]]*=[[:space:]]*");
     $arrAST  = $pConfig->leer_configuracion(false);
 
     //actions

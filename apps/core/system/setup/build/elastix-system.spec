@@ -135,6 +135,9 @@ fi
 
 %changelog
 * Thu May  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Currency: remove dead code. Elastix 3 requires an reimplementation
+  using the organization properties table.
+  SVN Rev[4878]
 - CHANGED: DHCP Client List: remove unnecessary call to filesize() on lease list
   file. It causes problems on a zero size lease list.
   SVN Rev[4877]

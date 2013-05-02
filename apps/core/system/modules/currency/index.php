@@ -58,7 +58,7 @@ function _moduleContent(&$smarty, $module_name)
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
     //conexion resource
-    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
 
     //actions
     $accion = getAction();

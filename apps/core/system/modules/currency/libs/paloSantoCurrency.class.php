@@ -26,6 +26,9 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoCurrency.class.php,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
+
+require_once 'libs/paloSantoOrganization.class.php';
+
 class paloSantoCurrency {
     var $_DB;
     var $errMsg;
@@ -49,73 +52,22 @@ class paloSantoCurrency {
         }
     }
 
-    /*HERE YOUR FUNCTIONS*/
-
-    function ObtainNumCurrency()
-    {
-        //Here your implementation
-        $query   = "SELECT COUNT(*) FROM ";
-        /*
-        $result=$this->_DB->getFirstRowQuery($query);
-        if($result==FALSE)
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result[0];
-        */
-
-        /*THIS LINE SHOULD BE ERASE*/ return 0; /*THIS LINE SHOULD BE ERASE*/
-    }
-
-    function ObtainCurrency($limit, $offset, $field_pattern)
-    {
-        //Here your implementation
-        $query   = "SELECT * FROM ";
-        /*
-        $result=$this->_DB->fetchTable($query, true);
-        if($result==FALSE)
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-        return $result;
-        */
-
-        /*THIS LINE SHOULD BE ERASE*/ return array(); /*THIS LINE SHOULD BE ERASE*/
-    }
-
     function loadCurrency()
     {
-        $query = "SELECT * FROM settings WHERE key='currency'";
-
-        $result = $this->_DB->fetchTable($query, true);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-
-        $result = $result[0];
-        $curr = $result['value'];
-
-        return $curr;
+        $pORGZ = new paloSantoOrganization($this->_DB);
+        $arrCredentials = getUserCredentials();
+        $currency = $pORGZ->getOrganizationProp($arrCredentials['id_organization'], 'currency');
+        if ($currency === false) $this->errMsg = $pORGZ->errMsg;
+        return $currency;
     }
 
     function SaveOrUpdateCurrency($curr)
     {
-        if( $this->loadCurrency() == false )//no tiene registro de currency
-            $query = "INSERT INTO settings(key,value) values('currency','$curr')";
-        else
-            $query = "UPDATE settings SET value='$curr' WHERE key='currency'";
-
-        $result = $this->_DB->genQuery($query);
-        if( $result == false ){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-
-        return true;
+        $pORGZ = new paloSantoOrganization($this->_DB);
+        $arrCredentials = getUserCredentials();
+        $r = $pORGZ->setOrganizationProp($arrCredentials['id_organization'], 'currency', $curr);
+        if (!$r) $this->errMsg = $pORGZ->errMsg;
+        return $r;
     }
 }
 ?>

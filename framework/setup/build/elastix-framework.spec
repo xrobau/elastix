@@ -310,6 +310,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use strpos instead of dynamic regexp in module search
+  SVN Rev[4882]
+
 * Mon Apr 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: reimplement several widget helper methods to receive the
   database connection used for authentication instead of opening a duplicate.

@@ -131,6 +131,9 @@ fi
 
 %changelog
 * Thu May  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Client List: remove unnecessary call to filesize() on lease list
+  file. It causes problems on a zero size lease list.
+  SVN Rev[4877]
 - CHANGED: DHCP Server: since DHCP server configuration is done entirely via the
   privileged script, the database parameter for the constructor to PaloSantoDHCP
   is unnecessary and has been removed.

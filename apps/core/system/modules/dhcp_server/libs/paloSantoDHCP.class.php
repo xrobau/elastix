@@ -32,27 +32,7 @@ include_once("libs/paloSantoDB.class.php");
 /* Clase que implementa DHCP Server */
 class PaloSantoDHCP
 {
-    private $_DB; // instancia de la clase paloDB
     var $errMsg;
-
-    function PaloSantoDHCP(&$pDB)
-    {
-        // Se recibe como parámetro una referencia a una conexión paloDB
-        if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        } else {
-            $dsn = (string)$pDB;
-            $this->_DB = new paloDB($dsn);
-
-            if (!$this->_DB->connStatus) {
-                $this->errMsg = $this->_DB->errMsg;
-                // debo llenar alguna variable de error
-            } else {
-                // debo llenar alguna variable de error
-            }
-        }
-    }
 
     function getConfigurationDHCP() 
     {

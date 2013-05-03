@@ -109,6 +109,12 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Fri May 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: remove bogus compare of translated ajax response field to
+  hardcoded untranslated string. Apparently the check serves no purpose, and
+  breaks loading of event data in languages other than English.
+  SVN Rev[4884]
+
 * Wed Apr 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: fix broken user filtering in main listing of contacts that
   resulted in private contacts from other users being visible. Fixes Elastix 

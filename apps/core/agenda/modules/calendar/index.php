@@ -831,83 +831,82 @@ function viewBoxCalendar($arrConf,$arrLang,$pDB,$local_templates_dir,$smarty,$mo
 		$jsonObject->set_error(_tr("Don't exist the event"));
 		return $jsonObject->createJSON();
 	}
-    if($action == "view_box"){
-        $data = $pCalendar->get_event_by_id($id);
-        $type_event = $data['it_repeat'];
-        $days_repeat = $data['days_repeat'];
-        $data['it_repeat'] = returnEventToType($type_event, $arrLang);
-        $data['visibility'] = "visibility: hidden;";
-        $data['visibility_repeat'] = "visibility: hidden;";
-        $data['notification_status'] = $data['notification'];
-        $data['title'] = _tr("View Event");
-        $new_date_ini = $data['starttime'];
-        $new_date_end = $data['endtime'];
-        $data['date'] = date("d M Y H:i",strtotime($new_date_ini));
-        $data['to'] = date("d M Y H:i",strtotime($new_date_end));
-		$data['Contact'] = $arrLang['Contact'];
-		$data['Email'] = $arrLang['Email'];
 
-        if($data['notification']=="on"){
-            $arrContacts = getEmailToTables($data['emails_notification']);
-            $data['emails_notification'] = getEmails($data['emails_notification']);
-            $data['visibility'] = "visibility: visible;";
-            $data = array_merge($data,$arrContacts);
-        }else
-            $data['size_emails'] = 0;
+    $data = $pCalendar->get_event_by_id($id);
+    $type_event = $data['it_repeat'];
+    $days_repeat = $data['days_repeat'];
+    $data['it_repeat'] = returnEventToType($type_event, $arrLang);
+    $data['visibility'] = "visibility: hidden;";
+    $data['visibility_repeat'] = "visibility: hidden;";
+    $data['notification_status'] = $data['notification'];
+    $data['title'] = _tr("View Event");
+    $new_date_ini = $data['starttime'];
+    $new_date_end = $data['endtime'];
+    $data['date'] = date("d M Y H:i",strtotime($new_date_ini));
+    $data['to'] = date("d M Y H:i",strtotime($new_date_end));
+	$data['Contact'] = $arrLang['Contact'];
+	$data['Email'] = $arrLang['Email'];
 
-        if($type_event==5){
-            $data['visibility_repeat'] = "visibility: visible;";
-        }
+    if($data['notification']=="on"){
+        $arrContacts = getEmailToTables($data['emails_notification']);
+        $data['emails_notification'] = getEmails($data['emails_notification']);
+        $data['visibility'] = "visibility: visible;";
+        $data = array_merge($data,$arrContacts);
+    }else
+        $data['size_emails'] = 0;
 
-        if($type_event==6){
-            $visibility_repeat = "visibility: visible;";
-        }
-
-        if($days_repeat != ""){
-            $arr = getDaysByCheck($days_repeat,2);
-            $data = array_merge($data,$arr);
-        }
-
-		if($data['call_to']!=""){
-			$visibility_alert = "";
-		}else
-			$visibility_alert = "display:none";
-
-		$date_ini = getParameter("event_date");
-		if(!preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/",$date_ini))
-			$date_ini = date("M d Y");
-
-		$dateServer = gmdate("D M d Y H:i:s TO (e)", strtotime($date_ini));//Fri Nov 12 2010 00:00:00 GMT-0500 (ECT)
-
-		$arrForm = createFieldForm($arrLang);
-		$oForm = new paloForm($smarty,$arrForm);
-
-		$smarty->assign("add_phone",$arrLang["Search in Address Book"]);
-		$smarty->assign("SAVE", $arrLang["Save"]);
-		$smarty->assign("EDIT", $arrLang["Edit"]);
-		$smarty->assign("DELETE", $arrLang["Delete"]);
-		$smarty->assign("CANCEL", $arrLang["Cancel"]);
-		$smarty->assign("Start_date", $arrLang["Start_date"]);
-		$smarty->assign("Notification_Alert", $arrLang["Notification_Alert"]);
-		$smarty->assign("End_date", $arrLang["End_date"]);
-		$smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-		$smarty->assign("module_name", $module_name);
-		$smarty->assign("notification_email", $arrLang["notification_email"]);
-		$smarty->assign("id_event",$id);
-		$smarty->assign("Call_alert",$arrLang["Call_alert"]);
-//		$smarty->assign("visibility_emails",$visibility_emails);
-		$smarty->assign("icon", "modules/$module_name/images/agenda_calendar.png");
-		$smarty->assign("visibility_alert", $visibility_alert);
-		$smarty->assign("LBL_EDIT", $arrLang["Edit Event"]);
-		$smarty->assign("LBL_LOADING", $arrLang["Loading"]);
-		$smarty->assign("LBL_DELETING", $arrLang["Deleting"]);
-		$smarty->assign("LBL_SENDING", $arrLang["Sending Request"]);
-		$smarty->assign("START_TYPE", $arrLang["START_TYPE"]);
-		$smarty->assign("DATE_SERVER", $dateServer);
-		$smarty->assign("Color", $arrLang["Color"]);
-		$smarty->assign("Listen", $arrLang["Listen"]);
-		$smarty->assign("Listen_here", _tr("Click here to listen"));
+    if($type_event==5){
+        $data['visibility_repeat'] = "visibility: visible;";
     }
+
+    if($type_event==6){
+        $visibility_repeat = "visibility: visible;";
+    }
+
+    if($days_repeat != ""){
+        $arr = getDaysByCheck($days_repeat,2);
+        $data = array_merge($data,$arr);
+    }
+
+	if($data['call_to']!=""){
+		$visibility_alert = "";
+	}else
+		$visibility_alert = "display:none";
+
+	$date_ini = getParameter("event_date");
+	if(!preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/",$date_ini))
+		$date_ini = date("M d Y");
+
+	$dateServer = gmdate("D M d Y H:i:s TO (e)", strtotime($date_ini));//Fri Nov 12 2010 00:00:00 GMT-0500 (ECT)
+
+	$arrForm = createFieldForm($arrLang);
+	$oForm = new paloForm($smarty,$arrForm);
+
+	$smarty->assign("add_phone",$arrLang["Search in Address Book"]);
+	$smarty->assign("SAVE", $arrLang["Save"]);
+	$smarty->assign("EDIT", $arrLang["Edit"]);
+	$smarty->assign("DELETE", $arrLang["Delete"]);
+	$smarty->assign("CANCEL", $arrLang["Cancel"]);
+	$smarty->assign("Start_date", $arrLang["Start_date"]);
+	$smarty->assign("Notification_Alert", $arrLang["Notification_Alert"]);
+	$smarty->assign("End_date", $arrLang["End_date"]);
+	$smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+	$smarty->assign("module_name", $module_name);
+	$smarty->assign("notification_email", $arrLang["notification_email"]);
+	$smarty->assign("id_event",$id);
+	$smarty->assign("Call_alert",$arrLang["Call_alert"]);
+//  $smarty->assign("visibility_emails",$visibility_emails);
+	$smarty->assign("icon", "modules/$module_name/images/agenda_calendar.png");
+	$smarty->assign("visibility_alert", $visibility_alert);
+	$smarty->assign("LBL_EDIT", $arrLang["Edit Event"]);
+	$smarty->assign("LBL_LOADING", $arrLang["Loading"]);
+	$smarty->assign("LBL_DELETING", $arrLang["Deleting"]);
+	$smarty->assign("LBL_SENDING", $arrLang["Sending Request"]);
+	$smarty->assign("START_TYPE", $arrLang["START_TYPE"]);
+	$smarty->assign("DATE_SERVER", $dateServer);
+	$smarty->assign("Color", $arrLang["Color"]);
+	$smarty->assign("Listen", $arrLang["Listen"]);
+	$smarty->assign("Listen_here", _tr("Click here to listen"));
 
 	$htmlForm = $oForm->fetchForm("$local_templates_dir/evento.tpl",$arrLang["Calendar"], array());
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name' name='formNewEvent' id='formNewEvent' onsubmit='return sendNewEvent();'>".$htmlForm."</form>";

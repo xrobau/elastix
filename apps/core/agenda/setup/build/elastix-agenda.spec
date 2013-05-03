@@ -122,6 +122,12 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Fri May 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: remove bogus compare of translated ajax response field to
+  hardcoded untranslated string. Apparently the check serves no purpose, and
+  breaks loading of event data in languages other than English.
+  SVN Rev[4884]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

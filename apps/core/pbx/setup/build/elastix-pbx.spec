@@ -362,6 +362,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Voicemail: check that specified extension belongs to user before 
+  deleting voicemail. Fixes Elastix bug #1546.
+  SVN Rev[4885]
+
 * Wed Apr 10 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

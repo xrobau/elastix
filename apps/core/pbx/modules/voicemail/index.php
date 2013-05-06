@@ -158,7 +158,7 @@ function _moduleContent(&$smarty, $module_name)
     }
 
     if( getParameter('submit_eliminar') ) {
-        borrarVoicemails();
+        borrarVoicemails($pACL);
         if($oFilterForm->validateForm($_POST)) {
             // Exito, puedo procesar los datos ahora.
             $date_start = translateDate($_POST['date_start']) . " 00:00:00"; 
@@ -541,27 +541,29 @@ function save_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext
     }
 }
 
-function borrarVoicemails()
+function borrarVoicemails($pACL)
 {
-    $voicemailPath = "";
-    $path = "/var/spool/asterisk/voicemail/default";
-    $folder = "INBOX";
-    //$voicemailPath = "$path/$extension/$folder";
-
-    if(is_array($_POST) && count($_POST) > 0){
-        foreach($_POST as $name => $on){
-            if(substr($name,0,4)=='voc-'){
-                $arrData = explode(",", $name);
-                $file = substr($arrData[0],4);
-                $voicemailPath = "$path/{$arrData[1]}/$folder";
-                $pos = strrpos($file, '_');
-                $file = substr($file, 0, strrpos($file, '_'));
-                unlink("$voicemailPath/$file.txt");
-                unlink("$voicemailPath/$file.wav");
-                unlink("$voicemailPath/$file.WAV");
-            }
+    $user = isset($_SESSION['elastix_user']) ? $_SESSION['elastix_user'] : "";
+    $extension = $pACL->getUserExtension($user);
+    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+    
+    $listaArchivos = array();
+    if (is_array($_POST)) foreach (array_keys($_POST) as $name) {
+    	// El formato esperado de clave es voc-msg0001_txt,1064
+        $regs = NULL;
+        if (preg_match('/^voc-(\w+)_(\w+),(\d+)$/', $name, $regs)) {
+        	if ($esAdministrador || $extension == $regs[3]) {
+        		$voicemailPath = "/var/spool/asterisk/voicemail/default/{$regs[3]}/INBOX";
+                $listaArchivos[] = "$voicemailPath/{$regs[1]}.txt";
+                $listaArchivos[] = "$voicemailPath/{$regs[1]}.wav";
+                $listaArchivos[] = "$voicemailPath/{$regs[1]}.WAV";
+        	} else {
+                // Intento de borrar el voicemail de otro usuario
+        		return;
+        	}
         }
     }
+    array_map('unlink', $listaArchivos);
 }
 
 function createFieldFormVoiceList($arrLang)

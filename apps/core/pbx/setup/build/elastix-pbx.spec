@@ -363,6 +363,9 @@ fi
 
 %changelog
 * Mon May 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Voicemail: check that voicemail password is numeric before writing 
+  configuration. Fixes Elastix bug #1547.
+  SVN Rev[4886]
 - FIXED: Voicemail: check that specified extension belongs to user before 
   deleting voicemail. Fixes Elastix bug #1546.
   SVN Rev[4885]

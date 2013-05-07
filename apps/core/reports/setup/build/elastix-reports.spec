@@ -92,6 +92,13 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue May 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Summary by Extension: source extension must be queried in both src and
+  srcchannel. Ditto with dst and dstchannel. Also unify extension filtering on
+  paloSantoCDR to look up extension on channels. Fixes Elastix bug #1545. Might
+  also fix Elastix bugs #567, #707, #1322.
+  SVN Rev[4907]
+
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.

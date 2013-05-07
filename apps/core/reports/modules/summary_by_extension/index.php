@@ -142,6 +142,9 @@ function reportReportCall($smarty, $module_name, $local_templates_dir, &$pDB_cdr
 
     $arrData = null;
     $arrResult = $pReportCall->ObtainReportCall($limit,$offset,$date_ini,$date_end,$type,$value,$order_by,$order_type);
+    if ($pReportCall->errMsg != '') {
+    	$smarty->assign('mb_message', $pReportCall->errMsg);
+    }
 
     $order_type = ($order_type == "desc")?"asc":"desc";
 

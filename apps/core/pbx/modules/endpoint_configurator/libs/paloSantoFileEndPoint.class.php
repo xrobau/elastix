@@ -198,7 +198,29 @@ class PaloSantoFileEndPoint
                
 
                 break;
-	    
+	     case 'Voptech':
+                if($ArrayData['data']['model'] == "VI2007"||$ArrayData['data']['model'] == "VI2008"||$ArrayData['data']['model'] == "VI2006"){
+		            $currentVersion = getVersionConfigFileVOPTECH($ArrayData['data']['ip_endpoint'],"admin","admin");  
+		            $tmpVersion['versionCfg'] = $currentVersion;
+                    $newVersion = $this->updateArrParameters("Voptech", $ArrayData['data']['model'], $tmpVersion);
+                    $ArrayData['data']['arrParameters']['versionCfg'] = $newVersion['versionCfg'];
+                    $version = $ArrayData['data']['arrParameters']['versionCfg'];
+                    $contentFileVoptech = PrincipalFileVoptech($ArrayData['data']['model'],$ArrayData['data']['tech'],$ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['filename'],$version);
+
+		            $result = $this->telnet($ArrayData['data']['ip_endpoint'], "admin", "admin", $contentFileVoptech);
+                   
+		            if($result) $return = true;
+                    else $return = false;
+                }
+
+		        if($this->createFileConf($this->directory,$ArrayData['data']['filename'].".cfg", $contentFileVoptech)) {
+                    $arrComandos = arrVoptech($this->ipAdressServer, $ArrayData['data']['filename']);
+                    $result = $this->telnet($ArrayData['data']['ip_endpoint'], "admin", "admin", $arrComandos);
+                    if($result) $return = true;
+                    else $return = false;
+                }else $return = false;
+
+                break;
 	     case 'Escene':
                 if($ArrayData['data']['model'] == "ES620"){
 	          $contentFileEscene = PrincipalFileEscene620($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer);
@@ -417,6 +439,29 @@ class PaloSantoFileEndPoint
 	      return false;
       }
 
+    }
+
+
+    //Funcion que valida si el telefono es Voptech teniendo en cuenta que inicialemnte se cree que es fanvil por la direccion MAC
+    function isVendorVoptech($user,$password,$ip,$sw){  
+      include_once "vendors/Voptech.cfg.php";  
+      $nonce=getNonceVOPTECH($ip);
+      usleep(500000);
+      $fileP =getInitialPageVOPTECH($ip,$nonce,$user,$password);
+      usleep(500000);
+      $logou = logoutVOPTECH($ip,$nonce);
+      if ($fileP!=null)
+      {
+	     if(!preg_match("/title.htm/", $fileP)){
+	     	if(preg_match("/currentstat.htm/", $fileP)){
+	     		return true;
+	     	}
+	     }    
+      }else{
+	      $this->errMsg = _tr("Unable to connect to ").$ip;
+	      return false;
+      } 
+	  return false;
     }
 
     function buildPattonConfFile($arrData,$tone_set)
@@ -771,6 +816,10 @@ class PaloSantoFileEndPoint
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
                 break;
 	    
+        case 'Voptech':
+                return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".cfg");
+                break;
+	    
 	    case 'Escene':
                 return $this->deleteFileConf($this->directory, $ArrayData['data']['filename'].".xml");
                 break;
@@ -894,6 +943,13 @@ class PaloSantoFileEndPoint
                 //Creando archivos de ejemplo.
                 $contentFileFanvil = templatesFileFanvil($this->ipAdressServer);
                 $this->createFileConf($this->directory, "fanvilxxxxxxxx.template.cfg", $contentFileFanvil);
+                return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
+                break;
+
+        case 'Voptech':
+                //Creando archivos de ejemplo.
+                $contentFileVoptech = templatesFileVoptech($this->ipAdressServer);
+                $this->createFileConf($this->directory, "voptechxxxxxxxx.template.cfg", $contentFileVoptech);
                 return true; //no es tan importante la necesidad de estos archivos solo son de ejemplo.
                 break;
 
@@ -1094,6 +1150,20 @@ class PaloSantoFileEndPoint
                     }
                     else
                         $arrParametersOld['versionCfg'] = '2.0002';
+                }
+                break;
+
+            case 'Voptech':
+                if($model == 'VI2007' || $model == 'VI2008' || $model == 'VI2006' ){
+                    if(isset($arrParametersOld['versionCfg'])){
+                        $arrParametersOld['versionCfg'] = $arrParametersOld['versionCfg'] + 0.0001;
+                        if(strlen($arrParametersOld['versionCfg']) == 1)
+                            $arrParametersOld['versionCfg'] .= ".0";	
+                        while(strlen($arrParametersOld['versionCfg']) < 6)
+                            $arrParametersOld['versionCfg'] .= "0";
+                    }
+                    else
+                        $arrParametersOld['versionCfg'] = '2.0005';
                 }
                 break;
 	    

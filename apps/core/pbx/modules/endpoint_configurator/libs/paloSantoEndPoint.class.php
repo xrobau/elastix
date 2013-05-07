@@ -876,6 +876,19 @@ class paloSantoEndPoint
         }
         return false;
     }
+
+    function getMac($vendor)
+    {
+        $query = "Select value from mac where id_vendor=?";
+        $arrParameters = array($vendor);
+        $pDB = $this->connectDataBase("sqlite","endpoint");
+        if($pDB==false)
+            return false;
+        $result = $pDB->getFirstRowQuery($query,true,$arrParameters);
+        if(!$result)
+            return "";
+        return $result['value'];
+    }
 }
 
 /**

@@ -207,8 +207,16 @@ function load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo_csv, $base_dir,
 			   }
 
 			}
+            //Bloque agregado para manejar ciertos telefonos Voptech ya que tienen la misma porcion de MAC de vendor que Fanvil         		
+            if($dataVendor["name"] == "Fanvil"){	
+				$var = $paloFileEndPoint->isVendorVoptech("admin","admin",$currentEndpointIP,2);
+				if($var){
+					$endpointVoptech = $paloEndPoint->getVendorByName("Voptech");
+					$dataVendor["id"]	 = $endpointVoptech["id"];
+					$dataVendor["name"] = $endpointVoptech["name"];
+				}
+			}
                         $dataModel  = $paloEndPoint->getModelByVendor($dataVendor["id"],$name_model);
-
                         if(!(is_array($dataVendor) && count($dataVendor)>0)){
                             $msg .= _tr("Line")." $line: Vendor $dataVendor[name]"._tr("not supported.")."<br />";
                             continue;

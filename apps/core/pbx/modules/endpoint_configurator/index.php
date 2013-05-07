@@ -241,6 +241,16 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
 			       $endspoint['id_vendor']	 = $endpointElastix["id"];
 			 }
 			}
+            //Bloque agregado para manejar ciertos telefonos Voptech ya que tienen la misma porcion de MAC de vendor que Fanvil         		
+            if($endspoint["name_vendor"] == "Fanvil"){	
+				$var = $paloFileEndPoint->isVendorVoptech("admin","admin",$endspoint['ip_adress'],2);
+				if($var){
+					$endpointVoptech = $paloEndPoint->getVendorByName("Voptech");
+					$endspoint['name_vendor'] = $endpointVoptech["name"];
+					$endspoint['desc_vendor'] = $endpointVoptech["description"];
+					$endspoint['id_vendor']	 = $endpointVoptech["id"];
+				}
+			}
                         $arrTmp[0] = "<input type='checkbox' name='epmac_{$endspoint['mac_adress']}'  />";
                         $arrTmp[1] = $unset;
                         $arrTmp[5] = "<select name='id_model_device_{$endspoint['mac_adress']}' onchange='getDevices(this,\"$macWithout2Points\");'>".combo($paloEndPoint->getAllModelsVendor($endspoint['name_vendor']),$endspoint['model_no'])."</select>";
@@ -502,12 +512,19 @@ function validateParameterEndpoint($arrParameters, $module_name, $dsnAsterisk, $
                     $error .= "The model entered does not exist or does not belong to this vendor. <br />";
 					  
                 if ($tmpVendor == "Elastix") 
-		{
-		    $endpointElastix = $paloEndPoint->getVendorByName("Grandstream");
-		    $tmpVendor	     = $endpointElastix["name"];
-		    $tmpidVendor     = $endpointElastix["id"];
-		}
-		  
+		        {
+		            $endpointElastix = $paloEndPoint->getVendorByName("Grandstream");
+		            $tmpVendor	     = $endpointElastix["name"];
+		            $tmpidVendor     = $endpointElastix["id"];
+		        }
+                if ($tmpVendor == "Voptech") 
+		        {   
+                    $endpointElastix = $paloEndPoint->getVendorByName("Fanvil");
+                    if(substr($tmpMac,0,8) == $paloEndPoint->getMac($endpointElastix["id"])){		                
+		                $tmpVendor	     = $endpointElastix["name"];
+		                $tmpidVendor     = $endpointElastix["id"];
+                    }
+                }
 		$dataVendor = $paloEndPoint->getVendor(substr($tmpMac,0,8));
 		
                 if(!isset($dataVendor["name"]) || $dataVendor["name"] != $tmpVendor || !isset($dataVendor["id"]) || $dataVendor["id"] != $tmpidVendor)

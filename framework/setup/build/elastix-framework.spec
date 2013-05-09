@@ -305,9 +305,14 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu May 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: change registration text to point out that registration
+  is now required for installation of all addons through the web interface.
+  SVN Rev[4909]
+
 * Thu May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: use strpos instead of dynamic regexp in module search
-  SVN Rev[4882]
+  SVN Rev[4883]
 
 * Thu May 02 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - FIXED: framework - Build/elastix-framework.spec: Changed release in specfile.

@@ -16,7 +16,7 @@
 <div id="elx-blackmin-content-menu">
 <img align="absmiddle" src="themes/{$THEMENAME}/images/elastix_logo_mini.png" height="36" alt="elastix" longdesc="http://www.elastix.org" />&nbsp;{if $icon ne null}<img src="{$icon}" border="0" align="absmiddle" />&nbsp;&nbsp;{/if}{$title}
 <span id="elx-blackmin-quicklink">
-&nbsp;<a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupElastix('registrar','{$Register}',538,370)">{$Registered}</a>
+&nbsp;<a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupElastix('registrar','{$Register}',538,500)">{$Registered}</a>
 &nbsp;<a id="viewDetailsRPMs">{$VersionDetails}</a>
 &nbsp;<!--<a id="about_elastix2">{$ABOUT_ELASTIX}</a>--> <a href="javascript:mostrar();">{$ABOUT_ELASTIX}</a>
 &nbsp;<a href="index.php?logout=yes">{$LOGOUT}</a>

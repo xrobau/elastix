@@ -74,44 +74,69 @@ class paloSantoMissedCalls{
 
     function getCallingReport($date_start, $date_end, $filter_field, $filter_value, $sExtension)
     {
-	$where    = "";
-        $arrParam = array();
-        if(isset($filter_field) & $filter_field !=""){
-            $where    = " AND $filter_field like ? ";
-            $arrParam = array("$filter_value%");
+        $paramSQL = array($date_start, $date_end);
+        $filtercond = '1';
+        if (empty($filter_value) || !in_array($filter_field, array('src', 'dst')))
+            $filter_field = NULL;
+        if (!is_null($filter_field)) {
+        	$filtercond = "cdr.$filter_field LIKE ?";
+            $paramSQL[] = "$filter_value%";
         }
-	$dates = array($date_start, $date_end);
-	$arrParam = array_merge($dates,$arrParam);
 
-        $query   = "select 
-		      calldate, 
-		      clid, 
-		      src, 
-		      dst, 
-		      lastapp,
-		      lastdata,
-		      duration,
-		      billsec,
-		      disposition,
-		      userfield
-		    from 
-		      cdr 
-		    where 
-		      (lastapp = 'Dial' OR lastapp = 'Hangup' OR lastapp = 'Voicemail') AND
-		      calldate >= ? AND 
-		      calldate <= ? $where 
-		    order by 
-		      calldate desc";
+        $paramSQL = array_merge($paramSQL, array($date_start, $date_end, $date_start, $date_end));
 
-        $result=$this->_DB->fetchTable($query, true, $arrParam);
+        // Se require UNION debido a la ausencia de FULL OUTER JOIN
+    	$sql = <<<SQL_MISSING_CALLS
+(SELECT
+    cdr.calldate, 
+    IF(TRIM(cdr.src) = '', 'UNKNOWN', TRIM(cdr.src)) AS src, 
+    IF(TRIM(cdr.dst) = '', 'UNKNOWN', TRIM(cdr.dst)) AS dst, 
+    UCASE(TRIM(cdr.lastapp)) AS lastapp,
+    UCASE(TRIM(cdr.lastdata)) AS lastdata,
+    cdr.billsec,
+    UCASE(TRIM(cdr.disposition)) AS disposition,
+    MAX(succ_cdr.maxcalldate) AS maxcalldate
+FROM cdr
+LEFT JOIN (
+    SELECT src, dst, MAX(calldate) AS maxcalldate
+    FROM cdr
+    WHERE lastapp = 'Dial' AND disposition = 'ANSWERED' AND billsec > 0 AND calldate BETWEEN ? AND ?
+    GROUP BY src, dst
+) succ_cdr ON ((succ_cdr.src = cdr.src AND succ_cdr.dst = cdr.dst) OR (succ_cdr.src = cdr.dst AND succ_cdr.dst = cdr.src))
+WHERE $filtercond
+    AND cdr.calldate BETWEEN ? AND ?
+    AND (cdr.lastapp = 'Dial' OR cdr.lastapp = 'Hangup' OR cdr.lastapp = 'Voicemail')
+    AND (NOT (cdr.lastapp = 'Dial' AND cdr.disposition = 'ANSWERED' AND cdr.billsec > 0))
+    AND (succ_cdr.maxcalldate IS NULL OR cdr.calldate > succ_cdr.maxcalldate)
+GROUP BY cdr.calldate, cdr.src, cdr.dst, cdr.lastapp, cdr.lastdata, cdr.billsec, cdr.disposition
+)
+UNION
+(
+SELECT
+    NULL AS calldate,
+    IF(TRIM(cdr.src) = '', 'UNKNOWN', TRIM(cdr.src)) AS src, 
+    IF(TRIM(cdr.dst) = '', 'UNKNOWN', TRIM(cdr.dst)) AS dst,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    MAX(calldate) AS maxcalldate
+FROM cdr
+WHERE lastapp = 'Dial' AND disposition = 'ANSWERED' AND billsec > 0 AND calldate BETWEEN ? AND ?
+GROUP BY src, dst 
+)
+ORDER BY calldate DESC
+SQL_MISSING_CALLS;
+        $result = $this->_DB->fetchTable($sql, true, $paramSQL);
 
-        if($result==FALSE){
+        if ($result == FALSE) {
             $this->errMsg = $this->_DB->errMsg;
             return array();
         }
+
         return $result;
     }
-
+    
     /**********************************************************************************/
     /*    Manejo de estados:
 	  1)    ext1 => call => ext2   
@@ -149,139 +174,87 @@ class paloSantoMissedCalls{
     /* datos que seran mostrados en el reporte
     /**********************************************************************************/
 
-     function showDataReport($arrData, $total)
-    {	
-	$result = array();
-	$result2 = array();
-	$arrTmpData = array();
-	$arrCallsNoAnswer = array();
-	//obteniendo el arreglo de combinaciones: array("412-410","412-420","420-412")
-	if(is_array($arrData) && $total>0){
-	    foreach($arrData as $key => $value){
-		$arrTmp[0] = $value['calldate'];
-		$arrTmp[1] = $value['src'];
-		$arrTmp[2] = $value['dst'];
-		$arrTmp[3] = $value['lastapp'];
-		$arrTmp[4] = $value['billsec'];
-		$arrTmp[5] = $value['disposition'];
-
-		$keyTmp = $value['src']."-".$value['dst'];
-		if(empty($arrTmpData))
-		    $arrTmpData[] = $keyTmp;
-		else{
-		    if(!in_array($keyTmp, $arrTmpData))
-			$arrTmpData[] = $keyTmp;
-		}
-	    }
-	}
-	$size = count($arrTmpData);
-	$arrSal = array();
-	//agregado cada registo al arreglo de combinaciones: 
-	//array("412-410" => array("calldate"=>"25-10-2011","src"=>"412","dst"=>"410","lastapp"=>"Dial","billsec"=>"96","disposition"=>"ANSWERED"))
-	if($size > 0){
-	    foreach($arrData as $key => $value){
-		$arrTmp[0] = $value['calldate'];
-		$arrTmp[1] = $value['src'];
-		$arrTmp[2] = $value['dst'];
-		$arrTmp[3] = $value['lastapp'];
-		$arrTmp[4] = $value['billsec'];
-		$arrTmp[5] = $value['disposition'];
-		$keyTmp = $value['src']."-".$value['dst'];
-		$arrSal["$keyTmp"][] = $arrTmp;
-	    }
-	}
-	//segmentar la información a lo deseado
-	for($i=0; $i<$size; $i++){
-	    $cont  = 0; 
-	    $calls = $arrTmpData[$i];
-	    $timeLimit = $this->getTimeLastCallDestination($arrSal,$calls);
-	    // se recorre cada arreglo de llamadas de $calls en particular
-	    foreach($arrSal[$calls] as $key => $value){
-		$arrTmp2[0] = date('d-M-Y H:i:s',strtotime($value[0]));//calldate
-		// TODO es posible tratar de sacar el canal de origen o destino si es que no existe el origen o destino
-		$arrTmp2[1] = trim(($value[1]!="")?$value[1]:_tr("UNKNOWN"));//src
-		$arrTmp2[2] = trim(($value[2]!="")?$value[2]:_tr("UNKNOWN"));//dst
-		$lastapp = trim(strtoupper($value[3]));//lastapp
-		$billsec = trim($value[4]);//billsec
-		$disposition = trim(strtoupper($value[5]));//disposition
-		if($lastapp === "DIAL" & $disposition == "ANSWERED" & $billsec > 0){
-		    $arrCallsNoAnswer[] = $arrTmp2;
-		    break;
-		}else{ 
-		    if($arrTmp2[0] > $timeLimit)
-			$cont++;
-		    if($lastapp === "DIAL" & $disposition == "NO ANSWER" & $billsec == 0)
-			$arrTmp2[5] = _tr("NO ANSWER");
-		    elseif($lastapp === "HANGUP" & $disposition == "ANSWERED" & $billsec > 0)
-			$arrTmp2[5] = _tr("NO ANSWER - VOICEMAIL");
-		    elseif($lastapp === "VOICEMAIL" & $disposition == "ANSWERED" & $billsec > 0)
-			$arrTmp2[5] = _tr("NO ANSWER - VOICEMAIL");
-		    elseif($lastapp === "DIAL" & $disposition == "ANSWERED" & $billsec == 0)
-			$arrTmp2[5] = _tr("NO ANSWER");
-		    elseif($disposition == "BUSY")
-			$arrTmp2[5] = _tr("NO ANSWER");
-		    else
-			$arrTmp2[5] = _tr($disposition);
-		    $arrTmp2[3] = $this->getTimeToLastCall($arrTmp2[0]);
-		    $result2[$calls][] = $arrTmp2;
-		}
-	    }
-	    if($cont != 0){
-		$result2[$calls][0][4] = $cont;
-		$result[] = $result2[$calls][0];
-	    }
-	}
-	// verificando si existe alguna llamada por parte del destino hacia la fuente y esta haya
-        // sido contestada pra removerla del arreglo princial, debido a que se dio una respuesta 
-        // de llamada por parte del destino.
-	foreach($arrCallsNoAnswer as $key => $value){
-	    $date = $value[0];
-	    $src  = $value[1];
-	    $dst  = $value[2];
-	    $time = strtotime($date);
-	    foreach($result as $key2 => $value2){
-		$date2 = $value2[0];
-		$src2  = $value2[1];
-		$dst2  = $value2[2];
-		$time2 = strtotime($date2);
-		if($src2 == $dst && $dst2 == $src){
-		    if($time > $time2){// entonces se remueve el elemento de result ya que ya fue devuelta la llamada
-			unset($result[$key2]);
-		    }
-		}
-	    }
-	}
-
-	return $result;
-    }
-
-    // se debe obtener en base al arreglo de objetos de conbinacion la fecha de la ultima llamada exitosa desde el
-    // destino hasta la fuente, para ello se debe pasar el arreglo de combinacion junto con la extension fuente y destino
-    // la salida de respuesta mostrará la fecha de la ultima llamada exitosa que realizo el destino
-    function getTimeLastCallDestination($arrData, $callsid)
+    function showDataReport(&$arrData)
     {
-	$exts = explode("-",$callsid);
-	$src  = $exts[0];
-	$dst  = $exts[1];
-	$timeLimit = "";
-	$calls = "$dst-$src";
-	if(in_array("$dst-$src",$arrData)){
-	  foreach($arrData[$calls] as $key => $value){
-	      $calldate    = date('d-M-Y H:i:s',strtotime($value[0]));//calldate
-	      $src2        = trim(($value[1]!="")?$value[1]:_tr("UNKNOWN"));//src
-	      $dst2        = trim(($value[2]!="")?$value[2]:_tr("UNKNOWN"));//dst
-	      $lastapp     = trim(strtoupper($value[3]));//lastapp
-	      $billsec     = trim($value[4]);//billsec
-	      $disposition = trim(strtoupper($value[5]));//disposition
-	      if($lastapp === "DIAL" & $disposition == "ANSWERED" & $billsec > 0){
-		  if($src == $dst2 && $dst == $src2){
-		      $timeLimit = $calldate;
-		      break;
-		  }
-	      }
-	  }
-	}
-	return $timeLimit;
+     	/* El recordset en $arrData contiene los CDRs de interés, en orden de
+         * fecha de CDR descendente. El reporte a producir debe de tener una
+         * fila por cada combinación de número fuente y número destino para el
+         * cual, posterior a la última llamada exitosa entre los dos números
+         * (en cualquier sentido), la fuente haya intentado llamar al destino
+         * y fallado. Se lleva la cuenta del número de intentos, así como la
+         * fecha y razón de fallo del último intento. */
+        
+        /* PASO 1: se recolecta la fecha de la llamada exitosa más reciente 
+         * entre una fuente y un destino. Para este paso A-->B y B-->A son 
+         * igualmente válidos. Se asume que calldate está en formato 
+         * yyyy-mm-dd hh:mm:ss y que por lo tanto la comparación de cadena es
+         * idéntica a la comparación cronológica. */
+        $llamadasExitosas = array();
+        foreach ($arrData as $tupla) {
+            
+        	// Esto asume ordenamiento descendiente por calldate
+            if ($tupla['src'] < $tupla['dst']) {
+            	$k1 = $tupla['src'];
+                $k2 = $tupla['dst'];
+            } else {
+                $k1 = $tupla['dst'];
+                $k2 = $tupla['src'];
+            }
+            if (!is_null($tupla['maxcalldate'])) {
+                if (!(isset($llamadasExitosas[$k1]) && isset($llamadasExitosas[$k1][$k2]) && $tupla['maxcalldate'] < $llamadasExitosas[$k1][$k2])) {
+                    $llamadasExitosas[$k1][$k2] = $tupla['maxcalldate'];
+                }
+            }
+        }
+        
+        /* PASO 2: se buscan todas las llamadas fallidas posteriores a la última
+         * llamada exitosa anotada, o que no hayan tenido llamada exitosa en el
+         * intervalo. */
+        $reportPos = array();
+        $report = array();
+        foreach ($arrData as $tupla) if (!is_null($tupla['calldate'])) {
+        	if (!($tupla['lastapp'] == 'DIAL' && $tupla['disposition'] == 'ANSWERED' && $tupla['billsec'] > 0)) {
+        		// Buscar fecha de la última llamada exitosa, si existe
+                $src = $tupla['src'];
+                $dst = $tupla['dst'];
+                if ($src < $dst) {
+                    $k1 = $src;
+                    $k2 = $dst;
+                } else {
+                    $k1 = $dst;
+                    $k2 = $src;
+                }
+                $llamada_exitosa = NULL;
+                if (isset($llamadasExitosas[$k1]) && isset($llamadasExitosas[$k1][$k2]))
+                    $llamada_exitosa = $llamadasExitosas[$k1][$k2];
+                
+                if (is_null($llamada_exitosa) || $llamada_exitosa < $tupla['calldate']) {
+                	// Este CDR debe contribuir al reporte de llamadas fallidas
+                    if (!isset($reportPos[$src]) || !isset($reportPos[$src][$dst])) {
+                        if (($tupla['lastapp'] == 'DIAL' && $tupla['billsec'] == 0 && $tupla['disposition'] == 'NO ANSWER') ||
+                            ($tupla['lastapp'] == 'DIAL' && $tupla['billsec'] == 0 && $tupla['disposition'] == 'ANSWERED') ||
+                            ($tupla['disposition'] == 'BUSY')) {
+                            $failcause = _tr('NO ANSWER');
+                        } elseif (($tupla['lastapp'] == 'HANGUP' || $tupla['lastapp'] == 'VOICEMAIL') && $tupla['billsec'] > 0 && $tupla['disposition'] == 'ANSWERED') {
+                            $failcause = _tr('NO ANSWER - VOICEMAIL');
+                        } else {
+                        	$failcause = _tr($tupla['disposition']);
+                        }
+                    	$reportPos[$src][$dst] = count($report);
+                        $report[] = array(
+                            date('d-M-Y H:i:s', strtotime($tupla['calldate'])),
+                            (($src == 'UNKNOWN') ? _tr('UNKNOWN') : $src),
+                            (($dst == 'UNKNOWN') ? _tr('UNKNOWN') : $dst),
+                            $this->getTimeToLastCall($tupla['calldate']),   // tiempo desde fallo más reciente hasta ahora
+                            0,      // Número de fallas
+                            $failcause,
+                        );
+                    }
+                    $report[$reportPos[$src][$dst]][4]++;   // Contador de fallas
+                }
+        	}
+        }
+        return $report;
     }
 
     /**********************************************************************************/
@@ -292,7 +265,7 @@ class paloSantoMissedCalls{
     /*		1 mes	 => 2592000 segundos
     /*		1 año	 => 31104000 segundos
     /**********************************************************************************/
-    function getTimeToLastCall($time)
+    private function getTimeToLastCall($time)
     {
 	$anios    = "";
 	$meses    = "";
@@ -357,21 +330,6 @@ class paloSantoMissedCalls{
 	    $result   = floor($time)." "._tr("second(s)");
 	}
 	return $result;
-    }
-
-    function is_date($str) 
-    { 
-	$stamp = strtotime($str); 
-	if (!is_numeric($stamp))
-	    return FALSE; 
-
-	$month = date('m', $stamp); 
-	$day   = date('d', $stamp); 
-	$year  = date('Y', $stamp); 
-	if (checkdate($month, $day, $year)) 
-	    return TRUE; 
-
-	return FALSE; 
     }
 
     function getDataByPagination($arrData, $limit, $offset)

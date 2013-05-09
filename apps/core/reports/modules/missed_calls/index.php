@@ -86,6 +86,8 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $pACL, $arrConf)
 {
+    ini_set('max_execution_time', 3600);
+    
     $pCallingReport = new paloSantoMissedCalls($pDB);
     $oFilterForm  = new paloForm($smarty, createFieldFilter());
     $filter_field = getParameter("filter_field");
@@ -153,8 +155,11 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
     else{
         $limit  = 20;
         $oGrid->setLimit($limit);
-	$arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
-	$arrData = $pCallingReport->showDataReport($arrResult, $total);
+        $arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
+        $arrData = $pCallingReport->showDataReport($arrResult, $total);
+        if ($pCallingReport->errMsg != '') {
+        	$smarty->assign('mb_message', $pCallingReport->errMsg);
+        }
 
 	//recalculando el total para la paginación
 	$size = count($arrData);

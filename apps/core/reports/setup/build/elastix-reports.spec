@@ -92,6 +92,14 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu May 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Missed Calls: reimplement SQL query in order to substantially reduce
+  the number of records that must be examined by PHP code before generating the
+  report. This allows the report to work with much larger date ranges, or in
+  more busy systems, without hitting a PHP execution time timeout. Fixes Elastix
+  bug #1527.
+  SVN Rev[4908]
+
 * Tue May 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Summary by Extension: source extension must be queried in both src and
   srcchannel. Ditto with dst and dstchannel. Also unify extension filtering on

@@ -337,6 +337,20 @@ function saveEvent($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
                         return $content;
                     }
                 }
+
+                // Número a llamar sólo puede ser numérico
+                if (!preg_match('/^\d+$/', $call_to)) {
+                    $smarty->assign("mb_message", _tr('Invalid extension to call for reminder'));
+                    $content = viewForm_NewEvent($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+                    return $content;
+                }
+                
+                // Texto a generar no debe contener saltos de línea
+                if (count(preg_split("/[\r\n]+/", $recording)) > 1) {
+                    $smarty->assign("mb_message", _tr('Reminder text may not have newlines'));
+                    $content = viewForm_NewEvent($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+                    return $content;
+                }                
             }else{
                 $call_to = "";
                 $asterisk_calls = "off";
@@ -1108,6 +1122,13 @@ function getTextToSpeach($arrLang,&$pDB)
     $pCalendar = new paloSantoCalendar($pDB);
     $number    = getParameter('call_to');
     $text      = getParameter('tts');
+    
+    // Número a llamar sólo puede ser numérico
+    if (!preg_match('/^\d+$/', $number)) return $jsonObject->createJSON();
+    
+    // Texto a generar no debe contener saltos de línea
+    if (count(preg_split("/[\r\n]+/", $text)) > 1) return $jsonObject->createJSON();
+
     $pCalendar->makeCalled($number, $number, $text);
 	$jsonObject->set_message($data);
     return $jsonObject->createJSON();

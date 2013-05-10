@@ -110,6 +110,9 @@ fi
 
 %changelog
 * Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: check that notification phone is numeric, and disallow 
+  newlines on TTS text. Fixes Elastix bug #1549.
+  SVN Rev[4912]
 - FIXED: Address Book: check that phone number is numeric on contacts CSV 
   upload. Fixes Elastix bug #1548.
   SVN Rev[4910]

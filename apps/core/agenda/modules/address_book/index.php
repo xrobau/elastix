@@ -157,7 +157,7 @@ function load_address_book_from_csv($smarty, $arrLang, $ruta_archivo, $pDB, $pDB
 
     $result = isValidCSV($arrLang, $ruta_archivo, $arrayColumnas);
     if($result != 'true'){
-        $smarty->assign("mb_title",$arrLang["Error"]);
+        $smarty->assign("mb_title",_tr("Error"));
         $smarty->assign("mb_message", $result);
         return;
     }
@@ -253,6 +253,9 @@ function isValidCSV($arrLang, $sFilePath, &$arrayColumnas){
                             $PhoneNumber    = $tupla[$arrayColumnas[2]];
                             if($PhoneNumber == '')
                                 return $arrLang["Can't exist a Phone Number empty. Line"].": $count. - ". $arrLang["Please read the lines in the footer"];
+                            if (!preg_match('/^[\*|#]*[[:digit:]]*$/', $PhoneNumber)) {
+                            	return _tr('Invalid phone number. Line').": $count. - ". _tr("Please read the lines in the footer");
+                            }
                     }
                     $count++;
                 }

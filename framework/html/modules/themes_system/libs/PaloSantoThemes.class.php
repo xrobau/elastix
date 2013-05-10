@@ -105,6 +105,16 @@ class PaloSantoThemes
     {
         global $arrLang;
 
+        global $arrConf;
+        if (!preg_match('/^\w+$/', $sTheme)) {
+            $this->errMsg = _tr('Invalid theme');
+        	return false;
+        }
+        if (!is_dir($arrConf['basePath']."/themes/$sTheme")) {
+            $this->errMsg = _tr('Invalid theme');
+            return false;
+        }
+        
         if(set_key_settings($this->_DB,'theme',$sTheme))
             return true;
         else{

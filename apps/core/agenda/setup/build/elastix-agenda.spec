@@ -122,6 +122,11 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Address Book: check that phone number is numeric on contacts CSV 
+  upload. Fixes Elastix bug #1548.
+  SVN Rev[4910]
+
 * Fri May 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: remove bogus compare of translated ajax response field to
   hardcoded untranslated string. Apparently the check serves no purpose, and

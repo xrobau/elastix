@@ -296,6 +296,10 @@ function load_theme($ruta_base='')
 			$theme=getUserProp($user,'theme',$pDB);
 		}
     }
+
+    if (!preg_match('/^\w+$/', $theme)) $theme = false;
+    if ($theme !== false && !is_dir($ruta_base."themes/$theme")) $theme = false;
+
     //si no se encuentra setear el tema por default
     if (empty($theme) || $theme==false){
 		if($user!=""){

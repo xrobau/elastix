@@ -101,6 +101,16 @@ class PaloSantoThemes
      */
     function updateTheme($sTheme,$uid)
     {
+        global $arrConf;
+        if (!preg_match('/^\w+$/', $sTheme)) {
+            $this->errMsg = _tr('Invalid theme');
+            return false;
+        }
+        if (!is_dir($arrConf['basePath']."/themes/$sTheme")) {
+            $this->errMsg = _tr('Invalid theme');
+            return false;
+        }
+        
 		$pACL = new paloACL($this->_DB);
         if($pACL->setUserProp($uid,'theme',$sTheme,"system"))
             return true;

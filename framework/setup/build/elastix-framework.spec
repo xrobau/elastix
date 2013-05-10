@@ -310,6 +310,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Themes: check that selected theme is a valid name that exists in the
+  themes directory.
+  SVN Rev[4911]
+
 * Thu May 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: change registration text to point out that registration
   is now required for installation of all addons through the web interface.

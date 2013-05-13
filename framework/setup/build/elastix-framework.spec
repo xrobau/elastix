@@ -310,6 +310,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove several unused files and directories of examples 
+  and documentation for various libraries shipped with Elastix Framework.
+  SVN Rev[4926]
+
 * Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Themes: check that selected theme is a valid name that exists in the
   themes directory.

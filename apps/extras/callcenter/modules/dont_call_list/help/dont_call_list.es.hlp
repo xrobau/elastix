@@ -1,0 +1,25 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<h2> Phone List</h2>
+<p align="Justify">Esta opción nos permite crear una lista de restricción es decir una lista de número de teléfonos a las cuales no se procederá a llamar.
+En la creación de una "Nueva Campaña" el sistema nos permite crear una lista por medio de la importación de una lista CSV en el cual están los números de teléfonos y/o crearlos manualmente, al momento
+de comenzar la campaña y el sistema empiece a leer la lista a llamar entonces en ese momento comparara cada número con la lista creada en esta opción y no
+efectuará la llamada a dicho teléfono.
+</p>
+
+<div><img src="../modules/{$node_id}/images/dont_call.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<h3> Add Number</h3>
+<p>Esta opción nos permite agregar ya sea uno a uno los números restringidos o por medio de la importación de una lista CSV
+</p>
+<div><img src="../modules/{$node_id}/images/dont_call_add.jpg" border="0"></div>
+<div>Figura 2</div><br/><br/>
+
+</body>
+</html>

@@ -305,6 +305,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove several unused files and directories of examples 
+  and documentation for various libraries shipped with Elastix Framework.
+  SVN Rev[4926]
+
 * Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile.

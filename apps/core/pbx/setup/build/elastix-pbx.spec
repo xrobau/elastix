@@ -299,6 +299,9 @@ fi
 
 %changelog
 * Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Control Panel: validate several parameters before building AMI requests
+  with them. More of the same.
+  SVN Rev[4917]
 - FIXED: Conference: validate several conference parameters before building AMI
   requests with them. Fixes Elastix bug #1551.
   SVN Rev[4915]

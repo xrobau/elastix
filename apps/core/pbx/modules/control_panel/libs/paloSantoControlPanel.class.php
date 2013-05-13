@@ -71,7 +71,7 @@ class paloSantoControlPanel {
         }
     }
 
-    function AsteriskManagerAPI($action, $parameters, $return_data=false) 
+    private function AsteriskManagerAPI($action, $parameters, $return_data=false) 
     {
         global $arrLang;
         $astman_host = "127.0.0.1";
@@ -135,7 +135,7 @@ class paloSantoControlPanel {
     }
 
 
-    function showChannels()
+    private function showChannels()
     {
         //$parameters  = array('Command'=>'core show channels verbose');
         $parameters  = array('Command'=>'core show channels concise');
@@ -272,7 +272,7 @@ class paloSantoControlPanel {
         return $arrRecords;
     }
 
-    function getDataConferences()
+    private function getDataConferences()
     {
        $parameters = array('Command'=>"meetme list");
        $data = $this->AsteriskManagerAPI("Command",$parameters,true);
@@ -295,7 +295,7 @@ class paloSantoControlPanel {
         return $arrConf;
     }
 
-    function getDataParkinglots()
+    private function getDataParkinglots()
     {
         $parameters = array('Command'=>"parkedcalls show");
         $data = $this->AsteriskManagerAPI("Command",$parameters,true);
@@ -316,7 +316,7 @@ class paloSantoControlPanel {
         return $arrParking;
     }
 
-    function getAllDevices()
+    private function getAllDevices()
     {
         $parameters = array('Command'=>"database showkey cidname");
         $data = $this->AsteriskManagerAPI("Command",$parameters,true);
@@ -324,7 +324,7 @@ class paloSantoControlPanel {
         return $arrDevice;
     }
 
-    function getDeviceRegistry($ext)
+    private function getDeviceRegistry($ext)
     {
         $parameters = array('Command'=>"database showkey Registry/$ext");
         $data = $this->AsteriskManagerAPI("Command",$parameters,true);
@@ -337,7 +337,7 @@ class paloSantoControlPanel {
     }
 
 
-    function getDataExt($ext)
+    private function getDataExt($ext)
     {
         $parameters = array('Command'=>"database show AMPUSER $ext/cidname");
         $data = $this->AsteriskManagerAPI("Command",$parameters,true);
@@ -358,13 +358,16 @@ class paloSantoControlPanel {
 
     function makeCalled($number_org, $number_dst)
     {
+        if (!ctype_digit($number_org)) return FALSE;
+        if (!ctype_digit($number_dst)) return FALSE;
+
         $dataExt    = $this->getDataExt($number_org);
         $parameters = $this->Originate($number_org, $number_dst, $dataExt['dial'], $dataExt['cidname']);
 
         return $this->AsteriskManagerAPI("Originate",$parameters);
     }
 
-    function Originate($origen, $destino, $channel="", $description="")
+    private function Originate($origen, $destino, $channel="", $description="")
     {
         $parameters = array();
         $parameters['Channel']      = $channel;
@@ -378,7 +381,7 @@ class paloSantoControlPanel {
         return $parameters;
     }
 
-    function getChannelExt($ext)
+    private function getChannelExt($ext)
     {       
         $parameters  = array('Command'=>'core show channels concise');
         $data        = $this->AsteriskManagerAPI('Command',$parameters,true);
@@ -399,6 +402,7 @@ class paloSantoControlPanel {
 
     function hangupCalled($ext)
     {
+        if (!ctype_digit($ext)) return FALSE;
         $channel = $this->getChannelExt($ext);
         $parameters = array('Channel'=>$channel);
         return $this->AsteriskManagerAPI("Hangup",$parameters);
@@ -406,12 +410,15 @@ class paloSantoControlPanel {
 
     function queueAddMember($queue,$ext)
     {
+        if (!ctype_digit($queue)) return FALSE;
+        if (!ctype_digit($ext)) return FALSE;
+
         $dataExt    = $this->getDataExt($ext);
         $parameters = array('Queue'=>$queue,'Interface'=>$dataExt['dial']);
         return $this->AsteriskManagerAPI("QueueAdd",$parameters);
     }
 
-    function mailboxCount($number_org)
+    private function mailboxCount($number_org)
     {
         $parameters = array('Mailbox'=>"$number_org@default");
         $arrVM = $this->AsteriskManagerAPI("MailboxCount",$parameters,true);
@@ -464,7 +471,7 @@ class paloSantoControlPanel {
         return $arrQueue;
     }
 
-    function getQueueMembers()
+    private function getQueueMembers()
     {
         $arrQueueMembers = array();
         $parameters = array('Command'=>"queue show");
@@ -559,7 +566,7 @@ class paloSantoControlPanel {
         return $result;
     }
 
-    function getTrunkStatus($value,$tech)
+    private function getTrunkStatus($value,$tech)
     {
         if($tech == "SIP")
             $parameters = array('Command'=>"sip show peers");
@@ -584,7 +591,7 @@ class paloSantoControlPanel {
     }
 
 
-    function getDesign()
+    private function getDesign()
     {
         $query = "select id_device, id_area from item_box order by id_device asc;";
         $result=$this->_DB2->fetchTable($query, true);
@@ -774,7 +781,7 @@ class paloSantoControlPanel {
     } 
 
 
-    function Sec2HHMMSS($sec)
+    private function Sec2HHMMSS($sec)
     {
         $HH = '00'; $MM = '00'; $SS = '00';
 
@@ -795,7 +802,7 @@ class paloSantoControlPanel {
 
         return "$HH:$MM:$SS";
     }
-
+/*
     function getNumQueueWaitingByUser($user) {
         $parameters = array('Command'=>"queue show");
         $arrQueues = $this->AsteriskManagerAPI("Command",$parameters,true);
@@ -812,7 +819,7 @@ class paloSantoControlPanel {
         }
         return $arrQue;
     }
-
+*/
     function getAsterisk_QueueInfo() {
         $parameters = array('Command'=>"queue show");
         $arrQueues = $this->AsteriskManagerAPI("Command",$parameters,true);
@@ -824,7 +831,7 @@ class paloSantoControlPanel {
             }
         return $arrQue;
     }
-
+/*
      function getAllQueuesXML(){
         global $arrLang;
         $arrDevs   = $this->getAllQueuesARRAY2();
@@ -844,5 +851,6 @@ class paloSantoControlPanel {
         }
         return $xmlRecords;
     }
+*/
 }
 ?>

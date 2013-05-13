@@ -2700,6 +2700,8 @@ SQL_INSERTAR_AGENDAMIENTO;
         if (!isset($comando->extension)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sExtension = (string)$comando->extension;
+        if (!ctype_digit($sExtension))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_transferResponse = $xml_response->addChild('transfercall_response');
@@ -2759,6 +2761,8 @@ SQL_INSERTAR_AGENDAMIENTO;
         if (!isset($comando->extension)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sExtension = (string)$comando->extension;
+        if (!ctype_digit($sExtension))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_transferResponse = $xml_response->addChild('atxfercall_response');

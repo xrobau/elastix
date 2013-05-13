@@ -5,78 +5,69 @@
 </header>
 <body>
 
-
 <h1>{$node_name}</h1>
-<p align="Justify">Esta opción nos permite crear lo que se conoce como campañas salientes, que son información 
-de cuándo y cómo se va a generar una serie de llamadas de manera
-automática a números telefónicos que se deben subir en un
-archivo csv desde esta misma opción.
-</p>
-
-<div><img src="../modules/{$node_id}/images/campaign_list.jpg" border="0"></div>
-<div>Figura 1</div><br/><br/>
+<p align="Justify">This option allows creating an outgoing campaign where a set of calls are generated automatically from a list of phone numbers and assigned to the agents.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_campaign_list.png" border="0" />
+<p>Figure 1<p></div>
+<p align="Justify">You can <b>Activate, Deactivate</b> and <b>Delete</b> a campaign by selecting it from the list and using the buttons located in the filter section. To <b>Edit</b> a campaign click on the blue link Edit at the right of the campaign from the list. You can also download a report of the calls in a <b>CSV file</b> that contains the status of the attempts and the data collected in the forms.</p>
+<br />
 <h3>New Campaign</h3>
-<p align="Justify">Esta opción   nos permite ingresar todos los datos
-necesarios para la creación de una campaña. Hay que tomar en cuenta que estos datos son importantes al
-momento que se generan las llamadas.A continuación se describe cada uno de ellos:
-</p>
+<p align="Justify">To create a new campaign, click on the blue link "Create new campaign" located in the section where the filters are. The parameters requires to create a new campaign are very important to determine how a call is going to be made. Below a brief description of the required parameters:</p>
+
 <table class="inline">
   <tr>
-    <th>Campo</th><th>Descripción</th>
+    <th>Field</th><th>Description</th>
   </tr>
   <tr>
-    <td>Nombre</td><td>Nombre de la Campaña.</td>
+    <td>Name</td><td>Name of the campaign</td>
   </tr>
   <tr>
-    <td>Fecha Inicio</td><td>Fecha en la cual entrara en vigencia la campaña</td>
+    <td>Range date</td><td align="Justify"><b>Start: </b> Date on which the campaign starts. <br /> <b>End: </b>Date o which the campaign ends. After this date, no more calls will be made although there are pending phone numbers.</td>
   </tr>
   <tr>
-    <td>Fecha Fin</td ><td align="Justify">Fecha de fin de la Campaña. Luego de esta fecha no se realizarán más llamadas aunque hayan quedado números telefónicos pendientes.</td>
+    <td>Schedule per Day</td><td align="Justify">The range of time per day which the campaign will last.</td>
   </tr>
   <tr>
-    <td>Formulario</td><td align="Justify">Seleccionar los formularios de los cuales se va a hacer uso durante la campaña telefónica, para recolectar datos.</td>
+    <td>Form</td><td align="Justify">Select the forms to be used in the campaign to collect data.</td>
   </tr>
 <tr>
-    <td>Troncal</td><td align="Justify">Troncal por la que las llamadas telefónicas salen.</td>
+    <td>External URLs</td><td align="Justify">You can select a URL previously configured to be shown by the agent in the campaign.</td>
+  </tr>
+  <tr>
+    <td>Trunk</td><td align="Justify">Select the trunk from where the calls are going out.</td>
+  </tr>
+  <tr>
+    <td>Max. used channels</td><td align="Justify">It limits the maximum number of simultaneous calls for this campaign.</td>
   </tr>
 <tr>
-    <td>Contexto</td><td align="Justify">Nombre   del   contexto   a   utilizar   en   una   campaña.   Por 
-defecto se utiliza: from-internal.
+    <td>Context</td><td align="Justify">The name of the context to use for the campaign. The value by default is from-internal.
     </td>
   </tr>
 <tr>
-    <td>Cola</td><td align="Justify">Cola que se ha creado en el IVR con los agentes que van a 
-realizar   las   llamadas   y   que   es   asignada   para   realizar   la 
-campaña.
+    <td>Queue</td><td align="Justify">It is the queue assigned to the campaign with the agents who will take the outgoing calls.
    </td>
   </tr>
 <tr>
-    <td>Intentos</td><td align="Justify">Número de veces que se reintenta ejecutar una una llamada 
-que no se ha ejecutado con éxito.
+    <td>Retries</td><td align="Justify">Number of times that a call is made if it was unsuccessful.
     </td>
 </tr>
 <tr>
-    <td>Archivos de Llamadas</td><td align="Justify">Archivo   formato   csv   que   contiene   los   números   de 
-teléfonos   de   las   personas   a   las   cuales   se   realizará   las 
-llamadas. A más de los teléfonos también se pueden cargar 
-mas datos. 
-
+    <td>Call File</td><td align="Justify">Select a file in format .csv which contains the phone numbers that will be called by teh campaign. You can add more data in this file as Name and Last Name.
     </td>
 </tr>
-
 <tr>
-    <td>Script</td><td align="Justify">Es un mensaje de guía para los agentes en el momento que están   realizando   las   llamadas,   es   decir,   que   este   podría servir en el momento que una llamada es realizada y el agente tiene un saludo cargado en este script.
+    <td>Call File Encoding</td><td align="Justify">It's the type of encoding of the file. Leave this field with the value by default.
+</td>
+</tr>
+<tr>
+    <td>Script</td><td align="Justify">It's the message that guides the agents when they are attending a call. It could contain a greeting or special words that an agent has to say in the call.
     </td>
 </tr>
-
 </table>
-<div><img src="../modules/{$node_id}/images/campaign_new.jpg" border="0"></div>
-<div>Figura 2</div><br/><br/>
-<h3>View</h3>
-<p>Al dar click sobre  "View" dentro de "Campaigns List", nos llevará a una pantalla donde se mostrará los datos de la campaña. A la vez en esta pantalla usted podra "Editar","Desactivar","Eliminar" una campaña.</p>
-<div><img src="../modules/{$node_id}/images/campaign_view.jpg" border="0"></div>
-<div>Figura 3</div><br/><br/>
 
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_campaign_new.png" border="0" />
+<p>Figure 2</p></div>
 
 </body>
 </html>

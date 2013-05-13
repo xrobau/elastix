@@ -1,0 +1,82 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+
+<h1>{$node_name}</h1>
+<p align="Justify">Esta opción nos permite crear lo que se conoce como campañas salientes, que son información 
+de cuándo y cómo se va a generar una serie de llamadas de manera
+automática a números telefónicos que se deben subir en un
+archivo csv desde esta misma opción.
+</p>
+
+<div><img src="../modules/{$node_id}/images/campaign_list.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+<h3>New Campaign</h3>
+<p align="Justify">Esta opción   nos permite ingresar todos los datos
+necesarios para la creación de una campaña. Hay que tomar en cuenta que estos datos son importantes al
+momento que se generan las llamadas.A continuación se describe cada uno de ellos:
+</p>
+<table class="inline">
+  <tr>
+    <th>Campo</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Nombre</td><td>Nombre de la Campaña.</td>
+  </tr>
+  <tr>
+    <td>Fecha Inicio</td><td>Fecha en la cual entrara en vigencia la campaña</td>
+  </tr>
+  <tr>
+    <td>Fecha Fin</td ><td align="Justify">Fecha de fin de la Campaña. Luego de esta fecha no se realizarán más llamadas aunque hayan quedado números telefónicos pendientes.</td>
+  </tr>
+  <tr>
+    <td>Formulario</td><td align="Justify">Seleccionar los formularios de los cuales se va a hacer uso durante la campaña telefónica, para recolectar datos.</td>
+  </tr>
+<tr>
+    <td>Troncal</td><td align="Justify">Troncal por la que las llamadas telefónicas salen.</td>
+  </tr>
+<tr>
+    <td>Contexto</td><td align="Justify">Nombre   del   contexto   a   utilizar   en   una   campaña.   Por 
+defecto se utiliza: from-internal.
+    </td>
+  </tr>
+<tr>
+    <td>Cola</td><td align="Justify">Cola que se ha creado en el IVR con los agentes que van a 
+realizar   las   llamadas   y   que   es   asignada   para   realizar   la 
+campaña.
+   </td>
+  </tr>
+<tr>
+    <td>Intentos</td><td align="Justify">Número de veces que se reintenta ejecutar una una llamada 
+que no se ha ejecutado con éxito.
+    </td>
+</tr>
+<tr>
+    <td>Archivos de Llamadas</td><td align="Justify">Archivo   formato   csv   que   contiene   los   números   de 
+teléfonos   de   las   personas   a   las   cuales   se   realizará   las 
+llamadas. A más de los teléfonos también se pueden cargar 
+mas datos. 
+
+    </td>
+</tr>
+
+<tr>
+    <td>Script</td><td align="Justify">Es un mensaje de guía para los agentes en el momento que están   realizando   las   llamadas,   es   decir,   que   este   podría servir en el momento que una llamada es realizada y el agente tiene un saludo cargado en este script.
+    </td>
+</tr>
+
+</table>
+<div><img src="../modules/{$node_id}/images/campaign_new.jpg" border="0"></div>
+<div>Figura 2</div><br/><br/>
+<h3>View</h3>
+<p>Al dar click sobre  "View" dentro de "Campaigns List", nos llevará a una pantalla donde se mostrará los datos de la campaña. A la vez en esta pantalla usted podra "Editar","Desactivar","Eliminar" una campaña.</p>
+<div><img src="../modules/{$node_id}/images/campaign_view.jpg" border="0"></div>
+<div>Figura 3</div><br/><br/>
+
+
+</body>
+</html>

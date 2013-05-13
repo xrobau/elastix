@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Conference: validate several conference parameters before building AMI
+  requests with them. Fixes Elastix bug #1551.
+  SVN Rev[4915]
+
 * Mon May 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Voicemail: check that voicemail password is numeric before writing 
   configuration. Fixes Elastix bug #1547.

@@ -236,6 +236,9 @@ class paloSantoConference {
 
     function MuteCaller($data_connection, $room, $userId, $mute)
     {
+        if (!ctype_digit($room)) return FALSE;
+        if (count(preg_split("/[\r\n]+/", $userId)) > 1) return FALSE;
+
         if($mute=='on')
             $action = 'mute';
         else
@@ -247,6 +250,9 @@ class paloSantoConference {
 
     function KickCaller($data_connection, $room, $userId)
     {
+        if (!ctype_digit($room)) return FALSE;
+        if (count(preg_split("/[\r\n]+/", $userId)) > 1) return FALSE;
+
         $action = 'kick';
         $command = "meetme $action $room $userId";
         $arrResult = $this->AsteriskManager_Command($data_connection['host'],
@@ -255,6 +261,8 @@ class paloSantoConference {
 
     function KickAllCallers($data_connection, $room)
     {
+        if (!ctype_digit($room)) return FALSE;
+
         $command = "meetme kick $room all";
         $arrResult = $this->AsteriskManager_Command($data_connection['host'],
             $data_connection['user'], $data_connection['password'], $command);
@@ -262,6 +270,10 @@ class paloSantoConference {
 
     function InviteCaller($data_connection, $room, $device, $callerId)
     {
+        if (!ctype_digit($device)) return FALSE;
+        if (!ctype_digit($room)) return FALSE;
+        if (count(preg_split("/[\r\n]+/", $callerId)) > 1) return FALSE;
+        
         $command_data['device'] = $device;
         $command_data['room'] = $room;
         $command_data['callerid'] = $callerId;
@@ -269,7 +281,7 @@ class paloSantoConference {
             $data_connection['user'], $data_connection['password'], $command_data);
     }
 
-    function AsteriskManager_Command($host, $user, $password, $command) {
+    private function AsteriskManager_Command($host, $user, $password, $command) {
         global $arrLang;
         $astman = new AGI_AsteriskManager( );
         if (!$astman->connect("$host", "$user" , "$password")) {
@@ -284,7 +296,7 @@ class paloSantoConference {
         return false;
     }
 
-    function AsteriskManager_Originate($host, $user, $password, $command_data) {
+    private function AsteriskManager_Originate($host, $user, $password, $command_data) {
         global $arrLang;
         $astman = new AGI_AsteriskManager();
 
@@ -324,7 +336,7 @@ class paloSantoConference {
         return false;
     }
 
-    function Originate($channel, $callerid, $data, $sSep)
+    private function Originate($channel, $callerid, $data, $sSep)
     {
         $parameters = array();
         $parameters['Channel'] = "Local/" . $channel;

@@ -311,6 +311,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: remove XSS bug on module name in help system.
+  SVN Rev[4927]
 - DELETED: Framework: remove several unused files and directories of examples 
   and documentation for various libraries shipped with Elastix Framework.
   SVN Rev[4926]

@@ -286,6 +286,7 @@ touch /etc/asterisk/iax_register.conf
 touch /etc/asterisk/iax_custom.conf
 touch /etc/asterisk/meetme_custom.conf
 touch /etc/asterisk/queues_custom.conf
+touch /etc/asterisk/vm_general_custom.conf
 #
 
 
@@ -362,6 +363,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 12 2013 Rocio Mera <rmera@palosanto.com> 3.0.0-4
+- CHANGED: pbx - Build/elastix-pbx.spec: Was added in the post section the 
+  creation of file /etc/asterisk/vm_general_custom.conf.
+
 * Mon May 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Voicemail: check that voicemail password is numeric before writing 
   configuration. Fixes Elastix bug #1547.
@@ -370,7 +375,7 @@ fi
   deleting voicemail. Fixes Elastix bug #1546.
   SVN Rev[4885]
 
-* Wed Apr 10 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+* Wed Apr 10 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
 

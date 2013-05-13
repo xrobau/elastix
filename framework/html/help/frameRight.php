@@ -46,8 +46,7 @@ if (!preg_match('/^\w+$/', $_GET['id_nodo'])) {
 if(!empty($_GET['id_nodo'])){
     $idMenuMostrar = $_GET['id_nodo'];
     if(!empty($_GET['name_nodo'])){
-	    $nameMenuMostrar = $_GET['name_nodo'];
-        $smarty->assign("node_name", $nameMenuMostrar);
+        $smarty->assign("node_name", htmlentities($_GET['name_nodo'], ENT_COMPAT, 'UTF-8'));
     }
                 
     // Si no existe el archivo de ayuda y se trata de un menu "padre",

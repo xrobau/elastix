@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -305,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Themes: check that selected theme is a valid name that exists in the
   themes directory.
@@ -315,12 +319,35 @@ rm -rf $RPM_BUILD_ROOT
   is now required for installation of all addons through the web interface.
   SVN Rev[4909]
 
+* Tue May 06 2013 José Briones <jbriones@palosanto.com>
+- UPDATED: slashdot theme help.css help style was updated.
+  SVN Rev[4896]
+- UPDATED: giox theme help.css help style was updated.
+  SVN Rev[4895]
+- UPDATED: elastixwine theme help.css help style was updated.
+  SVN Rev[4894]
+- UPDATED: elastixwave theme help.css help style was updated.
+  SVN Rev[4893]
+- UPDATED: elastixblue theme help.css help style was updated.
+  SVN Rev[4892]
+- UPDATED: default theme help.css help style was updated.
+  SVN Rev[4891]
+- UPDATED: blackmin theme help.css help style was updated.
+  SVN Rev[4890]
+- UPDATED: al help.css help style was updated.
+  SVN Rev[4889]
+- UPDATED: elastixneo help.css help style was updated.
+  SVN Rev[4888]
+- UPDATED: elastixneo help.css help style was updated.
+  SVN Rev[4887]
+
 * Thu May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: use strpos instead of dynamic regexp in module search
   SVN Rev[4883]
 
 * Thu May 02 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - FIXED: framework - Build/elastix-framework.spec: Changed release in specfile.
+  SVN Rev[4875]
 
 * Mon Apr 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: reimplement several widget helper methods to receive the

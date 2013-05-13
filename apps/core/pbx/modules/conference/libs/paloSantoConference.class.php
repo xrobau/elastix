@@ -501,6 +501,9 @@ class paloConference extends paloAsteriskDB{
 
     function MuteCaller($room, $userId, $mute)
     {
+        if (!ctype_digit($room)) return FALSE;
+        if (count(preg_split("/[\r\n]+/", $userId)) > 1) return FALSE;
+
         if($mute=='on')
             $action = 'mute';
         else
@@ -511,6 +514,9 @@ class paloConference extends paloAsteriskDB{
 
     function KickCaller($room, $userId)
     {
+        if (!ctype_digit($room)) return FALSE;
+        if (count(preg_split("/[\r\n]+/", $userId)) > 1) return FALSE;
+
         $action = 'kick';
         $command = "meetme $action $room $userId";
         $arrResult = $this->AsteriskManager_Command($command);
@@ -526,6 +532,7 @@ class paloConference extends paloAsteriskDB{
             $this->errMsg=_tr("Invalid Room");
             return false;
         }
+        if (count(preg_split("/[\r\n]+/", $ext_room)) > 1) return FALSE;
         
         $query="Select exten from extension where dial=?";
         $result=$this->_DB->getFirstRowQuery($query,false,array($channel));

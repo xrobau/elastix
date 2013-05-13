@@ -363,7 +363,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
-* Mon May 12 2013 Rocio Mera <rmera@palosanto.com> 3.0.0-4
+* Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Conference: validate several conference parameters before building AMI
+  requests with them. Fixes Elastix bug #1551.
+  SVN Rev[4915]
 - CHANGED: pbx - Build/elastix-pbx.spec: Was added in the post section the 
   creation of file /etc/asterisk/vm_general_custom.conf.
 

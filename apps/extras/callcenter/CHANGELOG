@@ -1,3 +1,6 @@
+* FIXED: Dialer (ECCP): check that target extension for transfer is entirely
+  numeric. Fixes Elastix bug #1553.
+
 2.2.0-1 (SVN revision 4874)
 * Agent Console: filter breaks to remove inactive breaks from list.
 * Dialer: tag all incoming calls with no end timestamp as LostTrack on startup.

@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,6 +298,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Changed release in specfile.  
+
 * Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: validate several parameters before building AMI requests
   with them. More of the same.
@@ -305,6 +309,21 @@ fi
 - FIXED: Conference: validate several conference parameters before building AMI
   requests with them. Fixes Elastix bug #1551.
   SVN Rev[4915]
+
+* Wed May 07 2013 José Briones <jbriones@palosanto.com>
+- ADDED: Added new file of sql commands for new phones models in endpoint
+  database.
+  SVN Rev[4906]
+- ADDED: support for new vendor Voptech VI2006, VI2007, VI2008.
+  SVN Rev[4903]
+- CHANGED: endpoints_batch : support for new vendor Voptech.
+  SVN Rev[4900]
+- CHANGED: support for new vendor Voptech.
+  SVN Rev[4899]
+- CHANGED: support for new vendor Voptech, models VI2006, VI2007, VI2008.
+  SVN Rev[4898]
+- ADDED: Added support for new vendor Voptech.
+  SVN Rev[4897]
 
 * Mon May 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Voicemail: check that voicemail password is numeric before writing 
@@ -317,6 +336,7 @@ fi
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4839]
 
 * Thu Apr 04 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: conference module, help section was updated.

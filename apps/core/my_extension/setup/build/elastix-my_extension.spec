@@ -84,6 +84,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: My Extension: check that the values for record_in and record_out are
+  valid before writing to the database. Fixes Elastix bug #1554.
+  SVN Rev[4928]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: my_extension - Build/elastix-my_extension.spec: Changed Version and Release in 
   specfile according to the current branch.

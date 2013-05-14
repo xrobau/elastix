@@ -346,15 +346,15 @@ function createFieldForm($arrLang)
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "RADIO",
                                             "INPUT_EXTRA_PARAM"      => array("Always" => $arrLang["Always"],"Never" => $arrLang["Never"],"Adhoc" => $arrLang["On-Demand"]),
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
+                                            "VALIDATION_TYPE"        => "ereg",
+                                            "VALIDATION_EXTRA_PARAM" => '^(Always|Never|Adhoc)$'
                                             ),
             "record_outgoing"                => array( "LABEL"                 => $arrLang["Record Outgoing"],
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "RADIO",
                                             "INPUT_EXTRA_PARAM"      => array("Always" => $arrLang["Always"],"Never" => $arrLang["Never"],"Adhoc" => $arrLang["On-Demand"]),
                                             "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
+                                            "VALIDATION_EXTRA_PARAM" => '^(Always|Never|Adhoc)$'
                                         )
             );
     return $arrFields;

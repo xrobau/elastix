@@ -68,9 +68,19 @@ class ContactList
 	} elseif (in_array($this->resourcePath[0], array('internal', 'external'))) {
 	    switch (array_shift($this->resourcePath)) {
 	    case 'internal':
-		$uriObject = (count($this->resourcePath) <= 0) 
-		    ? new InternalContactList() 
-		    : new InternalContact(array_shift($this->resourcePath));
+		if(count($this->resourcePath) <= 0)
+			$uriObject =  new InternalContactList(); 
+		else{
+			$id = array_shift($this->resourcePath);
+                        if(count($this->resourcePath) <= 0)
+				$uriObject = new InternalContact($id);
+			elseif(array_shift($this->resourcePath) == "icon"){
+                        	if(count($this->resourcePath) <= 0)
+					$uriObject = new ContactImg($id,"no","internal");
+				 elseif(array_shift($this->resourcePath) == "thumbnail")
+					$uriObject = new ContactImg($id,"yes","internal");
+			}
+		}
 		break;
 	    case 'external':
 		if(count($this->resourcePath) <= 0)
@@ -81,9 +91,9 @@ class ContactList
 			$uriObject = new ExternalContact($id);
 		    elseif(array_shift($this->resourcePath) == "icon"){
 			if(count($this->resourcePath) <= 0)
-			    $uriObject = new ExternalContactImg($id,"no");
+			    $uriObject = new ContactImg($id,"no","external");
 			elseif(array_shift($this->resourcePath) == "thumbnail")
-			    $uriObject = new ExternalContactImg($id,"yes");
+			    $uriObject = new ContactImg($id,"yes","external");
 		    }
 		}
 		break;
@@ -310,21 +320,23 @@ class ExternalContact extends Contact
     }
 }
 
-class ExternalContactImg extends REST_Resource
+class ContactImg extends REST_Resource
 {
     protected $_idNumero;
     protected $_thumbnail;
+    protected $_directory;
 
-    function __construct($sNIdumero, $thumbnail)
+    function __construct($sNIdumero, $thumbnail, $directory)
     {
 	 $this->_idNumero = $sNIdumero;
 	 $this->_thumbnail = $thumbnail;
+	 $this->_directory = $directory;
     }
 
     function HTTP_GET()
     {
 	$pCore_AddressBook = new core_AddressBook();
-	$image = $pCore_AddressBook->getContactImage($this->_idNumero, $this->_thumbnail);
+	$image = $pCore_AddressBook->getContactImage($this->_idNumero, $this->_thumbnail, $this->_directory);
 	if($image === FALSE){
 	    $json = new paloSantoJSON();
 	    $error = $pCore_AddressBook->getError();

@@ -1,4 +1,6 @@
-<input type='hidden' name='id' value='{$ID}'>
+<input type='hidden' name='id' value='{$ID}' />
+<input type='hidden' name='type' value='{$TYPE}' />
+
 <table width="99%" border="0" cellspacing="0" cellpadding="0" align="center">
     <tr>
         <td align="left">
@@ -11,7 +13,7 @@
             {/if}
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
-	{if $mode ne 'view'}
+	{if ($mode ne 'view') and ($TYPE ne 'internal') }
 	    <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
 	{/if}
     </tr>
@@ -29,28 +31,54 @@
                 <tr id="tr_new_contact">
                     <td width="310px" align="center">
             {if $ShowImg}
-                        <img alt="image" src="index.php?menu={$MODULE_NAME}&action=getImage&idPhoto={$idPhoto}&thumbnail=no&rawmode=yes"/>
+                        <img alt="image" src="index.php?menu={$MODULE_NAME}&action=getImage&type={$TYPE}&idPhoto={$idPhoto}&thumbnail=no&rawmode=yes"/>
             {else}
                         <img alt="image" src="modules/{$MODULE_NAME}/images/Icon-user.png"/>
             {/if}
                     </td>
                     <td>
-                        <table class="letra12" width="100%" cellpadding="4" cellspacing="0" border="0">
+                        <table class="letra12" width="100%" cellpadding="4" cellspacing="0" border="0">                            
                             <tr>
-                                <td align="left" width="20%"><b>{$name.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+                                <td align="left" width="25%"><b>{$name.LABEL}: {if ($mode ne 'view') and ($TYPE ne 'internal') }<span  class="required">*</span>{/if}</b></td>
                                 <td class="required" align="left">{$name.INPUT}</td>
                             </tr>
-                            <tr>
-                                <td align="left" width="20%"><b>{$last_name.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
-                                <td class="required" align="left">{$last_name.INPUT}</td>
+                            {if $TYPE eq 'external'}
+                                <tr>
+                                    <td align="left" width="25%"><b>{$last_name.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</b></td>
+                                    <td class="required" align="left">{$last_name.INPUT}</td>
+                                </tr>
+                            {/if}
+                            <tr id='tr_phone'>
+                                <td align="left" width="25%"><b>{$work_phone.LABEL}: {if ($mode ne 'view') and ($TYPE ne 'internal') }<span id="span_phone" class="required">*</span>{/if}</b></td>
+                                <td class="required" align="left">{$work_phone.INPUT}</td>             
+                            </tr>                            
+                            <tr id='tr_phone'>
+                                <td align="left" width="25%"><b>{$cell_phone.LABEL}: </b></td>
+                                <td align="left">{$cell_phone.INPUT}</td>
                             </tr>
                             <tr id='tr_phone'>
-                                <td align="left" width="20%"><b>{$telefono.LABEL}: {if $mode ne 'view'}<span id="span_phone" class="required">*</span>{/if}</b></td>
-                                <td class="required" align="left">{$telefono.INPUT}</td>
+                                <td align="left" width="25%"><b>{$home_phone.LABEL}: </b></td>
+                                <td align="left">{$home_phone.INPUT}</td>
+                            </tr>
+                            <tr id='tr_phone'>
+                                <td align="left" width="25%"><b>{$fax1.LABEL}: </b></td>
+                                <td align="left">{$fax1.INPUT}</td>
+                            </tr>
+                            <tr id='tr_phone'>
+                                <td align="left" width="25%"><b>{$fax2.LABEL}: </b></td>
+                                <td align="left">{$fax2.INPUT}</td>
                             </tr>
                             <tr>
                                 <td align="left"><b>{$email.LABEL}: </b></td>
                                 <td align="left">{$email.INPUT}</td>
+                            </tr>
+                            <tr>
+                                <td align="left"><b>{$province.LABEL}: </b></td>
+                                <td align="left">{$province.INPUT}</td>
+                            </tr>
+                            <tr>
+                                <td align="left"><b>{$city.LABEL}: </b></td>
+                                <td align="left">{$city.INPUT}</td>
                             </tr>
                             <tr>
                                 <td align="left"><b>{$address.LABEL}: </b></td>
@@ -61,6 +89,14 @@
                                 <td align="left">{$company.INPUT}</td>
                             </tr>
                             <tr>
+                                <td align="left"><b>{$company_contact.LABEL}: </b></td>
+                                <td align="left">{$company_contact.INPUT}</td>
+                            </tr>
+                            <tr>
+                                <td align="left"><b>{$contact_rol.LABEL}: </b></td>
+                                <td align="left">{$contact_rol.INPUT}</td>
+                            </tr>
+                            <tr>
                                 <td align="left"><b>{$notes.LABEL}: </b></td>
                                 <td align="left">{$notes.INPUT}</td>
                             </tr>
@@ -69,17 +105,19 @@
                                 <td align="left"><b>{$picture.LABEL}: </b></td>
                                 <td align="left">{$picture.INPUT}</td>
                             </tr>
-                            <tr>
-                                <td align="right">
-                                    <input type="radio" name="address_book_status" id="isPrivate" value="isPrivate" {$check_isPrivate} />
-                                    {$private_contact} &nbsp;&nbsp;&nbsp;
-                                </td>
-                                <td align="left">
-                                    &nbsp;&nbsp;&nbsp;
-                                    <input type="radio" name="address_book_status" id="isPublic" value="isPublic" {$check_isPublic} />
-                                    {$public_contact}
-                                </td>
-                            </tr> 
+                            {if $TYPE eq 'external'}
+                                <tr>
+                                    <td align="right">
+                                        <input type="radio" name="address_book_status" id="isPrivate" value="isPrivate" {$check_isPrivate} />
+                                        {$private_contact} &nbsp;&nbsp;&nbsp;
+                                    </td>
+                                    <td align="left">
+                                        &nbsp;&nbsp;&nbsp;
+                                        <input type="radio" name="address_book_status" id="isPublic" value="isPublic" {$check_isPublic} />
+                                        {$public_contact}
+                                    </td>
+                                </tr> 
+                            {/if}
                     {/if}
                         </table>
                     </td>

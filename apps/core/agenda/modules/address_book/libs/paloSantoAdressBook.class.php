@@ -67,14 +67,14 @@ a array with the field "total" containing the total of records.
     function getAddressBook($limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL, $count=FALSE, $iduser=NULL)
     {
         // SIEMPRE se debe filtrar por usuario activo. Véase bug Elastix #1529.
-    	$sql = 'SELECT '.($count ? 'COUNT(*) AS total' : '*').' FROM contact';
-        $whereFields = array('(iduser = ? OR status = ?)');
+    	$sql = 'SELECT '.($count ? 'COUNT(*) AS total' : '*, telefono work_phone').' FROM contact';
+        $whereFields = array('(iduser = ? OR status = ?)',"directory='external'");
         $sqlParams = array($iduser, 'isPublic');
         
         // Filtro por campo específico. Por omisión se filtra por id
         if (!is_null($field_name) and !is_null($field_pattern)) {
-        	if (!in_array($field_name, array('id','name','last_name','telefono',
-                'extension','email','iduser','address','company','notes','status')))
+        	if (!in_array($field_name, array('id','name','last_name','telefono','cell_phone','home_phone',
+                'fax1','fax2','extension','email','province','city','iduser','address','company','company_contact','contact_rol','notes','status')))
                 $field_name = 'id';
             $cond = "$field_name LIKE ?";
             $sqlParams[] = $field_pattern;
@@ -96,7 +96,7 @@ a array with the field "total" containing the total of records.
             $sql .= ' OFFSET ?';
             $sqlParams[] = (int)$offset;
         }
-        
+
         $result = $this->_DB->fetchTable($sql, true, $sqlParams);
         if (!is_array($result)) {
         	$this->errMsg = $this->_DB->errMsg;
@@ -104,40 +104,69 @@ a array with the field "total" containing the total of records.
         return $result;
     }
 
+    function getInternalContacts($arrDevices)
+    {
+        $arrData = array();
+        
+        if(is_array($arrDevices) && count($arrDevices) > 0){
+            foreach($arrDevices as $k => $dev)
+                $arrIDs[] = $dev['id'];
+
+            $query = "SELECT * FROM contact WHERE telefono in (".implode(',',$arrIDs).") and directory='internal' and status='isPublic'";
+            
+            $result = $this->_DB->fetchTable($query, true, array());
+            if (!is_array($result)) {
+                    $this->errMsg = $this->_DB->errMsg;
+            }
+            
+            foreach($result as $k => $contact){
+                $arrData[$contact['telefono']] = $contact;
+            }
+        }
+        return $arrData;
+    }
+    
     function getAddressBookByCsv($limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL, $count=FALSE, $iduser=NULL)
     {
     	return $this->getAddressBook($limit, $offset, $field_name, $field_pattern, $count, $iduser);
     }
 
-    function contactData($id, $id_user)
+    function contactData($id, $id_user, $directory, $isAdminGroup, $dsn)
     {
-        $params = array($id, $id_user);
-        $query   = "SELECT * FROM contact WHERE id=? and (iduser=? or status='isPublic')";
-
-        //$strWhere = "id=$id";
-
-        // Clausula WHERE aqui
-        //if(!empty($strWhere)) $query .= "WHERE $strWhere ";
-
-        $result=$this->_DB->getFirstRowQuery($query, true, $params);
-        if(!$result && $result==null && count($result) < 1)
-            return false;
-        return $result;
+        if($directory == "external"){
+            $where = "id=? and (iduser=? or status='isPublic') and directory='external'";
+            $params = array($id, $id_user);    
+        
+            $query   = "SELECT *, telefono work_phone FROM contact WHERE $where";            
+        
+            $result=$this->_DB->getFirstRowQuery($query, true, $params);
+            if(!$result && $result==null && count($result) < 1)
+                return false;
+            else
+                return $result;
+        }
+        else if($directory == "internal" && $isAdminGroup){
+            $matriz = $this->getDeviceFreePBX_Completed($dsn,1,0,"telefono",$id,FALSE);
+            $result = $matriz[0];
+            
+            if(!$result['exists_on_address_book_db'])
+                unset($result['id']);
+              
+            return $result;
+        }
     }
 
     function addContact($data)
     {
-        //$queryInsert = $this->_DB->construirInsert('contact', $data);
-        $queryInsert = "insert into contact(name,last_name,telefono,email,iduser,picture,address,company,notes,status) values(?,?,?,?,?,?,?,?,?,?)";
+        $queryInsert = "insert into contact(name,last_name,telefono,cell_phone,home_phone,fax1,fax2,email,iduser,picture,province,city,address,company,company_contact,contact_rol,directory,notes,status) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $result = $this->_DB->genQuery($queryInsert, $data);
-
+        //echo $this->_DB->errMsg;
         return $result;
     }
 
     function addContactCsv($data)
     {
-        //$queryInsert = $this->_DB->construirInsert('contact', $data);
-        $queryInsert = "insert into contact(name,last_name,telefono,email,iduser,address,company,status) values(?,?,?,?,?,?,?,?)";
+        $queryInsert = "insert into contact(name,last_name,telefono,cell_phone,home_phone,fax1,fax2,email,province,city,iduser,address,company,company_contact,contact_rol,notes,status,directory) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $result = $this->_DB->genQuery($queryInsert, $data);
 
         return $result;
@@ -145,21 +174,19 @@ a array with the field "total" containing the total of records.
 
     function updateContact($data,$id)
     {
-        //$queryUpdate = $this->_DB->construirUpdate('contact', $data,$where);
-//        die($queryUpdate);
-        $queryUpdate = "update contact set name=?, last_name=?, telefono=?, email=?, iduser=?, picture=?, address=?, company=?, notes=?, status=?  where id=?";
+        $queryUpdate = "update contact set name=?, last_name=?, telefono=?, cell_phone=?, home_phone=?, fax1=?, fax2=?, email=?, iduser=?, picture=?, province=?, city=?, address=?, company=?, company_contact=?, contact_rol=?, directory=?, notes=?, status=?  where id=?";
 	$data[] = $id;
         $result = $this->_DB->genQuery($queryUpdate, $data);
 
         return $result;
     }
 
-    function existContact($name, $last_name, $telefono)
+    function existContact($name, $last_name, $telefono, $directory='external')
     {
         $query =     " SELECT count(*) as total FROM contact "
                     ." WHERE name=? and last_name=?"
-                    ." and telefono=?";
-	$arrParam = array($name,$last_name,$telefono);
+                    ." and telefono=? and directory=?";
+	$arrParam = array($name,$last_name,$telefono,$directory);
         $result=$this->_DB->getFirstRowQuery($query, true, $arrParam);
         if(!$result)
             $this->errMsg = $this->_DB->errMsg;
@@ -263,6 +290,24 @@ a array with the field "total" containing the total of records.
         }
     }
 
+    function existsDeviceFreePBX($dsn, $device)
+    {
+        $query = "SELECT count(*) existe FROM devices WHERE id=?";
+        
+        $pDB = new paloDB($dsn);
+        if($pDB->connStatus)
+            return false;
+        $result = $pDB->getFirstRowQuery($query,true,array($device)); //se consulta a la base asterisk 
+
+        if(is_array($result) && count($result)>0){
+            if($result['existe']>0)
+                return true;
+            else
+                return false;
+        }
+        return false;
+    }
+    
     function getDeviceFreePBX($dsn, $limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL,$count=FALSE)
     {
         //Defining the fields to get. If the param $count is true, then we will get the result of the sql function count(), else, we will get all fields in the table.
@@ -311,6 +356,52 @@ a array with the field "total" containing the total of records.
         return $result;
     }
 
+    function getDeviceFreePBX_Completed($dsn, $limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL,$count=FALSE)
+    {        
+        $arrDevices = $this->getDeviceFreePBX($dsn,$limit,$offset,$field_name,$field_pattern,$count);
+        
+        if(!$count){
+            $arrVMs     = $this->getMailsFromVoicemail();
+            $arrContact = $this->getInternalContacts($arrDevices);
+
+            if(count($arrDevices) > 0 && is_array($arrDevices)){
+                foreach($arrDevices as &$device){
+                    $device['name']          = $device['description'];
+                    $device['work_phone']    = $device['id'];
+                    $device['cell_phone']    = isset($arrContact[$device['id']]['cell_phone'])?$arrContact[$device['id']]['cell_phone']:"";
+                    $device['home_phone']    = isset($arrContact[$device['id']]['home_phone'])?$arrContact[$device['id']]['home_phone']:"";
+                    $device['fax1']          = isset($arrContact[$device['id']]['fax1'])?$arrContact[$device['id']]['fax1']:"";
+                    $device['fax2']          = isset($arrContact[$device['id']]['fax2'])?$arrContact[$device['id']]['fax2']:"";
+                    $device['email']         = isset($arrVMs[$device['id']])?$arrVMs[$device['id']]:"";
+                    $device['province']      = isset($arrContact[$device['id']]['province'])?$arrContact[$device['id']]['province']:"";
+                    $device['city']          = isset($arrContact[$device['id']]['city'])?$arrContact[$device['id']]['city']:"";
+                    $device['address']       = isset($arrContact[$device['id']]['address'])?$arrContact[$device['id']]['address']:"";
+                    $device['company']       = isset($arrContact[$device['id']]['company'])?$arrContact[$device['id']]['company']:"";
+                    $device['company_contact'] = isset($arrContact[$device['id']]['company_contact'])?$arrContact[$device['id']]['company_contact']:"";
+                    $device['contact_rol']     = isset($arrContact[$device['id']]['contact_rol'])?$arrContact[$device['id']]['contact_rol']:"";
+                    $device['directory']       = isset($arrContact[$device['id']]['directory'])?$arrContact[$device['id']]['directory']:"";
+                    $device['notes']         = isset($arrContact[$device['id']]['notes'])?$arrContact[$device['id']]['notes']:"";
+                    $device['picture']       = isset($arrContact[$device['id']]['picture'])?$arrContact[$device['id']]['picture']:"";
+                    $device['status']        = "isPublic";
+                    $device['directory']     = "internal";
+                    $device['exists_on_address_book_db'] = isset($arrContact[$device['id']])?true:false;
+                    $device['id_on_address_book_db']     = isset($arrContact[$device['id']]['id'])?$arrContact[$device['id']]['id']:false;
+                }
+                return $arrDevices;
+            }        
+            else{
+                return false;//CASO ERROR
+            }
+        }
+        else{
+            if(is_array($arrDevices) && count($arrDevices)>0){
+                return $arrDevices[0]['total'];
+            }
+            else
+                return false; //CASO DE ERROR
+        }
+    }
+    
     function getMailsFromVoicemail()
     {
         $result = array();
@@ -327,19 +418,26 @@ a array with the field "total" containing the total of records.
         return $result;
     }
 
-    function isEditablePublicContact($id, $id_user){
-        $params = array($id, $id_user);
-        $query   = "SELECT * FROM contact WHERE id=? and iduser=? ";
+    function isEditablePublicContact($id, $id_user, $directory, $isAdminGroup=false, $dns)
+    {
+        //Solo se pueden editar los contactos externos por medio
+        //de sus creadores o dueños.
+        //Tambien se pueden editar los contactos internos pero
+        //solo lo hacen usuarios del grupo administrador
+        
+        if($directory == "external"){
+            $params = array($id, $id_user);
+            $query   = "SELECT * FROM contact WHERE id=? and iduser=? ";
 
-        //$strWhere = "id=$id";
-
-        // Clausula WHERE aqui
-        //if(!empty($strWhere)) $query .= "WHERE $strWhere ";
-
-        $result=$this->_DB->getFirstRowQuery($query, true, $params);
-        if(!$result && $result==null && count($result) < 1)
-            return false;
-        return $result;
+            $result=$this->_DB->getFirstRowQuery($query, true, $params);
+            if(!$result && $result==null && count($result) < 1)
+                return false;
+            return $result;
+        }
+        else if($directory == "internal" && $isAdminGroup){
+            return $this->existsDeviceFreePBX($dns,$id); 
+        }
+        return false;
     }
 
 }

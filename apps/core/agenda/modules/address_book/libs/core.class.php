@@ -316,34 +316,24 @@ class core_AddressBook
 		$field_name = NULL;
 		$field_pattern = NULL;
 	    }
-            $rs = $addressBook->getDeviceFreePBX($this->_astDSN, NULL, NULL, $field_name, $field_pattern, TRUE);
-            if (!is_array($rs)) {
+	    $iNumTotal = $addressBook->getDeviceFreePBX_Completed($this->_astDSN, NULL, NULL, $field_name, $field_pattern, TRUE);
+            if ($iNumTotal === false) {
                 $this->errMsg["fc"] = 'DBERROR';
                 $this->errMsg["fm"] = 'Database operation failed';
                 $this->errMsg["fd"] = 'Unable to count data from internal phonebook';
                 $this->errMsg["cn"] = get_class($addressBook);
                 return false;
             }
-            $iNumTotal = $rs[0]['total'];
             if (!isset($limit)) $limit = $iNumTotal;
 
             // Recuperar la agenda interna
-            $agendaInterna = $addressBook->getDeviceFreePBX($this->_astDSN, $limit, $offset, $field_name, $field_pattern);
-            if (!is_array($agendaInterna)) {
+            $extension = $addressBook->getDeviceFreePBX_Completed($this->_astDSN, $limit, $offset, $field_name, $field_pattern);
+            if ($extension === false) {
                 $this->errMsg["fc"] = 'DBERROR';
                 $this->errMsg["fm"] = 'Database operation failed';
                 $this->errMsg["fd"] = 'Unable to read data from internal phonebook';
                 $this->errMsg["cn"] = get_class($addressBook);
                 return false;
-            }
-            $listaEmails = $addressBook->getMailsFromVoicemail();
-            foreach ($agendaInterna as $tuplaAgenda) {
-		$extension[] = array(
-		    'id'    =>  $tuplaAgenda['id'],
-		    'phone' =>  $tuplaAgenda['id'],
-		    'name'  =>  $tuplaAgenda['description'],
-		    'email' =>  ((isset($listaEmails[$tuplaAgenda['id']]) && trim($listaEmails[$tuplaAgenda['id']]) != '') ? $listaEmails[$tuplaAgenda['id']] : NULL),
-		);
             }
             break;
         case 'external':
@@ -382,26 +372,16 @@ class core_AddressBook
              * getAddressBook, se requiere poner un filtro de mentira, porque
              * de lo contrario, la función ignora id_user, y devuelve los 
              * contactos de todos los usuarios. */ 
-            $agendaExterna = $addressBook->getAddressBook(
+            $extension = $addressBook->getAddressBook(
                 $limit, $offset, 
                 $field_name, $field_pattern, 
                 FALSE, $id_user);
-            if (!is_array($agendaExterna)) {
+            if (!is_array($extension)) {
                 $this->errMsg["fc"] = 'DBERROR';
                 $this->errMsg["fm"] = 'Database operation failed';
                 $this->errMsg["fd"] = 'Unable to read data from external phonebook - '.$addressBook->_DB->errMsg;
                 $this->errMsg["cn"] = get_class($addressBook);
                 return false;
-            }
-            foreach ($agendaExterna as $tuplaAgenda) {
-		$extension[] = array(
-		    'id'            =>  $tuplaAgenda['id'],
-		    'phone'         =>  $tuplaAgenda['telefono'],
-		    'name'          =>  $tuplaAgenda['name'].' '.$tuplaAgenda['last_name'],
-		    'first_name'    =>  $tuplaAgenda['name'],
-		    'last_name'     =>  $tuplaAgenda['last_name'],
-		    'email'         =>  (trim($tuplaAgenda['email']) == '' ? NULL : $tuplaAgenda['email']),
-		);
             }
             break;
         }
@@ -584,7 +564,7 @@ class core_AddressBook
         return true;
     }
 
-    public function getContactImage($id, $thumbnail)
+    public function getContactImage($id, $thumbnail, $directory)
     {
 	global $arrConf;
 
@@ -605,9 +585,9 @@ class core_AddressBook
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
-
+	$isAdminGroup = $this->_pACL->isUserAdministratorGroup($_SERVER['PHP_AUTH_USER']);
         // Verificar si el contacto existe y pertenece al usuario logoneado
-        $tupla = $addressBook->contactData($id, $id_user);
+        $tupla = $addressBook->contactData($id, $id_user, $directory, $isAdminGroup, $this->_astDSN);
 	if (!is_array($tupla)) {
             $this->errMsg["fc"] = 'DBERROR';
             $this->errMsg["fm"] = 'Database operation failed';
@@ -619,9 +599,10 @@ class core_AddressBook
 	$ruta_destino = "/var/www/address_book_images";
 	$arrIm = explode(".",$tupla['picture']);
 	$typeImage = $arrIm[count($arrIm)-1];
+        $idt = ($directory=="external")?$tupla['id']:$tupla['id_on_address_book_db'];  
 	if($thumbnail=="yes"){
 	    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user_Thumbnail.png";
-	    $image = $ruta_destino."/".$id."_Thumbnail.$typeImage";
+	    $image = $ruta_destino."/".$idt."_Thumbnail.$typeImage";
 	}
 	else{
 	    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user.png";

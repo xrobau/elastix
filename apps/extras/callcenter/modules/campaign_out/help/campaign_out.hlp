@@ -22,7 +22,7 @@
     <td>Name</td><td>Name of the campaign</td>
   </tr>
   <tr>
-    <td>Range date</td><td align="Justify"><b>Start: </b> Date on which the campaign starts. <br /> <b>End: </b>Date o which the campaign ends. After this date, no more calls will be made although there are pending phone numbers.</td>
+    <td>Range date</td><td align="Justify"><b>Start: </b> Date on which the campaign starts. <br /> <b>End: </b>Date on which the campaign ends. After this date, no more calls will be made although there are pending phone numbers.</td>
   </tr>
   <tr>
     <td>Schedule per Day</td><td align="Justify">The range of time per day which the campaign will last.</td>

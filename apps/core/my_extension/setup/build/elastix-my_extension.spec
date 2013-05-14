@@ -84,6 +84,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: My Extension: check that the values for record_in and record_out are
+  valid before writing to the database. Fixes Elastix bug #1554.
+  SVN Rev[4928]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

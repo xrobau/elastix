@@ -45,7 +45,7 @@
     <td>Status</td><td align="Justify">Off Line / On line. It shows whether the agent is logged in to agent console or not.</td>
   </tr>
 <tr>
-    <td>Options</td><td align="Justify"><strong>Edit:</strong>The agent information can be modified with this option.<br/>
+    <td>Options</td><td align="Justify"><strong>Edit: </strong>The agent information can be modified with this option.<br/>
     </td>
 </tr>
 </table>

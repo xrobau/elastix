@@ -51,7 +51,7 @@
 </table>
 
 <h2>New Agent</h2>
-<p>To create a new agent, click on the blue link "New Agent". Here you have to fill out the form with a number for the agent, the name and password that will be used for logging in the agent console. You don't have to set the ECCP password because the system does it automatically.</p>
+<p>To create a new agent, click on the blue link "New Agent". Here you have to fill out the form with a number for the agent, the name and password that will be used for logging in the agent console. It's not necessary to set the ECCP password since if it is left in blank the system set one randomly.</p>
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_agent_new.png" border="0" />
 <p>Figure 2</p></div><br />
 

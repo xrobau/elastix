@@ -6,30 +6,14 @@
 <body>
 
 <h1>{$node_name}</h1>
-<p>La opción "Breaks" del módulo "Call Center" en Elastix nos permite crear
-instantes de tiempos predefinidos en los cuales los
-agentes no receptarán o realizarán llamadas, un ejemplo
-de Break, es el tiempo de lunch de un agente, muy
-importante prefijar los tiempos de break para de esta
-forma poder determinar la productividad de los agentes y
-reconocer cual fue el tiempo en el que estuvo ausente del
-call center.
-</p>
-
-<p>En la figura 1 podemos observar una  lista de los breaks.
-</p>
-<div><img src="../modules/{$node_id}/images/break_list.jpg" border="0"></div>
-<div>Figura 1</div><br/><br/>
+<p align="Justify">This option allows creating break times which could be time for lunch, rest or any other reason. During this time the agent will not be available for making or receiving calls. This is important to determine the productivity of the agents by registering the time that the agent was not taking calls in the call center. The figure 1 shows a list of the existing breaks. 
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_break_list.png" border="0" />
+<p>Figure 1</p></div><br/>
+You can <b>Activate</b> or <b>Deactivate</b> them by selecting the break and clicking on those buttons.</p>
 <h2>New Break</h2>
-<p>Esta opción nos permite crear un nuevo "break".
-</p>
-<div><img src="../modules/{$node_id}/images/break_new.jpg" border="0"></div>
-<div>Figura 2</div><br/><br/>
-<h2>View</h2>
-<p>Al dar click sobre  "View" dentro de "Breaks List", nos llevará a una pantalla donde se mostrará los datos del "break". A la vez en esta pantalla usted podra "Editar","Desactivar" un "break".
-</p>
-<div><img src="../modules/{$node_id}/images/break_edit.jpg" border="0"></div>
-<div>Figura 3</div><br/><br/>
+<p align="Justify">To create a new break, click on the blue link "Create New Break". Fill out the form with a name of the break and a brief description of it. When done, click on "Save" button. </p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_break_new.png" border="0" />
+<p>Figure 2</p></div><br/>
 
 </body>
 </html>

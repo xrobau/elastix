@@ -5,15 +5,8 @@
 </header>
 <body>
 <h1>{$node_name}</h1>
-<p align="Justify">La opción "Calls Detail" nos muestra la 
-información en forma detallada de la llamadas
-recibidas(Inbound) y realizadas(Outbound) por medio del
-call center. Ingresando el rango de la fechas en la cual se
-desea ver el detalle de las llamadas, se especifica el
-Status de la llamada receptada o realizada, el tiempo de
-espera, la duración de la llamada, etc.
-</p>
-<div><img src="../modules/{$node_id}/images/calls_detail.jpg" border="0"></div>
-<div>Figure 1</div><br/><br/>
+<p align="Justify">This option shows detailed information about all the incoming and outgoing calls of the call center with the agent, duration, queue, status, etc. You can use the filters to get more specific information. See Figure 1.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_calls_detail.png" border="0" />
+<p>Figure 1</p></div><br/>
 </body>
 </html>

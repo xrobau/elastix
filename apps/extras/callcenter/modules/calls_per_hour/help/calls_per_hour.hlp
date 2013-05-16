@@ -5,20 +5,9 @@
 </header>
 <body>
 <h1>{$node_name}</h1>
+<p align="Justify">This option shows the amount of accomplished incoming and outgoing calls. They are arranged by hours (24 hours) and queues so you can see the total of calls for a queue in a specific hour or all the hours, and the total of calls for an hour in a specific queue or all the queues. Use the filters to find more specific information (See Figure 1). You can download this report in different formats such as CSV, XLS and PDF.</p>
 
-<p align="Justify">La opción "Calls per hour" nos muestra la 
-información de las llamadas recibidas y
-realizadas por hora clasificadas por cola.
-Se detalla el número de la llamadas realizadas en cada
-hora (24 horas) visualizándolo por cada una de las colas,
-además de q nos muestra el total de número de llamadas
-efectuadas en el rango determina por las fechas
-ingresadas.
-
-
-
-</p>
-<div><img src="../modules/{$node_id}/images/call_x_hour.jpg" border="0"></div>
-<div>Figura 1</div><br/><br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_call_x_hour.png" border="0" />
+<p>Figure 1</p></div><br/>
 </body>
 </html>

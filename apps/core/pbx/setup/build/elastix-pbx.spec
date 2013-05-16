@@ -298,6 +298,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu May 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Extensions Batch: rewrite the entire module to get rid of multiple
+  opportunities for SQL injection and code execution. Tighten up and centralize
+  validations on CSV fields. Improve readability and make the code smaller.
+  SVN Rev[4954]
+
 * Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Changed release in specfile.  

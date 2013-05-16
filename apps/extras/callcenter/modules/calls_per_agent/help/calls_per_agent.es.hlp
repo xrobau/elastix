@@ -1,0 +1,20 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p align="Justify">La opción "Calls per Agent" nos muestra la 
+información del número de llamadas
+receptadas(Inbound) y realizadas(Outbound) por agente.
+Facilitándonos un informe de las llamadas que un agente
+a recibido o realizado, con la respectiva duración, el
+promedio y la llamada más larga de acuerdo a los
+parámetros seteados en los filtros.
+</p>
+<div><img src="../modules/{$node_id}/images/call_x_agent.jpg" border="0"></div>
+<div>Figura 1</div><br/><br/>
+</body>
+</html>

@@ -6,19 +6,12 @@
 <body>
 
 <h1>{$node_name}</h1>
-<p align="Justify">Muestra la lista de formularios existentes, con el objetivo
-de hacer una vista preliminar de estos, antes de que sean
-usados en una campaña.<br/><br/>
-Para hacer una vista preliminar de los formularios:
-Se debe hacer click sobre PreView y nos llevará a una
-pantalla donde se mostrará: el Nombre, Descripción y los
-campos que contiene un formulario en forma gráfica.
-Es importante tomar en cuenta que desde esta opción no
-se puede ingresar ningún dato.
-</p>
-<div><img src="../modules/{$node_id}/images/form_list.jpg" border="0"></div>
-<div>Figura 1</div><br/><br/>
-<div><img src="../modules/{$node_id}/images/form.jpg" border="0"></div>
-<div>Figura 2</div><br/><br/>
+<p align="Justify">This option shows a list of the existing forms with the possibility to show a preview of them before they can be used in the campaigns. Use the filter to show all the Forms.</p>
+<p align="Justify"></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_form_list.png" border="0" />
+<p>Figure 1</p></div><br/>
+<p align="Justify">To see how a form looks, click on the link "Preview" located in the column "Options" of the list (See Figure 2). From this option you can't access to any data or modify the form.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_form.png" border="0" />
+<p>Figure 2</p></div><br/>
 </body>
 </html>

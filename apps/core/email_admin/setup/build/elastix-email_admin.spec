@@ -194,6 +194,11 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Thu May 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: port implementation from Elastix 2 into Elastix 3 to get
+  a base implementation free from sudo chown (which no longer works).
+  SVN Rev[4957]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: email_admin - Build/elastix-email_admin.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

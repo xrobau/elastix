@@ -6,72 +6,54 @@
 <body>
 
 <h1>{$node_name}</h1>
-<p>La opción "Form Designer" del módulo "Call Center" en Elastix nos permite la creación de formularios, los
-cuales se crean con el objetivo de recolectar datos al
-momento de ejecutar una campaña y realizar llamadas
-desde la consola de agente.
-</p>
-
-<p>La figura 1 nos muestra la lista de formularios existentes, con el objetivo
-de hacer una "vista" de estos, antes de que sean
-usados en una campaña.<br/><br/>
-
-</p>
-<div><img src="../modules/{$node_id}/images/form_designer.jpg" border="0"></div>
-<div>Figura 1</div><br/><br/>
+<p align="Justify">This option lets us create forms which are useful for the agent to collect data during an ingoing or outgoing campaign. The Figure 1 shows the existing Forms in a list where you can see which ones are active and Inactive. To show the status of all forms, use the filter and select the option "All".</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_form_designer.png" border="0" />
+<p>Figure 1</p></div><br/>
+<p align="Justify">As you can see in the Figure 1, you can create a new form, view the existing ones and activate the inactive forms.</p>
 <h3>Create New Form</h3>
-<p>Esta opción nos permite crear un Nuevo Formulario.
-Se mostrará una pantalla en la que se debe ingresar los
-siguientes campos:
-</p>
+<p align="Justify">To create a new form, click on the blue link "Create a New Form". There are two sections when creating a form. This first part is the name and description of the form. The second part is where we add the fields that the form will have and they can be text, list, date or label type. Below is a brief description of the required parameters for the new form.</p>
+<br />
 <table class="inline">
   <tr>
-    <th>Campo</th><th>Descripción</th>
+    <th>Field</th><th>Description</th>
   </tr>
   <tr>
-    <td>Nombre</td><td>Nombre con que se identifica el formulario.</td>
+    <td>Name</td><td>This is the name that identifies the form.</td>
   </tr>
 <tr>
-    <td>Descripción</td><td>Una descripción que indique para que fue creado.</td>
+    <td>Description</td><td>This is a brief description of the form.</td>
 </tr>
 </table>
-<div><img src="../modules/{$node_id}/images/form_designer_1.jpg" border="0"></div>
-<div>Figura 2</div><br/><br/>
-<p>Los formularios pueden llevar n campos que se hayan
-especificado.
-Estos campos son agregados desde la sección que dice
-Nuevo Campo.
-Se deben ingresar los campos que se describen en la
-tabla de abajo y luego hacer click en Agregar Campos<br/><br/>
-<strong>Nota:</strong> Si se selecciona el tipo Type List se debe indicar las
-posibles opciones separadas por coma en el cuadro de
-texto Opciones.
-
-</p>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_form_new.png" border="0" />
+<p>Figure 2</p></div><br/>
+<p align="Justify">The form can have N fields and they can be added by clicking on "Add Field" button after setting the required parameters. Below a brief description of them:</p>
 <table class="inline">
   <tr>
-    <th>Campo</th><th>Descripción</th>
+    <th>Field</th><th>Description</th>
   </tr>
   <tr>
-    <td>Nombre del Campo</td><td>Nombre del Campo.</td>
+    <td>Field Name</td><td>This is the name of the field.</td>
   </tr>
 <tr>
-    <td>Orden</td><td>Orden del Campo.</td>
+    <td>Order</td><td>This is the position of the field in the form.</td>
 </tr>
 <tr>
-    <td>Tipo</td><td>Type Label = Etiqueta<br/>
-                     Type Text  = Caja de Texto<br/>
-                     Type List  = Combo Box<br/>
-                     Type Date  = Campo tipo Fecha<br/>
-                     Type Text Area = Ingreso de Texto extenso.<br/>       
+    <td>Type</td><td><b>Type Label: </b>This type is to display an instruction.<br/>
+                     <b>Type Text: </b>This type is to enter short text.<br/>
+                     <b>Type List: </b>This type is to select several options from a list. If you use this type you have to add the possible options.<br/>
+                     <b>Type Date: </b>This type is to select a date.<br/>
+                     <b>Type Text Area: </b>This type is to enter long text.<br/>       
     </td>
 </tr>
 </table>
-<div><img src="../modules/{$node_id}/images/form_designer_2.jpg" border="0"></div>
-<div>Figura 3</div><br/><br/>
 <h3>View</h3>
-<p>Al dar click sobre  "View" dentro de "Form List", nos llevará a una pantalla donde se mostrará los datos del formulario. A la vez en esta pantalla usted podra "Editar","Desactivar","Eliminar" un formulario.</p>
-<div><img src="../modules/{$node_id}/images/form_edit.jpg" border="0"></div>
-<div>Figura 4</div><br/><br/>
+<p align="Justify">You can check the details of an existing form by clicking on the blue link "View" located in the column Options from the list. A new window will be shown (See Figure 3) and here you can <b>Edit, Deactivate</b> or <b>Delete</b> the selected form.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_form_view.png" border="0" />
+<p>Figure 3</p></div><br />
+<h3>Edit</h3>
+<p>You can add and delete fields, change the name of the forms and other parameters, See Figure 4.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_form_edit.png" border="0" />
+<p>Figure 4</p></div><br/>
 </body>
 </html>

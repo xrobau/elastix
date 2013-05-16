@@ -5,17 +5,11 @@
 </header>
 <body>
 <h1>{$node_name}</h1>
-
-<p align="Justify">La opción "Time Login-Logout" nos muestra la 
-información del tiempo en el cual un agente
-ha estado activo en la consola agente desde el momento
-de abrir su sesión hasta cerrarla, midiendo así la
-eficiencia del agente, contabilizando el tiempo de las
-llamadas contestadas sobre el tiempo q estuvo activo
-clasificada por agente o de manera detallada(se
-muestran todos los registros).
-</p>
-<div><img src="../modules/{$node_id}/images/time_li_lo.jpg" border="0"></div>
-<div>Figura 1</div><br/><br/>
+<p align="Justify">This option shows information about the time that the agents have been active in the agent console since they logged in until they logged out. This report shows the measurement of efficiency of the agents by counting the time of calls answered over the time they were active in the console.</p>
+<p>Use the filter to generate a general report (Figure 1) or a detailed report (Figure 2). You can download it in different formats such as CSV, XLS and PDF.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_time_li_lo_gen.png" border="0" />
+<p>Figure 1</p></div><br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_time_li_lo_det.png" border="0" />
+<p>Figure 2</p></div><br/>
 </body>
 </html>

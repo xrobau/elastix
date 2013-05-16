@@ -1,32 +1,17 @@
-<table width="99%" border="0" cellspacing="0" cellpadding="0" align="center">
-    <tr>
-        <td>
-            <table width="100%" cellpadding="4" cellspacing="0" border="0">
-                <tr>
-                    <td><input class="button" type="submit" name="save" value="{$SAVE}"></td>
-                    <td align="right" nowrap><span class="letra12"></td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
-                <tr>
-                    <td width="22%" align="right">{$label_file}:</td>
-                    <td width="30%"><input type='file' id='userfile' name='userfile'></td>
-                    <td width="30%" align='center'><a class="link1" href="?menu={$MODULE_NAME}&amp;accion=download_csv&amp;rawmode=yes">{$DOWNLOAD}</a></td>
-                    <td align="center">{$DELETE_ALL}</td>
-                </tr> 
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
-                <tr><td>{$HeaderFile}</td></tr>
-                <tr><td>{$AboutUpdate}</td></tr>
-            </table>
-        </td>
-    </tr>
+<form  method='POST' enctype='multipart/form-data' style='margin-bottom:0;' action='?menu={$MODULE_NAME}'>
+<table width="99%" border="0">
+<tbody>
+<tr>
+    <td align="right">{$LABEL_FILE}:</td>
+    <td><input type='file' id='csvfile' name='csvfile' /></td>
+    <td><input class="button" type="submit" name="csvupload" value="{$LABEL_UPLOAD}" /></td>
+</tr>
+<tr>
+    <td colspan="2"><a class="link1" href="?menu={$MODULE_NAME}&amp;action=csvdownload&amp;rawmode=yes">{$LABEL_DOWNLOAD}</a></td>
+    <td><input class='button' type='submit' name='delete_all' value='{$LABEL_DELETE}' onClick="return confirmSubmit('{$CONFIRM_DELETE}');" /></td>
+</tr>
+<tr><td colspan="3">{$HeaderFile}</td></tr>
+<tr><td colspan="3">{$AboutUpdate}</td></tr>
+</tbody>
 </table>
+</form>

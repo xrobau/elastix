@@ -194,6 +194,12 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Vacations: add shell escaping to fix potential code injection 
+  vulnerabilities in vacation script configuration. Pointed out by Fortify 
+  report.
+  SVN Rev[4973]
+
 * Thu May 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam: port implementation from Elastix 2 into Elastix 3 to get
   a base implementation free from sudo chown (which no longer works).

@@ -52,7 +52,7 @@ class PaloSantoPackages
         $paquetes = array();
         $filtroGrep = "";
 	    if($filtro!="")
-	        $filtroGrep = "| grep $filtro";
+	        $filtroGrep = "| grep ".escapeshellarg($filtro);
         $comando = "rpm -qa --queryformat '%{NAME}|%{SUMMARY}|%{VERSION}|%{RELEASE}\n' $filtroGrep";
         exec($comando,$respuesta,$retorno);
 
@@ -74,9 +74,8 @@ class PaloSantoPackages
 
     function getAllPackages($ruta,$filtro="", $offset, $limit, $total, &$actualizar)
     {
-		$valorfiltro="";
-        if($filtro!="")
-            $valorfiltro = " where name like '%$filtro%'";
+        $valorfiltro = array();
+        if ($filtro != "") $valorfiltro['namefilter'] = $filtro;
 
         $arr_repositorios = $this->getRepositorios($ruta);
         $arrRepositoriosPaquetes = array();
@@ -99,7 +98,7 @@ class PaloSantoPackages
      *
      * @return array    Listado de los repositorios
      */
-    function getRepositorios($dir='/var/cache/yum/')
+    private function getRepositorios($dir='/var/cache/yum/')
     {
         global $arrLang;
 
@@ -117,7 +116,7 @@ class PaloSantoPackages
         return $arr_respuesta;
     }
 
-    function getPaquetesDelRepositorio($ruta,$repositorio,$filtro, $contar=false)
+    private function getPaquetesDelRepositorio($ruta,$repositorio,/*$filtro*/ $param, $contar=false)
     {
 	$cadena_dsn = null;
         if(file_exists($ruta.$repositorio."/primary.xml.gz.sqlite")){
@@ -141,11 +140,34 @@ class PaloSantoPackages
                 return array();
             }
 
-            if($contar)
-                $sQuery  = "select count(*) as total from packages $filtro";
-            else
-                $sQuery  = "select name,summary,version,release,'$repositorio' repositorio from packages $filtro";
-            $arr_paquetes = $pDB->fetchTable($sQuery,true);
+            $sql = 'SELECT '.
+                ($contar ? 'COUNT(*)' : "name, summary, version, release, '$repositorio' repositorio").
+                ' FROM packages';
+            $paramSQL = array();
+            $condWhere = array();
+            if (isset($param['name'])) {
+                $condWhere[] = 'name = ?';
+            	$paramSQL[] = $param['name'];
+            }
+            if (isset($param['version'])) {
+                $condWhere[] = 'version = ?';
+                $paramSQL[] = $param['version'];
+            }
+            if (isset($param['release'])) {
+                $condWhere[] = 'release = ?';
+                $paramSQL[] = $param['release'];
+            }
+            if (isset($param['namefilter'])) {
+                $condWhere[] = 'name LIKE ?';
+                $paramSQL[] = '%'.$param['namefilter'].'%';
+            }
+            if (count($condWhere) > 0) $sql .= ' WHERE '.implode(' AND ', $condWhere);
+            if (isset($param['limit']) && isset($param['offset'])) {
+            	$sql .= ' LIMIT ? OFFSET ?';
+                $paramSQL[] = $param['limit'];
+                $paramSQL[] = $param['offset'];
+            }
+            $arr_paquetes = $pDB->fetchTable($sql, true, $paramSQL);
 
             $pDB->disconnect();
             if (is_array($arr_paquetes) && count($arr_paquetes) > 0) {
@@ -158,18 +180,22 @@ class PaloSantoPackages
 
     function estaPaqueteInstalado($paquete)
     {
-        global $arrLang;
-        exec("rpm -q $paquete",$respuesta,$retorno);
+        exec("rpm -q ".escapeshellarg($paquete),$respuesta,$retorno);
         if($retorno == 0)
             return true;
         else return false;
     }
 
-    function buscarRepositorioDelPaquete($ruta,$paquete,$version,$release, $offset, $limit)
+    private function buscarRepositorioDelPaquete($ruta,$paquete,$version,$release, $offset, $limit)
     {
         global $arrLang;
-        $filtro = " where name = '$paquete' and version = '$version' and release = '$release' ";
-        $filtro .= " LIMIT $limit OFFSET $offset";
+        $filtro = array(
+            'name'      =>  $paquete,
+            'version'   =>  $version,
+            'release'   =>  $release,
+            'limit'     =>  $limit,
+            'offset'    =>  $offset,
+        );
 
         $arr_repositorios = $this->getRepositorios($ruta);
         if(is_array($arr_repositorios) && count($arr_repositorios) > 0) {
@@ -219,7 +245,7 @@ class PaloSantoPackages
 	
     }
 
-    function writeTempFile($arr){
+    private function writeTempFile($arr){
       if ($f = fopen ($this->fn, 'w+'))
       {
 	 foreach($arr as $key => $value){
@@ -309,7 +335,7 @@ class PaloSantoPackages
         }
     }
 
-    function procesarDatos($datos,$val)
+    private function procesarDatos($datos,$val)
     {
         global $arrLang;
         $respuesta = "";
@@ -406,13 +432,13 @@ function uninstallPackage($package)
 		$total = 0;
         if($submitInstalado == "all")
         {
-			if($filtro != "")
-				$filtro = " where name like '%$filtro%'";
+            $valorfiltro = array();
+            if ($filtro != "") $valorfiltro['namefilter'] = $filtro;
             $total = 0;
             $arr_repositorios = $this->getRepositorios($ruta);
             if (is_array($arr_repositorios) && count($arr_repositorios) > 0) {
                 foreach($arr_repositorios as $key => $repositorio){
-                    $arr_paquetes = $this->getPaquetesDelRepositorio($ruta,$repositorio,$filtro,true);
+                    $arr_paquetes = $this->getPaquetesDelRepositorio($ruta,$repositorio,$valorfiltro,true);
                     if(isset($arr_paquetes[0]['total']))
 			$total += $arr_paquetes[0]['total'];
                 }
@@ -420,7 +446,8 @@ function uninstallPackage($package)
         }
 		if($total==0){
 			if($filtro != "")
-			$comando="rpm -qa --queryformat '%{NAME}\n' | grep $filtro | grep -c .";
+			$comando="rpm -qa --queryformat '%{NAME}\n' | grep ".
+                escapeshellarg($filtro)." | grep -c .";
 			else
 			$comando="rpm -qa | grep -c .";
 				exec($comando,$output,$retval);

@@ -134,6 +134,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Packages: fix several code injection and SQL injection vulnerabilities.
+  Pointed out by Fortify report.
+  SVN Rev[4971]
+
 * Thu May  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Currency: remove dead code. Elastix 3 requires an reimplementation
   using the organization properties table.

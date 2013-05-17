@@ -155,11 +155,13 @@ function error_exit($sMsg, $errorcode = 1)
     exit($errorcode);
 }
 
-function changeFilePermission($file)
+function changeFilePermission($file, $newmask = 0664)
 {
+	$oldmask = umask(0);
 	chown($file,"asterisk");
 	chgrp($file,"asterisk");
-	exec("chmod 664 $file 2>&1",$output, $ret);
+	chmod($file, $newmask);
+	umask($oldmask);
 	return true;
 }
 
@@ -271,16 +273,16 @@ function deleteFolderOrganization($idcode){
     $repOrg=$pathelxdir."oldOrganizations/$idcode";
     if(!is_dir($pathelxdir."oldOrganizations")){
         mkdir($pathelxdir."oldOrganizations");
-        exec("chmod 755 $pathelxdir"."oldOrganizations");
+        chmod($pathelxdir."oldOrganizations", 0755);
     }else{
         //comprobamos permisos de escritura del directorio
         if(!is_writable($pathelxdir."oldOrganizations")){
-            exec("chmod 755 $pathelxdir"."oldOrganizations");
+            chmod($pathelxdir."oldOrganizations", 0755);
         }
     }
     if(!is_dir($repOrg)){
         mkdir($repOrg);
-        exec("chmod 755 $repOrg");
+        chmod($repOrg, 0755);
     }
     
     foreach($arrDir as $value){
@@ -388,8 +390,7 @@ function createDirOrganization($domain){
     
     if(!is_dir($pathDial)){
         if(mkdir($pathDial)){
-            exec("chown asterisk.asterisk $path",$output,$retval);
-            exec("chmod 775 $path",$output,$retval);
+            changeFilePermission($path, 0775);
         }else{
             fprintf(STDERR, "ERR: failed to create '/etc/asterisk/organizations' directory");
             return false;
@@ -412,8 +413,7 @@ function createDirOrganization($domain){
         }
         
         if(mkdir("$dir/$domain")){
-            exec("chown asterisk.asterisk $dir/$domain ",$output,$retval);
-            exec("chmod 775 $dir/$domain",$output,$retval);
+            changeFilePermission("$dir/$domain", 0775);
         }else{
             fprintf(STDERR, "ERR: failed to create $dir/$domain directory - %s\n", $output[0]);
             $exito=false;
@@ -1425,6 +1425,10 @@ function changeStateOrganization($filename,$state){
     
     if(!($state=="suspend" || $state=="unsuspend" || $state=="terminate")){
         fprintf(STDERR, "ERR: Invalid Organization State.\n");
+        return false;
+    }
+    if (basename($filename) != $filename) {
+        fprintf(STDERR, "ERR: Invalid Organization filename\n");
         return false;
     }
     

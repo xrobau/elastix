@@ -363,6 +363,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: asteriskconfig: remove some unnecessary exec() calls for chmod. Fix
+  a potential arbitrary file deletion vulnerability through organization change
+  code.
+  SVN Rev[4965]
+
 * Thu May 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Extensions Batch: rewrite the entire module to get rid of multiple
   opportunities for SQL injection and code execution. Tighten up and centralize

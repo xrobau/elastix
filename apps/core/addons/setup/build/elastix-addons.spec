@@ -125,6 +125,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: enforce single rpm per request. Fix potential limited command
+  injection on addon delete. Pointed out by Fortify report.
+  SVN Rev[4966]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: Addons - Build/elastix-addons.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

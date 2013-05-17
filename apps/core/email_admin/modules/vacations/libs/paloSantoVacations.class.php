@@ -186,12 +186,16 @@ class paloSantoVacations {
         fwrite($fp,$content);
         fclose($fp);
 
-	exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'put $fileScript'",$flags, $status);
+	exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+        " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
+        " -e 'put $fileScript'",$flags, $status);
 	if($status!=0){
 	    $this->errMsg = _tr("Error: Impossible upload ")."vacations.sieve";
 	    return false;
 	}else{
-	    exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'activate vacations.sieve'",$flags, $status);
+	    exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+            " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
+            " -e 'activate vacations.sieve'",$flags, $status);
 	    if($status!=0){
 		$this->errMsg = _tr("Error: Impossible activate ")."vacations.sieve";
 		return false;
@@ -226,7 +230,9 @@ class paloSantoVacations {
 	if(!$existCron)
 	    $this->createCronFile();
 
-	exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'delete vacations.sieve'",$flags, $status);
+	exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+        " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
+        " -e 'delete vacations.sieve'",$flags, $status);
 
 	if($status!=0){
 	    $this->errMsg = _tr("Error: Impossible remove ")."vacations.sieve";
@@ -240,13 +246,17 @@ class paloSantoVacations {
 	    fwrite($fp,$contentSpamFilter);
 	    fclose($fp);
 
-	    exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'put $fileScript'",$flags, $status);
+	    exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+            " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
+            " -e 'put $fileScript'",$flags, $status);
 
 	    if($status!=0){
 		$this->errMsg = _tr("Error: Impossible upload ")."scriptTest.sieve";
 		return false;
 	    }else{
-		exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'activate scriptTest.sieve'",$flags, $status);
+		exec("echo ".$SIEVE['PASS']." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+            " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
+            " -e 'activate scriptTest.sieve'",$flags, $status);
 		if($status!=0){
 		    $this->errMsg = _tr("Error: Impossible activate ")."scriptTest.sieve";
 		    return false;

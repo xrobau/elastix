@@ -255,6 +255,11 @@ function do_iniciarInstallUpdate($smarty, $module_name, $local_templates_dir)
     $json = new Services_JSON();
     Header('Content-Type: application/json');
 
+    if (!preg_match("/^[\w-\.]+$/", $name_rpm)) {
+        $respuesta["error"] = _tr("Invalid addon name");
+        return $json->encode($respuesta);
+    }
+
     $oAddons = new paloSantoAddons();
     $sid = $oAddons->getSID();
     if(is_null($sid)){
@@ -286,6 +291,11 @@ function do_iniciarUninstall($smarty, $module_name, $local_templates_dir)
     $name_rpm = getParameter("name_rpm");
     $json = new Services_JSON();
     Header('Content-Type: application/json');
+
+    if (!preg_match("/^[\w-\.]+$/", $name_rpm)) {
+        $respuesta["error"] = _tr("Invalid addon name");
+        return $json->encode($respuesta);
+    }
 
     //Se busca si existe el archivo que indica las dependencias a desinstalar también
     if(file_exists("/usr/bin/$name_rpm-dependencies")){
@@ -324,6 +334,11 @@ function do_checkDependencies($smarty, $module_name, $local_templates_dir)
     $name_rpm = getParameter("name_rpm");
     $json = new Services_JSON();
     Header('Content-Type: application/json');
+
+    if (!preg_match("/^[\w-\.]+$/", $name_rpm)) {
+        $respuesta["error"] = _tr("Invalid addon name");
+        return $json->encode($respuesta);
+    }
 
     $oAddons = new paloSantoAddons();
     $sid = $oAddons->getSID();

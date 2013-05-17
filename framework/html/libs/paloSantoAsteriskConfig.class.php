@@ -102,7 +102,8 @@ class paloSantoASteriskConfig{
 			return false;
 		}
 
-		$sComando = '/usr/bin/elastix-helper asteriskconfig createDirOrganization '.$orgzDomain.'  2>&1';
+		$sComando = '/usr/bin/elastix-helper asteriskconfig createDirOrganization '.
+            escapeshellarg($orgzDomain).'  2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
@@ -140,7 +141,8 @@ class paloSantoASteriskConfig{
             }
         }
         
-        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionFile '."$action $orgzDomain".'  2>&1';
+        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionFile '.
+            escapeshellarg($action)." ".escapeshellarg($orgzDomain).'  2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         
@@ -159,7 +161,8 @@ class paloSantoASteriskConfig{
     {
         $path="/etc/asterisk/organizations/";
         
-        $sComando = '/usr/bin/elastix-helper asteriskconfig deleteFileOrgAst '.$orgzDomain.' 2>&1';
+        $sComando = '/usr/bin/elastix-helper asteriskconfig deleteFileOrgAst '.
+            escapeshellarg($orgzDomain).' 2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0){
@@ -374,7 +377,8 @@ class paloSantoASteriskConfig{
             }
         }
         
-        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals '."$action $orgzDomain".'  2>&1';
+        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals '.
+            escapeshellarg($action)." ".escapeshellarg($orgzDomain).'  2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
@@ -577,7 +581,8 @@ class paloSantoASteriskConfig{
             return false;
         }
 
-        $sComando = "/usr/bin/elastix-helper asteriskconfig generateDialPlan $domain $reload  2>&1";
+        $sComando = "/usr/bin/elastix-helper asteriskconfig generateDialPlan ".
+            escapeshellarg($domain)." ".escapeshellarg($reload)."  2>&1";
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {

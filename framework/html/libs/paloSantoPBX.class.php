@@ -745,15 +745,7 @@ class paloSip extends paloAsteriskDB {
 	function hashMd5Secret($name,$secret)
 	{
 		$cadena=$name.":asterisk:".$secret;
-		exec("echo -n '$cadena' | md5sum",$opt,$ret);
-		if($ret!=0)
-		{
-			$this->errMsg="Error setting secret for sip device";
-			return null;
-		}else{
-			$md5secret=trim(substr($opt[0],0,strpos($opt[0],'-')));
-			return $md5secret;
-		}
+		return md5($cadena);
 	}
 
 	function insertDB()

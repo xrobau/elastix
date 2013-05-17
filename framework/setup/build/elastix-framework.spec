@@ -310,6 +310,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: remove several opportunities for command injection in 
+  paloSantoOrganization, paloSantoAsterisk, paloSantoPBX. Pointed out by Fortify
+  report.
+  SVN Rev[4964]
+
 * Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: remove XSS bug on module name in help system.
   SVN Rev[4927]

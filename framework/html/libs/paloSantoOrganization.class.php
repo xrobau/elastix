@@ -532,7 +532,8 @@ class paloSantoOrganization{
             return false;
         }
         
-        $sComando = "/usr/bin/elastix-helper asteriskconfig changeOrgsState $file $state 2>&1";
+        $sComando = '/usr/bin/elastix-helper asteriskconfig changeOrgsState '.
+            escapeshellarg($file).' '.escapeshellarg($state).' 2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0){
@@ -745,7 +746,7 @@ class paloSantoOrganization{
 
 
     private function createFolderFaxOrg($domain){
-        $sComando = '/usr/bin/elastix-helper faxconfig createDirFax '.$domain.'  2>&1';
+        $sComando = '/usr/bin/elastix-helper faxconfig createDirFax '.escapeshellarg($domain).'  2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
@@ -965,7 +966,8 @@ class paloSantoOrganization{
         //elminamos los archivos de audio,grabaciones,faxes, etc relacionados con la organizacion
         $dError="";
         foreach($arrIdCode as $idcode){
-            $sComando = "/usr/bin/elastix-helper asteriskconfig deleteFolderOrganization $idcode 2>&1";
+            $sComando = "/usr/bin/elastix-helper asteriskconfig deleteFolderOrganization ".
+                escapeshellarg($idcode)." 2>&1";
             $output = $ret = NULL;
             exec($sComando, $output, $ret);
             if ($ret != 0){
@@ -1164,7 +1166,7 @@ class paloSantoOrganization{
             return false;
         }
         
-        $sComando = '/usr/bin/elastix-helper faxconfig deleteFaxsByOrg '.$idOrg.'  2>&1';
+        $sComando = '/usr/bin/elastix-helper faxconfig deleteFaxsByOrg '.escapeshellarg($idOrg).'  2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {

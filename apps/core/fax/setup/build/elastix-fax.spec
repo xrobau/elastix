@@ -207,6 +207,12 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: remove several instances of command injection vulnerabilities in 
+  paloSantoFax and in privileged script. Use SQL parameters in privileged 
+  script. Pointed out by Fortify report.
+  SVN Rev[4962]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.

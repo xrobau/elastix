@@ -491,10 +491,21 @@ class paloFax {
      * 
      * @return bool VERDADERO en caso de éxito, FALSO en error
      */
-    function addFaxConfiguration($nextPort,$devId,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email)
+    function addFaxConfiguration($nextPort,$devId,$country_code,$area_code,
+        $clid_name,$clid_number,$extension,$secret,$email)
     {
         $this->errMsg = '';
-        $sComando = '/usr/bin/elastix-helper faxconfig add '."$devId $nextPort $country_code $area_code $clid_number $extension $secret $email $clid_name".' 2>&1';
+        $sComando = '/usr/bin/elastix-helper faxconfig add'.
+            ' '.escapeshellarg($devId).
+            ' '.escapeshellarg($nextPort).
+            ' '.escapeshellarg($country_code).
+            ' '.escapeshellarg($area_code).
+            ' '.escapeshellarg($clid_number).
+            ' '.escapeshellarg($extension).
+            ' '.escapeshellarg($secret).
+            ' '.escapeshellarg($email).
+            ' '.escapeshellarg($clid_name).
+            ' 2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
@@ -510,10 +521,21 @@ class paloFax {
      *
      * @return bool VERDADERO en caso de éxito, FALSO en error
      */
-    function editFaxConfiguration($nextPort,$devId,$country_code,$area_code,$clid_name,$clid_number,$extension,$secret,$email)
+    function editFaxConfiguration($nextPort,$devId,$country_code,$area_code,
+        $clid_name,$clid_number,$extension,$secret,$email)
     {
         $this->errMsg = '';
-        $sComando = '/usr/bin/elastix-helper faxconfig edit '."$devId $nextPort $country_code $area_code $clid_number $extension $secret $email $clid_name".' 2>&1';
+        $sComando = '/usr/bin/elastix-helper faxconfig edit'.
+            ' '.escapeshellarg($devId).
+            ' '.escapeshellarg($nextPort).
+            ' '.escapeshellarg($country_code).
+            ' '.escapeshellarg($area_code).
+            ' '.escapeshellarg($clid_number).
+            ' '.escapeshellarg($extension).
+            ' '.escapeshellarg($secret).
+            ' '.escapeshellarg($email).
+            ' '.escapeshellarg($clid_name).
+            ' 2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
@@ -532,7 +554,7 @@ class paloFax {
     function deleteFaxConfiguration($dev_id)
     {
         $this->errMsg = '';
-        $sComando = '/usr/bin/elastix-helper faxconfig delete '.$dev_id.'  2>&1';
+        $sComando = '/usr/bin/elastix-helper faxconfig delete '.escapeshellarg($dev_id).'  2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {

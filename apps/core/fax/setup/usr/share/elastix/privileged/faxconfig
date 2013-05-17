@@ -621,15 +621,23 @@ function action_refreshFaxMaster($opt)
     return ($retval == 0);
 }
 
-function createDirFax($domain){
+function createDirFax($domain)
+{
+	if (!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)) {
+		error_exit("ERR: invalid domain name for fax!\n");
+	}
+
 	$path="/var/www/faxes";
 	$exito=true;
 	$arrDir=array("$path/$domain","$path/$domain/sent","$path/$domain/recvd");
 
+	umask(0);
+
 	if(!is_dir($path)){
 		if(mkdir($path)){
-			exec("chown asterisk.asterisk $path",$output,$retval);
-			exec("chmod 755 $path",$output,$retval);
+			chown($path, 'asterisk');
+			chgrp($path, 'asterisk');
+			chmod($path, 0755);
 		}else{
 			fprintf(STDERR, "ERR: failed to create fax directory");
 			return false;
@@ -643,8 +651,9 @@ function createDirFax($domain){
 
 	foreach($arrDir as $dir){
 		if(mkdir($dir)){
-			exec("chown asterisk.uucp $dir ",$output,$retval);
-			exec("chmod 775 $dir",$output,$retval);
+			chown($dir, 'asterisk');
+			chgrp($dir, 'uucp');
+			chmod($dir, 0775);
 		}else{
 			fprintf(STDERR, "ERR: failed to create fax directory - %s\n", $output[0]);
 			$exito=false;
@@ -669,9 +678,17 @@ function recivedFaxsDB($tiff_file,$modemdev,$commID,$company_number,$tipo,$faxpa
     if($id_user != -1){
         try{
             $conn = new PDO('sqlite:/var/www/db/elastix.db');
-            $result=$conn->query("INSERT INTO fax_docs (pdf_file,modemdev,commID,errormsg,company_name,company_fax,id_user,date,type,faxpath) VALUES  ('$tiff_file','$modemdev','$commID',' ','$company_name','$company_number',$id_user,datetime('now','localtime'),'$tipo','$faxpath')");
+            $sql = <<<SQL_INSERT_FAXDOCS
+INSERT INTO fax_docs
+	(pdf_file, modemdev, commID, errormsg, company_name, company_fax, id_user,
+	date,type,faxpath)
+VALUES (?, ?, ?, ?, ?, ?, ?, DATETIME('now', 'localtime'), ?, ?)
+SQL_INSERT_FAXDOCS;
+            $sth = $conn->prepare($sql);
+            $result = $sth->execute(array($tiff_file, $modemdev, $commID, ' ',
+            	$company_name, $company_number, $id_user, $tipo, $faxpath));
             if(!$result){
-                fprintf(STDERR, "ERR: Error inserting faxdocs - %s\n", print_r($conn->errorInfo(),1));
+                fprintf(STDERR, "ERR: Error inserting faxdocs - %s\n", print_r($sth->errorInfo(),1));
                 return false;
             }
         }catch(PDOException $e){

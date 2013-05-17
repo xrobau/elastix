@@ -310,6 +310,8 @@ function saveEvent($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     $repeat             = "none";
     $event_type = 0;
 
+    if (!ctype_digit($id)) $id = NULL;
+
     if(!preg_match("/^#\w{3,6}$/",$color))
         $color = "#3366CC";
 

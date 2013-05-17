@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: check that event ID is numeric before saving it. Pointed
+  out by Fortify report.
+  SVN Rev[4975]
+
 * Tue May 14 2013 Bruno Macias <bmacias@palosanto.com> 2.4.0-4
 - ADDED: Module address book, New feature, new fields were added to contacts.
   Now both internal and external contacts have the ability to have the same

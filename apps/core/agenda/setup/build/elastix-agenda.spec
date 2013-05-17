@@ -122,6 +122,11 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: check that event ID is numeric before saving it. Pointed
+  out by Fortify report.
+  SVN Rev[4975]
+
 * Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: check that notification phone is numeric, and disallow 
   newlines on TTS text. Fixes Elastix bug #1549.

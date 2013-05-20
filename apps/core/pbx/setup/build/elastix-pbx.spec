@@ -363,6 +363,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Recordings: fix a number of command injection vulnerabilities. Replace
+  calls to exec with corresponding internal functions for mkdir(). Clean up
+  code indentation. Pointed out by Fortify report.
+  SVN Rev[4977]
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: asteriskconfig: remove some unnecessary exec() calls for chmod. Fix
   a potential arbitrary file deletion vulnerability through organization change

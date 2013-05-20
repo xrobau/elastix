@@ -128,16 +128,14 @@ class paloSantoRecordings extends paloAsteriskDB{
         $tmpFile=$prep."_".$file_sin_ext.".wav";
         //mpg123 -w outputFile inputFile
 	
-        exec("mpg123 -w $base/$tmpFile $base/$tmp", $output, $ret);
+        exec("mpg123 -w ".escapeshellarg($base/$tmpFile)." ".escapeshellarg($base/$tmp), $output, $ret);
 	
+        unlink("$base/$tmp");
         if ($ret != 0) {
-            unlink("$base/$tmp");
             $this->errMsg = implode('', $output);
             return FALSE;
-        }else{
-            unlink("$base/$tmp");
-            return TRUE;
         }
+        return TRUE;
     }
 
     function getTipeOfFile($file){
@@ -155,15 +153,13 @@ class paloSantoRecordings extends paloAsteriskDB{
      function resampleMoHFiles($base,$tmpFile,$filename){
       //  sox inputFile -r 8000 -c 1 outputFile
         $output = $ret = NULL;		
-	exec("sox $base/$tmpFile -r 8000 -c 1 $base/$filename", $output, $ret);
+        exec("sox ".escapeshellarg($base/$tmpFile)." -r 8000 -c 1 ".escapeshellarg($base/$filename), $output, $ret);
+        unlink("$base/$tmpFile");
         if ($ret != 0) {
-            unlink("$base/$tmpFile");
             $this->errMsg = implode('', $output);
             return FALSE;
-        }else{
-            unlink("$base/$tmpFile");
-            return TRUE;
         }
+        return TRUE;
     }
 
     function getRecordingsByUser($domain,$extUser){
@@ -245,7 +241,7 @@ class paloSantoRecordings extends paloAsteriskDB{
         $command_data['origen'] = $origen;
         $command_data['channel'] = $channel;
         $command_data['description'] = $description;
-	$command_data["recording_name"]=$recording_name;
+        $command_data["recording_name"]=$recording_name;
         return $this->AsteriskManager_Originate($data_connection['host'], $data_connection['user'], $data_connection['password'], $command_data);
     }
 
@@ -402,81 +398,85 @@ class paloSantoRecordings extends paloAsteriskDB{
 
     function deleteRecordings($records,$domain,$userLevel1)
     {
-	$retval = 0;
-	$err = 0;
+        if (!preg_match('/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/', $domain)) {
+            $this->errMsg = _tr('Invalid domain');
+        	return FALSE;
+        }
+        
+        $retval = 0;
+        $err = 0;
         $where="where ";
-	$arrRec = array();
+        $arrRec = array();
         $i=0;$arrComando="";
-	//$bExito = true;
-	foreach($records as $rec){
-	   $i++;
-	   $pieces = explode(",", $rec);
-          
-	   if($i==count($records))
+        //$bExito = true;
+        foreach ($records as $rec) {
+            $i++;
+            $pieces = explode(",", $rec);
+
+            if (!in_array($pieces[0], array('system', 'custom')))
+                $err = 1;
+            if (basename($pieces[1]) != $pieces[1])
+                $err = 1;
+
+            if($i==count($records))
                 $where .= "filename = ?";
-	   else
-		$where .= "filename = ? or "; 
+            else
+                $where .= "filename = ? or "; 
 	  
-	if($userLevel1=="admin"){
-	    if($pieces[0]=="system")
-		  $val = "/var/lib/asterisk/sounds/".$domain."/".$pieces[0]."/".$pieces[1];
-	    else
-		  $err = 1;
-	}
-	elseif($userLevel1=="superadmin")
-	    if($pieces[0]=="custom")  
-		  $val = "/var/lib/asterisk/sounds/".$pieces[0]."/".$pieces[1];
-	    else
-		  $err = 1;
-	array_push($arrRec,$val); 
-	}   
-
-    if($err == 1){
-       $this->errMsg=_tr("You are not authorized to perform this action").$this->_DB->errMsg;
-       return false;
-    }
-    else{
-     
-	$arrTmp = array();
-	foreach($arrRec as $arr){
-	    if(file_exists($arr)){
-		if(rename($arr,$arr.".old")==false)
-		   $retval = 1;
-	    }
-	    
-	}
-	
-	if($retval!=0)
-	    return false;
-	else{
-	  //  $bExito=true;
-	      
-	    $queryD="DELETE from recordings $where";
-	    $result=$this->_DB->genQuery($queryD,$arrRec);
-	    
-           
-	    if($result==false){
-	      $this->errMsg=_tr("Error Deleting Recordings ").$this->_DB->errMsg;
-	      foreach($arrRec as $arr){
-		  if(file_exists($arr.".old")){ 
-		       $comando="mv $arr.old $arr";
-		       exec($comando, $output, $retval);
-		  }
-	      }
-	      return false;
-	    }else{
-	      foreach($arrRec as $arr){
-		  if(file_exists($arr.".old")){ 
-		       $comando="rm -f $arr.old ";
-		       exec($comando, $output, $retval);
-		  }
-	      }
-	      return true;
-
+            if($userLevel1=="admin"){
+                if($pieces[0]=="system")
+                    $val = "/var/lib/asterisk/sounds/".$domain."/".$pieces[0]."/".$pieces[1];
+                else
+                    $err = 1;
             }
-       	} 
-       }
-     }
-    
+            elseif($userLevel1=="superadmin")
+                if($pieces[0]=="custom")  
+                    $val = "/var/lib/asterisk/sounds/".$pieces[0]."/".$pieces[1];
+                else
+                    $err = 1;
+            array_push($arrRec,$val); 
+        }   
+
+        if($err == 1){
+            $this->errMsg=_tr("You are not authorized to perform this action").$this->_DB->errMsg;
+            return false;
+        }
+        else{
+
+            $arrTmp = array();
+            foreach($arrRec as $arr){
+                if(file_exists($arr)){
+                    if(rename($arr,$arr.".old")==false)
+                        $retval = 1;
+                }
+            }
+
+            if($retval!=0)
+                return false;
+            else{
+                //  $bExito=true;
+
+                $queryD="DELETE from recordings $where";
+                $result=$this->_DB->genQuery($queryD,$arrRec);
+           
+                if ($result==false) {
+                    $this->errMsg=_tr("Error Deleting Recordings ").$this->_DB->errMsg;
+                    foreach($arrRec as $arr){
+                        if(file_exists($arr.".old")){
+                            rename("$arr.old", $arr);
+                        }
+                    }
+                    return false;
+                } else {
+                    foreach($arrRec as $arr){
+                        if(file_exists($arr.".old")) {
+                            unlink("$arr.old");
+                        }
+                    }
+                    return true;
+                }
+            } 
+        }
+    }
 }
 ?>

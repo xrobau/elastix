@@ -420,9 +420,10 @@ function restore_form($smarty, $local_templates_dir, $arrLang, $path_backup, $mo
         $arr = array_keys($_POST["submit_restore"]);
         $archivo_post = $arr[0];
     }else $archivo_post = isset($_POST["backup_file"])?$_POST["backup_file"]:"";
+    $archivo_post = basename($archivo_post);
 
     $dir_respaldo = "$path_backup";
-    $comando="cd $dir_respaldo; tar xvf $dir_respaldo/$archivo_post backup/a_options.xml";
+    $comando="cd ".escapeshellarg($dir_respaldo)."; tar xvf ".escapeshellarg($dir_respaldo/$archivo_post)." backup/a_options.xml";
     exec($comando,$output,$retval);
     if ($retval==0)
     {
@@ -595,10 +596,11 @@ function compareArrays($path_backup, $arr_XML)
 function showAlert($path_backup, $smarty, $arrLang, $backup_file, $module_name, $parameter){
     //verificar que existe el archivo de respaldo
 
-    if (empty($backup_file))
+    if (empty($backup_file)) {
         $smarty->assign("ERROR_MSG", $arrLang["Backup file path can't be empty"]);
-    else
-    {
+    } elseif (!preg_match('/^elastixbackup-\d{14}-\w{2}\.tar$/', $backup_file)) {
+        $smarty->assign('ERROR_MSG', _tr('Invalid backup filename'));
+    } else {
         $path_file_backup = "$path_backup/$backup_file";
         //verificar que el archivo existe
         if (!file_exists($path_file_backup))

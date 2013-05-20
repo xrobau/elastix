@@ -134,6 +134,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon May 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: fix some potential code injection vulnerabilities.
+  Pointed out by Fortify report.
+  SVN Rev[4978]
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: fix several code injection and SQL injection vulnerabilities.
   Pointed out by Fortify report.

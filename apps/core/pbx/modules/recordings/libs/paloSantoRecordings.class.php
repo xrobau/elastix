@@ -61,8 +61,8 @@ class paloSantoRecordings {
             $dsnAsterisk = generarDSNSistema('asteriskuser', 'asterisk');
             $pDB = new paloDB($dsnAsterisk);
 
-            $query = "SELECT dial, description, id FROM devices WHERE id=$extension";
-            $result = $pDB->getFirstRowQuery($query, TRUE);
+            $query = "SELECT dial, description, id FROM devices WHERE id = ?";
+            $result = $pDB->getFirstRowQuery($query, TRUE, array($extension));
             if($result != FALSE)
                 return $result;
             else return FALSE;
@@ -115,8 +115,8 @@ class paloSantoRecordings {
     {
         $pDB = new paloDB($dsn);
 
-        $query = "SELECT dial, description FROM devices WHERE id=$id";
-        $result = $pDB->getFirstRowQuery($query, TRUE);
+        $query = "SELECT dial, description FROM devices WHERE id = ?";
+        $result = $pDB->getFirstRowQuery($query, TRUE, array($id));
         if($result != FALSE)
             return $result;
         else{

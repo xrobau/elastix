@@ -298,6 +298,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Recordings: fix a number of command injection vulnerabilities. Replace
+  calls to exec with corresponding internal functions for mkdir(). Clean up
+  code indentation. Pointed out by Fortify report.
+  SVN Rev[4977]
+
 * Thu May 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Extensions Batch: rewrite the entire module to get rid of multiple
   opportunities for SQL injection and code execution. Tighten up and centralize

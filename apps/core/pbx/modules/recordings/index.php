@@ -160,9 +160,7 @@ function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $
                 $smarty->assign("file_record_name", $_FILES['file_record']['name']);
                 if(!file_exists($destiny_path))
                 {
-                    $comando="mkdir $destiny_path";
-                    exec($comando, $output, $retval);
-                    if ($retval!=0) $bExito = false;
+                    $bExito = mkdir($destiny_path, 0755, TRUE);
                 }
                 if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(wav|WAV|Wav|gsm|GSM|Gsm|Wav49|wav49|WAV49)$/",$_FILES['file_record']['name'])) {
                     $smarty->assign("mb_title", $arrLang['ERROR'].":");

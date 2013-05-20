@@ -1502,6 +1502,8 @@ function setDataCalendar($arrLang,$pDB,$arrConf){
     $starttime     = $startdate." ".$hour_ini;
     $endtime       = $enddate." ".$hour_end;
 
+    if (!ctype_digit($id)) $id = NULL;
+
     // obtain data to create audio files
     $arrResult = $pCalendar->getEventById($id, $id_user);
 

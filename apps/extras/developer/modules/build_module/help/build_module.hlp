@@ -6,86 +6,86 @@
 <body>
 
 <h1>{$node_name}</h1>
-
-
-<p align="Justify">La opción "Build Module" del módulo "Developer" en Elastix nos permite
-crear facilmente modulos hasta de tercer nivel  dentro de Elastix. Hay que tener ciertas
-consideraciones al momento de crearlo y distinguir en que nivel vamos a crearlo. Como podemos
-observar hay 3 secciones en las que se divide el módulo.
-</p>
-<div><img src="../modules/{$node_id}/images/build_module_1.png" border="0"></div>
-<div>Figura 1</div><br/><br/>
+<p align="Justify">The option "Build Module" of the menu "Developer" lets us easily create modules up to third level in Elastix. We can create a module and place it in a new first level module, or include it in an existing one.</p>
+<p align="Justify">This module has three sections: General Information, Location and Module Description (See Figure 1).</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_build_module_1.png" border="0" />
+<p>Figure 1</p></div>
 <h2>General Information</h2>
 <table class="inline">
   <tr>
-    <th>Parámetro</th><th>Descripción</th>
+    <th>Parameter</th><th>Description</th>
   </tr>
   <tr>
-    <td>Module Name</td><td>Nombre del Módulo, iniciando la primera letra de cada palabra con mayúscula</td>
+    <td>Module Name</td><td>This is the name of the new module. Start the name with uppercase.</td>
   </tr>
   <tr>
-    <td>Module Id</td><td>Identificador del Módulo, debe ser en letra minuscula y separada por un subguión tal como se muestra en la figura 1.</td>
+    <td>Module Id</td><td>This is the identifier of the module</td>
   </tr>
   <tr>
-    <td>Group Permission</td><td>Esta opción permite elegir el grado de accesibilidad de los usuarios a este módulo.</td>
+    <td>Your Name</td><td>This is the name of the owner of the new module.</td>
   </tr>
   <tr>
-    <td>Your Name</td><td>Definimos el nombre de quien hizo el módulo.</td>
+    <td>Your e-mail</td><td>This is the email of the owner of the module..</td>
   </tr>
   <tr>
-    <td>Your e-mail</td><td>Dirección de correo electrónico de quien hizo el módulo.</td>
+    <td>Group Permission</td><td>This is the type of access for the new module.</td>
   </tr>
-  <tr>
 </table>
 <br>
 <h2>Location</h2>
 <table class="inline">
   <tr>
-    <th>Parámetro</th><th>Descripción</th>
-  </tr>
-    <td>Module Type</td><td>Esta opción nos permite elegir el tipo de modulo que deseamos crear,        tenemos dos tipos.<br/><strong>Form:</strong> Creacion de un módulo formulario.<br/>
-    <strong>Grid:</strong> Creación de un módulo reporte</td>
+    <th>Parameter</th><th>Description</th>
   </tr>
   <tr>
-    <td>Module Level</td><td>Aqui definimos el nivel del modulo este puede ser 2 ó 3</td>
+    <td>Module Level</td><td>Here we define the level of the new module. <br />If you choose level 2 you have to define a parent module which is level 1 (See Figure 2 and 3). <br />If you choose level 3 you have to define two parent modules which are level 1 and 2 (See Figure 4 and 5). </td>
   </tr>
   <tr>
-    <td>Level 1 Parent Exists</td><td>Esta opción es muy importante pues aqui definimos si el          modulo a crear tiene un "módulo padre existente".<br/><strong>Si:</strong> Escogemos el  "módulo padre".<br/><strong>No:</strong> Procederemos a ingresar información en 2 campos        adicionales, Figura 2 y 3.
+    <td>Level 1 Parent Exists</td><td>This option defines the parent of the module that we are creating (See Figures below).<br/><strong>Yes:</strong> We have to choose the name of the existing parent module.<br/><strong>No:</strong> We have to enter the name for the new parent module.
     </td>
   </tr>
   <tr>
-    <td>Level 1 Parent Name</td><td>Definimos el nombre del "Modulo Padre" siguiendo el mismo formato es decir solo la primera palabra con letra mayúscula</td>
+    <td>Level 1 Parent Name</td><td>If the parent module exists select the name from the list. If the parent module doesn't exist, enter the name starting with uppercase.</td>
   </tr>
   <tr>
-    <td>Level 1 Parent Id</td><td>Definimos el identificador del "Modulo Padre" siguiendo el mismo formato es decir con letra minúscula y separada de subguiones si es necesario.</td>
+    <td>Level 1 Parent Id</td><td>This is the identifier of the parent module.</td>
   </tr>
 </table><br/>
-<div><img src="../modules/{$node_id}/images/build_parent_name.png" border="0"></div>
-<div>Figura 2</div><br/><br/>
-<div><img src="../modules/{$node_id}/images/build_parent_id.png" border="0"></div>
-<div>Figura 3</div><br/><br/>
-<p><strong>NOTA:</strong>Cabe recalcar que si escogemos la creación de un modulo de nivel 3, se procedera a escoger a que "Submodulo" pertenece y este a que "Modulo Padre".</p>
-<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_1.png" border="0" />
+<p>Figure 2</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_2.png" border="0" />
+<p>Figure 3</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_3.png" border="0" />
+<p>Figure 4</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_4.png" border="0" />
+<p>Figure 5</p></div>
+
 <h2>Module Description</h2>
 <table class="inline">
   <tr>
-    <th>Parámetro</th><th>Descripción</th>
+    <th>Parameter</th><th>Description</th>
   </tr>
   <tr>
-    <td>Module Type</td><td>Esta opción nos permite elegir el tipo de modulo que deseamos crear,        tenemos dos tipos.<br/><strong>Form:</strong> Creacion de un módulo formulario.<br/>
-    <strong>Grid:</strong> Creación de un módulo reporte</td>
+    <td>Module Type</td><td>This option defines the type of module we will create. There are 3 types:<br/><strong>Form:</strong> It's a module used to enter data (See figure 6).<br/>
+    <strong>Grid:</strong> It's a module that shows information as a report (See figure 7).<br /><strong>Framed:</strong> It's a module used to embed an external application (See figure 8).</td>
   </tr>
   <tr>
-    <td>Field Name</td><td>Definimos el nombre del campo a crear</td>
+    <td>Field Name</td><td>Define the name of the field for the module</td>
   </tr>
   <tr>
-    <td>Field Type</td><td>Definimos el tipo del campo a crear</td>
+    <td>Field Type</td><td>Define the type of the field. Only for the type "Form".</td>
   </tr>    
+  <tr>
+    <td>Url</td><td>Define the URL of the external application. Only for the type "Framed".</td>
+  </tr>  
 </table>
 <br/>
-<div><img src="../modules/{$node_id}/images/build_module_addfield.png" border="0"></div>
-<div>Figura 4</div><br/><br/>
-<p><strong>NOTA:</strong> Con los botones  ">>", "<<" podemos añadir o quitar los campos a insertar en nuestro formulario. Ademas, cuando es de tipo
-grid el campo  "Field Type" es oculto, solo basta con escribir en "Field Name" que son los nombres de las columnas a presentar.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_description_1.png" border="0" />
+<p>Figure 6</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_description_2.png" border="0" />
+<p>Figure 7</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_description_3.png" border="0" />
+<p>Figure 8</p></div>
+<p><strong>NOTE:</strong> With the buttons ">>" and "<<" we can insert and delete the fields that we are creating for the new module.</p><br />	
 </body>
 </html>

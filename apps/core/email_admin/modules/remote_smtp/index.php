@@ -140,6 +140,8 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
         $arrData['status']          = rtrim(getParameter('status'));
         $arrData['autentification'] = getParameter('autentification');
 
+        if ($arrData['status'] != 'on') $arrData['status'] = 'off';
+
         $SMTP_Server = rtrim(getParameter('SMTP_Server'));
         if($SMTP_Server != "custom"){
             if($arrData['user'] == "" || $arrData['password'] == ""){

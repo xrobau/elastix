@@ -195,6 +195,10 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Remote SMTP: use SQL parameters for status update, and validate it.
+  SVN Rev[4983]
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Vacations: add shell escaping to fix potential code injection 
   vulnerabilities in vacation script configuration. Pointed out by Fortify 

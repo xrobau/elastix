@@ -112,14 +112,10 @@ class paloSantoEmailRelay {
         $result = $this->_DB->getFirstRowQuery($query,true);
 
         if(is_array($result) && count($result) >0){
-            if($result['existe']==1){
-                $query = "update email_relay set value='$status' where name='status';";
-                $ok = $this->_DB->genQuery($query);
-            }
-            else{
-                $query = "insert into email_relay(name,value) values('status','$status');";
-                $ok = $this->_DB->genQuery($query);
-            }
+            $query = ($result['existe'] >= 1)
+                ? "update email_relay set value=? where name='status'"
+                : "insert into email_relay(name,value) values('status', ?)";
+            $ok = $this->_DB->genQuery($query, array($status));
 
             if(!$ok){
                 $this->errMsg = $this->_DB->errMsg;

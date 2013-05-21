@@ -305,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: replace unserialize with implode/explode in help system.
+  SVN Rev[4995]
+
 * Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: remove XSS bug on module name in help system.
   SVN Rev[4927]

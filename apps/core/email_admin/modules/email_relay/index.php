@@ -64,7 +64,7 @@ function _moduleContent(&$smarty, $module_name)
     if(isset($_POST['update_relay']) ) {
         $in_redes_relay = trim($_POST['redes_relay']);
         if(!empty($in_redes_relay)) {
-            $arrRedesRelay = explode("\n", $in_redes_relay);
+            $arrRedesRelay = array_map('trim', explode("\n", $in_redes_relay));
             // Ahora valido que las redes estén en formato correcto
             if(is_array($arrRedesRelay) and count($arrRedesRelay)>0) {
                 foreach ($arrRedesRelay as $redRelay) {
@@ -95,25 +95,21 @@ function _moduleContent(&$smarty, $module_name)
         } 
         if($bGuardar) {
             // Si no hay errores de validacion entonces ingreso las redes al archivo de relay /etc/postfix/network_table
-            if(file_exists($conf_relay)) {
-                exec("sudo -u root chown asterisk.asterisk $conf_relay");
-                if($fh = @fopen($conf_relay, "w")) {
-                    if(fwrite($fh, "$in_redes_relay")) {
-                        exec("sudo -u root service generic-cloexec postfix restart");
-                        // TODO: Tengo que revisar si este comando se ejecuto correctamente
-                        $smarty->assign("mb_title",$arrLang["Message"]);
-                        $smarty->assign("mb_message", $arrLang["Configuration updated successfully"]);
-
-                    } else {
-                        $smarty->assign("mb_title",$arrLang["Error"]);
-                        $smarty->assign("mb_message", $arrLang["Write error when writing the new configuration."]);
-                    }
-                    fclose($fh);
-                } else {
-                    $smarty->assign("mb_title",$arrLang["Error"]);
-                    $smarty->assign("mb_message", $arrLang["Write error when writing the new configuration."]);
-                }
-                exec("sudo -u root chown root.root $conf_relay");
+            $output = $retval = NULL;
+            exec('/usr/bin/elastix-helper relayconfig '.            
+                implode(' ', array_map('escapeshellarg', $arrRedesRelay)).' 2>&1',
+                $output, $retval);
+            if ($retval != 0) {
+                $smarty->assign(array(
+                    'mb_title'      =>  _tr('Error'),
+                    'mb_message'    =>  _tr('Write error when writing the new configuration.').
+                        ': '.implode('<br/>', $output),
+                ));
+            } else {
+            	$smarty->assign(array(
+                    'mb_title'      =>  _tr('Message'),
+                    'mb_message'    =>  _tr('Configuration updated successfully'),
+                ));
             }
         }
 
@@ -132,8 +128,8 @@ function _moduleContent(&$smarty, $module_name)
         }
     } else {
         // Si el archivo no existe algo anda mal.
-        // Por ahora lo creo al archivo vacio
-        exec("/sg/bin/sudo -u root touch $conf_relay");
+        $smarty->assign("mb_title",$arrLang["Error"]);
+        $smarty->assign("mb_message", $arrLang["Could not read the relay configuration."]);
     } 
 
 

@@ -195,6 +195,9 @@ fi
 
 %changelog
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email Relay: port implementation from Elastix 2 into Elastix 3 to get
+  a base implementation free from sudo chown (which no longer works).
+  SVN Rev[4984]
 - CHANGED: Remote SMTP: use SQL parameters for status update, and validate it.
   SVN Rev[4983]
 - CHANGED: Remote SMTP: port implementation from Elastix 2 into Elastix 3 to get

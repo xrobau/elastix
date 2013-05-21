@@ -110,13 +110,13 @@ $oPt = new paloTree($arrNodos);
 
 $nodeserial = isset($_GET['nodeserial'])?$_GET['nodeserial']:'';
 
-$oPt->actualizarNodosAbiertos($_GET['id_nodo'], unserialize(urldecode($nodeserial)));
+$oPt->actualizarNodosAbiertos($_GET['id_nodo'], explode(',',urldecode($nodeserial)));
 
 // Just to make sure that the parent node is open
 $idParent=$oPt->obtenerParent($_GET['id_nodo']);
 $oPt->tocarNodo($idParent, 1);
 
-$nodeserial=urlencode(serialize($oPt->obtenerNodosAbiertos()));
+$nodeserial=urlencode(implode(',',$oPt->obtenerNodosAbiertos()));
 $oPt->setURLBase("frameLeft.php?nodeserial=$nodeserial");
 $oPt->setRutaImage("../images");
 

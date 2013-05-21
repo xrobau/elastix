@@ -363,6 +363,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Asterisk CLI: rewrite to use escapeshellarg properly instead of
+  reimplementing special character filtering. Remove bogus unused library.
+  SVN Rev[4991]
+
 * Mon May 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Recordings: fix a number of command injection vulnerabilities. Replace
   calls to exec with corresponding internal functions for mkdir(). Clean up

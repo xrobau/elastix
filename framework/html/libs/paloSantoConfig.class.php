@@ -292,16 +292,16 @@ class paloConfig
 
     private function privado_chown($usuario, $ruta)
     {   
-        //echo "chown $usuario $ruta<br>";
-        $cmd_chown = escapeshellcmd("sudo -u root chown $usuario $ruta");
-        $mensaje = `$cmd_chown 2>&1`;
-
-        if ($mensaje != "") {
-		    $this->errMsg = $mensaje;
-		    return false;
-		} else {
-            return true;
+        $usergroup = explode('.', $usuario);
+        if (!chown($ruta, $usergroup[0])) {
+            $this->errMsg = 'Failed to chown';
+            return FALSE;
         }
+        if (count($usergroup) > 1 && !chgrp($ruta, $usergroup[1])) {
+            $this->errMsg = 'Failed to chgrp';
+            return FALSE;
+        }
+        return TRUE;
     }
 
 	/*	Funcion que extrae claves de un archivo que contiene claves de la forma CLAVE=VALOR,

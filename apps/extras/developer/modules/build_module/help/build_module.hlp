@@ -86,6 +86,7 @@
 <p>Figure 7</p></div>
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_description_3.png" border="0" />
 <p>Figure 8</p></div>
-<p><strong>NOTE:</strong> With the buttons ">>" and "<<" we can insert and delete the fields that we are creating for the new module.</p><br />	
+<p><strong>NOTE:</strong> With the buttons ">>" and "<<" we can insert and delete the fields that we are creating for the new module.</p>	
+<p>To create the new module click on the button "Save" and refresh the web interface to see the new module in Elastix.</p><br />
 </body>
 </html>

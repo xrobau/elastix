@@ -981,7 +981,7 @@ function view_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pD
 
     $smarty->assign("idPhoto",$id);
 
-    $contactData = $padress_book->contactData($id, $id_user, $directory, $isAdminGroup, $dsnAsterisk);
+    $contactData = $padress_book->contactData($id, $id_user, $directory, true, $dsnAsterisk);
     if($contactData){
         $smarty->assign("ID",$id);
         $smarty->assign("TYPE",$directory);
@@ -1184,12 +1184,11 @@ function getImageContact($smarty, $module_name, $local_templates_dir, $pDB, $pDB
     
     $pACL       = new paloACL($pDB_2);
     $id_user    = $pACL->getIdUser($_SESSION["elastix_user"]);
-    $isAdminGroup = $pACL->isUserAdministratorGroup($_SESSION["elastix_user"]);
      
     $ruta_destino = "/var/www/address_book_images";
     $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/$module_name/images/Icon-user.png";
     $padress_book = new paloAdressBook($pDB);
-    $contactData = $padress_book->contactData($contact_id, $id_user,$directory,$isAdminGroup,$dsnAsterisk);
+    $contactData = $padress_book->contactData($contact_id, $id_user,$directory,true,$dsnAsterisk);
     $idt = ($directory=="external")?$contactData['id']:$contactData['id_on_address_book_db'];
     
     $pic = isset($contactData['picture'])?$contactData['picture']:0;

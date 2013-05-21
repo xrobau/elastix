@@ -42,13 +42,16 @@ require_once "$documentRoot/modules/address_book/libs/core.class.php";
  *      GET     lista un reporte de todos los contactos externos, o de los 
  *              indicados por los parámetros limit y offset.
  *      POST    recibe una representación estándar application/x-www-form-urlencoded
- *              que contiene [phone first_name last_name email], y crea un nuevo
+ *              que contiene [phone first_name last_name email address company 
+ *              notes status cell_phone home_phone fax1 fax2 province city 
+ *              company_contact contact_rol], y crea un nuevo
  *              contacto para el usuario.
  *  /ContactList/internal/XXXX application/json
  *      GET     reporta la información del contacto externo cuyo ID de base de 
  *              datos es XXXX.
- *      PUT     actualiza la información del contacto externo con [phone 
- *              first_name last_name email]
+ *      PUT     actualiza la información del contacto externo XXXX con [phone 
+ *              first_name last_name email address company notes status cell_phone
+ *              home_phone fax1 fax2 province city company_contact contact_rol]
  *      DELETE  borra el contacto externo
  */
 
@@ -180,12 +183,25 @@ class ExternalContactList extends ContactListResource
     	}
 
         $pCore_AddressBook = new core_AddressBook();
-        $phone = (isset($_POST["phone"])) ? $_POST["phone"] : NULL;
-        $first_name = (isset($_POST["first_name"])) ? $_POST["first_name"] : NULL;
-        $last_name = (isset($_POST["last_name"])) ? $_POST["last_name"] : NULL;
-        $email = (isset($_POST["email"])) ? $_POST["email"] : NULL;
+
+        $phone 		 = (isset($_POST["phone"])) 	      ? $_POST["phone"] 	  : NULL;
+        $first_name 	 = (isset($_POST["first_name"]))      ? $_POST["first_name"] 	  : NULL;
+        $last_name 	 = (isset($_POST["last_name"]))       ? $_POST["last_name"] 	  : NULL;
+        $address 	 = (isset($_POST["address"])) 	      ? $_POST["address"] 	  : NULL;
+	$company 	 = (isset($_POST["company"])) 	      ? $_POST["company"] 	  : NULL;
+	$email 		 = (isset($_POST["email"])) 	      ? $_POST["email"] 	  : NULL;
+	$notes 	 	 = (isset($_POST["notes"])) 	      ? $_POST["notes"] 	  : NULL;
+	$status 	 = (isset($_POST["status"])) 	      ? $_POST["status"] 	  : NULL;
+	$cell_phone 	 = (isset($_POST["cell_phone"]))      ? $_POST["cell_phone"] 	  : NULL;
+	$home_phone 	 = (isset($_POST["home_phone"]))      ? $_POST["home_phone"] 	  : NULL;
+	$fax1 		 = (isset($_POST["fax1"])) 	      ? $_POST["fax1"] 		  : NULL;
+	$fax2 		 = (isset($_POST["fax2"])) 	      ? $_POST["fax2"] 		  : NULL;
+	$province	 = (isset($_POST["province"])) 	      ? $_POST["province"] 	  : NULL;
+	$city		 = (isset($_POST["city"])) 	      ? $_POST["city"] 		  : NULL;
+	$company_contact = (isset($_POST["company_contact"])) ? $_POST["company_contact"] : NULL;
+	$conctact_rol 	 = (isset($_POST["contact_rol"]))     ? $_POST["contact_rol"]	  : NULL;
         
-        $result = $pCore_AddressBook->addAddressBookContact($phone, $first_name, $last_name, $email, TRUE);
+        $result = $pCore_AddressBook->addAddressBookContact($phone, $first_name, $last_name, $email, TRUE, $address, $company, $notes, $status, $cell_phone, $home_phone, $fax1, $fax2, $province, $city, $company_contact, $contact_rol);
         if ($result !== FALSE) {
             Header('HTTP/1.1 201 Created');
             Header('Location: '.$this->requestURL()."/$result");

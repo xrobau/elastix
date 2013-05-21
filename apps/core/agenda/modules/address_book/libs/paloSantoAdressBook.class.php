@@ -440,5 +440,43 @@ a array with the field "total" containing the total of records.
         return false;
     }
 
+    function getLastContactInsertedId()
+    {
+	$query = "SELECT seq FROM sqlite_sequence WHERE name='contact'";
+	$result = $this->_DB->getFirstRowQuery($query);
+	if($result === FALSE){
+	    $this->errMsg = $pDB->errMsg;
+            return FALSE;
+	}
+	return $result[0];
+    }
+
+//Esta función redimensiona una imagen y la guarda. El parámetro $image contiene la ruta de la imagen a redireccionar, $width y $height son el ancho y alto original de la image, $new_width y $new_height son el nuevo ancho y alto, $format contiene el tipo de imagen (GIF,JPEG,PNG) y $destination es la ruta destino donde se guardará la imagen redimensionada, a esta ruta hay que agregar la extensión.
+    function saveResizeImage($image,$width,$height,$new_width,$new_height,$format,$destination)
+    {
+	$thumb = imagecreatetruecolor($new_width,$new_height);
+	switch($format){
+		case 1: //GIF
+			$source = imagecreatefromgif($image);
+			imagecopyresized($thumb,$source,0,0,0,0,$new_width,$new_height,$width,$height);
+			$destination .= ".gif";
+			imagegif($thumb,$destination);
+			return ".gif";
+		case 2: //JPEG
+			$source = imagecreatefromjpeg($image);
+			imagecopyresized($thumb,$source,0,0,0,0,$new_width,$new_height,$width,$height);
+			$destination .= ".jpg";
+			imagejpeg($thumb,$destination);
+			return ".jpg";
+		case 3: //PNG
+			$source = imagecreatefrompng($image);
+			imagecopyresized($thumb,$source,0,0,0,0,$new_width,$new_height,$width,$height);
+			$destination .= ".png";
+			imagepng($thumb,$destination);
+			return ".png";
+		default:
+			return FALSE;
+	}
+    }
 }
 ?>

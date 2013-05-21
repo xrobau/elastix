@@ -400,7 +400,7 @@ class core_AddressBook
      * @param   string    $email            (Optional) Email of the new contact
      * @return  boolean   True if the contact was successfully added, or false if an error exists
      */
-    function addAddressBookContact($phone, $first_name, $last_name, $email, $getIdInserted=FALSE)
+    function addAddressBookContact($phone, $first_name, $last_name, $email, $getIdInserted=FALSE, $address=NULL, $company=NULL, $notes=NULL, $status=NULL, $cell_phone=NULL, $home_phone=NULL, $fax1=NULL, $fax2=NULL, $province=NULL, $city=NULL, $company_contact=NULL, $contact_rol=NULL)
     {
         global $arrConf;
 
@@ -421,21 +421,96 @@ class core_AddressBook
             return false;
         }
 
+	if (isset($cell_phone) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $cell_phone)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid cell phone, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+
+	if (isset($home_phone) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $home_phone)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid home phone, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+
+	if (isset($fax1) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $fax1)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid fax1, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+
+	if (isset($fax2) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $fax2)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid fax2, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+
+	$arrStatus = array("isPrivate","isPublic");
+	if(!in_array($status,$arrStatus))
+		$status = "isPrivate";
+        
+	$lastId = $addressBook->getLastContactInsertedId();
+        $nextId = $lastId + 1; //TODO: Hay que tener en cuenta la posibilidad de una condición de carrera, es decir en caso de que existan dos peticiones hechas exactamente al mismo tiempo, con lo cual las dos obtendrían el mismo id y una de estas peticiones sobreescribirá la imagen enviada por la otra. (escenario muy complicado pero de todas formas posible)
+
+	if(isset($picture)){
+		$picture = base64_decode($picture);
+		file_put_contents("/tmp/image",$picture); //localización temporal de la imagen
+		$size = getimagesize("/tmp/image");
+		if(!is_array($size)){
+			$this->errMsg["fc"] = 'PARAMERROR';
+            		$this->errMsg["fm"] = 'Invalid format';
+            		$this->errMsg["fd"] = 'Invalid picture, the format of the image is incorrect';
+            		$this->errMsg["cn"] = get_class($this);
+            		return false;
+		}
+		$destination_path = "/var/www/address_book_images";
+		//Se procede a redimensionar la imagen para evitar inyección de código dentro de la imagen y luego se guarda
+                $extension = $pAddressBook->saveResizeImage("/tmp/image",$size[0],$size[1],$size[0],$size[1],$size[2],$destination_path."/$nextId");
+		//Se procede a guardar la imagen en formato thumbnail
+		$new_width = 48;
+		$new_heigth = 48;
+		$pAddressBook->saveResizeImage("/tmp/image",$size[0],$size[1],$new_width,$new_height,$size[2],$destination."/{$nextId}_thumbnail");
+		$picture = $nextId.$extension;
+		unlink("/tmp/image");
+	}
+
+	$arrStatus = array("isPrivate","isPublic");
+	if(!in_array($status,$arrStatus))
+		$status = "isPrivate";
+
         // Construir el arreglo de datos que hay que almacenar
         if (!isset($first_name)) $first_name = NULL;
         if (!isset($last_name)) $last_name = NULL;
         if (!isset($email)) $email = NULL;
+
         $data = array(
             $first_name,
             $last_name,
             $phone,
+	    $cell_phone,
+	    $home_phone,
+	    $fax1,
+	    $fax2,
             $email,
             $id_user,
-            NULL,   // picture
-            NULL,   // address
-            NULL,   // company
-            NULL,   // notes
-            'isPrivate',    // status
+            $picture,
+	    $province,
+	    $city,
+	    $address,
+	    $company,
+	    $company_contact,
+	    $contact_rol,
+	    "external",
+	    $notes,
+	    $status
         );
         $result = $addressBook->addContact($data);
         if (!$result) {
@@ -446,11 +521,13 @@ class core_AddressBook
             return false;
         }
 	if($getIdInserted)
-	    return $dbAddressBook->getLastInsertId();
+	    return $nextId;
 	else
 	    return true;
     }
 
+    //Solo se pueden actualizar los contactos internos por parte de un
+    //user que pertenezca al grupo administrador
     function updateContact($id, $phone, $first_name, $last_name, $email)
     {
 	global $arrConf;
@@ -569,7 +646,7 @@ class core_AddressBook
 	global $arrConf;
 
         if (!$this->_checkUserAuthorized('address_book')) return false;
-
+        
         $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
         $addressBook = new paloAdressBook($dbAddressBook);
 
@@ -577,7 +654,7 @@ class core_AddressBook
         $id_user = $this->_leerIdUser();
         if (is_null($id_user)) return false;
 
-        // Validar que el ID está presente y es numérico
+        // Validar que el ID estÃ¡ presente y es numÃ©rico
         if (!isset($id) || !preg_match('/^\d+$/', $id)) {
             $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid format';
@@ -585,10 +662,10 @@ class core_AddressBook
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
-	$isAdminGroup = $this->_pACL->isUserAdministratorGroup($_SERVER['PHP_AUTH_USER']);
+
         // Verificar si el contacto existe y pertenece al usuario logoneado
-        $tupla = $addressBook->contactData($id, $id_user, $directory, $isAdminGroup, $this->_astDSN);
-	if (!is_array($tupla)) {
+        $tupla = $addressBook->contactData($id, $id_user, $directory, true, $this->_astDSN);
+        if (!is_array($tupla)) {
             $this->errMsg["fc"] = 'DBERROR';
             $this->errMsg["fm"] = 'Database operation failed';
             $this->errMsg["fd"] = 'Unable to read data from external phonebook - '.$addressBook->_DB->errMsg;
@@ -596,35 +673,36 @@ class core_AddressBook
             return false;
         }
 
-	$ruta_destino = "/var/www/address_book_images";
-	$arrIm = explode(".",$tupla['picture']);
-	$typeImage = $arrIm[count($arrIm)-1];
-        $idt = ($directory=="external")?$tupla['id']:$tupla['id_on_address_book_db'];  
-	if($thumbnail=="yes"){
-	    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user_Thumbnail.png";
-	    $image = $ruta_destino."/".$idt."_Thumbnail.$typeImage";
-	}
-	else{
-	    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user.png";
-	    $image = $ruta_destino."/".$tupla['picture'];
-	}
-	if(is_file($image)){
+        $ruta_destino = "/var/www/address_book_images";
+        $arrIm = explode(".",$tupla['picture']);
+        $typeImage = $arrIm[count($arrIm)-1];
+        $idt = ($directory=="external")?$tupla['id']:$tupla['id_on_address_book_db'];
+        if($thumbnail=="yes"){
+            $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user_Thumbnail.png";
+            $image = $ruta_destino."/".$idt."_Thumbnail.$typeImage";
+        }
+        else{
+            $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/address_book/images/Icon-user.png";
+            $image = $ruta_destino."/".$tupla['picture'];
+        }
+        if(is_file($image)){
+
 	    if(strtolower($typeImage) == "png"){
-		Header("Content-type: image/png"); 
-		$im = imagecreatefromPng($image); 
-		ImagePng($im); // Mostramos la imagen 
-		ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen 
-	    }else{
-		Header("Content-type: image/jpeg"); 
-		$im = imagecreatefromJpeg($image); 
-		ImageJpeg($im); // Mostramos la imagen 
-		ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen 
-	    }
-	}else{
-	    Header("Content-type: image/png"); 
-	    $image = file_get_contents($imgDefault); 
-	    return $image;
-	}
+                Header("Content-type: image/png");
+                $im = imagecreatefromPng($image);
+                ImagePng($im); // Mostramos la imagen
+                ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen
+            }else{
+                Header("Content-type: image/jpeg");
+                $im = imagecreatefromJpeg($image);
+                ImageJpeg($im); // Mostramos la imagen
+                ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen
+            }
+        }else{
+            Header("Content-type: image/png");
+            $image = file_get_contents($imgDefault);
+            return $image;
+        }
     }
 
     /**

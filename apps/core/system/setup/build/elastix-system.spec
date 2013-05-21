@@ -47,9 +47,6 @@ rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
 mkdir -p $RPM_BUILD_ROOT/etc/dahdi
 mkdir -p $RPM_BUILD_ROOT/usr/sbin/
 
-# ** hardware_detector file ** #
-mv setup/usr/sbin/hardware_detector           $RPM_BUILD_ROOT/usr/sbin/
-
 # ** switch_wanpipe_media file ** #
 mv setup/usr/sbin/switch_wanpipe_media        $RPM_BUILD_ROOT/usr/sbin/
 rmdir setup/usr/sbin
@@ -128,12 +125,16 @@ fi
 /usr/share/elastix/module_installer/*
 /var/www/backup/automatic_backup.php
 %defattr(755, root, root)
-/usr/sbin/hardware_detector
 /usr/sbin/switch_wanpipe_media
 /usr/share/elastix/privileged/*
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Hardware Detector: move hardware_detector script to the directory
+  /usr/share/elastix/privileged/ as was done in Elastix 2.
+  SVN Rev[4979]
+
 * Mon May 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix some potential code injection vulnerabilities.
   Pointed out by Fortify report.

@@ -228,7 +228,8 @@ class PaloSantoHardwareDetection
         if($chk_dahdi_replace=="true")
             $overwrite_chan_dahdi = " -o";
 
-        exec("sudo /usr/sbin/hardware_detector $there_is_other_card $overwrite_chan_dahdi",$respuesta,$retorno);
+        $respuesta = $retorno = NULL;
+        exec("/usr/bin/elastix-helper hardware_detector $there_is_other_card $overwrite_chan_dahdi", $respuesta, $retorno);
         if(is_array($respuesta)){
             foreach($respuesta as $key => $linea){
                 //falta validar algun error

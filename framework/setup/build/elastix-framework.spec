@@ -20,6 +20,7 @@ Conflicts: elastix-system <= 3.0.0-2
 Conflicts: elastix-callcenter <= 2.0.0-16
 Conflicts: elastix-pbx <= 2.2.0-16
 Conflicts: elastix-fax <= 2.2.0-5 
+Conflicts: elastix-email_admin <= 3.0.0-2
 Conflicts: kernel-module-dahdi
 Conflicts: kernel-module-rhino
 Conflicts: kernel-module-wanpipe
@@ -310,6 +311,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: remove all dangerous commands from sudoers as was done for
+  Elastix 2. Conflicts with elastix-email_admin-3.0.0-2.
+  SVN Rev[4985]
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: remove several opportunities for command injection in 
   paloSantoOrganization, paloSantoAsterisk, paloSantoPBX. Pointed out by Fortify

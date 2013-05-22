@@ -299,6 +299,9 @@ fi
 
 %changelog
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: add missing check for IPv4 address format.
+  Pointed out by Fortify report.
+  SVN Rev[4999]
 - FIXED: Batch of Endpoints: remove unnecessary and risky copy of uploaded file.
   Pointed out by Fortify report.
   SVN Rev[4998] 

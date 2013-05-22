@@ -546,17 +546,13 @@ function obtainResultOperationRate($smarty, $module_name, $local_templates_dir, 
         }else{
             if(is_uploaded_file($_FILES['importcsv']['tmp_name']))
             {
-                $ruta_archivo = "/tmp/".$_FILES['importcsv']['name'];
-                copy($_FILES['importcsv']['tmp_name'], $ruta_archivo);
-
                 $arrTrunks = $pBillingRates->getTrunks($pDB2); //obtain the trunks for billing
                 $arrForm = createFormNew($arrLang, $arrTrunks);
                 $oForm = new paloForm($smarty,$arrForm);
     
-                $contenido_archivo=file($ruta_archivo);
                 //$count=0;
                 $row = 1;
-                if ($handle = fopen($ruta_archivo, "r")) {
+                if ($handle = fopen($_FILES['importcsv']['tmp_name'], "r")) {
                     $rate_val = fgetcsv($handle, 4096);
                     //Linea 1 header ignorada
                     //Desde linea 2 son datos

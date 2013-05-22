@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Billing Rates: remove unnecessary and risky copy of uploaded file, and
+  remove unnecessary load of same file via file() which was left unused. Pointed
+  out by Fortify report.
+  SVN Rev[4997]
+
 * Thu May 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Missed Calls: reimplement SQL query in order to substantially reduce
   the number of records that must be examined by PHP code before generating the

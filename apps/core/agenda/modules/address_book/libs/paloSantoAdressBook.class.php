@@ -158,7 +158,7 @@ a array with the field "total" containing the total of records.
 
     function addContact($data)
     {
-        $queryInsert = "insert into contact(name,last_name,telefono,cell_phone,home_phone,fax1,fax2,email,iduser,picture,province,city,address,company,company_contact,contact_rol,directory,notes,status) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $queryInsert = "insert into contact(name,last_name,telefono,cell_phone,home_phone,fax1,fax2,email,iduser,picture,province,city,address,company,company_contact,contact_rol,directory,notes,status,department,im) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $result = $this->_DB->genQuery($queryInsert, $data);
         //echo $this->_DB->errMsg;
         return $result;
@@ -174,10 +174,10 @@ a array with the field "total" containing the total of records.
 
     function updateContact($data,$id)
     {
-        $queryUpdate = "update contact set name=?, last_name=?, telefono=?, cell_phone=?, home_phone=?, fax1=?, fax2=?, email=?, iduser=?, picture=?, province=?, city=?, address=?, company=?, company_contact=?, contact_rol=?, directory=?, notes=?, status=?  where id=?";
+        $queryUpdate = "update contact set name=?, last_name=?, telefono=?, cell_phone=?, home_phone=?, fax1=?, fax2=?, email=?, iduser=?, picture=?, province=?, city=?, address=?, company=?, company_contact=?, contact_rol=?, directory=?, notes=?, status=?, department=?, im=? where id=?";
 	$data[] = $id;
         $result = $this->_DB->genQuery($queryUpdate, $data);
-
+        //echo $this->_DB->errMsg;
         return $result;
     }
 
@@ -383,6 +383,8 @@ a array with the field "total" containing the total of records.
                     $device['notes']         = isset($arrContact[$device['id']]['notes'])?$arrContact[$device['id']]['notes']:"";
                     $device['picture']       = isset($arrContact[$device['id']]['picture'])?$arrContact[$device['id']]['picture']:"";
                     $device['status']        = "isPublic";
+                    $device['department']    = isset($arrContact[$device['id']]['department'])?$arrContact[$device['id']]['department']:"";
+                    $device['im']            = isset($arrContact[$device['id']]['im'])?$arrContact[$device['id']]['im']:"";
                     $device['directory']     = "internal";
                     $device['exists_on_address_book_db'] = isset($arrContact[$device['id']])?true:false;
                     $device['id_on_address_book_db']     = isset($arrContact[$device['id']]['id'])?$arrContact[$device['id']]['id']:false;

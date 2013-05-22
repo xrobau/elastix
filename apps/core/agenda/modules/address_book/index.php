@@ -330,7 +330,7 @@ function new_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pDB
     $smarty->assign("AboutContacts", $arrLang["About Address Book"]);
 
 
-    $padress_book = new paloAdressBook($pDB);
+    //$padress_book = new paloAdressBook($pDB);
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/new_adress_book.tpl", $arrLang["Address Book"], $_POST);
 
@@ -565,6 +565,12 @@ function createFieldForm($arrLang, $directory)
                                             "INPUT_EXTRA_PARAM"     => ($directory=='external')?"":array("disabled" => "disabled","readonly" => "readonly"),
                                             "VALIDATION_TYPE"       => "ereg",
                                             "VALIDATION_EXTRA_PARAM"=> "^[\*|#]*[[:digit:]]*$"),
+                "department"    => array(   "LABEL"                 => _tr("Department"),
+                                            "REQUIRED"              => "no",
+                                            "INPUT_TYPE"            => "TEXT",
+                                            "INPUT_EXTRA_PARAM"     => array("style" => "width:300px;"),
+                                            "VALIDATION_TYPE"       => "text",
+                                            "VALIDATION_EXTRA_PARAM"=> ""),
                 "cell_phone"    => array(   "LABEL"                 => _tr("Cell Phone Number (SMS)"),
                                             "REQUIRED"              => "no",
                                             "INPUT_TYPE"            => "TEXT",
@@ -593,6 +599,12 @@ function createFieldForm($arrLang, $directory)
                                             "REQUIRED"              => "no",
                                             "INPUT_TYPE"            => "TEXT",
                                             "INPUT_EXTRA_PARAM"     => ($directory=='external')?array("style" => "width:300px;"):array("disabled" => "disabled","readonly" => "readonly","style" => "width:300px;"),
+                                            "VALIDATION_TYPE"       => "ereg",
+                                            "VALIDATION_EXTRA_PARAM"=> "([[:alnum:]]|.|_|-){1,}@([[:alnum:]]|.|_|-){1,}"),
+                "im"            => array(   "LABEL"                 => _tr("Address IM (XMPP, Openfire)"),
+                                            "REQUIRED"              => "no",
+                                            "INPUT_TYPE"            => "TEXT",
+                                            "INPUT_EXTRA_PARAM"     => array("style" => "width:300px;"),
                                             "VALIDATION_TYPE"       => "ereg",
                                             "VALIDATION_EXTRA_PARAM"=> "([[:alnum:]]|.|_|-){1,}@([[:alnum:]]|.|_|-){1,}"),
                 "picture"   => array(      "LABEL"                  => $arrLang["picture"],
@@ -625,13 +637,13 @@ function createFieldForm($arrLang, $directory)
                                             "INPUT_EXTRA_PARAM"     => array("style" => "width:300px;"),
                                             "VALIDATION_TYPE"       => "text",
                                             "VALIDATION_EXTRA_PARAM"=> ""),
-                "company_contact" => array( "LABEL"                 => _tr("Contact person in your Company"),
+                "company_contact" => array( "LABEL"                 => ($directory=='external')?_tr("Contact person in your Company"):_tr("Manager"),
                                             "REQUIRED"              => "no",
                                             "INPUT_TYPE"            => "TEXT",
                                             "INPUT_EXTRA_PARAM"     => array("style" => "width:300px;"),
                                             "VALIDATION_TYPE"       => "text",
                                             "VALIDATION_EXTRA_PARAM"=> ""),
-                "contact_rol" => array(     "LABEL"                 => _tr("Contact person's current position"),
+                "contact_rol" => array(     "LABEL"                 => ($directory=='external')?_tr("Contact person's current position"):_tr("Current position"),
                                             "REQUIRED"              => "no",
                                             "INPUT_TYPE"            => "TEXT",
                                             "INPUT_EXTRA_PARAM"     => array("style" => "width:300px;"),
@@ -814,6 +826,8 @@ function save_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pD
         $namedb = $last_namedb = $emaildb = "";
         $statusdb = "isPublic";
         $telefonodb = $idPost;
+        $departmentdb = $imdb = "";
+        
         if($directory=="external"){
             $namedb       = isset($_POST['name'])?$_POST['name']:"";
             $last_namedb  = isset($_POST['last_name'])?$_POST['last_name']:"";
@@ -821,6 +835,11 @@ function save_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pD
             $statusdb     = isset($_POST['address_book_status'])?$_POST['address_book_status']:"";
             $emaildb      = isset($_POST['email'])?$_POST['email']:"";
         }
+        else if($directory=="internal"){
+            $departmentdb = isset($_POST['department'])?$_POST['department']:"";
+            $imdb         = isset($_POST['im'])?$_POST['im']:"";
+        }
+        
         $cellphonedb  = isset($_POST['cell_phone'])?$_POST['cell_phone']:"";
         $homephonedb  = isset($_POST['home_phone'])?$_POST['home_phone']:"";
         $fax1db       = isset($_POST['fax1'])?$_POST['fax1']:"";
@@ -837,7 +856,7 @@ function save_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pD
         $notesdb      = isset($_POST['notes'])?$_POST['notes']:"";
         
         $data = array($namedb, $last_namedb, $telefonodb, $cellphonedb, $homephonedb, $fax1db, $fax2db, $emaildb, $iduserdb, 
-            $picturedb, $provincedb, $citydb, $addressdb, $companydb, $company_contactdb, $contact_roldb, $directorydb, $notesdb, $statusdb);
+            $picturedb, $provincedb, $citydb, $addressdb, $companydb, $company_contactdb, $contact_roldb, $directorydb, $notesdb, $statusdb, $departmentdb, $imdb);
         if($update && isset($contactData['id'])){ // actualizacion del contacto
             if($contactData){
                 if($file_upload == ""){
@@ -1017,6 +1036,8 @@ function view_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pD
     $arrData['notes']         = isset($_POST['notes'])?$_POST['notes']:$contactData['notes'];
     $arrData['picture']       = isset($_POST['picture'])?$_POST['picture']:$contactData['picture'];
     $arrData['status']        = isset($_POST['status'])?$_POST['status']:$contactData['status'];
+    $arrData['department']    = isset($_POST['department'])?$_POST['department']:$contactData['department'];
+    $arrData['im']            = isset($_POST['im'])?$_POST['im']:$contactData['im'];
 
     $smarty->assign("ShowImg",1);
     $htmlForm = $oForm->fetchForm("$local_templates_dir/new_adress_book.tpl",  $arrLang["Address Book"], $arrData);

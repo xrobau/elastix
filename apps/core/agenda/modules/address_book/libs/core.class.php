@@ -541,7 +541,7 @@ class core_AddressBook
         $id_user = $this->_leerIdUser();
         if (is_null($id_user)) return false;
 
-	$contactData = $addressBook->contactData($id,$id_user);
+	$contactData = $addressBook->contactData($id,$id_user,$directory, true, $dsnAsterisk);
 	if(!is_array($contactData) || count($contactData) == 0){
 	    $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid id contact';

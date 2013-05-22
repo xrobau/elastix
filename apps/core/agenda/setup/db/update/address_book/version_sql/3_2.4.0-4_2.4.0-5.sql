@@ -1,0 +1,4 @@
+BEGIN TRANSACTION;
+ALTER TABLE contact ADD COLUMN department varchar(100);
+ALTER TABLE contact ADD COLUMN im varchar(100);
+COMMIT;

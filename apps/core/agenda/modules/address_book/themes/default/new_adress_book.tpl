@@ -51,7 +51,13 @@
                             <tr id='tr_phone'>
                                 <td align="left" width="25%"><b>{$work_phone.LABEL}: {if ($mode ne 'view') and ($TYPE ne 'internal') }<span id="span_phone" class="required">*</span>{/if}</b></td>
                                 <td class="required" align="left">{$work_phone.INPUT}</td>             
-                            </tr>                            
+                            </tr>       
+                            {if $TYPE eq 'internal'}
+                                <tr>
+                                    <td align="left" width="25%"><b>{$department.LABEL}: </b></td>
+                                    <td class="required" align="left">{$department.INPUT}</td>
+                                </tr>
+                            {/if}
                             <tr id='tr_phone'>
                                 <td align="left" width="25%"><b>{$cell_phone.LABEL}: </b></td>
                                 <td align="left">{$cell_phone.INPUT}</td>
@@ -72,6 +78,12 @@
                                 <td align="left"><b>{$email.LABEL}: </b></td>
                                 <td align="left">{$email.INPUT}</td>
                             </tr>
+                            {if $TYPE eq 'internal'}
+                                <tr>
+                                    <td align="left" width="25%"><b>{$im.LABEL}: </b></td>
+                                    <td class="required" align="left">{$im.INPUT}</td>
+                                </tr>
+                            {/if}
                             <tr>
                                 <td align="left"><b>{$province.LABEL}: </b></td>
                                 <td align="left">{$province.INPUT}</td>

@@ -93,5 +93,9 @@ $arrLangModule=array(
 "City" => "Ciudad",
 "Contact person's current position" => "Cargo del contacto",
 "Contact person in your Company" => "Contacto en la compañia",    
+"Department" => "Departamento",
+"Address IM (XMPP, Openfire)" => "Dirección IM (XMPP, Openfire)",
+"Manager" => "Responsable",
+"Current position" => "Cargo",
 );
 ?>

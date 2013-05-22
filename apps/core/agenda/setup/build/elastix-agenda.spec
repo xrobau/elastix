@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: remove unnecessary and risky copy of uploaded file. Pointed out
+  by Fortify report.
+  SVN Rev[4998] 
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: check that event ID is numeric before saving it. Pointed
   out by Fortify report.

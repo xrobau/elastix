@@ -117,10 +117,8 @@ function load_endpoint($smarty, $module_name, $local_templates_dir, $arrLang, $a
         $smarty->assign("mb_message", _tr("Invalid file extension.- It must be csv"));
     }else {
         if(is_uploaded_file($_FILES['file']['tmp_name'])) {
-            $ruta_archivo = "/tmp/".$_FILES['file']['name'];
-            copy($_FILES['file']['tmp_name'], $ruta_archivo);
             //Funcion para cargar los endpoints
-            load_endpoint_from_csv($smarty, $arrLang, $ruta_archivo, $base_dir, $dsnAsterisk, $dsnSqlite, $module_name, $local_templates_dir, $arrConf);
+            load_endpoint_from_csv($smarty, $arrLang, $_FILES['file']['tmp_name'], $base_dir, $dsnAsterisk, $dsnSqlite, $module_name, $local_templates_dir, $arrConf);
         }else {
             $smarty->assign("mb_title", _tr("Error"));
             $smarty->assign("mb_message", _tr("Possible file upload attack. Filename") ." :". $_FILES['file']['name']);

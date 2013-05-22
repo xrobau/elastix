@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Batch of Endpoints: remove unnecessary and risky copy of uploaded file.
+  Pointed out by Fortify report.
+  SVN Rev[4998] 
+
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Asterisk CLI: rewrite to use escapeshellarg properly instead of
   reimplementing special character filtering. Remove bogus unused library.

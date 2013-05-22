@@ -135,10 +135,8 @@ function save_csv($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $ar
         $smarty->assign("mb_message", $arrLang["Invalid file extension.- It must be csv"]);
     }else {
         if(is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-            $ruta_archivo = "/tmp/".$_FILES['userfile']['name'];
-            copy($_FILES['userfile']['tmp_name'], $ruta_archivo);
             //Funcion para cargar las extensiones
-            load_address_book_from_csv($smarty, $arrLang, $ruta_archivo, $pDB, $pDB_2);
+            load_address_book_from_csv($smarty, $arrLang, $_FILES['userfile']['tmp_name'], $pDB, $pDB_2);
         }else {
             $smarty->assign("mb_title", $arrLang["Error"]);
             $smarty->assign("mb_message", $arrLang["Possible file upload attack. Filename"] ." :". $_FILES['userfile']['name']);

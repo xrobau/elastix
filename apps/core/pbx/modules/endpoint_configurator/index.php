@@ -507,10 +507,15 @@ function validateParameterEndpoint($arrParameters, $module_name, $dsnAsterisk, $
                 $tmpModel        = $arrParameters["id_model_device_$tmpMac"];
                 $tmpVendor       = $arrParameters["name_vendor_device_$tmpMac"];
                 $tmpidVendor     = $arrParameters["id_vendor_device_$tmpMac"];
+                $tmpIpAddress    = $arrParameters["ip_adress_endpoint_$tmpMac"];
                 $tmpModelsVendor = $paloEndPoint->getAllModelsVendor($tmpVendor);
                 if(!array_key_exists($tmpModel,$tmpModelsVendor))
                     $error .= "The model entered does not exist or does not belong to this vendor. <br />";
-					  
+                
+                if (!preg_match('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/', $tmpIpAddress)) {
+                    $error .= "Invalid IP address. <br />";
+                }
+                
                 if ($tmpVendor == "Elastix") 
 		        {
 		            $endpointElastix = $paloEndPoint->getVendorByName("Grandstream");

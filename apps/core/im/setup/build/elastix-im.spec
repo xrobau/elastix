@@ -63,6 +63,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thy May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: im: hardcode IP and port for openfire redirect instead of picking them
+  from GET parameters. Pointed out by Fortify report.
+  SVN Rev[5002]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

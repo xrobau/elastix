@@ -363,6 +363,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: pbxadmin: remove entire module folder. This module is a wrapper for
+  freePBX which was removed in Elastix 3.
+  SVN Rev[5003]
+
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: add missing check for IPv4 address format.
   Pointed out by Fortify report.

@@ -461,7 +461,7 @@ class core_AddressBook
 	$lastId = $addressBook->getLastContactInsertedId();
         $nextId = $lastId + 1; //TODO: Hay que tener en cuenta la posibilidad de una condición de carrera, es decir en caso de que existan dos peticiones hechas exactamente al mismo tiempo, con lo cual las dos obtendrían el mismo id y una de estas peticiones sobreescribirá la imagen enviada por la otra. (escenario muy complicado pero de todas formas posible)
 
-	if(isset($picture)){
+	if(isset($picture) && $picture!=""){
 		$picture = base64_decode($picture);
                 $tmpname = "/tmp/image".time();
 		file_put_contents($tmpname,$picture); //localización temporal de la imagen
@@ -607,7 +607,7 @@ class core_AddressBook
             return false;
         }
         
-        if(isset($picture)){
+        if(isset($picture) && $picture!=""){
 		$picture = base64_decode($picture);
                 $tmpname = "/tmp/image".time();
 		file_put_contents($tmpname,$picture); //localización temporal de la imagen

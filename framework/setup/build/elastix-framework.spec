@@ -306,6 +306,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: do not echo back the invalid e-mail address to prevent XSS.
+  Pointed out by Fortify report.
+  SVN Rev[5007]
 - FIXED: Framework: escape id_nodo, name_nodo in main help system. Pointed out
   by Fortify report.
   SVN Rev[5005]

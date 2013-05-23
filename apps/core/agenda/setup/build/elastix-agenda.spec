@@ -109,7 +109,7 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
-* Thu May 24 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+* Thu May 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
 

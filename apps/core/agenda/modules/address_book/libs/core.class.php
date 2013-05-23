@@ -400,7 +400,7 @@ class core_AddressBook
      * @param   string    $email            (Optional) Email of the new contact
      * @return  boolean   True if the contact was successfully added, or false if an error exists
      */
-    function addAddressBookContact($phone, $first_name, $last_name, $email, $getIdInserted=FALSE, $address=NULL, $company=NULL, $notes=NULL, $status=NULL, $cell_phone=NULL, $home_phone=NULL, $fax1=NULL, $fax2=NULL, $province=NULL, $city=NULL, $company_contact=NULL, $contact_rol=NULL)
+    function addAddressBookContact($phone, $first_name, $last_name, $email, $getIdInserted=FALSE, $address=NULL, $company=NULL, $notes=NULL, $status=NULL, $cell_phone=NULL, $home_phone=NULL, $fax1=NULL, $fax2=NULL, $province=NULL, $city=NULL, $company_contact=NULL, $contact_rol=NULL, $picture=NULL)
     {
         global $arrConf;
 
@@ -412,6 +412,7 @@ class core_AddressBook
         // Obtener el ID del usuario logoneado
         $id_user = $this->_leerIdUser();
         if (is_null($id_user)) return false;
+        
         // Validar que el teléfono está presente y es numérico
         if (!isset($phone) || !preg_match('/^\d+$/', $phone)) {
             $this->errMsg["fc"] = 'PARAMERROR';
@@ -421,7 +422,7 @@ class core_AddressBook
             return false;
         }
 
-	if (isset($cell_phone) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $cell_phone)) {
+	if (isset($cell_phone) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $cell_phone)) {
             $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid format';
             $this->errMsg["fd"] = 'Invalid cell phone, it must be a numeric string and can only contain at the beginning * or #';
@@ -429,7 +430,7 @@ class core_AddressBook
             return false;
         }
 
-	if (isset($home_phone) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $home_phone)) {
+	if (isset($home_phone) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $home_phone)) {
             $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid format';
             $this->errMsg["fd"] = 'Invalid home phone, it must be a numeric string and can only contain at the beginning * or #';
@@ -437,7 +438,7 @@ class core_AddressBook
             return false;
         }
 
-	if (isset($fax1) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $fax1)) {
+	if (isset($fax1) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $fax1)) {
             $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid format';
             $this->errMsg["fd"] = 'Invalid fax1, it must be a numeric string and can only contain at the beginning * or #';
@@ -445,7 +446,7 @@ class core_AddressBook
             return false;
         }
 
-	if (isset($fax2) && !preg_match('/^[\*|#]*[[:Digit:]]*$/', $fax2)) {
+	if (isset($fax2) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $fax2)) {
             $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid format';
             $this->errMsg["fd"] = 'Invalid fax2, it must be a numeric string and can only contain at the beginning * or #';
@@ -462,8 +463,9 @@ class core_AddressBook
 
 	if(isset($picture)){
 		$picture = base64_decode($picture);
-		file_put_contents("/tmp/image",$picture); //localización temporal de la imagen
-		$size = getimagesize("/tmp/image");
+                $tmpname = "/tmp/image".time();
+		file_put_contents($tmpname,$picture); //localización temporal de la imagen
+		$size = getimagesize($tmpname);
 		if(!is_array($size)){
 			$this->errMsg["fc"] = 'PARAMERROR';
             		$this->errMsg["fm"] = 'Invalid format';
@@ -473,13 +475,13 @@ class core_AddressBook
 		}
 		$destination_path = "/var/www/address_book_images";
 		//Se procede a redimensionar la imagen para evitar inyección de código dentro de la imagen y luego se guarda
-                $extension = $pAddressBook->saveResizeImage("/tmp/image",$size[0],$size[1],$size[0],$size[1],$size[2],$destination_path."/$nextId");
+                $extension = $addressBook->saveResizeImage($tmpname,$size[0],$size[1],$size[0],$size[1],$size[2],$destination_path."/$nextId");
 		//Se procede a guardar la imagen en formato thumbnail
 		$new_width = 48;
-		$new_heigth = 48;
-		$pAddressBook->saveResizeImage("/tmp/image",$size[0],$size[1],$new_width,$new_height,$size[2],$destination."/{$nextId}_thumbnail");
+		$new_height = 48;
+		$addressBook->saveResizeImage($tmpname,$size[0],$size[1],$new_width,$new_height,$size[2],$destination_path."/{$nextId}_Thumbnail");
 		$picture = $nextId.$extension;
-		unlink("/tmp/image");
+		unlink($tmpname);
 	}
 
 	$arrStatus = array("isPrivate","isPublic");
@@ -510,7 +512,9 @@ class core_AddressBook
 	    $contact_rol,
 	    "external",
 	    $notes,
-	    $status
+	    $status,
+            NULL,
+            NULL
         );
         $result = $addressBook->addContact($data);
         if (!$result) {
@@ -528,12 +532,14 @@ class core_AddressBook
 
     //Solo se pueden actualizar los contactos internos por parte de un
     //user que pertenezca al grupo administrador
-    function updateContact($id, $phone, $first_name, $last_name, $email)
+    function updateContact($id, $phone, $first_name, $last_name, $email=NULL, $address=NULL, $company=NULL, $notes=NULL, $status=NULL, $cell_phone=NULL, $home_phone=NULL, $fax1=NULL, $fax2=NULL, $province=NULL, $city=NULL, $company_contact=NULL, $contact_rol=NULL, $picture=NULL, $addressBookType="external")
     {
 	global $arrConf;
 
         if (!$this->_checkUserAuthorized('address_book')) return false;
 
+        $isAdminGroup = $this->_getACL()->isUserAdministratorGroup($_SERVER['PHP_AUTH_USER']);
+        
         $dbAddressBook = $this->_getDB($arrConf['dsn_conn_database']);
         $addressBook = new paloAdressBook($dbAddressBook);
 
@@ -541,7 +547,17 @@ class core_AddressBook
         $id_user = $this->_leerIdUser();
         if (is_null($id_user)) return false;
 
-	$contactData = $addressBook->contactData($id,$id_user,$directory, true, $dsnAsterisk);
+        // Elegir entre la agenda interna y externa
+        if (!isset($addressBookType) || 
+            !in_array($addressBookType, array('internal', 'external'))) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Unrecognized address book type, must be internal or external';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+        
+	$contactData = $addressBook->contactData($id,$id_user,$addressBookType, $isAdminGroup, $this->_astDSN);
 	if(!is_array($contactData) || count($contactData) == 0){
 	    $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid id contact';
@@ -550,7 +566,8 @@ class core_AddressBook
             return false;
 	}
 
-	if (isset($phone) && !preg_match('/^\d+$/', $phone)) {
+	// Validar que el teléfono está presente y es numérico
+        if (!isset($phone) || !preg_match('/^\d+$/', $phone)) {
             $this->errMsg["fc"] = 'PARAMERROR';
             $this->errMsg["fm"] = 'Invalid format';
             $this->errMsg["fd"] = 'Invalid phone, must be numeric string';
@@ -558,21 +575,105 @@ class core_AddressBook
             return false;
         }
 
-	$first_name = (isset($first_name))?$first_name:$contactData["name"];
-	$last_name = (isset($last_name))?$last_name:$contactData["last_name"];
-	$phone = (isset($phone))?$phone:$contactData["telefono"];
-	$email = (isset($email))?$email:$contactData["email"];
+	if (isset($cell_phone) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $cell_phone)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid cell phone, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+
+	if (isset($home_phone) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $home_phone)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid home phone, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+
+	if (isset($fax1) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $fax1)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid fax1, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+
+	if (isset($fax2) && !preg_match('/^[\*|#]*[[:digit:]]*$/', $fax2)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid format';
+            $this->errMsg["fd"] = 'Invalid fax2, it must be a numeric string and can only contain at the beginning * or #';
+            $this->errMsg["cn"] = get_class($this);
+            return false;
+        }
+        
+        if(isset($picture)){
+		$picture = base64_decode($picture);
+                $tmpname = "/tmp/image".time();
+		file_put_contents($tmpname,$picture); //localización temporal de la imagen
+		$size = getimagesize($tmpname);
+		if(!is_array($size)){
+			$this->errMsg["fc"] = 'PARAMERROR';
+            		$this->errMsg["fm"] = 'Invalid format';
+            		$this->errMsg["fd"] = 'Invalid picture, the format of the image is incorrect';
+            		$this->errMsg["cn"] = get_class($this);
+            		return false;
+		}
+		$destination_path = "/var/www/address_book_images";
+		//Se procede a redimensionar la imagen para evitar inyección de código dentro de la imagen y luego se guarda
+                $extension = $addressBook->saveResizeImage($tmpname,$size[0],$size[1],$size[0],$size[1],$size[2],$destination_path."/$id");
+		//Se procede a guardar la imagen en formato thumbnail
+		$new_width = 48;
+		$new_height = 48;
+		$addressBook->saveResizeImage($tmpname,$size[0],$size[1],$new_width,$new_height,$size[2],$destination_path."/{$id}_Thumbnail");
+		$picture = $id.$extension;
+		unlink($tmpname);
+	}
+        else
+            $picture = $contactData["picture"];
+
+	$arrStatus = array("isPrivate","isPublic");
+	if(!in_array($status,$arrStatus))
+		$status = $contactData["status"];
+        
+        $first_name 	 = (isset($first_name))      ? $first_name      : $contactData["name"];
+        $last_name 	 = (isset($last_name))       ? $last_name       : $contactData["last_name"];
+        $work_phone	 = (isset($phone)) 	     ? $phone 	        : $contactData["telefono"];
+	$cell_phone 	 = (isset($cell_phone))      ? $cell_phone      : $contactData["cell_phone"];
+	$home_phone 	 = (isset($home_phone))      ? $home_phone      : $contactData["home_phone"];
+	$fax1 		 = (isset($fax1)) 	     ? $fax1            : $contactData["fax1"];
+	$fax2 		 = (isset($fax2)) 	     ? $fax2 	        : $contactData["fax2"];
+        $email 		 = (isset($email)) 	     ? $email 	        : $contactData["email"];
+        $province	 = (isset($province))        ? $province 	: $contactData["province"];
+	$city		 = (isset($city)) 	     ? $city 	        : $contactData["city"];
+        $address 	 = (isset($address))         ? $address 	: $contactData["address"];
+	$company 	 = (isset($company)) 	     ? $company 	: $contactData["company"];
+        $company_contact = (isset($company_contact)) ? $company_contact : $contactData["company_contact"];
+	$contact_rol  	 = (isset($contact_rol))     ? $contact_rol     : $contactData["contact_rol"];
+    	$notes 	 	 = (isset($notes)) 	     ? $notes 	        : $contactData["notes"];
+        
 	$data = array(
             $first_name,
             $last_name,
             $phone,
+	    $cell_phone,
+	    $home_phone,
+	    $fax1,
+	    $fax2,
             $email,
             $id_user,
-            $contactData["picture"],   // picture
-            $contactData["address"],   // address
-            $contactData["company"],   // company
-            $contactData["notes"],   // notes
-            $contactData["status"],    // status
+            $picture,
+	    $province,
+	    $city,
+	    $address,
+	    $company,
+	    $company_contact,
+	    $contact_rol,
+	    "external",
+	    $notes,
+	    $status,
+            NULL,
+            NULL
         );
 	$result = $addressBook->updateContact($data,$id);
 	if (!$result) {
@@ -613,9 +714,9 @@ class core_AddressBook
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
-
+               
         // Verificar si el contacto existe y pertenece al usuario logoneado
-        $tupla = $addressBook->contactData($id, $id_user);
+        $tupla = $addressBook->contactData($id, $id_user, "external", false, NULL);
         if (!is_array($tupla)) {
             $this->errMsg["fc"] = 'DBERROR';
             $this->errMsg["fm"] = 'Database operation failed';
@@ -633,10 +734,15 @@ class core_AddressBook
         }
 
         // Borrar el contacto indicado
-        $addressBook->deleteContact($id, $id_user);
-        if (isset($tupla['picture']) && $tupla['picture'] != '' && 
-            file_exists('/var/www/address_book_images/'.$tupla['picture'])) {
-            unlink('/var/www/address_book_images/'.$tupla['picture']);
+        $result = $addressBook->deleteContact($id, $id_user);
+        if($tupla['picture']!="" && isset($tupla['picture'])){
+            if('/var/www/address_book_images/'.$tupla['picture'])
+                unlink('/var/www/address_book_images/'.$tupla['picture']);
+
+            $arrIm = explode(".",$tupla['picture']);
+            $typeImage = $arrIm[count($arrIm)-1];
+            if(is_file("/var/www/address_book_images/{$id}_Thumbnail.{$typeImage}"))
+                unlink("/var/www/address_book_images/{$id}_Thumbnail.{$typeImage}");
         }
         return true;
     }

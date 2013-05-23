@@ -912,18 +912,23 @@ function deleteContact($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2
     $ruta_destino = "/var/www/address_book_images/";
     $pACL         = new paloACL($pDB_2);
     $id_user      = $pACL->getIdUser($_SESSION["elastix_user"]);
-    $isAdminGroup = $pACL->isUserAdministratorGroup($_SESSION["elastix_user"]);
-    $result = "";
+    $result       = "";
+    
     foreach($_POST as $key => $values){
         if(substr($key,0,8) == "contact_")
         {
             $tmpBookID = substr($key, 8);
-            if($padress_book->isEditablePublicContact($tmpBookID, $id_user, "external", $isAdminGroup, $dsnAsterisk)){
-                $contactTmp = $padress_book->contactData($tmpBookID, $id_user,"external", $isAdminGroup, $dsnAsterisk);
+            if($padress_book->isEditablePublicContact($tmpBookID, $id_user, "external", false, null)){
+                $contactTmp = $padress_book->contactData($tmpBookID, $id_user,"external", false, null);
                 $result = $padress_book->deleteContact($tmpBookID, $id_user);
                 if($contactTmp['picture']!="" && isset($contactTmp['picture'])){
                     if(is_file($ruta_destino."/".$contactTmp['picture']))
                         unlink($ruta_destino."/".$contactTmp['picture']);
+                    
+                    $arrIm = explode(".",$contactTmp['picture']);
+                    $typeImage = $arrIm[count($arrIm)-1];
+                    if(is_file($ruta_destino."/{$tmpBookID}_Thumbnail.{$typeImage}"))
+                        unlink($ruta_destino."/{$tmpBookID}_Thumbnail.{$typeImage}");
                 }
             }
         }

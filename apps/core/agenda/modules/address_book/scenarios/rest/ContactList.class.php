@@ -184,24 +184,28 @@ class ExternalContactList extends ContactListResource
 
         $pCore_AddressBook = new core_AddressBook();
 
-        $phone 		 = (isset($_POST["phone"])) 	      ? $_POST["phone"] 	  : NULL;
         $first_name 	 = (isset($_POST["first_name"]))      ? $_POST["first_name"] 	  : NULL;
         $last_name 	 = (isset($_POST["last_name"]))       ? $_POST["last_name"] 	  : NULL;
-        $address 	 = (isset($_POST["address"])) 	      ? $_POST["address"] 	  : NULL;
-	$company 	 = (isset($_POST["company"])) 	      ? $_POST["company"] 	  : NULL;
-	$email 		 = (isset($_POST["email"])) 	      ? $_POST["email"] 	  : NULL;
-	$notes 	 	 = (isset($_POST["notes"])) 	      ? $_POST["notes"] 	  : NULL;
-	$status 	 = (isset($_POST["status"])) 	      ? $_POST["status"] 	  : NULL;
+        $work_phone	 = (isset($_POST["phone"])) 	      ? $_POST["phone"] 	  : NULL;
 	$cell_phone 	 = (isset($_POST["cell_phone"]))      ? $_POST["cell_phone"] 	  : NULL;
 	$home_phone 	 = (isset($_POST["home_phone"]))      ? $_POST["home_phone"] 	  : NULL;
 	$fax1 		 = (isset($_POST["fax1"])) 	      ? $_POST["fax1"] 		  : NULL;
 	$fax2 		 = (isset($_POST["fax2"])) 	      ? $_POST["fax2"] 		  : NULL;
-	$province	 = (isset($_POST["province"])) 	      ? $_POST["province"] 	  : NULL;
+        $email 		 = (isset($_POST["email"])) 	      ? $_POST["email"] 	  : NULL;
+        $province	 = (isset($_POST["province"])) 	      ? $_POST["province"] 	  : NULL;
 	$city		 = (isset($_POST["city"])) 	      ? $_POST["city"] 		  : NULL;
-	$company_contact = (isset($_POST["company_contact"])) ? $_POST["company_contact"] : NULL;
-	$conctact_rol 	 = (isset($_POST["contact_rol"]))     ? $_POST["contact_rol"]	  : NULL;
+        $address 	 = (isset($_POST["address"])) 	      ? $_POST["address"] 	  : NULL;
+	$company 	 = (isset($_POST["company"])) 	      ? $_POST["company"] 	  : NULL;
+        $company_contact = (isset($_POST["company_contact"])) ? $_POST["company_contact"] : NULL;
+	$contact_rol  	 = (isset($_POST["contact_rol"]))     ? $_POST["contact_rol"]	  : NULL;
+        $picture         = (isset($_POST["picture"]))         ? $_POST["picture"]	  : NULL;
+	$notes 	 	 = (isset($_POST["notes"])) 	      ? $_POST["notes"] 	  : NULL;
+	$status 	 = (isset($_POST["status"])) 	      ? $_POST["status"] 	  : NULL;
         
-        $result = $pCore_AddressBook->addAddressBookContact($phone, $first_name, $last_name, $email, TRUE, $address, $company, $notes, $status, $cell_phone, $home_phone, $fax1, $fax2, $province, $city, $company_contact, $contact_rol);
+	
+	
+        
+        $result = $pCore_AddressBook->addAddressBookContact($work_phone, $first_name, $last_name, $email, TRUE, $address, $company, $notes, $status, $cell_phone, $home_phone, $fax1, $fax2, $province, $city, $company_contact, $contact_rol, $picture);
         if ($result !== FALSE) {
             Header('HTTP/1.1 201 Created');
             Header('Location: '.$this->requestURL()."/$result");
@@ -288,12 +292,26 @@ class ExternalContact extends Contact
         $pCore_AddressBook = new core_AddressBook();
         $putvars = NULL;
         parse_str(file_get_contents('php://input'), $putvars);
-        $phone = (isset($putvars["phone"])) ? $putvars["phone"] : NULL;
-        $first_name = (isset($putvars["first_name"])) ? $putvars["first_name"] : NULL;
-        $last_name = (isset($putvars["last_name"])) ? $putvars["last_name"] : NULL;
-        $email = (isset($putvars["email"])) ? $putvars["email"] : NULL;
         
-        $result = $pCore_AddressBook->updateContact($this->_idNumero, $phone, $first_name, $last_name, $email);
+        $first_name 	 = (isset($putvars["first_name"]))      ? $putvars["first_name"]      : NULL;
+        $last_name 	 = (isset($putvars["last_name"]))       ? $putvars["last_name"]       : NULL;
+        $work_phone	 = (isset($putvars["phone"])) 	        ? $putvars["phone"] 	      : NULL;
+	$cell_phone 	 = (isset($putvars["cell_phone"]))      ? $putvars["cell_phone"]      : NULL;
+	$home_phone 	 = (isset($putvars["home_phone"]))      ? $putvars["home_phone"]      : NULL;
+	$fax1 		 = (isset($putvars["fax1"])) 	        ? $putvars["fax1"]            : NULL;
+	$fax2 		 = (isset($putvars["fax2"])) 	        ? $putvars["fax2"] 	      : NULL;
+        $email 		 = (isset($putvars["email"])) 	        ? $putvars["email"] 	      : NULL;
+        $province	 = (isset($putvars["province"]))        ? $putvars["province"] 	      : NULL;
+	$city		 = (isset($putvars["city"])) 	        ? $putvars["city"] 	      : NULL;
+        $address 	 = (isset($putvars["address"]))         ? $putvars["address"] 	      : NULL;
+	$company 	 = (isset($putvars["company"])) 	? $putvars["company"] 	      : NULL;
+        $company_contact = (isset($putvars["company_contact"])) ? $putvars["company_contact"] : NULL;
+	$contact_rol  	 = (isset($putvars["contact_rol"]))     ? $putvars["contact_rol"]     : NULL;
+        $picture         = (isset($putvars["picture"]))         ? $putvars["picture"]	      : NULL;
+	$notes 	 	 = (isset($putvars["notes"])) 	        ? $putvars["notes"] 	      : NULL;
+	$status 	 = (isset($putvars["status"])) 	        ? $putvars["status"] 	      : NULL;
+        
+        $result = $pCore_AddressBook->updateContact($this->_idNumero, $work_phone, $first_name, $last_name, $email, $address, $company, $notes, $status, $cell_phone, $home_phone, $fax1, $fax2, $province, $city, $company_contact, $contact_rol, $picture);
         if ($result === FALSE) {
             $error = $pCore_AddressBook->getError();
             if ($error["fc"] == "DBERROR")

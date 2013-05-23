@@ -306,6 +306,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: escape id_nodo, name_nodo in main help system. Pointed out
+  by Fortify report.
+  SVN Rev[5005]
 - CHANGED: Framework: replace unserialize with implode/explode in help system.
   SVN Rev[4995]
 

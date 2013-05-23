@@ -63,6 +63,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thy May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: im: hardcode IP and port for openfire redirect instead of picking them
+  from GET parameters. Pointed out by Fortify report.
+  SVN Rev[5002]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: im - Build/elastix-im.spec: Changed Version and Release in 
   specfile according to the current branch.

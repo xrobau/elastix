@@ -88,8 +88,8 @@ foreach($arrSalida as $linea) { //obtengo el estado de openfire
     }
 }
 
-$ip = (isset($_GET['IP']))?$_GET['IP']:$_SERVER["SERVER_ADDR"];
-$port = (isset($_GET['PORT']))?$_GET['PORT']:"9090";
+$ip = $_SERVER["SERVER_ADDR"];
+$port = "9090";
 //PASO 2
 if($statusOpenfire == 'off' && isset($_GET['accion']) && $_GET['accion']=='activar') { //no activo openfire y decide activarlo
     exec("sudo /sbin/chkconfig --level 2345 openfire on",$arrSalida, $var);
@@ -108,7 +108,7 @@ if($statusOpenfire == 'off' && isset($_GET['accion']) && $_GET['accion']=='activ
     }
 }
 else if($statusOpenfire == 'off') { 
-    echo $tabla_ini.$arrLang['The service Openfire No running']."<a href='openfireWrapper.php?IP=$ip&PORT=$port&accion=activar'>".$arrLang['click here']."</a>".$tabla_fin;
+    echo $tabla_ini.$arrLang['The service Openfire No running']."<a href='openfireWrapper.php?accion=activar'>".$arrLang['click here']."</a>".$tabla_fin;
 }
 else{ //esta activo openfire
     header("Location: http://".$ip.":".$port);

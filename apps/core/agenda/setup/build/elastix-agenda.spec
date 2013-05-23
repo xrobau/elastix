@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,9 +109,24 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Thu May 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Thu May 23 2013 Bruno Macias <bmacias@palosanto.com>
+- FIXED: module address book, validation field picture on rest webservice was
+  improved, because dont validation when this was empty
+  SVN Rev[5007]
+
+* Thu May 23 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: agenda - Build/elastix-agenda.spec: It was corrected in changelog a
+  date corresponding to release 2.4.0-5
+  SVN Rev[5005]
+
 * Thu May 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5004]
 
 * Wed May 22 2013 Bruno Macias <bmacias@palosanto.com>
 - UPDATED: module address book, new fields on webservice-rest.

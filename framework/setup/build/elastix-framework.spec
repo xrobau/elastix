@@ -312,6 +312,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix incorrect validation of valid idUser in method
+  isUserAdministratorGroup.
+  SVN Rev[5001]
+
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: replace unserialize with implode/explode in help system.
   SVN Rev[4995]

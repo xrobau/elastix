@@ -925,7 +925,7 @@ INFO_AUTH_MODULO;
     {
         $is=false;
         $idUser = $this->getIdUser($username);
-        if(!is_null($idUser)){
+        if($idUser){
             $arrGroup = $this->getMembership($idUser);
             $is = array_key_exists('administrator',$arrGroup);
         }

@@ -3,7 +3,7 @@
 Summary: Elastix My Extension 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -84,18 +84,32 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Tue Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: My Extension: check that the values for record_in and record_out are
   valid before writing to the database. Fixes Elastix bug #1554.
   SVN Rev[4928]
 
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: myex_config module, help section was updated.
+  SVN Rev[4782]
+
+* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: myex_config module, help section was updated.
+  SVN Rev[4781]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: my_extension - Build/elastix-my_extension.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4641]
 
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-1
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4357]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 

@@ -298,6 +298,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: add missing check for IPv4 address format.
   Pointed out by Fortify report.
@@ -325,7 +329,8 @@ fi
 
 * Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
-  SVN history. Changed release in specfile.  
+  SVN history. Changed release in specfile. 
+  SVN Rev[4920]
 
 * Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: validate several parameters before building AMI requests

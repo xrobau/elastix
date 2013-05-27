@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -195,6 +195,10 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Remote SMTP: use SQL parameters for status update, and validate it.
   SVN Rev[4983]
@@ -208,6 +212,7 @@ fi
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4837]
 
 * Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: vacations module, help section was updated.

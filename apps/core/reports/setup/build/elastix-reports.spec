@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Rates: remove unnecessary and risky copy of uploaded file, and
   remove unnecessary load of same file via file() which was left unused. Pointed
@@ -116,6 +120,7 @@ fi
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4840]
 
 * Thu Mar 28 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: missed_calls module, help section was updated.

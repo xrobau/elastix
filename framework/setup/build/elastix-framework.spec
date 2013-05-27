@@ -312,6 +312,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 27 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: do not use HTTP_HOST to build redirects and other URLs in
+  REST services, as it is attacker-controlled. Pointed out by Fortify report.
+  SVN Rev[5010] 
+
 * Thu May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: do not echo back the invalid e-mail address to prevent XSS.
   Pointed out by Fortify report.

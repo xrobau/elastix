@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -126,6 +126,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Tue May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Weak Keys: expose database errors for later debugging.
   SVN Rev[4882]
@@ -138,6 +142,7 @@ fi
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: security - Build/elastix-security.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4816]
 
 * Mon Feb 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Firewall Rules: change layout on New Rule form to be more compatible

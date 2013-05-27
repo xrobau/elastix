@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Mon May 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix some potential code injection vulnerabilities.
   Pointed out by Fortify report.
@@ -148,6 +152,7 @@ fi
 * Thu May 02 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4878]
 
 - CHANGED: DHCP Client List: remove unnecessary call to filesize() on lease list
   file. It causes problems on a zero size lease list.

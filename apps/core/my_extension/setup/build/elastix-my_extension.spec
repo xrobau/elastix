@@ -93,11 +93,11 @@ fi
   valid before writing to the database. Fixes Elastix bug #1554.
   SVN Rev[4928]
 
-* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+* Mon Mar 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: myex_config module, help section was updated.
   SVN Rev[4782]
 
-* Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
+* Mon Mar 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: myex_config module, help section was updated.
   SVN Rev[4781]
 

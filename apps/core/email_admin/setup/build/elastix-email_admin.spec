@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -194,6 +194,10 @@ fi
 /var/www/disable_vacations.php
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Email Relay: port implementation from Elastix 2 into Elastix 3 to get
   a base implementation free from sudo chown (which no longer works).
@@ -218,6 +222,7 @@ fi
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: email_admin - Build/elastix-email_admin.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4812]
 
 * Fri Jan 18 2013 Rocio Mera <rmera@palosanto.com>
 - CHANGED: Apps - Modules/Email_Admin: Was made changing in libs

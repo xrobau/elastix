@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -124,6 +124,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: enforce single rpm per request. Fix potential limited command
   injection on addon delete. Pointed out by Fortify report.
@@ -132,6 +136,7 @@ fi
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Changed release in specfile
+  SVN Rev[4834]
 
 * Mon Apr 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: addons_availables module, help section was updated.

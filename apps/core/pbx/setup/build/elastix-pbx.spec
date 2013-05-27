@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,7 +298,7 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
-* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 

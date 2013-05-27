@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -122,6 +122,10 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: remove unnecessary and risky copy of uploaded file. Pointed out
   by Fortify report.
@@ -149,6 +153,7 @@ fi
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4810]
 
 * Wed Jan 23 2013 German Macas <gmacas@palosanto.com>
 - FIXED: modules: calendar: Fixed CallerId in calendar event and resize of

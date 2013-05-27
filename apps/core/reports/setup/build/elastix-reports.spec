@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Rates: remove unnecessary and risky copy of uploaded file, and
   remove unnecessary load of same file via file() which was left unused. Pointed
@@ -116,6 +120,7 @@ fi
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: reports - Build/elastix-reports.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4815]
 
 * Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
 - FIXED: Its no more necesary to resize the popups in certain windows of

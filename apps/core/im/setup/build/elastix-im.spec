@@ -3,7 +3,7 @@
 Summary: Elastix IM 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-%{release}.tgz
@@ -63,7 +63,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
-* Thy May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: im - Build/elastix-im.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Thu May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: im: hardcode IP and port for openfire redirect instead of picking them
   from GET parameters. Pointed out by Fortify report.
   SVN Rev[5002]

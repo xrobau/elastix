@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -207,6 +207,10 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: remove several instances of command injection vulnerabilities in 
   paloSantoFax and in privileged script. Use SQL parameters in privileged 
@@ -216,6 +220,7 @@ fi
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4813]
 
 * Fri Jan 18 2013 Rocio Mera <rmera@palosanto.com>
 - CHANGED: Apps - Modules/Fax: Was made changing in lib paloSantoFax.class.php

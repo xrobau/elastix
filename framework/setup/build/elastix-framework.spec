@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -305,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile
+
 * Mon May 27 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: do not use HTTP_HOST to build redirects and other URLs in
   REST services, as it is attacker-controlled. Pointed out by Fortify report.
@@ -330,6 +334,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4917]
 
 * Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Themes: check that selected theme is a valid name that exists in the

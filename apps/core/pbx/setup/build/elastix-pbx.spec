@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -363,6 +363,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu May 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: pbxadmin: remove entire module folder. This module is a wrapper for
   freePBX which was removed in Elastix 3.
@@ -420,6 +424,7 @@ fi
 * Wed Apr 10 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[4831]
 
 * Wed Apr 10 2013 Rocio Mera <rmera@palosanto.com>
 - CHANGED: Apps - PBX: Was made changed in module general_settings admin to

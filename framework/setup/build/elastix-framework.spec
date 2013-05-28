@@ -305,6 +305,15 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: introduce new setting 'uelastix'. This flag will be set
+  for uElastix images and absent/unset on ordinary systems. When set, the 
+  framework will enable a number of optimizations to improve performance in the
+  ARM environment. Currently setting this flag disables tracking of menu history
+  and enables caching of authorized modules in the session variable 
+  'elastix_user_permission'.
+  SVN Rev[5033]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile

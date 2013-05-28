@@ -79,6 +79,19 @@ class paloMenu {
     {
     	global $arrConf;
 
+        $uelastix = FALSE;
+        if (isset($_SESSION)) {
+            $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+            if (empty($pDB->errMsg)) {
+                $uelastix = get_key_settings($pDB, 'uelastix');
+                $uelastix = ((int)$uelastix != 0);
+            }
+            unset($pDB);
+        }
+        
+        if ($uelastix && isset($_SESSION['elastix_user_permission']))
+            return $_SESSION['elastix_user_permission'];
+
         // Adjuntar base de datos de ACL para acelerar búsqueda
         $bExito = $this->_DB->genQuery('ATTACH DATABASE ? AS acl', 
             array(str_replace('sqlite3:////', '/', $arrConf['elastix_dsn']['acl'])));
@@ -150,6 +163,7 @@ INFO_AUTH_MODULO;
             $arrMenuFiltered,
             array_intersect_key($menuPrimerNivel, $menuSuperior));
                 
+        if ($uelastix) $_SESSION['elastix_user_permission'] = $arrMenuFiltered;
         return $arrMenuFiltered;
     }
 

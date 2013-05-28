@@ -650,6 +650,14 @@ SQL_PROFILE_MENUCOLOR;
  */
 function putMenuAsHistory($pdbACL, $pACL, $uid, $menu)
 {
+    global $arrConf;
+    
+    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+    if (empty($pDB->errMsg)) {
+        $uelastix = get_key_settings($pDB, 'uelastix');
+        if ((int)$uelastix != 0) return TRUE;
+    }
+
 	$id_resource = $pACL->getResourceId($menu);
     if (is_null($id_resource)) return FALSE;
     
@@ -792,6 +800,14 @@ function getSmarty($mainTheme, $basedir = '/var/www/html')
 
 function loadShortcut($pdbACL, $uid, &$smarty)
 {
+    global $arrConf;
+    
+    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+    if (empty($pDB->errMsg)) {
+        $uelastix = get_key_settings($pDB, 'uelastix');
+        if ((int)$uelastix != 0) return '';
+    }
+
     if($uid === FALSE) return '';
     $sql = <<<SQL_BOOKMARKS_HISTORY
 SELECT aus.id AS id, ar.description AS name, ar.id AS id_menu, ar.name AS namemenu

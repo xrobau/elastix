@@ -396,31 +396,53 @@ PLANTILLA_PROCESS_ROW;
     function getDataApplet_SystemResources()
     {
         $oPalo = new paloSantoSysInfo();
-        $arrSysInfo = $oPalo->getSysInfo();
 
-        $cpu_info = $arrSysInfo['CpuModel'];
-
-        //CPU USAGE
-        $cpu_usage = $this->genericImage('rbgauge', array('percent' => $arrSysInfo['CpuUsage'], 'size' => '140,140'), null, null);
-                $inf1 = number_format($arrSysInfo['CpuUsage'] * 100.0, 1);
+        $cpu_a = $oPalo->obtener_muestra_actividad_cpu();
+        
+        $cpuinfo = $oPalo->getCPUInfo();
+        $speed = number_format($cpuinfo['CpuMHz'], 2)." MHz";
+        $cpu_info = $cpuinfo['CpuModel'];
+        
+        $meminfo = $oPalo->getMemInfo();
 
         //MEMORY USAGE
-        $fraction_mem_used = ($arrSysInfo['MemTotal'] - $arrSysInfo['MemFree'] - $arrSysInfo['Cached'] - $arrSysInfo['MemBuffers']) / $arrSysInfo['MemTotal'];
+        $fraction_mem_used = ($meminfo['MemTotal'] - $meminfo['MemFree'] - $meminfo['Cached'] - $meminfo['MemBuffers']) / $meminfo['MemTotal'];
         $mem_usage_val  = number_format(100.0 * $fraction_mem_used, 1);
-        $mem_usage = $this->genericImage('rbgauge', array('percent' => $fraction_mem_used, 'size' => '140,140'), null, null);
-        $inf2 = number_format($arrSysInfo['MemTotal']/1024, 2)." Mb";
+        $mem_usage = $this->genericImage('rbgauge', array(
+            'percent' => $fraction_mem_used,
+            'size' => '140,140'),
+            null, null);
+        $inf2 = number_format($meminfo['MemTotal']/1024, 2)." Mb";
 
         //SWAP USAGE
-        $fraction_swap_used = ($arrSysInfo['SwapTotal'] - $arrSysInfo['SwapFree']) / $arrSysInfo['SwapTotal'];
+        $fraction_swap_used = ($meminfo['SwapTotal'] - $meminfo['SwapFree']) / $meminfo['SwapTotal'];
         $swap_usage_val = number_format(100.0 * $fraction_swap_used, 1);
-        $swap_usage = $this->genericImage('rbgauge', array('percent' => $fraction_swap_used, 'size' => '140,140'), null, null);
-        $inf3 = number_format($arrSysInfo['SwapTotal']/1024, 2)." Mb";
+        $swap_usage = $this->genericImage('rbgauge', array(
+            'percent' => $fraction_swap_used,
+            'size' => '140,140'),
+            null, null);
+        $inf3 = number_format($meminfo['SwapTotal']/1024, 2)." Mb";
 
         //UPTIME
-        $uptime = $arrSysInfo['SysUptime'];
-
-        // CPU SPEED
-        $speed = number_format($arrSysInfo['CpuMHz'], 2)." MHz";
+        $upfields = array();
+        $up = $oPalo->getUptime(); // Segundos de actividad desde arranque
+        $upfields[] = $up % 60; $up = ($up - $upfields[0]) / 60;
+        $upfields[] = $up % 60; $up = ($up - $upfields[1]) / 60;
+        $upfields[] = $up % 24; $up = ($up - $upfields[2]) / 24;
+        $upfields[] = $up;
+        
+        $uptime = $upfields[1].' '._tr('minute(s)');
+        if ($upfields[2] > 0) $uptime = $upfields[2].' '._tr('hour(s)').' '.$uptime;
+        if ($upfields[3] > 0) $uptime = $upfields[3].' '._tr('day(s)').' '.$uptime;
+        
+        usleep(200000);
+        $cpu_b = $oPalo->obtener_muestra_actividad_cpu();
+        $cpu_percent = calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
+        $cpu_usage = $this->genericImage('rbgauge', array(
+            'percent' => $cpu_percent,
+            'size' => '140,140'),
+            null, null);
+        $inf1 = number_format($cpu_percent * 100.0, 1);
 
         $html ="<div style='height:165px; position:relative; text-align:center;'>
                           <div style='width:155px; float:left; position: relative;'>

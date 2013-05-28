@@ -13,6 +13,100 @@ class paloSantoSysInfo
         return obtener_info_de_sistema();
     }
 
+    function getMemInfo()
+    {
+        $arrInfo = array(
+            'MemTotal'      =>  0,
+            'MemFree'       =>  0,
+            'MemBuffers'    =>  0,
+            'SwapTotal'     =>  0,
+            'SwapFree'      =>  0,
+            'Cached'        =>  0,
+        );
+        foreach (file('/proc/meminfo') as $linea) {
+            $regs = NULL;
+            if (preg_match('/^(\w+):\s+(\d+) kB/', $linea, $regs)) {
+                if (isset($arrInfo[$regs[1]])) $arrInfo[$regs[1]] = $regs[2];
+            }
+        }
+        return $arrInfo;
+    }
+
+    function getCPUInfo()
+    {
+        $arrInfo = array(
+            'CpuModel'      =>  '(unknown)',
+            'CpuVendor'     =>  '(unknown)',
+            'CpuMHz'        =>  0.0,
+        );
+        foreach (file('/proc/cpuinfo') as $linea) {
+            $regs = NULL;
+            if (preg_match('/^(.+?)\s*:\s*(.+)/', $linea, $regs)) {
+                $regs[1] = trim($regs[1]);
+                $regs[2] = trim($regs[2]);
+                if ($regs[1] == 'model name' || $regs[1] == 'Processor')
+                    $arrInfo['CpuModel'] = $regs[2];
+                if ($regs[1] == 'vendor_id')
+                    $arrInfo['CpuVendor'] = $regs[2];
+                if ($regs[1] == 'cpu MHz')
+                    $arrInfo['CpuMHz'] = $regs[2];
+            }
+        }
+        return $arrInfo;
+    }
+    
+    function getUptime()
+    {
+        $btime = NULL;
+        foreach (file('/proc/stat') as $linea) {
+            if (strpos($linea, 'btime ') === 0) {
+                $t = explode(' ', $linea);
+                $btime = $t[1];
+                break;
+            }
+        }
+        return $this->_info_sistema_diff_stat($btime, time());
+    }
+
+    function obtener_muestra_actividad_cpu()
+    {
+        if (!function_exists('_info_sistema_linea_cpu')) {
+            function _info_sistema_linea_cpu($s) { return (strpos($s, 'cpu ') === 0); }
+        }
+        $muestra = preg_split('/\s+/',
+            array_shift(array_filter(file('/proc/stat', FILE_IGNORE_NEW_LINES),
+                '_info_sistema_linea_cpu')));
+        array_shift($muestra);
+        return $muestra;
+    }
+
+    function calcular_carga_cpu_intervalo($m1, $m2)
+    {
+        $diffmuestra = array_map(array($this, '_info_sistema_diff_stat'), $m1, $m2);
+        $cpuActivo = $diffmuestra[0] + $diffmuestra[1] + $diffmuestra[2] + $diffmuestra[4] + $diffmuestra[5] + $diffmuestra[6];
+        $cpuTotal = $cpuActivo + $diffmuestra[3];
+        return ($cpuTotal > 0) ? $cpuActivo / $cpuTotal : 0;
+    }
+
+    /* Método para poder realizar la resta de dos cantidades enteras que pueden
+     * no caber en un entero de PHP, pero cuya diferencia es pequeña y puede 
+     * caber en el mismo entero. */
+    private function _info_sistema_diff_stat($a, $b)
+    {
+        $aa = str_split("$a");
+        $bb = str_split("$b");
+        while (count($aa) < count($bb)) array_unshift($aa, '0');
+        while (count($aa) > count($bb)) array_unshift($bb, '0');
+        while (count($aa) > 0 && $aa[0] == $bb[0]) {
+            array_shift($aa);
+            array_shift($bb);
+        }
+        if (count($aa) <= 0) return 0;
+        $a = implode('', $aa); $b = implode('', $bb);
+        return (int)$b - (int)$a;
+    }
+    
+
     function ObtenerInfo_Particion($value)
     {
         $result = array();

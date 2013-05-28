@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: the System Resources applet does not call the method
+  getSysInfo() anymore, but discrete functions. This saves two unnecessary 
+  process spawns and at least one disk hit for unused free space information.
+  SVN Rev[5036]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

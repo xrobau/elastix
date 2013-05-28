@@ -8,16 +8,9 @@ require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 
 class paloSantoSysInfo
 {
-    var $arrSysInfo;
-
-    function paloSantoSysInfo()
-    {
-        $this->arrSysInfo = obtener_info_de_sistema();
-    }
-
     function getSysInfo()
     {
-        return $this->arrSysInfo;
+        return obtener_info_de_sistema();
     }
 
     function ObtenerInfo_Particion($value)
@@ -41,10 +34,8 @@ class paloSantoSysInfo
 
     }
 
-    function ObtenerInfo_CPU_Usage($size = "90,20")
+    function rbgauge($value, $size = "90,20")
     {
-        $value = $this->arrSysInfo['CpuUsage'];
-
         $result = array();
         $result['ATTRIBUTES'] = array('TYPE'=>'gauge','SIZE'=>$size);  // bar => gauge
         $result['MESSAGES'] = array('ERROR'=>'Error','NOTHING_SHOW'=>'Nada que mostrar');
@@ -137,36 +128,6 @@ class paloSantoSysInfo
         return $result;
     }
 
-    function ObtenerInfo_MemUsage($size = "90,20")
-    {
-        $value = ($this->arrSysInfo['MemTotal'] - $this->arrSysInfo['MemFree'] - $this->arrSysInfo['Cached'] - $this->arrSysInfo['MemBuffers'])/$this->arrSysInfo['MemTotal'];
-
-        $result = array();
-        $result['ATTRIBUTES'] = array('TYPE'=>'gauge','SIZE'=>$size); // bar => gauge
-        $result['MESSAGES'] = array('ERROR'=>'Error','NOTHING_SHOW'=>'Nada que mostrar');
-
-        $temp = array();
-        $temp['DAT_1'] = array('VALUES'=>array("value"=>$value));
-        $result['DATA'] = $temp;
-
-        return $result;
-    }
-
-    function ObtenerInfo_SwapUsage($size = "90,20")
-    {
-        $value = ($this->arrSysInfo['SwapTotal'] - $this->arrSysInfo['SwapFree'])/$this->arrSysInfo['SwapTotal'];
-
-        $result = array();
-        $result['ATTRIBUTES'] = array('TYPE'=>'gauge','SIZE'=>$size); // bar => gauge
-        $result['MESSAGES'] = array('ERROR'=>'Error','NOTHING_SHOW'=>'Nada que mostrar');
-
-        $temp = array();
-        $temp['DAT_1'] = array('VALUES'=>array("value"=>$value));
-        $result['DATA'] = $temp;
-
-        return $result;
-    }
-
     function CallsMemoryCPU()
     {
         $arrayResult = array();
@@ -232,15 +193,12 @@ class paloSantoSysInfo
     {
         return Date('H:i', $value);
     }
-    
-    function _isActivate($process){
-    exec("ls /etc/rc3.d/ | grep \"$process\" ",$arrConsle,$flatStatus);
-    if($flatStatus==0){
-      if(preg_match("/^S/",$arrConsle[0]))
-	 return 1;
-      else
-         return 0;
-    }else return 0;
+
+    function _isActivate($process)
+    {
+        $output = $retval = NULL;
+        exec('ls /etc/rc3.d/ | grep '.escapeshellarg($process), $output, $retval);
+        return ($retval == 0 && preg_match("/^S/", $output[0])) ? 1 : 0;
     }
 
     function getStatusServices()
@@ -255,33 +213,33 @@ class paloSantoSysInfo
 
         $arrSERVICES["Asterisk"]["status_service"] = $this->_existPID_ByFile("/var/run/asterisk/asterisk.pid","asterisk");
         $arrSERVICES["Asterisk"]["activate"] = $this->_isActivate("asterisk");
-	$arrSERVICES["Asterisk"]["name_service"]   = "Telephony Service";
+        $arrSERVICES["Asterisk"]["name_service"]   = "Telephony Service";
 
         $arrSERVICES["OpenFire"]["status_service"] = $this->_existPID_ByFile("/var/run/openfire.pid","openfire");
-	$arrSERVICES["OpenFire"]["activate"] = $this->_isActivate("openfire");
+        $arrSERVICES["OpenFire"]["activate"] = $this->_isActivate("openfire");
         $arrSERVICES["OpenFire"]["name_service"]   = "Instant Messaging Service";
 
         $arrSERVICES["Hylafax"]["status_service"]  = $this->getStatusHylafax();
-	$arrSERVICES["Hylafax"]["activate"] 	   = $this->_isActivate("hylafax");
+        $arrSERVICES["Hylafax"]["activate"] 	   = $this->_isActivate("hylafax");
         $arrSERVICES["Hylafax"]["name_service"]    = "Fax Service";
 /*
         $arrSERVICES["IAXModem"]["status_service"] = $this->_existPID_ByFile("/var/run/iaxmodem.pid","iaxmodem");
         $arrSERVICES["IAXModem"]["name_service"]   = "IAXModem Service";
 */
         $arrSERVICES["Postfix"]["status_service"]  = $this->_existPID_ByCMD("master","postfix");
-	$arrSERVICES["Postfix"]["activate"] 	   = $this->_isActivate("postfix");
+        $arrSERVICES["Postfix"]["activate"] 	   = $this->_isActivate("postfix");
         $arrSERVICES["Postfix"]["name_service"]    = "Email Service";
 
         $arrSERVICES["MySQL"]["status_service"]    = $this->_existPID_ByCMD("mysqld","mysqld");
-	$arrSERVICES["MySQL"]["activate"] 	   = $this->_isActivate("mysqld");
+        $arrSERVICES["MySQL"]["activate"] 	   = $this->_isActivate("mysqld");
         $arrSERVICES["MySQL"]["name_service"]      = "Database Service";
 
         $arrSERVICES["Apache"]["status_service"]   = $this->_existPID_ByFile("/var/run/httpd.pid","httpd");
-	$arrSERVICES["Apache"]["activate"] 	   = $this->_isActivate("httpd");
+        $arrSERVICES["Apache"]["activate"] 	   = $this->_isActivate("httpd");
         $arrSERVICES["Apache"]["name_service"]     = "Web Server";
 
         $arrSERVICES["Dialer"]["status_service"]   = $this->_existPID_ByFile("/opt/elastix/dialer/dialerd.pid","elastixdialer");
-	$arrSERVICES["Dialer"]["activate"] 	   = $this->_isActivate("elastixdialer");
+        $arrSERVICES["Dialer"]["activate"] 	   = $this->_isActivate("elastixdialer");
         $arrSERVICES["Dialer"]["name_service"]     = "Elastix Call Center Service";
 
         return $arrSERVICES;
@@ -310,7 +268,7 @@ class paloSantoSysInfo
         exec("/usr/sbin/dahdi_hardware",$arrConsle,$flatStatus);
         if($flatStatus==0){
             foreach($arrConsle as $k => $v){
-                if(ereg("([a-z0-9\:\.\-\_]*)[[:space:]]+([a-z0-9\:\.\-\_\+]*)[[:space:]]+([a-z0-9\:\.\-\_]*) (.*)",$v,$arrReg)){
+                if(preg_match("/([a-z0-9\:\.\-\_]*)[[:space:]]+([a-z0-9\:\.\-\_\+]*)[[:space:]]+([a-z0-9\:\.\-\_]*) (.*)/",$v,$arrReg)){
                     $arrDATA[] = array("hwd" => $arrReg[1], "module" => $arrReg[2], "vendor" => $arrReg[3], "card" => $arrReg[4], "num_serie" => "");
                 }
             }
@@ -382,7 +340,6 @@ class paloSantoSysInfo
     {
         $status_hfaxd = $this->_existPID_ByCMD("hfaxd","hylafax");
         $status_faxq  = $this->_existPID_ByCMD("faxq","hylafax");
-
         if($status_hfaxd == "OK" && $status_faxq == "OK")
             return "OK";
         elseif($status_hfaxd == "Shutdown" && $status_faxq == "Shutdown")
@@ -393,40 +350,30 @@ class paloSantoSysInfo
 
     function _existPID_ByFile($filePID, $nameService)
     {
-        if($this->_existService($nameService)){
-            if(file_exists($filePID)){
-                $pid=trim(`cat $filePID`);
-                $exist=`ps -p $pid | grep $pid`;
-                if(isset($exist)) return "OK";
-                else return "Shutdown";
-            }
-            return "Shutdown";
+        if (!$this->_existService($nameService)) return "Not_exists";
+        if (file_exists($filePID)) {
+            $pid = trim(file_get_contents($filePID));
+            return (is_dir("/proc/$pid")) ? 'OK' : 'Shutdown';
         }
-        else
-            return "Not_exists";
+        return "Shutdown";
     }
 
     function _existPID_ByCMD($serviceName, $nameService)
     {
-        if($this->_existService($nameService)){
-            $pid=trim(`/sbin/pidof $serviceName`);
-            $pid_grep=str_replace(" ","|",$pid);
-
-            $exist=`ps -p $pid | grep "[$pid_grep]"`;
-
-            if(isset($exist)) return "OK";
-            else return "Shutdown";
+        if (!$this->_existService($nameService)) return "Not_exists";
+        foreach (explode(' ', trim(`/sbin/pidof $serviceName`)) as $pid) {
+            if (ctype_digit($pid) && (is_dir("/proc/$pid"))) return 'OK';
         }
-        else
-            return "Not_exists";
+        return 'Shutdown';
     }
 
     function _existService($nameService)
     {
-        $path = "/etc/rc.d/init.d";
-        if(file_exists("$path/$nameService"))
-            return true;
-        return false;
+        if (file_exists("/usr/lib/systemd/system/{$nameService}.service"))
+            return TRUE;
+        if (file_exists("/etc/rc.d/init.d/{$nameService}"))
+            return TRUE;
+        return FALSE;
     }
 
     function getAsterisk_Connections()
@@ -550,13 +497,13 @@ class paloSantoSysInfo
         $arrChannels = $this->AsteriskManager_Command("core show channels");
         if(is_array($arrChannels) & count($arrChannels)>0){
             foreach($arrChannels as $line){
-                if(ereg("s@macro-dialout",$line))
+                if(preg_match("/s@macro-dialout/",$line))
                     $arrChann["external_calls"]++;
-                else if(ereg("s@macro-dial:",$line))
+                else if(preg_match("/s@macro-dial:/",$line))
                     $arrChann["internal_calls"]++;
-                else if(ereg("^([0-9]+) active call",$line,$arrToken))
+                else if(preg_match("/^([0-9]+) active call/",$line,$arrToken))
                     $arrChann["total_calls"] = $arrToken[1];
-                else if(ereg("^([0-9]+) active channel",$line,$arrToken))
+                else if(preg_match("/^([0-9]+) active channel/",$line,$arrToken))
                     $arrChann["total_channels"] = $arrToken[1];
             }
         }
@@ -569,7 +516,7 @@ class paloSantoSysInfo
 
         if(is_array($arrQueues) & count($arrQueues)>0){
             foreach($arrQueues as $line){
-                if(ereg("^([0-9]+)[[:space:]]*has ([0-9]+)",$line,$arrToken))
+                if(preg_match("/^([0-9]+)[[:space:]]*has ([0-9]+)/",$line,$arrToken))
                     $arrQue[$arrToken[1]] = $arrToken[2];
             }
         }

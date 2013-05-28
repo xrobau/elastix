@@ -203,7 +203,6 @@ PLANTILLA_RSS_ROW;
 <input type="button" class="neo_applet_process" name="processcontrol_restart" id="neo_applet_process_restart" value="$sMsgRestart" />
 <input type="button" class="neo_applet_process" name="processcontrol_activate" id="neo_applet_process_activate" value="$sMsgActivate" />
 <input type="button" class="neo_applet_process" name="processcontrol_deactivate" id="neo_applet_process_deactivate" value="$sMsgDeactivate" />
-
 </div>
 <img id="neo-applet-processes-processing" src="modules/{$this->module_name}/images/loading.gif" style="display: none;" alt="" />
 </div>
@@ -227,7 +226,7 @@ PLANTILLA_POSICIONABLE;
         <input type="hidden" name="key-servicio" id="key-servicio" value="%s" />
         <input type="hidden" name="status-servicio" id="status-servicio" value="%s" />
         <input type="hidden" name="activate-process" id="activate-process" value="%s" />
-        <img src="modules/dashboard/images/%s" style="cursor:%s; width="15" height="15" alt="menu" />
+        <img src="modules/dashboard/images/%s" style="cursor:%s;" width="15" height="15" alt="menu" />
     </div>
     <div class="neo-applet-processes-row-status-msg" style="color: %s">%s</div>
     <div class="neo-applet-processes-row-status-icon"></div></div>
@@ -396,36 +395,26 @@ PLANTILLA_PROCESS_ROW;
 
     function getDataApplet_SystemResources()
     {
-                /*include("libs/pChart/libs/pData.class");
-                include("libs/pChart/libs/pChart.class");
-                include("libs/pChart/libs/MyHorBar.class.php");*/
-
-
         $oPalo = new paloSantoSysInfo();
         $arrSysInfo = $oPalo->getSysInfo();
-        //CPU INFO    $arrSysInfo['CpuVendor']
+
         $cpu_info = $arrSysInfo['CpuModel'];
 
         //CPU USAGE
-        $cpu_usage = $this->getImage_CPU_Usage("140,140");//$this->module_name,
+        $cpu_usage = $this->genericImage('rbgauge', array('percent' => $arrSysInfo['CpuUsage'], 'size' => '140,140'), null, null);
                 $inf1 = number_format($arrSysInfo['CpuUsage'] * 100.0, 1);
-        //$inf1 = number_format($arrSysInfo['CpuUsage']*100, 2)._tr('% used of')." ".number_format($arrSysInfo['CpuMHz'], 2)." MHz";
-        //$cpu_usage =  $img."&nbsp;&nbsp;&nbsp;".$inf;
 
         //MEMORY USAGE
-        $mem_usage_val  = number_format(100.0 * ($arrSysInfo['MemTotal'] - $arrSysInfo['MemFree'] - $arrSysInfo['Cached'] - $arrSysInfo['MemBuffers'])/$arrSysInfo['MemTotal'], 1);
-        $mem_usage = $this->getImage_MEM_Usage("140,140");
-                $inf2 = number_format($arrSysInfo['MemTotal']/1024, 2)." Mb";
-
-        //$inf2 = number_format($mem_usage_val*100, 2)._tr('% used of')." ".number_format($arrSysInfo['MemTotal']/1024, 2)." Mb";
-        //$mem_usage = $img."&nbsp;&nbsp;&nbsp;".$inf;
+        $fraction_mem_used = ($arrSysInfo['MemTotal'] - $arrSysInfo['MemFree'] - $arrSysInfo['Cached'] - $arrSysInfo['MemBuffers']) / $arrSysInfo['MemTotal'];
+        $mem_usage_val  = number_format(100.0 * $fraction_mem_used, 1);
+        $mem_usage = $this->genericImage('rbgauge', array('percent' => $fraction_mem_used, 'size' => '140,140'), null, null);
+        $inf2 = number_format($arrSysInfo['MemTotal']/1024, 2)." Mb";
 
         //SWAP USAGE
-        $swap_usage_val = number_format(100.0 * ($arrSysInfo['SwapTotal'] - $arrSysInfo['SwapFree'])/$arrSysInfo['SwapTotal'], 1);
-        $swap_usage = $this->getImage_Swap_Usage("140,140");
-                $inf3 = number_format($arrSysInfo['SwapTotal']/1024, 2)." Mb";
-        //$inf3 = number_format($swap_usage_val, 2)." ".number_format($arrSysInfo['SwapTotal']/1024, 2)." Mb";
-        //$swap_usage = $img."&nbsp;&nbsp;&nbsp;".$inf;
+        $fraction_swap_used = ($arrSysInfo['SwapTotal'] - $arrSysInfo['SwapFree']) / $arrSysInfo['SwapTotal'];
+        $swap_usage_val = number_format(100.0 * $fraction_swap_used, 1);
+        $swap_usage = $this->genericImage('rbgauge', array('percent' => $fraction_swap_used, 'size' => '140,140'), null, null);
+        $inf3 = number_format($arrSysInfo['SwapTotal']/1024, 2)." Mb";
 
         //UPTIME
         $uptime = $arrSysInfo['SysUptime'];
@@ -433,81 +422,38 @@ PLANTILLA_PROCESS_ROW;
         // CPU SPEED
         $speed = number_format($arrSysInfo['CpuMHz'], 2)." MHz";
 
-/*
-                // Dataset definition
-                $DataSet = new pData;
-                $DataSet->AddPoint(array(1,2),"Serie1");
-                $DataSet->AddPoint(array(2,3),"Serie2");
-                $DataSet->AddPoint(array(3,4),"Serie3");
-                $DataSet->AddAllSeries();
-                $DataSet->SetAbsciseLabelSerie();
-                $DataSet->SetSerieName("January","Serie1");
-                $DataSet->SetSerieName("February","Serie2");
-                $DataSet->SetSerieName("March","Serie3");
-
-                // Initialise the graph
-                //$Test = new pChart(300,100);
-                $Test = new MyHorBar(400,200);
-                $Test->setFontProperties("Fonts/tahoma.ttf",8);
-                $Test->setGraphArea(5,5,350,250);
-                $Test->drawFilledRoundedRectangle(7,7,693,223,5,240,240,240);
-                $Test->drawRoundedRectangle(5,5,695,225,5,230,230,230);
-                //$Test->drawGraphArea(255,255,255,TRUE);
-                //$Test->drawScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2,TRUE);
-                $Test->drawHorScale($DataSet->GetData(),$DataSet->GetDataDescription(),SCALE_NORMAL,150,150,150,TRUE,0,2,TRUE);
-                $Test->drawHorGrid(10,TRUE,230,230,230,50);
-                $Test->drawGrid(4,TRUE,230,230,230,50);
-
-                // Draw the 0 line
-                $Test->setFontProperties("Fonts/tahoma.ttf",6);
-                $Test->drawTreshold(0,143,55,72,TRUE,TRUE);
-
-                // Draw the bar graph
-                //$Test->drawBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),TRUE);
-        // Draw the bar graph
-        $Test->drawHorBarGraph($DataSet->GetData(),$DataSet->GetDataDescription(),FALSE);
-                // Finish the graph
-                $Test->setFontProperties("Fonts/tahoma.ttf",8);
-                $Test->drawLegend(596,150,$DataSet->GetDataDescription(),255,255,255);
-                $Test->setFontProperties("Fonts/tahoma.ttf",10);
-                $Test->drawTitle(50,22,"Prueba 1",50,50,50,585);
-
-                $Test->Render($_SERVER['DOCUMENT_ROOT']."/libs/pChart/tmp/pruebaIMG.png");
-*/
-
-                $html ="<div style='height:165px; position:relative; text-align:center;'>
-                                  <div style='width:155px; float:left; position: relative;'>
-                                        $cpu_usage
-                                        <div class=\"neo-applet-sys-gauge-percent\">$inf1%</div><div>"._tr('CPU')."</div>
-                                  </div>
-                                  <div style='width:154px; float:left; position: relative;'>
-                                        $mem_usage
-                                        <div class=\"neo-applet-sys-gauge-percent\">$mem_usage_val%</div><div>"._tr('RAM')."</div>
-                                  </div>
-                                  <div style='width:155px; float:right; position: relative;'>
-                                        $swap_usage
-                                  <div class=\"neo-applet-sys-gauge-percent\">$swap_usage_val%</div><div>"._tr('SWAP')."</div>
-                                  </div>
-                                </div>
-                                <div class='neo-divisor'></div>
-                                <div class=neo-applet-tline>
-                                  <div class='neo-applet-titem'><strong>"._tr('CPU Info').":</strong></div>
-                                  <div class='neo-applet-tdesc'>$cpu_info</div>
-                                </div>
-                                <div class=neo-applet-tline>
-                                  <div class='neo-applet-titem'><strong>"._tr('Uptime').":</strong></div>
-                                  <div class='neo-applet-tdesc'>$uptime</div>
-                                </div>
-                                <div class='neo-applet-tline'>
-                                  <div class='neo-applet-titem'><strong>"._tr('CPU Speed').":</strong></div>
-                                  <div class='neo-applet-tdesc'>$speed</div>
-                                </div>
-                                <div class='neo-applet-tline'>
-                                  <div class='neo-applet-titem'><strong>"._tr('Memory usage').":</strong></div>
-                                  <div class='neo-applet-tdesc'>RAM: $inf2 SWAP: $inf3</div>
-                                </div>";
-                return $html;
-
+        $html ="<div style='height:165px; position:relative; text-align:center;'>
+                          <div style='width:155px; float:left; position: relative;'>
+                                $cpu_usage
+                                <div class=\"neo-applet-sys-gauge-percent\">$inf1%</div><div>"._tr('CPU')."</div>
+                          </div>
+                          <div style='width:154px; float:left; position: relative;'>
+                                $mem_usage
+                                <div class=\"neo-applet-sys-gauge-percent\">$mem_usage_val%</div><div>"._tr('RAM')."</div>
+                          </div>
+                          <div style='width:155px; float:right; position: relative;'>
+                                $swap_usage
+                          <div class=\"neo-applet-sys-gauge-percent\">$swap_usage_val%</div><div>"._tr('SWAP')."</div>
+                          </div>
+                        </div>
+                        <div class='neo-divisor'></div>
+                        <div class=neo-applet-tline>
+                          <div class='neo-applet-titem'><strong>"._tr('CPU Info').":</strong></div>
+                          <div class='neo-applet-tdesc'>$cpu_info</div>
+                        </div>
+                        <div class=neo-applet-tline>
+                          <div class='neo-applet-titem'><strong>"._tr('Uptime').":</strong></div>
+                          <div class='neo-applet-tdesc'>$uptime</div>
+                        </div>
+                        <div class='neo-applet-tline'>
+                          <div class='neo-applet-titem'><strong>"._tr('CPU Speed').":</strong></div>
+                          <div class='neo-applet-tdesc'>$speed</div>
+                        </div>
+                        <div class='neo-applet-tline'>
+                          <div class='neo-applet-titem'><strong>"._tr('Memory usage').":</strong></div>
+                          <div class='neo-applet-tdesc'>RAM: $inf2 SWAP: $inf3</div>
+                        </div>";
+        return $html;
     }
 
     function getDataApplet_Faxes()
@@ -707,14 +653,6 @@ PLANTILLA_PROCESS_ROW;
                );
    }
 
-    function getImage_CPU_Usage($value = null)
-    {
-                if(isset($value))
-                        return $this->genericImage("ObtenerInfo_CPU_Usage", array('size' => $value), NULL, NULL);
-                else
-                        return $this->genericImage("ObtenerInfo_CPU_Usage");
-    }
-
     function getImage_Disc_Usage($value)
     {
         return $this->genericImage("ObtenerInfo_Particion", array('percent' => $value), 140, NULL);
@@ -723,22 +661,6 @@ PLANTILLA_PROCESS_ROW;
     function getImage_Hit()
     {
         return $this->genericImage("CallsMemoryCPU");
-    }
-
-    function getImage_MEM_Usage($value = null)
-    {
-                if(isset($value)){
-                        return $this->genericImage("ObtenerInfo_MemUsage", array('size' => $value), null, null);
-                }else
-                        return $this->genericImage("ObtenerInfo_MemUsage");
-    }
-
-    function getImage_Swap_Usage($value = null)
-    {
-                if(isset($value))
-                        return $this->genericImage("ObtenerInfo_SwapUsage", array('size' => $value), null, null);
-                else
-                        return $this->genericImage("ObtenerInfo_SwapUsage");
     }
 
     function conectionAsteriskCDR()

@@ -74,7 +74,6 @@ function _moduleContent($smarty, $module_name)
             $hwd = getParameter("hwd");
             $num_serie = getParameter("num_serie");
             $vendor = getParameter("vendor");
-
             ini_set("soap.wsdl_cache_enabled", "0");
             $client = new SoapClient($arrConf['dir_WebServices']);
 
@@ -95,10 +94,6 @@ function _moduleContent($smarty, $module_name)
             return '';
         case "loadAppletData":
             $content = loadAppletData($pDataApplets,$arrPaneles,$session);
-            return $content;
-            break;
-        case "getImageLoading":
-            $content = getImageLoading($module_name);
             return $content;
             break;
         case "refreshDataApplet":
@@ -153,6 +148,7 @@ function processControl($action)
         return "ERROR DE ACL: $pACL->errMsg";
     }
     $isAdministrator = $pACL->isUserSuperAdmin($_SESSION['elastix_user']);
+    
     $message = 'success';
     if (!$isAdministrator) {
         $message = _tr('Process control restricted to administrators');
@@ -227,23 +223,12 @@ function refreshDataApplet($pDataApplets)
     return $jsonObject->createJSON();
 }
 
-function getImageLoading($module_name)
-{
-    $jsonObject = new PaloSantoJSON();
-    $message = "<img class='ima' src='modules/{$module_name}/images/loading.gif' border='0' align='absmiddle' />&nbsp;
-                        "._tr('Loading');
-    $jsonObject->set_message($message);
-    return $jsonObject->createJSON();
-}
-
 function executeImage($module_name, $sImg)
 {
     $listaImgs = array(
         'CallsMemoryCPU'                                =>  array(null, 'functionCallback'),
-        'ObtenerInfo_CPU_Usage'                         =>  array(array('size'), null),
-        'ObtenerInfo_MemUsage'                          =>  array(array('size'), null),
-        'ObtenerInfo_SwapUsage'                         =>  array(array('size'), null),
         'ObtenerInfo_Particion'                         =>  array(array('percent'), null),
+        'rbgauge'                                       =>  array(array('percent', 'size'), null),
     );
     if (isset($listaImgs[$sImg])) {
         $arrParameters = array();

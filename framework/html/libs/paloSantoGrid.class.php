@@ -26,9 +26,6 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoGrid.class.php, bmacias@palosanto.com Exp $ */
-global $arrConf;
-require_once "{$arrConf['basePath']}/libs/paloSantoPDF.class.php";
-
 
 class paloSantoGrid {
 
@@ -371,6 +368,9 @@ class paloSantoGrid {
 
     function fetchGridPDF()
     {
+        global $arrConf;
+        require_once "{$arrConf['basePath']}/libs/paloSantoPDF.class.php";
+
         $pdf= new paloPDF();
         $pdf->setOrientation("L");
         $pdf->setFormat("A3");

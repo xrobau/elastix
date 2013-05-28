@@ -313,6 +313,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: require paloSantoPDF.class.php inside the only method that
+  actually requires its class paloPDF, rather than every time paloSantoGrid is
+  required.
+  SVN Rev[5034]
 - CHANGED: Framework: introduce new setting 'uelastix'. This flag will be set
   for uElastix images and absent/unset on ordinary systems. When set, the 
   framework will enable a number of optimizations to improve performance in the

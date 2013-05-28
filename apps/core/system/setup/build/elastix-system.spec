@@ -131,6 +131,11 @@ fi
 
 %changelog
 * Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: the Hard Disks applet does not call the method 
+  getSysInfo() anymore, but uses popen() on two commands in an attempt to run
+  them in parallel. This saves some unnecessary file opens in /proc as well as
+  an unneeded usleep().
+  SVN Rev[5038]
 - CHANGED: Dashboard: the System Resources applet does not call the method
   getSysInfo() anymore, but discrete functions. This saves two unnecessary 
   process spawns and at least one disk hit for unused free space information.

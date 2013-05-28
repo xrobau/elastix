@@ -194,14 +194,11 @@ class paloSantoSysInfo
         return Date('H:i', $value);
     }
 
-    function _isActivate($process){
-    exec("ls /etc/rc3.d/ | grep \"$process\" ",$arrConsle,$flatStatus);
-      if($flatStatus==0){
-        if(preg_match("/^S/",$arrConsle[0]))
-           return 1;
-        else
-           return 0;
-      }else return 0;
+    function _isActivate($process)
+    {
+        $output = $retval = NULL;
+        exec('ls /etc/rc3.d/ | grep '.escapeshellarg($process), $output, $retval);
+        return ($retval == 0 && preg_match("/^S/", $output[0])) ? 1 : 0;
     }
 
     function getStatusServices()
@@ -215,11 +212,11 @@ class paloSantoSysInfo
         // file pid service call_center is /opt/elastix/dialer/dialerd.pid
 
         $arrSERVICES["Asterisk"]["status_service"] = $this->_existPID_ByFile("/var/run/asterisk/asterisk.pid","asterisk");
-	$arrSERVICES["Asterisk"]["activate"] = $this->_isActivate("asterisk");
-	$arrSERVICES["Asterisk"]["name_service"]   = "Telephony Service";
+        $arrSERVICES["Asterisk"]["activate"] = $this->_isActivate("asterisk");
+        $arrSERVICES["Asterisk"]["name_service"]   = "Telephony Service";
 
         $arrSERVICES["OpenFire"]["status_service"] = $this->_existPID_ByFile("/var/run/openfire.pid","openfire");
-	$arrSERVICES["OpenFire"]["activate"] = $this->_isActivate("openfire");
+        $arrSERVICES["OpenFire"]["activate"] = $this->_isActivate("openfire");
         $arrSERVICES["OpenFire"]["name_service"]   = "Instant Messaging Service";
 
         $arrSERVICES["Hylafax"]["status_service"]  = $this->getStatusHylafax();
@@ -230,22 +227,22 @@ class paloSantoSysInfo
         $arrSERVICES["IAXModem"]["name_service"]   = "IAXModem Service";
 */
         $arrSERVICES["Postfix"]["status_service"]  = $this->_existPID_ByCMD("master","postfix");
-	$arrSERVICES["Postfix"]["activate"] 	   = $this->_isActivate("postfix");
+        $arrSERVICES["Postfix"]["activate"] 	   = $this->_isActivate("postfix");
         $arrSERVICES["Postfix"]["name_service"]    = "Email Service";
 
         $arrSERVICES["MySQL"]["status_service"]    = $this->_existPID_ByCMD("mysqld","mysqld");
-	$arrSERVICES["MySQL"]["activate"] 	   = $this->_isActivate("mysqld");
+        $arrSERVICES["MySQL"]["activate"] 	   = $this->_isActivate("mysqld");
         $arrSERVICES["MySQL"]["name_service"]      = "Database Service";
 
         $arrSERVICES["Apache"]["status_service"]   = $this->_existPID_ByCMD('httpd',"httpd");
-	$arrSERVICES["Apache"]["activate"] 	   = $this->_isActivate("httpd");
+        $arrSERVICES["Apache"]["activate"] 	   = $this->_isActivate("httpd");
         $arrSERVICES["Apache"]["name_service"]     = "Web Server";
 
         $arrSERVICES["Dialer"]["status_service"]   = $this->_existPID_ByFile("/opt/elastix/dialer/dialerd.pid","elastixdialer");
-	$arrSERVICES["Dialer"]["activate"] 	   = $this->_isActivate("elastixdialer");
+        $arrSERVICES["Dialer"]["activate"] 	   = $this->_isActivate("elastixdialer");
         $arrSERVICES["Dialer"]["name_service"]     = "Elastix Call Center Service";
+
         return $arrSERVICES;
-	
     }
 
     function getStatusTrunks()
@@ -312,7 +309,6 @@ class paloSantoSysInfo
         $dsn = "sqlite3:///$arrConf[elastix_dbdir]/hardware_detector.db";
         $pDB  = new paloDB($dsn);
 
-        
         $query = "update car_system set num_serie='$num_serie', vendor='$vendor' where hwd='$hwd' and num_serie='' and vendor='';";
         $result=$pDB->genQuery($query);
 
@@ -355,10 +351,10 @@ class paloSantoSysInfo
     function _existPID_ByFile($filePID, $nameService)
     {
         if (!$this->_existService($nameService)) return "Not_exists";
-    	if (file_exists($filePID)) {
-    		$pid = trim(file_get_contents($filePID));
+        if (file_exists($filePID)) {
+            $pid = trim(file_get_contents($filePID));
             return (is_dir("/proc/$pid")) ? 'OK' : 'Shutdown';
-    	}
+        }
         return "Shutdown";
     }
 
@@ -366,7 +362,7 @@ class paloSantoSysInfo
     {
         if (!$this->_existService($nameService)) return "Not_exists";
         foreach (explode(' ', trim(`/sbin/pidof $serviceName`)) as $pid) {
-        	if (ctype_digit($pid) && (is_dir("/proc/$pid"))) return 'OK';
+            if (ctype_digit($pid) && (is_dir("/proc/$pid"))) return 'OK';
         }
         return 'Shutdown';
     }

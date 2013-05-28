@@ -225,7 +225,7 @@ PLANTILLA_POSICIONABLE;
     <div class="neo-applet-processes-row-menu">
         <input type="hidden" name="key-servicio" id="key-servicio" value="%s" />
         <input type="hidden" name="status-servicio" id="status-servicio" value="%s" />
-	<input type="hidden" name="activate-process" id="activate-process" value="%s" />
+        <input type="hidden" name="activate-process" id="activate-process" value="%s" />
         <img src="modules/dashboard/images/%s" style="cursor:%s;" width="15" height="15" alt="menu" />
     </div>
     <div class="neo-applet-processes-row-status-msg" style="color: %s">%s</div>
@@ -259,7 +259,6 @@ PLANTILLA_PROCESS_ROW;
                 $sColorStatus,
                 strtoupper($sDescStatus));
         }
-	
         return $sListaServicios;
     }
 

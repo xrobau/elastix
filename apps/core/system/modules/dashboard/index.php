@@ -30,8 +30,6 @@
 
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
-include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoACL.class.php";
 
 function _moduleContent($smarty, $module_name)
 {
@@ -186,7 +184,6 @@ function processControl($action)
     $jsonObject->set_message($message);
     Header('Content-Type: application/json');
     return $jsonObject->createJSON();
-
 }
 
 function createApplesTD($arrPaneles, $pDataApplets){

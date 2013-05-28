@@ -5,160 +5,72 @@
     </header>
     <body>
         <h1>{$node_name}</h1>
-        <p align="Justify">Module Peer Information show the list of peer established. This module allow to share DialPlan with other server through Internet.</p>
+        <p align="Justify"> The Distributed DialPlan allows sharing the DialPlan with other servers through Internet or LAN. The module "Remote Server" shows the list of remote servers that we are requesting connection and also creates new request. In order to create a new request, first you have to enter the "General Information" of your Elastix Server from the module "Company Information". See the alert message in Figure 1.</p>
 	<br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img1.png" border="0"></div>
-	<div align="center">Figure 1</div>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_remote_1.png" border="0" />
+	<p>Figure 1</p></div>
+	<br/><br/>
+<p align="Justify">If you have entered the General Information of your Elastix server, you will be able to make a request and delete connections (See figure 2).</p>
+	<br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_main.png" border="0" />
+	<p>Figure 2</p></div>
 	<br/><br/>
 
-	<b style="font-size: 20px;">SEND REQUEST</b>
+	<b style="font-size: 20px;">New Request</b>
 
-	<p align="Justify">To create a connection to access the "New Request" in the Peers Information section and fill the form:</p>
+	<p align="Justify">To create a connection, click on the button "New Request" and fill the form (See Figure 3)</p>
 	<br />
-        <div align="center"><img src="../modules/{$node_id}/images/img2.png" border="0"></div>
-	<div align="center">Figure 2</div>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_request.png" border="0" />
+	<p>Figure 3</p></div>
 	<br/><br/>
 	<div>
 	Where:
 	  <ul>
-	      <li><b style="font-style: italic;">Host Remote:</b> Ip Remote Server to send request.</li>
-	      <li><b style="font-style: italic;">Remote Host Secret Keyword:</b> It is the secret key from the server to connect. This key must be sent via email by the server to connect to the your server to create the request.</li>
-	      <li><b style="font-style: italic;">Comment:</b> Some comments about request.</li>
+	      <li><b style="font-style: italic;">Remote Server:</b> The IP of the remote server where the request will be sent.</li>
+	      <li><b style="font-style: italic;">Remote Server's Key:</b> This is the secret key of the server we are going to connect to and it can be obtained from the module "Server Key" in the remote server. This key can be sent via email.</li>
+	      <li><b style="font-style: italic;">Comment:</b> Some comments about the request.</li>
 	  </ul>
 	</div>
-	<br/><br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img3.png" border="0"></div>
-	<div align="center">Figure 3</div>
-	<br/><br/>
-	<div>
-	Where:
-	  <ul style="list-style-type: decimal;">
-	      <li>The state of the local server on hold: <b style="font-style: italic;">"waiting response"</b></li>
-	      <li>The state of the remote server with IP 192.168.5.222: <b style="font-style: italic;">"Requesting connection"</b></li>
-	  </ul>
-	</div>
-	<br/><br/>
 
-	<b style="font-size: 20px;">RECEPTION OF PETITION THE REMOTE SERVER</b>
+<p align="Justify">Once you have requested the connection, you will see the status <b><i>Waiting Response...</i></b> in the list of remote servers as shown in Figure 4. This means that we are waiting for the remote server to accept the connection request.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_remote_2.png" border="0" />
+	<p>Figure 4</p></div>
+	<br/><br/>
+<p align="Justify">If the remote server accepts the request, the status will be <b><i>Connected</b></i> in both servers (See Figure 5). Here you can do some actions as "View" the details of connection (See Figure 6) and "Disconnect".</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_status_1.png" border="0" />
+	<p>Figure 5</p></div>
+	<br/><br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_view_1.png" border="0" />
+	<p>Figure 6</p></div>
+	<br/><br/>
+<p align="Justify">If the remote server rejects the request, the status will be <b><i>Rejected</b></i> (See Figure 7).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_status_2.png" border="0" />
+	<p>Figure 7</p></div>
+	<br/><br/>
+	<b style="font-size: 20px;">Reception of petition from a Remote Server</b>
 
-	<p align="Justify">From the other server will be displayed in the list of peer is the connection that the local server tries to establish with other.</p>
+	<p align="Justify">When a remote server sends us a request to establish a connection to our local server, we can accept it or reject it. The Figure 8 shows the request from a remote server to our server.</p>
 	<br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img4.png" border="0"></div>
-	<div align="center">Figure 4</div>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_request_2.png" border="0" />
+	<p>Figure 8</p></div>
 	<br/><br/>
 	<div>
 	Where:
-	  <ul style="list-style-type: decimal;">
-	      <li>Local status (Remote Server): <b style="font-style: italic;">"Requesting connection"</b></li>
-	      <li>Status of server which makes the request from the server "192.168.3.254": <b style="font-style: italic;">"waiting response"</b></li>
-	      <li>Options available with details of the server that performs the connection request from the server "192.168.3.254": <b style="font-style: italic;">"View"</b></li>
+	  <ul style="list-style-type: none;">
+	      <li><b>Remote Server:</b> This is the server that is sending the request of connection to our local server.</li>
+	      <li><b>Connection Status:</b> This field informs that we have a new request waiting for our response. Click on "New Connection Request" to see the details of the server that wants to connect to us (See figure 9).</li>
+	      <li><b>Actions:</b> Here we can Accept or Reject the request.</li>
 	  </ul>
 	</div>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_view_2.png" border="0" />
+	<p>Figure 9</p></div>
+	<br/><br/>
 	<br/>
-	<p align="Justify">In the "View" could view the server information you want to exchange your dial plan.</p>
-	<br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img5.png" border="0"></div>
-	<div align="center">Figure 5</div>
-	<br/><br/>
+	<b style="font-size: 20px;">Deleting a request</b>
 
-	<b style="font-size: 20px;">REJECTING THE REQUEST IN THE REMOTE SERVER</b>
-
-	<p align="Justify">In the "Requesting connection" in <b>Figure 4</b> when clicking accessing the following screen:</p>
-	<br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img6.png" border="0"></div>
-	<div align="center">Figure 6</div>
+	<p align="Justify">To remove a request from the remote server list, click on the checkbox of the request you want to delete from the list, click on the button "Delete" and accept the confirmation message (See Figure 10).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_delete.png" border="0" />
+	<p>Figure 10</p></div>
 	<br/><br/>
-	<div>
-	<b>Figure 6</b> can display the actions you can make from them are:
-	<ul>
-	    <li><b style="font-style: italic;">Accept:</b> To accept the request of connection.</li>
-	    <li><b style="font-style: italic;">Reject:</b> To reject the request od connection.</li>
-	</ul>
-	If the action is "Reject" then the server side which done ​​the request will display the following screen:
-	</div>
-	<br/><br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img7.png" border="0"></div>
-	<div align="center">Figure 7</div>
-	<br/><br/>
-	<div>
-	Where:
-	  <ul style="list-style-type: decimal;">
-	      <li>Local status is rejected: <b style="font-style: italic;">"Request rejected"</b></li>
-	      <li>Remote status is rejected: <b style="font-style: italic;">"connection rejected"</b></li>
-	  </ul>
-	</div>
-	<br/><br/>
-
-	<b style="font-size: 20px;">ACCEPTING THE REQUEST IN THE REMOTE SERVER</b>
-
-	<p align="Justify">If the action "Accept" in the <b>Figure 6</b> is selected then the server side which done ​​the request will display the following screen:</p>
-	<br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img8.png" border="0"></div>
-	<div align="center">Figure 8</div>
-	<br/><br/>
-	<div>
-	Where:
-	  <ul style="list-style-type: decimal;">
-	      <li>Shows the Mac Address sharing the server with whom you want to connect.</li>
-	      <li>Status of the remote server with which you want to connect in this case is disconnected and only need to apply the remote server the action "connect" to establish the connection: <b style="font-style: italic;">"disconnected"</b></li>
-	      <li>Action to connect: <b style="font-style: italic;">"Connect"</b></li>
-	  </ul>
-	</div>
-	<br/><br/>
-
-	<b style="font-size: 20px;">CONNECTION SUCCESSFUL</b>
-
-	<p align="Justify">If both servers accept the connection and are in state "connected" then the process is complete and both servers can make call to each other.</p>
-	<br/><br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img9.png" border="0"></div>
-	<div align="center">Figure 9</div>
-	<br/><br/>
-	<div>
-	Where:
-	  <ul style="list-style-type: decimal;">
-	      <li>Status <b style="font-style: italic;">"connected"</b> of the local server.</li>
-	      <li>Status <b style="font-style: italic;">"connected"</b> of remote server.</li>
-	      <li>Action for details of connection: <b style="font-style: italic;">"View"</b></li>
-	  </ul>
-	</div>
-	<br/><br/>
-
-	<b style="font-size: 20px;">DISCONNECTING A PEER</b>
-
-	<p align="Justify">If for some reason you want to disconnect the connection this could be done by entering the screen shown below from the "view" shown in <b style="font-style: italic;">Figure 9</b>.</p>
-	<br/><br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img10.png" border="0"></div>
-	<div align="center">Figure 10</div>
-	<br/><br/>
-
-	<b style="font-size: 20px;">DELETING A PEER</b>
-
-	<p align="Justify">If a petition has been rejected you just have to remove it:</p>
-	<br/><br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img11.png" border="0"></div>
-	<div align="center">Figure 11</div>
-	<br/><br/>
-	<div>
-	Where:
-	  <ul style="list-style-type: decimal;">
-	      <li>Button of remove peer.</li>
-	      <li>Popup of confirmation to remove peer.</li>
-	  </ul>
-	</div>
-	<br/><br/>
-	<p align="Justify">If a connection has been removed then the other server would see the following:</p>
-	<br/>
-        <div align="center"><img src="../modules/{$node_id}/images/img12.png" border="0"></div>
-	<div align="center">Figure 12</div>
-	<br/><br/>
-	<div>
-	Where:
-	  <ul style="list-style-type: decimal;">
-	      <li>Action to remove the peer.</li>
-	      <li>Local Connection Status: <b style="font-style: italic;">"request Deleted"</b></li>
-	      <li>Remote Connection Status: <b style="font-style: italic;">"connection deleted"</b></li>
-	      <li>Popup of confirmation to remove peer.</li>
-	  </ul>
-	</div>
     </body>
 </html>

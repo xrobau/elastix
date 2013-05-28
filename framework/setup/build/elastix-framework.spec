@@ -237,12 +237,12 @@ fi
 
 # Actualizacion About Version Release
 # Verificar si en la base ya existe algo
-#if [ "`sqlite3 /var/www/db/settings.db "select count(key) from settings where key='elastix_version_release';"`" = "0" ]; then
-#    `sqlite3 /var/www/db/settings.db "insert into settings (key, value) values('elastix_version_release','%{version}-%{release}');"`
-#else
+if [ "`sqlite3 /var/www/db/elastix.db "select count(key) from settings where property='elastix_version_release';"`" = "0" ]; then
+    `sqlite3 /var/www/db/elastix.db "insert into settings (property, value) values('elastix_version_release','%{version}-%{release}');"`
+else
     #Actualizar
-#    `sqlite3 /var/www/db/settings.db "update settings set value='%{version}-%{release}' where key='elastix_version_release';"`
-#fi
+    `sqlite3 /var/www/db/elastix.db "update settings set value='%{version}-%{release}' where property='elastix_version_release';"`
+fi
 
 # Para que agrege el contenido de /etc/motd
 /bin/grep -r '/usr/local/sbin/motd.sh > /etc/motd' /etc/rc.local
@@ -312,6 +312,18 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: introduce new setting 'uelastix'. This flag will be set
+  for uElastix images and absent/unset on ordinary systems. When set, the 
+  framework will enable a number of optimizations to improve performance in the
+  ARM environment. Currently setting this flag disables tracking of menu history
+  and enables caching of authorized modules in the session variable 
+  'elastix_user_permission'.
+- FIXED: Framework: restore use of settings table in elastix.db, and fix the
+  functions get_key_settings and set_key_settings to use the changed column 
+  name.
+  SVN Rev[5033]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

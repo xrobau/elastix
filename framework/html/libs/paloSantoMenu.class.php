@@ -80,7 +80,20 @@ class paloMenu {
     {
     	global $arrConf;
 
-	// Obtener todos los módulos autorizados
+        $uelastix = FALSE;
+        if (isset($_SESSION)) {
+            $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+            if (empty($pDB->errMsg)) {
+                $uelastix = get_key_settings($pDB, 'uelastix');
+                $uelastix = ((int)$uelastix != 0);
+            }
+            unset($pDB);
+        }
+        
+        if ($uelastix && isset($_SESSION['elastix_user_permission']))
+            return $_SESSION['elastix_user_permission'];
+
+        // Obtener todos los módulos autorizados
        $sPeticionSQL = <<<INFO_AUTH_MODULO
 SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no
        FROM acl_resource ar where id in (
@@ -135,6 +148,7 @@ INFO_AUTH_MODULO;
             $arrMenuFiltered,
             array_intersect_key($menuPrimerNivel, $menuSuperior));
                 
+        if ($uelastix) $_SESSION['elastix_user_permission'] = $arrMenuFiltered;
         return $arrMenuFiltered;
     }
 

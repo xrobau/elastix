@@ -243,7 +243,7 @@ function translateDate($dateOrig)
 function get_key_settings($pDB,$key)
 {
     $r = $pDB->getFirstRowQuery(
-        'SELECT value FROM settings WHERE key = ?',
+        'SELECT value FROM settings WHERE property = ?',
         FALSE, array($key));
     return ($r && count($r) > 0) ? $r[0] : '';
 }
@@ -252,13 +252,13 @@ function set_key_settings($pDB,$key,$value)
 {
     // Verificar si existe el valor de configuración
     $r = $pDB->getFirstRowQuery(
-        'SELECT COUNT(*) FROM settings WHERE key = ?',
+        'SELECT COUNT(*) FROM settings WHERE property = ?',
         FALSE, array($key));
     if (!$r) return FALSE;
     $r = $pDB->genQuery(
         (($r[0] > 0) 
-            ? 'UPDATE settings SET value = ? WHERE key = ?' 
-            : 'INSERT INTO settings (value, key) VALUES (?, ?)'),
+            ? 'UPDATE settings SET value = ? WHERE property = ?' 
+            : 'INSERT INTO settings (value, property) VALUES (?, ?)'),
         array($value, $key));
     return $r ? TRUE : FALSE;    
 }
@@ -677,6 +677,14 @@ SQL_PROFILE_MENUCOLOR;
  */
 function putMenuAsHistory($pdbACL, $pACL, $uid, $id_resource)
 {
+    global $arrConf;
+    
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    if (empty($pDB->errMsg)) {
+        $uelastix = get_key_settings($pDB, 'uelastix');
+        if ((int)$uelastix != 0) return TRUE;
+    }
+
     // Leer historial actual. El item 0 es el más reciente
     $sqlselect = <<<SQL_LEER_HISTORIAL
 SELECT aus.id AS id, ar.id AS id_menu FROM user_shortcut aus, acl_resource ar
@@ -1488,6 +1496,14 @@ function getSmarty($mainTheme, $basedir = '/var/www/html')
 
 function loadShortcut($pdbACL, $uid, &$smarty)
 {
+    global $arrConf;
+    
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    if (empty($pDB->errMsg)) {
+        $uelastix = get_key_settings($pDB, 'uelastix');
+        if ((int)$uelastix != 0) return '';
+    }
+
     if($uid === FALSE) return '';
     $sql = <<<SQL_BOOKMARKS_HISTORY
 SELECT us.id AS id, ar.description AS name, ar.id AS id_menu

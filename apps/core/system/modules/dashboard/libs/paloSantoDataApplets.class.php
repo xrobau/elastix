@@ -52,29 +52,47 @@ class paloSantoDataApplets
     {
         $content = '';
 
-        $hdmodel = array();
-        $output = NULL;
-        exec('/usr/bin/elastix-helper hdmodelreport', $output);
-        foreach ($output as $s) {
+    	// Intento de ejecutar los comandos en paralelo
+        $pipe_dirspace = popen('/usr/bin/elastix-helper dirspacereport', 'r');
+        $pipe_hdmodel = popen('/usr/bin/elastix-helper hdmodelreport', 'r');
+        
+        // Recolectar la información de particiones
+        $output = $retval = NULL;
+        exec('/bin/df -P /etc/fstab', $output, $retval);
+        $part = array();
+        $regexp = "!^([/-_\.[:alnum:]|-]+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d{1,3}%)\s+([/-_\.[:alnum:]]+)$!";
+        foreach ($output as $linea) {
+            $regs = NULL;
+            if (preg_match($regexp, $linea, $regs)) {
+            	$particion = array(
+                    'dispositivo'               =>  $regs[1],
+                    'num_bloques_total'         =>  $regs[2],
+                    'num_bloques_usados'        =>  $regs[3],
+                    'punto_montaje'             =>  $regs[6],
+                );
+                $particion['porcentaje_usado'] = 100.0 * $particion['num_bloques_usados'] / $particion['num_bloques_total'];
+                $particion['porcentaje_libre'] = 100.0 - $particion['porcentaje_usado'];
+                $part[] = $particion;
+            }
+        }
+        
+        // Recolectar la información acumulada de modelos de partición
+        while ($s = fgets($pipe_hdmodel)) {
             $s = trim($s); $l = explode(' ', $s, 2);
             if (count($l) > 1) $hdmodel[$l[0]] = $l[1];
         }
-
-        $oPalo = new paloSantoSysInfo();
-        $arrSysInfo = $oPalo->getSysInfo();
-        $arrParticiones = $arrSysInfo['particiones'];
-        $str = ""; $val = null;
-        foreach( $arrParticiones as $key => $particion )
-        {
-            $iPorcentajeUsado = 100.0 * $particion['num_bloques_usados'] / $particion['num_bloques_total'];
-            $iPorcentajeLibre = 100.0 - $iPorcentajeUsado;
-            $sEnlaceImagen = $this->getImage_Disc_Usage($iPorcentajeUsado);
+        pclose($pipe_hdmodel);
+        
+        // Combinar la información de modelo y generar HTML
+        // TODO: mover esto a una plantilla
+        foreach ($part as $particion) {
+            $sEnlaceImagen = $this->getImage_Disc_Usage($particion['porcentaje_usado']);
             $sTotalGB = number_format($particion['num_bloques_total'] / 1024 / 1024, 2);
-            $sPorcentajeUsado = number_format($iPorcentajeUsado, 0);
-            $sPorcentajeLibre = number_format($iPorcentajeLibre, 0);
+            $sPorcentajeUsado = number_format($particion['porcentaje_usado'], 0);
+            $sPorcentajeLibre = number_format($particion['porcentaje_libre'], 0);
 
             // Intentar determinar el modelo del disco que contiene la partición
-            $sModelo = isset($hdmodel[$particion['fichero']]) ? $hdmodel[$particion['fichero']] : 'N/A';
+            $sModelo = isset($hdmodel[$particion['dispositivo']]) ? $hdmodel[$particion['dispositivo']] : 'N/A';
             $content .= <<<PLANTILLA_DISCO
 <div>
     $sEnlaceImagen
@@ -90,7 +108,6 @@ class paloSantoDataApplets
     </div>
 </div>
 PLANTILLA_DISCO;
-        }
 
         // Lista de directorios a buscar
         $listaReporteDir = array(
@@ -125,13 +142,13 @@ PLANTILLA_DISCO;
                 'use'   =>  'N/A',
             ),
         );
-        $output = NULL;
-        exec('/usr/bin/elastix-helper dirspacereport', $output);
-        foreach ($output as $s) {
-                $s = trim($s); $l = explode(' ', $s);
+        //foreach ($output as $s) {
+        while ($s = fgets($pipe_dirspace)) {
+            $s = trim($s); $l = explode(' ', $s);
             if (count($l) > 1 && isset($listaReporteDir[$l[0]]))
                 $listaReporteDir[$l[0]]['use'] = $l[1];
         }
+        pclose($pipe_dirspace);
 
         // Datos extra de directorios seleccionados
         $content .= <<<PLANTILLA_DIRECTORIOS
@@ -144,6 +161,7 @@ PLANTILLA_DISCO;
 <div class="neo-applet-hd-report-row-right"><strong>{$listaReporteDir['recordings']['tag']}:</strong> {$listaReporteDir['recordings']['use']}</div></div>
 PLANTILLA_DIRECTORIOS;
         return $content;
+        }
     }
 
     function getDataApplet_PerformanceGraphic()

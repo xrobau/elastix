@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed May 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Wed May 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: set up an HTML version of the gauges used in the Hard
   Disks and System Resources applets, and use them if the uelastix flag is set.
@@ -151,6 +155,7 @@ fi
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5018]
 
 * Mon May 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix some potential code injection vulnerabilities.

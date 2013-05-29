@@ -400,6 +400,8 @@ div.neo-applet-tdesc {
 	float:left;
 	margin-left: 15%;
     white-space:nowrap;
+    left:120px;
+    overflow:hidden;
 }
 div.neo-clearing {
 	clear:both;
@@ -598,3 +600,4 @@ div.neo-applet-processes-menu {
       background: #E4E2E2;
       color:#000;
 }
+

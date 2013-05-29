@@ -131,6 +131,8 @@ fi
 
 %changelog
 * Wed May 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: fix overlapping text in System Resources applet on blackmin.
+  SVN Rev[5046]
 - CHANGED: Dashboard: to check whether a service is enabled, the code now runs
   a glob and caches the results instead of spawning a ls and a grep. Also add
   support for systemd services.

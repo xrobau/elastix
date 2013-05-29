@@ -131,9 +131,13 @@ fi
 
 %changelog
 * Wed May 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: to check whether a service is enabled, the code now runs
+  a glob and caches the results instead of spawning a ls and a grep. Also add
+  support for systemd services.
+  SVN Rev[5045]
 - CHANGED: Dashboard: request several applets concurrently instead of 
   sequentially.
-  SVN Rev[5043]
+  SVN Rev[5044]
 - CHANGED: Dashboard: set up an HTML version of the gauges used in the Hard
   Disks and System Resources applets, and use them if the uelastix flag is set.
   This is required to skip generation of the corresponding graphic, which is

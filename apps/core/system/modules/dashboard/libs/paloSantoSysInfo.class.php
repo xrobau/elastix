@@ -8,6 +8,8 @@ require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 
 class paloSantoSysInfo
 {
+    private $_initscript_cache = NULL;
+    
     function getSysInfo()
     {
         return obtener_info_de_sistema();
@@ -290,9 +292,24 @@ class paloSantoSysInfo
 
     function _isActivate($process)
     {
-        $output = $retval = NULL;
-        exec('ls /etc/rc3.d/ | grep '.escapeshellarg($process), $output, $retval);
-        return ($retval == 0 && preg_match("/^S/", $output[0])) ? 1 : 0;
+        if (!is_array($this->_initscript_cache)) {
+            $this->_initscript_cache = array();
+            
+            // Esta lista asume systemd
+            foreach (glob('/etc/systemd/system/multi-user.target.wants/*.service') as $path) {
+                $regs = NULL;
+                if (preg_match('|([^/]+)\.service$|', $path, $regs))
+                    $this->_initscript_cache[] = $regs[1];
+            }
+            
+            // Esta lista asume scripts SysV
+            foreach (glob('/etc/rc3.d/S*') as $path) {
+                $regs = NULL;
+                if (preg_match('|/S\d+(\S+)$|', $path, $regs))
+                    $this->_initscript_cache[] = $regs[1];
+            }
+        }
+        return in_array($process, $this->_initscript_cache) ? 1 : 0;
     }
 
     function getStatusServices()

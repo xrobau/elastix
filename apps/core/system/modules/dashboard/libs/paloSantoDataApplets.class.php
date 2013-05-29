@@ -48,6 +48,20 @@ class paloSantoDataApplets
         $title = "";
     }
 
+    private function _getFastGraphics()
+    {
+        $uelastix = FALSE;
+        if (isset($_SESSION)) {
+            $pDB = new paloDB($this->arrConf['elastix_dsn']['elastix']);
+            if (empty($pDB->errMsg)) {
+                $uelastix = get_key_settings($pDB, 'uelastix');
+                $uelastix = ((int)$uelastix != 0);
+            }
+            unset($pDB);
+        }
+        return $uelastix;
+    }
+
     function getDataApplet_HardDrives()
     {
         $content = '';
@@ -56,6 +70,8 @@ class paloSantoDataApplets
         $pipe_dirspace = popen('/usr/bin/elastix-helper dirspacereport', 'r');
         $pipe_hdmodel = popen('/usr/bin/elastix-helper hdmodelreport', 'r');
         
+        $fastgauge = $this->_getFastGraphics();
+
         // Recolectar la información de particiones
         $output = $retval = NULL;
         exec('/bin/df -P /etc/fstab', $output, $retval);
@@ -86,7 +102,9 @@ class paloSantoDataApplets
         // Combinar la información de modelo y generar HTML
         // TODO: mover esto a una plantilla
         foreach ($part as $particion) {
-            $sEnlaceImagen = $this->getImage_Disc_Usage($particion['porcentaje_usado']);
+            $sEnlaceImagen = $fastgauge 
+                ? $this->_htmldiskuse($particion['porcentaje_usado'] / 100.0, 140, 140)
+                : $this->getImage_Disc_Usage($particion['porcentaje_usado']);
             $sTotalGB = number_format($particion['num_bloques_total'] / 1024 / 1024, 2);
             $sPorcentajeUsado = number_format($particion['porcentaje_usado'], 0);
             $sPorcentajeLibre = number_format($particion['porcentaje_libre'], 0);
@@ -162,6 +180,19 @@ PLANTILLA_DISCO;
 PLANTILLA_DIRECTORIOS;
         return $content;
         }
+    }
+
+    private function _htmldiskuse($percent, $width, $height)
+    {
+        $height_used = (int)($percent * 100.0);
+        $height_free = 100 - $height_used;
+        return <<<PLANTILLA_DIV
+<div style="width: {$width}px; height: {$height}px;">
+<div style="position: relative; left: 33%; width: 33%; background: #6e407e;  height: 100%; border: 1px solid #000000;">
+<div style="position: relative; background: #3184d5; top: {$height_free}%; height: {$height_used}%">&nbsp;</div>
+</div>
+</div>
+PLANTILLA_DIV;
     }
 
     function getDataApplet_PerformanceGraphic()
@@ -414,6 +445,7 @@ PLANTILLA_PROCESS_ROW;
     function getDataApplet_SystemResources()
     {
         $oPalo = new paloSantoSysInfo();
+        $fastgauge = $this->_getFastGraphics();
 
         $cpu_a = $oPalo->obtener_muestra_actividad_cpu();
         
@@ -426,19 +458,23 @@ PLANTILLA_PROCESS_ROW;
         //MEMORY USAGE
         $fraction_mem_used = ($meminfo['MemTotal'] - $meminfo['MemFree'] - $meminfo['Cached'] - $meminfo['MemBuffers']) / $meminfo['MemTotal'];
         $mem_usage_val  = number_format(100.0 * $fraction_mem_used, 1);
-        $mem_usage = $this->genericImage('rbgauge', array(
-            'percent' => $fraction_mem_used,
-            'size' => '140,140'),
-            null, null);
+        $mem_usage = $fastgauge
+            ? $this->_htmlgauge($fraction_mem_used, 140, 140) 
+            : $this->genericImage('rbgauge', array(
+                'percent' => $fraction_mem_used,
+                'size' => '140,140'),
+                null, null);
         $inf2 = number_format($meminfo['MemTotal']/1024, 2)." Mb";
 
         //SWAP USAGE
         $fraction_swap_used = ($meminfo['SwapTotal'] - $meminfo['SwapFree']) / $meminfo['SwapTotal'];
         $swap_usage_val = number_format(100.0 * $fraction_swap_used, 1);
-        $swap_usage = $this->genericImage('rbgauge', array(
-            'percent' => $fraction_swap_used,
-            'size' => '140,140'),
-            null, null);
+        $swap_usage = $fastgauge
+            ? $this->_htmlgauge($fraction_swap_used, 140, 140) 
+            : $this->genericImage('rbgauge', array(
+                'percent' => $fraction_swap_used,
+                'size' => '140,140'),
+                null, null);
         $inf3 = number_format($meminfo['SwapTotal']/1024, 2)." Mb";
 
         //UPTIME
@@ -456,10 +492,12 @@ PLANTILLA_PROCESS_ROW;
         usleep(200000);
         $cpu_b = $oPalo->obtener_muestra_actividad_cpu();
         $cpu_percent = calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
-        $cpu_usage = $this->genericImage('rbgauge', array(
-            'percent' => $cpu_percent,
-            'size' => '140,140'),
-            null, null);
+        $cpu_usage = $fastgauge
+            ? $this->_htmlgauge($cpu_percent, 140, 140) 
+            : $this->genericImage('rbgauge', array(
+                'percent' => $cpu_percent,
+                'size' => '140,140'),
+                null, null);
         $inf1 = number_format($cpu_percent * 100.0, 1);
 
         $html ="<div style='height:165px; position:relative; text-align:center;'>
@@ -494,6 +532,30 @@ PLANTILLA_PROCESS_ROW;
                           <div class='neo-applet-tdesc'>RAM: $inf2 SWAP: $inf3</div>
                         </div>";
         return $html;
+    }
+
+    private function _htmlgauge($percent, $width, $height)
+    {
+        if ($percent > 1) $percent = 1.0;
+        if ($percent < 0.25)
+            $rgb = array(0, $percent * 4, 1.0);
+        elseif ($percent < 0.5)
+            $rgb = array(0, 1.0, (1.0 - ($percent - 0.25) * 4));
+        elseif ($percent < 0.75)
+            $rgb = array(($percent - 0.5) * 4, 1.0, 0);
+        else
+            $rgb = array(1.0, (1.0 - ($percent - 0.75) * 4), 0);
+        $color = sprintf('#%02x%02x%02x', (int)($rgb[0] * 255), (int)($rgb[1] * 255), (int)($rgb[2] * 255));
+
+        $height_used = (int)($percent * 100.0);
+        $height_free = 100 - $height_used;
+        return <<<PLANTILLA_DIV
+<div style="width: {$width}px; height: {$height}px;">
+<div style="position: relative; left: 33%; width: 33%; background: #FFFFFF;  height: 100%; border: 1px solid #000000;">
+<div style="position: relative; background: {$color}; top: {$height_free}%; height: {$height_used}%">&nbsp;</div>
+</div>
+</div>
+PLANTILLA_DIV;
     }
 
     function getDataApplet_Faxes()

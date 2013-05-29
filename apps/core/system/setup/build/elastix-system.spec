@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed May 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: request several applets concurrently instead of 
+  sequentially.
+  SVN Rev[5043]
+
 * Wed May 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

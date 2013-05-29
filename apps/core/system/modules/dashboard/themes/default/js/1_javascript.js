@@ -264,24 +264,24 @@ function jfunction(id)
 
 function refresh(element)
 {
-    code = $(element).attr("id");
+    var code = $(element).attr("id");
     code = code.split("refresh_");
     code = code[1];
-    loading = $("#loading").val();
+    var loading = $("#loading").val();
     // Se obtiene la imagen loading con su texto traducido
     $("#"+code).html("<img class='ima' src='modules/"+module_name+"/images/loading.gif' border='0' align='absmiddle' />&nbsp;"+loading);
-        // Se realiza la petición para obtener los datos del applet
-        var arrAction	 = new Array();
-        arrAction["action"]  = "refreshDataApplet";
-        arrAction["code"]    = code;
-        arrAction["rawmode"] = "yes";
-        request("index.php",arrAction,false,
-	    function(arrData,statusResponse,error)
-	    {
-	      $("#"+code).html(arrData);
-	    }
-	 );
-	
+
+    // Se realiza la petición para obtener los datos del applet
+    var arrAction	 = new Array();
+    arrAction["action"]  = "refreshDataApplet";
+    arrAction["code"]    = code;
+    arrAction["rawmode"] = "yes";
+    request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            $("#"+code).html(arrData);
+        }
+    );
 }
 
 function neoAppletProcesses_esconderMenu()

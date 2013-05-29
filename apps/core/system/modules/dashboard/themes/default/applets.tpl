@@ -5,5 +5,8 @@
 </table>
 <input type="hidden" id="loading" value="{$loading}"/>
 <script language="javascript" type = "text/javascript">
-    loadAppletData();
+    /*loadAppletData();*/
+    {literal}
+    $('a[id^="refresh_"]').each(function (i, e) { refresh(e); });
+    {/literal}
 </script>

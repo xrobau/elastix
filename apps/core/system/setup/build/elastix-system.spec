@@ -131,6 +131,9 @@ fi
 
 %changelog
 * Wed May 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: request several applets concurrently instead of 
+  sequentially.
+  SVN Rev[5043]
 - CHANGED: Dashboard: set up an HTML version of the gauges used in the Hard
   Disks and System Resources applets, and use them if the uelastix flag is set.
   This is required to skip generation of the corresponding graphic, which is

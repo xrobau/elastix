@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -305,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu May 30 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile
+
 * Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: require paloSantoPDF.class.php inside the only method that
   actually requires its class paloPDF, rather than every time paloSantoGrid is
@@ -321,6 +325,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile
+  SVN Rev[5019]
 
 * Mon May 27 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: do not use HTTP_HOST to build redirects and other URLs in

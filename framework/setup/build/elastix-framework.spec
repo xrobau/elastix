@@ -305,6 +305,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri May 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: re-introduce saving last viewed module in a session 
+  variable. It turns out that embedded freepbx really needs this hack. Now with
+  a comment explaining why the hack is necessary.
+  SVN Rev[5049]
+
 * Thu May 30 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile

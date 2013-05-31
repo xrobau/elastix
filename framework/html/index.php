@@ -150,9 +150,17 @@ if (isset($_SESSION['elastix_user']) &&
         return;
     }
 
+    /* El módulo pbxadmin que integra a FreePBX no construye enlaces con 
+     * parámetros menu, ni con config.php en todos los casos. Por lo tanto, los
+     * usos sucesivos de enlaces en FreePBX embebido requiren recordar que se
+     * sirven a través de pbxadmin. */
+    if (empty($selectedMenu) && !empty($_SESSION['menu']))
+        $selectedMenu = $_SESSION['menu'];
+
     // Inicializa el objeto palosanto navigation
     $oPn = new paloSantoNavigation($arrMenuFiltered, $smarty, $selectedMenu);
     $selectedMenu = $oPn->getSelectedModule();
+    $_SESSION['menu'] = $selectedMenu;
 
     // Guardar historial de la navegación
     // TODO: también para rawmode=yes ?

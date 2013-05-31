@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri May 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Date/Time: fix incorrect formatting of date for ticking clock.
+  SVN Rev[5048]
+
 * Wed May 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: fix overlapping text in System Resources applet on blackmin.
   SVN Rev[5046]

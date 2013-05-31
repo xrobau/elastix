@@ -196,11 +196,10 @@ function _moduleContent(&$smarty, $module_name)
 	}
     $sContenido = '';
 
-//    $smarty->assign("COMBO_FECHA_HORA",/*$combo_fecha_hora*/ 'gato' );
     $mes = date("m",time());
+    $mes = (int)$mes - 1;
 
     $smarty->assign("CURRENT_DATETIME", strftime("%Y,$mes,%d,%H,%M,%S",time()));
-    $smarty->assign("MES_ACTUAL", ucwords(strftime("%B",time())));
     $smarty->assign('LISTA_ZONAS', $listaZonas);
     $smarty->assign('ZONA_ACTUAL', $sZonaActual);
     $smarty->assign("CURRENT_DATE",strftime("%d %b %Y",time()));

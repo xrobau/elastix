@@ -1,26 +1,8 @@
 <script type="text/javascript">
  
-var serv_date2=new Date({$CURRENT_DATETIME});
-{literal}
-function formatear_long2(val){
-var salida2=(val.toString().length==1)? "0"+val : val;
-return salida2;
-}
-
-function displaytime2(){
-serv_date2.setSeconds(serv_date2.getSeconds()+1);
-
-var datestring2=formatear_long2(serv_date2.getDate())+", "+serv_date2.getFullYear();
-var timestring2=formatear_long2(serv_date2.getHours())+":"+formatear_long2(serv_date2.getMinutes())+":"+formatear_long2(serv_date2.getSeconds())
-
-document.getElementById("SERVER_TIME").innerHTML=datestring2+" "+timestring2;
-//document.getElementById("servertime").innerHTML=datestring2+" "+timestring2;
-}
-{/literal}
-
-setInterval("displaytime2()", 1000);
-
-
+var serv_date2 = new Date({$CURRENT_DATETIME});
+var browser_date = new Date();
+var serv_msecdiff = browser_date.getTime() - serv_date2.getTime();
 </script>
 
 
@@ -41,7 +23,7 @@ setInterval("displaytime2()", 1000);
 
           <tr> 
             <td width="15%"><b>{$INDEX_HORA_SERVIDOR}:</b></td>
-            <td>{$MES_ACTUAL} <span id="SERVER_TIME" align='right'></span></td>
+            <td><span id="SERVER_TIME" align='right'></span></td>
           </tr>
           <tr>
             <td width="15%"><b>{$TIME_NUEVA_FECHA}:</b></td>

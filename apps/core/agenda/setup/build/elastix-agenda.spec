@@ -122,6 +122,11 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Sun Jun 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: remove an useless sleep() call in the method to check whether
+  the Festival TTS service is up.
+  SVN Rev[5050]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

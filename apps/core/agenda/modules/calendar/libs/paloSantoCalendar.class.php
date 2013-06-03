@@ -557,7 +557,6 @@ class paloSantoCalendar {
     function festivalUp()
     {
         exec("service festival status", $flag, $status);
-		sleep(3);
         if($status == 0){
             return true;
         }

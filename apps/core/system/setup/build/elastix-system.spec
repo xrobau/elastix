@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jun 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: fix regression in restore functionality due to missing
+  quotation marks for string expression.
+  SVN Rev[5051]
+
 * Fri May 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Date/Time: fix incorrect formatting of date for ticking clock.
   SVN Rev[5048]

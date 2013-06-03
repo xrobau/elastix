@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Sun Jun 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: remove an useless sleep() call in the method to check whether
+  the Festival TTS service is up.
+  SVN Rev[5050]
+
 * Thu May 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

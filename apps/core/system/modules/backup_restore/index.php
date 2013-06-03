@@ -423,7 +423,7 @@ function restore_form($smarty, $local_templates_dir, $arrLang, $path_backup, $mo
     $archivo_post = basename($archivo_post);
 
     $dir_respaldo = "$path_backup";
-    $comando="cd ".escapeshellarg($dir_respaldo)."; tar xvf ".escapeshellarg($dir_respaldo/$archivo_post)." backup/a_options.xml";
+    $comando="cd ".escapeshellarg($dir_respaldo)."; tar xvf ".escapeshellarg("$dir_respaldo/$archivo_post")." backup/a_options.xml";
     exec($comando,$output,$retval);
     if ($retval==0)
     {

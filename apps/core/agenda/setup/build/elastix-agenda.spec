@@ -122,6 +122,12 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Tue Jun 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: the output of 'core show channels concise' has changed from 
+  Asterisk 1.6 to 1.8 and later, and breaks parsing prior to call transfer.
+  Fixed. Fixes part of Elastix bug #1570.
+  SVN Rev[5053]
+
 * Sun Jun 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: remove an useless sleep() call in the method to check whether
   the Festival TTS service is up.

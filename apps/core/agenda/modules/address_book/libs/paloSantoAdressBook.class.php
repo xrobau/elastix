@@ -282,7 +282,7 @@ a array with the field "total" containing the total of records.
             $arrData = explode("!",$arrConsole[0]);
             $command_data['origen']  = $origen;
             $command_data['destino'] = $destino;
-            $command_data['channel'] = $arrData[11]; // $arrData[0] tiene mi canal de conversa, $arrData[11] tiene el canal con quies estoy conversando
+            $command_data['channel'] = $arrData[12]; // $arrData[0] tiene mi canal de conversa, $arrData[12] tiene el canal con quies estoy conversando
             $command_data['description'] = $description;
             return $this->AsteriskManager_Redirect($data_connection['host'], $data_connection['user'], $data_connection['password'], $command_data);
         }

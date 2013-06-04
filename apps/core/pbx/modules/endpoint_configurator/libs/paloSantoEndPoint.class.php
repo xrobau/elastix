@@ -807,7 +807,7 @@ class paloSantoEndPoint
         $data = explode("\n",$result['data']);
         $extension = "";
         foreach($data as $key => $line){
-            if(preg_match("/(\d+\/\d+)[[:space:]]*($ip)[[:space:]]*[[:alpha:]]*[[:space:]]*[[:alpha:]]*[[:space:]]*[[:alpha:]]{0,1}[[:space:]]*[[:digit:]]*[[:space:]]*([[:alpha:]]*)/",$line,$match)){
+            if(preg_match("/(\d+\/\d+)[[:space:]]*($ip)[[:space:]]+[[:alpha:]]*[[:space:]]*[[:alpha:]]*[[:space:]]*[[:alpha:]]{0,1}[[:space:]]*[[:digit:]]*[[:space:]]*([[:alpha:]]*)/",$line,$match)){
                 if($match[3] == "OK"){
                     $tmp = explode("/",$match[1]);
             $_SESSION['endpoint_configurator']['extensions_registered'][$ip][] = "SIP:$tmp[0]";

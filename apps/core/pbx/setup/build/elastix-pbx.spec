@@ -363,6 +363,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jun 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: search of extension given IP can falsely match
+  another IP of which the target IP is a prefix. Fixed. Fixes part of Elastix 
+  bug #1570.
+  SVN Rev[5052]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

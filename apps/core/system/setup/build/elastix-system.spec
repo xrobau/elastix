@@ -130,6 +130,17 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Jun 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Packages: partial rewrite. Reorganize strategy for installed packages
+  to run rpm in a pipe (hopefully in parallel) and to keep open the database
+  connections to the various repository files. Do not invoke an external command
+  to check whether each package is installed when one invocation is enough. Make
+  a distinction between same-named packages for different architectures. Do not
+  display anything but the latest version of a not-installed package. All of
+  this results in a noticeable speedup (from 8 seconds to 3 for the basic 
+  listing).
+  SVN Rev[5055] 
+
 * Mon Jun 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix regression in restore functionality due to missing
   quotation marks for string expression.

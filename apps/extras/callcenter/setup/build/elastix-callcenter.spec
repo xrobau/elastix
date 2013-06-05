@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Jun 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Callback Extensions: remove access to variable that no longer exists
+  from Agents implementation.
+
 * Mon May 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): check that target extension for transfer is entirely
   numeric. Fixes Elastix bug #1553.

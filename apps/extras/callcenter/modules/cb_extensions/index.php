@@ -148,7 +148,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
             //NULL,
             htmlentities($tuplaAgente['number'], ENT_COMPAT, 'UTF-8'),
             htmlentities($tuplaAgente['name'], ENT_COMPAT, 'UTF-8'),
-            (($tuplaAgente['sync'] != 'CC') ? ($tuplaAgente['online'] ? _tr("Online") : _tr("Offline")) : '&nbsp;'),
+            ($tuplaAgente['online'] ? _tr("Online") : _tr("Offline")),
             "<a href='?menu=$module_name&amp;action=edit_agent&amp;id_agent=" . $tuplaAgente["number"] . "'>["._tr("Edit")."]</a>",
         );
 /*

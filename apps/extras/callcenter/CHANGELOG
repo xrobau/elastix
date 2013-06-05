@@ -1,3 +1,5 @@
+* FIXED: Callback Extensions: remove access to variable that no longer exists
+  from Agents implementation.
 * FIXED: Dialer (ECCP): check that target extension for transfer is entirely
   numeric. Fixes Elastix bug #1553.
 

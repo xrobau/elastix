@@ -92,6 +92,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Billing Rates, Graphic Report: remove duplicate definition of
+  getParameter() that gets confused by Fortify as the one used by the framework.
+  SVN Rev[5058]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.

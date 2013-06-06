@@ -64,18 +64,6 @@ function _moduleContent(&$smarty, $module_name)
     return $sContenidoModulo;
 }
 
-if (!function_exists('getParameter')) {
-function getParameter($parameter)
-{
-    if(isset($_POST[$parameter]))
-        return $_POST[$parameter];
-    else if(isset($_GET[$parameter]))
-        return $_GET[$parameter];
-    else
-        return null;
-}
-}
-
 function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectorio)
 {
     global $arrLang;

@@ -319,6 +319,8 @@ function load_language($ruta_base='')
 
 function load_language_module($module_id, $ruta_base='')
 {
+    global $arrLangModule;
+
     $lang = get_language($ruta_base);
     include_once $ruta_base."modules/$module_id/lang/en.lang";
     $lang_file_module = $ruta_base."modules/$module_id/lang/$lang.lang";

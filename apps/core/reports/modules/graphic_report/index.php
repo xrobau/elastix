@@ -404,18 +404,6 @@ function loadTrunks($pDB_ext)
     return $arrTrunk;
 }
 
-if (!function_exists('getParameter')) {
-function getParameter($parameter)
-{
-    if(isset($_POST[$parameter]))
-        return $_POST[$parameter];
-    else if(isset($_GET[$parameter]))
-        return $_GET[$parameter];
-    else
-        return null;
-}
-}
-
 function getAction()
 {
     foreach (array('show', 'new') as $key)

@@ -243,7 +243,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
     {
         if (!file_exists("modules/$module/index.php"))
             return "Error: The module <b>modules/$module/index.php</b> could not be found!<br/>";
-
+        /*
         // Cargar las configuraciones para el módulo elegido
         if (file_exists("modules/$module/configs/default.conf.php")) {
             require_once "modules/$module/configs/default.conf.php";
@@ -255,7 +255,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
         
         // Cargar las traducciones para el módulo elegido
         load_language_module($module);
-        
+        */
         ini_set('include_path', dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module/libs:".ini_get('include_path'));
 
         require_once "modules/$module/index.php";

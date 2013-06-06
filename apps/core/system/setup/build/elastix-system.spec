@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Time Config: remove duplicate definition of getParameter() that gets
+  confused by Fortify as the one used by the framework.
+  SVN Rev[5059]
+
 * Wed Jun 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Packages: partial rewrite. Reorganize strategy for installed packages
   to run rpm in a pipe (hopefully in parallel) and to keep open the database

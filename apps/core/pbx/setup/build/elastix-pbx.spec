@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: File Editor, Monitoring, Voicemail: remove duplicate definition of
+  getParameter() that gets confused by Fortify as the one used by the framework.
+  SVN Rev[5057]
+
 * Tue Jun 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: search of extension given IP can falsely match
   another IP of which the target IP is a prefix. Fixed. Fixes part of Elastix 

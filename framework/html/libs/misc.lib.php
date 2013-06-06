@@ -838,4 +838,14 @@ SQL_BOOKMARKS_HISTORY;
     
     return $smarty->fetch('_common/_shortcut.tpl');
 }
+
+function getTemplatesDirModule($module_name)
+{
+    global $arrConf;
+
+    //folder path for custom templates
+    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
+    $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
+    return "$base_dir/modules/$module_name/$templates_dir/{$arrConf['theme']}";
+}
 ?>

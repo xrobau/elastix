@@ -305,6 +305,22 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: lay foundation to remove some boilerplate from all Elastix
+  modules:
+  - All modules need to load their i18n strings. Currently every module either
+    calls load_language_module() or uses require() directly to load the PHP 
+    strings. The framework will now load the i18n strings for the module.
+    Duplicate loading of strings is harmless, so old modules can remain as-is.
+  - All modules need to load their default.conf.php file. Just like the language
+    files, the framework now loads the configuration for the module.
+  - All modules need to get the custom template directory for forms and such.
+    A framework function, getTemplatesDirModule(), has been created for this.
+  - Finally, many modules use the convention that class XYZ is defined in the
+    file XYZ.class.php. The framework can now support this convention to 
+    implement autoloading, so that modules do not need to require() every single
+    class file anymore. 
+
 * Fri May 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: re-introduce saving last viewed module in a session 
   variable. It turns out that embedded freepbx really needs this hack. Now with

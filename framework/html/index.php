@@ -27,9 +27,25 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.3 2007/07/17 00:03:42 gcarrillo Exp $ */
 
+function spl_elastix_class_autoload($sNombreClase)
+{
+    if (!preg_match('/^\w+$/', $sNombreClase)) return;
+
+    $sNombreBase = $sNombreClase.'.class.php';
+    foreach (explode(':', ini_get('include_path')) as $sDirInclude) {
+        if (file_exists($sDirInclude.'/'.$sNombreBase)) {
+            require_once($sNombreBase);
+            return;
+        }
+    }
+}
+spl_autoload_register('spl_elastix_class_autoload');
+
+// Agregar directorio libs de script a la lista de rutas a buscar para require()
+ini_set('include_path', dirname($_SERVER['SCRIPT_FILENAME'])."/libs:".ini_get('include_path'));
+
 include_once("libs/misc.lib.php");
 include_once "configs/default.conf.php";
-include_once "libs/paloSantoNavigation.class.php"; 
 include_once "libs/paloSantoDB.class.php";
 include_once "libs/paloSantoMenu.class.php";
 include_once("libs/paloSantoACL.class.php");// Don activate unless you know what you are doing. Too risky!
@@ -145,6 +161,19 @@ if (isset($_SESSION['elastix_user']) &&
     // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
     if (!is_null($selectedMenu) && $selectedMenu == '_elastixutils' && 
         file_exists('modules/_elastixutils/index.php')) {
+        
+        // Cargar las configuraciones para el módulo elegido
+        if (file_exists('modules/_elastixutils/configs/default.conf.php')) {
+            require_once 'modules/_elastixutils/configs/default.conf.php';
+
+            global $arrConf;
+            global $arrConfModule;
+            $arrConf = array_merge($arrConf, $arrConfModule);
+        }
+        
+        // Cargar las traducciones para el módulo elegido
+        load_language_module($selectedMenu);
+        
         require_once 'modules/_elastixutils/index.php';
         echo _moduleContent($smarty, $selectedMenu);
         return;

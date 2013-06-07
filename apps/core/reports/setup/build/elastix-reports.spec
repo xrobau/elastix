@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Jun 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Graphic Report: replace static select tag in template with a select
+  from paloForm, which additionally provides for future i18n. Also fixes part of
+  Elastix bug #1570.
+  SVN Rev[5063]
+
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Billing Rates, Graphic Report: remove duplicate definition of
   getParameter() that gets confused by Fortify as the one used by the framework.

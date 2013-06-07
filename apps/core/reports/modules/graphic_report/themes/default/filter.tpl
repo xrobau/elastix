@@ -3,11 +3,7 @@
         <td width="30%" align="right">{$date_from.LABEL}:</b></td>
         <td width="20%" align="left" nowrap>{$date_from.INPUT} </td>
         <td width="20%" onload="show_elements();">
-            <select id="classify_by" name="classify_by" size="1" onChange="show_elements();" >
-                <option value="Number"{$SELECTED_1} >Extention(Number)</option>
-                <option value="Queue" {$SELECTED_2} >Queue</option>
-                <option value="Trunk" {$SELECTED_3} >Trunk</option>
-            </select>
+            {$classify_by.INPUT}
         </td>
     </tr>
     <tr class="letra12">

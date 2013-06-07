@@ -93,6 +93,8 @@ fi
 
 %changelog
 * Fri Jun 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Graphic Report: convert entirely from arrLang to use of _tr().
+  SVN Rev[5064]
 - FIXED: Graphic Report: replace static select tag in template with a select
   from paloForm, which additionally provides for future i18n. Also fixes part of
   Elastix bug #1570.

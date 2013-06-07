@@ -48,24 +48,7 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoExtention.class.php";
     
-
-    global $arrLang;
-    global $arrLangModule;
-
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-
-    // Include language file for EN, then for local, and merge the two.
-    $arrLangModule = NULL;
-    include_once("modules/$module_name/lang/en.lang");
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) {
-        $arrLanEN = $arrLangModule;
-        include_once($lang_file);
-        $arrLangModule = array_merge($arrLanEN, $arrLangModule);
-    }
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
@@ -102,7 +85,7 @@ function _moduleContent(&$smarty, $module_name)
     {
         case "show":
             $_POST['nav'] = null; $_POST['start'] = null;
-            $content = report_Extention($smarty, $module_name, $local_templates_dir, $arrLang, $pDB_cdr, $pDB_ext, $arrLangModule);
+            $content = report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr, $pDB_ext);
             break;
         case 'grafic':
             $du = $_GET['du'];
@@ -114,7 +97,7 @@ function _moduleContent(&$smarty, $module_name)
 	    if(preg_match("/^[1-9]{1}[[:digit:]]*$/",$ext))
 		grafic($du, $totIn, $totOut, $tot, $ext);
 	    else
-		$content = report_Extention($smarty, $module_name, $local_templates_dir, $arrLang, $pDB_cdr, $pDB_ext, $arrLangModule);
+		$content = report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr, $pDB_ext);
             break;
         case 'grafic_queue':
             $queue = "";//isset($_GET['queue'])?$_GET['queue']:"";//queue
@@ -138,30 +121,30 @@ function _moduleContent(&$smarty, $module_name)
             grafic_trunk2($pDB_cdr, $pDB_ext, $module_name, $trunk, $dti, $dtf);
             break;
         default:
-            $content = report_Extention($smarty, $module_name, $local_templates_dir, $arrLang, $pDB_cdr, $pDB_ext, $arrLangModule);
+            $content = report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr, $pDB_ext);
             break;
     }
 
     return $content;
 }
 
-function report_Extention($smarty, $module_name, $local_templates_dir, $arrLang, $pDB_cdr, $pDB_ext, $arrLangModule)
+function report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr, $pDB_ext)
 {
-    $arrCalls = array("All"=>$arrLang["All"],"Incoming_Calls" => $arrLang["Incoming Calls"],"Outcoming_Calls" => "Outcoming Calls");
+    $arrCalls = array("All"=>_tr("All"),"Incoming_Calls" => _tr("Incoming Calls"),"Outcoming_Calls" => _tr("Outcoming Calls"));
     $arrFormElements = array(
-        "date_from"         => array(   "LABEL"                  => $arrLangModule["Start date"],
+        "date_from"         => array(   "LABEL"                  => _tr("Start date"),
                                         "REQUIRED"               => "yes",
                                         "INPUT_TYPE"             => "DATE",
                                         "INPUT_EXTRA_PARAM"      => "",
                                         "VALIDATION_TYPE"        => "text",
                                         "VALIDATION_EXTRA_PARAM" => ""),
-        "date_to"           => array(   "LABEL"                  => $arrLangModule["End date"],
+        "date_to"           => array(   "LABEL"                  => _tr("End date"),
                                         "REQUIRED"               => "no",
                                         "INPUT_TYPE"             => "DATE",
                                         "INPUT_EXTRA_PARAM"      => "",
                                         "VALIDATION_TYPE"        => "text",
                                         "VALIDATION_EXTRA_PARAM" => ""),
-        "extensions"        => array(   "LABEL"                  => $arrLangModule["Number"],
+        "extensions"        => array(   "LABEL"                  => _tr("Number"),
                                         "REQUIRED"               => "no",
                                         "INPUT_TYPE"             => "SELECT",
                                         "INPUT_EXTRA_PARAM"      => loadExtentions($pDB_ext),
@@ -176,7 +159,7 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $arrLang,
                                         "EDITABLE"               => "yes",
                                         "VALIDATION_EXTRA_PARAM" => "",
                                         'ONCHANGE'               => 'show_elements();'),
-        "call_to"           => array(   "LABEL"                  => $arrLangModule["Number"],
+        "call_to"           => array(   "LABEL"                  => _tr("Number"),
                                         "REQUIRED"               => "yes",
                                         "INPUT_TYPE"             => "TEXT",
                                         "INPUT_EXTRA_PARAM"      => array("id" => 'call_to'),
@@ -193,8 +176,8 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $arrLang,
                             );
 
     $oFilterForm = new paloForm($smarty, $arrFormElements);
-    $smarty->assign("SHOW", $arrLang["Show"]);
-    $smarty->assign("HERE", $arrLangModule["Here"]);
+    $smarty->assign("SHOW", _tr("Show"));
+    $smarty->assign("HERE", _tr("Here"));
 
     $date_ini = getParameter("date_from");
     $date_fin = getParameter("date_to");
@@ -244,8 +227,8 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $arrLang,
     {
 	if(!preg_match("/^[1-9]{1}[[:digit:]]*$/",$ext) && isset($ext)){
 	    $error = true;
-	    $smarty->assign("mb_title",$arrLang["Validation Error"]);
-	    $smarty->assign("mb_message",$arrLang["The extension must be numeric and can not start with zero"]);
+	    $smarty->assign("mb_title",_tr("Validation Error"));
+	    $smarty->assign("mb_message",_tr("The extension must be numeric and can not start with zero"));
 	}
         $smarty->assign("SELECTED_1","selected");
         $smarty->assign("SELECTED_2","");
@@ -315,7 +298,7 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $arrLang,
 	$smarty->assign("ruta_img",  "<tr class='letra12'><td align='center'><td></tr>");
 
     $smarty->assign("icon","modules/$module_name/images/reports_graphic_reports.png");
-    $htmlForm = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", $arrLangModule["Graphic Report"], $_POST);
+    $htmlForm = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", _tr("Graphic Report"), $_POST);
 
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
@@ -418,8 +401,6 @@ function getAction()
 // Generación de todos los gráficos a partir de este punto
 function grafic($du, $totIn, $totOut, $tot, $ext)
 {
-	global $arrLangModule;
-
 	if(ereg("^([[:digit:]]{1,3})%", trim($du), $arrReg)) {
 		$usoDisco = $arrReg[1];
 	} else {
@@ -447,7 +428,7 @@ function grafic($du, $totIn, $totOut, $tot, $ext)
 		//$graph->title->SetColor("#444444");
 		
 		// Set A title for the plot
-		$graph->title->Set(utf8_decode($arrLangModule["Number of calls extension"]." $ext"));
+		$graph->title->Set(utf8_decode(_tr("Number of calls extension")." $ext"));
 		//$graph->title->SetFont(FF_VERDANA,FS_BOLD,18);
 		$graph->title->SetColor("#444444");
 		$graph->legend->Pos(0.1,0.2);
@@ -474,8 +455,8 @@ function grafic($du, $totIn, $totOut, $tot, $ext)
 		// NOTE: You can't have exploded slices with edges!
 		$p1->SetEdge("black");
 		
-		$p1->SetLegends(array(utf8_decode($arrLangModule["Incoming Calls"]." ").$totIn,
-		                      utf8_decode($arrLangModule["Outcoming Calls"]." ").$totOut ));
+		$p1->SetLegends(array(utf8_decode(_tr("Incoming Calls")." ").$totIn,
+		                      utf8_decode(_tr("Outcoming Calls")." ").$totOut ));
 		
 		$graph->Add($p1);
 		$graph->Stroke();
@@ -483,7 +464,7 @@ function grafic($du, $totIn, $totOut, $tot, $ext)
 	else
 	{
 		$graph = new CanvasGraph(500,140,"auto");
-		$title = new Text(utf8_decode($arrLangModule["The extension"]." $ext ".$arrLangModule["does not have calls yet"]));
+		$title = new Text(utf8_decode(_tr("The extension")." $ext "._tr("does not have calls yet")));
 		$title->ParagraphAlign('center');
 		$title->SetFont(FF_FONT2,FS_BOLD);
 		$title->SetMargin(3);
@@ -491,7 +472,7 @@ function grafic($du, $totIn, $totOut, $tot, $ext)
 		$title->Center(0,500,70);
 		$graph->AddText($title);
 
-		$t1 = new Text(utf8_decode($arrLangModule["No exist calls for this number"]));
+		$t1 = new Text(utf8_decode(_tr("No exist calls for this number")));
 		$t1->SetBox("white","black",true);
 		$t1->ParagraphAlign("center");
 		$t1->SetColor("black");
@@ -506,7 +487,6 @@ function grafic($du, $totIn, $totOut, $tot, $ext)
 
 function grafic_queue(&$pDB_ast_cdr, &$pDB_ast, $queue, $dti, $dtf)
 {
-    global $arrLangModule;
     global $arrConf;
 
     $ancho = "700";
@@ -574,7 +554,7 @@ function grafic_queue(&$pDB_ast_cdr, &$pDB_ast, $queue, $dti, $dtf)
 
     // Especifico la escala
     $graph->SetScale("intlin");
-    $graph->title->Set(utf8_decode($arrLangModule["Number Calls vs Queues"]));
+    $graph->title->Set(utf8_decode(_tr("Number Calls vs Queues")));
     $graph->xaxis->SetLabelFormatCallback('NameQueue');
     $graph->xaxis->SetLabelAngle(90);
     $graph->xaxis->SetColor("#666666","#444444");
@@ -594,7 +574,7 @@ function grafic_queue(&$pDB_ast_cdr, &$pDB_ast, $queue, $dti, $dtf)
             $line->SetStepStyle();
             $line->SetColor("#00cc00");
             $line->setFillColor("#00cc00");
-            $line->SetLegend("# ".$arrLangModule["Calls"]);
+            $line->SetLegend("# "._tr("Calls"));
             $graph->Add($line);
             $graph->yaxis->SetColor("#00cc00");
         }
@@ -605,7 +585,7 @@ function grafic_queue(&$pDB_ast_cdr, &$pDB_ast, $queue, $dti, $dtf)
         $graph->Stroke();
     else{
         $graph = new CanvasGraph(500,140,"auto");
-	$title = new Text(utf8_decode($arrLangModule["No records found"]));
+	$title = new Text(utf8_decode(_tr("No records found")));
 	$title->ParagraphAlign('center');
 	$title->SetFont(FF_FONT2,FS_BOLD);
 	$title->SetMargin(3);
@@ -613,7 +593,7 @@ function grafic_queue(&$pDB_ast_cdr, &$pDB_ast, $queue, $dti, $dtf)
 	$title->Center(0,500,70);
 	$graph->AddText($title);
 
-	$t1 = new Text(utf8_decode($arrLangModule["There are no data to present"]));
+	$t1 = new Text(utf8_decode(_tr("There are no data to present")));
 	$t1->SetBox("white","black",true);
 	$t1->ParagraphAlign("center");
 	$t1->SetColor("black");
@@ -635,8 +615,6 @@ function NameQueue($aVal){
 
 function grafic_trunk(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dtf)
 {
-	global $arrLangModule;
-
 	//*******************
 	require_once "modules/$module_name/libs/paloSantoExtention.class.php";
 	$objPalo_AST_CDR = new paloSantoExtention($pDB_ast_cdr);
@@ -682,7 +660,7 @@ function grafic_trunk(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dtf
 		//$graph->title->SetColor("#444444");
 		
 		// Set A title for the plot
-		$graph->title->Set(utf8_decode($arrLangModule["Total Time"]));
+		$graph->title->Set(utf8_decode(_tr("Total Time")));
 		//$graph->title->SetFont(FF_VERDANA,FS_BOLD,18);
 		$graph->title->SetColor("#444444");
 		$graph->legend->Pos(0.05,0.2);
@@ -709,8 +687,8 @@ function grafic_trunk(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dtf
 		// NOTE: You can't have exploded slices with edges!
 		$p1->SetEdge("black");
 		
-		$p1->SetLegends(array( utf8_decode($arrLangModule["Incoming Calls"].":\n").SecToHHMMSS($arrResult[0]),
-		                       utf8_decode($arrLangModule["Outcoming Calls"].":\n").SecToHHMMSS($arrResult[1])));
+		$p1->SetLegends(array( utf8_decode(_tr("Incoming Calls").":\n").SecToHHMMSS($arrResult[0]),
+		                       utf8_decode(_tr("Outcoming Calls").":\n").SecToHHMMSS($arrResult[1])));
 		
 		$graph->Add($p1);
 		$graph->Stroke();
@@ -718,7 +696,7 @@ function grafic_trunk(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dtf
 	else
 	{
 		$graph = new CanvasGraph(400,140,"auto");
-		$title = new Text(utf8_decode($arrLangModule["Total Time"]));
+		$title = new Text(utf8_decode(_tr("Total Time")));
 		$title->ParagraphAlign('center');
 		$title->SetFont(FF_FONT2,FS_BOLD);
 		$title->SetMargin(3);
@@ -726,7 +704,7 @@ function grafic_trunk(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dtf
 		$title->Center(0,400,70);
 		$graph->AddText($title);
 
-		$t1 = new Text(utf8_decode($arrLangModule["There are no data to present"]));
+		$t1 = new Text(utf8_decode(_tr("There are no data to present")));
 		$t1->SetBox("white","black",true);
 		$t1->ParagraphAlign("center");
 		$t1->SetColor("black");
@@ -753,8 +731,6 @@ function SecToHHMMSS($sec)
 
 function grafic_trunk2(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dtf)
 {
-	global $arrLangModule;
-
 	//
 	require_once "modules/$module_name/libs/paloSantoExtention.class.php";
 	$objPalo_AST_CDR = new paloSantoExtention($pDB_ast_cdr);
@@ -800,7 +776,7 @@ function grafic_trunk2(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dt
 		//$graph->title->SetColor("#444444");
 		
 		// Set A title for the plot
-		$graph->title->Set(utf8_decode($arrLangModule["Number of Calls"]));
+		$graph->title->Set(utf8_decode(_tr("Number of Calls")));
 		//$graph->title->SetFont(FF_VERDANA,FS_BOLD,18);
 		$graph->title->SetColor("#444444");
 		$graph->legend->Pos(0.04,0.2);
@@ -827,8 +803,8 @@ function grafic_trunk2(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dt
 		// NOTE: You can't have exploded slices with edges!
 		$p1->SetEdge("black");
 		
-		$p1->SetLegends(array( utf8_decode($arrLangModule["Incoming Calls"].":  ").$arrResult[0],
-		                       utf8_decode($arrLangModule["Outcoming Calls"].": ").$arrResult[1] ));
+		$p1->SetLegends(array( utf8_decode(_tr("Incoming Calls").":  ").$arrResult[0],
+		                       utf8_decode(_tr("Outcoming Calls").": ").$arrResult[1] ));
 		
 		$graph->Add($p1);
 		$graph->Stroke();
@@ -837,7 +813,7 @@ function grafic_trunk2(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dt
 	{
 
 		$graph = new CanvasGraph(400,140,"auto");
-		$title = new Text(utf8_decode($arrLangModule["Number of Calls"]));
+		$title = new Text(utf8_decode(_tr("Number of Calls")));
 		$title->ParagraphAlign('center');
 		$title->SetFont(FF_FONT2,FS_BOLD);
 		$title->SetMargin(3);
@@ -845,7 +821,7 @@ function grafic_trunk2(&$pDB_ast_cdr, &$pDB_ast, $module_name, $trunk, $dti, $dt
 		$title->Center(0,400,70);
 		$graph->AddText($title);
 
-		$t1 = new Text(utf8_decode($arrLangModule["There are no data to present"]));
+		$t1 = new Text(utf8_decode(_tr("There are no data to present")));
 		$t1->SetBox("white","black",true);
 		$t1->ParagraphAlign("center");
 		$t1->SetColor("black");

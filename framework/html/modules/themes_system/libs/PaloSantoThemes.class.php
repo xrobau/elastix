@@ -63,8 +63,6 @@ class PaloSantoThemes
      */
     function getThemes($dir='')
     {
-        global $arrLang;
-
         if($dir == ''){
             global $arrConf;
             $dir = $arrConf['basePath'];
@@ -79,7 +77,7 @@ class PaloSantoThemes
             }
         } 
         else 
-            $this->errMsg = $arrLang["Themes not Found"];
+            $this->errMsg = _tr("Themes not Found");
         return $arr_respuesta;
     }
 
@@ -103,8 +101,6 @@ class PaloSantoThemes
      */
     function updateTheme($sTheme)
     {
-        global $arrLang;
-
         global $arrConf;
         if (!preg_match('/^\w+$/', $sTheme)) {
             $this->errMsg = _tr('Invalid theme');
@@ -118,7 +114,7 @@ class PaloSantoThemes
         if(set_key_settings($this->_DB,'theme',$sTheme))
             return true;
         else{
-            $this->errMsg = $arrLang['The theme could not be updated'];
+            $this->errMsg = _tr('The theme could not be updated');
             return false;
         }
     } 

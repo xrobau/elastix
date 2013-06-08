@@ -29,7 +29,6 @@
 global $arrLangModule;
 $arrLangModule=array(
 /*Start Language*/
-"Language"=>"Language",
 "Select language"=>"Select language",
 "Continue"=>"Continue",
 "You can't change language"=>"You can't change language",

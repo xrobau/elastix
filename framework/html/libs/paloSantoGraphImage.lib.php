@@ -204,7 +204,7 @@ if( sizeof($G_YDATAS) >= 1 )
 {
     // true no funciona porque cada cadena u otro valor que se retorne es valor "valido o verdadero"
     // y equivale a true, entonces para diferenciarlo verdaderamente se compara con 'true'
-    $str = checkAttributes(/*$arrLang*/ $G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING);
+    $str = checkAttributes($G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING);
     if( $str != 'true' ){ showError($str, $G_SIZE); return; }
 
     if( $G_TYPE == 'lineplot' )
@@ -585,34 +585,32 @@ else{
 
 }
 
-function checkAttributes(/*$arrLang*/$G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING)
+function checkAttributes($G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING)
 {
     return true;
     $str = '';
-//    global $G_TITLE,$G_TYPE,$G_LABEL_X,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING;
-    global $arrLang;
 
     if( $G_TYPE == 'lineplot' || $G_TYPE == 'barplot' || $G_TYPE == 'lineplot_multiaxis' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($G_LABEL_Y == null)    $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($G_LABEL_Y == null)    $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else if( $G_TYPE == 'plot3d' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else if( $G_TYPE == 'bar' || $G_TYPE == 'bar2' ){
     }
     else if( $G_TYPE == 'prueba' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($G_LABEL_Y == null)    $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($G_LABEL_Y == null)    $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else
-        $str = $arrLang["Failure in"]." ATTRIBUTE: TYPE";
+        $str = _tr("Failure in")." ATTRIBUTE: TYPE";
 
     // true no funciona, retorno mejor 'true'
     if( $str == '' ) return 'true';

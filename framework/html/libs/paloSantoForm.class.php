@@ -29,7 +29,7 @@
 
 /* A continuacion se ilustra como luce un tipico elemento del arreglo $this->arrFormElements
 "subject"  => array(
-                "LABEL"                  => $arrLang["Fax Suject"],
+                "LABEL"                  => _tr("Fax Suject"),
                 "DESCRIPTION"            => _tr("Subject sent in the mail"),
                 "REQUIRED"               => "yes",
                 "INPUT_TYPE"             => "TEXT",
@@ -39,7 +39,7 @@
                 "VALIDATION_EXTRA_PARAM" => "")
 
 "content" => array(
-                "LABEL"                  => $arrLang["Fax Content"],
+                "LABEL"                  => _tr("Fax Content"),
                 "DESCRIPTION"            => _tr("Subject sent in the mail"),
                 "REQUIRED"               => "no",
                 "INPUT_TYPE"             => "TEXTAREA",
@@ -61,7 +61,7 @@
                 "VALIDATION_EXTRA_PARAM" => '')
 
 'formulario'       => array(
-                "LABEL"                  => $arrLang["Form"],
+                "LABEL"                  => _tr("Form"),
                 "DESCRIPTION"            => "",
                 "REQUIRED"               => "yes",
                 "INPUT_TYPE"             => "SELECT",

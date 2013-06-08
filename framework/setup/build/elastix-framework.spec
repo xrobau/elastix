@@ -313,6 +313,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Jun 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Group Permission: use _tr instead of arrLang, use load_language_module().
+  SVN Rev[5071]
 - CHANGED: Registration: use _tr instead of arrLang, use load_language_module().
   SVN Rev[5070]
 - CHANGED: Themes System: use _tr instead of arrLang, use load_language_module().

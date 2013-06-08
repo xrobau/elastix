@@ -39,21 +39,12 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoGroupPermission.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -79,17 +70,19 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($accion){
         case "apply":
-            $content = applyGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization,$lang,$arrLang);
+            $content = applyGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization);
             break;
         default:
-            $content = reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization,$lang,$arrLang);
+            $content = reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization);
             break;
     }
     return $content;
 }
 
-function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization,$lang,$arrLang)
+function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization)
 {
+    global $arrLang;
+    
     $pACL = new paloACL($pDB);
 	$pORGZ = new paloSantoOrganization($pDB);
     $filter_resource = getParameter("resource_apply");
@@ -102,20 +95,20 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
 	if(!isset($idOrgFil) || $idOrgFil===""){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You need have one organization selected"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 	}
 
 	if(!isset($idGroup) || $idGroup===""){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not set a group"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 	}
 
 	if($userLevel1!="superadmin"){
 		if($idOrgFil!=$idOrganization){
 			$smarty->assign("mb_title", _tr("ERROR"));
 			$smarty->assign("mb_message",_tr("You are not set a group"));
-			return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+			return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 		}
 	}
 
@@ -124,11 +117,11 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
 	if($orgTmp===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 	}elseif(count($orgTmp)<=0){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Organization doesn't exist"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 	}
 
 	if($idOrgFil==1){
@@ -140,10 +133,11 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
 	if($pACL->getGroups($idGroup,$idOrgFil)==false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Invalid Group"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 	}
 
 	//obtenemos las traducciones del parametro filtrado
+    $lang = get_language();
 	if($lang != "en"){
 		$filter_value = strtolower(trim($filter_resource));
 		foreach($arrLang as $key=>$value){
@@ -166,7 +160,7 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
 	if($arrResources===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr($pACL->errMsg));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 	}
 
 	$arrResources=array_slice($arrResources,$offset,$limit);
@@ -226,11 +220,13 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
 
     //borra los menus q tiene de permisos que estan guardados en la session, el index.php principal (html) volvera a generar esta arreglo de permisos.
     unset($_SESSION['elastix_user_permission']);
-    return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization,$lang,$arrLang);
+    return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
 }
 
-function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization,$lang="en",$arrLang)
+function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization)
 {
+    global $arrLang;
+    
 	$pACL = new paloACL($pDB);
 	$pORGZ = new paloSantoOrganization($pDB);
 	$arrGroups=array();
@@ -310,7 +306,8 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
 	$filter_resource = getParameter("filter_resource");
 	$filter_resource = htmlentities($filter_resource);
 
-	if($lang != "en"){
+	$lang = get_language();
+    if($lang != "en"){
 		$filter_value = strtolower(trim($filter_resource));
 		foreach($arrLang as $key=>$value){
 			$langValue    = strtolower(trim($value));

@@ -35,20 +35,13 @@ function _moduleContent(&$smarty, $module_name)
     include      "configs/languages.conf.php";
     include_once "modules/$module_name/configs/default.conf.php";
 
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-	
-	//global variables
+    load_language_module($module_name);
+
+    //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-    
+
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -87,7 +80,7 @@ function _moduleContent(&$smarty, $module_name)
         //si no me puedo conectar a la base de datos
 //       debo presentar un mensaje en vez del boton cambiar
 //       un
-        $arrForm  = array("language"  => array("LABEL"                  => $arrLang["Select language"],
+        $arrForm  = array("language"  => array("LABEL"                  => _tr("Select language"),
                                                "REQUIRED"               => "yes",
                                                "INPUT_TYPE"             => "SELECT",
                                                "INPUT_EXTRA_PARAM"      => $langElastix,
@@ -115,13 +108,13 @@ function _moduleContent(&$smarty, $module_name)
             $arrDefaultRate['language']=$defLang;
         }
         else
-             $msgError=$arrLang["You can't change language"].'.-'.$arrLang["ERROR"].":".$pACL->errMsg;
+             $msgError=_tr("You can't change language").'.-'._tr("ERROR").":".$pACL->errMsg;
        // $arrDefaultRate['language']="es";
-        $smarty->assign("CAMBIAR", $arrLang["Save"]);
+        $smarty->assign("CAMBIAR", _tr("Save"));
         $smarty->assign("MSG_ERROR",$msgError);
         $smarty->assign("conectiondb",$conexionDB);
 	$smarty->assign("icon","modules/$module_name/images/system_preferencies_language.png");
-        $contenido = $oForm->fetchForm("$local_templates_dir/language.tpl", $arrLang["Language"], $arrDefaultRate);
+        $contenido = $oForm->fetchForm("$local_templates_dir/language.tpl", _tr("Language"), $arrDefaultRate);
     }
     return $contenido;
 }

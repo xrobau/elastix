@@ -313,6 +313,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Jun 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Language:  use _tr instead of arrLang, use load_language_module().
+  SVN Rev[5067]
 - CHANGED: Framework: use _tr instead of arrLang in paloSantoValidar and 
   paloSantoGraphImage.lib.php.
   SVN Rev[5066]

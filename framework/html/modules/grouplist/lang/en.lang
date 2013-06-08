@@ -38,6 +38,5 @@ $arrLangModule=array(
 "The Group have users assigned. You can delete any group that does not have any users assigned in it."=>"The Group have users assigned. You can delete any group that does not have any users assigned in it.",
 "Create New Group" => "Create New Group",
 "View Group" => "View Group",
-"Group List" => "Group List",
 );
 ?>

@@ -34,21 +34,12 @@ function _moduleContent(&$smarty, $module_name)
     include_once("libs/paloSantoACL.class.php");
     include_once "modules/$module_name/configs/default.conf.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
 
     /////conexion a php
@@ -70,13 +61,13 @@ function _moduleContent(&$smarty, $module_name)
         echo "ERROR DE ACL: $pACL->errMsg <br>";
     }
 
-    $arrFormElements = array("description" => array("LABEL"                  => $arrLang["Description"],
+    $arrFormElements = array("description" => array("LABEL"                  => _tr("Description"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "group"       => array("LABEL"                  => $arrLang["Group"],
+                             "group"       => array("LABEL"                  => _tr("Group"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
@@ -87,21 +78,21 @@ function _moduleContent(&$smarty, $module_name)
 //description  id  name
 
     $contenidoModulo="";
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("APPLY_CHANGES", $arrLang["Apply changes"]);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("DELETE", $arrLang["Delete"]);
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("DELETE", _tr("Delete"));
     $smarty->assign("icon","modules/$module_name/images/system_groups.png");
-    $smarty->assign("CONFIRM_CONTINUE", $arrLang["Are you sure you wish to continue?"]);
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
     if(isset($_POST['submit_create_group'])) {
         // Implementar
         include_once("libs/paloSantoForm.class.php");
         $arrFillGroup['group']       = '';
         $arrFillGroup['description'] = '';
         $oForm = new paloForm($smarty, $arrFormElements);
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", $arrLang["New Group"],$arrFillGroup);
+        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", _tr("New Group"),$arrFillGroup);
     } else if(isset($_POST['edit'])) {
 
         // Tengo que recuperar la data del usuario
@@ -113,18 +104,18 @@ function _moduleContent(&$smarty, $module_name)
             Header("Location: ?menu=$module_name");
         } else {
             if($arrGroup[0][1]=='administrator')
-                $arrGroup[0][1] = $arrLang['administrator'];
+                $arrGroup[0][1] = _tr('administrator');
             else if($arrGroup[0][1]=='operator')
-                $arrGroup[0][1] = $arrLang['operator'];
+                $arrGroup[0][1] = _tr('operator');
             else if($arrGroup[0][1]=='extension')
-                $arrGroup[0][1] = $arrLang['extension'];
+                $arrGroup[0][1] = _tr('extension');
 
             if($arrGroup[0][2]=='total access')
-                $arrGroup[0][2] = $arrLang['total access'];
+                $arrGroup[0][2] = _tr('total access');
             else if($arrGroup[0][2]=='operator')
-                $arrGroup[0][2] = $arrLang['operator'];
+                $arrGroup[0][2] = _tr('operator');
             else if($arrGroup[0][2]=='extension user')
-                $arrGroup[0][2] = $arrLang['extension user'];
+                $arrGroup[0][2] = _tr('extension user');
 
 
             $arrFillGroup['group'] = $arrGroup[0][1];
@@ -136,7 +127,7 @@ function _moduleContent(&$smarty, $module_name)
 
             $oForm->setEditMode();
             $smarty->assign("id_group", htmlspecialchars($_POST['id_group'], ENT_COMPAT, 'UTF-8'));
-            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", "{$arrLang['Edit Group']} \"" . $arrFillGroup['group'] . "\"", $arrFillGroup);
+            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", _tr('Edit Group')." \"" . $arrFillGroup['group'] . "\"", $arrFillGroup);
         }
     } else if(isset($_POST['submit_save_group'])) {
 
@@ -154,21 +145,21 @@ function _moduleContent(&$smarty, $module_name)
             if(!empty($pACL->errMsg)) {
                 // Ocurrio algun error aqui
                 $smarty->assign("mb_message", "ERROR: $pACL->errMsg");
-                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", $arrLang["New Group"], $_POST);
+                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", _tr("New Group"), $_POST);
             } else {
                 header("Location: ?menu=grouplist");
             }
         } else {
             // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $smarty->assign("mb_title", _tr("Validation Error"));
             $arrErrores=$oForm->arrErroresValidacion;
-            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
+            $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
             }
             $strErrorMsg .= "";
             $smarty->assign("mb_message", $strErrorMsg);
-            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", $arrLang["New Group"], $_POST);
+            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", _tr("New Group"), $_POST);
         }
 
     } else if(isset($_POST['submit_apply_changes'])) {
@@ -194,15 +185,15 @@ function _moduleContent(&$smarty, $module_name)
                 {
                     // Ocurrio algun error aqui
                     $smarty->assign("mb_message", "ERROR: $pACL->errMsg");
-                    $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", $arrLang["Edit Group"], $_POST);
+                    $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", _tr("Edit Group"), $_POST);
                 } else {
                     header("Location: ?menu=grouplist");
                 }
             } else {
                 // Manejo de Error
-                $smarty->assign("mb_title", $arrLang["Validation Error"]);
+                $smarty->assign("mb_title", _tr("Validation Error"));
                 $arrErrores=$oForm->arrErroresValidacion;
-                $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
+                $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
                 foreach($arrErrores as $k=>$v) {
                     $strErrorMsg .= "$k, ";
                 }
@@ -212,7 +203,7 @@ function _moduleContent(&$smarty, $module_name)
                 $arrFillGroup['group']       = $_POST['group'];
                 $arrFillGroup['description'] = $_POST['description'];
                 $smarty->assign("id_group", htmlspecialchars($_POST['id_group'], ENT_COMPAT, 'UTF-8'));
-                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", $arrLang["Edit Group"], $arrFillGroup);
+                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", _tr("Edit Group"), $arrFillGroup);
             }
         }
     } else if(isset($_GET['action']) && $_GET['action']=="view") {
@@ -232,33 +223,33 @@ function _moduleContent(&$smarty, $module_name)
         } else {
             // Conversion de formato
             if($arrGroup[0][1]=='administrator')
-                $arrGroup[0][1] = $arrLang['administrator'];
+                $arrGroup[0][1] = _tr('administrator');
             else if($arrGroup[0][1]=='operator')
-                $arrGroup[0][1] = $arrLang['operator'];
+                $arrGroup[0][1] = _tr('operator');
             else if($arrGroup[0][1]=='extension')
-                $arrGroup[0][1] = $arrLang['extension'];
+                $arrGroup[0][1] = _tr('extension');
 
             if($arrGroup[0][2]=='total access')
-                $arrGroup[0][2] = $arrLang['total access'];
+                $arrGroup[0][2] = _tr('total access');
             else if($arrGroup[0][2]=='operator')
-                $arrGroup[0][2] = $arrLang['operator'];
+                $arrGroup[0][2] = _tr('operator');
             else if($arrGroup[0][2]=='extension user')
-                $arrGroup[0][2] = $arrLang['extension user'];
+                $arrGroup[0][2] = _tr('extension user');
 
             $arrTmp['group']        = $arrGroup[0][1];
             $arrTmp['description']  = $arrGroup[0][2];
 
             $smarty->assign("id_group", htmlspecialchars($_GET['id'], ENT_COMPAT, 'UTF-8'));
-            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", $arrLang["View Group"], $arrTmp); // hay que pasar el arreglo
+            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/grouplist.tpl", _tr("View Group"), $arrTmp); // hay que pasar el arreglo
         }
     } else {
         if (isset($_POST['delete'])) {
            //- TODO: Validar el id de group
             if(isset($_POST['id_group']) && $_POST['id_group']=='1') {
                 // No se puede eliminar al grupo admin
-                $smarty->assign("mb_message", $arrLang["The administrator group cannot be deleted because is the default Elastix Group. You can delete any other group."]);
+                $smarty->assign("mb_message", _tr("The administrator group cannot be deleted because is the default Elastix Group. You can delete any other group."));
             } else if ($pACL->HaveUsersTheGroup($_POST['id_group'])==TRUE){
-                $smarty->assign("mb_message", $arrLang["The Group have users assigned. You can delete any group that does not have any users assigned in it."]);
+                $smarty->assign("mb_message", _tr("The Group have users assigned. You can delete any group that does not have any users assigned in it."));
             } else {
                 $pACL->deleteGroup($_POST['id_group']);
             }
@@ -288,36 +279,36 @@ function _moduleContent(&$smarty, $module_name)
             $arrTmp    = array();
 
             if($group[1]=='administrator')
-                $group[1] = $arrLang['administrator'];
+                $group[1] = _tr('administrator');
             else if($group[1]=='operator')
-                $group[1] = $arrLang['operator'];
+                $group[1] = _tr('operator');
             else if($group[1]=='extension')
-                $group[1] = $arrLang['extension'];
+                $group[1] = _tr('extension');
 
             if($group[2]=='total access')
-                $group[2] = $arrLang['total access'];
+                $group[2] = _tr('total access');
             else if($group[2]=='operator')
-                $group[2] = $arrLang['operator'];
+                $group[2] = _tr('operator');
             else if($group[2]=='extension user')
-                $group[2] = $arrLang['extension user'];
+                $group[2] = _tr('extension user');
 
             $arrTmp[0] = "&nbsp;<a href='?menu=grouplist&action=view&id=" . $group[0] . "'>" . $group[1] . "</a>";//id_group   name
             $arrTmp[1] = $group[2];//description
             $arrData[] = $arrTmp;
         }
 
-        $arrGrid = array("title"    => $arrLang["Group List"],
+        $arrGrid = array("title"    => _tr("Group List"),
                          "icon"     => "/modules/$module_name/images/system_groups.png",
-                         "columns"  => array(0 => array("name"      => $arrLang["Group"],
+                         "columns"  => array(0 => array("name"      => _tr("Group"),
                                                         "property1" => ""),
-                                             1 => array("name"      => $arrLang["Description"],
+                                             1 => array("name"      => _tr("Description"),
                                                        "property1" => "")
                                             )
                         );
 
 
         $oGrid->addNew("submit_create_group",_tr("Create New Group"));
-        $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+        $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
     }
     return $contenidoModulo;
 }

@@ -356,7 +356,7 @@ class paloForm
                 default:
                     $strInput = "";
             }
-            $arrMacro['LABEL'] = _labelName($varName,&$arrVars);
+            $arrMacro['LABEL'] = _labelName($varName, $arrVars);
             $arrMacro['INPUT'] = $strInput;
             $this->smarty->assign($varName, $arrMacro);
         }

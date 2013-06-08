@@ -306,6 +306,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Jun 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use _tr instead of arrLang in paloSantoValidar and 
+  paloSantoGraphImage.lib.php.
+  SVN Rev[5066]
 - CHANGED: Framework: backport changes to paloSantoForm from trunk to 2.4 
   branch. Remove references to arrLang and use _tr instead.
   SVN Rev[5065]

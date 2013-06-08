@@ -38,23 +38,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoGroupPermission.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -67,16 +59,16 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($accion){
         case "apply":
-            $content = applyGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $lang, $arrLang);
+            $content = applyGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
         default:
-            $content = reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $lang, $arrLang);
+            $content = reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
     }
     return $content;
 }
 
-function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $lang, $arrLang)
+function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pGroupPermission = new paloSantoGroupPermission();
 
@@ -295,11 +287,13 @@ print_r($listaPermisosNuevosGrupo);
 
     //borra los menus q tiene de permisos que estan guardados en la session, el index.php principal (html) volvera a generar esta arreglo de permisos.
     unset($_SESSION['elastix_user_permission']);
-    return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $lang, $arrLang, true, $action_apply, $start_apply);
+    return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, true, $action_apply, $start_apply);
 }
 
-function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $lang, $arrLang, $wasSaved = false, $value_action = "", $value_start = 0)
+function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $wasSaved = false, $value_action = "", $value_start = 0)
 {
+    global $arrLang;
+    
     $pGroupPermission = new paloSantoGroupPermission();
 
     $filter_group = getParameter("filter_group");
@@ -316,6 +310,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
         $parameter_to_find = array();
+    $lang = get_language();
     if($lang != "en"){
             foreach($arrLang as $key=>$value){
             $langValue    = strtolower(trim($value));
@@ -387,7 +382,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
             }
 
             $arrTmp[0] = "<input type='checkbox' $disabled name='groupPermission[".$resource["name"]."][".$resource["id"]."]' $checked0>";
-            $arrTmp[1] = isset($arrLang[$resource["description"]]) ? $arrLang[$resource["description"]] : $resource["description"];
+            $arrTmp[1] = _tr($resource["description"]);
             $arrTmp[2] = "<input type='checkbox' $disabled name='viewPermission[".$resource["name"]."][".$resource["id"]."]' $checked1>";
             $arrTmp[3] = "<input type='checkbox' $disabled name='createPermission[".$resource["name"]."][".$resource["id"]."]' $checked2>";
             $arrTmp[4] = "<input type='checkbox' $disabled name='deletePermission[".$resource["name"]."][".$resource["id"]."]' $checked3>";
@@ -397,31 +392,23 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
         }
     }
 
-    $arrGrid = array(   "title"    => $arrLang["Group Permission"],
+    $arrGrid = array(   "title"    => _tr("Group Permission"),
                         "icon"     => "images/list.png",
                         "width"    => "99%",
                         "start"    => ($total==0) ? 0 : $offset + 1,
                         "end"      => $end,
                         "total"    => $total,
                         "url"      => $url,
-                        "columns"  => array(0 => array("name"      => "<input class='button' type='submit' name='apply' value='{$arrLang['Apply']}' />",
+                        "columns"  => array(0 => array("name"      => "<input class='button' type='submit' name='apply' value='"._tr('Apply')."' />",
                                                         "property1" => ""),
-                                            1 => array("name"      => $arrLang["Resource"],
+                                            1 => array("name"      => _tr("Resource"),
                                                         "property1" => ""),
-                                            /*2 => array("name"      => $arrLang["View"],
-                                                        "property1" => ""),
-                                            3 => array("name"      => $arrLang["Create"],
-                                                        "property1" => ""),
-                                            4 => array("name"      => $arrLang["Delete"],
-                                                        "property1" => ""),
-                                            5 => array("name"      => $arrLang["Update"],
-                                                        "property1" => "" ),*/
                         ));
 
     //begin section filter
-    $arrFormFilterGroupPermission = createFieldFilter($arrLang, $pGroupPermission);
+    $arrFormFilterGroupPermission = createFieldFilter($pGroupPermission);
     $oFilterForm = new paloForm($smarty, $arrFormFilterGroupPermission);
-    $smarty->assign("SHOW", $arrLang["Show"]);
+    $smarty->assign("SHOW", _tr("Show"));
 
     $_POST["filter_group"] = $filter_group;
     $_POST["filter_resource"] = $filter_resource;
@@ -442,35 +429,35 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
     //end section filter
 
     $oGrid->showFilter(trim($htmlFilter));
-    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
     //end grid parameters
 
     return $contenidoModulo;
 }
 
 
-function createFieldFilter($arrLang, $pGroupPermission)
+function createFieldFilter($pGroupPermission)
 {
     $arrGruposACL = $pGroupPermission->getGroupsACL();
     $arrGrupos = array();
 
     for( $i = 0; $i < count($arrGruposACL); $i++ )
     {
-        if( $arrGruposACL[$i][1] == 'administrator')  $arrGruposACL[$i][1] = $arrLang['administrator'];
-        else if( $arrGruposACL[$i][1] == 'operator')  $arrGruposACL[$i][1] = $arrLang['operator'];
-        else if( $arrGruposACL[$i][1] == 'extension') $arrGruposACL[$i][1] = $arrLang['extension'];
+        if( $arrGruposACL[$i][1] == 'administrator')  $arrGruposACL[$i][1] = _tr('administrator');
+        else if( $arrGruposACL[$i][1] == 'operator')  $arrGruposACL[$i][1] = _tr('operator');
+        else if( $arrGruposACL[$i][1] == 'extension') $arrGruposACL[$i][1] = _tr('extension');
 
         $arrGrupos[$arrGruposACL[$i][0]] = $arrGruposACL[$i][1];
     }
 
     $arrFormElements = array(
-            "filter_group" => array(    "LABEL"                  => $arrLang["Group"],
+            "filter_group" => array(    "LABEL"                  => _tr("Group"),
                                         "REQUIRED"               => "no",
                                         "INPUT_TYPE"             => "SELECT",
                                         "INPUT_EXTRA_PARAM"      => $arrGrupos,
                                         "VALIDATION_TYPE"        => "text",
                                         "VALIDATION_EXTRA_PARAM" => ""),
-            "filter_resource" => array( "LABEL"                  => $arrLang["Resource"],
+            "filter_resource" => array( "LABEL"                  => _tr("Resource"),
                                         "REQUIRED"               => "no",
                                         "INPUT_TYPE"             => "TEXT",
                                         "INPUT_EXTRA_PARAM"      => "",

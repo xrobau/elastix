@@ -37,21 +37,12 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     require_once "modules/$module_name/libs/PaloSantoThemes.class.php";
     
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
         
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
@@ -65,12 +56,12 @@ function _moduleContent(&$smarty, $module_name)
     $uid = $pACL->getIdUser($user);
 
     if(!empty($pDB->errMsg)) {
-        $smarty->assign("mb_message", $arrLang["Error when connecting to database"]."<br/>".$pDB->errMsg);
+        $smarty->assign("mb_message", _tr("Error when connecting to database")."<br/>".$pDB->errMsg);
     }
 
     // Definición del formulario de nueva campaña
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("CHANGE", $arrLang["Save"]);
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CHANGE", _tr("Save"));
     $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
 
     $oThemes = new PaloSantoThemes($pDB); 
@@ -78,7 +69,7 @@ function _moduleContent(&$smarty, $module_name)
 
     $formCampos = array(
         'themes'                 => array(
-            "LABEL"                  => $arrLang["Themes"],
+            "LABEL"                  => _tr("Themes"),
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "SELECT",
             "INPUT_EXTRA_PARAM"      => $arr_themes,
@@ -98,22 +89,20 @@ function _moduleContent(&$smarty, $module_name)
 
 function changeTheme(&$pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm, $uid) {
 
-    global $arrLang; 
     $oThemes = new PaloSantoThemes($pDB); 
     $tema_actual = $oThemes->getThemeActual($uid); 
     $arrTmp['themes']   = $tema_actual;
     $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
-    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Change Theme"],$arrTmp);
+    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Change Theme"),$arrTmp);
     return $contenidoModulo;
 }
 
 function updateTheme(&$pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm, $uid) {
-    global $arrLang;
 
     if(!$oForm->validateForm($_POST)) {
         $smarty->assign("mb_title", _tr("Validation Error"));
         $arrErrores=$oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/>";
+        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
@@ -132,7 +121,7 @@ function updateTheme(&$pDB, $smarty, $module_name, $local_templates_dir, $formCa
 	    }
 	    else{
 		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message", $arrLang["The smarty cache could not be deleted"]);
+		$smarty->assign("mb_message", _tr("The smarty cache could not be deleted"));
 	    }
         } else {
             $smarty->assign("mb_title", _tr("Validation Error"));
@@ -140,7 +129,7 @@ function updateTheme(&$pDB, $smarty, $module_name, $local_templates_dir, $formCa
         } 
     }
     $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
-    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Change Theme"],$_POST);
+    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Change Theme"),$_POST);
     return $contenidoModulo;
 }
 ?>

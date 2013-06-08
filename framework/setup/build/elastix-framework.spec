@@ -313,6 +313,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Jun 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Themes System: use _tr instead of arrLang, use load_language_module().
+  SVN Rev[5069]
 - CHANGED: Group List: use _tr instead of arrLang, use load_language_module().
   SVN Rev[5068]
 - CHANGED: Language:  use _tr instead of arrLang, use load_language_module().

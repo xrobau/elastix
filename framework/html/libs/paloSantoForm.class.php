@@ -29,7 +29,8 @@
 
 /* A continuacion se ilustra como luce un tipico elemento del arreglo $this->arrFormElements
 "subject"  => array(
-                "LABEL"                  => $arrLang["Fax Suject"],
+                "LABEL"                  => _tr("Fax Suject"),
+                "DESCRIPTION"            => _tr("Subject sent in the mail"),
                 "REQUIRED"               => "yes",
                 "INPUT_TYPE"             => "TEXT",
                 "INPUT_EXTRA_PARAM"      => array("style" => "width:240px"),
@@ -38,7 +39,8 @@
                 "VALIDATION_EXTRA_PARAM" => "")
 
 "content" => array(
-                "LABEL"                  => $arrLang["Fax Content"],
+                "LABEL"                  => _tr("Fax Content"),
+                "DESCRIPTION"            => _tr("Subject sent in the mail"),
                 "REQUIRED"               => "no",
                 "INPUT_TYPE"             => "TEXTAREA",
                 "INPUT_EXTRA_PARAM"      => "",
@@ -50,6 +52,7 @@
 
 "today"  => array(
                 "LABEL"                  => "Today",
+                "DESCRIPTION"            => "",
                 "REQUIRED"               => "yes",
                 "INPUT_TYPE"             => "DATE",
                 "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "'%d %b %Y' %H:%M","TIMEFORMAT" => "12", "FIRSTDAY" => 1),
@@ -58,7 +61,8 @@
                 "VALIDATION_EXTRA_PARAM" => '')
 
 'formulario'       => array(
-                "LABEL"                  => $arrLang["Form"],
+                "LABEL"                  => _tr("Form"),
+                "DESCRIPTION"            => "",
                 "REQUIRED"               => "yes",
                 "INPUT_TYPE"             => "SELECT",
                 "INPUT_EXTRA_PARAM"      => $arrSelectForm,
@@ -71,6 +75,7 @@
 
 "checkbox"  => array(
                 "LABEL"                  => "Habiltar",
+                "DESCRIPTION"            => "",
                 "REQUIRED"               => "no",
                 "INPUT_TYPE"             => "CHECKBOX",
                 "INPUT_EXTRA_PARAM"      => "",
@@ -136,6 +141,7 @@ class paloForm
                         htmlentities($key, ENT_COMPAT, 'UTF-8'),
                         htmlentities($value, ENT_COMPAT, 'UTF-8'));
                 }
+                
                 return implode(' ', $listaAttr);
             }
         }
@@ -147,7 +153,28 @@ class paloForm
                 return htmlentities($s, ENT_COMPAT, 'UTF-8');
             }
         }
-
+        
+        if (!function_exists('_labelName')) {
+            function _labelName($varName,&$arrVars)
+            {
+                $tooltip="";
+                if(isset($arrVars['DESCRIPTION'])){
+                    if($arrVars['DESCRIPTION']!=false && $arrVars['DESCRIPTION']!=""){
+                        $tooltip='data-tooltip="'.htmlentities($arrVars['DESCRIPTION'], ENT_COMPAT, 'UTF-8').'"';
+                    }
+                }
+                if($tooltip!=""){
+                    return sprintf('<label for="%s" %s>%s</label>',
+                            htmlentities($varName, ENT_COMPAT, 'UTF-8'),
+                            $tooltip,
+                            htmlentities($arrVars['LABEL'], ENT_COMPAT, 'UTF-8')
+                        );
+                }else{
+                    return htmlentities($arrVars['LABEL'], ENT_COMPAT, 'UTF-8');
+                }
+            }
+        }
+        
         foreach($this->arrFormElements as $varName=>$arrVars) {
             if(!isset($arrPreFilledValues[$varName]))
                 $arrPreFilledValues[$varName] = "";
@@ -329,7 +356,7 @@ class paloForm
                 default:
                     $strInput = "";
             }
-            $arrMacro['LABEL'] = htmlentities($arrVars['LABEL'], ENT_COMPAT, 'UTF-8');
+            $arrMacro['LABEL'] = _labelName($varName,&$arrVars);
             $arrMacro['INPUT'] = $strInput;
             $this->smarty->assign($varName, $arrMacro);
         }

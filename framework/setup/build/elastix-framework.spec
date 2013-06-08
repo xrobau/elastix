@@ -305,6 +305,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sat Jun 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: backport changes to paloSantoForm from trunk to 2.4 
+  branch. Remove references to arrLang and use _tr instead.
+  SVN Rev[5065]
+
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: lay foundation to remove some boilerplate from all Elastix
   modules:

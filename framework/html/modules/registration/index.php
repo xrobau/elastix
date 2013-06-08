@@ -38,23 +38,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoRegistration.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -71,10 +63,10 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         case "save":
-            $content = saveRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL);
+            $content = saveRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$pDBACL);
             break;
 	case "getDataRegisterServer":
-	    $content = getDataRegistration($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL);
+	    $content = getDataRegistration($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$pDBACL);
 	    break;
         case "showAboutAs":
             $content = showFormAboutAs($smarty, $module_name, $local_templates_dir, $arrConf);
@@ -83,7 +75,7 @@ function _moduleContent(&$smarty, $module_name)
             $content = showFormRPMS_Version($smarty, $module_name, $local_templates_dir, $arrConf);
             break;
         default: // view_form
-            $content = viewFormRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang,$pDBACL);
+            $content = viewFormRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$pDBACL);
             break;
     }
     return $content;
@@ -128,11 +120,11 @@ function showFormRPMS_Version($smarty, $module_name, $local_templates_dir, $arrC
     return $jsonObject->createJSON();
 }
 
-function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang,&$pDBACL)
+function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,&$pDBACL)
 {
     $pRegister = new paloSantoRegistration($pDB);
     $pACL = new paloACL($pDBACL);
-    $arrFormRegister = createFieldForm($arrLang);
+    $arrFormRegister = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormRegister);
     //begin, Form data persistence to errors and other events.
     $_DATA  = $_POST;
@@ -141,11 +133,11 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
     $registered = "";
     $smarty->assign("ID", $id); //persistence id with input hidden in tpl
     $smarty->assign("identitykeylbl", _tr("Your Server ID"));
-    $smarty->assign("registration", $arrLang["registration"]);
-    $smarty->assign("alert_message", $arrLang["alert_message"]);
-    $smarty->assign("Cancel", $arrLang["Cancel"]);
+    $smarty->assign("registration", _tr("registration"));
+    $smarty->assign("alert_message", _tr("alert_message"));
+    $smarty->assign("Cancel", _tr("Cancel"));
     $smarty->assign("module_name", $module_name);
-    $smarty->assign("sending", $arrLang["Save information and sending data"]);
+    $smarty->assign("sending", _tr("Save information and sending data"));
     $smarty->assign("errorMsg", _tr("Impossible connect to Elastix Web services. Please check your internet connection."));
     $smarty->assign("getinfo", _tr("Getting infomation from Elastix Web Services."));
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
@@ -153,10 +145,10 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
     
 
     if(!is_file("/etc/elastix.key")){
-	$smarty->assign("Activate_registration", $arrLang["Activate registration"]);
+	$smarty->assign("Activate_registration", _tr("Activate registration"));
     }else{
 	$registered = "registered";
-	$smarty->assign("Activate_registration", $arrLang["Update Information"]);
+	$smarty->assign("Activate_registration", _tr("Update Information"));
     }
     $smarty->assign("registered", $registered);
     $smarty->assign("displayError", "display: none;");
@@ -170,7 +162,7 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
 
 
 // primero se guarda de manera local y luego se llama al webservice donde envia los datos a almacenar y responde con un valor si se almaceno correctamente
-function saveRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang,&$pDBACL)
+function saveRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,&$pDBACL)
 {
     $pRegister    = new paloSantoRegistration($pDB);
     $jsonObject   = new PaloSantoJSON();
@@ -275,7 +267,7 @@ function saveRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     return $jsonObject->createJSON();
 }
 
-function getDataRegistration($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang,&$pDBACL)
+function getDataRegistration($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,&$pDBACL)
 {
     $pRegister   = new paloSantoRegistration($pDB);
     $jsonObject   = new PaloSantoJSON();
@@ -302,7 +294,7 @@ function getDataRegistration($smarty, $module_name, $local_templates_dir, &$pDB,
 
 }
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
     $arrCountry = array();
 

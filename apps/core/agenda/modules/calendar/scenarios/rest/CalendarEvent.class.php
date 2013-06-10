@@ -72,7 +72,7 @@ class CalendarEventBase extends REST_Resource
             return $json->createJSON();
         }
         
-        $sBaseUrl = $this->requestURL();
+        $sBaseUrl = '/rest.php/calendar/CalendarEvent';
         foreach (array_keys($result['events']) as $k)
             $result['events'][$k]['url'] = $sBaseUrl.'/'.$result['events'][$k]['id'];
         $json = new Services_JSON();
@@ -104,7 +104,7 @@ class CalendarEventBase extends REST_Resource
         $result = $pCore_Calendar->addCalendarEvent($startdate,$enddate,$subject,$description,$asterisk_call,$recording,$call_to,$reminder_timer,$emails_notification, $color, TRUE);
         if ($result !== FALSE) {
             Header('HTTP/1.1 201 Created');
-            Header('Location: '.$this->requestURL()."/$result");
+            Header('Location: /rest.php/calendar/CalendarEvent/'.$result);
         } else {
             $error = $pCore_Calendar->getError();
             if ($error["fc"] == "DBERROR")
@@ -151,7 +151,7 @@ class CalendarEventById extends REST_Resource
         }
         
         $tupla = $result['events'][0];
-        $tupla['url'] = $this->requestURL();
+        $tupla['url'] = '/rest.php/calendar/CalendarEvent/'.$this->_idNumero;
         $json = new Services_JSON();
         return $json->encode($tupla);
     }

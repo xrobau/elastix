@@ -110,6 +110,9 @@ fi
 
 %changelog
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: hardcode base URL for REST service because PHP_SELF is 
+  insecure. Pointed out by Fortify report.
+  SVN Rev[5075]
 - FIXED: Agenda: discard nonnumeric values of contact ID to prevent manipulation
   of subsequent redirect. Pointed out by Fortify report.
   SVN Rev[5074]

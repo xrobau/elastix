@@ -102,8 +102,8 @@ class ContactListBase extends REST_Resource
     {
     	$json = new Services_JSON();
         return $json->encode(array(
-            'url_internal'  =>  $this->requestURL().'/internal',
-            'url_external'  =>  $this->requestURL().'/external',));
+            'url_internal'  =>  '/rest.php/address_book/ContactList/internal',
+            'url_external'  =>  '/rest.php/address_book/ContactList/external',));
     }
 }
 
@@ -136,7 +136,7 @@ class ContactListResource extends REST_Resource
             return $json->createJSON();
         }
         
-        $sBaseUrl = $this->requestURL();
+        $sBaseUrl = '/rest.php/address_book/ContactList/'.$this->_addressBookType;
         foreach (array_keys($result['extension']) as $k)
             $result['extension'][$k]['url'] = $sBaseUrl.'/'.$result['extension'][$k]['id'];
         $json = new Services_JSON();
@@ -178,7 +178,7 @@ class ExternalContactList extends ContactListResource
         $result = $pCore_AddressBook->addAddressBookContact($phone, $first_name, $last_name, $email, TRUE);
         if ($result !== FALSE) {
             Header('HTTP/1.1 201 Created');
-            Header('Location: '.$this->requestURL()."/$result");
+            Header('Location: /rest.php/address_book/ContactList/'.$this->_addressBookType."/$result");
         } else {
             $error = $pCore_AddressBook->getError();
             if ($error["fc"] == "DBERROR")
@@ -228,7 +228,7 @@ class Contact extends REST_Resource
         }
         
         $tupla = $result['extension'][0];
-        $tupla['url'] = $this->requestURL();
+        $tupla['url'] = '/rest.php/address_book/ContactList/'.$this->_addressBookType.'/'.$this->_idNumero;
         $json = new Services_JSON();
         return $json->encode($tupla);
     }

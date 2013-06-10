@@ -87,8 +87,8 @@ class SyncContactsBase extends REST_Resource
     {
     	$json = new Services_JSON();
         return $json->encode(array(
-            'url_differential'  =>  $this->requestURL().'/differential',
-            'url_full'	        =>  $this->requestURL().'/full',));
+            'url_differential'  =>  '/rest.php/address_book/SyncContacts/differential',
+            'url_full'	        =>  '/rest.php/address_book/SyncContacts/full',));
     }
 }
 

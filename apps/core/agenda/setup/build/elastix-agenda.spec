@@ -122,6 +122,11 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: discard nonnumeric values of contact ID to prevent manipulation
+  of subsequent redirect. Pointed out by Fortify report.
+  SVN Rev[5074]
+
 * Tue Jun 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: the output of 'core show channels concise' has changed from 
   Asterisk 1.6 to 1.8 and later, and breaks parsing prior to call transfer.

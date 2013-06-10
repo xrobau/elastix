@@ -583,6 +583,9 @@ function save_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pD
     $id_user      = $pACL->getIdUser($_SESSION["elastix_user"]);
     $bandera = true;
 
+    if (isset($_GET['id']) && !ctype_digit($_GET['id'])) unset($_GET['id']);
+    if (isset($_POST['id']) && !ctype_digit($_POST['id'])) unset($_POST['id']);
+
     if(!$oForm->validateForm($_POST)) {
         // Falla la validación básica del formulario
         $smarty->assign("mb_title", $arrLang["Validation Error"]);

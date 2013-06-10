@@ -183,7 +183,7 @@ class orgActions extends orgREST{
             return $jsonObject->createJSON();
         }else{
             $arrORGS=array();
-            $sBaseUrl = $this->requestURL();
+            $sBaseUrl = '/rest.php/organization/organization';
             foreach($result as $x => $org){
                 $arrORGS["organization"][$x]['name']=$org['name'];
                 $arrORGS["organization"][$x]['domain']=$org['domain'];
@@ -236,7 +236,7 @@ class orgActions extends orgREST{
                 $jsonObject->set_error(_tr("Error creating admin user to new organization").$pOrg->errMsg);
             }else{
                 header('HTTP/1.1 201 Created');
-                Header('Location: '.$this->requestURL()."/$idOrg");
+                Header('Location: /rest.php/organization/organization/'.$idOrg);
                 $jsonObject->set_status("OK");
                 $jsonObject->set_message(array("organization"=>true,"user"=>true));
             }
@@ -387,7 +387,7 @@ class orgStatus extends orgREST
         
         $arrOrg=array();
         $pOrg = new paloSantoOrganization($arrConf['elastix_dsn']["elastix"]);
-        $sBaseUrl = $this->requestURL();
+        $sBaseUrl = '/rest.php/organization/organization/state';
         $result=$pOrg->getbunchOrganizationState($validOrgs);
         if($result===false){
             $this->error=$pOrg->errMsg;

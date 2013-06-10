@@ -313,6 +313,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Organization: hardcode base URL for REST service because PHP_SELF is 
+  insecure. Pointed out by Fortify report.
+  SVN Rev[5078]
 - FIXED: Registration: fix references to data sources that changed in Elastix 3.
   SVN Rev[5073]
 

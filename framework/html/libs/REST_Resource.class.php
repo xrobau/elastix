@@ -49,16 +49,6 @@ class REST_Resource
         }
         Header($sAllow.implode(', ', $listaPermitida));
     }
-    
-    protected function requestURL()
-    {
-        // $_SERVER['HTTP_HOST'] es controlable por un atacante
-        /*
-        return (($_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://').
-            (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_ADDR']).$_SERVER['PHP_SELF'];
-        */
-        return $_SERVER['PHP_SELF'];
-    }
 }
 
 ?>

@@ -312,6 +312,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Registration: fix references to data sources that changed in Elastix 3.
+  SVN Rev[5073]
+
 * Sat Jun 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Group Permission: use _tr instead of arrLang, use load_language_module().
   SVN Rev[5071]

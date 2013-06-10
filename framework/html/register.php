@@ -55,9 +55,10 @@ if(!empty($pACL->errMsg)) {
 }
 
 // Load smarty
+$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/");
 $smarty = getSmarty($arrConf['mainTheme']);
 
-$pDBMenu = new paloDB($arrConf['elastix_dsn']['menu']);
+$pDBMenu = new paloDB($arrConf['elastix_dsn']['elastix']);
 
 // 2) Autentico usuario
 if(isset($_SESSION['elastix_user']) && isset($_SESSION['elastix_pass']) && $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass']) or $developerMode==true) {

@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri Jun 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Graphic Report: convert entirely from arrLang to use of _tr().
   SVN Rev[5064]
@@ -108,6 +112,7 @@ fi
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5016]
 
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Rates: remove unnecessary and risky copy of uploaded file, and

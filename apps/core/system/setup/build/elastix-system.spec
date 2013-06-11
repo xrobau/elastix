@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Time Config: remove duplicate definition of getParameter() that gets
   confused by Fortify as the one used by the framework.
@@ -169,6 +173,7 @@ fi
 * Wed May 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5043]
 
 * Wed May 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: set up an HTML version of the gauges used in the Hard

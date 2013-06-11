@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,6 +298,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: File Editor, Monitoring, Voicemail: remove duplicate definition of
   getParameter() that gets confused by Fortify as the one used by the framework.
@@ -312,6 +316,7 @@ fi
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5015]
 
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: add missing check for IPv4 address format.

@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 6
+Release: 7
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -305,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove insecure implementation of requestURL()
   SVN Rev[5079]
@@ -342,6 +346,7 @@ rm -rf $RPM_BUILD_ROOT
     file XYZ.class.php. The framework can now support this convention to 
     implement autoloading, so that modules do not need to require() every single
     class file anymore. 
+  SVN Rev[5060]
 
 * Fri May 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: re-introduce saving last viewed module in a session 
@@ -352,6 +357,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu May 30 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile
+  SVN Rev[5047]
 
 * Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: require paloSantoPDF.class.php inside the only method that

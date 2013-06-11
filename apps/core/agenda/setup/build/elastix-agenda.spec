@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,6 +109,10 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: hardcode base URL for REST service because PHP_SELF is 
   insecure. Pointed out by Fortify report.
@@ -134,6 +138,7 @@ fi
 * Thu May 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5009]
 
 * Thu May 23 2013 Bruno Macias <bmacias@palosanto.com>
 - FIXED: module address book, validation field picture on rest webservice was

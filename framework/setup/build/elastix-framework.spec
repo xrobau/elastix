@@ -305,6 +305,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: force focus on input_user textbox for blackmin theme as done
+  with the other themes.
+  SVN Rev[5086]
+
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

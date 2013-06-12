@@ -71,7 +71,7 @@ function _moduleContent(&$smarty, $module_name)
     switch($accion)
     {
         case 'delete_backup': //BOTON DE BORRAR BACKUP "ELIMINAR"
-            $content = delete_backup($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, $pDB);
+            $content = delete_backup($smarty, $module_name, $local_templates_dir, $dir_backup, $pDB);
             break;
         case 'backup': //BOTON "RESPALDAR"
             $content = backup_form($smarty, $local_templates_dir, $arrLang, $module_name);
@@ -86,7 +86,7 @@ function _moduleContent(&$smarty, $module_name)
             $content = process_restore($smarty, $local_templates_dir, $arrLang, $dir_backup, $module_name);
             break;
         case 'download_file':
-            $content = downloadBackup($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup);
+            $content = downloadBackup($smarty, $module_name, $local_templates_dir, $dir_backup);
             break;
 
 /******************************* PARA FTP BACKUP ***************************************/
@@ -108,45 +108,44 @@ function _moduleContent(&$smarty, $module_name)
             break;
 /******************************* PARA BACKUP AUTOMATICO ********************************/
         case "automatic":
-            $content = automatic_backup($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup,$pDB);
+            $content = automatic_backup($smarty, $module_name, $local_templates_dir, $dir_backup,$pDB);
             break;
 /***************************************************************************************/
         default:
-            $content = report_backup_restore($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, $pDB);
+            $content = report_backup_restore($smarty, $module_name, $local_templates_dir, $dir_backup, $pDB);
             break;
     }
 
     return $content;
 }
 
-function report_backup_restore($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, &$pDB)
+function report_backup_restore($smarty, $module_name, $local_templates_dir, $dir_backup, &$pDB)
 {
-    $nombre_archivos = array();
-    $num_backups = Obtener_Total_Backups($dir_backup);
-    $pFTPBackup = new paloSantoFTPBackup($pDB);
-    //Paginacion
-    $limit  = 10;
-    $total  = $num_backups;
+    $total_archivos = array_reverse(array_map('basename', glob("$dir_backup/*.tar")));
 
-// obtencion de parametros desde la base
-        $_DATA = $pFTPBackup->getStatusAutomaticBackupById(1);
-        if(!(is_array($_DATA) & count($_DATA)>0)){
-            $_DATA['status'] = "DISABLED";
-        }
+    // Paginacion
+    $limit = 10;
+    $total = count($total_archivos);
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+    $end    = $oGrid->getEnd();
 
-    $oGrid  = new paloSantoGrid($smarty);
-    $offset = $oGrid->getOffSet($limit,$total,(isset($_GET['nav']))?$_GET['nav']:NULL,(isset($_GET['start']))?$_GET['start']:NULL);
-
-    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
-
-    $nombre_archivos = Obtener_Backups($dir_backup, $total-$offset, $limit);
-
+    $nombre_archivos = array_slice($total_archivos, $offset, $limit);
     //Fin Paginacion
+    
+    // obtencion de parametros desde la base
+    $pFTPBackup = new paloSantoFTPBackup($pDB);
+    $_DATA = $pFTPBackup->getStatusAutomaticBackupById(1);
+    if(!(is_array($_DATA) & count($_DATA)>0)){
+        $_DATA['status'] = "DISABLED";
+    }
 
     $arrData = null;
     if(is_array($nombre_archivos) && $total>0){
         foreach($nombre_archivos as $key => $nombre_archivo){
-            $arrTmp[0] = "<input type='checkbox' name='chk[".$nombre_archivo."]' id='chk[".$nombre_archivo."]'>";
+            $arrTmp[0] = "<input type='checkbox' name='chk[".$nombre_archivo."]' id='chk[".$nombre_archivo."]'/>";
             $arrTmp[1] = "<a href='?menu=$module_name&action=download_file&file_name=$nombre_archivo&rawmode=yes'>$nombre_archivo</a>";
             $fecha="";
             // se parsea el archivo para obtener la fecha
@@ -158,35 +157,30 @@ function report_backup_restore($smarty, $module_name, $local_templates_dir, $arr
             }
 
             $arrTmp[2] = $fecha;
-            $arrTmp[3] = "<input type='submit' name='submit_restore[".$nombre_archivo."]' value='{$arrLang['Restore']}' class='button'>";
+            $arrTmp[3] = "<input type='submit' name='submit_restore[".$nombre_archivo."]' value='"._tr('Restore')."' class='button' />";
             $arrData[] = $arrTmp;
         }
     }
 
-    $arrGrid = array("title"    => $arrLang["Backup List"],
+    $arrGrid = array("title"    => _tr('Backup List'),
                      "url"      => array('menu' => $module_name),
                      "icon"     => "/modules/$module_name/images/system_backup_restore.png",
                      "width"    => "99%",
                      "start"    => ($total==0) ? 0 : $offset + 1,
                      "end"      => $end,
                      "total"    => $total,
-                     "columns"  => array(0 => array("name"      => "",
-                                                    "property1" => ""),
-                                         1 => array("name"      => $arrLang["Name Backup"],
-                                                    "property1" => ""),
-                                         2 => array("name"      => $arrLang["Date"],
-                                                    "property1" => ""),
-                                         3 => array("name"      => $arrLang["Action"],
-                                                    "property1" => ""),
+                     "columns"  => array(0 => array("name"      => ""),
+                                         1 => array("name"      => _tr('Name Backup')),
+                                         2 => array("name"      => _tr('Date')),
+                                         3 => array("name"      => _tr('Action')),
                                     )
                     );
     $time = $_DATA['status'];
 
-    $smarty->assign("FILE_UPLOAD", $arrLang["File Upload"]);
-    $smarty->assign("AUTOMATIC", $arrLang["AUTOMATIC"]);
-   // $smarty->assign("BACKUP", $arrLang["Backup"]);
-    $smarty->assign("UPLOAD", $arrLang["Upload"]);
-    $smarty->assign("FTP_BACKUP", $arrLang["FTP Backup"]);
+    $smarty->assign("FILE_UPLOAD", _tr('File Upload'));
+    $smarty->assign("AUTOMATIC", _tr('AUTOMATIC'));
+    $smarty->assign("UPLOAD", _tr('Upload'));
+    $smarty->assign("FTP_BACKUP", _tr('FTP Backup'));
     $oGrid->addNew("backup",_tr("Backup"));
     $oGrid->deleteList(_tr("Are you sure you wish to delete backup (s)?"),'delete_backup',_tr("Delete"));
     $oGrid->customAction("view_form_FTP",_tr("FTP Backup"));
@@ -199,106 +193,29 @@ function report_backup_restore($smarty, $module_name, $local_templates_dir, $arr
     );
 
     $oGrid->addComboAction("time",_tr("AUTOMATIC"),$backupIntervals,$time,'automatic');
-    
-
-    //$htmlFilter = $smarty->fetch("$local_templates_dir/filter.tpl");
-    //$oGrid->showFilter(trim($htmlFilter),true);
-    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
 
     return $contenidoModulo;
 }
 
-function automatic_backup($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, $pDB)
+function automatic_backup($smarty, $module_name, $local_templates_dir, $dir_backup, &$pDB)
 {
-    $nombre_archivos = array();
-    $num_backups = Obtener_Total_Backups($dir_backup);
-    $pFTPBackup = new paloSantoFTPBackup($pDB);
-    //Paginacion
-    $limit  = 5;
-    $total  = $num_backups;
-
-    $time = getParameter("time");
-
-    $oGrid  = new paloSantoGrid($smarty);
-    $offset = $oGrid->getOffSet($limit,$total,(isset($_GET['nav']))?$_GET['nav']:NULL,(isset($_GET['start']))?$_GET['start']:NULL);
-
-    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
-
-    $nombre_archivos = Obtener_Backups($dir_backup, $total-$offset, $limit);
-
-    //Fin Paginacion
-
-    $arrData = null;
-    if(is_array($nombre_archivos) && $total>0){
-        foreach($nombre_archivos as $key => $nombre_archivo){
-            $arrTmp[0] = "<input type='checkbox' name='chk[".$nombre_archivo."]' id='chk[".$nombre_archivo."]'>";
-            $arrTmp[1] = "<a href='?menu=$module_name&action=download_file&file_name=$nombre_archivo'>$nombre_archivo</a>";
-            $fecha="";
-            // se parsea el archivo para obtener la fecha
-            if(preg_match("/\w*-\d{4}\d{2}\d{2}\d{2}\d{2}\d{2}-\w{2}\.\w*/",$nombre_archivo)){ //elastixbackup-20110720122759-p7.tar
-                $arrMatchFile = preg_split("/-/",$nombre_archivo);
-                $data  = $arrMatchFile[1];
-                $fecha = substr($data,-8,2)."/".substr($data,-10,2)."/".substr($data,0,4)." ".substr($data,-6,2).":".substr($data,-4,2 ).":".substr($data,-2,2);
-                $id    = $arrMatchFile[1]."-".$arrMatchFile[2];
-            }
-            $arrTmp[2] = $fecha;
-            $arrTmp[3] = "<input type='submit' name='submit_restore[".$nombre_archivo."]' value='{$arrLang['Restore']}' class='button'>";
-            $arrData[] = $arrTmp;
-        }
-    }
-
-    $arrGrid = array("title"    => $arrLang["Backup List"],
-                     "url"      => array('menu' => $module_name),
-                     "icon"     => "/modules/$module_name/images/system_backup_restore.png",
-                     "width"    => "99%",
-                     "start"    => ($total==0) ? 0 : $offset + 1,
-                     "end"      => $end,
-                     "total"    => $total,
-                     "columns"  => array(0 => array("name"      => "",
-                                                    "property1" => ""),
-                                         1 => array("name"      => $arrLang["Name Backup"],
-                                                    "property1" => ""),
-                                         2 => array("name"      => $arrLang["Date"],
-                                                    "property1" => ""),
-                                         3 => array("name"      => $arrLang["Action"],
-                                                    "property1" => ""),
-                                    )
-                    );
-
-
-    $smarty->assign("FILE_UPLOAD", $arrLang["File Upload"]);
-    $smarty->assign("AUTOMATIC", $arrLang["AUTOMATIC"]);
-
-   // $smarty->assign("BACKUP", $arrLang["Backup"]);
-    $smarty->assign("UPLOAD", $arrLang["Upload"]);
-    $smarty->assign("FTP_BACKUP", $arrLang["FTP Backup"]);
-    $oGrid->addNew("backup",_tr("Backup"));
-    $oGrid->deleteList(_tr("Are you sure you wish to delete backup (s)?"),'delete_backup',_tr("Delete"));
-    $oGrid->customAction("view_form_FTP",_tr("FTP Backup"));
-    $backupIntervals = array(
-        'DISABLED'  =>  _tr('DISABLED'),
-        'DAILY'     =>  _tr('DAILY'),
-        'MONTHLY'   =>  _tr('MONTHLY'),
-        'WEEKLY'    =>  _tr('WEEKLY'),
-    );
-
-    $oGrid->addComboAction("time",_tr("AUTOMATIC"),$backupIntervals,$time,'automatic');
+	$time = getParameter("time");
 
     //if there is data in database
+    $pFTPBackup = new paloSantoFTPBackup($pDB);
     $result = $pFTPBackup->getStatusAutomaticBackupById();
     if(isset($result) && $result != "")
         $pFTPBackup->updateStatus($time);
     else
         $pFTPBackup->insertStatus($time);
-    $smarty->assign("mb_message", $arrLang["SUCCESSFUL"]);
+    $smarty->assign("mb_message", _tr('SUCCESSFUL'));
     $pFTPBackup->createCronFile($time);
-    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
 
-    return $contenidoModulo;
+    return report_backup_restore($smarty, $module_name, $local_templates_dir, $dir_backup, $pDB);
 }
 
-
-function downloadBackup($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, &$pDB)
+function downloadBackup($smarty, $module_name, $local_templates_dir, $dir_backup, &$pDB)
 {
     $bArchivoValido = TRUE;
 
@@ -328,24 +245,7 @@ function downloadBackup($smarty, $module_name, $local_templates_dir, $arrLang, $
     }
 }
 
-
-function Obtener_Total_Backups($dir_backup)
-{
-    $comando="ls $dir_backup/*.tar | grep -c .";
-    exec($comando,$output,$retval);
-    if ($retval!=0) return 0;
-    return $output[0];
-}
-
-function Obtener_Backups($dir_backup, $offset_inv, $limit)
-{
-    $comando="ls $dir_backup/*.tar -t | tail -n $offset_inv | head -n $limit | xargs -n 1 basename";
-    exec($comando,$output,$retval);
-    if ($retval!=0) return array();
-    return $output;
-}
-
-function delete_backup($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, &$pDB)
+function delete_backup($smarty, $module_name, $local_templates_dir, $dir_backup, &$pDB)
 {
     function delete_backup_isInvalidFile($file_name) {
         return !preg_match('/^elastixbackup-\d{14}-\w{2}\.tar$/', $file_name);
@@ -366,7 +266,7 @@ function delete_backup($smarty, $module_name, $local_templates_dir, $arrLang, $d
             $smarty->assign('mb_message', _tr('Error when deleting backup file'));
         }
     }
-    return report_backup_restore($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup, $pDB);
+    return report_backup_restore($smarty, $module_name, $local_templates_dir, $dir_backup, $pDB);
 }
 
 function form_general($smarty, $local_templates_dir, $arrLang, $arrBackupOptions, $module_name)
@@ -422,13 +322,13 @@ function restore_form($smarty, $local_templates_dir, $arrLang, $path_backup, $mo
     }else $archivo_post = isset($_POST["backup_file"])?$_POST["backup_file"]:"";
     $archivo_post = basename($archivo_post);
 
-    $dir_respaldo = "$path_backup";
-    $comando="cd ".escapeshellarg($dir_respaldo)."; tar xvf ".escapeshellarg("$dir_respaldo/$archivo_post")." backup/a_options.xml";
-    exec($comando,$output,$retval);
-    if ($retval==0)
+    $output = $retval = NULL;
+    exec('tar -xOf '.escapeshellarg("$path_backup/$archivo_post").' backup/a_options.xml',
+        $output, $retval);
+    if ($retval == 0)
     {
         $xmlDoc = new DOMDocument();
-        $xmlDoc->load("$dir_respaldo/backup/a_options.xml");
+        $xmlDoc->loadXML(implode('', $output));        
 
         //copio el archivo en memoria
         $root = $xmlDoc->documentElement;//apunto a el tag raiz
@@ -443,9 +343,8 @@ function restore_form($smarty, $local_templates_dir, $arrLang, $path_backup, $mo
         }
     }
 
-    //$_ruta_archivo_ = $archivo_post;
     $smarty->assign("BACKUP_FILE", $archivo_post);
-    $smarty->assign("title", $arrLang["Restore"]. ": $archivo_post");
+    $smarty->assign("title", _tr("Restore"). ": $archivo_post");
     $smarty->assign("OPTION_URL", "restore");
     $parameter = 0;
     showAlert($path_backup, $smarty, $arrLang, $archivo_post, $module_name, $parameter);
@@ -603,45 +502,28 @@ function showAlert($path_backup, $smarty, $arrLang, $backup_file, $module_name, 
     } else {
         $path_file_backup = "$path_backup/$backup_file";
         //verificar que el archivo existe
-        if (!file_exists($path_file_backup))
-        {
-                $smarty->assign("ERROR_MSG", $arrLang["File doesn't exist"]);
-        }else
-        {
-            //crear la carpeta donde se va a descomprimir el archivo de respaldo
-            $dir_respaldo = "$path_backup";
-            $timestamp=time();
-            $ruta_restaurar="$path_backup/restore";
-            $ruta_respaldo="$ruta_restaurar/backup";
-            if (!file_exists($ruta_restaurar)) mkdir($ruta_restaurar);
-            //descomprimir el archivo
-            $comando="tar -C $ruta_restaurar -pxvf $path_file_backup ";
-            exec($comando,$output,$retval);
-            if ($retval==0)
-            {
-                $path_backup_XML = getVersionPrograms_SYSTEM();
-                $arr_XML = getVersionPrograms_XML($ruta_restaurar);
-                if($arr_XML==null){
-                    $smarty->assign("mb_message", $arrLang["no_file_xml"]);
-                    exec("rm $ruta_restaurar -rf");
-                    return ;
-                }
-                $compare = compareArrays($path_backup_XML, $arr_XML);
+        if (!file_exists($path_file_backup)) {
+            $smarty->assign("ERROR_MSG", _tr("File doesn't exist"));
+        } else {
+            $path_backup_XML = getVersionPrograms_SYSTEM();
+            $arr_XML = getVersionPrograms_XML($path_file_backup);
+            if($arr_XML==null){
+                $smarty->assign("mb_message", $arrLang["no_file_xml"]);
+                return ;
+            }
+            $compare = compareArrays($path_backup_XML, $arr_XML);
 
-                if($parameter == 0){
-                    if(count($compare)>=1 && $compare!=null){
-                        $warning = $arrLang["Warning"];
-                        $pag = '"?menu='.$module_name.'&action=detail&rawmode=yes&file_name='.$backup_file.'"';
-                        $outMessage = $warning." <a href='javascript:popup_dif($pag);'>".$arrLang["details"]."</a>";
-                        $smarty->assign("mb_message", $outMessage);
-                    }
-                    exec("rm $ruta_restaurar -rf");
-                    return ;
-                }else{
-                    exec("rm $ruta_restaurar -rf");
-                    $version = boxAlert($module_name, $arrLang,$path_backup_XML,$arr_XML,$compare);
-                    return $version;
+            if($parameter == 0){
+                if(count($compare)>=1 && $compare!=null){
+                    $warning = $arrLang["Warning"];
+                    $pag = '"?menu='.$module_name.'&action=detail&rawmode=yes&file_name='.$backup_file.'"';
+                    $outMessage = $warning." <a href='javascript:popup_dif($pag);'>".$arrLang["details"]."</a>";
+                    $smarty->assign("mb_message", $outMessage);
                 }
+                return ;
+            }else{
+                $version = boxAlert($module_name, $arrLang,$path_backup_XML,$arr_XML,$compare);
+                return $version;
             }
         }
     }
@@ -800,13 +682,16 @@ function getVersionPrograms_SYSTEM()
     return $arrPro;
 }
 
-function getVersionPrograms_XML($path_backup)
+function getVersionPrograms_XML($path_file_backup)
 {
-    $dir_respaldo = "$path_backup";
-     if(!file_exists("$dir_respaldo/backup/versions.xml"))
-        return null;
+    // Output program versions to stdout
+    $output = $retval = NULL;
+    exec('tar -xOf '.escapeshellarg($path_file_backup).' backup/versions.xml',
+        $output, $retval);
+    if ($retval != 0) return NULL;
     $xmlDoc = new DOMDocument();
-    $xmlDoc->load("$dir_respaldo/backup/versions.xml");
+    if (!$xmlDoc->loadXML(implode('', $output))) return NULL;
+    
     $arrPrograms = null;
 
     //copio el archivo en memoria

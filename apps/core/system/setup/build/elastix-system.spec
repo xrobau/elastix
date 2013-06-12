@@ -130,6 +130,13 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: partial rewrite of FTP implementation to clean up the
+  API and improve error reporting and handling. Remove a style in custom CSS 
+  that conflicts with a framework style. Remove dead code. Convert some uses of
+  $arrLang to _tr().
+  SVN Rev[5092]
+
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

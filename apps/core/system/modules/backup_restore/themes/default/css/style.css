@@ -4,24 +4,6 @@
     margin:0 auto;
 }
 
-.ui-state-default { 
-    background:#E6E6E6 url(../../../images/ui-bg_glass_75_e6e6e6_1x400.png) repeat-x scroll 50% 50%;
-    border:1px solid #D3D3D3;
-    color:#555555;
-    font-weight:normal;
-    outline-color:-moz-use-text-color;
-    outline-style:none;
-    outline-width:medium;
-    height:10px;
-}
-
-.ui-state-highlight {
-    background:#FBF9EE url(../../../images/ui-bg_glass_55_fbf9ee_1x400.png) repeat-x scroll 50% 50%;
-    border:1px solid #FCEFA1;
-    color:#363636;
-    height:10px;
-}
-
 #sortable1, #sortable2 { 
     list-style-type: none; 
     margin: 0; 

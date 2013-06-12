@@ -25,12 +25,22 @@
         </div>
         <div id="home">
             <div id="lef">
-                <ul id="sortable1" class='droptrue'>{$LOCAL_LI}</ul>
+                <ul id="sortable1" class='droptrue'>
+                {* {$LOCAL_LI} *}
+                {foreach from=$local_files item=file}
+                <li class='ui-state-default' id='inn_{$file}'><b class='item'>{$file}</b></li>
+                {/foreach}
+                </ul>
             </div>
             <div id="med">
             </div>
             <div id="cen">
-                <ul id="sortable2" class='droptrue2'>{$REMOTE_LI}</ul>
+                <ul id="sortable2" class='droptrue2'>
+                {* {$REMOTE_LI} *}
+                {foreach from=$remote_files item=file}
+                <li class='ui-state-default' id='out_{$file}'><b class='item'>{$file}</b></li>
+                {/foreach}
+                </ul>
             </div>
             <div id="rig">
                 <table style="font-size: 16px;" width="25%" >

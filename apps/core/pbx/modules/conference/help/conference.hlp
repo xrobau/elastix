@@ -45,7 +45,7 @@
     <td>Start Time (PST/PDT)</td><td>Yes</td><td>Select the date and time in which the conference will start.</td>
   </tr>
   <tr>
-    <td>Conference Number</td><td>Yes</td><td>When you create a conference a random number is generated automatically in this field.<br />You can change this number if you want but make sure this is not being used already.</td>
+    <td>Conference Number</td><td>Yes</td><td>When you create a conference a random number is generated automatically in this field. This number identifies the conference and you can change it if you want but make sure it is not being used by another conference.</td>
   </tr>
   <tr>
     <td>Conference Owner</td><td>No</td><td>The user who is in charge of the conference.</td>
@@ -71,7 +71,13 @@
 <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_conference_callers.png" border="0" />
 <p>Figure 4</p></div>
 <br />
-<p>To invite a user to the conference, select the extension number from the dropdown list and click on "Invite Caller". Immediately the user's phone will start to ring. When the user answers the phone he will be part of the conference.</p>
+<h3>Invite a participant</h3>
+<p>There are two ways to join a user to the conference:
+<ul style="list-style-type:decimal">
+<li>Select the extension number from the dropdown list and click on "Invite Caller". Immediately the user's phone will start to ring. When the user answers the phone he will be part of the conference.</li>
+<li>Call to <b>5555</b> and when you are asked, enter the conference number followed by the pound key (#). </li>
+</ul>
+</p>
 
 <p>If you want to silence a user, just select the checkbox from the mute column and click on "Mute". If you want to terminate a call, select the checkbox from Kick column and click on "Kick".</p>
 

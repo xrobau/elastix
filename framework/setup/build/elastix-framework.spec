@@ -312,6 +312,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: force focus on input_user textbox for blackmin theme as done
+  with the other themes.
+  SVN Rev[5086]
+
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove insecure implementation of requestURL()
   SVN Rev[5079]

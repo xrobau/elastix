@@ -131,10 +131,15 @@ fi
 
 %changelog
 * Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: use internal glob instead of exec'd shell piping to
+  list backup files. Modernize pagination. Convert more uses of $arrLang to 
+  _tr(). Remove a large code duplication at automatic backup handling. Use the
+  -O option of tar to extract XML to stdout instead of using temporary files.
+  SVN Rev[5093] 
 - CHANGED: Backup/Restore: partial rewrite of FTP implementation to clean up the
   API and improve error reporting and handling. Remove a style in custom CSS 
   that conflicts with a framework style. Remove dead code. Convert some uses of
-  $arrLang to _tr().
+  $arrLang to _tr(). Fixes Elastix bug #1586.
   SVN Rev[5092]
 
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>

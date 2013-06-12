@@ -26,8 +26,11 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoFTPBackup.class.php,v 1.1 2009-09-07 10:09:02 Eduardo Cueva ecueva@palosanto.com Exp $ */
+
+define ('ELASTIX_BACKUP_DIR', '/var/www/backup');
+
 class paloSantoFTPBackup {
-    var $_DB;
+    private $_DB;
     var $errMsg;
 
     function paloSantoFTPBackup(&$pDB)
@@ -49,86 +52,168 @@ class paloSantoFTPBackup {
         }
     }
 
-    /*HERE YOUR FUNCTIONS*/
-
-    function connectFTP($user, $password, $host, $port){
-    //Permite conectarse al Servidor FTP
-        $id_ftp=ftp_connect($host,$port); //Obtiene un manejador del Servidor FTP
-        if (!$id_ftp) {
-            return 1;
-        }else{
-            $login = ftp_login($id_ftp,$user,$password); //Se loguea al Servidor FTP
-            if (!$login) {
-                return 2;
-            }else
-                ftp_pasv($id_ftp,true); //Establece el modo de conexión true modo pasivo
+    /**
+     * Procedimiento para cargar las credenciales del servidor FTP de la base de
+     * datos.
+     * 
+     * @return  mixed   NULL en error, o tupla de credenciales.
+     */
+    function obtenerCredencialesFTP()
+    {
+        $idServidorFTP = 1;
+        $paramSQL = array($idServidorFTP);
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT server, port, user, password, pathServer FROM serverFTP WHERE id = ?',
+            TRUE, $paramSQL);
+        if (!is_array($tupla)) {
+            $tupla = NULL;
+            $this->errMsg = _tr('Failed to load FTP server credentials').' - '.$this->_DB->errMsg;
         }
-        return $id_ftp; //Devuelve el manejador a la función
+        
+        return $tupla;
     }
 
-    function uploadFile($local_file,$remote_file,$user, $password, $host, $port, $path){
-        //Sube archivo de la maquina Cliente al Servidor (Comando PUT)
-        $id_ftp=$this->connectFTP($user, $password, $host, $port); //Obtiene un manejador y se conecta al Servidor FTP 
-        if($id_ftp == 1 || $id_ftp == 2)    return $id_ftp;
-        $local_file = '/var/www/backup/'.$remote_file;
-        ftp_chdir($id_ftp, $path);  // se cambia de directorio
-        $val = ftp_put($id_ftp,$remote_file,$local_file,FTP_BINARY);
-        //Sube un archivo al Servidor FTP en modo Binario
-        ftp_quit($id_ftp); //Cierra la conexion FTP
-        return $val;
+    /**
+     * Procedimiento para guardar un nuevo conjunto de credenciales FTP a la 
+     * base de datos.
+     * 
+     * @param   string  $server     Servidor FTP a contactar para las operaciones
+     * @param   string  $port       Puerto FTP para contactar a servidor
+     * @param   string  $user       Usuario remoto FTP
+     * @param   string  $password   Contraseña del usuario remoto
+     * @param   string  $path       Ruta en el servidor FTP para respaldos
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function asignarCredencialesFTP($server, $port, $user, $password, $path)
+    {
+        $idServidorFTP = 1;
+        $paramSQL = array($idServidorFTP);
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) AS N FROM serverFTP WHERE id = ?',
+            TRUE, $paramSQL);
+        if (!is_array($tupla)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        $sql = ($tupla['N'] > 0)
+            ? 'UPDATE serverFTP SET server = ?, port = ?, user = ?, '.
+                'password = ?, pathServer = ? WHERE id = ?'
+            : 'INSERT INTO serverFTP (server, port, user, password, '.
+                'pathServer, id) VALUES (?, ?, ?, ?, ?, ?)';
+        $paramSQL = array($server, $port, $user, $password, $path, $idServidorFTP);
+        $r = $this->_DB->genQuery($sql, $paramSQL);
+        if (!$r) $this->errMsg = $this->_DB->errMsg;
+        return $r;
     }
 
-    function downloadFile($local_file,$remote_file,$user, $password, $host, $port, $path){
-        $id_ftp=$this->connectFTP($user, $password, $host, $port);
-        if($id_ftp == 1 || $id_ftp == 2)    return $id_ftp;
-        $local_file = '/var/www/backup/'.$local_file;
-        $handle = fopen($local_file, 'w');
-        ftp_chdir($id_ftp, $path);
-        $val = ftp_fget($id_ftp,$handle,$remote_file,FTP_BINARY,0);
-        fclose($handle);
-        ftp_quit($id_ftp);
-        return $val;
+    // Abrir la conexión FTP con login y modo pasivo y cambio de directorio
+    private function _abrirConexionFTP()
+    {
+    	$ftpcred = $this->obtenerCredencialesFTP();
+        if (!is_array($ftpcred)) return NULL;
+        if (count($ftpcred) <= 0) {
+            $this->errMsg = _tr('FTP server credentials not set');
+            return NULL;
+        }
+        
+        $ftpconn = @ftp_connect($ftpcred['server'], $ftpcred['port']);
+        if (!$ftpconn) {
+            $this->errMsg = _tr('Error Connection');
+        	return NULL;
+        }
+        if (!ftp_login($ftpconn, $ftpcred['user'], $ftpcred['password'])) {
+            $this->errMsg = _tr('Error user_password');
+            ftp_close($ftpconn);
+        	return NULL;
+        }
+        if (!ftp_pasv($ftpconn, TRUE)) {
+            $this->errMsg = _tr('Failed to set passive mode on FTP');
+            ftp_close($ftpconn);
+        	return NULL;
+        }
+        if (!ftp_chdir($ftpconn, $ftpcred['pathServer'])) {
+            $this->errMsg = _tr('Failed to change remote FTP directory');
+            ftp_close($ftpconn);
+            return NULL;
+        }
+        return $ftpconn;
     }
 
-    function getExternalNames($user, $password, $host, $port, $path){
-        // permite conectarse y obtener los nombres de los archivos externos
-        // get contents of the current directory
-        $id_ftp=$this->connectFTP($user, $password, $host, $port);
-        if($id_ftp == 1 || $id_ftp == 2)    return $id_ftp;
-        ftp_chdir($id_ftp, $path);
-        $contents = ftp_nlist($id_ftp, "-la .");
-        ftp_quit($id_ftp);
-        $new_contents = $this->getOnlyTar($contents);
-        if(!$new_contents) return 'empty';
-        return $new_contents;
+    /**
+     * Procedimiento para enviar un archivo de respaldo al servidor FTP 
+     * configurado.
+     * 
+     * @param   string  $sNombreArchivo Nombre del archivo de respaldo
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function enviarArchivoFTP($sNombreArchivo)
+    {
+    	$ftpconn = $this->_abrirConexionFTP();
+        if (is_null($ftpconn)) return FALSE;
+        
+        $sRutaLocal = ELASTIX_BACKUP_DIR.'/'.$sNombreArchivo;
+        $bExito = ftp_put($ftpconn, $sNombreArchivo, $sRutaLocal, FTP_BINARY);
+        ftp_close($ftpconn);
+        if (!$bExito) $this->errMsg = _tr('Problem uploading').' '.$sNombreArchivo;
+        return $bExito;
+    }
+    
+    /**
+     * Procedimiento para recibir un archivo de respaldo del servidor FTP 
+     * configurado.
+     * 
+     * @param   string  $sNombreArchivo Nombre del archivo de respaldo
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function recibirArchivoFTP($sNombreArchivo)
+    {
+        $ftpconn = $this->_abrirConexionFTP();
+        if (is_null($ftpconn)) return FALSE;
+        
+        $sRutaLocal = ELASTIX_BACKUP_DIR.'/'.$sNombreArchivo;
+        $bExito = ftp_get($ftpconn, $sRutaLocal, $sNombreArchivo, FTP_BINARY);
+        ftp_close($ftpconn);
+        if (!$bExito) $this->errMsg = _tr('Problem downloading').' '.$sNombreArchivo;
+        return $bExito;
     }
 
-    function getOnlyTar($contents){
+    /**
+     * Procedimiento para listar los archivos de respaldo (todos los .tar) del
+     * servidor FTP configurado.
+     * 
+     * @return  mixed   NULL en caso de error, o lista (posiblemente vacía)
+     */
+    function listarArchivosTarFTP()
+    {
+        $ftpconn = $this->_abrirConexionFTP();
+        if (is_null($ftpconn)) return NULL;
+        
+        $contents = ftp_nlist($ftpconn, '-la .');
+        ftp_close($ftpconn);
+        if ($contents === FALSE) {
+            $this->errMsg = _tr('Failed to list contents');
+        	return NULL;
+        }
+
         $new_list = array();
         foreach ($contents as $fileline) {
-        	$regs = NULL;
+            $regs = NULL;
             /* Recolectar nombres de archivo sin espacios que contengan .tar .
              * Aparentemente esto no es necesario ya que $fileline debería tener
              * la totalidad del nombre de archivo, pero da la impresión de que
              * el código anterior se encontró con un caso en que la entrada 
              * tenía información que no era parte del nombre de archivo. */
             if (preg_match('/(\S*\.tar\S*)/', $fileline, $regs)) {
-            	$new_list[] = $regs[1];
+                $new_list[] = $regs[1];
             }
         }
-        
-        if (count($new_list) <= 0) $new_list = '';
         return $new_list;
     }
 
-    function ObtainLink($user, $password, $host, $port){
-        //Obriene ruta del directorio del Servidor FTP (Comando PWD)
-        $id_ftp=$this->connectFTP($user, $password, $host, $port); //Obtiene un manejador y se conecta al Servidor FTP 
-        if($id_ftp == 1 || $id_ftp == 2)    return $id_ftp;
-        $Directorio=ftp_pwd($id_ftp); //Devuelve ruta actual p.e. "/home/willy"
-        ftp_quit($id_ftp); //Cierra la conexion FTP
-        return $Directorio; //Devuelve la ruta a la función
-    }
+    /*HERE YOUR FUNCTIONS*/
 
     //obtiene lo asrchivos locales
     function obtainFiles($dir){
@@ -141,85 +226,7 @@ class paloSantoFTPBackup {
         return $names;
     }
 
-    function updateData($server, $port, $user, $password, $path)
-    {
-        $query = "UPDATE serverFTP 
-                  SET server='$server', 
-                      port=$port, 
-                      user='$user', 
-                      password='$password',
-                      pathServer='$path'
-                  WHERE id = 1";
-        $result=$this->_DB->genQuery($query);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true;
-    }
-
-    function insertData($server, $port, $user, $password, $path)
-    {
-        $query = "INSERT INTO serverFTP(server,port,user,password,pathServer) VALUES('$server',$port,'$user','$password','$path');";
-        $result=$this->_DB->genQuery($query);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true;
-    }
-
     ///////////////////////////////
-
-
-    function getNumFTPBackup($filter_field, $filter_value)
-    {
-        $where = "";
-        if(isset($filter_field) & $filter_field !="")
-            $where = "where $filter_field like '$filter_value%'";
-
-        $query   = "SELECT COUNT(*) FROM table $where";
-
-        $result=$this->_DB->getFirstRowQuery($query);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result[0];
-    }
-
-    function getFTPBackup($limit, $offset, $filter_field, $filter_value)
-    {
-        $where = "";
-        if(isset($filter_field) & $filter_field !="")
-            $where = "where $filter_field like '$filter_value%'";
-
-        $query   = "SELECT * FROM table $where LIMIT $limit OFFSET $offset";
-
-        $result=$this->_DB->fetchTable($query, true);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-        return $result;
-    }
-
-    function getFTPBackupById($id)
-    {
-        $query = "SELECT * FROM serverFTP WHERE id=$id";
-
-        $result=$this->_DB->getFirstRowQuery($query,true);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
 
     function getStatusAutomaticBackupById()
     {
@@ -236,10 +243,8 @@ class paloSantoFTPBackup {
 
     function updateStatus($status)
     {
-        $query = "UPDATE automatic_backup 
-                  SET status='$status'
-                  WHERE id = 1";
-        $result=$this->_DB->genQuery($query);
+        $query = 'UPDATE automatic_backup SET status = ? WHERE id = 1';
+        $result = $this->_DB->genQuery($query, array($status));
 
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
@@ -250,8 +255,8 @@ class paloSantoFTPBackup {
 
     function insertStatus($status)
     {
-        $query = "INSERT INTO automatic_backup(status) VALUES('$status');";
-        $result=$this->_DB->genQuery($query);
+        $query = "INSERT INTO automatic_backup(status) VALUES(?);";
+        $result=$this->_DB->genQuery($query, array($status));
 
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;

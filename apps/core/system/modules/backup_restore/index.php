@@ -91,16 +91,16 @@ function _moduleContent(&$smarty, $module_name)
 
 /******************************* PARA FTP BACKUP ***************************************/
         case "save_new_FTP":
-            $content = saveNewFTPBackup($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = saveNewFTPBackup($smarty, $module_name, $local_templates_dir, $pDB);
             break;
         case "view_form_FTP":
-            $content = viewFormFTPBackup($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = viewFormFTPBackup($smarty, $module_name, $local_templates_dir, $pDB);
             break;
         case 'uploadFTPServer':
-            $content = file_upload_FTPServer($module_name, $arrLang, $arrConf, $pDB);
+            $content = file_upload_FTPServer($module_name, $pDB);
             break;
         case 'downloadFTPServer':
-            $content = file_download_FTPServer($module_name, $arrLang, $arrConf, $pDB);
+            $content = file_download_FTPServer($module_name, $pDB);
             break;
 /***************************************************************************************/
           case "detail":
@@ -822,244 +822,115 @@ function getVersionPrograms_XML($path_backup)
 }
 
 /************************  FUNCIONES PARA FTP BACKUP ***********************************/
-function viewFormFTPBackup($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function viewFormFTPBackup($smarty, $module_name, $local_templates_dir, &$pDB)
 {
+    global $arrConf;
+    
+    // Variables estáticas
+    $smarty->assign(array(
+        'SAVE'              =>  _tr('Save'),
+        'EDIT'              =>  _tr('Edit'),
+        'CANCEL'            =>  _tr('Cancel'),
+        'UPLOAD'            =>  _tr('Upload'),
+        'DOWNLOAD'          =>  _tr('Download'),
+        'TITLE'             =>  _tr('TITLE'),
+        'REQUIRED_FIELD'    =>  _tr('Required field'),
+        'icon'              =>  "modules/$module_name/images/system_backup_restore.png",
+        'module_name'       =>  $module_name,
+    ));
+    
     $pFTPBackup = new paloSantoFTPBackup($pDB);
-    $arrFormFTPBackup = createFieldForm($arrLang);
-    $oForm = new paloForm($smarty,$arrFormFTPBackup);
-    global $arrConfModule;
-    $band = 0;
-    //begin, Form data persistence to errors and other events.
-    $_DATA  = $_POST;
-    $action = getParameter("action");
-    if(!$action){
-        $_DATA = $pFTPBackup->getFTPBackupById(1);
-        $band = 0;
+    
+    // Datos a mostrar en el formulario de credenciales del servidor
+    $ftpcred = array(
+        'server'        =>  '',
+        'port'          =>  21,
+        'user'          =>  '',
+        'password'      =>  '',
+        'pathServer'    =>  '/',
+    );
+    $dbcred = $pFTPBackup->obtenerCredencialesFTP();
+    if (is_array($dbcred)) foreach (array_keys($ftpcred) as $k) {
+    	if (isset($dbcred[$k])) $ftpcred[$k] = $dbcred[$k];
     }
+    foreach (array_keys($ftpcred) as $k)
+        if (isset($_POST[$k])) $ftpcred[$k] = $_POST[$k];
 
-    if(!(isset($_DATA) & $_DATA!="" & count($_DATA)>0)){
-        $_DATA = $pFTPBackup->getFTPBackupById(1);
-        if(!(is_array($_DATA) & count($_DATA)>0)){
-            $_DATA['server'] = "";
-            $_DATA['port'] = "21";
-            $_DATA['user'] = "";
-            $_DATA['password'] = "";
-            $_DATA['pathServer'] = "/";
-            $band = 1;
-        }
-    }
+    // Listado de archivos local y remoto
+    $smarty->assign('local_files', $pFTPBackup->obtainFiles($arrConf['dir']));
+    $smarty->assign('remote_files', $pFTPBackup->listarArchivosTarFTP());
+    if ($pFTPBackup->errMsg != '') $smarty->assign('mb_message', $pFTPBackup->errMsg);
 
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("UPLOAD", $arrLang["Upload"]);
-    $smarty->assign("DOWNLOAD", $arrLang["Download"]);
-    $smarty->assign("TITLE", $arrLang["TITLE"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "modules/$module_name/images/system_backup_restore.png");
-
-    $dir = $arrConf['dir'];
-    $array_new = $pFTPBackup->obtainFiles($dir);
-    $content_remote = "";
-    $content_local = "";
-    $files_names = "";
-    for($i=0; $i<count($array_new); $i++)
-        $content_local .= "<li class='ui-state-default' id="."'inn_"."$array_new[$i]'><b class='item'>{$array_new[$i]}</b></li>";
-
-    if($band == 0){
-        $files_names = $pFTPBackup->getExternalNames($_DATA['user'], $_DATA['password'], $_DATA['server'], $_DATA['port'], $_DATA['pathServer'], $smarty);
-    }else{
-        $files_names = 'empty';
-    }
-    if($files_names == 1)
-        $smarty->assign("mb_message", $arrLang["Error Connection"]);
-    else if($files_names == 2)
-        $smarty->assign("mb_message", $arrLang["Error user_password"]);
-    else if($files_names == 'empty')
-        $content_remote = "";
-    else
-        for($i=0; $i<count($files_names); $i++)
-            $content_remote .= "<li class='ui-state-highlight' id="."'out_"."$files_names[$i]'><b class='item'>{$files_names[$i]}</b></li>";
-
-    $smarty->assign("LOCAL_LI",$content_local);
-    $smarty->assign("REMOTE_LI", $content_remote);
-    $smarty->assign("module_name",$module_name);
-
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/formFTP.tpl",$arrLang["FTP Backup"], $_DATA);
-    $content  = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
-    return $content;
+    $oForm = new paloForm($smarty, createFieldForm());
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/formFTP.tpl", _tr('FTP Backup'), $ftpcred);
+    return "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 }
 
-function saveNewFTPBackup($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function saveNewFTPBackup($smarty, $module_name, $local_templates_dir, &$pDB)
 {
     $pFTPBackup = new paloSantoFTPBackup($pDB);
-    $arrFormFTPBackup = createFieldForm($arrLang);
-    $oForm = new paloForm($smarty,$arrFormFTPBackup);
-    $_DATA  = $_POST;
-    $server = getParameter("server");
-    $port = getParameter("port");
-    $user = getParameter("user");
-    $password = getParameter("password");
-    $path = getParameter("pathServer");
+
+    $oForm = new paloForm($smarty, createFieldForm());
     if(!$oForm->validateForm($_POST)){
         // Validation basic, not empty and VALIDATION_TYPE
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
+        $smarty->assign("mb_title", _tr('Validation Error'));
         $arrErrores = $oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/>";
-        if(is_array($arrErrores) && count($arrErrores) > 0){
-            foreach($arrErrores as $k=>$v)
-                $strErrorMsg .= "$k, ";
+        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
+        if (is_array($arrErrores) && count($arrErrores) > 0) {
+            $strErrorMsg .= implode(', ', array_keys($arrErrores));
         }
         $smarty->assign("mb_message", $strErrorMsg);
+    } else {
+        $server = getParameter("server");
+        $port = getParameter("port");
+        $user = getParameter("user");
+        $password = getParameter("password");
+        $path = getParameter("pathServer");
+
+        //deben estar llenos todos los campos
+        if ($server &&  $port &&  $user  &&  $password &&  $path) {
+            $r = $pFTPBackup->asignarCredencialesFTP($server, $port, $user, $password, $path);
+            if (!$r) $smarty->assign("mb_message", $pFTPBackup->errMsg);
+        } else
+            $smarty->assign("mb_message", _tr('Error to save'));
     }
-    else{
-        if($server &&  $port &&  $user  &&  $password &&  $path){ //deben estar llenos todos los campos
-            $result = $pFTPBackup->getFTPBackupById(1);
-            if($result)
-                $pFTPBackup->updateData($server, $port, $user, $password, $path);
-            else
-                $pFTPBackup->insertData($server, $port, $user, $password, $path);
-        }else
-            $smarty->assign("mb_message", $arrLang["Error to save"]);
-        $content = viewFormFTPBackup($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
-    }
-    return $content;
+    return viewFormFTPBackup($smarty, $module_name, $local_templates_dir, $pDB);
 }
 /*****************************************************************************************/
 /*************** FUNCIONES PARA HACER UN BACKUP/RESTORE A UN SERVIDOR FTP ****************/
 
-function file_upload_FTPServer($module_name, $arrLang, $arrConf, &$pDB)
+function file_upload_FTPServer($module_name, &$pDB)
 {
-    $dir = $arrConf['dir'];
     $file    = getParameter('file');
     $lista   = getParameter('lista'); //identifica en que lista se hace el drop
 
     $array = obtainList($file);
+    if($lista == 'droptrue2' && $array[0] == 'out')
+        return _tr('Error Drag Drop');
+    if(!$array[1])
+        return _tr('Error Drag Drop');
     $pFTPBackup = new paloSantoFTPBackup($pDB);
-    $info = $pFTPBackup->getFTPBackupById(1);
-    $user = $info['user'];
-    $password = $info['password'];
-    $host = $info['server'];
-    $port = $info['port'];
-    $path = $info['pathServer'];
-
-    $files_names = $pFTPBackup->getExternalNames($user, $password, $host, $port, $path);
-     if($lista == 'droptrue2' & $array[0] == 'out')
-        echo $arrLang["Error Drag Drop"];
-     else{
-        if(!$files_names)
-            echo $arrLang["Error to request"];
-        else{
-            if(!$array[1])
-                echo $arrLang["Error Drag Drop"];
-            else{
-                if($files_names == 'empty'){
-                    $local_file = $array[1];
-                    $remote_file = $array[1];
-                    $val = $pFTPBackup->uploadFile($local_file,$remote_file,$user, $password, $host, $port, $path);
-                    if ($val) {
-                        echo $arrLang["Successfully uploaded"]." $local_file\n";
-                    } else {
-                        echo $arrLang["Problem uploading"]." $local_file\n";
-                    }
-                }
-                else{
-                    $local_file = $array[1];
-                    $remote_file = $array[1];
-                    $val = $pFTPBackup->uploadFile($local_file,$remote_file,$user, $password, $host, $port, $path);
-                    if ($val) {
-                        echo $arrLang["Successfully uploaded"]." $local_file\n";
-                    } else {
-                        echo $arrLang["Problem uploading"]." $local_file\n";
-                    }
-                }
-            }
-        }
-    }
+    $r = $pFTPBackup->enviarArchivoFTP($array[1]);
+    if (!$r)
+        return $pFTPBackup->errMsg;
+    return _tr('Successfully uploaded').' '.$array[1];
 }
 
-function file_download_FTPServer($module_name, $arrLang, $arrConf, &$pDB)
+function file_download_FTPServer($module_name, &$pDB)
 {
-    $dir = $arrConf['dir'];
     $file    = getParameter('file');
     $lista   = getParameter('lista'); //identifica en que lista se hace el drop
 
     $array = obtainList($file);
+    if($lista == 'droptrue' && $array[0] == 'inn')
+        return _tr('Error Drag Drop');
+    if(!$array[1])
+        return _tr('Error Drag Drop');
     $pFTPBackup = new paloSantoFTPBackup($pDB);
-    $info = $pFTPBackup->getFTPBackupById(1);
-    $user = $info['user'];
-    $password = $info['password'];
-    $host = $info['server'];
-    $port = $info['port'];
-    $path = $info['pathServer'];
-
-    $local_files = $pFTPBackup->obtainFiles($dir);
-
-    if($lista == 'droptrue' & $array[0] == 'inn')
-        echo $arrLang["Error Drag Drop"];
-    else{
-        if(!$local_files)
-            echo $arrLang["Error to request"];
-        else{
-            if(!$array[1])
-                echo $arrLang["Error Drag Drop"];
-            else{
-                if($local_files == 'empty'){
-                    $local_file = $array[1];
-                    $remote_file = $array[1];
-                    $val = $pFTPBackup->downloadFile($local_file,$remote_file,$user, $password, $host, $port, $path);
-                    if ($val) {
-                        echo $arrLang["Successfully written"]." to $local_file\n";
-                    } else {
-                        echo $arrLang["Problem downloading"]." $local_file\n";
-                    }
-                }
-                else{
-                    $local_file = $array[1];
-                    $remote_file = $array[1];
-                    $val = $pFTPBackup->downloadFile($local_file,$remote_file,$user, $password, $host, $port, $path);
-                    if ($val) {
-                        echo $arrLang["Successfully written"]." to $local_file\n";
-                    } else {
-                        echo $arrLang["Problem downloading"]." $remote_file\n";
-                    }
-                }
-            }
-        }
-    }
-}
-
-function getListUp($fileUP, $fileRemote){// fileUp toda la sita que se envia
-    $up = "";
-    $i = 0;
-    $k = 0;
-    $repetidos = "";
-    $fileUP = array_unique($fileUP);
-    for($j=0; $j<count($fileUP); $j++){
-        if(!in_array($fileUP[$j],$fileRemote)){
-            $up[$i] = $fileUP[$j];
-            $i++;
-        }else {
-            if(filesRepeted($fileUP[$j],$fileRemote) > 0){
-                $repetidos[$k] = $fileUP[$j];
-                $k++;
-            }
-        }
-    }
-    $sal[0] = $i;
-    $sal[1] = $up;
-    $sal[2] = $repetidos;
-    return $sal;
-}
-
-function filesRepeted($filename,$fileRemote){
-    $i=0;
-    $j=0;
-    for($i=0; $i<count($fileRemote); $i++){
-        if(in_array($filename,$fileRemote))
-            $j++;
-    }
-    return $j;
+    $r = $pFTPBackup->recibirArchivoFTP($array[1]);
+    if (!$r)
+        return $pFTPBackup->errMsg;
+    return _tr('Successfully written').' '.$array[1];
 }
 
 function obtainList($fileString)
@@ -1077,61 +948,66 @@ function obtainList($fileString)
 }
 /******************************************************************************************/
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
-    $arrOptions = array('val1' => 'Value 1', 'val2' => 'Value 2', 'val3' => 'Value 3');
-
     $arrFields = array(
-            "server"   => array(      "LABEL"                  => $arrLang["Server FTP"],
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "TEXT",
-                                            "INPUT_EXTRA_PARAM"      => "",
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
-            "port"   => array(      "LABEL"                  => $arrLang["Port"],
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "TEXT",
-                                            "INPUT_EXTRA_PARAM"      => "",
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
-            "user"   => array(      "LABEL"                  => $arrLang["User"],
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "TEXT",
-                                            "INPUT_EXTRA_PARAM"      => "",
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
-            "password"   => array(      "LABEL"                  => $arrLang["Password"],
-                                            "REQUIRED"               => "si",
-                                            "INPUT_TYPE"             => "PASSWORD",
-                                            "INPUT_EXTRA_PARAM"      => "",
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
-            "local"   => array(      "LABEL"                  => $arrLang["Local"],
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "TEXT",
-                                            "INPUT_EXTRA_PARAM"      => "",
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
-            "server_ftp"   => array(      "LABEL"                  => $arrLang["Server FTP"],
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "TEXT",
-                                            "INPUT_EXTRA_PARAM"      => "",
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
-            "pathServer"   => array(     "LABEL"                  => $arrLang["Path Server FTP"],
-                                            "REQUIRED"               => "no",
-                                            "INPUT_TYPE"             => "TEXT",
-                                            "INPUT_EXTRA_PARAM"      => "",
-                                            "VALIDATION_TYPE"        => "text",
-                                            "VALIDATION_EXTRA_PARAM" => ""
-                                            ),
-            );
+        "server"   => array(      
+            "LABEL"                  => _tr("Server FTP"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+            ),
+        "port"   => array(
+            "LABEL"                  => _tr("Port"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+            ),
+        "user"   => array(
+            "LABEL"                  => _tr("User"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+            ),
+        "password"   => array(
+            "LABEL"                  => _tr("Password"),
+            "REQUIRED"               => "si",
+            "INPUT_TYPE"             => "PASSWORD",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+            ),
+        "local"   => array(
+            "LABEL"                  => _tr("Local"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+            ),
+        "server_ftp"   => array(
+            "LABEL"                  => _tr("Server FTP"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+            ),
+        "pathServer"   => array(
+            "LABEL"                  => _tr("Path Server FTP"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+            ),
+        );
     return $arrFields;
 }
 

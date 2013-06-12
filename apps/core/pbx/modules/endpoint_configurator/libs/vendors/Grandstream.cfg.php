@@ -5,44 +5,8 @@
 */
 function PrincipalFileGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model)
 {
-    if($model == "GXV3140"){
-            $content="
-        # Firmware Server Path
-        P192 = $ipAdressServer
-        
-        # Config Server Path
-        P237 = $ipAdressServer
-        
-        # Firmware Upgrade. 0 - TFTP Upgrade,  1 - HTTP Upgrade.
-        P212 = 0
-        
-        # Account Name
-        P417 = $DisplayName
-        
-        # SIP Server
-        P402 = $ipAdressServer
-        
-        # Outbound Proxy
-        P403 = $ipAdressServer
-        
-        # SIP User ID
-        P404 = $id_device
-        
-        # Authenticate ID
-        P405 = $id_device
-        
-        # Authenticate password
-        P406 = $secret
-        
-        # Display Name (John Doe)
-        P407 = $DisplayName";
-    }
-    elseif($model == "GXP2120" || $model == "GXP2100" || $model == "GXP1405" || $model == "GXV3175"){
-        $content = getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model);
-    }
-    else{
-        $content = getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model);
-    }
+//Usado por modelos como GXP2120,GXP2100,GXP1405,GXV3175,GXV3140,GXP2200
+    $content = getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParameters, $ipAdressServer, $model);
     return $content;
 }
 
@@ -154,6 +118,22 @@ function getFileConfigGrandstream($DisplayName, $id_device, $secret, $arrParamet
             $content .="
         # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO
         P73=1";
+    }
+    if ($model == "GXV3140" || $model == "GXP2200" ){
+        $content.="
+        # Voicemail UserID (User ID/extension for 3rd party voice mail system)
+        # MaxLength 64 characters
+        P33 = *97
+
+        # Account Active.
+        # 0 - No, 1 - Yes. Default value is 1.
+        P271 = 1
+
+        # Display Name (John Doe)
+        P3 = $DisplayName
+
+        # Dial Plan Maxlength: unlimited, default is allow all { x+ | *x+ | *xx*x+ }
+        P290 = { x+ | *x+ | *xx*x+ }";
     }
     
     return $content;

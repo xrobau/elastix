@@ -130,7 +130,7 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
         $iUltimoOffset = NULL;
     }
 
-    $pAsteriskLogs = new paloSantoAsteriskLogs($pDB);
+    $pAsteriskLogs = new paloSantoAsteriskLogs();
 
     $listaFechas = $pAsteriskLogs->astLog->listarFechas();
 

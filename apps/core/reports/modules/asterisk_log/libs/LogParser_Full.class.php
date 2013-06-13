@@ -76,11 +76,9 @@ class LogParser_Full
 							$sLinea = fgets($hArchivo);
 							// La línea esperada tiene el formato siguiente: 
 							// [Jun  6 04:02:01] VERBOSE[3708] logger.c: Asterisk Event Logger restarted
-							$iPosCierre = strpos($sLinea, ']');
-							$sPosibleFecha = '';
-							if ($iPosCierre !== FALSE && $sLinea{0} == '[')
-							{
-								$sPosibleFecha = substr($sLinea, 1, $iPosCierre - 1);
+                            $regs = NULL;
+                            if (preg_match('/^\[(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\]/', $sLinea, $regs)) {
+                                $sPosibleFecha = $regs[1];
 								$iTimestamp = strtotime($sPosibleFecha);
 								if ($iTimestamp !== FALSE) {
 									$sFechaPuntoInicial = date('Y-m-d', $iTimestamp);
@@ -100,11 +98,9 @@ class LogParser_Full
 
 							// La línea esperada tiene el formato siguiente: 
 							// [Jun  6 04:02:01] VERBOSE[3708] logger.c: Asterisk Event Logger restarted
-							$iPosCierre = strpos($sLinea, ']');
-							$sPosibleFecha = '';
-							if ($iPosCierre !== FALSE && $sLinea{0} == '[')
-							{
-								$sPosibleFecha = substr($sLinea, 1, $iPosCierre - 1);
+                            $regs = NULL;
+                            if (preg_match('/^\[(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\]/', $sLinea, $regs)) {
+                                $sPosibleFecha = $regs[1];
 								$iTimestamp = strtotime($sPosibleFecha);
 								if ($iTimestamp !== FALSE) {
 									$sFechaPuntoMedio = date('Y-m-d', $iTimestamp);
@@ -158,11 +154,9 @@ class LogParser_Full
 
 									// La línea esperada tiene el formato siguiente: 
 									// [Jun  6 04:02:01] VERBOSE[3708] logger.c: Asterisk Event Logger restarted
-									$iPosCierre = strpos($sLinea, ']');
-									$sPosibleFecha = '';
-									if ($iPosCierre !== FALSE && $sLinea{0} == '[')
-									{
-										$sPosibleFecha = substr($sLinea, 1, $iPosCierre - 1);
+                                    $regs = NULL;
+                                    if (preg_match('/^\[(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\]/', $sLinea, $regs)) {
+                                        $sPosibleFecha = $regs[1];
 										$iTimestamp = strtotime($sPosibleFecha);
 										if ($iTimestamp !== FALSE) {
 											$sFecha = date('Y-m-d', $iTimestamp);

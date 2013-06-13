@@ -30,31 +30,13 @@
 include_once "modules/$module_name/libs/LogParser_Full.class.php";
 
 class paloSantoAsteriskLogs {
-    var $_DB;
     var $errMsg;
     var $astLog;
 
-    function paloSantoAsteriskLogs(&$pDB)
+    function paloSantoAsteriskLogs()
     {
-        // Se recibe como parámetro una referencia a una conexión paloDB
-        if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        } else {
-            $dsn = (string)$pDB;
-            $this->_DB = new paloDB($dsn);
-
-            if (!$this->_DB->connStatus) {
-                $this->errMsg = $this->_DB->errMsg;
-                // debo llenar alguna variable de error
-            } else {
-                // debo llenar alguna variable de error
-            }
-        }
         $this->astLog = new LogParser_Full();
     }
-
-    /*HERE YOUR FUNCTIONS*/
 
     function ObtainNumAsteriskLogs($sFecha)
     {
@@ -74,13 +56,13 @@ class paloSantoAsteriskLogs {
             // Se desactiva la condición porque ya no todas las líneas empiezan con corchete
             if (!(count($lineas) == 0 && !is_null($s) && $s{0} != '[')) {
                 $regs = NULL;
-                if (ereg('^\[([[:alnum:][:space:]\:]+)\][[:space:]]+([[:alpha:]]+)(\[[[:digit:]]+\][[:space:]]+[^[:space:]]+\.c:)[[:space:]]+(.*)$', $s, $regs)) {
+                if (preg_match('/^\[([\w\s:]+)\]\s+((\w+)(\[\d+\]\s+\S+\.c:)\s+)?(.*)/', $s, $regs)) {
                     $l = array(
                         'offset'=> $pos[1],
                         'fecha' => $regs[1],
-                        'tipo' => $regs[2],
-                        'origen' => $regs[3],
-                        'linea' => $regs[4],
+                        'tipo' => $regs[3],
+                        'origen' => $regs[4],
+                        'linea' => $regs[5],
                     );
                 } else {
                     $l = array(

@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Jun 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Asterisk Logs: fix date parsing to avoid interpreting plain PIDs as
+  dates. Extract date from a new type of message line on asterisk boot. Remove
+  unnecessary database connection parameter.
+  SVN Rev[5097] 
+
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.

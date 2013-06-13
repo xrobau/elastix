@@ -28,19 +28,85 @@
   +----------------------------------------------------------------------+
   $Id: hangup.agi,v 1.1 2012-08-21 05:07:46 Alberto Santos asantos@palosanto.com Exp $ */
 
+/*********************************************************************************
+  This agi script will be executed every time a call is finished (hangup).
+  It will check for any executable script at /usr/local/elastix/addons_scripts
+  the folder addons_scripts does not exist by default it must be created by the
+  package or development that need it.
+  
+  The executable script will receive all the parameters of the call (asterisk),
+  for example:
+
+  /usr/local/elastix/addons_scripts/name_script  --uniqueid '1371156228.45' 
+  --answer '2013-06-13 15:43:48' --src '301' --dst '1234' --billsec '3'
+  --dstchannel '' --disposition 'ANSWERED' --accountcode '' 
+  --channel 'SIP/301-0000002d' --dial_trunk ''
+
+  Then the script can handle the parameters and do the tasks it has to do.
+
+  Here is an example about an script in /usr/local/elastix/addons_scripts
+  it must have executable permissions and root must be the owner and the group
+  it belongs.
+
+*******************EXAMPLE**********************
+  #!/usr/bin/php
+  <?php
+
+	require_once 'Console/Getopt.php';
+
+	// Parse command-line options
+	$opt = Console_Getopt::getopt($argv, '', array(
+	    'uniqueid=',
+	    'answer=',
+	    'source=',
+	    'destination=',
+	    'billsec=',
+	    'dstchannel=',
+	    'disposition=',
+	    'accountcode=',
+	    'channel=',
+	    'dial_trunk=',
+	));
+	if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
+
+	$uniqueid = "";
+	$billsec = "";
+
+	foreach($opt[0] as $options){
+        	if($options[0] == "--uniqueid")
+                	$uniqueid = $options[1];
+	        elseif($options[0] == "--billsec")
+        	        $billsec = $options[1];
+	}
+
+	//Do something with variables needed... in this case $uniqueid and $billsec
+
+	exit(0);
+
+	function error_exit($sMsg, $errorcode = 1)
+	{
+	    fwrite(STDERR, $sMsg);
+	    exit($errorcode);
+	}
+
+  ?>
+ 
+*********************************************************************************/
+
+
 define("ADDONS_SCRIPTS_DIR","/usr/local/elastix/addons_scripts");
 
 require_once "phpagi.php";
 
 $AGI = new AGI();
 
-//The array $arrVariable contains all the necessary asterisk variables for the addons scripts
+//The array $arrVariable contains all the necessary asterisk variables for addons scripts
 /******************************************************************/
 $arrVariables = array();
 $arrVariables["uniqueid"] 	= get_var($AGI,"CDR(uniqueid)");
 $arrVariables["answer"] 	= get_var($AGI,"CDR(answer)");
-$arrVariables["src"] 		= get_var($AGI,"CDR(src)");
-$arrVariables["dst"] 		= get_var($AGI,"CDR(dst)");
+$arrVariables["source"] 	= get_var($AGI,"CDR(src)");
+$arrVariables["destination"]	= get_var($AGI,"CDR(dst)");
 $arrVariables["billsec"] 	= get_var($AGI,"CDR(billsec)");
 $arrVariables["dstchannel"] 	= get_var($AGI,"CDR(dstchannel)");
 $arrVariables["disposition"] 	= get_var($AGI,"CDR(disposition)");
@@ -60,38 +126,22 @@ if(is_dir(ADDONS_SCRIPTS_DIR)){
 			elseif ($infoScript[4] != 0) error("The addon script ".ADDONS_SCRIPTS_DIR."/".$script." has invalid owner (should be root)!\n");
 			elseif ($infoScript[5] != 0) error("The addon script ".ADDONS_SCRIPTS_DIR."/".$script." has invalid group (should be root)!\n");
 			else{
-				/*All addons scripts must have the option --parameters that returns all the asterisk parameters needed by the script,
-			          for now the options availables are uniqueid, answer, src, dst, billsec, dstchannel, disposition, accountcode, channel,
-				  dial_trunk. Each parameter must be separated with an enter (\n) for example an script could return:
-					uniqueid
-					src
-					dst
-					dial_trunk
+				$parameters = "";
+				foreach($arrVariables as $key => $value){
+					if(empty($value))
+						$parameters .= " --$key ''";
+					else
+						$parameters .= " --$key ".escapeshellarg($value);
+				}
+				/*
+				  Now we proceed to call to the script with all the parameters as the following example:
+
+				  /usr/local/elastix/addons_scripts/name_script  --uniqueid '1371156228.45' --answer '2013-06-13 15:43:48' --src '301' --dst '1234' --billsec '3' --dstchannel '' --disposition 'ANSWERED' --accountcode '' --channel 'SIP/301-0000002d' --dial_trunk ''
+
 				*/
-				exec(ADDONS_SCRIPTS_DIR."/".$script." --parameters",$output,$ret);
-				if($ret != 0) error("Error during the execution of script ".ADDONS_SCRIPTS_DIR."/".$script);
-				else{
-					$firstOption = ord('a');
-					$error = FALSE;
-					$parameters = "";
-					foreach($output as $position => $variable){
-						if(!isset($arrVariables[$variable])){
-							$error = TRUE;
-							break;
-						}
-						$next = $firstOption + $position;
-						$option = chr($next);
-						$parameters .= "-$option\"{$arrVariables[$variable]}\" "; //Parameters needed by the script with the format:
-													 // -a"optionA" -b"optionC" -c"OptionC" ...
-					}
-					if($error) error("The addon script ".ADDONS_SCRIPTS_DIR."/".$script." is returning parameters not defined!");
-					else{
-file_put_contents("/tmp/tesss.txt",$parameters."\n",FILE_APPEND);
-						//Now we proceed to call to the script with the parameters needed
-						exec(ADDONS_SCRIPTS_DIR."/".$script." $parameters",$output,$ret);
-						if($ret != 0) error("The addon script ".ADDONS_SCRIPTS_DIR."/".$script." could not be executed successfully");
-					}
-				}	
+
+				exec(ADDONS_SCRIPTS_DIR."/".$script.$parameters,$output,$ret);
+				if($ret != 0) error("The addon script ".ADDONS_SCRIPTS_DIR."/".$script." could not be executed successfully");
 			}
 		    }
 		}

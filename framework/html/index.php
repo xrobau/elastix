@@ -138,7 +138,9 @@ if (isset($_SESSION['elastix_user']) &&
     }
 
     $smarty->assign("md_message_title", _tr('md_message_title'));
-    $smarty->assign("currentyear",date("Y"));
+    $sCurYear = date('Y');
+    if ($sCurYear < '2013') $sCurYear = '2013';
+    $smarty->assign("currentyear", $sCurYear);
     $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
     $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
     $smarty->assign("LOGOUT", _tr('Logout'));

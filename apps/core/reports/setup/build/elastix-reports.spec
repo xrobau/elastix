@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Jun 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Asterisk Logs: fix date parsing to avoid interpreting plain PIDs as
+  dates. Extract date from a new type of message line on asterisk boot. Remove
+  unnecessary database connection parameter.
+  SVN Rev[5097] 
+
 * Fri Jun 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Graphic Report: convert entirely from arrLang to use of _tr().
   SVN Rev[5064]

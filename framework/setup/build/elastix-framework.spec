@@ -312,6 +312,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jun 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: minimum year for copyright is 2013, so force it if date()
+  reports anything lower.
+  SVN Rev[5094]
+
 * Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: force focus on input_user textbox for blackmin theme as done
   with the other themes.

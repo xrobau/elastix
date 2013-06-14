@@ -131,7 +131,7 @@ function applyOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB, 
 			$langValue    = strtolower(trim($value));
 			if($filter_value!=""){
 				if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-					if(preg_match("/$filter_value/",$langValue))
+					if(strpos($langValue, $filter_value) !== FALSE)
 						$parameter_to_find[] = $key;
 			}
 		}
@@ -308,7 +308,7 @@ function reportOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB,
 			$langValue    = strtolower(trim($value));
 			if($filter_value!=""){
 				if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-					if(preg_match("/$filter_value/",$langValue))
+					if(strpos($langValue, $filter_value) !== FALSE)
 						$parameter_to_find[] = $key;
 			}
 		}

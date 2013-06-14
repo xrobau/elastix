@@ -312,15 +312,15 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
         $parameter_to_find = array();
     $lang = get_language();
     if($lang != "en"){
-            foreach($arrLang as $key=>$value){
+        foreach($arrLang as $key=>$value){
             $langValue    = strtolower(trim($value));
             $filter_value = strtolower(trim($filter_resource));
             if($filter_value!=""){
                 if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-                    if(preg_match("/$filter_value/",$langValue))
-                                    $parameter_to_find[] = $key;
+                    if (strpos($langValue, $filter_value) !== FALSE)
+                            $parameter_to_find[] = $key;
             }
-            }
+        }
     }
 
     $parameter_to_find[] = $filter_resource;

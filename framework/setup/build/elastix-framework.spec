@@ -313,6 +313,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Jun 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Organization: use tempnam instead of loop to generate unique temporary
+  filename. Pointed out by Fortify report
+  SVN Rev[5100]
 - CHANGED: Organization Permission: use strpos instead of regexp to search for 
   substring. Pointed out by Fortify report.
   SVN Rev[5099]

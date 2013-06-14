@@ -508,10 +508,8 @@ class paloSantoOrganization{
             return false;
         }
         
-        srand((double)microtime()*1000000);
-        do{
-            $file="orgToChange".rand();
-        }while(is_file("/tmp/$file"));
+        $tempfile = tempnam('/tmp', 'orgToChange');
+        $file = basename($tempfile);
         
         //escribimos un archivo que en contiene el id de las organizaciones que deseamos 
         //cambiar de estado, un id por linea
@@ -527,7 +525,7 @@ class paloSantoOrganization{
             return false;
         }
         
-        if(file_put_contents("/tmp/$file",$validOrg)===false){
+        if(file_put_contents($tempfile,$validOrg)===false){
             $this->errMsg=_tr("Couldn't be written file /tmp/$file");
             return false;
         }

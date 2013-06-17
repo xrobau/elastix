@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,9 +298,33 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Thu Jun 13 2013 Alberto Santos <asantos@palosanto.com>
+- FIXED: script hangup.agi. Fixed a missplaced code at line 89. Also changed
+  the method to call the scripts.
+  SVN Rev[5096]
+
+* Wed Jun 12 2013 José Briones <jbriones@palosanto.com>
+- UPDATED: Module conference. The help section was updated.
+  SVN Rev[5091]
+
+* Wed Jun 12 2013 José Briones <jbriones@palosanto.com>
+- ADDED: Added new file of sql commands for the new phone Grandstream GXP2200
+  in endpoint database.
+  SVN Rev[5089]
+
+* Wed Jun 12 2013 José Briones <jbriones@palosanto.com>
+- UPDATE: Module endpoint_configurator, Support for GXP2200 was added, and
+  support for GXV3140 was improved.
+  SVN Rev[5087]
+
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5081]
 
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: File Editor, Monitoring, Voicemail: remove duplicate definition of

@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Thu Jun 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: fix date parsing to avoid interpreting plain PIDs as
   dates. Extract date from a new type of message line on asterisk boot. Remove
@@ -101,6 +105,7 @@ fi
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5082]
 
 * Fri Jun 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Graphic Report: convert entirely from arrLang to use of _tr().

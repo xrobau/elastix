@@ -305,6 +305,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: rewrite menu selection for blackmin theme using CSS 
+  drop-down menus to improve navigation.
+  SVN Rev[5105]
+
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

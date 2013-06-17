@@ -312,6 +312,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: rewrite menu selection for blackmin theme using CSS 
+  drop-down menus to improve navigation.
+  SVN Rev[5105]
+
 * Fri Jun 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Organization: use tempnam instead of loop to generate unique temporary
   filename. Pointed out by Fortify report

@@ -168,92 +168,79 @@ INPUT:disabled {
 /* Definición del menú de la página */
 #elx-blackmin-menu
 {
-	background: #000000;
-    color: #ffffff;
+	display: inline;
+	font-family: verdana, arial, helvetica, sans-serif;
+	font-size: 9pt;
+}
+#elx-blackmin-menu .raquo
+{
+	position: absolute;
+	right: 0;
+}
+#elx-blackmin-menu li
+{
+	margin:    0px;
+	padding:   0px;
+	position:  relative;
+    line-height: normal;
+    width: 100%;
+    white-space: nowrap;
+}
+#elx-blackmin-menu a
+{
+    color: #bbbbbb;
+    text-decoration: none;
+    width: 100%;
+    display: inline-block;
+}
+#elx-blackmin-menu>div
+{
+    background: #000000;
+    color: #bbbbbb;
     position: absolute;
-    padding: 4pt;
+    padding-right: 10px;
     font-size: 11pt;
-    min-width: 150pt;
-    
     display: none;
     z-index: 1000000;
+}
+#elx-blackmin-menu:hover>div
+{
+	display: block;
 }
 #elx-blackmin-menu ul
 {
     list-style-type: none;
+    padding-left: 5px;
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    min-width: 100%;
 }
-#elx-blackmin-menu li
+#elx-blackmin-menu>div>ul ul
 {
-    line-height: normal;
+	display: none;
 }
-#elx-blackmin-menu>ul
+#elx-blackmin-menu>div>ul li.selected
 {
-	padding-left: 0;
-	margin-top: 0;
-}
-#elx-blackmin-menu>ul>li:hover
-{
-    background: #333333;
-}
-#elx-blackmin-menu>ul>li>a
-{
-    color: #bbbbbb;
-    text-decoration: none;
-}
-#elx-blackmin-menu>ul>li>a:hover
-{
-    color: #ffffff;
-}
-#elx-blackmin-menu>ul>li.selected>a
-{
-    color: #ffffff;
     font-weight: bold;
 }
-#elx-blackmin-menu>ul>li>ul
-{
-    padding-left: 10pt;
-}
-#elx-blackmin-menu>ul>li>ul>li:hover
+#elx-blackmin-menu>div>ul li:hover
 {
     background: #444444;
 }
-#elx-blackmin-menu>ul>li>ul>li>a
-{
-    color: #bbbbbb;
-    text-decoration: none;
-}
-#elx-blackmin-menu>ul>li>ul>li>a:hover
+#elx-blackmin-menu>div>ul li:hover>a
 {
     color: #ffffff;
 }
-#elx-blackmin-menu>ul>li>ul>li.selected>a
+#elx-blackmin-menu>div>ul li:hover>ul
 {
-    color: #ffffff;
-    font-weight: bold;
+    display: block;
+    background: #000000;
+    position: absolute;
+    left: 100%;
+    top: -6px;
+    border:1px #888 solid;
 }
-#elx-blackmin-menu>ul>li>ul>li>ul
-{
-    padding-left: 10pt;
-}
-#elx-blackmin-menu>ul>li>ul>li>ul>li:hover
-{
-    background: #555555;
-}
-#elx-blackmin-menu>ul>li>ul>li>ul>li>a
-{
-    color: #bbbbbb;
-    text-decoration: none;
-}
-#elx-blackmin-menu>ul>li>ul>li>ul>li>a:hover
-{
-    color: #ffffff;
-}
-#elx-blackmin-menu>ul>li>ul>li>ul>li.selected>a
-{
-    color: #ffffff;
-    font-weight: bold;
-}
-
 
 /* Definición del contenido de la página */
 #elx-blackmin-content

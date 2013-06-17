@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: fix botched detail window for package version mismatch.
+  Convert all of the module to use _tr() and load_language_module().
+  SVN Rev[5106]
+
 * Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: use internal glob instead of exec'd shell piping to
   list backup files. Modernize pagination. Convert more uses of $arrLang to 

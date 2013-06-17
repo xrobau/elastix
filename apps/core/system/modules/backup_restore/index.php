@@ -40,21 +40,13 @@ function _moduleContent(&$smarty, $module_name)
 
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    //include_once "modules/$module_name/libs/paloSantoConference.php";
 
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //conexion resource
     $pDB = new paloDB($arrConf['dsn_conn_database']);
@@ -74,16 +66,16 @@ function _moduleContent(&$smarty, $module_name)
             $content = delete_backup($smarty, $module_name, $local_templates_dir, $dir_backup, $pDB);
             break;
         case 'backup': //BOTON "RESPALDAR"
-            $content = backup_form($smarty, $local_templates_dir, $arrLang, $module_name);
+            $content = backup_form($smarty, $local_templates_dir, $module_name);
             break;
         case 'submit_restore': //BOTON DE RSTAURAR, lleva a la ventana de seleccion para restaurar
-            $content = restore_form($smarty, $local_templates_dir, $arrLang, $dir_backup, $module_name);
+            $content = restore_form($smarty, $local_templates_dir, $dir_backup, $module_name);
             break;
         case 'process_backup':
-            $content = process_backup($smarty, $local_templates_dir, $arrLang, $module_name);
+            $content = process_backup($smarty, $local_templates_dir, $module_name);
             break;
         case 'process_restore':
-            $content = process_restore($smarty, $local_templates_dir, $arrLang, $dir_backup, $module_name);
+            $content = process_restore($smarty, $local_templates_dir, $dir_backup, $module_name);
             break;
         case 'download_file':
             $content = downloadBackup($smarty, $module_name, $local_templates_dir, $dir_backup);
@@ -104,7 +96,7 @@ function _moduleContent(&$smarty, $module_name)
             break;
 /***************************************************************************************/
           case "detail":
-            $content = viewDetail($smarty, $module_name, $local_templates_dir, $arrLang, $dir_backup);
+            $content = viewDetail($smarty, $module_name, $local_templates_dir, $dir_backup);
             break;
 /******************************* PARA BACKUP AUTOMATICO ********************************/
         case "automatic":
@@ -269,26 +261,26 @@ function delete_backup($smarty, $module_name, $local_templates_dir, $dir_backup,
     return report_backup_restore($smarty, $module_name, $local_templates_dir, $dir_backup, $pDB);
 }
 
-function form_general($smarty, $local_templates_dir, $arrLang, $arrBackupOptions, $module_name)
+function form_general($smarty, $local_templates_dir, $arrBackupOptions, $module_name)
 {
-    $smarty->assign("PROCESS",$arrLang["Process"]);
-    $smarty->assign("LBL_TODOS", $arrLang["Select All options"]);
-    $smarty->assign("TODO_FAX", $arrLang["Select all in this section"]);
-    $smarty->assign("TODO_EMAIL", $arrLang["Select all in this section"]);
-    $smarty->assign("TODO_ENDPOINT", $arrLang["Select all in this section"]);
-    $smarty->assign("TODO_ASTERISK", $arrLang["Select all in this section"]);
-    $smarty->assign("TODO_OTROS", $arrLang["Select all in this section"]);
-    $smarty->assign("TODO_OTROS_NEW", $arrLang["Select all in this section"]);
-    $smarty->assign("BACK", $arrLang["Cancel"]);
-    $smarty->assign("WARNING", $arrLang["This process could take several minutes"]);
+    $smarty->assign("PROCESS",_tr('Process'));
+    $smarty->assign("LBL_TODOS", _tr('Select All options'));
+    $smarty->assign("TODO_FAX", _tr('Select all in this section'));
+    $smarty->assign("TODO_EMAIL", _tr('Select all in this section'));
+    $smarty->assign("TODO_ENDPOINT", _tr('Select all in this section'));
+    $smarty->assign("TODO_ASTERISK", _tr('Select all in this section'));
+    $smarty->assign("TODO_OTROS", _tr('Select all in this section'));
+    $smarty->assign("TODO_OTROS_NEW", _tr('Select all in this section'));
+    $smarty->assign("BACK", _tr('Cancel'));
+    $smarty->assign("WARNING", _tr('This process could take several minutes'));
 
     /*****************/
-    $smarty->assign("FAX", $arrLang["Fax"]);
-    $smarty->assign("EMAIL", $arrLang["Email"]);
-    $smarty->assign("ENDPOINT", $arrLang["Endpoint"]);
-    $smarty->assign("ASTERISK", $arrLang["Asterisk"]);
-    $smarty->assign("OTROS", $arrLang["Others"]);
-    $smarty->assign("OTROS_NEW", $arrLang["Others"]);
+    $smarty->assign("FAX", _tr('Fax'));
+    $smarty->assign("EMAIL", _tr('Email'));
+    $smarty->assign("ENDPOINT", _tr('Endpoint'));
+    $smarty->assign("ASTERISK", _tr('Asterisk'));
+    $smarty->assign("OTROS", _tr('Others'));
+    $smarty->assign("OTROS_NEW", _tr('Others'));
     /*****************/
 
     $smarty->assign("backup_fax", $arrBackupOptions['fax']);
@@ -302,19 +294,19 @@ function form_general($smarty, $local_templates_dir, $arrLang, $arrBackupOptions
     return $smarty->fetch("$local_templates_dir/backup.tpl");
 }
 
-function backup_form($smarty, $local_templates_dir, $arrLang, $module_name)
+function backup_form($smarty, $local_templates_dir, $module_name)
 {
-    $arrBackupOptions = Array_Options($arrLang, "");
+    $arrBackupOptions = Array_Options();
 
-    $smarty->assign("title", $arrLang["Backup"]);
+    $smarty->assign("title", _tr('Backup'));
     $smarty->assign("OPTION_URL", "backup");
 
-    return form_general($smarty, $local_templates_dir, $arrLang, $arrBackupOptions, $module_name);
+    return form_general($smarty, $local_templates_dir, $arrBackupOptions, $module_name);
 }
 
-function restore_form($smarty, $local_templates_dir, $arrLang, $path_backup, $module_name)
+function restore_form($smarty, $local_templates_dir, $path_backup, $module_name)
 {
-    $arrBackupOptions = Array_Options($arrLang, "disabled='disabled'");
+    $arrBackupOptions = Array_Options("disabled='disabled'");
     if(isset($_POST["submit_restore"]))
     {
         $arr = array_keys($_POST["submit_restore"]);
@@ -346,16 +338,22 @@ function restore_form($smarty, $local_templates_dir, $arrLang, $path_backup, $mo
     $smarty->assign("BACKUP_FILE", $archivo_post);
     $smarty->assign("title", _tr("Restore"). ": $archivo_post");
     $smarty->assign("OPTION_URL", "restore");
-    $parameter = 0;
-    showAlert($path_backup, $smarty, $arrLang, $archivo_post, $module_name, $parameter);
+    list($versionList_current, $versionList_torestore, $compare) = 
+        runPackageVersionCompare($path_backup, $smarty, $archivo_post);
 
-    return form_general($smarty, $local_templates_dir, $arrLang, $arrBackupOptions, $module_name);
+    if (!is_null($compare) && count($compare) > 0) {
+        $pag = '"?menu='.$module_name.'&action=detail&rawmode=yes&file_name='.$archivo_post.'"';
+        $outMessage = _tr('Warning')." <a href='javascript:popup_dif($pag);'>"._tr('details').'</a>';
+        $smarty->assign('mb_message', $outMessage);
+    }
+
+    return form_general($smarty, $local_templates_dir, $arrBackupOptions, $module_name);
 }
 
-function process_backup($smarty, $local_templates_dir, $arrLang, $module_name)
+function process_backup($smarty, $local_templates_dir, $module_name)
 {
 	// Recolectar las claves conocidas seleccionadas
-    $opcionesBackup = Array_Options($arrLang);
+    $opcionesBackup = Array_Options();
     $clavesBackup = array();
     foreach ($opcionesBackup as $opcionBackup) {
     	$clavesBackup = array_merge($clavesBackup, array_keys($opcionBackup));
@@ -382,15 +380,15 @@ function process_backup($smarty, $local_templates_dir, $arrLang, $module_name)
         $smarty->assign('ERROR_MSG', $sMensaje);
     }
 
-    return backup_form($smarty, $local_templates_dir, $arrLang, $module_name);
+    return backup_form($smarty, $local_templates_dir, $module_name);
 }
 
-function process_restore($smarty, $local_templates_dir, $arrLang, $path_backup, $module_name)
+function process_restore($smarty, $local_templates_dir, $path_backup, $module_name)
 {
     $smarty->assign("module", $module_name);
 
     // Recolectar las claves conocidas seleccionadas
-    $opcionesBackup = Array_Options($arrLang);
+    $opcionesBackup = Array_Options();
     $clavesBackup = array();
     foreach ($opcionesBackup as $opcionBackup) {
         $clavesBackup = array_merge($clavesBackup, array_keys($opcionBackup));
@@ -422,49 +420,55 @@ function process_restore($smarty, $local_templates_dir, $arrLang, $path_backup, 
             $smarty->assign('ERROR_MSG', $sMensaje);
         }
     }
-    return restore_form($smarty, $local_templates_dir, $arrLang, $path_backup, $module_name);
+    return restore_form($smarty, $local_templates_dir, $path_backup, $module_name);
 }
 
-function Array_Options($arrLang, $disabled="")
+function Array_Options($disabled="")
 {
     $arrBackupOptions = array(
-            "asterisk"      =>  array(
-                                    "as_db"             =>  array("desc"=>$arrLang["Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "as_config_files"   =>  array("desc"=>$arrLang["Configuration Files"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "as_monitor"        =>  array("desc"=>$arrLang["Monitors"]."  ".$arrLang["(Heavy Content)"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "as_voicemail"      =>  array("desc"=>$arrLang["Voicemails"]."  ".$arrLang["(Heavy Content)"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "as_sounds"         =>  array("desc"=>$arrLang["Sounds"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "as_mohmp3"            =>
-                                    array("desc"=>$arrLang["MOH"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "as_dahdi"         =>  array("desc"=>$arrLang["DAHDI Configuration"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                ),
-            "fax"           =>  array(
-                                    "fx_db"             =>  array("desc"=>$arrLang["Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "fx_pdf"            =>  array("desc"=>$arrLang["PDF"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                ),
-            "email"         =>  array(
-                                    "em_db"             =>  array("desc"=>$arrLang["Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "em_mailbox"        =>  array("desc"=>$arrLang["Mailbox"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                ),
-            "endpoint"      =>  array(
-                                    "ep_db"             =>  array("desc"=>$arrLang["Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "ep_config_files"   =>  array("desc"=>$arrLang["Configuration Files"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                ),
-            "otros"         =>  array(
-                                    "sugar_db"          =>  array("desc"=>$arrLang["SugarCRM Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "vtiger_db"         =>  array("desc"=>$arrLang["VtigerCRM Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "a2billing_db"      =>  array("desc"=>$arrLang["A2billing Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "mysql_db"          =>  array("desc"=>$arrLang["Mysql Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "menus_permissions" =>  array("desc"=>$arrLang["Menus and Permissions"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "fop_config"        =>  array("desc"=>$arrLang["Flash Operator Panel Config Files"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                ),
-           "otros_new"      =>  array(
-                                    "calendar_db"          =>  array("desc"=>$arrLang["Calendar  Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "address_db"          =>  array("desc"=>$arrLang["Address Book Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "conference_db"          =>  array("desc"=>$arrLang["Conference  Database"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                    "eop_db"          =>  array("desc"=>$arrLang["EOP"],"check"=>"","msg"=>"","disable"=>"$disabled"),
-                                ),
+        "asterisk"      =>  array(
+            "as_db"             =>  array("desc"=>_tr('Database')),
+            "as_config_files"   =>  array("desc"=>_tr('Configuration Files')),
+            "as_monitor"        =>  array("desc"=>_tr('Monitors')."  "._tr('(Heavy Content)')),
+            "as_voicemail"      =>  array("desc"=>_tr('Voicemails')."  "._tr('(Heavy Content)')),
+            "as_sounds"         =>  array("desc"=>_tr('Sounds')),
+            "as_mohmp3"         =>  array("desc"=>_tr('MOH')),
+            "as_dahdi"          =>  array("desc"=>_tr('DAHDI Configuration')),
+        ),
+        "fax"           =>  array(
+            "fx_db"             =>  array("desc"=>_tr('Database')),
+            "fx_pdf"            =>  array("desc"=>_tr('PDF')),
+        ),
+        "email"         =>  array(
+            "em_db"             =>  array("desc"=>_tr('Database')),
+            "em_mailbox"        =>  array("desc"=>_tr('Mailbox')),
+        ),
+        "endpoint"      =>  array(
+            "ep_db"             =>  array("desc"=>_tr('Database')),
+            "ep_config_files"   =>  array("desc"=>_tr('Configuration Files')),
+        ),
+        "otros"         =>  array(
+            "sugar_db"          =>  array("desc"=>_tr('SugarCRM Database')),
+            "vtiger_db"         =>  array("desc"=>_tr('VtigerCRM Database')),
+            "a2billing_db"      =>  array("desc"=>_tr('A2billing Database')),
+            "mysql_db"          =>  array("desc"=>_tr('Mysql Database')),
+            "menus_permissions" =>  array("desc"=>_tr('Menus and Permissions')),
+            "fop_config"        =>  array("desc"=>_tr('Flash Operator Panel Config Files')),
+        ),
+       "otros_new"      =>  array(
+            "calendar_db"       =>  array("desc"=>_tr('Calendar  Database')),
+            "address_db"        =>  array("desc"=>_tr('Address Book Database')),
+            "conference_db"     =>  array("desc"=>_tr('Conference  Database')),
+            "eop_db"            =>  array("desc"=>_tr('EOP')),
+        ),
     );
+    foreach (array_keys($arrBackupOptions) as $k1)
+    foreach (array_keys($arrBackupOptions[$k1]) as $k2) {
+        $arrBackupOptions[$k1][$k2]['check'] = '';
+    	$arrBackupOptions[$k1][$k2]['msg'] = '';
+        $arrBackupOptions[$k1][$k2]['disable'] = "$disabled";
+    }
+    
     return $arrBackupOptions;
 }
 
@@ -477,125 +481,75 @@ function Array_Options($arrLang, $disabled="")
 /* FUNCIONS PARA EL RESTORE*/
 /* ------------------------------------------------------------------------------- */
 
-function compareArrays($path_backup, $arr_XML)
+function runPackageVersionCompare($path_backup, $smarty, $backup_file)
 {
-    $errors = "";
-    foreach($path_backup as $key => $value) {
-        if (!isset($arr_XML[$key]) || !isset($arr_XML[$key]['version']) ||
-            !isset($arr_XML[$key]['release']) ||
-            $arr_XML[$key]['version'] != $path_backup[$key]['version'] ||
-            $arr_XML[$key]['release'] != $path_backup[$key]['release']) {
-
-            $errors[$key] = $path_backup[$key]['version']. "-" .$path_backup[$key]['release'];
-        }
-    }
-    return $errors;
-}
-
-function showAlert($path_backup, $smarty, $arrLang, $backup_file, $module_name, $parameter){
     //verificar que existe el archivo de respaldo
-
+    $path_file_backup = "$path_backup/$backup_file";
     if (empty($backup_file)) {
-        $smarty->assign("ERROR_MSG", $arrLang["Backup file path can't be empty"]);
-    } elseif (!preg_match('/^elastixbackup-\d{14}-\w{2}\.tar$/', $backup_file)) {
-        $smarty->assign('ERROR_MSG', _tr('Invalid backup filename'));
-    } else {
-        $path_file_backup = "$path_backup/$backup_file";
-        //verificar que el archivo existe
-        if (!file_exists($path_file_backup)) {
-            $smarty->assign("ERROR_MSG", _tr("File doesn't exist"));
-        } else {
-            $path_backup_XML = getVersionPrograms_SYSTEM();
-            $arr_XML = getVersionPrograms_XML($path_file_backup);
-            if($arr_XML==null){
-                $smarty->assign("mb_message", $arrLang["no_file_xml"]);
-                return ;
-            }
-            $compare = compareArrays($path_backup_XML, $arr_XML);
-
-            if($parameter == 0){
-                if(count($compare)>=1 && $compare!=null){
-                    $warning = $arrLang["Warning"];
-                    $pag = '"?menu='.$module_name.'&action=detail&rawmode=yes&file_name='.$backup_file.'"';
-                    $outMessage = $warning." <a href='javascript:popup_dif($pag);'>".$arrLang["details"]."</a>";
-                    $smarty->assign("mb_message", $outMessage);
-                }
-                return ;
-            }else{
-                $version = boxAlert($module_name, $arrLang,$path_backup_XML,$arr_XML,$compare);
-                return $version;
-            }
-        }
+        $smarty->assign('ERROR_MSG', _tr("Backup file path can't be empty"));
+        return NULL;
     }
+    if (!preg_match('/^elastixbackup-\d{14}-\w{2}\.tar$/', $backup_file)) {
+        $smarty->assign('ERROR_MSG', _tr('Invalid backup filename'));
+        return NULL;
+    }
+    if (!file_exists($path_file_backup)) {
+        $smarty->assign('ERROR_MSG', _tr("File doesn't exist"));
+        return NULL;
+    }
+
+    $versionList_current = getVersionPrograms_SYSTEM();
+    $versionList_torestore = getVersionPrograms_XML($path_file_backup);
+    if (is_null($versionList_torestore)) {
+        $smarty->assign("mb_message", _tr('no_file_xml'));
+        return NULL;
+    }
+    $compare = comparePackageVersions($versionList_current, $versionList_torestore);
+    return array($versionList_current, $versionList_torestore, $compare);
 }
 
-function boxAlert($module_name, $arrLang, $programs, $external, $compare){   
-    $html = "<body bgcolor='#f2f2f2'><table id='version' width='750px' align='center' border='0' cellspacing='0' cellpadding='4' style='font-weight:normal;'>".
-             "<tr><td class='neo-module-name' align='left' valign='middle' colspan=5'>".$arrLang['warning_details']."</td></tr>
-             <tr style='font-size: 13px; color: #EEE; background-color: #555;'>
-                <td align='center' style='font-size: 12px; font-family: verdana,arial,helvetica,sans-serif;'>".$arrLang['programs']."</td>
-                <td align='center' style='font-size: 12px; font-family: verdana,arial,helvetica,sans-serif;'>".$arrLang['Package']."</td>
-                <td colspan='2' style='font-size: 13px; color: #EEE; background-color: #555;'>
-                    <table class='neo-table-title-row' align='center'>
-                        <tr align='center'><td width='130px' colspan='2' style='border-bottom: solid 1px #AAAAAA; font-size: 13px; color: #EEE; font-family: verdana,arial,helvetica,sans-serif;'>"._tr("Version")."</td></tr>
-                        <tr align='center' style='font-size: 13px; font-family: verdana,arial,helvetica,sans-serif;'>
-                            <td style='color: #EEE; font-size: 13px;'>".$arrLang['local_version']."</td>
-                            <td style='color: #EEE; font-size: 13px;'>".$arrLang['external_version']."</td>
-                        </tr>
-                    </table>
-                </td>
-                <td class='neo-module-name'>
-                    <table align='center'>
-                        <tr class='neo-module-name' align='center'><td colspan='6' style='border-bottom: solid 1px #AAAAAA; font-size: 13px; color: #EEE; font-family: verdana,arial,helvetica,sans-serif;'>"._tr("Options Backup")."</td></tr>
-                        <tr align='center' style='font-size: 12px; color: #EEE;'>
-                            <td width='60px' >&nbsp;"._tr("Endpoint")."&nbsp;</td>
-                            <td width='60px' >&nbsp;"._tr("Fax")."&nbsp;</td>
-                            <td width='60px' >&nbsp;"._tr("Email")."&nbsp;</td>
-                            <td width='60px' >&nbsp;"._tr("Asterisk")."&nbsp;</td>
-                            <td width='60px' >&nbsp;"._tr("Others")."&nbsp;</td>
-                            <td width='60px' >&nbsp;"._tr("Others new")."&nbsp;</td>
-                        </tr>
-                    </table>
-                </td>
-             </tr>";
-    foreach($compare as $key => $value){
-        $externalValues = (isset($external[$key]['version']) && isset($external[$key]['release']))
-            ? $external[$key]['version']."-".$external[$key]['release'] : '(invalid)';
-        $programsValues = $programs[$key]['version']."-".$programs[$key]['release'];
+function boxAlert($smarty, $local_templates_dir, $versionList_current, $versionList_torestore, $compare)
+{
+    $packagereport = array();
+    foreach($compare as $key => $value) {
+        $tupla = array(
+            'desc'              =>  _tr($key),
+            'name'              =>  $key,
+            'version_current'   =>  '',
+            'version_backup'    =>  '',
+        );
 
-        if(!isset($external[$key]['version']) || !isset($external[$key]['release']) ||
-            $external[$key]['version'] == $external[$key]['release']){
-            $externalValues = "<span style='font-style: italic; color: red;'>"._tr("Package not installed")."</span>";
+        if (!isset($versionList_torestore[$key]['version']) || !isset($versionList_torestore[$key]['release']) ||
+            $versionList_torestore[$key]['version'] == $versionList_torestore[$key]['release']){
+            $tupla['version_backup'] = "<span style='font-style: italic; color: red;'>"._tr("Package not installed")."</span>";
+        } else {
+        	$tupla['version_backup'] = $versionList_torestore[$key]['version']."-".$versionList_torestore[$key]['release'];
         }
 
-        if($programs[$key]['version'] == $programs[$key]['release']){
-            $programsValues = "<span style='font-style: italic; color: red;'>"._tr("Package not installed")."</span>";
+        $tupla['version_current'] = $versionList_current[$key]['version']."-".$versionList_current[$key]['release'];
+        if ($versionList_current[$key]['version'] == $versionList_current[$key]['release']){
+            $tupla['version_current'] = "<span style='font-style: italic; color: red;'>"._tr("Package not installed")."</span>";
         }
 
-        $arrVal = getValueofBackupOption($key);
-
-        $html .="<tr class='neo-table-data-row' onmouseout=\"this.style.backgroundColor='#f2f2f2';\" onmouseover=\"this.style.backgroundColor='#e0e0e0';\" style='color: #555; font-size: 11px; background-color: #f2f2f2; font-family: verdana,arial,helvetica,sans-serif;'>
-                        <td class='tdStyle' align='center'>"._tr($key)."</td>
-                        <td class='tdStyle' align='center'>$key</td>
-                        <td class='tdStyle' align='center'>$programsValues</td>
-                        <td class='tdStyle' align='center'>$externalValues</td>
-                        <td class='tdStyle'>
-                            <table align='center'>
-                                <tr align='center' style='font-size: 11px;'>
-                                    <td width='60px' class='tdStyle'>".$arrVal['endpoint']."</td>
-                                    <td width='60px' class='tdStyle'>".$arrVal['fax']."</td>
-                                    <td width='60px' class='tdStyle'>".$arrVal['email']."</td>
-                                    <td width='60px' class='tdStyle'>".$arrVal['asterisk']."</td>
-                                    <td width='60px' class='tdStyle'>".$arrVal['otros']."</td>
-                                    <td width='60px' class='tdStyle'>".$arrVal['otros_new']."</td>
-                                </tr>
-                            </table>
-                        <td>
-                    </tr>
-            </table>";
+        $packagereport[] = array_merge($tupla, getValueofBackupOption($key));
     }
-    $html .="</body>";
-    return $html;
+	$smarty->assign(array(
+        'warning_details'   =>  _tr('warning_details'),
+        'programs'          =>  _tr('programs'),
+        'Package'           =>  _tr('Package'),
+        'Version'           =>  _tr('Version'),
+        'local_version'     =>  _tr('local_version'),
+        'external_version'  =>  _tr('external_version'),
+        'Options_Backup'    =>  _tr('Options Backup'),
+        'Endpoint'          =>  _tr('Endpoint'),
+        'Fax'               =>  _tr('Fax'),
+        'Email'             =>  _tr('Email'),
+        'Asterisk'          =>  _tr('Asterisk'),
+        'Others'            =>  _tr('Others'),
+        'Others_new'        =>  _tr('Others new'),
+        'packagereport'     =>  $packagereport,
+    ));
+    return $smarty->fetch("$local_templates_dir/versionCompareDetail.tpl");
 }
 
 function getValueofBackupOption($valueOp)
@@ -609,14 +563,8 @@ function getValueofBackupOption($valueOp)
         "otros_new" => array("elastix-pbx","elastix-agenda")
     );
     $arrayResult = array();
-    foreach($arrayOptions as $key => $value)
-    {
-        for($i=0; $i<count($value); $i++){
-            $package = $value[$i];
-            if($valueOp == $package)
-                $arrayResult[$key] = "x";
-            $arrayResult[$key] = isset($arrayResult[$key])?$arrayResult[$key]:"";
-        }
+    foreach($arrayOptions as $key => $value) {
+        $arrayResult[$key] = in_array($valueOp, $value) ? 'x' : '';
     }
     return $arrayResult;
 }
@@ -629,14 +577,16 @@ function showMessageAlert($arr){
     return $version;
 }
 
-function viewDetail($smarty, $module_name, $local_templates_dir, $arrLang, $path_backup){
-    $parameter = 1;
+function viewDetail($smarty, $module_name, $local_templates_dir, $path_backup)
+{
+    $htmlForm = '';
     $backup_file = getParameter("file_name");
-   $htmlForm = showAlert($path_backup, $smarty, $arrLang, $backup_file, $module_name, $parameter);
-    $header = "<head><link rel='stylesheet' href='themes/elastixneo/styles.css'>
-             <link rel='stylesheet' href='themes/elastixneo/table.css'>";
-    $content  = $header."<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form></head>";
-    return $content;
+    list($versionList_current, $versionList_torestore, $compare) =
+        runPackageVersionCompare($path_backup, $smarty, $backup_file);
+    if (!is_null($compare)) {
+        $htmlForm = boxAlert($smarty, $local_templates_dir, $versionList_current, $versionList_torestore, $compare);
+    }
+    return $htmlForm;
 }
 
 function getVersionPrograms_SYSTEM()
@@ -704,6 +654,34 @@ function getVersionPrograms_XML($path_file_backup)
             "release" => $optionGeneral->getAttribute("rel"));
     }
     return $arrPrograms;
+}
+
+/**
+ * Procedimiento para comparar las listas de versiones entre lo instalado 
+ * actualmente y lo que se va a restarar, para avisar de posibles 
+ * inconsistencias.
+ * 
+ * @param   array   $versionList_current    Lista de paquetes instalados 
+ *                                          actualmente.
+ * @param   array   $versionList_torestore  Lista de paquetes que estaban 
+ *                                          instalados cuando se realizó el
+ *                                          backup.
+ * 
+ * @return  array   Lista (posiblemente vacía) de diferencias de versiones
+ */
+function comparePackageVersions($versionList_current, $versionList_torestore)
+{
+    $errors = array();
+    foreach ($versionList_current as $key => $value) {
+        if (!isset($versionList_torestore[$key]) || !isset($versionList_torestore[$key]['version']) ||
+            !isset($versionList_torestore[$key]['release']) ||
+            $versionList_torestore[$key]['version'] != $versionList_current[$key]['version'] ||
+            $versionList_torestore[$key]['release'] != $versionList_current[$key]['release']) {
+
+            $errors[$key] = $versionList_current[$key]['version']. "-" .$versionList_current[$key]['release'];
+        }
+    }
+    return $errors;
 }
 
 /************************  FUNCIONES PARA FTP BACKUP ***********************************/

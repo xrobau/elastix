@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: fix botched detail window for package version mismatch.
+  Convert all of the module to use _tr() and load_language_module().
+  SVN Rev[5106]
+
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

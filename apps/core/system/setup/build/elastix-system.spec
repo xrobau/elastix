@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: use internal glob instead of exec'd shell piping to
   list backup files. Modernize pagination. Convert more uses of $arrLang to 
@@ -145,6 +149,7 @@ fi
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5085]
 
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Time Config: remove duplicate definition of getParameter() that gets

@@ -224,11 +224,15 @@ function _moduleContent(&$smarty, $module_name)
                 $session_id = session_id();
 
             $sContenido=<<<contenido
-                    <embed src='index.php?menu=$module_name&action=download&ext=$ext&name=$file&rawmode=yes&elastixSession=$session_id' width=300, height=20 autoplay=true loop=false type="$ctype"></embed><br>
+<html>
+<head><title>Elastix</title></head>
+<body>
+    <embed src='index.php?menu=$module_name&action=download&ext=$ext&name=$file&rawmode=yes&elastixSession=$session_id' width=300, height=20 autoplay=true loop=false type="$ctype"></embed><br>
+</body>
+</html>
 contenido;
 
-            $smarty->assign("CONTENT", $sContenido);
-            $smarty->display("_common/popup.tpl");
+            echo $sContenido;
         }else{
             die("<b>404 ".$arrLang["no_file"]."</b>");
         }

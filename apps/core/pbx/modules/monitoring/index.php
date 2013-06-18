@@ -504,13 +504,16 @@ function display_record($smarty, $module_name, $local_templates_dir, &$pDB, $pAC
                 $session_id = session_id();
                 $ctype=record_format($pDB, $arrConf);
                 $sContenido=<<<contenido
-                    <embed src='index.php?menu=$module_name&action=download&id=$file&namefile=$namefile&rawmode=yes&elastixSession=$session_id' width=300, height=20 autoplay=true loop=false type="$ctype"></embed><br>
+<html>
+<head><title>Elastix</title></head>
+<body>
+    <embed src='index.php?menu=$module_name&action=download&id=$file&namefile=$namefile&rawmode=yes&elastixSession=$session_id' width=300, height=20 autoplay=true loop=false type="$ctype"></embed><br>
+</body>
+</html>
 contenido;
             break;
     }
-
-    $smarty->assign("CONTENT", $sContenido);
-    $smarty->display("_common/popup.tpl");
+    echo $sContenido;
 }
 
 function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension, $esAdministrador)

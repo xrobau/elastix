@@ -364,6 +364,11 @@ fi
 
 %changelog
 * Tue Jun 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Voicemail, Monitoring: stop using popup.tpl. The blackmin theme lacks
+  this template, and these two are the only two modules to use it. Additionally
+  the template triggers javascript errors due to missing jquery. It is easier to
+  just embed the html header and footer.
+  SVN Rev[5108]
 - CHANGED: Endpoint Configurator: prevent potential use of unset array element
   in session at construction of PaloSantoFileEndPoint.
   SVN Rev[5107]

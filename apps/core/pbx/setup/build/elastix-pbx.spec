@@ -363,6 +363,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jun 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: prevent potential use of unset array element
+  in session at construction of PaloSantoFileEndPoint.
+  SVN Rev[5107]
+
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: File Editor, Monitoring, Voicemail: remove duplicate definition of
   getParameter() that gets confused by Fortify as the one used by the framework.

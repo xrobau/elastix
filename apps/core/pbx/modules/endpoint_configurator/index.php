@@ -132,7 +132,6 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
     $arrData = array();
     if(!isset($_SESSION['elastix_endpoints']) || !is_array($_SESSION['elastix_endpoints']) || empty($_SESSION['elastix_endpoints'])){
        
-        $paloFileEndPoint = new PaloSantoFileEndPoint($arrConf["tftpboot_path"],$_SESSION["endpoint_mask"]);
         $paloEndPoint        = new paloSantoEndPoint($dsnAsterisk,$dsnSqlite);
         $arrEndpointsConf    = $paloEndPoint->listEndpointConf();
         $arrVendor           = $paloEndPoint->listVendor();
@@ -140,6 +139,7 @@ function endpointConfiguratedShow($smarty, $module_name, $local_templates_dir, $
         $arrDeviceFreePBXAll = $paloEndPoint->getDeviceFreePBX(true);
         $endpoint_mask       = isset($_POST['endpoint_mask'])?$_POST['endpoint_mask']:network();
         $_SESSION["endpoint_mask"] = $endpoint_mask;
+        $paloFileEndPoint = new PaloSantoFileEndPoint($arrConf["tftpboot_path"],$_SESSION["endpoint_mask"]);
         $pValidator          = new PaloValidar();
 
         if(!$pValidator->validar('endpoint_mask', $endpoint_mask, 'ip/mask')){

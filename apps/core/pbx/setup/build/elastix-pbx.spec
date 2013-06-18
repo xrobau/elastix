@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jun 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: prevent potential use of unset array element
+  in session at construction of PaloSantoFileEndPoint.
+  SVN Rev[5107]
+
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

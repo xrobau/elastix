@@ -1,4 +1,4 @@
-[elastix]
+[elxpbx]
 ignore_backup = no
 engine = mysql
 path = /var/lib/mysql

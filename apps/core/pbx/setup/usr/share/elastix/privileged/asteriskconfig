@@ -47,37 +47,36 @@ require_once "modules/ring_group/libs/paloSantoRG.class.php";
 require_once "modules/time_conditions/libs/paloSantoTC.class.php";
 require_once "modules/conference/libs/paloSantoConference.class.php";
 
+global $arrConf;
+
 if(!isset($argv[1]))
     exit(1);
     
 switch($argv[1]){
-	case "dialplan-reload":
+    case "dialplan-reload":
         exit(dialplanReload() ? 0 : 1);
-		break;
-	case "reload":
-        exit(reload() ? 0 : 1);
-		break;
-    case "createDirOrganization":
-        if(isset($argv[2])){
-            exit(createDirOrganization($argv[2]) ? 0 : 1);
-        }else
-            error_exit("Missing arguments \n");
         break;
-    case "createExtensionFile":
-        if(isset($argv[2]) && isset($argv[3])){
+    case "reload":
+        exit(reload() ? 0 : 1);
+        break;
+    case "writeExtensionConf":
+        if(isset($argv[2])){
             exit(createExtensionFile($argv[2],$argv[3]) ? 0 : 1);
         }else
-            error_exit("Missing arguments \n");
+            exit(createExtensionFile() ? 0 : 1);
         break;
-    case "createExtensionGlobals":
-        if(isset($argv[2]) && isset($argv[3])){
-            exit(createExtensionGlobals($argv[2],$argv[3]) ? 0 : 1);
+    case "createOrganizationAst":
+        if(isset($argv[2])){
+            exit(createOrganizationAsterisk($argv[2]) ? 0 : 1);
         }else
             error_exit("Missing arguments \n");
         break;
-    case "createFeaturesFile":
-        exit(createFeaturesFile() ? 0 : 1);
-        break; 
+    case "cleanFailCreation":
+        if(isset($argv[2])){
+            exit(cleanFailCreation($argv[2]) ? 0 : 1);
+        }else
+            error_exit("Missing arguments \n");
+        break;
     case "generateDialPlan":
         if(isset($argv[2])){
             exit(generateDialPlan($argv[2],$argv[3]) ? 0 : 1);
@@ -99,21 +98,9 @@ switch($argv[1]){
     case "createExtGeneral":
         exit(createExtGeneral() ? 0 : 1);
         break;
-    case "createExtAddtionals":
-        if(isset($argv[2])){
-            exit(createExtAddtionals($argv[2]) ? 0 : 1);
-        }else
-            exit(createExtAddtionals() ? 0 : 1);
-        break;
     case "writeTechRegister":
         if(isset($argv[2])){
             exit(writeTechRegister($argv[2]) ? 0 : 1);
-        }else
-            error_exit("Missing arguments \n");
-        break;
-    case "deleteFileOrgAst":
-        if(isset($argv[2])){
-            exit(deleteFileOrgAst($argv[2]) ? 0 : 1);
         }else
             error_exit("Missing arguments \n");
         break;
@@ -185,43 +172,218 @@ function dialplanReload(){
     return true;
 }
 
-
-/**
-    funcion usada para eliminar los archivos de configuracion
-    de asterisk de una organizacion dentro del servidor elastix
-    @param string domain -> dominio de la organizacion de la que
-                            se van a eliminar los archivos
-*/
-function deleteFileOrgAst($domain){
+function createOrganizationAsterisk($domain){
+    global $arrConf;
     if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
         fprintf(STDERR, "Invalid domain format");
         return false;
     }
     
-    $date=date("YMd_His");
-    $path="/etc/asterisk/organizations/";
-    $arrayFile=array("extensions_$domain.conf","extensions_additionals_$domain.conf","extensions_globals_$domain.conf","extensions_custom_$domain.conf");
+    //la organizacion no debe existir
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
+    $query="SELECT code FROM organization WHERE domain=?";
+    $result=$pDB->fetchTable($query,false,array($domain));
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection elxpbx - %s\n", $pDB->errMsg);
+        return false;
+    }elseif(count($result)>0){
+        fprintf(STDERR, "ERR: Organization already exits\n");
+        return false;
+    }
     
-    foreach($arrayFile as $file){
-        if(file_exists($path.$file)){
-            if(unlink($path.$file)===false){
-                fprintf(STDERR, "File %s couldn't be deleted",$file);
-                return false;
+    if(createFeaturesFile()==false){
+        fprintf(STDERR, "ERR:Error trying set Features Codes\n");
+        return false;
+    }
+    
+    if(createDirOrganization($domain)==false){
+        fprintf(STDERR, "ERR: Organization's directories for asterisk couldn't be created\n");
+        return false;
+    }
+    
+    if(createDirFax($domain)==false){
+        fprintf(STDERR, "ERR: Organization's directories for fax couldn't be created\n");
+        return false;
+    }
+    
+    //se incluyen dentro de los archivos extensions.conf y extensions_globalas.conf
+    //los archivos de configuracion del plan de marcado de la organizacion
+    if(createExtensionFile("add",$domain)==false){
+        return false;
+    }
+    return true;
+}
+
+function createDirOrganization($domain){
+    $pathDial="/etc/asterisk/organizations";
+    $exito=true;
+        
+    if(!is_dir($pathDial)){
+        if(mkdir($pathDial)){
+            changeFilePermission($pathDial, 0775);
+        }else{
+            fprintf(STDERR, "ERR: failed to create '/etc/asterisk/organizations' directory");
+            return false;
+        }
+    }
+    
+    $pathlib="/var/lib/asterisk";
+    $pathspool="/var/spool/asterisk";
+
+    $astmonitor = $pathspool."/monitor";
+    $astmeetme = $pathspool."/meetme";
+    $astspooltmp = $pathspool."/tmp";
+    $astlibsound = $pathlib."/sounds";
+    $arrDir=array($astmonitor,$astmeetme,$astlibsound,$astspooltmp,$pathDial);
+    $date=date("YMd_His");
+    foreach($arrDir as $dir){
+        if(is_dir("$dir/$domain")){
+            rename("$dir/$domain","$dir/$domain"."_".$date);
+        }
+        
+        if(mkdir("$dir/$domain")){
+            changeFilePermission("$dir/$domain", 0775);
+        }else{
+            fprintf(STDERR, "ERR: failed to create $dir/$domain directory - %s\n", $output[0]);
+            $exito=false;
+            break;
+        }
+    }
+
+    if(!$exito){
+        foreach($arrDir as $dir){
+            if(is_dir("$dir/$domain"))
+                rmdir("$dir/$domain");
+        }
+        return false;
+    }else{
+        return true;
+    }
+}
+
+function createDirFax($domain)
+{
+    $path="/var/www/elastixdir/faxdocs";
+    $exito=true;
+    $arrDir=array("$path/$domain","$path/$domain/sent","$path/$domain/recvd");
+
+    umask(0);
+
+    if(!is_dir($path)){
+        if(mkdir($path)){
+            chown($path, 'asterisk');
+            chgrp($path, 'asterisk');
+            chmod($path, 0755);
+        }else{
+            fprintf(STDERR, "ERR: failed to create fax directory");
+            return false;
+        }
+    }
+
+    if(is_dir("$path/$domain")){
+        $date=date("YMd_His");
+        rename("$path/$domain","$path/$domain"."_".$date);
+    }
+
+    foreach($arrDir as $dir){
+        if(mkdir($dir)){
+            chown($dir, 'asterisk');
+            chgrp($dir, 'uucp');
+            chmod($dir, 0775);
+        }else{
+            fprintf(STDERR, "ERR: failed to create fax directory - %s\n", $output[0]);
+            $exito=false;
+            break;
+        }
+    }
+
+    if(!$exito){
+        if(is_dir("$path/$domain"))
+            rmdir("$path/$domain");
+        if(is_dir("$path/$domain/sent"))
+            rmdir("$path/$domain/sent");
+        if(is_dir("$path/$domain/recvd"))
+            rmdir("$path/$domain/recvd");
+        return false;
+    }else{
+        return true;
+    }
+}
+
+/**
+ * Esta función es usada para eliminar los directorios creados en el proceso
+ * de creación de una organización cuando esta ha ido mal
+ */
+function cleanFailCreation($domain){
+    //validamos el dominio
+    if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
+        fprintf(STDERR, "Invalid domain format");
+        return false;
+    }
+        
+    //comprobamos que no exista una organizacion con ese dominio
+    $query="SELECT 1 FROM organization WHERE domain=?";
+    $exist=$pDB->getFirstRowQuery($query,true,array($domain));
+    if(count($exist)>0){
+        error_exit("Err: Action can be done because this organization hasn't be deleted from database. Domain: ").$domain;
+    }
+        
+    //eliminamos las carpetas creadas
+    $pathlib="/var/lib/asterisk/";
+    $pathspool="/var/spool/asterisk/";
+    $pathelxdir="/var/www/elastixdir/";
+    $pathAsterisk="/etc/asterisk/";
+    
+    $arrDir[] = array($pathspool."monitor/",false,"monitor"); //grabaciones llamadas 
+    $arrDir[] = array($pathspool."meetme/",false,"meetme"); //grabaciones llamadas meetme
+    $arrDir[] = array($pathspool."tmp/",false,"tmp");
+    $arrDir[] = array($pathlib."sounds/",true,"sounds"); //recordings
+    $arrDir[] = array($pathAsterisk."organizations/",false,"asteriskconfs"); //directorio dentro de asterisk que contiene los archivos de configuracion de la organizacion
+    $arrDir[]=array($pathelxdir."faxdocs/",true,"faxdocs"); //faxes recibidos y enviados
+    $arrDir[]=array($pathelxdir."backup/",true,"backup"); //backup del sistema
+    
+    foreach($arrDir as $value){
+        if(is_dir($value["0"].$domain)){
+            if(!_delTree($value["0"].$domain,$value["1"])){
+                $error="\nFailed to delete: ".$value["0"].$domain;
             }
         }
     }
     
+    if($error!=""){
+        fprintf(STDERR,$error);
+        return false;
+    }else
+        return true;
+}
+
+ /** This function verify if a directory exist
+  *  If the directory doesn't exist these function try to create these one
+  *  @param $string $path -> directory path
+  *  @return bool  true -> directory exist o could be created
+  *                false -> directory doesn't exist and couldn't be created
+  */
+function isDir($path){
+    if(!is_dir($path)){
+        if(mkdir($path)){
+            changeFilePermission($path, 0775);
+        }else{
+            fprintf(STDERR, "ERR: failed to create '/etc/asterisk/organizations' directory");
+            return false;
+        }
+    }
     return true;
 }
 
-/*
+/**
     Esta funcion eliminara toda la informacion de una organizacion
     dentro del servidor. Usese con cuidado. 
     Esta funcion asume que la organizacion ya ha sido borrada de la 
     base de datos (tabla organization)
-    @param $idcode string codigo unico dentro del sistema d ela organizacion
+    @param $idcode string codigo unico dentro del sistema de la organizacion
 */
 function deleteFolderOrganization($idcode){
+    global $arrConf;
     if(!preg_match("/^[[:alnum:]]+$/",$idcode)){
          error_exit("ERR: Invalid Organization.\n");
     }
@@ -229,47 +391,38 @@ function deleteFolderOrganization($idcode){
     $pathlib="/var/lib/asterisk/";
     $pathspool="/var/spool/asterisk/";
     $pathelxdir="/var/www/elastixdir/";
+    $pathAsterisk="/etc/asterisk/";
     
     $arrDir[] = array($pathspool."monitor/",false,"monitor"); //grabaciones llamadas 
     $arrDir[] = array($pathspool."meetme/",false,"meetme"); //grabaciones llamadas meetme
     $arrDir[] = array($pathspool."tmp/",false,"tmp");
     $arrDir[] = array($pathlib."sounds/",true,"sounds"); //recordings
     $arrDir[] = array($pathlib."moh/",true,"moh"); //musica en espera
+    $arrDir[] = array($pathAsterisk."organizations/",false,"asteriskconfs"); //directorio dentro de asterisk que contiene los archivos de configuracion de la organizacion
     
     $arrDir[]=array($pathelxdir."faxdocs/",true,"faxdocs"); //faxes recibidos y enviados
     $arrDir[]=array($pathelxdir."backup/",true,"backup"); //backup del sistema
     
-    //TODO: antiguo directorio de faxes. Esto debe ser borrado
-    //luego que se actualiace el modulo fax para que los faxes enviados 
-    //y recibidos queden bajo el directorio /var/www/elastixdir/faxdocs
-    $arrDir[]=array("/var/www/faxes/",true,"faxes");
+    $pDB = new paloDB($arrConf["elastix_dsn"]["elastix"]);
+    //obtenemos los datos de la organizacion eliminada de la tabla org_history_register
+    $query="SELECT org_code,org_domain FROM org_history_register WHERE org_idcode = ?";
+    $orgData=$pDB->getFirstRowQuery($query,true,array($idcode));
+    if($orgData==false){
+        error_exit("Err: Couldn't get information about organization with idcode: $idcode");
+    }else{
+        $code=$orgData["org_code"];
+        $domain=$orgData["org_domain"];
+    }
     
-    try{
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        //obtenemos los datos de la organizacion eliminada de la tabla org_history_register
-        $sOrgData = $conn->prepare('SELECT org_code,org_domain FROM org_history_register WHERE org_idcode = ?');
-        $sOrgData->execute(array($idcode));
-        $orgData = $sOrgData->fetchAll(PDO::FETCH_ASSOC);
-        if($orgData==false)
-            error_exit("Err: Couldn't get information about organization with idcode: ").$idcode;
-        
-        $code=$orgData[0]["org_code"];
-        $domain=$orgData[0]["org_domain"];
-        
-        //comprobamos que la organizacion ya haya sido borrada de la base
-        $sOrgExist = $conn->prepare("SELECT 1 from organization where idcode=?");
-        $sOrgExist->execute(array($idcode));
-        $orgExist = $sOrgExist->fetchAll(PDO::FETCH_ASSOC);
-        if(count($orgExist)!=0)
-            error_exit("Err: Organization exist yet. Domain: ").$domain;
-    }catch(PDOException $e){
-        error_exit("ERR: failed to delete organization data in Elastix - ".$e->getMessage()."\n");
+    //comprobamos que la organizacion ya haya sido borrada de la base
+    $query="SELECT 1 FROM organization WHERE idcode=?";
+    $exist=$pDB->getFirstRowQuery($query,true,array($idcode));
+    if(count($exist)>0){
+        error_exit("Err: Action can be done because this organization hasn't be deleted from database. Domain: $domain");
     }
     
     $error="";
-    //carpeta que contendra la data de la organizacion que no pueda ser eliminada
+    //carpeta que contendra la data de la organizacion que no pudo ser eliminada
     $repOrg=$pathelxdir."oldOrganizations/$idcode";
     if(!is_dir($pathelxdir."oldOrganizations")){
         mkdir($pathelxdir."oldOrganizations");
@@ -289,7 +442,7 @@ function deleteFolderOrganization($idcode){
         if(is_dir($value["0"].$domain)){
             if(!_delTree($value["0"].$domain,$value["1"])){
                 rename($value["0"].$domain,"$repOrg/$value[2]_$domain");
-                $error="\nFailed to delete: ".$value["0"].$domain;
+                $error .="\nFailed to delete: ".$value["0"].$domain;
             }
         }
     }
@@ -313,7 +466,7 @@ function deleteFolderOrganization($idcode){
     }
     
     if($error!=""){
-        return false;
+        error_exit($error);
     }else
         return true;
 }
@@ -327,7 +480,6 @@ function _delTree($dir,$callback=false) {
     $files = array_diff(scandir($dir), array('.','..')); 
     foreach ($files as $file) {
         if(is_dir("$dir/$file")){
-            print("$dir/$file");
             if($callback)
                 _delTree("$dir/$file",$callback);
         }else{
@@ -379,60 +531,19 @@ function createMoHDir($class,$domain=null){
     return true;
 }
 
-function createDirOrganization($domain){
-    $pathDial="/etc/asterisk/organizations";
-    $exito=true;
-    
-    if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-        fprintf(STDERR, "Invalid domain format");
-        return false;
-    }
-    
-    if(!is_dir($pathDial)){
-        if(mkdir($pathDial)){
-            changeFilePermission($path, 0775);
-        }else{
-            fprintf(STDERR, "ERR: failed to create '/etc/asterisk/organizations' directory");
-            return false;
-        }
-    }
-    
-    $pathlib="/var/lib/asterisk";
-    $pathspool="/var/spool/asterisk";
-
-    $astmonitor = $pathspool."/monitor";
-    $astmeetme = $pathspool."/meetme";
-    $astspooltmp = $pathspool."/tmp";
-    $astlibsound = $pathlib."/sounds";
-    
-    $arrDir=array($astmonitor,$astmeetme,$astlibsound,$astspooltmp);
-    $date=date("YMd_His");
-    foreach($arrDir as $dir){
-        if(is_dir("$dir/$domain")){
-            rename("$dir/$domain","$dir/$domain"."_".$date);
-        }
-        
-        if(mkdir("$dir/$domain")){
-            changeFilePermission("$dir/$domain", 0775);
-        }else{
-            fprintf(STDERR, "ERR: failed to create $dir/$domain directory - %s\n", $output[0]);
-            $exito=false;
-            break;
-        }
-    }
-
-    if(!$exito){
-        foreach($arrDir as $dir){
-            if(is_dir("$dir/$domain"))
-                rmdir("$dir/$domain");
-        }
-        return false;
-    }else{
-        return true;
-    }
-}
-
-function createExtensionFile($action,$orgdomain){
+/**
+ * Esta funcion crea el archivo extensions.conf
+ * si no se pasa ningún argumento se reescribe el archivo
+ * haciendo inclusión de los archivos de configuración de las
+ * organización activas
+ * Si se setean el parámetro $action entonces es necesario pasar 
+ * también el parametro domain. Si action==add se añade una línea
+ * de inclusión con este nombre de dominio. Si action==delete se
+ * elimina de los archivos de inclusión ese dominio
+ * pDB -> es un objeto pDO usado para la conección
+ */
+function createExtensionFile($action="",$orgdomain="",&$pDB=null){
+    global $arrConf;
     $EXITO=false;
     $file="/etc/asterisk/extensions.conf";
     
@@ -443,11 +554,13 @@ exten => h,1,Hangup()
 
 EXTENSIONS_CONFIG;
     
-    $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
-    $query="Select domain from organization where state=?";
+    if(!is_object($pDB))
+        $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
+        
+    $query="SELECT domain FROM organization WHERE state=?";
     $result=$pDB->fetchTable($query,false,array("active"));
     if($result===false){
-        fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDB->errMsg);
+        fprintf(STDERR, "ERR: Database connection elxpbx - %s\n", $pDB->errMsg);
         return false;
     }
        
@@ -483,8 +596,18 @@ EXTENSIONS_CONFIG;
         }
     }else
         $content .="#include extensions_general.conf\n";
-        
-    $content .="#include extensions_globals.conf\n";
+    
+    //comprobamos que exista el directorio donde son incluidos los archivos de configuracion de las
+    //organizaciones
+    if(!isDir("/etc/asterisk/organizations/")){
+        return false;
+    }
+    
+    if(createExtensionGlobals($arrDomain)==true){
+        $content .="#include extensions_globals.conf\n";
+    }else{
+        return false;
+    }
     
     if(!is_file("/etc/asterisk/extensions_custom.conf")){
         if(file_put_contents("/etc/asterisk/extensions_custom.conf","")!==false){
@@ -493,16 +616,20 @@ EXTENSIONS_CONFIG;
         }
     }else
         $content .="#include extensions_custom.conf\n";
-        
+    
     foreach($arrDomain as $value){
         if(!empty($value)){
-            if(!is_file("/etc/asterisk/organizations/extensions_".$value.".conf")){
-                if(file_put_contents("/etc/asterisk/organizations/extensions_".$value.".conf","")!==false){
-                    $content .="#include organizations/extensions_".$value.".conf\n";
-                    changeFilePermission("/etc/asterisk/organizations/extensions_".$value.".conf");
+            if(!is_file("/etc/asterisk/organizations/$value/extensions_".$value.".conf")){
+                //comprobamos que exista el directorio de archivos de configuracion de la organizacion
+                if(!isDir("/etc/asterisk/organizations/$value")){
+                    return false;
+                }
+                if(file_put_contents("/etc/asterisk/organizations/$value/extensions_".$value.".conf","")!==false){
+                    $content .="#include organizations/$value/extensions_".$value.".conf\n";
+                    changeFilePermission("/etc/asterisk/organizations/$value/extensions_".$value.".conf");
                 }
             }else{
-                $content .="#include organizations/extensions_".$value.".conf\n";
+                $content .="#include organizations/$value/extensions_".$value.".conf\n";
             }
         }
     }
@@ -517,43 +644,10 @@ EXTENSIONS_CONFIG;
     }   
 }
 
-function createExtensionGlobals($action,$orgdomain){
+function createExtensionGlobals($arrDomain){
     $EXITO=false;
-    $file="/etc/asterisk/extensions.conf";
-    
     $content = "";
     
-    $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
-    $query="Select domain from organization where state=?";
-    $result=$pDB->fetchTable($query,false,array("active"));
-    if($result===false){
-        fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDB->errMsg);
-        return false;
-    }
-    
-    $arrDomain=array();
-    foreach($result as $domain){
-        $arrDomain[]=$domain[0];
-    }
-    
-    if($action=="add" || $action=="delete"){
-        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $orgdomain)){
-            fprintf(STDERR, "Invalid domain format");
-            return false;
-        }
-    }
-    
-    if($action=="add"){
-        if(in_array($orgdomain,$arrDomain)===false){
-            $arrDomain[]=$orgdomain;
-        }
-    }elseif($action=="delete"){
-        $index=array_search($orgdomain,$arrDomain);
-        if($index!==false){    
-            $arrDomain[$index]=null;
-        }
-    }
-
     $file="/etc/asterisk/extensions_globals.conf";
     $source_file="/var/www/elastixdir/asteriskconf/elastix_pbx.conf";
     $content ="[globals]\n";
@@ -577,10 +671,14 @@ function createExtensionGlobals($action,$orgdomain){
                 //antes de incluir el archivo validamos que el mismo exista
                 //ya que si no existe y lo incluimos esto provocara que asterisk crash
                 //en caso de no existir el archivo se lo inteta crear
-                if(!is_file("/etc/asterisk/organizations/extensions_globals_".$value.".conf")){
-                    if(file_put_contents("/etc/asterisk/organizations/extensions_globals_".$value.".conf","")!==false){
-                        $content .="#include organizations/extensions_globals_".$value.".conf\n";
-                        changeFilePermission("/etc/asterisk/organizations/extensions_globals_".$value.".conf");
+                if(!is_file("/etc/asterisk/organizations/$value/extensions_globals_".$value.".conf")){
+                    //comprobamos que exista el directorio de archivos de configuracion de la organizacion
+                    if(!isDir("/etc/asterisk/organizations/$value")){
+                        return false;
+                    }
+                    if(file_put_contents("/etc/asterisk/organizations/$value/extensions_globals_".$value.".conf","")!==false){
+                        $content .="#include organizations/$value/extensions_globals_".$value.".conf\n";
+                        changeFilePermission("/etc/asterisk/organizations/$value/extensions_globals_".$value.".conf");
                     }
                 }else
                     $content .="#include organizations/extensions_globals_".$value.".conf\n";
@@ -604,24 +702,14 @@ function createExtensionGlobals($action,$orgdomain){
 function createExtensionDomainFile($domain,$code){
     $EXITO=false;
     $fsource="/var/www/elastixdir/asteriskconf/generic_extensions.conf";
-    $extFile="/etc/asterisk/organizations/extensions_$domain.conf";
-    $extAddFile="/etc/asterisk/organizations/extensions_additionals_$domain.conf";
-    $extCusFile="/etc/asterisk/organizations/extensions_custom_$domain.conf";
-    $extGlobalFile="/etc/asterisk/organizations/extensions_globals_$domain.conf";
+    $extFile="/etc/asterisk/organizations/$domain/extensions_$domain.conf";
+    $extAddFile="/etc/asterisk/organizations/$domain/extensions_additionals_$domain.conf";
+    $extCusFile="/etc/asterisk/organizations/$domain/extensions_custom_$domain.conf";
+    $extGlobalFile="/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf";
+    
     if(is_file($fsource)){
         if($handler=fopen($fsource,'r')){
-            $content = fread($handler, filesize($fsource));
-            $content = str_replace("{CODE}", "$code", $content);
-            $content = str_replace("{DOMAIN}", "$domain", $content);
-            fclose($handler);
-            
-            if(file_put_contents($extFile, $content)!==false){
-                changeFilePermission($extFile);
-            }else{
-                fprintf(STDERR, "ERR: File $extFile couldn't be written");
-                return false;
-            }  
-            
+            //archivos a los cuales se hace inclusion en el archivo extensions_domain.conf
             $content="";
             foreach(array($extAddFile,$extCusFile,$extGlobalFile) as $file){
                 if(is_file($file)===false){
@@ -633,6 +721,19 @@ function createExtensionDomainFile($domain,$code){
                     }    
                 }
             }
+            
+            //el archivo extensions_domain.conf contiene las configuraciones estatitcas del palan de marcado
+            //su contenido se lo obtiene del archivo generic_extensions.conf
+            $content = fread($handler, filesize($fsource));
+            $content = str_replace("{CODE}", "$code", $content);
+            $content = str_replace("{DOMAIN}", "$domain", $content);
+            fclose($handler);
+            if(file_put_contents($extFile, $content)!==false){
+                changeFilePermission($extFile);
+            }else{
+                fprintf(STDERR, "ERR: File $extFile couldn't be written");
+                return false;
+            }  
             $EXITO=true;
         }else{
             fprintf(STDERR, "ERR: Couldn't be opened for reading file - %s\n", $fsource);
@@ -644,12 +745,13 @@ function createExtensionDomainFile($domain,$code){
 }
 
 function createExtensionGlobalsDomainFile($domain,$code){
-    $file="/etc/asterisk/organizations/extensions_globals_$domain.conf";
+    global $arrConf;
+    $file="/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf";
     $contenido="";
             
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
     //leemos todas las variables globales de la organizacion desde la tabla globals
-    $query="SELECT variable,value from globals where organization_domain=?";
+    $query="SELECT variable,value FROM globals WHERE organization_domain=?";
     $result=$pDB->fetchTable($query,false,array($domain));
     if($result===false){
         fprintf(STDERR, "ERR: Database connection elxppbx - %s\n", $pDB->errMsg);
@@ -672,19 +774,19 @@ function createExtensionGlobalsDomainFile($domain,$code){
 }
 
 function generateDialPlan($domain,$reload=false){
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
-    
+    global $arrConf;
     if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
         fprintf(STDERR, "Invalid domain format");
         return false;
     }
     
+    //la organizacion no debe existir
+    $pDB=new paloDB($arrConf['elastix_dsn']['elastix']);
     //valido que exista el dominio y obtengo el code asociado a este
-    $queryCode="SELECT code from organization where domain=?";
-    $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, false, array($domain));
+    $queryCode="SELECT code FROM organization WHERE domain=?";
+    $resultc=$pDB->getFirstRowQuery($queryCode, false, array($domain));
     if($resultc===false){
-        fprintf(STDERR, "ERR: Database connection elastix.db - %s\n", $pDBSQLITE->errMsg);
+        fprintf(STDERR, "ERR: Database connection elxpbx - %s\n", $pDB->errMsg);
         return false;
     }elseif(count($resultc)==0){
         fprintf(STDERR, "ERR: Organization dosen't exist\n");
@@ -692,15 +794,26 @@ function generateDialPlan($domain,$reload=false){
     }
     $code=$resultc[0];
 
-    $file="/etc/asterisk/organizations/extensions_additionals_$domain.conf";
+    $file="/etc/asterisk/organizations/$domain/extensions_additionals_$domain.conf";
 
     $arrContext=array();
     $arrFromInt=array();
     
+    //comprobamos que exista el directorio donde son incluidos los archivos de configuracion de las
+    //organizaciones
+    if(!isDir("/etc/asterisk/organizations")){
+        return false;
+    }
+    
+    //comprobamos que exista el directorio que contendra los archivos, en caso de no existir los crea
+    if(!isDir("/etc/asterisk/organizations/$domain")){
+        return false;
+    }
+    
     //al momento de crear una organizacion no se escriben las variables globales de la misma
     //por lo que es necesario una vez que se mande a generar por primera vez el plan de marcado para
     //la misma hacer un reload para que las variables globales sean seteadas correctamente
-    if(is_file("/etc/asterisk/organizations/extensions_globals_$domain.conf")===false || filesize("/etc/asterisk/organizations/extensions_globals_$domain.conf")==0){
+    if(is_file("/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf")===false || filesize("/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf")==0){
         $reload=true;
     }
     
@@ -874,7 +987,7 @@ function createFeatureMapfile(){
     
     $contenido="";
     $file="/etc/asterisk/features_map.conf";
-    $query="Select name, default_code from features_code_settings where name=? or name=? or name=? or name=? and estado=?";
+    $query="SELECT name, default_code FROM features_code_settings WHERE (name=? or name=? or name=? or name=?) and estado=?";
     $result=$pDB->fetchTable($query,true,array("blind_transfer","attended_transfer","one_touch_monitor","disconnect_call",'enabled'));
     if($result===false){
         fprintf(STDERR, "ERR: Database connection globals_settings - %s\n", $pDB->errMsg);
@@ -982,7 +1095,6 @@ function createFeatureApplicationMapfile(){
 */
 function createExtGeneral(){
     $file="/etc/asterisk/extensions_general.conf";
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
     
     $contenido="\n[from-pstn]\n";
     $contenido .="include =>from-pstn-custom\n";
@@ -1257,8 +1369,9 @@ function createExtAddtionals($domain=null){
 }
 
 function createFileDahdiChannelAdd($domain=null){
+    global $arrConf;
     $file="/etc/asterisk/chan_dahdi_additional.conf";
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
     
     if(!is_null($domain)){
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
@@ -1266,7 +1379,6 @@ function createFileDahdiChannelAdd($domain=null){
         }
     }
     
-    $pDBSQLITE=new paloDB("sqlite3:////var/www/db/elastix.db");
     //valido que exista el dominio y obtengo el code asociado a este
     $queryCode="SELECT code from organization where domain=?";
     
@@ -1292,7 +1404,7 @@ function createFileDahdiChannelAdd($domain=null){
     foreach($result as $value){
         if(!empty($value["organization_domain"])){
             if($value["organization_domain"]!=$domain){
-                $resultc=$pDBSQLITE->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
+                $resultc=$pDB->getFirstRowQuery($queryCode, true, array($value["organization_domain"]));
                 if($resultc!=false){
                     $content .="context=from-analog\n";
                     $content .="channel => ".$value["data"]."\n";
@@ -1318,6 +1430,7 @@ function createFileDahdiChannelAdd($domain=null){
 }
 
 function writeTechRegister($tech){
+    global $arrConf;
     if($tech=="sip" or $tech=="iax2"){
         if($tech=="sip"){
             $file="sip_register.conf";
@@ -1328,7 +1441,7 @@ function writeTechRegister($tech){
         }
             
         $query="SELECT tech,string_register from trunk where tech=?";
-        $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+        $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
         $result=$pDB->fetchTable($query,true,array($tech));
         if($result===false){
             fprintf(STDERR, "ERR: Couldn't be written file - '/etc/asterisk/$file'. %s\n",$pDB->errMsg);
@@ -1361,10 +1474,11 @@ function writeTechRegister($tech){
 }
 
 function createDialplanTrunkPattern(){
+    global $arrConf;
     $arrExt=array();
     $exten="s";
     $prepend=$prefix=$pattern=$len="";
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
     $query="SELECT * from trunk_dialpatterns order by trunkid";
     $result=$pDB->fetchTable($query,true);
     if($result===false){
@@ -1421,14 +1535,22 @@ function createDialplanTrunkPattern(){
 }
 
 function changeStateOrganization($filename,$state){
+    global $arrConf;
     $error="";
     
     if(!($state=="suspend" || $state=="unsuspend" || $state=="terminate")){
         fprintf(STDERR, "ERR: Invalid Organization State.\n");
         return false;
     }
-    if (basename($filename) != $filename) {
-        fprintf(STDERR, "ERR: Invalid Organization filename\n");
+    
+    if(dirname("$filename")!="/tmp"){
+        fprintf(STDERR, "ERR: Invalid File name.\n");
+        return false;
+    }
+    
+    //validamos en nombre del archivo para asegurarnos que no sea un path relativo
+    if(!preg_match("/^orgToChange/",basename("$filename"))){
+        fprintf(STDERR, "ERR: Invalid File name.\n");
         return false;
     }
     
@@ -1439,14 +1561,14 @@ function changeStateOrganization($filename,$state){
     
     $arrExito=array();
     
-    $arrOrg = file("/tmp/$filename");
+    $arrOrg = file("$filename");
     if($arrOrg === FALSE){
-        error_exit("ERR: failed to load /tmp/$filename for organization update\n");
+        error_exit("ERR: failed to load $filename for organization update\n");
     }
     
     
     //creamos una nueva instanacia de la clase paloSantoOrganization
-    $pDB=new paloDB("sqlite3:////var/www/db/elastix.db");
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
     $pOrg=new paloSantoOrganization($pDB);
     $pOrg->_DB->beginTransaction();
     
@@ -1479,8 +1601,8 @@ function changeStateOrganization($filename,$state){
         }   
     }
     
-    if(is_file("/tmp/$filename"))
-        unlink("/tmp/$filename");
+    if(is_file("$filename"))
+        unlink("$filename");
     
     if($error!=""){
         $pOrg->_DB->rollBack();
@@ -1489,7 +1611,7 @@ function changeStateOrganization($filename,$state){
     }
     
     if(count($arrExito)!=0){
-        if(createExtensionFile("","")){
+        if(createExtensionFile("","",$pDB)){
             if(dialplanReload()){
                 $pOrg->_DB->commit();
                 return true;
@@ -1509,8 +1631,9 @@ function changeStateOrganization($filename,$state){
 
 
 function writeSIPGeneralFile(){
+    global $arrConf;
     $query="Select * from sip_general where cathegory!=? and property_name!=? and property_name!=?";
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
     $result=$pDB->fetchTable($query,true,array("nat","nat","nat_type"));
     if($result===false){
         fprintf(STDERR, "ERR: Error getting SIP general settings %s.\n",$pDB->errMsg);
@@ -1604,8 +1727,9 @@ function writeSIPGeneralFile(){
 
 
 function writeIAXGeneralFile(){
+    global $arrConf;
     $query="Select * from iax_general";
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
     $result=$pDB->fetchTable($query,true);
     if($result===false){
         fprintf(STDERR, "ERR: Error getting IAX general settings %s.\n",$pDB->errMsg);
@@ -1671,8 +1795,9 @@ function writeIAXGeneralFile(){
 }
 
 function writeVMGeneralFile(){
+    global $arrConf;
     $query="Select * from voicemail_general";
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
     $result=$pDB->getFirstRowQuery($query,true);
     if($result===false){
         fprintf(STDERR, "ERR: Error getting Voicemail general settings %s.\n",$pDB->errMsg);

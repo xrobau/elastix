@@ -71,7 +71,7 @@ function _moduleContent(&$smarty, $module_name)
         header("Location: index.php?menu=system");
     }
 	
-	$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+	$pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
 
 	$action = getAction();
     $content = "";
@@ -95,20 +95,18 @@ function _moduleContent(&$smarty, $module_name)
 }
 
 function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccount, $idOrganization){
-	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+	$pAstConf=new paloSantoASteriskConfig($pDB);
 	$params=array();
 	$msgs="";
-
+    $mensaje=_tr("Click here to reload dialplan");
+	
 	$query = "SELECT domain, id from organization";
 	//si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de marcado
 	if($userLevel1!="superadmin"){
 		$query .= " where id=?";
 		$params[]=$idOrganization;
 	}
-
-	$mensaje=_tr("Click here to reload dialplan");
-	$result=$pDB2->fetchTable($query,false,$params);
+	$result=$pAstConf->_DB->fetchTable($query,false,$params);
 	if(is_array($result)){
 		foreach($result as $value){
 			if($value[1]!=1){
@@ -125,10 +123,7 @@ function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccou
 
 function viewFeatures($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization, $action=""){
     $error = "";
-    //conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pDB2);
-    $pORGZ = new paloSantoOrganization($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB);
     
     $arrForm = createFieldForm();
     if($userLevel1=="superadmin"){
@@ -215,10 +210,7 @@ function viewFeatures($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
 function applyChanges($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization){
     $action = "";
-    //conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pDB2);
-    $pORGZ = new paloSantoOrganization($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB);
     
     $resultO=$pORGZ->getOrganizationById($idOrganization);
     
@@ -274,7 +266,7 @@ function applyChanges($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
                         $smarty->assign("mb_title", _tr("MESSAGE"));
                         $smarty->assign("mb_message",_tr("Changes applied successfully. "));
                         //mostramos el mensaje para crear los archivos de ocnfiguracion
-                        $pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+                        $pAstConf=new paloSantoASteriskConfig($pDB);
                         $pAstConf->setReloadDialplan($domain,true);
                     }else{
                         $pDB->rollBack();
@@ -314,9 +306,7 @@ function crearSelect($name,$option,$disabled){
 function get_default_code($smarty, $module_name, &$pDB, $arrConf, $userLevel1, $userAccount, $idOrganization){
     $jsonObject = new PaloSantoJSON();
     $feature=getParameter("fc_name");
-    //conexion elastix.db
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pORGZ = new paloSantoOrganization($pDB2);
+    $pORGZ = new paloSantoOrganization($pDB);
     $resultO=$pORGZ->getOrganizationById($idOrganization);
     if($resultO==FALSE){
         $jsonObject->set_error(_tr(_tr("Organization doesn't exist. ")._tr($pORGZ->errMsg)));
@@ -581,8 +571,6 @@ function createFieldForm()
 }
 
 function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization){
-	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB2);
 	$continue=false;
 
 	if($userLevel1=="other"){
@@ -600,7 +588,7 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	}
 
 	$query="select domain from organization where id=?";
-	$result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
+	$result=$pDB->getFirstRowQuery($query, false, array($idOrganization));
 	if($result===false){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
@@ -613,7 +601,7 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	}
 
 	if($continue){
-		$pAstConf=new paloSantoASteriskConfig($pDB,$pDB2);
+		$pAstConf=new paloSantoASteriskConfig($pDB);
 		if($pAstConf->generateDialplan($domain)===false){
 			$pAstConf->setReloadDialplan($domain,true);
 			$smarty->assign("mb_title", _tr("ERROR"));

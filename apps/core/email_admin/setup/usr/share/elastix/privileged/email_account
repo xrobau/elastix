@@ -28,14 +28,15 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: emailaccount.php,v 1.1 2012/03/21 11:32:00 rocio Exp $*/
-
 require_once 'Console/Getopt.php';
+
+ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+include_once "libs/misc.lib.php";
+include_once "configs/default.conf.php";
+global $arrConf;
 
 $CYRUS = NULL;
 define('SASL_DOMAIN', 'example.com');
-
-// Ugly - should not depend on anything under /var/www/html
-ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
 
 $opt = Console_Getopt::getopt($argv, '', array(
     'createdomain=',        // Create a new domain
@@ -106,6 +107,7 @@ function loadCyrusPassword()
 
 function create_domain($opt)
 {
+    global $arrConf;
     $sNewDomain = NULL;
     
     foreach ($opt[0] as $option) switch ($option[0]) {
@@ -122,9 +124,9 @@ function create_domain($opt)
     
     // Check for existing domain,
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
         $sth = $conn->prepare('SELECT 1 FROM organization WHERE domain = ?');
         $sth->execute(array($sNewDomain));
         $domainList = $sth->fetchAll(PDO::FETCH_COLUMN);
@@ -142,11 +144,12 @@ function create_domain($opt)
 }
 
 function writePostfixMain(){
+    global $arrConf;
     //get the current domain create in system 
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
         $sth = $conn->prepare('SELECT domain FROM organization');
         $sth->execute();
         $domainList = $sth->fetchAll(PDO::FETCH_COLUMN);
@@ -166,15 +169,21 @@ function writePostfixMain(){
     if ($postfixConf === FALSE) {
         error_exit("ERR: failed to load /etc/postfix/main.cf for domain update\n");
     }
-    $bUpdated = FALSE;
+    
     $bKeyExists = FALSE;
     foreach (array_keys($postfixConf) as $i) {
         $regs = NULL;
         if (preg_match('/^(\w+)\s*=\s*(.*)/', rtrim($postfixConf[$i]), $regs)) {
             if ($regs[1] == $sDomainKey) {
                 $postfixConf[$i] = $sDomainKey.' = '.implode(',', $domains)."\n";
+                $bKeyExists = true;
             }
         }
+    }
+    
+    //no se encontro el key 'virtual_mailbox_domains' en el archivo main.cf por lo que procedemos a crearlo
+    if($bKeyExists==false){
+        $postfixConf[]="$sDomainKey = ".implode(',', $domains)."\n";
     }
     
     if (FALSE === file_put_contents('/etc/postfix/main.cf', $postfixConf)) {
@@ -192,6 +201,7 @@ function writePostfixMain(){
 */
 function deleteAccountByDomain($opt)
 {
+    global $arrConf;
     $sDomain = NULL;
     
     foreach ($opt[0] as $option) switch ($option[0]) {
@@ -215,7 +225,8 @@ function deleteAccountByDomain($opt)
     }
     
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         //comprobamos que exista una organizacion con dicho dominio
@@ -284,7 +295,7 @@ function add_domain_postfix($sDomain)
             }
         }
     }
-    if (!$bKeyExists && $bAddRemove) {
+    if (!$bKeyExists) {
         $postfixConf[] = "$sDomainKey = $sDomain\n";
         $bUpdated = TRUE;
     }
@@ -311,8 +322,9 @@ function reloadPostfix(){
 
 function create_account($opt)
 {
+    global $arrConf;
+    
     $bSuccess = FALSE;
-
     $sDomain = NULL;
     $sUsername = NULL;
     $sPassword = NULL;
@@ -333,23 +345,24 @@ function create_account($opt)
             $sQuota = $option[1];
             break;
     }    
-    if (is_null($sDomain)) {
-        error_exit("ERR: no domain specified.\n");
+    
+    if (!preg_match('/^[\w\.\-]+$/', $sNewDomain)) {
+        error_exit("ERR: --createaccount: invalid domain.\n");
     }
     if (is_null($sUsername)) {
-        error_exit("ERR: no username specified.\n");
+        error_exit("ERR: --createaccount: no username specified.\n");
     }
     if (is_null($sPassword)) {
-        error_exit("ERR: no password specified.\n");
+        error_exit("ERR: --createaccount: no password specified.\n");
     }
     if (is_null($sQuota)) {
-        error_exit("ERR: no quota specified.\n");
+        error_exit("ERR: --createaccount: no quota specified.\n");
     }
     if (!preg_match('/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*$/', $sUsername)) {
-        error_exit("ERR: Wrong format for username $sUsername.\n");
+        error_exit("ERR: --createaccount: Wrong format for username $sUsername.\n");
     }
     if (!ctype_digit($sQuota)) {
-        error_exit("ERR: invalid quota, expected integer.\n");
+        error_exit("ERR: --createaccount: invalid quota, expected integer.\n");
     }
     
     loadCyrusPassword();
@@ -363,7 +376,8 @@ function create_account($opt)
     }
     
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Check whether username already exists
@@ -398,7 +412,7 @@ function _internal_create_account($conn, &$preparedSth, $cyr_conn, $account)
 {
     global $CYRUS;
 
-    //comprobamos qie el dominio existe
+/*    //comprobamos que el dominio existe
     if (!isset($preparedSth['listDomain'])) {
         $preparedSth['listDomain'] = $conn->prepare(
             'SELECT id FROM organization WHERE domain = ?');
@@ -410,7 +424,7 @@ function _internal_create_account($conn, &$preparedSth, $cyr_conn, $account)
     if (count($domainList) <= 0) {
         fwrite(STDERR, "ERR: domain {$account['domain']} not found.\n");
         return FALSE;
-    }
+    }*/
 
     $sFullUsername = "{$account['username']}@{$account['domain']}";
 
@@ -462,6 +476,7 @@ function _internal_create_account_password($sFullUsername, $sPassword)
 
 function delete_account($opt)
 {
+    global $arrConf;
     $sUsername = NULL;
     
     // Collect and validate options
@@ -485,9 +500,9 @@ function delete_account($opt)
     }
     
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);        
         $sth = $conn->prepare(
             'SELECT username FROM acl_user WHERE username = ?');
         $sth->execute(array($sUsername));
@@ -511,8 +526,9 @@ function delete_account($opt)
 
 function set_account_password($opt)
 {
+    global $arrConf;
+    
     $bSuccess = TRUE;
-
     $sUsername = NULL;
     $sPassword = NULL;
     
@@ -533,10 +549,10 @@ function set_account_password($opt)
     }
 
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->beginTransaction();
-
         // Check whether username already exists
         $sth = $conn->prepare('SELECT id FROM acl_user WHERE username = ?');
         $sth->execute(array($sUsername));
@@ -589,4 +605,44 @@ function reconstruct_mailbox($opt)
 
     return ($ret == 0);
 }
+
+function parseDSN($dsn){
+    //$dsn => databasemotor://username:password@hostspec/database
+    //mysql => mysql://username:password@hostspec/database
+    //squlite => sqlite:///database
+    $database=$username=$password=$hostspec=$dbname=false;
+    //get the technology
+    if(($pos = strpos($dsn, '://')) !== false) {
+        $database = substr($dsn, 0, $pos);
+        $dsn = substr($dsn, $pos + 3);
+    } else {
+        return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
+    }
+     
+    //username y password en caso de haberlos
+    if (($at = strrpos($dsn,'@')) !== false) {
+        $str = substr($dsn, 0, $at);
+        $dsn = substr($dsn, $at + 1);
+        if (($pos = strpos($str, ':')) !== false) {
+            $username = rawurldecode(substr($str, 0, $pos));
+            $password = rawurldecode(substr($str, $pos + 1));
+        } else {
+            $username = rawurldecode($str);
+        }
+    }
+    
+    //hostspec 
+    if (strpos($dsn, '/') !== false) {
+        list($hostspec, $dbname) = explode('/', $dsn, 2);
+    }
+        
+    if($database=="squlite" || $database=="squlite3"){
+        $dsn="squlite:$dbname";
+    }elseif($database=="mysql"){
+        $dsn="$database:dbname=$dbname;host=$hostspec";
+    }
+    
+    return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
+}
+
 ?>

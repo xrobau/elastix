@@ -67,7 +67,6 @@ function _moduleContent(&$smarty, $module_name){
     $userAccount=$arrCredentiasls["userAccount"];
     $idOrganization=$arrCredentiasls["id_organization"];
 
-
     $action = getAction();
     $content = "";
 
@@ -203,10 +202,10 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     }
 
     if($pORGZ->getNumOrganization() > 1){
-        if(!($userLevel1 == "other"))
+        if($userLevel1=="admin" || $userLevel1=="superadmin")
             $oGrid->addNew("create_user",_tr("Create New User"));
 
-        if($userLevel1 == "superadmin"){
+        if($userLevel1=="superadmin"){
             $arrOrgz=array(0=>"all");
             foreach(($pORGZ->getOrganization()) as $value){
                 if($value["id"]!=1)
@@ -231,13 +230,12 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
 }
 
 function showMessageReload($module_name, &$pDB, $userLevel1, $userAccount, $idOrganization){
-    $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
+    $pAstConf=new paloSantoASteriskConfig($pDB);
     $params=array();
     $msgs="";
 
     $query = "SELECT domain, id from organization";
-    //si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de mnarcada
+    //si es superadmin aparece un link por cada organizacion que necesite reescribir su plan de marcado
     if($userLevel1!="superadmin"){
         $query .= " where id=?";
         $params[]=$idOrganization;
@@ -541,18 +539,6 @@ function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
                     $idOrganization=$organization;
             }
             if($continuar){
-                $renameFile="";
-                //esta seccion es solo si el usuario quiere subir una imagen a su cuenta
-                $pictureUpload = $_FILES['picture']['name'];
-                if(isset($pictureUpload) && $pictureUpload != ""){
-                    $idImg=date("Ymdhis");
-                    if(!uploadImage($idImg,$renameFile,$errorImg)){
-                        $smarty->assign("mb_title", _tr("ERROR"));
-                        $smarty->assign("mb_message",$errorImg);
-                        return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-                    }
-                }
-
                 $username=getParameter("username");
                 $name=getParameter("name");
                 $idGrupo=getParameter("group");
@@ -571,29 +557,18 @@ function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     }
 
     if($exito){
-        //el archivo que se subio anteriormente cambia de nomber y ahora usa es idUser.ext
-        //tambien ahi que actualizar la infomacion de la imagen en la base de datos
-        if($renameFile!=""){
-            $filename=basename($renameFile);
-            $ext=explode(".",$filename);
-            $picture=$lastid.".".$ext[count($ext)-1];
-            if($pACL->setUserPicture($lastid,$picture))
-                rename($renameFile,"/var/www/elastixdir/users_images/$picture");
-            else
-                unlink($renameFile);
+        //esta seccion es solo si el usuario quiere subir una imagen a su cuenta
+        if(isset($_FILES['picture']['name']) && $_FILES['picture']['name'] != ""){
+            uploadImage($lastid,$pDB,$errorImg);
         }
         $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",_tr("User has been created successfully"));
+        $smarty->assign("mb_message",_tr("User has been created successfully")."</br>".$errorImg);
         //mostramos el mensaje para crear los archivos de ocnfiguracion
-        $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-        $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
+        $pAstConf=new paloSantoASteriskConfig($pDB);
         $orgTmp2=$pORGZ->getOrganization("","","id",$idOrganization);
         $pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
         $content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }else{
-        if($renameFile!=""){
-            unlink($renameFile);
-        }
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",$error);
         $content = viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -714,17 +689,6 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
                 }elseif(!isset($cldiName) || $cldiName==""){
                     $error=_tr("Caller Id Name must not be empty");
                 }else{
-                    //esta seccion es solo si el usuario quiere subir una imagen a su cuenta
-                    $pictureUpload = $_FILES['picture']['name'];
-                    if(isset($pictureUpload) && $pictureUpload != ""){
-                        $idImg=date("Ymdhis");
-                        if(!uploadImage($idImg,$renameFile,$errorImg)){
-                            $smarty->assign("mb_title", _tr("ERROR"));
-                            $smarty->assign("mb_message",$errorImg);
-                            return viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
-                        }
-                    }
-                    
                     $exito=$pORGZ->updateUserOrganization($idUser, $name, $md5password, $password1, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $idGrupo, $quota, $userLevel1, $reAsterisk);
                     $error=$pORGZ->errMsg;
                 }
@@ -733,31 +697,21 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
     }
 
     if($exito){
-        //el archivo que se subio anteriormente cambia de nomber y ahora usa es idUser.ext
-        //tambien ahi que actualizar la infomacion de la imagen en la base de datos
-        if($renameFile!=""){
-            $filename=basename($renameFile);
-            $ext=explode(".",$filename);
-            $picture=$idUser.".".$ext[count($ext)-1];
-            if($pACL->setUserPicture($idUser,$picture))
-                rename($renameFile,"/var/www/elastixdir/users_images/$picture");
-            else
-                unlink($renameFile);
+        //esta seccion es solo si el usuario quiere subir una imagen a su cuenta
+        if(isset($_FILES['picture']['name']) && $_FILES['picture']['name']!=""){
+            uploadImage($idUser,$pDB,$errorImg);
         }
+        
         $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",_tr("User has been edited successfully"));
+        $smarty->assign("mb_message",_tr("User has been edited successfully")."<br>$errorImg");
         if($reAsterisk){
             //mostramos el mensaje para crear los archivos de ocnfiguracion
-            $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-            $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
-            $orgTmp2=$pORGZ->getOrganization("","","id",$pACL->getIdOrganizationUser($idUser));
+            $pAstConf=new paloSantoASteriskConfig($pDB);
+            $orgTmp2=$pORGZ->getOrganization("","","id",$idOrgz);
             $pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
         }
         $content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }else{
-        if($renameFile!=""){
-            unlink($renameFile);
-        }
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",$error);
         $content = viewFormUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -785,11 +739,11 @@ function deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
         }else{
             $exito=$pORGZ->deleteUserOrganization($idUser);
         }
-    }else if($userLevel1=="admin"){
-        if($pACL->userBellowOrganization($idUser,$idOrganization)){
+    }elseif($userLevel1=="admin"){
+        if($idOrgReload==$idOrganization){
             $exito=$pORGZ->deleteUserOrganization($idUser);
         }else{
-            $pORGZ->errMsg=$pACL->errMsg;
+            $pORGZ->errMsg=_tr("Invalid User");
         }
     }
 
@@ -797,8 +751,7 @@ function deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
         $smarty->assign("mb_title", _tr("MESSAGE"));
         $smarty->assign("mb_message",_tr("The user was deleted successfully"));
         //mostramos el mensaje para crear los archivos de ocnfiguracion
-        $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-        $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pDB);
+        $pAstConf=new paloSantoASteriskConfig($pDB);
         $orgTmp2=$pORGZ->getOrganization("","","id",$idOrgReload);
         $pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
         $content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -840,45 +793,64 @@ function getGroups(&$pDB){
 
 function getImage($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userLevel1, $idOrganization){
     $pACL       = new paloACL($pDB);
-    $ruta_destino = "/var/www/elastixdir/users_images";
     $imgDefault = $_SERVER['DOCUMENT_ROOT']."/modules/$module_name/images/Icon-user.png";
-    $id_user="";
+    $id_user=getParameter("ID");
+    $picture=false;
 
     if($userLevel1=="superadmin"){
-        $id_user = getParameter("ID");
-    }else if($userLevel1=="admin"){
-        $idTemp = getParameter("ID");
-        if($pACL->userBellowOrganization($idTemp,$idOrganization)){
-            $id_user=$idTemp;
-        }
+        $picture = $pACL->getUserPicture($id_user);
     }else{
-        $id_user=$pACL->getIdUser($userAccount);
-    }
-
-    $picture = $pACL->getUserPicture($id_user);
-    $image = $ruta_destino."/".$picture[0];
-    $arrIm = explode(".",$picture[0]);
-    $typeImage = $arrIm[count($arrIm)-1];
-
-    // Creamos la imagen a partir de un fichero existente
-    if(is_file($image) && $picture!==false){
-        if(strtolower($typeImage) == "png"){
-            Header("Content-type: image/png");
-            $im = imagecreatefromPng($image);
-            ImagePng($im); // Mostramos la imagen
-            ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen
+        if($userLevel1=="admin"){
+            //verificamos que el usario pertenezca a la organizacion
+            if($pACL->userBellowOrganization($id_user,$idOrganization))
+                $picture = $pACL->getUserPicture($id_user);
         }else{
-            Header("Content-type: image/jpeg");
-            $im = imagecreatefromJpeg($image);
-            ImageJpeg($im); // Mostramos la imagen
-            ImageDestroy($im); // Liberamos la memoria que ocupaba la imagen
+            $id_user=$pACL->getIdUser($userAccount);
+            $picture = $pACL->getUserPicture($id_user);
         }
+    } 
+    
+    // Creamos la imagen a partir de un fichero existente
+    if($picture!=false && !empty($picture["picture_type"])){
+        Header("Content-type: {$picture["picture_type"]}");
+        print $picture["picture_content"];
     }else{
         Header("Content-type: image/png");
         $im = file_get_contents($imgDefault);
         echo $im;
     }
     return;
+}
+
+
+function uploadImage($idUser,$pDB,&$error){
+    $pACL = new paloACL($pDB);
+    $pictureUpload = $_FILES['picture']['name'];
+    $Exito=false;
+
+    //valido el tipo de archivo
+    // \w cualquier caracter, letra o guion bajo
+    // \s cualquier espacio en blanco
+    if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(png|PNG|JPG|jpg|JPEG|jpeg)$/",$pictureUpload)) {
+        $error=_tr("Invalid file extension.- It must be png or jpg or jpeg");
+    }elseif(preg_match("/(\.php)/",$pictureUpload)){
+        $error=_tr("Possible file upload attack.");
+    }else{
+        if(is_uploaded_file($_FILES['picture']['tmp_name'])){
+            $ancho = 240;
+            $alto = 200;
+            redimensionarImagen($_FILES['picture']['tmp_name'],$_FILES['picture']['tmp_name'],$ancho,$alto);
+            $picture_type=$_FILES['picture']['type'];
+            $picture_content=file_get_contents($_FILES['picture']['tmp_name']);
+            $Exito=$pACL->setUserPicture($idUser,$picture_type,$picture_content);
+            if($Exito===false){
+                $error="Image couldn't be upload";
+            }
+        }else {
+            $error=_tr("Possible file upload attack. Filename")." : ". $pictureUpload;
+        }
+    }
+    return $Exito;
 }
 
 function redimensionarImagen($ruta1,$ruta2,$ancho,$alto){
@@ -935,7 +907,7 @@ function redimensionarImagen($ruta1,$ruta2,$ancho,$alto){
     // imagecopyresampled, solo estan en G.D. 2.0.1 con PHP 4.0.6+
     @imagecopyresampled($img2,$img,0,0,0,0,$ancho_dest,$alto_dest,$ancho_orig,$alto_orig) or imagecopyresized($img2,$img,0,0,0,0,$ancho_dest,$alto_dest,$ancho_orig,$alto_orig);
 
-    // Crear fichero nuevo, según extensión.
+    // Crear fichero nuevo, segÃºn extensiÃ³n.
     if ($tipo==1) // GIF
     if (function_exists("imagegif"))
         imagegif($img2, $ruta2);
@@ -957,58 +929,6 @@ function redimensionarImagen($ruta1,$ruta2,$ancho,$alto){
     return true;
 }
 
-function uploadImage($idImg,&$fileUpload,&$error){
-    $pictureUpload = $_FILES['picture']['name'];
-    $file_upload = "";
-    $ruta_destino = "/var/www/elastixdir/users_images";
-    $Exito=false;
-
-    //valido el tipo de archivo
-    // \w cualquier caracter, letra o guion bajo
-    // \s cualquier espacio en blanco
-    if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(png|PNG|JPG|jpg|JPEG|jpeg)$/",$pictureUpload)) {
-        $error=_tr("Invalid file extension.- It must be png or jpg or jpeg");
-    }elseif(preg_match("/(\.php)/",$pictureUpload)){
-        $error=_tr("Possible file upload attack.");
-    }else{
-        if(is_uploaded_file($_FILES['picture']['tmp_name'])) {
-            $file_upload = basename($_FILES['picture']['tmp_name']); // verificando que solo tenga la ruta al archivo
-            $file_name = basename("/tmp/".$_FILES['picture']['name']);
-            $ruta_archivo = "/tmp/$file_upload";
-            $arrIm = explode(".",$pictureUpload);
-            $renameFile = "$ruta_destino/$idImg.".$arrIm[count($arrIm)-1];
-            $file_upload = $idImg.".".$arrIm[count($arrIm)-1];
-            $filesize = $_FILES['picture']['size'];
-            $filetype = $_FILES['picture']['type'];
-
-            $sizeImgUp=getimagesize($ruta_archivo);
-            if(!$sizeImgUp){
-                $error=_tr("Possible file upload attack. Filename")." : ". $pictureUpload;
-            }
-            //realizar acciones
-            if(!rename($ruta_archivo, $renameFile)){
-                $error=_("Error to Upload")." : ". $pictureUpload;
-            }else{ //redimensiono la imagen
-                $ancho = 240;
-                $alto = 200;
-                if(is_file($renameFile)){
-                    if(!redimensionarImagen($renameFile,$renameFile,$ancho,$alto)){
-                        $error=_tr("Possible file upload attack. Filename")." : ". $pictureUpload;
-                    }else
-                        $Exito=true;
-                }
-            }
-        }else {
-            $error=_tr("Possible file upload attack. Filename")." : ". $pictureUpload;
-        }
-    }
-    if($Exito){
-        $fileUpload=$renameFile;
-    }else{
-        $fileUpload="";
-    }
-    return $Exito;
-}
 
 function createFieldForm($arrGrupos,$arrOrgz){
     $arrFormElements = array("name" => array("LABEL"                  => _tr('Name').'(Ex. John Doe)',

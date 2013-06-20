@@ -20,13 +20,13 @@
    </table>
 </div>
 <div style="display: inline-block; width: 270px; height: 270px; position: absolute;">
-	{if $ShowImg}
-	<div class="div-image" {$MARGIN_PIC}>
-		<img class="picture" alt="image" src="index.php?menu={$MODULE_NAME}&action=getImage&ID={$id_user}&rawmode=yes"/>
-	</div>
-	{else}
-		<img alt="image" style="margin-top: 20px; height: 256px; width: 256px;" src="modules/{$MODULE_NAME}/images/Icon-user.png"/>
-	{/if}
+    {if $ShowImg}
+        <div class="div-image" {$MARGIN_PIC}>
+            <img class="picture" alt="image" src="index.php?menu={$MODULE_NAME}&action=getImage&ID={$id_user}&rawmode=yes"/>
+        </div>
+    {else}
+        <img alt="image" style="margin-top: 20px; height: 256px; width: 256px;" src="modules/{$MODULE_NAME}/images/Icon-user.png"/>
+    {/if}
 </div>
 <div style="display: inline-block; position: relative; left: 280px; height: {$HEIGHT}; {$MARGIN_TAB}">
 <div id="formulario">

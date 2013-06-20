@@ -1,29 +1,28 @@
--- Create database	 
- CREATE DATABASE IF NOT EXISTS elxpbx;	 
- USE elxpbx;	 
- -- Database: `elxpbx`
-
--- Create user db
-GRANT SELECT, UPDATE, INSERT, DELETE ON `elxpbx`.* to asteriskuser@localhost;
-
-CREATE TABLE IF NOT EXISTS `globals` (
-  `organization_domain` varchar(50) NOT NULL,
-  `variable` varchar(255) NOT NULL,
-  `value` varchar(255) NOT NULL,
-  PRIMARY KEY  (`organization_domain`,`variable`),
+-- PBX
+CREATE TABLE IF NOT EXISTS globals (
+  organization_domain varchar(100) NOT NULL,
+  variable varchar(255) NOT NULL,
+  value varchar(255) NOT NULL,
+  PRIMARY KEY  (organization_domain,variable),
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,  
   INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS `globals_settings` (
-  `variable` varchar(255) NOT NULL,
-  `value` varchar(255) NOT NULL,
-  PRIMARY KEY  (`variable`)
+
+CREATE TABLE IF NOT EXISTS globals_settings (
+  variable varchar(255) NOT NULL,
+  value varchar(255) NOT NULL,
+  PRIMARY KEY  (variable)
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS `reload_dialplan` (
-  `organization_domain` varchar(50) NOT NULL,
-  `show_msg` enum('yes','no') NOT NULL default 'no',
-  PRIMARY KEY  (`organization_domain`)
+
+
+CREATE TABLE IF NOT EXISTS reload_dialplan (
+  organization_domain varchar(100) NOT NULL,
+  show_msg enum('yes','no') NOT NULL default 'no',
+  PRIMARY KEY  (organization_domain),
+  INDEX organization_domain (organization_domain),
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 
@@ -31,13 +30,13 @@ CREATE TABLE IF NOT EXISTS `reload_dialplan` (
 -- archivo sip.conf y referentes a la creacion de dispositivos
 -- con tecnologia sip. Es configurada por el superadmin
 DROP TABLE IF EXISTS sip_general;
-CREATE TABLE `sip_general` (
+CREATE TABLE sip_general (
     id int(11) NOT NULL AUTO_INCREMENT,
     property_name varchar(250),
     property_val varchar(250),
     cathegory varchar(250),
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `property_name` (`property_name`)
+    PRIMARY KEY (id),
+    UNIQUE KEY property_name (property_name)
 ) ENGINE = INNODB;
 
 insert into sip_general (property_name,property_val,cathegory) values ('default_context','default','general');
@@ -75,20 +74,20 @@ insert into sip_general (property_name,property_val,cathegory) values ('disallow
 insert into sip_general (property_name,property_val,cathegory) values ('allow','ulaw,alaw,gsm','general');
 insert into sip_general (property_name,property_val,cathegory) values ('g726nonstandard','en','general');
 insert into sip_general (property_name,property_val,cathegory) values ('preferred_codec_only','','general');
-insert into sip_general (property_name,property_val,cathegory) values ('nat','force_rport','general');
+insert into sip_general (property_name,property_val,cathegory) values ('nat','yes','general');
 insert into sip_general (property_name,property_val,cathegory) values ('nat_type','public','general');
 
 
 -- seccion general archivo iax.conf
 -- editable solo por el superadmin
 DROP TABLE IF EXISTS iax_general;
-CREATE TABLE `iax_general` (
+CREATE TABLE iax_general (
     id int(11) NOT NULL AUTO_INCREMENT,
     property_name varchar(250),
     property_val varchar(250),
     cathegory varchar(250),
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `property_name` (`property_name`)
+    PRIMARY KEY (id),
+    UNIQUE KEY property_name (property_name)
 )ENGINE = INNODB;
 
 insert into iax_general (property_name,property_val,cathegory) values ('delayreject','yes','general');
@@ -106,11 +105,12 @@ insert into iax_general (property_name,property_val,cathegory) values ('disallow
 insert into iax_general (property_name,property_val,cathegory) values ('allow','ulaw,alaw,gsm','general');
 insert into iax_general (property_name,property_val,cathegory) values ('codecpriority','host','general');
 insert into iax_general (property_name,property_val,cathegory) values ('bandwidth','','general');
+
 -- seccion general archivo voicemail.conf
 -- editable solo por el superadmin
 DROP TABLE IF EXISTS voicemail_general;
 CREATE TABLE voicemail_general (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
+    id int(11) NOT NULL AUTO_INCREMENT,
     -- Formats for writing Voicemail
     format CHAR(80) default 'wav49|gsm|wav',
     -- Send email from this address
@@ -162,7 +162,7 @@ CREATE TABLE voicemail_general (
     tz varchar(250) default 'central',
     saycid enum ('yes','no'),
     sayduration enum ('yes','no') default 'yes',
-    saydurationm int(5),
+    saydurationm int(5) default 2,
     -- Allow sender to review/rerecord their message before saving it OFF by default
     review enum ('yes','no') default 'yes', 
     -- Allow sender to hit 0 before/after/during leaving a voicemail to reach an operator
@@ -180,7 +180,7 @@ CREATE TABLE voicemail_general (
     -- Enforce minimum password length
     minpassword int(5),
     messagewrap enum ('yes','no'),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (id)
 )ENGINE = INNODB;
 
 insert into voicemail_general(serveremail) values ("vm@asterisk");
@@ -189,69 +189,71 @@ insert into voicemail_general(serveremail) values ("vm@asterisk");
 -- configure los parametros por default al momento de crear una extension 
 -- de tipo sip
 DROP TABLE IF EXISTS sip_settings;
-CREATE TABLE IF NOT EXISTS `sip_settings` (
-      `organization_domain` varchar(50) NOT NULL, 
-      `port` int(5) DEFAULT '5060',
-      `defaultuser` varchar(10) DEFAULT NULL,
-      `useragent` varchar(20) DEFAULT 'elastix_3.0',
-      `host` varchar(40) NULL default 'dynamic',
-      `type` enum('friend','user','peer') default 'friend',
-      `context` varchar(40) DEFAULT 'from-internal',
-      `deny` varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
-      `permit` varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
-      `transport` enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
-      `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT 'auto',
-      `directmedia` enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT 'no',
-      `nat` enum('yes','no','force_rport','comedia') DEFAULT NULL,
-      `language` varchar(40) DEFAULT NULL,
-      `tonezone` varchar(3) DEFAULT NULL,
-      `disallow` varchar(40) DEFAULT 'all',
-      `allow` varchar(40) DEFAULT 'ulaw,alaw,gsm',
-      `trustrpid` enum('yes','no') DEFAULT 'yes',
-      `progressinband` enum('yes','no','never') DEFAULT NULL,
-      `promiscredir` enum('yes','no') DEFAULT NULL,
-      `useclientcode` enum('yes','no') DEFAULT NULL,
-      `accountcode` varchar(40) DEFAULT NULL,
-      `callcounter` enum('yes','no') DEFAULT 'yes',
-      `busylevel` int(11) DEFAULT NULL,
-      `allowoverlap` enum('yes','no') DEFAULT NULL,
-      `allowsubscribe` enum('yes','no') DEFAULT NULL,
-      `videosupport` enum('yes','no') DEFAULT NULL,
-      `maxcallbitrate` int(11) DEFAULT NULL,
-      `rfc2833compensate` enum('yes','no') DEFAULT NULL,
-      `session-timers` enum('accept','refuse','originate') DEFAULT NULL,
+CREATE TABLE IF NOT EXISTS sip_settings (
+      organization_domain varchar(100) NOT NULL, 
+      port int(5) DEFAULT '5060',
+      defaultuser varchar(10) DEFAULT NULL,
+      useragent varchar(20) DEFAULT 'elastix_3.0',
+      host varchar(40) NULL default 'dynamic',
+      type enum('friend','user','peer') default 'friend',
+      context varchar(40) DEFAULT 'from-internal',
+      deny varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
+      permit varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
+      transport enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
+      dtmfmode enum('rfc2833','info','shortinfo','inband','auto') DEFAULT 'auto',
+      directmedia enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT 'no',
+      nat enum('yes','no','force_rport','comedia') DEFAULT NULL,
+      language varchar(40) DEFAULT NULL,
+      tonezone varchar(3) DEFAULT NULL,
+      disallow varchar(40) DEFAULT 'all',
+      allow varchar(40) DEFAULT 'ulaw,alaw,gsm',
+      trustrpid enum('yes','no') DEFAULT 'yes',
+      progressinband enum('yes','no','never') DEFAULT NULL,
+      promiscredir enum('yes','no') DEFAULT NULL,
+      useclientcode enum('yes','no') DEFAULT NULL,
+      accountcode varchar(40) DEFAULT NULL,
+      callcounter enum('yes','no') DEFAULT 'yes',
+      busylevel int(11) DEFAULT NULL,
+      allowoverlap enum('yes','no') DEFAULT NULL,
+      allowsubscribe enum('yes','no') DEFAULT NULL,
+      videosupport enum('yes','no') DEFAULT NULL,
+      maxcallbitrate int(11) DEFAULT NULL,
+      rfc2833compensate enum('yes','no') DEFAULT NULL,
+      `session-timers` enum('`accept`','`refuse`','`originate`') DEFAULT NULL,
       `session-expires` int(11) DEFAULT NULL,
       `session-minse` int(11) DEFAULT NULL,
       `session-refresher` enum('uac','uas') DEFAULT NULL,
-      `t38pt_usertpsource` varchar(40) DEFAULT NULL,
-      `regexten` varchar(40) DEFAULT NULL,
-      `qualify` varchar(40) DEFAULT 'yes',
-      `rtptimeout` int(11) DEFAULT NULL,
-      `rtpholdtimeout` int(11) DEFAULT NULL,
-      `sendrpid` enum('yes','no','pai','yes,pai') DEFAULT 'no',
-      `outboundproxy` varchar(40) DEFAULT NULL,
-      `callbackextension` varchar(40) DEFAULT NULL,
-      `timert1` int(11) DEFAULT NULL,
-      `timerb` int(11) DEFAULT NULL,
-      `qualifyfreq` int(11) DEFAULT NULL,
-      `constantssrc` enum('yes','no') DEFAULT NULL,
-      `usereqphone` enum('yes','no') DEFAULT NULL,
-      `textsupport` enum('yes','no') DEFAULT NULL,
-      `faxdetect` enum('yes','no') DEFAULT 'yes',
-      `buggymwi` enum('yes','no') DEFAULT NULL,
-      `cid_number` varchar(40) DEFAULT NULL,
-      `callingpres` enum('allowed_not_screened','allowed_passed_screen','allowed_failed_screen','allowed','prohib_not_screened','prohib_passed_screen','prohib_failed_screen','prohib') DEFAULT NULL,
-      `mohinterpret` varchar(40) DEFAULT NULL,
-      `mohsuggest` varchar(40) DEFAULT NULL,
-      `parkinglot` varchar(40) DEFAULT NULL,
-      `hasvoicemail` enum('yes','no') DEFAULT NULL,
-      `subscribemwi` enum('yes','no') DEFAULT NULL,
-      `vmexten` varchar(40) DEFAULT '*97',
-      `rtpkeepalive` int(11) DEFAULT NULL,
-      `g726nonstandard` enum('yes','no') DEFAULT NULL,
-      `ignoresdpversion` enum('yes','no') DEFAULT NULL,
-      `allowtransfer` enum('yes','no') DEFAULT NULL,
-      PRIMARY KEY (`organization_domain`)
+      t38pt_usertpsource varchar(40) DEFAULT NULL,
+      regexten varchar(40) DEFAULT NULL,
+      qualify varchar(40) DEFAULT 'yes',
+      rtptimeout int(11) DEFAULT NULL,
+      rtpholdtimeout int(11) DEFAULT NULL,
+      sendrpid enum('yes','no','pai','yes,pai') DEFAULT 'no',
+      outboundproxy varchar(40) DEFAULT NULL,
+      callbackextension varchar(40) DEFAULT NULL,
+      timert1 int(11) DEFAULT NULL,
+      timerb int(11) DEFAULT NULL,
+      qualifyfreq int(11) DEFAULT NULL,
+      constantssrc enum('yes','no') DEFAULT NULL,
+      usereqphone enum('yes','no') DEFAULT NULL,
+      textsupport enum('yes','no') DEFAULT NULL,
+      faxdetect enum('yes','no') DEFAULT 'yes',
+      buggymwi enum('yes','no') DEFAULT NULL,
+      cid_number varchar(40) DEFAULT NULL,
+      callingpres enum('allowed_not_screened','allowed_passed_screen','allowed_failed_screen','allowed','prohib_not_screened','prohib_passed_screen','prohib_failed_screen','prohib') DEFAULT NULL,
+      mohinterpret varchar(40) DEFAULT NULL,
+      mohsuggest varchar(40) DEFAULT NULL,
+      parkinglot varchar(40) DEFAULT NULL,
+      hasvoicemail enum('yes','no') DEFAULT NULL,
+      subscribemwi enum('yes','no') DEFAULT NULL,
+      vmexten varchar(40) DEFAULT '*97',
+      rtpkeepalive int(11) DEFAULT NULL,
+      g726nonstandard enum('yes','no') DEFAULT NULL,
+      ignoresdpversion enum('yes','no') DEFAULT NULL,
+      allowtransfer enum('yes','no') DEFAULT NULL,
+      PRIMARY KEY (organization_domain),
+      INDEX organization_domain (organization_domain),
+      FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 
@@ -259,13 +261,13 @@ CREATE TABLE IF NOT EXISTS `sip_settings` (
 -- configure los parametros por default al momento de crear una extension 
 -- de tipo iax
 DROP TABLE IF EXISTS iax_settings;
-CREATE TABLE IF NOT EXISTS `iax_settings` (
-  `organization_domain` varchar(50) NOT NULL, 
-  `type` varchar(10) NOT NULL default 'friend', -- friend/user/peer
-  `context` varchar(40) default 'from-internal',
-  `host` varchar(40) NOT NULL default 'dynamic',
-  `ipaddr` varchar(40) NULL, -- Must be updateable by Asterisk user
-  `port` int(5) NULL, -- Must be updateable by Asterisk user
+CREATE TABLE IF NOT EXISTS iax_settings (
+  organization_domain varchar(100) NOT NULL, 
+  type varchar(10) NOT NULL default 'friend', -- friend/user/peer
+  context varchar(40) default 'from-internal',
+  host varchar(40) NOT NULL default 'dynamic',
+  ipaddr varchar(40) NULL, -- Must be updateable by Asterisk user
+  port int(5) NULL, -- Must be updateable by Asterisk user
   `sourceaddress` varchar(20) NULL,
   `mask` varchar(20) NULL,
   `regexten` varchar(40) NULL,
@@ -296,12 +298,14 @@ CREATE TABLE IF NOT EXISTS `iax_settings` (
   `setvar` varchar(200) NULL, 
   `permit` varchar(40) NULL,
   `deny` varchar(40) NULL,
-  PRIMARY KEY (`organization_domain`)
+  PRIMARY KEY (organization_domain),
+  INDEX organization_domain (organization_domain),
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE
 )ENGINE = INNODB;
 
 
 DROP TABLE IF EXISTS voicemail_settings;
-CREATE TABLE `voicemail_settings` (
+CREATE TABLE voicemail_settings (
     organization_domain varchar(100) NOT NULL, 
     -- Mailbox context.
     context CHAR(80) NOT NULL DEFAULT 'default',
@@ -349,7 +353,9 @@ CREATE TABLE `voicemail_settings` (
     maxmsg INT(5) DEFAULT '100',
     -- Increase DB gain on recorded message by this amount (0.0 means none)
     volgain DECIMAL(5,2),
-    PRIMARY KEY (`organization_domain`)
+    PRIMARY KEY (organization_domain),
+    INDEX organization_domain (organization_domain),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS sip;
@@ -441,17 +447,18 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `rtpkeepalive` int(11) DEFAULT NULL,
       `g726nonstandard` enum('yes','no') DEFAULT NULL,
       `ignoresdpversion` enum('yes','no') DEFAULT NULL,
-      `organization_domain` varchar(50) NOT NULL,
+      `organization_domain` varchar(100) NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `name` (`name`),
       KEY `ipaddr` (`ipaddr`,`port`),
       KEY `host` (`host`,`port`),
-      INDEX organization_domain (organization_domain)
+      INDEX organization_domain (organization_domain),
+      FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS iax;
 CREATE TABLE `iax` (
-  `organization_domain` varchar(50) NOT NULL,
+  `organization_domain` varchar(100) NOT NULL,
   `name` varchar(40) NOT NULL default '',
   `type` varchar(10) NOT NULL default 'friend', -- friend/user/peer
   `username` varchar(40) NULL, -- username to send as peer
@@ -503,6 +510,7 @@ CREATE TABLE `iax` (
   `permit` varchar(40) DEFAULT NULL,
   `deny` varchar(40) DEFAULT NULL,
   PRIMARY KEY  (`name`),
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
   INDEX name (name, host),
   INDEX name2 (name, ipaddr, port),
   INDEX ipaddr (ipaddr, port),
@@ -513,7 +521,7 @@ CREATE TABLE `iax` (
 DROP TABLE IF EXISTS voicemail;
 CREATE TABLE voicemail (
     -- All of these column names are very specific, including "uniqueid".  Do not change them if you wish voicemail to work.
-    uniqueid INT(5) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    uniqueid INT(5) NOT NULL AUTO_INCREMENT,
     -- Mailbox context.
     context CHAR(80) NOT NULL DEFAULT 'default',
     -- Mailbox number.  Should be numeric.
@@ -576,13 +584,14 @@ CREATE TABLE voicemail (
     imappassword VARCHAR(80),
     stamp timestamp,
     organization_domain varchar(100) NOT NULL,
+    PRIMARY KEY(uniqueid), 
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
-
 CREATE TABLE IF NOT EXISTS `extension` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
-      `organization_domain` varchar(50) NOT NULL,
+      `organization_domain` varchar(100) NOT NULL,
       `context` varchar(40) NOT NULL,
       `exten` int(20) NOT NULL,
       `tech` varchar(20) NOT NULL,
@@ -597,12 +606,13 @@ CREATE TABLE IF NOT EXISTS `extension` (
       `mohclass` varchar(80) default 'default',
       `noanswer` varchar(100) default NULL,
       PRIMARY KEY (`id`),
+      FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
       INDEX organization_domain (organization_domain)
 )ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `fax` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
-      `organization_domain` varchar(50) NOT NULL,
+      `organization_domain` varchar(100) NOT NULL,
       `context` varchar(40) NOT NULL,
       `exten` int(20) NOT NULL,
       `tech` varchar(20) NOT NULL,
@@ -612,6 +622,7 @@ CREATE TABLE IF NOT EXISTS `fax` (
       `callerid_name` varchar(20) DEFAULT NULL,
       `callerid_number` varchar(40) DEFAULT NULL, 
       PRIMARY KEY (`id`),
+      FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
       INDEX organization_domain (organization_domain)
 )ENGINE = INNODB;
 
@@ -643,16 +654,18 @@ CREATE TABLE IF NOT EXISTS `trunk_dialpatterns` (
   `prepend_digits` varchar(50) NOT NULL default '',
   `seq` int(11) NOT NULL default '0',
   PRIMARY KEY  (`trunkid`,`match_pattern_prefix`,`match_pattern_pass`,`prepend_digits`,`seq`),
-  FOREIGN KEY (`trunkid`) REFERENCES trunk(`trunkid`)
+  FOREIGN KEY (`trunkid`) REFERENCES trunk(`trunkid`) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS `trunk_organization` (
   `trunkid` int(11) NOT NULL,
-  `organization_domain` varchar(50) NOT NULL,
+  `organization_domain` varchar(100) NOT NULL,
   PRIMARY KEY  (`trunkid`,`organization_domain`),
-  INDEX organization_domain (organization_domain),
-  FOREIGN KEY (`trunkid`) REFERENCES trunk(`trunkid`)
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
+  FOREIGN KEY (`trunkid`) REFERENCES trunk(`trunkid`) ON DELETE CASCADE,
+  INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
+
 
 CREATE TABLE IF NOT EXISTS `features_code_settings` (
   `name` varchar(50) NOT NULL,
@@ -662,12 +675,14 @@ CREATE TABLE IF NOT EXISTS `features_code_settings` (
   PRIMARY KEY (`name`)
 ) ENGINE = INNODB;
 
+
 CREATE TABLE IF NOT EXISTS `features_code` (
-  `organization_domain` varchar(50) NOT NULL,
+  `organization_domain` varchar(100) NOT NULL,
   `name` varchar(50) NOT NULL,
   `code` varchar(40) default NULL,
   `estado` enum('enabled','disabled') default 'enabled',
   PRIMARY KEY (`organization_domain`,`name`),
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
   INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
@@ -704,7 +719,7 @@ insert into `features_code_settings` (name,default_code,description,estado) valu
 insert into `features_code_settings` (name,default_code,description,estado) values("voicemail_mine","*97","My Voicemail","enabled");
 insert into `features_code_settings` (name,default_code,description,estado) values("sim_in_call","7777","Simulate Incoming Call","enabled"); 
 insert into `features_code_settings` (name,default_code,description,estado) values("direct_call_pickup","**","Directed Call Pickup","enabled");
-insert into `features_code_settings` (name,default_code,description,estado) values("user_logoff","*12","Simulate Incoming Call","enabled"); 
+insert into `features_code_settings` (name,default_code,description,estado) values("user_logoff","*12","Simulate Incoming Call","enabled");
 insert into `features_code_settings` (name,default_code,description,estado) values("user_logon","*11","Simulate Incoming Call","enabled");
 insert into `features_code_settings` (name,default_code,description,estado) values("pickup","*8","Asterisk General Call Pickup","enabled"); 
 insert into `features_code_settings` (name,default_code,description,estado) values("blind_transfer","#1","In-Call Asterisk Blind Transfer","enabled");
@@ -755,9 +770,10 @@ INSERT INTO globals_settings VALUES("RECORDEXTEN","");
 INSERT INTO globals_settings VALUES("CREATE_VM","yes");
 INSERT INTO globals_settings VALUES("ALLOW_CODEC","ulaw,alaw,gsm");
 
+
 DROP TABLE IF EXISTS queue;
 CREATE TABLE queue (
-    name VARCHAR(128) PRIMARY KEY,
+    name VARCHAR(128),
     description VARCHAR(128) DEFAULT NULL,
     autofill enum ('yes','no') DEFAULT 'yes',
     monitor_type enum ('MixMonitor','Monitor') default 'MixMonitor',
@@ -824,29 +840,31 @@ CREATE TABLE queue (
     calling_restriction INT(11) default 0,
     skip_busy_detail INT(11),
     queue_number INT(11) not null,
+    PRIMARY KEY(name),
     UNIQUE KEY queue_number (queue_number,organization_domain),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
 
 DROP TABLE IF EXISTS queue_member;
 CREATE TABLE queue_member(
-uniqueid INT(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-membername varchar(40),
-queue_name varchar(128) not null,
-interface varchar(128) not null,
-penalty INT(11),
-paused INT(11),
-state_interface varchar(128), 
-exten INT(11) NOT NULL,
-UNIQUE KEY queue_interface (queue_name, interface),
-FOREIGN KEY (queue_name) REFERENCES queue(name)
+    uniqueid INT(10) UNSIGNED AUTO_INCREMENT,
+    membername varchar(40),
+    queue_name varchar(128) not null,
+    interface varchar(128) not null,
+    penalty INT(11),
+    paused INT(11),
+    state_interface varchar(128), 
+    exten INT(11) NOT NULL,
+    UNIQUE KEY queue_interface (queue_name, interface),
+    PRIMARY KEY(uniqueid),
+    FOREIGN KEY (queue_name) REFERENCES queue(name) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS musiconhold;
-CREATE TABLE musiconhold (
-    -- Name of the MOH class
-    name char(80) not null primary key,
+CREATE TABLE musiconhold ( -- Name of the MOH class
+    name char(80) not null ,
     -- Descriptive name of the MOH class
     description char(80) default "", 
     -- One of 'custom', 'files', 'mp3nb', 'quietmp3nb', or 'quietmp3'
@@ -865,30 +883,32 @@ CREATE TABLE musiconhold (
     stamp timestamp,
     -- organization's Domain that is owner of the class
     organization_domain varchar(100) NOT NULL,
+    PRIMARY KEY(name),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,  
     INDEX organization_domain (organization_domain),
     UNIQUE KEY description_moh (description,organization_domain)
 ) ENGINE = INNODB;
-
-insert into musiconhold (name,description,mode,directory,sort) values('default','default','files','/var/lib/asterisk/mohmp3/','random');
-
-insert into musiconhold (name,description,mode,directory,sort) values('none','none','files','/var/lib/asterisk/mohmp3/none/','random');
+insert into musiconhold (name,description,mode,directory,sort,organization_domain) values('default','default','files','/var/lib/asterisk/mohmp3/','random',"");
+insert into musiconhold (name,description,mode,directory,sort,organization_domain) values('none','none','files','/var/lib/asterisk/mohmp3/none/','random',"");
 
 DROP TABLE IF EXISTS recordings;
 CREATE TABLE recordings (
-    uniqueid INT(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    uniqueid INT(10) UNSIGNED AUTO_INCREMENT,
     -- path completo de donde se encuentra la grabacion incluyendo el nombre de la grabacion
     filename varchar(128) NOT NULL,
     -- dominio al que pertenece la grabacion
     organization_domain varchar(100) NOT NULL,
     source varchar(20) NOT NULL,
     name varchar(50) default null,
+    PRIMARY KEY(uniqueid),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
     UNIQUE KEY filename (filename),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS ivr;
 CREATE TABLE ivr (
-    id INT(10) PRIMARY KEY AUTO_INCREMENT,
+    id INT(10) AUTO_INCREMENT,
     name varchar(50) NOT NULL,
     announcement INT(11) default null,
     timeout INT(11),
@@ -898,9 +918,13 @@ CREATE TABLE ivr (
     mesg_timeout INT(11) default null,
     mesg_invalid INT(11) default null,
     organization_domain varchar(100) NOT NULL,
+    PRIMARY KEY(id),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
     UNIQUE KEY ivr_name (name,organization_domain),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
+
+
 
 DROP TABLE IF EXISTS ivr_destination;
 CREATE TABLE ivr_destination (
@@ -911,23 +935,25 @@ CREATE TABLE ivr_destination (
     ivr_return enum ('yes','no') default 'no',
     ivr_id INT(10) not NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (ivr_id) REFERENCES ivr(id)
+    FOREIGN KEY (ivr_id) REFERENCES ivr(id) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS did_details;
-DROP TABLE IF EXISTS did;
 
+DROP TABLE IF EXISTS did;
 CREATE TABLE did (
     id int(11) NOT NULL AUTO_INCREMENT,
     did varchar(100) NOT NULL,
     organization_domain varchar(100),
-    organization_code varchar(100),
+    organization_code varchar(20),
     country varchar(100) NOT NULL,
     city varchar(100) NOT NULL,
     country_code varchar(100) NOT NULL,
     area_code varchar(100) NOT NULL,
     type enum ('digital','analog','voip') NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,   
+    FOREIGN KEY (organization_code) REFERENCES organization(code) ON DELETE CASCADE,
     UNIQUE KEY did (did)
 ) ENGINE = INNODB;
 
@@ -936,7 +962,7 @@ CREATE TABLE did_details (
     keyword varchar(50) NOT NULL,
     data varchar(50) NOT NULL,
     PRIMARY KEY (did,keyword,data),
-    FOREIGN KEY (did) REFERENCES did(did)
+    FOREIGN KEY (did) REFERENCES did(did) ON DELETE CASCADE  
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS inbound_route;
@@ -962,6 +988,7 @@ CREATE TABLE inbound_route (
     fax_destiny varchar(50),
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,   
     INDEX organization_domain (organization_domain),
     UNIQUE KEY route_in (did_number,cid_number,organization_domain)
 ) ENGINE = INNODB;
@@ -978,6 +1005,7 @@ CREATE TABLE outbound_route (
     seq int(11) NOT NULL,
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,   
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
@@ -990,7 +1018,7 @@ CREATE TABLE outbound_route_dialpattern (
     match_cid varchar(50) NOT NULL default '',
     seq int(11) NOT NULL,
     PRIMARY KEY (`outbound_route_id`,`prepend`,`prefix`,`match_pattern`,`seq`),
-    FOREIGN KEY (`outbound_route_id`) REFERENCES outbound_route(`id`)
+    FOREIGN KEY (`outbound_route_id`) REFERENCES outbound_route(`id`) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS outbound_route_trunkpriority;
@@ -999,8 +1027,8 @@ CREATE TABLE outbound_route_trunkpriority (
     trunk_id int(11) NOT NULL,
     seq int(11) NOT NULL,
     PRIMARY KEY  (`outbound_route_id`,`trunk_id`),
-    FOREIGN KEY (`outbound_route_id`) REFERENCES outbound_route(`id`),
-    FOREIGN KEY (`trunk_id`) REFERENCES trunk(`trunkid`)
+    FOREIGN KEY (`outbound_route_id`) REFERENCES outbound_route(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`trunk_id`) REFERENCES trunk(`trunkid`) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 DROP TABLE IF EXISTS ring_group;
@@ -1025,8 +1053,9 @@ CREATE TABLE ring_group (
     rg_extensions varchar(128),
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY  (id),
-    FOREIGN KEY (rg_moh) REFERENCES musiconhold(name),
-    UNIQUE INDEX rg_num_org (rg_number,organization_domain),
+    FOREIGN KEY (rg_moh) REFERENCES musiconhold(name) ON DELETE CASCADE,
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
+    INDEX rg_num_org (rg_number,organization_domain),
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
@@ -1036,6 +1065,7 @@ CREATE TABLE time_group (
     name varchar(50) NOT NULL,
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY  (id),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
@@ -1046,7 +1076,7 @@ CREATE TABLE tg_parameters (
     tg_day_w varchar(50), 
     tg_day_m varchar(50),
     tg_month varchar(50),
-    FOREIGN KEY (id_tg) REFERENCES time_group(id),
+    FOREIGN KEY (id_tg) REFERENCES time_group(id) ON DELETE CASCADE,
     PRIMARY KEY (id_tg,tg_hour,tg_day_w,tg_day_m,tg_month)
 ) ENGINE = INNODB;
 
@@ -1061,7 +1091,8 @@ CREATE TABLE time_conditions (
     destination_f varchar(50) NOT NULL,
     organization_domain varchar(100) NOT NULL,
     PRIMARY KEY  (id),
-    FOREIGN KEY (id_tg) REFERENCES time_group(id),
+    FOREIGN KEY (id_tg) REFERENCES time_group(id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
@@ -1086,5 +1117,6 @@ CREATE TABLE meetme (
     organization_domain varchar(100) NOT NULL,
     index confno (confno,starttime,endtime),
     PRIMARY KEY (bookid),
+    FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;

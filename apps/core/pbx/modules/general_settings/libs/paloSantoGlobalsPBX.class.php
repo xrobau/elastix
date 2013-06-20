@@ -48,7 +48,6 @@ class paloGlobalsPBX extends paloAsteriskDB{
 	protected $code;
 	protected $domain;
 	public $errMsg;
-	public $_DBSQLite;
 
 	function paloGlobalsPBX(&$pDB,$domain){
 		if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
@@ -101,7 +100,7 @@ class paloGlobalsPBX extends paloAsteriskDB{
     /**
         esta funcion solo es llamada al momento de crear una nueva organizacion dentro del sisitema
     */
-    function insertDBGlobals($country,&$_DBSQLite){
+    function insertDBGlobals($country){
         $arrCredentiasls=getUserCredentials();
         $userLevel1=$arrCredentiasls["userlevel"];
         if($userLevel1!="superadmin"){
@@ -109,17 +108,9 @@ class paloGlobalsPBX extends paloAsteriskDB{
             return false;
         }
         
-        $queryCode="SELECT code from organization where domain=?";
-        $code=$_DBSQLite->getFirstRowQuery($queryCode, false, array($this->domain));
-        if($code===false){
-            $this->errMsg = $this->_DBSQLite->errMsg;
+        if($this->validateGlobalsPBX()==false)
             return false;
-        }elseif(count($code)==0){
-            $this->errMsg = _tr("Organization doesn't exist");
-            return false;
-        }else
-            $this->code=$code[0];
-        
+                
         $query="INSERT INTO globals values (?,?,?)";
 
         $arrLngPBX=getLanguagePBX();
@@ -189,7 +180,6 @@ class paloGlobalsPBX extends paloAsteriskDB{
             return false;
             
         $query="UPDATE globals SET value=? WHERE variable=? and organization_domain=?";
-        
         if($arrProp===false){
             $this->errMsg=_tr("Invalid general properties. ");
             return false;
@@ -226,7 +216,7 @@ class paloGlobalsPBX extends paloAsteriskDB{
     }
     
     function getGlobalVar($variable){
-        $query="SELECT value from globals where organization_domain=? and variable=?";
+        $query="SELECT value FROM globals where organization_domain=? and variable=?";
         $result=$this->_DB->getFirstRowQuery($query,false,array($this->domain,$variable));
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;
@@ -236,7 +226,7 @@ class paloGlobalsPBX extends paloAsteriskDB{
     }
     
     function getGlobalVarSettings($variable){
-        $query="SELECT value from globals_settings where variable=?";
+        $query="SELECT value FROM globals_settings where variable=?";
         $result=$this->_DB->getFirstRowQuery($query,false,array($variable));
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;
@@ -250,7 +240,7 @@ class paloGlobalsPBX extends paloAsteriskDB{
         usadas dentro de la organizacion
     */
     function getAllGlobals(){
-        $query="SELECT variable,value from globals where organization_domain=?";
+        $query="SELECT variable,value FROM globals where organization_domain=?";
         
         $result=$this->_DB->fetchTable($query,true,array($this->domain));
         if($result===false){
@@ -266,7 +256,7 @@ class paloGlobalsPBX extends paloAsteriskDB{
         de cada organizacion
     */
     function getAllGlobalSettings(){
-        $query="SELECT variable,value from globals_settings";
+        $query="SELECT variable,value FROM globals_settings";
         $result=$this->_DB->fetchTable($query,true);
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;

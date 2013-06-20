@@ -67,57 +67,57 @@ function _moduleContent($smarty, $module_name)
     $accion = getAction();
     switch($accion){
         case "checkFaxStatus":
-            $contenidoModulo = checkFaxStatus("faxListStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang);
+            $contenidoModulo = checkFaxStatus("faxListStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $arrCredentials);
             break;
          case "checkFaxStatus2":
-            $contenidoModulo = faxListStatus2("faxListStatus2",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
+            $contenidoModulo = faxListStatus2("faxListStatus2",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB, $arrCredentials);
             break;
         case "checkSendStatus":
-            $contenidoModulo = faxSendStatus("faxSendStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
+            $contenidoModulo = faxSendStatus("faxSendStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB, $arrCredentials);
             break;
         case "stateFax":
-            $contenidoModulo = stateFax("stateFax",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB);
+            $contenidoModulo = stateFax("stateFax",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang, $pDB, $arrCredentials);
             break;
         case "setFaxMsg":
-            $contenidoModulo = setFaxMsg("setFaxMsg",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB);
+            $contenidoModulo = setFaxMsg("setFaxMsg",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang,$pDB, $arrCredentials);
             break;
         default:
-            $contenidoModulo = listFax($pDB, $smarty, $module_name, $local_templates_dir, $arrCredentials["userlevel"],$arrCredentials["userAccount"] ,$arrCredentials["id_organization"]);
+            $contenidoModulo = listFax($pDB, $smarty, $module_name, $local_templates_dir, $arrCredentials);
             break;
     }
     return $contenidoModulo;
 }
 
-function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1, $userAccount, $idOrganization)
-{
+function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $credentials){
     $limit = 30;
     $oFax  = new paloFax($pDB);
-	$pACL = new paloACL($pDB);
-	$pORGZ = new paloSantoOrganization($pDB);
+    $pACL = new paloACL($pDB);
+    $pORGZ = new paloSantoOrganization($pDB);
+    $idOrgFil=null;
+    
+    //parametros
+    $idOrgGet=getParameter("idOrganization");
+    if($userLevel1=="superadmin"){
+        if(isset($idOrgGet)){   
+            if($idOrgGet!="all")
+                $idOrgFil=$idOrgGet;
+        }
+    }else{
+        $idOrgFil=$credentials["id_organization"];
+    }
+    $url["menu"]=$module_name;
+    $url["idOrganization"]=$idOrgFil;
 
-	$idOrgFil=getParameter("idOrganization");
+    
+    if($credentials["userlevel"]!="other"){
+        $total = $oFax->getTotalFax($idOrgFil);
+        $idUser = null;
+    }else{
+        $total = 1;
+        $idUser=$pACL->getIdUser($userAccount);
+    }	
 
-	if($userLevel1=="superadmin"){
-		if(isset($idOrgFil)){
-			$url = "?menu=$module_name&idOrganization=$idOrgFil";
-			if($idOrgFil=="all")
-				$idOrgFil=null;
-		}else
-			$url = "?menu=$module_name&idOrganization=all";
-	}else{
-		$idOrgFil=$idOrganization;
-		$url = "?menu=$module_name&idOrganization=$idOrgFil";
-	}
-
-	if($userLevel1!="other"){
-		$total = $oFax->getTotalFax($idOrgFil);
-		$idUser = null;
-	}else{
-		$total = 1;
-		$idUser=$pACL->getIdUser($userAccount);
-	}	
-
-   $oGrid = new paloSantoGrid($smarty);
+    $oGrid = new paloSantoGrid($smarty);
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $oGrid->pagingShow(true);
@@ -125,7 +125,7 @@ function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1
     $oGrid->setTitle(_tr("Virtual Fax List"));
     $oGrid->setIcon("/modules/$module_name/images/fax_virtual_fax_list.png");
 
-     $arrColumns = array(
+        $arrColumns = array(
         _tr("Fax Extension"),
         _tr("Destination Email"),
         _tr("Caller ID Name"),
@@ -135,20 +135,20 @@ function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1
     $oGrid->setColumns($arrColumns);
     $offset = $oGrid->calculateOffset();
 
-	$arrFax = $oFax->getFaxList($idOrgFil,$idUser,$offset,$limit);
+    $arrFax = $oFax->getFaxList($idOrgFil,$idUser,$offset,$limit);
     $arrFaxStatus = $oFax->getFaxStatus();
 
     $arrData = array();
     foreach($arrFax as $fax) {
-			$arrTmp    = array();
-			$arrTmp[0] = $fax['extension'];
-			$arrTmp[1] = $fax['email'];
-			$arrTmp[2] = $fax['clid_name'] . "&nbsp;";
-			$arrTmp[3] = $fax['clid_number'] . "&nbsp;";
-			$arrTmp[4] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
+            $arrTmp    = array();
+            $arrTmp[0] = $fax['extension'];
+            $arrTmp[1] = $fax['email'];
+            $arrTmp[2] = $fax['clid_name'] . "&nbsp;";
+            $arrTmp[3] = $fax['clid_number'] . "&nbsp;";
+            $arrTmp[4] = $arrFaxStatus['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
             $arrTmp[5] = "<div class='load' id='".$fax['extension']."' style='text-align: center;'><strong>?</strong></div>";
 
-			$arrData[] = $arrTmp;
+            $arrData[] = $arrTmp;
     }
 
     $session = getSession();
@@ -156,22 +156,22 @@ function listFax(&$pDB, $smarty, $module_name, $local_templates_dir, $userLevel1
     putSession($session);
 
     if($userLevel1 == "superadmin"){
-		$arrOrgz=array("all"=>"all");
-		foreach(($pORGZ->getOrganization()) as $value){
-			if($value["id"]!=1)
-				$arrOrgz[$value["id"]]=$value["name"];
-		}
-		$arrFormElements = createFieldFilter($arrOrgz);
-		$oFilterForm = new paloForm($smarty, $arrFormElements);
-		if(isset($idOrgFil))
-			$_POST["idOrganization"]=$idOrgFil;
-		else{
-			$_POST["idOrganization"]="all";
-		}
-		$oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$_POST["idOrganization"]], $_POST, array("idOrganization" => "all"),true);
-		$htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
-		$oGrid->showFilter(trim($htmlFilter));
-	}
+        $arrOrgz=array("all"=>"all");
+        foreach(($pORGZ->getOrganization()) as $value){
+            if($value["id"]!=1)
+                $arrOrgz[$value["id"]]=$value["name"];
+        }
+        $arrFormElements = createFieldFilter($arrOrgz);
+        $oFilterForm = new paloForm($smarty, $arrFormElements);
+        if(isset($idOrgFil))
+            $_POST["idOrganization"]=$idOrgFil;
+        else{
+            $_POST["idOrganization"]="all";
+        }
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$_POST["idOrganization"]], $_POST, array("idOrganization" => "all"),true);
+        $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+        $oGrid->showFilter(trim($htmlFilter));
+    }
 
     $oGrid->setData($arrData);
     return $oGrid->fetchGrid();

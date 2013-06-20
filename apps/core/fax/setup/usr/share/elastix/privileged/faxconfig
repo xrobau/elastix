@@ -30,6 +30,10 @@
   $Id: faxconfig.php,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
 require_once 'Console/Getopt.php';
+ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+include_once "libs/misc.lib.php";
+include_once "configs/default.conf.php";
+global $arrConf;
 
 define('CONFIGDIR_IAXMODEM', '/etc/iaxmodem');
 define('CONFIGDIR_HYLAFAX', '/var/spool/hylafax/etc');
@@ -85,21 +89,9 @@ switch($argv[1]){
 		break;
 	case 'faxmaster':
 		break;
-	case 'createDirFax':
-		if(isset($argv[2])){
-			exit(createDirFax($argv[2]) ? 0 : 1);
-		}else
-			error_exit("Missing arguments",1);
-		break;
 	case 'restartService':
         exit(restartService() ? 0 : 1);
 		break;
-    case 'recivedFaxsDB':
-        if(isset($argv[2]) && isset($argv[3]) && isset($argv[4]) && isset($argv[5]) && isset($argv[6]) && isset($argv[7])  && isset($argv[8])  && isset($argv[9])){
-            exit(recivedFaxsDB($argv[2],$argv[3],$argv[4],$argv[5],$argv[6],$argv[7],$argv[8],$argv[9]) ? 0 : 1);
-        }else
-            error_exit("Missing arguments",1);
-        break;
 	default:
 		error_exit("No action specified \n");
 		break;
@@ -132,6 +124,7 @@ function error_exit($sMsg, $errorcode = 1)
  */
 function newFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,$secret,$email,$clid_name)
 {
+    global $arrConf;
 	$bExito = TRUE;
 
 	$faxData=array();
@@ -159,7 +152,8 @@ function newFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,$
     $arrDev=array();
     // get devId of the current faxes
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         // Read all the fax configuration information
         $sth = $conn->query('SELECT value FROM user_properties WHERE property = "dev_id"');
         while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
@@ -216,6 +210,7 @@ function restartService(){
 }
 
 function deleteFax($dev_id){
+    global $arrConf;
 	//el dev_id debe ser de 4 caracteres, y solo pueden se numeros y letras
 	if(!preg_match('/[[:alnum:]]{3}/',$dev_id)){
 		error_exit("Device Id not valid");
@@ -230,7 +225,8 @@ function deleteFax($dev_id){
     $arrDev=array();
     // get devId of the current faxes
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         // Read all the fax configuration information
         $sth = $conn->query('SELECT value FROM user_properties WHERE property = "dev_id"');
         while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
@@ -263,6 +259,7 @@ function deleteFax($dev_id){
 // /var/spool/hylafax/etc/FaxDispatch y /etc/inittab 
 // ademas ejecutar la funcion restartService()
 function deleteFaxsByOrg($id_org){
+    global $arrConf;
     $delFaxs=$faxs=array();
     
     if(!preg_match('/^[0-9]+$/',$id_org)){
@@ -270,7 +267,8 @@ function deleteFaxsByOrg($id_org){
     }
     
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         // Read all faxes asociated with the organization
         $query="SELECT value, user.id_organization as idOrg FROM user_properties join (SELECT u.id,g.id_organization FROM acl_user u inner join acl_group g on u.id_group = g.id) as user on id_user=user.id WHERE property='dev_id'";
         $sth = $conn->query($query);
@@ -344,6 +342,7 @@ function editFax($dev_id,$port,$country_code,$area_code,$clid_number,$extension,
 // esta funcion es utilizada para escribir los archivos
 // /etc/init/elastix_fax.config y /var/spool/hylafax/etc/FaxDispatch
 function rewriteFileFax(){
+    global $arrConf;
     $arrDev=array();
     
     //fDispatch contiene el contenido del archivo /var/spool/hylafax/etc/FaxDispatch
@@ -352,7 +351,8 @@ function rewriteFileFax(){
     $fDispatch[] = "case \"\$DEVICE\" in\n";
     
     try {
-        $conn = new PDO('sqlite:/var/www/db/elastix.db');
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         // Read all the fax configuration information
         $sth = $conn->query('SELECT up.value,u.username FROM user_properties up JOIN acl_user u ON up.id_user=u.id WHERE up.property = "dev_id"');       
         while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
@@ -596,10 +596,10 @@ function action_refreshFaxMaster($opt)
 {
     // Read current value of faxmaster
     try {
-        $conn = new PDO('sqlite:/var/www/db/settings.db');
-
+        $arrDBConn=parseDSN($arrConf["elastix_dsn"]["elastix"]);
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         // Read all the fax configuration information
-        $sth = $conn->query('SELECT value FROM settings WHERE key = "fax_master"');
+        $sth = $conn->query('SELECT value FROM settings WHERE property = "fax_master"');
         $sFaxMaster = $sth->fetchColumn();
     } catch (PDOException $e) {
         fprintf(STDERR, "ERR: failed to query fax master - %s\n", $e->getMessage());
@@ -621,83 +621,38 @@ function action_refreshFaxMaster($opt)
     return ($retval == 0);
 }
 
-function createDirFax($domain)
-{
-	if (!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)) {
-		error_exit("ERR: invalid domain name for fax!\n");
-	}
-
-	$path="/var/www/faxes";
-	$exito=true;
-	$arrDir=array("$path/$domain","$path/$domain/sent","$path/$domain/recvd");
-
-	umask(0);
-
-	if(!is_dir($path)){
-		if(mkdir($path)){
-			chown($path, 'asterisk');
-			chgrp($path, 'asterisk');
-			chmod($path, 0755);
-		}else{
-			fprintf(STDERR, "ERR: failed to create fax directory");
-			return false;
-		}
-	}
-
-	if(is_dir("$path/$domain")){
-		$date=date("YMd_His");
-		rename("$path/$domain","$path/$domain"."_".$date);
-	}
-
-	foreach($arrDir as $dir){
-		if(mkdir($dir)){
-			chown($dir, 'asterisk');
-			chgrp($dir, 'uucp');
-			chmod($dir, 0775);
-		}else{
-			fprintf(STDERR, "ERR: failed to create fax directory - %s\n", $output[0]);
-			$exito=false;
-			break;
-		}
-	}
-
-	if(!$exito){
-		if(is_dir("$path/$domain"))
-			rmdir("$path/$domain");
-		if(is_dir("$path/$domain/sent"))
-			rmdir("$path/$domain/sent");
-		if(is_dir("$path/$domain/recvd"))
-			rmdir("$path/$domain/recvd");
-		return false;
-	}else{
-		return true;
-	}
-}
-
-function recivedFaxsDB($tiff_file,$modemdev,$commID,$company_number,$tipo,$faxpath,$id_user,$company_name){
-    if($id_user != -1){
-        try{
-            $conn = new PDO('sqlite:/var/www/db/elastix.db');
-            $sql = <<<SQL_INSERT_FAXDOCS
-INSERT INTO fax_docs
-	(pdf_file, modemdev, commID, errormsg, company_name, company_fax, id_user,
-	date,type,faxpath)
-VALUES (?, ?, ?, ?, ?, ?, ?, DATETIME('now', 'localtime'), ?, ?)
-SQL_INSERT_FAXDOCS;
-            $sth = $conn->prepare($sql);
-            $result = $sth->execute(array($tiff_file, $modemdev, $commID, ' ',
-            	$company_name, $company_number, $id_user, $tipo, $faxpath));
-            if(!$result){
-                fprintf(STDERR, "ERR: Error inserting faxdocs - %s\n", print_r($sth->errorInfo(),1));
-                return false;
-            }
-        }catch(PDOException $e){
-            fprintf(STDERR, "ERR: PROBLEMA DE CONEXION - %s\n", $e->getMessage());
-            return false;
-        }
-        return true;
+function parseDSN($dsn){
+    //$dsn => databasemotor://username:password@hostspec/database
+    //mysql => mysql://username:password@hostspec/database
+    //squlite => sqlite:///database
+    $database=$username=$password=$hostspec=$dbname=false;
+    //get the technology
+    if(($pos = strpos($dsn, '://')) !== false) {
+        $database = substr($dsn, 0, $pos);
+        $dsn = substr($dsn, $pos + 3);
+    } else {
+        return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
     }
-    return false;
+    //username y password en caso de haberlos
+    if (($at = strrpos($dsn,'@')) !== false) {
+        $str = substr($dsn, 0, $at);
+        $dsn = substr($dsn, $at + 1);
+        if (($pos = strpos($str, ':')) !== false) {
+            $username = rawurldecode(substr($str, 0, $pos));
+            $password = rawurldecode(substr($str, $pos + 1));
+        } else {
+            $username = rawurldecode($str);
+        }
+    }
+    //hostspec 
+    if (strpos($dsn, '/') !== false) {
+        list($hostspec, $dbname) = explode('/', $dsn, 2);
+    }   
+    if($database=="squlite" || $database=="squlite3"){
+        $dsn="squlite:$dbname";
+    }elseif($database=="mysql"){
+        $dsn="$database:dbname=$dbname;host=$hostspec";
+    }
+    return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
 }
-
 ?>

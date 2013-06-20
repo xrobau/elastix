@@ -1,7 +1,7 @@
 [elastix]
 ignore_backup = no
-engine = sqlite3
-path = /var/www/db
+engine = mysql
+path = /var/lib/mysql
 deletable = yes
 
 [register]

@@ -31,22 +31,21 @@ if(file_exists("/etc/elastix.conf")){
     $rewrite_file = false;
     $file = file("/etc/elastix.conf");
     foreach($file as $line){
-	if(preg_match("/^\s*amiadminpwd\s*=\s*(.+)$/",rtrim($line),$matches)){
-	    echo "The key amiadminpwd already exist in /etc/elastix.conf... Nothing to do\n";
-	    $secret = $matches[1];
-	    $dosearch = false;
-	}
-	if(!preg_match("/\n$/",$line)){
+        if(preg_match("/^\s*amiadminpwd\s*=\s*(.+)$/",rtrim($line),$matches)){
+            echo "The key amiadminpwd already exist in /etc/elastix.conf... Nothing to do\n";
+            $secret = $matches[1];
+            $dosearch = false;
+        }
+        if(!preg_match("/\n$/",$line)){
             $rewrite_file = true;
             $content[] = $line."\n";
-        }
-        else
+        }else
             $content[] = $line;
     }
     if($rewrite_file){
         file_put_contents("/etc/elastix.conf",implode("",$content));
-	chown("/etc/elastix.conf","asterisk");
-	chgrp("/etc/elastix.conf","asterisk");
+        chown("/etc/elastix.conf","asterisk");
+        chgrp("/etc/elastix.conf","asterisk");
     }
 }
 
@@ -82,7 +81,6 @@ TEMP;
     chown("/etc/elastix.conf","asterisk");
     chgrp("/etc/elastix.conf","asterisk");
 }
-checkAmportalFile($secret,$doReload);
 if($doReload)
   exit(1);
 else
@@ -92,51 +90,51 @@ function search_ami_admin_pwd($ami_file,&$secret,&$files_searched,&$doReload)
 {
     //Esto evita que el script entre en un lazo infinito debido a inclusiones cíclicas
     if(in_array($ami_file,$files_searched))
-	return false;
+    return false;
     $files_searched[] = $ami_file;
     $base_path = "/etc/asterisk/";
     $path_file = $base_path.$ami_file;
     if(!file_exists($path_file))
-	return false;
+    return false;
     $file = file($path_file);
     $admin_found = false;
     $secret_found = false;
     $admin_at_least_once_found = false;
     $admin_line = 0;
     foreach($file as $number => $line){
-	if($admin_found && preg_match("/^\s*secret\s*=\s*(.+)$/",rtrim($line),$matches)){
-	    $secret = explode(";",$matches[1]);
-	    $secret = trim($secret[0]);
-	    $secret_found = true;
-	}
-	elseif(preg_match("/^\s*\[admin\]\s*(;.*)?$/",rtrim($line))){
-	    $admin_found = true;
-	    $secret_found = false;
-	    $admin_at_least_once_found = true;
-	    $admin_line = $number;
-	}
-	elseif(preg_match("/^\s*\[\w+\]\s*(;.*)?$/",rtrim($line))){
-	    if($admin_found && !$secret_found){
-		echo "Secret not found for user admin... Adding the default key \"elastix456\" to admin\n";
-		writeSecret("elastix456",$admin_line,$path_file);
-		$secret = "elastix456";
-		$doRelaod = true;
-	    }
-	    $admin_found = false;
-	    $secret_found = false;
-	}
-	elseif(preg_match("/^\s*#include\s+(.+)$/",rtrim($line),$matches)){
-	    $include = explode(";",$matches[1]);
-	    $include = trim($include[0]);
-	    if(search_ami_admin_pwd($include,$secret,$files_searched,$doReload))
-		$admin_at_least_once_found = true;
-	}
+    if($admin_found && preg_match("/^\s*secret\s*=\s*(.+)$/",rtrim($line),$matches)){
+        $secret = explode(";",$matches[1]);
+        $secret = trim($secret[0]);
+        $secret_found = true;
+    }
+    elseif(preg_match("/^\s*\[admin\]\s*(;.*)?$/",rtrim($line))){
+        $admin_found = true;
+        $secret_found = false;
+        $admin_at_least_once_found = true;
+        $admin_line = $number;
+    }
+    elseif(preg_match("/^\s*\[\w+\]\s*(;.*)?$/",rtrim($line))){
+        if($admin_found && !$secret_found){
+        echo "Secret not found for user admin... Adding the default key \"elastix456\" to admin\n";
+        writeSecret("elastix456",$admin_line,$path_file);
+        $secret = "elastix456";
+        $doRelaod = true;
+        }
+        $admin_found = false;
+        $secret_found = false;
+    }
+    elseif(preg_match("/^\s*#include\s+(.+)$/",rtrim($line),$matches)){
+        $include = explode(";",$matches[1]);
+        $include = trim($include[0]);
+        if(search_ami_admin_pwd($include,$secret,$files_searched,$doReload))
+        $admin_at_least_once_found = true;
+    }
     }
     if($admin_found && !$secret_found){
-	echo "Secret not found for user admin... Adding the default key \"elastix456\" to admin\n";
-	writeSecret("elastix456",$admin_line,$path_file);
-	$secret = "elastix456";
-	$doReload = true;
+    echo "Secret not found for user admin... Adding the default key \"elastix456\" to admin\n";
+    writeSecret("elastix456",$admin_line,$path_file);
+    $secret = "elastix456";
+    $doReload = true;
     }
     return $admin_at_least_once_found;
 }
@@ -144,58 +142,15 @@ function search_ami_admin_pwd($ami_file,&$secret,&$files_searched,&$doReload)
 function writeSecret($secret,$line_number,$path_file)
 {
     if(file_exists($path_file)){
-	$file = file($path_file);
-	$arrText = array();
-	foreach($file as $number => $line){
-	    $arrText[] = $line;
-	    if($number == $line_number)
-		$arrText[] = "secret = $secret\n";
-	}
-	file_put_contents($path_file,implode("",$arrText));
+    $file = file($path_file);
+    $arrText = array();
+    foreach($file as $number => $line){
+        $arrText[] = $line;
+        if($number == $line_number)
+        $arrText[] = "secret = $secret\n";
     }
-}
-
-//Asumo que el archivo /etc/amportal.conf existe, caso contrario no se hace nada
-function checkAmportalFile($ami_secret,&$doReload)
-{
-    include_once "/var/www/html/libs/paloSantoConfig.class.php";
-    if(!file_exists("/etc/amportal.conf")){
-	echo "File /etc/amportal.conf does not exist...Nothing to do\n";
-	return false;
+    file_put_contents($path_file,implode("",$arrText));
     }
-    $conf_file = new paloConfig("/etc","amportal.conf"," = ","[[:space:]]*=[[:space:]]*");
-    $content = $conf_file->leer_configuracion();
-    $amportal_ami_user = $conf_file->privado_get_valor($content,"AMPMGRUSER");
-    if($amportal_ami_user != "admin"){
-	$arr_replace = array("AMPMGRUSER" => "admin");
-	$conf_file->escribir_configuracion($arr_replace);
-	$doReload = true;
-    }
-    $amportal_ami_secret = $conf_file->privado_get_valor($content,"AMPMGRPASS");
-    if($amportal_ami_secret != $ami_secret){
-	$arr_replace = array("AMPMGRPASS" => $ami_secret);
-	$conf_file->escribir_configuracion($arr_replace);
-	$doReload = true;
-    }
-    $db_pass = $conf_file->privado_get_valor($content,"AMPDBPASS");
-    $ari_user = $conf_file->privado_get_valor($content,"ARI_ADMIN_USERNAME");
-    if($ari_user == ""){
-	$arr_replace = array("ARI_ADMIN_USERNAME" => "admin");
-	$conf_file->escribir_configuracion($arr_replace);
-	$doReload = true;
-    }
-    $ari_password = $conf_file->privado_get_valor($content,"ARI_ADMIN_PASSWORD");
-    if($ari_password == "" || $ari_password == "ari_password"){
-	$arr_replace = array("ARI_ADMIN_PASSWORD" => $db_pass);
-	$conf_file->escribir_configuracion($arr_replace);
-	$doReload = true;
-    }
-    $amportal_file = file("/etc/amportal.conf");
-    $content = array();
-    foreach($amportal_file as $line){
-    $content[] = preg_replace("/^(\w+)\s*=\s*(.+)/","$1=$2",$line);
-    }
-    file_put_contents("/etc/amportal.conf",implode("",$content));
 }
 
 ?>

@@ -46,7 +46,7 @@ require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoMenu.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
 
-$pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/elastix.db");
+$pDBACL = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
 if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
 

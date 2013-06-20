@@ -97,4 +97,3 @@ asterisk ALL = NOPASSWD: /sbin/service
 asterisk ALL = NOPASSWD: /sbin/chkconfig
 
 asterisk ALL = NOPASSWD: /usr/sbin/elastix-helper
-uucp     ALL = NOPASSWD: /usr/sbin/elastix-helper

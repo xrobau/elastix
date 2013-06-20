@@ -220,26 +220,17 @@ class orgActions extends orgREST{
         }
         
         $pOrg = new paloSantoOrganization($arrConf['elastix_dsn']["elastix"]);
-        $idOrg=$pOrg->createOrganization($arrParam["name"],$arrParam["domain"],$arrParam["country"],$arrParam["city"],$arrParam["address"],$arrParam["country_code"],$arrParam["area_code"],$arrParam["quota"],$arrParam["email_contact"],$arrParam["numUser"],$arrParam["numExtensions"],$arrParam["numQueues"],$error);
+        $idOrg=$pOrg->createOrganization($arrParam["name"],$arrParam["domain"],$arrParam["country"],$arrParam["city"],$arrParam["address"],$arrParam["country_code"],$arrParam["area_code"],$arrParam["quota"],$arrParam["email_contact"],$arrParam["numUser"],$arrParam["numExtensions"],$arrParam["numQueues"],$arrParam["org_user_pswd"]);
         if($idOrg===false){
             header("HTTP/1.1 500 Internal Server Error");
             $jsonObject->set_status("ERROR");
             $jsonObject->set_message(array("organization"=>false,"user"=>false));
-            $jsonObject->set_error($error);
+            $jsonObject->set_error($pOrg->errMsg);
         }else{
-            //procedemos a crear al usuario administrador de la entidad
-            $exito=$pOrg->createAdminUserOrg($arrParam["domain"],$arrParam["email_contact"],$arrParam["org_user_pswd"],$arrParam["country_code"],$arrParam["area_code"],$arrParam["quota"],$arrParam["send_email"]);
-            if($exito==false){
-                header('HTTP/1.1 203 Created');
-                $jsonObject->set_status("ERROR");
-                $jsonObject->set_message(array("organization"=>true,"user"=>false));
-                $jsonObject->set_error(_tr("Error creating admin user to new organization").$pOrg->errMsg);
-            }else{
-                header('HTTP/1.1 201 Created');
-                Header('Location: /rest.php/organization/organization/'.$idOrg);
-                $jsonObject->set_status("OK");
-                $jsonObject->set_message(array("organization"=>true,"user"=>true));
-            }
+            header('HTTP/1.1 201 Created');
+            Header('Location: /rest.php/organization/organization/'.$idOrg);
+            $jsonObject->set_status("OK");
+            $jsonObject->set_message(array("organization"=>true,"user"=>true));
         }
         return $jsonObject->createJSON();
     }

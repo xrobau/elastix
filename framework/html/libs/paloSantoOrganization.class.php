@@ -66,9 +66,7 @@ class paloSantoOrganization{
             $where    = "where $filter_field like ?";
             $arrParam = array("$filter_value%");
         }
-
-        $query   = "SELECT COUNT(id) FROM organization $where;";
-
+        $query="SELECT COUNT(id) FROM organization $where;";
         $result=$this->_DB->getFirstRowQuery($query, false, $arrParam);
 
         if($result==FALSE){
@@ -131,12 +129,12 @@ class paloSantoOrganization{
 
     function getUsersByOrganization($id)
     {
-		if (!preg_match('/^[[:digit:]]+$/', "$id")) {
+        if (!preg_match('/^[[:digit:]]+$/', "$id")) {
             $this->errMsg = "Organization ID is not numeric";
-			return false;
+            return false;
         }
 
-        $query   = "SELECT u.id, u.username, u.name, u.md5_password, u.id_group, u.extension, u.fax_extension, u.picture FROM acl_user u inner join acl_group g on u.id_group = g.id where g.id_organization=?";
+        $query = "SELECT u.id, u.username, u.name, u.md5_password, u.id_group, u.extension, u.fax_extension, u.picture FROM acl_user u inner join acl_group g on u.id_group = g.id where g.id_organization=?";
         $result=$this->_DB->fetchTable($query, true, array($id));
 
         if($result==FALSE){
@@ -196,7 +194,7 @@ class paloSantoOrganization{
     //recibe como parametros el id de la organizacion y el nombre de la propiedad que se desea obtener
     function getOrganizationProp($id,$key)
     {
-        $query = "SELECT value FROM organization_properties WHERE id_organization=? and key=?;";
+        $query = "SELECT value FROM organization_properties WHERE id_organization=? and property=?";
         $result=$this->_DB->getFirstRowQuery($query, false, array($id,$key));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
@@ -207,7 +205,7 @@ class paloSantoOrganization{
 
 	function getOrganizationPropByCategory($id,$category)
     {
-        $query = "SELECT key,value FROM organization_properties WHERE id_organization=? and category=?;";
+        $query = "SELECT property,value FROM organization_properties WHERE id_organization=? and category=?";
         $result=$this->_DB->fetchTable($query, true, array($id,$category));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
@@ -226,19 +224,20 @@ class paloSantoOrganization{
       *  @return boolean verdadera si se ejecuta con existo la accion, falso caso contrario
     */
     function setOrganizationProp($id,$key,$value,$category=""){
-        $bQuery = "select 1 from organization_properties where id_organization=? and key=?";
-        $bResult=$this->_DB->getFirstRowQuery($bQuery,false, array($id,$key));
+        $bQuery = "select 1 FROM organization_properties WHERE id_organization=? AND property=?";
+        $bResult=$this->_DB->getFirstRowQuery($bQuery,false,array($id,$key));
         if($bResult===false){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }else{
             if(count($bResult)==0){
-                $query="INSERT INTO organization_properties values (?,?,?,?)";
+                $query="INSERT INTO organization_properties VALUES(?,?,?,?)";
                 $arrParams=array($id,$key,$value,$category);
             }else{
                 if($bResult[0]=="1"){
-                $query="UPDATE organization_properties SET value=? where id_organization=? and key=?";
-                $arrParams=array($value,$id,$key);}
+                    $query="UPDATE organization_properties SET value=? where id_organization=? and property=?";
+                    $arrParams=array($value,$id,$key);
+                }
             }
             $result=$this->_DB->genQuery($query, $arrParams);
             if($result==false){
@@ -249,27 +248,27 @@ class paloSantoOrganization{
         }
     }
 
-	//esta funcion se usa para setear las propiedades de una organizacion que pertenecen a la categoria system
-	//al momento de crear una nueva organizacion
-	//se usa como valor de cada una de la propiedades los valores respectivos que tiene seteados la organizacion
-	//principal
-	function setOrganizationPropSys($idOrganization){
-		$Exito=false;
-		if (is_null($idOrganization) || !preg_match('/^[[:digit:]]+$/', "$idOrganization")) {
+    //esta funcion se usa para setear las propiedades de una organizacion que pertenecen a la categoria system
+    //al momento de crear una nueva organizacion
+    //se usa como valor de cada una de la propiedades los valores respectivos que tiene seteados la organizacion
+    //principal
+    function setOrganizationPropSys($idOrganization){
+        $Exito=false;
+        if (is_null($idOrganization) || !preg_match('/^[[:digit:]]+$/', "$idOrganization")) {
             $this->errMsg = "Invalid ID Organization";
-		}
-		$result=$this->getOrganizationPropByCategory(1,"system");
-		if($result!=false){
-			foreach($result as $tmp){
-				$Exito=$this->setOrganizationProp($idOrganization,$tmp["key"],$tmp["value"],"system");
-				if(!$Exito){
-					$this->errMsg = $this->_DB->errMsg;
-					return false;
-				}
-			}
-		}
-		return $Exito;
-	}
+        }
+        $result=$this->getOrganizationPropByCategory(1,"system");
+        if($result!=false){
+            foreach($result as $tmp){
+                $Exito=$this->setOrganizationProp($idOrganization,$tmp["property"],$tmp["value"],"system");
+                if(!$Exito){
+                    $this->errMsg = $this->_DB->errMsg;
+                    return false;
+                }
+            }
+        }
+        return $Exito;
+    }
 
     private function getNewPBXCode($domain)
     {
@@ -290,7 +289,7 @@ class paloSantoOrganization{
             //la primera vez esto es falso. Si llega a ser verdad 
             //la variable code estaria seteada y tendria 15 caracteres
             if($existCode){
-                $code=substr($code, 0, 10);
+                $code=substr($code, 1, 10);
                 $len=10;
             }else{
                 $code=$inicode;
@@ -385,7 +384,7 @@ class paloSantoOrganization{
         }
             
         //compatible con DATETIME MySQL format
-        $date=date("Y-m-d H:i:s");
+        $date=date("Y-m-d H:i:s");
         
         if($action=="create"){
             $selq="SELECT code,domain from organization where idcode=?";
@@ -420,7 +419,7 @@ class paloSantoOrganization{
             $this->errMsg=_tr("Invalid event");
             return false;
         }
-        $date=date("Y-m-d H:i:s");
+        $date=date("Y-m-d H:i:s");
         $query="INSERT INTO org_history_events (event,org_idcode,event_date) values(?,?,?)";
         $param=array($event,$idcode,$date);
         $result=$this->_DB->genQuery($query,$param);
@@ -508,8 +507,7 @@ class paloSantoOrganization{
             return false;
         }
         
-        $tempfile = tempnam('/tmp', 'orgToChange');
-        $file = basename($tempfile);
+        $file=tempnam("/tmp","orgToChange");
         
         //escribimos un archivo que en contiene el id de las organizaciones que deseamos 
         //cambiar de estado, un id por linea
@@ -525,8 +523,8 @@ class paloSantoOrganization{
             return false;
         }
         
-        if(file_put_contents($tempfile,$validOrg)===false){
-            $this->errMsg=_tr("Couldn't be written file /tmp/$file");
+        if(file_put_contents("$file",$validOrg)===false){
+            $this->errMsg=_tr("Couldn't be written file $file");
             return false;
         }
         
@@ -542,63 +540,63 @@ class paloSantoOrganization{
     }
 
 
-	private function assignResource($idOrganization){
-		$rInsert=true;
-		$recurso=array();
-		$arrResource=array("usermgr","organization","userlist","grouplist","group_permission","preferences","language","themes_system","myex_config","webmail","cdrreport","billing","billing_rates","billing_report","dest_distribution","billing_setup","graphic_report","summary_by_extension","missed_calls","openfire","downloads","sphones","faxutils","instantmessaging","calendar","address_book","sec_accessaudit","sec_weak_keys","email_accounts","email_list","email_stats","vacations","virtual_fax","faxlist","sendfax","faxviewer","sysdash","dashboard","applet_admin","backup_restore","currency","pbxadmin","control_panel","voicemail","monitoring","endpoint_configurator","conference","extensions_batch","tools","asterisk_cli","file_editor","text_to_wav",'extensions','queues','trunks','ivr','features_code','general_settings','inbound_route','outbound_route');
-		//1) Asignamos los recursos a la organizacion
-		//   estos recursos son sacados en base a los recursos por default a los que tiene acceso
+    private function assignResource($idOrganization){
+        $rInsert=true;
+        $recurso=array();
+        $arrResource=array("usermgr","organization","userlist","grouplist","group_permission","preferences","language","themes_system","cdrreport","billing","billing_rates","billing_report","dest_distribution","billing_setup","graphic_report","summary_by_extension","missed_calls","calendar","address_book","sec_accessaudit","sec_weak_keys","email_accounts","email_list","email_stats","vacations","virtual_fax","faxlist","sendfax","faxviewer","currency","pbxadmin","control_panel","voicemail","monitoring","endpoint_configurator","conference","extensions_batch","tools","text_to_wav",'extensions','queues','trunks','ivr','features_code','general_settings','inbound_route','outbound_route');
+        //1) Asignamos los recursos a la organizacion
+        //   estos recursos son sacados en base a los recursos por default a los que tiene acceso
         //   el adminitrador de cada entidad
-		//   En caso de que no exista el group 1, que es el grupo administrador por default se asignan los recursos
-		//   que existan en la tabla acl_resource y se encuentre dentro del arreglo $arrResource
-		$query1="select o.id_resource from organization_resource o join group_resource g on o.id=g.id_org_resource where id_group=1";
-		$recursos=$this->_DB->fetchTable($query1, true);
-		
-		if($recursos===false){
-			//ocurrio un error con la conexion
-			$this->errMsg = "An error has occurred when were assigned resources to the organization. ".$this->_DB->errMsg;
-			return false;
-		}elseif(count($recursos)>0){
-			foreach($recursos as $value){
-				$recurso[]=$value["id_resource"];
-			}
-		}else{
-			$recurso=$arrResource;
-		}
+        //   En caso de que no exista el group 2, que es el grupo administrador por default se asignan los recursos
+        //   que existan en la tabla acl_resource y se encuentre dentro del arreglo $arrResource
+        $query1="select o.id_resource from organization_resource o join group_resource g on o.id=g.id_org_resource where id_group=2";
+        $recursos=$this->_DB->fetchTable($query1, true);
+        
+        if($recursos===false){
+            //ocurrio un error con la conexion
+            $this->errMsg = "An error has occurred when were assigned resources to the organization. ".$this->_DB->errMsg;
+            return false;
+        }elseif(count($recursos)>0){
+            foreach($recursos as $value){
+                $recurso[]=$value["id_resource"];
+            }
+        }else{
+            $recurso=$arrResource;
+        }
 
-		$tmp=0;
-		//con los recursos por default verificamos que estos existan en la tabla acl_resource
-		//y de ahi le asignamos los recursos a la organizazion
-		$query2="SELECT id FROM acl_resource WHERE Type!=''";
-		$result=$this->_DB->fetchTable($query2, true);
-		foreach($result as $value){
-			$result2[]=$value["id"];
-		}
-		if($result===false){
-			$this->errMsg = _tr("An error has occurred when trying get resources of the system. ").$this->_DB->errMsg;
-			return false;
-		}else{
-			$qInsert="INSERT INTO organization_resource (id_organization, id_resource) VALUES(?,?)";
-			foreach($recurso as $value){
-				if(in_array($value,$result2)){
-					//creamos una entrada en la tabla organization_resource para esa recurso
-					$rInsert=$this->_DB->genQuery($qInsert,array($idOrganization,$value));
-					if($rInsert==false){
-						$this->errMsg = _tr("An error has occurred when trying get resources of the system. ").$this->_DB->errMsg;
-						return false;
-					}
-				}
-			}
-		}
-			
-		if($rInsert){
-			if($this->createAllGroupOrganization($idOrganization)){
-				return true;
-			}else
-				return false;
-		}
-		
-	}
+        $tmp=0;
+        //con los recursos por default verificamos que estos existan en la tabla acl_resource
+        //y de ahi le asignamos los recursos a la organizazion
+        $query2="SELECT id FROM acl_resource WHERE Type!=''";
+        $result=$this->_DB->fetchTable($query2, true);
+        foreach($result as $value){
+            $result2[]=$value["id"];
+        }
+        if($result===false){
+            $this->errMsg = _tr("An error has occurred when trying get resources of the system. ").$this->_DB->errMsg;
+            return false;
+        }else{
+            $qInsert="INSERT INTO organization_resource (id_organization, id_resource) VALUES(?,?)";
+            foreach($recurso as $value){
+                if(in_array($value,$result2)){
+                    //creamos una entrada en la tabla organization_resource para esa recurso
+                    $rInsert=$this->_DB->genQuery($qInsert,array($idOrganization,$value));
+                    if($rInsert==false){
+                        $this->errMsg = _tr("An error has occurred when trying get resources of the system. ").$this->_DB->errMsg;
+                        return false;
+                    }
+                }
+            }
+        }
+            
+        if($rInsert){
+            if($this->createAllGroupOrganization($idOrganization)){
+                return true;
+            }else
+                return false;
+        }
+        
+    }
 
     private function createAllGroupOrganization($idOrganization){
         $gExito = false;
@@ -619,21 +617,21 @@ class paloSantoOrganization{
 		// se asume que la organizacion por default , la 1 tiene los tres grupos de elastix creadsos
         // los modulos a los que estos grupos tinen acceso se toman como refencia para asignar los recursos
 		// a los grupos recien creados
-		//          id_grupo 1=administrator
-		//          id_group 2=operator
-		//          id_group 3=extension
+		//          id_grupo 2=administrator
+		//          id_group 3=operator
+		//          id_group 4=extension
 		$query = "Insert into group_resource (id_org_resource,id_group) select id, ? from organization_resource where id_organization=? and id_resource in (select o.id_resource from organization_resource o join group_resource g on o.id=g.id_org_resource where id_group=?)";
 		if($gExito){
 			foreach($grpOrga as $value){
 				switch($value[1]){
 					case "administrator":
-						$id_group=1;
-						break;
-					case "operator":
 						$id_group=2;
 						break;
-					default:
+					case "operator":
 						$id_group=3;
+						break;
+					default:
+						$id_group=4;
 					}
 				$result=$this->_DB->genQuery($query,array($value[0],$idOrganization,$id_group));
                 if($result==false){
@@ -646,9 +644,10 @@ class paloSantoOrganization{
     }
     
 
-    function createOrganization($name,$domain,$country,$city,$address,$country_code,$area_code, $quota, $email_contact,$max_num_user,$max_num_exten,$max_num_queues,&$error)
+    function createOrganization($name,$domain,$country,$city,$address,$country_code,$area_code, $quota, $email_contact,$max_num_user,$max_num_exten,$max_num_queues,$admin_password)
     {
         global $arrConf;
+        $pEmail=new paloEmail($this->_DB);
         $flag=false;
         $error_domain="";
         $address=isset($address)? $address : "";
@@ -697,41 +696,45 @@ class paloSantoOrganization{
                     //se asignan los recursos a los grupos
                     $gExito=$this->assignResource($resultOrgz['id']);
                     if($gExito==false){
-                        $error = _tr("Error trying create organization groups.");
+                        $this->errMsg = _tr("Error trying create organization groups.").$this->errMsg;
                         $this->_DB->rollBAck();
                     }else{
                         //procedo a crear el plan de marcado para la organizacion
-                        $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-                        $pDB->beginTransaction();
-                        $pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
+                        $pAstConf=new paloSantoASteriskConfig($this->_DB);
                         //procedo a setear las configuaraciones generales del plan de marcado por cada organizacion
                         if($pAstConf->createOrganizationAsterisk($domain,$country)){
                             //procedo a crear el nuevo dominio
                             if(!($this->createDomain($domain))){
+                                $error=$this->errMsg;
                                 //no se puede crear el dominio
-                                $this->_DB->rollBAck();
-                                $pAstConf->_DB->rollBAck();
-                                $pAstConf->delete_dialplanfiles($domain);
+                                $this->_DB->rollBAck(); //desasemos los cambios en la base
+                                $this->cleanFailCreation($resultOrgz["domain"]); //eliminamos cualquier rastro de la organizacion
                             }else{
-                                if(!$this->createFolderFaxOrg($domain)){
-                                    $this->_DB->rollBAck();
-                                    $pAstConf->_DB->rollBAck();
-                                    $pAstConf->delete_dialplanfiles($domain);
-                                }else{
-                                    $flag=$resultOrgz['id'];
+                                //creamos al usuario administrador de las organizacion
+                                $user=$this->createAdminUserOrg($resultOrgz['id'],$domain,$name,$email_contact,$admin_password,$country_code,$area_code,$quota,true);
+                                if($user){
                                     $this->_DB->commit();
-                                    $pAstConf->_DB->commit();
+                                    return true;
+                                }else{
+                                    $error=$this->errMsg;
+                                    //revertimos los cambios realizados
+                                    $this->_DB->rollBAck(); //desasemos los cambios en la base
+                                    //eliminamos cualquier rastro de la oprganizacion de asterisk
+                                    $pAstConf->writeExtesionConfFile();
+                                    $this->cleanFailCreation($resultOrgz["domain"]);
+                                    //eliminamos el dominio de la organizacion
+                                    $pEmail->writePostfixMain();
+                                    $pEmail->reloadPostfix();
                                 }
                             }
                         }else{
                             $error=_tr("Error have ocurred to create dialplan for new organization. ").$pAstConf->errMsg;
                             $this->_DB->rollBAck();
-                            $pAstConf->_DB->rollBAck();
-                            $pAstConf->delete_dialplanfiles($domain);
+                            $this->cleanFailCreation($resultOrgz["domain"]); //eliminamos cualquier rastro de la organizacion
                         }
                     }
                 }else{
-                    $error=_tr("Errors trying set organization properties");
+                    $error=_tr("Errors trying set organization properties").$this->errMsg;
                     $this->_DB->rollBAck();
                 }
             }
@@ -739,50 +742,32 @@ class paloSantoOrganization{
             $error=_tr("Already exist other organization with the same domain");
         }
 
+        $this->errMsg=$error;
         return $flag;
-    }
-
-
-    private function createFolderFaxOrg($domain){
-        $sComando = '/usr/bin/elastix-helper faxconfig createDirFax '.escapeshellarg($domain).'  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('<br/>', $output);
-            return FALSE;
-        }
-        return TRUE;
     }
     
     //esta funcion es usada para crear al usuario administrado de la organizacion 
     //una vez que la organizacion ha sido creada
-    function createAdminUserOrg($domain,$email_contact,$password,$country_code,$area_code,$quota,$sendEmail=false){
-        //procedemos a crear al usuario administrador de la entidad
-        $newOrg=$this->getOrganizationByDomain_Name($domain);
-        if($newOrg!=false){
-            $md5password=md5($password);
-            $pACL=new paloACL($this->_DB);
-            $idGrupo=$pACL->getIdGroup("administrator",$newOrg["id"]);
-            $exito=$this->createUserOrganization($newOrg["id"], "admin", "admin", $md5password, $password, $idGrupo, "100", "200",$country_code, $area_code, "200", "admin", $quota, $lastid);
-            if($exito){
-                //mostramos el mensaje para crear los archivos de configuracion dentro de asterisk
-                $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-                $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$this->_DB);
-                $pAstConf->setReloadDialplan($domain,true);
-                //enviamos un email a la nueva organizacion creada
-                if($sendEmail==true){
-                    if(!$this->sendEmail($password,$newOrg["name"],$domain,$email_contact,"create",$error)){
-                        $this->errMsg="<br />"._tr("Mail to new admin user couldn't be sent. ").$error;
-                    }else
-                        $this->errMsg="<br />"._tr("A email with the password for admin@$domain user has been sent to ").$email_contact;
-                }
-                return true;
-            }else{
-                //mensaje en caso de que no se pueda crear el usuario administrador de la organizaion
-               $this->errMsg="<br />Error: ".$this->errMsg;
+    private function createAdminUserOrg($idOrg,$domain,$CompanyName,$email_contact,$password,$country_code,$area_code,$quota,$sendEmail=false){
+        $md5password=md5($password);
+        $pACL=new paloACL($this->_DB);
+        $idGrupo=$pACL->getIdGroup("administrator",$idOrg);
+        $exito=$this->createUserOrganization($idOrg,"admin", "admin", $md5password, $password, $idGrupo, "100", "200",$country_code, $area_code, "200", "admin", $quota, $lastid,false);
+        if($exito){
+            //mostramos el mensaje para crear los archivos de configuracion dentro de asterisk
+            $pAstConf=new paloSantoASteriskConfig($this->_DB);
+            $pAstConf->setReloadDialplan($domain,true);
+            //enviamos un email a la nueva organizacion creada
+            if($sendEmail==true){
+                if(!$this->sendEmail($password,$CompanyName,$domain,$email_contact,"create",$error)){
+                    $this->errMsg="<br />"._tr("Mail to new admin user couldn't be sent. ").$error;
+                }else
+                    $this->errMsg="<br />"._tr("A email with the password for admin@$domain user has been sent to ").$email_contact;
             }
+            return true;
         }else{
-            $this->errMsg="<br />"._tr("Error: couldn't get just created organization's data").$this->_DB->errMsg;
+            //mensaje en caso de que no se pueda crear el usuario administrador de la organizaion
+            $this->errMsg="<br />Error: ".$this->errMsg;
         }
         return false;
     }
@@ -812,10 +797,9 @@ class paloSantoOrganization{
                 }
             }
             //obtenemos el total de extensiones y colas creadas
-            $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
             if($max_num_exten!=0){
                 $query="SELECT count(id) from extension where organization_domain=?";
-                $res=$pDB->getFirstRowQuery($query,false,array($domain));
+                $res=$this->_DB->getFirstRowQuery($query,false,array($domain));
                 if($max_num_exten<$res[0]){
                     $this->errMsg=_tr("Max. # of exten")._tr(" must be greater than current numbers of exten ")."($res[0])";
                     return false;
@@ -823,7 +807,7 @@ class paloSantoOrganization{
             }
             if($max_num_queues!=0){
                 $query="SELECT count(name) from extension where organization_domain=?";
-                $res=$pDB->getFirstRowQuery($query,false,array($domain));
+                $res=$this->_DB->getFirstRowQuery($query,false,array($domain));
                 if($res!==false){
                     if($max_num_queues<$res[0]){
                         $this->errMsg=_tr("Max. # of queues")._tr(" must be greater than current numbers of queues "). "($res[0])";
@@ -865,23 +849,9 @@ class paloSantoOrganization{
         }
         return $flag;
     }
-
-    function deleteOrganizationProp($id)
-    {
-        $flag=false;
-        $error="";
-        $query="delete from organization_properties where id_organization=?;";
-        $result=$this->_DB->genQuery($query, array($id));
-        if($result==true){
-               $flag = true;
-        }else{
-            $this->errMsg=$this->_DB->errMsg;
-        }
-        return $flag;
-    }
     
     /**
-        funcion que elimina de asterisk un conjunto de organizacion
+        funcion que elimina de elastix un conjunto de organizacion
         @param $arrOrg array arreglo unidimensional que contiene el id de
                              las organizaciones que se van a eliminar
     */
@@ -898,6 +868,8 @@ class paloSantoOrganization{
         
         foreach($arrOrg as $idOrg){
             if(preg_match("/^[0-9]+$/",$idOrg) && $idOrg!=1){
+                //se borra tosod los registros de la organizacion de la base de datos
+                //se elimina los correos y los faxes de los usuarios
                 if($this->deleteOrganizationDB($idOrg,$idcode)){
                     $arrIdCode[]=$idcode;
                     $arrDelOrg[]=$this->errMsg;
@@ -920,16 +892,12 @@ class paloSantoOrganization{
         //***************************************************
         //reescribimos los archivos extensions.conf, extensions_globals.conf chan_dahdi_additional.conf con las configuraciones correctas
         $astError="";
-        $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-        $pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
-        if($pAstConf->createExtensionsGlobals("none",'none')===false){
-            $astError =_tr("Error has ocurred to try rewriting asterisk config file extensions_globals.conf. ").$pAstConf->errMsg."<br />";
+        $pAstConf=new paloSantoASteriskConfig($this->_DB);// extensions.conf, extensions_globals.conf
+        if(!$pAstConf->writeExtesionConfFile()){
+            $astError=_tr("Error has ocurred to try rewriting asterisk configs file. ").$pAstConf->errMsg."<br />";
             $flag=false;
         }
-        if($pAstConf->includeInExtensions_conf("none",'none')===false){
-            $astError .=_tr("Error has ocurred to try rewriting asterisk config file extensions.conf. ").$pAstConf->errMsg."<br />";
-            $flag=false;
-        }
+        
         $sComando = "/usr/bin/elastix-helper asteriskconfig createFileDahdiChannelAdd 2>&1";
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
@@ -939,6 +907,7 @@ class paloSantoOrganization{
         }
         if($astError!="")
             $astError ="<br />".$astError;
+            
         //***************************************************
         
         //***************************************************
@@ -964,12 +933,8 @@ class paloSantoOrganization{
         //elminamos los archivos de audio,grabaciones,faxes, etc relacionados con la organizacion
         $dError="";
         foreach($arrIdCode as $idcode){
-            $sComando = "/usr/bin/elastix-helper asteriskconfig deleteFolderOrganization ".
-                escapeshellarg($idcode)." 2>&1";
-            $output = $ret = NULL;
-            exec($sComando, $output, $ret);
-            if ($ret != 0){
-                $dError .= implode('', $output);
+            if(!$this->deleteFilesOrganization($idcode)){
+                $dError .= $this->errMsg;
                 $flag=false;
             }
         }
@@ -989,6 +954,30 @@ class paloSantoOrganization{
         //***************************************************
         $this->errMsg=$exito.$error.$astError.$fError.$dError.$reError;
         return $flag;
+    }
+    
+    private function deleteFilesOrganization($idcode){
+        $sComando = "/usr/bin/elastix-helper asteriskconfig deleteFolderOrganization ".
+            escapeshellarg($idcode)." 2>&1";
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0){
+            $this->errMsg = implode('', $output);
+            return false;
+        }else
+            return true;
+    }
+    
+    private function cleanFailCreation($domain){
+        $sComando = "/usr/bin/elastix-helper asteriskconfig cleanFailCreation ".
+            escapeshellarg($domain)." 2>&1";
+        $output = $ret = NULL;
+        exec($sComando, $output, $ret);
+        if ($ret != 0){
+            $this->errMsg = implode('', $output);
+            return false;
+        }else
+            return true;
     }
 
     private function deleteOrganizationDB($id,&$idcode){
@@ -1027,37 +1016,6 @@ class paloSantoOrganization{
                 }
                 
                 $this->_DB->beginTransaction();
-                //se procede a eliminar los usuarios asociados a la organizacion si es que tiene alguno
-                if(!$this->deleteAllUserOrganization($id)){
-                    $this->_DB->rollBack();
-                    $this->errMsg =$error.$this->errMsg;
-                    return false;
-                }
-                
-                if(!$this->deleteOrganizationProp($id)){//no se pueden eliminar los registros de la tabla organization_properties
-                    $this->errMsg =$error.$this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
-                //procedemos a borrar los grupos pertenecientes a la entidad
-                $queryGroup="Select id from acl_group where id_organization=?";
-                $arrGroup=$this->_DB->fetchTable($queryGroup, true, array($id));
-                foreach($arrGroup as $value){
-                    if(!$pACL->deleteGroup($value["id"])){
-                        $this->errMsg =$error.$pACL->errMsg;
-                        $this->_DB->rollBack();
-                        return false;
-                    }
-                }
-                
-                //borramos los permisos de la tabla organization_resource
-                $qDelOrgResource="DELETE FROM organization_resource where id_organization=?";
-                $rDelOrgResource=$this->_DB->genQuery($qDelOrgResource,array($id));
-                if($rDelOrgResource==false){
-                    $this->errMsg =$error.$this->_DB->errMsg;
-                    $this->_DB->rollBack();
-                    return false;
-                }
                 
                 //registramos en el servidor que la organizacion ha sido borrada
                 if(!$this->orgHistoryRegister("delete", $arrOrgz['idcode'])){
@@ -1073,16 +1031,28 @@ class paloSantoOrganization{
                     return false;
                 }
                 
-                //borramos todas las configuraciones de la organizacion relacionadas al mail
-                $bExito = $this->deleteEmailSettingsOrg($id);
+                //borramos los archivos del configuracion de faxes de los usuarios pertenecientes a la organizacion
+                $bExito =$this->deleteFaxsByOrg($id);
                 if (!$bExito){
-                    $this->errMsg =$error.$this->errMsg;
+                    $this->errMsg=$error._tr("Faxes couldn't be deleted.")." ".$this->errMsg;
+                    $this->_DB->rollBack();
+                    return false;
+                }
+                
+                //borramos la organizacion de asterisk
+                $pAstConf=new paloSantoASteriskConfig($this->_DB);
+                //TODO: setear backup de astDB de la organizaiona ntes de proseguir para
+                //poder restaurar estos valores en caso de que algo salga mal
+                if(!$pAstConf->deleteOrganizationPBX($domain,$code)){
+                    $this->errMsg .=$error.$pAstConf->errMsg." ".$this->errMsg;
                     $this->_DB->rollBack();
                     return false;
                 }
                 
                 //borramos la organization
-                $query="DELETE FROM organization WHERE id = ?;";
+                //la base esta en mysql y todas las tablas relacionadas a la organizacion
+                //tiene referencia a la tabla organization y tienen un constraint delete cascade
+                $query="DELETE FROM organization WHERE id = ?";
                 $result=$this->_DB->genQuery($query,array($id));
                 if($result==FALSE){ //no se puede eliminar la organizacion
                     $this->errMsg =$error.$this->_DB->errMsg;
@@ -1090,65 +1060,23 @@ class paloSantoOrganization{
                     return false;
                 }
                 
-                //borramos la organizacion de asterisk
-                $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-                $pAstConf=new paloSantoASteriskConfig($pDB,$this->_DB);
-                $pAstConf->_DB->beginTransaction();
-                if($pAstConf->deleteOrganizationPBX($domain,$code)){
-                    $pAstConf->_DB->commit();
+                //borramos los buzones de correo de los usuarios pertencientes a la organizacion
+                //esto se hace al ultimo porque en caso de que algo salga mal no tener que restaurar lso correos
+                $bExito = $this->deleteAccountByDomain($domain);
+                if (!$bExito){
+                    $this->errMsg=_tr("Mailbox couldn't be deleted.")." ".$this->errMsg;
+                    $this->_DB->rollBack();
+                    return false;
+                }else{
                     $this->_DB->commit();
                     $this->errMsg .=$domain; //regresa el dominio de la organizacion que se elimino
                     return true;
-                }else{
-                    $this->errMsg .=$error.$pAstConf->errMsg." ".$this->errMsg;
-                    //TODO:volver a restaurar la organizacion dentro de Asterisk -- NO SE COMO?
-                    $pAstConf->_DB->rollBack();
-                    $this->_DB->rollBack();
-                    return false;
                 }
             }
 		}else{
 			$this->errMsg=_tr("Organization doesn't exist. Id: ").$id;
 			return false;
 		}
-    }
-    
-    private function deleteAllUserOrganization($idOrg){
-        $pACL=new paloACL($this->_DB);
-        
-        if(!preg_match("/^[0-9]+$/",$idOrg)){
-            $this->errMsg=_tr("Invalid Organization");
-            return false;
-        }
-        
-        //obtenemos la lista de id los los usuarios asociados a la organizacion
-        $query   = "SELECT u.id,u.picture FROM acl_user u inner join acl_group g on u.id_group = g.id where g.id_organization=?";
-        $result=$this->_DB->fetchTable($query, true, array($idOrg));
-        if($result===FALSE){
-            $this->errMsg =$this->_DB->errMsg;
-            return false;
-        }else{
-            if(count($result)==0){
-                return true;
-            }
-            
-            foreach($result as $value){
-                if(!$pACL->deleteUser($value["id"])){
-                    $this->errMsg=_tr("Error: User Organizations couldn't be deleted. ").$pACL->errMsg;
-                    return false;
-                }else{
-                    if(!empty($value["picture"]))
-                        if(is_file("/var/www/elastixdir/users_images/".$value["picture"]))
-                            unlink("/var/www/elastixdir/users_images/".$value["picture"]);
-                }
-            }
-            //eliminar faxes asociados a los usuarios de la organizacion
-            if(!$this->deleteFaxsByOrg($idOrg)){
-                $this->errMsg=_tr("Error: Faxs Organizations couldn't be deleted. ").$this->errMsg;
-                return false;
-            }
-            return true;
-        }
     }
     
     /**
@@ -1205,47 +1133,6 @@ class paloSantoOrganization{
             return FALSE;
         }
         return TRUE;
-    }
-
-    private function deleteEmailSettingsOrg($idOrg){
-        if(!preg_match("/^[0-9]+$/",$idOrg)){
-            $this->errMsg=_tr("Invalid Organization");
-            return false;
-        }
-        
-        $this->errMsg = "";
-        $listaSQL = array(
-            "DELETE FROM email_statistics where id_organization=?",
-            "DELETE FROM member_list where id_emaillist in (SELECT id from email_list where id_organization=?)",
-            "DELETE FROM email_list where id_organization=?"
-        );
-            
-        foreach ($listaSQL as $sPeticionSQL) {
-            $result = $this->_DB->genQuery($sPeticionSQL,array($idOrg));
-            if( $result == false ){
-                $this->errMsg = $this->_DB->errMsg;
-                return false;
-            }
-        }
-        
-       /* //borramos del sistema en caso de existir las emailList creadas 
-        $sComando = "/usr/bin/elastix-helper mailman_config removeListByOrg ".escapeshellarg($idOrg);
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if($ret == 0)
-            return true;
-        else{
-            $this->errMsg = "A error has ocurred while trying delete email List".implode('<br/>', $output);
-            return false;
-        }*/
-            
-        $query="SELECT domain FROM organization WHERE id=?";
-        $result=$this->_DB->getFirstRowQuery($query,TRUE,array($idOrg));
-        //borramos el dominio de la organizacion
-        if($this->deleteAccountByDomain($result["domain"]))
-            return true;
-        else
-            return false;
     }
     
     /**
@@ -1396,14 +1283,14 @@ class paloSantoOrganization{
     }
 
 
-    function setParameterUserExtension($domain,$type,$exten,$secret,$fullname,$email,&$pDB2)
+    function setParameterUserExtension($domain,$type,$exten,$secret,$fullname,$email)
     {
-        $pDevice=new paloDevice($domain,$type,$pDB2);
+        $pDevice=new paloDevice($domain,$type,$this->_DB);
         if($pDevice->errMsg!=""){
             $this->errMsg=_tr("Error getting settings from extension user").$pDevice->errMsg;
             return false;
         }
-        $pGPBX = new paloGlobalsPBX($pDB2,$domain);
+        $pGPBX = new paloGlobalsPBX($this->_DB,$domain);
         
         $arrProp=array();
         $arrProp["fullname"]=$fullname;
@@ -1423,15 +1310,15 @@ class paloSantoOrganization{
         return $arrOpt;
     }
 
-    function setParameterFaxExtension($domain,$type,$exten,$secret,$clid_name,$clid_number,$port=null,&$pDB2)
+    function setParameterFaxExtension($domain,$type,$exten,$secret,$clid_name,$clid_number,$port=null)
     {
-        $pDevice=new paloDevice($domain,$type,$pDB2);
+        $pDevice=new paloDevice($domain,$type,$this->_DB);
         if($pDevice->errMsg!=""){
             $this->errMsg=_tr("Error getting settings from fax extension user").$pDevice->errMsg;
             return false;
         }
 
-        $pGPBX = new paloGlobalsPBX($pDB,$domain);
+        $pGPBX = new paloGlobalsPBX($this->_DB,$domain);
         
         $arrProp=array();
         $arrProp["name"]=$exten;
@@ -1460,7 +1347,7 @@ class paloSantoOrganization{
         una extension telefonica dentro de asterisk
         un fax con hylafax y la extension para el fax dentro de asterisk
     */
-    function createUserOrganization($idOrganization, $username, $name, $md5password, $password, $idGroup, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $quota, &$lastId)
+    function createUserOrganization($idOrganization, $username, $name, $md5password, $password, $idGroup, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $quota, &$lastId,$transaction=true)
     {
         include_once "libs/cyradm.php";
         include_once "configs/email.conf.php";
@@ -1470,7 +1357,6 @@ class paloSantoOrganization{
         $continuar=true;
         $Exito = false;
         $error="";
-        $pDB2=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 
         // 1) valido que la organizacion exista
         // 2) trato de crea el usuario en la base -- aqui se hacen validaciones con respecto al usuario
@@ -1487,7 +1373,6 @@ class paloSantoOrganization{
 
         $arrOrgz=$this->getOrganizationById($idOrganization);
         if(is_array($arrOrgz) && count($arrOrgz)>0){ // 1)
-            $this->_DB->beginTransaction();
             $emailUser = $username;
             $username = $username."@".$arrOrgz["domain"];
             $org_extension=$arrOrgz["code"]."_".$extension;
@@ -1501,7 +1386,7 @@ class paloSantoOrganization{
                 return false;
             }
 
-            $pDevice=new paloDevice($arrOrgz["domain"],"sip",$pDB2);
+            $pDevice=new paloDevice($arrOrgz["domain"],"sip",$this->_DB);
             if($pDevice->existExtension($extension,"sip")==true){
                 $this->errMsg=$pDevice->errMsg;
                 return false;
@@ -1524,6 +1409,7 @@ class paloSantoOrganization{
                 }
             }
             
+            if($transaction) $this->_DB->beginTransaction();
             if(($pACL->createUser($username, $name, $md5password, $idGroup,$extension,$fax_extension, $idOrganization))){//creamos usuario
                 //seteamos los registros en la tabla user_properties
                 if($countryCode=="" || $countryCode==null) $countryCode= $this->getOrganizationProp($idOrganization,"country_code");
@@ -1541,13 +1427,13 @@ class paloSantoOrganization{
                 foreach($faxProperties as $key => $value){
                     if($value===false){
                         $error="Property $key is not set. ".$this->errMsg;
-                        $this->_DB->rollBack();
+                        if($transaction) $this->_DB->rollBack();
                         $continuar=false;
                         break;
                     }else{
                         if(!$pACL->setUserProp($idUser,$key,$value,"fax")){
                             $error= _tr("Error setting parameters faxs").$pACL->errMsg;
-                            $this->_DB->rollBack();
+                            if($transaction) $this->_DB->rollBack();
                             $continuar=false;
                             break;
                         }
@@ -1559,7 +1445,7 @@ class paloSantoOrganization{
                 if($quota!==false && $continuar){
                     if(!$pACL->setUserProp($idUser,"email_quota",$quota,"email")){
                         $error= _tr("Error setting quota").$pACL->errMsg;
-                        $this->_DB->rollBack();
+                        if($transaction) $this->_DB->rollBack();
                         $continuar=false;
                     }
                 }else{
@@ -1570,9 +1456,9 @@ class paloSantoOrganization{
                 $arrSysProp = $this->getOrganizationPropByCategory($idOrganization,"system");
                 if(is_array($arrSysProp) && $continuar){
                     foreach($arrSysProp as $tmp){
-                        if(!$pACL->setUserProp($idUser,$tmp["key"],$tmp["value"],"system")){
+                        if(!$pACL->setUserProp($idUser,$tmp["property"],$tmp["value"],"system")){
                             $error= _tr("Error setting user properties").$pACL->errMsg;
-                            $this->_DB->rollBack();
+                            if($transaction) $this->_DB->rollBack();
                             $continuar=false;
                             break;
                         }
@@ -1586,23 +1472,21 @@ class paloSantoOrganization{
                 $nextPort=$pFax->getNextAvailablePort();
                 if($nextPort==false){
                     $error=$pFax->errMsg;
-                    $this->_DB->rollBack();
+                    if($transaction) $this->_DB->rollBack();
                     $continuar=false;
                 }
 
-                $pDB2->beginTransaction();
                 //creamos la extension iax para el fax del usuario
                 if($continuar){
-                    $arrPropFax=$this->setParameterFaxExtension($arrOrgz["domain"],"iax2",$fax_extension,$password,$cldiName,$clidNumber,$nextPort,$pDB2);
+                    $arrPropFax=$this->setParameterFaxExtension($arrOrgz["domain"],"iax2",$fax_extension,$password,$cldiName,$clidNumber,$nextPort,$this->_DB);
                     if($arrPropFax==false){
                         $error=$this->errMsg;
-                        $this->_DB->rollBack();
+                        if($transaction) $this->_DB->rollBack();
                         $continuar=false;
                     }else{
                         if($pDevice->createFaxExtension($arrPropFax,"iax2")==false){
                             $error=$pDevice->errMsg;
-                            $pDB2->rollBack();
-                            $this->_DB->rollBack();
+                            if($transaction) $this->_DB->rollBack();
                             $continuar=false;
                         }
                     }
@@ -1610,17 +1494,15 @@ class paloSantoOrganization{
 
                 if($continuar){
                     //creamos la extension del usuario
-                    $arrProp=$this->setParameterUserExtension($arrOrgz["domain"],"sip",$extension,$password,$name,$username,$pDB2);
+                    $arrProp=$this->setParameterUserExtension($arrOrgz["domain"],"sip",$extension,$password,$name,$username,$this->_DB);
                     if($arrProp==false){
                         $error=$this->errMsg;
-                        $pDB2->rollBack();
-                        $this->_DB->rollBack();
+                        if($transaction) $this->_DB->rollBack();
                         $continuar=false;
                     }else{
                         if($pDevice->createNewDevice($arrProp,"sip")==false){
                             $error=$pDevice->errMsg;
-                            $pDB2->rollBack();
-                            $this->_DB->rollBack();
+                            if($transaction) $this->_DB->rollBack();
                             $pDevice->deleteAstDBExt($extension,$org_extension,"sip");
                             $continuar=false;
                         }
@@ -1632,27 +1514,24 @@ class paloSantoOrganization{
                     if($pFax->createFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$org_fax_extension,$md5password,$username,$nextPort)){//si se crea exitosamente el fax creamos el email
                         if($pEmail->createAccount($arrOrgz["domain"],$emailUser,$password,$quota*1024)){
                             $Exito=true;
-                            $this->_DB->commit();
-                            $pDB2->commit();
+                            if($transaction) $this->_DB->commit();
                             $pFax->restartService();
                         }else{
                             $error=_tr("Error trying create email_account").$pEmail->errMsg;
                             $devId=$pACL->getUserProp($idUser,"dev_id");
-                            $this->_DB->rollBack();
+                            if($transaction) $this->_DB->rollBack();
                             $pDevice->deleteAstDBExt($extension,$org_extension,"sip");
-                            $pDB2->rollBack();
                             $pFax->deleteFax($devId);
                         }
                     }else{
                         $error=_tr("Error trying create new fax").$pFax->errMsg;
                         $pDevice->deleteAstDBExt($extension,$org_extension,"sip");
-                        $pDB2->rollBack();
-                        $this->_DB->rollBack();
+                        if($transaction) $this->_DB->rollBack();
                     }
                 }
             }else{
                 $error=_tr("User couldn't be created").". ".$pACL->errMsg;
-                $this->_DB->rollBack();
+                if($transaction) $this->_DB->rollBack();
             }
         }else{
             $error=_tr("Invalid Organization").$this->errMsg;
@@ -1715,7 +1594,6 @@ class paloSantoOrganization{
         $error="";
         $cExten=false;
         $cFExten=false;
-        $pDB2=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
         $arrBackup=array();
         $editFax=false;
         $faxProperties=array();
@@ -1737,14 +1615,12 @@ class paloSantoOrganization{
         $oldExten=$arrUser[0][5];
         $oldFaxExten=$arrUser[0][6];
         
-        $pDevice=new paloDevice($arrOrgz["domain"],"sip",$pDB2);
+        $pDevice=new paloDevice($arrOrgz["domain"],"sip",$this->_DB);
         $arrExtUser=$pDevice->getExtension($oldExten);
         $arrFaxExtUser=$pDevice->getFaxExtension($oldFaxExten);
         
         if($name=="")
             $name=$username;
-
-        $pDB2->beginTransaction();
 
         if($userLevel1=="other"){
             $extension=$arrUser[0][5];
@@ -1837,7 +1713,7 @@ class paloSantoOrganization{
 
                 if($continuar && $userLevel1!="other"){
                     $port=$pACL->getUserProp($idUser,"port");
-                    $modificarExts=$this->modificarExtensionsUsuario($cExten,$cFExten,$pDB2,$arrOrgz["domain"],$oldExten,$oldFaxExten,$extension,$fax_extension,$password1,$md5password,$name,$username,$cldiName,$clidNumber,$port,$arrBackup);
+                    $modificarExts=$this->modificarExtensionsUsuario($cExten,$cFExten,$arrOrgz["domain"],$oldExten,$oldFaxExten,$extension,$fax_extension,$password1,$md5password,$name,$username,$cldiName,$clidNumber,$port,$arrBackup);
 
                     if($modificarExts==false){
                         $error=_tr("Couldn't updated user extensions").$this->errMsg;
@@ -1898,7 +1774,6 @@ class paloSantoOrganization{
                 if($continuar){
                     $Exito=true;
                     $this->_DB->commit();
-                    $pDB2->commit();
                     //recargamos la configuracion en realtime de los dispositivos para que tomen efectos los cambios
                     if($cExten){
                         //se cambio la extension del usuario hay que eliminar de cache la anterior
@@ -1920,7 +1795,6 @@ class paloSantoOrganization{
                     $pFax->restartService();
                 }else{
                     $this->_DB->rollBack();
-                    $pDB2->rollBack();
                     if($editFax==true){
                         $pFax->editFax($idUser,$org_countryCode,$org_areaCode,$org_cldiName,$org_clidNumber,$arrFaxExtUser["device"],$arrUser[0][3],$username);
                     }
@@ -1932,12 +1806,10 @@ class paloSantoOrganization{
             }else{
                 $error=_tr("Failed Updated Group")." ".$pACL->errMsg;
                 $this->_DB->rollBack();
-                $pDB2->rollBack();
             }
         }else{
             $error=_tr("User couldn't be update")." ".$pACL->errMsg;
             $this->_DB->rollBack();
-            $pDB2->rollBack();
         }
 
         if($cExten || $cFExten)
@@ -1947,9 +1819,9 @@ class paloSantoOrganization{
         return $Exito;
     }
 
-    private function modificarExtensionsUsuario(&$EXTEN,&$FEXTEN,&$pDB2,$domain,$oldExten,$oldFaxExten,$extension,$fax_extension,$password,$md5password,$name,$username,$cldiName,$clidNumber,$port,&$arrBackup){
+    private function modificarExtensionsUsuario(&$EXTEN,&$FEXTEN,$domain,$oldExten,$oldFaxExten,$extension,$fax_extension,$password,$md5password,$name,$username,$cldiName,$clidNumber,$port,&$arrBackup){
         $continuar=true;
-        $pDevice=new paloDevice($domain,"sip",$pDB2);
+        $pDevice=new paloDevice($domain,"sip",$this->_DB);
         $error="";
 
         //1.- verificar si el usuario cambio de extension y si es asi que no este siendo usado por otro usuario
@@ -1965,7 +1837,7 @@ class paloSantoOrganization{
                 return false;
             }
             //borramos el channel del fax anterior anterior
-            $arrPropFax=$this->setParameterFaxExtension($domain,"iax2",$fax_extension,$password,$cldiName,$clidNumber,$port,$pDB2);
+            $arrPropFax=$this->setParameterFaxExtension($domain,"iax2",$fax_extension,$password,$cldiName,$clidNumber,$port);
             if($arrPropFax==false){
                 $error=$this->errMsg;
                 return false;
@@ -1987,7 +1859,7 @@ class paloSantoOrganization{
             }
 
             //creamos una nueva para el usuario
-            $arrProp=$this->setParameterUserExtension($domain,"sip",$extension,$password,$name,$username,$pDB2);
+            $arrProp=$this->setParameterUserExtension($domain,"sip",$extension,$password,$name,$username);
             if($arrProp==false){
                 $error=$this->errMsg;
                 $continuar=false;
@@ -2038,9 +1910,6 @@ class paloSantoOrganization{
         $areaCode=$pACL->getUserProp($idUser,"area_code");
         $cldiName=$pACL->getUserProp($idUser,"clid_name");
         $clidNumber=$pACL->getUserProp($idUser,"clid_number");
-        $picture=$pACL->getUserPicture($idUser);
-
-        $pDB2=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
 
         $idDomain=$arrUser[0][4];
         $query="Select domain from organization where id=?";
@@ -2050,13 +1919,12 @@ class paloSantoOrganization{
             return false;
         }
         
-        $pDevice=new paloDevice($getDomain[0],"sip",$pDB2);
+        $pDevice=new paloDevice($getDomain[0],"sip",$this->_DB);
         $arrExten=$pDevice->getExtension($arrUser[0][5]);
         $arrFaxExten=$pDevice->getFaxExtension($arrUser[0][6]);
         
         $ruta_destino="/var/www/elastixdir/users_images/".$getDomain[0];
         $this->_DB->beginTransaction();
-        $pDB2->beginTransaction();
         //tomamos un backup de las extensiones que se van a eliminar de la base astDB por si algo sale mal
         //y ahi que restaurar la extension
         $arrExt=$pDevice->backupAstDBEXT($arrUser[0][5]);
@@ -2064,17 +1932,13 @@ class paloSantoOrganization{
             if($pDevice->deleteExtension($arrUser[0][5]) && $pDevice->deleteFaxExtension($arrUser[0][6])){
                 if($pFax->deleteFax($devId)){
                     if($pEmail->eliminar_cuenta($arrUser[0][1])){
-                        if(isset($picture[0]))
-                            unlink($ruta_destino."/".$picture[0]);
                         $Exito=true;
-                        $pDB2->commit();
                         $this->_DB->commit();
                         $pDevice->tecnologia->prunePeer($arrExten["device"],$arrExten["tech"]);
                         $pDevice->tecnologia->prunePeer($arrFaxExten["device"],$arrFaxExten["tech"]);
                         $pFax->restartService();
                     }else{
                         $pDevice->restoreBackupAstDBEXT($arrExt);
-                        $pDB2->rollBack();
                         $this->_DB->rollBack();
                         $pFax->createFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$arrUser[0][6],$arrUser[0][3],$arrUser[0][1],$port,$devId);
                         $this->errMsg=_tr("Email Account cannot be deleted").$pEmail->errMsg;
@@ -2082,13 +1946,11 @@ class paloSantoOrganization{
                 }else{
                     $this->errMsg=_tr("Fax cannot be deleted").$pFax->errMsg;
                     $pDevice->restoreBackupAstDBEXT($arrExt);
-                    $pDB2->rollBack();
                     $this->_DB->rollBack();
                 }
             }else{
                 $this->errMsg=_tr("User Extension can't be deleted").$pDevice->errMsg;
                 $pDevice->restoreBackupAstDBEXT($arrExt);
-                $pDB2->rollBack();
                 $this->_DB->rollBack();
             }
         }else{

@@ -28,10 +28,11 @@
   $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
 global $arrConf;
+$arrConf['dsn_mysql_elx'] = generarDSNSistema('asteriskuser', 'elxpbx');
 $arrConf['elastix_dbdir'] = '/var/www/db';
 $arrConf['elastix_dsn'] = array(
-                                "elastix"   =>  "sqlite3:///$arrConf[elastix_dbdir]/elastix.db",
-								"acl"       =>  "sqlite3:///$arrConf[elastix_dbdir]/elastix.db", //se lo deja por compatibilidad
+                                "elastix"   =>  $arrConf['dsn_mysql_elx'],
+								"acl"       =>  $arrConf['dsn_mysql_elx'], //se lo deja por compatibilidad
                                 "samples"   =>  "sqlite3:///$arrConf[elastix_dbdir]/samples.db",
                             );
 $arrConf['basePath'] = '/var/www/html';

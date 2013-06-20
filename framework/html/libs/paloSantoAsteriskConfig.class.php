@@ -31,23 +31,22 @@ if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
 
-global $arrConf;
-
 include_once "libs/paloSantoConfig.class.php";
 include_once "libs/paloSantoPBX.class.php";
 include_once "libs/misc.lib.php";
 include_once "modules/features_code/libs/paloSantoFeaturesCode.class.php";
 include_once "modules/general_settings/libs/paloSantoGlobalsPBX.class.php";
 
+global $arrConf;
+
 class paloSantoASteriskConfig{
     public $errMsg;
-	public $_DB; //conexion a la base elxpbx mysql
-	public $_DBSQLite; //conexion a la base elastix.db de sqlite
+    public $_DB; //conexion a la base elxpbx mysql
 
-	//recibe una conexion a la base de elxpbx de mysql
-	function paloSantoASteriskConfig(&$pDB,&$pDBSQlite)
-	{
-		// Se recibe como parámetro una referencia a una conexión paloDB
+    //recibe una conexion a la base de elxpbx de mysql
+    function paloSantoASteriskConfig(&$pDB)
+    {
+        // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
             $this->_DB =& $pDB;
             $this->errMsg = $this->_DB->errMsg;
@@ -62,352 +61,111 @@ class paloSantoASteriskConfig{
                 // debo llenar alguna variable de error
             }
         }
+    }   
 
-		// Se recibe como parámetro una referencia a una conexión paloDB
-        if (is_object($pDBSQlite)) {
-            $this->_DBSQLite =& $pDBSQlite;
-            $this->errMsg = $this->_DBSQLite->errMsg." ".$this->errMsg;
-        } else {
-            $dsn = (string)$pDBSQlite;
-            $this->_DBSQLite = new paloDB($dsn);
-
-            if (!$this->_DBSQLite->connStatus) {
-                $this->errMsg = $this->_DBSQLite->errMsg." ".$this->errMsg;
-                // debo llenar alguna variable de error
-            } else {
-                // debo llenar alguna variable de error
-            }
-        }
-	}
-
-	function getCodeByDomain($domain){
-		$query="SELECT code from organization where domain=?";
-		$result=$this->_DBSQLite->getFirstRowQuery($query,true,array($domain));
-		if($result===false)
-			$this->errMsg=$pDB->errMsg;
-		elseif(count($result)==0)
-			$this->errMsg=_tr("Organization doesn't exist");
-		return $result;
-	}
-	
-
-	private function createAsteriskDirectory($orgzDomain){
-		$query="SELECT 1 from organization where domain=?";
-		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain));
-		if($result===false){
-			$this->errMsg = $this->_DBSQLite->errMsg;
-			return false;
-		}elseif(count($result)==0){
-			$this->errMsg = _tr("Organization doesn't exist");
-			return false;
-		}
-
-		$sComando = '/usr/bin/elastix-helper asteriskconfig createDirOrganization '.
-            escapeshellarg($orgzDomain).'  2>&1';
+    function getCodeByDomain($domain){
+        $query="SELECT code FROM organization where domain=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($domain));
+        if($result===false)
+            $this->errMsg=$this->_DB->errMsg;
+        elseif(count($result)==0)
+            $this->errMsg=_tr("Organization doesn't exist");
+        return $result;
+    }
+    
+    function writeExtesionConfFile(){
+        $sComando = '/usr/bin/elastix-helper asteriskconfig writeExtensionConf 2>&1';
         $output = $ret = NULL;
         exec($sComando, $output, $ret);
         if ($ret != 0) {
             $this->errMsg = implode('', $output);
             return FALSE;
-        }
-        return TRUE;
-	}
-
-	/**
-        Funcion que se encarga de escribir el archivo extensions.conf
-        Recibe como parametros un el dominino de una organizacion y una accion
-        @param string $action -> pueden ser dos valores add or delete
-        @param string $domain -> dominio de la organizacion con la que se quiere realizar la accion
-    */
-	function includeInExtensions_conf($action="add",$orgzDomain)
-	{
-        if($action=="add" || $action=="delete"){
-            $query="SELECT 1 from organization where domain=?";
-            $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain));
-            if($result===false){
-                $this->errMsg = $this->_DBSQLite->errMsg;
-                return false;
-            }
-            if($action=="add"){
-                if(count($result)==0){
-                    $this->errMsg = _tr("Organization doesn't exist");
-                    return false;
-                }
-            }else{
-                if(count($result)=="1"){
-                    $this->errMsg = _tr("Can't delete organization from extensions.conf");
-                    return false;
-                }
-            }
-        }
-        
-        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionFile '.
-            escapeshellarg($action)." ".escapeshellarg($orgzDomain).'  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return FALSE;
-        }
-        return true;
-	}
-
-    //borra el plan de marcado de una organizacion especifica
-    //esto se hace cuando se elimina una organizacion del sistema
-    //antes de llamar a esta funcion ya se debio haber eliminado
-    //a la organizacion de la base sqlite elastix.db
-    function delete_dialplanfiles($orgzDomain)
-    {
-        $path="/etc/asterisk/organizations/";
-        
-        $sComando = '/usr/bin/elastix-helper asteriskconfig deleteFileOrgAst '.
-            escapeshellarg($orgzDomain).' 2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0){
-            $this->errMsg = implode('', $output);
-            return false;
         }
         return true;
     }
 
-	//Si se falla la momento de crear los archivos, ahi que deshacer los cambios desde donde se llame a esta funcion
-	function createOrganizationAsterisk($domain,$country){
-		//obtenemos el codigo de la organizacion y de esa manera validamos que la organizacion exista
-		$query="SELECT 1 from organization where domain=?";
-		$result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
-		if($result===false){
-			$this->errMsg = $this->_DBSQLite->errMsg;
-			return false;
-		}elseif(count($result)==0){
-			$this->errMsg = _tr("Organization doesn't exist");
-			return false;
-		}
-		$pFC=new paloFeatureCodePBX($this->_DB,$domain);
+    //Si se falla la momento de crear los archivos, ahi que deshacer los cambios desde donde se llame a esta funcion
+    function createOrganizationAsterisk($domain,$country){
+        //validamos que la organizacion que intentamos crear realmente exista
+        $query="SELECT code FROM organization WHERE domain=?";
+        $result=$this->_DB->getFirstRowQuery($query, true, array($domain));
+        if($result==false){
+            $this->errMsg = ($result===false)?$this->_DB->errMsg:_tr("Organization doesn't exist");
+        }else{
+            $orgCode=$result["code"];
+        }
+        
+        $pFC=new paloFeatureCodePBX($this->_DB,$domain);
 
-		// 1.-Seateamos las configuracions generales para la organizacion en la base de datos
-		//	  (sip_settings,iax_settings,voicemail_settings,globals,features_codes)
-		// 2.-Creamos dentro de asterisk directorios que van a ser usados por la organizacion
-		// 3.-Inclumos los archivos recien creados en con la sentencias include dentro del archivo
+        // 1.-Seateamos las configuracions generales para la organizacion en la base de datos
+        //	  (sip_settings,iax_settings,voicemail_settings,globals,features_codes)
+        // 2.-Creamos dentro de asterisk directorios que van a ser usados por la organizacion
+        // 3.-Inclumos los archivos recien creados en con la sentencias include dentro del archivo
         //    extensions.conf y extensions_globals.conf
         // TODO: No se escriben los archivos de configuracion de la organizacion dentro del plan de marcado
         //       hasta que el superadmin cree al admin de la organizacion recien creada
-		if($this->setGeneralSettingFirstTime($domain,$country)){
-			if($pFC->insertPaloFeatureDB()){
-				if($this->createAsteriskDirectory($domain)){
-                    if($pFC->createFeatureFile()){
-                        if($this->setReloadDialplan($domain)){
-                            if($this->createExtensionsGlobals("add",$domain)!==false && $this->includeInExtensions_conf("add",$domain)!==false){
-                                return true;
-                            }else{
-                                $this->errMsg=_tr("Error trying created configuartion file in asterisk").$this->errMsg;}
-                        }else{
-                            $this->errMsg=_tr("Error trying created configuartion file in asterisk").$this->errMsg;}
-                    }else{
-                        $this->errMsg=_tr("Error trying created file features.conf ").$pFC->errMsg;}
-				}else{
-					$this->errMsg=_tr("Error trying created directories inside asterisk");}
-			}else
-				$this->errMsg=_tr("Error trying set Features Codes").$pFC->errMsg;
-		}else{
-			$this->errMsg=_tr("Error trying set general settings asterisk. ").$this->errMsg;}
-
-		return false;
-	}
-
-	
-	function deleteOrganizationPBX($domain,$code){
-		// 2. Eliminar de la base de datos elxpbx todo lo que tenga que ver con la organizacion
-	    //    Esto falta de ver cual es la mejor forma - en todas las tablas el campo que hace referencia a la organization
-		//    se llama organization_domain
-		// 3. Eliminar las entradas dentro de astDB que correspondan a la organizacion
-		// 4. Eliminamos los archivos de configuracion dentro del directorio de asterisk que pertenezcan al dominio
-
-		//arreglo que contiene las tablas dentro de elxpbx que no tienen el campo
-        //organization_domian
-		$arrNoOrgDomain=array("trunk_dialpatterns","trunk","outbound_route_dialpattern","outbound_route_trunkpriority","features_code_settings","globals_settings","iax_general","sip_general","voicemail_general","queue_member","ivr_destination","did_details","did","tg_parameters");
-
-		//obtenemos una lista de las tablas dentro de la base elxpbx
-		$queryShow="show tables from elxpbx";
-		$result=$this->_DB->fetchTable($queryShow);
-		if($result===false){
-			$this->errMsg = $this->_DB->errMsg;
-			return false;
-		}
-		//TODO: Implementarlo en una funcion aparte
-		foreach($result as $value){
-			$queryDel="DELETE from ".$value[0]." where organization_domain=?";
-			if(!in_array($value[0],$arrNoOrgDomain)){
-                if($value[0]=="queue"){
-                    $query="SELECT name from queue where organization_domain=?";
-                    $result=$this->_DB->fetchTable($query, false, array($domain));
-                    if($result===false){
-                        $this->errMsg=$this->_DB->errMsg;
-                        return false;
-                    }else{
-                        foreach($result as $valor){
-                            $qDel="DELETE from queue_member where queue_name=?";
-                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
-                            if($result==false){
-                                $this->errMsg=$this->_DB->errMsg;
-                                return false;
-                            }
-                        }
+        if($this->setGeneralSettingFirstTime($domain,$orgCode,$country)){
+            if($pFC->insertPaloFeatureDB()){
+                if($this->setReloadDialplan($domain)){
+                    //realizamos la
+                    $sComando = '/usr/bin/elastix-helper asteriskconfig createOrganizationAst '.
+                        escapeshellarg($domain).'  2>&1';
+                    $output = $ret = NULL;
+                    exec($sComando, $output, $ret);
+                    if ($ret != 0) {
+                        $this->errMsg = implode('', $output);
+                        return FALSE;
                     }
-				}elseif($value[0]=="ivr"){
-                    $query="SELECT id from ivr where organization_domain=?";
-                    $result=$this->_DB->fetchTable($query, false, array($domain));
-                    if($result===false){
-                        $this->errMsg=$this->_DB->errMsg;
-                        return false;
-                    }else{
-                        foreach($result as $valor){
-                            $qDel="DELETE from ivr_destination where ivr_id=?";
-                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
-                            if($result==false){
-                                $this->errMsg=$this->_DB->errMsg;
-                                return false;
-                            }
-                        }
-                    }
-				}elseif($value[0]=="outbound_route"){
-                    $query="SELECT id from outbound_route where organization_domain=?";
-                    $result=$this->_DB->fetchTable($query, false, array($domain));
-                    if($result===false){
-                        $this->errMsg=$this->_DB->errMsg;
-                        return false;
-                    }else{
-                        foreach($result as $valor){
-                            $qDel="DELETE from outbound_route_dialpattern where outbound_route_id=?";
-                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
-                            if($result==false){
-                                $this->errMsg=$this->_DB->errMsg;
-                                return false;
-                            }
-                            
-                            $qDel="DELETE from outbound_route_trunkpriority where outbound_route_id=?";
-                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
-                            if($result==false){
-                                $this->errMsg=$this->_DB->errMsg;
-                                return false;
-                            }
-                        }
-                    }
-				}elseif($value[0]=="time_group"){
-                    $query="SELECT id from time_group where organization_domain=?";
-                    $result=$this->_DB->fetchTable($query, false, array($domain));
-                    if($result===false){
-                        $this->errMsg=$this->_DB->errMsg;
-                        return false;
-                    }else{
-                        foreach($result as $valor){
-                            $qDel="DELETE from tg_parameters where id_tg=?";
-                            $result=$this->_DB->genQuery($qDel,array($valor[0]));
-                            if($result==false){
-                                $this->errMsg=$this->_DB->errMsg;
-                                return false;
-                            }
-                        }
-                    }
-				}
-				$result=$this->_DB->genQuery($queryDel,array($domain));
-				if(!$result){
-					$this->errMsg=$this->_DB->errMsg;
-					return false;
-				}
-			}
-		}
-		
-		$queryd="UPDATE did set organization_domain=NULL where organization_domain=?";
+                    return true;
+                }else{
+                    $this->errMsg=_tr("Error trying set organizations properties").$this->errMsg;}
+            }else
+                $this->errMsg=_tr("Error trying set Features Codes").$pFC->errMsg;
+        }else{
+            $this->errMsg=_tr("Error trying set general settings asterisk. ").$this->errMsg;}
+
+        return false;
+    }
+
+
+    function deleteOrganizationPBX($domain,$code){
+        // 1. Eliminar las entradas dentro de astDB que correspondan a la organizacion
+        // 2. actualizamos los  registros de los did que  hayan pertenecido a una organizacion
+        $queryd="UPDATE did set organization_domain=NULL where organization_domain=?";
         if($this->_DB->genQuery($queryd,array($domain))==false){
             $this->errMsg .=$this->_DB->errMsg;
             return false;
         }
 
-		//borramos las entradas de la organizacion dentro de astDB
-		$errorMng="";
-		$astMang=AsteriskManagerConnect($errorMng);
-		if($astMang==false){
-			$this->errMsg=$errorMng;
-			return false;
-		}else{ 
-			$result=$astMang->database_delTree("EXTUSER/".$code);
-			$result=$astMang->database_delTree("DEVICE/".$code);
-			$result=$astMang->database_delTree("DND/".$code);
-			$result=$astMang->database_delTree("CALLTRACE/".$code);
-			$result=$astMang->database_delTree("CFU/".$code);
-			$result=$astMang->database_delTree("CFB/".$code);
-			$result=$astMang->database_delTree("CF/".$code);
-			$result=$astMang->database_delTree("CW/".$code);
-			$result=$astMang->database_delTree("BLACKLIST/".$code);
-			$result=$astMang->database_delTree("QPENALTY/".$code);
-		}
-		
-		$exito=$this->delete_dialplanfiles($domain);
-		if(!$exito){
-			$this->errMsg=_tr("Error deleting dialplan files of organization with")."$domain. ".$this->errMsg;
-        }
-        
-		return $exito;
-	}
-	
-	//se crean la varias globales del sistema, antes esto estaba dentro de extensions_additionals
-    //ahora sera un archivo aparte
-    //se sobreescribe este archivo cada vez que se crea una nueva organizacion
-    function createExtensionsGlobals($action="add", $orgzDomain){
-        global $arrConf;
-       
-        $query="SELECT 1 from organization where domain=? and state=?";
-        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($orgzDomain,"active"));
-        if($result===false){
-            $this->errMsg = $this->_DBSQLite->errMsg;
+        //borramos las entradas de la organizacion dentro de astDB
+        $errorMng="";
+        $astMang=AsteriskManagerConnect($errorMng);
+        if($astMang==false){
+            $this->errMsg=$errorMng;
             return false;
+        }else{ 
+            $result=$astMang->database_delTree("EXTUSER/".$code);
+            $result=$astMang->database_delTree("DEVICE/".$code);
+            $result=$astMang->database_delTree("DND/".$code);
+            $result=$astMang->database_delTree("CALLTRACE/".$code);
+            $result=$astMang->database_delTree("CFU/".$code);
+            $result=$astMang->database_delTree("CFB/".$code);
+            $result=$astMang->database_delTree("CF/".$code);
+            $result=$astMang->database_delTree("CW/".$code);
+            $result=$astMang->database_delTree("BLACKLIST/".$code);
+            $result=$astMang->database_delTree("QPENALTY/".$code);
         }
-        
-        if($action=="add"){
-            if(count($result)==0){
-                $this->errMsg = _tr("Organization doesn't exist");
-                return false;
-            }
-        }else{
-            if(count($result)=="1"){
-                $this->errMsg = _tr("Can't delete organization from extensions_globals.conf");
-                return false;
-            }
-        }
-        
-        $sComando = '/usr/bin/elastix-helper asteriskconfig createExtensionGlobals '.
-            escapeshellarg($action)." ".escapeshellarg($orgzDomain).'  2>&1';
-        $output = $ret = NULL;
-        exec($sComando, $output, $ret);
-        if ($ret != 0) {
-            $this->errMsg = implode('', $output);
-            return FALSE;
-        }
+               
         return true;
     }
 
-
-    private function setGeneralSettingFirstTime($domain,$country)
+    private function setGeneralSettingFirstTime($domain,$codeOrg,$country)
     {
         global $arrConf;
         $source_file="/var/www/elastixdir/asteriskconf/globals.conf";
-        //verificamos que exista el dominio
-        $query="SELECT code from organization where domain=?";
-        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
-        if($result===false){
-            $this->errMsg = $pDB->errMsg;
-            return false;
-        }elseif(empty($result[0])){
-            $this->errMsg = _tr("Organization dosen't exist");
-            return false;
-        }else
-            $codeOrg=$result[0];
-        
         
         $pGlobals=new paloGlobalsPBX($this->_DB,$domain);
-        $res=$pGlobals->insertDBGlobals($country,$this->_DBSQLite);
+        $res=$pGlobals->insertDBGlobals($country);
         if($res==false){
             $this->errMsg = $pGlobals->errMsg;
             return false;
@@ -417,8 +175,6 @@ class paloSantoASteriskConfig{
         if($reslng!=false){
             $language=$reslng;
         }
-        
-        
         //sip , iax , voicemail 
         //llenado de tablas tech_settings usando como referencia lo configurado en tech_general
         $psip=new paloSip($this->_DB);
@@ -494,8 +250,7 @@ class paloSantoASteriskConfig{
         }
         //TODO:falta asignarle una truncal de salida. Esto no se puede hacer porque aun no se le
         //ha permitido salida por ninguna truncal a la organizacion
-        
-
+       
         return true;
     }
 
@@ -507,27 +262,6 @@ class paloSantoASteriskConfig{
         efecto dentro de asterisk
     */
     function setReloadDialplan($domain,$reload=false){
-        //obtenemos el dominio de la organizacion para verificar que esta exista
-        $query="SELECT id from organization where domain=?";
-        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
-        if($result===false){
-            $this->errMsg = $this->_DBSQLite->errMsg;
-            return false;
-        }elseif(count($result)==0){
-            $this->errMsg = _tr("Organization dosen't exist");
-            return false;
-        }
-
-        //comprobamos que el usuario tiene acceso a modificar esta informacion
-        $arrCredentials=getUserCredentials();
-        if($arrCredentials["userlevel"]!="superadmin"){ //debemos comprobar el id de la organizacion
-            if( ($result[0] != $arrCredentials["id_organization"]) || $arrCredentials["id_organization"]===false){
-                $this->errMsg=_tr("Invalid organization");
-                return false;
-            }
-        }
-
-
         $status=($reload==true)?"yes":"no";
         $query="SELECT show_msg from reload_dialplan where organization_domain=?";
         $estado=$this->_DB->getFirstRowQuery($query, false, array($domain));
@@ -548,18 +282,7 @@ class paloSantoASteriskConfig{
 
 
     function getReloadDialplan($domain){
-        //obtenemos el dominio de la organizacion
-        $query="SELECT 1 from organization where domain=?";
-        $result=$this->_DBSQLite->getFirstRowQuery($query, false, array($domain));
-        if($result===false){
-            $this->errMsg = $this->_DBSQLite->errMsg;
-            return false;
-        }elseif(count($result)==0){
-            $this->errMsg = _tr("Organization dosen't exist");
-            return false;
-        }
-
-        $query="SELECT show_msg from reload_dialplan where organization_domain=?";
+        $query="SELECT show_msg FROM reload_dialplan WHERE organization_domain=?";
         $estado=$this->_DB->getFirstRowQuery($query, false, array($domain));
         if($estado==false){
             $this->errMsg = $this->_DB->errMsg;
@@ -569,12 +292,12 @@ class paloSantoASteriskConfig{
     }
 
     function generateDialplan($domain,$reload=false){
-        //valido que exista el dominio y obtengo el code asociado a la extension
+        //valido que exista el dominio
         //obtenemos el codigo de la organizacion
-        $queryCode="SELECT code from organization where domain=?";
-        $code=$this->_DBSQLite->getFirstRowQuery($queryCode, false, array($domain));
+        $queryCode="SELECT code FROM organization WHERE domain=?";
+        $code=$this->_DB->getFirstRowQuery($queryCode, false, array($domain));
         if($code===false){
-            $this->errMsg = $this->_DBSQLite->errMsg;
+            $this->errMsg = $this->_DB->errMsg;
             return false;
         }elseif(count($code)==0){
             $this->errMsg = _tr("Organization dosen't exist");

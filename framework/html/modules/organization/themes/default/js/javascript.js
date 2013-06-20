@@ -110,7 +110,7 @@ function change_state(){
     
     if(orgs.length!=0){
         var msg=$("#msg_ch_alert").val();
-        if(!confirm(msg.replace('{STATE_NAME}',state))){
+        if(!confirm(msg.replace('STATE_NAME',state))){
             return false;
         }
         

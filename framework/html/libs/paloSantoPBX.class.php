@@ -36,20 +36,20 @@ include_once "/var/www/html/libs/extensions.class.php";
 include_once "/var/www/html/libs/misc.lib.php";
 
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
-	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
+    require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
 
 class paloAsteriskDB {
-	public $_DB;
-	public $errMsg;
+    public $_DB;
+    public $errMsg;
 
-	function __construct(&$pDB)
+    function __construct(&$pDB)
     {
-		if (is_object($pDB)) {
+        if (is_object($pDB)) {
             $this->_DB =& $pDB;
             $this->errMsg = $this->_DB->errMsg;
         }else{
-			$dsn = (string)$pDB;
+            $dsn = (string)$pDB;
             $this->_DB = new paloDB($dsn);
 
             if (!$this->_DB->connStatus) {
@@ -58,81 +58,79 @@ class paloAsteriskDB {
             } else {
                 // debo llenar alguna variable de error
             }
-		}
+        }
     }
 
-	function executeQuery($query,$arrayParam)
-	{
-		$result=$this->_DB->genQuery($query,$arrayParam);
-		if($result==false){
-			$this->errMsg = $this->_DB->errMsg;
-			return false;
-		}
-		return $result;
-	}
+    function executeQuery($query,$arrayParam)
+    {
+        $result=$this->_DB->genQuery($query,$arrayParam);
+        if($result==false){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }
+        return $result;
+    }
 
-	function getResultQuery($query,$arrayParam,$assoc=false,$noexits="Don't exist registers.")
-	{
-		$result=$this->_DB->fetchTable($query,$assoc,$arrayParam);
-		if($result===false){
-			$this->errMsg = $this->_DB->errMsg;
-			return false;
-		}elseif($result==false){
-			$this->errMsg = $noexits;
-		}
-		return $result;
-	}
+    function getResultQuery($query,$arrayParam,$assoc=false,$noexits="Don't exist registers.")
+    {
+        $result=$this->_DB->fetchTable($query,$assoc,$arrayParam);
+        if($result===false){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }elseif($result==false){
+            $this->errMsg = $noexits;
+        }
+        return $result;
+    }
 
-	function getFirstResultQuery($query,$arrayParam,$assoc=false,$noexits="Don't exist registers.")
-	{
-		$result=$this->_DB->getFirstRowQuery($query,$assoc,$arrayParam);
-		if($result===false){
-			$this->errMsg = $this->_DB->errMsg;
-			return false;
-		}elseif($result==false){
-			$this->errMsg = $noexits;
-		}
-		return $result;
-	}
+    function getFirstResultQuery($query,$arrayParam,$assoc=false,$noexits="Don't exist registers.")
+    {
+        $result=$this->_DB->getFirstRowQuery($query,$assoc,$arrayParam);
+        if($result===false){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }elseif($result==false){
+            $this->errMsg = $noexits;
+        }
+        return $result;
+    }
 
 
-	function getCodeByDomain($domain){
-		global $arrConf;
-		$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-		$query="SELECT code from organization where domain=?";
-		$result=$pDB->getFirstRowQuery($query,true,array($domain));
-		if($result===false)
-			$this->errMsg=$pDB->errMsg;
-		elseif(count($result)==0 || empty($result["code"]))
-			$this->errMsg=_tr("Organization doesn't exist");
-		return $result;
-	}
+    function getCodeByDomain($domain){
+        $query="SELECT code from organization where domain=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($domain));
+        if($result===false)
+            $this->errMsg=$pDB->errMsg;
+        elseif(count($result)==0 || empty($result["code"]))
+            $this->errMsg=_tr("Organization doesn't exist");
+        return $result;
+    }
 
-	//revisar que no exista dentro de la organizacion otra elemento con el mismo patron de marcado
-	function existExtension($extension,$domain)
-	{
-		$exist=true;
-		//validamos que el patron de marcado no sea usado como extension
-		$query="SELECT count(id) from extension where exten=? and organization_domain=?";
-		$result=$this->getFirstResultQuery($query,array($extension,$domain));
-		if($result[0]!=0){
-			$this->errMsg=_tr("Already exits a extension with same pattern").$this->errMsg;
-		}else{
-			//validamos que el patron de marcado no esta siendo usado para una extension de fax
-			$query="SELECT count(id) from fax where exten=? and organization_domain=?";
-			$result=$this->getFirstResultQuery($query,array($extension,$domain));
-			if($result[0]!=0){
-				$this->errMsg=_tr("Already exits a fax extension with same pattern").$this->errMsg;
-			}else{
-				//validamos que el patron de marcado no este siendo usado por los features code
-				$query="SELECT 1 from features_code f join features_code_settings fg on f.name=fg.name 
-				where f.code=? or fg.default_code=? and f.organization_domain=?";
-				$result=$this->getFirstResultQuery($query,array($extension,$extension,$domain));
-				if(count($result)>0 || $result===false){
-					$this->errMsg=_tr("Already exits a feature code with same pattern").$this->errMsg;
-				}else{
+    //revisar que no exista dentro de la organizacion otra elemento con el mismo patron de marcado
+    function existExtension($extension,$domain)
+    {
+        $exist=true;
+        //validamos que el patron de marcado no sea usado como extension
+        $query="SELECT count(id) from extension where exten=? and organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($extension,$domain));
+        if($result[0]!=0){
+            $this->errMsg=_tr("Already exits a extension with same pattern").$this->errMsg;
+        }else{
+            //validamos que el patron de marcado no esta siendo usado para una extension de fax
+            $query="SELECT count(id) from fax where exten=? and organization_domain=?";
+            $result=$this->getFirstResultQuery($query,array($extension,$domain));
+            if($result[0]!=0){
+                $this->errMsg=_tr("Already exits a fax extension with same pattern").$this->errMsg;
+            }else{
+                //validamos que el patron de marcado no este siendo usado por los features code
+                $query="SELECT 1 from features_code f join features_code_settings fg on f.name=fg.name 
+                where f.code=? or fg.default_code=? and f.organization_domain=?";
+                $result=$this->getFirstResultQuery($query,array($extension,$extension,$domain));
+                if(count($result)>0 || $result===false){
+                    $this->errMsg=_tr("Already exits a feature code with same pattern").$this->errMsg;
+                }else{
                     //validamos que el patron de marcado no este siendo usado por una cola
-					$query="SELECT count(name) from queue where queue_number=? and organization_domain=?";
+                    $query="SELECT count(name) from queue where queue_number=? and organization_domain=?";
                     $result=$this->getFirstResultQuery($query,array($extension,$domain));
                     if($result[0]!=0){
                         $this->errMsg=_tr("Already exits a queue with same pattern").$this->errMsg;
@@ -145,30 +143,30 @@ class paloAsteriskDB {
                         }else
                             $exist=false;
                     }
-				}
-			}
-		}
-		return $exist;
-	}
+                }
+            }
+        }
+        return $exist;
+    }
 
-	//por el momento solo se pueden crear dispositivos de tipos sip e iax, no son soportadas
-	//otras tecnologias
-	function getAllDevice($domain,$tech=null){
-		$where="";
-		$arrParam=array($domain);
-		if(!empty($tech)){
-			$where=" and tech=?";
-			if(strtolower($tech)=="iax")
-				$arrParam[]="iax2";
-			else
-				$arrParam[]=strtolower($tech);
-		}
-		$query="SELECT dial, device, exten from extension where organization_domain=? $where";
-		$result=$this->getResultQuery($query,$arrParam,true,"Don't exist any devices created");
-		return $result;
-	}
+    //por el momento solo se pueden crear dispositivos de tipos sip e iax, no son soportadas
+    //otras tecnologias
+    function getAllDevice($domain,$tech=null){
+        $where="";
+        $arrParam=array($domain);
+        if(!empty($tech)){
+            $where=" and tech=?";
+            if(strtolower($tech)=="iax")
+                $arrParam[]="iax2";
+            else
+                $arrParam[]=strtolower($tech);
+        }
+        $query="SELECT dial, device, exten from extension where organization_domain=? $where";
+        $result=$this->getResultQuery($query,$arrParam,true,"Don't exist any devices created");
+        return $result;
+    }
 
-	function prunePeer($device,$tech){
+    function prunePeer($device,$tech){
         $errorM="";
         $astMang=AsteriskManagerConnect($errorM);
         if($astMang==false){
@@ -180,7 +178,7 @@ class paloAsteriskDB {
         }
         return true;
     }
-    
+
     function loadPeer($device,$tech){
         $errorM="";
         $astMang=AsteriskManagerConnect($errorM);
@@ -193,7 +191,7 @@ class paloAsteriskDB {
         }
         return true;
     }
-    
+
     function getRecordingsSystem($domain=null){
         $where="";
         $param=array();
@@ -218,7 +216,7 @@ class paloAsteriskDB {
         }
         return $recordings; 
     }
-    
+
     //devuelve el archivo de audio que corresponde al id dado 
     //caso contrario devuelve falso
     function getFileRecordings($domain=null,$key){
@@ -247,7 +245,7 @@ class paloAsteriskDB {
         }
         return $file;
     }
-    
+
     function getMoHClass($domain=null){
         $where="";
         $param=array();
@@ -272,7 +270,7 @@ class paloAsteriskDB {
         }
         return $moh; 
     }
-    
+
     function existMoHClass($class,$domain=null){
         $where="";
         $param=array($class);
@@ -293,7 +291,7 @@ class paloAsteriskDB {
         }
         return false;
     }
-    
+
     //devuelve un arreglo que contiene los posibles destinos de ultimo recurso dado una categoria
     //categorias son: extensions, ivrs, queues, trunks, phonebook, terminate call
     function getDefaultDestination($domain,$categoria){
@@ -360,7 +358,7 @@ class paloAsteriskDB {
         }
         return $arrDestine;
     }
-    
+
     function validateDestine($domain,$valor){
         $arrDestine=array();
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
@@ -390,7 +388,7 @@ class paloAsteriskDB {
                     return false;
                 }
                 break;
-           /* case "trunks":
+            /* case "trunks":
                 $query="SELECT count(trunkid) from trunk where organization_domain=? and trunkid=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
                 if($result[0]!="1"){
@@ -430,7 +428,7 @@ class paloAsteriskDB {
         }
         return true;
     }
-    
+
     //funcion que dado los datos de destinations guardados devuelve el goto del mismo
     function getGotoDestine($domain,$valor){
         $arrDestine=array();
@@ -508,7 +506,7 @@ class paloAsteriskDB {
         }
         return false;
     }
-    
+
     function getCategoryDefault($domain){
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
             $this->errMsg="Invalid domain format";
@@ -547,13 +545,13 @@ class paloAsteriskDB {
         }
         return $arrCat;
     }
-    
+
     /**
         funcion que sirve para verificar si un determinado modulo 
         se encuentra cargado dentro de asterisk
         @param string $module_name nombre del modulo 
         @return bool retorna verdadero si el module esta cargado
-                     falso caso contrario
+                        falso caso contrario
     */
     function isAsteriskModInstaled($module_name){
         $errorM="";
@@ -568,7 +566,7 @@ class paloAsteriskDB {
         }
         return false;
     }
-    
+
     function getGlobalVar($variable,$domain){
         $query="SELECT value from globals where organization_domain=? and variable=?";
         $result=$this->_DB->getFirstRowQuery($query,false,array($domain,$variable));
@@ -578,7 +576,7 @@ class paloAsteriskDB {
         }else
             return $result[0];
     }
-    
+
     function getAudioFormatAsterisk(){
         $errorM="";
         $arrFormats=array();
@@ -603,7 +601,7 @@ class paloAsteriskDB {
         }
         return $arrFormats;
     }
-    
+
     function getCodecsAsterisk(){
         $errorM="";
         $arrFormats=array();
@@ -611,7 +609,7 @@ class paloAsteriskDB {
         $arrFormats["video"]=array("h264","h263p","h261","h263","mpg4");
         return $arrFormats;
     }
-    
+
     function getVoicemailTZ(){
         $arrTz=array();
         //mapear el archivo /etc/asterisk/vm_zonemessages
@@ -750,8 +748,7 @@ class paloSip extends paloAsteriskDB {
 
 	function insertDB()
 	{
-		//valido que el dispositivo tenga seteado el parametro organization_domain y que este exista como dominio de algunaç
-		//organizacion
+		//valido que el dispositivo tenga seteado el parametro organization_domain y que este exista como dominio de alguna organizacion
 		$result=$this->getCodeByDomain($this->organization_domain);
 		if($result==false){
 			$this->errMsg =_tr("Can't create the sip device").$this->errMsg;
@@ -1639,7 +1636,7 @@ class paloDevice{
 	protected $code;
 	public $errMsg;
 
-	function paloDevice($domain,$type,&$pDB2)
+	function paloDevice($domain,$type,$pDB)
 	{
 		if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
 			$this->errMsg="Invalid domain format";
@@ -1647,10 +1644,10 @@ class paloDevice{
 			$this->domain=$domain;
 
 			if($type=="sip"){
-				$this->tecnologia=new paloSip($pDB2);
+				$this->tecnologia=new paloSip($pDB);
 				$this->errMsg=$this->tecnologia->errMsg;
 			}elseif($type=="iax2"){
-				$this->tecnologia=new paloIax($pDB2);
+				$this->tecnologia=new paloIax($pDB);
 				$this->errMsg=$this->tecnologia->errMsg;
 			}else{
 				$this->errMsg="Invalid technology name";
@@ -1708,9 +1705,8 @@ class paloDevice{
     //retorna verdadero si se ha alcanzado el maximo numero se extensiones por organizacion
     function maxMunExtensionByOrg(){
         global $arrConf;
-        $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-        $qOrg="SELECT value from organization_properties where key=? and category=? and id_organization=(SELECT id from organization where domain=?)";
-        $res_num_exten=$pDB->getFirstRowQuery($qOrg,false,array("max_num_exten","limit",$this->domain));
+        $qOrg="SELECT value from organization_properties where property=? and category=? and id_organization=(SELECT id from organization where domain=?)";
+        $res_num_exten=$this->tecnologia->getFirstResultQuery($qOrg,array("max_num_exten","limit",$this->domain),false);
         if($res_num_exten!=false){
             $max_num_exten=$res_num_exten[0];
             if(ctype_digit($max_num_exten)){
@@ -2485,7 +2481,7 @@ class paloDevice{
 		$arrBackup=array();
 		$arrBackup["exten"]=$exten;
 		$device=$this->code."_$exten";
-		$arrFamily=array("EXTUSER/".$this->code."/$exten","DEVICE/".$this->code."/$device","DND/".$this->code."/$exten","CALLTRACE/".$this->code."/$exten","CFU/".$this->code."/$exten","CFB/".$this->code."/$exten","CF/".$this->code."/$exten");
+		$arrFamily=array("EXTUSER/".$this->code."/$exten","DEVICE/".$this->code."/$device","DND/".$this->code."/$exten","CALLTRACE/".$this->code."/$exten","CFU/".$this->code."/$exten","CFB/".$this->code."/$exten","CF/".$this->code."/$exten","CW/".$this->code."/$exten");
 		foreach($arrFamily as $value){
 			$result=$astMang->database_show($value);
 			$arrBackup[]=$result;
@@ -2648,7 +2644,7 @@ class paloDevice{
 			$result=$astMang->database_del("CFU",$this->code."/".$exten);
 			$result=$astMang->database_del("CFB",$this->code."/".$exten);
 			$result=$astMang->database_del("CF",$this->code."/".$exten);
-			$result=$astMang->database_del("Cw",$this->code."/".$exten);
+			$result=$astMang->database_del("CW",$this->code."/".$exten);
 			//eliminar la extension de la base interna de asterisk (ASTDB) que sirve par amantener un registro
 			//$result=$astMang->database_del(strtoupper($tech),"Registry/".$device);
 			$astMang->disconnect();

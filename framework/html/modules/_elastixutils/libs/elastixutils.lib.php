@@ -104,6 +104,11 @@ function setUserPassword()
       $arrResult['msg'] = _tr("The new password doesn't match with retype new password.");
       return $arrResult;
     }
+    //verificamos que la nueva contraseña sea fuerte
+    if(isStrongPassword($new_pass)){
+        $arrResult['msg'] = _tr("The new password can not be empty. It must have at least 10 characters and contain digits, uppers and little case letters");
+        return $arrResult;
+    }
 
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     global $arrConf;
@@ -114,7 +119,7 @@ function setUserPassword()
         $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     else{
         // verificando la clave vieja
-        $val = $pACL->authenticateUser ($user, md5($old_pass));
+        $val = $pACL->authenticateUser($user, md5($old_pass));
         if($val === TRUE){
             $status = $pACL->changePassword($uid, md5($new_pass));
             if($status){

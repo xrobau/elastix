@@ -62,14 +62,12 @@ function _moduleContent(&$smarty, $module_name)
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
     //conexion resource
-    $pDB = new paloDB($arrConf['dsn_conn_database']);
-    $pACL = new paloACL($pDB);   
-
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    
     //comprobacion de la credencial del usuario, el usuario admin es el unica capaz de crear y borrar entidades
     //los usuarios de tipo administrador estan en la capacidad de editar sus propias entidades nada mas
     $userLevel1 = "";
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-
 	//verificar que tipo de usurio es: superadmin, admin o other
 	$arrCredentiasls=getUserCredentials();
     $userLevel1=$arrCredentiasls["userlevel"];
@@ -508,23 +506,15 @@ function saveNewOrganization($smarty, $module_name, $local_templates_dir, &$pDB,
             return viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
         }
         
-        $exito=$pOrganization->createOrganization($name,$domain,$country,$state,$address,$country_code,$area_code,$quota,$email_contact,$num_user,$num_exten,$num_queues,$error);
+        $admin_password=generatePassword();
+        $exito=$pOrganization->createOrganization($name,$domain,$country,$state,$address,$country_code,$area_code,$quota,$email_contact,$num_user,$num_exten,$num_queues,$admin_password);
         if($exito!==false){
-            //exito contine el id de la organizacion recien creada
-            //procedemos a crear al usuario administrador de la entidad
-            $password=generatePassword();
-            $exito=$pOrganization->createAdminUserOrg($domain,$email_contact,$password,$country_code,$area_code,$quota,true);
-            if($exito==false){
-                $msg="<span style='color:red'><br />"._tr("Error creating admin user to new organization. To create Organization's Admin User go modules Users > Users")."<span />".$pOrganization->errMsg;
-            }else
-                $msg="<br />"._tr("To admin the new organization login to elastix as admin@$domain").$pOrganization->errMsg;
-                
             $smarty->assign("mb_title", _tr("Message"));
-            $smarty->assign("mb_message", _tr("The organization was created").$msg);
+            $smarty->assign("mb_message", _tr("The organization was created successfully")."<br />"._tr("To admin the new organization login to elastix as admin@$domain").$pOrganization->errMsg);
             return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
         }else{
             $smarty->assign("mb_title", _tr("Error"));
-            $smarty->assign("mb_message",_tr($error)._tr($pOrganization->errMsg));
+            $smarty->assign("mb_message",_tr($pOrganization->errMsg));
             return viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
         }
     }

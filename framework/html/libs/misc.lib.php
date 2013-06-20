@@ -334,7 +334,7 @@ function getUserProp($username,$key,&$pdB){
 }
 
 function getOrganizationProp($id,$key,&$pDB){
-	$bQuery = "select value from organization_properties where id_organization=? and key=?";
+	$bQuery = "select value from organization_properties where id_organization=? and property=?";
 	$bResult=$pDB->getFirstRowQuery($bQuery,false, array($id,$key));
 	if($bResult==false){
 		return false;
@@ -545,8 +545,8 @@ function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
     case 'asteriskuser':
         $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
         $listaParam = $pConfig->leer_configuracion(FALSE);
-        if (isset($listaParam['DBUSER']))
-            return $listaParam['DBPASSWORD'];
+        if (isset($listaParam['DBPASSWORD']))
+            return $listaParam['DBPASSWORD']['valor'];
         break;
     }
     return NULL;
@@ -584,19 +584,19 @@ function obtenerClaveAMIAdmin($ruta_base='')
  */
 function generarDSNSistema($sNombreUsuario, $sNombreDB, $ruta_base='')
 {
-    require_once '/var/www/html/libs/paloSantoConfig.class.php';
+    require_once $ruta_base.'libs/paloSantoConfig.class.php';
     switch ($sNombreUsuario) {
     case 'root':
         $sClave = obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base);
         if (is_null($sClave)) return NULL;
         return 'mysql://root:'.$sClave.'@localhost/'.$sNombreDB;
     case 'asteriskuser':
-        $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
-        $listaParam = $pConfig->leer_configuracion(FALSE);
-        return "mysql://".
-               $listaParam['DBUSER']['valor']. ":".
-               $listaParam['DBPASSWORD']['valor']. "@".
-               $listaParam['DBHOST']['valor']. "/".$sNombreDB;
+        $sClave = obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base);
+        if (is_null($sClave)) 
+            return NULL;
+        else{
+            return "mysql://asteriskuser:".$sClave.'@localhost/'.$sNombreDB;
+        }
     }
     return NULL;
 }
@@ -621,7 +621,7 @@ function isPostfixToElastix2(){
 // Esto se lo hace exclusivamente debido a la migración de las bases de datos .db del framework a archivos .sql ya que el último rpm generado que contenía las bases como .db las renombra a .rpmsave
 function checkFrameworkDatabases($dbdir)
 {
-    $arrFrameWorkDatabases = array("elastix.db","register.db","samples.db");
+    $arrFrameWorkDatabases = array("register.db","samples.db");
     foreach($arrFrameWorkDatabases as $database){
         if(!file_exists("$dbdir/$database") || filesize("$dbdir/$database")==0){
             if(file_exists("$dbdir/$database.rpmsave"))
@@ -670,14 +670,13 @@ SQL_PROFILE_MENUCOLOR;
  *   de su posición actual y colocarse en la parte superior de la lista. El 
  *   número de items debe quedar inalterado.
  * 
- * @param   object  $pdbACL     Objeto paloDB conectado a las tablas de ACL.
- * @param   object  $pACL       Objeto paloACL para consultar IDs de menú.
+ * @param   object  $pdbACL     Objeto paloDB que contiene la coneccion a la base elxpbx.
  * @param   integer $uid        ID de usuario para el historial
  * @param   string  $id_resource Item de menú a insertar en el historial
  * 
  * @return  bool    VERDADERO si se inserta el item, FALSO en error.  
  */
-function putMenuAsHistory($pdbACL, $pACL, $uid, $id_resource)
+function putMenuAsHistory($pdbACL, $uid, $id_resource)
 {
     global $arrConf;
     
@@ -808,7 +807,7 @@ function load_default_timezone()
 function AsteriskManagerConnect(&$error) {
 	global $arrConf;
 	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
-	require_once $arrConf['basePath'].'/libs/paloSantoConfig.class.php';
+	require_once '/var/www/html/libs/paloSantoConfig.class.php';
 
 	$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
 	$arrConfig = $pConfig->leer_configuracion(false);

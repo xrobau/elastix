@@ -27,13 +27,9 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoACL.class.php,v 1.1.1.1 2007/07/06 21:31:55 gcarrillo Exp $ 
   $Id: paloSantoACL.class.php,v 3.0 2012/09/01 21:31:55 Rocio Mera rmera@palosanto.com Exp $ */
-/*
-if (isset($arrConf['basePath'])) {
-    include_once($arrConf['basePath'] . "/libs/paloSantoDB.class.php");
-} else {
-    include_once("libs/paloSantoDB.class.php");
-}
-*/
+  
+ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+include_once "libs/paloSantoDB.class.php";
 
 define('PALOACL_MSG_ERROR_1', 'Username or password is empty');
 define('PALOACL_MSG_ERROR_2', 'Invalid characters found in username');
@@ -121,22 +117,22 @@ class paloACL {
 		if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
             $this->errMsg = _tr("User ID must be numeric");
 		}else{
-			$query="Select picture from acl_user where id=?";
-			$arr_result = $this->_DB->getFirstRowQuery($query,false,array($id_user));
-			if (!is_array($arr_result)) {
+			$query="SELECT picture_type,picture_content from acl_user where id=?";
+			$arr_result = $this->_DB->getFirstRowQuery($query,true,array($id_user));
+			if ($arr_result===false || count($arr_result)==0) {
 				$this->errMsg = $this->_DB->errMsg;
 			}
 		}
         return $arr_result;
 	}
 
-	function setUserPicture($id_user,$picture){
+	function setUserPicture($id_user,$picture_type,$picture_content){
 		$result = FALSE;
 		if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
             $this->errMsg = _tr("User ID must be numeric");
 		}else{
-			$query="update acl_user set picture=? where id=?";
-			$result = $this->_DB->genQuery($query,array($picture,$id_user));
+			$query="update acl_user set picture_type=?,picture_content=? where id=?";
+			$result = $this->_DB->genQuery($query,array($picture_type,$picture_content,$id_user));
 		}
         return $result;
 	}
@@ -367,32 +363,32 @@ class paloACL {
         if ($username == "") {
             $this->errMsg = _tr("Username can't be empty");
         } elseif(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/", $username)){
-			$this->errMsg = _tr("Username is not valid");
-		}else{
-			if ( !$name ) $name = $username;
+            $this->errMsg = _tr("Username is not valid");
+        }else{
+            if ( !$name ) $name = $username;
             // Verificar que el nombre de usuario no existe previamente
             $id_user = $this->getIdUser($username);
             if ($id_user !== FALSE) {
                 $this->errMsg = _tr("Username already exists");
             } elseif ($this->errMsg == "") {
-			//El id_group no puede ser 0
-				if(!preg_match("/^[[:digit:]]+$/","$id_group") || $id_group=="0"){ // 1)
-					$this->errMsg = _tr("Grout ID is not valid");
-					return false;
-				}
+            //El id_group no puede ser el grupo del superadmin, superadmin_group=1
+                if(!preg_match("/^[[:digit:]]+$/","$id_group") || $id_group=="1"){ // 1)
+                    $this->errMsg = _tr("Grout ID is not valid");
+                    return false;
+                }
 
-			//El id_organization no puede ser 1
-				if(!preg_match("/^[[:digit:]]+$/","$idOrganization") || $idOrganization=="1"){ // 1)
-					$this->errMsg = _tr("Organization ID is not valid");
-					return false;
-				}
+            //El id_organization no puede ser 1
+                if(!preg_match("/^[[:digit:]]+$/","$idOrganization") || $idOrganization=="1"){ // 2)
+                    $this->errMsg = _tr("Organization ID is not valid");
+                    return false;
+                }
 
-			//validar que el grupo exista y que pertenezca a la misma organization que el usuario
-				$arrGroup=$this->getGroups($id_group, $idOrganization);
-				if($arrGroup==false){ // 1)
-					$this->errMsg = _tr("Group dosen't exist");
-					return false;
-				}
+            //validar que el grupo exista y que pertenezca a la misma organization que el usuario
+                $arrGroup=$this->getGroups($id_group, $idOrganization);
+                if($arrGroup==false){ // 2)
+                    $this->errMsg = _tr("Group dosen't exist");
+                    return false;
+                }
 
                 $sPeticionSQL = "INSERT into acl_user (username,name,md5_password,id_group,extension,fax_extension) VALUES (?,?,?,?,?,?)";
                 $arrParam = array($username,$name,$md5_password,$id_group,$extension, $fax_extension);
@@ -407,12 +403,12 @@ class paloACL {
     }
 
     /**
-     * Procedimiento para modificar al usuario con el ID de usuario especificado, para darle una nueva extension, fax extension
-	 * y description
+     * Procedimiento para modificar al usuario con el ID de usuario especificado, para darle una nueva extension, fax extension y description
      *
      * @param int       $id_user        Indica el ID del usuario a modificar
-     * @param string    $username       Login del usuario a crear
-     * @param string    $description    Descripción del usuario a crear
+     * @param string    $name           nombre descriptivo del usuario
+     * @param string    $extension      extension telefonica del usuario
+     * @param string    $fax_extension  extensión de fax del usuario
      *
      * @return bool VERDADERO si se modifico correctamente el usuario, FALSO si ocurre un error.
      */
@@ -493,23 +489,10 @@ class paloACL {
             $this->errMsg = _tr("User ID is not valid");
         } else {
             $this->errMsg = "";
-			$listaSQL = array(
-				"DELETE FROM fax_docs WHERE id_user = ?",
-                "DELETE FROM user_properties WHERE id_user = ?",
-                "DELETE FROM user_shortcut WHERE id_user = ?",
-				"DELETE FROM sticky_note WHERE id_user = ?",
-				"DELETE FROM messages_vacations where account = (SELECT username FROM acl_user where id=?)",
-				"DELETE FROM acl_user WHERE id = ?"
-            );
-
-            $bExito = TRUE;
-
-			foreach ($listaSQL as $sPeticionSQL) {
-                $bExito = $this->_DB->genQuery($sPeticionSQL,array($id_user));
-                if (!$bExito) {
-                    $this->errMsg = $this->_DB->errMsg;
-                    break;
-                }
+            $query = "DELETE FROM acl_user WHERE id=?";
+            $bExito = $this->_DB->genQuery($sPeticionSQL,array($id_user));
+            if (!$bExito) {
+                $this->errMsg = $this->_DB->errMsg;
             }
 		}
         return $bExito;
@@ -608,12 +591,12 @@ class paloACL {
                 "SELECT g.id, g.name ".
                 "FROM acl_group as g, acl_user as u ".
                 "WHERE u.id_group = g.id AND u.id = ?";
-            $result = $this->_DB->fetchTable($sPeticionSQL, FALSE, array($id_user));
-            if ($result && is_array($result) && count($result)>0) {
-                $arr_resultado = array();
-                foreach($result as $key => $value)
-                    $arr_resultado[$value[1]] = $value[0];
-            }else $this->errMsg = $this->_DB->errMsg;
+            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, array($id_user));
+            if($result==false){
+                $this->errMsg = ($result===false)?$this->_DB->errMsg:"User doen't belong to any group";
+            }else{
+                $arr_resultado[$result[1]] = $result[0];
+            }
         }
         return $arr_resultado;
     }
@@ -630,9 +613,9 @@ class paloACL {
     {
         $idGroup = FALSE;
 
-		if(!preg_match('/^[[:digit:]]+$/', "$id_organization")) {
+        if(!preg_match('/^[[:digit:]]+$/', "$id_organization")) {
             $this->errMsg = _tr("Organization ID must be numeric");
-			return false;
+            return false;
         }
 
         $arrParams = array($sNombreGroup, $id_organization);
@@ -640,7 +623,7 @@ class paloACL {
         $this->errMsg = '';
         $sPeticionSQL = "SELECT id FROM acl_group WHERE name = ? and id_organization = ?";
         $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $arrParams);
-        if ($result && is_array($result) && count($result)>0) {
+        if (is_array($result) && count($result)>0) {
             $idGroup = $result[0];
         }else $this->errMsg = $this->_DB->errMsg;
         return $idGroup;
@@ -663,7 +646,7 @@ class paloACL {
             $this->errMsg = _tr("User ID and Group ID can't be empty");
         }elseif(!preg_match('/^[[:digit:]]+$/', "$id_user")) {
             $this->errMsg = _tr("User ID must be numeric");
-        }elseif( !preg_match('/^[[:digit:]]+$/', "$id_group") || $id_group=="0" ) {
+        }elseif( !preg_match('/^[[:digit:]]+$/', "$id_group") || $id_group=="1" ) {
             $this->errMsg = _tr("Group ID is not valid");
 		}elseif (is_array($listaUser = $this->getUsers($id_user)) &&
             is_array($listaGrupo = $this->getGroups($id_group))) {
@@ -769,7 +752,7 @@ class paloACL {
     function isUserAuthorizedById($id_user, $resource_name)
     {
 $sPeticionSQL = <<<INFO_AUTH_MODULO
-SELECT count(ogr.id_resource) From organization_resource as ogr
+    SELECT count(ogr.id_resource) From organization_resource as ogr
 	JOIN group_resource as gr on ogr.id=gr.id_org_resource
 	where gr.id_group=(Select u.id_group from acl_user as u where u.id=?) and ogr.id_resource=?;
 INFO_AUTH_MODULO;
@@ -887,34 +870,32 @@ INFO_AUTH_MODULO;
 	//funcion que devuelve el id de la organizacion a la que pertenece un usuario dado el id del usuario
 	function getIdOrganizationUser($idUser)
 	{
-		$id_Organization = false;
-		if (!preg_match('/^[[:digit:]]+$/', "$idUser")) {
+        $id_Organization = false;
+        if (!preg_match('/^[[:digit:]]+$/', "$idUser")) {
             $this->errMsg = _tr("User ID is not valid");
-			return false;
-		}
-		$arrGroup=$this->getMembership($idUser);
-		if(is_array($arrGroup) && count($arrGroup)>0){
-			$sql="Select g.id_organization from acl_group as g join acl_user as u on u.id_group=g.id where u.id=?";
-			$result = $this->_DB->getFirstRowQuery($sql,true,array($idUser));
-			if (is_array($result)) {
-				 if(count($result)>0)
-					$id_Organization = $result["id_organization"];
-				else
-					$this->errMsg = _tr("User doesn't exist");
-            }else $this->errMsg = $this->_DB->errMsg;
-		}
+            return false;
+        }
+        $sql="Select g.id_organization from acl_group as g join acl_user as u on u.id_group=g.id where u.id=?";
+        $result = $this->_DB->getFirstRowQuery($sql,true,array($idUser));
+        if (is_array($result)) {
+            if(count($result)>0)
+                $id_Organization = $result["id_organization"];
+            else
+                $this->errMsg = _tr("User doesn't exist");
+        }else 
+            $this->errMsg = $this->_DB->errMsg;
 		return $id_Organization;
-	}
+    }
 
-	//funcion que devuelve el id de la organizacion a la que pertenece un usuario dado su username
-	function getIdOrganizationUserByName($username)
-	{
-		$idUser=$this->getIdUser($username);
-		$id_Organization=$this->getIdOrganizationUser($idUser);
-		return $id_Organization;
-	}
+    //funcion que devuelve el id de la organizacion a la que pertenece un usuario dado su username
+    function getIdOrganizationUserByName($username)
+    {
+        $idUser=$this->getIdUser($username);
+        $id_Organization=$this->getIdOrganizationUser($idUser);
+        return $id_Organization;
+    }
 
-	 /**
+    /**
      * Procedimiento para saber si un usuario (login) pertenece al grupo administrador
      *
      * @param string   $username  Username del usuario
@@ -945,7 +926,7 @@ INFO_AUTH_MODULO;
         $idUser = $this->getIdUser($username);
         if($idUser){
             $arrGroup = $this->getMembership($idUser);
-            $is = array_search('0', $arrGroup);
+            $is = array_search('1', $arrGroup);
             if($username=="admin" && $is!==false){
                 return true;
 			}
@@ -1065,59 +1046,49 @@ INFO_AUTH_MODULO;
      */
     function deleteGroup($id_group)
     {
-        $bExito = FALSE;
         if (!preg_match('/^[[:digit:]]+$/', "$id_group") ) {
             $this->errMsg = _tr("Group ID must be numeric");
+            return false;
         } else {
-			//no se pueden borrar los grupos por default de elasstix
-			$arrGroup=$this->getGroups($id_group);
-			if(is_array($arrGroup) && count($arrGroup)>0){
-				if($arrGroup[0][3]=="1"){
-					$this->errMsg = _tr("Group doesn't exist");
-					return FALSE;
-				}
-			}else{
-				$this->errMsg = _tr("Group doesn't exist").$this->errMsg;
-				return FALSE;
-			}
+            //no se pueden borrar los grupos por default de elasstix
+            $arrGroup=$this->getGroups($id_group);
+            if(is_array($arrGroup) && count($arrGroup)>0){
+                if($arrGroup[0][3]=="1"){
+                    $this->errMsg = _tr("Invalid Group");
+                    return FALSE;
+                }
+            }else{
+                $this->errMsg = _tr("Group doesn't exist").$this->errMsg;
+                return FALSE;
+            }
 
-			$this->errMsg = "";
-			$listaSQL = array(
-				"DELETE FROM group_resource WHERE id_group = ?",
-				"DELETE FROM acl_group WHERE id = ?",
-			);
-			$bExito = TRUE;
-			if(!($this->HaveUsersTheGroup($id_group))){
-				foreach ($listaSQL as $sPeticionSQL) {
-					$bExito = $this->_DB->genQuery($sPeticionSQL, array($id_group));
-					if (!$bExito) {
-						$this->errMsg = $this->_DB->errMsg;
-						break;
-					}
-				}
-			}else{
-				$this->errMsg = _tr("You can not delete this group. You must delete all users belong this group before to delete the group");
-				$bExito = FALSE;
-			}
-		}
-		return $bExito;
-	}
+            $this->errMsg = "";
+            $query = "DELETE FROM acl_group WHERE id = ?";
+            //no deben haber usuarios ertenecientes al grupo para que este puede ser borrado
+            if(!($this->HaveUsersTheGroup($id_group))){
+                $bExito = $this->_DB->genQuery($query, array($id_group));
+                if (!$bExito) {
+                    $this->errMsg = $this->_DB->errMsg;
+                }
+            }else{
+                $this->errMsg = _tr("You can not delete this group. You must delete all users belong this group before to delete the group");
+                return FALSE;
+            }
+        }
+        return $bExito;
+    }
 
     function HaveUsersTheGroup($id_group)
     {
         $Haveusers = TRUE;
-        if (!preg_match('/^[[:digit:]]+$/', "$id_group")) {
-            $this->errMsg = _tr("Group ID must be numeric");
-        } else {
-            $sPeticionSQL = "SELECT count(id) FROM acl_user WHERE id_group = ?";
-            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE,array($id_group));
-            if ($result && is_array($result)) {
-                $users = $result[0];
-                if($users==0)
-                    $Haveusers = FALSE;
-            }else{
-				$this->errMsg = $this->_DB->errMsg;
-			}
+        $sPeticionSQL = "SELECT count(id) FROM acl_user WHERE id_group = ?";
+        $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE,array($id_group));
+        if(is_array($result)) {
+            $numUsers = $result[0];
+            if($numUsers==0)
+                $Haveusers = FALSE;
+        }else{
+            $this->errMsg = $this->_DB->errMsg;
         }
         return $Haveusers;
     }
@@ -1447,7 +1418,6 @@ INFO_AUTH_MODULO;
 			return false;
         }else {
 			$queryId = "SELECT id FROM organization_resource where id_organization = ? AND id_resource = ?";
-			$dGrpResorc = "DELETE FROM group_resource WHERE id_org_resource = ?";
 			$dOrgResorc = "DELETE FROM organization_resource WHERE id = ?";
             foreach ($resources as $resource){
 				$result=$this->_DB->getFirstRowQuery($queryId,false, array($idOrganization, $resource));
@@ -1455,11 +1425,6 @@ INFO_AUTH_MODULO;
 					$this->errMsg = _tr("Error has ocurred to delete permission")." ".$this->_DB->errMsg;
 					return false;
 				}elseif(count($result)>0){
-					if (!$this->_DB->genQuery($dGrpResorc, array($result[0]))){
-						$this->errMsg = $this->_DB->errMsg;
-						return false;
-					}
-
 					if (!$this->_DB->genQuery($dOrgResorc, array($result[0]))){
 						$this->errMsg = $this->_DB->errMsg;
 						return false;
@@ -1501,18 +1466,13 @@ INFO_AUTH_MODULO;
     function deleteResource($idresource)
     {
         $this->errMsg = "";
-		$arryQuery = array();
-		$arryQuery[] = "DELETE FROM group_resource WHERE id_org_resource in (SELECT id from organization_resource where id_resource=?)";
-		$arryQuery[] = "DELETE FROM organization_resource WHERE id_resource = ?";
-		$arryQuery[] = "DELETE FROM acl_resource WHERE id = ?";
-		foreach($arryQuery as $query)
-			$result = $this->_DB->genQuery($query,array($idresource));
-			if($result==FALSE){
-				$this->errMsg = $this->_DB->errMsg;
-				return false;
-			}else
-				return true;
-		
+        $query = "DELETE FROM acl_resource WHERE id = ?";
+        $result = $this->_DB->genQuery($query,array($idresource));
+        if($result==FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else
+            return true;
     }
 
 
@@ -1536,19 +1496,18 @@ INFO_AUTH_MODULO;
         return $groupName;
     }
 
-	function updateUserName($idUser, $name){
-		if(!preg_match("/[[:digit:]]+/",$idUser)){
-			$this->errMsg=_tr("User ID is not valid");
-			return false;
-		}
-		$query="Update acl_user set name=? where id=?";
-		$result = $this->_DB->genQuery($query,array($name,$idUser));
-		if($result==false){
-			$this->errMsg = $this->_DB->errMsg;
-			return false;
-		}else
-			return true;
-	}
-
+    function updateUserName($idUser, $name){
+        if(!preg_match("/[[:digit:]]+/",$idUser)){
+            $this->errMsg=_tr("User ID is not valid");
+            return false;
+        }
+        $query="Update acl_user set name=? where id=?";
+        $result = $this->_DB->genQuery($query,array($name,$idUser));
+        if($result==false){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else
+            return true;
+    }
 }
 ?>

@@ -363,6 +363,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: General Settings: fix trivial syntax error.
+  SVN Rev[5115]
+
 * Tue Jun 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Voicemail, Monitoring: stop using popup.tpl. The blackmin theme lacks
   this template, and these two are the only two modules to use it. Additionally

@@ -104,7 +104,7 @@ function showMessageReload($module_name,$arrConf, &$pDB, $userLevel1, $userAccou
 	}
 
 	$mensaje=_tr("Click here to reload dialplan");
-	$result=$pAstConf->_DB->->fetchTable($query,false,$params);
+	$result=$pAstConf->_DB->fetchTable($query,false,$params);
 	if(is_array($result)){
 		foreach($result as $value){
 			if($value[1]!=1){

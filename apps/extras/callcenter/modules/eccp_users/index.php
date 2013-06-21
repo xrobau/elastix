@@ -94,31 +94,12 @@ function listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir)
     }
     
     // Listar todos los agentes
-    $offset = 0; $limit = 50;
-    $total = $oUsuarios->contarUsuarios();
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit(50);
+    $oGrid->setTotal($oUsuarios->contarUsuarios());
+    $offset = $oGrid->calculateOffset();
+    $listaAgentes = $oUsuarios->listarUsuarios(NULL, $offset, $oGrid->getLimit());
 
-    // Si se quiere avanzar a la sgte. pagina
-    if(isset($_GET['nav']) && $_GET['nav']=="end") {
-        // Mejorar el sgte. bloque.
-        if(($total%$limit)==0) {
-            $offset = $total - $limit;
-        } else {
-            $offset = $total - $total%$limit;
-        }
-    }
-
-    // Si se quiere avanzar a la sgte. pagina
-    if(isset($_GET['nav']) && $_GET['nav']=="next") {
-        //if (isset(estado']))
-        $offset = $_GET['start'] + $limit - 1;
-    }
-
-    // Si se quiere retroceder
-    if(isset($_GET['nav']) && $_GET['nav']=="previous") {
-        $offset = $_GET['start'] - $limit - 1;
-    }
-
-    $listaAgentes = $oUsuarios->listarUsuarios(NULL, $offset, $limit);
     $arrData = array();
     foreach ($listaAgentes as $t) {
     	$arrData[] = array(
@@ -128,15 +109,11 @@ function listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir)
         ); 
     }
     
-    $arrData = array_slice($arrData,$offset,$limit);
     $url = construirURL(array('menu' => $module_name), array('nav', 'start'));
     $arrGrid = array("title"    => _tr('ECCP User List'),
                      "url"      => $url,
                      "icon"     => 'images/user.png',
                      "width"    => "99%",
-                     "start"    => ($total==0) ? 0 : $offset + 1,
-                     "end"      => ($offset+$limit)<=$total ? $offset+$limit : $total,
-                     "total"    => $total,
                      "columns"  => array(
                                         0 => array("name"       => 
                                             '<input type="submit" class="button" name="delete" value="'.
@@ -148,7 +125,6 @@ function listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir)
                                         )
                     );
     
-    $oGrid = new paloSantoGrid($smarty);
     $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-users.tpl"));
     $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
     if (strpos($sContenido, '<form') === FALSE)

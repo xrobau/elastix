@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Packages: remove stray debugging statements.
+  SVN Rev[5116]
+
 * Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix botched detail window for package version mismatch.
   Convert all of the module to use _tr() and load_language_module().

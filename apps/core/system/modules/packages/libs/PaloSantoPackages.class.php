@@ -156,7 +156,7 @@ class PaloSantoPackages
         
         $repos = glob($this->_ruta."/*");
         if (count($repos) <= 0) {
-            print "Faltan repos<br/>\n";
+            //print "Faltan repos<br/>\n";
         	$this->bActualizar = TRUE;
         }
         
@@ -182,7 +182,7 @@ class PaloSantoPackages
             	// Pedir actualización si los repos tienen más de 1 semana
                 $st = stat($rutas[0]);
                 if (time() - $st['mtime'] > 3600 * 24 * 7) {
-                    print "Repo $repo es viejo<br/>\n";
+                    //print "Repo $repo es viejo<br/>\n";
                     $this->bActualizar = TRUE;
                 }
                 
@@ -191,7 +191,7 @@ class PaloSantoPackages
                 if (empty($dbconn->errMsg)) $this->_repodb[$repo] = $dbconn; 
             } else {
             	// Alguien hizo yum clean all
-                print "No hay sqlite para repo $repo<br/>\n";
+                //print "No hay sqlite para repo $repo<br/>\n";
                 $this->bActualizar = TRUE;
             } 
         }

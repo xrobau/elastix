@@ -144,40 +144,16 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
     }
 
     // para el pagineo
-    $limit = 50;
-    $offset = 0;
+    $arrCampaign = $oCampaign->getCampaigns(NULL, NULL, NULL, $sEstado);
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit(50);
+    $oGrid->setTotal(count($arrCampaign));
+    $offset = $oGrid->calculateOffset();
+    $arrCampaign = array_slice($arrCampaign, $offset, $oGrid->getLimit());
 
     $url = construirURL(
         array('menu' => $module_name, 'cbo_estado' => $sEstado),
         array('nav', 'start'));
-
-    $arrCampaign = $oCampaign->getCampaigns(null, $offset, NULL, $sEstado);
-    $total = count($arrCampaign);
-
-    // Si se quiere avanzar a la sgte. pagina
-    if(isset($_GET['nav']) && $_GET['nav']=="end") {
-        $totalCampaigns  = count($arrCampaign);
-        // Mejorar el sgte. bloque.
-        if(($totalCampaigns%$limit)==0) {
-            $offset = $totalCampaigns - $limit;
-        } else {
-            $offset = $totalCampaigns - $totalCampaigns%$limit;
-        }
-    }
-
-    // Si se quiere avanzar a la sgte. pagina
-    if(isset($_GET['nav']) && $_GET['nav']=="next") {
-        $offset = $_GET['start'] + $limit - 1;
-    }
-
-    // Si se quiere retroceder
-    if(isset($_GET['nav']) && $_GET['nav']=="previous") {
-        $offset = $_GET['start'] - $limit - 1;
-    }
-
-    $arrCampaign = $oCampaign->getCampaigns($limit, $offset, NULL, $sEstado);
-
-    $end = count($arrCampaign);
 
     if (is_array($arrCampaign)) {
         foreach($arrCampaign as $campaign) {
@@ -209,36 +185,25 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
     }
 
     // Definición de la tabla de las campañas
-    $arrGrid = array("title"    => _tr("Campaigns List"),
+    $arrGrid = array(
+        "title"    => _tr("Campaigns List"),
         "url"      => $url,
         "icon"     => "images/list.png",
         "width"    => "99%",
-        "start"    => ($total==0) ? 0 : $offset + 1,
-        "end"      => ($offset+$limit)<=$total ? $offset+$limit : $total,
-        "total"    => $total,
         "columns"  => array(
-                            0 => array("name"      => '',
-                                       "property1" => ""),
-                            1 => array("name"      => _tr("Name Campaign"),
-                                       "property1" => ""),
-                            2 => array("name"      => _tr("Range Date"), 
-                                       "property1" => ""),
-                            3 => array("name"      => _tr("Schedule per Day"), 
-                                       "property1" => ""),
-                            4 => array("name"      => _tr("Retries"), 
-                                       "property1" => ""),
-                            5 => array("name"      => _tr("Trunk"), 
-                                       "property1" => ""),
-                            6 => array("name"      => _tr("Queue"), 
-                                       "property1" => ""),
-                            7 => array("name"      => _tr("Completed Calls"),
-                                       "property1" => ""),
-                            8 => array("name"      => _tr("Average Time"), 
-                                       "property1" => ""),
-                            9 => array("name"     => _tr("Status"), 
-                                       "property1" => ""),
-                            10 => array("name"     => _tr("Options"), 
-                                       "property1" => "")));
+            0 => array("name"      => ''),
+            1 => array("name"      => _tr("Name Campaign")),
+            2 => array("name"      => _tr("Range Date")),
+            3 => array("name"      => _tr("Schedule per Day")),
+            4 => array("name"      => _tr("Retries")),
+            5 => array("name"      => _tr("Trunk")),
+            6 => array("name"      => _tr("Queue")),
+            7 => array("name"      => _tr("Completed Calls")),
+            8 => array("name"      => _tr("Average Time")),
+            9 => array("name"     => _tr("Status")),
+            10 => array("name"     => _tr("Options"))
+        )
+    );
 
     // Construir el HTML del filtro
     $smarty->assign(array(
@@ -254,7 +219,6 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
         'MESSAGE_CONTINUE_DEACTIVATE'   =>  _tr("Are you sure you wish to continue?"),
         'MESSAGE_CONTINUE_DELETE'       =>  _tr("Are you sure you wish to delete campaign?"),
     ));
-    $oGrid = new paloSantoGrid($smarty);
     $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-campaign.tpl"));
     $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
     if (strpos($sContenido, '<form') === FALSE)

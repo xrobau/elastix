@@ -1,3 +1,5 @@
+* FIXED: Campaigns In, Campaigns Out, Agents, Callback Extensions, ECCP Users:
+  modernize pagination to fix zeros under elastixneo theme.
 * FIXED: Callback Extensions: remove access to variable that no longer exists
   from Agents implementation.
 * FIXED: Dialer (ECCP): check that target extension for transfer is entirely

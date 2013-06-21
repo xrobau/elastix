@@ -233,50 +233,21 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
         $arrData[] = $tuplaData;
     }
 
-    $limit = 50;
-    $offset = 0;
     $url = construirURL(array('menu' => $module_name, 'cbo_estado' => $sEstadoAgente), array('nav', 'start'));
 
-    if( is_array($arrData) ) {
-        $arrData = array_slice($arrData,$offset);
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit(50);
+    if (is_array($arrData)) {
+        $oGrid->setTotal(count($arrData));
+        $offset = $oGrid->calculateOffset();
+        $arrData = array_slice($arrData, $offset, $oGrid->getLimit());
     }
-    $total = count($arrData);
-
-    // Si se quiere avanzar a la sgte. pagina
-    if(isset($_GET['nav']) && $_GET['nav']=="end") {
-        $totalCalls  = count($arrData);
-        // Mejorar el sgte. bloque.
-        if(($totalCalls%$limit)==0) {
-            $offset = $totalCalls - $limit;
-        } else {
-            $offset = $totalCalls - $totalCalls%$limit;
-        }
-    }
-
-    // Si se quiere avanzar a la sgte. pagina
-    if(isset($_GET['nav']) && $_GET['nav']=="next") {
-        //if (isset(estado']))
-        $offset = $_GET['start'] + $limit - 1;
-    }
-
-    // Si se quiere retroceder
-    if(isset($_GET['nav']) && $_GET['nav']=="previous") {
-        $offset = $_GET['start'] - $limit - 1;
-    }
-
-    if( is_array($arrData) ) {
-        $arrData = array_slice($arrData,$offset,$limit);
-    }
-    $end = count($arrData);
 
     // Construir el reporte de los agentes activos
     $arrGrid = array("title"    => _tr("Agent List"),
                      "url"      => $url,
                      "icon"     => "images/user.png",
                      "width"    => "99%",
-                     "start"    => ($total==0) ? 0 : $offset + 1,
-                     "end"      => ($offset+$limit)<=$total ? $offset+$limit : $total,
-                     "total"    => $total,
                      "columns"  => array(
                                         0 => array("name"       => '&nbsp;',
                                                     "property1" => ""),
@@ -292,7 +263,6 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
                                                     "property1" => ""),
                                         )
                     );
-    $oGrid = new paloSantoGrid($smarty);
     $smarty->assign(array(
         'LABEL_STATE'           =>  _tr('Status'),
         'LABEL_CREATE_AGENT'    =>  _tr("New agent"),

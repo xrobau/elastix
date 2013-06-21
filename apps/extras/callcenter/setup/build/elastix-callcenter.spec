@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaigns In, Campaigns Out, Agents, Callback Extensions, ECCP Users:
+  modernize pagination to fix zeros under elastixneo theme.
+
 * Tue Jun 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Callback Extensions: remove access to variable that no longer exists
   from Agents implementation.

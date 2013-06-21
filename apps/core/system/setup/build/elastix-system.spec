@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jun 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: remove stray debugging statements.
   SVN Rev[5116]
@@ -142,6 +146,7 @@ fi
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5103]
 
 * Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: use internal glob instead of exec'd shell piping to

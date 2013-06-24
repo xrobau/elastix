@@ -484,7 +484,7 @@ class paloSantoCalendar {
         $dataExt    = $this->getDataExt($number_org);
         $variables  = "TTS=\"$textToSpeach\"";
         //$parameters = $this->Originate($number_org, $number_dst, $dataExt['dial'], $dataExt['cidname'], "festival-event", $variables, "Festival", "hello");
-        $parameters = $this->Originate($number_org, $number_dst, $dataExt['dial'], $dataExt['cidname'], "", $variables, "Festival", $textToSpeach);
+        $parameters = $this->Originate($number_org, $number_dst, $dataExt['dial'], $dataExt['cidname'], "from-internal", $variables, "Festival", $textToSpeach);
 
         return $this->AsteriskManagerAPI("Originate",$parameters);
     }

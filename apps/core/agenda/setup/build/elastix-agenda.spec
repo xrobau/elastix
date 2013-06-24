@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Address Book, Calendar: specify Context for AMI Originate instead of
+  a blank field. Fixes Elastix bug #1605.
+  SVN Rev[5120]
+
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

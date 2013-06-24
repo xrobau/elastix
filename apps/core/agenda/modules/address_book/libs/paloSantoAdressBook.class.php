@@ -268,7 +268,7 @@ a array with the field "total" containing the total of records.
         $parameters['Channel']      = $channel;
         $parameters['CallerID']     = "$description <$origen>";
         $parameters['Exten']        = $destino;
-        $parameters['Context']      = "";
+        $parameters['Context']      = "from-internal";
         $parameters['Priority']     = 1;
         $parameters['Application']  = "";
         $parameters['Data']         = "";

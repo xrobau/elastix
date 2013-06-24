@@ -130,50 +130,55 @@ function _moduleContent(&$smarty, $module_name)
 
 function report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr, $pDB_ext)
 {
-    $arrCalls = array("All"=>_tr("All"),"Incoming_Calls" => _tr("Incoming Calls"),"Outcoming_Calls" => _tr("Outcoming Calls"));
     $arrFormElements = array(
-        "date_from"         => array(   "LABEL"                  => _tr("Start date"),
-                                        "REQUIRED"               => "yes",
-                                        "INPUT_TYPE"             => "DATE",
-                                        "INPUT_EXTRA_PARAM"      => "",
-                                        "VALIDATION_TYPE"        => "text",
-                                        "VALIDATION_EXTRA_PARAM" => ""),
-        "date_to"           => array(   "LABEL"                  => _tr("End date"),
-                                        "REQUIRED"               => "no",
-                                        "INPUT_TYPE"             => "DATE",
-                                        "INPUT_EXTRA_PARAM"      => "",
-                                        "VALIDATION_TYPE"        => "text",
-                                        "VALIDATION_EXTRA_PARAM" => ""),
-        "extensions"        => array(   "LABEL"                  => _tr("Number"),
-                                        "REQUIRED"               => "no",
-                                        "INPUT_TYPE"             => "SELECT",
-                                        "INPUT_EXTRA_PARAM"      => loadExtentions($pDB_ext),
-                                        "VALIDATION_TYPE"        => "text",
-                                        "EDITABLE"               => "yes",
-                                        "VALIDATION_EXTRA_PARAM" => ""),
-        "classify_by"       => array(   "LABEL"                  => "",
-                                        "REQUIRED"               => "no",
-                                        "INPUT_TYPE"             => "SELECT",
-                                        "INPUT_EXTRA_PARAM"      => array("Number"=>_tr('Extension (Number)'),"Queue"=>_tr('Queue'),"Trunk"=>_tr('Trunk')),
-                                        "VALIDATION_TYPE"        => "text",
-                                        "EDITABLE"               => "yes",
-                                        "VALIDATION_EXTRA_PARAM" => "",
-                                        'ONCHANGE'               => 'show_elements();'),
-        "call_to"           => array(   "LABEL"                  => _tr("Number"),
-                                        "REQUIRED"               => "yes",
-                                        "INPUT_TYPE"             => "TEXT",
-                                        "INPUT_EXTRA_PARAM"      => array("id" => 'call_to'),
-                                        "VALIDATION_TYPE"        => "text",
-                                        "EDITABLE"               => "yes",
-                                        "VALIDATION_EXTRA_PARAM" => ""),
-        "trunks"            => array(   "LABEL"                  => "Trunk",
-                                        "REQUIRED"               => "no",
-                                        "INPUT_TYPE"             => "SELECT",
-                                        "INPUT_EXTRA_PARAM"      => loadTrunks($pDB_ext),
-                                        "VALIDATION_TYPE"        => "text",
-                                        "EDITABLE"               => "yes",
-                                        "VALIDATION_EXTRA_PARAM" => ""),
-                            );
+        "date_from"         => array(
+            "LABEL"                  => _tr("Start date"),
+            "REQUIRED"               => "yes",
+            "INPUT_TYPE"             => "DATE",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""),
+        "date_to"           => array(
+            "LABEL"                  => _tr("End date"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "DATE",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""),
+        "extensions"        => array(
+            "LABEL"                  => _tr("Number"),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "SELECT",
+            "INPUT_EXTRA_PARAM"      => loadExtentions($pDB_ext),
+            "VALIDATION_TYPE"        => "text",
+            "EDITABLE"               => "yes",
+            "VALIDATION_EXTRA_PARAM" => ""),
+        "classify_by"       => array(
+            "LABEL"                  => "",
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "SELECT",
+            "INPUT_EXTRA_PARAM"      => array("Number"=>_tr('Extension (Number)'),"Queue"=>_tr('Queue'),"Trunk"=>_tr('Trunk')),
+            "VALIDATION_TYPE"        => "text",
+            "EDITABLE"               => "yes",
+            "VALIDATION_EXTRA_PARAM" => "",
+            'ONCHANGE'               => 'show_elements();'),
+        "call_to"           => array(
+            "LABEL"                  => _tr("Number"),
+            "REQUIRED"               => "yes",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => array("id" => 'call_to'),
+            "VALIDATION_TYPE"        => "text",
+            "EDITABLE"               => "yes",
+            "VALIDATION_EXTRA_PARAM" => ""),
+        "trunks"            => array(
+            "LABEL"                  => "Trunk",
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "SELECT",
+            "INPUT_EXTRA_PARAM"      => loadTrunks($pDB_ext),
+            "VALIDATION_TYPE"        => "text",
+            "EDITABLE"               => "yes",
+            "VALIDATION_EXTRA_PARAM" => ""),
+    );
 
     $oFilterForm = new paloForm($smarty, $arrFormElements);
     $smarty->assign("SHOW", _tr("Show"));
@@ -182,10 +187,9 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr,
     $date_ini = getParameter("date_from");
     $date_fin = getParameter("date_to");
     $ext = getParameter("call_to");
-    $calls_io = getParameter("calls");
 
-    $date_ini2 = ConverterDate($date_ini);
-    $date_fin2 = ConverterDate($date_fin);
+    $date_ini2 = translateDate($date_ini);
+    $date_fin2 = translateDate($date_fin);
     $ext2 = $ext;
 
     $option = "";
@@ -201,20 +205,19 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr,
         $smarty->assign("date_to", $date_fin);
         $smarty->assign("date_2", $date_fin);
 
-        $date_ini2 = ConverterDate($date_ini);
-        $date_fin2 = ConverterDate($date_fin);
+        $date_ini2 = translateDate($date_ini);
+        $date_fin2 = translateDate($date_fin);
     }
     else{
         $_POST["date_from"] = date("d M Y");
         $_POST["date_to"] = date("d M Y");
         $date_ini = date("d M Y");
         $date_fin = date("d M Y");
-        $date_ini2 = ConverterDate($date_ini);
-        $date_fin2 = ConverterDate($date_fin);
+        $date_ini2 = translateDate($date_ini);
+        $date_fin2 = translateDate($date_fin);
     }
 
     $_POST["extensions"] = $ext;
-    $_POST["calls"] = $calls_io;
 
     $smarty->assign("value_2", $date_ini);
     $smarty->assign("module_name", $module_name);
@@ -223,58 +226,35 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr,
 
     $ruta_img = array();
     $error = false;
-    if( $option == "Number")
-    {
-	if(!preg_match("/^[1-9]{1}[[:digit:]]*$/",$ext) && isset($ext)){
-	    $error = true;
-	    $smarty->assign("mb_title",_tr("Validation Error"));
-	    $smarty->assign("mb_message",_tr("The extension must be numeric and can not start with zero"));
-	}
+    if ($option == "Number") {
+    	if (!preg_match("/^[1-9]{1}[[:digit:]]*$/",$ext) && isset($ext)) {
+    	    $error = true;
+    	    $smarty->assign("mb_title",_tr("Validation Error"));
+    	    $smarty->assign("mb_message",_tr("The extension must be numeric and can not start with zero"));
+    	}
         $smarty->assign("SELECTED_1","selected");
         $smarty->assign("SELECTED_2","");
         $smarty->assign("SELECTED_3","");
 
-        //Paginacion
-        //$limit  = 15;
-        $total_datos = $pExtention->ObtainNumExtention($date_ini2, $date_fin2, $ext2, $calls_io);
-        $total  = $total_datos[0];
-    
         $numIn = 0; $numOut = 0; $numTot = 0;
-        if($calls_io=="Incoming_Calls"){//CUANDO ES INCOMING
-            $numTot_T = $pExtention->ObtainNumExtention($date_ini2, $date_fin2, $ext2, "");//total TODOS
-            $numTot = $numTot_T[0];
-            //$total -> incoming
-            $numIn = $total;
-            $numOut = $numTot - $numIn;  
-        }
-        else if($calls_io=="Outcoming_Calls"){
-            $numTot_T = $pExtention->ObtainNumExtention($date_ini2, $date_fin2, $ext2, "");//total todos
-            $numTot = $numTot_T[0];
-            //$total -> outcoming
-            $numIn = $numTot - $total;
-            $numOut = $total;
-        }
-        else{
-            $numIn_T = $pExtention->ObtainNumExtentionByIOrO($date_ini2, $date_fin2, $ext, 'in');
-            //$total -> todos
-            $numTot = $total;
-            $numIn = $numIn_T[0];
-            $numOut = $total - $numIn;
+        $result = $pExtention->countCallsByExtension($date_ini2, $date_fin2, $ext);
+        if (is_array($result)) {
+        	$numIn = $result['num_incoming_call'];
+            $numOut = $result['num_outgoing_call'];
+            $numTot = $numIn + $numOut;
         }
 
         if($numIn != 0) $VALUE = (int)( 100*( $numIn/$numTot ) );
         else $VALUE = 0;
 
         $ruta_img = array("?menu={$module_name}&amp;action=grafic&amp;du={$VALUE}%&amp;in={$numIn}&amp;out={$numOut}&amp;ext={$ext2}&amp;tot={$numTot}&amp;rawmode=yes");
-    }
-    else if($option == "Queue"){
+    } else if($option == "Queue") {
         $smarty->assign("SELECTED_1","");
         $smarty->assign("SELECTED_2","selected");
         $smarty->assign("SELECTED_3","");
 
         $ruta_img = array("?menu={$module_name}&amp;action=grafic_queue&amp;queue={$ext2}&amp;dti={$date_ini2}&amp;dtf={$date_fin2}&amp;rawmode=yes");
-    }
-    else if($option == "Trunk"){
+    } else if($option == "Trunk") {
         $smarty->assign("SELECTED_1","");
         $smarty->assign("SELECTED_2","");
         $smarty->assign("SELECTED_3","selected");
@@ -286,16 +266,12 @@ function report_Extention($smarty, $module_name, $local_templates_dir, $pDB_cdr,
             "?menu={$module_name}&amp;action=grafic_trunk2&amp;trunk={$trunkT}&amp;dti={$date_ini2}&amp;dtf={$date_fin2}&amp;rawmode=yes");
 
     }
-    else{
-
-    }
-
     for ($i = 0; $i < count($ruta_img); $i++) 
-	$ruta_img[$i] = "<img src='".$ruta_img[$i]."' border='0'>";
+	   $ruta_img[$i] = "<img src='".$ruta_img[$i]."' border='0'>";
     if(count($ruta_img)>0 && !$error)
-	$smarty->assign("ruta_img",  "<tr class='letra12'><td align='center'>".implode('&nbsp;&nbsp;', $ruta_img).'<td></tr>');
+	   $smarty->assign("ruta_img",  "<tr class='letra12'><td align='center'>".implode('&nbsp;&nbsp;', $ruta_img).'<td></tr>');
     else
-	$smarty->assign("ruta_img",  "<tr class='letra12'><td align='center'><td></tr>");
+	   $smarty->assign("ruta_img",  "<tr class='letra12'><td align='center'><td></tr>");
 
     $smarty->assign("icon","modules/$module_name/images/reports_graphic_reports.png");
     $htmlForm = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", _tr("Graphic Report"), $_POST);
@@ -317,63 +293,6 @@ function loadExtentions($pDB_ext)
 
     return $arrayR; 
 }
-
-function ConverterDate($date)
-{
-    //$date DD MM AAAA
-    $date_fin = "";
-    $dia = "";
-    $mes = "";
-    $anio = "";
-
-    $cont = 0;
-    $posTemp = 0;
-    $leng = strlen($date);
-    if( $leng != 0 ){
-        for($i = 0; $i < $leng; $i++ ){
-            if( strcmp($date[$i]," ") == 0 ){
-    
-                if( $cont == 0 ) $dia = substr($date, $posTemp, $i);
-                if( $cont == 1 ){ 
-                    $mes = substr($date, $posTemp+1, $i - strlen($dia) - 1 );
-                    $anio = substr($date, $i+1);
-                    break;
-                }
-
-                $cont++;
-                $posTemp = $i;
-            }
-        }
-    }
-
-    return "$anio-".MesStr2Int($mes)."-$dia"; 
-}
-
-function MesStr2Int($str_mes)
-{
-    switch($str_mes){
-        case "Jan": return "01";
-        case "Feb": return "02";
-        case "Mar": return "03";
-        case "Apr": return "04";
-        case "May": return "05";
-        case "Jun": return "06";
-        case "Jul": return "07";
-        case "Aug": return "08";
-        case "Sep": return "09";
-        case "Oct": return "10";
-        case "Nov": return "11";
-        case "Dec": return "12";
-        default: return "00";
-    }
-}
-
-function redondear_dos_decimal($valor)
-{
-    $float_redondeado = round($valor * 100) / 100;
-
-    return $float_redondeado;
-} 
 
 function loadTrunks($pDB_ext)
 {

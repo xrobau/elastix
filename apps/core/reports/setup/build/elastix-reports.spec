@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Graphic Report: fix report of DAHDI extensions that did not appear as
+  part of the pie chart count. Fixes Elastix bug #1606. Additionally, remove 
+  dead code and use standard translator function for date handling.
+  SVN Rev[5122] 
+
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.

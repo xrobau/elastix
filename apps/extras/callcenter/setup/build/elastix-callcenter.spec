@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): extend campaignlog request to request the last N 
+  records instead of all of the log entries for a given date range.
+
 * Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Campaigns In, Campaigns Out, Agents, Callback Extensions, ECCP Users:
   modernize pagination to fix zeros under elastixneo theme.

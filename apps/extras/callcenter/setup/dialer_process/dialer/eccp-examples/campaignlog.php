@@ -14,7 +14,9 @@ try {
         (count($argv) > 2 && trim($argv[2]) != '') ? $argv[2] : NULL,
         (count($argv) > 3 && trim($argv[3]) != '') ? $argv[3] : NULL,
         (count($argv) > 4 && trim($argv[4]) != '') ? $argv[4] : NULL,
-        (count($argv) > 5 && trim($argv[5]) != '') ? $argv[5] : NULL
+        (count($argv) > 5 && trim($argv[5]) != '') ? $argv[5] : NULL,
+        (count($argv) > 6 && trim($argv[6]) != '') ? $argv[6] : NULL,
+        (count($argv) > 7 && trim($argv[7]) != '') ? $argv[7] : NULL
         ));
     print "Disconnect...\n";
     $x->disconnect();

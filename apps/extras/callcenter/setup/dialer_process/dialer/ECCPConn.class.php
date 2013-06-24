@@ -3467,6 +3467,13 @@ LEER_ULTIMA_PAUSA;
             return $this->_generarRespuestaFallo(400, 'Bad request');
         if (!is_null($idCampania)) $sCola = NULL;
 
+        // Verificar si se requieren los últimos N desde el offset indicado
+        $iUltimosN = NULL; $iOffset = 0;
+        if (isset($comando->last_n)) {
+        	$iUltimosN = (int)$comando->last_n;
+            if (isset($comando->offset)) $iOffset = (int)$comando->offset;
+        }
+
         $xml_response = new SimpleXMLElement('<response />');
         $xml_campaignlogResponse = $xml_response->addChild('campaignlog_response');
 
@@ -3510,11 +3517,25 @@ ORDER BY id
 LOG_CAMPANIA_SALIENTE;
             $paramSQL = array($idCampania, $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59');
         }
+
+        if (!is_null($iUltimosN)) {
+        	$sPeticionSQL_leerLog .= ' DESC LIMIT ? OFFSET ?';
+            $paramSQL[] = $iUltimosN;
+            $paramSQL[] = $iOffset;
+        }
         
         $sth = $this->_db->prepare($sPeticionSQL_leerLog);
         $sth->execute($paramSQL);
         $xml_logentries = $xml_campaignlogResponse->addChild('logentries');
-        while ($tupla = $sth->fetch(PDO::FETCH_ASSOC)) {
+        $recordset = $sth->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!is_null($iUltimosN)) {
+        	// Ya que se pidió el orden inverso, se invierte el orden
+            $recordset = array_reverse($recordset);
+        }
+        
+        //while ($tupla = $sth->fetch(PDO::FETCH_ASSOC)) {
+        foreach ($recordset as $tupla) {
             $xml_logentry = $xml_logentries->addChild('logentry');
         	foreach ($tupla as $k => $v) if (!is_null($v)) {
         		$xml_logentry->addChild($k, str_replace('&', '&amp;', $v));

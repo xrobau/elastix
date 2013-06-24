@@ -570,7 +570,7 @@ class ECCP
     }
     
     public function campaignlog($campaign_type, $campaign_id = NULL, $queue = NULL,
-        $datetime_start = NULL, $datetime_end = NULL)
+        $datetime_start = NULL, $datetime_end = NULL, $offset = 0, $lastN = NULL)
     {
     	$xml_request = new SimpleXMLElement('<request />');
         $xml_cmdRequest = $xml_request->addChild('campaignlog');
@@ -583,6 +583,12 @@ class ECCP
             $xml_cmdRequest->addChild('datetime_start', str_replace('&', '&amp;', $datetime_start));
         if (!is_null($datetime_end))
             $xml_cmdRequest->addChild('datetime_end', str_replace('&', '&amp;', $datetime_end));
+        if (!is_null($datetime_end))
+            $xml_cmdRequest->addChild('datetime_end', str_replace('&', '&amp;', $datetime_end));
+        if (!is_null($offset))
+            $xml_cmdRequest->addChild('offset', $offset);
+        if (!is_null($lastN))
+            $xml_cmdRequest->addChild('last_n', $lastN);
         $xml_response = $this->send_request($xml_request);
         return $xml_response->campaignlog_response;
     }

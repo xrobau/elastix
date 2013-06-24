@@ -122,6 +122,11 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Address Book, Calendar: specify Context for AMI Originate instead of
+  a blank field. Fixes Elastix bug #1605.
+  SVN Rev[5120]
+
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar,Address Book: hardcode base URL for REST service because 
   PHP_SELF is insecure. Pointed out by Fortify report.

@@ -52,137 +52,44 @@ class paloSantoExtention {
         }
     }
 
-    private function _src_ext($ext)
+    /**
+     * Procedimiento para contar las llamadas relacionadas a una extensión, 
+     * desglosadas por dirección. 
+     * 
+     * @param   string  $date_ini   Fecha inicial yyyy-mm-dd
+     * @param   string  $date_fin   Fecha final yyyy-mm-dd
+     * @param   string  $ext        Extensión a consultar
+     * 
+     * @return  mixed   NULL en caso de error, o tupla (num_incoming_call, num_outgoing_call)
+     */
+    function countCallsByExtension($date_ini, $date_fin, $ext)
     {
-        return "substring_index(channel,'-',1) regexp '^[A-Za-z0-9]+/$ext$'";
-    }
+    	if (trim($ext) == '') {
+            $this->errMsg = _tr('Invalid extension');
+    		return NULL;
+    	}
+        $paramSQL = array($ext, $ext, $ext, $ext, $date_ini.' 00:00:00', $date_fin.' 23:59:59');
+        $sql = <<<COUNT_CALLS_BY_EXTENSION
+SELECT
+    SUM(IF(dst = ? OR SUBSTRING_INDEX(SUBSTRING_INDEX(dstchannel,'-',1),'/',-1) = ?, 1, 0))
+        AS num_incoming_call,
+    SUM(IF(src = ? OR SUBSTRING_INDEX(SUBSTRING_INDEX(channel,'-',1),'/',-1) = ?, 1, 0))
+        AS num_outgoing_call
+FROM cdr
+WHERE calldate BETWEEN ? AND ?
+COUNT_CALLS_BY_EXTENSION;
+        $result = $this->_DB->getFirstRowQuery($sql, TRUE, $paramSQL);
 
-    private function _dst_ext($ext)
-    {
-        return "substring_index(dstchannel,'-',1) regexp '^[A-Za-z0-9]+/$ext$'";
-    }
-
-    function ObtainNumExtention($date_ini, $date_fin, $ext, $calls_io)
-    {
-        if( strlen($ext) == 0 )
-            return 0;
-
-        $query = "SELECT count(*) FROM cdr";
-
-        if($calls_io=="Incoming_Calls")
-            $query .= " WHERE ".$this->_dst_ext($ext) ;
-        else if($calls_io=="Outcoming_Calls")
-            $query .= " WHERE ".$this->_src_ext($ext) ;
-        else
-            $query .= " WHERE ((".$this->_src_ext($ext).") OR (".$this->_dst_ext($ext)."))" ;
-
-      
-        if( strlen($date_ini) >= 5 ){
-            if( strlen($date_fin) <= 5 )
-                $query .= " and ( TO_DAYS( DATE(calldate) ) > TO_DAYS( '$date_ini') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_ini') )";
-            else{
-                $query .= " and ( TO_DAYS( DATE(calldate) ) > TO_DAYS( '$date_ini') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_ini') )  ";
-                $query .= " and ( TO_DAYS( DATE(calldate) ) < TO_DAYS( '$date_fin') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_fin') ) ";
-            }
-        }
-
-        $result = $this->_DB->getFirstRowQuery($query);
-
-        if($result==FALSE)
-        {
+        if (!is_array($result)) {
             $this->errMsg = $this->_DB->errMsg;
-            return 0;
+            return NULL;
         }
-        return $result;
-    }
-
-    function ObtainNumExtentionByIOrO($date_ini, $date_fin, $ext, $io)
-    {
-        if( strlen($ext) == 0 )
-            return 0;
-
-        if( $io == "in" )
-            $query = "SELECT count(*) FROM cdr WHERE ".$this->_dst_ext($ext)." ";
-        else//if( $io == "in" )
-            $query = "SELECT count(*) FROM cdr WHERE ".$this->_src_ext($ext)." ";
-      
-        if( strlen($date_ini) >= 5 ){
-            if( strlen($date_fin) <= 5 )
-                $query .= " and ( TO_DAYS( DATE(calldate) ) > TO_DAYS( '$date_ini') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_ini') )";
-            else{
-                $query .= " and ( TO_DAYS( DATE(calldate) ) > TO_DAYS( '$date_ini') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_ini') )  ";
-                $query .= " and ( TO_DAYS( DATE(calldate) ) < TO_DAYS( '$date_fin') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_fin') ) ";
-            }
-        }
-
-        $result = $this->_DB->getFirstRowQuery($query);
-
-        if($result==FALSE)
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result;
-    }
-
-    function ObtainExtention($limit, $offset, $date_ini, $date_fin, $ext, $calls_io)
-    {
-        if( strlen($ext) == 0 )
-            return 0;
-
-        $query = "SELECT *
-                  FROM cdr";
-        
-        if($calls_io=="Incoming_Calls")
-            $query .= " WHERE dst = '$ext'" ;
-        else if($calls_io=="Outcoming_Calls")
-            $query .= " WHERE src = '$ext'" ;
-        else
-            $query .= " WHERE (src = '$ext' OR dst = '$ext')" ;
-
-        if( strlen($date_ini) >= 5 ){
-            if( strlen($date_fin) <= 5 )
-                $query .= " and ( TO_DAYS( DATE(calldate) ) > TO_DAYS( '$date_ini') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_ini') )";
-            else{
-                $query .= " and ( TO_DAYS( DATE(calldate) ) > TO_DAYS( '$date_ini') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_ini') )  ";
-                $query .= " and ( TO_DAYS( DATE(calldate) ) < TO_DAYS( '$date_fin') OR TO_DAYS( DATE(calldate) ) = TO_DAYS( '$date_fin') ) ";
-            }
-        }
-
-        $query .= " ORDER BY calldate desc ";
-        $query .= " LIMIT $limit OFFSET $offset ";
-
-        $result = $this->_DB->fetchTable($query, true);
-
-        if($result==FALSE)
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-
         return $result;
     }
 
     function loadExtentions()
     {
         $query = "SELECT id, user FROM devices ORDER BY 1 asc";
-
-        $result = $this->_DB->fetchTable($query, true);
-
-        if($result == FALSE)
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-
-        return $result;
-    }
-
-    function loadCdrByExtencion($ext)
-    {
-        $query = "SELECT *
-                  FROM cdr
-                  WHERE src like '%$ext%' OR dst '%$ext%' ";
 
         $result = $this->_DB->fetchTable($query, true);
 

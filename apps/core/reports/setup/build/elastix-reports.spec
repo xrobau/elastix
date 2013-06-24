@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Graphic Report: fix report of DAHDI extensions that did not appear as
+  part of the pie chart count. Fixes Elastix bug #1606. Additionally, remove 
+  dead code and use standard translator function for date handling.
+  SVN Rev[5122] 
+
 * Thu Jun 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: fix date parsing to avoid interpreting plain PIDs as
   dates. Extract date from a new type of message line on asterisk boot. Remove

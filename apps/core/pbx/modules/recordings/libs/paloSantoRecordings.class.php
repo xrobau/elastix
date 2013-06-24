@@ -334,7 +334,7 @@ class paloSantoRecordings extends paloAsteriskDB{
         $parameters = array();
         $parameters['Channel']      = $channel;
         $parameters['CallerID']     = "$description <$origen>";
-        $parameters['Context']      = "";
+        $parameters['Context']      = "from-internal";
         $parameters['Priority']     = 1;
         $parameters['Application']  = "Record";
         $parameters['Data']         = "/var/lib/asterisk/sounds/".$this->domain."/system/$recording_name.wav,,,k";

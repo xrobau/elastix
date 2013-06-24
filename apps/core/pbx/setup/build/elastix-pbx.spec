@@ -363,6 +363,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Control Panel, Recordings: specify Context for AMI Originate instead of
+  a blank field. Fixes Elastix bug #1605.
+  SVN Rev[5121]
+
 * Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: General Settings: fix trivial syntax error.
   SVN Rev[5115]

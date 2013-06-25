@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: remove custom jQueryUI CSS theme. The calendar will now use
+  whatever the Elastix Framework chooses as the default jQueryUI theme.
+  SVN Rev[5130]
+
 * Mon Jun 24 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

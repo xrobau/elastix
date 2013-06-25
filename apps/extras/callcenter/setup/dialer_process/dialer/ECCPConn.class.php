@@ -3468,10 +3468,10 @@ LEER_ULTIMA_PAUSA;
         if (!is_null($idCampania)) $sCola = NULL;
 
         // Verificar si se requieren los últimos N desde el offset indicado
-        $iUltimosN = NULL; $iOffset = 0;
+        $iUltimosN = NULL; $idBefore = NULL;
         if (isset($comando->last_n)) {
         	$iUltimosN = (int)$comando->last_n;
-            if (isset($comando->offset)) $iOffset = (int)$comando->offset;
+            if (isset($comando->idbefore)) $idBefore = (int)$comando->idbefore;
         }
 
         $xml_response = new SimpleXMLElement('<response />');
@@ -3493,10 +3493,12 @@ WHERE (id_campaign_incoming = ? OR (? IS NULL AND id_campaign_incoming IS NULL))
     AND call_progress_log.id_call_incoming = call_entry.id
     AND call_entry.id_queue_call_entry = queue_call_entry.id
     AND call_progress_log.datetime_entry BETWEEN ? AND ?
+    AND ((? IS NULL) OR (call_progress_log.id < ?))
 ORDER BY id
 LOG_CAMPANIA_ENTRANTE;
             $paramSQL = array($idCampania, $idCampania, $sCola, $sCola,
-                $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59');
+                $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59',
+                $idBefore, $idBefore);
         } else {
             $sPeticionSQL_leerLog = <<<LOG_CAMPANIA_SALIENTE
 SELECT call_progress_log.id, call_progress_log.datetime_entry,
@@ -3513,15 +3515,17 @@ WHERE id_campaign_outgoing = ?
     AND call_progress_log.id_call_outgoing = calls.id
     AND calls.id_campaign = campaign.id
     AND call_progress_log.datetime_entry BETWEEN ? AND ?
+    AND ((? IS NULL) OR (call_progress_log.id < ?))
 ORDER BY id
 LOG_CAMPANIA_SALIENTE;
-            $paramSQL = array($idCampania, $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59');
+            $paramSQL = array($idCampania,
+                $sFechaInicio.' 00:00:00', $sFechaFin.' 23:59:59',
+                $idBefore, $idBefore);
         }
 
         if (!is_null($iUltimosN)) {
-        	$sPeticionSQL_leerLog .= ' DESC LIMIT ? OFFSET ?';
+        	$sPeticionSQL_leerLog .= ' DESC LIMIT ?';
             $paramSQL[] = $iUltimosN;
-            $paramSQL[] = $iOffset;
         }
         
         $sth = $this->_db->prepare($sPeticionSQL_leerLog);

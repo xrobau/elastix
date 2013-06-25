@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,6 +298,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jun 25 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel, Recordings: specify Context for AMI Originate instead of
   a blank field. Fixes Elastix bug #1605.
@@ -316,6 +320,7 @@ fi
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5102]
 
 * Thu Jun 13 2013 Alberto Santos <asantos@palosanto.com>
 - FIXED: script hangup.agi. Fixed a missplaced code at line 89. Also changed

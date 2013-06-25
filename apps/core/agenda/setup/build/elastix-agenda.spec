@@ -122,6 +122,11 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: remove custom jQueryUI CSS theme. The calendar will now use
+  whatever the Elastix Framework chooses as the default jQueryUI theme.
+  SVN Rev[5130]
+
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Address Book, Calendar: specify Context for AMI Originate instead of
   a blank field. Fixes Elastix bug #1605.

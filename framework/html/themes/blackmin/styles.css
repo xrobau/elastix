@@ -301,7 +301,7 @@ form.elx-blackmin-form-table>table>thead>tr>th
     padding: 4px;
     text-align: left;
 }
-table.tabForm
+.tabForm
 {
 	background: #fafafa;
 	color: #000000;
@@ -311,7 +311,7 @@ table.tabForm
     background-repeat: repeat-x;
     background-position: top;
 }
-table.tabForm td
+.tabForm td
 {
 	padding: 4px;
 }

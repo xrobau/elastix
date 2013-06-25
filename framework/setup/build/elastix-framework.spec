@@ -312,6 +312,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix blackmin style so padding is not incorrectly applied to
+  buttons in Calendar menu.
+  SVN Rev[5124]
+
 * Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: rewrite menu selection for blackmin theme using CSS 
   drop-down menus to improve navigation.

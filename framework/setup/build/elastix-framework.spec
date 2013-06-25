@@ -305,6 +305,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix blackmin style so padding is not incorrectly applied to
+  buttons in Calendar menu.
+  SVN Rev[5124]
+
 * Fri Jun 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

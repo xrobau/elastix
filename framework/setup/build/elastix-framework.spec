@@ -306,6 +306,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add !DOCTYPE declaration to all themes that missed it in
+  order to normalize behavior of jQueryUI widgets.
+  SVN Rev[5125]
 - FIXED: Framework: fix blackmin style so padding is not incorrectly applied to
   buttons in Calendar menu.
   SVN Rev[5124]

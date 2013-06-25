@@ -313,6 +313,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: move several CSS files out of the ui-lightness jQueryUI
+  theme into a custom directory widgetcss. These CSS files are not part of the
+  ui-lightness theme, but styles used by elastixneo widgets. This allows 
+  switching of jQueryUI themes without losing widget functionality.
+  SVN Rev[5129]
 - CHANGED: Framework: choose a jQueryUI theme based on the current theme. The
   association of themes is currently hardcoded for now.
   SVN Rev[5126]

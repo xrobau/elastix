@@ -316,6 +316,22 @@ class paloSantoNavigation extends paloSantoNavigationBase
 
     function putHEAD_JQUERY_HTML()
     {
+        global $arrConf;
+        
+        // TODO: allow custom theme to define a jQueryUI theme
+        $jquery_ui_theme = 'ui-lightness';
+        switch ($arrConf['mainTheme']) {
+        case 'blackmin':    $jquery_ui_theme = 'black-tie'; break;
+        case 'giox':
+        case 'elastixblue':
+        case 'elastixneo':  $jquery_ui_theme = 'redmond'; break;
+        
+        case 'elastixwine':
+        case 'default':     $jquery_ui_theme = 'blitzer'; break;
+        case 'slashdot':    $jquery_ui_theme = 'start'; break;
+        }
+        $jquery_ui_path = 'libs/js/jquery/css/'.$jquery_ui_theme;
+        
         $documentRoot = $_SERVER["DOCUMENT_ROOT"];
         // include file of framework
         $HEADER_LIBS_JQUERY = array();
@@ -334,12 +350,12 @@ class paloSantoNavigation extends paloSantoNavigationBase
             }
 
             // FIXED: The css ui-lightness shouldn't be static.
-            $directoryCss = "$documentRoot/libs/js/jquery/css/ui-lightness/";
+            $directoryCss = "$documentRoot/$jquery_ui_path/";
             if(is_dir($directoryCss)){
                 $arr_css = $this->obtainFiles($directoryCss,"css");
                 if($arr_css!=false && count($arr_css)>0){
                     for($i=0; $i<count($arr_css); $i++){
-                        $dir_css = "libs/js/jquery/css/ui-lightness/".$arr_css[$i];
+                        $dir_css = $jquery_ui_path.'/'.$arr_css[$i];
                         $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
                     }
                 }

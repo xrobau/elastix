@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,6 +109,10 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Mon Jun 24 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Address Book, Calendar: specify Context for AMI Originate instead of
   a blank field. Fixes Elastix bug #1605.
@@ -117,6 +121,7 @@ fi
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5083]
 
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: hardcode base URL for REST service because PHP_SELF is 

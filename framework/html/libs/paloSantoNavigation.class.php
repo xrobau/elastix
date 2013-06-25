@@ -350,17 +350,18 @@ class paloSantoNavigation extends paloSantoNavigationBase
             }
 
             // FIXED: The css ui-lightness shouldn't be static.
-            $directoryCss = "$documentRoot/$jquery_ui_path/";
-            if(is_dir($directoryCss)){
-                $arr_css = $this->obtainFiles($directoryCss,"css");
-                if($arr_css!=false && count($arr_css)>0){
-                    for($i=0; $i<count($arr_css); $i++){
-                        $dir_css = $jquery_ui_path.'/'.$arr_css[$i];
-                        $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
+            foreach (array('libs/js/jquery/widgetcss', $jquery_ui_path) as $csspath) {
+                $directoryCss = "$documentRoot/$csspath/";
+                if(is_dir($directoryCss)){
+                    $arr_css = $this->obtainFiles($directoryCss,"css");
+                    if($arr_css!=false && count($arr_css)>0){
+                        for($i=0; $i<count($arr_css); $i++){
+                            $dir_css = $csspath.'/'.$arr_css[$i];
+                            $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
+                        }
                     }
                 }
             }
-            //$HEADER_LIBS_JQUERY
         }
         $this->_smarty->assign("HEADER_LIBS_JQUERY", implode("\n", $HEADER_LIBS_JQUERY));
     }

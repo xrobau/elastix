@@ -313,6 +313,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: choose a jQueryUI theme based on the current theme. The
+  association of themes is currently hardcoded for now.
+  SVN Rev[5126]
 - CHANGED: Framework: add !DOCTYPE declaration to all themes that missed it in
   order to normalize behavior of jQueryUI widgets.
   SVN Rev[5125]

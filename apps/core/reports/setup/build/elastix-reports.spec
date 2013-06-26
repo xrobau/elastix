@@ -93,6 +93,9 @@ fi
 
 %changelog
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Summary By Extension: tweak SQL query used to report summary, 
+  attempts to fix Elastix bug #1607.
+  SVN Rev[5133]
 - FIXED: Summary By Extension: SVN commit 4907 introduced a regression that 
   breaks filtering by a particular extension or user. Fixed. Should fix last
   part of Elastix bug #1322.

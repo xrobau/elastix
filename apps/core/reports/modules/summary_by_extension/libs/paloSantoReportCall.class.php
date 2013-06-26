@@ -60,11 +60,11 @@ class paloSantoReportCall {
         $condWhere = '';
         if ($type == 'Ext' && !empty($value)) {
         	$paramSQL[] = $value;
-            $condWhere = 'WHERE d.id = ?';
+            $condWhere = 'WHERE id = ?';
         }
         if ($type == 'User' && !empty($value)) {
         	$paramSQL[] = $value.'%';
-            $condWhere = 'WHERE d.description LIKE ?';
+            $condWhere = 'WHERE description LIKE ?';
         }
         $result = $this->_DB_cdr->getFirstRowQuery("SELECT COUNT(*) AS N FROM asterisk.devices $condWhere", FALSE, $paramSQL);
 

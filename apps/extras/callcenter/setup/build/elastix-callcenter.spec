@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Monitoring: fix design flaw that requested very large datasets 
+  because of log entries on busy servers. Now log entries are not requested on
+  load, but only on demand, and only 100 at a time.
+
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): extend campaignlog request to request the last N 
   records instead of all of the log entries for a given date range.

@@ -1002,6 +1002,8 @@ INFO_FORMULARIOS;
                 implode(', ', array_fill(0, count($columnas), '?')).')';
             $sth = $this->_db->prepare($sPeticionSQL);
             $sth->execute($paramSQL);
+            
+            $tuplaAnterior['id'] = $this->_db->lastInsertId();
 
             /* Emitir el evento a las conexiones ECCP. Para mantener la 
              * consistencia con el resto del API, se quitan los valores de 

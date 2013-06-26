@@ -67,6 +67,9 @@ function _moduleContent(&$smarty, $module_name)
     case 'checkStatus':
         $sContenido = manejarMonitoreo_checkStatus($module_name, $smarty, $local_templates_dir);
         break;
+    case 'loadPreviousLogEntries':
+        $sContenido = manejarMonitoreo_loadPreviousLogEntries($module_name, $smarty, $local_templates_dir);
+        break;
     default:
         // Página principal con plantilla
         $sContenido = manejarMonitoreo_HTML($module_name, $smarty, $local_templates_dir);
@@ -76,7 +79,7 @@ function _moduleContent(&$smarty, $module_name)
 
 function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas)
 {
-    $debug = "";
+    //$debug = "";
     $smarty->assign("MODULE_NAME", $module_name);
     $smarty->assign(array(
         'title'                         =>  _tr('Campaign Monitoring'),
@@ -105,9 +108,10 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas)
         'ETIQUETA_ESTADO'               =>  _tr('Status'),
         'ETIQUETA_DESDE'                =>  _tr('Since'),
         'ETIQUETA_AGENTE'               =>  _tr('Agent'),
-        'ETIQUETA_REGISTRO'             =>  _tr('Campaign log'),
+        'ETIQUETA_REGISTRO'             =>  _tr('View campaign log'),
+        'PREVIOUS_N'                    =>  _tr('Previous 100 entries'),
     ));
-    $smarty->assign('INFO_DEBUG', $debug);
+    //$smarty->assign('INFO_DEBUG', $debug);
     return $smarty->fetch("file:$sDirLocalPlantillas/informacion_campania.tpl");
 }
 
@@ -203,7 +207,8 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
             }
         }
         if ($respuesta['status'] == 'success') {
-        	$logCampania = $oPaloConsola->leerLogCampania($sTipoCampania, $sIdCampania);
+        	//$logCampania = $oPaloConsola->leerLogCampania($sTipoCampania, $sIdCampania);
+            $logCampania = array();
             if (!is_array($logCampania)) {
                 $respuesta['status'] = 'error';
                 $respuesta['message'] = $oPaloConsola->errMsg;
@@ -267,6 +272,46 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
         $respuesta['estadoClienteHash'] = generarEstadoHash($module_name, $estadoCliente);
     }
     
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode($respuesta);
+}
+
+function manejarMonitoreo_loadPreviousLogEntries($module_name, $smarty, $sDirLocalPlantillas)
+{
+    $respuesta = array(
+        'status'    =>  'success',
+        'message'   =>  '(no message)',
+    );
+	
+    $sTipoCampania = getParameter('campaigntype');
+    $sIdCampania = getParameter('campaignid');
+    $idBefore = getParameter('beforeid');
+    if (is_null($idBefore) || !ctype_digit($idBefore))
+        $idBefore = NULL;
+    if (is_null($sTipoCampania) || !in_array($sTipoCampania, array('incoming', 'outgoing', 'incomingqueue'))) {
+        $respuesta['status'] = 'error';
+        $respuesta['message'] = _tr('Invalid campaign type');
+    } elseif (is_null($sIdCampania) || !ctype_digit($sIdCampania)) {
+        $respuesta['status'] = 'error';
+        $respuesta['message'] = _tr('Invalid campaign ID');
+    } else {
+        $oPaloConsola = new PaloSantoConsola();
+        $logCampania = $oPaloConsola->leerLogCampania($sTipoCampania, $sIdCampania, 100, $idBefore);
+        if (!is_array($logCampania)) {
+            $respuesta['status'] = 'error';
+            $respuesta['message'] = $oPaloConsola->errMsg;
+        } else {
+            // Traducción de log de la campaña
+            $logFinalCampania = array();
+            foreach ($logCampania as $entradaLog) {
+                $logFinalCampania[] = formatoLogCampania($entradaLog);
+            }
+            
+            $respuesta['log'] = $logFinalCampania;
+        }
+    }
+        
     $json = new Services_JSON();
     Header('Content-Type: application/json');
     return $json->encode($respuesta);
@@ -497,6 +542,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         }
 
                         $respuesta['log'][] = formatoLogCampania(array(
+                            'id'                =>  $evento['id'],
                             'new_status'        =>  $evento['new_status'],
                             'datetime_entry'    =>  $evento['datetime_entry'],
                             'campaign_type'     =>  $evento['call_type'],
@@ -741,6 +787,7 @@ function formatoLogCampania($entradaLog)
     }
 
     return array(
+        'id'        =>  $entradaLog['id'],
         'timestamp' =>  $entradaLog['datetime_entry'],
         'mensaje'   =>  $sMensaje,
     );

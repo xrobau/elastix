@@ -93,7 +93,7 @@
 <td width="20%" nowrap="nowrap">{$ETIQUETA_DESDE}</td>
 </tr>
 </table>
-<div class="llamadas">
+<div class="llamadas" {literal}{{bindAttr style="App.campaniaActual.alturaLlamada"}}{/literal}>
 <table>
 {literal}{{#view tagName="tbody"}}
 {{#each App.campaniaActual.llamadasMarcando}}
@@ -119,7 +119,7 @@
 <td width="20%" nowrap="nowrap">{$ETIQUETA_DESDE}</td>
 </tr>
 </table>
-<div class="llamadas">
+<div class="llamadas" {literal}{{bindAttr style="App.campaniaActual.alturaLlamada"}}{/literal}>
 <table>
 {literal}{{#view tagName="tbody"}}
 {{#each App.campaniaActual.agentes}}
@@ -136,8 +136,11 @@
 </div>
 </td></tr></table>
 
+{literal}{{view Ember.Checkbox checkedBinding="App.campaniaActual.registroVisible"}}{/literal}
 <b>{$ETIQUETA_REGISTRO}: </b><br/>
-{literal}{{#view App.RegistroView class="registro" messagesBinding="App.campaniaActual.registro" }}
+{literal}{{#if App.campaniaActual.registroVisible}}
+<button class="button" {{action cargarPrevios target="App.campaniaActual"}}>{/literal}{$PREVIOUS_N}{literal}</button>
+{{#view App.RegistroView class="registro" messagesBinding="App.campaniaActual.registro" }}
 <table>
 {{#each App.campaniaActual.registro}}
 <tr>
@@ -146,9 +149,7 @@
 </tr>
 {{/each}}
 </table>
-{{/view}}{/literal}
+{{/view}}
+{{/if}}{/literal}
 </script>
 </div>
-<pre>
-{$INFO_DEBUG}
-</pre>

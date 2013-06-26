@@ -86,8 +86,8 @@ $arrLangModule=array(
     =>  'Estado',
 'Since'
     =>  'Desde',
-'Campaign log'
-    =>  'Registro de campaña',
+'View campaign log'
+    =>  'Ver registro de campaña',
 'Placing'   =>  'Colocando',
 'Dialing'   =>  'Marcando',
 'Ringing'   =>  'Timbrando',
@@ -124,5 +124,6 @@ $arrLangModule=array(
 'incoming'  =>  'Campaña entrante',
 'incomingqueue' =>  'Cola entrante',
 'N/A' => 'N/D', /* No Disponible */
+'Previous 100 entries' => '100 entradas anteriores',
 );
 ?>

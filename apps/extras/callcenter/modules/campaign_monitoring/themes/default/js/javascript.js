@@ -104,10 +104,53 @@ $(document).ready(function() {
 					reciente: true})
 			*/
 		],
+		registroVisible: false,
 		registro:	[
 		    // No es necesario Ember.Object porque no se espera modificar los valores
 			//{timestamp: '10:59:00', mensaje: 'Esta es una prueba'}
-		]
+		],
+		alturaLlamada: function() {
+			return this.get('registroVisible') ? 'height: 180px;' : 'height: 400px;';
+		}.property('registroVisible'),
+		cargarPrevios: function() {
+			var beforeid = (this.registro.length > 0) ? this.registro[0].id : null; 
+			
+			var key_campaign = App.campaniasDisponibles.get('key_campaign');
+			if (key_campaign != null) {
+				for (i = 0; i < App.campaniasDisponibles.content.length; i++) {
+					if (App.campaniasDisponibles.content[i].get('key_campaign') == key_campaign) {
+						var campaign_type = App.campaniasDisponibles.content[i].get('type');
+						var campaign_id = App.campaniasDisponibles.content[i].get('id_campaign');
+
+						//alert('cargarPrevios campaign_type='+campaign_type+' campaign_id='+campaign_id+' beforeid='+beforeid);
+
+						$.post('index.php?menu=' + module_name + '&rawmode=yes', {
+							menu:			module_name, 
+							rawmode:		'yes',
+							action:			'loadPreviousLogEntries',
+							campaigntype:	campaign_type,
+							campaignid:		campaign_id,
+							beforeid:		beforeid
+						},
+						function(respuesta) {
+							if (respuesta.status == 'error') {
+								mostrar_mensaje_error(respuesta.message);
+							} else {
+								for (var i = respuesta.log.length - 1; i >= 0; i--) {
+									var registro = respuesta.log[i];
+									App.campaniaActual.registro.insertAt(0, {
+										id:			registro.id,
+										timestamp:	registro.timestamp,
+										mensaje: 	registro.mensaje
+									});
+								}
+							}
+						});
+					}
+				}
+			}
+
+		}
 	});
 	App.ApplicationView = Ember.View.extend({
 		templateName:	'campaignMonitoringView'
@@ -415,6 +458,7 @@ function manejarRespuestaStatus(respuesta)
 	for (var i = 0; i < respuesta.log.length; i++) {
 		var registro = respuesta.log[i];
 		App.campaniaActual.registro.addObject({
+			id:			registro.id,
 			timestamp:	registro.timestamp,
 			mensaje: 	registro.mensaje
 		});

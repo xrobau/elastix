@@ -867,6 +867,7 @@ LISTA_EXTENSIONES;
                     $evento['pause_start'] = (string)$evt->pause_start;
                     break;
                 case 'callprogress':
+                    $evento['id'] = (int)$evt->id;
                     $evento['datetime_entry'] = (string)$evt->datetime_entry;
                     $evento['call_type'] = (string)$evt->campaign_type;
                     $evento['campaign_id'] = isset($evt->campaign_id) ? (int)$evt->campaign_id : NULL;
@@ -1085,13 +1086,13 @@ LISTA_EXTENSIONES;
     	}
     }
     
-    function leerLogCampania($sCallType, $iCampaignId)
+    function leerLogCampania($sCallType, $iCampaignId, $lastN = NULL, $idbefore = NULL)
     {
     	try {
             $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = ($sCallType == 'incomingqueue') 
-                ? $oECCP->campaignlog('incoming', NULL, $iCampaignId)
-                : $oECCP->campaignlog($sCallType, $iCampaignId);
+                ? $oECCP->campaignlog('incoming', NULL, $iCampaignId, NULL, NULL, $lastN, $idbefore)
+                : $oECCP->campaignlog($sCallType, $iCampaignId, NULL, NULL, NULL, $lastN, $idbefore);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to read campaign log').' - '.$this->_formatoErrorECCP($respuesta);
                 return NULL;

@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Summary By Extension: SVN commit 4907 introduced a regression that 
+  breaks filtering by a particular extension or user. Fixed. Should fix last
+  part of Elastix bug #1322.
+  SVN Rev[5132]
+
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Graphic Report: fix report of DAHDI extensions that did not appear as
   part of the pie chart count. Fixes Elastix bug #1606. Additionally, remove 

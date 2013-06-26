@@ -139,12 +139,12 @@ SELECT d.id AS extension, d.description AS user_name,
     SUM(IF(calls.src = d.id OR SUBSTRING_INDEX(SUBSTRING_INDEX(channel,'-',1),'/',-1) = d.id, calls.billsec, 0))
         AS duration_outgoing_call
 FROM asterisk.devices d
-LEFT JOIN asteriskcdrdb.cdr calls
-    ON ((
+LEFT JOIN (SELECT * FROM asteriskcdrdb.cdr WHERE calldate BETWEEN ? AND ?) calls
+    ON (
         calls.src = d.id OR SUBSTRING_INDEX(SUBSTRING_INDEX(channel,'-',1),'/',-1) = d.id 
         OR
         calls.dst = d.id OR SUBSTRING_INDEX(SUBSTRING_INDEX(dstchannel,'-',1),'/',-1) = d.id
-    ) AND calls.calldate BETWEEN ? AND ?)
+    )
 WHERE $filter
 GROUP BY d.id
 ORDER BY $order_by $order_type

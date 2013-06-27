@@ -1,3 +1,4 @@
+2.2.0-2 (SVN revision 5135)
 * Campaign Monitoring: fix design flaw that requested very large datasets 
   because of log entries on busy servers. Now log entries are not requested on
   load, but only on demand, and only 100 at a time.

@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,7 +97,7 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-2
 - FIXED: Campaign Monitoring: fix design flaw that requested very large datasets 
   because of log entries on busy servers. Now log entries are not requested on
   load, but only on demand, and only 100 at a time.

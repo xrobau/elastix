@@ -209,6 +209,7 @@ function arrowsExpand(){
 function loadAppletData()
 {
     var arrAction          = new Array();
+    arrAction["menu"] = getCurrentElastixModule();
     arrAction["action"]    = "loadAppletData";
     arrAction["rawmode"]   = "yes";
     request("index.php",arrAction,false,
@@ -228,6 +229,7 @@ function jfunction(id)
     var a_id_card = arrID[1];
     if(arrID[0]=="editMan1"){
 	var arrAction = new Array();
+		arrAction["menu"] = getCurrentElastixModule();
     	arrAction["action"]  = "saveRegisterForm";
     	arrAction["rawmode"] = "yes";
 	//var id = $(this).attr('id');
@@ -241,6 +243,7 @@ function jfunction(id)
     }//openWndMan1(a_id_card);
     else{
 	var arrAction = new Array();
+		arrAction["menu"] = getCurrentElastixModule();
     	arrAction["action"]  = "saveRegisterForm";
     	arrAction["rawmode"] = "yes";
 	//var id = $(this).attr('id');
@@ -273,6 +276,7 @@ function refresh(element)
 
     // Se realiza la petición para obtener los datos del applet
     var arrAction	 = new Array();
+    arrAction["menu"] = getCurrentElastixModule();
     arrAction["action"]  = "refreshDataApplet";
     arrAction["code"]    = code;
     arrAction["rawmode"] = "yes";

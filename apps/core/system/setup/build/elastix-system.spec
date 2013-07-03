@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Jul 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: send explicit module as part of various ajax requests that 
+  were missing it.
+  SVN Rev[5209]
+
 * Fri Jun 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

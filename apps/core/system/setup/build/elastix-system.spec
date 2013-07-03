@@ -10,7 +10,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-9
+Prereq: elastix-framework >= 2.4.0-3
 Prereq: elastix-fax >= 2.2.0-4 
 Prereq: php-soap
 Prereq: dahdi

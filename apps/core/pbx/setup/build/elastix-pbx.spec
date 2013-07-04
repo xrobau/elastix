@@ -363,6 +363,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jul 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: rename SQL file for update which was incorrectly
+  named. This will prevent the update from being applied twice when updating 
+  from 2.4.0-1 to versions later than 2.4.0-7. Partially fixes Elastix bug #1618.
+  SVN Rev[5213]
+
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel, Recordings: specify Context for AMI Originate instead of
   a blank field. Fixes Elastix bug #1605.

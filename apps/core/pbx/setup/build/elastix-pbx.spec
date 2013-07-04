@@ -298,6 +298,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jul 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: rename SQL file for update which was incorrectly
+  named. This will prevent the update from being applied twice when updating 
+  from 2.4.0-1 to versions later than 2.4.0-7. Partially fixes Elastix bug #1618.
+  SVN Rev[5213]
+
 * Tue Jun 25 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

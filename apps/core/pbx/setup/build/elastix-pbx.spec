@@ -223,6 +223,9 @@ if [ $1 -eq 1 ]; then #install
 elif [ $1 -eq 2 ]; then #update
   # The installer database
    elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
+
+  # Elastix bug #1618 - need to scan and fix model duplicates
+  /usr/bin/fix-model-duplicates-bug1618
 fi
 
 #verificando si existe el menu en pbx
@@ -291,6 +294,7 @@ fi
 /usr/share/elastix/endpoint-vendors
 %defattr(755, root, root)
 /usr/bin/elastix-endpoint-configure
+/usr/bin/fix-model-duplicates-bug1618
 /etc/init.d/festival
 /bin/asterisk.reload
 /usr/share/elastix/privileged/*
@@ -299,6 +303,10 @@ fi
 
 %changelog
 * Thu Jul 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Endpoint Configurator: add a script that will scan for model duplicates
+  and move all endpoints references to the first item before removing the 
+  duplicates. Final fix for Elastix bug #1618.
+  SVN Rev[5215]
 - FIXED: Endpoint Configurator: rename SQL file for update which was incorrectly
   named. This will prevent the update from being applied twice when updating 
   from 2.4.0-1 to versions later than 2.4.0-7. Partially fixes Elastix bug #1618.

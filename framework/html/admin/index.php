@@ -185,7 +185,8 @@ if (isset($_SESSION['elastix_user']) &&
 
             global $arrConf;
             global $arrConfModule;
-            $arrConf = array_merge($arrConf, $arrConfModule);
+            if(is_array($arrConfModule))
+                $arrConf = array_merge($arrConf, $arrConfModule);
         }
         
         // Cargar las traducciones para el módulo elegido

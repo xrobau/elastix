@@ -31,8 +31,7 @@ require_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    require_once "apps/$module_name/libs/paloSantoJSON.class.php";
-
+    require_once "apps/$module_name/libs/elastixutils.lib.php";
     $sFuncName = 'handleJSON_'.getParameter('action');
     if (function_exists($sFuncName))
         return $sFuncName($smarty, $module_name);

@@ -31,14 +31,7 @@ require_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    require_once "modules/$module_name/configs/default.conf.php";
-    require_once "modules/$module_name/libs/elastixutils.lib.php";
-
-    global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-    
-    load_language_module($module_name);
+    require_once "apps/$module_name/libs/paloSantoJSON.class.php";
 
     $sFuncName = 'handleJSON_'.getParameter('action');
     if (function_exists($sFuncName))

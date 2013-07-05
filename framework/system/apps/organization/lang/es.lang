@@ -68,6 +68,9 @@ $arrLangModule=array(
 "Error trying created directories inside asterisk" => "Error al tratar de crear directorios dentro de asterisk. ",
 "Error deleting dialplan files of organization" => "Error al tratar borrar plan de marcado de la organizacion",
 "File extensions_globals, couldn't be created" => "Archivo extensions_globals no pudo ser creado. ",
-"Couldn't be written file" => "No pudo ser creado archivo"
+"Couldn't be written file" => "No pudo ser creado archivo",
+"active" => "Activa",
+"terminate" => "Lista para Eliminar",
+"suspend" => "Suspendida"
 );
 ?>

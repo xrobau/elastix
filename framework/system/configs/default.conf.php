@@ -28,14 +28,17 @@
   $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
 global $arrConf;
-$arrConf['dsn_mysql_elx'] = generarDSNSistema('asteriskuser', 'elxpbx');
+$arrConf['dsn_mysql_elastix'] = generarDSNSistema("asteriskuser","elxpbx");
 $arrConf['elastix_dbdir'] = '/var/www/db';
 $arrConf['elastix_dsn'] = array(
-                                "elastix"   =>  $arrConf['dsn_mysql_elx'],
-								"acl"       =>  $arrConf['dsn_mysql_elx'], //se lo deja por compatibilidad
+                                "elastix"   =>  $arrConf['dsn_mysql_elastix'],
+                                "acl"       =>  $arrConf['dsn_mysql_elastix'], //se lo deja por compatibilidad
                                 "samples"   =>  "sqlite3:///$arrConf[elastix_dbdir]/samples.db",
                             );
+$arrConf['documentRoot'] = '/var/www/html';
 $arrConf['basePath'] = '/var/www/html';
+$arrConf['webCommon'] = 'web/_common';
+$arrConf['elxPath'] = '/usr/share/elastix';
 $arrConf['theme'] = 'default'; //theme personal para los modulos esencialmente
 
 // Verifico si las bases del framework están, debido a la migración de dichas bases como archivos .db a archivos .sql

@@ -85,7 +85,8 @@ function obtenerDetallesRPMS()
 
 function setUserPassword()
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    include_once "{$arrConf['elxPath']}/libs/paloSantoACL.class.php";
 
     $old_pass   = getParameter("oldPassword");
     $new_pass   = getParameter("newPassword");
@@ -139,8 +140,9 @@ function setUserPassword()
 //pendiente
 function searchModulesByName()
 {
-    include_once "libs/JSON.php";
-    include_once "modules/group_permission/libs/paloSantoGroupPermission.class.php";
+    global $arrConf;
+    include_once "{$arrConf['elxPath']}/libs/JSON.php";
+    include_once "{$arrConf['elxPath']}/apps/group_permission/libs/paloSantoGroupPermission.class.php";
     $json = new Services_JSON();
 
     $pGroupPermission = new paloSantoGroupPermission();
@@ -151,10 +153,22 @@ function searchModulesByName()
     global $arrLang;
 
     // obteniendo los id de los menus permitidos
-    global $arrConf;
     $pACL = new paloACL($arrConf['elastix_dsn']['elastix']);
     $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
-    $arrSessionPermissions = $pMenu->filterAuthorizedMenus($pACL->getIdUser($_SESSION['elastix_user']));
+    
+    //antes de obtener el listado de los modulos debemos determinar
+    //si la interfaz desde la cual se esta llamando a los metodos es administrativa o 
+    //es de usuario final. 
+    $tmpPath=explode("/",$arrConf['basePath']);
+    if($tmpPath[count($tmpPath)-1]=='admin')
+        $administrative="yes";
+    else
+        $administrative="no";
+        
+    $arrSessionPermissions = $pMenu->filterAuthorizedMenus($pACL->getIdUser($_SESSION['elastix_user']),$administrative);
+    if(!is_array($arrSessionPermissions))
+        $arrSessionPermissions = array();
+        
     $arrIdMenues = array();
     foreach($arrSessionPermissions as $key => $value){
         $arrIdMenues[] = $value['id']; // id, IdParent, Link,  Type, order_no, HasChild
@@ -197,7 +211,8 @@ function searchModulesByName()
 
 function changeMenuColorByUser()
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    include_once "{$arrConf['elxPath']}/paloSantoACL.class.php";
 
     $color = getParameter("menuColor");
     $arrResult  = array();
@@ -208,7 +223,6 @@ function changeMenuColorByUser()
     }
 
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    global $arrConf;
     $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
@@ -229,13 +243,13 @@ function changeMenuColorByUser()
 
 function putMenuAsBookmark($menu)
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    include_once "{$arrConf['elxPath']}/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['data'] = array("action" => "none", "menu" => "$menu");
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     if($menu != ""){
         $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        global $arrConf;
         $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
         $pACL = new paloACL($pdbACL);
         $uid = $pACL->getIdUser($user);
@@ -308,12 +322,12 @@ function putMenuAsBookmark($menu)
  */
 function saveStickyNote($menu, $description, $popup)
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    include_once "{$arrConf['elxPath']}/libs/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     if($menu != ""){
         $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        global $arrConf;
         $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
         $pACL = new paloACL($pdbACL);
         //$id_resource = $pACL->getIdResource($menu);
@@ -364,12 +378,12 @@ function saveStickyNote($menu, $description, $popup)
 
 function saveNeoToggleTabByUser($menu, $action_status)
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    include_once "{$arrConf['elxPath']}/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     if($menu != ""){
         $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        global $arrConf;
         $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
         $pACL = new paloACL($pdbACL);
         $uid = $pACL->getIdUser($user);

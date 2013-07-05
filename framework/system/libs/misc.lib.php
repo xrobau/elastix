@@ -27,6 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: misc.lib.php,v 1.3 2007/08/10 01:32:51 gcarrillo Exp $ */
 
+global $elxPath;
+$elxPath="/usr/share/elastix";
 
 function recoger_valor($key, &$get, &$post, $default = NULL) {
     if (isset($post[$key])) return $post[$key];
@@ -263,12 +265,12 @@ function set_key_settings($pDB,$key,$value)
     return $r ? TRUE : FALSE;    
 }
 
-function load_version_elastix($ruta_base='')
+function load_version_elastix()
 {
-    require_once $ruta_base."configs/default.conf.php";
+    global $elxPath;
+    require_once "$elxPath/configs/default.conf.php";
+    include_once "$elxPath/libs/paloSantoDB.class.php";
     global $arrConf;
-    include_once $ruta_base."libs/paloSantoDB.class.php";
-
     //conectarse a la base de settings para obtener la version y release del sistema elastix
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
     if(empty($pDB->errMsg)) {
@@ -282,83 +284,86 @@ function load_version_elastix($ruta_base='')
     else return $theme;
 }
 
-function load_theme($ruta_base='')
+function load_theme()
 {
-    require_once $ruta_base."configs/default.conf.php";
+    global $elxPath;
+    require_once "$elxPath/configs/default.conf.php";
+    include_once "$elxPath/libs/paloSantoDB.class.php";
     global $arrConf;
-    include_once $ruta_base."libs/paloSantoDB.class.php";
-	$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-	if(empty($pDB->errMsg)) {
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    $theme=null;
+    if(empty($pDB->errMsg)) {
         if($user==""){
-			$theme=getOrganizationProp(1,'theme',$pDB);
-		}else{
-			$theme=getUserProp($user,'theme',$pDB);
-		}
+            $theme=getOrganizationProp(1,'theme',$pDB);
+        }else{
+            $theme=getUserProp($user,'theme',$pDB);
+        }
     }
 
     if (!preg_match('/^\w+$/', $theme)) $theme = false;
-    if ($theme !== false && !is_dir($ruta_base."themes/$theme")) $theme = false;
+    if ($theme !== false && !is_dir($arrConf['basePath']."/web/themes/$theme")) $theme = false;
 
     //si no se encuentra setear el tema por default
     if (empty($theme) || $theme==false){
-		if($user!=""){
-			setUserProp($user,'theme',"elastixneo","system",$pDB);}
+        if($user!=""){
+            setUserProp($user,'theme',"elastixneo","system",$pDB);}
         return "elastixneo";
     }else{
-		return $theme;
-	}
+        return $theme;
+    }
 }
 
 
 function update_theme()
 {
-	//actualizo el tema personalizado del usuario
-	global $arrConf;
-	$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/");
-	$documentRoot = $arrConf['basePath'];
-	exec("rm -rf $documentRoot/var/templates_c/*",$arrConsole,$flagStatus);
-	//STEP 2: Update menus elastix permission.
-	if(isset($_SESSION['elastix_user_permission']))
-		unset($_SESSION['elastix_user_permission']);
+    //actualizo el tema personalizado del usuario
+    global $arrConf;
+    $arrConf['mainTheme'] = load_theme();
+    $documentRoot = $arrConf['documentRoot'];
+    exec("rm -rf $documentRoot/tmp/smarty/templates_c/*",$arrConsole,$flagStatus);
+    //STEP 2: Update menus elastix permission.
+    if(isset($_SESSION['elastix_user_permission']))
+        unset($_SESSION['elastix_user_permission']);
 }
 
 function getUserProp($username,$key,&$pdB){
-	$bQuery = "select value from user_properties where id_user=(Select id from acl_user where username=?) and property=?";
-	$bResult=$pdB->getFirstRowQuery($bQuery,false, array($username,$key));
-	if($bResult==false){
-		return false;
-	}else{
-		return $bResult[0];
-	}
+    $bQuery = "select value from user_properties where id_user=(Select id from acl_user where username=?) and property=?";
+    $bResult=$pdB->getFirstRowQuery($bQuery,false, array($username,$key));
+    if($bResult==false){
+        return false;
+    }else{
+        return $bResult[0];
+    }
 }
 
 function getOrganizationProp($id,$key,&$pDB){
-	$bQuery = "select value from organization_properties where id_organization=? and property=?";
-	$bResult=$pDB->getFirstRowQuery($bQuery,false, array($id,$key));
-	if($bResult==false){
-		return false;
-	}else{
-		return $bResult[0];
-	}
+    $bQuery = "select value from organization_properties where id_organization=? and property=?";
+    $bResult=$pDB->getFirstRowQuery($bQuery,false, array($id,$key));
+    if($bResult==false){
+        return false;
+    }else{
+        return $bResult[0];
+    }
 }
 
 function setUserProp($username,$key,$value,$category="",&$pDB){
-	$query="INSERT INTO user_properties values ((Select id from acl_user where username=?),?,?,?)";
-	$arrParams=array($username,$key,$value,$category);
-	$result=$pDB->genQuery($query, $arrParams);
-	if($result==false){
-		return false;
-	}else
-		return true;
+    $query="INSERT INTO user_properties values ((Select id from acl_user where username=?),?,?,?)";
+    $arrParams=array($username,$key,$value,$category);
+    $result=$pDB->genQuery($query, $arrParams);
+    if($result==false){
+        return false;
+    }else
+        return true;
 }
 
-function load_language($ruta_base='')
+function load_language()
 {
-    $lang = get_language($ruta_base);
+    global $elxPath;
+    $lang = get_language();
 
-    include_once $ruta_base."lang/en.lang";
-    $lang_file = $ruta_base."lang/$lang.lang";
+    include_once "$elxPath/lang/en.lang";
+    $lang_file = "$elxPath/lang/$lang.lang";
 
     if ($lang != 'en' && file_exists("$lang_file")) {
         $arrLangEN = $arrLang;
@@ -367,13 +372,13 @@ function load_language($ruta_base='')
     }
 }
 
-function load_language_module($module_id, $ruta_base='')
+function load_language_module($module_id)
 {
+    global $elxPath;
     global $arrLangModule;
-
-    $lang = get_language($ruta_base);
-    include_once $ruta_base."modules/$module_id/lang/en.lang";
-    $lang_file_module = $ruta_base."modules/$module_id/lang/$lang.lang";
+    $lang = get_language();
+    include_once "$elxPath/apps/$module_id/lang/en.lang";
+    $lang_file_module = "$elxPath/apps/$module_id/lang/$lang.lang";
     if ($lang != 'en' && file_exists("$lang_file_module")) {
         $arrLangEN = $arrLangModule;
         include_once "$lang_file_module";
@@ -391,11 +396,12 @@ function _tr($s)
     return isset($arrLang[$s]) ? $arrLang[$s] : $s;
 }
 
-function get_language($ruta_base='')
+function get_language()
 {
-    require_once $ruta_base."configs/default.conf.php";
-    include $ruta_base."configs/languages.conf.php";
-    include_once "/var/www/html/libs/paloSantoOrganization.class.php";
+    global $elxPath;
+    require_once "$elxPath/configs/default.conf.php";
+    include "$elxPath/configs/languages.conf.php";
+    include_once "$elxPath/libs/paloSantoOrganization.class.php";
 
     global $arrConf;
     $lang="";
@@ -510,9 +516,10 @@ function getParameter($parameter)
  *
  * @return  mixed   NULL si no se reconoce usuario, o la clave en plaintext
  */
-function obtenerClaveCyrusAdmin($ruta_base='')
+function obtenerClaveCyrusAdmin()
 {
-    require_once $ruta_base.'libs/paloSantoConfig.class.php';
+    global $elxPath;
+    require_once "$elxPath/libs/paloSantoConfig.class.php";
 
 	$pConfig = new paloConfig("/etc", "elastix.conf", "=", "[[:space:]]*=[[:space:]]*");
 	$listaParam = $pConfig->leer_configuracion(FALSE);
@@ -531,9 +538,10 @@ function obtenerClaveCyrusAdmin($ruta_base='')
  *
  * @return  mixed   NULL si no se reconoce usuario, o la clave en plaintext
  */
-function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
+function obtenerClaveConocidaMySQL($sNombreUsuario)
 {
-    require_once $ruta_base.'libs/paloSantoConfig.class.php';
+    global $elxPath;
+    require_once "$elxPath/libs/paloSantoConfig.class.php";
     switch ($sNombreUsuario) {
     case 'root':
         $pConfig = new paloConfig("/etc", "elastix.conf", "=", "[[:space:]]*=[[:space:]]*");
@@ -560,9 +568,10 @@ function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
  * @return  string   clave en plaintext de AMI del usuario admin
  */
 
-function obtenerClaveAMIAdmin($ruta_base='')
+function obtenerClaveAMIAdmin()
 {
-    require_once $ruta_base.'libs/paloSantoConfig.class.php';
+    global $elxPath;
+    require_once "$elxPath/libs/paloSantoConfig.class.php";
     $pConfig = new paloConfig("/etc", "elastix.conf", "=", "[[:space:]]*=[[:space:]]*");
     $listaParam = $pConfig->leer_configuracion(FALSE);
     if(isset($listaParam["amiadminpwd"]))
@@ -578,20 +587,20 @@ function obtenerClaveAMIAdmin($ruta_base='')
  *
  * @param   string  $sNombreUsuario     Nombre de usuario para interrogar
  * @param   string  $sNombreDB          Nombre de base de datos para DNS
- * @param   string  $ruta_base          Ruta base para inclusión de librerías
  *
  * @return  mixed   NULL si no se reconoce usuario, o el DNS con clave resuelta
  */
-function generarDSNSistema($sNombreUsuario, $sNombreDB, $ruta_base='')
+function generarDSNSistema($sNombreUsuario, $sNombreDB)
 {
-    require_once $ruta_base.'libs/paloSantoConfig.class.php';
+    global $elxPath;
+    require_once "$elxPath/libs/paloSantoConfig.class.php";
     switch ($sNombreUsuario) {
     case 'root':
-        $sClave = obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base);
+        $sClave = obtenerClaveConocidaMySQL($sNombreUsuario);
         if (is_null($sClave)) return NULL;
         return 'mysql://root:'.$sClave.'@localhost/'.$sNombreDB;
     case 'asteriskuser':
-        $sClave = obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base);
+        $sClave = obtenerClaveConocidaMySQL($sNombreUsuario);
         if (is_null($sClave)) 
             return NULL;
         else{
@@ -805,9 +814,9 @@ function load_default_timezone()
 
 //funcion que crea una conexion a asterisk manager
 function AsteriskManagerConnect(&$error) {
-	global $arrConf;
+    global $elxPath;
 	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
-	require_once '/var/www/html/libs/paloSantoConfig.class.php';
+	require_once "$elxPath/libs/paloSantoConfig.class.php";
 
 	$pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
 	$arrConfig = $pConfig->leer_configuracion(false);
@@ -826,41 +835,46 @@ function AsteriskManagerConnect(&$error) {
 }
 
 /**
- funcion que sirve para comprobar las credenciales de usuario
- identificar si es usuario superadmin, admin o other
- identificar a que organizacion pertenece
- @return
-	Array => ( userAccount => (UserName or ""),
-			   id_organization => (ID_ORG or false),
-			   userlevel => (superadmin,admin or other),
-				)
-*/
+ * Function that return is the loggin user is susperadmin
+ */
+function isUserSuperAdmin(){
+    global $arrConf;
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pdbACL);
+    return $pACL->isUserSuperAdmin($_SESSION['elastix_user']);
+}
+
+/**
+    funcion que sirve para comprobar las credenciales de usuario
+    identificar si es usuario superadmin, final_user, other
+    identificar a que organizacion pertenece
+    @return
+    Array => ( userAccount => (UserName or ""),
+                id_organization => (ID_ORG or false),
+                userlevel => (superadmin,final_user,other),
+                )
+    */
 function getUserCredentials(){
-	global $arrConf;
-	$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pdbACL);
+    global $arrConf;
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pdbACL);
 
-	$userLevel1 = "other";
+    $userLevel1 = "organization";
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-	//verificar que tipo de usurio es: superadmin, admin o other
-	if($userAccount!=""){
-		$idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
-		if($pACL->isUserSuperAdmin($userAccount)){
-			$userLevel1 = "superadmin";
-		}else{
-			if($pACL->isUserAdministratorGroup($userAccount))
-				$userLevel1 = "admin";
-			else
-				$userLevel1 = "other";
-		}
-	}else
-		$idOrganization=false;
+    //verificar que tipo de usurio es: superadmin, admin o other
+    if($userAccount!=""){
+        $idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
+        if($pACL->isUserSuperAdmin($userAccount)){
+            $userLevel1 = "superadmin";
+        }
+    }else
+        $idOrganization=false;
 
-	if($idOrganization==false){
-		header("Location: index.php");
-	}
+    if($idOrganization==false){
+        header("Location: index.php");
+    }
 
-	$query="SELECT domain from organization where id=?";
+    $query="SELECT domain from organization where id=?";
     $result=$pdbACL->getFirstRowQuery($query,false,array($idOrganization));
     if($result==false){
         $domain=false;
@@ -870,8 +884,8 @@ function getUserCredentials(){
         else
             $domain=$result[0];
     }
-    
-	return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
+
+    return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
 }
 
 function getOrgDomainUser(){
@@ -1482,15 +1496,17 @@ function getCountrySettings($country){
 }
 
 // Create a new Smarty object and initialize template directories   
-function getSmarty($mainTheme, $basedir = '/var/www/html')  
+function getSmarty($mainTheme)  
 {   
-    require_once("$basedir/libs/smarty/libs/Smarty.class.php");     
+    global $elxPath;
+    global $arrConf;
+    require_once("$elxPath/libs/smarty/libs/Smarty.class.php");     
     $smarty = new Smarty();     
     
-    $smarty->template_dir = "$basedir/themes/$mainTheme";   
-    $smarty->config_dir =   "$basedir/configs/";    
-    $smarty->compile_dir =  "$basedir/var/templates_c/";    
-    $smarty->cache_dir =    "$basedir/var/cache/";  
+    $smarty->template_dir = "{$arrConf['basePath']}/web/themes/$mainTheme";   
+    $smarty->config_dir =   "$elxPath/configs/";    
+    $smarty->compile_dir =  "{$arrConf['documentRoot']}/tmp/smarty/templates_c/";    
+    $smarty->cache_dir =    "{$arrConf['documentRoot']}/tmp/smarty/cache/";  
     
     return $smarty;     
 }
@@ -1536,13 +1552,13 @@ SQL_BOOKMARKS_HISTORY;
     return $smarty->fetch('_common/_shortcut.tpl');
 }
 
-function getTemplatesDirModule($module_name)
+
+function getWebDirModule($module_name)
 {
     global $arrConf;
 
     //folder path for custom templates
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
-    return "$base_dir/modules/$module_name/$templates_dir/{$arrConf['theme']}";
+    $base_dir = $arrConf['basePath'];;
+    return "$base_dir/web/apps/$module_name";
 }
 ?>

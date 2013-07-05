@@ -27,7 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: PaloSantoJSON.class.php,v 1.1.1.1 2010/06/15 11:10:00 Mercy Anchundia manchundia@palosanto.com */
 
-require_once "JSON.php";
+$elxPath="/usr/share/elastix";
+require_once "$elxPath/libs/JSON.php";
 
 class PaloSantoJSON {
 

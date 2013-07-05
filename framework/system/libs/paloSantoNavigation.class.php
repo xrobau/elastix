@@ -241,26 +241,40 @@ class paloSantoNavigation extends paloSantoNavigationBase
 
     private function includeModule($module)
     {
-        if (!file_exists("modules/$module/index.php"))
-            return "Error: The module <b>modules/$module/index.php</b> could not be found!<br/>";
-        /*
-        // Cargar las configuraciones para el módulo elegido
-        if (file_exists("modules/$module/configs/default.conf.php")) {
-            require_once "modules/$module/configs/default.conf.php";
-
+        global $arrConf;
+        //comprobamos que exista el index del modulo
+        if (!file_exists("{$arrConf['elxPath']}/apps/$module/index.php"))
+            return "Error: The module <b>{$arrConf['elxPath']}/apps/$module/index.php</b> could not be found!<br/>";
+        
+        require_once "apps/$module/index.php";
+        
+        //si existe el archivo de configuracion del modulo se los incluye y se cargan las configuraciones
+        //especificas del modulo elegido
+        if (file_exists("$elxPath/apps/$module/configs/default.conf.php")) {
+            include_once "apps/_elastixutils/configs/default.conf.php";
             global $arrConf;
             global $arrConfModule;
-            $arrConf = array_merge($arrConf, $arrConfModule);
+            if(is_array($arrConfModule))
+                $arrConf = array_merge($arrConf, $arrConfModule);
+        }
+        
+        
+        //se incluyen las librerias que esten dentro de apps/$module/libs
+        $dirLibs="{$arrConf['elxPath']}/apps/$module/libs";
+        if(is_dir($dirLibs)){
+            $arr_libs = $this->obtainFiles($dirLibs,"class.php");
+            if($arr_libs!=false && count($arr_libs)>0){
+                for($i=0; $i<count($arr_libs); $i++){
+                    include_once "apps/$module/libs/".$arr_libs[$i];
+                }
+            }
         }
         
         // Cargar las traducciones para el módulo elegido
         load_language_module($module);
-        */
-        ini_set('include_path', dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module/libs:".ini_get('include_path'));
-
-        require_once "modules/$module/index.php";
+        
         if (!function_exists("_moduleContent"))
-            return "Wrong module: modules/$module/index.php";
+            return "Wrong module: apps/$module/index.php";
         $this->putHEAD_MODULE_HTML($module);
         return _moduleContent($this->_smarty, $module);
     }
@@ -279,89 +293,67 @@ class paloSantoNavigation extends paloSantoNavigationBase
     * e-mail:
     *   ecueva@palosanto.com
     */
-    private function putHEAD_MODULE_HTML($menuLibs)  // add by eduardo
+    private function putHEAD_MODULE_HTML($module)  // add by eduardo
     {
-        // get the header with scripts and links(css)
-        $documentRoot = $_SERVER["DOCUMENT_ROOT"];
-
-        //STEP 1: include file of module
-        $directory = "$documentRoot/modules/".$menuLibs;
+        global $arrConf;
         $HEADER_MODULES = array();
-        if(is_dir($directory)){
-            // FIXED: The theme default shouldn't be static.
-            $directoryScrips = "$documentRoot/modules/$menuLibs/themes/default/js/";
-            $directoryCss = "$documentRoot/modules/$menuLibs/themes/default/css/";
-            if(is_dir($directoryScrips)){
-                $arr_js = $this->obtainFiles($directoryScrips,"js");
-                if($arr_js!=false && count($arr_js)>0){
-                    for($i=0; $i<count($arr_js); $i++){
-                        $dir_script = "modules/$menuLibs/themes/default/js/".$arr_js[$i];
-                        $HEADER_MODULES[] = "<script type='text/javascript' src='$dir_script'></script>";
-                    }
+        // FIXED: The theme default shouldn't be static.
+        $directoryScrips = "{$arrConf['basePath']}/web/apps/$module/js/";
+        $directoryCss = "{$arrConf['basePath']}/web/apps/$module/css/";
+        if(is_dir($directoryScrips)){
+            $arr_js = $this->obtainFiles($directoryScrips,"js");
+            if($arr_js!=false && count($arr_js)>0){
+                for($i=0; $i<count($arr_js); $i++){
+                    $dir_script = "web/apps/$module/js/".$arr_js[$i];
+                    $HEADER_MODULES[] = "<script type='text/javascript' src='$dir_script'></script>";
                 }
             }
-            if(is_dir($directoryCss)){
-                $arr_css = $this->obtainFiles($directoryCss,"css");
-                if($arr_css!=false && count($arr_css)>0){
-                    for($i=0; $i<count($arr_css); $i++){
-                        $dir_css = "modules/$menuLibs/themes/default/css/".$arr_css[$i];
-                        $HEADER_MODULES[] = "<link rel='stylesheet' href='$dir_css' />";
-                    }
-                }
-            }
-            //$HEADER_MODULES
         }
+        if(is_dir($directoryCss)){
+            $arr_css = $this->obtainFiles($directoryCss,"css");
+            if($arr_css!=false && count($arr_css)>0){
+                for($i=0; $i<count($arr_css); $i++){
+                    $dir_css = "web/apps/$module/css/".$arr_css[$i];
+                    $HEADER_MODULES[] = "<link rel='stylesheet' href='$dir_css' />";
+                }
+            }
+        }
+        //$HEADER_MODULES
         $this->_smarty->assign("HEADER_MODULES", implode("\n", $HEADER_MODULES));
     }
 
     function putHEAD_JQUERY_HTML()
     {
         global $arrConf;
-        
-        // TODO: allow custom theme to define a jQueryUI theme
-        $jquery_ui_theme = 'ui-lightness';
-        switch ($arrConf['mainTheme']) {
-        case 'blackmin':    $jquery_ui_theme = 'black-tie'; break;
-        case 'giox':
-        case 'elastixblue':
-        case 'elastixneo':  $jquery_ui_theme = 'redmond'; break;
-        
-        case 'elastixwine':
-        case 'default':     $jquery_ui_theme = 'blitzer'; break;
-        case 'slashdot':    $jquery_ui_theme = 'start'; break;
-        }
-        $jquery_ui_path = 'libs/js/jquery/css/'.$jquery_ui_theme;
-        
-        $documentRoot = $_SERVER["DOCUMENT_ROOT"];
+        $documentRoot = $arrConf['documentRoot'];
         // include file of framework
         $HEADER_LIBS_JQUERY = array();
-        $JQqueryDirectory = "$documentRoot/libs/js/jquery";
+        $JQqueryDirectory = "$documentRoot/web/_common/js/jquery";
         // it to load libs JQuery
         if(is_dir($JQqueryDirectory)){
-            $directoryScrips = "$documentRoot/libs/js/jquery/";
+            $directoryScrips = "$documentRoot/web/_common/js/jquery/";
             if(is_dir($directoryScrips)){
                 $arr_js = $this->obtainFiles($directoryScrips,"js");
                 if($arr_js!=false && count($arr_js)>0){
                     for($i=0; $i<count($arr_js); $i++){
-                        $dir_script = "libs/js/jquery/".$arr_js[$i];
+                        $dir_script = "{$arrConf['webCommon']}/js/jquery/".$arr_js[$i];
                         $HEADER_LIBS_JQUERY[] = "<script type='text/javascript' src='$dir_script'></script>";
                     }
                 }
             }
 
             // FIXED: The css ui-lightness shouldn't be static.
-            foreach (array('libs/js/jquery/widgetcss', $jquery_ui_path) as $csspath) {
-                $directoryCss = "$documentRoot/$csspath/";
-                if(is_dir($directoryCss)){
-                    $arr_css = $this->obtainFiles($directoryCss,"css");
-                    if($arr_css!=false && count($arr_css)>0){
-                        for($i=0; $i<count($arr_css); $i++){
-                            $dir_css = $csspath.'/'.$arr_css[$i];
-                            $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
-                        }
+            $directoryCss = "$documentRoot/web/_common/js/jquery/css/ui-lightness/";
+            if(is_dir($directoryCss)){
+                $arr_css = $this->obtainFiles($directoryCss,"css");
+                if($arr_css!=false && count($arr_css)>0){
+                    for($i=0; $i<count($arr_css); $i++){
+                        $dir_css = "{$arrConf['webCommon']}/js/jquery/css/ui-lightness/".$arr_css[$i];
+                        $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
                     }
                 }
             }
+            //$HEADER_LIBS_JQUERY
         }
         $this->_smarty->assign("HEADER_LIBS_JQUERY", implode("\n", $HEADER_LIBS_JQUERY));
     }
@@ -372,7 +364,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
     *   This function Obtain all name files into of a directory where $type is the extension of the file
     *
     * Example:
-    *   $array = obtainFiles('/var/www/html/modules/calendar/themes/default/js/','js');
+    *   $array = obtainFiles('/var/www/html/web/apps/calendar/js/','js');
     *
     * Developer:
     *   Eduardo Cueva

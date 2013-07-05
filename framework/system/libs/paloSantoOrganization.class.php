@@ -26,11 +26,13 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoOrganization.class.php,v 1.1 2012-02-07 11:02:13 Rocio Mera rmera@palosanto.com Exp $ */
-include_once "libs/paloSantoEmail.class.php";
-include_once "libs/paloSantoACL.class.php";
-include_once "libs/paloSantoFax.class.php";
-include_once "libs/paloSantoAsteriskConfig.class.php";
-include_once "libs/paloSantoPBX.class.php";
+
+$elxPath="/usr/share/elastix";
+include_once "$elxPath/libs/paloSantoEmail.class.php";
+include_once "$elxPath/libs/paloSantoACL.class.php";
+include_once "$elxPath/libs/paloSantoFax.class.php";
+include_once "$elxPath/libs/paloSantoAsteriskConfig.class.php";
+include_once "$elxPath/libs/paloSantoPBX.class.php";
 
 
 class paloSantoOrganization{
@@ -55,76 +57,105 @@ class paloSantoOrganization{
             }
         }
     }
-
-    /*HERE YOUR FUNCTIONS*/
-
-    function getNumOrganization($filter_field = null, $filter_value = null)
-    {
-        $where    = "";
-        $arrParam = null;
-        if(isset($filter_field) & $filter_field !=""){
-            $where    = "where $filter_field like ?";
-            $arrParam = array("$filter_value%");
+    
+    /**
+     * This function return the number the organizations that exist filtering by the given params
+     * @param array =>
+     * @return mixed => false in case of errors
+     *                  integer => number of organizations
+     */
+    function getNumOrganization($arrProp){
+        $arrWhere=array();
+        $arrParam=array();
+        //la organizacion por default de elastix no se contabiliza
+        $query="SELECT count(id) FROM organization WHERE id!=1";
+        
+        if(!empty($arrProp['state']) && $arrProp['state']!='all'){
+            $arrWhere[]=" state=? ";
+            $arrParam[]=$arrProp['state'];
         }
-        $query="SELECT COUNT(id) FROM organization $where;";
+        if(!empty($arrProp['name'])){
+            $arrWhere[]=" UPPER(name) like ? ";
+            $arrParam[]="%".strtoupper($arrProp['name'])."%";
+        }
+        if(!empty($arrProp['domain'])){
+            $arrWhere[]=" domain like ? ";
+            $arrParam[]="%{$arrProp['domain']}%";
+        }
+        if(!empty($arrProp['id'])){
+            $arrWhere[]=" id=? ";
+            $arrParam[]=$arrProp['id'];
+        }
+        
+        if(count($arrWhere)>0){
+            $query .=" AND ".implode(" AND ",$arrWhere);
+        }
+        
         $result=$this->_DB->getFirstRowQuery($query, false, $arrParam);
-
         if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result[0];
-    }
-
-    function getOrganization($limit="", $offset="", $filter_field="", $filter_value="")
-    {
-        $where    = "";
-        $limite = "";
-        $offsets = "";
-        $arrParam = null;
-        if(isset($filter_field) & $filter_field !=""){
-            $where    = "where $filter_field like ?";
-            $arrParam = array("$filter_value");
-        }
-
-        if(isset($limite) & $limite !=""){
-            $limite = "LIMIT $limit";
-        }
-
-        if(isset($offset) & $offset !=""){
-            $offsets = "OFFSET $offset";
-        }
-
-        $query   = "SELECT * FROM organization $where $limite $offsets";
-
-        $result=$this->_DB->fetchTable($query, true, $arrParam);
-
-        if($result===false){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-
+        return $result[0];
+    }
+    
+    /**
+     * This function return a list of organizations that exist filtering by the given params
+     * @param array =>
+     * @return mixed => false in case of errors
+     *                  array => list of organizations
+     */
+    function getOrganization($arrProp){
+        $arrWhere=array();
+        $arrParam=array();
+        $query="SELECT * FROM organization WHERE id!=1";
+        if(!empty($arrProp['state']) && $arrProp['state']!='all'){
+            $arrWhere[]=" state=? ";
+            $arrParam[]=$arrProp['state'];
+        }
+        if(!empty($arrProp['name'])){
+            $arrWhere[]=" UPPER(name) like ? ";
+            $arrParam[]="%".strtoupper($arrProp['name'])."%";
+        }
+        if(!empty($arrProp['domain'])){
+            $arrWhere[]=" domain like ? ";
+            $arrParam[]="%{$arrProp['domain']}%";
+        }
+        if(!empty($arrProp['id'])){
+            $arrWhere[]=" id=? ";
+            $arrParam[]=$arrProp['id'];
+        }
+        
+        if(count($arrWhere)>0){
+            $query .=" AND ".implode(" AND ",$arrWhere);
+        }
+        
+        if(isset($arrProp['limit']) && isset($arrProp['offset'])){
+            $query .=" limit ? offset ?";
+            $arrParam[]=$arrProp['limit'];
+            $arrParam[]=$arrProp['offset'];
+        }
+        
+        $result=$this->_DB->fetchTable($query, true, $arrParam);
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-        return $result;
+            return false;
+        }else
+            return $result;
     }
+
 
     function getNumUserByOrganization($id)
     {
-        $query   = "SELECT COUNT(u.id) FROM acl_user u inner join acl_group g on u.id_group = g.id where g.id_organization=?;";
+        $query="SELECT COUNT(u.id) FROM acl_user u inner join acl_group g on u.id_group = g.id where g.id_organization=?;";
         $result=$this->_DB->getFirstRowQuery($query, false, array($id));
 
         if($result===FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
+        }else{
+            return $result[0];
         }
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result[0];
     }
 
     function getUsersByOrganization($id)
@@ -141,7 +172,6 @@ class paloSantoOrganization{
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-
         return $result;
     }
 
@@ -543,103 +573,63 @@ class paloSantoOrganization{
     private function assignResource($idOrganization){
         $rInsert=true;
         $recurso=array();
-        $arrResource=array("usermgr","organization","userlist","grouplist","group_permission","preferences","language","themes_system","cdrreport","billing","billing_rates","billing_report","dest_distribution","billing_setup","graphic_report","summary_by_extension","missed_calls","calendar","address_book","sec_accessaudit","sec_weak_keys","email_accounts","email_list","email_stats","vacations","virtual_fax","faxlist","sendfax","faxviewer","currency","pbxadmin","control_panel","voicemail","monitoring","endpoint_configurator","conference","extensions_batch","tools","text_to_wav",'extensions','queues','trunks','ivr','features_code','general_settings','inbound_route','outbound_route');
-        //1) Asignamos los recursos a la organizacion
-        //   estos recursos son sacados en base a los recursos por default a los que tiene acceso
-        //   el adminitrador de cada entidad
-        //   En caso de que no exista el group 2, que es el grupo administrador por default se asignan los recursos
-        //   que existan en la tabla acl_resource y se encuentre dentro del arreglo $arrResource
-        $query1="select o.id_resource from organization_resource o join group_resource g on o.id=g.id_org_resource where id_group=2";
-        $recursos=$this->_DB->fetchTable($query1, true);
-        
-        if($recursos===false){
-            //ocurrio un error con la conexion
-            $this->errMsg = "An error has occurred when were assigned resources to the organization. ".$this->_DB->errMsg;
-            return false;
-        }elseif(count($recursos)>0){
-            foreach($recursos as $value){
-                $recurso[]=$value["id_resource"];
-            }
-        }else{
-            $recurso=$arrResource;
-        }
-
-        $tmp=0;
-        //con los recursos por default verificamos que estos existan en la tabla acl_resource
-        //y de ahi le asignamos los recursos a la organizazion
-        $query2="SELECT id FROM acl_resource WHERE Type!=''";
-        $result=$this->_DB->fetchTable($query2, true);
-        foreach($result as $value){
-            $result2[]=$value["id"];
-        }
-        if($result===false){
-            $this->errMsg = _tr("An error has occurred when trying get resources of the system. ").$this->_DB->errMsg;
+        $query="INSERT INTO organization_resource (id_organization, id_resource) ".
+                    "SELECT ?,re.id FROM acl_resource re WHERE re.organization_access='yes'";
+        $result=$this->_DB->genQuery($query,array($idOrganization));
+        if($result==false){
+            $this->errMsg="An error has occurred trying to assign resources to the organization. ".$this->_DB->errMsg;
             return false;
         }else{
-            $qInsert="INSERT INTO organization_resource (id_organization, id_resource) VALUES(?,?)";
-            foreach($recurso as $value){
-                if(in_array($value,$result2)){
-                    //creamos una entrada en la tabla organization_resource para esa recurso
-                    $rInsert=$this->_DB->genQuery($qInsert,array($idOrganization,$value));
-                    if($rInsert==false){
-                        $this->errMsg = _tr("An error has occurred when trying get resources of the system. ").$this->_DB->errMsg;
-                        return false;
-                    }
-                }
-            }
-        }
-            
-        if($rInsert){
+            //creamos los grupos de la organizacion y asignamos los permisos por default de estos grupos
             if($this->createAllGroupOrganization($idOrganization)){
                 return true;
             }else
                 return false;
         }
-        
     }
 
     private function createAllGroupOrganization($idOrganization){
         $gExito = false;
         $pACL = new paloACL($this->_DB);
 
-        $arrayGroups= array("administrator"=>"total access","operator"=>"operator","extension"=>"extension user");
-        foreach($arrayGroups as $key => $value){
-            $gExito=$pACL->createGroup($key, $value, $idOrganization);
-            if($gExito==false){
-				$this->errMsg = $pACL->errMsg;
+        //creamos los grupos 
+        $query="INSERT INTO acl_group (description,name,id_organization) ".
+                "SELECT description,name,? FROM acl_group WHERE id_organization=1 AND name IN ('administrator', 'supervisor', 'final_user')";
+        $exito=$this->_DB->genQuery($query,array($idOrganization));
+        if($exito==false){
+            $this->errMsg=_tr("An error has ocurred trying to create organizaion's group");
+            return false;
+        }
+        
+        //obtenemos los grupos recien insertados a la organizacion
+        $grpOrga=$pACL->getGroups(null,$idOrganization);
+        if($grpOrga==false){
+            $this->errMsg=_tr("An error has ocurred trying to create organizaion's group");
+            return false;
+        }
+        
+        //asignamos los recursos a los grupos recien creados
+        //la asignacion de recursos se obtiene de la asignacion que existe a los grupos 
+        // 'administrator', 'supervisor', 'final_user' de la organizacion por default
+        // que tiene id 1. 
+        //Los grupos antes mencionados no deberian ser borrados del sistema
+        $query="INSERT INTO group_resource_actions (id_group,id_org_resource,id_action) " .
+                    "SELECT ?,or_re.id,gr_re.id_action FROM ".
+                        "(SELECT or1.id,or1.id_resource FROM organization_resource or1 
+                            WHERE or1.id_organization=?) as or_re ".
+                    "JOIN ".
+                    "(SELECT or2.id_resource,gr.id_action FROM organization_resource or2 ".
+                        "JOIN group_resource_actions gr ON or2.id=gr.id_org_resource JOIN acl_group g ON g.id=gr.id_group WHERE g.name=? AND or2.id_organization=1) as gr_re ".
+                    "ON or_re.id_resource=gr_re.id_resource";
+        foreach($grpOrga as $value){
+            //$value[0]=id
+            //$value[1]=name
+            $result=$this->_DB->genQuery($query,array($value[0],$idOrganization,$value[1]));
+            if($result==false){
+                $this->errMsg = _tr("An error has ocurred trying to assign group resources").$this->_DB->errMsg;
                 return false;
             }
         }
-
-		//obtenemos los grupos recien insertados a la organizacion
-		$grpOrga=$pACL->getGroups(null,$idOrganization);
-
-		// se asume que la organizacion por default , la 1 tiene los tres grupos de elastix creadsos
-        // los modulos a los que estos grupos tinen acceso se toman como refencia para asignar los recursos
-		// a los grupos recien creados
-		//          id_grupo 2=administrator
-		//          id_group 3=operator
-		//          id_group 4=extension
-		$query = "Insert into group_resource (id_org_resource,id_group) select id, ? from organization_resource where id_organization=? and id_resource in (select o.id_resource from organization_resource o join group_resource g on o.id=g.id_org_resource where id_group=?)";
-		if($gExito){
-			foreach($grpOrga as $value){
-				switch($value[1]){
-					case "administrator":
-						$id_group=2;
-						break;
-					case "operator":
-						$id_group=3;
-						break;
-					default:
-						$id_group=4;
-					}
-				$result=$this->_DB->genQuery($query,array($value[0],$idOrganization,$id_group));
-                if($result==false){
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                }
-			}
-		}
         return true;
     }
     
@@ -649,7 +639,7 @@ class paloSantoOrganization{
         global $arrConf;
         $pEmail=new paloEmail($this->_DB);
         $flag=false;
-        $error_domain="";
+        $error_domain=$error="";
         $address=isset($address)? $address : "";
         //contrumios la nueva entidad
         //antes que todo debemos validar que no exista el dominio que queremos crear en el sistema
@@ -677,7 +667,6 @@ class paloSantoOrganization{
                     return false;
                 if(!$this->registerEvent("create",$idcode))
                     return false;
-                
                 //obtenemos la organizacion recien creada
                 $resultOrgz=$this->getOrganizationByDomain_Name($domain);
                 //seteamos los valores de organization_properties correspondientes a la categoria system
@@ -696,7 +685,7 @@ class paloSantoOrganization{
                     //se asignan los recursos a los grupos
                     $gExito=$this->assignResource($resultOrgz['id']);
                     if($gExito==false){
-                        $this->errMsg = _tr("Error trying create organization groups.").$this->errMsg;
+                        $error=$this->errMsg;
                         $this->_DB->rollBAck();
                     }else{
                         //procedo a crear el plan de marcado para la organizacion
@@ -1197,7 +1186,8 @@ class paloSantoOrganization{
     //al email_contact de una organizacion, al momento de que la organizacion es creada, 
     //suspendida o terminada
     function sendEmail($password="",$org_name,$org_domain,$email_contact,$category,&$error){
-        require_once("/var/www/html/libs/phpmailer/class.phpmailer.php");
+        global $arrConf;
+        require_once("{$arrConf['elxPath']}/libs/phpmailer/class.phpmailer.php");
         
         if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/",$email_contact)){
             $error="No has been sent the email address to which send the email";
@@ -1349,8 +1339,6 @@ class paloSantoOrganization{
     */
     function createUserOrganization($idOrganization, $username, $name, $md5password, $password, $idGroup, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $quota, &$lastId,$transaction=true)
     {
-        include_once "libs/cyradm.php";
-        include_once "configs/email.conf.php";
         $pACL=new paloACL($this->_DB);
         $pEmail = new paloEmail($this->_DB);
         $pFax = new paloFax($this->_DB);

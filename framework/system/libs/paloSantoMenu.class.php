@@ -27,11 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoMenu.class.php,v 1.2 2007/09/05 00:25:25 gcarrillo Exp $ */
 
-if (isset($arrConf['basePath'])) {
-    include_once($arrConf['basePath'] . "/libs/paloSantoDB.class.php");
-} else {
-    include_once("libs/paloSantoDB.class.php");
-}
+$elxPath="/usr/share/elastix";
+include_once("$elxPath/libs/paloSantoDB.class.php");
 
 class paloMenu {
 
@@ -76,10 +73,10 @@ class paloMenu {
         return $menu;
     }
 
-    function filterAuthorizedMenus($idUser)
+    function filterAuthorizedMenus($idUser,$administrative='no')
     {
-    	global $arrConf;
-
+        global $arrConf;
+        $org_access='';
         $uelastix = FALSE;
         if (isset($_SESSION)) {
             $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
@@ -93,18 +90,28 @@ class paloMenu {
         if ($uelastix && isset($_SESSION['elastix_user_permission']))
             return $_SESSION['elastix_user_permission'];
 
-        // Obtener todos los módulos autorizados
-       $sPeticionSQL = <<<INFO_AUTH_MODULO
-SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no
-       FROM acl_resource ar where id in (
-	   SELECT ogr.id_resource From organization_resource as ogr
-			JOIN group_resource as gr on ogr.id=gr.id_org_resource
-			where gr.id_group=(Select u.id_group from acl_user as u where u.id=?) )
-	   ORDER BY order_no;
-INFO_AUTH_MODULO;
+        
+        $superAdmin=isUserSuperAdmin();
+        //el usuario superadmin solo tiene acceso a los modulos administrativos
+        if($superAdmin && $administrative=='no'){
+            return NULL;
+        }
+        
+        if(!$superAdmin){
+            //comprobamos que el modulo puede ser accesado por la organizacion
+            $org_access="AND ar.organization_access='yes'"; 
+        }
+        
+        $query="SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no ".
+                "FROM acl_resource ar WHERE administrative=? $org_access AND ar.id IN ( ".
+                    "SELECT ogr.id_resource From organization_resource as ogr ".
+                        "JOIN group_resource_actions as gr ON ogr.id=gr.id_org_resource ".
+                        "JOIN acl_user u ON u.id_group=gr.id_group WHERE u.id=? AND gr.id_action='access') ".
+                        "ORDER BY order_no";
+
         $arrMenuFiltered = array();
 
-        $r = $this->_DB->fetchTable($sPeticionSQL, TRUE, array($idUser));
+        $r = $this->_DB->fetchTable($query, TRUE, array($administrative,$idUser));
         if (!is_array($r)) {
             $this->errMsg = $this->_DB->errMsg;
         	return NULL;
@@ -118,7 +125,7 @@ INFO_AUTH_MODULO;
         // Leer los menús de primer nivel
         $r = $this->_DB->fetchTable(
             'SELECT id, IdParent, Link, description, Type, order_no, 1 AS HasChild '.
-            'FROM acl_resource WHERE IdParent = "" ORDER BY order_no', TRUE);
+            "FROM acl_resource WHERE IdParent='' AND administrative=? $org_access ORDER BY order_no", TRUE, array($administrative));
         if (!is_array($r)) {
             $this->errMsg = $this->_DB->errMsg;
             return NULL;
@@ -147,7 +154,7 @@ INFO_AUTH_MODULO;
         $arrMenuFiltered = array_merge(
             $arrMenuFiltered,
             array_intersect_key($menuPrimerNivel, $menuSuperior));
-                
+        
         if ($uelastix) $_SESSION['elastix_user_permission'] = $arrMenuFiltered;
         return $arrMenuFiltered;
     }
@@ -161,10 +168,10 @@ INFO_AUTH_MODULO;
     {
         $this->errMsg = "";
         $listaMenus = array();
-	$sQuery = "SELECT id, description FROM acl_resource WHERE IdParent=''";
-	$arrMenus = $this->_DB->fetchTable($sQuery);
+        $sQuery = "SELECT id, description FROM acl_resource WHERE IdParent=''";
+        $arrMenus = $this->_DB->fetchTable($sQuery);
         if (is_array($arrMenus)) {
-	   foreach ($arrMenus as $menu)
+        foreach ($arrMenus as $menu)
             {
                 $listaMenus[$menu[0]]=$menu[1];
             }

@@ -26,10 +26,9 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoForm.class.php,v 1.4 2007/05/09 01:07:03 gcarrillo Exp $ */
-
 /* A continuacion se ilustra como luce un tipico elemento del arreglo $this->arrFormElements
 "subject"  => array(
-                "LABEL"                  => _tr("Fax Suject"),
+                "LABEL"                  => $arrLang["Fax Suject"],
                 "DESCRIPTION"            => _tr("Subject sent in the mail"),
                 "REQUIRED"               => "yes",
                 "INPUT_TYPE"             => "TEXT",
@@ -39,7 +38,7 @@
                 "VALIDATION_EXTRA_PARAM" => "")
 
 "content" => array(
-                "LABEL"                  => _tr("Fax Content"),
+                "LABEL"                  => $arrLang["Fax Content"],
                 "DESCRIPTION"            => _tr("Subject sent in the mail"),
                 "REQUIRED"               => "no",
                 "INPUT_TYPE"             => "TEXTAREA",
@@ -61,7 +60,7 @@
                 "VALIDATION_EXTRA_PARAM" => '')
 
 'formulario'       => array(
-                "LABEL"                  => _tr("Form"),
+                "LABEL"                  => $arrLang["Form"],
                 "DESCRIPTION"            => "",
                 "REQUIRED"               => "yes",
                 "INPUT_TYPE"             => "SELECT",
@@ -83,9 +82,8 @@
                 "EDITABLE"               => "yes",
                 "VALIDATION_EXTRA_PARAM" => "")
 */
-
-require_once("misc.lib.php");
 global $arrConf;
+require_once("{$arrConf['elxPath']}/libs/misc.lib.php");
 
 class paloForm
 {
@@ -316,7 +314,7 @@ class paloForm
                     break;
                 case "DATE":
                     if($bIngresoActivo) {
-                        require_once("libs/js/jscalendar/calendar.php");    
+                        require_once("{$arrConf['webCommon']}/js/jscalendar/calendar.php");    
                         $time = false;
                         $format = '%d %b %Y';
                         $timeformat = '12';
@@ -333,7 +331,7 @@ class paloForm
                                     $firstDay = $value;
                             }
                         }
-                        $oCal = new DHTML_Calendar("/libs/js/jscalendar/", "en", "calendar-win2k-2", $time);
+                        $oCal = new DHTML_Calendar("{$arrConf['webCommon']}/js/jscalendar/", "en", "calendar-win2k-2", $time);
                         $this->smarty->assign("HEADER", $oCal->load_files());
 
                         $strInput .= $oCal->make_input_field(
@@ -356,7 +354,7 @@ class paloForm
                 default:
                     $strInput = "";
             }
-            $arrMacro['LABEL'] = _labelName($varName, $arrVars);
+            $arrMacro['LABEL'] = _labelName($varName,&$arrVars);
             $arrMacro['INPUT'] = $strInput;
             $this->smarty->assign($varName, $arrMacro);
         }
@@ -379,8 +377,9 @@ class paloForm
     //       puesto que en ese caso la funcion devolvera true. Es ese el comportamiento esperado?
     function validateForm($arrCollectedVars)
     {
+        global $arrConf;
         $arrCollectedVars = array_merge($arrCollectedVars,$_FILES);
-        include_once("libs/paloSantoValidar.class.php");
+        include_once("{$arrConf['elxPath']}/libs/paloSantoValidar.class.php");
         $oVal = new PaloValidar();
         foreach($arrCollectedVars as $varName=>$varValue) {
             // Valido si la variable colectada esta en $this->arrFormElements

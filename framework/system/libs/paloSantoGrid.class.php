@@ -27,8 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoGrid.class.php, bmacias@palosanto.com Exp $ */
 
+global $arrConf;
 class paloSantoGrid {
-
     private $title;
     private $icon;
     private $width;
@@ -46,11 +46,16 @@ class paloSantoGrid {
     private $url;
     private $arrActions;
     private $arrControlFilters;
-
+    private $_basePath;
+    private $_webCommon;
+    
     public function paloSantoGrid($smarty)
     {
+        global $arrConf;
+        $this->_basePath=$arrConf['basePath'];
+        $this->_webCommon=$arrConf['webCommon'];
         $this->title  = "";
-        $this->icon   = "images/list.png";
+        $this->icon   = $this->_webCommon."/images/list.png";
         $this->width  = "99%";
         $this->smarty = $smarty;
         $this->enableExport = false;
@@ -127,7 +132,7 @@ class paloSantoGrid {
     public function addNew($task="add", $alt="New Row", $asLink=false)
     {
         $type = ($asLink)?"link":"submit";
-        $this->addAction($task,$alt,"images/plus2.png",$type);
+        $this->addAction($task,$alt,$this->_webCommon."/images/plus2.png",$type);
     }
 
     public function customAction($task="task", $alt="Custom Action", $img="",  $asLink=false)
@@ -140,7 +145,7 @@ class paloSantoGrid {
     {
         $type    = ($asLink)?"link":"submit";
         $onclick = "return confirmSubmit('"._tr($msg)."')";
-        $this->addAction($task,$alt,"images/delete5.png",$type,$onclick);
+        $this->addAction($task,$alt,$this->_webCommon."/images/delete5.png",$type,$onclick);
     }
 
     public function addLinkAction($href="action=add", $alt="New Row", $icon=null, $onclick=null)
@@ -369,12 +374,11 @@ class paloSantoGrid {
     function fetchGridPDF()
     {
         global $arrConf;
-        require_once "{$arrConf['basePath']}/libs/paloSantoPDF.class.php";
+        require_once "{$arrConf['elxPath']}/libs/paloSantoPDF.class.php";
 
         $pdf= new paloPDF();
         $pdf->setOrientation("L");
         $pdf->setFormat("A3");
-        //$pdf->setLogoHeader("themes/elastixwave/images/logo_elastix.gif");
         $pdf->setColorHeader(array(5,68,132));
         $pdf->setColorHeaderTable(array(227,83,50));
         $pdf->setFont("Verdana");
@@ -449,7 +453,7 @@ class paloSantoGrid {
         $this->smarty->assign("FILTER_GRID_HIDE"  , _tr("Hide Filter"));
         $this->smarty->assign("MORE_OPTIONS"      , _tr("More Options"));
         $this->smarty->assign("DOWNLOAD_GRID"     , _tr("Download"));
-
+        
         return $this->smarty->fetch($this->tplFile);
     }
 

@@ -16,7 +16,8 @@
 //
 //    Copyright (C) 2004 Coalescent Systems Inc. (info@coalescentsystems.ca)
 //
-include_once "/var/www/html/libs/misc.lib.php";
+$elxPath="/usr/share/elastix";
+include_once "$elxPath/libs/misc.lib.php";
 
 class extension {
 	var $data;

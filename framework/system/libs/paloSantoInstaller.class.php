@@ -23,12 +23,13 @@
   $Id: paloSantoInstaller.class.php,v 1.1 2007/09/05 00:25:25 gcarrillo Exp $
 */
 
-require_once "/var/www/html/libs/paloSantoDB.class.php";
-require_once "/var/www/html/libs/paloSantoModuloXML.class.php";
-require_once "/var/www/html/libs/misc.lib.php";
+$elxPath="/usr/share/elastix";
+require_once "$elxPath/libs/paloSantoDB.class.php";
+require_once "$elxPath/libs/paloSantoModuloXML.class.php";
+require_once "$elxPath/libs/misc.lib.php";
 
 // La presencia de MYSQL_ROOT_PASSWORD es parte del API global.
-define('MYSQL_ROOT_PASSWORD', obtenerClaveConocidaMySQL('root', '/var/www/html/'));
+define('MYSQL_ROOT_PASSWORD', obtenerClaveConocidaMySQL('root'));
 
 class Installer
 {
@@ -149,9 +150,10 @@ class Installer
         return $retval;
     }
 
-    function addModuleLanguage($tmpDir,$DocumentRoot)
+    function addModuleLanguage($tmpDir)
     {
-        require_once("configs/languages.conf.php");
+        $elxPath="/usr/share/elastix";
+        require_once("$elxPath/configs/languages.conf.php");
         //array que incluye todos los lenguages que existan en /html/lang
         $languages = array_keys($languages);
 
@@ -159,8 +161,8 @@ class Installer
         //Se recorre por cada lenguaje
         foreach ($languages as $lang)
         {
-            if (file_exists("$DocumentRoot/lang/$lang.lang")) {
-                require_once("$DocumentRoot/lang/$lang.lang");
+            if (file_exists("$elxPath/lang/$lang.lang")) {
+                require_once("$elxPath/lang/$lang.lang");
                 global $arrLang;
                 //Se realiza por cada modulo
                 if (count(($oModuloXML->_arbolMenu))>0) {
@@ -177,7 +179,7 @@ class Installer
                         }
                     }
                 }
-                $gestor = fopen("$DocumentRoot/lang/$lang.lang", "w");
+                $gestor = fopen("$elxPath/lang/$lang.lang", "w");
                 $contenido = "<?php \nglobal \$arrLang; \n\$arrLang =";
                 $contenido .= var_export($arrLang,TRUE)."?>";
                 if (fwrite($gestor, $contenido) === FALSE) {
@@ -192,13 +194,11 @@ class Installer
 
     function refresh($documentRoot='')
     {
-        if($documentRoot == ''){
-            global $arrConf;
-            $documentRoot = $arrConf['basePath'];
-        }
+        global $arrConf;
+        $documentRoot = $arrConf['documentRoot'];
 
         //STEP 1: Delete tmp templates of smarty.
-        exec("rm -rf $documentRoot/var/templates_c/*",$arrConsole,$flagStatus); 
+        exec("rm -rf $documentRoot/tmp/smarty/templates_c/*",$arrConsole,$flagStatus); 
 
         //STEP 2: Update menus elastix permission.
         if(isset($_SESSION['elastix_user_permission']))

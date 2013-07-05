@@ -28,12 +28,11 @@
   $Id: paloSantoPBX.class.php,v 1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
 
 global $arrConf;
-
-include_once "/var/www/html/libs/paloSantoACL.class.php";
-include_once "/var/www/html/libs/paloSantoConfig.class.php";
-include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
-include_once "/var/www/html/libs/extensions.class.php";
-include_once "/var/www/html/libs/misc.lib.php";
+include_once "{$arrConf['elxPath']}/libs/paloSantoACL.class.php";
+include_once "{$arrConf['elxPath']}/libs/paloSantoConfig.class.php";
+include_once "{$arrConf['elxPath']}/libs/paloSantoAsteriskConfig.class.php";
+include_once "{$arrConf['elxPath']}/libs/extensions.class.php";
+include_once "{$arrConf['elxPath']}/libs/misc.lib.php";
 
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
     require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";

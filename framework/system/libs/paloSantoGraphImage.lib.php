@@ -27,13 +27,14 @@
   +----------------------------------------------------------------------+
 */
 
-require_once("libs/jpgraph/jpgraph.php");
-require_once("libs/jpgraph/jpgraph_line.php");
-require_once("libs/jpgraph/jpgraph_pie.php");
-require_once("libs/jpgraph/jpgraph_pie3d.php");
-require_once("libs/jpgraph/jpgraph_bar.php");
-require_once("libs/jpgraph/jpgraph_canvas.php");
-require_once("libs/jpgraph/jpgraph_canvtools.php");
+$elxPath="/usr/share/elastix";
+require_once("$elxPath/libs/jpgraph/jpgraph.php");
+require_once("$elxPath/libs/jpgraph/jpgraph_line.php");
+require_once("$elxPath/libs/jpgraph/jpgraph_pie.php");
+require_once("$elxPath/libs/jpgraph/jpgraph_pie3d.php");
+require_once("$elxPath/libs/jpgraph/jpgraph_bar.php");
+require_once("$elxPath/libs/jpgraph/jpgraph_canvas.php");
+require_once("$elxPath/libs/jpgraph/jpgraph_canvtools.php");
 
 /**
  * Método que sirve de reemplazo al mecanismo de paloSantoGraph y paloSantoGraphLib
@@ -70,20 +71,20 @@ $G_LABEL_Y = null;
 //ESTATICOS
 $G_SCALE  = "textlin";
 $G_WEIGHT = 1;
+global $arrConf;
 
 if($G_MODULE != ''){
-    require_once("modules/$G_MODULE/libs/$G_CLASS.class.php");//lib del modulo
-    require_once("modules/$G_MODULE/configs/default.conf.php");//archivo configuracion del modulo
+    require_once("{$arrConf['elxPath']}/apps/$G_MODULE/libs/$G_CLASS.class.php");//lib del modulo
+    require_once("{$arrConf['elxPath']}/apps/$G_MODULE/configs/default.conf.php");//archivo configuracion del modulo
     global $arrConfModule;
 
     $dsn = isset($arrConfModule["dsn_conn_database"])?$arrConfModule["dsn_conn_database"]:"";
 }
 else{
-    require_once("libs/$G_CLASS.class.php");//lib del modulo
-    require_once("configs/default.conf.php");//archivo configuracion del modulo
-    global $arrConf;
+    require_once("{$arrConf['elxPath']}/apps/libs/$G_CLASS.class.php");//lib del modulo
+    require_once("{$arrConf['elxPath']}/apps/configs/default.conf.php");//archivo configuracion del modulo
 
-    $dsn = isset($arrConf["dsn_conn_database"]) ? $arrConf["dsn_conn_database"] : "";
+    $dsn = isset($arrConf['elastix_dsn']['elastix']) ? $arrConf['elastix_dsn']['elastix'] : "";
 }
 
 $oPaloClass = new $G_CLASS($dsn);
@@ -204,7 +205,7 @@ if( sizeof($G_YDATAS) >= 1 )
 {
     // true no funciona porque cada cadena u otro valor que se retorne es valor "valido o verdadero"
     // y equivale a true, entonces para diferenciarlo verdaderamente se compara con 'true'
-    $str = checkAttributes($G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING);
+    $str = checkAttributes(/*$arrLang*/ $G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING);
     if( $str != 'true' ){ showError($str, $G_SIZE); return; }
 
     if( $G_TYPE == 'lineplot' )
@@ -353,7 +354,7 @@ if( sizeof($G_YDATAS) >= 1 )
                 imagealphablending($thumb, true);
                 imagesavealpha($thumb, true);
 
-                $source2 = imagecreatefrompng("images/pie_alpha.png");
+                $source2 = imagecreatefrompng("/var/www/html/web/_common/images/pie_alpha.png");
                 imagealphablending($source2, true);
                 imagecopyresampled($thumb, $source2, 0, 0, 0, 0, 290 * $escala, 294 * $escala, 290, 294);
 
@@ -502,7 +503,7 @@ if( sizeof($G_YDATAS) >= 1 )
                 imagealphablending($thumb, true);
                 imagesavealpha($thumb, true);  
             
-                $source = imagecreatefrompng("images/gauge_base.png");
+                $source = imagecreatefrompng("/var/www/html/web/_common/images/gauge_base.png");
                 imagealphablending($source, true);
                 imagecopyresampled($thumb, $source, 0, 0, 0, 0, 285 * $escala, 285 * $escala, 285, 285);
             
@@ -523,7 +524,7 @@ if( sizeof($G_YDATAS) >= 1 )
                 imagefilledpolygon($thumb, $arrTriangle1, 3, $lred);
                 imagefilledpolygon($thumb, $arrTriangle2, 3, $dred);
             
-                $source2 = imagecreatefrompng("images/gauge_center.png");
+                $source2 = imagecreatefrompng("/var/www/html/web/_common/images/gauge_center.png");
                 imagealphablending($source2, true);
                 imagecopyresampled($thumb, $source2, 121 * $escala, 120 * $escala, 0, 0, 44 * $escala, 44 * $escala, 44, 44);
 
@@ -585,32 +586,34 @@ else{
 
 }
 
-function checkAttributes($G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING)
+function checkAttributes(/*$arrLang*/$G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING)
 {
     return true;
     $str = '';
+//    global $G_TITLE,$G_TYPE,$G_LABEL_X,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING;
+    global $arrLang;
 
     if( $G_TYPE == 'lineplot' || $G_TYPE == 'barplot' || $G_TYPE == 'lineplot_multiaxis' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($G_LABEL_Y == null)    $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($G_LABEL_Y == null)    $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else if( $G_TYPE == 'plot3d' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else if( $G_TYPE == 'bar' || $G_TYPE == 'bar2' ){
     }
     else if( $G_TYPE == 'prueba' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($G_LABEL_Y == null)    $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($G_LABEL_Y == null)    $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else
-        $str = _tr("Failure in")." ATTRIBUTE: TYPE";
+        $str = $arrLang["Failure in"]." ATTRIBUTE: TYPE";
 
     // true no funciona, retorno mejor 'true'
     if( $str == '' ) return 'true';

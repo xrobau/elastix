@@ -27,9 +27,9 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoACL.class.php,v 1.1.1.1 2007/07/06 21:31:55 gcarrillo Exp $ 
   $Id: paloSantoACL.class.php,v 3.0 2012/09/01 21:31:55 Rocio Mera rmera@palosanto.com Exp $ */
-  
-ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
-include_once "libs/paloSantoDB.class.php";
+
+$elxPath="/usr/share/elastix";
+include_once "$elxPath/libs/paloSantoDB.class.php";
 
 define('PALOACL_MSG_ERROR_1', 'Username or password is empty');
 define('PALOACL_MSG_ERROR_2', 'Invalid characters found in username');
@@ -753,14 +753,15 @@ class paloACL {
     {
 $sPeticionSQL = <<<INFO_AUTH_MODULO
     SELECT count(ogr.id_resource) From organization_resource as ogr
-	JOIN group_resource as gr on ogr.id=gr.id_org_resource
-	where gr.id_group=(Select u.id_group from acl_user as u where u.id=?) and ogr.id_resource=?;
+        JOIN group_resource_actions as gr on ogr.id=gr.id_org_resource
+        WHERE gr.id_action='access' AND ogr.id_resource=?
+            AND gr.id_group=(Select u.id_group from acl_user as u where u.id=?);
 INFO_AUTH_MODULO;
-		$result=$this->_DB->fetchTable($sPeticionSQL,false,array($id_user, $resource_name));
-		if(is_array($result) && count($result)>0){
-			return true;
-		}else
-			return false;
+        $result=$this->_DB->fetchTable($sPeticionSQL,false,array($resource_name,$id_user));
+        if(is_array($result) && count($result)>0){
+            return true;
+        }else
+            return false;
     }
 
     function isUserAuthorized($username, $resource_name)
@@ -935,46 +936,46 @@ INFO_AUTH_MODULO;
     }
 
 
-      /**
+    /**
      * Procedimiento para crear un nuevo grupo
      *
      * @param string    $group       nombre del grupo a crear
      * @param string    $description    Descripción del grupo a crear
-	 * @param string    $id_organization    id de la organization a la que pertenece el grupo a crear
-     *
-     * @return bool     VERDADERO si el grupo se crea correctamente, FALSO en error
-     */
+        * @param string    $id_organization    id de la organization a la que pertenece el grupo a crear
+        *
+        * @return bool     VERDADERO si el grupo se crea correctamente, FALSO en error
+        */
     function createGroup($group, $description, $id_organization)
     {
         $bExito = FALSE;
-		//validamos que el id de la organizacion sea numerico
-		//no se le pueden crear nuevos grupos a la organizacion 1, ya que esta es solo de administracion
-		if (!preg_match("/^[[:digit:]]+$/", "$id_organization") || $id_organization==1){
-			$this->errMsg = _tr("Organization ID is not valid");
-		}else if ($group == "") {
+        //validamos que el id de la organizacion sea numerico
+        //no se le pueden crear nuevos grupos a la organizacion 1, ya que esta es solo de administracion
+        if (!preg_match("/^[[:digit:]]+$/", "$id_organization") || $id_organization==1){
+            $this->errMsg = _tr("Organization ID is not valid");
+        }else if ($group == "") {
             $this->errMsg = _tr("Group can't be empty");
         } else {
             if ( !$description ) $description = $group;
-			// Verificar que exista la organizacion
-			$query="select id from organization where id=?";
-			$result=$this->_DB->getFirstRowQuery($query,false,array($id_organization));
-			if($result===false){
-				$this->errMsg = $this->_DB->errMsg;
-			}elseif(count($result)==0){
-				$this->errMsg = _tr("Organization doesn't exist");
-			}else{
-				// Verificar que el nombre de Grupo no existe previamente
-				$id_group = $this->getIdGroup($group, $id_organization);
-				if ($id_group !== FALSE) {
-					$this->errMsg = _tr("Group already exists");
-				} elseif ($this->errMsg == "") {
-					$sPeticionSQL = "Insert into acl_group (description,name,id_organization) values(?,?,?);";
-					if ($this->_DB->genQuery($sPeticionSQL,array($description,$group, $id_organization))) {
-						$bExito = TRUE;
-					} else {
-						$this->errMsg = $this->_DB->errMsg;
-					}
-				}
+            // Verificar que exista la organizacion
+            $query="select id from organization where id=?";
+            $result=$this->_DB->getFirstRowQuery($query,false,array($id_organization));
+            if($result===false){
+                $this->errMsg = $this->_DB->errMsg;
+            }elseif(count($result)==0){
+                $this->errMsg = _tr("Organization doesn't exist");
+            }else{
+                // Verificar que el nombre de Grupo no existe previamente
+                $id_group = $this->getIdGroup($group, $id_organization);
+                if ($id_group !== FALSE) {
+                    $this->errMsg = _tr("Group already exists");
+                } elseif ($this->errMsg == "") {
+                    $sPeticionSQL = "INSERT INTO acl_group (description,name,id_organization) values(?,?,?);";
+                    if ($this->_DB->genQuery($sPeticionSQL,array($description,$group, $id_organization))) {
+                        $bExito = TRUE;
+                    } else {
+                        $this->errMsg = $this->_DB->errMsg;
+                    }
+                }
             }
         }
 
@@ -1508,6 +1509,23 @@ INFO_AUTH_MODULO;
             return false;
         }else
             return true;
+    }
+    
+    /**
+     * Esta funcion retorna si un usuario identificado por su username tiene permisos
+     * de realizar cierta action dentro de un modulo elastix que es identificado por 
+     * su nombre
+     */
+    function userCanPerformAction($moduleId,$action,$userAccount){
+        $query="SELECT ogr.id_resource From organization_resource as ogr ".
+                    "JOIN group_resource_actions as gr on ogr.id=gr.id_org_resource ".
+                        "WHERE gr.id_action=? AND ogr.id_resource=? ".
+                        "AND gr.id_group=(Select u.id_group from acl_user as u where u.username=?)";
+        $result=$this->_DB->fetchTable($query,false,array($action,$moduleId,$userAccount));
+        if(is_array($result) && count($result)>0){
+            return true;
+        }else
+            return false;
     }
 }
 ?>

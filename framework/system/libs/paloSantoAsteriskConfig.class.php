@@ -27,15 +27,16 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoAsteriskConfig,v 1.1 05/11/2012 rocio mera rmera@palosanto.com Exp $ */
 
+$elxPath="/usr/share/elastix";
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
 
-include_once "libs/paloSantoConfig.class.php";
-include_once "libs/paloSantoPBX.class.php";
-include_once "libs/misc.lib.php";
-include_once "modules/features_code/libs/paloSantoFeaturesCode.class.php";
-include_once "modules/general_settings/libs/paloSantoGlobalsPBX.class.php";
+include_once "$elxPath/libs/paloSantoConfig.class.php";
+include_once "$elxPath/libs/paloSantoPBX.class.php";
+include_once "$elxPath/libs/misc.lib.php";
+include_once "$elxPath/apps/features_code/libs/paloSantoFeaturesCode.class.php";
+include_once "$elxPath/apps/general_settings/libs/paloSantoGlobalsPBX.class.php";
 
 global $arrConf;
 

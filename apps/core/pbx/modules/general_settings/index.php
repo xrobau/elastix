@@ -31,12 +31,12 @@ include_once "$elxPath/libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    include_once "$elxPath/libs/paloSantoDB.class.php");
-    include_once "$elxPath/libs/paloSantoConfig.class.php");
-    include_once "$elxPath/libs/paloSantoGrid.class.php");
+    include_once "$elxPath/libs/paloSantoDB.class.php";
+    include_once "$elxPath/libs/paloSantoConfig.class.php";
+    include_once "$elxPath/libs/paloSantoGrid.class.php";
 	include_once "$elxPath/libs/paloSantoForm.class.php";
 	include_once "$elxPath/libs/paloSantoOrganization.class.php";
-    include_once "$elxPath/libs/paloSantoACL.class.php");
+    include_once "$elxPath/libs/paloSantoACL.class.php";
     include_once "$elxPath/apps/$module_name/configs/default.conf.php";
 	include_once "$elxPath/apps/$module_name/libs/paloSantoGlobalsPBX.class.php";
 

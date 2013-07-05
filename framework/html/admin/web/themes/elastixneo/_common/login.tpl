@@ -4,14 +4,14 @@
 	<title>Elastix - {$PAGE_NAME}</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<!--<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">-->
-	<link rel="stylesheet" href="themes/{$THEMENAME}/login_styles.css">
+	<link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/login_styles.css">
     {$HEADER_LIBS_JQUERY}
   </head>
   <body>
 	<form method="POST">
 	  <div id="neo-login-box">
 		<div id="neo-login-logo">
-		  <img src="themes/{$THEMENAME}/images/elastix_logo_mini.png" width="200" height="62" alt="elastix logo" />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/elastix_logo_mini.png" width="200" height="62" alt="elastix logo" />
 		</div>
 		<div class="neo-login-line">
 		  <div class="neo-login-label">{$USERNAME}:</div>

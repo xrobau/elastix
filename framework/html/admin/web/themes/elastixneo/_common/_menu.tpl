@@ -16,7 +16,7 @@
 
 <script type='text/javascript'>
 //<![CDATA[
-
+var themeName='elastixneo'; //nombre del tema
 function mostrar_Menu(element)
 {
     var subMenu;
@@ -38,31 +38,28 @@ function mostrar_Menu(element)
 
 //<![CDATA[
     $(".menutabletaboff").mouseover(function(){
-        var source_img = $('#neo-logobox').find('img:first').attr("src");
-        var themeName = source_img.split("/",2);
-        $(this).css("background-image","url(themes/"+themeName[1]+"/images/fondo_boton_center2.gif)");
+        $(this).css("background-image","url(web/themes/"+themeName+"/images/fondo_boton_center2.gif)");
         $(this).css("height","47px");
         $(this).find('a:first').css("bottom","6px");
-        $(this).parent().find('div:first').css("background-image","url(themes/"+themeName[1]+"/images/fondo_boton_left2.gif)");
-        $(this).parent().find('div:last').css("background-image","url(themes/"+themeName[1]+"/images/fondo_boton_right2.gif)");
+        $(this).parent().find('div:first').css("background-image","url(web/themes/"+themeName+"/images/fondo_boton_left2.gif)");
+        $(this).parent().find('div:last').css("background-image","url(web/themes/"+themeName+"/images/fondo_boton_right2.gif)");
         $(this).parent().find('div:first').css("height","38px");
         $(this).parent().find('div:last').css("height","38px");
     });
 
     $(".menutabletaboff").mouseout(function(){
-        var source_img = $('#neo-logobox').find('img:first').attr("src");
-        var themeName = source_img.split("/",2);
-        $(this).css("background-image","url(themes/"+themeName[1]+"/images/fondo_boton_center.gif)");
+        $(this).css("background-image","url(web/themes/"+themeName+"/images/fondo_boton_center.gif)");
         $(this).css("height","37px");
         $(this).find('a:first').css("bottom","0px");
-        $(this).parent().find('div:first').css("background-image","url(themes/"+themeName[1]+"/images/fondo_boton_left.gif)");
-        $(this).parent().find('div:last').css("background-image","url(themes/"+themeName[1]+"/images/fondo_boton_right.gif)");
+        $(this).parent().find('div:first').css("background-image","url(web/themes/"+themeName+"/images/fondo_boton_left.gif)");
+        $(this).parent().find('div:last').css("background-image","url(web/themes/"+themeName+"/images/fondo_boton_right.gif)");
         $(this).parent().find('div:first').css("height","35px");
         $(this).parent().find('div:last').css("height","35px");
     });
 /*newwwww*/
 $(document).ready(function(){
 	$("#toggleleftcolumn, #neo-lengueta-minimized").click(function(){
+        var webCommon=getWebCommon();
 	    if(!$('#neo-lengueta-minimized').hasClass('neo-display-none')){
 		  $("#neo-contentbox-leftcolumn").removeClass("neo-contentbox-leftcolumn-minimized");
 		  $("#neo-contentbox-maincolumn").css("width", "1025px");
@@ -71,7 +68,7 @@ $(document).ready(function(){
 		  if($('#toggleleftcolumn')){
 			  var labeli = $('#toolTip_hideTab').val();
 			  $('#toggleleftcolumn').attr('title',labeli);
-			  $('#toggleleftcolumn').attr('src',"images/expand.png");
+			  $('#toggleleftcolumn').attr('src',webCommon+"images/expand.png");
 		  }
 	    }else{
 		  $("#neo-contentbox-leftcolumn").addClass("neo-contentbox-leftcolumn-minimized");
@@ -81,18 +78,16 @@ $(document).ready(function(){
 		  if($('#toggleleftcolumn')){
 			  var labeli = $('#toolTip_showTab').val();
 			  $('#toggleleftcolumn').attr('title',labeli);
-			  $('#toggleleftcolumn').attr('src',"images/expandOut.png");
+			  $('#toggleleftcolumn').attr('src',webCommon+"images/expandOut.png");
 		  }
 		}
 	});
 	$("#togglebookmark").click(function() {
-		var source_img = $('#neo-logobox').find('img:first').attr("src");
-		var themeName = source_img.split("/",2);
 		var imgBookmark = $("#togglebookmark").attr('src');
 		if(/bookmarkon.png/.test(imgBookmark)) {
-			$("#togglebookmark").attr('src',"themes/"+themeName[1]+"/images/bookmark.png");
+			$("#togglebookmark").attr('src',"web/themes/"+themeName+"/images/bookmark.png");
 		} else {
-			$("#togglebookmark").attr('src',"themes/"+themeName[1]+"/images/bookmarkon.png");
+			$("#togglebookmark").attr('src',"web/themes/"+themeName+"/images/bookmarkon.png");
 		}
 	});
 	$("#neo-cmenu-cpallet").hover(
@@ -325,35 +320,31 @@ function removeNeoDisplayOnMouseOver(ref){
 
 function moveLeft()
 {
-	var source_img = $('#neo-logobox').find('img:first').attr("src");
-	var themeName = source_img.split("/",2);
 	var img = $('#neo-smenubox-arrow-more').children(':first-child').attr('src');
 	var longpaso = 60;
 	var leftvar = $('#neo-smenubox-innerdiv').css("left");
 	leftvarArr = leftvar.split("px");
 	if($('#neo-smenubox-innerdiv').offset().left<-longpaso && leftvarArr[0] < 0 ) {
 		$('#neo-smenubox-innerdiv').animate({left:'+='+longpaso}, 70, function() {});
-		$('#neo-smenubox-arrow-more').children(':first-child').attr('src', 'themes/'+themeName[1]+'/images/icon_arrowleft.png');
-		$('#neo-smenubox-arrow-more').children(':last-child').attr('src', 'themes/'+themeName[1]+'/images/icon_arrowright.png');
+		$('#neo-smenubox-arrow-more').children(':first-child').attr('src', 'web/themes/'+themeName+'/images/icon_arrowleft.png');
+		$('#neo-smenubox-arrow-more').children(':last-child').attr('src', 'web/themes/'+themeName+'/images/icon_arrowright.png');
 	} else {
 		$('#neo-smenubox-innerdiv').css("left", "0px");
 		if(/icon_arrowleft.png/.test(img))
-			$('#neo-smenubox-arrow-more').children(':first-child').attr('src', 'themes/'+themeName[1]+'/images/icon_arrowleft_no.png');
+			$('#neo-smenubox-arrow-more').children(':first-child').attr('src', 'web/themes/'+themeName+'/images/icon_arrowleft_no.png');
 	}
 }
 
 function moveRight()
 {
-	var source_img = $('#neo-logobox').find('img:first').attr("src");
-	var themeName = source_img.split("/",2);
 	var img = $('#neo-smenubox-arrow-more').children(':last-child').attr('src');
 	var longpaso = 60;
 	if(($('#neo-smenubox-innerdiv').offset().left+$('#neo-smenubox-innerdiv').outerWidth()+longpaso)>($("#neo-smenubox").offset().left+$("#neo-smenubox").outerWidth())) {
 		$('#neo-smenubox-innerdiv').animate({left:'-='+longpaso}, 70, function() {});
-		$('#neo-smenubox-arrow-more').children(':first-child').attr('src', 'themes/'+themeName[1]+'/images/icon_arrowleft.png');
+		$('#neo-smenubox-arrow-more').children(':first-child').attr('src', 'web/themes/'+themeName+'/images/icon_arrowleft.png');
 	} else {
 		if(/icon_arrowright.png/.test(img))
-			$('#neo-smenubox-arrow-more').children(':last-child').attr('src', 'themes/'+themeName[1]+'/images/icon_arrowright_no.png');
+			$('#neo-smenubox-arrow-more').children(':last-child').attr('src', 'web/themes/'+themeName+'/images/icon_arrowright_no.png');
 	}
 }
 
@@ -404,7 +395,7 @@ function oneClickEvent()
 <input type="hidden" id="lbl_no_description" value="{$LBL_NO_STICKY}" />
 
 <div id="neo-headerbox">
-	<div id="neo-logobox"><img src="themes/{$THEMENAME}/images/elastix_logo_mini2.png" width="200" height="59" alt="elastix" longdesc="http://www.elastix.org" /></div>
+	<div id="neo-logobox"><img src="{$WEBPATH}themes/{$THEMENAME}/images/elastix_logo_mini2.png" width="200" height="59" alt="elastix" longdesc="http://www.elastix.org" /></div>
 	<div id="neo-mmenubox"> <!-- mostrando contenido del menu principal -->
 	  {foreach from=$arrMainMenu key=idMenu item=menu name=menuMain}
 		{if $idMenu eq $idMainMenuSelected && $smarty.foreach.menuMain.iteration lt 8}
@@ -416,7 +407,7 @@ function oneClickEvent()
 		{elseif $smarty.foreach.menuMain.iteration lt 8}
 		  <div class="neo-tabh"><a class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></div>
 		{elseif $smarty.foreach.menuMain.iteration eq 8}
-		  <div class="neo-tabh-rend"><img src="themes/{$THEMENAME}/images/arrowdown.png" width="17" height="15" alt="arrowdown" /></div>
+		  <div class="neo-tabh-rend"><img src="{$WEBPATH}themes/{$THEMENAME}/images/arrowdown.png" width="17" height="15" alt="arrowdown" /></div>
 		  <div id="neo-second-showbox-menu" class="neo-second-showbox-menu neo-display-none">
 			<p><a class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></p>
 		{elseif $smarty.foreach.menuMain.iteration ge 8}
@@ -432,24 +423,24 @@ function oneClickEvent()
 	  <div id="neo-smenubox-innerdiv">
 		{foreach from=$arrSubMenu key=idSubMenu item=subMenu}
 		  {if $idSubMenu eq $idSubMenuSelected}
-			<div class="neo-tabvon"><a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.description}</a></div>
+			<div class="neo-tabvon"><a href="index.php?menu={$idSubMenu}" class="submenu_on">{$subMenu.description}</a></div>
 		  {else}
 			<div class="neo-tabv"><a href="index.php?menu={$idSubMenu}">{$subMenu.description}</a></div>
 		  {/if}
 		{/foreach}
 	  </div>
 	  <div id="neo-smenubox-arrow-more" class="neo-display-none">
-		  <img src="themes/{$THEMENAME}/images/icon_arrowleft_no.png" width="15" height="17" alt="arrowleft" class="neo-smenubox-arrow-more-left" style="cursor: pointer;" />
-		  <img src="themes/{$THEMENAME}/images/icon_arrowright.png" width="15" height="17" alt="arrowright" class="neo-smenubox-arrow-more-right" style="cursor: pointer;" />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/icon_arrowleft_no.png" width="15" height="17" alt="arrowleft" class="neo-smenubox-arrow-more-left" style="cursor: pointer;" />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/icon_arrowright.png" width="15" height="17" alt="arrowright" class="neo-smenubox-arrow-more-right" style="cursor: pointer;" />
 	  </div>
 	</div>
 	<div id="neo-topbar">
 	  <div id="neo-cmenubox">
-		<div id="neo-cmenu-cpallet" class="neo-cmenutableft"><img src="themes/{$THEMENAME}/images/cpallet.png" width="19" height="21" alt="color" /></div>
-		<div id="neo-cmenu-search" class="neo-cmenutab"><img src="themes/{$THEMENAME}/images/searchw.png" width="19" height="21" alt="user_search" border="0" /></div>
-		<div id="neo-cmenu-info" class="neo-cmenutab"><img src="themes/{$THEMENAME}/images/information.png" width="19" height="21" alt="user_info" border="0" /></div>
-		<div id="neo-cmenu-addons" class="neo-cmenutab"><a href="index.php?menu=addons"><img src="themes/{$THEMENAME}/images/toolbar_addons.png" width="19" height="21" alt="elastix_addons" border="0" /></a></div>
-		<div id="neo-cmenu-user" class="neo-cmenutab"><img src="themes/{$THEMENAME}/images/user.png" width="19" height="21" alt="user" border="0" /></div>
+		<div id="neo-cmenu-cpallet" class="neo-cmenutableft"><img src="{$WEBPATH}themes/{$THEMENAME}/images/cpallet.png" width="19" height="21" alt="color" /></div>
+		<div id="neo-cmenu-search" class="neo-cmenutab"><img src="{$WEBPATH}themes/{$THEMENAME}/images/searchw.png" width="19" height="21" alt="user_search" border="0" /></div>
+		<div id="neo-cmenu-info" class="neo-cmenutab"><img src="{$WEBPATH}themes/{$THEMENAME}/images/information.png" width="19" height="21" alt="user_info" border="0" /></div>
+		<div id="neo-cmenu-addons" class="neo-cmenutab"><a href="index.php?menu=addons"><img src="{$WEBPATH}themes/{$THEMENAME}/images/toolbar_addons.png" width="19" height="21" alt="elastix_addons" border="0" /></a></div>
+		<div id="neo-cmenu-user" class="neo-cmenutab"><img src="{$WEBPATH}themes/{$THEMENAME}/images/user.png" width="19" height="21" alt="user" border="0" /></div>
 	  </div>
 	</div>
 	<div id="neo-cmenu-showbox-search" class="neo-cmenu-showbox neo-display-none">
@@ -503,25 +494,26 @@ function oneClickEvent()
 	      &nbsp;{$title}</span><div class="neo-module-name-right"></div>
 	      <div class="neo-module-title-buttonstab-right"></div><span class="neo-module-title-buttonstab">
 	      {if $STATUS_STICKY_NOTE eq 'true'}
-		  <img src="themes/{$THEMENAME}/images/tab_notes_on.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes_on.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />
 		  {else}
-		  <img src="themes/{$THEMENAME}/images/tab_notes.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />
 		  {/if}
 		  {if $viewMenuTab eq 'true'}
-	      <img src="images/expandOut.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0" onclick='saveToggleTab()' title="{$SHOW_IZQTAB}" />
+	      <img src="{$WEBCOMMON}images/expandOut.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0" onclick='saveToggleTab()' title="{$SHOW_IZQTAB}" />
 		  {elseif $viewMenuTab eq 'false'}
-		   <img src="images/expand.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0" onclick='saveToggleTab()' title="{$HIDE_IZQTAB}" />
+		   <img src="{$WEBCOMMON}images/expand.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0" onclick='saveToggleTab()' title="{$HIDE_IZQTAB}" />
 		  {else}
-		   <img src="images/expand.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0" onclick='saveToggleTab()' title="{$HIDE_IZQTAB}" />
+		   <img src="{$WEBCOMMON}images/expand.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0" onclick='saveToggleTab()' title="{$HIDE_IZQTAB}" />
 		  {/if}
 		  {if $IMG_BOOKMARKS eq 'bookmark.png'}
-		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$ADD_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$ADD_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {else}
-		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
-	      <img src="images/icon-help.png" width="24" height="24" alt="help" title="{$HELP}" class="neo-picker" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
+	      <a href="javascript:popUp('help/index.php?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
+	      <img src="{$WEBCOMMON}images/icon-help.png" width="24" height="24" alt="help" title="{$HELP}" class="neo-picker" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
           <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
+          <input type="hidden" id="elastix_framework_webCommon" value="{$WEBCOMMON}" />
 	      <div class="neo-module-content">
 	{else}
 	<div id="neo-contentbox-leftcolumn" class="neo-contentbox-leftcolumn-minimized">
@@ -537,19 +529,20 @@ function oneClickEvent()
 	      &nbsp;{$title}</span><div class="neo-module-name-right"></div>
 	      <div class="neo-module-title-buttonstab-right"></div><span class="neo-module-title-buttonstab">
 	      {if $STATUS_STICKY_NOTE eq 'true'}
-		  <img src="themes/{$THEMENAME}/images/tab_notes_on.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" style="cursor: pointer;" class="togglestickynote" />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes_on.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" style="cursor: pointer;" class="togglestickynote" />
 		  {else}
-		  <img src="themes/{$THEMENAME}/images/tab_notes.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" style="cursor: pointer;" class="togglestickynote" />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" style="cursor: pointer;" class="togglestickynote" />
 		  {/if}
-		  <img src="images/expandOut.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0"  title="{$SHOW_IZQTAB}" />
+		  <img src="{$WEBCOMMON}images/expandOut.png" width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0"  title="{$SHOW_IZQTAB}" />
 		  {if $IMG_BOOKMARKS eq 'bookmark.png'}
-		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$ADD_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$ADD_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {else}
-		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
+		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
-	      <img src="images/icon-help.png" width="24" height="24" alt="help" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
+	      <a href="javascript:popUp('help/index.php?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
+	      <img src="{$WEBCOMMON}images/icon-help.png" width="24" height="24" alt="help" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
           <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
+          <input type="hidden" id="elastix_framework_webCommon" value="{$WEBCOMMON}" />
 	 <div class="neo-module-content">
 	{/if}
 

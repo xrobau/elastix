@@ -11,7 +11,7 @@ div.neo-table-toolbar-button {
 	border-radius: 8px 8px 8px 8px;
 	text-shadow: 1px 1px #ccc;
 	padding: 5px 4px 4px 8px;
-	background-image:url(../images/bgicon.png);
+	background-image:url(../../../../web/_common/images/bgicon.png);
 }
 
 .neo-table-header-row {
@@ -21,7 +21,7 @@ div.neo-table-toolbar-button {
         margin-top:8px;
         border-top: 1px solid #aaa;
         border-bottom: 1px solid #aaa;
-        background: url(../../../images/addons_header_row_bg.png) repeat-x top;
+        background: url(../../../../web/_common/images/addons_header_row_bg.png) repeat-x top;
 }
 
 .neo-table-header-row input[type=text] {
@@ -38,7 +38,7 @@ div.neo-table-toolbar-button {
         padding: 0px 8px 10px 0px;
         margin-top:0px;
         border-bottom: 1px solid #aaa;
-        background: url(../../../images/addons_header_row_bg.png) repeat-x top;
+        background: url(../../../../web/_common/images/addons_header_row_bg.png) repeat-x top;
 }
 
 .neo-table-footer-row input[type=text] {

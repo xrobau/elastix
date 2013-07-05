@@ -653,7 +653,7 @@ table.tabla_cabecera {
     BORDER-BOTTOM: #444444 1px solid;
 	border: 1px #9E9E9E solid;
 	padding: 10px 8px 8px 8px;
-	background-image : url(images/searchFormBg.gif);
+	background-image : url(../../../../web/_common/images/searchFormBg.gif);
 	background-repeat: repeat-x;
 	background-position: top;
 	background-color: #eef3f8;
@@ -675,7 +675,7 @@ tr.primera_fila {
     font-weight: bold;
     text-align: left;
     background-color: #f8f7f7;
-    background-image: url(images/primerafilabg.gif); 
+    background-image: url(../../../../web/_common/images/primerafilabg.gif); 
     background-repeat: repeat-x;
     background-position: bottom;
     padding: 3px 5px 3px 5px;
@@ -1097,7 +1097,7 @@ td.botonon {
 }
 
 #layerCM {
-    background: transparent url('/images/message_box_blue.png') no-repeat;
+    background: transparent url('../../../../web/_common/images/message_box_blue.png') no-repeat;
     /*position: absolute;*/
     left:120px;
     top:50px;
@@ -1114,7 +1114,7 @@ td.botonon {
 }
 
 .layer_handle{
-    background: transparent url('/images/close.png') no-repeat;
+    background: transparent url('images/close.png') no-repeat;
     padding:0px;
     text-align:center;
     font-weight:bold;
@@ -1424,7 +1424,7 @@ TABLE.table_data {
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
     border-radius: 6px;
-    background:url(/images/modalbox_bg.png) top left repeat-x #fff;
+    background:url(../../../../web/_common/images/modalbox_bg.png) top left repeat-x #fff;
     top: 50%;
     left: 45%;
    scrollbar-face-color: #6685CA;
@@ -1452,7 +1452,7 @@ TABLE.table_data {
     right:10px;
     width:18px;
     height:15px;
-    background:url(/images/bookmarks_equis.png) no-repeat;
+    background:url(images/bookmarks_equis.png) no-repeat;
     cursor: pointer;
 }
 .neo-modal-elastix-popup-content {
@@ -1528,3 +1528,15 @@ label[data-tooltip]:hover:before, label[data-tooltip]:hover:after {
     visibility: visible; 
     -moz-transition: visibility 0s linear .3s;  
 } 
+.font-green{
+    font-weight: bold;
+    color: green;
+}
+.font-red{
+    font-weight: bold;
+    color: red;
+}
+.font-orange{
+    font-weight: bold;
+    color: #FF6600;
+}

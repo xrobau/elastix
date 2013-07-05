@@ -25,10 +25,10 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
   <title>Elastix </title>
-  <link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
-  <link rel="stylesheet" href="themes/{$THEMENAME}/help.css">
-  <script src="libs/js/base.js"></script>
-  <script src="libs/js/iframe.js"></script>
+  <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/help.css">
+  <script src="{$WEBCOMMON}js/base.js"></script>
+  <script src="{$WEBCOMMON}js/iframe.js"></script>
 </head>
 <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
 {$CONTENT}

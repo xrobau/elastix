@@ -42,20 +42,28 @@ function spl_elastix_class_autoload($sNombreClase)
 spl_autoload_register('spl_elastix_class_autoload');
 
 // Agregar directorio libs de script a la lista de rutas a buscar para require()
-ini_set('include_path', dirname($_SERVER['SCRIPT_FILENAME'])."/libs:".ini_get('include_path'));
 
-include_once("libs/misc.lib.php");
+$elxPath="/usr/share/elastix";
+// /usr/share/elastix/ directorio que contiene las librerias del sistema
+//
+ini_set('include_path',dirname($_SERVER['SCRIPT_FILENAME']).":$elxPath:".ini_get('include_path'));
+
+include_once "libs/misc.lib.php";
 include_once "configs/default.conf.php";
 include_once "libs/paloSantoDB.class.php";
+include_once "libs/paloSantoACL.class.php";
 include_once "libs/paloSantoMenu.class.php";
-include_once("libs/paloSantoACL.class.php");// Don activate unless you know what you are doing. Too risky!
+include_once "libs/paloSantoNavigation.class.php";
+
+$arrConf['basePath']=$arrConf['basePath']."/admin"; //se cambia la ubicacion del modulo
+$arrConf['webCommon']="../".$arrConf['webCommon']; //se cambia la ubicacion del modulo
 
 load_default_timezone();
 
 session_name("elastixSession");
 session_start();
 
-$arrConf['mainTheme'] = load_theme($arrConf['basePath']."/");
+$arrConf['mainTheme'] = load_theme();
 
 if(isset($_GET['logout']) && $_GET['logout']=='yes') {
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"unknown";
@@ -89,7 +97,6 @@ $smarty = getSmarty($arrConf['mainTheme']);
 
 //- 1) SUBMIT. Si se hizo submit en el formulario de ingreso
 //-            autentico al usuario y lo ingreso a la sesion
-
 if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
     $pass_md5 = md5(trim($_POST['input_pass']));
     if($pACL->authenticateUser($_POST['input_user'], $pass_md5)) {
@@ -113,23 +120,28 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
 if (isset($_SESSION['elastix_user']) && 
     isset($_SESSION['elastix_pass']) && 
     $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass'])) {
-    
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
     $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
-    $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);
-
+    //obtenemos los menu a los que el usuario tiene acceso
+    $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser,'yes');
+    
     $id_organization = $pACL->getIdOrganizationUser($idUser);
     $_SESSION['elastix_organization'] = $id_organization;
 
+    if(!is_array($arrMenuFiltered))
+        $arrMenuFiltered=array();
+    
     //traducir el menu al idioma correspondiente
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
         $arrMenuFiltered[$idMenu]['description'] = _tr($arrMenuItem['description']);
     }
-
+    
+    //variables de smarty usadas en los templates
     $smarty->assign("THEMENAME", $arrConf['mainTheme']);
+    $smarty->assign("WEBPATH", "web/");
+    $smarty->assign("WEBCOMMON", "../".$arrConf['webCommon']."/");
 
     /*agregado para register*/
-    
     $smarty->assign("Register", _tr("Register"));
     $smarty->assign("lblRegisterCm", _tr("Register"));
     $smarty->assign("lblRegisteredCm", _tr("Registered"));
@@ -160,17 +172,16 @@ if (isset($_SESSION['elastix_user']) &&
     $smarty->assign("ABOUT_ELASTIX", _tr('About Elastix')." ".$arrConf['elastix_version']);
 
     $selectedMenu = getParameter('menu');
-
     /* El módulo _elastixutils sirve para contener las utilidades json que
      * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
      * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
     // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
     if (!is_null($selectedMenu) && $selectedMenu == '_elastixutils' && 
-        file_exists('modules/_elastixutils/index.php')) {
+        file_exists("$elxPath/apps/_elastixutils/index.php")) {
         
         // Cargar las configuraciones para el módulo elegido
-        if (file_exists('modules/_elastixutils/configs/default.conf.php')) {
-            require_once 'modules/_elastixutils/configs/default.conf.php';
+        if (file_exists("$elxPath/apps/_elastixutils/configs/default.conf.php")) {
+            require_once "apps/_elastixutils/configs/default.conf.php";
 
             global $arrConf;
             global $arrConfModule;
@@ -180,7 +191,7 @@ if (isset($_SESSION['elastix_user']) &&
         // Cargar las traducciones para el módulo elegido
         load_language_module($selectedMenu);
         
-        require_once 'modules/_elastixutils/index.php';
+        require_once "apps/_elastixutils/index.php";
         echo _moduleContent($smarty, $selectedMenu);
         return;
     }
@@ -188,11 +199,6 @@ if (isset($_SESSION['elastix_user']) &&
     // Inicializa el objeto palosanto navigation
     $oPn = new paloSantoNavigation($arrMenuFiltered, $smarty, $selectedMenu);
     $selectedMenu = $oPn->getSelectedModule();
-
-    // Guardar historial de la navegación
-    // TODO: también para rawmode=yes ?
-    putMenuAsHistory($pdbACL, $pACL, $idUser, $selectedMenu);
-
     // Obtener contenido del módulo, si usuario está autorizado a él
     $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $selectedMenu);
     $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';    
@@ -205,13 +211,16 @@ if (isset($_SESSION['elastix_user']) &&
     } else {
         $oPn->renderMenuTemplates();
 
-        if (file_exists('themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
-        	require_once('themes/'.$arrConf['mainTheme'].'/themesetup.php');
+        if (file_exists($arrConf['basePath'].'/web/themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
+        	require_once($arrConf['basePath'].'/web/themes/'.$arrConf['mainTheme'].'/themesetup.php');
             themeSetup($smarty, $selectedMenu, $pdbACL, $pACL, $idUser);
         }
 
         // Autorizacion
         if ($bModuleAuthorized) {
+            // Guardar historial de la navegación
+            // TODO: también para rawmode=yes ?
+            putMenuAsHistory($pdbACL, $idUser, $selectedMenu);
             $smarty->assign("CONTENT", $sModuleContent);
             $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 
                 ? $smarty->fetch("_common/_menu.tpl") 
@@ -220,7 +229,7 @@ if (isset($_SESSION['elastix_user']) &&
         $smarty->display("_common/index.tpl");
     }
 } else {
-	$rawmode = getParameter("rawmode");
+    $rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes'){
         include_once "libs/paloSantoJSON.class.php";
         $jsonObject = new PaloSantoJSON();
@@ -228,20 +237,21 @@ if (isset($_SESSION['elastix_user']) &&
         $jsonObject->set_error(_tr("Your session has expired. If you want to do a login please press the button 'Accept'."));
         $jsonObject->set_message(null);
         echo $jsonObject->createJSON();
-    }
-    else{
+    }else{
         $oPn = new paloSantoNavigation(array(), $smarty);
-		$oPn->putHEAD_JQUERY_HTML();
-		$smarty->assign("THEMENAME", $arrConf['mainTheme']);
-		$smarty->assign("currentyear",date("Y"));
-		$smarty->assign("PAGE_NAME", _tr('Login page'));
-		$smarty->assign("WELCOME", _tr('Welcome to Elastix'));
-		$smarty->assign("ENTER_USER_PASSWORD", _tr('Please enter your username and password'));
-		$smarty->assign("USERNAME", _tr('Username'));
-		$smarty->assign("PASSWORD", _tr('Password'));
-		$smarty->assign("SUBMIT", _tr('Submit'));
+        $oPn->putHEAD_JQUERY_HTML();
+        $smarty->assign("THEMENAME", $arrConf['mainTheme']);
+        $smarty->assign("WEBPATH", "web/");
+        $smarty->assign("WEBCOMMON", "../".$arrConf['webCommon']."/");
+        $smarty->assign("currentyear",date("Y"));
+        $smarty->assign("PAGE_NAME", _tr('Login page'));
+        $smarty->assign("WELCOME", _tr('Welcome to Elastix'));
+        $smarty->assign("ENTER_USER_PASSWORD", _tr('Please enter your username and password'));
+        $smarty->assign("USERNAME", _tr('Username'));
+        $smarty->assign("PASSWORD", _tr('Password'));
+        $smarty->assign("SUBMIT", _tr('Submit'));
 
-		$smarty->display("_common/login.tpl");
-	}
+        $smarty->display("_common/login.tpl");
+    }
 }
 ?>

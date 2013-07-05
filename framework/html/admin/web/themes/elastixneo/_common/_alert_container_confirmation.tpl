@@ -9,7 +9,7 @@
      <td bgcolor="#FFFFFF">
        <table cellspacing="0" cellpadding="4" border="0">
          <tr>
-           <td width="100" align="center" valign="middle"><img src="themes/{$THEMENAME}/images/confirmation.gif"></td>
+           <td width="100" align="center" valign="middle"><img src="{$WEBPATH}themes/{$THEMENAME}/images/confirmation.gif"></td>
            <td><font color="#000000" style="FONT-FAMILY: verdana, arial, helvetica, sans-serif; FONT-SIZE: 8pt">{_ALERT_MSG}</font></td>
          </tr>
          <tr>

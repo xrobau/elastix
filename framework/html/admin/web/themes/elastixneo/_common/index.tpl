@@ -4,20 +4,20 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
         <title>Elastix</title>
-        <link rel="stylesheet" href="themes/{$THEMENAME}/styles.css" />
-        <link rel="stylesheet" href="themes/{$THEMENAME}/help.css" />
+        <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" />
+        <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/help.css" />
 		<!--<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/old.theme.elastixwave.styles.css" />-->
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/header.css" />
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/content.css" />
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/applet.css" />
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/sticky_note.css" />
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/table.css" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/header.css" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/content.css" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/applet.css" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/sticky_note.css" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/table.css" />
 
         <!--[if lte IE 8]><link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/ie.css" /><![endif]-->
 	{$HEADER_LIBS_JQUERY}
-        <script type='text/javascript' src="libs/js/base.js"></script>
-	<script type='text/javascript' src="libs/js/sticky_note.js"></script>
-        <script type='text/javascript' src="libs/js/iframe.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/base.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/sticky_note.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/iframe.js"></script>
         {$HEADER}
 	{$HEADER_MODULES}
     </head>

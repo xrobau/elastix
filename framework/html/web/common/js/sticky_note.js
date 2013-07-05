@@ -54,7 +54,8 @@ var note = function() {
 		arrAction["id_menu"] = getCurrentElastixModule();
 		arrAction["action"]  = "get_sticky_note";
 		arrAction["rawmode"] = "yes";
-		var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#get_note_label').val()+"</span></div></div>";
+        var webCommon=getWebCommon();
+		var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#get_note_label').val()+"</span></div></div>";
 		$.blockUI({
 		  message: urlImaLoading
 		});
@@ -141,7 +142,8 @@ function send_sticky_note(){
 		arrAction["popup"]  = 0;
 	}
 	arrAction["rawmode"] = "yes";
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#save_note_label').val()+"</span></div></div>";
+    var webCommon=getWebCommon();
+	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#save_note_label').val()+"</span></div></div>";
 	$.blockUI({
 	  message: urlImaLoading
 	});
@@ -157,10 +159,10 @@ function send_sticky_note(){
 				var themeName = $('#elastix_theme_name').val();
 				if(themeName == "elastixneo"){
 					if(arrAction['description'] != ""){
-						var imgName = "themes/elastixneo/images/tab_notes_on.png";
+						var imgName = "web/themes/elastixneo/images/tab_notes_on.png";
 						$('#togglestickynote1').attr('src',imgName);
 					}else{
-						var imgName = "themes/elastixneo/images/tab_notes.png";
+						var imgName = "web/themes/elastixneo/images/tab_notes.png";
 						$('#togglestickynote1').attr('src',imgName);
 					}
 				}

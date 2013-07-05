@@ -27,8 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
     global $arrConfModule;
-    $arrConfModule['module_name'] = 'email_domains';
-    $arrConfModule['templates_dir'] = 'themes';
+    $arrConfModule['module_name'] = 'dashboard';
     $arrConfModule['dir_WebServices'] = "http://webservice.elastix.org/modules/serial_hardware_telephony/webservice/telephonyHardware.wsdl";
     $arrConfModule['dir_RSS'] = "http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw";
 

@@ -29,8 +29,6 @@
     global $arrConf;
     global $arrConfModule;
 
-    $arrConfModule['module_name']       = 'applet_admin';
-    $arrConfModule['templates_dir']     = 'themes';
     $arrConfModule['dsn_conn_database'] = "sqlite3:///$arrConf[elastix_dbdir]/dashboard.db";
     //ex2: $arrConfModule['dsn_conn_database'] = "mysql://user:password@ip_host_sever_mysql/base_name";
 ?>

@@ -32,29 +32,8 @@ include_once "libs/paloSantoForm.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoAppletAdmin.class.php";
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
-    //global variables
-    global $arrConf;
-    global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     //actions
     $action = getAction();
@@ -87,12 +66,11 @@ function showApplets_Admin($module_name)
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("Applet", $arrLang["Applet"]);
     $smarty->assign("Activated", $arrLang["Activated"]);
-    $smarty->assign("icon", "modules/$module_name/images/system_dashboard_applet_admin.png");
+    $smarty->assign("icon", "web/apps/$module_name/images/system_dashboard_applet_admin.png");
 
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    //folder path for custom templates
+    $local_templates_dir=getWebDirModule($module_name);
     $htmlForm = $oForm->fetchForm("$local_templates_dir/applet_admin.tpl",$arrLang["Dashboard Applet Admin"], $_POST);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 

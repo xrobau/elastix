@@ -26,7 +26,8 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoDashboard.class.php,v 1.1.1.1 2008/01/31 21:31:55  Exp $ */
-include_once "paloSantoSysInfo.class.php";
+include_once "apps/dashboard/libs/paloSantoSysInfo.class.php";
+
 class paloSantoDashboard {
     var $_DB;
     var $errMsg;
@@ -51,18 +52,19 @@ class paloSantoDashboard {
     }
 
    function getSystemStatus($email,$passw){
-    global $arrLang;
+        global $arrLang;
         global $arrConf;
 
-    $dbEmails = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/email.db");
-    if($email!='' && $passw!='')
-        $imap = imap_open("{localhost:143/notls}","$email","$passw");
-    else return $arrLang["You don't have a webmail account"];
+        $dbEmails = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/email.db");
+        if($email!='' && $passw!='')
+            $imap = imap_open("{localhost:143/notls}","$email","$passw");
+        else 
+            return $arrLang["You don't have a webmail account"];
 
-    if (!$imap)
-        return $arrLang["Imap: Connection error"];
-    $quotainfo = imap_get_quotaroot($imap,"INBOX");
-    imap_close($imap);
+        if (!$imap)
+            return $arrLang["Imap: Connection error"];
+        $quotainfo = imap_get_quotaroot($imap,"INBOX");
+        imap_close($imap);
 
     $content = $arrLang["Quota asigned"]." $quotainfo[limit] KB<br>".$arrLang["Quota Used"]." $quotainfo[usage] KB<br>".$arrLang["Quota free space"]." ". (string)($quotainfo['limit'] - $quotainfo['usage']) . " KB";
     return $content;

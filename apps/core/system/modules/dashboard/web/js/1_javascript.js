@@ -210,10 +210,10 @@ function changeArrow(urlimg,id){
   var sal = "";
   var imgID = document.getElementById(id);
   if(urlimg.indexOf('flecha_down.gif')!=-1){ 
-    sal = "modules/"+module_name+"/images/flecha_up.gif";
+    sal = "admin/web/apps/"+module_name+"/images/flecha_up.gif";
   }
   else{
-    sal = "modules/"+module_name+"/images/flecha_down.gif";
+    sal = "admin/web/apps/"+module_name+"/images/flecha_down.gif";
   }
   return sal;
 }
@@ -222,7 +222,7 @@ function arrowsCollapse(){
   for(var i=1; i<=12; i++){
     var id = "imga"+i;
     var imgID = document.getElementById(id);
-    imgID.src = "modules/"+module_name+"/images/flecha_down.gif";
+    imgID.src = "admin/web/apps/"+module_name+"/images/flecha_down.gif";
   }
 }
 
@@ -230,7 +230,7 @@ function arrowsExpand(){
   for(var i=1; i<=12; i++){
     var id = "imga"+i;
     var imgID = document.getElementById(id);
-    imgID.src = "modules/"+module_name+"/images/flecha_up.gif";
+    imgID.src = "admin/web/apps/"+module_name+"/images/flecha_up.gif";
   }
 }
 
@@ -239,6 +239,7 @@ function loadAppletData()
     var arrAction          = new Array();
     arrAction["action"]    = "loadAppletData";
     arrAction["rawmode"]   = "yes";
+    arrAction["menu"]   = "dashboard";
     request("index.php",arrAction,false,
 	function(arrData,statusResponse,error)
 	{
@@ -273,12 +274,13 @@ function refresh(element)
     code = code[1];
     var loading = $("#loading").val();
     // Se obtiene la imagen loading con su texto traducido
-    $("#"+code).html("<img class='ima' src='modules/"+module_name+"/images/loading.gif' border='0' align='absmiddle' />&nbsp;"+loading);
+    $("#"+code).html("<img class='ima' src='web/apps/"+module_name+"/images/loading.gif' border='0' align='absmiddle' />&nbsp;"+loading);
 
     // Se realiza la petición para obtener los datos del applet
     var arrAction	 = new Array();
     arrAction["action"]  = "refreshDataApplet";
     arrAction["code"]    = code;
+    arrAction["menu"]   = "dashboard";
     arrAction["rawmode"] = "yes";
     request("index.php",arrAction,false,
         function(arrData,statusResponse,error)

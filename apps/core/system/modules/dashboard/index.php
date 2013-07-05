@@ -27,41 +27,15 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.2 2007/07/07 22:50:39 admin Exp $ */
 
-
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent($smarty, $module_name)
 {
-    require_once "libs/misc.lib.php";
-
-    //include module files
-    include_once "modules/$module_name/libs/paloSantoDataApplets.class.php";
-    include_once "modules/$module_name/libs/paloSantoSysInfo.class.php";
-    include_once "modules/$module_name/libs/paloSantoDashboard.class.php";
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/applet_admin/libs/paloSantoAppletAdmin.class.php";
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
-
-    //global variables
     global $arrConf;
-    global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+    include_once "apps/applet_admin/libs/paloSantoAppletAdmin.class.php";
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     $oPalo = new paloSantoSysInfo();
     $pDataApplets = new paloSantoDataApplets($module_name,$arrConf);
@@ -273,18 +247,16 @@ function showApplets_Admin()
     $oForm = new paloForm($smarty,array());
 
     $arrApplets = $oPalo->getApplets_User($_SESSION["elastix_user"]);
-    $smarty->assign("icon","modules/$module_name/images/system_dashboard.png");
+    $smarty->assign("icon","web/apps/$module_name/images/system_dashboard.png");
     $smarty->assign("applets",$arrApplets);
     $smarty->assign("SAVE", $arrLang["Save"]);
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("Applet", $arrLang["Applet"]);
     $smarty->assign("Activated", $arrLang["Activated"]);
-    $smarty->assign("IMG", "images/list.png");
+    $smarty->assign("IMG", "{$arrConf['webCommon']}/images/list.png");
 
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
     $htmlForm = $oForm->fetchForm("$local_templates_dir/applet_admin.tpl",$arrLang["Dashboard"], $_POST);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 

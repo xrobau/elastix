@@ -1,9 +1,9 @@
 <?php
 global $arrConf;
-require_once "{$arrConf['basePath']}/libs/misc.lib.php";
-require_once "{$arrConf['basePath']}/libs/paloSantoDB.class.php";
-require_once "{$arrConf['basePath']}/libs/paloSantoSampler.class.php";
-require_once "{$arrConf['basePath']}/libs/paloSantoTrunk.class.php";
+require_once "libs/misc.lib.php";
+require_once "libs/paloSantoDB.class.php";
+require_once "libs/paloSantoSampler.class.php";
+require_once "libs/paloSantoTrunk.class.php";
 require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 
 class paloSantoSysInfo

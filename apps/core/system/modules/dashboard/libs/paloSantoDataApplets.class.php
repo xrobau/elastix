@@ -26,12 +26,12 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoDataApplets.class.php,v 1.1.1.1 2011/02/11 Alberto Santos 21:31:55  Exp $ */
-
+global $arrConf;
 include_once "libs/paloSantoGraphImage.lib.php";
-include_once "paloSantoSysInfo.class.php";
-include_once "paloSantoDashboard.class.php";
+include_once "apps/dashboard/libs/paloSantoSysInfo.class.php";
+include_once "apps/dashboard/libs/paloSantoDashboard.class.php";
 require_once "libs/magpierss/rss_fetch.inc";
-require_once "libs/paloSantoDB.class.php";
+require_once "/libs/paloSantoDB.class.php";
 
 class paloSantoDataApplets
 {
@@ -116,7 +116,7 @@ class paloSantoDataApplets
     $sEnlaceImagen
     <div class="neo-applet-hd-innerbox">
       <div class="neo-applet-hd-innerbox-top">
-       <img src="modules/{$this->module_name}/images/light_usedspace.png" width="13" height="11" alt="used" /> {$sPorcentajeUsado}% Used &nbsp;&nbsp;<img src="modules/{$this->module_name}/images/light_freespace.png" width="13" height="11" alt="used" /> {$sPorcentajeLibre}% Available
+       <img src="web/apps/{$this->module_name}/images/light_usedspace.png" width="13" height="11" alt="used" /> {$sPorcentajeUsado}% Used &nbsp;&nbsp;<img src="web/apps/{$this->module_name}/images/light_freespace.png" width="13" height="11" alt="used" /> {$sPorcentajeLibre}% Available
       </div>
       <div class="neo-applet-hd-innerbox-bottom">
         <div><strong>Hard Disk Capacity:</strong> {$sTotalGB}GB</div>
@@ -215,7 +215,7 @@ PLANTILLA_DIV;
 <div class="neo-applet-news-row">
     <span class="neo-applet-news-row-date">%s</span>
     <a href="https://twitter.com/share?original_referer=%s&related=&source=tweetbutton&text=%s&url=%s&via=elastixGui"  target="_blank">
-        <img src="modules/dashboard/images/twitter-icon.png" width="16" height="16" alt="tweet" />
+        <img src="web/apps/dashboard/images/twitter-icon.png" width="16" height="16" alt="tweet" />
     </a>
     <a href="%s" target="_blank">%s</a>
 </div>
@@ -253,7 +253,7 @@ PLANTILLA_RSS_ROW;
 <input type="button" class="neo_applet_process" name="processcontrol_activate" id="neo_applet_process_activate" value="$sMsgActivate" />
 <input type="button" class="neo_applet_process" name="processcontrol_deactivate" id="neo_applet_process_deactivate" value="$sMsgDeactivate" />
 </div>
-<img id="neo-applet-processes-processing" src="modules/{$this->module_name}/images/loading.gif" style="display: none;" alt="" />
+<img id="neo-applet-processes-processing" src="web/apps/{$this->module_name}/images/loading.gif" style="display: none;" alt="" />
 </div>
 PLANTILLA_POSICIONABLE;
 
@@ -269,13 +269,13 @@ PLANTILLA_POSICIONABLE;
         $sIconoDesconocido = 'system.png';
         $sPlantilla = <<<PLANTILLA_PROCESS_ROW
 <div class="neo-applet-processes-row">
-    <div class="neo-applet-processes-row-icon"><img src="modules/dashboard/images/%s" width="32" height="28" alt="%s" /></div>
+    <div class="neo-applet-processes-row-icon"><img src="web/apps/dashboard/images/%s" width="32" height="28" alt="%s" /></div>
     <div class="neo-applet-processes-row-name">%s</div>
     <div class="neo-applet-processes-row-menu">
         <input type="hidden" name="key-servicio" id="key-servicio" value="%s" />
         <input type="hidden" name="status-servicio" id="status-servicio" value="%s" />
         <input type="hidden" name="activate-process" id="activate-process" value="%s" />
-        <img src="modules/dashboard/images/%s" style="cursor:%s;" width="15" height="15" alt="menu" />
+        <img src="web/apps/dashboard/images/%s" style="cursor:%s;" width="15" height="15" alt="menu" />
     </div>
     <div class="neo-applet-processes-row-status-msg" style="color: %s">%s</div>
     <div class="neo-applet-processes-row-status-icon"></div></div>
@@ -324,12 +324,12 @@ PLANTILLA_PROCESS_ROW;
                 if($value["num_serie"]==""){
                     $serStatus = "<a id='editMan1_$value[hwd]' style='text-decoration:none;color:white; cursor:pointer;' onClick ='jfunction(\"editMan1_$value[hwd]\");'>"._tr('No Registered')."</a>";
                     $color = "#FF0000";
-                    $image = "modules/hardware_detector/images/card_no_registered.gif";
+                    $image = "web/apps/hardware_detector/images/card_no_registered.gif";
                 }
                 else{
                     $serStatus = "<a id='editMan2_$value[hwd]' style='text-decoration:none;color:white;cursor:pointer;' onClick = 'jfunction(\"editMan2_$value[hwd]\");'>"._tr('Registered')."</a>";
                     $color = "#10ED00";
-                    $image = "modules/hardware_detector/images/card_registered.gif";
+                    $image = "web/apps/hardware_detector/images/card_registered.gif";
                 }
                 $cardsStatus .= "<div class='services'>$i.-&nbsp;".$value['card']." ($value[vendor]): &nbsp;&nbsp; </div>
                                 <div align='center' style='background-color:".$color.";' class='status' >$serStatus</div>";
@@ -729,12 +729,12 @@ PLANTILLA_DIV;
                         </div>
                         <div class='closeapplet' align='right' width='10%'>
                             <a id='refresh_{$code}' style='cursor: pointer;' class='toggle' onclick='javascript:refresh(this)'>
-                                <img id='imga11'  class='ima'  src='modules/{$this->module_name}/images/reload.png' border='0' align='absmiddle' />
+                                <img id='imga11'  class='ima'  src='web/apps/{$this->module_name}/images/reload.png' border='0' align='absmiddle' />
                             </a>
                         </div>
                     </div>
                     <div class='portlet_content' id = '$code'>
-                        <img class='ima' src='modules/{$this->module_name}/images/loading.gif' border='0' align='absmiddle' />&nbsp;
+                        <img class='ima' src='web/apps/{$this->module_name}/images/loading.gif' border='0' align='absmiddle' />&nbsp;
                         "._tr('Loading')."
                     </div>
                 </div>";

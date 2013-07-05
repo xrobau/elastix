@@ -26,18 +26,19 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
-include_once "libs/paloSantoJSON.class.php";
+$elxPath="/usr/share/elastix";
+include_once "$elxPath/libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    include_once("libs/paloSantoDB.class.php");
-    include_once("libs/paloSantoConfig.class.php");
-    include_once("libs/paloSantoGrid.class.php");
-	include_once "libs/paloSantoForm.class.php";
-	include_once "libs/paloSantoOrganization.class.php";
-    include_once("libs/paloSantoACL.class.php");
-    include_once "modules/$module_name/configs/default.conf.php";
-	include_once "modules/$module_name/libs/paloSantoFeaturesCode.class.php";
+    include_once "$elxPath/libs/paloSantoDB.class.php";
+    include_once "$elxPath/libs/paloSantoConfig.class.php";
+    include_once "$elxPath/libs/paloSantoGrid.class.php";
+	include_once "$elxPath/libs/paloSantoForm.class.php";
+	include_once "$elxPath/libs/paloSantoOrganization.class.php";
+    include_once "$elxPath/libs/paloSantoACL.class.php";
+    include_once "$elxPath/modules/apps/configs/default.conf.php";
+	include_once "$elxPath/modules/apps/libs/paloSantoFeaturesCode.class.php";
 
     //include file language agree to elastix configuration
     //if file language not exists, then include language by default (en)

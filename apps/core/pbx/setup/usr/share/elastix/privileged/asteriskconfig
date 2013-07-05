@@ -30,22 +30,14 @@
   $Id: asteriskconfig,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
 
-ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
-
+$elxPath="/usr/share/elastix";
+ini_set('include_path',"$elxPath:".ini_get('include_path'));
+require_once 'Console/Getopt.php';
 include_once "libs/misc.lib.php";
 include_once "configs/default.conf.php";
-
-require_once 'Console/Getopt.php';
 require_once "libs/paloSantoPBX.class.php";
 require_once "libs/paloSantoAsteriskConfig.class.php";
 require_once "libs/paloSantoOrganization.class.php";
-require_once "modules/queues/libs/paloSantoQueues.class.php";
-require_once "modules/ivr/libs/paloSantoIVR.class.php";
-require_once "modules/inbound_route/libs/paloSantoInbound.class.php";
-require_once "modules/outbound_route/libs/paloSantoOutbound.class.php";
-require_once "modules/ring_group/libs/paloSantoRG.class.php";
-require_once "modules/time_conditions/libs/paloSantoTC.class.php";
-require_once "modules/conference/libs/paloSantoConference.class.php";
 
 global $arrConf;
 
@@ -775,6 +767,14 @@ function createExtensionGlobalsDomainFile($domain,$code){
 
 function generateDialPlan($domain,$reload=false){
     global $arrConf;
+    require_once "apps/queues/libs/paloSantoQueues.class.php";
+    require_once "apps/ivr/libs/paloSantoIVR.class.php";
+    require_once "apps/inbound_route/libs/paloSantoInbound.class.php";
+    require_once "apps/outbound_route/libs/paloSantoOutbound.class.php";
+    require_once "apps/ring_group/libs/paloSantoRG.class.php";
+    require_once "apps/time_conditions/libs/paloSantoTC.class.php";
+    require_once "apps/conference/libs/paloSantoConference.class.php";
+   
     if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
         fprintf(STDERR, "Invalid domain format");
         return false;

@@ -27,13 +27,13 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoFeatuteCode.class.php,v 1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
 
-global $arrConf;
+$elxPath="/usr/share/elastix";
+include_once "$elxPath/libs/misc.lib.php";
+include_once "$elxPath/libs/paloSantoACL.class.php";
+include_once "$elxPath/libs/paloSantoConfig.class.php";
+include_once "$elxPath/libs/paloSantoAsteriskConfig.class.php";
+include_once "$elxPath/libs/extensions.class.php";
 
-include_once "/var/www/html/libs/paloSantoACL.class.php";
-include_once "/var/www/html/libs/paloSantoConfig.class.php";
-include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
-include_once "/var/www/html/libs/extensions.class.php";
-include_once "/var/www/html/libs/misc.lib.php";
 
 class paloFeatureCode {
 	public $code;

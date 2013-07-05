@@ -26,52 +26,30 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1 2012-02-07 11:02:12 Rocio Mera rmera@palosanto.com Exp $ */
-//include elastix framework
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoDID.class.php";
-    include_once "libs/paloSantoOrganization.class.php";
-    include_once "libs/paloSantoACL.class.php";
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
-    //global variables
-    global $arrConf;
-    global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
+    include_once "{$arrConf['elxPath']}/libs/paloSantoOrganization.class.php";
 
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
 	//verificar que tipo de usurio es: superadmin, admin o other
 	$arrCredentiasls=getUserCredentials();
     $userLevel1=$arrCredentiasls["userlevel"];
     $userAccount=$arrCredentiasls["userAccount"];
     $idOrganization=$arrCredentiasls["id_organization"];
-
     //comprobacion de la credencial del usuario, el usuario superadmin es el unico capaz de crear did
     //y asignarlos a los puertos y tarjetas correpondientes
-	if($userLevel1!="superadmin"){
+	/*if($userLevel1!="superadmin"){
         header("Location: index.php?menu=system");
-    }
-    
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+    }*/
 		
     $action = getAction();
     $content = "";
@@ -118,9 +96,9 @@ function reportDID($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     $pORGZ = new paloSantoOrganization($pDB2);
     $error="";
 
-    if($userLevel1!="superadmin"){
+    /*if($userLevel1!="superadmin"){
         header("Location: index.php?menu=system");
-    }
+    }*/
     
     $domain=getParameter("organization");
     if($userLevel1=="superadmin"){
@@ -203,7 +181,7 @@ function reportDID($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
         $oGrid->addNew("create_did",_tr("New DID"));
 
         $arrOrgz=array("all"=>"all");
-        foreach(($pORGZ->getOrganization()) as $value){
+        foreach(($pORGZ->getOrganization(array())) as $value){
             if($value["id"]!=1)
                 $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -539,7 +517,6 @@ function writeDidFile(&$error,$type){
             return FALSE;
         }
     }
-    
     return true;
 }
 

@@ -28,7 +28,5 @@
   $Id: default.conf.php,v 1.1 2012-02-07 11:02:12 Rocio Mera rmera@palosanto.com Exp $ */
     global $arrConf;
     global $arrConfModule;
-
-    $arrConfModule['module_name']       = 'did';
-    $arrConfModule['templates_dir']     = 'themes';
+    $arrConfModule['dsn_conn_database'] = "sqlite3:///$arrConf[elastix_dbdir]/elastix.db";
 ?>

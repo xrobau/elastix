@@ -26,10 +26,13 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoIVR.class.php,v 1.1 2012-09-07 11:50:00 Germán Macas gmacas@palosanto.com Exp $ */
-    include_once "/var/www/html/libs/paloSantoACL.class.php";
-    include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
-    include_once "/var/www/html/libs/paloSantoPBX.class.php";
-    global $arrConf;
+
+global $arrConf;
+  
+include_once "libs/paloSantoACL.class.php";
+include_once "libs/paloSantoAsteriskConfig.class.php";
+include_once "libs/paloSantoPBX.class.php";
+    
 
 class paloDidPBX extends paloAsteriskDB{
     
@@ -315,67 +318,80 @@ class paloDidPBX extends paloAsteriskDB{
         return true;
     }
     
-    function getDIDFree(){
-        $arrDID=array();
-        $query="SELECT did from did where organization_domain IS NULL";
-        $result=$this->_DB->fetchTable($query,true,array("port"));
+    function getDIDFree($arrProp){
+        $arrParam=array();
+        $query="SELECT id,did,country,city,country_code,area_code FROM did WHERE organization_domain IS NULL";
+        if(!empty($arrProp['country'])){
+            $query .=" AND country=? ";
+            $arrParam[]=$arrProp['country'];
+        }
+        if(!empty($arrProp['city'])){
+            $query .=" AND city=? ";
+            $arrParam[]=$arrProp['city'];
+        }
+        $result=$this->_DB->fetchTable($query,true,$arrParam);
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;
             return false;
         }else{
-            foreach($result as $value){
-                $arrDID[$value["did"]]=$value["did"];
-            }
+            return $result;
         }
-        return  $arrDID;
     }
     
-    function saveOrgDID($idOrg,$select_dids){
-        //se comprueba de que exista una organizacion creada con dicho id
-        global $arrConf;
-        $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
-        
-        if(!preg_match("/[0-9]+/",$idOrg)){
-            $this->errMsg=_tr("Inavlid Organization. ");
-            return false;
-        }elseif($idOrg=="1"){
-            $this->errMsg=_tr("Inavlid Organization. ");
-            return false;
-        }
-        
-        $query="SELECT domain,code from organization where id=?";
-        $result=$pDB2->getFirstRowQuery($query,true,array($idOrg));
+    /**
+     * Funcion que quita la asignacion de un conjunto de did identificado
+     * por sus id de una organizacion identificada por su dominio
+     */
+    function removeAsignation($select_dids,$domain){
+        //comprobamos que la organizacion exista
+        $query="SELECT domain,code from organization where domain=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($domain));
         if($result==false){
-            $this->errMsg=_tr("Organization doesn't exist. ").$pDB2->errMsg;
+            $this->errMsg=($result===false)?$this->_DB->errMsg:_tr("Organization doesn't exist.");
             return false;
         }
         
-        /*if(empty($select_dids)){
-            $this->errMsg .=_tr("You must select at least one DID. ");
-            return false;
-        }*/
+        if(!is_array($select_dids) || count($select_dids)==0)
+            return true;
+            
+        foreach($select_dids as $value)
+            $q="?,";
+        $q=substr($q,0,-1);
         
-        $queryd="UPDATE did set organization_domain=NULL, organization_code=NULL where organization_domain=?";
-        if($this->_DB->genQuery($queryd,array($result["domain"]))==false){
+        $select_dids[]=$domain;
+        $queryd="UPDATE did SET organization_domain=NULL, organization_code=NULL WHERE id IN ($q) AND organization_domain=?";
+        if($this->_DB->genQuery($queryd,$select_dids)==false){
             $this->errMsg .=_tr("DID couldn't be updated. ").$this->_DB->errMsg;
             return false;
+        }else
+            return true;
+    }
+    
+    /**
+     * Funcion que asigna un conjunto de dids identificado
+     * por sus id de una organizacion identificada por su dominio
+     */
+    function assignDIDs($select_dids,$domain){
+        $query="SELECT domain,code from organization where domain=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($domain));
+        if($result==false){
+            $this->errMsg=($result===false)?$this->_DB->errMsg:_tr("Organization doesn't exist.");
+            return false;
         }
         
-        $query="UPDATE did set organization_domain=?, organization_code=? where did=?";
-        //obtenemos los canales seleccionados
-        $arrDID=explode(",",$select_dids);
-        $freeDID=$this->getDIDFree();
-        foreach($arrDID as $value){
-            if($value!=""){
-                if(in_array($value,$freeDID)){
-                    if($this->_DB->genQuery($query,array($result["domain"],$result["code"],$value))==false){
-                        $this->errMsg .=_tr("DID couldn't be updated. ").$this->_DB->errMsg;
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
+        if(!is_array($select_dids) || count($select_dids)==0)
+            return true;
+            
+        foreach($select_dids as $value)
+            $q="?,";
+        $q=substr($q,0,-1);
+        
+        $query="UPDATE did SET organization_domain=?, organization_code=? WHERE id IN ($q) AND organization_domain IS NULL";
+        if($this->_DB->genQuery($query,array($result["domain"],$result["code"],$value))==false){
+            $this->errMsg .=_tr("DID couldn't be updated. ").$this->_DB->errMsg;
+            return false;
+        }else
+            return true;
     }
 }
 ?>

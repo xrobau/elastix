@@ -1,6 +1,8 @@
 var estado="off";
 $(document).ready(function(){
-	
+	$("#idOrganization").on("change", function() {
+        $("#idformgrid").submit();
+    });
      $('#selectAll').change(function(){
 		if($(this).is(":checked")){
 			var resource = new Array();

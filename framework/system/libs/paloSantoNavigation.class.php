@@ -250,7 +250,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
         
         //si existe el archivo de configuracion del modulo se los incluye y se cargan las configuraciones
         //especificas del modulo elegido
-        if (file_exists("$elxPath/apps/$module/configs/default.conf.php")) {
+        if (file_exists("{$arrConf['elxPath']}/apps/$module/configs/default.conf.php")) {
             include_once "apps/_elastixutils/configs/default.conf.php";
             global $arrConf;
             global $arrConfModule;

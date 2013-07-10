@@ -30,7 +30,9 @@
   $Id: faxconfig.php,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
 require_once 'Console/Getopt.php';
-ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+
+$elxPath="/usr/share/elastix";
+ini_set('include_path',"$elxPath:".ini_get('include_path'));
 include_once "libs/misc.lib.php";
 include_once "configs/default.conf.php";
 global $arrConf;

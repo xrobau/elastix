@@ -27,7 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoFax.class.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
-include_once "libs/paloSantoACL.class.php";
+$elxPath="/usr/share/elastix";
+include_once "$elxPath/libs/paloSantoACL.class.php";
 
 class paloFax {
 

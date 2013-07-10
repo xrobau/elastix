@@ -30,7 +30,8 @@
   $Id: emailaccount.php,v 1.1 2012/03/21 11:32:00 rocio Exp $*/
 require_once 'Console/Getopt.php';
 
-ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+$elxPath="/usr/share/elastix";
+ini_set('include_path',"$elxPath:".ini_get('include_path'));
 include_once "libs/misc.lib.php";
 include_once "configs/default.conf.php";
 global $arrConf;
@@ -118,7 +119,7 @@ function create_domain($opt)
     if (is_null($sNewDomain)) {
         error_exit("ERR: --createdomain: no domain specified.\n");
     }
-    if (!preg_match('/^[\w\.\-]+$/', $sNewDomain)) {
+    if (!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $sNewDomain)) {
         error_exit("ERR: --createdomain: invalid domain.\n");
     }
     
@@ -159,7 +160,7 @@ function writePostfixMain(){
     
     $domains=array();
     foreach($domainList as $domain){
-        if (preg_match('/^[\w\.\-]+$/', $domain)) {
+        if (preg_match('/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/', $domain)) {
             $domains[]=$domain;
         }
     }
@@ -210,13 +211,13 @@ function deleteAccountByDomain($opt)
             break;
     }
     
-    if (!preg_match('/^[\w\.\-]+$/', $sDomain)) {
+    if (!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $sDomain)) {
         error_exit("ERR: --deleteAccountByDomain: invalid domain.\n");
     }
     
     loadCyrusPassword();
 
-    require_once('libs/cyradm.php');
+    require_once("{$arrConf['elxPath']}/libs/cyradm.php");
 
     // Connect to IMAP before doing anything else
     $cyr_conn = new cyradm;
@@ -346,7 +347,7 @@ function create_account($opt)
             break;
     }    
     
-    if (!preg_match('/^[\w\.\-]+$/', $sNewDomain)) {
+    if (!preg_match('/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/', $sDomain)) {
         error_exit("ERR: --createaccount: invalid domain.\n");
     }
     if (is_null($sUsername)) {
@@ -367,7 +368,7 @@ function create_account($opt)
     
     loadCyrusPassword();
 
-    require_once('libs/cyradm.php');
+    require_once("{$arrConf['elxPath']}/libs/cyradm.php");
 
     // Connect to IMAP before doing anything else
     $cyr_conn = new cyradm;
@@ -491,7 +492,7 @@ function delete_account($opt)
 
     loadCyrusPassword();
 
-    require_once('libs/cyradm.php');
+    require_once("{$arrConf['elxPath']}/libs/cyradm.php");
 
     // Connect to IMAP before doing anything else
     $cyr_conn = new cyradm;

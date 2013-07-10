@@ -27,17 +27,11 @@ Codificación: UTF-8
 +----------------------------------------------------------------------+
 $Id: paloSantoEmail.class.php,v 1.1.1.1 2007/07/06 21:31:55 gcarrillo Exp $ */
 
-if (isset($arrConf['basePath'])) {
-    include_once($arrConf['basePath'] . "/libs/paloSantoDB.class.php");
-    include_once($arrConf['basePath'] . "/libs/paloSantoConfig.class.php");
-    include_once($arrConf['basePath'] . "/libs/misc.lib.php");
-    include_once($arrConf['basePath'] . "/libs/cyradm.php");
-} else {
-    include_once("libs/paloSantoDB.class.php");
-    include_once("libs/paloSantoConfig.class.php");
-    include_once("libs/misc.lib.php");
-    include_once("libs/cyradm.php");
-}
+$elxPath="/usr/share/elastix";
+include_once("$elxPath/libs/paloSantoDB.class.php");
+include_once("$elxPath/libs/paloSantoConfig.class.php");
+include_once("$elxPath/libs/misc.lib.php");
+include_once("$elxPath/libs/cyradm.php");
 
 
 class paloEmail {

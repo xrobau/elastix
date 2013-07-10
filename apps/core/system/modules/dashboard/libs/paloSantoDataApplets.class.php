@@ -31,7 +31,7 @@ include_once "libs/paloSantoGraphImage.lib.php";
 include_once "apps/dashboard/libs/paloSantoSysInfo.class.php";
 include_once "apps/dashboard/libs/paloSantoDashboard.class.php";
 require_once "libs/magpierss/rss_fetch.inc";
-require_once "/libs/paloSantoDB.class.php";
+require_once "libs/paloSantoDB.class.php";
 
 class paloSantoDataApplets
 {

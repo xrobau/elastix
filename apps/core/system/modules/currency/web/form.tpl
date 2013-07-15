@@ -1,8 +1,10 @@
+{if $CAN_SAVE}
 <table width="99%" border="0" cellspacing="0" cellpadding="4" align="center">
     <tr class="letra12">
         <td align="left"><input class="button" type="submit" name="save" value="{$SAVE}"></td>
     </tr>
 </table>
+{/if}
 <table class="tabForm" style="font-size: 16px;" width="100%" >
     <tr class="letra12">
         <td align="left"><b>{$currency.LABEL}: </b></td>

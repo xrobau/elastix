@@ -74,7 +74,7 @@ function formCurrency($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
     if( $curr == false ) $curr = "$";
     $smarty->assign("SAVE", _tr("Save"));
-    $smarty->assign('CAN_SAVE',$actionSave);
+   
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("icon", "web/apps/$module_name/images/system_preferences_currency.png");
     $_POST['currency'] = $curr;

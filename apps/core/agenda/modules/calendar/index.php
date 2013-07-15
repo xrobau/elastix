@@ -269,7 +269,7 @@ function viewCalendarById($smarty, $module_name, $local_templates_dir, &$pDB, $a
     $smarty->assign("DATE_SERVER", $dateServer);
     $smarty->assign("CreateEvent", $arrLang["Create New Event"]);
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["Calendar"], $_DATA);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["Calendar"], array());
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name' name='formCalendar' id='formCalendar'>".$htmlForm."</form>";
 
     return $content;

@@ -122,6 +122,14 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: FIXED: Calendar: remove *second* bogus compare of translated 
+  ajax response field to hardcoded untranslated string. Apparently the check 
+  serves no purpose, and breaks loading of event data in languages other than 
+  English.
+- FIXED: Calendar: remove reference to uninitialized variable.
+  SVN Rev[5312]
+
 * Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: remove custom jQueryUI CSS theme. The calendar will now use
   whatever the Elastix Framework chooses as the default jQueryUI theme.

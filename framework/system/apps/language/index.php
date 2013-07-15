@@ -27,100 +27,125 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
-function _moduleContent(&$smarty, $module_name)
-{
-	//include module files
     include_once "libs/paloSantoDB.class.php";
     include_once "libs/paloSantoForm.class.php";
-    include      "configs/languages.conf.php";
-    include_once "modules/$module_name/configs/default.conf.php";
-
-    load_language_module($module_name);
+   
+function _moduleContent(&$smarty, $module_name)
+{
+	include      "configs/languages.conf.php";
 
     //global variables
     global $arrConf;
     global $arrConfModule;
+   
     $arrConf = array_merge($arrConf,$arrConfModule);
-
+    
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
-	$pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/elastix.db");
-    $pACL = new paloACL($pdbACL);
-	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    $local_templates_dir=getWebDirModule($module_name);
+   	
+    //conexion resource
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+   	$pACL = new paloACL($pDB);
+    
+    //get actual User Id
+    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $uid = $pACL->getIdUser($user);
     
-    $error_msg='';
-    $msgError='';
-    $contenido='';
-    $archivos=array();
-    $langElastix=array();
-    $arrDefaultRate=array();
-    $conexionDB=FALSE;
-    //leer los archivos disponibles
-  /*  $languages=array(
-                    "en"=>"English",
-                    "es"=>"Español",
-                    "fr"=>"Français",
-                    );*/
-    leer_directorio("lang",$error_msg,$archivos);
-    if (count($archivos)>0)
-    {
-        foreach ($languages as $lang=>$lang_name)
-        {
+    //actions
+    $accion = getAction();
+ 
+    switch($accion){
+        case "save":
+            $content = saveLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages,$uid); 
+            break;
+        default:
+            $content = formLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages,$uid);
+            break;
+    }
+    return $content;
+}
+
+function formLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages,$uid)
+{   
+  $lang=get_language();
+  $error_msg='';
+  $archivos=array();
+  $langElastix=array();
+  $contenido=''; 
+  $msgError='';
+  $arrDefaultRate=array();
+  $conexionDB=FALSE;
+  
+  leer_directorio("/usr/share/elastix/lang",$error_msg,$archivos);
+    if (count($archivos)>0){
+        foreach ($languages as $lang=>$lang_name){
             if (in_array("$lang.lang",$archivos))
                $langElastix[$lang]=$lang_name;
         }
     }
 
-    if (count($langElastix)>0){
+    if (count($langElastix)>0){ 
+        $arrFormLanguage = createFieldForm($langElastix);
+        $oForm = new paloForm($smarty, $arrFormLanguage);
+      
+        if(empty($pACL->errMsg)) {
+            $conexionDB=TRUE;
+        } else
+            $msgError=_tr("You can't change language").'.-'._tr("ERROR").":".$pACL->errMsg;
+        
+        // $arrDefaultRate['language']="es";
+        $smarty->assign("CAMBIAR", _tr("Save"));
+        $smarty->assign("MSG_ERROR",$msgError);
+        $smarty->assign("conectiondb",$conexionDB);
+	    $smarty->assign("icon","web/apps/$module_name/images/system_preferencies_language.png");
+   
+          
+        //obtener el valor de la tarifa por defecto
+        $defLang=$pACL->getUserProp($uid,'language');
+        if (empty($defLang) || $defLang===false) $defLang="en";
+            $arrDefault['language']=$defLang;
+        $htmlForm = $oForm->fetchForm("$local_templates_dir/language.tpl", _tr("Language"), $arrDefault);
+        $contenido = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>"; 
+}
 
-        //si no me puedo conectar a la base de datos
-//       debo presentar un mensaje en vez del boton cambiar
-//       un
+     return $contenido;
+}
+
+function saveLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages, $uid){
+     
+    //guardar el nuevo valor
+    $lang = $_POST['language'];
+    if($uid!==false){
+		$bExito=$pACL->setUserProp($uid,'language',$lang,"system");
+   
+    }
+	else
+	$bExito=false;
+        //redirigir a la pagina nuevamente
+    if ($bExito){
+       header("Location: index.php?menu=language");
+        
+    }else{
+        $smarty->assign("mb_title", _tr("Error"));
+        $smarty->assign("mb_message", $pACL->errMsg);
+        return formLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages, $uid, $lang);
+    }
+ 
+}
+
+
+function createFieldForm($langElastix){
         $arrForm  = array("language"  => array("LABEL"                  => _tr("Select language"),
                                                "REQUIRED"               => "yes",
                                                "INPUT_TYPE"             => "SELECT",
                                                "INPUT_EXTRA_PARAM"      => $langElastix,
                                                "VALIDATION_TYPE"        => "text",
                                                "VALIDATION_EXTRA_PARAM" => ""),);
-        $oForm = new paloForm($smarty, $arrForm);
-        if(empty($pACL->errMsg)) {
-            $conexionDB=TRUE;
-        if(isset($_POST['save_language'])) {
-        //guardar el nuevo valor
-            $lang = $_POST['language'];
-            if($uid!==false)
-				$bExito=$pACL->setUserProp($uid,'language',$lang,"system");
-			else
-				$bExito=false;
-        //redirigir a la pagina nuevamente
-            if ($bExito){
-            header("Location: index.php?menu=language");
-            }else
-               $smarty->assign("mb_message", "Error");
-        }
-    //obtener el valor de la tarifa por defecto
-            $defLang=$pACL->getUserProp($uid,'language');
-            if (empty($defLang) || $defLang===false) $defLang="en";
-            $arrDefaultRate['language']=$defLang;
-        }
-        else
-             $msgError=_tr("You can't change language").'.-'._tr("ERROR").":".$pACL->errMsg;
-       // $arrDefaultRate['language']="es";
-        $smarty->assign("CAMBIAR", _tr("Save"));
-        $smarty->assign("MSG_ERROR",$msgError);
-        $smarty->assign("conectiondb",$conexionDB);
-	$smarty->assign("icon","modules/$module_name/images/system_preferencies_language.png");
-        $contenido = $oForm->fetchForm("$local_templates_dir/language.tpl", _tr("Language"), $arrDefaultRate);
-    }
-    return $contenido;
+        return $arrForm;
 }
 
-function leer_directorio($directorio,$error_msg,&$archivos)
-{
+
+function leer_directorio($directorio,$error_msg,&$archivos){
     $bExito=FALSE;
     $archivos=array();
     if (file_exists($directorio)) {
@@ -139,4 +164,13 @@ function leer_directorio($directorio,$error_msg,&$archivos)
 
      return $bExito;
 }
+
+function getAction()
+{
+    if(getParameter("save_language")) //Get parameter by POST (submit)
+        return "save";
+    else
+        return "report";
+}
+
 ?>

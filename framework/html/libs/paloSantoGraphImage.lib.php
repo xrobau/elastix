@@ -48,6 +48,35 @@ require_once("libs/jpgraph/jpgraph_canvtools.php");
 function displayGraph($G_MODULE, $G_CLASS, $G_FUNCTION, $G_PARAMETERS, $G_FUNCTIONCB="")
 {
 
+if($G_MODULE != ''){
+    require_once("modules/$G_MODULE/libs/$G_CLASS.class.php");//lib del modulo
+    require_once("modules/$G_MODULE/configs/default.conf.php");//archivo configuracion del modulo
+    global $arrConfModule;
+
+    $dsn = isset($arrConfModule["dsn_conn_database"])?$arrConfModule["dsn_conn_database"]:"";
+}
+else{
+    require_once("libs/$G_CLASS.class.php");//lib del modulo
+    require_once("configs/default.conf.php");//archivo configuracion del modulo
+    global $arrConf;
+
+    $dsn = isset($arrConf["dsn_conn_database"]) ? $arrConf["dsn_conn_database"] : "";
+}
+
+$oPaloClass = new $G_CLASS($dsn);
+$arrParam = $G_PARAMETERS;
+$result = call_user_func_array(array(&$oPaloClass, $G_FUNCTION), $arrParam );
+
+if ($G_FUNCTIONCB != '') $result['FORMAT_CALLBACK'] = array($oPaloClass, $G_FUNCTIONCB);
+return displayGraphResult($result);
+}
+
+function displayGraphResult($result)
+{
+global $globalCB;
+$globalCB = NULL;
+if (isset($result['FORMAT_CALLBACK'])) $globalCB = $result['FORMAT_CALLBACK'];
+
 //------- PARAMETROS DEL GRAPH -------
 $G_TYPE    = null;//tipo de grafica
 $G_TITLE   = null;//titulo
@@ -70,29 +99,6 @@ $G_LABEL_Y = null;
 //ESTATICOS
 $G_SCALE  = "textlin";
 $G_WEIGHT = 1;
-
-if($G_MODULE != ''){
-    require_once("modules/$G_MODULE/libs/$G_CLASS.class.php");//lib del modulo
-    require_once("modules/$G_MODULE/configs/default.conf.php");//archivo configuracion del modulo
-    global $arrConfModule;
-
-    $dsn = isset($arrConfModule["dsn_conn_database"])?$arrConfModule["dsn_conn_database"]:"";
-}
-else{
-    require_once("libs/$G_CLASS.class.php");//lib del modulo
-    require_once("configs/default.conf.php");//archivo configuracion del modulo
-    global $arrConf;
-
-    $dsn = isset($arrConf["dsn_conn_database"]) ? $arrConf["dsn_conn_database"] : "";
-}
-
-$oPaloClass = new $G_CLASS($dsn);
-$arrParam = $G_PARAMETERS;
-$result = call_user_func_array(array(&$oPaloClass, $G_FUNCTION), $arrParam );
-
-global $globalCB;
-$globalCB = NULL;
-if ($G_FUNCTIONCB != '') $globalCB = array($oPaloClass, $G_FUNCTIONCB);
 
 //------------------- CONTRUCCION DEL ARREGLO PARA X & Y -------------------
 global $xData;

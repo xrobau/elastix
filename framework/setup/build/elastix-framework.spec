@@ -305,6 +305,16 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: reorganize the API provided by paloSantoGraphImage in 
+  order to separate the graph stroke based on a callback result, from the class
+  loading and method invoking required to generate said callback result. This
+  enables modules to build graph results inside their own methods without having
+  to implement the specific method callbacks, and most importantly, without
+  having to place the function inside a class that resides in any specific path.
+  This is required for the dashboard applet reorganization.
+  SVN Rev[5310] 
+
 * Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: move several CSS files out of the ui-lightness jQueryUI
   theme into a custom directory widgetcss. These CSS files are not part of the

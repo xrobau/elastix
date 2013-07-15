@@ -48,6 +48,35 @@ require_once("$elxPath/libs/jpgraph/jpgraph_canvtools.php");
  */
 function displayGraph($G_MODULE, $G_CLASS, $G_FUNCTION, $G_PARAMETERS, $G_FUNCTIONCB="")
 {
+global $arrConf;
+
+if($G_MODULE != ''){
+    require_once("{$arrConf['elxPath']}/apps/$G_MODULE/libs/$G_CLASS.class.php");//lib del modulo
+    require_once("{$arrConf['elxPath']}/apps/$G_MODULE/configs/default.conf.php");//archivo configuracion del modulo
+    global $arrConfModule;
+
+    $dsn = isset($arrConfModule["dsn_conn_database"])?$arrConfModule["dsn_conn_database"]:"";
+}
+else{
+    require_once("{$arrConf['elxPath']}/apps/libs/$G_CLASS.class.php");//lib del modulo
+    require_once("{$arrConf['elxPath']}/apps/configs/default.conf.php");//archivo configuracion del modulo
+
+    $dsn = isset($arrConf['elastix_dsn']['elastix']) ? $arrConf['elastix_dsn']['elastix'] : "";
+}
+
+$oPaloClass = new $G_CLASS($dsn);
+$arrParam = $G_PARAMETERS;
+$result = call_user_func_array(array(&$oPaloClass, $G_FUNCTION), $arrParam );
+
+if ($G_FUNCTIONCB != '') $result['FORMAT_CALLBACK'] = array($oPaloClass, $G_FUNCTIONCB);
+return displayGraphResult($result);
+}
+
+function displayGraphResult($result)
+{
+global $globalCB;
+$globalCB = NULL;
+if (isset($result['FORMAT_CALLBACK'])) $globalCB = $result['FORMAT_CALLBACK'];
 
 //------- PARAMETROS DEL GRAPH -------
 $G_TYPE    = null;//tipo de grafica
@@ -71,29 +100,6 @@ $G_LABEL_Y = null;
 //ESTATICOS
 $G_SCALE  = "textlin";
 $G_WEIGHT = 1;
-global $arrConf;
-
-if($G_MODULE != ''){
-    require_once("{$arrConf['elxPath']}/apps/$G_MODULE/libs/$G_CLASS.class.php");//lib del modulo
-    require_once("{$arrConf['elxPath']}/apps/$G_MODULE/configs/default.conf.php");//archivo configuracion del modulo
-    global $arrConfModule;
-
-    $dsn = isset($arrConfModule["dsn_conn_database"])?$arrConfModule["dsn_conn_database"]:"";
-}
-else{
-    require_once("{$arrConf['elxPath']}/apps/libs/$G_CLASS.class.php");//lib del modulo
-    require_once("{$arrConf['elxPath']}/apps/configs/default.conf.php");//archivo configuracion del modulo
-
-    $dsn = isset($arrConf['elastix_dsn']['elastix']) ? $arrConf['elastix_dsn']['elastix'] : "";
-}
-
-$oPaloClass = new $G_CLASS($dsn);
-$arrParam = $G_PARAMETERS;
-$result = call_user_func_array(array(&$oPaloClass, $G_FUNCTION), $arrParam );
-
-global $globalCB;
-$globalCB = NULL;
-if ($G_FUNCTIONCB != '') $globalCB = array($oPaloClass, $G_FUNCTIONCB);
 
 //------------------- CONTRUCCION DEL ARREGLO PARA X & Y -------------------
 global $xData;
@@ -205,7 +211,7 @@ if( sizeof($G_YDATAS) >= 1 )
 {
     // true no funciona porque cada cadena u otro valor que se retorne es valor "valido o verdadero"
     // y equivale a true, entonces para diferenciarlo verdaderamente se compara con 'true'
-    $str = checkAttributes(/*$arrLang*/ $G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING);
+    $str = checkAttributes($G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING);
     if( $str != 'true' ){ showError($str, $G_SIZE); return; }
 
     if( $G_TYPE == 'lineplot' )
@@ -586,34 +592,32 @@ else{
 
 }
 
-function checkAttributes(/*$arrLang*/$G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING)
+function checkAttributes($G_TITLE,$G_TYPE,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING)
 {
     return true;
     $str = '';
-//    global $G_TITLE,$G_TYPE,$G_LABEL_X,$G_LABEL_Y,$_MSJ_ERROR,$_MSJ_NOTHING;
-    global $arrLang;
 
     if( $G_TYPE == 'lineplot' || $G_TYPE == 'barplot' || $G_TYPE == 'lineplot_multiaxis' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($G_LABEL_Y == null)    $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($G_LABEL_Y == null)    $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else if( $G_TYPE == 'plot3d' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else if( $G_TYPE == 'bar' || $G_TYPE == 'bar2' ){
     }
     else if( $G_TYPE == 'prueba' ){
-        if($G_TITLE == null)      $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: TITLE" : ",TITLE" ;
-        if($G_LABEL_Y == null)    $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
-        if($_MSJ_ERROR == null)   $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: ERROR" : ",ERROR" ;
-        if($_MSJ_NOTHING == null) $str .= ($str == "") ? $arrLang["Failure in"]." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
+        if($G_TITLE == null)      $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: TITLE" : ",TITLE" ;
+        if($G_LABEL_Y == null)    $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: LABEL_Y" : ",LABEL_Y" ;
+        if($_MSJ_ERROR == null)   $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: ERROR" : ",ERROR" ;
+        if($_MSJ_NOTHING == null) $str .= ($str == "") ? _tr("Failure in")." ATTRIBUTE: NOTHING_SHOW" : ",NOTHING_SHOW" ;
     }
     else
-        $str = $arrLang["Failure in"]." ATTRIBUTE: TYPE";
+        $str = _tr("Failure in")." ATTRIBUTE: TYPE";
 
     // true no funciona, retorno mejor 'true'
     if( $str == '' ) return 'true';

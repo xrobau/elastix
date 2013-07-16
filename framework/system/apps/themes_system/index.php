@@ -33,40 +33,64 @@ include_once "libs/paloSantoACL.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    require_once "modules/$module_name/libs/PaloSantoThemes.class.php";
     
-    load_language_module($module_name);
-
     //global variables
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
         
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     // se conecta a la base
-    $pDB = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/elastix.db");
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pDB);
 	$user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $uid = $pACL->getIdUser($user);
+    
+    //actions
+    $accion = getAction();
+    $content = "";
+
+    switch($accion){
+        case "save":
+            $content = saveThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid);
+            break;
+        default:
+            $content = formThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid);
+            break;
+    }
+    return $content;
+
+}
+
+function formThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid){
+   
 
     if(!empty($pDB->errMsg)) {
         $smarty->assign("mb_message", _tr("Error when connecting to database")."<br/>".$pDB->errMsg);
     }
-
+    
     // Definición del formulario de nueva campaña
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("CHANGE", _tr("Save"));
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
+    $smarty->assign("icon","web/apps/$module_name/images/system_preferences_themes.png");
 
     $oThemes = new PaloSantoThemes($pDB); 
-    $arr_themes = $oThemes->getThemes("$base_dir/themes/");
+    $arr_themes = $oThemes->getThemes("/var/www/html/admin/web/themes/");
+    $formThemes= createFieldForm($arr_themes);
+    $oForm = new paloForm($smarty, $formThemes);
+    
+    $tema_actual = $oThemes->getThemeActual($uid); 
+    $arrTmp['themes'] = $tema_actual;
+   
+   $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Change Theme"),$arrTmp);
+    return $contenidoModulo;
 
+}
+
+
+function createFieldForm($arr_themes){
     $formCampos = array(
         'themes'                 => array(
             "LABEL"                  => _tr("Themes"),
@@ -77,41 +101,17 @@ function _moduleContent(&$smarty, $module_name)
             "VALIDATION_EXTRA_PARAM" => "",
         )
     );
-    $oForm = new paloForm($smarty, $formCampos);
-
-    if (isset($_POST['changeTheme'])) {
-        $contenidoModulo = updateTheme($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm, $uid);
-    } else {
-        $contenidoModulo = changeTheme($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm, $uid);
-    }
-    return $contenidoModulo;
+   return $formCampos;
 }
 
-function changeTheme(&$pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm, $uid) {
-
-    $oThemes = new PaloSantoThemes($pDB); 
-    $tema_actual = $oThemes->getThemeActual($uid); 
-    $arrTmp['themes']   = $tema_actual;
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
-    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Change Theme"),$arrTmp);
-    return $contenidoModulo;
-}
-
-function updateTheme(&$pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm, $uid) {
-
-    if(!$oForm->validateForm($_POST)) {
-        $smarty->assign("mb_title", _tr("Validation Error"));
-        $arrErrores=$oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
-        if(is_array($arrErrores) && count($arrErrores) > 0){
-            foreach($arrErrores as $k=>$v) {
-                $strErrorMsg .= "$k, ";
-            }
-        }
-        $strErrorMsg .= "";
-        $smarty->assign("mb_message", $strErrorMsg);
-    } else {
+function saveThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid){
+           
+        
         $oThemes = new PaloSantoThemes($pDB);
+        $arr_themes = $oThemes->getThemes("/var/www/html/admin/web/themes/");
+        $formThemes= createFieldForm($arr_themes);
+        $oForm = new paloForm($smarty, $formThemes);
+        print($_POST['themes']);
         $exito   = $oThemes->updateTheme($_POST['themes'],$uid);
 
         if ($exito) {
@@ -124,12 +124,22 @@ function updateTheme(&$pDB, $smarty, $module_name, $local_templates_dir, $formCa
 		$smarty->assign("mb_message", _tr("The smarty cache could not be deleted"));
 	    }
         } else {
-            $smarty->assign("mb_title", _tr("Validation Error"));
-            $smarty->assign("mb_message", $oThemes->errMsg);
+        $smarty->assign("mb_title", _tr("Validation Error"));
+        $smarty->assign("mb_message", $oThemes->errMsg);
         } 
-    }
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_themes.png");
-    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Change Theme"),$_POST);
-    return $contenidoModulo;
+    
+    
+
+   return formThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid);
 }
+
+
+function getAction()
+{
+    if(getParameter("changeTheme")) //Get parameter by POST (submit)
+        return "save";
+    else
+        return "report";
+}
+
 ?>

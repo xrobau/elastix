@@ -106,7 +106,7 @@ class PaloSantoThemes
             $this->errMsg = _tr('Invalid theme');
             return false;
         }
-        if (!is_dir($arrConf['basePath']."/themes/$sTheme")) {
+        if (!is_dir($arrConf['basePath']."/web/themes/$sTheme")) {
             $this->errMsg = _tr('Invalid theme');
             return false;
         }

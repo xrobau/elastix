@@ -305,6 +305,12 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Jul 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix /etc/init.d/generic-cloexec script to be aware of
+  systemctl and run it instead of blindly running a /etc/init.d/ script that
+  might not exist in a systemctl system. Fixes Elastix bug #1632.
+  SVN Rev[5317]
+
 * Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: reorganize the API provided by paloSantoGraphImage in 
   order to separate the graph stroke based on a callback result, from the class

@@ -33,22 +33,33 @@ function _moduleContent(&$smarty, $module_name)
 {
     //include module files
     include_once "libs/paloSantoForm.class.php" ;
-    include_once "modules/$module_name/configs/default.conf.php";
-
-    load_language_module($module_name);
-
+    
     //global variables
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
     
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
     
-	
+    $sZonaActual = "America/New_York";
 
+	//actions
+    $accion = getAction();
+    $content = "";
+    switch($accion){
+        case "save":
+            $content = saveTime($smarty,$module_name,$local_templates_dir, $sZonaActual);
+            break;
+        default:
+            $content = formTime($smarty,$module_name,$local_templates_dir, $sZonaActual);
+            break;
+    }
+    return $content;
+}
+
+function formTime($smarty,$module_name,$local_templates_dir, $sZonaActual){
+    
     $smarty->assign("TIME_TITULO",_tr("Date and Time Configuration"));
     $smarty->assign("INDEX_HORA_SERVIDOR",_tr("Current Datetime"));
     $smarty->assign("TIME_NUEVA_FECHA",_tr("New Date"));
@@ -56,9 +67,7 @@ function _moduleContent(&$smarty, $module_name)
     $smarty->assign("TIME_NUEVA_ZONA",_tr("New Timezone"));
     $smarty->assign("INDEX_ACTUALIZAR",_tr("Apply changes"));
     $smarty->assign("TIME_MSG_1", _tr("The change of date and time can concern important  system processes.").'  '._tr("Are you sure you wish to continue?"));
-
-    $arrForm = array(
-    );
+    $arrForm = array();
     $oForm = new paloForm($smarty, $arrForm);
 
 /*
@@ -75,18 +84,7 @@ function _moduleContent(&$smarty, $module_name)
 	Luego de esto, ejecutar cambio de hora local
 
 */
-	// Abrir el archivo /usr/share/zoneinfo/zone.tab y cargar la columna 3
-	// Se ignoran líneas que inician con #
-	$listaZonas = NULL;
-	$hArchivo = fopen('/usr/share/zoneinfo/zone.tab', 'r');
-	if ($hArchivo) {
-		$listaZonas = array();
-		while ($tupla = fgetcsv($hArchivo, 2048, "\t")) {
-			if (count($tupla) >= 3 && $tupla[0]{0} != '#') $listaZonas[] = $tupla[2];
-		}
-		fclose($hArchivo);
-		sort($listaZonas);
-	}
+	$listaZonas = leeZonas();
 	
 	// Cargar de /etc/sysconfig/clock la supuesta zona horaria configurada.
 	// El resto de contenido del archivo se preserva, y la clave ZONE se 
@@ -105,11 +103,22 @@ function _moduleContent(&$smarty, $module_name)
 		}
 		fclose($hArchivo);
 	}
+     $sContenido = '';
 
+    $mes = date("m",time());
+    $mes = (int)$mes - 1;
 
-	if (isset($_POST['Actualizar'])) {
-//		print '<pre>';print_r($_POST);print '</pre>';
+    $smarty->assign("CURRENT_DATETIME", strftime("%Y,$mes,%d,%H,%M,%S",time()));
+    $smarty->assign('LISTA_ZONAS', $listaZonas);
+    $smarty->assign('ZONA_ACTUAL', $sZonaActual);
+    $smarty->assign("CURRENT_DATE",strftime("%d %b %Y",time()));
+    $smarty->assign("icon","web/apps/$module_name/images/system_preferences_datetime.png");
+	$sContenido .= $oForm->fetchForm("$local_templates_dir/time.tpl", _tr('Date and Time Configuration'), $_POST);
+	return $sContenido;
+}
 
+function saveTime($smarty,$module_name,$local_templates_dir, $sZonaActual ){
+	
         $date = getParameter("date");
         $date = translateDate($date);
         $date = explode("-",$date);
@@ -122,7 +131,8 @@ function _moduleContent(&$smarty, $module_name)
             $day = $date[2];
             $year = $date[0];
         }
-		// Validación básica
+		
+        // Validación básica
 		$listaVars = array(
 	//		'ServerDate_Year'	=>	'^[[:digit:]]{4}$',
 	//		'ServerDate_Month'	=>	'^[[:digit:]]{1,2}$',
@@ -131,7 +141,8 @@ function _moduleContent(&$smarty, $module_name)
 			'ServerDate_Minute'	=>	'^[[:digit:]]{1,2}$',
 			'ServerDate_Second'	=>	'^[[:digit:]]{1,2}$',
 		);
-		$bValido = TRUE;
+		
+        $bValido = TRUE;
 		foreach ($listaVars as $sVar => $sReg) {
 			if (!ereg($sReg, $_POST[$sVar])) {
 				$bValido = FALSE;
@@ -147,6 +158,9 @@ function _moduleContent(&$smarty, $module_name)
 
 		// Validación de zona horaria nueva
 		$sZonaNueva = $_POST['TimeZone'];
+        
+        $listaZonas = leeZonas();
+
 		if (!in_array($sZonaNueva, $listaZonas)) $sZonaNueva = $sZonaActual;
 
 		if (!$bValido) {
@@ -167,7 +181,6 @@ function _moduleContent(&$smarty, $module_name)
 
             if ($bValido) {
                 $sZonaActual = $sZonaNueva;
-                
                 $fecha = sprintf('%04d-%02d-%02d %02d:%02d:%02d', 
                 	$year, $month, $day, $_POST['ServerDate_Hour'], $_POST['ServerDate_Minute'], $_POST['ServerDate_Second']);
                 $cmd = "/usr/bin/elastix-helper dateconfig --datetime '$fecha' 2>&1";
@@ -181,19 +194,37 @@ function _moduleContent(&$smarty, $module_name)
     			}
             }
 		}
-	}
-    $sContenido = '';
 
-    $mes = date("m",time());
-    $mes = (int)$mes - 1;
+	return formTime($smarty,$module_name,$local_templates_dir, $listaZonas, $sZonaActual);
 
-    $smarty->assign("CURRENT_DATETIME", strftime("%Y,$mes,%d,%H,%M,%S",time()));
-    $smarty->assign('LISTA_ZONAS', $listaZonas);
-    $smarty->assign('ZONA_ACTUAL', $sZonaActual);
-    $smarty->assign("CURRENT_DATE",strftime("%d %b %Y",time()));
-    $smarty->assign("icon","modules/$module_name/images/system_preferences_datetime.png");
-	$sContenido .= $oForm->fetchForm("$local_templates_dir/time.tpl", _tr('Date and Time Configuration'), $_POST);
-	return $sContenido;
+
 }
+
+    
+function leeZonas(){
+    
+    // Abrir el archivo /usr/share/zoneinfo/zone.tab y cargar la columna 3
+	// Se ignoran líneas que inician con #
+    $listaZonas = NULL;
+	$hArchivo = fopen('/usr/share/zoneinfo/zone.tab', 'r');
+	if ($hArchivo) {
+		$listaZonas = array();
+		while ($tupla = fgetcsv($hArchivo, 2048, "\t")) {
+			if (count($tupla) >= 3 && $tupla[0]{0} != '#') $listaZonas[] = $tupla[2];
+		}
+		fclose($hArchivo);
+		sort($listaZonas);
+
+	}
+   return $listaZonas;
+}
+
+function getAction(){
+    if(getParameter("Actualizar")) //Get parameter by POST (submit)
+        return "save";
+    else
+        return "report";
+}
+   
 
 ?>

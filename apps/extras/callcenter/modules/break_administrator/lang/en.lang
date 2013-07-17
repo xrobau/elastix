@@ -45,9 +45,9 @@ $arrLangModule=array(
 "Name Break can't be empty" => "Name Break can't be empty",
 "Name Break already exists" => "Name Break already exists",
 "Id Break is empty" => "Id Break is empty",
-"Desactivate Error" => "Desactivate Error", //Bruno agrego
-"Error when desactivating the Break" => "Error when desactivating the Break",
-"Desactivate"=>"Desactivate",
+"Desactivate Error" => "Deactivate Error", //Bruno agrego
+"Error when desactivating the Break" => "Error when deactivating the Break",
+"Desactivate"=>"Deactivate",
 "Activate"=>"Activate",
 "Status"=>"Status",
 );

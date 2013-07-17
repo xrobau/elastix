@@ -24,6 +24,46 @@ $(document).ready(function(){
             $(this).prop("disabled",false);
     });
 });
+//did assign function
+$(function() {
+    $( "#sortable1,#sortable2" ).sortable({
+        connectWith: ".connectedSortable"
+    }).disableSelection();
+    $( "#sortable2" ).on("sortreceive", function( event, ui ) {
+        var listDID = $(this).sortable('toArray').toString();
+        $("input[name=listDIDOrg]").val(listDID);
+    });
+    $( "#sortable2" ).on("sortremove", function( event, ui ) {
+        var listDID = $(this).sortable('toArray').toString();
+        $("input[name=listDIDOrg]").val(listDID);
+    });
+});
+function filer_did(){
+    var country=$("#country").find('option:selected').val();
+    var city=$("#city").find('option:selected').val();
+    var arrAction = new Array();
+    arrAction["menu"]="organization";
+    arrAction["action"]="changeDIDfilter";
+    arrAction["country"]=country;
+    arrAction["city"]=city;
+    arrAction["listDIDOrg"]=$("input[name='listDIDOrg']").val();
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            alert(arrData);
+            alert(statusResponse);
+            alert(error);
+            if(error!=""){
+                alert(error);
+            }else{
+                $("#sortable1 > li").remove();
+                for(x in arrData){
+                    $("#sortable1").append('<li class="ui-state-default" id="'+arrData[x]['id']+'">('+arrData[x]['country_code']+') '+arrData[x]['area_code']+'-'+arrData[x]['did']+'</li>');
+                }
+            }
+    });
+}
+//did assign function
 
 function org_chk_limit(name){
     if($("input[name="+name+"_chk]").is(':checked')){
@@ -37,7 +77,6 @@ function org_chk_limit(name){
     }
     
 }
-
 function select_country()
 {
     var country=$("#country").find('option:selected').val();
@@ -56,42 +95,6 @@ function select_country()
             }
     });
 }
-
-function quitar_did(){
-    var did=$("select[name=arr_did] option:selected").val();
-    //se quita el elemento de la lista de seleccionados
-    $("select[name=arr_did] option:selected").remove();
-    //se agrega el elemento de la lista de canales disponibles
-    $("select[name='did']").append("<option value="+did+">"+did+"</option>");
-    var val=$("#select_dids").val();
-    var arrVal=val.split(",");
-    var option="";
-    for (x in arrVal){
-        if(arrVal[x]!=did && arrVal[x]!="")
-            option += arrVal[x]+",";
-    }
-    $("#select_dids").val(option);
-}
-
-function mostrar_select_dids(){
-    var val=$("#select_dids").val();
-    var arrVal=val.split(",");
-    
-    for (x in arrVal){
-        if(arrVal[x]!=""){
-            $("select[name='arr_did']").append("<option value="+arrVal[x]+">"+arrVal[x]+"</option>");
-        }
-    }
-    
-    var chann=$("select[name='did']");
-    var options = $('option', chann);
-        options.each(function() {
-            if(arrVal.indexOf($(this).text())!=-1){
-                $("select[name=did] option[value='"+$(this).text()+"']").remove();
-            }
-        });
-}
-
 function change_state(){
     //el nuevo estado
     var state=$("#state_orgs option:selected").val();

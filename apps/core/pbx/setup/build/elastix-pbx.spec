@@ -364,6 +364,10 @@ fi
 
 %changelog
 * Wed Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: phpagi-asmanager.php: revert SVN commit 4252. This is not the proper
+  place to run load_default_timezone(). The proper place is the script including
+  this library.
+  SVN Rev[5332] 
 - DELETED: Asterisk CLI: remove unused folder i18n
   SVN Rev[5319]  
 

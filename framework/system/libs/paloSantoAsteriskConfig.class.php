@@ -28,15 +28,8 @@
   $Id: paloSantoAsteriskConfig,v 1.1 05/11/2012 rocio mera rmera@palosanto.com Exp $ */
 
 $elxPath="/usr/share/elastix";
-if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
-	require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
-}
-
 include_once "$elxPath/libs/paloSantoConfig.class.php";
-include_once "$elxPath/libs/paloSantoPBX.class.php";
 include_once "$elxPath/libs/misc.lib.php";
-include_once "$elxPath/apps/features_code/libs/paloSantoFeaturesCode.class.php";
-include_once "$elxPath/apps/general_settings/libs/paloSantoGlobalsPBX.class.php";
 
 global $arrConf;
 
@@ -87,6 +80,8 @@ class paloSantoASteriskConfig{
 
     //Si se falla la momento de crear los archivos, ahi que deshacer los cambios desde donde se llame a esta funcion
     function createOrganizationAsterisk($domain,$country){
+        require_once "apps/features_code/libs/paloSantoFeaturesCode.class.php";
+        
         //validamos que la organizacion que intentamos crear realmente exista
         $query="SELECT code FROM organization WHERE domain=?";
         $result=$this->_DB->getFirstRowQuery($query, true, array($domain));
@@ -130,6 +125,7 @@ class paloSantoASteriskConfig{
 
 
     function deleteOrganizationPBX($domain,$code){
+        require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
         // 1. Eliminar las entradas dentro de astDB que correspondan a la organizacion
         // 2. actualizamos los  registros de los did que  hayan pertenecido a una organizacion
         $queryd="UPDATE did set organization_domain=NULL where organization_domain=?";
@@ -156,12 +152,16 @@ class paloSantoASteriskConfig{
             $result=$astMang->database_delTree("BLACKLIST/".$code);
             $result=$astMang->database_delTree("QPENALTY/".$code);
         }
+        $astMang->disconnect();
                
         return true;
     }
 
     private function setGeneralSettingFirstTime($domain,$codeOrg,$country)
-    {
+    {   
+        require_once "apps/general_settings/libs/paloSantoGlobalsPBX.class.php";
+        include_once "libs/paloSantoPBX.class.php";
+        
         global $arrConf;
         $source_file="/var/www/elastixdir/asteriskconf/globals.conf";
         

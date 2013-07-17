@@ -31,6 +31,8 @@ require_once('/var/www/html/libs/paloSantoDB.class.php');
 
 class ElastixInstallerProcess extends AbstractProcess
 {
+    private $_debug = FALSE;    // Setear a TRUE para mostrar salida de yum
+
     private $oMainLog;      // Log abierto por framework de demonio
     private $_hEscucha;     // Socket que escucha las conexiones entrantes
     private $_procYum;      // Objeto que administra conexión a YUM
@@ -45,6 +47,14 @@ class ElastixInstallerProcess extends AbstractProcess
 
     private $_customStatus = '';    // Estado arbitrario para compartir con interfaz web
     private $_numAsignacionesCustom = 0;    // Número de veces que ha cambiado el estado arbitrario
+    private $_cachedir = '/var/cache/yum';
+    
+    /* Lote de comandos a ejecutar para la operación actual. Cada comando se
+     * representa como una tupla. El elemento 0 es el comando a ejecutar o 
+     * ejecutado. El elemento 1 es la salida del comando, o NULL si el comando 
+     * está pendiente de ejecutar. En todo momento, el comando actualmente en
+     * ejecución es el primer elemento que tenga la salida puesta a NULL.  */
+    private $_loteComandos = array();
 
     function inicioPostDemonio($infoConfig, &$oMainLog)
     {
@@ -54,6 +64,37 @@ class ElastixInstallerProcess extends AbstractProcess
         $this->oMainLog =& $oMainLog;
 
         $this->_conexiones = array();
+
+        // El siguiente comando ejecuta python para averiguar los valores de 
+        // $basearch y $releasever que se referencian en /etc/yum.conf en Fedora 17
+        $basearch = $releasever = NULL;
+        $sCmd = "python -c '".
+            "import yum; ".
+            "yb = yum.YumBase(); ".
+            "ba = yb.conf.yumvar[\"basearch\"]; ".
+            "rv = yb.conf.yumvar[\"releasever\"]; ".
+            "print \"BASEARCH-RELEASEVER:\", ba, rv;'";
+        $output = $retval = NULL;
+        exec($sCmd, $output, $retval);
+        foreach ($output as $s) {
+        	$regs = NULL;
+            if (preg_match('/^BASEARCH-RELEASEVER:\s+(\S+)\s+(\S+)/', $s, $regs)) {
+            	$basearch = $regs[1];
+                $releasever = $regs[2];
+            }
+        }
+        if (!is_null($basearch) && file_exists('/etc/yum.conf')) {
+        	foreach (file('/etc/yum.conf') as $s) {
+        		$regs = NULL;
+                if (preg_match('/^cachedir\s*=\s*(.+)/', trim($s), $regs)) {
+                	$this->_cachedir = str_replace(
+                        array('$basearch', '$releasever'),
+                        array($basearch, $releasever),
+                        $regs[1]);
+                    $this->oMainLog->output("INFO: cachedir es ahora {$this->_cachedir}");
+                }
+        	}
+        }
 
         // Socket para recibir peticiones entrantes
         if ($bContinuar) {
@@ -118,10 +159,14 @@ class ElastixInstallerProcess extends AbstractProcess
             }
         }
         
+        /* En Fedora 17+, el yum shell ya no muestra la cadena "Setting up Yum Shell",
+         * de forma que para saber que el shell está listo para recibir comandos,
+         * se envía un comando y se espera a recibir la respuesta conocida. */
+        fwrite($this->_procPipes[0], "help\n");
+        
         // Leer los datos de la salida de yum hasta que se obtenga la cadena
         // final que indica que se tiene el shell listo.
         $bFinInicio = FALSE; $sContenido = '';
-        $sFinSetup = "Setting up Yum Shell\n";
         while ($bContinuar && !$bFinInicio) {
 		    $salidaYum = array($this->_procPipes[1], $this->_procPipes[2]);
 		    $entradaYum = NULL;
@@ -135,7 +180,7 @@ class ElastixInstallerProcess extends AbstractProcess
     		        // Mensaje de stderr de yum, mandar a log
     		        $s = stream_get_contents($this->_procPipes[2]);
     		        while (substr($s, -1) == "\n") $s = substr($s, 0, strlen($s) - 1);
-    		        $this->oMainLog->output("yum(stderr): $s");
+    		        if ($this->_debug) $this->oMainLog->output("yum(stderr): $s");
     		    }
     		    if (in_array($this->_procPipes[1], $salidaYum)) {
     		        // Mensaje de stdout de yum
@@ -147,8 +192,9 @@ class ElastixInstallerProcess extends AbstractProcess
     		            break;
     		        }
     		        while (substr($s, -1) == "\n") $s = substr($s, 0, strlen($s) - 1);
-    		        $this->oMainLog->output("yum(stdout): $s");
-    		        if (substr($sContenido, -strlen($sFinSetup)) == $sFinSetup) {
+    		        if ($this->_debug) $this->oMainLog->output("yum(stdout): $s");
+                    $t = $this->_recuperarSalidaConHelp($sContenido);
+                    if (!is_null($t)) {
         		        $this->oMainLog->output("INFO: yum shell está preparado.");
         		        $bFinInicio = TRUE;
 		            }
@@ -168,6 +214,29 @@ class ElastixInstallerProcess extends AbstractProcess
         }
         
         return $bContinuar;
+    }
+
+    /* Al ejecutar yum shell via pipe, no existe ningún separador obvio que 
+     * permita saber que un comando ya ha sido terminado de procesar por yum.
+     * Para lidiar con esto, todos los comandos serán ejecutados con un "help"
+     * a continuación. En el momento en que se detecta la salida de "help", se
+     * sabe que se ha terminado de ejecutar el comando, y la salida previa a la
+     * de "help" es la salida del comando de interés.
+     * 
+     * Esta función intenta extraer la salida de comando de un comando ejecutado
+     * con help a continuación. Si la salida no contiene help, se asume que el 
+     * comando no se ha terminado de ejecutar, y se devuelve NULL. De otro modo
+     * se devuelve la salida previa al help */
+    private function _recuperarSalidaConHelp(&$sContenido)
+    {
+    	$inicio = stripos($sContenido, '> usage: yum [options] COMMAND');
+        if ($inicio !== FALSE &&
+            strpos($sContenido, "List of Commands:\n") !== FALSE &&
+            strpos($sContenido, "Shell specific arguments:\n") !== FALSE &&
+            substr($sContenido, -6) == "\n    \n") {
+            return substr($sContenido, 0, $inicio);
+        }
+        return NULL;
     }
 
     private function _finalizarYumShell()
@@ -199,7 +268,7 @@ class ElastixInstallerProcess extends AbstractProcess
             		        // Mensaje de stderr de yum, mandar a log
             		        $s = stream_get_contents($this->_procPipes[2]);
             		        while (substr($s, -1) == "\n") $s = substr($s, 0, strlen($s) - 1);
-            		        $this->oMainLog->output("yum(stderr): $s");
+            		        if ($this->_debug) $this->oMainLog->output("yum(stderr): $s");
             		    }
             		    if (in_array($this->_procPipes[1], $salidaYum)) {
             		        // Mensaje de stdout de yum
@@ -211,7 +280,7 @@ class ElastixInstallerProcess extends AbstractProcess
             		            break;
             		        }
             		        while (substr($s, -1) == "\n") $s = substr($s, 0, strlen($s) - 1);
-            		        $this->oMainLog->output("yum(stdout): $s");
+            		        if ($this->_debug) $this->oMainLog->output("yum(stdout): $s");
             		    }
                     }
                 }
@@ -224,6 +293,88 @@ class ElastixInstallerProcess extends AbstractProcess
         	$this->oMainLog->output("INFO: yum finaliza con ret=$ret");
         	$this->_procYum = NULL;
         }
+    }
+
+    /* Asignar una lista de comandos a ejecutar por lote, y empezar por el 
+     * primero de ellos. A cada comando se le concatena el comando "help" para
+     * poder determinar cuándo cada comando ha sido terminado de ejecutarse */
+    private function _iniciarLoteComandos($listaCmd)
+    {
+    	$this->_sContenido = '';
+        $this->_loteComandos = array();
+        foreach ($listaCmd as $cmd) {
+        	$this->_loteComandos[] = array($cmd, NULL);
+        }
+        $this->oMainLog->output("INFO: ejecutando comando yum: ".$this->_loteComandos[0][0]);
+        fwrite($this->_procPipes[0], $this->_loteComandos[0][0]."\nhelp\n");
+    }
+
+    private function _actualizarLoteComandos()
+    {
+        // Leer la última salida disponible y agregarla para parsear
+        $s = stream_get_contents($this->_procPipes[1]);
+        $this->_sContenido .= $s;
+        if ($s == '') {
+            $this->oMainLog->output("ERR: fin no esperado de yum!");
+            return FALSE;
+        }
+
+        // Para depuración
+        while (substr($s, -1) == "\n") $s = substr($s, 0, strlen($s) - 1);
+        if ($this->_debug) $this->oMainLog->output("yum(stdout): $s");
+        
+    	// Localizar comando actualmente en ejecución
+        for ($i = 0; $i < count($this->_loteComandos); $i++) {
+        	if (is_null($this->_loteComandos[$i][1])) break;
+        }
+        if ($i < count($this->_loteComandos)) {
+            $salidaComando = $this->_recuperarSalidaConHelp($this->_sContenido);
+            if (!is_null($salidaComando)) {
+            	// El comando actual se ha terminado de ejecutar
+                $this->_loteComandos[$i][1] = $salidaComando;
+                $this->_sContenido = '';
+                
+                // Ejecutar el siguiente comando en la lista, si existe
+                $i++;
+                if ($i < count($this->_loteComandos)) {
+                    $this->oMainLog->output("INFO: ejecutando comando yum: ".$this->_loteComandos[$i][0]);
+                	fwrite($this->_procPipes[0], $this->_loteComandos[$i][0]."\nhelp\n");
+                }
+            }
+        } else {
+        	$this->oMainLog->output("WARN: ".__FUNCTION__.
+                ": no hay comandos pendientes, lote actual es: ".
+                print_r($this->_loteComandos, TRUE));
+        }
+        return TRUE;
+    }
+
+    /* Verificar si el comando que inicia con el prefijo indicado ha terminado,
+     * y recuperar su salida de haberlo hecho. Si no, devuelve NULL. */
+    private function _salidaComandoLote($prefijo)
+    {
+        for ($i = 0; $i < count($this->_loteComandos); $i++) {
+            if (is_null($this->_loteComandos[$i][1])) return NULL;
+            if (strpos($this->_loteComandos[$i][0], $prefijo) === 0)
+                return $this->_loteComandos[$i][1];
+        }
+        
+        // Esto no debería ocurrir
+        $this->oMainLog->output("WARN: ".__FUNCTION__.
+            ": no se encuentra comando que inicie con '$prefijo', lote actual es: ".
+            print_r($this->_loteComandos, TRUE));
+        return NULL;
+    }
+
+    private function _concatenarSalidaCompletaLote($bIncompleto = FALSE)
+    {
+    	$s = '';
+        for ($i = 0; $i < count($this->_loteComandos); $i++) {
+            if (is_null($this->_loteComandos[$i][1])) break;
+            $s .= $this->_loteComandos[$i][1];
+        }
+        if ($bIncompleto) $s .= $this->_sContenido;
+        return $s;
     }
 
     // Construir el URL que describe el socket para escuchar peticiones
@@ -263,7 +414,8 @@ class ElastixInstallerProcess extends AbstractProcess
             }
             if (is_resource($this->_procYum) && in_array($this->_procPipes[1], $listoLeer)) {
                 // Se tiene nueva información del yum shell
-                $bActivo = $this->_actualizarEstadoYumShell();
+                //$bActivo = $this->_actualizarEstadoYumShell();
+                $bActivo = $this->_actualizarLoteComandos();
                 if (!$bActivo) {
                     $this->_finalizarYumShell();
                     if ($this->_estadoPaquete['status'] != 'error') {
@@ -278,6 +430,8 @@ class ElastixInstallerProcess extends AbstractProcess
                             'warning'   =>  array(),
                         );
                     }
+                } else {
+                	$this->_actualizarEstadoYumShell();
                 }
             }
             if (is_resource($this->_procYum) && in_array($this->_procPipes[2], $listoLeer)) {
@@ -539,9 +693,9 @@ Installing for dependencies:
  meanwhile       i386         1.0.2-5.el5        base                     108 k
 
     */
-    private function _recogerPaquetesTransaccion()
+    private function _recogerPaquetesTransaccion($sContenido)
     {
-        $lineas = explode("\n", $this->_sContenido);
+        $lineas = explode("\n", $sContenido);
         $this->_estadoPaquete['progreso'] = array();
         $bReporte = FALSE;
         $sOperacion = NULL;
@@ -602,13 +756,13 @@ Installing for dependencies:
         // Validar las rutas base de los repos
         $infoRepo = array();
         if ($this->_estadoPaquete['status'] != 'error') {
-            $sRutaCache = '/var/cache/yum/';
+            $sRutaCache = $this->_cachedir;
             foreach ($this->_estadoPaquete['progreso'] as $paquete) {
                 if (!isset($infoRepo[$paquete['repo']])) {
 
                     $sNombreRepo = $paquete['repo'];
                     if ($sNombreRepo == 'installed') continue;
-                    $sRutaRepo = $sRutaCache.$paquete['repo'].'/';
+                    $sRutaRepo = $sRutaCache.'/'.$paquete['repo'].'/';
                     $infoRepo[$sNombreRepo] = array(
                         'ruta'  =>  $sRutaRepo,                        
                     );
@@ -636,7 +790,14 @@ Installing for dependencies:
                                 if (preg_match('|^(.*)/(\S+)|', $sRutaPrimary, $regs)) {
                                     $sRutaPrimary = $regs[2];
                                 }
-                                $infoRepo[$sNombreRepo]['primary_db'] = $sRutaPrimary.'.sqlite';
+                                
+                                // CentOS 5 usa $sRutaRepo/primary.xml.gz.sqlite
+                                // Fedora 17 usa $sRutaRepo/gen/primary.xml.sqlite
+                                if (file_exists($sRutaRepo.'gen/'.basename($sRutaPrimary, '.gz').'.sqlite')) {
+                                    $infoRepo[$sNombreRepo]['primary_db'] = 'gen/'.basename($sRutaPrimary, '.gz').'.sqlite';
+                                } else {
+                                    $infoRepo[$sNombreRepo]['primary_db'] = $sRutaPrimary.'.sqlite';
+                                }
                             }
                         }
                         if (!isset($infoRepo[$sNombreRepo]['primary_db'])) {
@@ -740,11 +901,14 @@ Installing for dependencies:
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = FALSE;
 
-        $sComando = "ts list\ninstall ".implode(' ', $listaArgs)."\nts solve\nts list\n";
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
         $this->_activarCapturaStderr();
-        fwrite($this->_procPipes[0], $sComando);
+        $this->_iniciarLoteComandos(array(
+            'ts list repoload',
+            'install '.implode(' ', $listaArgs), 
+            'ts solve',
+            'ts list final'));
         return "OK Processing\n";
     }
     
@@ -772,11 +936,14 @@ Installing for dependencies:
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = TRUE;
 
-        $sComando = "ts list\ninstall ".implode(' ', $listaArgs)."\nts solve\nts list\n";
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
         $this->_activarCapturaStderr();
-        fwrite($this->_procPipes[0], $sComando);
+        $this->_iniciarLoteComandos(array(
+            'ts list repoload',
+            'install '.implode(' ', $listaArgs), 
+            'ts solve',
+            'ts list final'));
         return "OK Processing\n";
     }
 
@@ -796,10 +963,13 @@ Installing for dependencies:
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = FALSE;
         
-        $sComando = "ts list\nupdate ".implode(' ', $listaArgs)."\nts solve\nts list\n";
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
-        fwrite($this->_procPipes[0], $sComando);
+        $this->_iniciarLoteComandos(array(
+            'ts list repoload',
+            'update '.implode(' ', $listaArgs), 
+            'ts solve',
+            'ts list final'));
         return "OK Processing\n";
     }
 
@@ -827,10 +997,13 @@ Installing for dependencies:
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = TRUE;
         
-        $sComando = "ts list\nupdate ".implode(' ', $listaArgs)."\nts solve\nts list\n";
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
-        fwrite($this->_procPipes[0], $sComando);
+        $this->_iniciarLoteComandos(array(
+            'ts list repoload',
+            'update '.implode(' ', $listaArgs), 
+            'ts solve',
+            'ts list final'));
         return "OK Processing\n";
     }
 
@@ -849,10 +1022,12 @@ Installing for dependencies:
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['testonly'] = FALSE;
         
-        $sComando =  "list ".implode(' ', $listaArgs)."\nts list\n";
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
-        fwrite($this->_procPipes[0], $sComando);
+        $this->_iniciarLoteComandos(array(
+            'list '.implode(' ', $listaArgs), 
+            //'ts list'
+            ));
         return "OK Processing\n";
     }
 
@@ -869,10 +1044,12 @@ Installing for dependencies:
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['testonly'] = FALSE;
         
-        $sComando = "ts reset\nts list\n";
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
-        fwrite($this->_procPipes[0], $sComando);
+        $this->_iniciarLoteComandos(array(
+            'ts reset', 
+            //'ts list'
+            ));
         return "OK\n";
     }
     
@@ -912,10 +1089,10 @@ Installing for dependencies:
         $this->_estadoPaquete['testonly'] = FALSE;
         $this->_estadoPaquete['autoconfirm'] = FALSE;
 
-        $sComando = "run\n";
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
-        fwrite($this->_procPipes[0], $sComando);
+        $this->_iniciarLoteComandos(array(
+            'run'));
         $this->_activarCapturaStderr();
         return "OK Starting transaction...\n";
     }
@@ -930,24 +1107,51 @@ Installing for dependencies:
         return "OK Stored\n";
     }
 
+    private function _procesarRemove(&$listaArgs)
+    {
+        if (!is_array($listaArgs) || count($listaArgs) <= 0)
+            return "ERR No packages\n";
+        if ($this->_estadoPaquete['status'] != 'idle')
+            return "ERR Invalid status\n";
+        
+        $this->_sContenido = '';    // Anular la salida de yum que se haya leído
+        $this->_estadoPaquete['status'] = 'busy';
+        $this->_estadoPaquete['action'] = 'reporefresh';
+        $this->_estadoPaquete['errores'] = array();
+        $this->_estadoPaquete['warning'] = array();
+        $this->_estadoPaquete['instalado'] = array();
+        $this->_estadoPaquete['testonly'] = FALSE;
+        
+        if (!$this->_asegurarYumShellIniciado())
+            return "ERR Unable to start Yum Shell\n";
+        $this->_iniciarLoteComandos(array(
+            'ts list repoload',
+            'erase '.implode(' ', $listaArgs),
+            'ts solve', 
+            'ts list final'));
+        return "OK Processing\n";
+    }
+
+    private function _procesarRemoveConfirm(&$listaArgs)
+    {
+        $r = $this->_procesarRemove($listaArgs);
+        if (substr($r, 0, 2) == 'OK')
+            $this->_estadoPaquete['autoconfirm'] = TRUE;
+        return $r;
+    }
+
     private function _actualizarEstadoYumShell()
     {
         $this->_timestampUltimoUso = time();
 
-        $s = stream_get_contents($this->_procPipes[1]);
-        $this->_sContenido .= $s;
-        if ($s == '') {
-	        $this->oMainLog->output("ERR: fin no esperado de yum!");
-	        return FALSE;
-        }
-        while (substr($s, -1) == "\n") $s = substr($s, 0, strlen($s) - 1);
-        $this->oMainLog->output("yum(stdout): $s");
-        
         if ($this->_estadoPaquete['status'] == 'busy') {
             switch ($this->_estadoPaquete['action']) {
             case 'cancelling':
                 // Segundo SIGINT (véase _procesarCancel() para explicación)
-                if (FALSE !== strpos($this->_sContenido, 'Current download cancelled, interrupt (ctrl-c) again within two seconds to exit')) {
+                $iCancelPos = strpos(
+                    $this->_concatenarSalidaCompletaLote(TRUE),
+                    'Current download cancelled, interrupt (ctrl-c) again within two seconds to exit');
+                if (FALSE !== $iCancelPos) {
                     $infoYum = proc_get_status($this->_procYum);
                     posix_kill($infoYum['pid'], SIGINT);
                     $this->_estadoPaquete = array(
@@ -964,11 +1168,11 @@ Installing for dependencies:
                 break;
             case 'checkinstalled':
                 // Se revisa si un paquete en particular está instalado
-                $pos = strpos($this->_sContenido, "Transaction Summary");
-                if ($pos !== FALSE) {
+                $salidaCmd = $this->_salidaComandoLote('list');
+                if (!is_null($salidaCmd)) {
                     $this->_estadoPaquete['status'] = 'idle';
                     $this->_estadoPaquete['action'] = 'none';
-                    $lineas = explode("\n", $this->_sContenido);
+                    $lineas = explode("\n", $salidaCmd);
                     $bReporteInstalado = FALSE;
                     foreach ($lineas as $sLinea) {
                         if (strpos($sLinea, 'Installed Packages') !== FALSE) {
@@ -992,30 +1196,28 @@ Installing for dependencies:
                 break;
             case 'reporefresh':
                 // Se inicia refresco de repos para poder realizar resolución de dependencias...
-                $pos = strpos($this->_sContenido, "Transaction Summary");
-                if ($pos !== FALSE) {
+                $salidaCmd = $this->_salidaComandoLote('ts list repoload');
+                if (!is_null($salidaCmd)) {
                     $this->_estadoPaquete['action'] = 'depsolving';
-                    $this->_inactivarCapturaStderr();
                 }
                 break;
             case 'depsolving':
                 // Realizando resolución de dependencias
-                $pos = strpos($this->_sContenido, "Success resolving dependencies");
-                if ($pos !== FALSE) {
-                    $pos2 = strpos($this->_sContenido, "Transaction Summary", $pos);
-                    if ($pos2 !== FALSE) {
+                $salidaCmdSolve = $this->_salidaComandoLote('ts solve');
+                $salidaCmdTs = $this->_salidaComandoLote('ts list final');
+                if (!is_null($salidaCmdSolve) && strpos($salidaCmdSolve, "Success resolving dependencies") !== FALSE) {
+                    if (!is_null($salidaCmdTs)) {
                         // Ya es seguro recolectar los paquetes que conforman la transacción
                         $this->_estadoPaquete['status'] = 'idle';
                         if ($this->_estadoPaquete['testonly']) {
                             $this->_estadoPaquete['action'] = 'none';
                             $this->_estadoPaquete['testonly'] = FALSE;
-                            $this->_recogerPaquetesTransaccion();
-                            $sComando = "ts reset\nts list\n";
-                            fwrite($this->_procPipes[0], $sComando);
+                            $this->_recogerPaquetesTransaccion($salidaCmdTs);
+                            $this->_iniciarLoteComandos(array('ts reset'));
                         } else {
                             $this->_estadoPaquete['action'] = 'confirm';
                             $this->_estadoPaquete['testonly'] = FALSE;
-                            $this->_recogerPaquetesTransaccion();
+                            $this->_recogerPaquetesTransaccion($salidaCmdTs);
                             
                             // Proceder directamente a operación en caso de autoconfirm
                             if ($this->_estadoPaquete['autoconfirm'] &&
@@ -1027,11 +1229,10 @@ Installing for dependencies:
                         }
                         
                     }
+                    $this->_inactivarCapturaStderr();
                 } else {
                     // Ocurren problemas de resolución de dependencias
-                    $pos = strpos($this->_sContenido, "has depsolving problems");
-                    $pos2 = strpos($this->_sContenido, "Transaction Summary", $pos);
-                    if ($pos !== FALSE && $pos2 !== FALSE) {
+                    if (!is_null($salidaCmdSolve) && !is_null($salidaCmdTs)) {
                         // Recoger los errores de dependencias que han ocurrido
                         $this->_estadoPaquete['status'] = 'idle';
                         $this->_estadoPaquete['action'] = 'none';
@@ -1039,66 +1240,43 @@ Installing for dependencies:
                         $this->_estadoPaquete['warning'] = array();
                         $this->_estadoPaquete['errores'] = array();
 
-                        $this->_recogerPaquetesTransaccion();
+                        $this->_recogerPaquetesTransaccion($salidaCmdTs);
                         $this->_estadoPaquete['status'] = 'error';
                         $listaPaquetes = $this->_estadoPaquete['progreso'];
                         $this->_estadoPaquete['progreso'] = array();
 
-                        $lineas = explode("\n", $this->_sContenido);
+                        // El siguiente método funciona en CentOS 5
+                        $lineas = explode("\n", $salidaCmdSolve);
                         $listaDepFaltantes = array();
                         foreach ($lineas as $sLinea) {
                             $regs = NULL;
+                            
+                            $depsrc = NULL; $depmsg = NULL;
                             if (preg_match('/Missing Dependency: (.+) is needed by package (\S+) \(\S+\)/', $sLinea, $regs)) {
-                                // TODO: parsear estado de árbol para trazar árbol de dependencias
-                                $this->_estadoPaquete['errores'][] = $regs[0];
-                                //$listaDepFaltantes[] = $regs[1];
-                                $sDependencia = $regs[1];
-                                
-                                // Se verifica si la dependencia es por una versión de RPM,
-                                // o por una versión específica. Se usa a propósito el formato
-                                // de la petición de requires.
-                                $regs = NULL;
-                                if (preg_match('/^(\S+)\s+(\S+)\s+(\S+)$/', $sDependencia, $regs)) {
-                                    $sNombreBase = $regs[1];
-                                    $sSimboloComparador = $regs[2];
-                                    $sVersion = $regs[3];
-                                    
-                                    // Elegir comparador adecuado
-                                    $mapaComp = array(
-                                        '>' =>  'GT',
-                                        '>=' => 'GE',
-                                        '=' =>  'EQ',
-                                        '<=' => 'LE',
-                                        '<' =>  'LT',
-                                    );
-                                    $sComparador = isset($mapaComp[$sSimboloComparador]) ? $mapaComp[$sSimboloComparador] : 'EQ';
-                                    $reqDesc = array(
-                                        'name'  =>  $sNombreBase,
-                                        'flags' =>  $sComparador,
-                                        'epoch' =>  NULL,
-                                        'version' =>  NULL,
-                                        'release' =>  NULL,
-                                    );
-                                    
-                                    // Parseo de la cadena de versión
-                                    if (preg_match('/^((\S+):)?(\S+)-(\S+)$/', $sVersion, $regs)) {
-                                        $reqDesc['epoch'] = $regs[2];
-                                        $reqDesc['version'] = $regs[3];
-                                        $reqDesc['release'] = $regs[4];
-                                    } else {
-                                        $reqDesc['version'] = $sVersion;
-                                    }
-                                    
-                                    $listaDepFaltantes[] = $reqDesc;
-                                } else {
-                                    $listaDepFaltantes[] = array(
-                                        'name'  =>  $sDependencia,
-                                        'flags' =>  NULL,
-                                        'epoch' =>  NULL,
-                                        'version' =>  NULL,
-                                        'release' =>  NULL,
-                                    );
+                                $depmsg = $regs[0];
+                                $depsrc = $regs[1];
+                            }
+                            
+                            if (!is_null($depsrc)) {
+                                $listaDepFaltantes[] = $this->_acumularMensajeDependenciaFallida($depmsg, $depsrc);
+                            }
+                        }
+
+                        // El siguiente método es necesario en Fedora 17
+                        $lineas = explode("\n", $this->_stderrBuf);
+                        foreach ($lineas as $i => $sLinea) {
+                            $regs = NULL;
+                            
+                            $depsrc = NULL; $depmsg = NULL;
+                            if ($i > 0) {
+                                $testmsg = $lineas[$i - 1]." ".$sLinea;
+                                if (preg_match('/Error: Package: \S+ \(\S+\)\s+Requires: (.+)/', $testmsg, $regs)) {
+                                    $depmsg = $regs[0];
+                                    $depsrc = $regs[1];
                                 }
+                            }
+                            if (!is_null($depsrc)) {
+                                $listaDepFaltantes[] = $this->_acumularMensajeDependenciaFallida($depmsg, $depsrc);
                             }
                         }
 
@@ -1242,19 +1420,20 @@ Installing for dependencies:
                                 }
                             }
                         }
+                        $this->_inactivarCapturaStderr();
                     }
                 }
                 break;
             case 'downloading':
                 // Descargando paquetes. Se monitorea el tamaño del archivo RPM descargado
                 $this->_revisarProgresoPaquetes();
-                if (strpos($this->_sContenido, 'Running Transaction Test') !== FALSE) {
+                if (strpos(/*$this->_sContenido*/$this->_concatenarSalidaCompletaLote(TRUE), 'Running Transaction Test') !== FALSE) {
                     $this->_estadoPaquete['action'] = 'applying';
                 }
                 break;
             case 'applying':
                 // Aplicando la transacción
-                $lineas = explode("\n", $this->_sContenido);
+                $lineas = explode("\n", $this->_concatenarSalidaCompletaLote(TRUE));
                 $iPosPaquete = NULL;
                 
                 // Resetear el estado de todos los paquetes
@@ -1339,7 +1518,7 @@ Installing for dependencies:
             $this->_stderrBuf .= $s;
         }
         while (substr($s, -1) == "\n") $s = substr($s, 0, strlen($s) - 1);
-        $this->oMainLog->output("yum(stderr): $s");
+        if ($this->_debug) $this->oMainLog->output("yum(stderr): $s");
         
         if ($this->_bCapturarStderr) switch ($this->_estadoPaquete['action']) {
         case 'reporefresh':
@@ -1387,6 +1566,59 @@ Installing for dependencies:
         }
     }
 
+    private function _acumularMensajeDependenciaFallida($depmsg, $depsrc)
+    {
+        // TODO: parsear estado de árbol para trazar árbol de dependencias
+        $this->_estadoPaquete['errores'][] = $depmsg;
+        $sDependencia = $depsrc;
+        
+        // Se verifica si la dependencia es por una versión de RPM,
+        // o por una versión específica. Se usa a propósito el formato
+        // de la petición de requires.
+        $regs = NULL;
+        if (preg_match('/^(\S+)\s+(\S+)\s+(\S+)$/', $sDependencia, $regs)) {
+            $sNombreBase = $regs[1];
+            $sSimboloComparador = $regs[2];
+            $sVersion = $regs[3];
+            
+            // Elegir comparador adecuado
+            $mapaComp = array(
+                '>' =>  'GT',
+                '>=' => 'GE',
+                '=' =>  'EQ',
+                '<=' => 'LE',
+                '<' =>  'LT',
+            );
+            $sComparador = isset($mapaComp[$sSimboloComparador]) ? $mapaComp[$sSimboloComparador] : 'EQ';
+            $reqDesc = array(
+                'name'  =>  $sNombreBase,
+                'flags' =>  $sComparador,
+                'epoch' =>  NULL,
+                'version' =>  NULL,
+                'release' =>  NULL,
+            );
+            
+            // Parseo de la cadena de versión
+            if (preg_match('/^((\S+):)?(\S+)-(\S+)$/', $sVersion, $regs)) {
+                $reqDesc['epoch'] = $regs[2];
+                $reqDesc['version'] = $regs[3];
+                $reqDesc['release'] = $regs[4];
+            } else {
+                $reqDesc['version'] = $sVersion;
+            }
+            
+            return $reqDesc;
+        } else {
+            return array(
+                'name'  =>  $sDependencia,
+                'flags' =>  NULL,
+                'epoch' =>  NULL,
+                'version' =>  NULL,
+                'release' =>  NULL,
+            );
+        }
+    }
+
     private function _revisarProgresoPaquetes()
     {
         clearstatcache();
@@ -1415,35 +1647,5 @@ Installing for dependencies:
         $this->_stderrBuf = '';
     }
     
-    private function _procesarRemove(&$listaArgs)
-    {
-        if (!is_array($listaArgs) || count($listaArgs) <= 0)
-            return "ERR No packages\n";
-        if ($this->_estadoPaquete['status'] != 'idle')
-            return "ERR Invalid status\n";
-        
-        $this->_sContenido = '';    // Anular la salida de yum que se haya leído
-        $this->_estadoPaquete['status'] = 'busy';
-        $this->_estadoPaquete['action'] = 'reporefresh';
-        $this->_estadoPaquete['errores'] = array();
-        $this->_estadoPaquete['warning'] = array();
-        $this->_estadoPaquete['instalado'] = array();
-        $this->_estadoPaquete['testonly'] = FALSE;
-        
-        $sComando = "ts list\nerase ".implode(' ', $listaArgs)."\nts solve\nts list\n";
-        if (!$this->_asegurarYumShellIniciado())
-            return "ERR Unable to start Yum Shell\n";
-        fwrite($this->_procPipes[0], $sComando);
-        return "OK Processing\n";
-    }
-
-    private function _procesarRemoveConfirm(&$listaArgs)
-    {
-        $r = $this->_procesarRemove($listaArgs);
-        if (substr($r, 0, 2) == 'OK')
-            $this->_estadoPaquete['autoconfirm'] = TRUE;
-        return $r;
-    }
-
 }
 ?>

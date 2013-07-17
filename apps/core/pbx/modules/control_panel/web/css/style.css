@@ -1,0 +1,380 @@
+#contentWrap{
+    /*width: 1350px;*//*990*/
+    width: auto;
+    height: auto;/*600*/
+    /*border: black solid 1px;*/
+    padding: 0;
+    margin: 0;
+}
+
+#faq {
+    padding: 0px 0px 0px 0px;
+    float: left;
+    margin: 0px 1px 0 0px;
+    width: 380px;/*396*/
+    height: auto;
+    /*border: black solid 1px;*/
+    z-index:-1;
+}
+
+.left_side, .right_side{
+    padding: 0px 0px 0px 0px;
+    float: left;
+    margin: 0;
+    width: auto;/*380*/
+    height: auto;/*150*/
+    border: black solid 1px;
+}
+
+#headArea1 {
+    /*float: left;*/
+    border-top: black solid 1px;
+    border-right: black solid 1px;
+    border-left: black solid 1px;
+    border-bottom: black solid 0px;
+}
+
+
+#headArea2 {
+    /*float: left;*/
+    border-top: black solid 1px;
+    border-right: black solid 1px;
+    border-left: black solid 1px;
+    border-bottom: black solid 0px;
+}
+
+#headArea3 {
+    /*float: left;*/
+    border-top: black solid 1px;
+    border-right: black solid 1px;
+    border-left: black solid 1px;
+    border-bottom: black solid 0px;
+}
+
+#headQueues {
+    /*float: left;*/
+    border-top: black solid 1px;
+    border-right: black solid 1px;
+    border-left: black solid 1px;
+    border-bottom: black solid 1px;
+}
+
+
+#subContent1 {
+    padding: 0px 0px 0px 0px;
+    float: left;
+    margin: 0px 0 0 0px;
+    /*background-color:#FAD9FF; */
+    width: 188px;/*193*/
+    height: 145px;
+}
+
+#subContent2 {
+    padding: 0px 0px 0px 0px;
+    float: left;
+    margin: 0px 0 0 0px;
+    /*background-color:#FCEEFF; */
+    width: 188px;
+    height: 145px;
+}
+
+
+#contentRight {
+    float: right;
+    width: 260px;
+    padding:10px;
+    background-color:#336600;
+    color:#FFFFFF;
+}
+
+
+#layer1 {
+    position: absolute;
+    left:200px;
+    top:100px;
+    width:300px;
+    background-color:#f0f5FF;
+    border: 1px solid #000;
+    z-index: 50;/*50*/
+    display:none;
+}
+
+#layer2 {
+    position: absolute;
+    left:200px;
+    top:100px;
+    width:300px;
+    background-color:#f0f5FF;
+    border: 1px solid #000;
+    z-index: 50;
+    display:none;
+}
+
+#layer3 {
+    position: absolute;
+    left:200px;
+    top:100px;
+    width:300px;
+    background-color:#f0f5FF;
+    border: 1px solid #000;
+    z-index: 50;
+    display:none;
+}
+
+.layer_handle {
+    padding:2px;
+    text-align:center;
+    font-weight:bold;
+    color: #FFFFFF;
+    vertical-align:middle;
+    font-size: 12px;
+}
+
+#layer1_content {
+    padding:5px;
+    font-size: 11px;
+    font-family:Verdana,Arial,Helvetica,sans-serif;
+}
+
+#close1 {
+    float:right;
+    text-decoration:none;
+    color:#FFFFFF;
+}
+#close2 {
+    float:right;
+    text-decoration:none;
+    color:#FFFFFF;
+}
+#close3 {
+    float:right;
+    text-decoration:none;
+    color:#FFFFFF;
+}
+
+#editArea2 {
+    color: #3EBB40;
+    font-size: 11px;
+    margin-left: 60px;
+    cursor: pointer;
+}
+
+#editArea3 {
+    color: #3EBB40;
+    font-size: 11px;
+    margin-left: 60px;
+    cursor: pointer;
+}
+
+#editArea4 {
+    color: #3EBB40;
+    font-size: 11px;
+    margin-left: 60px;
+    cursor: pointer;
+}
+
+#content {
+    padding: 0px 3px 0px 0px;
+    float: left;
+    width: auto;
+    height: auto;
+    background-color:#CCCCCC;
+}
+
+.sortable {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#sortable-list1 {
+    float: left;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+#sortable-list2 {
+    /*float: left;*/
+    padding: 0;
+    margin: 0;
+}
+
+#sortable-hidden {
+    /*float: left;*/
+    padding: 0;
+    margin: 0;
+}
+
+.state1{
+    /*float: left;*/
+}
+
+.state2{
+    /*float: left;*/
+}
+
+
+#tool {
+    float: left;
+    padding: 0px 3px 0px 0px;
+    background-color:#CCCCCC;
+    width: 300px;
+    height: 24px;
+    border: black solid 0px;
+}
+
+#timewaiting {
+    color: #4084C3;
+    font-size: 11px;
+    margin-left: 10px;
+}
+
+#allqueue {
+    color: #4084C3;
+    font-size: 11px;
+    margin-left: 60px;
+
+}
+
+#parametro {
+    color: black;
+    font-size: 9px;
+    padding: 5px;
+}
+
+.img_box { 
+    width: 23px;
+    height: 17px;
+    padding: 2px 2px 0 0;
+    border: 0;
+    z-index:50;
+}
+
+
+
+.mail_box {
+    width: 17px;
+    height: 11px;
+    padding: 6px 3px 0 0;
+    border: 0;
+}
+
+.info_img {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+}
+
+.monitor {
+    color: blue;
+    font-size: 9px;
+    padding: 5px;
+}
+
+/* ESTILO PARA TOOLTIP EMAIL*/
+a.Ntooltip {
+    position: relative; /* es la posici�n normal */
+    text-decoration: none ; /* forzar sin subrayado */
+}
+
+a.Ntooltip:hover {
+    z-index:999; /* va a estar por encima de todo */
+}
+
+a.Ntooltip span {
+    display: none; /* el elemento va a estar oculto */
+}
+
+a.Ntooltip:hover span {
+    display: block; /* se fuerza a mostrar el bloque */
+    position: absolute; /* se fuerza a que se ubique en un lugar de la pantalla */
+    top:1em; 
+    left:2em; /* donde va a estar */
+    width:80px; /* el ancho por defecto que va a tener */
+    height:20px;
+    padding:10px; /* la separaci�n entre el contenido y los bordes */
+    background-color: #6CF; /* el color de fondo por defecto */
+    border: 1px solid #36F;
+    
+    -moz-border-radius:12px;
+    -webkit-border-radius:12px;
+    border-radius:12px;
+    font-size:11px;
+    color: #000; /* el color de los textos por defecto */
+}
+
+
+/* ESTILO PARA TOOLTIP INFOR*/
+a.tooltipInfo {
+    position: relative; /* es la posicion normal */
+    text-decoration: none ; /* forzar sin subrayado */
+}
+
+a.tooltipInfo:hover {
+    z-index:998; /* va a estar por encima de todo */
+}
+
+a.tooltipInfo span {
+    display: none; /* el elemento va a estar oculto */
+    z-index:6000;
+}
+
+a.tooltipInfo:hover span{
+    display: block; /* se fuerza a mostrar el bloque */
+    position: absolute; /* se fuerza a que se ubique en un lugar de la pantalla */
+    top:1em; 
+    left:2em; /* donde va a estar */
+    width:160px; /* el ancho por defecto que va a tener */
+    height:50px;
+    padding:10px; /* la separacion entre el contenido y los bordes */
+    background-color: #6CF; /* el color de fondo por defecto */
+    border: 1px solid #36F;
+    
+    -moz-border-radius:12px;
+    -webkit-border-radius:12px;
+    border-radius:12px;
+    font-size:11px;
+    color: #000; /* el color de los textos por defecto */
+    
+}
+
+.box{
+    position:relative;
+    -moz-border-radius: 9px 9px 9px 9px;
+    -webkit-border-radius: 9px;
+    border-radius:9px;
+    width: 182px;
+    height: 24px;
+    margin: 1px 1px 1px 1px;
+    padding: 0px 0px 0px 1px;
+    border: black solid 1px;
+    color: black;
+    font-size: 10px;
+    line-height:112%;
+}
+
+.boxOn{
+    background-color: #fbaa3f;
+}
+
+.boxOff{
+    background-color: #FFEEB8;
+}
+
+.box_info{
+    float:left;
+    border: black solid 0px;
+}
+
+.box_description{
+    float:left;
+    width:115px;
+    text-align:left;
+    padding-left:4px;
+}
+
+.box_img2{
+    border: black solid 0px;
+}

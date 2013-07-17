@@ -21,7 +21,7 @@
                 </tr>
                 <tr>
                 	<td class="letra12" align='left'><b>{$Format_File}:</b></td>
-                	<td class="letra12" align='left'>"telefono","cedula/ruc","nombre","apellido"</td>
+                	<td class="letra12" align='left'>{$Format_Content}</td>
                	</tr>
                	<tr>
                		<td class="letra12" align='left' colspan="2"><b><a href="?menu={$MODULE_NAME}&amp;rawmode=yes&amp;action=csvdownload">{$ETIQUETA_DOWNLOAD}&nbsp;&raquo;</a></b></tr>

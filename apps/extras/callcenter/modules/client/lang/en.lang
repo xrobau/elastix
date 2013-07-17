@@ -23,5 +23,6 @@ $arrLangModule=array(
 'Inserted records'=>'Inserted records',
 'Updated records'=>'Updated records',
 'Detected charset'=>'Detected charset',
+'"Phone","Identification Card","Name","Last Name"' => '"Phone","Identification Card","Name","Last Name"'
 );
 ?>

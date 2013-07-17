@@ -124,6 +124,20 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Thu Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Addons: various changes to handle Fedora 17 ARM:
+  In Fedora 17, the cachedir has components that include the basearch and 
+  version release. These values are now queried on daemon startup.
+  The string "Setting up Yum Shell" is no longer displayed on startup on Fedora 
+  17. Additionally, in Fedora 17, the transaction summary command "ts list" is 
+  silent if the transaction is empty. Therefore, the startup detection and 
+  command output parsing have been reworked to issue "help" after each command.
+  The "help" command allows the daemon to detect that the intended command has 
+  finished.
+  The yum output and stderr are now hidden unless the internal debug flag is set.
+  Account for differences in sqlite database locations in Fedora 17.
+  SVN Rev[5340]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.

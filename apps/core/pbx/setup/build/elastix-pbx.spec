@@ -363,6 +363,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Asterisk CLI: remove unused folder i18n
+  SVN Rev[5319]  
+
 * Thu Jul 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: rename SQL file for update which was incorrectly
   named. This will prevent the update from being applied twice when updating 

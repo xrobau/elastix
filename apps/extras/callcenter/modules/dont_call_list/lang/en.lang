@@ -29,7 +29,7 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Phone List"=>"Phone List",
-"Number Phone's"=>"Number Phone's",
+"Number Phone's"=>"Phone Number",
 "Date Income"=>"Date Income",
 "Add"=>"Add",
 "Apply"=>"Apply",
@@ -42,13 +42,13 @@ $arrLangModule=array(
 "Result"=>"Result",
 "Load File"=>"Load File",
 "Please select any file"=>"Please select any file",
-"Please enter a number phone"=>"Please enter a number phone",
-"Number phone is not numeric value"=>"Number phone isn't a numeric value",
+"Please enter a number phone"=>"Please enter a phone number",
+"Number phone is not numeric value"=>"Phone number isn't a numeric value",
 "Add Number"=>"Add Number",
 "the number already exists"=>"The number already exists",
 "Active" => "Active",
 "Inactive" => "Inactive",
-"Desactivate"=>"Desactivate",
+"Desactivate"=>"Deactivate",
 "Activate"=>"Activate",
 );
 

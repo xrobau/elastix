@@ -302,6 +302,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Asterisk CLI: remove unused folder i18n
+  SVN Rev[5319]  
+
 * Thu Jul 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Endpoint Configurator: add a script that will scan for model duplicates
   and move all endpoints references to the first item before removing the 

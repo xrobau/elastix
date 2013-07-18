@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,6 +130,15 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Jul 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Dashboard: the Calls applet does not really require trunk access or
+  Asterisk AMI access, so both requires can be removed.
+  SVN Rev[5341]
+
 * Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: complete rewrite. The dashboard module has been completely
   rewritten in order to clean up the code and in order to modularize the applets
@@ -163,6 +172,7 @@ fi
 * Fri Jun 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5118]
 
 * Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: remove stray debugging statements.

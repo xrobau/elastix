@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -302,6 +302,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Wed Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: Asterisk CLI: remove unused folder i18n
   SVN Rev[5319]  
@@ -319,6 +323,7 @@ fi
 * Tue Jun 25 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5128]
 
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel, Recordings: specify Context for AMI Originate instead of

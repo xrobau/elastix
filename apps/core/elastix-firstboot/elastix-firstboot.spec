@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-firstboot: fix script to update password in mysql database
+  instead of sqlite.
+  SVN Rev[5345]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.

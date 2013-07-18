@@ -25,267 +25,119 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: index.php,v 1.2 2007/07/07 22:50:39 admin Exp $ */
+  $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
 
-include_once "libs/paloSantoForm.class.php";
-include_once "libs/paloSantoJSON.class.php";
+require_once 'libs/paloSantoJSON.class.php';
 
 function _moduleContent($smarty, $module_name)
 {
     global $arrConf;
-    include_once "apps/applet_admin/libs/paloSantoAppletAdmin.class.php";
-    //folder path for custom templates
-    $local_templates_dir=getWebDirModule($module_name);
 
-    $oPalo = new paloSantoSysInfo();
-    $pDataApplets = new paloSantoDataApplets($module_name,$arrConf);
+	load_language_module($module_name);
 
-    $action = getParameter("action");
-    $session = getSession();
-    $arrPaneles = $oPalo->getAppletsActivated($session['elastix_user']);
-    switch($action){
-        case "saveRegister":
-            $hwd = getParameter("hwd");
-            $num_serie = getParameter("num_serie");
-            $vendor = getParameter("vendor");
-            ini_set("soap.wsdl_cache_enabled", "0");
-            $client = new SoapClient($arrConf['dir_WebServices']);
-
-            $client->registerHardware($vendor,$num_serie);
-            return $oPalo->registerCard($hwd, $num_serie,$vendor);
-            break;
-        case "getRegister":
-            $hwd = getParameter("hwd");
-            return $oPalo->getDataCardRegister($hwd);
-            break;
-        case "updateOrder":
-            $ids_applet = getParameter("ids_applet");
-            return $oPalo->setApplets_UserOrder($ids_applet);
-            break;
-        case "image":
-            $sImg = getParameter('image');
-            executeImage($module_name, $sImg);
-            return '';
-        case "loadAppletData":
-            $content = loadAppletData($pDataApplets,$arrPaneles,$session);
-            return $content;
-            break;
-        case "refreshDataApplet":
-            $content = refreshDataApplet($pDataApplets);
-            return $content;
-            break;
-        case 'processcontrol_stop':
-        case 'processcontrol_start':
-        case 'processcontrol_restart':
-	case 'processcontrol_activate':
-        case 'processcontrol_deactivate':
-            return processControl($action);
-            break;
-        default:
-            unset($session["dashboard"]);
-            putSession($session);
-            break;
-    }
-
-
-    if(is_array($arrPaneles) && count($arrPaneles) == 0){
-        $result = $oPalo->setDefaultActivatedAppletsByUser($session['elastix_user']);
-        if(!$result){
-            $smarty->assign("mb_title", $arrLang["ERROR"]);
-            $smarty->assign("mb_message", $oPalo->errMsg);
-        }
-        $arrPaneles = $oPalo->getAppletsActivated($session['elastix_user']);
-    }
-
-    $AppletsPanels = createApplesTD($arrPaneles, $pDataApplets);
     $smarty->assign("module_name",  $module_name);
-    $smarty->assign("AppletsPanels",$AppletsPanels);
-    $smarty->assign("loading",_tr("Loading"));
-    $action = getParameter("save_new");
-    if(isset($action))
-     $app = saveApplets_Admin();
-    else $app = showApplets_Admin();
-    $smarty->assign("APPLET_ADMIN",$app);
 
-    return $smarty->fetch("file:$local_templates_dir/applets.tpl");
+    // Leer lista de applets implementados y validar con directorio
+    $paloApplets = new paloSantoApplets();
+    $appletlist = $paloApplets->leerAppletsActivados($_SESSION["elastix_user"]);
+    $t = array();
+    foreach ($appletlist as $applet) {
+    	if (is_dir("{$arrConf['elxPath']}/apps/$module_name/applets/{$applet['applet']}"))
+            $t[] = $applet;
+    }
+    $appletlist = $t;
+
+    // Verificar si se pide una petición para un applet individual
+    $appletnames = array();
+    foreach ($appletlist as $applet) { $appletnames[] = $applet['applet']; }
+    if (isset($_REQUEST['applet']) && !in_array($_REQUEST['applet'], $appletnames))
+        unset($_REQUEST['applet']);
+    if (isset($_REQUEST['applet'])) {
+        if (file_exists("{$arrConf['elxPath']}/apps/$module_name/applets/{$_REQUEST['applet']}/lang/en.lang"))
+            load_language_module("$module_name/applets/{$_REQUEST['applet']}");
+        require_once "{$arrConf['elxPath']}/apps/$module_name/applets/{$_REQUEST['applet']}/index.php";
+    }
+
+    $h = 'handleHTML_appletGrid';
+    if (isset($_REQUEST['action'])) {
+        $h = NULL;
+        $regs = NULL;
+        if (preg_match('/^\w+$/', $_REQUEST['action'])) {
+            if (isset($_REQUEST['applet']) && preg_match('/^\w+$/', $_REQUEST['applet'])) {
+                $classname = 'Applet_'.ucfirst($_REQUEST['applet']);
+                $methodname = 'handleJSON_'.$_REQUEST['action'];
+                
+                if (class_exists($classname)) {
+                	$appletobj = new $classname;
+                    if (method_exists($appletobj, $methodname)) {
+                        $h = array($appletobj, $methodname);                
+                    }
+                }
+                
+            }
+            if (is_null($h) && function_exists('handleJSON_'.$_REQUEST['action']))
+                $h = 'handleJSON_'.$_REQUEST['action'];
+        }
+        if (is_null($h))
+            $h = 'handleJSON_unimplemented';
+    }        
+    return call_user_func($h, $smarty, $module_name, $appletlist);
 }
 
-function processControl($action)
+function handleHTML_appletGrid($smarty, $module_name, $appletlist)
 {
-    global $arrConf;
-    $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
-    if (!empty($pDBACL->errMsg)) {
-        return "ERROR DE DB: $pDBACL->errMsg";
-    }
-    $pACL = new paloACL($pDBACL);
-    if (!empty($pACL->errMsg)) {
-        return "ERROR DE ACL: $pACL->errMsg";
-    }
-    $isAdministrator = $pACL->isUserSuperAdmin($_SESSION['elastix_user']);
+    $local_templates_dir = getWebDirModule($module_name);
     
-    $message = 'success';
-    if (!$isAdministrator) {
-        $message = _tr('Process control restricted to administrators');
-    } else {
-        $sServicio = getParameter('process');
-        $r = paloSantoDashboard::controlServicio($sServicio, $action);
-    }
-    $jsonObject = new PaloSantoJSON();
-    $jsonObject->set_message($message);
-    Header('Content-Type: application/json');
-    return $jsonObject->createJSON();
-}
-
-function createApplesTD($arrPaneles, $pDataApplets){
-	$str1 = "<td id='td_columns1' class='column'>";
-	$str2 = "<td id='td_columns2' class='column'>";
-	$idApplet = "";
-	for($i=0; $i<count($arrPaneles); $i++){
-		$applestUser = $arrPaneles[$i];
-		if(($i%2)==0){
-			$str1 .= getApplet($applestUser, $pDataApplets);
-		}else{
-			$str2 .= getApplet($applestUser, $pDataApplets);
-		}
-	}
-	$str1 .= "</td>";
-	$str2 .= "</td>";
-	$str = $str1.$str2;
-	return $str;
-}
-
-function getApplet($applestUser, $pDataApplets)
-{
-  //  $nameFunction = "getData$applestUser[code]";
-  //  $content = $pDataApplets->$nameFunction();
-
-    $pDataApplets->setIcon($applestUser['icon']);
-    $pDataApplets->setTitle(_tr($applestUser['name']));
-    return $pDataApplets->drawApplet($applestUser['aau_id'],$applestUser['code']);
-}
-
-function loadAppletData($pDataApplets, $arrPaneles, $session)
-{
-    $jsonObject = new PaloSantoJSON();
-    foreach($arrPaneles as $applet){
-	$code = $applet["code"];
-	if(!isset($session["dashboard"][$code])){
-	    $session["dashboard"][$code] = true;
-	    $function = "getData$code";
-	    $message = array();
-	    $message["data"] = $pDataApplets->$function();
-	    $message["code"] = $code;
-	    $jsonObject->set_message($message);
-	    putSession($session);
-	    return $jsonObject->createJSON();
-	}
-    }
-    $jsonObject->set_status("end");
-    return $jsonObject->createJSON();
-}
-
-function refreshDataApplet($pDataApplets)
-{
-    $jsonObject = new PaloSantoJSON();
-    $code = getParameter("code");
-    $function = "getData$code";
-    if(method_exists($pDataApplets,$function))
-	$message = $pDataApplets->$function();
-    else
-	$message = _tr("Error, the following code does not exist").": $code";
-    $jsonObject->set_message($message);
-    return $jsonObject->createJSON();
-}
-
-function executeImage($module_name, $sImg)
-{
-    $listaImgs = array(
-        'CallsMemoryCPU'                                =>  array(null, 'functionCallback'),
-        'ObtenerInfo_Particion'                         =>  array(array('percent'), null),
-        'rbgauge'                                       =>  array(array('percent', 'size'), null),
-    );
-    if (isset($listaImgs[$sImg])) {
-        $arrParameters = array();
-        if (is_array($listaImgs[$sImg][0])) foreach ($listaImgs[$sImg][0] as $k) {
-            $arrParameters[] = isset($_GET[$k]) ? $_GET[$k] : '';
-        }
-        $callback = is_null($listaImgs[$sImg][1]) ? '' : $listaImgs[$sImg][1];
-        displayGraph($module_name, 'paloSantoSysInfo', $sImg, $arrParameters, $callback);
-    }
-}
-
-function getSession()
-{
-    session_commit();
-    ini_set("session.use_cookies","0");
-    if(session_start()){
-        $tmp = $_SESSION;
-        session_commit();
-    }
-    return $tmp;
-}
-
-function putSession($data)//data es un arreglo
-{
-    session_commit();
-    ini_set("session.use_cookies","0");
-    if(session_start()){
-        $_SESSION = $data;
-        session_commit();
-    }
-}
-
-////////////////////// Begin Funciones para Applets Admin /////////////////////////////////
-function showApplets_Admin()
-{
-    global $smarty;
-    global $arrLang;
-    global $arrConf;
-    $module_name = "dashboard"; //$_SESSION["menu"];
-
-    $oPalo = new paloSantoAppletAdmin();
-    $oForm = new paloForm($smarty,array());
-
-    $arrApplets = $oPalo->getApplets_User($_SESSION["elastix_user"]);
+    $smarty->assign("title", htmlentities(_tr('Dashboard'), ENT_COMPAT, 'UTF-8'));
     $smarty->assign("icon","web/apps/$module_name/images/system_dashboard.png");
-    $smarty->assign("applets",$arrApplets);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("Applet", $arrLang["Applet"]);
-    $smarty->assign("Activated", $arrLang["Activated"]);
-    $smarty->assign("IMG", "{$arrConf['webCommon']}/images/list.png");
-
-    //folder path for custom templates
-    $local_templates_dir=getWebDirModule($module_name);
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/applet_admin.tpl",$arrLang["Dashboard"], $_POST);
-    $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
-
-    return $content;
+    $smarty->assign("LABEL_LOADING",  _tr('Loading'));
+    
+    // Partir los applets en las columnas requeridas
+    $applet_col_1 = array();
+    $applet_col_2 = array();
+    foreach ($appletlist as $i => $applet) {
+    	$applet['name'] = _tr($applet['name']);
+        if ($i % 2)
+            $applet_col_2[] = $applet;
+        else $applet_col_1[] = $applet;
+    }
+    $smarty->assign('applet_col_1', $applet_col_1);
+    $smarty->assign('applet_col_2', $applet_col_2);
+    
+    return $smarty->fetch("$local_templates_dir/appletgrid.tpl");
 }
 
-function saveApplets_Admin()
+function handleJSON_unimplemented($smarty, $module_name, $appletlist)
 {
-    global $smarty;
-    global $arrLang;
-    $arrIDs_DAU = null;
-    $module_name = "dashboard"; //$_SESSION["menu"];
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode(array(
+        'status'    =>  'error',
+        'message'   =>  _tr('Unimplemented method'),
+    ));
+}
 
-    if(is_array($_POST) & count($_POST)>0){
-        foreach($_POST as $key => $value){
-            if(substr($key,0,7) == "chkdau_")
-                $arrIDs_DAU[] = substr($key,7);
+function handleJSON_updateOrder($smarty, $module_name, $appletlist)
+{
+    $respuesta = array(
+        'status'    =>  'success',
+        'message'   =>  '(no message)',
+    );
+    
+    if (!isset($_REQUEST['appletorder']) || !is_array($_REQUEST['appletorder'])) {
+    	$respuesta['status'] = 'error';
+        $respuesta['message'] = _tr('Invalid request');
+    } else {
+        $paloApplets = new paloSantoApplets();
+        if (!$paloApplets->actualizarOrdenApplets($_SESSION["elastix_user"], $_REQUEST['appletorder'])) {
+            $respuesta['status'] = 'error';
+            $respuesta['message'] = $paloApplets->errMsg;
         }
     }
-
-    $oPalo = new paloSantoAppletAdmin();
-    $ok = $oPalo->setApplets_User($arrIDs_DAU, $_SESSION["elastix_user"]);
-
-    if(!$ok){
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
-        $smarty->assign("mb_message", $pprueba_applets->errMsg);
-    }
-    //return showApplets_Admin();
-    header("Location: /index.php?menu=$module_name");
+    
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode($respuesta);
 }
-////////////////////// End Funciones para Applets Admin /////////////////////////////////
 ?>

@@ -130,6 +130,35 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: complete rewrite. The dashboard module has been completely
+  rewritten in order to clean up the code and in order to modularize the applets
+  and introduce the capability for a third-party addon to define a custom
+  dashboard applet. A lot of cruft was removed, several potential SQL injection
+  vulnerabilities were closed, and all applets were reviewed in the process of
+  reorganization. Some highlights:
+  All applets: most of the HTML embedded in the source code was moved to templates.
+  SystemResources: a long-standing design flaw was fixed. Previously the CPU 
+  gauge would only show the CPU load for a small interval while the applet was
+  being rendered, with the result that it would frequently show 100% of use, and
+  it would not refresh automatically. Now it refreshes every 5 seconds. In order
+  to reduce CPU load due to redrawing of the gauge, the client side now uses an
+  HTML5 Canvas to redraw the gauge in the browser.
+  HardDrives: It was found that systems with large amounts of data in mail or
+  recordings directories would spend an inordinate amount of time running du 
+  in order to report the disk usage by directory. Now this report is only run by
+  explicit request and displays a warning that fetching the information will 
+  impact system performance. Also, some i18n work for Spanish.
+  PerformanceGraphic: i18n work.
+  CommunicationActivity: i18n work, and the network activity updates in real time.
+  TelephonyHardware: i18n work. SQL injections closed. The webservice client now
+  reports failures properly when the webservice cannot write the registration.
+
+  Elastix 3 note: this gets the dashboard port mostly working. Communication
+  Activity is known to be faulty in some places and requires a rewrite using
+  realtime DB. Some applets are obsoleted by usermode interface.
+  SVN Rev[5343]
+
 * Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: remove stray debugging statements.
   SVN Rev[5116]

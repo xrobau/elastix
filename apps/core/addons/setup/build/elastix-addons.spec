@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -124,6 +124,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Addons: various changes to handle Fedora 17 ARM:
   In Fedora 17, the cachedir has components that include the basearch and 
@@ -141,6 +145,7 @@ fi
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5011]
 
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: enforce single rpm per request. Fix potential limited command

@@ -312,6 +312,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix sampler.php to comply with new location of libraries.
+  SVN Rev[5344]
+
 * Tue Jul 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix /etc/init.d/generic-cloexec script to be aware of
   systemctl and run it instead of blindly running a /etc/init.d/ script that

@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,15 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module graphic_report. Correction of a mistake in the english
+  translation file
+  SVN Rev[5319]
+
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Summary By Extension: tweak SQL query used to report summary, 
   attempts to fix Elastix bug #1607.
@@ -110,6 +119,7 @@ fi
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5104]
 
 * Thu Jun 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: fix date parsing to avoid interpreting plain PIDs as

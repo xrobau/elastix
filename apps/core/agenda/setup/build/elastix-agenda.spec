@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,6 +109,30 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module address_book. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5348]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module calendar. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5347]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module calendar. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5346]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module address_book. Correction of some mistakes in the english
+  translation file
+  SVN Rev[5327]
+
 * Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: FIXED: Calendar: remove *second* bogus compare of translated 
   ajax response field to hardcoded untranslated string. Apparently the check 
@@ -125,6 +149,7 @@ fi
 * Mon Jun 24 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5127]
 
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Address Book, Calendar: specify Context for AMI Originate instead of

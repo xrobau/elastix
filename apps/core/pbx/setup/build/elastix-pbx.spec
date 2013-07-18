@@ -99,6 +99,8 @@ mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
 mkdir -p $RPM_BUILD_ROOT/usr/bin/
 mv setup/usr/bin/elastix-endpoint-configure $RPM_BUILD_ROOT/usr/bin/
 chmod 755 $RPM_BUILD_ROOT/usr/bin/elastix-endpoint-configure
+mv setup/usr/bin/fix-model-duplicates-bug1618 $RPM_BUILD_ROOT/usr/bin/
+chmod 755 $RPM_BUILD_ROOT/usr/bin/fix-model-duplicates-bug1618
 mv setup/usr/share/elastix/endpoint-vendors $RPM_BUILD_ROOT/usr/share/elastix/
 
 rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr

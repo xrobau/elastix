@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 9
+Release: 10
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -305,6 +305,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Tue Jul 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix /etc/init.d/generic-cloexec script to be aware of
   systemctl and run it instead of blindly running a /etc/init.d/ script that
@@ -340,6 +344,7 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Jun 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5117]
 
 * Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: rewrite menu selection for blackmin theme using CSS 

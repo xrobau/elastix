@@ -131,6 +131,8 @@ fi
 
 %changelog
 * Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Dashboard: remove applets obsoleted by usermode interface.
+  SVN Rev[5359]
 - CHANGED: Dashboard: complete rewrite. The dashboard module has been completely
   rewritten in order to clean up the code and in order to modularize the applets
   and introduce the capability for a third-party addon to define a custom

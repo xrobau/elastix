@@ -29,8 +29,6 @@
 */
 global $arrConf;
 require_once "modules/{$module_name}/libs/Applet_ReportForExtension.class.php";
-require_once "{$arrConf['basePath']}/libs/paloSantoTrunk.class.php";
-require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 
 define('MAX_CALL_RECORDS', 8);
 

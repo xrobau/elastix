@@ -56,7 +56,7 @@ $arrLangModule=array(
 "Backup" => "Desarrollar un respaldo...",
 "Process" => "Procesar",
 "Restore" => "Restaurar",
-"Elastix Database" => "Dase de Datos",
+"Elastix Database" => "Base de Datos",
 "Sounds" => "Sonidos",
 "Configuration Files" => "Archivos de configuración",
 "Monitors" => "Monitoreos",
@@ -97,8 +97,8 @@ $arrLangModule=array(
 "User" => "Usuario",
 "Password" => "Contraseña",
 "Local" => "Local",
-"Upload" => "Upload",
-"Download" => "Download",
+"Upload" => "Subir",
+"Download" => "Descargar",
 "Path Server FTP" => "Ruta en servidor FTP",
 "Error to connect" => "Por favor llene todos los campos para contactar al servidor",
 "Error Connection" => "No se puede conectar al servidor",
@@ -142,6 +142,6 @@ $arrLangModule=array(
 "elastix-sugarcrm-addon" => "Elastix SugarCRM",
 "Package not installed" => "No instalado",
 "Version" => "Version",
-"Please verify if the mysql password is the correct in /etc/elastix.conf (mysqlrootpwd)" => "Por favor verfique la clave de mysql si esta correcta en /etc/elastix.conf (mysqlrootpwd)",
+"Please verify if the mysql password is the correct in /etc/elastix.conf (mysqlrootpwd)" => "Por favor verifique la clave de mysql si esta correcta en /etc/elastix.conf (mysqlrootpwd)",
 );
 ?>

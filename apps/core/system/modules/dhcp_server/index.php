@@ -38,9 +38,7 @@ function _moduleContent(&$smarty, $module_name)
     global $arrConf;
     global $arrConfModule;
    
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-   
 
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -60,7 +58,7 @@ function _moduleContent(&$smarty, $module_name)
     $smarty->assign("WINS", _tr("WINS"));
     $smarty->assign("GATEWAY", _tr("Gateway"));
     $smarty->assign("OPTIONAL", _tr("Optional"));
-    $smarty->assign("icon", "modules/$module_name/images/system_network_dhcp_server.png");
+    $smarty->assign("icon", "web/apps/$module_name/images/system_network_dhcp_server.png");
     $smarty->assign("OF_1_TO_50000_SECONDS", _tr("Of 1 to 50000 Seconds"));
 
     if(isset($_POST["in_iniciar"])) $accion ="service_start";

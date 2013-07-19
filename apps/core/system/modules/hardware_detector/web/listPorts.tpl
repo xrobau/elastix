@@ -35,7 +35,7 @@
 	 <td class="filterForm" align="center">
 	{/if}
             <div class='hourglass' style="display:none" id='relojArena'>
-                <img src='images/hourglass.gif' align='absmiddle' /> 
+                <img src='web/_common/images/hourglass.gif' align='absmiddle' /> 
                 <font style='font-size:12px; color:red'>{$detectandoHardware}...</font>
             </div>
         </td>
@@ -48,19 +48,19 @@
                 <legend class="sombreado">{$Status_ports}</legend>
                 <table border="0" align="left">
                     <tr>
-                        <td><img src='modules/{$MODULE_NAME}/images/conn_alarm_icon.png' align='absmiddle' /></td>
+                        <td><img src='web/apps/{$MODULE_NAME}/images/conn_alarm_icon.png' align='absmiddle' /></td>
                         <td>{$Channel_detected_notused}</td>
                     </tr>
                     <tr>
-                        <td><img src='modules/{$MODULE_NAME}/images/conn_ok_icon.png' align='absmiddle' /></td>
+                        <td><img src='web/apps/{$MODULE_NAME}/images/conn_ok_icon.png' align='absmiddle' /></td>
                         <td>{$Channel_detected_use}</td>
                     </tr>
                     <tr>
-                        <td><img src='modules/{$MODULE_NAME}/images/conn_unkown_icon.png' align='absmiddle' /></td>
+                        <td><img src='web/apps/{$MODULE_NAME}/images/conn_unkown_icon.png' align='absmiddle' /></td>
                         <td>{$Undetected_Channel}</td>
                     </tr>
                     <tr>
-                        <td align="center"><img src='modules/{$MODULE_NAME}/images/conn_empty_icon.png' align='absmiddle' /></td>
+                        <td align="center"><img src='web/apps/{$MODULE_NAME}/images/conn_empty_icon.png' align='absmiddle' /></td>
                         <td>{$CHANNELS_EMPTY}</td>
                     </tr>
                     <tr>

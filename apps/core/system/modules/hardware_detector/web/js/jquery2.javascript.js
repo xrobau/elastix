@@ -4,7 +4,7 @@
  */
 function saveEdit(){
 var module_name = $('#lblModule').val();
-        var urlImaLoading = "<img src='images/loading2.gif' height='30px' /><span style='font-size: 14px; position: relative; top: -10px; left: -5px; '>"+$('#lblSaving').val()+"</span>";
+        var urlImaLoading = "<img src='web/_common/images/loading2.gif' height='30px' /><span style='font-size: 14px; position: relative; top: -10px; left: -5px; '>"+$('#lblSaving').val()+"</span>";
 	$('#cancel').attr('disabled','disabled');
 	$('#save_edit').attr('disabled','disabled');
 	$('.message').html(""); 	
@@ -33,7 +33,7 @@ var module_name = $('#lblModule').val();
 function saveSpan(){
 	 // blocking screen
         var module_name = $('#lblModule').val();
-       var urlImaLoading = "<img src='images/loading2.gif' height='30px' /><span style='font-size: 14px; position: relative; top: -10px; left: -5px; '>"+$('#lblSaving').val()+"</span>";
+       var urlImaLoading = "<img src='web/_common/images/loading2.gif' height='30px' /><span style='font-size: 14px; position: relative; top: -10px; left: -5px; '>"+$('#lblSaving').val()+"</span>";
 	$('.message').html(""); 
         $('.loading').html(urlImaLoading);   
 	$('#cancel').attr('disabled','disabled');

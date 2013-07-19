@@ -16,11 +16,11 @@ $arrLangModule = array(
     "Duration"      => "Duration",
     "Average"       => "Average",
     "Total"         => "Total",
-    "Call longest"  => "Call longest",
+    "Call longest"  => "Longest Call",
     "Calls answered" => "Calls answered",
     "Error when connecting to database"    => "Error when connecting to database",
-    "Debe ingresar una fecha"   => "Debe ingresar una fecha",
-    "Debe ingresar una fecha valida"    => "Debe ingresar una fecha valida",
+    "Debe ingresar una fecha"   => "Please enter a date.",
+    "Debe ingresar una fecha valida"    => "Please enter a valid date.",
     'Total'         => 'Total',
 );
 

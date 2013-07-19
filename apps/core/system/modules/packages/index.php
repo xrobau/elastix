@@ -32,22 +32,14 @@ include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
-{
-    //include module files
-    require_once "modules/$module_name/configs/default.conf.php";
-    require_once "modules/$module_name/libs/PaloSantoPackages.class.php";
-
-    load_language_module($module_name);
-    
+{ 
     //global variables
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-
+    
     //folder path for custom templates
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     $action = getParameter('action');
     switch ($action) {
@@ -138,7 +130,7 @@ function listPackages($smarty, $module_name, $local_templates_dir, $arrConf)
     );
     $arrGrid = array(
         "title"    => _tr('Packages'),
-        "icon"     => "/modules/$module_name/images/system_updates_packages.png",
+        "icon"     => "web/apps/$module_name/images/system_updates_packages.png",
         "width"    => "99%",
         "start"    => ($total==0) ? 0 : $offset + 1,
         "end"      => $end,

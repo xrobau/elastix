@@ -66,5 +66,6 @@ $arrLangModule=array(
 "ECCP Password" => "Contraseña ECCP",
 "Retype ECCP password" => "Repita contraseña ECCP",
 "ECCP passwords don't match" => "Contraseñas ECCP no coinciden",
+"New callback extension" => "Nuevo callback extension",
 );
 ?>

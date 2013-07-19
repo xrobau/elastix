@@ -49,7 +49,7 @@ $arrLangModule=array(
 "To rapair is necesary add an agent in configuration file. Do you want to continue?"=>"To repair, it is necessary to add the agent to the configuration file. Continue?",
 // desconectar agentes
 "Number"=>"Number",
-"Disconect"=>"Disconect",
+"Disconect"=>"Disconnect",
 "Configure"=>"Configure",
 "Offline"=>"Off Line",
 "Online"=>"On Line",

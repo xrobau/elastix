@@ -32,21 +32,15 @@ include_once "libs/paloSantoForm.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoDHCP_Configuration.class.php";
-
-    load_language_module($module_name);
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-
+   
     //global variables
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
 
+    
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     //conexion resource
     $pDB = new paloDB($arrConf['dsn_conn_database']);
@@ -134,7 +128,7 @@ function reportDHCP_Configuration($smarty, $module_name, $local_templates_dir, &
     $buttonDelete = "";
 
     $arrGrid = array("title"    => _tr('Assign IP Address to Host'),
-                        "icon"     => "modules/$module_name/images/system_network_assign_ip_address.png",
+                        "icon"     => "web/apps/$module_name/images/system_network_assign_ip_address.png",
                         "width"    => "99%",
                         "start"    => ($total==0) ? 0 : $offset + 1,
                         "end"      => $end,
@@ -227,7 +221,7 @@ function viewFormDHCP_Configuration($smarty, $module_name, $local_templates_dir,
     $smarty->assign("EDIT", _tr('Edit'));
     $smarty->assign("CANCEL", _tr('Cancel'));
     $smarty->assign("REQUIRED_FIELD", _tr('Required field'));
-    $smarty->assign("icon", "modules/$module_name/images/system_network_assign_ip_address.png");
+    $smarty->assign("icon", "web/apps/$module_name/images/system_network_assign_ip_address.png");
     $smarty->assign("HOST_NAME", _tr('ex_hostname'));
     $smarty->assign("IP_ADDRESS", _tr('ex_ipaddress'));
     $smarty->assign("MAC_ADDRESS", _tr('ex_mac_address'));
@@ -249,7 +243,7 @@ function saveDHCP_Configuration($smarty, $module_name, $local_templates_dir, &$p
     $smarty->assign("SAVE", _tr('Save'));
     $smarty->assign("EDIT", _tr('Edit'));
     $smarty->assign("CANCEL", _tr('Cancel'));
-    $smarty->assign("icon", "modules/$module_name/images/system_network_assign_ip_address.png");
+    $smarty->assign("icon", "web/apps/$module_name/images/system_network_assign_ip_address.png");
     $smarty->assign("ID", getParameter('id'));
     
     if(!$oForm->validateForm($_POST)) {
@@ -289,7 +283,7 @@ function saveDHCP_Configuration($smarty, $module_name, $local_templates_dir, &$p
             $smarty->assign("REQUIRED_FIELD", _tr('Required field'));
             $smarty->assign("SAVE", _tr('Save'));
             $smarty->assign("CANCEL", _tr('Cancel'));
-            $smarty->assign("icon", "modules/$module_name/images/system_network_assign_ip_address.png");
+            $smarty->assign("icon", "web/apps/$module_name/images/system_network_assign_ip_address.png");
     
             $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr('Assign IP Address to Host'), $_POST);
             $contenidoModulo = "<form  method='POST' enctype='multipart/form-data' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

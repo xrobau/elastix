@@ -29,7 +29,7 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Phone List"=>"Phone List",
-"Number Phone's"=>"Number Phone's",
+"Number Phone's"=>"Phone number",
 "Date Income"=>"Date Income",
 "Add"=>"Add",
 "Apply"=>"Apply",

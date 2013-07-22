@@ -38,8 +38,8 @@ $arrLangModule=array(
 "View edit" => "View edit",
 
 "Are you sure you wish to delete the DHCP configuration." => "¿Está usted seguro de borrar la configuración DHCP?",
-"The name of hostname is duplicated please changes to another name" => "The name of hostname is duplicated please changes to another name",
-"The following fields are duplicates or already exists" => "The following fields are duplicates or already exists",
+"The name of hostname is duplicated please changes to another name" => "El nombre del host está duplicado. Por favor cambie por otro nombre.",
+"The following fields are duplicates or already exists" => "Los siguientes campos están duplicados o ya existen.",
 "ex_hostname" => "(p.ej. myhostname)",
 "ex_ipaddress" => "(p.ej. 127.0.0.1)",
 "ex_mac_address" => "(p.ej. AA:BB:CC:DD:EE:FF)",

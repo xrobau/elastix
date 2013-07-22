@@ -636,7 +636,7 @@ class paloSantoExtensionsBatch
     	if (!isset($extension['directdid'])) return TRUE;
 
         $tupla = $this->_DB->getFirstRowQuery(
-            'SELECT COUNT(*) AS n FROM incoming WHERE destination LIKE = ?',
+            'SELECT COUNT(*) AS n FROM incoming WHERE destination LIKE ?',
             TRUE, array('%'.$extension['extension'].'%'));
         if (!is_array($tupla)) {
             $this->errMsg = $this->_DB->errMsg;

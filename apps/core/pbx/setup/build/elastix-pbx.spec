@@ -363,6 +363,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jul 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Extensions Batch: fix invalid SQL query that gets executed when an 
+  extension requires a direct DID.
+  SVN Rev[5387]
+
 * Wed Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: phpagi-asmanager.php: revert SVN commit 4252. This is not the proper
   place to run load_default_timezone(). The proper place is the script including

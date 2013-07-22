@@ -304,6 +304,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jul 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Extensions Batch: fix invalid SQL query that gets executed when an 
+  extension requires a direct DID.
+  SVN Rev[5387]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

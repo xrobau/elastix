@@ -41,7 +41,7 @@ configuration because some <br> processes could need them.",
 "IP" => "IP",
 "Error" => "Error",
 "Message" => "Message",
-"Configuration updated successfully" => "Configuration updated successfully",
+"Configuration updated successfully" => "Configuration successfully updated",
 "Write error when writing the new configuration." => "Write error when writing the new configuration.",
 );
 ?>

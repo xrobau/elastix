@@ -29,7 +29,7 @@
 global $arrLangModule;
 $arrLangModule = array(
 'New URL'   =>  'New URL',
-'Opens in'  =>  'Opens in',
+'Opens in'  =>  'Open in',
 'Active'   =>  'Active',
 'URL Template'   =>  'URL Template',
 'URL Description'   =>  'URL Description',

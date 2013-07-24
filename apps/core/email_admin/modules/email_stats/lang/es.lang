@@ -31,9 +31,9 @@ $arrLangModule=array(
 "Incoming Email" => "Correo entrante",
 "Nothing to show yet" => "Nada que mostrar todavía",
 "Total" => "Total",
-"Number of Emails" => "Numero de correos",
+"Number of Emails" => "Número de correos",
 "Incoming Email by Hour" => "Correo entrante por hora",
-"Incoming Email by Day" => "Correo entrante por dia",
+"Incoming Email by Day" => "Correo entrante por día",
 "Incoming Email by Month" => "Correo entrante por mes"
 );
 ?>

@@ -47,7 +47,7 @@ $arrLangModule=array(
 "has not been created." => "has not been created.",
 "not supported." => "not supported.",
 "Error, Technology Device (SIP/IAX) not supported on endpoint." => "Error, Technology Device (SIP/IAX) not supported on endpoint.",
-"Endpoint wasn't founded in subnet." => "Endpoint wasn't founded in subnet.",
+"Endpoint wasn't founded in subnet." => "Endpoint wasn't found in subnet.",
 "Resume" => "Resume",
 "Total endpoint processed" => "Total endpoint processed",
 "Invalid MAC Address" => "Invalid MAC Address",
@@ -62,11 +62,11 @@ $arrLangModule=array(
 "Can't exist a vendor empty. Line" => "Can't exist a vendor empty. Line",
 "Can't exist a model empty. Line" => "Can't exist a model empty. Line",
 "Can't exist a mac name empty. Line" => "Can't exist a mac name empty. Line",
-"Can't exist a ext empty. Line" => "Can't exist a ext empty. Line",
+"Can't exist a ext empty. Line" => "Can't exist an ext empty. Line",
 "Please read the lines in the footer"=>"Please read the lines in the footer",
 "Verify the header" => "Verify the header",
 "At minimum there must be the columns" => "At minimum there must be the columns",
-"Incomplete Columns" => "Columnas Incompletas",
-"The file is incorrect or empty" => "El archivo es incorrecto o está vacío",
+"Incomplete Columns" => "Incomplete Columns",
+"The file is incorrect or empty" => "The file is incorrect or empty",
 );
 ?>

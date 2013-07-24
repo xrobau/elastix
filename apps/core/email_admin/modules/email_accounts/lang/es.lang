@@ -54,7 +54,7 @@ $arrLangModule=array(
 "Error deleting record from table domain"=>"Error al grabar desde tabla domain",
 "You must select a domain to create an account" => "Usted debería seleccionar un dominio para crear una nueva cuenta de correo",
 "Could not query used disc space" => "Puede no haber espacio suficiente en disco",
-"The passwords are empty or don't match" => "Las contraseñas estan vacias o no coinciden",
+"The passwords are empty or don't match" => "Las contraseñas están vacías o no coinciden",
 "The passwords don't match" => "Las contraseñas no coinciden",
 "Changes Applied successfully" => "Cambios aplicados con éxito",
 "Error appliying changes" => "Error aplicando cambios",
@@ -79,6 +79,6 @@ $arrLangModule=array(
 "Edit quota" => "Editar cuota",
 "The following account does not exist" => "La siguiente cuenta no existe",
 "Edit quota to" => "Editar cuota a",
-"The passwords must not be empty" => "La contraseña no debe ser vacia"
+"The passwords must not be empty" => "La contraseña no debe ser vacía"
 );
 ?>

@@ -33,7 +33,7 @@ $arrLangModule=array(
 "Fax From Name" => "Remitente (Nombre)",
 "Fax Suject" => "Asunto",
 "Fax Content" => "Cuerpo",
-"Configuration Sending Fax Mail" => "Plantilla para email de fax saliente",
-"Edit Parameters" => "Editar Parametros",
+"Configuration Sending Fax Mail" => "Plantilla para correo de fax saliente",
+"Edit Parameters" => "Editar Parámetros",
 );
 ?>

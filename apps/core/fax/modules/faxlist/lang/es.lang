@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Virtual Fax List" => "Listado de Fax Virtual",
 "Virtual Fax Name" => "Nombre de Fax Virtual",
-"Fax Extension" => "Extension de Fax",
+"Fax Extension" => "Extensión de Fax",
 "Secret" => "Secreto",
 "Destination Email" => "Email Asociado",
 "Caller ID Name" => "Nombre Caller ID",

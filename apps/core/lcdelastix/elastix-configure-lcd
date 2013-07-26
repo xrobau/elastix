@@ -1,0 +1,115 @@
+#!/usr/bin/php
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.2-2                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+*/
+
+// The known drivers that can be detected
+$knownDrivers = array('none', 'auto', 'jbc1602', 'CFontzPacket');
+$sDriver = 'auto';
+
+// The default LCD serial device
+$sDevice = '/dev/ttyUSB0';
+
+if (count($argv) >= 2) $sDriver = $argv[1];
+if (!in_array($sDriver, $knownDrivers)) {
+	fputs(STDERR, "ERR: unknown driver {$sDriver}, using auto\n");
+	$sDriver = 'auto';
+}
+
+if (count($argv) >= 3) $sDevice = $argv[2];
+$st = stat($sDevice);
+if (($st["mode"] & 0170000) != 0020000) { // Check for character device
+	fputs(STDERR, "ERR: {$sDevice} is not a character device, using /dev/ttyUSB0\n");
+	$sDevice = '/dev/ttyUSB0';
+}
+$st = stat($sDevice);
+if (($st["mode"] & 0170000) != 0020000) { // Check for character device
+	fputs(STDERR, "FATAL: no character device to use, exiting...\n");
+	exit(1);
+}
+
+// Detect the device. This assumes there is at most one LCD device
+if ($sDriver == 'auto') {
+	$sDriver = 'none';
+	$output = $retval = NULL;
+	exec('/sbin/lsusb', $output, $retval);
+	foreach ($output as $s) {
+		if (stripos($s, '10c4:ea60') !== FALSE) {
+			$sDriver = 'jbc1602';
+			break;
+		}
+		if (stripos($s, '0403:fc0d') !== FALSE) {
+			$sDriver = 'CFontzPacket';
+			break;
+		}
+	}
+}
+
+if ($sDriver == 'none') {
+	print "Disabling LCD display...\n";
+	system("/sbin/service lcdelastix stop");
+	system("/sbin/service LCDd stop");
+	system("/sbin/chkconfig lcdelastix off");
+	system("/sbin/chkconfig LCDd off");
+} else {
+	print "Setting LCD display to $sDriver:$sDevice ...\n";
+
+	$lcdconf = file('/etc/LCDd.conf');
+	$bFoundSection = FALSE;
+	$sCurrSection = '';
+
+	for ($i = 0; $i < count($lcdconf); $i++) {
+		$regs = NULL;
+		if (preg_match('/^\[(\S+)\]/', $lcdconf[$i], $regs)) {
+			$sCurrSection = $regs[1];
+			if ($sCurrSection == $sDriver) $bFoundSection = TRUE;
+		} elseif ($sCurrSection == 'server') {
+			if (preg_match('/^Driver\s*=\s*/', $lcdconf[$i]))
+				$lcdconf[$i] = "Driver={$sDriver}\n";
+		} elseif ($sCurrSection == $sDriver) {
+			if (preg_match('/^Device\s*=\s*/', $lcdconf[$i]))
+				$lcdconf[$i] = "Device={$sDevice}\n";
+		}
+	}
+	if (!$bFoundSection) {
+		$lcdconf[] = <<<NEW_SECTION
+[$sDriver]
+Device=$sDevice
+
+NEW_SECTION;
+	}
+	file_put_contents('/etc/LCDd.conf', $lcdconf);
+
+	system("/sbin/service lcdelastix stop > /dev/null 2>&1");
+	system("/sbin/service LCDd restart >/dev/null 2>&1");
+	system("/sbin/service lcdelastix start >/dev/null 2>&1");
+	system("/sbin/chkconfig lcdelastix on");
+	system("/sbin/chkconfig LCDd on");
+}
+
+?>

@@ -106,6 +106,24 @@ NEW_SECTION;
 	file_put_contents('/etc/LCDd.conf', $lcdconf);
 
 	system("/sbin/service lcdelastix stop > /dev/null 2>&1");
+	system("/sbin/service LCDd stop >/dev/null 2>&1");
+	
+	$sBootMsg = "Booting Elastix...";
+	switch ($sDriver) {
+	case 'CFontzPacket':
+		$sCmds = <<<CFONTZ_CMDS
+clear
+pos_data 2 2 $sBootMsg
+store_state
+quit
+
+CFONTZ_CMDS;
+		$p = popen('/usr/bin/crystalfontz.pl ' + escapeshellarg($sDevice), 'w');
+		fwrite($p, $sCmds);
+		pclose($p);
+		break;
+	}
+
 	system("/sbin/service LCDd restart >/dev/null 2>&1");
 	system("/sbin/service lcdelastix start >/dev/null 2>&1");
 	system("/sbin/chkconfig lcdelastix on");

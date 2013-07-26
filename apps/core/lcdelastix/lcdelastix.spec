@@ -56,6 +56,9 @@ fi
 
 %changelog
 * Fri Jul 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.0-0
+- CHANGED: Modify crystalfontz.pl to accept an optional argument to point the
+  LCD character device.
+  SVN Rev[5432]
 - ADDED: Add new script elastix-configure-lcd to ease setting up of a LCD.
   SVN Rev[5430]
 - CHANGED: Make the LCD applets Elastix 3-aware.

@@ -1,7 +1,7 @@
 Summary: LCDproc client for Elastix status display
 Name: lcdelastix
-Version: 1.3.0
-Release: 1
+Version: 1.4.0
+Release: 0
 License: GPL
 Group: Applications/System
 Source0: lcdelastix-%{version}.tar.bz2
@@ -48,9 +48,18 @@ fi
 %defattr(-,root,root,-)
 %{_sysconfdir}/rc.d/init.d/lcdelastix
 %defattr(-,asterisk,asterisk,-)
+/opt/lcdelastix
 /opt/lcdelastix/*
 
 %changelog
+* Fri Jul 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.0-0
+- FIXED: Correct owner of /opt/lcdelastix. Fixes Elastix bug #1639.
+- CHANGED: Rewrite main application to make proper use of LCDProc menus. Rework
+  applets to be capable of having a compact version which will be used with 
+  displays of less than 3 lines. Fix the CPU usage code to calculate the CPU 
+  usage correctly.
+  SVN Rev[5422]
+
 * Wed Mar 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 1.3.0-1
 - FIXED: additionals - lcdelastix/lcdapplets/ch.php: Se muestra mensaje de error
   en el shell cuando se accede a PBX Activity>Concurr Channels con el LCD del 

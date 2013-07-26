@@ -31,18 +31,18 @@
   $Id: en.lang,v 1.7 2008/02/18 09:49:00 jvega Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Language Admin" => "Admin Lenguages",
-"New Language" => "Nuevo Lenguage",
+"Language Admin" => "Admin Idiomas",
+"New Language" => "Nuevo Idioma",
 "New Traslate" => "Nueva Traducción",
 "Select Module" => "Elija Módulo",
-"Select Language" => "Elija Lenguage",
-"Input Language English" => "Ingrese lenguage en Ingles",
+"Select Language" => "Elija Idioma",
+"Input Language English" => "Ingrese Idioma en Ingles",
 "Input Traslate" => "Ingrese Traducción",
 "Add" => "Agregar",
-"Input New Language" => "Ingresar nuevoLenguage",
-"Ej: For English: en.lang" => "Ej: Para español: en.lang",
+"Input New Language" => "Ingresar nuevo Idioma",
+"Ej: For English: en.lang" => "Ej: Para español: es.lang",
 "Message" => "Mensaje",
 "Traslate saved succetiful" => "Traducción guardada correctamente",
-"Language saved succetiful" => "Lenguage guardado correctamente",
+"Language saved succetiful" => "Idioma guardado correctamente",
 );
 ?>

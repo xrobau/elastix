@@ -114,17 +114,17 @@ $arrLang=array(
 
 /*load module*/
 "Load Module" => "Cargar Menú",
-"ID for new module (folder name)"  =>  "ID para nuevo modulo (nombre de carpeta)",
+"ID for new module (folder name)"  =>  "ID para nuevo módulo (nombre de carpeta)",
 "Choose Menu"  =>  "Seleccione Menú",
 "ID for new menu"  =>  "ID para nuevo menú",
 "Menu Name"  =>  "Nombre de Menú",
 "Defined Menu"  =>  "Menú definido",
 "New Menu"  =>  "Nuevo Menú",
-"Module sucessfully loaded"  =>  "Modulo cargado exitosamente",
-"Folder name doesn't exist in module file"  =>  "Nombre de carpeta no exite en archivo de modulo",
-"Folder configs doesn't exist in module file"  =>  "Carpeta configs no existe en archivo de modulo",
-"Folder themes doesn't exist in module file"  => "Carpeta themes no existe en archivo de modulo",
-"File index.php doesn't exist in module file"  =>  "Archivo index.php no existe en archivo de modulo",
+"Module sucessfully loaded"  =>  "Módulo cargado exitosamente",
+"Folder name doesn't exist in module file"  =>  "Nombre de carpeta no existe en archivo de módulo",
+"Folder configs doesn't exist in module file"  =>  "Carpeta configs no existe en archivo de módulo",
+"Folder themes doesn't exist in module file"  => "Carpeta themes no existe en archivo de módulo",
+"File index.php doesn't exist in module file"  =>  "Archivo index.php no existe en archivo de módulo",
 /*end load module*/
 
 
@@ -138,9 +138,9 @@ $arrLang=array(
 /*Module IM*/
 "IM" => "IM",
 "OpenFire" => "OpenFire",
-"The service Openfire No running" => "El servicio Openfire no esta activo en este momento. Si deseas activarlo haga ",
+"The service Openfire No running" => "El servicio Openfire no está activo en este momento. Si desea activarlo haga ",
 "Webmin" => "Webmin",
-"The service Webmin No running" => "El servicio Webmin no esta activo en este momento.Si deseas activarlo haga ",
+"The service Webmin No running" => "El servicio Webmin no está activo en este momento. Si desea activarlo haga ",
 
 
 /*vTigerCRM*/
@@ -179,9 +179,9 @@ $arrLang=array(
 "Title" => "Título",
 "Search" => "Buscar",
 "Show"   => "Mostrar",
-'md_message_title' => 'Dismiss',
+'md_message_title' => 'Descartar',
 "ERROR" => "Error",
-"VersionDetails" => "Version",
+"VersionDetails" => "Versión",
 "VersionPackage" => "Detalles de las versiones de los paquetes",
 "textMode" => "Modo Texto",
 "htmlMode" => "Modo Html",
@@ -198,14 +198,14 @@ $arrLang=array(
 "The new password doesn't match with retype new password." => "La clave nueva no es igual con la confirmación de la nueva clave.",
 "Please your session id does not exist. Refresh the browser and try again." => "Por favor su id de session no existe. Refresque el navegador y vuelva a intentar.",
 "Elastix password has been changed." => "Clave de usuario Elastix ha sido cambiada.",
-"Impossible to change your Elastix password." => "Imposible cambiar su clave de usuario elastix.",
-"Impossible to change your Elastix password. User does not exits or password is wrong" => "Imposible cambiar su clave de usaurio elastix. Nombre de usuario no existe o la clave es incorrecta",
+"Impossible to change your Elastix password." => "Imposible cambiar su clave de usuario Elastix.",
+"Impossible to change your Elastix password. User does not exits or password is wrong" => "Imposible cambiar su clave de usaurio Elastix. Nombre de usuario no existe o la clave es incorrecta",
 "Change Elastix Password" => "Cambiar clave de Elastix",
 "Current Password" => "Clave Actual",
 "New Password" => "Nueva Clave",
 "Retype New Password" => "Confirme la nueva clave",
 "Change" => "Actualizar",
-"Search modules" => "Busqueda de módulos",
+"Search modules" => "Búsqueda de módulos",
 "Unauthorized" => "No Autorizado",
 "You are not authorized to access this page." => "Usted no está autorizado a acceder a esta página",
 "You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "Usted no tiene permisos para acceder al Flash Operator Panel. Por favor contacte a su administrador.",
@@ -214,9 +214,9 @@ $arrLang=array(
 "History" => "Historia",
 "The maximum of bookmarks is 5. Please uncheck one in order to add this bookmark" => "El máximo número de bookmarks es 5. Por favor deseleccione uno para agregar este como bookmark",
 "Bookmark has been added." => "Bookmark ha sido agregado.",
-"Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error: " => "Bookmark no pudo se agregado. Por favor intente otra vez o contacte con el administrador de su elastix y notifique el siguiente error: ",
+"Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error: " => "Bookmark no pudo se agregado. Por favor intente otra vez o contacte con el administrador de su Elastix y notifique el siguiente error: ",
 "Bookmark has been removed." => "Bookmark ha sido removido.",
-"Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error: " => "Bookmark no puede ser removido. Por favor intente otra vez o contacte con el administrador de su elastix y notifique el siguiente error: ",
+"Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error: " => "Bookmark no puede ser removido. Por favor intente otra vez o contacte con el administrador de su Elastix y notifique el siguiente error: ",
 "Sending Request" => "Enviando Petición",
 "Request cannot be completed. Please try again or contact with your elastix administrator and notify the next error: " => "Requerimiento no pudo ser completado. Por favor intente otra vez o contacte con el administrador de su elastix y notifique el siguiente error: ",
 "Request has been sent." => "Requerimiento ha sido enviado.",
@@ -233,10 +233,10 @@ $arrLang=array(
 "Saving Note" => "Guardando Nota",
 "Loading Note" => "Cargando Nota",
 "Click here to leave a note." => "Click aquí para dejar una nota.",
-"Your session has expired. Press 'Accept' to return to the login page." => "Su sesion ha expirado. Presione 'Aceptar' para regresar a la pagina de ingreso.",
-"No records match the filter criteria" => "Ningun registro coincide con el criterio de filtrado seleccionado",
+"Your session has expired. Press 'Accept' to return to the login page." => "Su sesión ha expirado. Presione 'Aceptar' para regresar a la página de ingreso.",
+"No records match the filter criteria" => "Ningún registro coincide con el criterio de filtrado seleccionado",
 "New Row" => "Nueva Fila",
-"Custom Action" => "Accion Personalizada",
+"Custom Action" => "Acción Personalizada",
 "Delete Selected" => "Eliminar Seleccionado",
 "Page" => "Página",
 "of" => "de",
@@ -248,6 +248,10 @@ $arrLang=array(
 "Hide Filter" => "Ocultar Filtro",
 "More Options" => "Más Opciones",
 "Filter applied: " => "Filtro aplicado: ",
-"Filter applied " => "Filtro aplicado: "
+"Filter applied " => "Filtro aplicado: ",
+"Add" => "Agregar",
+"Save All" => "Guardar todo",
+"Key" => "Clave",
+"Value" => "Valor"
 );
 ?>

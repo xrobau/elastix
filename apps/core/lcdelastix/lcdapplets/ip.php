@@ -1,6 +1,8 @@
 #!/usr/bin/php -q
 <?php
-require_once "/var/www/html/libs/paloSantoNetwork.class.php";
+if (file_exists("/usr/share/elastix/libs/paloSantoNetwork.class.php"))
+    require_once "/usr/share/elastix/libs/paloSantoNetwork.class.php";
+else require_once "/var/www/html/libs/paloSantoNetwork.class.php";
 
 $pNet = new paloNetwork();
 $arrEths = $pNet->obtener_interfases_red_fisicas();

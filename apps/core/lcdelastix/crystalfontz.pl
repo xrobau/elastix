@@ -26,7 +26,7 @@ use constant CURSOR_BLINK_UNDERSCORE => 3;
 use constant CURSOR_INV_BLOCK	=> 4;
 
 # TODO: Make the device and default baud params.
-my $device = '/dev/ttyUSB0';
+my $device = $ARGV[0] or '/dev/ttyUSB0';
 set_local_baud($device, 115200);
 
 open FH, "+<" . $device or die "ERROR opening serial port.";

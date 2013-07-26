@@ -31,6 +31,6 @@ $arrLangModule=array(
 "Select language"=>"Seleccionar idioma",
 "Change"=>"Cambiar",
 "Continue"=>"Continuar",
-"You can't change language"=>"You can't change language",
+"You can't change language"=>"No se puede cambiar el idioma",
 );
 ?>

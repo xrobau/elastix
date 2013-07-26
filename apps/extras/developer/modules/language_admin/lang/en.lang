@@ -33,16 +33,16 @@ global $arrLangModule;
 $arrLangModule=array(
 "Language Admin" => "Language Admin",
 "New Language" => "New Language",
-"New Traslate" => "New Translate",
+"New Traslate" => "New Translation",
 "Select Module" => "Select Module",
 "Select Language" => "Select Language",
 "Input Language English" => "Input Language English",
-"Input Traslate" => "Input Translate",
+"Input Traslate" => "Input Translation",
 "Add" => "Add",
 "Input New Language" => "Input New Language",
 "Ej: For English: en.lang" => "Ej: For English: en.lang",
 "Message" => "Message",
-"Traslate saved succetiful" => "Translate saved successfully",
+"Traslate saved succetiful" => "Translation saved successfully",
 "Language saved succetiful" => "Language saved successfully",
 );
 ?>

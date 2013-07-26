@@ -26,7 +26,9 @@ mkdir -p  %{buildroot}/opt/lcdelastix/
 rm -f *.spec
 cp -r * %{buildroot}/opt/lcdelastix/
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
-install -m 0755 %{buildroot}/opt/lcdelastix/lcdelastix  %{buildroot}/etc/rc.d/init.d/lcdelastix
+install -m 0755 %{buildroot}/opt/lcdelastix/lcdelastix  %{buildroot}%{_sysconfdir}/rc.d/init.d/lcdelastix
+mkdir -p %{buildroot}%{_bindir}
+install -m 0755 elastix-configure-lcd  %{buildroot}%{_bindir}
 
 %clean
 rm -rf %{buildroot}
@@ -47,12 +49,15 @@ fi
 %files
 %defattr(-,root,root,-)
 %{_sysconfdir}/rc.d/init.d/lcdelastix
+%{_bindir}/elastix-configure-lcd
 %defattr(-,asterisk,asterisk,-)
 /opt/lcdelastix
 /opt/lcdelastix/*
 
 %changelog
 * Fri Jul 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.0-0
+- ADDED: Add new script elastix-configure-lcd to ease setting up of a LCD.
+  SVN Rev[5430]
 - CHANGED: Make the LCD applets Elastix 3-aware.
   SVN Rev[5425]
 - FIXED: Correct owner of /opt/lcdelastix. Fixes Elastix bug #1639.

@@ -1,31 +1,37 @@
 <?php
-/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4: */
-/* Codificación: UTF-8
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2003 PaloSanto Solutions S. A.                    |
-   +----------------------------------------------------------------------+
-   | Cdla. Nueva Kennedy Calle E #222 y 9na. Este                         |
-   | Telfs. 2283-268, 2294-440, 2284-356                                  |
-   | Guayaquil - Ecuador                                                  |
-   +----------------------------------------------------------------------+
-   | Este archivo fuente esta sujeto a las politicas de licenciamiento    |
-   | de PaloSanto Solutions S. A. y no esta disponible publicamente.      |
-   | El acceso a este documento esta restringido segun lo estipulado      |
-   | en los acuerdos de confidencialidad los cuales son parte de las      |
-   | politicas internas de PaloSanto Solutions S. A.                      |
-   | Si Ud. esta viendo este archivo y no tiene autorizacion explicita    |
-   | de hacerlo comuniquese con nosotros, podria estar infringiendo       |
-   | la ley sin saberlo.                                                  |
-   +----------------------------------------------------------------------+
-   | Autores: Alex Villacís Lasso <a_villacis@palosanto.com>              |
-   +----------------------------------------------------------------------+
-  
-   $Id: AppLogger.class.php,v 1.1.1.1 2008/06/02 22:23:59 avivar Exp $
-*/
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.2-2                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: AppLogger.class.php,v 1.3 2009/03/06 16:06:22 alex Exp $ */
+
 class AppLogger
 {
     private $LOGHANDLE;
     private $PREFIJO;
+    private $sNombreArchivo;
     
     // Crear una nueva instancia de AppLogger
     function AppLogger()
@@ -41,11 +47,25 @@ class AppLogger
         if (is_null($this->LOGHANDLE)) {
             $hLogHandle = fopen($sNombreArchivo, 'at');
             if (!$hLogHandle) {
-                $e = error_get_last();
+                if (function_exists('error_get_last')) 
+                    $e = error_get_last();
+                else $e = array('message' => 'Failed to open file, error_get_last() not available.');
                 throw new Exception("AppLogger::open() - No se puede abrir archivo de log '$sNombreArchivo' - $e[message]");
             }
             stream_set_write_buffer($hLogHandle, 0);
             $this->LOGHANDLE = $hLogHandle;
+            $this->sNombreArchivo = $sNombreArchivo;
+        }
+    }
+
+    // Cerrar y volver a abrir el archivo de bitácora bajo el mismo nombre.
+    // Pensado para usar en rotación de logs con logrotate.
+    function reopen()
+    {
+        if (!is_null($this->LOGHANDLE)) {
+            $sTempNombre = $this->sNombreArchivo;
+            $this->close();
+            $this->open($sTempNombre);
         }
     }
 
@@ -60,7 +80,7 @@ class AppLogger
     // formato YYYY-MM-DD hh:mm
     function output($sCadena)
     {
-        fwrite($this->LOGHANDLE, date('Y/m/d H:i')." : ".(is_null($this->PREFIJO) ? '' : "($this->PREFIJO) ").$sCadena."\n");
+        fwrite($this->LOGHANDLE, date('Y-m-d H:i:s')." : ".(is_null($this->PREFIJO) ? '' : "($this->PREFIJO) ").$sCadena."\n");
     }
 
     // Cerrar la bitácora del programa

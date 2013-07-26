@@ -53,6 +53,8 @@ fi
 
 %changelog
 * Fri Jul 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.0-0
+- CHANGED: Make the LCD applets Elastix 3-aware.
+  SVN Rev[5425]
 - FIXED: Correct owner of /opt/lcdelastix. Fixes Elastix bug #1639.
 - CHANGED: Rewrite main application to make proper use of LCDProc menus. Rework
   applets to be capable of having a compact version which will be used with 

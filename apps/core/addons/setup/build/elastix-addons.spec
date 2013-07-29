@@ -125,6 +125,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Jul 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Addons: reset authorized menu cache when addon is installed/updated.
+  SVN Rev[5443]
+
 * Thu Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Addons: various changes to handle Fedora 17 ARM:
   In Fedora 17, the cachedir has components that include the basearch and 

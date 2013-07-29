@@ -40,11 +40,11 @@ $arrLangModule=array(
 "Package Upgrade" => "Upgrade",
 "Package Delete" => "Delete",
 "Package Release" => "Release",
-"Packages not Founds" => "Packages not Founds",
+"Packages not Founds" => "Packages not Found",
 "All Package" => "All",
 "Packages" => "Packages",
 "Package Noninstalled" => "Noninstalled",
-"Repositor not Found" => "Repositor not Found",
+"Repositor not Found" => "Repository not Found",
 "Package Search" => "Search",
 "Repositor Place" => "Repository",
 "Package Update" => "Packages Update",
@@ -73,6 +73,6 @@ $arrLangModule=array(
 "Package(s) Uninstalled"=>"Package(s) Uninstalled",
 "Packages uninstalled"=>"Packages uninstalled",
 "Completed!"=>"Completed!",
-"Are you sure want to Install this package?"=>"Are you sure want to Install this package?",
+"Are you sure want to Install this package?"=>"Are you sure you want to Install this package?",
 );
 ?>

@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Password Connection" => "Clave del Servidor",
 "Keyword" => "Clave",
-"Emails" => "Email",
+"Emails" => "Correo",
 "Send" => "Enviar",
 "Get my Secret Connection" => "Generar una Clave",
 "Message" => "Mensaje",

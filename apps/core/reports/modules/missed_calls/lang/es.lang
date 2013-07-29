@@ -28,13 +28,13 @@
   $Id: es.lang,v 1.1 2011-04-25 09:04:41 Eduardo Cueva ecueva@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Missed Calls" => "Reporte de llamada Perdidas",
+"Missed Calls" => "Reporte de llamadas Perdidas",
 "Date" => "Fecha",
 "Source" => "Origen",
 "Start Date" => "Fecha Inicio",
 "End Date" => "Fecha Fin",
 "Destination" => "Destino",
-"Time since last call" => "Tiempo desde la ultima llamada",
+"Time since last call" => "Tiempo desde la última llamada",
 "Number of attempts" => "Número de intentos",
 "year(s)" => "año(s)",
 "month(s)" => "mes(s)",
@@ -47,6 +47,6 @@ $arrLangModule=array(
 "NO ANSWER - VOICEMAIL" => "NO CONTESTADA - BUZÓN DE VOZ",
 "UNKNOWN" => "DESCONOCIDO",
 "ANSWERED" => "CONTESTADA",
-"The following fields contain errors" => "Los siguientes campos tienen errores",
+"The following fields contain errors" => "Los siguientes campos contienen errores",
 );
 ?>

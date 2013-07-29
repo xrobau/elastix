@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule = array(
 "Error when connecting to database" => "Error cuando se conectaba a  la base de datos",
 "Error"                             => "Error",
-"Debe ingresar una fecha valida"    => "Debe ingresar una fecha valida",
+"Debe ingresar una fecha valida"    => "Debe ingresar una fecha válida",
 "Debe ingresar una fecha inicio/fin"=> "Debe ingresar una fecha inicio/fin",
 "Login Logout"                      => "Tiempo Login-Logout",
 "Agente"                            => "Agente",

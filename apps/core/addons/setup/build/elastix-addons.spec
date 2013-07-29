@@ -126,8 +126,10 @@ fi
 
 %changelog
 * Mon Jul 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: check for @-sign before repository name for installed package.
+  SVN Rev[5446]
 - CHANGED: Addons: reset authorized menu cache when addon is installed/updated.
-  SVN Rev[5443]
+  SVN Rev[5444]
 
 * Thu Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Addons: various changes to handle Fedora 17 ARM:

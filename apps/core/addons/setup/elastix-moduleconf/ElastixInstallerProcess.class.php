@@ -762,6 +762,7 @@ Installing for dependencies:
 
                     $sNombreRepo = $paquete['repo'];
                     if ($sNombreRepo == 'installed') continue;
+                    if ($sNombreRepo[0] == '@') continue;
                     $sRutaRepo = $sRutaCache.'/'.$paquete['repo'].'/';
                     $infoRepo[$sNombreRepo] = array(
                         'ruta'  =>  $sRutaRepo,                        
@@ -818,6 +819,7 @@ Installing for dependencies:
         if ($this->_estadoPaquete['status'] != 'error') {
             foreach ($this->_estadoPaquete['progreso'] as &$infoPaquete) {
                 if ($infoPaquete['repo'] == 'installed') continue;
+                if ($infoPaquete['repo'][0] == '@') continue;
                 $repo =& $infoRepo[$infoPaquete['repo']];
                 $regs = NULL;
                 if (!preg_match('/^((\S+):)?(\S+)-(\S+)$/', $infoPaquete['version'], $regs)) {

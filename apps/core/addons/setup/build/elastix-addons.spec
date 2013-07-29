@@ -125,8 +125,10 @@ fi
 
 %changelog
 * Mon Jul 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: check for @-sign before repository name for installed package.
+  SVN Rev[5446]
 - CHANGED: Addons: reset authorized menu cache when addon is installed/updated.
-  SVN Rev[5443]
+  SVN Rev[5444]
 
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest

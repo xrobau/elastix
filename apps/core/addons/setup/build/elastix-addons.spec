@@ -124,6 +124,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Jul 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Addons: reset authorized menu cache when addon is installed/updated.
+  SVN Rev[5443]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.

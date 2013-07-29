@@ -416,12 +416,17 @@ function do_checkStatus($smarty, $module_name, $local_templates_dir)
     elseif($status["status"] == "error")
 	$respuesta["error_description"] = $status["errmsg"];
     elseif($status["status"] == "idle" && is_array($action_tmp) && count($action_tmp) > 0){
-	if(isset($status["warnmsg"][0]))
-	    $respuesta["warnmsg"] = _tr("Warning").": ".$status["warnmsg"][0];
-	elseif($action_tmp["action_rpm"] == "Checking Dependencies")
-	    $respuesta["transaction_status"] = _tr("Addon")." $action_tmp[name_rpm] "._tr("has no problem with dependencies");
-	else
-	    $respuesta["transaction_status"] = _tr("Addon")." $action_tmp[name_rpm] "._tr("was successfully")." "._tr(getWordInPast($action_tmp["action_rpm"]));
+        if(isset($status["warnmsg"][0]))
+            $respuesta["warnmsg"] = _tr("Warning").": ".$status["warnmsg"][0];
+        elseif($action_tmp["action_rpm"] == "Checking Dependencies")
+            $respuesta["transaction_status"] = _tr("Addon")." $action_tmp[name_rpm] "._tr("has no problem with dependencies");
+        else {
+            $respuesta["transaction_status"] = _tr("Addon")." $action_tmp[name_rpm] "._tr("was successfully")." "._tr(getWordInPast($action_tmp["action_rpm"]));
+            
+            // Para addon instalado, se debe borrar la cache de permisos de usuario
+            if (isset($_SESSION['elastix_user_permission']))
+                unset($_SESSION['elastix_user_permission']);
+        }
     }
     return $json->encode($respuesta);
 }

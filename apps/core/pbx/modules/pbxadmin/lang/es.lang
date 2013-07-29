@@ -57,6 +57,14 @@ $arrLangModule=array(
 "Callback" => "Devolver Llamada",
 "DISA" => "DISA",
 "Warning: Updating FreePBX through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"." => "Advertencia: Actualizar FreePBX a través de su interfaz web ocasionará que se instalen versiones que pudieran aún no haber sido correctamente integradas con Elastix. Para evitar conflictos, es siempre recomendable buscar/instalar actualizaciones únicamente a través del comando linux \"yum update freePBX\".",
-"PBX Configuration" => "Configuración de PBX"
+"PBX Configuration" => "Configuración de PBX",
+"Blacklist" => "Lista negra",
+"CallerID Lookup Sources" => "Fuente de Búsqueda CallerID",
+"Day/Night Control" => "Control Día/Noche",
+"Zap Channel DIDs" => "DIDs Canal Zap",
+"Queue Priorities" => "Prioridades de Cola",
+"Time Groups" => "Grupos Horarios",
+"Languages" => "Idiomas",
+"VoiceMail Blasting" => "Correo de Voz Masivo"
 );
 ?>

@@ -22,7 +22,7 @@ global $arrLangModule;
 'Active'          => "Activa",
 "View Queue"      => "Ver Cola",
 'edit'            => "Editar",
-'dasactivate'     => "Desactivatar",
+'dasactivate'     => "Desactivar",
 'confirm continue'=> "Confirme si desea continuar",
 "Script"          => "Script",
 "Name Queue"      => "Nombre de Cola",

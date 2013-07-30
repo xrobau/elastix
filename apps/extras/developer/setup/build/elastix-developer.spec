@@ -3,14 +3,14 @@
 Summary: Elastix Module Developer
 Name:    elastix-%{modname}
 Version: 2.3.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-1.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-6
+Prereq: elastix-framework >= 2.4.0-3
 
 %description
 Elastix Module Developer
@@ -70,6 +70,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Jul 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Build Module: put Prereq for updated version of paloSantoNavigation,
+  and fix constructor call.
+  SVN Rev[5454]
+
 * Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-4
 - CHANGED: Bump version for release.
 - DELETED: Removed Load Module functionality, as now modules should be installed

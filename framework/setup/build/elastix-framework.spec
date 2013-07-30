@@ -21,6 +21,7 @@ Conflicts: elastix-callcenter <= 2.0.0-16
 Conflicts: elastix-pbx <= 2.2.0-16
 Conflicts: elastix-fax <= 2.2.0-5
 Conflicts: elastix-email_admin <= 2.3.0-8
+Conflicts: elastix-developer <= 2.3.0-4
 Conflicts: kernel-module-dahdi
 Conflicts: kernel-module-rhino
 Conflicts: kernel-module-wanpipe
@@ -305,6 +306,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Jul 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Add a Conflicts directive to prevent installation along with 
+  elastix-developer <= 2.3.0-4 . Part of fix for Elastix bug #1643.
+  SVN Rev[5453]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

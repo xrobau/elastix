@@ -336,7 +336,8 @@ function mostrar_menu()
                 require_once('libs/paloSantoNavigation.class.php');
                 $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
                 $arrMenu = $pMenu->cargar_menu();
-                $pNav = new paloSantoNavigation(null, $arrMenu, $smarty);
+                $smarty = NULL;
+                $pNav = new paloSantoNavigation($arrMenu, $smarty);
                 $arrMenuOptions = $pNav->getArrSubMenu($id_parent);
                 if(is_array($arrMenuOptions)){
                     $parent_Menu2  = "<td align='left'><b>{$arrLangModule["Level 2 Parent"]}: <span  class='required'>*</span></b></td>";

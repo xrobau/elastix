@@ -29,37 +29,16 @@ $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name){
-    include_once("libs/paloSantoDB.class.php");
-    include_once("libs/paloSantoConfig.class.php");
     include_once("libs/paloSantoGrid.class.php");
     include_once "libs/paloSantoForm.class.php";
     include_once "libs/paloSantoOrganization.class.php";
-    include_once("libs/paloSantoACL.class.php");
-    include_once "modules/$module_name/configs/default.conf.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
-    //global variables
-    global $arrConf;
-    global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
+    //folder path for custom templates
+    $local_templates_dir=getWebDirModule($module_name);
 
-        //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
-    //conexion elastix.db
-    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pDB);
+    //conexion resource
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
     //verificar que tipo de usurio es: superadmin, admin o other
     $arrCredentiasls=getUserCredentials();
@@ -201,13 +180,13 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         $end++;
     }
 
-    if($pORGZ->getNumOrganization() > 1){
+    if($pORGZ->getNumOrganization(array()) > 1){
         if($userLevel1=="admin" || $userLevel1=="superadmin")
             $oGrid->addNew("create_user",_tr("Create New User"));
 
         if($userLevel1=="superadmin"){
             $arrOrgz=array(0=>"all");
-            foreach(($pORGZ->getOrganization()) as $value){
+            foreach(($pORGZ->getOrganization(array())) as $value){
                 if($value["id"]!=1)
                     $arrOrgz[$value["id"]]=$value["name"];
             }

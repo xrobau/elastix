@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Create New User" => "Crear Nuevo Usuario",
 "Name" => "Nombre",
-"Login" => "Login",
+"Login" => "Usuario",
 "Password" => "Contraseña",
 "Retype password" => "Confirmar Contraseña",
 "New User" => "Nuevo Usuario",
@@ -45,7 +45,7 @@ $arrLangModule=array(
 "Webmail Domain" => "Dominio de Webmail",
 "Webmail Password" => "Contraseña de Webmail",
 "Retype Webmail password" => "Reingrese contraseña de Webmail",
-"Mail Profile" => "Perfil de Mail",
+"Mail Profile" => "Perfil de Correo",
 "No extension associated" => "La extensión no ha sido asociada",
 "userNoAllowed" => "El usuario no está autorizado a realizar esta acción",
 "You are not authorized to access to information of that user" => "Usted no está autorizado a acceder a la información de ese usuario",

@@ -2,7 +2,7 @@
 global $arrLangModule;
 $arrLangModule = array(
 //     "Calls per Agent"  => "Llamadas por Agente",
-    "Time conecction of agents"  => "Tiempo de conexion de agentes",
+    "Time conecction of agents"  => "Tiempo de conexión de agentes",
     "Start Date"    => "Fecha Inicio",
     "End Date"      => "Fecha Fin",
     "Query"         => "Consultar",
@@ -22,13 +22,13 @@ $arrLangModule = array(
     "Error when connecting to database"    => "Error cuando se conectaba a la base de datos",
     "Error when creating object paloSantoReportsBreak" => "Error al crear el objeto paloSantoReportsBreak",
     "Debe ingresar una fecha"   => "Debe ingresar una fecha",
-    "Debe ingresar una fecha valida"    => "Debe ingresar una fecha valida",
+    "Debe ingresar una fecha valida"    => "Debe ingresar una fecha válida",
 
 
     'Conecction Data'=>'Datos sobre la Conexion',
-    'First Conecction'=>'Primera Conexion',
-    'Last Conecction'=>'Ultima Desconexion',
-    'Time Conecction'=>'Tiempo de Conexion',
+    'First Conecction'=>'Primera Conexión',
+    'Last Conecction'=>'Última Desconexión',
+    'Time Conecction'=>'Tiempo de Conexión',
     'Count Conecction'=>'Conteo de Conexiones',
     'Calls Entry'=>'Llamadas Entrantes',
     'Reason No Ready'=>'Motivo No-Disponibilidad',
@@ -45,7 +45,7 @@ $arrLangModule = array(
     'Hour'=>'Hora',
     'Monitored' => 'Monitoreadas',
     'Unmonitored' => 'No Monitoreadas',
-    'Monitored only'=> 'Solo monitoredas',
+    'Monitored only'=> 'Sólo monitoredas',
     "There aren't records to show"=> "No hay registros para mostrar",
     "Agent name" => "Nombre Agente",
 );

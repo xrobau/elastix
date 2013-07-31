@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Rules" => "Reglas",
 "New" => "Nuevo",
-"Traffic" => "Trafico",
+"Traffic" => "Tráfico",
 "Interface IN" => "Interfaz ENTRADA",
 "Interface OUT" => "Interfaz SALIDA",
 "IP Source" => "Dirección Origen",

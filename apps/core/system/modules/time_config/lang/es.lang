@@ -34,8 +34,9 @@ $arrLangModule=array(
 "New Time" => "Nueva Hora",
 "New Timezone" => "Nueva Zona Horaria",
 "The change of date and time can concern important  system processes." => "Cambiar la fecha y la hora en el sistema puede crear valores inesperados o inconsistentes en los procesos cuyos cálculos dependen de él, como en la generación de informes, las condiciones de tiempo, etc.",
-"System time changed correctly" => "System time changed correctly",
-"You can not change the system time" => "You can not change the system time",
-"Can not find file" => "Can not find file",
+"System time changed correctly" => "La hora del sistema ha sido cambiada exitosamente",
+"You can not change the system time" => "No puede cambiar la hora del sistema",
+"Can not find file" => "No se puede encontrar el archivo",
+"System time changed successfully" => "La fecha/hora del sistema ha sido cambiada exitosamente",
 );
 ?>

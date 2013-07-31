@@ -29,9 +29,9 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Repositories" => "Repositorios",
-"Active" => "Active",
+"Active" => "Activo",
 "Name" => "Nombre",
-"Save/Update" => "Save/Update",
+"Save/Update" => "Guardar/Actualizar",
 "Default" => "Defecto",
 "Type" => "Tipo",
 "Main" => "Principales",

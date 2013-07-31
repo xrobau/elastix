@@ -1,7 +1,7 @@
 <?php
 global $arrLangModule;
 $arrLangModule = array(
-    "Time conecction of agents"  => "Time conecction of agents",
+    "Time conecction of agents"  => "Time connection of agents",
     "Start Date"    => "Start Date",
     "End Date"      => "End Date",
     "Query"         => "Query",
@@ -16,11 +16,11 @@ $arrLangModule = array(
     "Duration"      => "Duration",
     "Average"       => "Average",
     "Total"         => "Total",
-    "Call longest"  => "Call longest",
+    "Call longest"  => "Longest Call",
     "Calls answered" => "Calls answered",
     "Error when connecting to database"    => "Error when connecting to database",
-    "Debe ingresar una fecha"   => "Debe ingresar una fecha",
-    "Debe ingresar una fecha valida"    => "Debe ingresar una fecha valida",
+    "Debe ingresar una fecha"   => "You must enter a date",
+    "Debe ingresar una fecha valida"    => "You must enter a valid date",
 
 
     'Conecction Data'=>'Connection Data',

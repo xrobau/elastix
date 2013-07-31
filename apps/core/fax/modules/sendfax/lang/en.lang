@@ -43,6 +43,6 @@ $arrLangModule=array(
 "Please, select a valid Fax Device" => "Please, select a valid Fax Device",
 "Types of files" => "Types of files supported: ",
 "Fax has been sent correctly" => "Fax has been sent correctly",
-"Notification Sucessfull" => "Notification Sucessfull",
+"Notification Sucessfull" => "Notification Successful",
 );
 ?>

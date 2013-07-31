@@ -29,7 +29,7 @@
 
 global $arrLangModule;
 $arrLangModule = array(
-'PortKnock Protected Interfaces' => 'Interfases Protegidas por Portknock',
+'PortKnock Protected Interfaces' => 'Interfaces Protegidas por Portknock',
 'Interface' => 'Interfaz',
 'Protection' => 'Protección',
 'Port to Knock' => 'Puerto a tocar',

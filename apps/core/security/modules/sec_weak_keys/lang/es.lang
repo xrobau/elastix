@@ -28,7 +28,7 @@
   $Id: en.lang,v 1.1 2010-12-21 09:08:11 Alberto Santos asantos@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Weak Keys" => "Keys Débiles.",
+"Weak Keys" => "Claves Débiles.",
 "Extension" => "Extensión",
 "Description" => "Descripción",
 "Reason" => "Motivo",
@@ -62,7 +62,7 @@ $arrLangModule=array(
 "The New Secret does not match with the Confirmation Secret" => "La Nueva clave no concuerda con la Confirmación de Clave",
 "Successful Secret Update" => "Actualización de Clave Exitosa",
 "Change Secret" => "Cambiar Clave",
-"Weak Key" => "Key Débil",
+"Weak Key" => "Clave Débil",
 "Status" => "Estado" 
 );
 ?>

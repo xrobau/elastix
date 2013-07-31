@@ -28,7 +28,7 @@
   $Id: es.lang,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Reporte de Troncales usadas por Hora en el dia" => "Reporte de Troncales usadas por Hora en el dia",
+"Reporte de Troncales usadas por Hora en el dia" => "Reporte de Troncales usadas por Hora en el día",
 "Time Period " => "Periodo de Tiempo",
 "Entered" => "Entradas",
 "Answered" => "Respondidas",

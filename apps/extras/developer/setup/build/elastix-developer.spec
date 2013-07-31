@@ -70,6 +70,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Jul 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-5
+- Bump version for release.
+- FIXED: Delete Module: fix constructor call for paloSantoNavigation.
+  SVN Rev[5455]
+
 * Tue Jul 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Build Module: put Prereq for updated version of paloSantoNavigation,
   and fix constructor call.

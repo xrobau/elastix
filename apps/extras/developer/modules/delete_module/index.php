@@ -112,7 +112,7 @@ function delete_module($smarty, $module_name, $local_templates_dir, $arrLangModu
     global $arrConf;
     $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
     $arrMenu = $pMenu->cargar_menu();
-    $pNav = new paloSantoNavigation(null, $arrMenu, $smarty);
+    $pNav = new paloSantoNavigation($arrMenu, $smarty);
 
     $arrBorrar_Level_2 = array();
     $arrBorrar_Level_3 = array();
@@ -262,8 +262,9 @@ function mostrar_menu($level, $id_module_level_1, $id_module_level_2, $id_module
     {
         require_once('libs/paloSantoNavigation.class.php');
         $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
-	$arrMenu = $pMenu->cargar_menu();
-        $pNav = new paloSantoNavigation(null, $arrMenu, $smarty);
+        $arrMenu = $pMenu->cargar_menu();
+        $smarty = NULL;
+        $pNav = new paloSantoNavigation($arrMenu, $smarty);
         $arrMenuLevel_2 = $pNav->getArrSubMenu($id_module_level_1);
 
         $level_2  = "<td align='left'><b>{$arrLangModule["Level 2"]}:</b></td>";
@@ -300,8 +301,9 @@ function mostrar_menu($level, $id_module_level_1, $id_module_level_2, $id_module
 
         require_once('libs/paloSantoNavigation.class.php');
         $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
-	$arrMenu = $pMenu->cargar_menu();
-        $pNav = new paloSantoNavigation(null, $arrMenu, $smarty);
+        $arrMenu = $pMenu->cargar_menu();
+        $smarty = NULL;
+        $pNav = new paloSantoNavigation($arrMenu, $smarty);
         $arrMenuLevel_3 = $pNav->getArrSubMenu($id_module_level_2);
 
         if($arrMenuLevel_3 && count($arrMenuLevel_3)>0)

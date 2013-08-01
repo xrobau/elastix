@@ -42,7 +42,7 @@
     <td>User PIN</td><td>No</td><td>A key that the user has to enter to join to the conference.</td>
   </tr>
   <tr>
-    <td>Start Time (PST/PDT)</td><td>Yes</td><td>Select the date and time in which the conference will start.</td>
+    <td>Start Time</td><td>Yes</td><td>Select the date and time in which the conference will start.</td>
   </tr>
   <tr>
     <td>Conference Number</td><td>Yes</td><td>When you create a conference a random number is generated automatically in this field. This number identifies the conference and you can change it if you want but make sure it is not being used by another conference.</td>

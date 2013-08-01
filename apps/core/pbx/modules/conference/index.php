@@ -415,7 +415,7 @@ function createFieldForm($arrLang)
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "start_time"        => array("LABEL"              => $arrLang['Start Time (PST/PDT)'],
+                            "start_time"        => array("LABEL"              => $arrLang['Start Time'],
                                                      "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "DATE",
                                                      "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "%Y-%m-%d %H:%M","TIMEFORMAT" => "12"),

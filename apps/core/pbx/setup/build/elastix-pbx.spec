@@ -304,6 +304,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Conference: remove bogus reference to PST/PDT timezone in conference
+  start time. Fixes Elastix bug #1650.
+  SVN Rev[5479]
+
 * Tue Jul 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

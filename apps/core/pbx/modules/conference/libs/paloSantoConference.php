@@ -213,7 +213,7 @@ class paloSantoConference {
         if (!ctype_digit($room)) return $arrCallers;
 
         // User #: 01         1064 device               Channel: SIP/1064-00000001     (unmonitored) 00:00:11
-        $regexp = '!^User #:[[:space:]]*([[:digit:]]+)[[:space:]]*([[:digit:]]+)[[:alnum:]| |<|>]*Channel: ([[:alnum:]|/|-]+)[[:space:]]*([[:alnum:]|\(|\)| ]+\))[[:space:]]*([[:digit:]|\:]+)$!i';
+        $regexp = '!^User #:\s*(\d+)\s*(\d+).*Channel: (\S+)\s*(\(.*\))\s*([[:digit:]|\:]+)$!i';
         
         $command = "meetme list $room";
         $arrResult = $this->AsteriskManager_Command($data_connection['host'],
@@ -342,9 +342,7 @@ class paloSantoConference {
         $parameters['Channel'] = "Local/" . $channel;
         $parameters['CallerID'] = $callerid;
         $parameters['Data'] = $data . $sSep . "d";
-        $parameters['Context'] = "default";
         $parameters['Application'] = "MeetMe";
-        $parameters['Priority'] = 1;
 
         return $parameters;
     }
@@ -356,7 +354,7 @@ class paloSantoConference {
         $pDB = new paloDB($dsn);
         if($pDB->connStatus)
             return false;
-        $sqlPeticion = "select id, concat(description,' <',user,'>') label FROM devices WHERE tech = 'sip' ORDER BY id ASC;";
+        $sqlPeticion = "select id, concat(description,' <',user,'>') label FROM devices ORDER BY id ASC;";
         $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base asterisk
         $pDB->disconnect(); 
         $arrDevices = array();

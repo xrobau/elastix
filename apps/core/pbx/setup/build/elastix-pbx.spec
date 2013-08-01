@@ -305,6 +305,12 @@ fi
 
 %changelog
 * Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Conference: relax regexp to extract from lines in 'meetme list'. Fixes
+  Elastix bug #1652.
+- FIXED: Conference: in Asterisk 11, Invite Caller fails because both 
+  Application and Context/Priority are specified for Originate. Fixed.
+- FIXED: Conference: list all extensions, not just SIP.
+  SVN Rev[5491]
 - FIXED: Conference: remove bogus reference to PST/PDT timezone in conference
   start time. Fixes Elastix bug #1650.
   SVN Rev[5479]

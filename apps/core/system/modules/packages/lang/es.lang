@@ -75,5 +75,6 @@ $arrLangModule=array(
 "Architecture"=>"Arquitectura",
 "Available Version"=>"Versión Disponible",
 "Update"=>"Actualizar",
+"Message" => "Mensaje",
 );
 ?>

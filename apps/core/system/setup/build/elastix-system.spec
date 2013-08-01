@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Aug  1 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: attempt to backup and restore astdb.sqlite3 from
+  Asterisk 11, as well as handling the case of an Asterisk 1.8 backup being
+  restored in Asterisk 11.
+  SVN Rev[5478]
+
 * Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: Dashboard: remove applets obsoleted by usermode interface.
   SVN Rev[5359]

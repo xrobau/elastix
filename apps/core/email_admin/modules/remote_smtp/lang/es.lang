@@ -28,8 +28,8 @@
   $Id: en.lang,v 1.1 2010-07-21 01:08:56 Bruno Macias bmacias@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Host Name" => "Host Name",
-"Remote SMTP Delivery" => "Remote SMTP Delivery",
+"Host Name" => "Nombre del Host",
+"Remote SMTP Delivery" => "SMTP Remoto",
 "Remote SMTP Server" => "Servidor SMTP Remoto",
 "Port" => "Puerto",
 "Username" => "Usuario",
@@ -44,7 +44,7 @@ $arrLangModule=array(
 "Result transaction" => "Resultado de la transacción",
 "Configured successful" => "Configurado exitosamente",
 "Invalid file extension.- It must be pem" => "Inválida extensión de archivo.- Debe ser .pem",
-"Message Remote SMTP Server" => "<p>El parámetro 'Dominio' especifica el host predeterminado para enviar correo. En el caso de SMTP, especifique un dominio, host, host [] o [dirección], la forma [host] desactiva la búsquedas de MX.<br /><br />
+"Message Remote SMTP Server" => "<p>El parámetro 'Dominio' especifica el host predeterminado para enviar correo. En el caso de SMTP, especifique un dominio, host, host [] o [dirección], la forma [host] desactiva la búsqueda de MX.<br /><br />
             Dominio = [gateway.my.domain]<br />
             Dominio = uucphost<br />
             Dominio = [an.ip.add.ress]</p>",

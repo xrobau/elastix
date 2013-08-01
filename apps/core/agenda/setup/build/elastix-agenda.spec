@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: The "Download iCal" option dissapeared because the switch to
+  generic jQueryUI rendered one of its styles invisible. Fixed.
+  SVN Rev[5492]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

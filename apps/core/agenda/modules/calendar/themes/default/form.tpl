@@ -10,7 +10,7 @@
                 </div>
             </div>
             <div id="datepicker"></div>
-            <div id="icals" class="ui-datepicker-inline ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all">
+            <div id="icals" class="ui-widget ui-widget-content ui-helper-clearfix ui-corner-all">
                 <div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all title_size">{$Export_Calendar}</div>
                 <div class="content_ical">
                     <a href="index.php?menu={$module_name}&action=download_icals&rawmode=yes">

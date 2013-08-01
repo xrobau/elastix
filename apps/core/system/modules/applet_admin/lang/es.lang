@@ -45,5 +45,6 @@ $arrLangModule=array(
 	"Voicemails" => "Mensajes de voz",
 	"Telephony Hardware" => "Hardware Telefónico",
 	"Check All" => "Seleccionar/Deseleccionar Todo",
+	"Applet" => "Applet",
 );
 ?>

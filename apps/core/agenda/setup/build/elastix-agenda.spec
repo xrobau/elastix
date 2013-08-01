@@ -122,6 +122,11 @@ fi
 /etc/init.d/elastix-synchronizerd
 
 %changelog
+* Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: The "Download iCal" option dissapeared because the switch to
+  generic jQueryUI rendered one of its styles invisible. Fixed.
+  SVN Rev[5492]
+
 * Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: FIXED: Calendar: remove *second* bogus compare of translated 
   ajax response field to hardcoded untranslated string. Apparently the check 

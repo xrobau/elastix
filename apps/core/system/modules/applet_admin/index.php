@@ -82,6 +82,13 @@ function showApplets_Admin($module_name)
 
     $arrApplets = $pAppletAdmin->getApplets_User($_SESSION["elastix_user"]);
 
+    //Codigo para tomar en cuenta el nombre de applets para los archivos de idioma
+    foreach($arrApplets as &$applet){
+      $applet['name']=_tr($applet['name']);
+    }
+    unset($applet);
+    //
+
     $smarty->assign("applets",$arrApplets);
     $smarty->assign("SAVE", $arrLang["Save"]);
     $smarty->assign("CANCEL", $arrLang["Cancel"]);

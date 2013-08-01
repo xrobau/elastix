@@ -104,7 +104,7 @@ $BACKUP_PLAN = array(
                 ),
                 array(
                     'type'          =>  'file',
-                    'path'          =>  '/var/lib/asterisk/astdb',
+                    'path'          =>  array('/var/lib/asterisk/astdb.sqlite3', '/var/lib/asterisk/astdb'),
                     'restoreperm'   =>  0664,
                     'restoreown'    =>  array('asterisk', 'asterisk'),
                 ),
@@ -808,10 +808,21 @@ function backupComponent_sqlitedb($sLevelTag, &$backupComponent, $sWorkingDir)
 function backupComponent_file($sLevelTag, &$backupComponent, $sWorkingDir)
 {
 	$bResult = TRUE;
+
+	// If an array, backup the first one found
+    $backuppath = NULL;
+    if (is_array($backupComponent['path'])) {
+        foreach ($backupComponent['path'] as $bp) {
+            $backuppath = $bp;
+            if (file_exists($backuppath)) break;
+        }
+    } else {
+        $backuppath = $backupComponent['path'];
+    }
     
-    $sDestination = $sWorkingDir.'/'.basename($backupComponent['path']);
-    if (!copy($backupComponent['path'], $sDestination)) {
-        fwrite(STDERR, "ERR: $sLevelTag: failed to copy ".$backupComponent['path']." to destination $sWorkingDir\n");
+    $sDestination = $sWorkingDir.'/'.basename($backuppath);
+    if (!copy($backuppath, $sDestination)) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to copy ".$backuppath." to destination $sWorkingDir\n");
     	$bResult = FALSE;
     }
     return $bResult;
@@ -1132,9 +1143,18 @@ function restoreComponent_file($sLevelTag, &$backupComponent, $sWorkingDir)
 {
     $bResult = TRUE;
     
-    $sSource = $sWorkingDir.'/'.basename($backupComponent['path']);
-    if (!copy($sSource, $backupComponent['path'])) {
-        fwrite(STDERR, "ERR: $sLevelTag: failed to copy ".$backupComponent['path']." from source $sWorkingDir\n");
+    if (is_array($backupComponent['path'])) {
+        foreach ($backupComponent['path'] as $bp) {
+            $backuppath = $bp;
+            if (file_exists($sWorkingDir.'/'.basename($backuppath))) break;
+        }
+    } else {
+        $backuppath = $backupComponent['path'];
+    }
+    
+    $sSource = $sWorkingDir.'/'.basename($backuppath);
+    if (!copy($sSource, $backuppath)) {
+        fwrite(STDERR, "ERR: $sLevelTag: failed to copy ".$backuppath." from source $sWorkingDir\n");
         $bResult = FALSE;
     } else {
     	// Restore owner and permissions
@@ -1273,6 +1293,11 @@ function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
     $keysFromAsterisk = array('astlogdir');
     $fpbxConf = array();
     $astConf = array();
+
+    if (file_exists('/usr/sbin/astdb2sqlite3') && file_exists($sWorkingDir.'/astdb')) {
+        // Backup originated from asterisk 1.8 and restored on asterisk 11
+        system('/usr/sbin/astdb2sqlite3 /var/lib/asterisk/astdb');
+    }
 
     // Read information from /etc/amportal.conf
     foreach (file('/etc/amportal.conf') as $s) {

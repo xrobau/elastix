@@ -31,10 +31,23 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Applet Admin" => "Gestion des Applets ",
+"Applet Admin" => "Gestion des Applets",
 "Applet" => "Applet",
 "Activated" => "Activé",
-"Dashboard Applet Admin" => "Dashboard Applet Admin",
-"You must have at least one applet activated" => "You must have at least one applet activated"
+"Dashboard Applet Admin" => "Paramètres du tableau de bord",
+"You must have at least one applet activated" => "Vous devez avoir au moins un applet d'activé",
+"System Resources" => "Ressources système",
+"Processes Status" => "État des processus",
+"Hard Drives" => "Disque dur",
+"Performance Graphic" => "Graphique des performances",
+"News" => "Nouveaux",
+"Communication Activity" => "Activité des communications",
+"Calendar" => "Calendrier",
+"Calls" => "Appels",
+"Emails" => "Emails",
+"Faxes" => "Faxs",
+"Voicemails" => "Boîte vocale",
+"Telephony Hardware" => "Matériel téléphonique",
+"Check All"  =>  "Tout sélectionner",
 );
 ?>

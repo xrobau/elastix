@@ -79,6 +79,8 @@ $arrLangModule=array(
 "Edit quota" => "Editar cuota",
 "The following account does not exist" => "La siguiente cuenta no existe",
 "Edit quota to" => "Editar cuota a",
-"The passwords must not be empty" => "La contraseña no debe ser vacía"
+"The passwords must not be empty" => "La contraseña no debe ser vacía",
+"Reconstruct MailBox" => "Reconstruir Buzón",
+"Reconstruct" => "Reconstruir",
 );
 ?>

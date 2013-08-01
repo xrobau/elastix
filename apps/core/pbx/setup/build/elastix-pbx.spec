@@ -363,6 +363,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Conference: remove bogus reference to PST/PDT timezone in conference
+  start time. Fixes Elastix bug #1650.
+  SVN Rev[5479]
+
 * Mon Jul 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Extensions Batch: fix invalid SQL query that gets executed when an 
   extension requires a direct DID.

@@ -53,7 +53,7 @@ $arrLangModule=array(
 "Listen Only" => "Ecouter Seulement",
 "Wait for Leader" => "Attente Maître",
 "User Options" => "Options Utilisateur",
-"Start Time (PST/PDT)" => "Heure Début (PST/PDT)",
+"Start Time" => "Heure Début",
 "Duration (HH:MM)" => "Durée (HH:MM)",
 "Recurs" => "Récursive",
 "Max Participants" => "Participants Max",
@@ -86,7 +86,7 @@ $arrLangModule=array(
 "click here" => "cliquer ici",
 "Duration" => "Duré",
 "Status" => "Statut",
-"Update" => "Mise � jour",
+"Update" => "Mise � jour",
 "No Extensions" => "No d'extensions",
 "Unselected" => "Désélectionné",
 

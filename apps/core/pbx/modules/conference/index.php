@@ -1274,7 +1274,7 @@ function createFieldForm($recordings,$music){
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                            "start_time"        => array("LABEL"              => _tr('Start Time (PST/PDT)'),
+                            "start_time"        => array("LABEL"              => _tr('Start Time'),
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "DATE",
                                                      "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "%Y-%m-%d %H:%M","TIMEFORMAT" => "24"),

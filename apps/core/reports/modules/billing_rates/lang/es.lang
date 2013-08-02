@@ -28,10 +28,10 @@
   $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Billing Rates" => "Billing Rates",
+"Billing Rates" => "Tarifas de Facturación",
 "Prefix" => "Prefijo",
 "Rate" => "Tarifa",
-"Rate Offset" => "Tarifa de Conexión",
+"Rate Offset" => "Interconexión",
 "None" => "Nadie",
 "(by min)" => " (por min.)",
 "New Rate" => "Nueva Tarifa",
@@ -53,7 +53,7 @@ $arrLangModule=array(
 "REQUIRED_FIELD" => "Campos Requeridos",
 "EDIT" => "Editar",
 "DELETE" => "Eliminar",
-"Rate_offset" => "Rate offset",
+"Rate_offset" => "Interconexión",
 "Error_new" => "Error, para completar la creación de una nueva tarifa debe llenar todos los campos de texto",
 "Error_edit" => "Error, para completar la edición de una tarifa debe llenar todos los campos de texto",
 "error_name" => "Error, nombre de la tarifa ya existe",
@@ -71,7 +71,7 @@ $arrLangModule=array(
 "APPLY_CHANGES" => "Aplicar Cambios",
 "Validation Error" => "Error de Validación",
 "error_CVS" => "Hubo un error mientras se escribía en la base de datos. Revise si las columnas están correctas en el archivo .csv",
-"by_min" => "(by min)",
+"by_min" => "(por min)",
 "alert_import" => "[!]File.csv[/!]&quot;Prefix&quot;,&quot;Name&quot;,&quot;Rate&quot;,&quot;Rate Offset&quot;,&quot;Hidden Digits&quot;,&quot;Trunk&quot;",
 "Date close" => "Fecha de Cierre",
 "Rate History" => "Histórico de Tarifas",

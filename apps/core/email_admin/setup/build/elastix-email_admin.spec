@@ -190,11 +190,18 @@ fi
 /var/www/checkSpamFolder.php
 /var/www/deleteSpam.php
 /usr/local/elastix/postfix_stats.php
-/etc/cron.d/postfix_stats.cron
-/usr/share/elastix/privileged/*
 /var/www/disable_vacations.php
+%defattr(644, root, root)
+/etc/cron.d/postfix_stats.cron
+%defattr(755, root, root)
+/usr/share/elastix/privileged/*
 
 %changelog
+* Fri Aug  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email Stats: fix mispackaging of crontab file that results in crond
+  refusing to run mail traffic sampler. Fixes Elastix bug #1635.
+  SVN Rev[5511]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.

@@ -29,8 +29,8 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Summary by Extension" => "Resumen",
-"Start date" => "Fecha inicio",
-"End date" => "Fecha fin",
+"Start date" => "Fecha Inicio",
+"End date" => "Fecha Fin",
 "Extension"=>"Extensión",
 "User name"=>"Nombre Usuario",
 "Sec. Outgoing Calls"=>"Tiempo total (Llamadas Salientes)",
@@ -48,6 +48,8 @@ $arrLangModule=array(
 "calls" => "llamadas",
 "call" => "llamada",
 "No data to display" => "No hay datos para mostrar",
-"Details" => "Detalles"
+"Details" => "Detalles",
+"End Date" => "Fecha Fin",
+"Start Date" => "Fecha Inicio",
 );
 ?>

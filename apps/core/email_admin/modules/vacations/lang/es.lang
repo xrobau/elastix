@@ -67,5 +67,6 @@ $arrLangModule=array(
 "End date should be greater than the initial date" => "La fecha final debe ser mayor a la fecha inicial",
 "day(s)" => "día(s)",
 "Period" => "Período",
+"Vacations in progress" => "Vacaciones en progreso",
 );
 ?>

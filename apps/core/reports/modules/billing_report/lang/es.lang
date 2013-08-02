@@ -52,6 +52,6 @@ $arrLangModule=array(
 "horas" => "horas",
 "minutos" => "minutos",
 "segundos" => "segundos",
-"Account Code" => "Codigo de cuenta",
+"Account Code" => "Código de cuenta",
 );
 ?>

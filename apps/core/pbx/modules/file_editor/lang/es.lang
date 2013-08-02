@@ -31,7 +31,7 @@ $arrLangModule=array(
 "Command" => "Comando",
 "Execute" => "Ejecutar",
 "Result" => "Resultado",
-"File Editor" => "Asterisk File Editor",
+"File Editor" => "Editor de archivos de Asterisk",
 "File List" => "Nombre de archivo",
 "File Size" => "Tamaño de archivo",
 "Back" => "Regresar",
@@ -47,6 +47,6 @@ $arrLangModule=array(
 "Filter" => "Filtrar",
 "Reload Asterisk" => "Recargar Asterisk",
 "Asterisk has been reloaded" => "Asterisk ha sido recargado",
-"Error when connecting to Asterisk Manager" => "Ocurrió un error al intentar conectarse con Asterisk"
+"Error when connecting to Asterisk Manager" => "Ocurrió un error al intentar conectarse con Asterisk",
 );
 ?>

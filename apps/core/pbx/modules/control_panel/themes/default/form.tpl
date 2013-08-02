@@ -9,9 +9,9 @@
     <div id="content">
 
     <div id="tool"> 
-        <input type="button" value="Reload" onclick="loadSizeArea()"/>
-        <span id="timewaiting">Half waiting time Queue: </span>
-        <span id="allqueue">Calls in Queue: {$total_queues}</span>
+        <input type="button" value="{$reload}" onclick="loadSizeArea()"/>
+        <span id="timewaiting">{$half_wait_time_queue}: </span>
+        <span id="allqueue">{$calls_in_queue}: {$total_queues}</span>
     </div>
 
     <ul id="sortable-list1">
@@ -51,7 +51,7 @@
     <dl id="faq">
         <ul id="sortable-list2" class="sortable">
             <li class="state1">
-            <dt id="headArea1">{$descripArea2} -- {$lengthArea2} ext<div  style = 'float:right;'><span id="editArea2">[Edit Name]</span></div></dt>
+            <dt id="headArea1">{$descripArea2} -- {$lengthArea2} ext<div  style = 'float:right;'><span id="editArea2">[{$edit_name}]</span></div></dt>
             <dd id="area_2" class="right_side boxDrop">
                 <table border ='0' cellspacing="0" cellpadding="0">
                     <tr id="tableArea1"><br />
@@ -60,7 +60,7 @@
             </dd>
             </li>
             <li class="state1">
-            <dt id="headArea2">{$descripArea3} -- {$lengthArea3} ext<div  style = 'float:right;'><span id="editArea3">[Edit Name]</span></div></dt>
+            <dt id="headArea2">{$descripArea3} -- {$lengthArea3} ext<div  style = 'float:right;'><span id="editArea3">[{$edit_name}]</span></div></dt>
             <dd id="area_3" class="right_side boxDrop">
                 <table border ='0' cellspacing="0" cellpadding="0">
                     <tr id="tableArea2"><br />
@@ -69,7 +69,7 @@
             </dd>
             </li> 
             <li class="state1">
-            <dt id="headArea3">{$descripArea4} -- {$lengthArea4} ext<div  style = 'float:right;'><span id="editArea4">[Edit Name]</span></div></dt>
+            <dt id="headArea3">{$descripArea4} -- {$lengthArea4} ext<div  style = 'float:right;'><span id="editArea4">[{$edit_name}]</span></div></dt>
             <dd id="area_4" class="right_side boxDrop">
                 <table border ='0' cellspacing="0" cellpadding="0">
                     <tr id="tableArea3"><br />

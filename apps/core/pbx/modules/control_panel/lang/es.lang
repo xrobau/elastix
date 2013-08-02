@@ -35,6 +35,19 @@ $arrLangModule=array(
 "Participants" => "Participantes",
 "Participant" => "Participante",
 "Error when connecting to Asterisk Manager" => "Error al conectarse al Asterisk Manager",
-"Loading" => "Cargando"
+"Loading" => "Cargando",
+"Area 1" => "Área 1",
+"Area 2" => "Área 2",
+"Area 3" => "Área 3",
+"Conferences" => "Conferencias",
+"Extensions" => "Extensiones",
+"Parking lots" => "Parqueo de Llamadas",
+"Queues" => "Colas",
+"DAHDI Trunks" => "Troncales DAHDI",
+"SIP/IAX Trunks" => "Troncales SIP/IAX",
+"Edit Name" => "Editar Nombre",
+"Half waiting time Queue" => "Medio Tiempo de Espera de Cola",
+"Calls in Queue" => "Llamadas en Cola",
+"Reload" => "Refrescar",
 );
 ?>

@@ -135,6 +135,11 @@ function viewFormControlPanel($smarty, $module_name, $local_templates_dir, &$pDB
     $smarty->assign("lengthArea2", isset($arrDevices[2])?count($arrDevices[2]):null);
     $smarty->assign("lengthArea3", isset($arrDevices[3])?count($arrDevices[3]):null);
     $smarty->assign("lengthArea4", isset($arrDevices[4])?count($arrDevices[4]):null);
+
+    $smarty->assign("half_wait_time_queue",_tr("Half waiting time Queue"));
+    $smarty->assign("calls_in_queue",_tr("Calls in Queue"));
+    $smarty->assign("edit_name",_tr("Edit Name"));
+    $smarty->assign("reload",_tr("Reload"));
   /*  $smarty->assign("arrQueues", isset($arrQueues)?$arrQueues:null);
    // $smarty->assign("arrTrunks", $arrDAHDITrunks);
     $smarty->assign("lengthQueues", isset($arrQueues)?count($arrQueues):null);
@@ -146,7 +151,7 @@ function viewFormControlPanel($smarty, $module_name, $local_templates_dir, &$pDB
     $i=1;
     foreach($arrAreas as $key => $value){
         $smarty->assign("nameA$i", $value['a.name']);
-        $smarty->assign("descripArea$i", $value['a.description']);
+        $smarty->assign("descripArea$i", _tr($value['a.description']));
         $smarty->assign("height$i", $value['a.height']);
         $smarty->assign("width$i", $value['a.width']);
         $smarty->assign("size$i", $value['a.no_column']);

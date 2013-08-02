@@ -49,5 +49,6 @@ $arrLangModule=array(
 'failed' => 'Fallido',
 'killed' => 'Abortado',
 'timedout' => 'Expirado',
+"Status" => "Estado",
 );
 ?>

@@ -127,6 +127,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Aug  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Firewall Rules: add new rule for DHCP. Fixes Elastix bug #1645.
+  SVN Rev[5504]
+
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.

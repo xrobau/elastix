@@ -82,10 +82,11 @@ $arrLangModule=array(
 "Show" => "Mostrar",
 "click here" => "click aquí",
 'Duration'=>'Duración',
-'Status'=>'Status',
+'Status'=>'Estado',
 'Update'=>'Actualizar',
 'No Extensions'=>'No hay extensiones',
-'Unselected' => 'No selección',
+'Unselected' => 'No seleccionado',
 "Period" => "Periodo",
+"Enable Web Conference" => "Habilitar Conferencia Web",
 );
 ?>

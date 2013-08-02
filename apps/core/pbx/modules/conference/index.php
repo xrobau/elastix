@@ -272,7 +272,7 @@ function report_conference($smarty, $module_name, $local_templates_dir, $pDB, $a
                             array('name' => ""),
                             array("name"      => $arrLang["Conference Name"],),
                             array("name"      => $arrLang["Conference #"],),
-                            array('name'        => 'Period'),
+                            array('name'        => _tr('Period')),
                             array('name'        => $arrLang["Participants"],),
                         ),
                     );
@@ -307,6 +307,7 @@ function new_conference($smarty, $module_name, $local_templates_dir, $pDB, $arrL
     $smarty->assign("record", $arrLang["Record"]);
     $smarty->assign("listen_only", $arrLang["Listen Only"]);
     $smarty->assign("wait_for_leader", $arrLang["Wait for Leader"]);
+    $smarty->assign("enable_web_conf", _tr("Enable Web Conference"));
 
     $pConference = new paloSantoConference($pDB);
     while(true)

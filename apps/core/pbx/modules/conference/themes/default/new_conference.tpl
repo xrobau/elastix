@@ -94,7 +94,7 @@ if (ns6) {
                 <td align="left">{$max_participants.INPUT}</td>
             </tr>
 {if $WEBCONF_CONTENT}
-            <tr><td><input type="checkbox" name="enable_webconf" id="enable_webconf" {$WEBCONF_SELECTED} {literal} onclick="if (this.checked) { showlayer('webconf_options'); } else { hidelayer('webconf_options'); } " {/literal} /><b>Enable Web Conference</b></td><td colspan="3">&nbsp;</td></tr>
+            <tr><td><input type="checkbox" name="enable_webconf" id="enable_webconf" {$WEBCONF_SELECTED} {literal} onclick="if (this.checked) { showlayer('webconf_options'); } else { hidelayer('webconf_options'); } " {/literal} /><b>{$enable_web_conf}</b></td><td colspan="3">&nbsp;</td></tr>
             <tr><td colspan="4"><div id="webconf_options"><hr/>{$WEBCONF_CONTENT}</div></td></tr>
 {literal}
 <script type="text/javascript">

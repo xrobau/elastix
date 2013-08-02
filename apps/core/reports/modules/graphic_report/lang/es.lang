@@ -54,6 +54,9 @@ $arrLangModule=array(
 "No exist calls for this number" => "No hay llamadas para este número",
 "The extension" => "La extensión",
 "does not have calls yet" => "no tiene llamadas todavía",
-"The extension must be numeric and can not start with zero" => "La extensión debe ser numérica y no puede empezar con cero"
+"The extension must be numeric and can not start with zero" => "La extensión debe ser numérica y no puede empezar con cero",
+"Extension (Number)" => "Extensión (Número)",
+"Queue" => "Cola",
+"Trunk" => "Troncal",
 );
 ?>

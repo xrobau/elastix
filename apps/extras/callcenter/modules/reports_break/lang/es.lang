@@ -1,14 +1,14 @@
 <?php
 global $arrLangModule; 
  $arrLangModule = array(
-'List Break'     => "Listado de Breaks",
+'List Break'     => "Listado de Recesos",
 'agent'          => "Agente",
-'break'          => "Tipo Break",
+'break'          => "Tipo Receso",
 'time_init'      => "Hora Inicio",
 'time_end'       => "Hora Fin",
 'duration'       => "Duraci&oacute;n",
 "Name"           => "Nombre",
-'Reports Break'  => "Reporte de Break",
+'Reports Break'  => "Reporte de Recesos",
 'Agent Name'     => "Nombre Agente",
 'Break'          => "Break",
 'query'          => "Consultar",

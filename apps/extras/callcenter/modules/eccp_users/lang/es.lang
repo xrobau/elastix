@@ -37,5 +37,6 @@ $arrLangModule = array(
 'Retype password' => 'Vuelva a ingresar contraseña',
 'The passwords are empty or dont match' => 'Las contraseñas están vacías o no coinciden',
 'User name' => 'Nombre de usuario',
+'Edit user' => 'Editar usuario',
 );
 ?>

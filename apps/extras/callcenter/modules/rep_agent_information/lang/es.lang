@@ -48,6 +48,7 @@ $arrLangModule = array(
     'Monitored only'=> 'Sólo monitoredas',
     "There aren't records to show"=> "No hay registros para mostrar",
     "Agent name" => "Nombre Agente",
+    "Agent Information" => "Información del Agente",
 );
 
 ?>

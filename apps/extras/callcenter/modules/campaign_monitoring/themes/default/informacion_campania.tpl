@@ -76,9 +76,9 @@
 </tr>
 {literal}{{/if}}{/literal}
 <tr>
-<td><b>Average Call Duration:</b></td>
+<td><b>{$ETIQUETA_PROMEDIO_DURAC_LLAM}:</b></td>
 <td>{literal}{{App.campaniaActual.llamadas.fmtpromedio}}{/literal}</td>
-<td><b>Maximum Call Duration:</b></td>
+<td><b>{$ETIQUETA_MAX_DURAC_LLAM}:</b></td>
 <td>{literal}{{App.campaniaActual.llamadas.fmtmaxduration}}{/literal}</td>
 </tr>
 </table>

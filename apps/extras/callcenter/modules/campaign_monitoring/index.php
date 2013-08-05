@@ -110,6 +110,8 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas)
         'ETIQUETA_AGENTE'               =>  _tr('Agent'),
         'ETIQUETA_REGISTRO'             =>  _tr('View campaign log'),
         'PREVIOUS_N'                    =>  _tr('Previous 100 entries'),
+        'ETIQUETA_MAX_DURAC_LLAM'       =>  _tr('Average Call Duration'),
+        'ETIQUETA_PROMEDIO_DURAC_LLAM'  =>  _tr('Maximum Call Duration'),
     ));
     //$smarty->assign('INFO_DEBUG', $debug);
     return $smarty->fetch("file:$sDirLocalPlantillas/informacion_campania.tpl");

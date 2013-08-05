@@ -50,6 +50,7 @@ function _moduleContent(&$smarty,$module_name)
     $smarty->assign("File", _tr('File'));
     $smarty->assign('ETIQUETA_SUBMIT', _tr('Upload'));
     $smarty->assign('ETIQUETA_DOWNLOAD', _tr('Download contacts'));
+    $smarty->assign('Format_Content', _tr('"Phone","Identification Card","Name","Last Name"'));
 
     $form_campos = array(
         'file'    =>    array(

@@ -23,5 +23,6 @@ $arrLangModule=array(
 'Inserted records'=>'Registros insertados',
 'Updated records'=>'Registros actualizados',
 'Detected charset'=>'Codificación detectada',
+'"Phone","Identification Card","Name","Last Name"' => '"Teléfono","Cédula/Ruc","Nombre","Apellido"',
 );
 ?>

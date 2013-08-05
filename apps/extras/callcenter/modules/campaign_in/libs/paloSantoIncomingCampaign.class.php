@@ -619,7 +619,7 @@ FROM form f, form_field ff, form_data_recolected_entry fdr, call_entry c
 WHERE f.id = ff.id_form AND ff.tipo <> 'LABEL' AND fdr.id_form_field = ff.id AND fdr.id_call_entry = c.id AND c.id_campaign = ?)
 ORDER BY id_form, orden ASC
 SQL_FORMULARIOS;
-        $datosFormularios = $this->_DB->fetchTable($sqlFormularios, FALSE, array($id_campaign, $id_campaign));
+        $datosFormularios = $this->_DB->fetchTable($sqlFormularios, FALSE, array($id_campaign, $id_campaign, $id_campaign));
         if (!is_array($datosFormularios)) {
             $this->errMsg = 'Unable to read form data - '.$this->_DB->errMsg;
             $datosCampania = NULL;

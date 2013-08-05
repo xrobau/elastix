@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Aug  5 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Incoming Campaigns: fix missing SQL parameter to UNION query for 
+  campaign forms. Fixes Elastix bug #1641.
+  SVN Rev[5546]
+
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-2
 - FIXED: Campaign Monitoring: fix design flaw that requested very large datasets 
   because of log entries on busy servers. Now log entries are not requested on

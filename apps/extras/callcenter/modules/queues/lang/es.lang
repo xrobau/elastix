@@ -24,7 +24,7 @@ global $arrLangModule;
 'edit'            => "Editar",
 'dasactivate'     => "Desactivar",
 'confirm continue'=> "Confirme si desea continuar",
-"Script"          => "Script",
+"Script"          => "Guión",
 "Name Queue"      => "Nombre de Cola",
 "Queue"           => "Cola :",
 "Error when connecting to database"       => "Error cuando se conectaba a la base de datos",
@@ -38,5 +38,6 @@ global $arrLangModule;
 'all'             => "Todas",
 'active'          => "Activas",
 'inactive'        => "Inactivas",
+'Deactivate'      => "Desactivar",
 );
 ?>

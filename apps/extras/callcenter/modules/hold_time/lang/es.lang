@@ -48,5 +48,6 @@ $arrLangModule = array(
 "No Realizadas"                     => "No Realizadas",
 "Tiempo Promedio Espera(Seg)"       => "Tiempo Promedio Espera(Seg)",
 "Espera Mayor(seg)"                 => "Espera Mayor(seg)",
+"Total Calls"                             => "Llamadas Totales",
 );
 ?>

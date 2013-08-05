@@ -31,6 +31,8 @@ include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
+    load_language_module($module_name);
+
     //include elastix framework
     include_once "libs/paloSantoForm.class.php";
 
@@ -42,8 +44,6 @@ function _moduleContent(&$smarty, $module_name)
 
     //include lang local module
     global $arrLangModule;
-
-    load_language_module($module_name);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);

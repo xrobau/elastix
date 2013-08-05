@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,15 +130,118 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module backup_restore. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5490]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module packages. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5489]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module userlist. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5488]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- ADDED: Module dhcp_clientlist. Added the translation file es.lang.
+  SVN Rev[5487]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module applet_admin. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5486]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module applet_admin. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5485]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module applet_admin. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5484]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module applet_admin. Code added for supporting the applets' name in
+  the translation files.
+  SVN Rev[5483]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module applet_admin. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5482]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module applet_admin. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5481]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module applet_admin. Creation of translation file es.lang.
+  SVN Rev[5480]
+
 * Thu Aug  1 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: attempt to backup and restore astdb.sqlite3 from
   Asterisk 11, as well as handling the case of an Asterisk 1.8 backup being
   restored in Asterisk 11.
   SVN Rev[5478]
 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module userlist. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5475]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module time_config. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5474]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module repositories. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5463]
+
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module packages. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5438]
+
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module network_parameters .Correction of some mistakes in the
+  translation files.
+  SVN Rev[5437]
+
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module hardware_detector. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5423]
+
+* Mon Jul 22 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module dhcp_server. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5389]
+
+* Mon Jul 22 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module dhcp_by_mac. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5388]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module backup_restore. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5356]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5354]
 
 * Thu Jul 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
 - CHANGED: Dashboard: the Calls applet does not really require trunk access or

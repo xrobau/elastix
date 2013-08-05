@@ -12,5 +12,7 @@ global $arrLangModule;
 "Error"          => "Error",
 "Error when connecting to database"          => "Error cuando se conectaba a la base de datos",
 "Error when creating object paloSantoReportsCalls" => "Error al crear el objeto paloSantoReportsCalls",
+"Ingoing Calls Success"          => "Éxito de Llamadas Entrantes",
+"Total Calls"          => "Llamadas Totales",
 );
 ?>

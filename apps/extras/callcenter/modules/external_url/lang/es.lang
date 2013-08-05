@@ -40,7 +40,8 @@ $arrLangModule = array(
 'Apply changes' =>  'Aplicar cambios',
 'Enable use of this template' => 'Habilitar uso de esta plantilla',
 'Open URL in' => 'Abrir URL en',
-
+'Edit URL' => 'Editar URL',
+'Apply Changes' => 'Aplicar Cambios',
 'TEMPLATE_DESC' => "La plantilla de URL puede contener identificadores con ".
     "nombres entre llaves, como por ejemplo {HomeAddress}, los cuales serán ".
     "reemplazados con los verdaderos valores escapados para cada llamada ".

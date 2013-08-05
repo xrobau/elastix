@@ -14,8 +14,8 @@
     <tr><td width="100%">
         <table class="tabForm">
 			<tr class="letra12">
-				<td align="center" colspan="2"><b>Asterisk Connection</b></td>
-				<td align="center" colspan="2"><b>Dialer Parameters</b></td>
+				<td align="center" colspan="2"><b>{$ASTERISK_CONNECT_PARAM}</b></td>
+				<td align="center" colspan="2"><b>{$DIALER_PARAM}</b></td>
 			</tr>
 			<tr class="letra12">
 				<td align="right">{$asterisk_asthost.LABEL}:</td><td align="left">{$asterisk_asthost.INPUT}</td>

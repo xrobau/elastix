@@ -31,7 +31,7 @@
   $Id: es.lang,v 1.7 2008/02/18 09:49:00 bmacias Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Extensions Batch" => "Extensions Batch",
+"Extensions Batch" => "Lote de Extensiones",
 "Batch of Extensions" => "Batch of Extensions",
 "Are you really sure you want to delete all the extensions in this server?" => "¿Está seguro que desea eliminar todas las extensiones de este servidor?",
 "Invalid file extension.- It must be csv" => "Formato de archivo no válido.- Debe ser CSV",

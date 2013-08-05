@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -197,14 +197,69 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Fri Aug  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Fri Aug 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Stats: fix mispackaging of crontab file that results in crond
   refusing to run mail traffic sampler. Fixes Elastix bug #1635.
   SVN Rev[5511]
 
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module vacations. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5497]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module remote_smtp. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5496]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module email_accounts. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5495]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module vacations. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5476]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module remote_smtp. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5456]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  email_stats. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5397]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  email_list. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5396]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  email_domains. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5395]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module email_accounts. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5394]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module antispam. Correction of some mistakes in the translation to
+  english.
+  SVN Rev[5337]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5012]
 
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Remote SMTP: use SQL parameters for status update, and validate it.

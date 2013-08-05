@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,7 +109,21 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
-* Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module address_book. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5494]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module calendar. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5493]
+
+* Thu Aug 01 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: The "Download iCal" option dissapeared because the switch to
   generic jQueryUI rendered one of its styles invisible. Fixed.
   SVN Rev[5492]
@@ -117,6 +131,7 @@ fi
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5351]
 
 * Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATED: Module address_book. Correction of some mistakes in the translation

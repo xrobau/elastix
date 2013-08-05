@@ -125,5 +125,8 @@ $arrLangModule=array(
 'incomingqueue' =>  'Cola entrante',
 'N/A' => 'N/D', /* No Disponible */
 'Previous 100 entries' => '100 entradas anteriores',
+'Campaign Monitoring'  =>  'Monitoreo de Campaña',
+'Average Call Duration'  =>  'Promedio Duración de Llamada',
+'Maximum Call Duration'  =>  'Duración Máxima de Llamada',
 );
 ?>

@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -304,7 +304,39 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
-* Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Aug 05 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5513]
+
+* Mon Aug 05 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5512]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module file_editor. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5503]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module conference. Support Added for the translation of some words.
+  SVN Rev[5502]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module monitoring. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5501]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Support added to allow the translation of most of the words in
+  control_panel module.
+  SVN Rev[5500]
+
+
+* Thu Aug 01 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Conference: relax regexp to extract from lines in 'meetme list'. Fixes
   Elastix bug #1652.
 - FIXED: Conference: in Asterisk 11, Invite Caller fails because both 
@@ -315,9 +347,60 @@ fi
   start time. Fixes Elastix bug #1650.
   SVN Rev[5479]
 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module voicemail. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5477]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module text_to_wav. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5472]
+
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module recordings. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5451]
+
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module pbxadmin. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5441]
+
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module monitoring. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5436]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module file_editor. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5411]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module festival. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5410]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  extensions_batch. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5401]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  endpoints_batch. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5400]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  endpoint_configurator. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5399]
+
 * Tue Jul 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5393]
 
 * Mon Jul 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Extensions Batch: fix invalid SQL query that gets executed when an 

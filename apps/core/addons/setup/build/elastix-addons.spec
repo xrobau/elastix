@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -124,6 +124,14 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Aug 05 2013 Jose Briones <jbriones@palosanto.com> 
+- ADD: Added translation file es.lang
+  SVN Rev[5555]
+
 * Mon Jul 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: check for @-sign before repository name for installed package.
   SVN Rev[5446]
@@ -133,6 +141,7 @@ fi
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5350]
 
 * Thu Jul 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Addons: various changes to handle Fedora 17 ARM:

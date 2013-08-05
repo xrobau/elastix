@@ -50,5 +50,6 @@ $arrLangModule = array(
 "Desactivate" => "Desactivar", //Bruno agrego
 "Activate"=>"Activar",
 "Status"=>"Estado",
+"Apply Changes"=>"Aplicar Cambios",
 );
 ?>

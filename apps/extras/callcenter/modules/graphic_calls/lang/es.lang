@@ -54,5 +54,6 @@ $arrLangModule = array(
 'No answer/Short call'              => 'Sin respuesta/Llamada corta',
 'Calls'                             => 'Llamadas',
 'Total Calls'                       => 'Total de Llamadas',
+'Hour'                             => 'Hora',
 );
 ?>

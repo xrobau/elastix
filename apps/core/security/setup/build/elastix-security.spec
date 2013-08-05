@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -127,13 +127,43 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
-* Fri Aug  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Fri Aug 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Firewall Rules: add new rule for DHCP. Fixes Elastix bug #1645.
   SVN Rev[5504]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_weak_keys. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5469]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_rules. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5468]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_portknock_if. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5467]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_advanced_settings. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5466]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_rules. Correction of a mistake in the english translation
+  file
+  SVN Rev[5320]
 
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5084]
 
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - UPDATE: Module sec_rules, Security. The help section was updated.

@@ -36,9 +36,9 @@ $arrLangModule=array(
 'Could not save changes!' => 'No se pueden guardar cambios!',
 'Could not commit changes!' => 'No se pueden asentar cambios!',
 'Asterisk Server' => 'Servidor Asterisk',
-'Asterisk Login' => 'Login de Asterisk',
-'Asterisk Password' => 'Password de Asterisk',
-'Asterisk Password (confirm)' => 'Password de Asterisk (confirmación)',
+'Asterisk Login' => 'Usuario de Asterisk',
+'Asterisk Password' => 'Contraseña de Asterisk',
+'Asterisk Password (confirm)' => 'Contraseña de Asterisk (confirmación)',
 'Short Call Threshold' => 'Umbral de Llamada Corta',
 'Answering delay' => 'Retraso hasta contestación',
 'Enable dialer debug' => 'Activar DEBUG de marcador',
@@ -56,5 +56,7 @@ $arrLangModule=array(
 'Enable predictive dialer behavior' => 'Activar comportamiento predictivo del marcado',
 'Per-call dial timeout' => 'Espera máxima por llamada marcada',
 'Agent inactivity timeout' => 'Espera máxima de inactividad de agente',
+'Asterisk Connection' => 'Conexión de Asterisk',
+'Dialer Parameters' => 'Parámetros del Dialer',
 );
 ?>

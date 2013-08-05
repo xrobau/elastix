@@ -216,6 +216,8 @@ function form_Service(&$oDB, $smarty, $module_name, $local_templates_dir, $pd)
     }
     $bDialerActivo = $objConfig->getStatusDialer($pd);
 
+    $smarty->assign('ASTERISK_CONNECT_PARAM',_tr('Asterisk Connection'));
+    $smarty->assign('DIALER_PARAM',_tr('Dialer Parameters'));
     $smarty->assign('DIALER_STATUS_MESG',_tr('Dialer Status'));
     $smarty->assign('CURRENT_STATUS',_tr('Current Status'));
     $smarty->assign('DIALER_STATUS', $bDialerActivo 

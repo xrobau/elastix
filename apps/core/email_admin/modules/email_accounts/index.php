@@ -188,7 +188,7 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         }
     }else{
         $smarty->assign("mb_title", _tr("Error"));
-        $smarty->assign("mb_message", $pEmail->errMsg);
+        $smarty->assign("mb_message", _tr($pEmail->errMsg));
     }
 
     $total = count($arrData); 

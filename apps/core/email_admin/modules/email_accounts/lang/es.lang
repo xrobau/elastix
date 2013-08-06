@@ -82,5 +82,6 @@ $arrLangModule=array(
 "The passwords must not be empty" => "La contraseña no debe ser vacía",
 "Reconstruct MailBox" => "Reconstruir Buzón",
 "Reconstruct" => "Reconstruir",
+"Domain ID is not valid" => "ID del dominio no es válido",
 );
 ?>

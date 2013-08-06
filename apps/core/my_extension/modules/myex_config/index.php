@@ -174,6 +174,8 @@ function viewFormMyExtension($smarty, $module_name, $local_templates_dir, $pDB, 
     $smarty->assign("CANCEL", $arrLang["Cancel"]);
     $smarty->assign("icon", "images/list.png");//extension
     $smarty->assign("EXTENSION",$arrLang["SETTINGS FOR YOUR EXTENSION:"]." ".$extensionCID." (".$extension.")");//extension
+    $smarty->assign("TAG_CALL_FORW_CONF", _tr("Call Forward Configuration"));
+    $smarty->assign("TAG_CALL_MON_SET", _tr("Call Monitor Settings"));
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["My Extension"], $_DATA);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

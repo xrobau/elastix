@@ -1,0 +1,61 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+   Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.3                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on "AS IS"     |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translated by: José Briones                                          |
+  | Email: jbriones@elastix.com                                         |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2013-08-06 19:07:33 username Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"My Extension" => "Mi Extensión",
+"no_extension" => "No hay un número de extensión asociado al usuario actual. Usted puede asociar una extensión a su usuario haciendo click <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">aquí</a>",
+"Call Waiting" => "Llamada en Espera",
+"Do Not Disturb" => "No Molestar",
+"Error processing CallWaiting" => "Error al procesar Llamada en Espera",
+"Error processing Do Not Disturb" => "Error al procesar No Molestar",
+"Save Configuration" => "Guardar Configuración",
+"Your configuration has been saved correctly" => "La configuración ha sido guardada exitosamente",
+"Call Forward" => "Desviar Llamada",
+"Call Forward on Unavailable" => "Desviar Llamada en caso de Indisponibilidad",
+"Call Forward on Busy" => "Desviar Llamada en caso de Ocupado",
+"Configure a phone number here..." => "Escriba un número de teléfono aquí",
+"Validation Error" => "Error de validación",
+"Please check your phone number"      => "Por favor revise su número de teléfono",
+"Please check your phone number for Call Forward" => "Por favor revise su número de teléfono para desvío de llamada",
+"Please check your phone number for Call Forward On Unavailable" => "Por favor revise su número de teléfono para desvío de llamada en caso de Indisponibilidad",
+"Please check your phone number for Call Forward On Busy" => "Por favor revise su número de teléfono para desvío de llamada en caso de Ocupado ",
+"Always" => "Siempre",
+"Never"  => "Nunca",
+"On-Demand" => "Bajo demanda",
+"Record Incoming" => "Grabar Llamada Entrante",
+"Record Outgoing" => "Grabar Llamada Saliente",
+"SETTINGS FOR YOUR EXTENSION:" => "AJUSTES PARA SU EXTENSIÓN:",
+"contact_admin" => "No hay un número de extensión asociado al usuario actual. Por favor contacte al administrador para que le asigne una extensión",
+"Call Forward Configuration" => "Configuración de Desvío de Llamada",
+"Call Monitor Settings" => "Ajustes de Monitoreo de Llamadas",
+);
+?>

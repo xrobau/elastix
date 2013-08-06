@@ -252,6 +252,7 @@ $arrLang=array(
 "Add" => "Agregar",
 "Save All" => "Guardar todo",
 "Key" => "Clave",
-"Value" => "Valor"
+"Value" => "Valor",
+"Language Admin" => "Administrar Idioma"
 );
 ?>

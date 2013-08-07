@@ -6,6 +6,9 @@ BODY
     COLOR: #000000;
     FONT-SIZE: 9pt;
 }
+TABLE {
+    border-spacing: 0;
+}
 A
 {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;

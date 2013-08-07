@@ -306,6 +306,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Aug  7 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add border-spacing: 0 to styles for old themes so that
+  jQueryUI dialogs and widgets are displayed correctly.
+  SVN Rev[5573]
+
 * Tue Jul 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Add a Conflicts directive to prevent installation along with 
   elastix-developer <= 2.3.0-4 . Part of fix for Elastix bug #1643.

@@ -527,12 +527,12 @@ function loadLanguageFile($filename)
         global $arrLangModule;
         
         $s = NULL;
-        if (isset($arrLangModule) && is_array($arrLangModule) && count($arrLangModule) > 0) {
+        if (isset($arrLangModule) && is_array($arrLangModule)) {
             $s = serialize($arrLangModule);
         } elseif (isset($arrLang) && is_array($arrLang) && count($arrLang) > 0) {
             $s = serialize($arrLang);
         } else {
-            error_exit("ERR: invalid language file - does not define \$arrLang or \$arrLangModule!\n");
+            error_exit("ERR: invalid language file '$filename' - does not define \$arrLang or \$arrLangModule!\n");
         }
         while (strlen($s) > 0) {
             $i = fwrite($socks[0], $s);

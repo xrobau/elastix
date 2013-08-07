@@ -30,36 +30,20 @@
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoDB.class.php";
-include_once "modules/sec_ports/libs/paloSantoPortService.class.php";
 include_once "libs/paloSantoJSON.class.php";
 require_once "libs/paloSantoNetwork.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoRules.class.php";
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
+      
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
-
+   
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
-    //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+   
+   //folder path for custom templates
+    $local_templates_dir=getWebDirModule($module_name);
 
     //conexion resource
     //$str_conn = "sqlite3:////var/www/db/iptables.db";
@@ -106,7 +90,7 @@ function newRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    $smarty->assign("icon", "modules/$module_name/images/security_firewall_rules.png");
+    $smarty->assign("icon", "web/apps/$module_name/images/security_firewall_rules.png");
     $traffic = isset($arrValues['id_traffic']) ? $arrValues['id_traffic'] : "";
     $select_traffic_1 = ($traffic == "INPUT"  ) ? "selected" : "";
     $select_traffic_2 = ($traffic == "OUTPUT" ) ? "selected" : "";
@@ -587,7 +571,7 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $oGrid->setTitle(_tr("FireWall Rules"));
-    $oGrid->setIcon("/modules/$module_name/images/security_firewall_rules.png");
+    $oGrid->setIcon("web/apps/$module_name/images/security_firewall_rules.png");
     $oGrid->pagingShow(true);
     $offset = $oGrid->calculateOffset();
     $url    = "?menu=$module_name";
@@ -619,32 +603,32 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
             $arrTmp[1] = "<div id='div_$value[id]' style='width: 22px; font-size: 14pt;color:#E35332;float:left;text-align:right'>$value[rule_order] </div>";}
             if(!$first_time){
 				//if($offset!=0)
-					$arrTmp[1].="<a href='javascript:void(0);' class='up' id='rulerup_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/up.gif' border=0 title='"._tr('Up')."' /></a>"."<a href='javascript:void(0);' class='down' id='rulerdown_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/down.gif' border=0 title='"._tr('Down')."' /></a>";
+					$arrTmp[1].="<a href='javascript:void(0);' class='up' id='rulerup_$value[id]_$value[rule_order]'>"."<img src='web/apps/$module_name/images/up.gif' border=0 title='"._tr('Up')."' /></a>"."<a href='javascript:void(0);' class='down' id='rulerdown_$value[id]_$value[rule_order]'>"."<img src='web/apps/$module_name/images/down.gif' border=0 title='"._tr('Down')."' /></a>";
 				/*else
 					$arrTmp[1].="<a href='?menu=$module_name&action=$changeOrder&id=$value[id]&order=$value[rule_order]&direction=up;' class='up' id='rulerup_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/up.gif' border=0 title='"._tr('Up')."' /></a>"."<a href='javascript:void(0);' class='down' id='rulerdown_$value[id]_$value[rule_order]'>"."<img src='modules/$module_name/images/down.gif' border=0 title='"._tr('Down')."' /></a>";*/
 			}
             if($value['traffic'] == "INPUT"){
-                $image = "modules/$module_name/images/fw_input.gif";
+                $image = "web/apps/$module_name/images/fw_input.gif";
                 $title = _tr("INPUT");
                 $arrTmp[4] = _tr("IN").": $value[eth_in]";
             }elseif($value['traffic'] == "OUTPUT"){
-                $image = "modules/$module_name/images/fw_output.gif";
+                $image = "web/apps/$module_name/images/fw_output.gif";
                 $title = _tr("OUTPUT");
                 $arrTmp[4] = _tr("OUT").": $value[eth_out]";
             }else{
-                $image = "modules/$module_name/images/fw_forward.gif";
+                $image = "web/apps/$module_name/images/fw_forward.gif";
                 $title = _tr("FORWARD");
                 $arrTmp[4] = _tr("IN").":  $value[eth_in]<br />"._tr("OUT").": $value[eth_out]";
             }
 	    $arrTmp[2] = "<a><img src='$image' border=0 title='"._tr($title)."'</a>";
 	    if($value['target'] == "ACCEPT"){
-	    $image = "modules/$module_name/images/target_accept.gif";
+	    $image = "web/apps/$module_name/images/target_accept.gif";
 	    $title = _tr("ACCEPT");
             }elseif($value['target'] == "DROP"){
-                $image = "modules/$module_name/images/target_drop.gif";
+                $image = "web/apps/$module_name/images/target_drop.gif";
                 $title = _tr("DROP");
             }else{
-                $image = "modules/$module_name/images/target_drop.gif";
+                $image = "web/apps/$module_name/images/target_drop.gif";
                 $title = _tr("REJECT");
             }
             $arrTmp[3] = "<a><img src='$image' border=0 title='"._tr($title)."'</a>";
@@ -682,11 +666,11 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
                 $arrTmp[8] = "";
             if(!$first_time){
                 if($value['activated'] == 1){
-                    $image = "modules/$module_name/images/foco_on.gif";
+                    $image = "web/apps/$module_name/images/foco_on.gif";
                     $activated = "Desactivate";
                 }
                 else{
-                    $image = "modules/$module_name/images/foco_off.gif";
+                    $image = "web/apps/$module_name/images/foco_off.gif";
                     $activated = "Activate";
                 }
 
@@ -694,7 +678,7 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 					$arrTmp[9] = "<a href='?menu=$module_name&action=".$activated."&id=".$value['id']."&nav=next&start=$start'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
 				else
 					$arrTmp[9] = "<a href='?menu=$module_name&action=".$activated."&id=".$value['id']."'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
-                $arrTmp[10] = "<a href='?menu=$module_name&action=edit&id=".$value['id']."'>"."<img src='modules/$module_name/images/edit.gif' border=0 title='"._tr('Edit')."'</a>";
+                $arrTmp[10] = "<a href='?menu=$module_name&action=edit&id=".$value['id']."'>"."<img src='web/apps/$module_name/images/edit.gif' border=0 title='"._tr('Edit')."'</a>";
             }
             $arrData[] = $arrTmp;
         }
@@ -866,26 +850,26 @@ function changeOtherPage($pDB, $module_name)
 		$jsonObject->set_status(_tr("Successful Change").":$mensaje:$mensaje2:"._tr("Dismiss").":"._tr("MESSAGE"));
 		$arrayResult["id"] = $rule["id"];
 		if($rule['traffic'] == "INPUT"){
-		    $arrayResult["traffic"]["image"] = "modules/$module_name/images/fw_input.gif";
+		    $arrayResult["traffic"]["image"] = "web/apps/$module_name/images/fw_input.gif";
 		    $arrayResult["traffic"]["title"] = _tr("INPUT");
 		    $arrayResult["interface"] = _tr("IN").": $rule[eth_in]";
 		}elseif($rule['traffic'] == "OUTPUT"){
-		    $arrayResult["traffic"]["image"] = "modules/$module_name/images/fw_output.gif";
+		    $arrayResult["traffic"]["image"] = "web/apps/$module_name/images/fw_output.gif";
 		    $arrayResult["traffic"]["title"] = _tr("OUTPUT");
 		    $arrayResult["interface"] = _tr("OUT").": $rule[eth_out]";
 		}else{
-		    $arrayResult["traffic"]["image"] = "modules/$module_name/images/fw_forward.gif";
+		    $arrayResult["traffic"]["image"] = "web/apps/$module_name/images/fw_forward.gif";
 		    $arrayResult["traffic"]["title"] = _tr("FORWARD");
 		    $arrayResult["interface"] = _tr("IN").":  $rule[eth_in]<br />"._tr("OUT").": $rule[eth_out]";
 		}
 		if($rule['target'] == "ACCEPT"){
-		    $arrayResult["target"]["image"] = "modules/$module_name/images/target_accept.gif";
+		    $arrayResult["target"]["image"] = "web/apps/$module_name/images/target_accept.gif";
 		    $arrayResult["target"]["title"] = _tr("ACCEPT");
 		}elseif($rule['target'] == "DROP"){
-		    $arrayResult["target"]["image"] = "modules/$module_name/images/target_drop.gif";
+		    $arrayResult["target"]["image"] = "web/apps/$module_name/images/target_drop.gif";
 		    $arrayResult["target"]["title"] = _tr("DROP");
 		}else{
-		    $arrayResult["target"]["image"] = "modules/$module_name/images/target_drop.gif";
+		    $arrayResult["target"]["image"] = "web/apps/$module_name/images/target_drop.gif";
 		    $arrayResult["target"]["title"] = _tr("REJECT");
 		}
 		$arrayResult["ipSource"]  = $rule["ip_source"];
@@ -910,15 +894,15 @@ function changeOtherPage($pDB, $module_name)
 		else
 		    $arrayResult["details"] = "";
 		if($rule['activated'] == 1){
-			$image = "modules/$module_name/images/foco_on.gif";
+			$image = "web/apps/$module_name/images/foco_on.gif";
 			$activated = "Desactivate";
 		}
 		else{
-			$image = "modules/$module_name/images/foco_off.gif";
+			$image = "web/apps/$module_name/images/foco_off.gif";
 			$activated = "Activate";
 		}
 		$arrayResult["activate"] =  "<a href='?menu=$module_name&action=".$activated."&id=".$rule['id']."'>"."<img src='$image' border=0 title='"._tr($activated)."'</a>";
-		$arrayResult["edit"] = "<a href='?menu=$module_name&action=edit&id=".$rule['id']."'>"."<img src='modules/$module_name/images/edit.gif' border=0 title='"._tr('Edit')."'</a>";
+		$arrayResult["edit"] = "<a href='?menu=$module_name&action=edit&id=".$rule['id']."'>"."<img src='web/apps/$module_name/images/edit.gif' border=0 title='"._tr('Edit')."'</a>";
 		$jsonObject->set_message($arrayResult);
 	    }
 	    else

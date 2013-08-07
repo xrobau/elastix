@@ -30,37 +30,24 @@
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoConfig.class.php";
-include_once "modules/extensions_batch/libs/paloSantoExtensionsBatch.class.php";
 include_once "libs/misc.lib.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoWeakKeys.class.php";
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+   
+    //folder path for custom templates
+    $local_templates_dir=getWebDirModule($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
+   
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
+   
 
-    //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
+    
     //conexion resource
-    $dsn_asterisk = generarDSNSistema("asteriskuser","asterisk");
+    $dsn_asterisk = generarDSNSistema("asteriskuser","elxpbx");
     $pDB = new paloDB($dsn_asterisk);
 
     $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
@@ -100,7 +87,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oGrid->enableExport();   // enable csv export.
     $oGrid->pagingShow(true); // show paging section.
     $oGrid->setTitle(_tr("Weak Secrets"));
-    $oGrid->setIcon("modules/$module_name/images/security_weak_keys.png");
+    $oGrid->setIcon("web/apps/$module_name/images/security_weak_keys.png");
     $oGrid->setNameFile_Export(_tr("Weak Secrets"));
     if($oGrid->isExportAction()){
         $limit = $total;

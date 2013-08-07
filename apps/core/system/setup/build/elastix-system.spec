@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Aug  7 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: RSS parser in News applet wants to output iso-8859-1. Force
+  the encoding to utf-8 instead.
+  SVN Rev[5580]
+
 * Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

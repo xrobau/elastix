@@ -47,5 +47,6 @@ $arrLangModule=array(
 	"Check All" => "Seleccionar/Deseleccionar Todo",
 	"Applet" => "Applet",
 	"Dashboard Applet Admin" => "Gestión de Applets",
+        "You must have at least one applet activated" => "Debe tener al menos un applet activado",
 );
 ?>

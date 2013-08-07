@@ -20,6 +20,11 @@
 </div>
 &nbsp;{if $icon ne null}<img src="{$icon}" border="0" align="absmiddle" />&nbsp;&nbsp;{/if}{$title}
 <span id="elx-blackmin-quicklink">
+{if !empty($idSubMenu2Selected)}
+    <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
+{else}
+    <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
+{/if}<img src="images/icon-help.png" border="0" align="absmiddle"></a>
 &nbsp;<a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupElastix('registrar','{$Register}',538,500)">{$Registered}</a>
 &nbsp;<a id="viewDetailsRPMs">{$VersionDetails}</a>
 &nbsp;<a href="javascript:mostrar();">{$ABOUT_ELASTIX}</a>

@@ -307,6 +307,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Aug  7 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add help link and help template to blackmin theme.
+  SVN Rev[5578]
 - CHANGED: Framework: add border-spacing: 0 to styles for old themes so that
   jQueryUI dialogs and widgets are displayed correctly.
   SVN Rev[5573]

@@ -34,19 +34,13 @@ require_once "libs/paloSantoNetwork.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    require_once "modules/$module_name/configs/default.conf.php";
-    require_once "modules/$module_name/libs/paloSantoPortKnockInterfaces.class.php";
-
-    load_language_module($module_name);
-
+    
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf, $arrConfModule);
 
     //folder path for custom templates
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
-    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     $pDB = new paloDB($arrConf['dsn_conn_database']);
 

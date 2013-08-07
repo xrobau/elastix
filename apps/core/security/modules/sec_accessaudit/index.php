@@ -26,36 +26,23 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1 2010-12-18 05:12:06 Bruno Macias bmacias@palosanto.com Exp $ */
-function _moduleContent(&$smarty, $module_name)
-{
+    
     //include elastix framework
     include_once "libs/paloSantoGrid.class.php";
     include_once "libs/paloSantoForm.class.php";
 
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoAccessAudit.class.php";
-
-    // incluir el archivo de idioma de acuerdo al que este seleccionado
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+function _moduleContent(&$smarty, $module_name)
+{
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
     global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+    
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
+    $local_templates_dir=getWebDirModule($module_name);
+    
     $accion = getAction();
     $content = "";
 
@@ -96,7 +83,7 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
 
     $oGrid  = new paloSantoGrid($smarty);
     $oGrid->setTitle(_tr("Audit"));
-    $oGrid->setIcon("modules/$module_name/images/security_audit.png");
+    $oGrid->setIcon("web/apps/$module_name/images/security_audit.png");
     $oGrid->pagingShow(true); // show paging section.
     $oGrid->enableExport();   // enable export.
     $oGrid->setNameFile_Export(_tr("Access audit"));

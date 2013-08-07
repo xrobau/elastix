@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoAccessaudit.class.php,v 1.1 2010-12-18 03:12:50 Bruno Macias bmacias@palosanto.com Exp $ */
 
-include_once "modules/asterisk_log/libs/LogParser_Full.class.php";
+include_once "/usr/share/elastix/apps/asterisk_log/libs/LogParser_Full.class.php";
 
 class paloSantoAccessaudit{
     var $_DB;

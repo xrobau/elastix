@@ -308,7 +308,7 @@ function mostrar_menu()
             $parent_Menu .= "<td align='left'>";
                 $parent_Menu .= "<select name='parent_module' id='parent_module'>";
                 foreach($arrMenuOptions as $key => $valor)
-                    $parent_Menu .= "<option value='$key'>$valor</option>";
+                    $parent_Menu .= "<option value='$key'>"._tr($valor)."</option>";
                 $parent_Menu .= "</select>";
             $parent_Menu .= "</td>";
         }
@@ -344,7 +344,7 @@ function mostrar_menu()
                     $parent_Menu2 .= "<td>";
                     $parent_Menu2 .= "<select name='parent_module_2' id='parent_module_2'>";
                     foreach($arrMenuOptions as $key => $valor)
-                        $parent_Menu2 .= "<option value='$key'>{$valor['Name']}</option>";
+                        $parent_Menu2 .= "<option value='$key'>"._tr($valor['Name'])."</option>";
                     $parent_Menu2 .= "</select>";
                     $parent_Menu2 .= "</td>";
                     $parent_Menu2 .= "<td></td><td></td><td></td>";
@@ -375,7 +375,7 @@ function mostrar_menu()
                 $parent_Menu .= "<td align='left'>";
                     $parent_Menu .= "<select name='parent_module' id='parent_module' onchange='mostrar_menu()'>";
                     foreach($arrMenuOptions as $key => $valor)
-                        $parent_Menu .= "<option value='$key'>$valor</option>";
+                        $parent_Menu .= "<option value='$key'>"._tr($valor)."</option>";
                     $parent_Menu .= "</select>";
                 $parent_Menu .= "</td>";
                 $parent_Menu .= "<td></td><td></td><td></td>";

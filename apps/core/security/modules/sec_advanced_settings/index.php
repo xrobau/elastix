@@ -34,30 +34,16 @@ require_once("libs/misc.lib.php");
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoChangePassword.class.php";
-
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
+   
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
+    
     global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+   
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name); 
 
     //conexion resource
     $pDB = new paloDB($arrConf['dsn_conn_database']);
@@ -90,7 +76,7 @@ function viewFormAdvancedSecuritySettings($smarty, $module_name, $local_template
     $smarty->assign("subtittle1", _tr("Enable access"));
     $smarty->assign("subtittle2", _tr("Change Password"));
     $smarty->assign("value_anonymous_sip", $value_anonymous_sip);
-    $smarty->assign("icon", "modules/".$module_name."/images/security_advanced_settings.png");
+    $smarty->assign("icon", "web/apps/".$module_name."/images/security_advanced_settings.png");
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Advanced Security Settings"), $_POST);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

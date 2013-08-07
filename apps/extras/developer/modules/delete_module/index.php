@@ -217,7 +217,7 @@ function report_delete_module($smarty, $module_name, $local_templates_dir, $arrL
     $level_1 .= "<td align='left'>";
         $level_1 .= "<select onchange='mostrar_menu()' name='module_level_1' id='module_level_1'>";
         foreach($arrMenuOptions as $key => $valor)
-            $level_1 .= "<option value='$key'>$valor</option>";
+            $level_1 .= "<option value='$key'>"._tr($valor)."</option>";
         $level_1 .= "</select>";
     $level_1 .= "</td>";
 
@@ -280,10 +280,10 @@ function mostrar_menu($level, $id_module_level_1, $id_module_level_2, $id_module
                 if($key == $id_module_level_2)
                 {
                     $tmp_level_2 = $key;
-                    $level_2 .= "<option value='$key' selected>{$valor['Name']}</option>";
+                    $level_2 .= "<option value='$key' selected>"._tr($valor['Name'])."</option>";
                 }
                 else
-                    $level_2 .= "<option value='$key'>{$valor['Name']}</option>";
+                    $level_2 .= "<option value='$key'>"._tr($valor['Name'])."</option>";
                 $i++;
             }
             if($tmp_level_2 == "")
@@ -314,9 +314,9 @@ function mostrar_menu($level, $id_module_level_1, $id_module_level_2, $id_module
                 foreach($arrMenuLevel_3 as $key2 => $valor2)
                 {
                     if($key2 == $id_module_level_3)
-                        $level_3 .= "<option value='$key2' selected>{$valor2['Name']}</option>";
+                        $level_3 .= "<option value='$key2' selected>"._tr($valor2['Name'])."</option>";
                     else
-                        $level_3 .= "<option value='$key2'>{$valor2['Name']}</option>";
+                        $level_3 .= "<option value='$key2'>"._tr($valor2['Name'])."</option>";
                 }
                 $level_3 .= "</select>";
         }else $level_3 .= "<td align='left'>".$arrLangModule["This module don't have level 3"]."</td>";

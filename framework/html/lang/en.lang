@@ -236,6 +236,8 @@ $arrLang=array(
 "Hide Filter" => "Hide Filter",
 "More Options" => "More Options",
 "Filter applied: " => "Filter applied: ",
-"Filter applied " => "Filter applied: "
+"Filter applied " => "Filter applied: ",
+"Monitoring" => "Recordings",
+"Voicemail" => "Voicemails"
 );
 ?>

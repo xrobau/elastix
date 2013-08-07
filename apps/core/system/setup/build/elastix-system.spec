@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Aug  7 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: RSS parser in News applet wants to output iso-8859-1. Force
+  the encoding to utf-8 instead.
+  SVN Rev[5580]
+
 * Thu Aug  1 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: attempt to backup and restore astdb.sqlite3 from
   Asterisk 11, as well as handling the case of an Asterisk 1.8 backup being

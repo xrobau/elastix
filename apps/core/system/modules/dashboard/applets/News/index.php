@@ -39,6 +39,7 @@ class Applet_News
         );
         
         define('MAGPIE_CACHE_DIR', '/tmp/rss-cache');
+        define('MAGPIE_OUTPUT_ENCODING', 'UTF-8');
         $infoRSS = @fetch_rss('http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw');
         $sMensaje = magpie_error();
         if (strpos($sMensaje, 'HTTP Error: connection failed') !== FALSE) {

@@ -33,30 +33,17 @@ include_once "libs/paloSantoDB.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoPortService.class.php";
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+     
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
+    
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+   
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
+    $local_templates_dir=getWebDirModule($module_name);
+   
     //conexion
     $pDB = new paloDB($arrConf['dsn_conn_database']);
 
@@ -102,7 +89,7 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
     $oGrid->setTitle(_tr("Define Ports"));
-    $oGrid->setIcon("modules/$module_name/images/security_define_ports.png");
+    $oGrid->setIcon("web/apps/$module_name/images/security_define_ports.png");
     $oGrid->pagingShow(true);
     $offset = $oGrid->calculateOffset();
     $url = array(
@@ -192,7 +179,7 @@ function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $titulo = "";
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    $smarty->assign("icon", "images/list.png");
+    $smarty->assign("icon", "../../../../../var/www/html/admin/web/_common/images/list.png");
     $protocol = getParameter("protocol");
     
     if( $action == 'new' )

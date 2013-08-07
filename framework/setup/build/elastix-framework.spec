@@ -312,6 +312,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Aug  7 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add border-spacing: 0 to styles for old themes so that
+  jQueryUI dialogs and widgets are displayed correctly.
+  SVN Rev[5573]
+
 * Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix sampler.php to comply with new location of libraries.
   SVN Rev[5344]

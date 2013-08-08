@@ -35,12 +35,12 @@ global $arrLangModule;
 $arrLangModule=array(
 "Date and Time Configuration"  =>  "Configuration Date/Temps",
 "Current Datetime"  =>  "Date et temps actuels",
-"New Date"  =>  "Nouvelle Date",
-"New Time"  =>  "Nouveau Temps",
+"New Date"  =>  "Nouvelle date",
+"New Time"  =>  "Nouvelle heure",
 "New Timezone"  =>  "Nouveau fuseau horaire",
-"The change of date and time can concern important  system processes."  =>  "Le changement de la date et du temps peuvent influencer sur d'important processus système.",
-"System time changed correctly" => "System time changed correctly",
-"You can not change the system time" => "You can not change the system time",
-"Can not find file" => "Can not find file",
+"The change of date and time can concern important  system processes."  =>  "Le changement de la date et de l'heure peuvent influencer sur d'importants processus systèmes.",
+"System time changed correctly" => "Date et heure système mis à jour",
+"You can not change the system time" => "Vous ne pouvez pas changer la date et heure système",
+"Can not find file" => "Impossible de trouver le fichier",
 );
 ?>

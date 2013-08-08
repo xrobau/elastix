@@ -31,11 +31,11 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Virtual Fax List" => "Liste des Fax virtuels",
+"Virtual Fax List" => "Liste des fax virtuels",
 "Virtual Fax Name" => "Nom du fax virtuel",
-"Fax Extension" => "Extension de Fax",
+"Fax Extension" => "Extension de fax",
 "Secret" => "Mot de Passe",
-"Destination Email" => "Associated Email",
+"Destination Email" => "Email destinataire",
 "Caller ID Name" => "Nom d'identification de l'appelant",
 "Caller ID Number" => "Numéro d'identification de l'appelant",
 "View Virtual Fax" => "Voir fax virtuel",

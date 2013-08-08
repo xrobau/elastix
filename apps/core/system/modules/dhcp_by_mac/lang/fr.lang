@@ -1,6 +1,6 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciÃ³n: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version: 2.0                                           |
   | http://www.elastix.org                                               |
@@ -38,16 +38,16 @@ $arrLangModule=array(
 "Search" => "Recherche",
 "Show" => "Afficher",
 "Hostname" => "Nom d'hôte",
-"New Dhcp Config" => "Nouvelle config DHCP",
-"View edit" => "Voir Éditer",
-"Are you sure you wish to delete the DHCP configuration." => "Êtes_vous sûr que vous souhaitiez effacer la configuration DHCP.",
-"The name of hostname is duplicated please changes to another name" => "The nom de l'h�te est dipliqué, le changer par un autre nom SVP.",
-"The following fields are duplicates or already exists" => "Les champs suivants sont en double ou d�j� existent.",
-"Assign IP Address to Host" => "Assign IP Address to Host",
-"IP Address" => "IP Address",
-"MAC Address" => "MAC Address",
-"Assign IP Address" => "Assign IP Address",
-"ex_hostname" => "(ex. myhostname)",
+"New Dhcp Config" => "Nouvelle configuration DHCP",
+"View edit" => "Voir/Modifier",
+"Are you sure you wish to delete the DHCP configuration." => "Etes-vous sûr de vouloir supprimer la configuration DHCP ?",
+"The name of hostname is duplicated please changes to another name" => "Le nom de l'hôte existe déjà, veuillez le changer pour un autre.",
+"The following fields are duplicates or already exists" => "Les champs suivants existent déjà ou sont des doublons.",
+"Assign IP Address to Host" => "Assigner l'adresse IP à l'hôte",
+"IP Address" => "Adresse IP",
+"MAC Address" => "Adresse MAC",
+"Assign IP Address" => "Assigner l'adresse IP",
+"ex_hostname" => "(ex. monserveur)",
 "ex_ipaddress" => "(ex. 127.0.0.1)",
 "ex_mac_address" => "(ex. AA:BB:CC:DD:EE:FF)",
 

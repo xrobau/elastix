@@ -1,0 +1,57 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-31                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2010-08-09 10:08:51 Mercy Anchundia manchundia@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"My Extension" => "Mon Extension",
+"no_extension" => "Votre compte utilisateur n'est associé à aucune extension. Vous pouvez lui en associer une en cliquant <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">ici</a>",
+"Call Waiting" => "Appel en attente",
+"Do Not Disturb" => "Ne pas déranger",
+"Error processing CallWaiting" => "Erreur lors du traitement de l'appel en attente",
+"Error processing Do Not Disturb" => "Erreur lors du traitement du Ne pas déranger",
+"Save Configuration" => "Sauvegarder la configuration",
+"Your configuration has been saved correctly" => "Votre configuration a bien été sauvegardée",
+"Call Forward" => "Transfert d'appel",
+"Call Forward on Unavailable" => "Transférer l'appel sur non disponibilité",
+"Call Forward on Busy" => "Transférer l'appel sur occupation",
+"Configure a phone number here..." => "Indiquez un numéro de téléphone ici ...",
+"Validation Error" => "Erreur de validation",
+"Please check your phone number" => "Veuillez vérifier votre numéro de téléphone",
+"Please check your phone number for Call Forward" => "Veuillez vérifier votre numéro de téléphone pour le transfert d'appel",
+"Please check your phone number for Call Forward On Unavailable" => "Veuillez vérifier votre numéro de téléphone pour le transfert d'appel sur non disponibilité",
+"Please check your phone number for Call Forward On Busy" => "Veuillez vérifier votre numéro de téléphone pour le transfert d'appel sur occupation",
+"Always" => "Toujours",
+"Never"  => "Jamais",
+"On-Demand" => "Sur demande",
+"Record Incoming" => "Enregistrer les entrants",
+"Record Outgoing" => "Enregistrer les sortants",
+"SETTINGS FOR YOUR EXTENSION:" => "REGLAGES POUR VOTRE EXTENSION :",
+"contact_admin" => "Votre compte utilisateur n'est associé à aucune extension. Veuillez demander à l'administrateur de vous en assigner une"
+);
+?>
+

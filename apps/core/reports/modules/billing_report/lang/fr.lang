@@ -48,14 +48,13 @@ $arrLangModule=array(
 "Duration" => "Durée",
 "Filter" => "Filtre",
 "Field" => "Champ",
-"Rate Value" => "Rate Value",
+"Rate Value" => "Tarif facturé",
 "Trunk" => "Trunk",
-"default" => "default",
-"Unknown" => "Unknown",
-"horas" => "horas",
-"minutos" => "minutos",
-"segundos" => "segundos",
-"Account Code" => "Account Code",
-
+"default" => "défaut",
+"Unknown" => "Inconnu",
+"horas" => "heures",
+"minutos" => "minutes",
+"segundos" => "secondes",
+"Account Code" => "Code de compte",
 );
 ?>

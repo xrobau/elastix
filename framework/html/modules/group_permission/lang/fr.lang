@@ -33,14 +33,14 @@
   $Id: fr.lang,v 1.8 2008/05/20 00:36:42 bmacias Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Show"=>"Afficher",
-"Apply"=>"Appliquer",
-"Resource"=>"Ressource",
-"Group" => "Group",
-"Group Permission" => "Group Permission",
-"View" => "View",
-"Create" => "Create",
-"Delete" => "Delete",
-"Update" => "Update",
+"Show" => "Afficher",
+"Apply" => "Appliquer",
+"Resource" => "Ressource",
+"Group" => "Groupe",
+"Group Permission" => "Permission de groupe",
+"View" => "Voir",
+"Create" => "Créer",
+"Delete" => "Supprimer",
+"Update" => "Mettre à jour",
 );
 ?>

@@ -49,7 +49,7 @@ $arrLangModule=array(
 "Mac Address" => "Adresse MAC",
 "DHCP Client List" => "Liste des clients DHCP",
 "See All DHCP Info" => "Voir toutes les informations DHCP",
-"IP Address" => "Adresse IP sûr",
+"IP Address" => "Adresse IP",
 "MAC Address" => "Adresse MAC",
 "View Details" => "Voir les détails",
 

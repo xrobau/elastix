@@ -31,13 +31,13 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Shutdown" => "Arrêt",
+"Shutdown" => "Arrêter",
 "Accept" => "Accepter",
 "Halt" => "Eteindre",
 "Reboot" => "Redémarrer",
 "Shutdown in progress" => "Arrêt en cours",
 "Your system in shutting down now. Please, try again later." => "Opération en cours. Veuillez patienter.",
-"The reboot signal has been sent correctly." => "The reboot signal has been sent correctly.",
-"Continue" => "Continue"
+"The reboot signal has been sent correctly." => "La demande de redémarrage a bien été envoyée.",
+"Continue" => "Continuer"
 );
 ?>

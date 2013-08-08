@@ -1,6 +1,6 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciÃ³n: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version: 2.0                                           |
   | http://www.elastix.org                                               |
@@ -31,32 +31,34 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Incoming Calls" => "Appels Entrants",
-"Outcoming Calls" => "Appels Sortants",
+"Incoming Calls" => "Appels entrants",
+"Outcoming Calls" => "Appels sortants",
 "Calls" => "Appels",
 "Start date" => "Du",
 "End date" => "Au",
 "Number" => "N°",
 "Extensions" => "Extensions",
-"Required Field" => "Champs requis",
-"Total Time" => "Durée Total",
-"In calls:" => "Appels arrivée :",
-"Out calls:" => "Appels Départ :",
+"Required Field" => "Champ requis",
+"Total Time" => "Durée totale",
+"In calls:" => "Appels entrants :",
+"Out calls:" => "Appels sortants :",
 "Show" => "Voir",
-"There are no data to present" => "Il n'y a pas de donnée � présenter.",
-"Number of Calls" => "Nombre d'Appels",
+"There are no data to present" => "Il n'y a pas de donnée à présenter.",
+"Number of Calls" => "Nombre d'appels",
 "Number Calls vs Queues" => "Nombre d'appels par files d'attente.",
 "Number of calls extension" => "Nombre d'appels pour l'extension ",
 "Here" => "ici",
-"Graphic Report" => "Rapport Graphique",
+"Graphic Report" => "Rapport graphique",
 "No exist calls for this number" => "Pas d'appel existant pour ce numéro",
 "Queue" => "File d'attente",
 "Trunk" => "Trunk",
-"Extention(number)" => "N° d'entension",
-"All" => "All",
-"No records found" => "No records found",
-"The extension" => "The extension",
-"does not have calls yet" => "does not have calls yet",
-"The extension must be numeric and can not start with zero" => "The extension must be numeric and can not start with zero"
+"Extention(number)" => "N° d'extension",
+"All" => "Tous",
+"No records found" => "Aucun enregistrement trouvé",
+"The extension" => "L'extension",
+"does not have calls yet" => "n'a pas encore d'enregistrement",
+"The extension must be numeric and can not start with zero" => "L'extension doit être numérique et ne peut pas commencer par un zéro",
+"Extension (Number)" => "Extension (numéro)",
 );
 ?>
+

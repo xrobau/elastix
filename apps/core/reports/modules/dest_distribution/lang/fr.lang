@@ -31,23 +31,23 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Filter" => "Filter",
-"Start Date" => "Start Date",
-"End Date" => "End Date",
-"Destination Distribution" => "Destination Distribution",
-"Criteria" => "Criteria",
-"Distribution by Time" => "Distribution by Time",
-"Distribution by Number of Calls" => "Distribution by Number of Calls",
-"Distribution by Cost" => "Distribution by Cost",
-"Date Range spans maximum number of days" => "Date Range spans maximum number of days",
-"ERROR" => "ERROR",
+"Filter" => "Filtrer",
+"Start Date" => "Date de début",
+"End Date" => "Date de fin",
+"Destination Distribution" => "Répartition par destination",
+"Criteria" => "Critère",
+"Distribution by Time" => "Répartition par date",
+"Distribution by Number of Calls" => "Répartition par nombre d'appels",
+"Distribution by Cost" => "Répartition par coût",
+"Date Range spans maximum number of days" => "La période s'étend sur un nombre maximal de jours",
+"ERROR" => "ERREUR",
 "Minutes" => "Minutes",
-"Number of Calls" => "Number of Calls",
-"others" => "others",
-"Rate Name" => "Rate Name",
-"default" => "default",
-"Duration in seconds" => "Duration in seconds",
-"Cost" => "Cost",
-"No records found" => "No records found"
+"Number of Calls" => "Nombre d'appels",
+"others" => "autres",
+"Rate Name" => "Nom du coût",
+"default" => "défaut",
+"Duration in seconds" => "Durée en secondes",
+"Cost" => "Coût",
+"No records found" => "Aucun enregistrement trouvé"
 );
 ?>

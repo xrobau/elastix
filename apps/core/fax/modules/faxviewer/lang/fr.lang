@@ -31,15 +31,15 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Fax Viewer" => "Visualisation de Fax",
+"Fax Viewer" => "Visualisation de fax",
 "Search" => "Chercher",
 "Company Name" => "Nom de la Société",
-"Company Fax" => "N° du Fax",
-"Fax Date" => "Date du Fax",
+"Company Fax" => "N° du fax",
+"Fax Date" => "Date du fax",
 "File" => "Fichier",
-"Fax Destiny" => "Destination du Fax",
+"Fax Destiny" => "Destination du fax",
 "No Data Found" => "Aucune donnée trouvée",
-"Are you sure you wish to delete fax (es)?" => "Etes vous sûr de vouloir effacer le(s) fax ?",
+"Are you sure you wish to delete fax (es)?" => "Etes-vous sûr de vouloir effacer le(s) fax ?",
 "Unable to eliminate pdf file from the path." => "Impossible de supprimer le fichier pdf du dossier.",
 "Unable to eliminate pdf file from the database." => "Impossible de supprimer le fichier pdf de la base de données.",
 "Type Fax" => "Type de Fax",

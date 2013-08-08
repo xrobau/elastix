@@ -37,13 +37,13 @@ $arrLangModule=array(
 "Simultaneous SIP Channels" => "Canaux SIP simultanés",
 "Simultaneous IAX Channels" => "Canaux IAX simultanés",
 "Simultaneous H323 Channels" => "Canaux H323 simultanés",
-"Simultaneous Local Channels" => "Canaux Locaux simultanés",
+"Simultaneous Local Channels" => "Canaux locaux simultanés",
 "Total Channels" => "Total Canaux",
 "Zap Channels" => "Canaux Zap",
 "SIP Channels" => "Canaux SIP",
 "IAX Channels" => "Canaux IAX",
 "H323 Channels" => "Canaux H323",
-"Local Channels" => "Canaux Locaux",
-"Nothing to show yet" => "Nothing to show yet"
+"Local Channels" => "Canaux locaux",
+"Nothing to show yet" => "Rien à afficher pour le moment"
 );
 ?>

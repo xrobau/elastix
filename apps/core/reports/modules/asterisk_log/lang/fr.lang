@@ -31,7 +31,7 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Search string" => "Chaine Spécifique",
+"Search string" => "Rechercher un texte",
 "Search" => "Chercher",
 "Search next" => "Suite",
 "offset" => "Offset",

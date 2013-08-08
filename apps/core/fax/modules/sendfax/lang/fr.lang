@@ -31,22 +31,21 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Send Fax" => "Emettre un Fax",
-"Destination fax numbers" => "N° Fax destinataire",
+"Send Fax" => "Emettre un fax",
+"Destination fax numbers" => "N° fax destinataire",
 "Fax Device to use" => "Fax à utiliser",
 "Text to FAX" => "Texte",
 "Send" => "Emettre",
-"Select the files to FAX" => "Selectionner le fichier pour le Fax",
+"Select the files to FAX" => "Selectionner le fichier pour le fax",
 "File Upload" => "Fichier à émettre",
 "Text Information" => "Information Texte",
-"Select a Fax Device" => "Selectionner un équipement Fax",
-"File to upload is empty" => "Le fichier à transmettre est vide!",
+"Select a Fax Device" => "Sélectionner un équipement fax",
+"File to upload is empty" => "Le fichier à transmettre est vide !",
 "Text to send is empty" => "Le texte à émettre est vide",
-"Please, select a valid Fax Device" => "Sélectionner un équipement Fax valide.",
-"Wrong type of file" => "Wrong type of file",
-"Types of files" => "Types of files supported: ",
-"Fax has been sent correctly" => "Fax has been sent correctly",
-"Notification Sucessfull" => "Notification Sucessfull",
-
+"Please, select a valid Fax Device" => "Sélectionner un équipement fax valide.",
+"Wrong type of file" => "Mauvais type de fichier",
+"Types of files" => "Types de fichiers supportés : ",
+"Fax has been sent correctly" => "Le fax a bien été expédié",
+"Notification Sucessfull" => "Succès de la notification",
 );
 ?>

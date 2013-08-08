@@ -31,13 +31,13 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Template Email" => "Gabarit Email",
-"Fax From" => "From (Email Address)",
-"Fax From Name" => "From (Name)",
-"Fax Suject" => "Subject",
-"Fax Content" => "Body",
-"Configuration Sending Fax Mail" => "Template for Outgoing FAX's email",
-"Edit Parameters" => "Editer les Paramètres",
+"Template Email" => "Modèle email",
+"Fax From" => "De (Adresse email)",
+"Fax From Name" => "De (Nom)",
+"Fax Suject" => "Sujet",
+"Fax Content" => "Corps",
+"Configuration Sending Fax Mail" => "Modèle pour les emails d'envoi de fax",
+"Edit Parameters" => "Modifier les paramètres",
 
 );
 ?>

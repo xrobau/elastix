@@ -33,7 +33,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Hardware Detector" => "Détection matériel",
 "Ports not Founds" => "Ports non trouvés",
-"Card" => "Carte",
+"Card" => "Span",
 "Type port" => "Type",
 "No. Port" => "Port N°",
 "(In Use)" => "Actif",

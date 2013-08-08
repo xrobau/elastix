@@ -42,13 +42,13 @@ $arrLangModule=array(
 "Destiny directory couldn't be created" => "Le répertoire de destination n'a pas pu être créé",
 "File Upload" => "Fichier à envoyer",
 "ERROR" => "ERREUR",
-"You don't have extension number associated with user" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
+"You don't have extension number associated with user" => "Votre compte utilisateur n'est associé à aucune extension. Vous pouvez lui en associer une en cliquant <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">ici</a>",
 "The call couldn't be realized" => "L'appel ne peut être réalisé.",
 "Error copying the file" => "Erreur de copie de fichier",
 "Message" => "Message",
-"Possible file upload attack" => "Possibilit� d'attaque du fichier transmis.",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
-"You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup" => "You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup",
-"You do not need to add an extension to the record name" => "You do not need to add an extension to the record name"
+"Possible file upload attack" => "Possibilité d'attaque du fichier transmis.",
+"contact_admin" => "Votre compte utilisateur n'est associé à aucune extension. Veuillez demander à l'administrateur de vous en assigner une",
+"You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup" => "Vous pouvez commencer votre enregistrement après le bip sonore. Une fois celui-ci terminé, vous devez appuyez sur la touche # puis raccrocher",
+"You do not need to add an extension to the record name" => "Vous n'avez pas besoin d'ajouter une extension de fichier au nom de l'enregistrement"
 );
 ?>

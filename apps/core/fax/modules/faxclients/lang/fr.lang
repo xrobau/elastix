@@ -31,10 +31,10 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Fax Clients" => "Clients Fax",
+"Fax Clients" => "Clients fax",
 "Clients allowed to send faxes" => "Clients autorisés à envoyer des fax",
 "No IP entered, you must keep at least the IP 127.0.0.1" => "Aucune IP entrée, vous devez garder au moins l'IP 127.0.0.1",
-"These IPs are allowed to send faxes through Elastix.  You must insert one IP per row.  We recommend keeping localhost and 127.0.0.1  in the configuration because some processes could need them." => "Ces IPs sont autorisées à envoyer des fax à travers Elastix.<br>Vous devez insérer une IP par ligne.  Nous recommandons de garder <br> localhost et 127.0.0.1 dans la configuration car certains <br> processus les utilisent.",
+"These IPs are allowed to send faxes through Elastix.  You must insert one IP per row.  We recommend keeping localhost and 127.0.0.1  in the configuration because some processes could need them." => "Ces IPs sont autorisées à envoyer des fax à travers Elastix. Vous devez insérer une IP par ligne. Il est recommandé de garder localhost et 127.0.0.1 dans la configuration car certains processus les utilisent.",
 "Could not read the clients configuration." => "Impossible de lire la configuration clients.",
 "IP" => "IP",
 "Error" => "Erreur",

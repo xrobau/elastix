@@ -130,6 +130,13 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Aug  8 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: file restore can now be a list of file options, so use
+  selected option instead of possible list in chown and chgrp.
+- FIXED: Backup/Restore: sometimes the PATH is not accesible from scripts
+  invoked from backupengine, fixed by hardcoding a path in putenv().
+  SVN Rev[5640]
+
 * Wed Aug  7 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: RSS parser in News applet wants to output iso-8859-1. Force
   the encoding to utf-8 instead.

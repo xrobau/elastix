@@ -434,6 +434,9 @@ ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
 
 load_default_timezone();
 
+// Some scripts require programs in /sbin but sudo resets env
+putenv('PATH=/usr/kerberos/sbin:/usr/kerberos/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin');
+
 // Parse command-line options
 $opt = Console_Getopt::getopt($argv, '', array(
     'backup',       // Run a backup operation
@@ -1159,11 +1162,11 @@ function restoreComponent_file($sLevelTag, &$backupComponent, $sWorkingDir)
     } else {
     	// Restore owner and permissions
         if (isset($backupComponent['restoreperm'])) {
-            chmod($backupComponent['path'], $backupComponent['restoreperm']);
+            chmod($backuppath, $backupComponent['restoreperm']);
         }
         if (isset($backupComponent['restoreown'])) {
-            chown($backupComponent['path'], $backupComponent['restoreown'][0]);
-            chgrp($backupComponent['path'], $backupComponent['restoreown'][1]);
+            chown($backuppath, $backupComponent['restoreown'][0]);
+            chgrp($backuppath, $backupComponent['restoreown'][1]);
         }
     }
     return $bResult;

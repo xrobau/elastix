@@ -70,6 +70,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Aug  8 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Language Admin: (jbriones) relax strict validation on language 
+  translation in order to allow an empty arrLangModule.
+  SVN Rev[5590]
+
 * Wed Jul 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-5
 - Bump version for release.
 - FIXED: Delete Module: fix constructor call for paloSantoNavigation.

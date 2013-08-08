@@ -1,6 +1,6 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciÃ³n: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version: 2.0                                           |
   | http://www.elastix.org                                               |
@@ -31,27 +31,27 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"New Email list" => "Nouvelle liste d'eMail",
-"Are you sure you wish to delete the email list." => "Êtes_vous sûr que vous souhaitiez effacer la liste de courrier �lectronique ?",
-"Email List Name" => "Nom de la liste d'eMail",
-"Email Member" => "Email Membre",
-"Email List Members" => "Liste des membres eMail.",
+"New Email list" => "Nouvelle liste de courrier électronique",
+"Are you sure you wish to delete the email list." => "Etes-vous sûr de vouloir supprimer la liste de courrier électronique ?",
+"Email List Name" => "Nom de la liste de courrier électronique",
+"Email Member" => "Email du membre",
+"Email List Members" => "Email de la liste des membres",
 "Number of Accounts" => "Nombre de comptes",
-"Dhcp Client List" => "Liste des Clients DHCP",
+"Dhcp Client List" => "Liste des clients DHCP",
 "New Dhcp client" => "Nouveau client DHCP",
-"Are you sure you wish to delete the Ip." => "Êtes_vous sûr que vous souhaitiez effacer l'adresse Ip ?",
-"Ip Host" => "Ip Hôte",
+"Are you sure you wish to delete the Ip." => "Etes-vous sûr de vouloir supprimer l'adresse IP ?",
+"Ip Host" => "IP hôte",
 "Action" => "Action",
 "See All Dhcp Info" => "Voir les info DHCP",
-"Lease Ip" => "Bail Ip",
-"Start Date" => "Date (début)",
-"End Date" => "Date (Fin)",
+"Lease Ip" => "Bail IP",
+"Start Date" => "Date de début",
+"End Date" => "Date de fin",
 "Mac Address" => "Adresse MAC",
-"DHCP Client List" => "DHCP Client List",
-"See All DHCP Info" => "See All DHCP Info",
-"IP Address" => "IP Address",
-"MAC Address" => "MAC Address",
-"View Details" => "View Details",
+"DHCP Client List" => "Liste des clients DHCP",
+"See All DHCP Info" => "Voir toutes les informations DHCP",
+"IP Address" => "Adresse IP sûr",
+"MAC Address" => "Adresse MAC",
+"View Details" => "Voir les détails",
 
 );
 ?>

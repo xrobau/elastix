@@ -37,7 +37,7 @@ $arrLangModule=array(
 "IP" => "IP",
 "Mask" => "Masque",
 "MAC Address" => "Adresse MAC",
-"HW Info" => "Info HW",
+"HW Info" => "Informations matériel",
 "Status" => "Statut",
 "Ethernet Interfaces List" => "Liste des interfaces Ethernet",
 "Connected" => "Connecté",
@@ -56,7 +56,7 @@ $arrLangModule=array(
 "Edit Network Parameters" => "Editer les paramètres réseau",
 "Required field" => "Champ requis",
 "Apply changes" => "Appliquer les changements",
-"Are you sure you want to edit network parameters?" => "Etes vous sûr de vouloir modifier les paramètres réseau ?",
+"Are you sure you want to edit network parameters?" => "Etes-vous sûr de vouloir modifier les paramètres réseau ?",
 
 );
 ?>

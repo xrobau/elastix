@@ -29,9 +29,9 @@
   | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
-global $arrLangModulegModule;
-$arrLangModulegModule=array(  
-"Hold Time" => "Temps de prise",
+global $arrLangModule;
+$arrLangModule=array(  
+"Hold Time" => "Temps de pause",
 "Cola" => "File",
 "date" => "Date",
 "query" => "Chercher",
@@ -46,13 +46,14 @@ $arrLangModulegModule=array(
 "Ingoing" => "Entrant",
 "Outgoing" => "Sortant",
 "Todas" => "Tous",
-"Exitosas" => "R&eacute;ussis",
+"Exitosas" => "Réussis",
 "Abandonadas" => "Perdus",
-"No Realizadas" => "Non R&eacute;alis&eacute;s",
-"Total Calls" => "Total des Appels",
+"No Realizadas" => "Non réalisés",
+"Total Calls" => "Total des appels",
 "Total" => "Total",
-"Tiempo Promedio Espera(Seg)" => "Temps d'Attente Moyen (Seg)",
-"Espera Mayor(seg)" => "Meilleure Attente",
+"Tiempo Promedio Espera(Seg)" => "Temps d'attente myen (sec)",
+"Espera Mayor(seg)" => "Meilleure attente (sec)",
 
 );
 ?>
+

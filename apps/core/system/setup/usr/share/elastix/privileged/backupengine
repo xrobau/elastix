@@ -1299,6 +1299,8 @@ function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
 
     if (file_exists('/usr/sbin/astdb2sqlite3') && file_exists($sWorkingDir.'/astdb')) {
         // Backup originated from asterisk 1.8 and restored on asterisk 11
+		if (file_exists('/var/lib/asterisk/astdb.sqlite3'))
+			unlink('/var/lib/asterisk/astdb.sqlite3');
         system('/usr/sbin/astdb2sqlite3 /var/lib/asterisk/astdb');
     }
 

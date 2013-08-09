@@ -29,11 +29,11 @@
 global $arrLangModule;
 $arrLangModule = array(
     "Dashboard" => "Tableau de bord",
-    "You haven't extension" => "L'extension n'a pas été affectée.",
+    "You haven't extension" => "Vous n'avez pas d'extension.",
     "System Resources" => "Ressources système",
     "Processes Status" => "État des Processus",
     "Hard Drives" => "Disque dur",
-    "Performance Graphic" => "Performance Graphique",
+    "Performance Graphic" => "Graphique des performances",
     "News" => "Nouveaux",
     "Communication Activity" => "Activité des Communications",
     "Calendar" => "Calendrier",

@@ -33,7 +33,7 @@ $arrLangModule = array(
     "answered" => "<font color='green'><b>Répondu</b></font>",
     "missed" => "<font color='red'><b>Manqué</b></font>",
     "unknow" => "<b>Inconnu</b>",
-    "call record" => "{état} appel du {date} du n° {source}",
-    "call duration" => " et {heure} secs. de durée.",
+    "call record" => "{status} appel du {date} du n° {source}",
+    "call duration" => " et {time} secs. de durée.",
 );
 ?>

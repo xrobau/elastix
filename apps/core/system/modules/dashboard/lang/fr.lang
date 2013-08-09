@@ -39,5 +39,8 @@ $arrLangModule = array(
     "Calendar" => "Calendrier",
     "Calls" => "Appels",
     "Telephony Hardware" => "Matériel Téléphonique",
+    "Emails" => "Emails",
+    "Faxes" => "Faxs",
+    "Loading" => "Chargement",
 );
 ?>

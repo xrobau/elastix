@@ -30,6 +30,6 @@ global $arrLangModule;
 $arrLangModule = array(
     "You don't recibed voicemails" => "Aucun message vocal reçu.",
     "unknow" => "<b>Inconnu</b>",
-    "voicemail recived" => "De la boîte vocale {source} du {date} et {durée} secondes",
+    "voicemail recived" => "De la boîte vocale {source} du {date} et {duration} secondes",
 );
 ?>

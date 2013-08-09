@@ -45,6 +45,7 @@ mkdir -p $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/var/www/db
 mkdir -p $RPM_BUILD_ROOT/var/www/html
 mkdir -p $RPM_BUILD_ROOT/var/www/backup
+mkdir -p $RPM_BUILD_ROOT/var/lib/php/session-asterisk
 
 # ** /usr path ** #
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
@@ -247,6 +248,26 @@ fi
 # Para q se actualice smarty (tpl updates)
 rm -rf /var/www/html/var/templates_c/*
 
+# Patch elastix.ini to work around %config(noreplace) in previous versions 
+sed --in-place "s,/tmp,/var/lib/php/session-asterisk,g" /etc/php.d/elastix.ini 
+if [ $1 -eq 1 ]; then #install
+    /sbin/service httpd status > /dev/null 2>&1
+    if [ "$?" == "0" ]; then
+        echo "Restarting apache..."
+        /sbin/service httpd restart > /dev/null 2>&1
+    fi
+elif [ $1 -eq 2 ]; then #update
+    /sbin/service httpd status > /dev/null 2>&1
+    if [ "$?" == "0" ]; then
+        # Para versiones menores a 2.4.0-11 se debe reiniciar el apache debido a cambios en elastix.ini
+        compareVersion "$preversion" "2.4.0-11"
+        if [ "$?" == "9" ]; then
+            echo "Restarting apache..."
+            /sbin/service httpd restart > /dev/null 2>&1
+        fi
+    fi
+fi
+
 
 %preun
 # Reverse the patching of httpd.conf
@@ -304,8 +325,16 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/generic-cloexec
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
+%defattr(770, root, asterisk)
+/var/lib/php/session-asterisk
 
 %changelog
+* Fri Aug  9 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: switch PHP session directory from /tmp to 
+  /var/lib/php/session-asterisk in order to prevent sessions from being removed
+  by systemd. Fixes Elastix bug #1661.
+  SVN Rev[5647]
+
 * Wed Aug  7 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: add help link and help template to blackmin theme.
   SVN Rev[5578]

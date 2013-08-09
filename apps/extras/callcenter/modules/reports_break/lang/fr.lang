@@ -54,7 +54,7 @@ global $arrLangModule;
 "Error cargando listado de breaks tomados" => "Erreur en chargeant la liste des pauses prises",
 "Debe ingresar una fecha" => "Vous devez entrer une date",
 "Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
-"Validation Error" => "Erreur Validation",
+"Validation Error" => "Erreur de validation",
 "The following fields contain errors" => "Les champs suivants contiennent des erreurs",
 "No register break in database" => "Aucune pause enregistr&eacute;e dans la base de donn&eacute;es",
 "Start Date" => "D&eacute;but",

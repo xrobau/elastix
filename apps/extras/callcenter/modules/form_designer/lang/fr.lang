@@ -91,10 +91,10 @@ $arrLangModule=array(
 "Status" => "Etat",
 "Active" => "Actif",
 "Inactive" => "Inactif",
-"View" => "Vois",
+"View" => "Voir",
 "All" => "Tout",
 "Form Designer" => "Concepteur du formulaire",
-"No Data Found" => "No Data Found",
+"No Data Found" => "Aucune donnée trouvée",
 
 );
 ?>

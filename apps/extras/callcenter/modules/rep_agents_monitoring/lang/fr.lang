@@ -31,18 +31,19 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Agents Monitoring" => "Contr&ocirc;le des Agents",
+"Agents Monitoring" => "Contrôle des Agents",
 "Queue" => "File",
 "Agent" => "Agent",
-"Current status" => "Etat Actuel",
-"Total calls" => "Total des appels",
-"Total login time" => "Dur&eacute;e Totale login",
-"Total talk time" => "Total temps de parole",
-"No registered" => "Non enregistr&eacute;",
-"LOGOUT" => "Logout",
+"Current status" => "Etat actuel",
+"Total calls" => "Appels totaux",
+"Total login time" => "Durée totale de connexion",
+"Total talk time" => "Temps total de parole",
+"No registered" => "Non enregistré",
+"LOGOUT" => "Déconnexion",
 "Agents" => "Agents",
 "Total" => "Total",
-"Number" => "N&deg;",
+"Number" => "N°",
 
 );
 ?>
+

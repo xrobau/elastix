@@ -28,17 +28,17 @@
   $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Total_calls" => "Appels Totals",
+    "Total_calls" => "Appels Totaux",
     "OK" => "Enregistré",
     "NO_OK" => "Non enregistré",
     "internal_calls" => "Appels Internes",
     "external_calls" => "Appels Externes",
-    "total_channels" => "Canaux Totals",
-    "Queues_waiting" => "Appels dans la file",
+    "total_channels" => "Canaux Totaux",
+    "Queues_waiting" => "Files d'attente",
     "Waiting" => "En attente",
     "Network_traffic" => "Trafic réseau",
     "sip_extensions" => "Extensions SIP",
     "iax_extensions" => "Extensions IAX",
-    "Error when connecting to Asterisk Manager" => "Erreur lors de la connexion à l'Asterisk Manager",
+    "Error when connecting to Asterisk Manager" => "Erreur lors de la connexion au manager Asterisk",
 );
 ?>

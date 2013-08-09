@@ -31,7 +31,7 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Incoming calls monitoring" => "Contr&ocirc;le appels entrants",
+"Incoming calls monitoring" => "Contr&ocirc;le d'appels entrants",
 "Queue" => "File",
 "Entered" => "Re&ccedil;u",
 "Answered" => "R&eacute;pondu",

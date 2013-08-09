@@ -1,6 +1,6 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciÃ³n: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version: 2.0                                           |
   | http://www.elastix.org                                               |
@@ -33,25 +33,26 @@ global $arrLangModule;
 $arrLangModule=array(  
 "client" => "client",
 "fileCRM" => "fichier CRM",
-"Select file upload" => "Sélectionnez le fichier àcharger",
+"Select file upload" => "Sélectionner le fichier à charger",
 "Result" => "Résultat",
-"Load File" => "Charger Fichier",
-"Format File" => "Format Fichier",
+"Load File" => "Charger un fichier",
+"Format File" => "Format du fichier",
 "Upload" => "Charger",
 "File" => "Fichier",
 "Error" => "Erreur",
 "Error while loading file" => "Erreur en chargeant le fichier",
 "Invalid CSV File" => "Fichier CSV invalide",
-"Invalid phone number" => "Invalid phone number",
+"Invalid phone number" => "Numéro de téléphone incorrect",
 "Line" => "Ligne",
-"Unsupported attribute" => "Attribut non-suport&eacute;",
+"Unsupported attribute" => "Attribut non supporté",
 "Invalid Cedula/RUC" => "Fiche invalide",
 "Missing or empty name" => "Nom manquant ou vide",
 "Missing or empty surname" => "Nom de famille manquant ou vide",
 "Download contacts" => "Téléchargement des contacts",
-"Inserted records" => "Inserrer un enregistrement",
+"Inserted records" => "Insérer un enregistrement",
 "Updated records" => "Actualiser un enregistrement",
-"Detected charset" => "Jeu de caract�res détecté",
+"Detected charset" => "Jeu de caractères détecté",
 
 );
 ?>
+

@@ -29,7 +29,7 @@
 global $arrLangModule;
 $arrLangModule = array(
     "Error at read yours calls." => "Impossible d'accéder à la liste d'appels",
-    "You don't recibed calls" => "Aucun appel receçu.",
+    "You don't recibed calls" => "Aucun appel reçu.",
     "answered" => "<font color='green'><b>Répondu</b></font>",
     "missed" => "<font color='red'><b>Manqué</b></font>",
     "unknow" => "<b>Inconnu</b>",

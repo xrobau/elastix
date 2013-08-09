@@ -31,18 +31,20 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Reporte de Troncales usadas por Hora en el dia" => "Trunks utils&eacute; par heure",
-"Time Period " => "Dur&eacute;e de la p&eacute;riode ",
-"Entered" => "Re&ccedil;u",
-"Answered" => "R&eacute;pondu",
-"Abandoned" => "Abandonn&eacute;",
+"Reporte de Troncales usadas por Hora en el dia" => "Trunks utilisés par heure",
+"Time Period " => "Durée de la période ",
+"Entered" => "Reçu",
+"Answered" => "Répondu",
+"Abandoned" => "Abandonné",
 "In queue" => "Dans la file",
-"Without monitoring " => "Sans Contr&ocirc;le ",
+"Without monitoring " => "Sans contrôle ",
 "Queue" => "File",
 "Start date" => "Du",
 "End date" => "Au",
 "Total" => "Total",
 "Trunk" => "Trunk",
-
+"(All)" => "(Tous)",
+"Show" => "Voir",
 );
 ?>
+

@@ -40,5 +40,6 @@ $arrLangModule = array(
     "sip_extensions" => "Extensions SIP",
     "iax_extensions" => "Extensions IAX",
     "Error when connecting to Asterisk Manager" => "Erreur lors de la connexion au manager Asterisk",
+    "channels" => "canaux",
 );
 ?>

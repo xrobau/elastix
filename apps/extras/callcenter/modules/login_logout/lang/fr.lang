@@ -51,6 +51,9 @@ $arrLangModule=array(
 "Total" => "Total",
 "Detallado" => "Détaillé",
 "General" => "Général",
-
+"Incoming Queue" => "File entrante",
+"All" => "Toutes",
+"Llamadas entrantes" => "Appels entrants",
+"Llamadas salientes" => "Appels sortants",
 );
 ?>

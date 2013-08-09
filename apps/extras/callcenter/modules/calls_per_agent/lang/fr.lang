@@ -31,11 +31,11 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Calls per Agent" => "Appels par Agent",
-"Start Date" => "Date de D&eacute;but",
-"End Date" => "Date de Fin",
+"Calls per Agent" => "Appels par agent",
+"Start Date" => "Date de début",
+"End Date" => "Date de fin",
 "Query" => "Filtrer",
-"No.Agent" => "No. Agent",
+"No.Agent" => "N° d'agent",
 "Agent" => "Agent",
 "Queue" => "File",
 "Type" => "Type",
@@ -43,14 +43,15 @@ $arrLangModule=array(
 "Text" => "Texte",
 "Error" => "Erreur",
 "Transfer" => "Transfert",
-"Duration" => "Dur&eacute;e",
+"Duration" => "Durée",
 "Average" => "Moyenne",
 "Call longest" => "Appel le plus long",
-"Calls answered" => "Appels r&eacute;pondus",
-"Error when connecting to database" => "Erreur de connexion &agrave; la base de donn&eacute;es",
+"Calls answered" => "Appels répondus",
+"Error when connecting to database" => "Erreur de connexion à la base de données",
 "Debe ingresar una fecha" => "Vous devez entrer une date",
 "Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
 "Total" => "Total",
 
 );
 ?>
+

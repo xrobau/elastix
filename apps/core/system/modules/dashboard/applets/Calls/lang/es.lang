@@ -30,5 +30,11 @@ global $arrLangModule;
 $arrLangModule = array(
     "answered" => "<font color='green'><b>Contestada</b></font>",
     "missed" => "<font color='red'><b>Perdida</b></font>",
+    "Error at read yours calls." => "Falló al acceder a la lista de llamadas.",
+    "You don't recibed calls" => "No se han recibido llamadas.",
+    "unknow" => "<b>desconocido</b>",
+    "call record" => "{status} llamada con fecha {date} desde el número {source}",
+    "call duration" => " y {time} seg. de duración.",
+
 );
 ?>

@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Aug  9 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: further to choosing between astdb and astdb.sqlite3,
+  astdb.sqlite3 must be deleted before running astdb2sqlite3.
+  SVN Rev[5717] 
+
 * Thu Aug  8 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: file restore can now be a list of file options, so use
   selected option instead of possible list in chown and chgrp.

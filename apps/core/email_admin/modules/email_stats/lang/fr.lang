@@ -25,7 +25,7 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2011-06-01 10:06:04 Alberto Santos asantos@palosanto.com Exp $ */
+  $Id: fr.lang,v 1.1 2011-06-01 10:06:04 Alberto Santos asantos@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
 "Incoming Email" => "Emails entrants",
@@ -37,4 +37,3 @@ $arrLangModule=array(
 "Incoming Email by Month" => "Emails entrants par mois"
 );
 ?>
-

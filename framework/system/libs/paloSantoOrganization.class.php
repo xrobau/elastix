@@ -105,7 +105,7 @@ class paloSantoOrganization{
      * @return mixed => false in case of errors
      *                  array => list of organizations
      */
-    function getOrganization($arrProp){
+    function getOrganization($arrProp = array()){
         $arrWhere=array();
         $arrParam=array();
         $query="SELECT * FROM organization WHERE id!=1";

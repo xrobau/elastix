@@ -336,6 +336,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: allow calling paloSantoOrganization::getOrganization()
+  with no parameters, using an empty array as default parameter. Several modules
+  want to work this way.
+  SVN Rev[5759]   
 - FIXED: Framework: add missing reference to global $arrConf on paloForm.
   SVN Rev[5758]
 - FIXED: Framework: fix blackmin and giox themes to work with new filesystem

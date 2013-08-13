@@ -3,20 +3,14 @@ require_once "libs/paloSantoForm.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    require_once "modules/$module_name/configs/default.conf.php";
     
-	load_language_module($module_name);
-
     //global variables
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
 
     //folder path for custom templates
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
-    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+   $local_templates_dir=getWebDirModule($module_name);
 
     $txtCommand = isset($_POST['txtCommand'])? trim($_POST['txtCommand']) : '';
     $oForm = new paloForm($smarty, array());
@@ -25,7 +19,7 @@ function _moduleContent(&$smarty, $module_name)
         'command'   =>  _tr('Command'),
         'txtCommand'=>  htmlspecialchars($txtCommand),
         'execute'   =>  _tr('Execute'),
-        'icon'      =>  "modules/$module_name/images/pbx_tools_asterisk_cli.png",
+        'icon'      =>  "web/apps/$module_name/images/pbx_tools_asterisk_cli.png",
     ));
 
     $result = "";

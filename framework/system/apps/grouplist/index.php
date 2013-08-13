@@ -27,31 +27,25 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 afigueroa Exp $ */
 
-function _moduleContent(&$smarty, $module_name)
-{
     include_once("libs/paloSantoDB.class.php");
     include_once("libs/paloSantoGrid.class.php");
     include_once("libs/paloSantoACL.class.php");
-    include_once "modules/$module_name/configs/default.conf.php";
 	include_once "libs/paloSantoOrganization.class.php";
     include_once("libs/paloSantoConfig.class.php");
 	include_once "libs/paloSantoForm.class.php";
 
-    load_language_module($module_name);
-
+function _moduleContent(&$smarty, $module_name)
+{
     //global variables
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
 
 
-    /////conexion a php
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
 
-    //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+     //folder path for custom templates
+    $local_templates_dir=getWebDirModule($module_name);
 
 
     if(!empty($pDB->errMsg)) {
@@ -181,7 +175,7 @@ function reportGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 	}
 
 	$arrGrid = array("title"    => _tr("Group List"),
-					"icon"     => "/modules/$module_name/images/system_groups.png",
+					"icon"     => "web/apps/$module_name/images/system_groups.png",
 					"columns"  => array(0 => array("name"      => _tr("Group"),
 													"property1" => ""),
 										1 => array("name"      => _tr("Organization"),
@@ -190,13 +184,13 @@ function reportGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 												"property1" => "")
 										)
 					);
-
-	if($pORGZ->getNumOrganization() > 1){
+     
+	if($pORGZ->getNumOrganization(array()) >= 1){
 		if($userLevel1 == "admin")
 			$oGrid->addNew("create_group",_tr("Create New Group"));
         if($userLevel1 == "superadmin"){
             $arrOrgz=array(0=>"all");
-            foreach(($pORGZ->getOrganization()) as $value){
+            foreach(($pORGZ->getOrganization(array())) as $value){
                 if($value["id"]!=1)
                     $arrOrgz[$value["id"]]=$value["name"];
             }
@@ -306,7 +300,7 @@ function viewFormGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("EDIT", _tr("Edit"));
     $smarty->assign("DELETE", _tr("Delete"));
-    $smarty->assign("icon","modules/$module_name/images/system_groups.png");
+    $smarty->assign("icon","web/apps/$module_name/images/system_groups.png");
     $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
 	$smarty->assign("userLevel", $userLevel1);
 	$smarty->assign("id_group", $idGroup);

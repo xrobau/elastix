@@ -13,17 +13,17 @@
             <group id="1" name="administrator" desc="total access"></group>
         </permissions>
     </menuitem>
-	<menuitem menuid="sphones"            desc="Softphones"         parent="downloads"  module="no" link="static/softphones.htm"                order="31">
+	<menuitem menuid="sphones"            desc="Softphones"         parent="downloads"  module="yes" link=""          order="31">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
         </permissions>
     </menuitem>
-	<menuitem menuid="faxutils"           desc="Fax Utilities"      parent="downloads"  module="no" link="static/faxutils.htm"                  order="32">
+	<menuitem menuid="faxutils"           desc="Fax Utilities"      parent="downloads"  module="yes" link=""          order="32">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
         </permissions>
     </menuitem>
-	<menuitem menuid="instantmessaging"   desc="Instant Messaging"  parent="downloads"  module="no" link="static/instantmessaging.htm"          order="33">
+	<menuitem menuid="instantmessaging"   desc="Instant Messaging"  parent="downloads"  module="yes" link=""          order="33">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
         </permissions>

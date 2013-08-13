@@ -35,12 +35,12 @@
 * la tabla globals contiene los valores de la variables globales
   usadas dentro de cada organizacion
 */
-$elxPath="/usr/share/elastix";
-include_once "$elxPath/libs/paloSantoACL.class.php";
-include_once "$elxPath/libs/paloSantoConfig.class.php";
-include_once "$elxPath/libs/paloSantoAsteriskConfig.class.php";
-include_once "$elxPath/libs/extensions.class.php";
-include_once "$elxPath/libs/misc.lib.php";
+
+include_once "libs/paloSantoACL.class.php";
+include_once "libs/paloSantoConfig.class.php";
+include_once "libs/paloSantoAsteriskConfig.class.php";
+include_once "libs/extensions.class.php";
+include_once "libs/misc.lib.php";
 
 
 class paloGlobalsPBX extends paloAsteriskDB{

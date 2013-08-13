@@ -36,18 +36,12 @@ require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    include_once "modules/$module_name/configs/default.conf.php";
-
-    load_language_module($module_name);
-
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
 
     //folder path for custom templates
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
-    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     $sContenidoModulo = '';
     $sAccion = getParameter('action');
@@ -143,7 +137,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     $arrGrid = array(
         "title"    => _tr("File Editor"),
         "url"      => array('menu' => $module_name, 'file' => $sSubStrArchivo ),
-        "icon"     => "/modules/$module_name/images/pbx_tools_asterisk_file_editor.png",
+        "icon"     => "web/apps/$module_name/images/pbx_tools_asterisk_file_editor.png",
         "width"    => "99%",
         "start"    => $inicio,
         "end"      => $fin,

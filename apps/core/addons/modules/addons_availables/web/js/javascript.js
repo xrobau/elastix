@@ -331,7 +331,7 @@ function ocultar_dialogo_progreso()
 function loadingAddons()
 {
      var loadingHTML = "<div style='text-align: center; padding: 40px;'>"
-			    +"<img src='images/loading.gif' />"
+			    +"<img src='../../web/_common/images/loading.gif' />"
 		      +"</div>";
      $('#addonlist').empty().append(loadingHTML);
 }

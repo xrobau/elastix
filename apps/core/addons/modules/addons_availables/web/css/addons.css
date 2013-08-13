@@ -35,7 +35,7 @@
 	border-top: 1px solid #aaa;
 	border-bottom: 1px solid #aaa;
 	/* background-image: -moz-linear-gradient(center top , #f0f0f0, #cccccc);*/
-	background: url(../../../images/addons_header_row_bg.png) repeat-x top;
+	background: url(../images/addons_header_row_bg.png) repeat-x top;
 }
 .neo-addons-header-row-filter {
 	position:relative;
@@ -114,7 +114,7 @@
 	background-color:#4D90FE;
 	border: 1px solid #3079ED;
 	/* background-image: -moz-linear-gradient(center top , #4D90FE, #4787ED); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #4D90FE;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #4D90FE;
 	padding:5px 0px 0px 5px;
 	margin:0px 0px 0px 0px;
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
@@ -136,7 +136,7 @@
 	border: 1px solid #3079ED;
 	border-left: 1px solid #5099FF;
 	/* background-image: -moz-linear-gradient(center top , #4D90FE, #4787ED); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #4D90FE;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #4D90FE;
 	color:#FFF;
 	padding:4px 0px 0px 0px;
 	margin:0px 0px 0px 0px;
@@ -155,7 +155,7 @@
 	background-color:#48b917;
 	border: 1px solid #339900;
 	/* background-image: -moz-linear-gradient(center top , #48b917, #339900); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #48b917;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #48b917;
 	padding:5px 0px 0px 5px;
 	margin:0px 0px 0px 0px;
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
@@ -178,7 +178,7 @@
 	border: 1px solid #339900;
 	border-left: 1px solid #66cc33;
 	/* background-image: -moz-linear-gradient(center top , #48b917, #339900); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #48b917;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #48b917;
 	color:#FFF;
 	padding:4px 0px 0px 0px;
 	margin:0px 0px 0px 0px;
@@ -197,7 +197,7 @@
 	background-color:#cc0000;
 	border: 1px solid #990000;
 	/* background-image: -moz-linear-gradient(center top , #cc0000, #990000); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #cc0000;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #cc0000;
 	padding:5px 0px 0px 5px;
 	margin:0px 0px 0px 0px;
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
@@ -220,7 +220,7 @@
 	border: 1px solid #990000;
 	border-left: 1px solid #dd3333;
 	/* background-image: -moz-linear-gradient(center top , #cc0000, #990000); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #cc0000;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #cc0000;
 	color:#FFF;
 	padding:4px 0px 0px 0px;
 	margin:0px 0px 0px 0px;
@@ -239,7 +239,7 @@
 	background-color:#a0a0a0;
 	border: 1px solid #666666;
 	/* background-image: -moz-linear-gradient(center top , #a0a0a0, #666666); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #a0a0a0;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #a0a0a0;
 	padding:5px 0px 0px 5px;
 	margin:0px 0px 0px 0px;
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
@@ -261,7 +261,7 @@
 	border: 1px solid #666666;
 	border-left: 1px solid #a0a0a0;
 	/* background-image: -moz-linear-gradient(center top , #a0a0a0, #666666); */
-	background:url(../../../images/addons_row_button_bg.png) repeat-x top #a0a0a0;
+	background:url(../images/addons_row_button_bg.png) repeat-x top #a0a0a0;
 	color:#FFF;
 	padding:4px 0px 0px 0px;
 	margin:0px 0px 0px 0px;

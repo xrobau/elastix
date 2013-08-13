@@ -16,26 +16,26 @@
             {if $data.is_commercial and $data.fecha_compra eq 0}
 	    <input type="hidden" id="{$data.name_rpm}_link" value="{$data.url_marketplace}{$server_key}&referer="/>
 	    {if $data.has_trialversion eq 1}
-	    <div class="neo-addons-row-button-trial-left">{$TRIAL}</div><div class="neo-addons-row-button-trial-right"><img width="17" height="17" alt="Install" src="modules/{$module_name}/images/addons_icon_install.png"></div>
+	    <div class="neo-addons-row-button-trial-left">{$TRIAL}</div><div class="neo-addons-row-button-trial-right"><img width="17" height="17" alt="Install" src="web/apps/{$module_name}/images/addons_icon_install.png"></div>
 	    {/if}
             <div class="neo-addons-row-button-buy-left">{$BUY}</div>
-            <div class="neo-addons-row-button-buy-right"><img src="modules/{$module_name}/images/addons_icon_buy.png" width="19" height="18" alt="Buy" /></div>
+            <div class="neo-addons-row-button-buy-right"><img src="web/apps/{$module_name}/images/addons_icon_buy.png" width="19" height="18" alt="Buy" /></div>
             {else}
             <div class="neo-addons-row-button-install-left">{$INSTALL}</div>
-            <div class="neo-addons-row-button-install-right"><img src="modules/{$module_name}/images/addons_icon_install.png" width="17" height="17" alt="Install" /></div>
+            <div class="neo-addons-row-button-install-right"><img src="web/apps/{$module_name}/images/addons_icon_install.png" width="17" height="17" alt="Install" /></div>
             {/if}
         {else}
         {if $data.can_update}
             <div class="neo-addons-row-button-install-left tooltipInfo">{$UPDATE}{if !empty($data.upgrade_info)}<span>{$data.upgrade_info}</span>{/if}</div>
-            <div class="neo-addons-row-button-install-right"><img src="modules/{$module_name}/images/addons_icon_update.png" width="20" height="17" alt="Update" /></div>
+            <div class="neo-addons-row-button-install-right"><img src="web/apps/{$module_name}/images/addons_icon_update.png" width="20" height="17" alt="Update" /></div>
         {/if}
 	<input type="hidden" id="{$data.name_rpm}_installed" value="yes"/>
         <div class="neo-addons-row-button-uninstall-left">{$UNINSTALL}</div>
-        <div class="neo-addons-row-button-uninstall-right"><img src="modules/{$module_name}/images/addons_icon_uninstall.png" width="17" height="17" alt="Uninstall" /></div>
+        <div class="neo-addons-row-button-uninstall-right"><img src="web/apps/{$module_name}/images/addons_icon_uninstall.png" width="17" height="17" alt="Uninstall" /></div>
 	{if $data.fecha_compra eq 0 and $data.is_commercial}
 	    <input type="hidden" id="{$data.name_rpm}_link" value="{$data.url_marketplace}{$server_key}&referer="/>
 	    <div class="neo-addons-row-button-buy-left">{$BUY}</div>
-	    <div class="neo-addons-row-button-buy-right"><img src="modules/{$module_name}/images/addons_icon_buy.png" width="19" height="18" alt="Buy" /></div>
+	    <div class="neo-addons-row-button-buy-right"><img src="web/apps/{$module_name}/images/addons_icon_buy.png" width="19" height="18" alt="Buy" /></div>
 	{/if}
         {/if}
     </div>

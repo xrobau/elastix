@@ -125,6 +125,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: update code to use new filesystem layout.
+  SVN Rev[5762]
+
 * Mon Jul 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: check for @-sign before repository name for installed package.
   SVN Rev[5446]

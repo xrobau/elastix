@@ -119,15 +119,9 @@ function _moduleContent(&$smarty, $module_name)
     global $arrConf;
     global $arrConfModule;
 
-    require_once "modules/$module_name/configs/default.conf.php";
-    require_once "modules/$module_name/libs/paloSantoAddons.class.php";
     $arrConf = array_merge($arrConf,$arrConfModule);
-    load_language_module($module_name);
-    
-    //folder path for custom templates
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = isset($arrConf['templates_dir']) ? $arrConf['templates_dir'] : 'themes';
-    $local_templates_dir = "$base_dir/modules/$module_name/$templates_dir/{$arrConf['theme']}";
+
+    $local_templates_dir = getWebDirModule($module_name);
 
 	// Valores estáticos comunes a todas las operaciones
     $smarty->assign("module_name", $module_name);
@@ -160,7 +154,7 @@ function do_listarAddonsHTML($smarty, $module_name, $local_templates_dir)
 {
 	$smarty->assign(array(
         'title'     	   =>  _tr('Addon Market'),
-        'icon'      	   =>  'modules/'.$module_name.'/images/addons.png',
+        'icon'      	   =>  'web/apps/'.$module_name.'/images/addons.png',
 	'filter_by' 	   =>  _tr('Filter by'),
 	'available' 	   =>  _tr('Available'),
 	'installed' 	   =>  _tr('Installed'),

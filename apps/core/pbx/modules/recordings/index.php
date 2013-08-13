@@ -26,12 +26,7 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1 2008-06-12 09:06:35 afigueroa Exp $ */
-
-function _moduleContent(&$smarty, $module_name)
-{
     include_once "libs/paloSantoPBX.class.php";
-    
-    //include elastix framework
     include_once "libs/paloSantoJSON.class.php";
     include_once("libs/paloSantoDB.class.php");
     include_once "libs/paloSantoGrid.class.php";
@@ -39,30 +34,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "libs/paloSantoConfig.class.php";
     include_once "libs/paloSantoOrganization.class.php";
     include_once("libs/paloSantoACL.class.php");
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoRecordings.class.php";
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
-    load_language_module($module_name);
-
+function _moduleContent(&$smarty, $module_name)
+{
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+   
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+     $local_templates_dir=getWebDirModule($module_name);
 
     $pConfig = new paloConfig("/var/www/elastixdir/asteriskconf", "/elastix_pbx.conf", "=", "[[:space:]]*=[[:space:]]*");
     $arrConfig = $pConfig->leer_configuracion(false);
@@ -248,7 +228,7 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 
     if($userLevel1 == "superadmin"){
         $arrOrgz=array("all"=>"all","src_custom"=>_tr("custom"));
-        foreach(($pORGZ->getOrganization()) as $value){
+        foreach(($pORGZ->getOrganization(array())) as $value){
             if($value["id"]!=1)
                 $arrOrgz[$value["domain"]]=$value["name"];
         }

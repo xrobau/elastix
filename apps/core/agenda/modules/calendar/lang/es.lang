@@ -160,7 +160,7 @@ $arrLangModule=array(
 "Text to Speech" => "Texto a voz",
 "Search in Address Book" => "Buscar en Libreta de direcciones",
 "Listen" => "Escuchar",
-"Festival is not up" => "El servicio Festival (texto-a-voz) no se encuentra activo. Para activarlo diríjase a <a href='?menu=festival'>PBX->Tools->Festival</a>",
+"Festival is not up" => "El servicio Festival (texto-a-voz) no se encuentra activo. Para activarlo diríjase a <a href='?menu=festival'>PBX->Herramientas->Festival</a>",
 "Click here to listen" => "Click aquí para escuchar",
 "Deleting" => "Eliminando",
 "Sending Request" => "Enviando Petición",

@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Asterisk Logs: convert uses of arrLang to _tr. Sync with trunk.
+  SVN Rev[5725]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.

@@ -180,7 +180,8 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         $end++;
     }
 
-    if($pORGZ->getNumOrganization(array()) > 1){
+
+    if($pORGZ->getNumOrganization(array()) >= 1){
         if($userLevel1=="admin" || $userLevel1=="superadmin")
             $oGrid->addNew("create_user",_tr("Create New User"));
 

@@ -336,6 +336,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: add missing reference to global $arrConf on paloForm.
+  SVN Rev[5758]
 - FIXED: Framework: fix blackmin and giox themes to work with new filesystem
   layout. Add images referenced by themes but not included.
   SVN Rev[5754]

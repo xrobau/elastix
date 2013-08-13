@@ -120,6 +120,8 @@ class paloForm
      */
     function fetchForm($templateName, $title, $arrPreFilledValues = array())
     {
+        global $arrConf;
+        
         /* Función interna para convertir un arreglo especificado en 
            INPUT_EXTRA_PARAM en una cadena de atributos clave=valor adecuada 
            para incluir al final de un widget HTML. Si no existe 

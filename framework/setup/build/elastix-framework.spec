@@ -336,6 +336,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: it is legal to return an empty list for getOrganization()
+  if no organization has been created.
+  SVN Rev[5760]
 - CHANGED: Framework: allow calling paloSantoOrganization::getOrganization()
   with no parameters, using an empty array as default parameter. Several modules
   want to work this way.

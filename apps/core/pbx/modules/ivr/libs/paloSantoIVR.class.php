@@ -26,9 +26,9 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoIVR.class.php,v 1.1 2012-09-07 11:50:00 Germán Macas gmacas@palosanto.com Exp $ */
-    include_once "/var/www/html/libs/paloSantoACL.class.php";
-    include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
-    include_once "/var/www/html/libs/paloSantoPBX.class.php";
+    include_once "libs/paloSantoACL.class.php";
+    include_once "libs/paloSantoAsteriskConfig.class.php";
+    include_once "libs/paloSantoPBX.class.php";
 	global $arrConf;
 
 class paloIvrPBX extends paloAsteriskDB{

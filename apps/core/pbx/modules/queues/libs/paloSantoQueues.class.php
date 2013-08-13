@@ -26,10 +26,10 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoExtensions.class.php,v 1.1 2012-07-18 11:50:00 Rocio Mera rmera@palosanto.com Exp $ */
-    include_once "/var/www/html/libs/paloSantoACL.class.php";
-	include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
-	include_once "/var/www/html/libs/paloSantoPBX.class.php";
-	include_once "/var/www/html/libs/paloSantoOrganization.class.php";
+    include_once "libs/paloSantoACL.class.php";
+	include_once "libs/paloSantoAsteriskConfig.class.php";
+	include_once "libs/paloSantoPBX.class.php";
+	include_once "libs/paloSantoOrganization.class.php";
 	global $arrConf;
 class paloQueuePBX extends paloAsteriskDB{
     protected $code;

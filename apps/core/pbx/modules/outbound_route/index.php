@@ -26,38 +26,25 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
-include_once "libs/paloSantoJSON.class.php";
-
-function _moduleContent(&$smarty, $module_name)
-{
+    include_once "libs/paloSantoJSON.class.php";
     include_once("libs/paloSantoDB.class.php");
     include_once("libs/paloSantoConfig.class.php");
     include_once("libs/paloSantoGrid.class.php");
     include_once "libs/paloSantoForm.class.php";
     include_once "libs/paloSantoOrganization.class.php";
     include_once("libs/paloSantoACL.class.php");
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoOutbound.class.php";
     include_once "libs/paloSantoPBX.class.php";
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+function _moduleContent(&$smarty, $module_name)
+{
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+   
 	 //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+     $local_templates_dir=getWebDirModule($module_name);
 
 	 //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
 	 //y borrar usuarios de todas las organizaciones
@@ -183,7 +170,8 @@ function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
         else
             $arrOutbound = $pOutbound->getOutbounds(null,$limit,$offset);
     }else{
-        if($userLevel1=="admin")
+         //if($userLevel1=="admin")
+        if($userLevel1=="other")
             $arrOutbound = $pOutbound->getOutbounds($domain,$limit,$offset);
     }
 
@@ -215,13 +203,14 @@ function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
         $arrData[] = $arrTmp;
     }
 
-    if($pORGZ->getNumOrganization() > 1){
-        if($userLevel1 == "admin")
+    if($pORGZ->getNumOrganization(array()) >= 1){
+        //if($userLevel1 == "admin")
+        if($userLevel1 == "other")
             $oGrid->addNew("create_outbound",_tr("Create New Outbound Route"));
 
         if($userLevel1 == "superadmin"){
             $arrOrgz=array("all"=>"all");
-            foreach(($pORGZ->getOrganization()) as $value){
+            foreach(($pORGZ->getOrganization(array())) as $value){
                 if($value["id"]!=1)
                     $arrOrgz[$value["domain"]]=$value["name"];
             }
@@ -264,8 +253,8 @@ function ordenRoute($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
     $jsonObject = new PaloSantoJSON();
     $seq=getParameter("seq");
     $out_id=getParameter("out_id");
-    
-    if($userLevel1!="admin"){
+     //if($userLevel1!="admin"){
+    if($userLevel1!="other"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
         return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -332,8 +321,8 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 
 	$arrOutbound=array();
 	$action = getParameter("action");
-       
-	if($userLevel1!="admin"){
+      // if($userLevel1!="admin"){
+	if($userLevel1!="other"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
         return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -354,7 +343,8 @@ function viewFormOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $a
 			$smarty->assign("mb_message",_tr("Invalid Outbound"));
 			return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 		}else{
-            if($userLevel1=="admin"){
+            // if($userLevel1=="admin"){
+            if($userLevel1=="other"){
                 $pOutbound = new paloSantoOutbound($pDB,$domain);
                 $arrOutbound = $pOutbound->getOutboundById($idOutbound);
             }else{
@@ -498,8 +488,8 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	$pORGZ = new paloSantoOrganization($pDB2);
 	$continue=true;
 	$success=false;
-
-	if($userLevel1!="admin"){
+    //if($userLevel1!="admin"){
+	if($userLevel1!="other"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
         return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -597,8 +587,8 @@ function saveEditOutbound($smarty, $module_name, $local_templates_dir, $pDB, $ar
 	$continue=true;
 	$success=false;
 	$idOutbound=getParameter("id_outbound");
-
-	if($userLevel1!="admin"){
+    //if($userLevel1!="admin"){
+	if($userLevel1!="other"){
 	  $smarty->assign("mb_title", _tr("ERROR"));
 	  $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 	  return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -692,8 +682,8 @@ function deleteOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrC
 	$continue=true;
 	$success=false;
 	$idOutbound=getParameter("id_outbound");
-
-	if($userLevel1!="admin"){
+    //if($userLevel1!="admin"){
+	if($userLevel1!="other"){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 		return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -705,7 +695,8 @@ function deleteOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrC
 		$smarty->assign("mb_message",_tr("Invalid Outbound"));
 		return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
 	}else{
-        if($userLevel1=="admin"){
+      //if($userLevel1=="admin"){  
+      if($userLevel1=="other"){
             $resultO=$pORGZ->getOrganizationById($idOrganization);
             $domain=$resultO["domain"];
             $pOutbound=new paloSantoOutbound($pDB,$domain);
@@ -845,8 +836,8 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 	$pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
 	$pACL = new paloACL($pDB2);
 	$continue=false;
-
-	if($userLevel1=="other"){
+    //if($userLevel1=="other"){
+	if($userLevel1=="others"){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 		return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);

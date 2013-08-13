@@ -17,7 +17,7 @@
         <label for="tab-3">{$TRUNK_SEQUENCE}</label>
     </div>
     <div class="neo-table-header-row-navigation" align="right" style="display: inline-block;">
-        {if $userLevel eq 'admin' | $userLevel eq 'superadmin'}
+        {if $userLevel eq 'other' | $userLevel eq 'superadmin'}
             {if $mode eq 'input'}
             <input type="submit" name="save_new" value="{$SAVE}" >
             {elseif $mode eq 'edit'}

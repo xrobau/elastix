@@ -29,11 +29,14 @@
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
+include_once "libs/paloSantoOrganization.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    include_once "{$arrConf['elxPath']}/libs/paloSantoOrganization.class.php";
-
+    global $arrConf;
+    global $arrConfModule;
+    $arrConf = array_merge($arrConf,$arrConfModule);  
+     
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
 

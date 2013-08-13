@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Asterisk Logs: convert uses of arrLang to _tr. Sync with trunk.
+  SVN Rev[5725]
+
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Summary By Extension: tweak SQL query used to report summary, 
   attempts to fix Elastix bug #1607.

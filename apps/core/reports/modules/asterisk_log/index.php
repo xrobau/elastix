@@ -41,20 +41,12 @@ function _moduleContent(&$smarty, $module_name)
     // incluir el archivo de idioma de acuerdo al que este seleccionado
     // si el archivo de idioma no existe incluir el idioma por defecto
     
-
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
@@ -67,17 +59,17 @@ function _moduleContent(&$smarty, $module_name)
     switch($accion)
     {
         default:
-            $content = report_AsteriskLogs($smarty, $module_name, $local_templates_dir, array_merge($arrLang, $arrLangModule));
+            $content = report_AsteriskLogs($smarty, $module_name, $local_templates_dir);
             break;
     }
 
     return $content;
 }
 
-function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLang)
+function report_AsteriskLogs($smarty, $module_name, $local_templates_dir)
 {
     $arrFormElements = array(
-            "filter"            => array(   "LABEL"                  => $arrLang["Date"],
+            "filter"            => array(   "LABEL"                  => _tr("Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "SELECT",
                                             "INPUT_EXTRA_PARAM"      => NULL,
@@ -85,14 +77,14 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
                                             "VALIDATION_EXTRA_PARAM" => '^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$'),
 
             "busqueda"          => array(
-                                            "LABEL"                  => $arrLang['Search string'],
+                                            "LABEL"                  => _tr('Search string'),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             'VALIDATION_TYPE'           =>  'text',
                                             'INPUT_EXTRA_PARAM'         =>  '',
                                             'VALIDATION_EXTRA_PARAM'    =>  '',
             ),
-            "offset"            => array(   "LABEL"                  => $arrLang["offset"],
+            "offset"            => array(   "LABEL"                  => _tr("offset"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "HIDDEN",
                                             "INPUT_EXTRA_PARAM"      => NULL,
@@ -101,13 +93,13 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
 
             /* Variables requeridas para seguir la pista de la última búsqueda */
             "ultima_busqueda"          => array(
-                                            "LABEL"                  => $arrLang['Search string'],
+                                            "LABEL"                  => _tr('Search string'),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "HIDDEN",
                                             'VALIDATION_TYPE'           =>  'text',
                                             'INPUT_EXTRA_PARAM'         =>  '',
                                             'VALIDATION_EXTRA_PARAM'    =>  '',),
-            "ultimo_offset"            => array(   "LABEL"                  => $arrLang["offset"],
+            "ultimo_offset"            => array(   "LABEL"                  => _tr("offset"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "HIDDEN",
                                             "INPUT_EXTRA_PARAM"      => NULL,
@@ -115,8 +107,8 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
                                             "VALIDATION_EXTRA_PARAM" => '^[[:digit:]]+$'),
                                 );
 
-    $smarty->assign("SHOW", $arrLang["Show"]);
-    $smarty->assign("SEARCHNEXT", $arrLang['Search']);
+    $smarty->assign("SHOW", _tr("Show"));
+    $smarty->assign("SEARCHNEXT", _tr('Search'));
     $field_pattern = getParameter("filter");
     $busqueda = getParameter('busqueda');
     if (is_null($busqueda) || trim($busqueda) == '') $busqueda = '';
@@ -240,7 +232,7 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
         $posBusqueda = $pAsteriskLogs->astLog->buscarTextoMensaje($busqueda);
         if (!is_null($posBusqueda)) {
             $offset = $posBusqueda[1];
-            $smarty->assign('SEARCHNEXT', $arrLang['Search next']);
+            $smarty->assign('SEARCHNEXT', _tr('Search next'));
             $_POST['ultima_busqueda'] = $busqueda;
             $_POST['ultimo_offset'] = $offset;
             
@@ -297,26 +289,26 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir, $arrLa
     $oGrid->showFilter(trim($htmlFilter));
     
 
-    $arrGrid = array("title"    => $arrLang["Asterisk Logs"],
+    $arrGrid = array("title"    => _tr("Asterisk Logs"),
                     "url"      => $url,
                     "icon"     => "/modules/$module_name/images/reports_asterisk_logs.png",
                     "width"    => "99%",
                     "start"    => ($totalBytes==0) ? 0 : 1 + (int)($offset / 128),
                     "end"      => (int)($offset / 128) + $iNumLineasPorPagina,
                     "total"    => (int)($totalBytes / 128),
-                    "columns"  => array(0 => array("name"      => $arrLang['Date'],
+                    "columns"  => array(0 => array("name"      => _tr('Date'),
                                                 "property1" => ""),
 
-                                        1 => array("name"      => $arrLang['Type'],
+                                        1 => array("name"      => _tr('Type'),
                                                 "property1" => ""),
-                                        2 => array("name"      => $arrLang['Source'],
+                                        2 => array("name"      => _tr('Source'),
                                                 "property1" => ""),
-                                        3 => array("name"      => $arrLang['Message'],
+                                        3 => array("name"      => _tr('Message'),
                                                 "property1" => "")
                                     )
                 );
 
-    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
 
     /*$current_page=getParameter("page");
     print($current_page);

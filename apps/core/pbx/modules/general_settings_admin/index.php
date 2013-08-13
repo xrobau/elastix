@@ -26,37 +26,22 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
-
-function _moduleContent(&$smarty, $module_name)
-{
     include_once "libs/paloSantoDB.class.php";
     include_once "libs/paloSantoConfig.class.php";
     include_once "libs/paloSantoGrid.class.php";
 	include_once "libs/paloSantoForm.class.php";
     include_once "libs/misc.lib.php";
-    include_once "modules/$module_name/libs/paloGeneralSettingsPBX.class.php";
-    include_once "modules/$module_name/configs/default.conf.php";
-    
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
+function _moduleContent(&$smarty, $module_name)
+{
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
+  
 
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
     //y borrar usuarios de todas las organizaciones

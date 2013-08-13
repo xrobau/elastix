@@ -37,11 +37,11 @@
 */
 global $arrConf;
 
-include_once "/var/www/html/libs/paloSantoACL.class.php";
-include_once "/var/www/html/libs/paloSantoConfig.class.php";
-include_once "/var/www/html/libs/paloSantoAsteriskConfig.class.php";
-include_once "/var/www/html/libs/extensions.class.php";
-include_once "/var/www/html/libs/misc.lib.php";
+include_once "libs/paloSantoACL.class.php";
+include_once "libs/paloSantoConfig.class.php";
+include_once "libs/paloSantoAsteriskConfig.class.php";
+include_once "libs/extensions.class.php";
+include_once "libs/misc.lib.php";
 
 class paloGeneralPBX extends paloAsteriskDB{
     

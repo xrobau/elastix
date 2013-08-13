@@ -93,6 +93,8 @@ fi
 
 %changelog
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: CDR Report: update code to use new filesystem layout.
+  SVN Rev[5761]
 - CHANGED: Channel Usage: update code to use new filesystem layout.
   SVN Rev[5757]
 - CHANGED: Channel Usage: convert uses of arrLang to _tr. Sync with trunk.

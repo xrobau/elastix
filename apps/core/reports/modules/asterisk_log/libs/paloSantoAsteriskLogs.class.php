@@ -27,8 +27,6 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1 2008-06-13 04:06:20 Alex Villacís Lasso Exp $ */
 
-include_once "modules/$module_name/libs/LogParser_Full.class.php";
-
 class paloSantoAsteriskLogs {
     var $errMsg;
     var $astLog;

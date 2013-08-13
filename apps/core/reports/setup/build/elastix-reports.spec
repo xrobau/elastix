@@ -93,6 +93,8 @@ fi
 
 %changelog
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Asterisk Logs: update code to use new filesystem layout.
+  SVN Rev[5755]
 - CHANGED: Asterisk Logs: convert uses of arrLang to _tr. Sync with trunk.
   SVN Rev[5725]
 

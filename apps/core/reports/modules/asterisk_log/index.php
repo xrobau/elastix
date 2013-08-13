@@ -33,25 +33,13 @@ function _moduleContent(&$smarty, $module_name)
     include_once "libs/paloSantoGrid.class.php";
     include_once "libs/paloSantoForm.class.php";
 
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoAsteriskLogs.class.php";
-    include_once "modules/$module_name/libs/LogParser_Full.class.php";
-
-    // incluir el archivo de idioma de acuerdo al que este seleccionado
-    // si el archivo de idioma no existe incluir el idioma por defecto
-    
-    load_language_module($module_name);
-
     //global variables
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
 
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir = getWebDirModule($module_name);
 
     $accion = getAction();
 
@@ -291,7 +279,7 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir)
 
     $arrGrid = array("title"    => _tr("Asterisk Logs"),
                     "url"      => $url,
-                    "icon"     => "/modules/$module_name/images/reports_asterisk_logs.png",
+                    "icon"     => "web/apps/$module_name/images/reports_asterisk_logs.png",
                     "width"    => "99%",
                     "start"    => ($totalBytes==0) ? 0 : 1 + (int)($offset / 128),
                     "end"      => (int)($offset / 128) + $iNumLineasPorPagina,
@@ -309,19 +297,6 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir)
                 );
 
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
-
-    /*$current_page=getParameter("page");
-    print($current_page);
-    $contenidoModulo .= "<script type='text/javascript'>
-        var offset = ".$offset.";
-        var limit = ".$limit.";
-        var current_page = ".$current_page.";
-                    alert(current_page);
-            var start = current_page * limit;
-            page = Math.floor(start / limit);
-        $('#pageup').val(page);
-        $('#pagedown').val(page);
-    </script>";*/
     return $contenidoModulo;
 }
 

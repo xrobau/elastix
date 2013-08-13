@@ -26,38 +26,23 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2012/07/30 rocio mera rmera@palosanto.com Exp $ */
-include_once "libs/paloSantoJSON.class.php";
-
-function _moduleContent(&$smarty, $module_name)
-{
+    include_once "libs/paloSantoJSON.class.php";
     include_once("libs/paloSantoDB.class.php");
     include_once("libs/paloSantoConfig.class.php");
     include_once("libs/paloSantoGrid.class.php");
 	include_once "libs/paloSantoForm.class.php";
 	include_once "libs/paloSantoOrganization.class.php";
     include_once("libs/paloSantoACL.class.php");
-    include_once "modules/$module_name/configs/default.conf.php";
-	include_once "modules/$module_name/libs/paloSantoExtensions.class.php";
-    
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+function _moduleContent(&$smarty, $module_name)
+{
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+    
 	//folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
 
     //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de crear
     //y borrar usuarios de todas las organizaciones
@@ -131,7 +116,8 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 			$total=$pExten->getNumExtensions($domain);
 		else
 			$total=$pExten->getNumExtensions();
-    }elseif($userLevel1=="admin")
+  //  }elseif($userLevel1=="admin")
+    }elseif($userLevel1=="other")
         $total=$pExten->getNumExtensions($domain);
 	else
 		$total=1;
@@ -176,7 +162,8 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         else
             $arrExtens=$pExten->getExtensions(null,$limit,$offset);
     }else{
-		if($userLevel1=="admin"){
+		//if($userLevel1=="admin"){
+        if($userLevel1=="other"){
 			$arrExtens=$pExten->getExtensions($domain,$limit,$offset);
 		}else{
 			$extUser=$pACL->getUserExtension($userAccount);
@@ -221,13 +208,14 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         }
     }
 
-	if($pORGZ->getNumOrganization() > 1){
-		if($userLevel1 == "admin")
+	if($pORGZ->getNumOrganization(array()) >= 1){
+		//if($userLevel1 == "admin")
+        if($userLevel1 == "other")
 			$oGrid->addNew("create_exten",_tr("Create New Extension"));
 
 		if($userLevel1 == "superadmin"){
 			$arrOrgz=array("all"=>"all");
-			foreach(($pORGZ->getOrganization()) as $value){
+			foreach(($pORGZ->getOrganization(array())) as $value){
 				if($value["id"]!=1)
 					$arrOrgz[$value["domain"]]=$value["name"];
 			}
@@ -342,7 +330,9 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 				$arrExten = $pExten->getExtensionById($idExten);
 				$domain=$arrExten["domain"];
 			}else{*/
-				if($userLevel1=="admin"){
+				
+                //if($userLevel1=="admin"){
+                if($userLevel1=="other"){
 					$arrExten = $pExten->getExtensionById($idExten, $domain);
 				}else{
 					$idUser=$pACL->getIdUser($userAccount);
@@ -492,13 +482,14 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 	$continuar=true;
 	$exito=false;
 
-	if($userLevel1!="admin"){
+	//if($userLevel1!="admin"){
+    if($userLevel1!="other"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
         return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
     }
 	
-	if($pORGZ->getNumOrganization() <=1){
+	if($pORGZ->getNumOrganization(array()) < 1){
 		$smarty->assign("mb_title", _tr("MESSAGE"));
         $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create extension to this organization"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -656,7 +647,8 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
     }
 	
 	//un usuario que no es administrador no puede editar la extension de otro usuario
-	if($userLevel1=="other"){
+	//if($userLevel1=="other"){
+   if($userLevel1!="other"){
 		$idUser=$pACL->getIdUser($userAccount);
 		$arrUserExt=$pACL->getExtUser($idUser);
 		if($arrUserExt["id"]!=$idExten){
@@ -678,7 +670,8 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 		}else{*/
 			$resultO=$pORGZ->getOrganizationById($idOrganization);
 			$domain=$resultO["domain"];
-			if($userLevel1=="admin"){
+			//if($userLevel1=="admin"){
+            if($userLevel1=="other"){
 				$arrExten = $pExten->getExtensionById($idExten, $domain);
 			}else{
 				$arrExten = $pExten->getExtensionById($arrUserExt["id"], $domain);
@@ -877,8 +870,8 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 	$exito=false;
 	$idExten=getParameter("id_exten");
 
-
-	if($userLevel1!="admin"){
+	//if($userLevel1!="admin"){
+	if($userLevel1!="other"){
 		$smarty->assign("mb_title", _tr("ERROR"));
 		$smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
 		return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $userAccount, $idOrganization);
@@ -897,7 +890,8 @@ function deleteExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 		}else{*/
 			$resultO=$pORGZ->getOrganizationById($idOrganization);
 			$domain=$resultO["domain"];
-			if($userLevel1=="admin"){
+			//if($userLevel1=="admin"){
+            if($userLevel1=="other"){
 				$arrExten = $pExten->getExtensionById($idExten, $domain);
 			}else{
                 $arrExten = false;

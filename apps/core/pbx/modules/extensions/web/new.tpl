@@ -25,7 +25,7 @@
         <input type="submit" name="save_new" value="{$SAVE}" >
         {elseif $mode eq 'edit'}
         <input type="submit" name="save_edit" value="{$APPLY_CHANGES}" >
-        {elseif $userLevel eq 'admin'}
+        {elseif $userLevel eq 'other'}
         <input type="submit" name="edit" value="{$EDIT}">
         <input type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
         {/if}

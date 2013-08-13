@@ -29,34 +29,18 @@
 //include elastix framework
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
+include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoFestival.class.php";
-    include_once "libs/paloSantoJSON.class.php";
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
-
+    
     //folder path for custom templates
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
+    $local_templates_dir=getWebDirModule($module_name);
 
     //actions
     $action = getAction();
@@ -84,7 +68,7 @@ function viewFormFestival($smarty, $module_name, $local_templates_dir, $arrConf)
     else
         $_DATA["status"] = "off";
     $smarty->assign("SAVE", _tr("Save"));
-    $smarty->assign("icon", "modules/$module_name/images/pbx_tools_festival.png");
+    $smarty->assign("icon", "web/apps/$module_name/images/pbx_tools_festival.png");
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Festival"), $_DATA);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 

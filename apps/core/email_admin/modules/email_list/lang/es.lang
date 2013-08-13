@@ -80,7 +80,7 @@ $arrLangModule=array(
 "Remove" => "Remover",
 "New List Settings" => "Configuración de la Nueva Lista",
 "Mailman Admin Settings" => "Configuración del Administrador de Mailman",
-"There is no domain created. To use this module you need at least one domain. You can create a domain in the module Email->Domains" => "No existe ningún dominio creado. Para poder usar este módulo usted necesita al menos un dominio. Usted puede crear un dominio en el módulo <a href='?menu=email_domains'>Email->Domains</a>",
+"There is no domain created. To use this module you need at least one domain. You can create a domain in the module Email->Domains" => "No existe ningún dominio creado. Para poder usar este módulo usted necesita al menos un dominio. Usted puede crear un dominio en el módulo <a href='?menu=email_domains'>Correo Electrónico->Dominios</a>",
 "View members" => "Ver miembros",
 "Return" => "Regresar",
 "List Members of" => "Miembros de la Lista",

@@ -15,19 +15,19 @@
       <td>
         <table cellSpacing="0" cellPadding="0" width="100%" border="0" height="76">
           <tr>
-            <td class="menulogo" width=380><a href='http://www.elastix.org' target='_blank'><img src="images/logo_elastix_new3.gif" border='0' /></a></td>
+            <td class="menulogo" width=380><a href='http://www.elastix.org' target='_blank'><img src="{$WEBCOMMON}images/logo_elastix_new3.gif" border='0' /></a></td>
             {foreach from=$arrMainMenu key=idMenu item=menu}
             {if $idMenu eq $idMainMenuSelected}
             <td class="headlinkon" valign="bottom">
               <table cellSpacing="0" cellPadding="2" height="30" border="0">
-                <tr><td class="menutabletabon_left" nowrap valign="top"><IMG src="themes/{$THEMENAME}/images/1x1.gif"></td><td class="menutabletabon" title="" nowrap><a
-                        class="menutableon" href="index.php?menu={$idMenu}">{$menu.description}</a></td><td class="menutabletabon_right" nowrap valign="top"><IMG src="themes/{$THEMENAME}/images/1x1.gif"></td>
+                <tr><td class="menutabletabon_left" nowrap valign="top"><IMG src="{$WEBPATH}themes/{$THEMENAME}/images/1x1.gif"></td><td class="menutabletabon" title="" nowrap><a
+                        class="menutableon" href="index.php?menu={$idMenu}">{$menu.description}</a></td><td class="menutabletabon_right" nowrap valign="top"><IMG src="{$WEBPATH}themes/{$THEMENAME}/images/1x1.gif"></td>
                 </tr>
               </table>
             </td>
             {else}
             <td class="headlink" valign="bottom">
-              <div style="position:absolute; z-index:200; top:65px;"><a href="javascript:mostrar_Menu('{$idMenu}')"><img src="themes/{$THEMENAME}/images/corner.gif" border="0"></a></div>
+              <div style="position:absolute; z-index:200; top:65px;"><a href="javascript:mostrar_Menu('{$idMenu}')"><img src="{$WEBPATH}themes/{$THEMENAME}/images/corner.gif" border="0"></a></div>
               <input type="hidden" id="idMenu" value=""></input>
               <div class="vertical_menu_oculto" id="{$idMenu}">
                 <table cellpadding=0 cellspacing=0>
@@ -37,8 +37,8 @@
                 </table>
               </div>
               <table cellSpacing="0" cellPadding="2" height="29" border="0">
-                <tr><td class="menutabletaboff_left" nowrap valign="top"><IMG src="themes/{$THEMENAME}/images/1x1.gif"></td><td class="menutabletaboff" title="" nowrap><a
-                        class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></td><td class="menutabletaboff_right" nowrap valign="top"><IMG src="themes/{$THEMENAME}/images/1x1.gif"></td>
+                <tr><td class="menutabletaboff_left" nowrap valign="top"><IMG src="{$WEBPATH}themes/{$THEMENAME}/images/1x1.gif"></td><td class="menutabletaboff" title="" nowrap><a
+                        class="menutable" href="index.php?menu={$idMenu}">{$menu.description}</a></td><td class="menutabletaboff_right" nowrap valign="top"><IMG src="{$WEBPATH}themes/{$THEMENAME}/images/1x1.gif"></td>
                 </tr>
               </table> 
             </td>
@@ -92,7 +92,7 @@
               </table>
             </td>
             <td align="right" valign="middle">
-				<img src="themes/{$THEMENAME}/images/tab_notes.png" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />&nbsp;
+				<img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes.png" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />&nbsp;
 				{if !empty($idSubMenu2Selected)}
                     <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
                     <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
@@ -100,29 +100,29 @@
                     <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
                     <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
                 {/if}<img
-                src="themes/{$THEMENAME}/images/help_top.gif" border="0"></a>&nbsp;&nbsp;<a href="javascript:changeMenu()"><img
-                src="themes/{$THEMENAME}/images/arrow_top.gif" border="0"></a>&nbsp;&nbsp;</td>
+                src="{$WEBPATH}themes/{$THEMENAME}/images/help_top.gif" border="0"></a>&nbsp;&nbsp;<a href="javascript:changeMenu()"><img
+                src="{$WEBPATH}themes/{$THEMENAME}/images/arrow_top.gif" border="0"></a>&nbsp;&nbsp;</td>
           </tr>
         </table>
       </td>
     </tr>
-    <tr class="downshadow"><td><img src="themes/{$THEMENAME}/images/1x1.gif" height="5"></td></tr>
+    <tr class="downshadow"><td><img src="{$WEBPATH}themes/{$THEMENAME}/images/1x1.gif" height="5"></td></tr>
   </table>
 </div>
 <div id="miniMenu" style="display: none;">
   <table cellspacing="0" cellpadding="0" width="100%" class="menumini">
     <tr>
-      <td><img src="images/logo_elastix_new_mini.png" border="0"></td>
+      <td><img src="{$WEBCOMMON}images/logo_elastix_new_mini.png" border="0"></td>
       <td align="right" class="letra_gris" valign="middle">{$nameMainMenuSelected} &rarr; {$nameSubMenuSelected} {if !empty($idSubMenu2Selected)} &rarr; {$nameSubMenu2Selected} {/if}
-		  &nbsp;&nbsp;<img src="themes/{$THEMENAME}/images/tab_notes_bottom.png" alt="tabnotes" id="togglestickynote2" class="togglestickynote" style="cursor: pointer;" border="0"
+		  &nbsp;&nbsp;<img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes_bottom.png" alt="tabnotes" id="togglestickynote2" class="togglestickynote" style="cursor: pointer;" border="0"
           align="absmiddle" />
           &nbsp;&nbsp;{if !empty($idSubMenu2Selected)}
             <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
           {else}
             <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
-          {/if}<img src="themes/{$THEMENAME}/images/help_bottom.gif" border="0" 
+          {/if}<img src="{$WEBPATH}themes/{$THEMENAME}/images/help_bottom.gif" border="0" 
           align="absmiddle"></a>
-          &nbsp;&nbsp;<a href="javascript:changeMenu()"><img src="themes/{$THEMENAME}/images/arrow_bottom.gif" border="0" align="absmiddle"></a>&nbsp;&nbsp;
+          &nbsp;&nbsp;<a href="javascript:changeMenu()"><img src="{$WEBPATH}themes/{$THEMENAME}/images/arrow_bottom.gif" border="0" align="absmiddle"></a>&nbsp;&nbsp;
       </td>
     </tr>
   </table>

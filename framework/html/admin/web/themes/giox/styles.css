@@ -133,7 +133,7 @@ TABLE.table_data_login{
 }
 table.menumini {
     border-bottom: 1px solid #aaaaaa;
-    background-image: url(images/background_mini.jpg); 
+    background-image: url(../../../../web/_common/images/background_mini.jpg); 
 }
 TD.table_data {
 /*    BACKGROUND: #FFFFFF; */
@@ -212,7 +212,7 @@ TD.menulogo {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 9pt;
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bgblue.gif); 
     PADDING-RIGHT: 30px;
     PADDING-LEFT: 15px;
     PADDING-BOTTOM: 0px;
@@ -222,7 +222,7 @@ TD.menulogo {
 TD.logologin {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 9pt;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bgblue.gif); 
     PADDING-RIGHT: 0px;
     PADDING-LEFT: 0px;
     PADDING-BOTTOM: 0px;
@@ -231,20 +231,20 @@ TD.logologin {
 TD.headlink {
     /* BACKGROUND: #3964ad; */
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bgblue.gif); 
     PADDING-LEFT: 1px;
     PADDING-RIGHT: 1px;
     BORDER-BOTTOM: #333333 1px solid;
 }
 TD.headlinkon {
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bgblue.gif); 
     PADDING-LEFT: 0px;
     PADDING-RIGHT: 0px;
 }
 TD.headlinkspacer {
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif);
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bgblue.gif);
     PADDING-LEFT: 1px;
     PADDING-RIGHT: 0px;
     BORDER-BOTTOM: #333333 1px solid;
@@ -264,8 +264,8 @@ TD.menutabletaboff {
     BACKGROUND-COLOR: #eeeeee;
     PADDING-LEFT: 7px;
     PADDING-RIGHT: 7px;
-/*    BACKGROUND-IMAGE: url(../../images/bggris.gif);  */
-    BACKGROUND-IMAGE: url(../../images/bg_boton.jpg); 
+/*    BACKGROUND-IMAGE: url(../../../../web/_common/images/bggris.gif);  */
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bg_boton.jpg); 
     TEXT-ALIGN: center;
 }
 TD.menutabletaboff_left {
@@ -276,7 +276,7 @@ TD.menutabletaboff_left {
     BACKGROUND-COLOR: #eeeeee;
     PADDING-LEFT: 0px;
     PADDING-RIGHT: 2px;
-    BACKGROUND-IMAGE: url(../../images/bg_boton_left.jpg);
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bg_boton_left.jpg);
     background-repeat: no-repeat;
     background-position: left top; 
     TEXT-ALIGN: center;
@@ -289,7 +289,7 @@ TD.menutabletaboff_right {
     BACKGROUND-COLOR: #eeeeee;
     PADDING-LEFT: 0px;
     PADDING-RIGHT: 5px;
-    BACKGROUND-IMAGE: url(../../images/bg_boton_right.gif);
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bg_boton_right.gif);
     background-repeat: no-repeat;
     background-position: left top; 
     TEXT-ALIGN: center;
@@ -320,7 +320,7 @@ TD.menutabletabon_left {
 }
 TR.downshadow {
     PADDING-BOTTOM: 5px;
-    BACKGROUND-IMAGE: url(../../images/downshadow.gif);
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/downshadow.gif);
     background-repeat: repeat-x;
     background-position: top;
 
@@ -347,7 +347,7 @@ TD.menuaftertab {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 9pt;
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../../../web/_common/images/bgblue.gif); 
     PADDING-RIGHT: 20px;
     PADDING-LEFT: 10px;
     PADDING-BOTTOM: 0px;
@@ -662,7 +662,7 @@ td.botonoff {
 /*    border-right: 1px solid #330000; */
 /*    border-bottom: 1px solid #330000; */
 /*    background: #cc0000; */
-/*    background-image: url(../../images/bgrojo.gif);  */
+/*    background-image: url(../../../../web/_common/images/bgrojo.gif);  */
 }
 td.botonoff a {
     COLOR: #ffffff;
@@ -726,7 +726,7 @@ td.botonoff a {
     color: #444;
     background-color: #ffffff;
     border-color: #999999;
-    background-image: url(../../images/bgGray.gif); 
+    background-image: url(../../../../web/_common/images/bgGray.gif); 
     color: #082847;
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 14px;
@@ -736,7 +736,7 @@ td.botonoff a {
     border-color: #999;
     color: #aaaaaa;
     background-color: #fafafa;
-    background-image: url(../../images/bggrisForm.gif);
+    background-image: url(../../../../web/_common/images/bggrisForm.gif);
     border-top: 1px solid #aaaaaa;
     border-bottom: 1px solid #aaaaaa;
     padding: 10px 6px 12px 10px;
@@ -753,7 +753,7 @@ td.botonoff a {
     border-color: #999;
     color: #aaaaaa;
     background-color: #fafafa;
-    background-image: url(../../images/bggrisForm.gif);
+    background-image: url(../../../../web/_common/images/bggrisForm.gif);
     border-top: 1px solid #aaaaaa;
     /* border-bottom: 1px solid #aaaaaa; */
     padding: 10px 6px 12px 10px;
@@ -776,7 +776,7 @@ td.botonoff a {
     border-color: #999999;
     background-color: #eee;
     color: #444;
-    background-image: url(../../images/bgGray.gif);
+    background-image: url(../../../../web/_common/images/bgGray.gif);
 }
 .required {
     color: #ff0000;
@@ -844,7 +844,7 @@ a.letranodec:link, a.letranodec:visited {
 }
 
 #layerCM {
-    background: transparent url('/images/message_box_blue.png') no-repeat;
+    background: transparent url(../../../../web/_common/images/message_box_blue.png) no-repeat;
     position: absolute;
     left:150px;
     top:380px;
@@ -863,7 +863,7 @@ a.letranodec:link, a.letranodec:visited {
 
 .layer_handle{
 /*     background-color:#5588bb; */
-    background: transparent url('/images/close.png') no-repeat;
+    background: transparent url(../../../../web/_common/images/close.png) no-repeat;
     padding:0px;
     text-align:center;
     font-weight:bold;
@@ -900,23 +900,23 @@ a.letranodec:link, a.letranodec:visited {
 }
 
 #boxRPM .b {
-  background:url(../../images/b.png);
+  background:url(../../../../web/_common/images/b.png);
 }
 
 #boxRPM .tl {
-  background:url(../../images/tl.png);
+  background:url(../../../../web/_common/images/tl.png);
 }
 
 #boxRPM .tr {
-  background:url(../../images/tr.png);
+  background:url(../../../../web/_common/images/tr.png);
 }
 
 #boxRPM .bl {
-  background:url(../../images/bl.png);
+  background:url(../../../../web/_common/images/bl.png);
 }
 
 #boxRPM .br {
-  background:url(../../images/br.png);
+  background:url(../../../../web/_common/images/br.png);
 }
 
 #boxRPM {
@@ -1108,7 +1108,7 @@ td a.link_summary_on{
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
     border-radius: 6px;
-    background:url(/images/modalbox_bg.png) top left repeat-x #fff;
+    background:url(../../../../web/_common/images/modalbox_bg.png) top left repeat-x #fff;
     top: 50%;
     left: 45%;
 }
@@ -1129,7 +1129,7 @@ td a.link_summary_on{
     right:10px;
     width:18px;
     height:15px;
-    background:url(/images/bookmarks_equis.png) no-repeat;
+    background:url(../../../../web/_common/images/bookmarks_equis.png) no-repeat;
     cursor: pointer;
 }
 .neo-modal-elastix-popup-content {

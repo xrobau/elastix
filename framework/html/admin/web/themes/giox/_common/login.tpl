@@ -4,7 +4,7 @@
 <head>
 <title>Elastix - {$PAGE_NAME}</title>
 <!--<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">-->
-<link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
+<link rel="stylesheet" href="{$WEBPATH}/themes/{$THEMENAME}/styles.css">
 </head>
 
 <body bgcolor="#ffffff" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
@@ -13,7 +13,7 @@
       <td>
         <table cellSpacing="0" cellPadding="0" width="100%" border="0">
           <tr>
-            <td class="menulogo" width=380><img src="images/logo_elastix.png" width="233" height="75" /></td>
+            <td class="menulogo" width=380><img src="{$WEBPATH}images/logo_elastix.png" width="233" height="75" /></td>
           </tr>
         </table>
       </td>

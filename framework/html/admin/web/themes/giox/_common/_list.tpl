@@ -83,11 +83,11 @@
                     <td align="left">
                         &nbsp;
                         {if $enableExport==true}
-                            <img src="images/export.gif" border="0" align="absmiddle" />&nbsp;
+                            <img src="{$WEBCOMMON}images/export.gif" border="0" align="absmiddle" />&nbsp;
                             <font class="letranodec">{$lblExport}</font>&nbsp;&nbsp;
-                            <a href="{$url}&exportcsv=yes&rawmode=yes"><img src="images/csv.gif"         border="0" align="absmiddle" title="CSV" /></a>&nbsp;
-                            <a href="{$url}&exportspreadsheet=yes&rawmode=yes"><img src="images/spreadsheet.gif" border="0" align="absmiddle" title="SPREAD SHEET" /></a>&nbsp;
-                            <a href="{$url}&exportpdf=yes&rawmode=yes"><img src="images/pdf.png"         border="0" align="absmiddle" title="PDF" /></a>&nbsp;
+                            <a href="{$url}&exportcsv=yes&rawmode=yes"><img src="{$WEBCOMMON}images/csv.gif"         border="0" align="absmiddle" title="CSV" /></a>&nbsp;
+                            <a href="{$url}&exportspreadsheet=yes&rawmode=yes"><img src="{$WEBCOMMON}images/spreadsheet.gif" border="0" align="absmiddle" title="SPREAD SHEET" /></a>&nbsp;
+                            <a href="{$url}&exportpdf=yes&rawmode=yes"><img src="{$WEBCOMMON}images/pdf.png"         border="0" align="absmiddle" title="PDF" /></a>&nbsp;
                         {/if}
                     </td>
                     <td align="left" id="msg_status"></td>
@@ -95,28 +95,28 @@
                     {if $pagingShow}  
                         {if $start<=1}
                         <img
-                        src='images/start_off.gif' alt='{$lblStart}' align='absmiddle'
+                        src='{$WEBCOMMON}/images/start_off.gif' alt='{$lblStart}' align='absmiddle'
                         border='0' width='13' height='11'>&nbsp;{$lblStart}&nbsp;&nbsp;<img 
-                        src='images/previous_off.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'>
+                        src='{$WEBCOMMON}/images/previous_off.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'>
                         {else}
                         <a href="{$url}&nav=start&start={$start}"><img
-                        src='images/start.gif' alt='{$lblStart}' align='absmiddle'
+                        src='{$WEBCOMMON}/images/start.gif' alt='{$lblStart}' align='absmiddle'
                         border='0' width='13' height='11'></a>&nbsp;{$lblStart}&nbsp;&nbsp;<a href="{$url}&nav=previous&start={$start}"><img 
-                        src='images/previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'></a>
+                        src='{$WEBCOMMON}/images/previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'></a>
                         {/if}
                         &nbsp;{$lblPrevious}&nbsp;<span 
                         class='pageNumbers'>({$start} - {$end} of {$total})</span>&nbsp;{$lblNext}&nbsp;
                         {if $end==$total}
                         <img 
-                        src='images/next_off.gif'
+                        src='{$WEBCOMMON}/images/next_off.gif'
                         alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'>&nbsp;{$lblEnd}&nbsp;<img 
-                        src='images/end_off.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'>
+                        src='{$WEBCOMMON}/images/end_off.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'>
                         {else}
                         <a href="{$url}&nav=next&start={$start}"><img
-                        src='images/next.gif' 
+                        src='{$WEBCOMMON}/images/next.gif' 
                         alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'></a>&nbsp;{$lblEnd}&nbsp;<a 
                         href="{$url}&nav=end&start={$start}"><img 
-                        src='images/end.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'></a>
+                        src='{$WEBCOMMON}/images/end.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'></a>
                         {/if}
                     {/if}
                     </td>
@@ -161,28 +161,28 @@
                     {if $pagingShow}  
                         {if $start<=1}
                         <img
-                        src='images/start_off.gif' alt='{$lblStart}' align='absmiddle'
+                        src='{$WEBCOMMON}/images/start_off.gif' alt='{$lblStart}' align='absmiddle'
                         border='0' width='13' height='11'>&nbsp;{$lblStart}&nbsp;&nbsp;<img
-                        src='images/previous_off.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'>
+                        src='{$WEBCOMMON}/images/previous_off.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'>
                         {else}
                         <a href="{$url}&nav=start&start={$start}"><img
-                        src='images/start.gif' alt='{$lblStart}' align='absmiddle'
+                        src='{$WEBCOMMON}/images/start.gif' alt='{$lblStart}' align='absmiddle'
                         border='0' width='13' height='11'></a>&nbsp;{$lblStart}&nbsp;&nbsp;<a href="{$url}&nav=previous&start={$start}"><img
-                        src='images/previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'></a>
+                        src='{$WEBCOMMON}/images/previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'></a>
                         {/if}
                         &nbsp;{$lblPrevious}&nbsp;<span
                         class='pageNumbers'>({$start} - {$end} of {$total})</span>&nbsp;{$lblNext}&nbsp;
                         {if $end==$total}
                         <img
-                        src='images/next_off.gif'
+                        src='{$WEBCOMMON}/images/next_off.gif'
                         alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'>&nbsp;{$lblEnd}&nbsp;<img
-                        src='images/end_off.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'>
+                        src='{$WEBCOMMON}/images/end_off.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'>
                         {else}
                         <a href="{$url}&nav=next&start={$start}"><img
-                        src='images/next.gif'
+                        src='{$WEBCOMMON}/images/next.gif'
                         alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'></a>&nbsp;{$lblEnd}&nbsp;<a
                         href="{$url}&nav=end&start={$start}"><img
-                        src='images/end.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'></a>
+                        src='{$WEBCOMMON}/images/end.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'></a>
                         {/if}
                     {/if}
                     </td>

@@ -4,8 +4,8 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
   <title>Elastix - {$PAGE_NAME}</title>
-  <link rel="stylesheet" href="themes/blackmin/styles.css" /> 
-  <link rel="stylesheet" href="themes/blackmin/help.css" /> 
+  <link rel="stylesheet" href="{$WEBPATH}themes/blackmin/styles.css" /> 
+  <link rel="stylesheet" href="{$WEBPATH}themes/blackmin/help.css" /> 
 </head>
 <body class="elx-blackmin-login">
 <div class="logo"><img src="themes/blackmin/images/elastix_logo_mini.png" /></div>

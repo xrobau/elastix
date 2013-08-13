@@ -335,6 +335,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix blackmin and giox themes to work with new filesystem
+  layout. Add images referenced by themes but not included.
+  SVN Rev[5754]
+
 * Fri Aug  9 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: switch PHP session directory from /tmp to 
   /var/lib/php/session-asterisk in order to prevent sessions from being removed

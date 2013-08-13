@@ -4,13 +4,13 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
         <title>Elastix</title>
-        <link rel="stylesheet" href="themes/{$THEMENAME}/styles.css" />
-        <link rel="stylesheet" href="themes/{$THEMENAME}/help.css" />
-		<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/sticky_note.css" />
+        <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" />
+        <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/help.css" />
+		<link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/sticky_note.css" />
 	{$HEADER_LIBS_JQUERY}
-        <script src="libs/js/base.js"></script>
-        <script src="libs/js/iframe.js"></script>
-		<script type='text/javascript' src="libs/js/sticky_note.js"></script>
+        <script src="{$WEBCOMMON}js/base.js"></script>
+        <script src="{$WEBCOMMON}js/iframe.js"></script>
+		<script type='text/javascript' src="{$WEBCOMMON}js/sticky_note.js"></script>
         {$HEADER}
 	{$HEADER_MODULES}
     </head>

@@ -4,18 +4,18 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
   <title>Elastix</title>
-  <link rel="stylesheet" href="themes/{$THEMENAME}/styles.css" /> 
-  <link rel="stylesheet" href="themes/{$THEMENAME}/help.css" /> 
+  <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" /> 
+  <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/help.css" /> 
   {$HEADER_LIBS_JQUERY}  
-  <script type="text/javascript" src="libs/js/base.js"></script>
-  <script type="text/javascript" src="libs/js/iframe.js"></script>
+  <script type="text/javascript" src="{$WEBCOMMON}js/base.js"></script>
+  <script type="text/javascript" src="{$WEBCOMMON}js/iframe.js"></script>
   {$HEADER}
   {$HEADER_MODULES}
 </head>
 <body {$BODYPARAMS}>
 <div id="elx-blackmin-content-menu">
 <div id="elx-blackmin-menu">
-<img align="absmiddle" src="themes/{$THEMENAME}/images/elastix_logo_mini.png" height="36" alt="elastix" longdesc="http://www.elastix.org" />
+<img align="absmiddle" src="{$WEBPATH}themes/{$THEMENAME}/images/elastix_logo_mini.png" height="36" alt="elastix" longdesc="http://www.elastix.org" />
 {$MENU}
 </div>
 &nbsp;{if $icon ne null}<img src="{$icon}" border="0" align="absmiddle" />&nbsp;&nbsp;{/if}{$title}

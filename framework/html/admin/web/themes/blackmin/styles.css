@@ -120,7 +120,7 @@ input.button, input.submit
 {
 	border: 1px solid #999999;
 	background-color: #ffffff;
-	background-image: url(../../images/bgGray.gif);
+	background-image: url(../../../../web/_common/images/bgGray.gif);
     background-repeat: repeat-x;
     background-position: bottom;
 }
@@ -267,7 +267,7 @@ form.elx-blackmin-form-table>table>thead>tr.filterForm
     color: #000000;
 
     background-color: #fafafa;
-    background-image: url(../../images/bggrisForm.gif);
+    background-image: url(../../../../web/_common/images/bggrisForm.gif);
     background-repeat: repeat-x;
     background-position: top;
 }
@@ -307,7 +307,7 @@ form.elx-blackmin-form-table>table>thead>tr>th
 	color: #000000;
 	border: 1px solid #999;
 	padding-left:5px;
-	background-image: url(../../images/bggrisForm.gif);
+	background-image: url(../../../../web/_common/images/bggrisForm.gif);
     background-repeat: repeat-x;
     background-position: top;
 }
@@ -331,23 +331,23 @@ TD.menudescription {
     vertical-align: middle;
 }
 #boxRPM .b {
-  background:url(../../images/b.png);
+  background:url(../../../../web/_common/images/b.png);
 }
 
 #boxRPM .tl {
-  background:url(../../images/tl.png);
+  background:url(../../../../web/_common/images/tl.png);
 }
 
 #boxRPM .tr {
-  background:url(../../images/tr.png);
+  background:url(../../../../web/_common/images/tr.png);
 }
 
 #boxRPM .bl {
-  background:url(../../images/bl.png);
+  background:url(../../../../web/_common/images/bl.png);
 }
 
 #boxRPM .br {
-  background:url(../../images/br.png);
+  background:url(../../../../web/_common/images/br.png);
 }
 
 #boxRPM {
@@ -522,7 +522,7 @@ td a.link_summary_on{
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
     border-radius: 6px;
-    background:url(/images/modalbox_bg.png) top left repeat-x #fff;
+    background:url(../../../../web/_common/images/modalbox_bg.png) top left repeat-x #fff;
     top: 50%;
     left: 45%;
    scrollbar-face-color: #6685CA;
@@ -550,7 +550,7 @@ td a.link_summary_on{
     right:10px;
     width:18px;
     height:15px;
-    background:url(/images/bookmarks_equis.png) no-repeat;
+    background:url(../../../../web/_common/images/bookmarks_equis.png) no-repeat;
     cursor: pointer;
 }
 .neo-modal-elastix-popup-content {

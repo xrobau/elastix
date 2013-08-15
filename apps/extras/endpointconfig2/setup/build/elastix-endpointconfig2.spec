@@ -13,7 +13,11 @@ Requires: freePBX >= 2.8.1-12
 Requires: elastix-framework >= 2.4.0-0
 Requires: elastix-agenda >= 2.4.0-5
 Requires: py-Asterisk
+Requires: python-eventlet
 Requires: python-tempita
+Requires: pyOpenSSL
+Requires: python-daemon
+Requires: MySQL-python
 
 %description
 The Elastix Endpoint Configurator is a complete rewrite and reimplementation of
@@ -88,6 +92,9 @@ preversion=`cat $pathModule/preversion_%{modname}.info`
 if [ $1 -eq 1 ]; then #install
   # The installer database
     elastix-dbprocess "install" "$pathModule/setup/db"
+
+  # Restart apache to disable HTTPS redirect on phonesrv script
+  /sbin/service httpd restart
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
 fi

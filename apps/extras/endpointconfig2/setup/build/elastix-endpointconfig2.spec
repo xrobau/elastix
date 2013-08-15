@@ -58,8 +58,8 @@ mkdir -p                        $RPM_BUILD_ROOT/var/www/html/
 mv modules/                     $RPM_BUILD_ROOT/var/www/html/
 
 # Additional (module-specific) files that can be handled by RPM
-mv etc/ $RPM_BUILD_ROOT/
-mv usr/ $RPM_BUILD_ROOT/
+mv setup/etc/ $RPM_BUILD_ROOT/
+mv setup/usr/ $RPM_BUILD_ROOT/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.

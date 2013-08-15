@@ -1,0 +1,110 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Configure" => "Configure",
+    "New Endpoint Configurator" => "New Endpoint Configurator",
+    "Showing" => "Showing",
+    "Scan network for endpoints" => "Scan network for endpoints",
+    "Step" => "Step",
+    "Apply configuration to all selected endpoints" => "Apply configuration to all selected endpoints",
+    "Remove configuration for selected endpoints" => "Remove configuration for selected endpoints",
+    "Download list of configurable endpoints" => "Download list of configurable endpoints",
+    "CSV (Legacy)" => "CSV (Legacy)",
+    "XML" => "XML",
+    "CSV (nested)" => "CSV (nested)",
+    "Upload list of endpoint configuration" => "Upload list of endpoint configuration",
+    "View log of last configuration" => "View log of last configuration",
+    "MAC Address" => "MAC Address",
+    "Current IP" => "Current IP",
+    "Manufacturer" => "Manufacturer",
+    "Model" => "Model",
+    "This endpoint has been loaded from a file" => "This endpoint has been loaded from a file",
+    "Changes to this endpoint have not yet been applied" => "Changes to this endpoint have not yet been applied",
+    "This endpoint has at least one account assigned" => "This endpoint has at least one account assigned",
+    "This endpoint was previously detected but is missing from the latest scan" => "This endpoint was previously detected but is missing from the latest scan",
+    "(unknown)" => "(unknown)",
+    "No endpoints have been discovered or loaded." => "No endpoints have been discovered or loaded.",
+    "Cannot scan while scanning/configuration is in progress." => "Cannot scan while scanning/configuration is in progress.",
+    "Cannot configure while scanning/configuration is in progress." => "Cannot configure while scanning/configuration is in progress.",
+    "Invalid endpoint scan mask." => "Invalid endpoint scan mask.",
+    "Please confirm in order to remove tracking of selected endpoints. All configuration files for selections will be removed but no accounts will be removed from the phone or this system." => "Please confirm in order to remove tracking of selected endpoints. All configuration files for selections will be removed but no accounts will be removed from the phone or this system.",
+    "Endpoint configuration for" => "Endpoint configuration for",
+    "Unimplemented method" => "Unimplemented method",
+    "There is a network scan in progress" => "There is a network scan in progress",
+    "There is an endpoint configuration in progress" => "There is an endpoint configuration in progress",
+    "Invalid Format in Parameter" => "Invalid Format in Parameter",
+    "There is no network scan in progress." => "There is no network scan in progress.",
+    "Invalid endpoint ID" => "Invalid endpoint ID",
+    "Invalid model ID" => "Invalid model ID",
+    "Invalid or empty selection" => "Invalid or empty selection",
+    "Invalid endpoint file format" => "Invalid endpoint file format",
+    "No file uploaded" => "No file uploaded",
+    "Failed to upload file" => "Failed to upload file",
+    "Failed to detect endpoint file format" => "Failed to detect endpoint file format",
+    "Failed to parse file" => "Failed to parse file",
+    "Failed to save endpoints" => "Failed to save endpoints",
+    "Failed to open file" => "Failed to open file",
+    "Line" => "Line",
+    "missing required field" => "missing required field",
+    "property without endpoint" => "property without endpoint",
+    "account without endpoint" => "account without endpoint",
+    "account property without endpoint" => "account property without endpoint",
+    "account property without account" => "account property without account",
+    "invalid indentation" => "invalid indentation",
+    "Failed to read header" => "Failed to read header",
+    "Invalid header - the following columns are required" => "Invalid header - the following columns are required",
+    "(not detected)" => "(not detected)",
+    "Empty selection" => "Empty selection",
+    "Manufacturer not specified for endpoint" => "Manufacturer not specified for endpoint",
+    "Source" => "Source",
+    "Model not specified for endpoint" => "Model not specified for endpoint",
+    "The following manufacturer/model combination is unsupported" => "The following manufacturer/model combination is unsupported",
+    "Invalid MAC" => "Invalid MAC",
+    "Duplicate MAC" => "Duplicate MAC",
+    "Manufacturer switching is not supported" => "Manufacturer switching is not supported",
+    "Could not find account for endpoint" => "Could not find account for endpoint",
+    "Account tech mismatch for endpoint" => "Account tech mismatch for endpoint",
+    "Failed to save endpoint details" => "Failed to save endpoint details",
+    "Warning" => "Warning",
+    "Error" => "Error",
+    "Fatal error" => "Fatal error",
+    "Column" => "Column",
+    "Incorrect XML document type" => "Incorrect XML document type",
+    "Unrecognized element instead of endpoint" => "Unrecognized element instead of endpoint",
+    "Missing required element in endpoint" => "Missing required element in endpoint",
+    "Endpoint" => "Endpoint",
+    "Unrecognized element instead of property" => "Unrecognized element instead of property",
+    "Unrecognized element instead of account" => "Unrecognized element instead of account",
+    "Missing required element in account" => "Missing required element in account",
+    "Log of last configuration" => "Log of last configuration",
+    "Apply" => "Apply",
+    "Dismiss" => "Dismiss",
+);
+?>

@@ -1,0 +1,222 @@
+#!/usr/bin/python
+# vim: set fileencoding=utf-8 :
+# vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+# Codificación: UTF-8
+# +----------------------------------------------------------------------+
+# | Elastix version 2.0.4                                                |
+# | http://www.elastix.org                                               |
+# +----------------------------------------------------------------------+
+# | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+# +----------------------------------------------------------------------+
+# | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+# | Telfs. 2283-268, 2294-440, 2284-356                                  |
+# | Guayaquil - Ecuador                                                  |
+# | http://www.palosanto.com                                             |
+# +----------------------------------------------------------------------+
+# | The contents of this file are subject to the General Public License  |
+# | (GPL) Version 2 (the "License"); you may not use this file except in |
+# | compliance with the License. You may obtain a copy of the License at |
+# | http://www.opensource.org/licenses/gpl-license.php                   |
+# |                                                                      |
+# | Software distributed under the License is distributed on an "AS IS"  |
+# | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+# | the License for the specific language governing rights and           |
+# | limitations under the License.                                       |
+# +----------------------------------------------------------------------+
+# | The Original Code is: Elastix Open Source.                           |
+# | The Initial Developer of the Original Code is PaloSanto Solutions    |
+# +----------------------------------------------------------------------+
+# $Id: dialerd,v 1.2 2008/09/08 18:29:36 alex Exp $
+
+import sys, logging, re
+from optparse import OptionParser
+from ConfigParser import RawConfigParser
+import eventlet
+from eventlet import pools
+from eventlet.greenpool import GreenPool
+from eventlet.db_pool import ConnectionPool
+import MySQLdb
+commands = eventlet.import_patched('commands')
+
+sys.path.append('/usr/share/elastix/endpoint-classes/class')
+import elastix
+
+def main():
+    dbcred = get_database_credentials()
+    dbpool = ConnectionPool(MySQLdb,
+                host = 'localhost',
+                user = dbcred[0],
+                passwd = dbcred[1],
+                db = 'endpointconfig',
+                charset = 'utf8',
+                use_unicode = True)
+    amipool = None
+
+    # Load dictionary of IPs for endpoints, along with vendor and model 
+    # identification
+    endpointList = loadEndpointIP(dbpool)
+    if endpointList == None: return
+    if len(endpointList) <= 0: return
+
+    # List all of the IPs assigned to this server. If there are several IPs,
+    # each endpoint will be given the one that shares the most specific netmask
+    serveriplist = listIpAddresses()
+    
+    # Dynamically load all of the endpoint classes
+    endpointClasses = {}
+    for ip in endpointList:
+        if not (endpointList[ip]['manufacturer'] in endpointClasses):
+            pkgname = endpointList[ip]['manufacturer'].replace('-', '')
+            pkg = 'elastix.vendor.' + pkgname
+            vendormodule = __import__(pkg, {}, {}, pkg.split('.')[:-1])
+            endpointClasses[endpointList[ip]['manufacturer']] = vendormodule.Endpoint
+        eclass = endpointClasses[endpointList[ip]['manufacturer']]
+        
+        # Create the manufacturer-specific Endpoint object
+        endpoint = eclass(amipool, dbpool, chooseServerIP(serveriplist, ip),
+            ip, endpointList[ip]['mac'])        
+        if not endpoint.setModel(endpointList[ip]['model']):
+            logging.error('manufacturer %s does not implement model: %s' % 
+                (endpointList[ip]['manufacturer'], endpointList[ip]['model']))
+            return
+        endpointList[ip]['endpoint'] = endpoint
+
+    # Execute the deleteContent method on all of the endpoints
+    for ip in endpointList:
+        endpointList[ip]['endpoint'].deleteContent()
+
+def get_database_credentials():
+    '''Get database credentials to connect to endpointconfig database
+    
+    This implementation attempts to parse /etc/amportal.conf for the credentials.
+    The installation process should have given the freepbx database user full
+    access to the endpointconfig database.
+    '''
+    f = open('/etc/amportal.conf', 'r')
+    dbcred = [None, None]
+    for s in f:
+        m = re.match(r'AMPDBUSER\s*=\s*(.+)', s)
+        if m != None:
+            dbcred[0] = m.group(1)
+        m = re.match(r'AMPDBPASS\s*=\s*(.+)', s)
+        if m != None:
+            dbcred[1] = m.group(1)
+        if dbcred[0] != None and dbcred[1] != None: break
+    f.close()
+    if dbcred[0] != None and dbcred[1] != None:
+        return dbcred
+    else:
+        return None
+
+def loadEndpointIP(dbpool):
+    '''Load endpoint information for each selected endpoint into memory '''
+    logging.info('Loading endpoint information from database...')
+    dbconn = dbpool.get()
+    sth = dbconn.cursor()
+    sth.execute(
+        'SELECT endpoint.id, model.id, manufacturer.name, model.name, '\
+            'model.max_accounts, model.static_ip_supported, '\
+            'model.dynamic_ip_supported, endpoint.mac_address, '\
+            ' endpoint.last_known_ipv4 AS ip '\
+        'FROM endpoint, model, manufacturer '\
+        'WHERE endpoint.id_model = model.id '\
+            'AND model.id_manufacturer = manufacturer.id '\
+            'AND endpoint.selected = 1')
+    endpointList = {}
+    for row in sth.fetchall():
+        endpointList[row[8]] = {
+            'id'                    :   row[0],
+            'model_id'              :   row[1],
+            'manufacturer'          :   row[2],
+            'model'                 :   row[3],
+            'max_accounts'          :   row[4],
+            'static_ip_supported'   :   row[5],
+            'dynamic_ip_supported'  :   row[6],
+            'mac'                   :   row[7],
+            'ip'                    :   row[8],
+            'properties'            :   {},
+            'accounts'              :   [],
+            'endpoint'              :   None,
+        }
+    for ip in endpointList.keys():
+        # Load account information from database. No verification is done on 
+        # whether there is at least one account, because an endpoint type might
+        # exist that can do something interesting without an associated account.
+        totalAccounts = 0
+        sth.execute(
+            'SELECT tech, account FROM endpoint_account WHERE id_endpoint = %s '\
+            'ORDER BY priority, account',
+            (endpointList[ip]['id'],))
+        for row in sth.fetchall():
+            extension = elastix.Extension(dbconn, row[0], row[1])
+            if extension.tech != None:
+                endpointList[ip]['accounts'].append(extension)
+                totalAccounts += 1
+        if totalAccounts > endpointList[ip]['max_accounts']:
+            logging.error('Endpoint %s@%s cannot configure more than %d accounts, got %d' %
+                (endpointList[ip]['manufacturer'], ip, endpointList[ip]['max_accounts'], totalAccounts))
+            return False
+         
+        # Load endpoint properties from database. Endpoint properties may and 
+        # should override model properties, if they collide
+        sth.execute(
+            'SELECT property_key, property_value FROM model_properties '\
+            'WHERE id_model = %s',
+            (endpointList[ip]['model_id'],))
+        for row in sth.fetchall():
+            endpointList[ip]['properties'][row[0]] = row[1]
+        sth.execute(
+            'SELECT property_key, property_value FROM endpoint_properties '\
+            'WHERE id_endpoint = %s',
+            (endpointList[ip]['id'],))
+        for row in sth.fetchall():
+            endpointList[ip]['properties'][row[0]] = row[1]
+     
+    dbpool.put(dbconn)
+    if len(endpointList) <= 0:
+        logging.error('No loaded endpoints were found or associated, expected at least 1')
+        return None
+    else:
+        logging.info('Loaded %d endpoints' % (len(endpointList),))
+        return endpointList
+
+def listIpAddresses():
+    '''List IPv4/Netmask for all Ethernet interfaces'''
+    iflist = {}
+    output = commands.getoutput('/sbin/ip addr show')
+    bIsEther = False
+    ip = None
+    for s in output.split('\n'):
+        regs = re.search(r'^\d+:\s+(\w+):\s*<(.*)>', s)
+        if regs != None:
+            bIsEther = False
+        elif 'link/ether' in s:
+            bIsEther = True
+        else:
+            regs = re.search(r'\s*inet (\d+\.\d+\.\d+.\d+)/(\d+) brd (\d+\.\d+\.\d+.\d+).+\s((\w+)(:(\d+))?)\s*$', s)
+            if regs != None:
+                # Calculate netmask from number of bits
+                iMaskBits = int(regs.group(2))
+                iMask = (0xFFFFFFFF << (32 - iMaskBits)) & 0xFFFFFFFF
+                
+                # Calculate network as binary value
+                sIpAddr = regs.group(1)
+                ip = sIpAddr.split('.')
+                ipval = (int(ip[0]) << 24) | (int(ip[1]) << 16) | (int(ip[2]) << 8) | int(ip[3])
+                iflist[sIpAddr] = { 'netmask': iMask, 'network': (ipval & iMask) }
+    return iflist
+
+def chooseServerIP(iplist, endpointIp):
+    '''Choose a server IP whose network matches the one of the endpoint'''
+    defaultip = None
+    ip = endpointIp.split('.')
+    ipval = (int(ip[0]) << 24) | (int(ip[1]) << 16) | (int(ip[2]) << 8) | int(ip[3])
+    for serverip in iplist:
+        netinfo = iplist[serverip]
+        if defaultip == None: defaultip = serverip
+        if (ipval & netinfo['netmask']) == netinfo['network']:
+            return serverip
+    return defaultip
+
+if __name__ == '__main__':
+    main()

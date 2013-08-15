@@ -1,0 +1,110 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Configure" => "Configurar",
+    "New Endpoint Configurator" => "Nuevo Configurador de Endpoint",
+    "Showing" => "Mostrando",
+    "Scan network for endpoints" => "Buscar endpoints en la red",
+    "Step" => "Paso",
+    "Apply configuration to all selected endpoints" => "Aplicar configuración a todos los endpoints seleccionados",
+    "Remove configuration for selected endpoints" => "Remover configuración para los endpoints seleccionados",
+    "Download list of configurable endpoints" => "Descargar lista de endpoints configurables",
+    "CSV (Legacy)" => "CSV (Antiguo)",
+    "XML" => "XML",
+    "CSV (nested)" => "CSV (anidado)",
+    "Upload list of endpoint configuration" => "Cargar lista de configuración de endpoints",
+    "View log of last configuration" => "Mostrar registro de la última configuración",
+    "MAC Address" => "Dirección MAC",
+    "Current IP" => "IP Actual",
+    "Manufacturer" => "Fabricante",
+    "Model" => "Modelo",
+    "This endpoint has been loaded from a file" => "Este endpoint ha sido cargado de un archivo",
+    "Changes to this endpoint have not yet been applied" => "Cambios al endpoint no han sido aplicados",
+    "This endpoint has at least one account assigned" => "Este endpoint tiene al menos una cuenta asignada",
+    "This endpoint was previously detected but is missing from the latest scan" => "Este endpoint fue previamente detectado pero no apareció en la última búsqueda",
+    "(unknown)" => "(desconocido)",
+    "No endpoints have been discovered or loaded." => "No se han descubierto o cargado endpoints",
+    "Cannot scan while scanning/configuration is in progress." => "No se puede buscar con una búsqueda o configuración en progreso.",
+    "Cannot configure while scanning/configuration is in progress." => "No se puede configurar con una búsqueda o configuración en progreso.",
+    "Invalid endpoint scan mask." => "Máscara de búsqueda de endpoints inválida",
+    "Please confirm in order to remove tracking of selected endpoints. All configuration files for selections will be removed but no accounts will be removed from the phone or this system." => "Por favor confirme para remover la configuración de los endpoints seleccionados. Todos los archivos de configuración para las selecciones serán borrados pero no se quitarán cuentas del teléfono o del sistema.",
+    "Endpoint configuration for" => "Configuración de endpoint para",
+    "Unimplemented method" => "Método no implementado",
+    "There is a network scan in progress" => "Hay una búsqueda de red en progreso",
+    "There is an endpoint configuration in progress" => "Hay una configuración de endpoint en progreso",
+    "Invalid Format in Parameter" => "Formato inválido en parámetro",
+    "There is no network scan in progress." => "No hay búsqueda de red en progreso.",
+    "Invalid endpoint ID" => "ID de endpoint inválido",
+    "Invalid model ID" => "ID de modelo inválido",
+    "Invalid or empty selection" => "Selección inválida o vacía",
+    "Invalid endpoint file format" => "Formato de archivo de endpoint inválido",
+    "No file uploaded" => "No se ha cargado un archivo",
+    "Failed to upload file" => "No se ha podido cargar archivo",
+    "Failed to detect endpoint file format" => "No se puede detectar formato de archivo de endpoint",
+    "Failed to parse file" => "No se puede parsear archivo",
+    "Failed to save endpoints" => "No se pueden guardar los endpoints",
+    "Failed to open file" => "No se puede abrir el archivo",
+    "Line" => "Línea",
+    "missing required field" => "falta campo requerido",
+    "property without endpoint" => "propiedad sin endpoint",
+    "account without endpoint" => "cuenta sin endpoint",
+    "account property without endpoint" => "propiedad de cuenta sin endpoint",
+    "account property without account" => "propiedad de cuenta sin account",
+    "invalid indentation" => "sangría inválida",
+    "Failed to read header" => "No se puede leer cabecera",
+    "Invalid header - the following columns are required" => "Cabecera inválida - se requieren las siguientes columnas",
+    "(not detected)" => "(no detectado)",
+    "Empty selection" => "Selección vacía",
+    "Manufacturer not specified for endpoint" => "Fabricante no especificado para endpoint",
+    "Source" => "Fuente",
+    "Model not specified for endpoint" => "Modelo no especificado para endpoint",
+    "The following manufacturer/model combination is unsupported" => "La siguiente combinación de fabricante/modelo no está soportada",
+    "Invalid MAC" => "MAC inválida",
+    "Duplicate MAC" => "MAC duplicada",
+    "Manufacturer switching is not supported" => "Cambio de fabricante no está soportado",
+    "Could not find account for endpoint" => "No se encuentra cuenta para endpoint",
+    "Account tech mismatch for endpoint" => "No coincide tecnología para cuenta de endpoint",
+    "Failed to save endpoint details" => "No se pueden guardar detalles de endpoint",
+    "Warning" => "Advertencia",
+    "Error" => "Error",
+    "Fatal error" => "Error fatal",
+    "Column" => "Columna",
+    "Incorrect XML document type" => "Tipo de documento XML incorrecto",
+    "Unrecognized element instead of endpoint" => "Elemento no reconocido en lugar de endpoint",
+    "Missing required element in endpoint" => "Falta elemento requerido en endpoint",
+    "Endpoint" => "Endpoint",
+    "Unrecognized element instead of property" => "Elemento no reconocido en lugar de property",
+    "Unrecognized element instead of account" => "Elemento no reconocido en lugar de account",
+    "Missing required element in account" => "Falta elemento requerido en account",
+    "Log of last configuration" => "Registro de última configuración",
+    "Apply" => "Aplicar",
+    "Dismiss" => "Cerrar",
+);
+?>

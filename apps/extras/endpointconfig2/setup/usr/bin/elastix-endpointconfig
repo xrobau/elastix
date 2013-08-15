@@ -1,0 +1,462 @@
+#!/usr/bin/python
+# vim: set fileencoding=utf-8 :
+# vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+# Codificación: UTF-8
+# +----------------------------------------------------------------------+
+# | Elastix version 2.0.4                                                |
+# | http://www.elastix.org                                               |
+# +----------------------------------------------------------------------+
+# | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+# +----------------------------------------------------------------------+
+# | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+# | Telfs. 2283-268, 2294-440, 2284-356                                  |
+# | Guayaquil - Ecuador                                                  |
+# | http://www.palosanto.com                                             |
+# +----------------------------------------------------------------------+
+# | The contents of this file are subject to the General Public License  |
+# | (GPL) Version 2 (the "License"); you may not use this file except in |
+# | compliance with the License. You may obtain a copy of the License at |
+# | http://www.opensource.org/licenses/gpl-license.php                   |
+# |                                                                      |
+# | Software distributed under the License is distributed on an "AS IS"  |
+# | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+# | the License for the specific language governing rights and           |
+# | limitations under the License.                                       |
+# +----------------------------------------------------------------------+
+# | The Original Code is: Elastix Open Source.                           |
+# | The Initial Developer of the Original Code is PaloSanto Solutions    |
+# +----------------------------------------------------------------------+
+# $Id: dialerd,v 1.2 2008/09/08 18:29:36 alex Exp $
+
+'''
+All mentions of "current" or "currently" refer to the state of the code as of 
+2012-06-23 in the 2.3.0 branch of the Elastix SVN repository.
+
+This program is an attempt to improve on the current situation of the Endpoint
+Configurator. The Endpoint Configurator (EC) is an Elastix module that tries to 
+centralize the discovery and configuration of VoIP phones on the LAN, to save an
+administrator the trouble of having to log into the administration interface of
+each phone in order to point the phone to the Elastix server. Currently the 
+Endpoint Configurator is sort of adequate for configuring at most a dozen phones
+at a time, or to change the configuration of a single phone. It, however, fails
+to be of help when configuring hundreds or even thousands of phones at a time.
+The most obvious symptom is that the GUI locks up for minutes at a time when
+configuring less than a dozen phones at once.
+
+Another design flaw of the current Endpoint Configurator is that there is no
+support at all for the concept of multiple SIP/IAX accounts associated to a 
+single endpoint. Currently only one SIP/IAX account can be programmed into each
+endpoint.
+
+The design goals of this program are the following:
+1) Parallel configuration: the EC needs to contact the phone in order to reboot
+   it and make it read the configuration from the Elastix server (for the common 
+   TFTP configuration case). Currently this operation is synchronous, so each
+   phone of the list needs to wait until the previous phone has been contacted 
+   in order to start configuration. This program aims to run the configuration 
+   of all the phones in parallel, to save configuration time for hundreds of 
+   phones.
+2) Asynchronous operation: related to the first point. Due to the use of 
+   ordinary blocking sockets, the configuration must wait for network I/O for a 
+   single operation of a single phone, sequentially, for each phone. This 
+   program tries to use non-blocking I/O for all network configuration.
+3) Effective polymorphism: the current implementation tries to separate the 
+   functions that deal with various phone vendors and models in separate files.
+   However, the function dispatcher needs to know about the names of each of the
+   functions, and therefore needs to know about the names of every single 
+   vendor. Additionally the function dispatches encodes vendor-specific 
+   knowledge for some phone models. This spreads out knowledge of the vendors 
+   and models in several places and makes it more difficult to implement a new 
+   vendor or model adequately. This program uses inheritance properly so that 
+   only the implementation class knows about a particular phone vendor or model. 
+   Ideally, implementing a new vendor should just involve adding a new package
+   under /usr/share/elastix/endpoint-classes/class/vendor with no changes to the
+   core program.
+4) Template-based configuration: currently most, if not all implementations of
+   phone configurators replace a few variables in a largely-static configuration
+   file. This program takes this to the logical conclusion and uses 
+   python-tempita templates as much as possible, in order to simplify the file 
+   generation.
+
+
+For each endpoint to configure, the following needs to take place.
+- The privileged script detect_endpoints runs and probes the network for 
+  endpoints to configure. Alternatively, the endpoint IPs and models are loaded 
+  manually from a file. 
+- Some external agent, most commonly the web interface, fills the tables in the
+  endpointconfig MySQL database with the extensions to associate with the 
+  endpoint. Alternatively, the file used to load the endpoint IPs must also 
+  indicate which extensions should be associated to each endpoint. It is assumed
+  that each endpoint has an unique IPv4 address and is reachable from the 
+  Elastix system. Also, all endpoints to configure must have a specific model
+  associated to them, as the model selection is required (for most vendors) in 
+  order to know how to configure the phone.
+- This program receives a file with the list of IPv4s of all the phones to
+  configure via the --endpointfile parameter. Each IPv4 is in the format
+  aa.bb.cc.dd .
+- The IPv4 is looked up in the endpointconfig MySQL database to get the 
+  associated extensions, and the specified vendor and model. The vendor name
+  is used to build the package to load dynamically (elastix.vendor.{VENDORNAME}),
+  and then the Endpoint class inside each package is created.
+- The program queries Asterisk for the IPs of all of the registered extensions,
+  with 'sip show peers' and 'iax2 show peers'.
+- The Endpoint instance from the vendor package is initialized with the chosen
+  model and additional phone information read from the endpointconfig database.
+  For each extension to associate with the endpoint, an elastix.Extension class
+  is initialized with information from the asterisk (FreePBX) database.
+  Additionally, if the endpoint has an IPv4 address that matches one of the 
+  registered IPs, then the 'registered' flag will be set on the Extension
+  object.
+- The chosen vendor and model may require system-wide configuration files to be
+  created at /tftpboot, and therefore the static method 
+  elastix.vendor.{VENDORNAME}.Endpoint.updateGlobalConfig() is called for each
+  vendor class. It is not expected that this method requires network I/O, and 
+  therefore this step should be synchronous.
+- For each Endpoint, the method updateLocalConfig is invoked in a greenthread
+  taken from a GreenPile. Each implementation should return True if the 
+  configuration completes successfully, or False for any errors that prevent
+  correct configuration.
+
+'''
+import sys, traceback, logging, re
+from optparse import OptionParser
+from ConfigParser import RawConfigParser
+import eventlet
+from eventlet import pools
+from eventlet.greenpool import GreenPool
+from eventlet.db_pool import ConnectionPool
+from eventlet.green import socket
+import MySQLdb
+daemon = eventlet.import_patched('daemon')
+commands = eventlet.import_patched('commands')
+AsteriskManager = eventlet.import_patched('Asterisk.Manager')
+
+sys.path.append('/usr/share/elastix/endpoint-classes/class')
+import elastix
+
+def main():
+    '''Entry point'''
+    socket.setdefaulttimeout(5)
+    
+    # Parse and validate commandline options
+    parser = OptionParser()
+    parser.add_option('--progressfile', dest='progressfile',
+                      help='(optional) Progress logfile for endpoint configuration')
+    (options, args) = parser.parse_args()
+        
+    # Set up logging, and daemonize if logfile is specified
+    logconfig = {
+        'filemode'  : 'w',
+        'level'     : logging.INFO,
+        'format'    : '%(asctime)s : %(levelname)s: (%(module)s) %(message)s',
+        'datefmt'   :'%Y-%m-%d %H:%M:%S'
+    }
+    if options.progressfile != None:
+        logconfig['filename'] = options.progressfile
+        daemonctx = daemon.DaemonContext()
+        daemonctx.open()
+    logging.basicConfig(**logconfig)
+    
+    logging.info('BEGIN ENDPOINT CONFIGURATION')    
+    try:
+        #applyConfig(options.endpointfile)
+        applyConfig()
+    except Exception, e:
+        logging.error('Uncaught exception: \n' + traceback.format_exc())
+    logging.info('END ENDPOINT CONFIGURATION')
+
+iTotalSteps = 0
+iCurrentStep = 0
+
+def applyConfig():
+    global iTotalSteps
+    global iCurrentStep
+    
+    # Set up database connection pool
+    dbcred = get_database_credentials()
+    if dbcred == None:
+        logging.error('Failed to get database credentials\n')
+        return
+    dbpool = ConnectionPool(MySQLdb,
+                host = 'localhost',
+                user = dbcred[0],
+                passwd = dbcred[1],
+                db = 'endpointconfig',
+                charset = 'utf8',
+                use_unicode = True)
+    
+    # Load Asterisk credentials
+    config = RawConfigParser()
+    config.read(['/etc/asterisk/manager.conf'])
+    asteriskaddr = ('127.0.0.1', 5038)
+    asteriskcred = [None, None]
+    for section in config.sections():
+        if section == 'general':
+            asteriskaddr[1] = config.getint(section, 'port')
+        else:
+            asteriskcred[0] = section
+            asteriskcred[1] = config.get(section, 'secret')
+            break
+    
+    # Load dictionary of IPs for endpoints, along with vendor and model 
+    # identification
+    endpointList = loadEndpointIP(dbpool)
+    if endpointList == None: return
+    if len(endpointList) <= 0: return
+    
+    # Connect to Asterisk and read registered peers for supported techs
+    amipool = AsteriskManagerPool(max_size=1)
+    amipool.credentials(asteriskaddr, asteriskcred[0], asteriskcred[1])
+    ami = amipool.get()
+    
+    # TODO: truncation of long account names in Elastix 3
+    r = ami.Command('sip show peers')
+    
+    for s in r:
+        logging.debug(s)
+        l = s.split()
+        # 1064/1064    192.168.3.1  D   N  A  5060  OK (13 ms)
+        if len(l) > 6 and re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', l[1]):
+            peerIP = l[1]
+            if peerIP in endpointList:
+                extArray = l[0].split('/')
+                logging.info('SIP/%s registered in Asterisk as account %s' % (peerIP, extArray[0]))
+                for endpoint in endpointList[peerIP]['accounts']:
+                    if endpoint.tech == 'sip' and endpoint.account == extArray[0]:
+                        endpoint.registered = True
+
+    # TODO: truncation of long account names in Elastix 3
+    r = ami.Command('iax2 show peers')
+
+    for s in r:
+        logging.debug(s)
+        l = s.split()
+        # 2002   127.0.0.1  (D)  255.255.255.255  40001    OK (1 ms)
+        if len(l) > 5 and re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', l[1]) and l[5] == 'OK':
+            peerIP = l[1]
+            if peerIP in endpointList:
+                logging.info('IAX2/%s registered in Asterisk as account %s' % (peerIP, l[0]))
+                for endpoint in endpointList[peerIP]['accounts']:
+                    if endpoint.tech == 'iax2' and endpoint.account == l[0]:
+                        endpoint.registered = True
+    amipool.put(ami)
+    ami = None
+        
+    # List all of the IPs assigned to this server. If there are several IPs,
+    # each endpoint will be given the one that shares the most specific netmask
+    serveriplist = listIpAddresses()
+    
+    # Dynamically load all of the endpoint classes
+    endpointClasses = {}
+    for ip in endpointList:
+        if not (endpointList[ip]['manufacturer'] in endpointClasses):
+            pkgname = endpointList[ip]['manufacturer'].replace('-', '')
+            pkg = 'elastix.vendor.' + pkgname
+            vendormodule = __import__(pkg, {}, {}, pkg.split('.')[:-1])
+            endpointClasses[endpointList[ip]['manufacturer']] = vendormodule.Endpoint
+        eclass = endpointClasses[endpointList[ip]['manufacturer']]
+        
+        # Create the manufacturer-specific Endpoint object
+        endpoint = eclass(amipool, dbpool, chooseServerIP(serveriplist, ip),
+            ip, endpointList[ip]['mac'])        
+        if not endpoint.setModel(endpointList[ip]['model']):
+        	logging.error('manufacturer %s does not implement model: %s' % 
+				(endpointList[ip]['manufacturer'], endpointList[ip]['model']))
+        	return
+        endpoint.max_accounts = endpointList[ip]['max_accounts']
+        endpoint.static_ip_supported = bool(endpointList[ip]['static_ip_supported'])
+        endpoint.dynamic_ip_supported = bool(endpointList[ip]['dynamic_ip_supported'])
+        if not endpoint.setExtraParameters(endpointList[ip]['properties']):
+            logging.error('manufacturer %s model %s rejected parameters: %s' %
+                (endpointList[ip]['manufacturer'], endpointList[ip]['model'],
+                 str(endpointList[ip]['parameters'])))
+            return
+        endpoint.setAccountList(endpointList[ip]['accounts'])
+        endpointList[ip]['endpoint'] = endpoint
+    
+    # Update global configuration for all the endpoint vendors
+    iTotalSteps = len(endpointClasses) + 2 * len(endpointList)
+    iCurrentStep = 1
+    for endpointVendor in endpointClasses:
+        eclass = endpointClasses[endpointVendor]
+        logging.info('(%d/%d) global configuration update for %s...' %
+            (iCurrentStep, iTotalSteps, endpointVendor))
+        if not eclass.updateGlobalConfig(serveriplist.keys()[0]):
+            logging.error('ERR: global configuration update failed for %s' % (endpointVendor,))
+            return
+        iCurrentStep += 1
+    
+    # Update local configuration for all the endpoints. Each endpoint gets its
+    # own greenthread from a green pool
+    gpool = GreenPool()
+    for ip in endpointList:
+        gpool.spawn_n(spawn_endpoint, endpointList[ip])
+    gpool.waitall()
+
+def spawn_endpoint(endpointInfo):
+    global iTotalSteps
+    global iCurrentStep
+    
+    logging.info('(%d/%d) starting configuration for endpoint %s@%s (%s)...' %
+        (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
+         endpointInfo['ip'], endpointInfo['id']))
+    iCurrentStep += 1
+    r = endpointInfo['endpoint'].updateLocalConfig()
+    if r:
+        logging.info('(%d/%d) finished configuration for endpoint %s@%s (%s)...' %
+            (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
+             endpointInfo['endpoint'].getIP(), endpointInfo['id']))
+    else:
+        logging.warning('(%d/%d) failed configuration for endpoint %s@%s (%s)...' %
+            (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
+             endpointInfo['ip'], endpointInfo['id']))
+
+    iCurrentStep += 1
+    return r
+
+
+def get_database_credentials():
+    '''Get database credentials to connect to endpointconfig database
+    
+    This implementation attempts to parse /etc/amportal.conf for the credentials.
+    The installation process should have given the freepbx database user full
+    access to the endpointconfig database.
+    '''
+    f = open('/etc/amportal.conf', 'r')
+    dbcred = [None, None]
+    for s in f:
+        m = re.match(r'AMPDBUSER\s*=\s*(.+)', s)
+        if m != None:
+            dbcred[0] = m.group(1)
+        m = re.match(r'AMPDBPASS\s*=\s*(.+)', s)
+        if m != None:
+            dbcred[1] = m.group(1)
+        if dbcred[0] != None and dbcred[1] != None: break
+    f.close()
+    if dbcred[0] != None and dbcred[1] != None:
+        return dbcred
+    else:
+        return None
+
+def loadEndpointIP(dbpool):
+    '''Load endpoint information for each selected endpoint into memory '''
+    logging.info('Loading endpoint information from database...')
+    dbconn = dbpool.get()
+    sth = dbconn.cursor()
+    sth.execute(
+        'SELECT endpoint.id, model.id, manufacturer.name, model.name, '\
+            'model.max_accounts, model.static_ip_supported, '\
+            'model.dynamic_ip_supported, endpoint.mac_address, '\
+            ' endpoint.last_known_ipv4 AS ip '\
+        'FROM endpoint, model, manufacturer '\
+        'WHERE endpoint.id_model = model.id '\
+            'AND model.id_manufacturer = manufacturer.id '\
+            'AND endpoint.selected = 1')
+    endpointList = {}
+    for row in sth.fetchall():
+        endpointList[row[8]] = {
+            'id'                    :   row[0],
+            'model_id'              :   row[1],
+            'manufacturer'          :   row[2],
+            'model'                 :   row[3],
+            'max_accounts'          :   row[4],
+            'static_ip_supported'   :   row[5],
+            'dynamic_ip_supported'  :   row[6],
+            'mac'                   :   row[7],
+            'ip'                    :   row[8],
+            'properties'            :   {},
+            'accounts'              :   [],
+            'endpoint'              :   None,
+        }
+    for ip in endpointList.keys():
+        # Load account information from database. No verification is done on 
+        # whether there is at least one account, because an endpoint type might
+        # exist that can do something interesting without an associated account.
+        totalAccounts = 0
+        sth.execute(
+            'SELECT tech, account FROM endpoint_account WHERE id_endpoint = %s '\
+            'ORDER BY priority, account',
+            (endpointList[ip]['id'],))
+        for row in sth.fetchall():
+            extension = elastix.Extension(dbconn, row[0], row[1])
+            if extension.tech != None:
+                endpointList[ip]['accounts'].append(extension)
+                totalAccounts += 1
+        if totalAccounts > endpointList[ip]['max_accounts']:
+            logging.error('Endpoint %s@%s cannot configure more than %d accounts, got %d' %
+                (endpointList[ip]['manufacturer'], ip, endpointList[ip]['max_accounts'], totalAccounts))
+            return False
+         
+        # Load endpoint properties from database. Endpoint properties may and 
+        # should override model properties, if they collide
+        sth.execute(
+            'SELECT property_key, property_value FROM model_properties '\
+            'WHERE id_model = %s',
+            (endpointList[ip]['model_id'],))
+        for row in sth.fetchall():
+            endpointList[ip]['properties'][row[0]] = row[1]
+        sth.execute(
+            'SELECT property_key, property_value FROM endpoint_properties '\
+            'WHERE id_endpoint = %s',
+            (endpointList[ip]['id'],))
+        for row in sth.fetchall():
+            endpointList[ip]['properties'][row[0]] = row[1]
+     
+    dbpool.put(dbconn)
+    if len(endpointList) <= 0:
+        logging.error('No loaded endpoints were found or associated, expected at least 1')
+        return None
+    else:
+        logging.info('Loaded %d endpoints' % (len(endpointList),))
+        return endpointList
+
+def listIpAddresses():
+	'''List IPv4/Netmask for all Ethernet interfaces'''
+	iflist = {}
+	output = commands.getoutput('/sbin/ip addr show')
+	bIsEther = False
+	ip = None
+	for s in output.split('\n'):
+		regs = re.search(r'^\d+:\s+(\w+):\s*<(.*)>', s)
+		if regs != None:
+			bIsEther = False
+		elif 'link/ether' in s:
+			bIsEther = True
+		else:
+			regs = re.search(r'\s*inet (\d+\.\d+\.\d+.\d+)/(\d+) brd (\d+\.\d+\.\d+.\d+).+\s((\w+)(:(\d+))?)\s*$', s)
+			if regs != None:
+				# Calculate netmask from number of bits
+				iMaskBits = int(regs.group(2))
+				iMask = (0xFFFFFFFF << (32 - iMaskBits)) & 0xFFFFFFFF
+				
+				# Calculate network as binary value
+				sIpAddr = regs.group(1)
+				ip = sIpAddr.split('.')
+				ipval = (int(ip[0]) << 24) | (int(ip[1]) << 16) | (int(ip[2]) << 8) | int(ip[3])
+				iflist[sIpAddr] = { 'netmask': iMask, 'network': (ipval & iMask) }
+	return iflist
+
+def chooseServerIP(iplist, endpointIp):
+	'''Choose a server IP whose network matches the one of the endpoint'''
+	defaultip = None
+	ip = endpointIp.split('.')
+	ipval = (int(ip[0]) << 24) | (int(ip[1]) << 16) | (int(ip[2]) << 8) | int(ip[3])
+	for serverip in iplist:
+		netinfo = iplist[serverip]
+		if defaultip == None: defaultip = serverip
+		if (ipval & netinfo['netmask']) == netinfo['network']:
+			return serverip
+	return defaultip
+
+class AsteriskManagerPool(pools.Pool):
+    def credentials(self, addr, user, passwd):
+        self.addr = addr
+        self.user = user
+        self.passwd = passwd
+    
+    def create(self):
+        return AsteriskManager.Manager(self.addr, self.user, self.passwd,
+            listen_events = False)
+
+if __name__ == '__main__':
+    main()

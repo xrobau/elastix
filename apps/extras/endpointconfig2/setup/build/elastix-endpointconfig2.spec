@@ -18,6 +18,7 @@ Requires: python-tempita
 Requires: pyOpenSSL
 Requires: python-daemon
 Requires: MySQL-python
+Requires: python-json
 
 %description
 The Elastix Endpoint Configurator is a complete rewrite and reimplementation of
@@ -127,5 +128,9 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Aug 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: New Endpoint Configurator: Add data for the GrandStream GXP1400
+  SVN Rev[5765]
+
 * Thu Aug 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.1-0
 - ADDED: New Endpoint Configurator: Initial release 

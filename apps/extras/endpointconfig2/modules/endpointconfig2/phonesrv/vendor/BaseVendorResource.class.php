@@ -55,7 +55,7 @@ class BaseVendorResource
     {
         // Lista de cuentas del endpoint, por orden de prioridad
     	$recordset = $this->_db->fetchTable(
-            'SELECT account FROM endpoint_account WHERE id_endpoint = 2 ORDER BY priority',
+            'SELECT account FROM endpoint_account WHERE id_endpoint = ? ORDER BY priority',
             TRUE, array($id_endpoint));
         if (!is_array($recordset)) return NULL;
         $accounts = array();

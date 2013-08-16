@@ -129,6 +129,9 @@ fi
 
 %changelog
 * Fri Aug 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: New Endpoint Configurator: add phonebook.xml resource for GrandStream.
+  Fix invalid SQL for fetching the endpoint data.
+  SVN Rev[5766]
 - ADDED: New Endpoint Configurator: Add data for the GrandStream GXP1400
   SVN Rev[5765]
 

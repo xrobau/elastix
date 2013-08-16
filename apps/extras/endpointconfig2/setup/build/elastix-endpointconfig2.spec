@@ -129,11 +129,15 @@ fi
 
 %changelog
 * Fri Aug 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add some static provisioning support for
+  a few supported GrandStream models. This also attempts to point the phonebook
+  on GrandStream to the HTTP resource.
+  SVN Rev[5768]
 - ADDED: New Endpoint Configurator: add phonebook.xml resource for GrandStream.
   Fix invalid SQL for fetching the endpoint data.
-  SVN Rev[5766]
+  SVN Rev[5767]
 - ADDED: New Endpoint Configurator: Add data for the GrandStream GXP1400
-  SVN Rev[5765]
+  SVN Rev[5766]
 
 * Thu Aug 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.1-0
 - ADDED: New Endpoint Configurator: Initial release 

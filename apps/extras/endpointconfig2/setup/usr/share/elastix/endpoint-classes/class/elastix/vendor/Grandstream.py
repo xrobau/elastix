@@ -32,8 +32,10 @@ import struct
 import eventlet
 from eventlet.green import socket, urllib2, urllib, os
 import errno
+import json
 from elastix.BaseEndpoint import BaseEndpoint
 telnetlib = eventlet.import_patched('telnetlib')
+import cookielib
 
 class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
@@ -48,7 +50,7 @@ class Endpoint(BaseEndpoint):
     def setModel(self, sModel):
         if sModel in (
             # Tested models
-            'GXP280', 'GXV3140', 'GXV3175', 'GXP2120', 'BT200',
+            'GXP280', 'GXV3140', 'GXV3175', 'GXP2120', 'BT200', 'GXP1400',
             # Tested by Sergio
             'GXP2100', 'GXP1405',
             # These expose admin console in ssh, not telnet
@@ -148,6 +150,11 @@ class Endpoint(BaseEndpoint):
                 (self._vendorname, self._ip, str(e)))
             return False
         
+        # Attempt to send configuration via HTTP to phone. This is required for
+        # static provisioning
+        if not self._enableStaticProvisioning(vars):
+            return False
+        
         # Check if there is at least one registered extension. This is required
         # for sip notify to work
         if self._hasRegisteredExtension():
@@ -162,6 +169,151 @@ class Endpoint(BaseEndpoint):
         self._unregister()
         self._setConfigured()
         return True
+
+    def _enableStaticProvisioning(self, vars):
+        # Detect what kind of HTTP interface is required
+        try:
+            # Interface for newer GXP140x firmware - JSON based
+            response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/api.values.post')
+            body = response.read()
+            logging.info('Endpoint %s@%s appears to have GXP140x JSON interface...' %
+                        (self._vendorname, self._ip))
+            return self._enableStaticProvisioning_GXP140x(vars)
+        except urllib2.HTTPError, e:
+            if e.code != 404:
+                logging.error('Endpoint %s@%s failed to detect GXP140x - %s' %
+                    (self._vendorname, self._ip, str(e)))
+                return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        try:
+            # Interface for old BT200 firmware or similar
+            response = urllib2.urlopen('http://' + self._ip + '/update.htm')
+            body = response.read()
+            logging.info('Endpoint %s@%s appears to have BT200 interface...' %
+                        (self._vendorname, self._ip))
+            return self._enableStaticProvisioning_BT200(vars)
+        except urllib2.HTTPError, e:
+            if e.code != 404:
+                logging.error('Endpoint %s@%s failed to detect BT200 - %s' %
+                    (self._vendorname, self._ip, str(e)))
+                return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        
+        logging.warning('Endpoint %s@%s cannot identify HTTP interface, static provisioning might not work.' %
+                    (self._vendorname, self._ip))
+        return True
+
+    def _enableStaticProvisioning_GXP140x(self, vars):
+        try:
+            # Login into interface and get SID. Check proper Content-Type
+            response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/dologin',
+                urllib.urlencode({'password' : self._http_password}))
+            body = response.read()
+            if response.info()['Content-Type'] <> 'application/json':
+                logging.error('Endpoint %s@%s GXP140x - dologin answered not application/json but %s' %
+                    (self._vendorname, self._ip, response.info()['Content-Type']))
+                return False
+            
+            # Check successful login and get sid
+            jsonvars = json.read(body)
+            if not ('body' in jsonvars and 'sid' in jsonvars['body']):
+                logging.error('Endpoint %s@%s GXP140x - dologin failed login' %
+                    (self._vendorname, self._ip))
+                return False
+            sid = jsonvars['body']['sid']
+            
+            # Post vars with sid
+            vars.update({'sid' : sid})
+            response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/api.values.post',
+                urllib.urlencode(vars))
+            body = response.read()
+            if response.info():
+                if response.info()['Content-Type'] <> 'application/json':
+                    logging.error('Endpoint %s@%s GXP140x - api.values.post answered not application/json but %s' %
+                        (self._vendorname, self._ip, response.info()['Content-Type']))
+                    return False
+                jsonvars = json.read(body)
+            else:
+                # The GXP1400 has been discovered to violate the HTTP protocol.
+                # The response for /cgi-bin/api.values.post sticks a shebang
+                # header before the HTTP headers of the response. This causes
+                # the header parsing to end early and the body gets prepended
+                # with the headers. We now have to undo this mess.
+                expectbody = False 
+                for s in body.splitlines():
+                    if not expectbody:
+                        m = re.search(r'Content-Type: (\S+)', s)
+                        if m != None:
+                            if m.group(1) <> 'application/json':
+                                logging.error('Endpoint %s@%s GXP140x - api.values.post answered not application/json but %s' %
+                                    (self._vendorname, self._ip, m.group(1)))
+                                return False
+                        if s == '':
+                            expectbody = True
+                    else:
+                        # This expects the body to be a single JSON string in one line
+                        jsonvars = json.read(s)
+                        break
+            if not ('response' in jsonvars and jsonvars['response'] == 'success' \
+                    and 'body' in jsonvars and 'status' in jsonvars['body'] and jsonvars['body']['status'] == 'right' ):
+                logging.error('Endpoint %s@%s GXP140x - vars rejected by interface - %s' %
+                    (self._vendorname, self._ip, body))
+                return False
+            
+            return True
+        except json.ReadException, e:
+            logging.error('Endpoint %s@%s GXP140x received invalid JSON - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        except urllib2.HTTPError, e:
+            logging.error('Endpoint %s@%s GXP140x failed to send vars to interface - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s GXP140x failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+
+    def _enableStaticProvisioning_BT200(self, vars):
+        try:
+            # Login into interface
+            cookiejar = cookielib.CookieJar(cookielib.DefaultCookiePolicy(rfc2965=True))
+            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
+            response = opener.open('http://' + self._ip + '/dologin.htm',
+                urllib.urlencode({'Login' : 'Login', 'P2' : self._http_password, 'gnkey' : '0b82'}))
+            body = response.read()
+            if 'dologin.htm' in body:
+                logging.error('Endpoint %s@%s BT200 - dologin failed login' %
+                    (self._vendorname, self._ip))
+                return False
+
+            # Force cookie version to 0
+            for cookie in cookiejar:
+                cookie.version = 0
+            
+            response = opener.open('http://' + self._ip + '/update.htm',
+                urllib.urlencode(vars) + '&gnkey=0b82')
+            body = response.read()
+            if 'dologin.htm' in body:
+                logging.error('Endpoint %s@%s BT200 - dologin failed to keep session' %
+                    (self._vendorname, self._ip))
+                return False
+
+            return True
+        except urllib2.HTTPError, e:
+            logging.error('Endpoint %s@%s BT200 failed to send vars to interface - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s BT200 failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
 
     def _rebootbytelnet(self):
         '''Start reboot of Grandstream phone by telnet'''
@@ -181,7 +333,7 @@ class Endpoint(BaseEndpoint):
         # The Grandstream GXV3175 needs to have a wait of at least 1 second with
         # the stream open after the reboot command before the reboot command 
         # will actually take effect. We let the timeout close the telnet stream.
-        telnetwaitmodels = ('GXV3140', 'GXV3175', 'GXP2120')
+        telnetwaitmodels = ('GXV3140', 'GXV3175', 'GXP2120', 'GXP1400', 'GXP1405', 'GXP1450')
         deliberatetimeout = False
         
         # Attempt to login into admin telnet
@@ -233,16 +385,25 @@ class Endpoint(BaseEndpoint):
         return False
 
     def _hashTableGrandstreamConfig(self):
-        o = self._serverip.split('.')
+        stdvars = self._prepareVarList()
+        
+        # Remove 'http://' from begingging of string
+        stdvars['phonesrv'] = stdvars['phonesrv'][7:]
+        
+        o = stdvars['server_ip'].split('.')
         vars = {
-            'P192'  :   self._serverip, # Firmware Server Path
-            'P237'  :   self._serverip, # Config Server Path
+            'P192'  :   stdvars['server_ip'], # Firmware Server Path
+            'P237'  :   stdvars['server_ip'], # Config Server Path
             'P212'  :   '0',            # Firmware Upgrade. 0 - TFTP Upgrade,  1 - HTTP Upgrade.
             'P290'  :   '{ x+ | *x+ | *xx*x+ }', # (GXV3175 specific) Dialplan string
             'P64'   :   self._timeZone, # Time Zone
 
             'P8'    :   '0',            # DHCP=0 o static=1
             'P41': o[0], 'P42': o[1], 'P43': o[2], 'P44': o[3], # TFTP Server
+            
+            'P330'  :   1,    # 0-Disable phonebook download 1-HTTP 2-TFTP 3-HTTPS
+            'P331'  :   stdvars['phonesrv'],
+            'P332'  :   20,   # Minutes between XML phonebook fetches, or 0 to disable
         }
         if self._model in ('GXP280',):
             vars.update({'P73' : '1'})  # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO
@@ -250,25 +411,25 @@ class Endpoint(BaseEndpoint):
             vars.update({
                 'P8'     :  '1',    # DHCP=0 o static=1
             })
-            if self._static_ip != None:
+            if stdvars['static_ip'] != None:
                 # IP Address
-                o = self._static_ip.split('.')
+                o = stdvars['static_ip'].split('.')
                 vars.update({'P9':  o[0], 'P10': o[1], 'P11': o[2], 'P12': o[3],})
-            if self._static_mask != None:
+            if stdvars['static_mask'] != None:
                 # Subnet Mask
-                o = self._static_mask.split('.')
+                o = stdvars['static_mask'].split('.')
                 vars.update({'P13': o[0], 'P14': o[1], 'P15': o[2], 'P16': o[3],})
-            if self._static_gw != None:
+            if stdvars['static_gw'] != None:
                 # Gateway
-                o = self._static_gw.split('.')
+                o = stdvars['static_gw'].split('.')
                 vars.update({'P17': o[0], 'P18': o[1], 'P19': o[2], 'P20': o[3],})
-            if self._static_dns1 != None:
+            if stdvars['static_dns1'] != None:
                 # DNS Server 1
-                o = self._static_dns1.split('.')
+                o = stdvars['static_dns1'].split('.')
                 vars.update({'P21': o[0], 'P22': o[1], 'P23': o[2], 'P24': o[3],})
-            if self._static_dns2 != None:
+            if stdvars['static_dns2'] != None:
                 # IP Address
-                o = self._static_dns2.split('.')
+                o = stdvars['static_dns2'].split('.')
                 vars.update({'P25': o[0], 'P26': o[1], 'P27': o[2], 'P28': o[3],})
 
         varmap = [
@@ -329,23 +490,23 @@ class Endpoint(BaseEndpoint):
         ]
 
         # Blank out all variables prior to assignment
-        for i in range(0, min(len(varmap), self._max_sip_accounts)):
+        for i in range(0, min(len(varmap), stdvars['max_sip_accounts'])):
             vars[varmap[i]['enable']] = 0
-            vars[varmap[i]['sipserver']] = self._serverip
-            vars[varmap[i]['outboundproxy']] = self._serverip
+            vars[varmap[i]['sipserver']] = stdvars['server_ip']
+            vars[varmap[i]['outboundproxy']] = stdvars['server_ip']
             vars[varmap[i]['accountname']] = ''
             vars[varmap[i]['displayname']] = ''
             vars[varmap[i]['sipid']] = ''
             vars[varmap[i]['authid']] = ''
             vars[varmap[i]['secret']] = ''
         
-        for i in range(0, min(len(varmap), len(self._accounts))):
+        for i in range(0, min(len(varmap), len(stdvars['sip']))):
             vars[varmap[i]['enable']] = 1
-            vars[varmap[i]['accountname']] = self._accounts[i].description
-            vars[varmap[i]['displayname']] = self._accounts[i].description
-            vars[varmap[i]['sipid']] = self._accounts[i].extension
-            vars[varmap[i]['authid']] = self._accounts[i].account
-            vars[varmap[i]['secret']] = self._accounts[i].secret
+            vars[varmap[i]['accountname']] = stdvars['sip'][i].description
+            vars[varmap[i]['displayname']] = stdvars['sip'][i].description
+            vars[varmap[i]['sipid']] = stdvars['sip'][i].extension
+            vars[varmap[i]['authid']] = stdvars['sip'][i].account
+            vars[varmap[i]['secret']] = stdvars['sip'][i].secret
         return vars
             
     def _encodeGrandstreamConfig(self, vars):

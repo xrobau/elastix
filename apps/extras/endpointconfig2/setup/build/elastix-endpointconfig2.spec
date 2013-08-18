@@ -128,6 +128,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sun Aug 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: update Ember.js to 1.0.0-rc7 and 
+  Handlebars to 1.0.0.
+  SVN Rev[5769]
+
 * Fri Aug 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add some static provisioning support for
   a few supported GrandStream models. This also attempts to point the phonebook

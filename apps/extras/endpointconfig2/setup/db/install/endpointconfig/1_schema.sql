@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `model`
     /* Banderas de soporte de red */
     `static_ip_supported`   BOOLEAN     NOT NULL    DEFAULT FALSE,
     `dynamic_ip_supported`  BOOLEAN     NOT NULL    DEFAULT TRUE,
+    `static_prov_supported` BOOLEAN     NOT NULL    DEFAULT FALSE,
     
     PRIMARY KEY (`id`),
     FOREIGN KEY (`id_manufacturer`) REFERENCES `manufacturer` (`id`)

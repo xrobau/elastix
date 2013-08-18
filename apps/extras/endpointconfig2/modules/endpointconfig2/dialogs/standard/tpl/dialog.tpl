@@ -18,7 +18,7 @@
                 <tr title="{$DIALOG_STANDARD_TOOLTIP_DYNIP}"><td><b>{$DIALOG_STANDARD_LBL_DYNIP}:</b></td><td>{literal}{{#if modelObj}}{{#if modelObj.dynamic_ip_supported}}{/literal}{$DIALOG_STANDARD_LBL_YES}{literal}{{else}}{/literal}{$DIALOG_STANDARD_LBL_NO}{literal}{{/if}}{{else}}{/literal}{$DIALOG_STANDARD_LBL_UNKNOWN}{literal}{{/if}}{/literal}</td></tr>
                 <tr title="{$DIALOG_STANDARD_TOOLTIP_STATICIP}"><td><b>{$DIALOG_STANDARD_LBL_STATICIP}:</b></td><td>{literal}{{#if modelObj}}{{#if modelObj.static_ip_supported}}{/literal}{$DIALOG_STANDARD_LBL_YES}{literal}{{else}}{/literal}{$DIALOG_STANDARD_LBL_NO}{literal}{{/if}}{{else}}{/literal}{$DIALOG_STANDARD_LBL_UNKNOWN}{literal}{{/if}}{/literal}</td></tr>
                 <tr title="{$DIALOG_STANDARD_TOOLTIP_VLAN}"><td><b>{$DIALOG_STANDARD_LBL_VLAN}:</b></td><td>(unimplemented in DB)</td></tr>
-                <tr title="{$DIALOG_STANDARD_TOOLTIP_STATICPROV}"><td><b>{$DIALOG_STANDARD_LBL_STATICPROV}:</b></td><td>(unimplemented in DB)</td></tr>
+                <tr title="{$DIALOG_STANDARD_TOOLTIP_STATICPROV}"><td><b>{$DIALOG_STANDARD_LBL_STATICPROV}:</b></td><td>{literal}{{#if modelObj}}{{#if modelObj.static_prov_supported}}{/literal}{$DIALOG_STANDARD_LBL_YES}{literal}{{else}}{/literal}{$DIALOG_STANDARD_LBL_NO}{literal}{{/if}}{{else}}{/literal}{$DIALOG_STANDARD_LBL_UNKNOWN}{literal}{{/if}}{/literal}</td></tr>
             </tbody>
         </table>
     </div>

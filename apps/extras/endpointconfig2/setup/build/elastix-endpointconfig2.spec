@@ -129,6 +129,9 @@ fi
 
 %changelog
 * Sun Aug 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add flag to inform support for static
+  provisioning. Modify GUI to display the information.
+  SVN Rev[5770]
 - CHANGED: New Endpoint Configurator: update Ember.js to 1.0.0-rc7 and 
   Handlebars to 1.0.0.
   SVN Rev[5769]

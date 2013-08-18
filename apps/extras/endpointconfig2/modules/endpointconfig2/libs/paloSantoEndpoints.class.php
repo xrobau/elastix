@@ -59,7 +59,8 @@ class paloSantoEndpoints
         $sqlModels =
             'SELECT id_manufacturer, id AS id_model, name AS name_model, '.
                 'description, max_accounts, static_ip_supported, '.
-                'dynamic_ip_supported FROM model';
+                'dynamic_ip_supported, static_prov_supported '.
+            'FROM model';
         $recordset = $db->fetchTable($sqlModels, TRUE);
         if (!is_array($recordset)) {
             $this->_errMsg = '(internal) Failed to read models: '.$db->errMsg;
@@ -68,7 +69,8 @@ class paloSantoEndpoints
         $models = array();
         foreach ($recordset as $row) {
             foreach (array('max_accounts') as $k) $row[$k] = (int)$row[$k];
-            foreach (array('static_ip_supported', 'dynamic_ip_supported') as $k) $row[$k] = (bool)$row[$k];
+            foreach (array('static_ip_supported', 'dynamic_ip_supported', 'static_prov_supported') as $k)
+                $row[$k] = (bool)$row[$k];
         	if (!isset($models[$row['id_manufacturer']]))
                 $models[$row['id_manufacturer']] = array(
                     'unknown' => array(

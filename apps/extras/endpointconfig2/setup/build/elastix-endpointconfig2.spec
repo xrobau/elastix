@@ -129,6 +129,9 @@ fi
 
 %changelog
 * Mon Aug 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: serve gs_phonebook.xml as an alias to
+  phonebook.xml, as requested by GXP280 phones.
+  SVN Rev[5772]
 - ADDED: New Endpoint Configurator: add phonebook support for Elastix phones. As
   these are rebranded GXP140x phones, it is enough to subclass the Grandstream
   phonebook class and do nothing else.

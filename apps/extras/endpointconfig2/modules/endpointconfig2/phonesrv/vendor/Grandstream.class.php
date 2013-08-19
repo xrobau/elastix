@@ -42,6 +42,7 @@ class Grandstream extends BaseVendorResource
         }
         $service = array_shift($pathList);
         switch ($service) {
+        case 'gs_phonebook.xml':
         case 'phonebook.xml':
             $this->_handle_phonebook($id_endpoint, $pathList);
             break;

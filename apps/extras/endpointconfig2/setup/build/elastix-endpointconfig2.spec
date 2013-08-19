@@ -128,6 +128,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Aug 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: New Endpoint Configurator: add phonebook support for Elastix phones. As
+  these are rebranded GXP140x phones, it is enough to subclass the Grandstream
+  phonebook class and do nothing else.
+  SVN Rev[5771]
+
 * Sun Aug 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add flag to inform support for static
   provisioning. Modify GUI to display the information.

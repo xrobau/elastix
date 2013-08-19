@@ -477,6 +477,8 @@ INSERT INTO `model_properties` (`property_key`, `property_value`, `id_model`) VA
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Grandstream" AND model.name = "GXP2120")),
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Grandstream" AND model.name = "GXP2200")),
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Grandstream" AND model.name = "GXP2200")),
+("http_username", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Grandstream" AND model.name = "GXV3140")),
+("http_username", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Grandstream" AND model.name = "GXV3175")),
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Grandstream" AND model.name = "GXV3140")),
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Grandstream" AND model.name = "GXV3175")),
 ("telnet_username", "private", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "LG-ERICSSON" AND model.name = "IP8802")),

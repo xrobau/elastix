@@ -36,6 +36,7 @@ import json
 from elastix.BaseEndpoint import BaseEndpoint
 telnetlib = eventlet.import_patched('telnetlib')
 import cookielib
+import time
 
 class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
@@ -204,6 +205,24 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s failed to connect - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
+        try:
+            # Interface for GXVxxxx firmware or similar
+            response = urllib2.urlopen('http://' + self._ip + '/manager')
+            body = response.read()
+            logging.info('Endpoint %s@%s appears to have GXVxxxx interface...' %
+                        (self._vendorname, self._ip))
+            return self._enableStaticProvisioning_GXV(vars)
+        except urllib2.HTTPError, e:
+            if e.code != 404:
+                logging.error('Endpoint %s@%s failed to detect GXV - %s' %
+                    (self._vendorname, self._ip, str(e)))
+                return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+
+
         
         logging.warning('Endpoint %s@%s cannot identify HTTP interface, static provisioning might not work.' %
                     (self._vendorname, self._ip))
@@ -312,6 +331,55 @@ class Endpoint(BaseEndpoint):
             return False
         except socket.error, e:
             logging.error('Endpoint %s@%s BT200 failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+
+    def _enableStaticProvisioning_GXV(self, vars):
+        try:
+            # Login into interface
+            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+            response = opener.open('http://' + self._ip + '/manager?' + urllib.urlencode({
+                'action': 'login',
+                'Username' : self._http_username,
+                'Secret' : self._http_password,
+                'time':     (int)(time.time())}))
+            body = response.read()
+            if 'Error' in body:
+                logging.error('Endpoint %s@%s GXV - dologin failed login' %
+                    (self._vendorname, self._ip))
+                return False
+
+            # For this interface, the variables are translated as follows: The
+            # source key of the form Pxxxx produces a variable var-dddd where
+            # dddd is a counter. The corresponding value produces a variable
+            # val-dddd with the same counter
+            varcount = 0
+            submitvars = {
+                'action'    : 'put',
+                'time'      :   (int)(time.time())
+            }
+            for pk in vars:
+                varkey = 'var-' + ('%04d' % (varcount,))
+                varval = 'val-' + ('%04d' % (varcount,))
+                submitvars[varkey] = pk[1:]
+                submitvars[varval] = vars[pk]
+                varcount += 1
+            # TODO: remote phonebook does not work through this.            
+            
+            response = opener.open('http://' + self._ip + '/manager?' + urllib.urlencode(submitvars))
+            body = response.read()
+            if not ('Success' in body):
+                logging.error('Endpoint %s@%s GXV - dologin failed to keep session' %
+                    (self._vendorname, self._ip))
+                return False
+
+            return True
+        except urllib2.HTTPError, e:
+            logging.error('Endpoint %s@%s GXV failed to send vars to interface - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s GXV failed to connect - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
 

@@ -129,6 +129,9 @@ fi
 
 %changelog
 * Mon Aug 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: set Elastix LXP200 and Grandstream GXP280
+  as capable of static provisioning. Add default HTTP password for LXP200.
+  SVN Rev[5773] 
 - CHANGED: New Endpoint Configurator: serve gs_phonebook.xml as an alias to
   phonebook.xml, as requested by GXP280 phones.
   SVN Rev[5772]

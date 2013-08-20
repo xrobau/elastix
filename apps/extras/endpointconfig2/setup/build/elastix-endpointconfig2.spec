@@ -129,6 +129,8 @@ fi
 
 %changelog
 * Tue Aug 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add support for Elastix LXP100
+  SVN Rev[5777]
 - CHANGED: New Endpoint Configurator: add proper phonebook support for GXV3140.
   SVN Rev[5776]
 - CHANGED: New Endpoint Configurator: write authentication hash as soon as it

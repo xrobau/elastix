@@ -326,6 +326,29 @@ class BaseEndpoint(object):
         for account in self._accounts:
             if account.tech == 'sip':
                 vars['sip'].append(account)
+        
+        # Save the auth hash NOW in order to have it available for HTTP requests
+        try:
+            dbconn = self._dbpool.get()
+            sth = dbconn.cursor()
+            sth.execute('SELECT id FROM endpoint WHERE last_known_ipv4 = %s', (self._ip));
+            row = sth.fetchone()
+            if row != None:
+                id = row[0]
+            
+                sth.execute(\
+                    'UPDATE endpoint SET authtoken_sha1 = %s WHERE id = %s',\
+                    (self._authtoken_sha1, id,))
+            sth.close()
+            dbconn.commit()
+            self._dbpool.put(dbconn)
+        except MySQLdb.Error, e:
+            logging.error('Endpoint %s@%s failed to save authtoken - %s' %
+                (self._vendorname, self._ip, str(e)))
+            if dbconn != None:
+                dbconn.rollback()
+                dbpool.put(dbconn)
+        
         return vars
     
     def _doAuthPost(self, urlpath, postvars):

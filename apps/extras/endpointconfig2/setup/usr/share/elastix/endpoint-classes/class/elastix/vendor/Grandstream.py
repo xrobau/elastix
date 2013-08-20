@@ -364,7 +364,6 @@ class Endpoint(BaseEndpoint):
                 submitvars[varkey] = pk[1:]
                 submitvars[varval] = vars[pk]
                 varcount += 1
-            # TODO: remote phonebook does not work through this.            
             
             response = opener.open('http://' + self._ip + '/manager?' + urllib.urlencode(submitvars))
             body = response.read()
@@ -373,6 +372,23 @@ class Endpoint(BaseEndpoint):
                     (self._vendorname, self._ip))
                 return False
 
+            # Phonebook programming is a special case.
+            submitvars = {
+                'action'    :   'putdownphbk',
+                'time'      :   (int)(time.time()),
+                'url'       :   vars['P331'],
+                'mode'      :   2,  # HTTP
+                'clear-old' :   1,
+                'flag'      :   1,  # 1 forces download right now
+                'interval'  :   vars['P332'],
+                'rm-redup'  :   1                
+            }
+            response = opener.open('http://' + self._ip + '/manager?' + urllib.urlencode(submitvars))
+            body = response.read()
+            if not ('Success' in body):
+                logging.error('Endpoint %s@%s GXV - could not reprogram phonebook' %
+                    (self._vendorname, self._ip))
+            
             return True
         except urllib2.HTTPError, e:
             logging.error('Endpoint %s@%s GXV failed to send vars to interface - %s' %

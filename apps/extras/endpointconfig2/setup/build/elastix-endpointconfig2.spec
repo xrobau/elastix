@@ -129,6 +129,8 @@ fi
 
 %changelog
 * Tue Aug 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add proper phonebook support for GXV3140.
+  SVN Rev[5776]
 - CHANGED: New Endpoint Configurator: write authentication hash as soon as it
   is available, to allow reference from HTTP requests. Required for phonebook
   in Grandstream GXV3140.

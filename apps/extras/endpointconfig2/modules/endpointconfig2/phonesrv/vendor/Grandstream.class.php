@@ -66,6 +66,9 @@ class Grandstream extends BaseVendorResource
         else $_SERVER['PHP_AUTH_USER'] = $userdata['name_user'];
         
         $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8" ?><AddressBook/>');
+        
+        // GXV3140 aparentemente requiere esto
+        $xml->addChild('version', 1);
 
         $pCore_AddressBook = new core_AddressBook();
         foreach ($typemap as $addressBookType) {
@@ -84,16 +87,25 @@ class Grandstream extends BaseVendorResource
                 $xml_contact = $xml->addChild('Contact');
                 // LastName y FirstName deben estar presentes, incluso si vacíos
                 if (isset($contact['last_name'])) {
-                    $xml_contact->addChild('LastName', str_replace('&', '&amp;', $contact['last_name']));
                     $xml_contact->addChild('FirstName', str_replace('&', '&amp;', $contact['name']));
+                    $xml_contact->addChild('LastName', str_replace('&', '&amp;', $contact['last_name']));
                 } else {
-                	$xml_contact->addChild('LastName', str_replace('&', '&amp;', $contact['name']));
                     $xml_contact->addChild('FirstName');
+                	$xml_contact->addChild('LastName', str_replace('&', '&amp;', $contact['name']));
                 }
                 
-                $xml_phone = $xml_contact->addChild('Phone');
-                $xml_phone->addChild('phonenumber', str_replace('&', '&amp;', $contact['work_phone']));
-                $xml_phone->addChild('accountindex', 0);
+                $i = 0;
+                foreach (array('work_phone', 'cell_phone', 'home_phone') as $k) {
+                    if (!empty($contact[$k])) {
+                        $xml_phone = $xml_contact->addChild('Phone');
+                        $xml_phone->addChild('phonenumber', str_replace('&', '&amp;', $contact[$k]));
+                        $xml_phone->addChild('accountindex', $i);
+                        $i++;
+                    }
+                }
+                
+                // GXV3140: No hay todavía de dónde sacar grupos
+                //$xml_contact->addChild('Group', 0);
             }
             
             // TODO: GXP2200 tiene más campos

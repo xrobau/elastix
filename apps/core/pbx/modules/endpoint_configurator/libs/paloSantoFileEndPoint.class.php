@@ -260,7 +260,7 @@ class PaloSantoFileEndPoint
                 break;
 	    
 	    case 'Elastix':
-		if($ArrayData['data']['model'] == "LXP200"){
+		if(in_array($ArrayData['data']['model'], array('LXP100', 'LXP200'))){
 		  $contentFileElastix = PrincipalFileElastixLXP200($ArrayData['data']['DisplayName'], $ArrayData['data']['id_device'], $ArrayData['data']['secret'],$ArrayData['data']['arrParameters'],$this->ipAdressServer,$ArrayData['data']['model']);
 		  $sConfigBin = elastix_encode_config($ArrayData['data']['filename'], $contentFileElastix);
 		  if($this->createFileConf($this->directory, "cfg{$ArrayData['data']['filename']}", $sConfigBin))

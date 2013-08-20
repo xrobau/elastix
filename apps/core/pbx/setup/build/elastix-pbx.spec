@@ -304,6 +304,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Aug 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: add support for Elastix LXP100.
+  SVN Rev[5778]
+
 * Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

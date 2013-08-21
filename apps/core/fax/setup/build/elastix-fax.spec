@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -192,9 +192,99 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
+  history. Changed Release in specfile.
+  SVN Rev[4838]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5624]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5623]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5622]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5621]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5620]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5619]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5618]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5617]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction in a sql file to modify a registry in faxviewer.
+  SVN Rev[5499]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxviewer. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5498]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sendfax. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5470]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxviewer. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5409]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxlist. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5408]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxnew. Correction of some mistakes in the translation files.
+  SVN Rev[5407]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxmaster. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5406]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxlist. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5405]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxclients. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5404]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  email_template. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5398]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Fax: The whole notification script was changed to english language.
+  SVN Rev[5336]
+
 * Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: Fax - Build/elastix-fax.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4838]
 
 * Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: email_template module, help section was updated.

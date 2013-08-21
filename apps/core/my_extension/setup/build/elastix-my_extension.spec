@@ -3,7 +3,7 @@
 Summary: Elastix My Extension 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -84,9 +84,23 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5643]
+
+* Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE:  Added support for the translation of some words in the form, and
+  added the translation file es.lang.
+  SVN Rev[5569]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5014]
 
 * Tue Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: My Extension: check that the values for record_in and record_out are

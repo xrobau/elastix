@@ -34,5 +34,6 @@ $arrLangModule = array(
     "minute(s)" => "minutos(s)",
     "hour(s)" => "horas(s)",
     "day(s)" => "días(s)",
+    "Uptime" => "Tiempo de Actividad",
 );
 ?>

@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 10
+Release: 11
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -329,11 +329,39 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- REMOVED: Module Downloads, Old help files were deleted
+  SVN Rev[5728]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5711]
+
 * Fri Aug  9 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: switch PHP session directory from /tmp to 
   /var/lib/php/session-asterisk in order to prevent sessions from being removed
   by systemd. Fixes Elastix bug #1661.
   SVN Rev[5647]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5606]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5598]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5597]
+
+* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file en.lang.
+  SVN Rev[5581]
 
 * Wed Aug  7 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: add help link and help template to blackmin theme.
@@ -342,14 +370,47 @@ rm -rf $RPM_BUILD_ROOT
   jQueryUI dialogs and widgets are displayed correctly.
   SVN Rev[5573]
 
+* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: ADDED spanish translation of some words in main menus.
+  SVN Rev[5576]
+
+ Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5568]
+
+* Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5567]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module themes_system. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5473]
+
 * Tue Jul 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Add a Conflicts directive to prevent installation along with 
   elastix-developer <= 2.3.0-4 . Part of fix for Elastix bug #1643.
   SVN Rev[5453]
 
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Framework lang. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5431]
+
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module language. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5427]
+
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module grouplist. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5421]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5349]
 
 * Tue Jul 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix /etc/init.d/generic-cloexec script to be aware of

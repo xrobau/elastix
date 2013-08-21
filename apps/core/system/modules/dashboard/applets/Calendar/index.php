@@ -54,6 +54,8 @@ class Applet_Calendar
         $smarty->assign(array(
             'NO_EVENTOS'    =>  _tr("You don't have events"),
             'EVENTOS_DIAS'  =>  $listaEventosDias,
+            'tag_date' => _tr("Date"),  
+            'tag_call' => _tr("Call"),
         ));
         
         $local_templates_dir = dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module_name/applets/Calendar/tpl";

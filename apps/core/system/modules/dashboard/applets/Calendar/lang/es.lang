@@ -29,5 +29,7 @@
 global $arrLangModule;
 $arrLangModule = array(
     "You don't have events" => "No hay eventos futuros programados en el calendario",
+    "Date" => "Fecha",
+    "Call" => "Llamada",
 );
 ?>

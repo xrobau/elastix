@@ -1,574 +1,745 @@
 <?php
-    function getContent(&$smarty, $module_name, $withList)
-    {
-	require_once "libs/misc.lib.php";
-	$lang=get_language();
-	$base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-	$lang_file="modules/$module_name/lang/$lang.lang";
-	include_once "modules/$module_name/lang/en.lang";
-	if (file_exists("$base_dir/$lang_file")) {
-	    $arrLangEn = $arrLangModule;
-	    include_once $lang_file;
-	    $arrLangModule = array_merge($arrLangEn, $arrLangModule);
-	}
-	$skip_astman = NULL;
+function getContent(&$smarty, $elx_module_name, $withList)
+{
+    require_once "libs/misc.lib.php";
+    $lang=get_language();
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+    $lang_file="modules/$elx_module_name/lang/$lang.lang";
+    include_once "modules/$elx_module_name/lang/en.lang";
+    if (file_exists("$base_dir/$lang_file")) {
+        $arrLangEn = $arrLangModule;
+        include_once $lang_file;
+        $arrLangModule = array_merge($arrLangEn, $arrLangModule);
+    }
 
-    // En el FreePBX original, siempre se define display y setup en GET
+    $local_templates_dir = "$base_dir/modules/$elx_module_name/themes/default";
+    
+    //set variables
+    $vars = array(
+        'action'		 => null,
+        'confirm_email'          => '',
+        'confirm_password'	 => '',
+        'display'		 => '',
+        'extdisplay'             => null,
+        'email_address'          => '',
+        'fw_popover'             => '',
+        'fw_popover_process'     => '',
+        'logout'		 => false,
+        'password'		 => '',
+        'quietmode'		 => '',
+        'restrictmods'           => false,
+        'skip'                   => 0,
+        'skip_astman'            => false,
+        'type'                   => '',
+        'username'		 => '',
+        );
+
     if (!isset($_REQUEST['display'])) {
-    	$_REQUEST['display'] = 'extensions';
-        $_REQUEST['type'] = 'setup';
-        $_GET['display'] = 'extensions';
-        $_GET['type'] = 'setup';
+        $_REQUEST['display'] = 'extensions';
+        $_REQUEST['type']    = 'setup';
+        $_GET['display']     = 'extensions';
+        $_GET['type']        = 'setup';
+    }
+    
+    foreach ($vars as $k => $v) {
+        //were use config_vars instead of, say, vars, so as not to polute
+        // page.<some_module>.php (which usually uses $var or $vars)
+        $config_vars[$k] = $$k = isset($_REQUEST[$k]) ? $_REQUEST[$k] : $v;
+
+        //special handeling
+        switch ($k) {
+                case 'extdisplay':
+            $extdisplay = (isset($extdisplay) && $extdisplay !== false) 
+                        ? htmlspecialchars($extdisplay, ENT_QUOTES) 
+                        : false;
+                        $_REQUEST['extdisplay'] = $extdisplay;
+                        break;
+
+                case 'restrictmods':
+            $restrict_mods = $restrictmods 
+                ? array_flip(explode('/', $restrictmods)) 
+                : false;
+                        break;
+
+                case 'skip_astman':
+                        $bootstrap_settings['skip_astman']	= $skip_astman;
+                        break;
+        }
     }
 
-	/*interprete language to freepbx, todavia no funciona de todo bien :)
-	  en_US - English
-	  bg_BG - Bulgarian
-	  de_DE - Deutsch
-	  es_ES - Español
-	  fr_FR - Francais
-	  he_IL - Hebrew
-	  hu_HU - Hungarian
-	  it_IT - Italiano
-	  pt_PT - Portuguese
-	  ru_RU - Russki
-	  sv_SE - Svenska
-	*/
-	$arrLangFreePBX = array("en" => "en_US", "bg" => "bg_BG", "de" => "de_DE", "es" => "es_ES",
-				"fr" => "fr_FR", "he" => "he_IL", "hu" => "hu_HU", "it" => "it_IT",
-				"pt" => "pt_PT", "ru" => "ru_RU", "sv" => "sv_SE");
-	$langFreePBX = isset($arrLangFreePBX[$lang])?$arrLangFreePBX[$lang]:"en_US";
-	if(!isset($_COOKIE['lang'])) $_COOKIE['lang'] = $langFreePBX;
+    header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+    header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
+    header('Cache-Control: post-check=0, pre-check=0',false);
+    header('Pragma: no-cache');
+    header('Content-Type: text/html; charset=utf-8');
 
-	//global variables
-	global $arrConf;
-	global $arrLang;
-	global $arrLangModule;
-	$arrLang = array_merge($arrLang,$arrLangModule);
+    //Credenciales de acceso a freePBX como admin, durante la instalación
+    //de elastix en el primer inicio del sistema operativo pide la contrasena
+    //para el acceso web admin de elastix, esta es la misma que se define
+    //para el usuario admin de AMI. Entonces del archivo /etc/elastix.conf
+    //vamos a obtener la contrasena que necesitamos.
+    
+    $username = "admin";
+    $password = obtenerClaveAMIAdmin("/var/www/html/");    
 
-    // Scripts adicionales que pueden ser necesarios
-    $sScripts = '';
-    foreach (array('admin/common/jquery.toggleval.3.0.js') as $sRuta) {
-        if (file_exists($sRuta))
-            $sScripts .= "<script type='text/javascript' src='/$sRuta'></script>";
+    if(isset($_SESSION['AMP_user']))
+        unset($_SESSION);
+
+    global $amp_conf;
+    global $db;
+    global $no_auth;
+    global $currentcomponent;
+    global $CC;
+    global $dirname;
+    global $bootstrap_settings;
+    global $astman;
+    global $extmap;
+    global $module_name;
+    global $module_page; 
+    global $reload_needed;
+    global $active_modules;
+    global $remove_rnav;
+    global $js_content;
+    global $use_popover_css;
+    global $popover_mode;
+    global $quietmode;
+    $return_HTML = "";
+    
+    // This needs to be included BEFORE the session_start or we fail so
+    // we can't do it in bootstrap and thus we have to depend on the
+    // __FILE__ path here.
+    require_once("$base_dir/admin/libraries/ampuser.class.php");
+    //session_cache_limiter('public, no-store');
+    if (isset($_REQUEST['handler'])) {
+            $restrict_mods = true;
+            // I think reload is the only handler that requires astman, so skip it 
+            //for others
+            switch ($_REQUEST['handler']) {
+                    case 'api':
+                            $restrict_mods = false;
+                            break;
+                    case 'reload';
+                            break;
+                    default:
+                            $bootstrap_settings['skip_astman'] = true;
+                            break;
+            }
+    }
+      
+    // call bootstrap.php through freepbx.conf
+    if (!@include_once(getenv('FREEPBX_CONF') ? getenv('FREEPBX_CONF') : '/etc/freepbx.conf')) {
+                    include_once('/etc/asterisk/freepbx.conf');
     }
 
-	$salida="";
-	$fromElastixAdminPBX=1;
-	$headerFreePBX="
-	<link href='/modules/pbxadmin/themes/default/mainstyle.css' rel='stylesheet' type='text/css'>
-	<!--[if IE]>
-	<link href='/modules/pbxadmin/themes/default/ie.css' rel='stylesheet' type='text/css'>
-	<![endif]-->    
-	<script type='text/javascript' src='/modules/pbxadmin/js/script.js.php'></script>
-	<script type='text/javascript' src='/modules/pbxadmin/js/script.legacy.js'></script>
-	<script type='text/javascript' src='/modules/pbxadmin/js/libfreepbx.javascripts.js'></script>
-    $sScripts
-	<!--[if IE]>
-	<style type='text/css'>div.inyourface a{position:absolute;}</style>
-	<![endif]-->";
+    /* If there is an action request then some sort of update is usually being done.
+    This may protect from cross site request forgeries unless disabled.
+    */
+    if (!isset($no_auth) && $action != '' && $amp_conf['CHECKREFERER']) {
+            if (isset($_SERVER['HTTP_REFERER'])) {
+                    $referer = parse_url($_SERVER['HTTP_REFERER']);
+                    $refererok = (trim($referer['host']) == trim($_SERVER['SERVER_NAME'])) 
+                            ? true : false;
+            } else {
+                    $refererok = false;
+            }
+            if (!$refererok) {
+                    $display = 'badrefer';
+            }
+    }
+    if (isset($no_auth) && empty($display)) {
+            $display = 'noauth';
+    }
+    // handle special requests
+    if (!in_array($display, array('noauth', 'badrefer')) 
+            && isset($_REQUEST['handler'])
+    ) {
+            $module = isset($_REQUEST['module'])	? $_REQUEST['module']	: '';
+            $file 	= isset($_REQUEST['file'])		? $_REQUEST['file']		: '';
+            fileRequestHandler($_REQUEST['handler'], $module, $file);
+            exit();
+    }
+    
+    if (!$quietmode) {
+            module_run_notification_checks();
+    }
+    
+    //draw up freepbx menu
+    $fpbx_menu = array();
 
-	$dir_base = "/var/www/html/modules/$module_name/themes";
-	$local_templates_dir=(file_exists("$dir_base/".$arrConf['theme']))?"$dir_base/".$arrConf['theme']:"$dir_base/default";
+    // pointer to current item in $fpbx_menu, if applicable
+    $cur_menuitem = null;
 
-	// Obtengo el {$HEADER} anterior y le agrego lo nuevo
-	$headerNuevo = @$smarty->fetch("HEADER");
-	$headerNuevo .= $headerFreePBX;
-	$smarty->assign("HEADER", $headerNuevo);
+  //  var_dump($_SESSION);
+    // add module sections to $fpbx_menu
+    if(is_array($active_modules)){
+            foreach($active_modules as $key => $module) {
 
-	// Obtengo el {$BODYPARAMS} anterior y le agrego lo nuevo
-	$bodyParams = @$smarty->fetch("BODYPARAMS");
-	$bodyParams .= "onload='body_loaded();'";
-	$smarty->assign("BODYPARAMS", $bodyParams);
+                    //create an array of module sections to display
+                    // stored as [items][$type][$category][$name] = $displayvalue
+                    if (isset($module['items']) && is_array($module['items'])) {
+                            // loop through the types
+                            foreach($module['items'] as $itemKey => $item) {   
+                                
+                                    // check access, unless module.xml defines all have access
+                                    //TODO: move this to bootstrap and make it work
+                                    //module is restricted to admin with excplicit permission
+                                    $needs_perms = !isset($item['access']) 
+                                                    || strtolower($item['access']) != 'all'
+                                            ? true : false;
 
-	$_SESSION["AMP_user"]=NULL;
-	/* benchmark */
-	function microtime_float() { list($usec,$sec) = explode(' ',microtime()); return ((float)$usec+(float)$sec); }
-	$benchmark_starttime = microtime_float();
-	/*************/
+                                    //check if were logged in
+                                    $admin_auth = isset($_SESSION["AMP_user"]) 
+                                            && is_object($_SESSION["AMP_user"]);
 
-	$type = isset($_REQUEST['type'])?$_REQUEST['type']:'setup';
-	// Ojo, modifique ligeramente la sgte. linea para que la opcion por omision sea extensions
-	if(isset($_REQUEST['display'])) {
-	    $display = $_REQUEST['display'];
-	} else {
-	    $display = 'extensions';
-	    $_REQUEST['display'] = 'extensions';
-	}
-	$extdisplay = isset($_REQUEST['extdisplay'])?$_REQUEST['extdisplay']:null;
-	$skip = isset($_REQUEST['skip'])?$_REQUEST['skip']:0;
-	$action = isset($_REQUEST['action'])?$_REQUEST['action']:null;
-	$quietmode = isset($_REQUEST['quietmode'])?$_REQUEST['quietmode']:'';
+                                    //per admin access rules
+                                    $has_perms = $admin_auth
+                                            && $_SESSION["AMP_user"]->checkSection($itemKey);
 
-	// determine module type to show, default to 'setup'
-	$type_names = array(
-	    'tool'=>'Tools',
-	    'setup'=>'Setup',
-	    'cdrcost'=>'Call Cost',
-	);
+                                    //requies authentication
+                                    $needs_auth = isset($item['requires_auth']) 
+                                            && strtolower($item['requires_auth']) == 'false'
+                                                    ? false
+                                                    : true;
 
-	/*************************************************************/
-	/* Este bloque pertenece en su mayoria al archivo header.php */
-	/* ya que no estaban registrando ciertas variables globales; */
-	/* asi que lo repito aqui y evito parchar dicho archivo y    */
-	/* otros mas.                                                */
-	/*************************************************************/
+                                    //skip this module if we dont have proper access
+                                    //test: if we require authentication for this module
+                                    //			and either the user isnt authenticated
+                                    //			or the user is authenticated and dose require
+                                    //				section specifc permissions but doesnt have them
+                                    if ($needs_auth 
+                                            && (!$admin_auth || ($needs_perms && !$has_perms))
+                                    ) {
+                                            //clear display if they were trying to gain unautherized 
+                                            //access to $itemKey. If there logged in, but dont have
+                                            //permissions to view this specicc page - show them a message
+                                            //otherwise, show them the login page
+                                            if($display == $itemKey){ 
+                                                    if ($admin_auth) {
+                                                            $display = 'noaccess';	
+                                                    } else {
+                                                            $display = 'noauth';
+                                                    }
+                                            }
+                                            continue;
+                                    }
+                                    
+                                    if (!isset($item['display'])) {
+                                            $item['display'] = $itemKey;
+                                    }
 
-	// include base functions
-    global $amp_conf_defaults;
-	require_once('/var/www/html/admin/functions.inc.php');
-	require_once('/var/www/html/admin/common/php-asmanager.php');
+                                    // reference to the actual module
+                                    $item['module'] =& $active_modules[$key];
 
-	// Hack to avoid patching admin/functions.inc.php
-	$GLOBALS['amp_conf_defaults'] = $amp_conf_defaults;
+                                    // item is an assoc array, with at least 
+                                    //array(module=> name=>, category=>, type=>, display=>)
+                                    $fpbx_menu[$itemKey] = $item;
 
-	// get settings
-	$amp_conf       = parse_amportal_conf("/etc/amportal.conf");
-	$asterisk_conf  = parse_asterisk_conf($amp_conf["ASTETCDIR"]."/asterisk.conf");
-	$astman         = new AGI_AsteriskManager();
+                                    // allow a module to replace our main index page
+                                    if (($item['display'] == 'index') && ($display == '')) {
+                                            $display = 'index';
+                                    }
 
-	// attempt to connect to asterisk manager proxy
-	if (!isset($amp_conf["ASTMANAGERPROXYPORT"]) || !$res = $astman->connect("127.0.0.1:".$amp_conf["ASTMANAGERPROXYPORT"], $amp_conf["AMPMGRUSER"] , $amp_conf["AMPMGRPASS"])) {
-		// attempt to connect directly to asterisk, if no proxy or if proxy failed
-		if (!$res = $astman->connect("127.0.0.1:".$amp_conf["ASTMANAGERPORT"], $amp_conf["AMPMGRUSER"] , $amp_conf["AMPMGRPASS"])) {
-			// couldn't connect at all
-			unset( $astman );
-		}
-	}
-
-    if (!isset($astman) || is_null($astman)) {
-    	return _tr('Failed to connect to Asterisk Manager Interface').' - '.
-            "127.0.0.1:".$amp_conf["ASTMANAGERPORT"];
+                                    // check current item
+                                    if ($display == $item['display']) {
+                                            // found current menuitem, make a reference to it
+                                            $cur_menuitem =& $fpbx_menu[$itemKey];
+                                    }
+                            }
+                    }
+            }
     }
 
-	$GLOBALS['amp_conf'] = $amp_conf;
-	$GLOBALS['asterisk_conf']  = $asterisk_conf;
-	$GLOBALS['astman'] = $astman;
+    if ($cur_menuitem === null && !in_array($display, array('noauth', 'badrefer','noaccess',''))) {
+	$display = 'noaccess';
+    }
 
-	// Hack to avoid patching common/db_connect.php
-	// I suppose the used database is mysql
-	require_once('DB.php'); //PEAR must be installed
-	$db_user = $amp_conf["AMPDBUSER"];
-	$db_pass = $amp_conf["AMPDBPASS"];
-	$db_host = $amp_conf["AMPDBHOST"];
-	$db_name = $amp_conf["AMPDBNAME"];
+    // new gui hooks
+    if(!$quietmode && is_array($active_modules)){
+            foreach($active_modules as $key => $module) {
+                    modgettext::push_textdomain($module['rawname']);
+                    if (isset($module['items']) && is_array($module['items'])) {
+                            foreach($module['items'] as $itemKey => $itemName) {
+                                    //list of potential _configpageinit functions
+                                    $initfuncname = $key . '_' . $itemKey . '_configpageinit';
+                                    if ( function_exists($initfuncname) ) {
+                                            $configpageinits[] = $initfuncname;
+                                    }
+                            }
+                    }
+                    //check for module level (rather than item as above) _configpageinit function
+                    $initfuncname = $key . '_configpageinit';
+                    if ( function_exists($initfuncname) ) {
+                            $configpageinits[] = $initfuncname;
+                    }
+                    modgettext::pop_textdomain();
+            }
+    }
 
-	$datasource = 'mysql://'.$db_user.':'.$db_pass.'@'.$db_host.'/'.$db_name;
-	$db = DB::connect($datasource); // attempt connection
+    // extensions vs device/users ... this is a bad design, but hey, it works
+    if (!$quietmode && isset($fpbx_menu["extensions"])) {
+            if (isset($amp_conf["AMPEXTENSIONS"]) 
+                    && ($amp_conf["AMPEXTENSIONS"] == "deviceanduser")) {
+                    unset($fpbx_menu["extensions"]);
+            } else {
+                    unset($fpbx_menu["devices"]);
+                    unset($fpbx_menu["users"]);
+            }
+    }
 
-	$GLOBALS['db'] = $db;
+    ob_start();    
+    // load the component from the loaded modules
+    if (!in_array($display, array('', 'badrefer')) 
+            && isset($configpageinits) && is_array($configpageinits) 
+    ) {
 
-	if (!isset($_SESSION['AMP_user'])) {
-	    $_SESSION['AMP_user'] = new ampuser($amp_conf['AMPDBUSER']);
-	    $_SESSION['AMP_user']->setAdmin();
-	}
+            $CC = $currentcomponent = new component($display,$type);
+            // call every modules _configpageinit function which should just
+            // register the gui and process functions for each module, if relevant
+            // for this $display
+            foreach ($configpageinits as $func) {
+                    $func($display);
+            }
 
-	// Requiring header.php
-	include('/var/www/html/admin/header.php');
+            // now run each 'process' function and 'gui' function
+            $currentcomponent->processconfigpage();
+            $currentcomponent->buildconfigpage();
+    }
+    $module_name = "";
+    $module_page = "";
+    $module_file = "";
 
-	// The next block is to fix a music on hold issue
-	$category = strtr(isset($_REQUEST['category'])?$_REQUEST['category']:''," ./\"\'\`", "------");
-	if ($category == null) $category = 'default';
+    // hack to have our default display handler show the "welcome" view
+    // Note: this probably isn't REALLY needed if there is no menu item for "Welcome"..
+    // but it doesn't really hurt, and it provides a handler in case some page links
+    // to "?display=index"
+    //TODO: acount for bad refer
+    if ($display == 'index' && ($cur_menuitem['module']['rawname'] == 'builtin')) {
+            $display = '';
+    }
+    
+    // show the appropriate page
+    switch($display) {
+            case 'modules':
+                    // set these to avoid undefined variable warnings later
+                    //
+                    $module_name = 'modules';
+                    $module_page = $cur_menuitem['display'];
+                    include 'page.modules.php';
+                    break;
+            case 'noaccess':
+                    show_view($amp_conf['VIEW_NOACCESS'], array('amp_conf' => &$amp_conf));
+                    break;
+            case 'noauth':
+                    $config_vars['obe_error_msg'] = array();
+                    if ($config_vars['action'] == 'setup_admin'){
+                            $config_vars['obe_error_msg'] = framework_obe_intialize_validate(
+                                    $config_vars['username'],
+                                    $config_vars['password'],
+                                    $config_vars['confirm_password'],
+                                    $config_vars['email_address'],
+                                    $config_vars['confirm_email']);
+                    }
+                    //if we have no admin users AND were trying to set one up
+                    if (!count(getAmpAdminUsers()) 
+                            && $action == 'setup_admin'
+                            && !$config_vars['obe_error_msg']
+                    ) {
+                            //validate the inputs
+                            framework_obe_intialize_admin(
+                                    $config_vars['username'],
+                                    $config_vars['password'],
+                                    $config_vars['confirm_password'],
+                                    $config_vars['email_address'],
+                                    $config_vars['confirm_email']
+                            );
+                    }
 
-	if ($category == "default")
-	    $path_to_dir = $asterisk_conf['astvarlibdir']."/".$amp_conf["MOHDIR"]."/"; //path to directory u want to read.
-	else
-	    $path_to_dir = $asterisk_conf['astvarlibdir']."/".$amp_conf["MOHDIR"]."/$category"; //path to directory u want to read.
+                    //if we (still) have no admin users
+                    if (!count(getAmpAdminUsers())) {
+                            $login = $config_vars;
+                            $login['amp_conf'] = $amp_conf;
+                            $login['errors'] = $config_vars['obe_error_msg'];
+                            $return_HTML .= load_view($amp_conf['VIEW_OBE'], $login);
+                            unset($_SESSION['AMP_user']);
+                    }
 
-	$GLOBALS['path_to_dir'] = $path_to_dir;
+                    //prompt for a password if we have users
+                    if (count(getAmpAdminUsers())) {
+                            //error message
+                            $login['errors'] = array();
+                            if ($config_vars['username'] && $action !== 'setup_admin') {
+                                    $login['errors'][] = _('Invalid Username or Password');
+                            }
 
-	$path_to_moh_dir = $amp_conf['ASTVARLIBDIR'].'/'.$amp_conf['MOHDIR'];
-	$GLOBALS['path_to_moh_dir'] = $path_to_moh_dir;
+                            //show fop option if enabled, probobly doesnt belong on the
+                            //login page
+                            $login['panel'] = false;
+                            if (!empty($amp_conf['FOPWEBROOT']) 
+                                    && is_dir($amp_conf['FOPWEBROOT'])
+                            ){
+                                    $login['panel'] = str_replace($amp_conf['AMPWEBROOT'] .'/admin/',
+                                                    '', $amp_conf['FOPWEBROOT']);
+                            }
 
-	/*************************************************************/
-	/* Fin del bloque                                            */
-	/*************************************************************/
 
-	$GLOBALS['title'] = isset($title)?$title:'';
-	$GLOBALS['type']  = isset($type)?$type:'';
-	$GLOBALS['display'] = isset($display)?$display:'';
-	$GLOBALS['extdisplay'] = isset($extdisplay)?$extdisplay:'';
-	$GLOBALS['skip'] = isset($skip)?$skip:'';
-	$GLOBALS['action'] = isset($action)?$action:'';
-	$GLOBALS['quietmode'] = isset($quietmode)?$quietmode:'';
-	$GLOBALS['message'] = isset($message)?$message:'';
-	$GLOBALS['fpbx_menu'] = isset($fpbx_menu)?$fpbx_menu:'';
-	$GLOBALS['recordings_save_path'] = "/tmp/";
+                            $login['amp_conf'] = $amp_conf;
+                            $return_HTML .= load_view($amp_conf['VIEW_LOGIN'], $login);
+                    }
+                    break;
+            case 'badrefer':
+                    $return_HTML .= load_view($amp_conf['VIEW_BAD_REFFERER'], $amp_conf);
+                    break;
+            case '':
+                    if ($astman) {
+                            show_view($amp_conf['VIEW_WELCOME'], array('AMP_CONF' => &$amp_conf));
+                    } else {
+                            // no manager, no connection to asterisk
+                            show_view($amp_conf['VIEW_WELCOME_NOMANAGER'], 
+                                    array('mgruser' => $amp_conf["AMPMGRUSER"]));
+                    }
+                    break;
+            default:
+                    //display the appropriate module page
+                    $module_name = $cur_menuitem['module']['rawname'];
+                    $module_page = $cur_menuitem['display'];
+                    $module_file = 'modules/'.$module_name.'/page.'.$module_page.'.php';
 
-	//This _guielement_tabindex and _guielement_formfields fixed bug in extensions freePBX embedded
-	$GLOBALS['_guielement_tabindex'] = 1;
-	$GLOBALS['_guielement_formfields'] = 0;
-	//This $fc_save var fixed bug in System Recording en freePBX embedeed 
-	global $fc_save;
-	global $fc_check; 
-	global $recordings_save_path;
-	global $itemid;
+                    //TODO Determine which item is this module displaying.
+                    //Currently this is over the place, we should standardize on a 
+                    //"itemid" request var for now, we'll just cover all possibilities :-(
+                    $possibilites = array(
+                            'userdisplay',
+                            'extdisplay',
+                            'id',
+                            'itemid',
+                            'selection'
+                    );
+                    $itemid = '';
+                    foreach($possibilites as $possibility) {
+                            if (isset($_REQUEST[$possibility]) && $_REQUEST[$possibility] != '' ) {
+                                    $itemid = htmlspecialchars($_REQUEST[$possibility], ENT_QUOTES);
+                                    $_REQUEST[$possibility] = $itemid;
+                            }
+                    }
 
-	// handle special requests
-	if (isset($_REQUEST['handler'])) {
-	    switch ($_REQUEST['handler']) {
-		case 'reload':
-		    /** AJAX handler for reload event
-		    */
-		    include_once('/var/www/html/admin/common/json.inc.php');
-		    $response = do_reload();
-		    $json = new Services_JSON();
-		    //echo $json->encode($response);
-		break;
-		case 'file':
-		    /** Handler to pass-through file requests 
-		    * Looks for "module" and "file" variables, strips .. and only allows normal filename characters.
-		    * Accepts only files of the type listed in $allowed_exts below, and sends the corresponding mime-type, 
-		    * and always interprets files through the PHP interpreter. (Most of?) the freepbx environment is available,
-		    * including $db and $astman, and the user is authenticated.
-		    */
-		    if (!isset($_REQUEST['module']) || !isset($_REQUEST['file'])) {
-			die_freepbx("unknown");
-		    }
-		    //TODO: this could probably be more efficient
-		    $module = str_replace('..','.', preg_replace('/[^a-zA-Z0-9-\_\.]/','',$_REQUEST['module']));
-		    $file = str_replace('..','.', preg_replace('/[^a-zA-Z0-9-\_\.]/','',$_REQUEST['file']));
+                    // create a module_hook object for this module's page
+                    $module_hook = new moduleHook;
 
-		    $allowed_exts = array(
-			'.js' => 'text/javascript',
-			'.js.php' => 'text/javascript',
-			'.css' => 'text/css',
-			'.css.php' => 'text/css',
-			'.html.php' => 'text/html',
-			'.jpg.php' => 'image/jpeg',
-			'.jpeg.php' => 'image/jpeg',
-			'.png.php' => 'image/png',
-			'.gif.php' => 'image/gif',
-		    );
-		    foreach ($allowed_exts as $ext=>$mimetype) {
-			if (substr($file, -1*strlen($ext)) == $ext) {
-			    $fullpath = 'modules/'.$module.'/'.$file;
-			    if (file_exists($fullpath)) {
-				// file exists, and is allowed extension
+                    // populate object variables
+                    $module_hook->install_hooks($module_page,$module_name,$itemid);
 
-				// image, css, js types - set Expires to an hour in advance so the client does
-				// not keep checking for them. Replace from header.php
-				if (!$amp_conf['DEVEL']) {
-				    @header('Expires: '.gmdate('D, d M Y H:i:s', time()+3600).' GMT', true);
-				    @header('Cache-Control: ',true); 
-				    @header('Pragma: ', true); 
-				}
-				@header("Content-type: ".$mimetype);
-				include($fullpath);
-				exit();
-			    }
-			    break;
-			}
-		    }
-		    die_freepbx("not allowed");
-		break;
-	    }
-	    //exit();
-	}
+                    // let hooking modules process the $_REQUEST
+                    $module_hook->process_hooks($itemid, 
+                            $module_name, 
+                            $module_page, 
+                            $_REQUEST);
 
-	module_run_notification_checks();
 
-	$framework_asterisk_running =  checkAstMan();
+                    // include the module page
+                    if (isset($cur_menuitem['disabled']) && $cur_menuitem['disabled']) {
+                            show_view($amp_conf['VIEW_MENUITEM_DISABLED'], $cur_menuitem);
+                            break; // we break here to avoid the generateconfigpage() below
+                    } else if (file_exists($dirname."/".$module_file)) {
+                            // load language info if available
+                            modgettext::textdomain($module_name);
+                            include($dirname."/".$module_file);
+                    } else {
+                            $return_HTML .= "404 Not found (" . $module_file  . ')';
+                    }
 
-	// get all enabled modules
-	// active_modules array used below and in drawselects function and genConf function
-	// $active_modules = module_getinfo(false, MODULE_STATUS_ENABLED);
-	$active_modules = module_getinfo(false, MODULE_STATUS_ENABLED);
+                    // global component
+                    if ( isset($currentcomponent) ) {
+                            $return_CONFIG_HTML =  $currentcomponent->generateconfigpage();
+                    }
 
-	$GLOBALS['active_modules'] = $active_modules;
+                    break;
+    }
 
-	// Esto lo he puesto aqui porque el modulo blacklist lo requiere
-	// en caso de que o exista la clase extension
-	require_once("/var/www/html/admin/extensions.class.php");
-
-	$fpbx_menu = array();
-
-	// pointer to current item in $fpbx_menu, if applicable
-	$cur_menuitem = null;
-
-	// add module sections to $fpbx_menu
-	// Aqui lleno el arreglo fpbx_menu que es quien contiene los elementos del menu
-	// Tambien cargo unas funciones y se hacen otras cositas mas como setear la variable
-	// que contiene el item actual
-	$types = array();
-	if(is_array($active_modules)){
-	    foreach($active_modules as $key => $module) {
-		//include module functions
-		if (is_file("/var/www/html/admin/modules/{$key}/functions.inc.php")) {
-		    require_once("/var/www/html/admin/modules/{$key}/functions.inc.php");
-		}
-
-		//create an array of module sections to display
-		// stored as [items][$type][$category][$name] = $displayvalue
-		if (isset($module['items']) && is_array($module['items'])) {
-		    // loop through the types
-		    foreach($module['items'] as $itemKey => $item) {
-
-			// check access, unless module.xml defines all have access
-			if (!isset($item['access']) || strtolower($item['access']) != 'all') {
-			    if (!$_SESSION["AMP_user"]->checkSection($itemKey)) {
-				// no access, skip to the next 
-				continue;
-			    }
-			}
-
-			if (!$framework_asterisk_running && 
-			      ((isset($item['needsenginedb']) && strtolower($item['needsenginedb'] == 'yes')) || 
-			      (isset($item['needsenginerunning']) && strtolower($item['needsenginerunning'] == 'yes')))
-			  )
-			{
-			    $item['disabled'] = true;
-			} else {
-			    $item['disabled'] = false;
-			}
-
-			if (!in_array($item['type'], $types)) {
-			    $types[] = $item['type'];
-			}
-
-			if (!isset($item['display'])) {
-			    $item['display'] = $itemKey;
-			}
-
-			// reference to the actual module
-			$item['module'] =& $active_modules[$key];
-
-			// item is an assoc array, with at least array(module=> name=>, category=>, type=>, display=>)
-			$fpbx_menu[$itemKey] = $item;
-
-			// allow a module to replace our main index page
-			if (($item['display'] == 'index') && ($display == '')) {
-			    $display = 'index';
-			}
-
-			// check current item
-			if ($display == $item['display']) {
-			    // found current menuitem, make a reference to it 
-			    $cur_menuitem =& $fpbx_menu[$itemKey];
-			}
-		    }
-		}
-	    }
-	}
-	sort($types);
-
-	// new gui hooks
-	// Este bloque al parecer almacena en el arreglo configpageinits el nombre de ciertas funciones 
-	// estandar que se deben cargar si es que se encuentran.
-	// Al parecer no todo modulo las trae, es opcional. Por eso se buscan en todos los modulos...
-	if(is_array($active_modules)){
-	    foreach($active_modules as $key => $module) {
-		if (isset($module['items']) && is_array($module['items'])) {
-		    foreach($module['items'] as $itemKey => $itemName) {
-			//list of potential _configpageinit functions
-			$initfuncname = $key . '_' . $itemKey . '_configpageinit';
-			if ( function_exists($initfuncname) ) {
-			    $configpageinits[] = $initfuncname;
-			} 
-		    }
-		}
-		//check for module level (rather than item as above) _configpageinit function
-		$initfuncname = $key . '_configpageinit';
-		if ( function_exists($initfuncname) ) {
-		    $configpageinits[] = $initfuncname;
-		}
-	    }
-	}
-
-	// extensions vs device/users ... this is a bad design, but hey, it works
-	// Este bloque distingue entre si mostrar el menu de extensiones o en su lugar
-	// mostrar los menus de devices y users. Esto es porque existe la posibilidad de 
-	// disasociar dispositivos de usuarios.
-	if (isset($amp_conf["AMPEXTENSIONS"]) && ($amp_conf["AMPEXTENSIONS"] == "deviceanduser")) {
-	    unset($fpbx_menu["extensions"]);
-	} else {
-	    unset($fpbx_menu["devices"]);
-	    unset($fpbx_menu["users"]);
-	}
-
-	// check access
-	if (!is_array($cur_menuitem) && $display != "") {
-	    showview("noaccess");
-	    return '(internal) No active FreePBX modules found. Please enable Unembedded FreePBX for troubleshooting.';
-	}
-
-	// load the component from the loaded modules
-	if ( $display != '' && isset($configpageinits) && is_array($configpageinits) ) {
-
-	    $currentcomponent = new component($display,$type);
-	    $GLOBALS['currentcomponent']=$currentcomponent;
-
-	    // call every modules _configpageinit function which should just
-	    // register the gui and process functions for each module, if relevent
-	    // for this $display
-	    foreach ($configpageinits as $func) {
-		$func($display);
-	    }
-	    // now run each 'process' function and 'gui' function
-	    $currentcomponent->processconfigpage();
-	    $currentcomponent->buildconfigpage();
-	}
-	//  note: we buffer all the output from the 'page' being loaded..
-	// This may change in the future, with proper returns, but for now, it's a simple 
-	// way to support the old page.item.php include module format.
-
-	ob_start();
-
-	$module_name = "";
-	$module_page = "";
-	$module_file = "";
-
-	// hack to have our default display handler show the "welcome" view 
-	// Note: this probably isn't REALLY needed if there is no menu item for "Welcome"..
-	// but it doesn't really hurt, and it provides a handler in case some page links
-	// to "?display=index"
-	if (($display == 'index') && ($cur_menuitem['module']['rawname'] == 'builtin')) {
-	    $display = '';
-	}
-
-	// show the appropriate page
-	switch($display) {
-	    default:
-		//display the appropriate module page
-		$module_name = $cur_menuitem['module']['rawname'];
-		$module_page = $cur_menuitem['display'];
-		$module_file = '/var/www/html/admin/modules/'.$module_name.'/page.'.$module_page.'.php';
-
-		//TODO Determine which item is this module displaying. Currently this is over the place, we should standarize on a "itemid" request var for now, we'll just cover all possibilities :-(
-		$possibilites = array(
-		    'userdisplay',
-		    'extdisplay',
-		    'id',
-		    'itemid',
-		    'category',
-		    'selection'
-		);
-		$itemid = '';
-		foreach($possibilites as $possibility) {
-		    if ( isset($_REQUEST[$possibility]) && $_REQUEST[$possibility] != '' ) 
-			$itemid = $_REQUEST[$possibility];
-		}
-
-		// create a module_hook object for this module's page
-		$module_hook = new moduleHook;
-
-		// populate object variables
-		$module_hook->install_hooks($module_page,$module_name,$itemid);
-
-		// let hooking modules process the $_REQUEST
-		$module_hook->process_hooks($itemid, $module_name, $module_page, $_REQUEST);
-
-		// include the module page
-		if (isset($cur_menuitem['disabled']) && $cur_menuitem['disabled']) {
-		    showview("menuitem_disabled",$cur_menuitem);
-		    break; // we break here to avoid the generateconfigpage() below
-		} else if (file_exists($module_file)) {
-		    // load language info if available
-		    if (extension_loaded('gettext')) {
-			if (is_dir("/var/www/html/admin/modules/{$module_name}/i18n")) {
-			    bindtextdomain($module_name,"/var/www/html/admin/modules/{$module_name}/i18n");
-			    bind_textdomain_codeset($module_name, 'utf8');
-			    textdomain($module_name);
-			}
-		    }
-		// Aqui es donde se dibuja el GUI
-		    include($module_file);
-		} else {
-		    // TODO: make this a showview()
-		    echo "404 Not found";
-		}
-
-		// global component
-		if ( isset($currentcomponent) ) {
-		    echo $currentcomponent->generateconfigpage();
-		}
-
-	    break;
-	    case 'modules':
-		// set these to avoide undefined variable warnings later
-		//
-		$module_name = 'modules';
-		$module_page = $cur_menuitem['display'];
-		include '/var/www/html/admin/page.modules.php';
-	    break;
-	    case '':
-		if ($astman) {
-		    showview('welcome', array('AMP_CONF' => &$amp_conf));
-		} else {
-		    // no manager, no connection to asterisk
-		    showview('welcome_nomanager', array('mgruser' => $amp_conf["AMPMGRUSER"]));
-		}
-	    break;
-	}
-
-	//$salida .= @ob_get_flush();
-	$htmlFPBX = @ob_get_contents();
+    if ($quietmode) {
+            // send the output buffer, should be sending just the page contents
+            ob_end_flush();
+    } elseif ($fw_popover || $fw_popover_process) {
+	$admin_template = $template = array();
+	//get the page contents from the buffer
+	$content = ob_get_contents();
 	ob_end_clean();
+	$return_HTML = '';
+	 
+	$use_popover_css = ($fw_popover || $fw_popover_process);
+        $return_HTML .= load_view("$local_templates_dir/header.php", null);
 
-	// Aqui reviso si hay modulos deshabilitados
-	$modulos_desabilitados=0;
-	foreach($active_modules as $modulo) {
-	    if($modulo['status']=='3') {
-		$modulos_desabilitados=1;
-	    }
-	}
+        //if we have a module loaded, load its css
+        if (isset($module_name)) {
+                $return_HTML .= framework_include_css_freepbx();
+        }
 
-	if($modulos_desabilitados==1) {
-	    $salida .= "<table border=0 cellpadding=2 cellspacing=0 align='center' width='100%'><tr bgcolor='#cccccc'><td align='center'>There is at least one freePBX module that has been automatically disabled because it needs an update. Please go to the unembedded freePBX option and update this module(s). Otherwise unexpected things could happen with your PBX configuration.</td></tr></table>";
-	}
+        // set the language so local module languages take
+        set_language(); //TODO: falta revisar si esto funciona
 
-	if(check_reload_needed()) {
-	    // Reviso si el REQUEST_URI tiene ya variables tipo get. Solo busco por un signo de ?
-	    $pos=strpos($_SERVER['REQUEST_URI'], '?');
-	    if($pos>0) $URL_RELOAD = $_SERVER['REQUEST_URI']."&handler=reload";
-	    else $URL_RELOAD = $_SERVER['REQUEST_URI']."?handler=reload";
+        // If processing posback (fw_popover_process) and there are errors then we
+        // display again, otherwise we ignore the $content and prepare to process
+        //
+        $show_normal = $fw_popover_process ? fwmsg::errors() : true;
+        if ($show_normal) {
+                // provide beta status
+                if (isset($fpbx_menu[$display]['beta']) && strtolower($fpbx_menu[$display]['beta']) == 'yes') {
+                        $return_HTML .= load_view($amp_conf['VIEW_BETA_NOTICE']);
+                }
+                $return_HTML .= $content.$return_CONFIG_HTML;
+                $popover_mode = 'display';
+        } else {
+                $popover_mode = 'process';
+        }     
+           
 
-	    $salida .= "<table border=0 cellpadding=2 cellspacing=0 align='center' width='100%'><tr bgcolor='#f6bbbb'><td align='center'><a href='$URL_RELOAD'>Apply Configuration Changes Here</a></td></tr></table>";
-	}
+        $js_content     = load_view("$local_templates_dir/popover_js.php", null);
+        $extmap	        = framework_get_extmap(true);
+        $reload_needed  = false;
+        $remove_rnav    = true;
+        $return_HTML   .= load_view("$local_templates_dir/footer.php", null);
+        return $return_HTML;
+    
+    } else {
+        $_SESSION['module_name']	= $module_name;
+        $_SESSION['module_page']	= $module_page;
 
-	if($withList){
-	    $smarty->assign("Option", _tr('Option'));
-	    $smarty->assign("Unembedded_freePBX", _tr('Unembedded freePBX'));
-	    $smarty->assign("Basic", _tr('Basic'));
-	    $smarty->assign("Extensions", _tr('Extensions'));
-	    $smarty->assign("Feature_Codes", _tr('Feature Codes'));
-	    $smarty->assign("General_Settings", _tr('General Settings'));
-	    $smarty->assign("Outbound_Routes", _tr('Outbound Routes'));
-	    $smarty->assign("Trunks", _tr('Trunks'));
-	    $smarty->assign("Inbound_Call_Control", _tr('Inbound Call Control'));
-	    $smarty->assign("Inbound_Routes", _tr('Inbound Routes'));
-	    $smarty->assign("Announcements", _tr('Announcements'));
-	    $smarty->assign("Follow_Me", _tr('Follow Me'));
-	    $smarty->assign("IVR", _tr('IVR'));
-	    $smarty->assign("Misc_Destinations", _tr('Misc Destinations'));
-	    $smarty->assign("Queues", _tr('Queues'));
-	    $smarty->assign("Ring_Groups", _tr('Ring Groups'));
-	    $smarty->assign("Time_Conditions", _tr('Time Conditions'));
-	    $smarty->assign("Internal_Options_Configuration", _tr('Internal Options & Configuration'));
-	    $smarty->assign("Conferences", _tr('Conferences'));
-	    $smarty->assign("Misc_Applications", _tr('Misc Applications'));
-	    $smarty->assign("Music_on_Hold", _tr('Music on Hold'));
-	    $smarty->assign("PIN_Sets", _tr('PIN Sets'));
-	    $smarty->assign("Paging_Intercom", _tr('Paging and Intercom'));
-	    $smarty->assign("Parking_Lot", _tr('Parking Lot'));
-	    $smarty->assign("System_Recordings", _tr('System Recordings'));
-	    $smarty->assign("Remote_Access", _tr('Remote Access'));
-	    $smarty->assign("Callback", _tr('Callback'));
-	    $smarty->assign("DISA", _tr('DISA'));
+        $page_content		= ob_get_contents();
+        ob_end_clean();
 
-	    $smarty->assign("Zap_Channel_DIDs", _tr('Zap Channel DIDs'));
-	    $smarty->assign("Blacklist", _tr('Blacklist'));
-	    $smarty->assign("CallerID_Lookup_Sources", _tr('CallerID Lookup Sources'));
-	    $smarty->assign("Day_Night_Control", _tr('Day/Night Control'));
-	    $smarty->assign("Queue_Priorities", _tr('Queue Priorities'));
-	    $smarty->assign("Time_Groups", _tr('Time Groups'));
-	    $smarty->assign("Languages", _tr('Languages'));
-	    $smarty->assign("VoiceMail_Blasting", _tr('VoiceMail Blasting'));
+        //if we have a module loaded, load its css
+        if (isset($module_name)) {
+                $return_HTML .= framework_include_css_freepbx();
+        }
 
-	    $smarty->assign("INFO", _tr("Warning: Updating FreePBX through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"."));
-	}
-        $smarty->assign("htmlFPBX", $htmlFPBX);
-        $salida .= $smarty->fetch("$local_templates_dir/main.tpl");
-        return $salida;
+        // set the language so local module languages take
+        set_language(); //TODO: falta revisar si esto funciona
+
+        // send menu
+        $return_HTML .= load_view("$local_templates_dir/menu.php", null);
+
+        //send actual page content
+        $return_HTML .= $page_content.$return_CONFIG_HTML;
+
+        //send footer
+        $extmap	        = framework_get_extmap(true);
+        $reload_needed	= check_reload_needed();
+        $return_HTML .= load_view("$local_templates_dir/footer.php", null); 
+
+        if($withList){
+            $smarty->assign("Option", _tr('Option'));
+            $smarty->assign("Unembedded_freePBX", _tr('Unembedded freePBX'));
+            $smarty->assign("Basic", _tr('Basic'));
+            $smarty->assign("Extensions", _tr('Extensions'));
+            $smarty->assign("Feature_Codes", _tr('Feature Codes'));
+            $smarty->assign("Outbound_Routes", _tr('Outbound Routes'));
+            $smarty->assign("Trunks", _tr('Trunks'));
+            $smarty->assign("Inbound_Call_Control", _tr('Inbound Call Control'));
+            $smarty->assign("Inbound_Routes", _tr('Inbound Routes'));
+            $smarty->assign("Announcements", _tr('Announcements'));
+            $smarty->assign("Follow_Me", _tr('Follow Me'));
+            $smarty->assign("IVR", _tr('IVR'));
+            $smarty->assign("Misc_Destinations", _tr('Misc Destinations'));
+            $smarty->assign("Queues", _tr('Queues'));
+            $smarty->assign("Ring_Groups", _tr('Ring Groups'));
+            $smarty->assign("Time_Conditions", _tr('Time Conditions'));
+            $smarty->assign("Internal_Options_Configuration", _tr('Internal Options & Configuration'));
+            $smarty->assign("Conferences", _tr('Conferences'));
+            $smarty->assign("Misc_Applications", _tr('Misc Applications'));
+            $smarty->assign("Music_on_Hold", _tr('Music on Hold'));
+            $smarty->assign("PIN_Sets", _tr('PIN Sets'));
+            $smarty->assign("Paging_Intercom", _tr('Paging and Intercom'));
+            $smarty->assign("Parking_Lot", _tr('Parking Lot'));
+            $smarty->assign("System_Recordings", _tr('System Recordings'));
+            $smarty->assign("Remote_Access", _tr('Remote Access'));
+            $smarty->assign("Callback", _tr('Callback'));
+            $smarty->assign("DISA", _tr('DISA'));
+
+            $smarty->assign("Zap_Channel_DIDs", _tr('Zap Channel DIDs'));
+            $smarty->assign("Blacklist", _tr('Blacklist'));
+            $smarty->assign("CallerID_Lookup_Sources", _tr('CallerID Lookup Sources'));
+            $smarty->assign("Day_Night_Control", _tr('Day/Night Control'));
+            $smarty->assign("Queue_Priorities", _tr('Queue Priorities'));
+            $smarty->assign("Time_Groups", _tr('Time Groups'));
+            $smarty->assign("Languages", _tr('Languages'));
+            $smarty->assign("VoiceMail_Blasting", _tr('VoiceMail Blasting'));
+
+            $smarty->assign("INFO", _tr("Warning: Updating FreePBX through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"."));
+            $smarty->assign("htmlFPBX", $return_HTML);
+            return $smarty->fetch("$local_templates_dir/main.tpl");
+        }
     }
+}
+
+function framework_include_css_freepbx() {
+	global $active_modules, $module_name, $module_page, $amp_conf;
+
+	$version			= get_framework_version();
+	$version_tag		= '?load_version=' . urlencode($version);
+	if ($amp_conf['FORCE_JS_CSS_IMG_DOWNLOAD']) {
+	  $this_time_append	= '.' . time();
+	  $version_tag 		.= $this_time_append;
+	} else {
+		$this_time_append = '';
+	}
+
+	$html = '';
+	$view_module_version	= isset($active_modules[$module_name]['version'])
+							? $active_modules[$module_name]['version']
+							: $version_tag;
+	$mod_version_tag		= '&load_version=' . urlencode($view_module_version);
+	if ($amp_conf['FORCE_JS_CSS_IMG_DOWNLOAD']) {
+		$mod_version_tag	.= $this_time_append;
+	}
+
+	// DEPECRATED but still supported for a while, the assets directory is the new preferred mode
+	if (is_file('admin/modules/' . $module_name . '/' . $module_name . '.css')) {
+		$html .= '<link href="' . $_SERVER['PHP_SELF']
+				. '?handler=file&amp;module=' . $module_name
+				. '&amp;file=' . $module_name . '.css' . $mod_version_tag
+				. '" rel="stylesheet" type="text/css" />';
+	}
+	if (isset($module_page)
+		&& ($module_page != $module_name)
+		&& is_file('admin/modules/' . $module_name . '/' . $module_page . '.css')
+	) {
+			$html .= '<link href="' . $_SERVER['PHP_SELF']
+					. '?handler=file&amp;module=' . $module_name
+					. '&amp;file=' . $module_page . '.css' . $mod_version_tag
+					. '" rel="stylesheet" type="text/css" />';
+	}
+
+
+	// Check assets/css and then assets/css/page_name for any css files which will have been symlinked to
+	// assets/module_name/css/*
+	$css_dir = 'admin/modules/' . $module_name . '/assets/css';
+	if (is_dir($css_dir)) {
+		$d = opendir($css_dir);
+		$file_list = array();
+		while ($file = readdir($d)) {
+			$file_list[] = $file;
+		}
+		sort($file_list);
+		foreach ($file_list as $file) {
+			if (substr($file,-4) == '.css' && is_file($css_dir . '/' . $file)) {
+			  $html .= '<link href="admin/assets/' . $module_name . '/css/' . $file
+						. '" rel="stylesheet" type="text/css" />';
+			}
+		}
+		unset($file_list);
+		$css_subdir = $css_dir . '/' . $module_page;
+		if ($module_page != '' && is_dir($css_subdir)) {
+			$sd = opendir($css_subdir);
+
+			$file_list = array();
+			while ($p_file = readdir($sd)) {
+				$file_list[] = $p_file;
+			}
+			sort($file_list);
+			foreach ($file_list as $p_file) {
+				if (substr($p_file,-4) == '.css' && is_file($css_subdir . '/' . $p_file)) {
+			    $html .= '<link href="admin/assets/$module_name/css/' . $module_page . '/' . $p_file
+						. '" rel="stylesheet" type="text/css" />';
+				}
+			}
+		}
+	}
+
+	return $html;
+}
+
+function framework_include_js_freepbx($module_name, $module_page) {
+	global $amp_conf, $active_modules;
+	$version			= get_framework_version();
+	$version_tag		= '?load_version=' . urlencode($version);
+	if ($amp_conf['FORCE_JS_CSS_IMG_DOWNLOAD']) {
+	  $this_time_append	= '.' . time();
+	  $version_tag 		.= $this_time_append;
+	} else {
+		$this_time_append = '';
+	}
+
+	$html = '';
+
+	if (is_file('admin/modules/' . $module_name . '/' . $module_name . '.js')) {
+		$html .= '<script type="text/javascript" src="'
+				. $_SERVER['PHP_SELF'] . '?handler=file&amp;module='
+				. $module_name . '&amp;file=' . $module_name . '.js'
+				. $mod_version_tag . '"></script>';
+	}
+	if (isset($module_page)
+		&& ($module_page != $module_name)
+		&& is_file('admin/modules/' . $module_name . '/' . $module_page . '.js')
+	) {
+		$html .= '<script type="text/javascript" src="'
+				. $_SERVER['PHP_SELF'] . '?handler=file&amp;module='
+				. $module_name . '&amp;file=' . $module_page . '.js'
+				. $mod_version_tag . '"></script>';
+	}
+
+	// Check assets/js and then assets/js/page_name for any js files which will have been symlinked to
+	// assets/module_name/js/*
+	//
+	$js_dir = 'admin/modules/' . $module_name . '/assets/js';
+	if (is_dir($js_dir)) {
+		$file_list = scandir($js_dir);
+		foreach ($file_list as $file) {
+			if (substr($file,-3) == '.js' && is_file("$js_dir/$file")) {
+				$html .= '<script type="text/javascript"'
+						. ' src="admin/assets/' . $module_name . '/js/' . $file . '"></script>';
+			}
+		}
+		unset($file_list);
+		$js_subdir ="$js_dir/$module_page";
+		if ($module_page != '' && is_dir($js_subdir)) {
+			$file_list = scandir($js_subdir);
+			foreach ($file_list as $p_file) {
+				if (substr($p_file,-3) == '.js' && is_file("$js_subdir/$p_file")) {
+				  $html .= '<script type="text/javascript" '
+							. ' src="admin/assets/' . $module_name . '/js/'
+							. $module_page . '/' . $p_file
+							. '"></script>';
+				}
+			}
+		}
+  }
+
+	// DEPCRETATED but still supported:
+	// Note - include all the module js files first, then the page specific files,
+	//in case a page specific file requires a module level file
+	$js_dir = "admin/modules/$module_name/js";
+	if (is_dir($js_dir)) {
+		$file_list = scandir($js_dir);
+		foreach ($file_list as $file) {
+			if (substr($file,-3) == '.js' && is_file("$js_dir/$file")) {
+				$html .= '<script type="text/javascript"'
+				. ' src="' . $_SERVER['PHP_SELF'] . '?handler=file&module='
+				. $module_name . '&file='
+				. $js_dir . '/' . $file . $mod_version_tag
+				. '"></script>';
+			}
+		}
+		unset($file_list);
+		$js_subdir ="$js_dir/$module_page";
+		if ($module_page != '' && is_dir($js_subdir)) {
+			$sd = opendir($js_subdir);
+
+			$file_list = array();
+			while ($p_file = readdir($sd)) {
+				$file_list[] = $p_file;
+			}
+			sort($file_list);
+			foreach ($file_list as $p_file) {
+				if (substr($p_file,-3) == '.js' && is_file("$js_subdir/$p_file")) {
+					$html .= '<script type="text/javascript" src="'
+							. $_SERVER['PHP_SELF'] . '?handler=file&module='
+							. $module_name . '&file='
+							. $js_subdir . '/' . $p_file . $mod_version_tag
+							. '"></script>';
+				}
+			}
+		}
+	}
+
+	return $html;
+}
 ?>

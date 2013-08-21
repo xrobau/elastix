@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,6 +102,20 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
+  SVN history. Bumped Release in specfile.
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: elastix-admin-passwords: Reversed and fixed some changes in this
+  file, Applying the new changes for compatibility with the new freePBX.
+  SVN Rev[5780]
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: elastix-admin-passwords: It was changed the way that its stored the
+  password for FreePBX admin for a better interaction with freePBX.
+  SVN Rev[5779]
+
 * Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-firstboot: make update of password in manager.conf more 
   robust in the case it falls out of sync with /etc/elastix.conf.
@@ -110,10 +124,12 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in 
   specfile according to the current branch.
+  SVN Rev[4639]
 
 * Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-10
 - CHANGED: firstboot - Build/elastix-firstboot.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4625]
 
 * Wed Jan 09 2013 Luis Abarca <labarca@palosanto.com>
 - CHANGED: A minor correction in the commit 4564 where the Cancel option

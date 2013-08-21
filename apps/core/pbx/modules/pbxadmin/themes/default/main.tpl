@@ -1,10 +1,9 @@
 <table cellspacing="0" cellpadding="0" border="0" width="100%">
   <tr>
-    <td valign="top" width="220"><div id="nav"><div id="nav-setup"><ul>
+    <td valign="top" width="220"><div id="nav"><div id="nav-setup" class="tabs-container"><ul>
     <li class="category category-header">{$Basic}</li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=extensions"  >{$Extensions}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=featurecodeadmin"  >{$Feature_Codes}</a></li>
-    <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=general"  >{$General_Settings}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=routing"  >{$Outbound_Routes}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=trunks"  >{$Trunks}</a></li>
     <li>{$Inbound_Call_Control}</li>
@@ -38,8 +37,7 @@
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=callback"  >{$Callback}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=disa"  >{$DISA}</a></li>
     <li>{$Option}</li>
-    <li><a href="/admin/"  class="info" target="_blank">{$Unembedded_freePBX} <span style='margin-left:0.2cm; margin-top:-1.8cm; width:303px'>{$INFO}</span></a></li>
-</ul></div></div></td>
+    <li style="float:left;border-right:0px"><a href="/admin/" target="_blank">{$Unembedded_freePBX}</a></li><div style="height:0px"><a href="#" class="info"><span style='margin-left:0.2cm; margin-top:-1.8cm; width:303px'>{$INFO}</span></a></div>
 <td valign="top">{$htmlFPBX}</td>
 </tr>
 </table>

@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 10
+Release: 11
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -130,10 +130,90 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Aug 21 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Added support for transalating some words.
+  SVN Rev[5781]
+
 * Fri Aug  9 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: further to choosing between astdb and astdb.sqlite3,
   astdb.sqlite3 must be deleted before running astdb2sqlite3.
   SVN Rev[5717] 
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file es.lang.
+  SVN Rev[5716]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file es.lang.
+  SVN Rev[5715]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file es.lang.
+  SVN Rev[5714]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5713]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file es.lang.
+  SVN Rev[5712]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5710]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5709]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5708]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5707]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5706]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5705]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5704]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5703]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5702]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5701]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5700]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5699]
+
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5698]
 
 * Thu Aug  8 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: file restore can now be a list of file options, so use
@@ -142,14 +222,71 @@ fi
   invoked from backupengine, fixed by hardcoding a path in putenv().
   SVN Rev[5640]
 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5607]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5605]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5604]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5603]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5602]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5601]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5600]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5599]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5596]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5595]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5594]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5593]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5592]
+
 * Wed Aug  7 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: RSS parser in News applet wants to output iso-8859-1. Force
   the encoding to utf-8 instead.
   SVN Rev[5580]
 
+* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5575]
+
 * Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5562]
 
 * Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATED: Module backup_restore. Correction of some mistakes in the

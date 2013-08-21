@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,15 +92,109 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Channel Usage: convert uses of arrLang to _tr. Sync with trunk.
   SVN Rev[5756]
 - CHANGED: Asterisk Logs: convert uses of arrLang to _tr. Sync with trunk.
   SVN Rev[5725]
 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5642]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5641]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5639]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5638]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5637]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5636]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5635]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5634]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5510]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5509]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5508]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module file_editor. Correction of some mistakes in the translation
+  file es.lang.
+  SVN Rev[5507]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module file_editor. Correction of some mistakes in the translation
+  file es.lang.
+  SVN Rev[5506]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module summary_by_extension. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5471]
+
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module missed_calls. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5435]
+
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module graphic_report. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5420]
+
+* Fri Jul 19 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module cdrreport. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5384]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module billing_report. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5358]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module billing_rates. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5357]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module asterisk_log. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5355]
+
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5353]
 
 * Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATED: Module graphic_report. Correction of a mistake in the english

@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -197,9 +197,54 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5736]
+
+* Mon Aug 12 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5718]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added translation file fr.lang.
+  SVN Rev[5616]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added translation file fr.lang.
+  SVN Rev[5615]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added translation file fr.lang.
+  SVN Rev[5614]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5613]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5612]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5611]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5610]
+
+* Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Added support to translate some error messages.
+  SVN Rev[5570]
+
 * Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5559]
 
 * Fri Aug 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Stats: fix mispackaging of crontab file that results in crond

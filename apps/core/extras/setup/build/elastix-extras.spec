@@ -3,7 +3,7 @@
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-%{release}.tgz
@@ -63,6 +63,30 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Aug 21 2012 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Bumped release in specfile.
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- REMOVED: Module Downloads, Help files with wrong names were deleted
+  SVN Rev[5729]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: The names of the Downloads module's help files were changed.
+  SVN Rev[5725]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- ADDED: extras modules, Static pages on Donwloads menu, were added as modules.
+  SVN Rev[5723]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- ADDED: extras modules, Static pages on Donwloads menu, were added as modules.
+  SVN Rev[5722]
+
+* Mon Aug 12 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the description.
+  SVN Rev[5719]
+
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
 - CHANGED: extras - Build/elastix-extras.spec: Changed Version and Release in 
   specfile according to the current branch.

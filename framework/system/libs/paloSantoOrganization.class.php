@@ -105,7 +105,7 @@ class paloSantoOrganization{
      * @return mixed => false in case of errors
      *                  array => list of organizations
      */
-    function getOrganization($arrProp = array()){
+    function getOrganization($arrProp){
         $arrWhere=array();
         $arrParam=array();
         $query="SELECT * FROM organization WHERE id!=1";
@@ -137,7 +137,7 @@ class paloSantoOrganization{
         }
         
         $result=$this->_DB->fetchTable($query, true, $arrParam);
-        if(!is_array($result)){
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }else
@@ -594,7 +594,7 @@ class paloSantoOrganization{
 
         //creamos los grupos 
         $query="INSERT INTO acl_group (description,name,id_organization) ".
-                "SELECT description,name,? FROM acl_group WHERE id_organization=1 AND name IN ('administrator', 'supervisor', 'final_user')";
+                "SELECT description,name,? FROM acl_group WHERE id_organization=1 AND name IN ('administrator', 'supervisor', 'end_user')";
         $exito=$this->_DB->genQuery($query,array($idOrganization));
         if($exito==false){
             $this->errMsg=_tr("An error has ocurred trying to create organizaion's group");
@@ -610,17 +610,19 @@ class paloSantoOrganization{
         
         //asignamos los recursos a los grupos recien creados
         //la asignacion de recursos se obtiene de la asignacion que existe a los grupos 
-        // 'administrator', 'supervisor', 'final_user' de la organizacion por default
+        // 'administrator', 'supervisor', 'end_user' de la organizacion por default
         // que tiene id 1. 
         //Los grupos antes mencionados no deberian ser borrados del sistema
-        $query="INSERT INTO group_resource_actions (id_group,id_org_resource,id_action) " .
-                    "SELECT ?,or_re.id,gr_re.id_action FROM ".
-                        "(SELECT or1.id,or1.id_resource FROM organization_resource or1 
+        $query="INSERT INTO group_resource_action (id_group,id_resource_action) " .
+                    "SELECT ?,gract.id_resource_action FROM ".
+                        "(SELECT or1.id_resource FROM organization_resource or1 
                             WHERE or1.id_organization=?) as or_re ".
                     "JOIN ".
-                    "(SELECT or2.id_resource,gr.id_action FROM organization_resource or2 ".
-                        "JOIN group_resource_actions gr ON or2.id=gr.id_org_resource JOIN acl_group g ON g.id=gr.id_group WHERE g.name=? AND or2.id_organization=1) as gr_re ".
-                    "ON or_re.id_resource=gr_re.id_resource";
+                        "(SELECT gr.id_resource_action,ract.id_resource FROM resource_action ract 
+                            JOIN group_resource_action gr ON ract.id=gr.id_resource_action 
+                            JOIN acl_group g ON g.id=gr.id_group 
+                                WHERE g.name=? AND g.id_organization=1) as gract ".
+                    "ON or_re.id_resource=gract.id_resource";
         foreach($grpOrga as $value){
             //$value[0]=id
             //$value[1]=name

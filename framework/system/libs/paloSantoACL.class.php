@@ -746,18 +746,53 @@ class paloACL {
 			return $bResult;
         }
 	}
+	
+	/**
+	 * Funcion que devuelve el id del grupo al que pertenece un usuario.
+	 * Devuelve falso en caso de error
+	 * @param integer $idUser
+	 * @return mixed  integer -> id del grupo al que pertence el usuario 
+	 *                false -> en caso de eero
+	 */
+	function getUserGroup($idUser){
+        $query="SELECT id_group FROM acl_user WHERE id=?";
+        $result=$this->_DB->getFirstRowQuery($query,false,array($idUser));
+        if($result==false){
+            $this->errMsg=($result===false)?_tr("DATABASE ERROR"):_tr("User doesn't exist");
+            return false;
+        }else{
+            return $result[0];
+        }
+	}
 
 
 
     function isUserAuthorizedById($id_user, $resource_name)
     {
+    //obtenemos el id del grupo al que pertecene el usuario
+    $idGroup=$this->getUserGroup($id_user);
+    if($idGroup==false)
+        return false;
+        
+    //seleccionamos los recuersos a los cuales la organizacion a la que pertenece el usuario tiene acceso
+    //y de eso hacemos uns interseccion con la 
+    //union de las acciones permitidas por el grupo al que pertenece el usuario
+    //y las acciones permitidas a el usuario
 $sPeticionSQL = <<<INFO_AUTH_MODULO
-    SELECT count(ogr.id_resource) From organization_resource as ogr
-        JOIN group_resource_actions as gr on ogr.id=gr.id_org_resource
-        WHERE gr.id_action='access' AND ogr.id_resource=?
-            AND gr.id_group=(Select u.id_group from acl_user as u where u.id=?);
+    SELECT ore.id_resource FROM organization_resource ore 
+            JOIN acl_group g ON g.id_organization=ore.id_organization 
+            WHERE g.id=? AND ore.id_resource=? AND ore.id_resource IN 
+                (SELECT ract.id_resource FROM resource_action ract 
+                    JOIN group_resource_action as gr ON ract.id=gr.id_resource_action 
+                    WHERE gr.id_group=? AND ract.id_resource=? AND ract.action='access'  
+                UNION  
+                SELECT ract.id_resource FROM resource_action ract 
+                        JOIN user_resource_action as ur ON ract.id=ur.id_resource_action  
+                        WHERE ur.id_user=? AND ract.id_resource=? AND ract.action='access')
 INFO_AUTH_MODULO;
-        $result=$this->_DB->fetchTable($sPeticionSQL,false,array($resource_name,$id_user));
+        $result=$this->_DB->fetchTable($sPeticionSQL,false,array($idGroup,$resource_name,$idGroup, $resource_name,$id_user, $resource_name));
+        
+        //comprobamos que los recursos obtenidos se encuentre tambien en la tabla organization_resource
         if(is_array($result) && count($result)>0){
             return true;
         }else
@@ -1093,391 +1128,8 @@ INFO_AUTH_MODULO;
         }
         return $Haveusers;
     }
-
-     /**
-     * Procedimiento para obtener el listado de los recursos existentes en los ACL. Si
-     * se especifica un ID numérico de recurso, el listado contendrá únicamente al recurso
-     * indicado. De otro modo, se listarán todos los recursos.
-     *
-     * @param int   $id_rsrc    Si != NULL, indica el ID del recurso a recoger
-     *
-     * @return array    Listado de recursos en el siguiente formato, o FALSE en caso de error:
-     *  array(
-     *      array(id, name, description),
-     *      ...
-     *  )
-     */
-    function getResources($id_rsrc = NULL)
-    {
-        $arr_result = FALSE;
-		$where = "";
-		$arrParams = null;
-		if(!is_null($id_rsrc)){
-			$where = " and id = ?";
-			$arrParams = array($id_rsrc);
-		}
-		$this->errMsg = "";
-		$sPeticionSQL = "SELECT id, description FROM acl_resource WHERE Type!='' $where";
-		$arr_result = $this->_DB->fetchTable($sPeticionSQL, false,$arrParams);
-		if (!is_array($arr_result)) {
-			$arr_result = FALSE;
-			$this->errMsg = $this->_DB->errMsg;
-		}
-        return $arr_result;
-    }
-
-	/**
-     * Procedimiento para obtener el listado de los recursos existentes en los ACL dado
-     * el id de una organizacion. Si se especifica un el nombre del recurso, el listado contendrá únicamente
-     * al recurso indicado. De otro modo, se listarán todos los recursos a los que tenga acceso dicha organizacion.
-     *
-     * @param int   $id_rsrc    Si != NULL, indica el ID del recurso a recoger
-     *
-     * @return array    Listado de recursos en el siguiente formato, o FALSE en caso de error:
-     *  array(
-     *      array(id, name, description),
-     *      ...
-     *  )
-     */
-	function getResourcesByOrg($id_Organization, $filter_resource = NULL)
-    {
-        $arr_result = FALSE;
-		$where = "";
-        if (!preg_match('/^[[:digit:]]+$/', "$id_Organization")) {
-            $this->errMsg = _tr("Organization ID must be numeric");
-        } else {
-			$arrParams = array($id_Organization);
-			if(isset($filter_resource)){
-				if(!is_array($filter_resource)){
-					$where = " and description LIKE ? ";
-					$arrParams[] = "%$filter_resource%";
-				}else{
-					$where = " and (";
-					$i=1;
-					foreach($filter_resource as $key=>$value){
-						if($i==count($filter_resource)){
-							$where .= "description LIKE ? ) ";
-							$arrParams[] = "%$value%";
-						}
-						else{
-							$where .= "description = ? or ";
-							$arrParams[] = $value;
-						}
-						$i++;
-					}
-				}
-			}
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT ar.id, ar.description FROM acl_resource ar JOIN organization_resource ogr on ar.id=ogr.id_resource WHERE Type!='' and id_organization=? $where";
-            $arr_result = $this->_DB->fetchTable($sPeticionSQL, true,$arrParams);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $arr_result;
-    }
-
-
+    
     /**
-     * Procedimiento para crear un recurso bajo el nombre descrito, con una descripción opcional.
-     * Si un recurso con el nombre indicado ya existe, se reemplaza la descripción.
-     *
-     * @param string    $name           Nombre del grupo a crear
-     * @param string    $description    Descripción del grupo a crear, opcional
-     *
-     * @return bool     VERDADERO si el grupo ya existe o fue creado/actualizado correctamente
-     */
-    function createResource($name, $description, $id_parent, $type='module', $link='', $order=-1)
-    {
-        $bExito = FALSE;
-        $this->errMsg = "";
-        if ($name == "") {
-            $this->errMsg = _tr("Resource Name can't be empty");
-        } else {
-            if ($description == '') $description = $name;
-
-            // Verificar si el recurso ya existe
-			$sPeticionSQL = "SELECT id FROM acl_resource WHERE id = ? AND description = ? AND IdParent = ?";
-
-            $tupla = $this->_DB->getFirstRowQuery($sPeticionSQL,false,array($name,$description,$id_parent));
-            if (!is_array($tupla)) {
-                // Ocurre error de DB en consulta
-                $this->errMsg = $this->_DB->errMsg;
-            } else if (is_array($tupla) && count($tupla) > 0) {
-				$bExito = FALSE;
-                $this->errMsg = _tr("Menu already exists");
-			}else{
-				if($order!=-1){
-					$sPeticionSQL = "Insert INTO acl_resource (id,description,Type,Link,IdParent,order_no) values(?,?,?,?,?,?)";
-					$arrParams=array($name, $description,$type,$link,$id_parent,$order);
-                }
-                else{
-					$sPeticionSQL = "Insert INTO acl_resource (id,description,Type,Link,IdParent) values(?,?,?,?,?)";
-					$arrParams=array($name, $description,$type,$link,$id_parent);
-                }
-				if ($this->_DB->genQuery($sPeticionSQL,$arrParams)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                }
-			}
-        }
-        return $bExito;
-    }
-
-    //************************************************************************************************************************
-    //************************************************************************************************************************
-    function getNumResources($filter_resource = NULL)
-    {
-		$where = "";
-		$arrParam=array();
-		if(isset($filter_resource)){
-			if(!is_array($filter_resource)){
-				$where = " and description LIKE ? ";
-				$arrParam = array("%$filter_resource%");
-			}else{
-				$where = " and (";
-				$i=1;
-				$arrParam = array();
-				foreach($filter_resource as $key=>$value){
-					if($i==count($filter_resource)){
-						$where .= "description LIKE ? ) ";
-						$arrParam[] = "%$value%";
-					}
-					else{
-						$where .= "description = ? or ";
-						$arrParam[] = $value;
-					}
-					$i++;
-				}
-			}
-		}
-		$query = "SELECT count(id) FROM acl_resource WHERE Type!='' $where";
-        $result = $this->_DB->getFirstRowQuery($query, FALSE, $arrParam);
-
-        if( $result == false )
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result[0];
-    }
-
-    function getListResources($limit, $offset, $filter_resource=null)
-    {
-		$where = "";
-		$arrParam=array();
-
-        if(isset($filter_resource)){
-			if(!is_array($filter_resource)){
-				$where = " and description LIKE ? ";
-				$arrParam = array("%$filter_resource%");
-			}else{
-				$where = " and (";
-				$i=1;
-				$arrParam = array();
-				foreach($filter_resource as $key=>$value){
-					if($i==count($filter_resource)){
-						$where .= "description LIKE ? ) ";
-						$arrParam[] = "%$value%";
-					}
-					else{
-						$where .= "description = ? or ";
-						$arrParam[] = $value;
-					}
-					$i++;
-				}
-			}
-		}
-
-        $query = "SELECT id, description FROM acl_resource WHERE Type!='' $where ";
-        $query .= "LIMIT ? OFFSET ?";
-        $arrParam[] = $limit;
-        $arrParam[] = $offset;
-        $result = $this->_DB->fetchTable($query, true, $arrParam);
-
-        if( $result == false )
-        {
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-
-        return $result;
-    }
-
-	/**
-	 * Procedimiento que devuelve todos los recursos a los que un grupo tiene permiso de acceso
-	 * @param int   $id_group    ID del grupo del que se desea saber sus permisos
-	 * @return array Un arreglo con todos los recursos a los que los los miembros del grupo dado tienen
-					 acceso
-			   false en caso de error
-		array = ( array(resource_id ),
-				  array(resource_id2)
-				 )
-	 */
-    function loadGroupPermissions($id_group)
-    {
-		$where="";
-		$result=false;
-		if (!preg_match('/^[[:digit:]]+$/', "$id_group")) {
-            $this->errMsg = _tr("Group ID must be numeric");
-		}else{
-			$arrParams=array($id_group);
-			$query = "SELECT r.id FROM acl_resource r where r.id in ( Select ogr.id_resource from organization_resource ogr JOIN group_resource gr on gr.id_org_resource=ogr.id WHERE gr.id_group=? ) and Type!=''";
-			$result = $this->_DB->fetchTable($query,true,array($id_group));
-			if( $result === false ) {
-				$this->errMsg = $this->_DB->errMsg;
-			}
-		}
-        return $result;
-    }
-
-
-	function saveOrgPermission($idOrganization, $resources){
-        if (!preg_match('/^[[:digit:]]+$/', "$idOrganization")){
-            $this->errMsg = _tr("Organization ID is not valid");
-			return false;
-        }else{
-			$sPeticionSQL = "INSERT INTO organization_resource (id_organization, id_resource) ".
-                                "VALUES(?,?)";
-            foreach ($resources as $resource)
-            {
-				//validamos que exista el recurso
-				$query="SELECT 1 from acl_resource where id=?";
-				$result=$this->_DB->getFirstRowQuery($query,false, array($resource));
-                if($result==false){
-					$this->errMsg = _tr("Doesn't exist resource with id=").$resource." ".$this->_DB->errMsg;
-					return false;
-				}
-
-				//validamos que exista la organizacion
-				$query="SELECT 1 from organization where id=?";
-				$result=$this->_DB->getFirstRowQuery($query,false, array($idOrganization));
-				if($result==false){
-					$this->errMsg = _tr("Doesn't exist organization with id=").$idOrganization." ".$this->_DB->errMsg;
-					return false;
-				}
-
-				if (!$this->_DB->genQuery($sPeticionSQL, array($idOrganization, $resource))){
-					$this->errMsg = $this->_DB->errMsg;
-					return false;
-				}
-            }
-        }
-		return true;
-	}
-
-	
-    function saveGroupPermissions($idGroup, $resources)
-    {
-        if (!preg_match('/^[[:digit:]]+$/', "$idGroup")){
-            $this->errMsg = _tr("Group ID is not valid");
-			return false;
-        }else{
-			$sPeticionSQL = "INSERT INTO group_resource (id_group, id_org_resource) VALUES(?,?)";
-            foreach ($resources as $resource)
-            {
-				//validamos que exista el recurso
-				$query1="SELECT 1 from acl_resource where id=?";
-				$result1=$this->_DB->getFirstRowQuery($query1,false, array($resource));
-                if($result1==false){
-					$this->errMsg = _tr("Doesn't exist resource with id=").$resource." ".$this->_DB->errMsg;
-					return false;
-				}
-
-				//validamos que exista el grupo
-				$query2="SELECT id_organization from acl_group where id=?";
-				$result2=$this->_DB->getFirstRowQuery($query2,false, array($idGroup));
-				if($result2==false){
-					$this->errMsg = _tr("Doesn't exist group with id=").$idGroup." ".$this->_DB->errMsg;
-					return false;
-				}
-
-				//validamos que la organization a la que pertenece el grupo tenga acceso a ese recurso tambien
-				$query3="SELECT id from organization_resource where id_organization=? and id_resource=?";
-				$result3=$this->_DB->getFirstRowQuery($query3,false, array($result2[0],$resource));
-				if($result3==false){
-					$this->errMsg = _tr("Organization doesn't have priviled to access resource ").$resource." ".$this->_DB->errMsg;
-					return false;
-				}
-
-				if (!$this->_DB->genQuery($sPeticionSQL, array($idGroup,$result3[0]))){
-					$this->errMsg = $this->_DB->errMsg;
-					return false;
-				}
-            }
-        }
-        return true;
-    }
-
-
-	function deleteOrgPermissions($idOrganization, $resources)
-    {
-        if (!preg_match('/^[[:digit:]]+$/', "$idOrganization")){
-            $this->errMsg = _tr("Organization ID is not valid");
-			return false;
-        }else {
-			$queryId = "SELECT id FROM organization_resource where id_organization = ? AND id_resource = ?";
-			$dOrgResorc = "DELETE FROM organization_resource WHERE id = ?";
-            foreach ($resources as $resource){
-				$result=$this->_DB->getFirstRowQuery($queryId,false, array($idOrganization, $resource));
-				if($result===false){
-					$this->errMsg = _tr("Error has ocurred to delete permission")." ".$this->_DB->errMsg;
-					return false;
-				}elseif(count($result)>0){
-					if (!$this->_DB->genQuery($dOrgResorc, array($result[0]))){
-						$this->errMsg = $this->_DB->errMsg;
-						return false;
-					}
-				}
-            }
-        }
-        return true;
-    }
-
-
-    function deleteGroupPermissions($idGroup, $resources)
-    {
-        if (!preg_match('/^[[:digit:]]+$/', "$idGroup")){
-            $this->errMsg = _tr("Group ID is not valid");
-			return false;
-        }else{
-			//borramos la entrada en la tabla group_resource
-			$query2 = "DELETE FROM group_resource WHERE id_group = ? AND id_org_resource = (SELECT o.id from organization_resource o JOIN acl_group g on o.id_organization=g.id_organization where o.id_resource=? and g.id=?)";
-            foreach ($resources as $resource){
-                if (!$this->_DB->genQuery($query2, array($idGroup, $resource, $idGroup))){
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
-    /**
-     * Procedimiento para eliminar el recurso dado su id. 
-     * Antes de eliminar el recurso se debe elminar las entradas de dicho recurso de las tabla group_resource
-     * y organization_resource
-     * @param integer   $idresource
-     *
-     * @return bool     si es verdadero entonces se elimino bien
-     ******************************************************************/
-    function deleteResource($idresource)
-    {
-        $this->errMsg = "";
-        $query = "DELETE FROM acl_resource WHERE id = ?";
-        $result = $this->_DB->genQuery($query,array($idresource));
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }else
-            return true;
-    }
-
-
-     /**
      * Procedimiento para obtener el nombre del grupo dado un id. 
      *
      * @param integer   $idGroup  id del grupo
@@ -1511,21 +1163,432 @@ INFO_AUTH_MODULO;
             return true;
     }
     
+    
+    
     /**
-     * Esta funcion retorna si un usuario identificado por su username tiene permisos
-     * de realizar cierta action dentro de un modulo elastix que es identificado por 
-     * su nombre
+     * Esta funcion devuelve un arreglo que contine las acciones que un usuario puede realizar
+     * dentro de un modulo dado su id
+     * @param string $moduleId -> id del modulo
+     * @param integer $idUser -> id del usuario que realiza las acciones
+     * @return array array(action1,
+     *                     action2,
+     *                     action3)
      */
-    function userCanPerformAction($moduleId,$action,$userAccount){
-        $query="SELECT ogr.id_resource From organization_resource as ogr ".
-                    "JOIN group_resource_actions as gr on ogr.id=gr.id_org_resource ".
-                        "WHERE gr.id_action=? AND ogr.id_resource=? ".
-                        "AND gr.id_group=(Select u.id_group from acl_user as u where u.username=?)";
-        $result=$this->_DB->fetchTable($query,false,array($action,$moduleId,$userAccount));
+    function getResourceActionsByUser($idUser,$moduleId){
+        $sPeticionSQL = <<<INFO_AUTH_MODULO
+                SELECT ract.action FROM resource_action ract 
+                    JOIN group_resource_action as gr ON ract.id=gr.id_resource_action 
+                    JOIN acl_user u ON u.id_group=gr.id_group
+                    WHERE u.id=? AND ract.id_resource=?  
+                UNION  
+                SELECT ract.action FROM resource_action ract 
+                        JOIN user_resource_action as ur ON ract.id=ur.id_resource_action  
+                        WHERE ur.id_user=? AND ract.id_resource=?
+INFO_AUTH_MODULO;
+        $result=$this->_DB->fetchTable($sPeticionSQL,true,array($idUser,$moduleId,$idUser,$moduleId));
+        if(is_array($result)){
+            $resourcePermission=array();
+            foreach($result as $value){
+                $resourcePermission[]=$value['action'];
+            }
+            return $resourcePermission;
+        }else{
+            $this->errMsg=_tr("DATABASE ERROR");
+            return false;
+        }
+    }
+    
+    /**
+     * Esta funcion retorna verdadero en caso de que un usuario identificado por su id 
+     * pueda realizar una determinada accion dentro de un modulo
+     * @param string $moduleId -> id del modulo
+     * @param integer $idUser -> id del usuario que realiza las acciones
+     * @param string $action -> accion que se queire consultar
+     */
+     function userCanPerformAction($idUser,$moduleId,$action){
+        $sPeticionSQL = <<<INFO_AUTH_MODULO
+                SELECT ract.id_resource FROM resource_action ract 
+                    JOIN group_resource_action as gr ON ract.id=gr.id_resource_action 
+                    JOIN acl_user u ON u.id_group=gr.id_group
+                    WHERE u.id=? AND ract.id_resource=? AND ract.action=?
+                UNION  
+                SELECT ract.id_resource FROM resource_action ract 
+                        JOIN user_resource_action as ur ON ract.id=ur.id_resource_action  
+                        WHERE ur.id_user=? AND ract.id_resource=? AND ract.action=?
+INFO_AUTH_MODULO;
+        $result=$this->_DB->fetchTable($sPeticionSQL,false,array($idUser,$moduleId,$action,$idUser,$moduleId,$action));
         if(is_array($result) && count($result)>0){
             return true;
-        }else
+        }else{
+            $this->errMsg=($result===FALSE)?_tr("DATABASE ERROR"):_tr("You are not authorized to Perform this action");
             return false;
+        }
+    }
+
+     /**
+     * Procedimiento para obtener el listado de los recursos existentes en los ACL. Si
+     * se especifica un ID del recurso, el listado contendrá únicamente al recurso
+     * indicado. De otro modo, se listarán todos los recursos.
+     *
+     * @param int   $id_rsrc    Si != NULL, indica el ID del recurso a recoger
+     *
+     * @return array    Listado de recursos en el siguiente formato, o FALSE en caso de error:
+     *  array(
+     *      array(id, name, description),
+     *      ...
+     *  )
+     */
+    function getResources($id_rsrc = NULL,$orgAccess=null,$administrative=null)
+    {
+        $arr_result = FALSE;
+        $arrParams = null;
+        $this->errMsg = "";
+        
+        $sPeticionSQL = "SELECT id, description FROM acl_resource WHERE Type!='' $where";
+        if(!is_null($id_rsrc)){
+            $sPeticionSQL .= " and id = ?";
+            $arrParams = array($id_rsrc);
+        }
+        if(!is_null($orgAccess)){
+            $sPeticionSQL .= " and organization_access = ?";
+            $arrParams = array($orgAccess);
+        }
+        if(!is_null($administrative)){
+            $sPeticionSQL .= " and administrative = ?";
+            $arrParams = array($administrative);
+        }
+        $arr_result = $this->_DB->fetchTable($sPeticionSQL, false,$arrParams);
+        if (!is_array($arr_result)) {
+            $arr_result = FALSE;
+            $this->errMsg = $this->_DB->errMsg;
+        }
+        return $arr_result;
+    }
+
+	/**
+     * Procedimiento para obtener el listado de los recursos existentes en la tabla acl_resource
+     * a la que tiene acceso la organizacion. Si se especifica un el nombre del recurso, el listado contendrá 
+     * únicamente al recurso indicado. De otro modo, se listarán todos los recursos a los que tenga acceso dicha organizacion.
+     * @param array $filter_resource => arreglo que contine los nombres de los recuros
+                                        estos nombre son comparados con el campo description
+     * @param string $administrative => este campo sirve para distinguir entre modulos 
+                                        de tipo administrativo y modulos de tipo usuario final
+     */
+	function getResourcesByOrg($id_Organization, $filter_resource = NULL,$administrative=null)
+    {
+        $arr_result = FALSE;
+        $where = "";
+        if (!preg_match('/^[[:digit:]]+$/', "$id_Organization")) {
+            $this->errMsg = _tr("Organization ID must be numeric");
+        } else {
+            $arrParam = array($id_Organization);
+            if(isset($administrative)){
+                $where .=" AND administrative=? ";
+                $arrParam[] = $administrative;
+            }    
+            if(isset($filter_resource)){
+                if(is_array($filter_resource) && count($filter_resource)>0){
+                    $where .=" AND (";
+                    for($i=0;$i<count($filter_resource)-1;$i++){
+                        $where .=" UPPER(description) LIKE ? OR ";
+                        $arrParam[] = "%".strtoupper($filter_resource[$i])."%";
+                    }
+                    $where .=" UPPER(description) LIKE ? )";
+                    $arrParam[] = "%".strtoupper($filter_resource[count($filter_resource)-1])."%";
+                    
+                }else{
+                    $where .=" AND UPPER(description) LIKE ? ";
+                    $arrParam = "%".strtoupper($filter_resource)."%";
+                }
+            }
+            $this->errMsg = "";
+            $sPeticionSQL = "SELECT ar.id, ar.description FROM acl_resource ar JOIN organization_resource ogr on ar.id=ogr.id_resource WHERE Type!='' and id_organization=? AND organization_access='yes' AND $where";
+            $arr_result = $this->_DB->fetchTable($sPeticionSQL, true,$arrParam);
+            if (!is_array($arr_result)) {
+                $arr_result = FALSE;
+                $this->errMsg = $this->_DB->errMsg;
+            }
+        }
+        return $arr_result;
+    }
+
+
+    /**
+     * Procedimiento para crear un recurso bajo el nombre descrito, con una descripción opcional.
+     * Si un recurso con el nombre indicado ya existe, se reemplaza la descripción.
+     *
+     * @param string    $name           Nombre del grupo a crear
+     * @param string    $description    Descripción del grupo a crear, opcional
+     *
+     * @return bool     VERDADERO si el grupo ya existe o fue creado/actualizado correctamente
+     */
+    function createResource($name, $description, $id_parent, $type='module', $link='', $orgAccess, $administrative,$order=null)
+    {
+        $bExito = FALSE;
+        $this->errMsg = "";
+        if ($name == "") {
+            $this->errMsg = _tr("Resource Name can't be empty");
+        } else {
+            if ($description == '') $description = $name;
+
+            // Verificar si el recurso ya existe
+            $sPeticionSQL = "SELECT id FROM acl_resource WHERE id = ? AND description = ? AND IdParent = ?";
+
+            $tupla = $this->_DB->getFirstRowQuery($sPeticionSQL,false,array($name,$description,$id_parent));
+            if (!is_array($tupla)) {
+                // Ocurre error de DB en consulta
+                $this->errMsg = $this->_DB->errMsg;
+            } else if (is_array($tupla) && count($tupla) > 0) {
+                $bExito = FALSE;
+                $this->errMsg = _tr("Menu already exists");
+            }else{
+                $sPeticionSQL = "Insert INTO acl_resource (id, description, Type, Link, IdParent, organization_access, administrative";
+                $arrParams=array($name, $description,$type,$link,$id_parent,$orgAccess,$administrative);
+                if(isset($order)){
+                    $sPeticionSQL .=",order_no"; 
+                    $arrParams[]=$order;
+                }
+                $sPeticionSQL .=") VALUES(".implode(",",array_fill(0,count($arrParams),"?")).")";
+                
+                if ($this->_DB->genQuery($sPeticionSQL,$arrParams)) {
+                    $bExito = TRUE;
+                } else {
+                    $this->errMsg = $this->_DB->errMsg;
+                }
+            }
+        }
+        return $bExito;
+    }
+    
+    /**
+     * Esta funcion retirna el numero de resursos disponibles en el sistema
+     * @param array $filter_resource => arreglo que contine los nombres de los recuros
+                                        estos nombre son comparados con el campo description
+     * @param strting $orgAccess => este parametro filtra por el campo 'organization_access'
+                                    de la tabla acl_resource e indica si el recurso es cuestion deberia
+                                    ser poder accedido por una organizacion
+     * @param string $administrative => este campo sirve para distinguir entre modulos 
+                                        de tipo administrativo y modulos de tipo usuario final
+     */
+    function getNumResources($filter_resource = NULL,$orgAccess=null,$administrative=null)
+    {
+        $where = "";
+        $arrParam=array();
+        if(isset($orgAccess)){
+            $where .=" AND organization_access=? ";
+            $arrParam[] = $orgAccess;
+        }
+        if(isset($administrative)){
+            $where .=" AND administrative=? ";
+            $arrParam[] = $administrative;
+        }    
+        if(isset($filter_resource)){
+            if(is_array($filter_resource) && count($filter_resource)>0){
+                $where .=" AND (";
+                for($i=0;$i<count($filter_resource)-1;$i++){
+                    $where .=" UPPER(description) LIKE ? OR ";
+                    $arrParam[] = "%".strtoupper($filter_resource[$i])."%";
+                }
+                $where .=" UPPER(description) LIKE ? )";
+                $arrParam[] = "%".strtoupper($filter_resource[count($filter_resource)-1])."%";
+                
+            }else{
+                $where .=" AND UPPER(description) LIKE ? ";
+                $arrParam = "%".strtoupper($filter_resource)."%";
+            }
+        }
+        $query = "SELECT count(id) FROM acl_resource WHERE Type!='' $where";
+        $result = $this->_DB->getFirstRowQuery($query, FALSE, $arrParam);
+
+        if( $result == false )
+        {
+            $this->errMsg = $this->_DB->errMsg;
+            return 0;
+        }
+        return $result[0];
+    }
+
+    /**
+     * Esta funcion function la lista de resursos disponibles en el sistema
+     * Estos recuroso se pueden filtrar por tres parametros
+     * @param array $filter_resource => arreglo que contine los nombres de los recuros
+                                        estos nombre son comparados con el campo description
+     * @param strting $orgAccess => este parametro filtra por el campo 'organization_access'
+                                    de la tabla acl_resource e indica si el recurso es cuestion deberia
+                                    ser poder accedido por una organizacion
+     * @param string $administrative => este campo sirve para distinguir entre modulos 
+                                        de tipo administrativo y modulos de tipo usuario final
+     */
+    function getListResources($limit,$offset,$filter_resource=null,$orgAccess=null,$administrative=null)
+    {
+        $where = "";
+        $arrParam=array();
+        if(isset($orgAccess)){
+            $where .=" AND organization_access=? ";
+            $arrParam[] = $orgAccess;
+        }
+        if(isset($administrative)){
+            $where .=" AND administrative=? ";
+            $arrParam[] = $administrative;
+        }  
+        if(isset($filter_resource)){
+            if(is_array($filter_resource) && count($filter_resource)>0){
+                $where .=" AND (";
+                for($i=0;$i<count($filter_resource)-1;$i++){
+                    $where .=" UPPER(description) LIKE ? OR ";
+                    $arrParam[] = "%".strtoupper($filter_resource[$i])."%";
+                }
+                $where .=" UPPER(description) LIKE ? )";
+                $arrParam[] = "%".strtoupper($filter_resource[count($filter_resource)-1])."%";
+                
+            }else{
+                $where = " AND UPPER(description) LIKE ? ";
+                $arrParam = "%".strtoupper($filter_resource)."%";
+            }
+        }
+
+        $query = "SELECT id, description FROM acl_resource WHERE Type!='' $where ";
+        $query .= "LIMIT ? OFFSET ?";
+        $arrParam[] = $limit;
+        $arrParam[] = $offset;
+        $result = $this->_DB->fetchTable($query, true, $arrParam);
+
+        if( $result == false )
+        {
+            $this->errMsg = $this->_DB->errMsg;
+            return array();
+        }
+        return $result;
+    }
+
+    /**
+    * Procedimiento que devuelve un arreglo de dos dimensiones con las accciones por recursos
+    * que un grupo, identificado por du id, puede realizar
+    * @param int   $id_group    ID del grupo del que se desea saber sus permisos
+    * @return array Un arreglo con todos los recursos a los que los los miembros del grupo dado tienen
+                    acceso
+            false en caso de error
+            array = ( id_resource1 => array(action1,action2,..),
+                      id_resource2 => array(action1,action2,..),
+                      id_resource3 => array(action1,action2,..),
+                )
+    */
+    function loadGroupPermissions($id_group)
+    {
+        if (!preg_match('/^[[:digit:]]+$/', "$id_group")) {
+            $this->errMsg = _tr("Group ID must be numeric");
+            return false;
+        }else{
+            $arrParams=array($id_group);
+            $query = "SELECT ract.id_resource,ract.action FROM resource_action ract 
+                        JOIN group_resource_action gract ON ract.id=gract.id_resource_action
+                        WHERE gract.id_group=?";        
+            $result = $this->_DB->fetchTable($query,true,array($id_group));
+            if( $result === false ) {
+                $this->errMsg = $this->_DB->errMsg;
+                return false;
+            }else{
+                $arrResourcePermission=array();
+                foreach($result as $value){
+                    $arrResourcePermission[$value['id_resource']][]=$value['action'];
+                }
+                return $arrResourcePermission;
+            }
+        }
+    }
+
+    /**
+     * Funcion que almacena en la tabla organization_resource los modulos 
+     * o recursos a  los que una organizacion tiene accesso
+     */
+    function saveOrgPermission($idOrganization, $resources){
+        if (!preg_match('/^[[:digit:]]+$/', "$idOrganization")){
+            $this->errMsg = _tr("Organization ID is not valid");
+            return false;
+        }else{
+            $sPeticionSQL = "INSERT INTO organization_resource (id_organization, id_resource) ".
+                                "VALUES(?,?)";
+            foreach ($resources as $resource)
+            {
+                //validamos que exista el recurso
+                $query="SELECT 1 from acl_resource where id=?";
+                $result=$this->_DB->getFirstRowQuery($query,false, array($resource));
+                if($result==false){
+                    $this->errMsg = _tr("Doesn't exist resource with id=").$resource." ".$this->_DB->errMsg;
+                    return false;
+                }
+
+                //validamos que exista la organizacion
+                $query="SELECT 1 from organization where id=?";
+                $result=$this->_DB->getFirstRowQuery($query,false, array($idOrganization));
+                if($result==false){
+                    $this->errMsg = _tr("Doesn't exist organization with id=").$idOrganization." ".$this->_DB->errMsg;
+                    return false;
+                }
+
+                if (!$this->_DB->genQuery($sPeticionSQL, array($idOrganization, $resource))){
+                    $this->errMsg = $this->_DB->errMsg;
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    function deleteOrgPermissions($idOrganization, $resources)
+    {
+        if (!preg_match('/^[[:digit:]]+$/', "$idOrganization")){
+            $this->errMsg = _tr("Organization ID is not valid");
+            return false;
+        }else {
+            //debemos borrar los permisos de la tabla group_resource_action, user_resource_action y organization_resource
+            if(is_array($resources) && count($resources)>0){
+                $q=implode(',',array_fill(0,count($resources),'?'));
+                $query1="DELETE gr FROM group_resource_action gr JOIN resource_action ra 
+                            ON gr.id_resource_action=ra.id WHERE ra.id_resource IN ($q) AND gr.id_group IN (
+                                SELECT id FROM group WHERE id_organization=?)";
+                $query2="DELETE ur FROM user_resource_action us JOIN resource_action ra 
+                            ON ur.id_resource_action=ra.id WHERE ra.id_resource IN ($q) AND u.id_user IN (
+                                SELECT u.id FROM group g JOIN acl_user u ON u.id_group=g.id 
+                                    WHERE g.id_organization=?)";
+                $query3="DELETE FROM organization_resource WHERE ra.id_resource IN ($q) AND id_organization = ?";
+            
+                $resources[]=$idOrganization;
+                if (!$this->_DB->genQuery($query1,array($resources))){
+                    $this->errMsg = $this->_DB->errMsg;
+                    return false;
+                }
+                if (!$this->_DB->genQuery($query2,array($resources))){
+                    $this->errMsg = $this->_DB->errMsg;
+                    return false;
+                }
+                if (!$this->_DB->genQuery($query3,array($resources))){
+                    $this->errMsg = $this->_DB->errMsg;
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Procedimiento para eliminar el recurso dado su id. 
+     * Antes de eliminar el recurso se debe elminar las entradas de dicho recurso de las tabla group_resource
+     * y organization_resource
+     * @param integer   $idresource
+     *
+     * @return bool     si es verdadero entonces se elimino bien
+     ******************************************************************/
+    function deleteResource($idresource)
+    {
+        $this->errMsg = "";
+        $query = "DELETE FROM acl_resource WHERE id = ?";
+        $result = $this->_DB->genQuery($query,array($idresource));
+        if($result==FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else
+            return true;
     }
 }
 ?>

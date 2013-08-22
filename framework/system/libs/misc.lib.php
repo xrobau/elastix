@@ -834,64 +834,56 @@ function AsteriskManagerConnect(&$error) {
 	return false;
 }
 
-/**
- * Function that return is the loggin user is susperadmin
- */
-function isUserSuperAdmin(){
-    global $arrConf;
-    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pdbACL);
-    return $pACL->isUserSuperAdmin($_SESSION['elastix_user']);
-}
 
 /**
-    funcion que sirve para comprobar las credenciales de usuario
-    identificar si es usuario superadmin, final_user, other
-    identificar a que organizacion pertenece
+    funcion que sirve para obtener las credenciales de un usuario
     @return
-    Array => ( userAccount => (UserName or ""),
-                id_organization => (ID_ORG or false),
-                userlevel => (superadmin,final_user,other),
-                )
-    */
-function getUserCredentials(){
-    global $arrConf;
+    Array => ( idUser => (idUser or ""),
+               id_organization => (ID_ORG or false),
+               userlevel => (superadmin,organization),
+               domain => (dominio de la ORG or false)
+             )
+*/
+function getUserCredentials($username){
+    global $arrConf,$elxPath;
+    require_once("$elxPath/libs/paloSantoACL.class.php");
     $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pdbACL);
 
     $userLevel1 = "organization";
-    $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    //verificar que tipo de usurio es: superadmin, admin o other
-    if($userAccount!=""){
-        $idOrganization = $pACL->getIdOrganizationUserByName($userAccount);
-        if($pACL->isUserSuperAdmin($userAccount)){
-            $userLevel1 = "superadmin";
+    $idOrganization = $domain = false;
+    $idUser = $pACL->getIdUser($username);
+    if($idUser!=false){
+        $idOrganization = $pACL->getIdOrganizationUser($idUser);
+        if($idOrganization!=false){
+            if($pACL->isUserSuperAdmin($username)){
+                $userLevel1 = "superadmin";
+            }
         }
-    }else
-        $idOrganization=false;
-
-    if($idOrganization==false){
-        header("Location: index.php");
     }
-
-    $query="SELECT domain from organization where id=?";
-    $result=$pdbACL->getFirstRowQuery($query,false,array($idOrganization));
-    if($result==false){
-        $domain=false;
-    }else{
-        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $result[0]))
+    
+    if($idOrganization!=false){
+        //obtenemos el dominio de las organizacion
+        $query="SELECT domain from organization where id=?";
+        $result=$pdbACL->getFirstRowQuery($query,false,array($idOrganization));
+        if($result==false){
             $domain=false;
-        else
-            $domain=$result[0];
+        }else{
+            if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $result[0]))
+                $domain=false;
+            else
+                $domain=$result[0];
+        }
     }
-
-    return array("userAccount"=>$userAccount,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
+    return array("idUser"=>$idUser,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
 }
 
-function getOrgDomainUser(){
-    global $arrConf;
-    $credentials=getUserCredentials();
-    return $credentials["domain"];
+function getResourceActionsByUser($idUser,$moduleId){
+    global $arrConf,$elxPath;
+    require_once("$elxPath/libs/paloSantoACL.class.php");
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pdbACL);
+    return $pACL->getResourceActionsByUser($idUser,$moduleId);
 }
 
 function isStrongPassword($password){

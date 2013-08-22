@@ -76,6 +76,8 @@ class paloMenu {
     function filterAuthorizedMenus($idUser,$administrative='no')
     {
         global $arrConf;
+        require_once("libs/paloSantoACL.class.php");
+        $pACL = new paloACL($this->_DB);
         $org_access='';
         $uelastix = FALSE;
         if (isset($_SESSION)) {
@@ -91,7 +93,7 @@ class paloMenu {
             return $_SESSION['elastix_user_permission'];
 
         
-        $superAdmin=isUserSuperAdmin();
+        $superAdmin=$pACL->isUserSuperAdmin($_SESSION['elastix_user']);
         //el usuario superadmin solo tiene acceso a los modulos administrativos
         if($superAdmin && $administrative=='no'){
             return NULL;
@@ -102,16 +104,29 @@ class paloMenu {
             $org_access="AND ar.organization_access='yes'"; 
         }
         
-        $query="SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no ".
-                "FROM acl_resource ar WHERE administrative=? $org_access AND ar.id IN ( ".
-                    "SELECT ogr.id_resource From organization_resource as ogr ".
-                        "JOIN group_resource_actions as gr ON ogr.id=gr.id_org_resource ".
-                        "JOIN acl_user u ON u.id_group=gr.id_group WHERE u.id=? AND gr.id_action='access') ".
-                        "ORDER BY order_no";
-
+        //obtenemos el id del grupo al que pertecene el usuario
+        $idGroup=$pACL->getUserGroup($idUser);
+        if($idGroup==false)
+            return NULL;
+            
+        //seleccionamos los recuersos a los cuales la organizacion a la que pertenece el usuario tiene acceso
+        //y de eso hacemos uns interseccion con la 
+        //union de las acciones permitidas por el grupo al que pertenece el usuario
+        //y las acciones permitidas a el usuario
+        $query="SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no 
+                    FROM acl_resource ar JOIN organization_resource ore ON ar.id=ore.id_resource 
+                        JOIN acl_group g ON g.id_organization=ore.id_organization  
+                        WHERE g.id=? AND ar.administrative=? $org_access AND ar.id IN 
+                            (SELECT ract.id_resource FROM resource_action ract 
+                                JOIN group_resource_action as gr ON ract.id=gr.id_resource_action 
+                                WHERE gr.id_group=? AND ract.action='access'  
+                            UNION  
+                            SELECT ract.id_resource FROM user_resource_action as ur  
+                                    JOIN resource_action ract ON ract.id=ur.id_resource_action  
+                                    WHERE ur.id_user=? AND ract.action='access') ORDER BY ar.order_no";
         $arrMenuFiltered = array();
-
-        $r = $this->_DB->fetchTable($query, TRUE, array($administrative,$idUser));
+        
+        $r = $this->_DB->fetchTable($query, TRUE, array($idGroup,$administrative,$idGroup,$idUser));
         if (!is_array($r)) {
             $this->errMsg = $this->_DB->errMsg;
         	return NULL;
@@ -122,10 +137,24 @@ class paloMenu {
             $arrMenuFiltered[$tupla['id']] = $tupla;
         }
 
+        //Leer los menús de segundo nivel 
+        $r = $this->_DB->fetchTable(
+            'SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no, 1 AS HasChild '.
+            "FROM acl_resource ar WHERE ar.IdParent!='' and type='' AND ar.administrative=? $org_access ORDER BY ar.order_no", TRUE, array($administrative));
+        if (!is_array($r)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        $menuSegundoNivel = array();
+        foreach ($r as $tupla) {
+            $tupla['HasChild'] = (bool)$tupla['HasChild'];
+            $menuSegundoNivel[$tupla['id']] = $tupla;
+        }
+        
         // Leer los menús de primer nivel
         $r = $this->_DB->fetchTable(
-            'SELECT id, IdParent, Link, description, Type, order_no, 1 AS HasChild '.
-            "FROM acl_resource WHERE IdParent='' AND administrative=? $org_access ORDER BY order_no", TRUE, array($administrative));
+            'SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no, 1 AS HasChild '.
+            "FROM acl_resource ar WHERE ar.IdParent='' AND ar.administrative=? $org_access ORDER BY ar.order_no", TRUE, array($administrative));
         if (!is_array($r)) {
             $this->errMsg = $this->_DB->errMsg;
             return NULL;
@@ -137,23 +166,30 @@ class paloMenu {
         }
 
         // Resolver internamente las referencias de menú superior
-        $menuSuperior = array();
+        $menuPrimer = $menuSegundo = array();
         foreach (array_keys($arrMenuFiltered) as $k) {
-        	$kp = $arrMenuFiltered[$k]['IdParent'];
+            $kp = $arrMenuFiltered[$k]['IdParent'];
             if (isset($arrMenuFiltered[$kp])) {
-            	$arrMenuFiltered[$kp]['HasChild'] = TRUE;
-            } elseif (isset($menuPrimerNivel[$kp])) {
-                $menuSuperior[$kp] = $kp;
-            } else {
-                // Menú es de segundo nivel y no estaba autorizado
-                unset($arrMenuFiltered[$k]);
-            }
+                $arrMenuFiltered[$kp]['HasChild'] = TRUE;
+            } elseif (isset($menuSegundoNivel[$kp])) { //menu de segundo nivel
+                $menuSegundo[$kp] = $kp;
+                //si es menu de segundo nivel procemos a incluir al menu de primer nivel al cual pertenece
+                if(isset($menuSegundoNivel[$kp]['IdParent'])){
+                    if(isset($menuPrimerNivel[$menuSegundoNivel[$kp]['IdParent']])){
+                        $menuPrimer[$menuSegundoNivel[$kp]['IdParent']] = $menuSegundoNivel[$kp]['IdParent'];
+                    }
+                }
+            } elseif (isset($menuPrimerNivel[$kp])){
+                $menuPrimer[$kp] = $kp;
+            } 
         }
+        
 
         // Copiar al arreglo filtrado los menús de primer nivel EN EL ORDEN LEÍDO
         $arrMenuFiltered = array_merge(
             $arrMenuFiltered,
-            array_intersect_key($menuPrimerNivel, $menuSuperior));
+            array_intersect_key($menuSegundoNivel, $menuSegundo),
+            array_intersect_key($menuPrimerNivel, $menuPrimer));
         
         if ($uelastix) $_SESSION['elastix_user_permission'] = $arrMenuFiltered;
         return $arrMenuFiltered;

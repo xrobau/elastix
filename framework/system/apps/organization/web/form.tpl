@@ -1,21 +1,19 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
     <tr class="letra12">
         {if $mode eq 'input'}
-        <td >
-            <input class="button" type="submit" name="save_new" value="{$SAVE}">&nbsp;&nbsp;
-            <input class="button" type="submit" name="cancel" value="{$CANCEL}">
-        </td>
+            <td >
+                {if $CREATE_ORG}<input class="button" type="submit" name="save_new" value="{$SAVE}">&nbsp;&nbsp;{/if}
+                <input class="button" type="submit" name="cancel" value="{$CANCEL}">
+            </td>
         {elseif $mode eq 'view'}
         <td >
-            <input class="button" type="submit" name="edit" value="{$EDIT}">
-            {if $level_user eq 'super_admin'}
-            <input class="button" type="submit" name="delete" value="{$DELETE}" onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
-            {/if}
+            {if $EDIT_ORG}<input class="button" type="submit" name="edit" value="{$EDIT}">{/if}
+            {if $DELETE_ORG}<input class="button" type="submit" name="delete" value="{$DELETE}" onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">{/if}
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
         {elseif $mode eq 'edit'}
         <td >
-            <input class="button" type="submit" name="save_edit" value="{$APLICAR_CAMBIOS}">&nbsp;&nbsp;
+            {if $EDIT_ORG}<input class="button" type="submit" name="save_edit" value="{$APLICAR_CAMBIOS}">&nbsp;&nbsp;{/if}
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
         {/if}

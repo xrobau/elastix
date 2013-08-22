@@ -45,7 +45,14 @@ function _moduleContent(&$smarty, $module_name)
     //conexion resource
     $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
     
-    $arrCredentiasls=getUserCredentials();
+    //user credentials
+    $arrCredentiasls=getUserCredentials($_SESSION['elastix_user']);
+    
+    //user permissions
+    global $arrPermission;
+    $arrPermission=getResourceActionsByUser($arrCredentiasls['idUser'],$module_name);
+    if($arrPermission==false)
+       header("Location: index.php");
     
     $action = getAction();
     $content = "";
@@ -150,8 +157,9 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
     
     $arrColumns=array();
     if($credentials["userlevel"]=="superadmin"){
-        $arrColumns[]="";
+        $arrColumns[]=""; //delete
     }
+    $arrColumns[]=""; //did
     $arrColumns[]=_tr("Domain");
     $arrColumns[]=_tr("Name");
     $arrColumns[]=_tr("State");
@@ -323,18 +331,10 @@ function viewFormOrganization($smarty, $module_name, $local_templates_dir, &$pDB
             return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
         }
         
-        if($credentials['userlevel']!="superadmin" && ($id!=$idOrganization) ){
+        if($credentials['userlevel']!="superadmin" && ($id!=$credentials['id_organization']) ){
             $smarty->assign("mb_title", _tr("ERROR"));
             $smarty->assign("mb_message", _tr("Invalid Organization"));
             return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-        }
-
-        if($action!="view"){
-            if(!$pACL->userCanPerformAction($module_name,'edit',$credentials["userAccount"])){
-                $smarty->assign("mb_title", _tr("ERROR"));
-                $smarty->assign("mb_message", _tr("You are not authorized to perform this action"));
-                return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-            }
         }
         
         $dataOrgz = $pOrganization->getOrganizationById($id);
@@ -415,6 +415,21 @@ function viewFormOrganization($smarty, $module_name, $local_templates_dir, &$pDB
     $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
     $smarty->assign("icon", "web/apps/organizaciones/images/organization.png");
 
+    //variable usadas en el tpl
+    //estas acciones solosp pueden ser realizadas por el susperadmin
+    global $arrPermission;
+    if($credentials['userlevel']=="superadmin"){
+        if(in_array('create_org',$arrPermission)){
+            $smarty->assign('CREATE_ORG',TRUE);
+        }
+        if(in_array('delete_org',$arrPermission)){
+            $smarty->assign('DELETE_ORG',TRUE);
+        }
+    }
+    if(in_array('edit_org',$arrPermission)){
+        $smarty->assign('EDIT_ORG',TRUE);
+    }
+    
     $arrFormOrgz = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormOrgz);
     if($action=="view"){
@@ -534,15 +549,7 @@ function saveEditOrganization($smarty, $module_name, $local_templates_dir, &$pDB
     $arrFormOrgz = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormOrgz);
     $error = "";
-    $idOrg=getParameter("id");
-    
-    //comprobamos que el usuario tiene permiso para realizar esta accion
-    if(!$pACL->userCanPerformAction($module_name,'edit',$credentials["userAccount"])){
-        $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message", _tr("You are not authorized to perform this action"));
-        return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-    }
-    
+    $idOrg=getParameter("id");   
     
     if($credentials['userlevel']!="superadmin"){
        //si el usuario es diferente de superadmin el usuario debe pertence a la organizacion que quiere editar
@@ -1005,8 +1012,12 @@ function didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, 
             $arrDID[]=array('id'=>$value['id'],'did'=>$value['did'],'country_code'=>$value['country_code'],'area_code'=>$value['area_code']);
             $country[$value['country']]=$value['country'];
             $city[$value['city']]=$value['city'];
-        }
-        
+        }   
+    }
+    
+    global $arrPermission;
+    if(in_array('edit_did',$arrPermission)){
+        $smarty->assign('EDIT_DID',TRUE);
     }
     
     $smarty->assign("SEARCH","<input name='search_did' type='button' class='button' onclick='filer_did()' value='"._tr('Search')."'>");
@@ -1135,38 +1146,49 @@ function createDidForn($country,$city){
 
 function getAction()
 {
-
-    if(getParameter("new_organization"))
-        return "new_organization";
-    else if(getParameter("save_new")) //Get parameter by POST (submit)
-        return "save_new";
-    else if(getParameter("save_edit"))
-        return "save_edit";
-    else if(getParameter("edit"))
-        return "edit";
-    else if(getParameter("delete")) 
-        return "delete";
-    else if(getParameter("action")=="view")      //Get parameter by GET (command pattern, links)
+    global $arrPermission;
+    if(getParameter("new_organization")){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('create_org',$arrPermission))?'new_organization':'report';
+    }else if(getParameter("save_new")){ //Get parameter by POST (submit)
+        //preguntar si el usuario puede hacer accion
+        return (in_array('create_org',$arrPermission))?'save_new':'report';
+    }else if(getParameter("save_edit")){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('edit_org',$arrPermission))?'save_edit':'report';
+    }else if(getParameter("edit")){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('edit_org',$arrPermission))?'edit':'report';
+    }else if(getParameter("delete")){ 
+        //preguntar si el usuario puede hacer accion
+        return (in_array('delete_org',$arrPermission))?'delete':'report';
+    }else if(getParameter("action")=="view"){      //Get parameter by GET (command pattern, links)
         return "view";
-    else if(getParameter("action")=="get_country_code")
+    }else if(getParameter("action")=="get_country_code"){
         return "get_country_code";
-    else if(getParameter("assignDIDs"))
-        return "didAssign";
-    else if(getParameter("removeDID"))
-        return "removeDID";
-    else if(getParameter("action")=="changeDIDfilter")
+    }else if(getParameter("assignDIDs")){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('edit_did',$arrPermission))?'didAssign':'report';
+    }else if(getParameter("removeDID")){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('edit_did',$arrPermission))?'didAssign':'report';
+    }else if(getParameter("action")=="changeDIDfilter"){
         return "changeDIDfilter";
-    else if(getParameter("action")=="reportDIDs")
-        return "reportDIDs";
-    else if(getParameter("save_did"))
-        return "saveDidAssign";
-    else if(getParameter("action")=="reloadAsterisk")
+    }else if(getParameter("action")=="reportDIDs"){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('access_did',$arrPermission))?'reportDIDs':'report';
+    }else if(getParameter("save_did")){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('edit_did',$arrPermission))?'saveDidAssign':'report';
+    }else if(getParameter("action")=="reloadAsterisk"){
         return "reloadAsterisk";
-    else if(getParameter("action")=="change_org_state")
-        return "change_state";
-    else if(getParameter("action")=="delete_org_2")
-        return "delete_org_2";
-    else
+    }else if(getParameter("action")=="change_org_state"){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('delete_org',$arrPermission))?'change_state':'report';
+    }else if(getParameter("action")=="delete_org_2"){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('delete_org',$arrPermission))?'delete':'report';
+    }else
         return "report"; //cancel
 }
 ?>

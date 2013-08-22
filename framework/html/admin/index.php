@@ -124,8 +124,10 @@ if (isset($_SESSION['elastix_user']) &&
     $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
     //obtenemos los menu a los que el usuario tiene acceso
     $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser,'yes');
-    
     $id_organization = $pACL->getIdOrganizationUser($idUser);
+    if($id_organization==false){
+        die("Error to retrieve User Info. ".$pACL->errMsg);
+    }
     $_SESSION['elastix_organization'] = $id_organization;
 
     if(!is_array($arrMenuFiltered))

@@ -628,7 +628,7 @@ class paloSantoOrganization{
             //$value[1]=name
             $result=$this->_DB->genQuery($query,array($value[0],$idOrganization,$value[1]));
             if($result==false){
-                $this->errMsg = _tr("An error has ocurred trying to assign group resources").$this->_DB->errMsg;
+                $this->errMsg = _tr("An error has ocurred trying to assign group resources");
                 return false;
             }
         }

@@ -1302,7 +1302,7 @@ INFO_AUTH_MODULO;
                 }
             }
             $this->errMsg = "";
-            $sPeticionSQL = "SELECT ar.id, ar.description FROM acl_resource ar JOIN organization_resource ogr on ar.id=ogr.id_resource WHERE Type!='' and id_organization=? AND organization_access='yes' AND $where";
+            $sPeticionSQL = "SELECT ar.id, ar.description FROM acl_resource ar JOIN organization_resource ogr on ar.id=ogr.id_resource WHERE Type!='' and id_organization=? AND organization_access='yes' $where order by ar.id Asc";
             $arr_result = $this->_DB->fetchTable($sPeticionSQL, true,$arrParam);
             if (!is_array($arr_result)) {
                 $arr_result = FALSE;
@@ -1382,6 +1382,7 @@ INFO_AUTH_MODULO;
             $where .=" AND administrative=? ";
             $arrParam[] = $administrative;
         }    
+                
         if(isset($filter_resource)){
             if(is_array($filter_resource) && count($filter_resource)>0){
                 $where .=" AND (";
@@ -1506,29 +1507,67 @@ INFO_AUTH_MODULO;
             $this->errMsg = _tr("Organization ID is not valid");
             return false;
         }else{
-            $sPeticionSQL = "INSERT INTO organization_resource (id_organization, id_resource) ".
-                                "VALUES(?,?)";
-            foreach ($resources as $resource)
-            {
-                //validamos que exista el recurso
-                $query="SELECT 1 from acl_resource where id=?";
-                $result=$this->_DB->getFirstRowQuery($query,false, array($resource));
-                if($result==false){
-                    $this->errMsg = _tr("Doesn't exist resource with id=").$resource." ".$this->_DB->errMsg;
+            //validamos que exista la organizacion
+            $query="SELECT 1 from organization where id=?";
+            $result=$this->_DB->getFirstRowQuery($query,false, array($idOrganization));
+            if($result==false){
+                $this->errMsg = _tr("Doesn't exist organization with id=").$idOrganization." ".$this->_DB->errMsg;
+                return false;
+            }
+            
+            if(is_array($resources) && count($resources)>0){
+                $arrParam[]=$idOrganization;
+                $q='';
+                foreach ($resources as $resource){
+                    $arrParam[]=$resource;
+                    $q .="?,";
+                }
+                $q=substr($q,0,-1);
+                $sPeticionSQL = "INSERT INTO organization_resource (id_organization, id_resource) ".
+                                " SELECT ?,ar.id FROM acl_resource ar WHERE ar.organization_access='yes'
+                                    AND ar.id IN ($q)";
+                if (!$this->_DB->genQuery($sPeticionSQL, $arrParam)){
+                    $this->errMsg = _tr("DATABASE ERROR").$this->_DB->errMsg;
                     return false;
                 }
-
-                //validamos que exista la organizacion
-                $query="SELECT 1 from organization where id=?";
-                $result=$this->_DB->getFirstRowQuery($query,false, array($idOrganization));
-                if($result==false){
-                    $this->errMsg = _tr("Doesn't exist organization with id=").$idOrganization." ".$this->_DB->errMsg;
+                
+                //una vez el recurso a sido asignado a la organizacion asignar los permisos por default
+                //para ese recursos a los grupos a los que se asigno el recurso
+                //los grupos a los que se le asignara seran los que tengan de nobre administrator,supervisor 
+                //y end_user
+                
+                //obtenemos los grupos recien insertados a la organizacion
+                $grpOrga=$this->getGroups(null,$idOrganization);
+                if($grpOrga==false){
+                    $this->errMsg=_tr("An error has ocurred trying to set organizaion's group permissions.");
                     return false;
                 }
-
-                if (!$this->_DB->genQuery($sPeticionSQL, array($idOrganization, $resource))){
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
+                $query="INSERT INTO group_resource_action (id_group,id_resource_action) ".
+                                "SELECT ?,gract.id_resource_action FROM ".
+                                "(SELECT or1.id_resource FROM organization_resource or1 
+                                    WHERE or1.id_organization=? AND or1.id_resource IN ($q)) as or_re ".
+                            "JOIN ".
+                                "(SELECT gr.id_resource_action,ract.id_resource FROM resource_action ract 
+                                    JOIN group_resource_action gr ON ract.id=gr.id_resource_action 
+                                    JOIN acl_group g ON g.id=gr.id_group 
+                                        WHERE g.name=? AND g.id_organization=1) as gract ".
+                            "ON or_re.id_resource=gract.id_resource";
+                
+                foreach($grpOrga as $value){
+                    $param=array();
+                    if($value[1]=='administrator' || $value[1]=='supervisor' || $value[1]=='end_user'){
+                        $param[]=$value[0];
+                        $param[]=$idOrganization;
+                        for($i=0;$i<count($resources);$i++){
+                            $param[]=$resources[$i];
+                        }
+                        $param[]=$value[1];
+                        $result=$this->_DB->genQuery($query,$param);
+                        if($result==false){
+                            $this->errMsg = _tr("An error has ocurred trying to set organizaion's group permissions.");
+                            return false;
+                        }
+                    }
                 }
             }
         }
@@ -1546,24 +1585,24 @@ INFO_AUTH_MODULO;
                 $q=implode(',',array_fill(0,count($resources),'?'));
                 $query1="DELETE gr FROM group_resource_action gr JOIN resource_action ra 
                             ON gr.id_resource_action=ra.id WHERE ra.id_resource IN ($q) AND gr.id_group IN (
-                                SELECT id FROM group WHERE id_organization=?)";
-                $query2="DELETE ur FROM user_resource_action us JOIN resource_action ra 
-                            ON ur.id_resource_action=ra.id WHERE ra.id_resource IN ($q) AND u.id_user IN (
-                                SELECT u.id FROM group g JOIN acl_user u ON u.id_group=g.id 
+                                SELECT g.id FROM acl_group g WHERE g.id_organization=?)";
+                $query2="DELETE ur FROM user_resource_action ur JOIN resource_action ra 
+                            ON ur.id_resource_action=ra.id WHERE ra.id_resource IN ($q) AND ur.id_user IN (
+                                SELECT u.id FROM acl_group g JOIN acl_user u ON u.id_group=g.id 
                                     WHERE g.id_organization=?)";
-                $query3="DELETE FROM organization_resource WHERE ra.id_resource IN ($q) AND id_organization = ?";
+                $query3="DELETE FROM organization_resource WHERE id_resource IN ($q) AND id_organization = ?";
             
                 $resources[]=$idOrganization;
-                if (!$this->_DB->genQuery($query1,array($resources))){
-                    $this->errMsg = $this->_DB->errMsg;
+                if (!$this->_DB->genQuery($query1,$resources)){
+                    $this->errMsg = _tr("DATABASE ERROR");
                     return false;
                 }
-                if (!$this->_DB->genQuery($query2,array($resources))){
-                    $this->errMsg = $this->_DB->errMsg;
+                if (!$this->_DB->genQuery($query2,$resources)){
+                    $this->errMsg = _tr("DATABASE ERROR");
                     return false;
                 }
-                if (!$this->_DB->genQuery($query3,array($resources))){
-                    $this->errMsg = $this->_DB->errMsg;
+                if (!$this->_DB->genQuery($query3,$resources)){
+                    $this->errMsg = _tr("DATABASE ERROR");
                     return false;
                 }
             }

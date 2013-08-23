@@ -5,7 +5,9 @@
     <table width="100%" cellpadding="4" cellspacing="0" border="0">
       <tr>
         <td align="left">
-          <input class="button" type="submit" name="submit_accept" value="{$ACCEPT}" onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
+          {if $SHUTDOWN}
+            <input class="button" type="submit" name="shutdown" value="{$ACCEPT}" onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
+          {/if}
      </tr>
    </table>
   </td>

@@ -36,7 +36,7 @@ function _moduleContent($smarty, $module_name)
 
 	load_language_module($module_name);
 
-    $smarty->assign("module_name",  $module_name);
+    $smarty->assign("module_name",$module_name);
 
     // Leer lista de applets implementados y validar con directorio
     $paloApplets = new paloSantoApplets();

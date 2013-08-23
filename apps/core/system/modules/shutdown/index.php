@@ -27,43 +27,84 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
+/**
+ * resource actions => access
+ *                     shutdown
+ */
 function _moduleContent(&$smarty, $module_name) {
 
     //global variables
     global $arrConf;
-    global $arrConfModule;
-   
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
     
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
     
+    //user credentials
+    $arrCredentiasls=getUserCredentials($_SESSION['elastix_user']);
+    
+    //user permissions
+    global $arrPermission;
+    $arrPermission=getResourceActionsByUser($arrCredentiasls['idUser'],$module_name);
+    if($arrPermission==false)
+       header("Location: index.php");
+        
+    $action=getAction();
+    $content = "";
+
+    switch($action){
+        case "shutdown":
+            $content = shutdown($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentiasls);
+        default:
+            $content = showModule($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentiasls);
+    }
+    return $content;
+}
+
+function showModule($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentiasls){
     $smarty->assign("icon","web/apps/$module_name/images/system_shutdown.png");
     $smarty->assign("title",_tr("Shutdown"));
-    if(isset($_POST['submit_accept'])) {
-        $smarty->assign("SHUTDOWN_PROGRESS", _tr("Shutdown in progress"));
-        $smarty->assign("MSG_LINK", _tr("Continue"));
-        if($_POST['shutdown_mode']=='1') {
-            $smarty->assign("SHUTDOWN_MSG", _tr("Your system in shutting down now. Please, try again later."));
-            exec("sudo -u root /sbin/shutdown -h now", $salida, $retorno);
-            $salida = $smarty->fetch("file:$local_templates_dir/shutdown_in_progress.tpl");
-        } else if ($_POST['shutdown_mode']=='2') {
-            $smarty->assign("SHUTDOWN_MSG", _tr("The reboot signal has been sent correctly."));
-            exec("sudo -u root /sbin/shutdown -r now", $salida, $retorno);
-            $salida = $smarty->fetch("file:$local_templates_dir/shutdown_in_progress.tpl");
-        } else {
-            echo "Modo invalido";
-        }
-
-    } else {
-        $smarty->assign("ACCEPT", _tr("Accept"));
-        $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
-        $smarty->assign("HALT", _tr("Halt"));
-        $smarty->assign("REBOOT", _tr("Reboot"));
-        $salida = $smarty->fetch("file:$local_templates_dir/shutdown.tpl");
-    }
-
+    $smarty->assign("ACCEPT", _tr("Accept"));
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
+    $smarty->assign("HALT", _tr("Halt"));
+    $smarty->assign("REBOOT", _tr("Reboot"));
+    $smarty->assign("module_name",$module_name);
+    setActionTPL($smarty,$arrPermission);
+    $salida = $smarty->fetch("$local_templates_dir/shutdown.tpl");
     return $salida;
+}
+
+function shutdown($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentiasls){
+    $smarty->assign("SHUTDOWN_PROGRESS", _tr("Shutdown in progress"));
+    $smarty->assign("MSG_LINK", _tr("Continue"));
+    if($_POST['shutdown_mode']=='1') {
+        $smarty->assign("SHUTDOWN_MSG", _tr("Your system in shutting down now. Please, try again later."));
+        exec("sudo -u root /sbin/shutdown -h now", $salida, $retorno);
+        $salida = $smarty->fetch("file:$local_templates_dir/shutdown_in_progress.tpl");
+    } else if ($_POST['shutdown_mode']=='2') {
+        $smarty->assign("SHUTDOWN_MSG", _tr("The reboot signal has been sent correctly."));
+        exec("sudo -u root /sbin/shutdown -r now", $salida, $retorno);
+        $salida = $smarty->fetch("file:$local_templates_dir/shutdown_in_progress.tpl");
+    } else {
+        $smarty->assign("mb_title", _tr("Error"));
+        $smarty->assign("mb_message",_tr("Invalid Mode"));
+        return showModule($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentiasls);
+    }
+}
+
+function getAction()
+{
+    global $arrPermission;
+    if(getParameter('shutdown')){
+        //preguntar si el usuario puede hacer accion
+        return (in_array('shutdown',$arrPermission))?'shutdown':'show';
+    }else{
+        return 'show';
+    }
+}
+
+function setActionTPL($smarty,$arrPermission){
+    if(in_array('shutdown',$arrPermission)){
+        $smarty->assign('SHUTDOWN',TRUE);
+    }
 }
 ?>

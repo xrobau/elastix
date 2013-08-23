@@ -1,7 +1,9 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
     <tr class="letra12">
         <td align="left">
-            <input class="button" type="submit" name="save_new" value="{$SAVE}">&nbsp;&nbsp;
+            {if $EDIT_APP}
+                <input class="button" type="submit" name="save_new" value="{$SAVE}">&nbsp;&nbsp;
+            {/if}
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
     </tr>

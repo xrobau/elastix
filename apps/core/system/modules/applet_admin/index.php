@@ -35,10 +35,18 @@ function _moduleContent(&$smarty, $module_name)
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
 
+    //user credentials
+    $arrCredentiasls=getUserCredentials($_SESSION['elastix_user']);
+    
+    //user permissions
+    global $arrPermission;
+    $arrPermission=getResourceActionsByUser($arrCredentiasls['idUser'],$module_name);
+    if($arrPermission==false)
+       header("Location: index.php");
+       
     //actions
     $action = getAction();
     $content = "";
-
     switch($action){
         case "save_new":
             $content = saveApplets_Admin($module_name);
@@ -67,7 +75,8 @@ function showApplets_Admin($module_name)
     $smarty->assign("Applet", $arrLang["Applet"]);
     $smarty->assign("Activated", $arrLang["Activated"]);
     $smarty->assign("icon", "web/apps/$module_name/images/system_dashboard_applet_admin.png");
-
+    setActionTPL();
+    
     //folder path for custom templates
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -107,9 +116,19 @@ function saveApplets_Admin($module_name)
 
 function getAction()
 {
+    global $arrPermission;
     if(getParameter("save_new")) //Get parameter by POST (submit)
-        return "save_new";
+        //preguntar si el usuario puede hacer accion
+        return (in_array('edit',$arrPermission))?'save_new':'report';
     else
         return "report"; //cancel
+}
+
+function setActionTPL(){
+    global $smarty;
+    global $arrPermission;
+    if(in_array('edit',$arrPermission)){
+        $smarty->assign('EDIT_APP',TRUE);
+    }
 }
 ?>

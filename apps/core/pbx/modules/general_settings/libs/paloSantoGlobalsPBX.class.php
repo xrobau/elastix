@@ -100,13 +100,6 @@ class paloGlobalsPBX extends paloAsteriskDB{
         esta funcion solo es llamada al momento de crear una nueva organizacion dentro del sisitema
     */
     function insertDBGlobals($country){
-        $arrCredentiasls=getUserCredentials();
-        $userLevel1=$arrCredentiasls["userlevel"];
-        if($userLevel1!="superadmin"){
-            $this->errMsg =_tr("You are no authorized to perform this action");
-            return false;
-        }
-        
         if($this->validateGlobalsPBX()==false)
             return false;
                 

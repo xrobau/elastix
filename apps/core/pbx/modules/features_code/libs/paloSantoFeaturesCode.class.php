@@ -148,13 +148,6 @@ class paloFeatureCodePBX extends paloAsteriskDB{
     //funcion solo deberia ser llamada por el usuario superadmin que es el unico capaz de realizar
     //estas acciones
     function insertPaloFeatureDB(){
-        $arrCredentiasls=getUserCredentials();
-        $userLevel1=$arrCredentiasls["userlevel"];
-        if($userLevel1!="superadmin"){
-            $this->errMsg =_tr("You are no authorized to perform this action");
-            return false;
-        }
-
         $arrFeatures=$this->getAllFeaturesCodeSettings();
         foreach($arrFeatures as $value){
             $this->arrFeatureCode[] = new paloFeatureCode($value["name"], $value["default_code"], null, $value["estado"]);

@@ -3,14 +3,12 @@
       <tr>
         <td align="left">
           {if $mode eq 'input'}
-          <input class="button" type="submit" name="save_new" value="{$SAVE}" >
+            {if $CREATE_USER}<input class="button" type="submit" name="save_new" value="{$SAVE}" >{/if}
           {elseif $mode eq 'edit'}
-          <input class="button" type="submit" name="save_edit" value="{$APPLY_CHANGES}" >
-          {elseif $userLevel eq 'admin' || $userLevel eq 'superadmin'}
-          <input class="button" type="submit" name="edit" value="{$EDIT}">
-          <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">
-          {else}
-          <input class="button" type="submit" name="edit" value="{$EDIT}">
+            {if $EDIT_USER}<input class="button" type="submit" name="save_edit" value="{$APPLY_CHANGES}" >{/if}
+          {elseif $mode eq 'view'}
+            {if $EDIT_USER}<input class="button" type="submit" name="edit" value="{$EDIT}">{/if}
+            {if $DEL_USER}<input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_CONTINUE}')">{/if}
           {/if}
 		  <input class="button" type="submit" name="cancel" value="{$CANCEL}"></td>
 		{if $mode ne 'view'}

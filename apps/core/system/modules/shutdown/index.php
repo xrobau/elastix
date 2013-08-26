@@ -40,22 +40,16 @@ function _moduleContent(&$smarty, $module_name) {
     $local_templates_dir=getWebDirModule($module_name);
     
     //user credentials
-    $arrCredentiasls=getUserCredentials($_SESSION['elastix_user']);
+    global $arrCredentials;
     
-    //user permissions
-    global $arrPermission;
-    $arrPermission=getResourceActionsByUser($arrCredentiasls['idUser'],$module_name);
-    if($arrPermission==false)
-       header("Location: index.php");
-        
     $action=getAction();
     $content = "";
 
     switch($action){
         case "shutdown":
-            $content = shutdown($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentiasls);
+            $content = shutdown($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentials);
         default:
-            $content = showModule($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentiasls);
+            $content = showModule($smarty,$module_name,$local_templates_dir,$arrPermission,$arrCredentials);
     }
     return $content;
 }

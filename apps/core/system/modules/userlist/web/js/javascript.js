@@ -27,3 +27,23 @@ function select_organization()
 			}
 	});
 }
+function mailbox_reconstruct(username){
+    if(username==''){
+        alert('Invalid Username');
+    }
+    
+    ShowModalPopUP("Reconstruct Mailbox", 350, 350,'<div id="reconstruct_msg" style="margin:20px auto;"><img src="../web/_common/images/loading.gif">');
+    var arrAction = new Array();
+    arrAction["menu"]="userlist";
+    arrAction["action"]="reconstruct_mailbox";
+    arrAction["username"]=username;
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error!=""){
+                $("#reconstruct_msg").html(error);
+            }else{
+                $("#reconstruct_msg").html(arrData);
+            }
+    });
+}

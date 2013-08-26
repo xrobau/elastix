@@ -111,7 +111,7 @@ class paloACL {
         }
         return $arr_result;
     }
-
+    
 	function getUserPicture($id_user){
 		$arr_result = FALSE;
 		if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
@@ -185,6 +185,16 @@ class paloACL {
         return $extension;
     }
 
+    function getUserByUsername($username){
+        $query="SELECT u.id,u.username,u.name,u.extension,u.fax_extension,g.id_organization FROM acl_user u JOIN acl_group g ON u.id_group=g.id WHERE username=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($username));
+        if($result==false){
+            $this->errMsg=($result===false)?_tr("DATABASE ERROR"):_tr('User does not exist');
+            return false;
+        }else{
+            return $result;
+        }
+    }
 
     /**
      * Procedimiento para obtener el listado de los usuarios existentes en los ACL. Se
@@ -199,12 +209,12 @@ class paloACL {
      *      ...
      *  )
      */
-    function getUsersPaging($limit = NULL, $offset = NULL, $id_organization = null)
+    function getUsersPaging($limit = NULL, $offset = NULL, $id_organization = null,$username = null)
     {
-		$arrParams = null;
-		$where = "";
-		$paging = "";
-		$arr_result = FALSE;
+        $arrParams = null;
+        $where = array();
+        $paging = "";
+        $arr_result = FALSE;
         if (!is_null($limit) && !preg_match('/^[[:digit:]]+$/', "$limit")) {
             $this->errMsg = _tr("Limit must be numeric");
             return FALSE;
@@ -213,20 +223,25 @@ class paloACL {
             $this->errMsg = _tr("Offset must be numeric");
             return FALSE;
         }
-		if(!is_null($limit) && !is_null($offset)){
-			$paging = "limit $limit offset $offset";
-		}
+        if(!is_null($limit) && !is_null($offset)){
+            $paging = "limit $limit offset $offset";
+        }
 
-		if(!is_null($id_organization) && !preg_match('/^[[:digit:]]+$/', "$id_organization")){
-            $this->errMsg = _tr("Organization ID must be numeric");
-            return FALSE;
-		}elseif(!is_null($id_organization)){
-			$where = "where g.id_organization=?";
-			$arrParams = array($id_organization);
-		}
+        if(!empty($id_organization)){
+            $where[] = " g.id_organization=?";
+            $arrParams[] = $id_organization;
+        }
+        if(!empty($username)){
+            $where[] = " UPPER(a.username) like ?";
+            $arrParams[] = "%$username%";
+        }
 
         $this->errMsg = "";
-		$sPeticionSQL = "SELECT a.id, a.username, a.name, a.md5_password, g.id_organization, a.extension, a.fax_extension, a.id_group FROM acl_user as a JOIN  acl_group as g on a.id_group=g.id $where $paging" ;
+        $sPeticionSQL = "SELECT a.id, a.username, a.name, a.md5_password, g.id_organization, a.extension, a.fax_extension, a.id_group FROM acl_user as a JOIN  acl_group as g on a.id_group=g.id " ;
+        if(count($where)>0){
+            $sPeticionSQL .=" WHERE ".implode(" AND ",$where);
+        }
+        $sPeticionSQL .=" $paging";
 
         $arr_result = $this->_DB->fetchTable($sPeticionSQL,false,$arrParams);
         if (!is_array($arr_result)) {
@@ -292,22 +307,25 @@ class paloACL {
      *
      * @return int    Cantidad de usuarios existentes, o NULL en caso de error:
      */
-    function getNumUsers($id_organization = NULL)
+    function getNumUsers($id_organization = NULL,$username = null)
     {
         $this->errMsg = "";
-		$arrParams = null;
-		$where = "";
+        $arrParams = null;
+        $where = array();
 
-		if(!is_null($id_organization) && !preg_match('/^[[:digit:]]+$/', "$id_organization")){
-            $this->errMsg = _tr("Organization ID must be numeric");
-            return FALSE;
-		}elseif(!is_null($id_organization)){
-			$where = "where g.id_organization=?";
-			$arrParams = array($id_organization);
-		}
+        if(!empty($id_organization)){
+            $where[] = " g.id_organization=?";
+            $arrParams[] = $id_organization;
+        }
+        if(!empty($username)){
+            $where[] = " UPPER(a.username) like ?";
+            $arrParams[] = "%$username%";
+        }
 
-        $sPeticionSQL = "SELECT count(*) FROM acl_user as a JOIN  acl_group as g on a.id_group=g.id $where";
-
+        $sPeticionSQL = "SELECT count(*) FROM acl_user as a JOIN  acl_group as g on a.id_group=g.id";
+        if(count($where)>0){
+            $sPeticionSQL .=" WHERE ".implode(" AND ",$where);
+        }
         $data = $this->_DB->getFirstRowQuery($sPeticionSQL,false,$arrParams);
         if (!is_array($data) || count($data) <= 0) {
             $this->errMsg = $this->_DB->errMsg;
@@ -490,7 +508,7 @@ class paloACL {
         } else {
             $this->errMsg = "";
             $query = "DELETE FROM acl_user WHERE id=?";
-            $bExito = $this->_DB->genQuery($sPeticionSQL,array($id_user));
+            $bExito = $this->_DB->genQuery($query,array($id_user));
             if (!$bExito) {
                 $this->errMsg = $this->_DB->errMsg;
             }
@@ -919,7 +937,7 @@ INFO_AUTH_MODULO;
             else
                 $this->errMsg = _tr("User doesn't exist");
         }else 
-            $this->errMsg = $this->_DB->errMsg;
+            $this->errMsg = _tr('DATABASE ERROR');
 		return $id_Organization;
     }
 

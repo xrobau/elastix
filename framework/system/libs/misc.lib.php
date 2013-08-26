@@ -850,7 +850,7 @@ function getUserCredentials($username){
     $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
     $pACL = new paloACL($pdbACL);
 
-    $userLevel1 = "organization";
+    $userLevel1 = "other";
     $idOrganization = $domain = false;
     $idUser = $pACL->getIdUser($username);
     if($idUser!=false){
@@ -858,6 +858,8 @@ function getUserCredentials($username){
         if($idOrganization!=false){
             if($pACL->isUserSuperAdmin($username)){
                 $userLevel1 = "superadmin";
+            }elseif($pACL->isUserAdministratorGroup($username)){
+                $userLevel1 = "admin";
             }
         }
     }

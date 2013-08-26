@@ -273,6 +273,18 @@ class paloSantoNavigation extends paloSantoNavigationBase
         // Cargar las traducciones para el módulo elegido
         load_language_module($module);
         
+        // Cargar las creadenciales del modulo
+        global $arrCredentials;
+        $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+        if($arrCredentials==false)
+            return "Error to load User Credentials: {$_SESSION['elastix_user']}";
+        
+        //cargar los permisos del modulo
+        global $arrPermission;
+        $arrPermission=getResourceActionsByUser($arrCredentials['idUser'],$module);
+        if($arrPermission==false)
+            return "Error to load Module Permissions: $module";
+        
         if (!function_exists("_moduleContent"))
             return "Wrong module: apps/$module/index.php";
         $this->putHEAD_MODULE_HTML($module);

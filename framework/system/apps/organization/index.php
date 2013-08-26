@@ -46,65 +46,59 @@ function _moduleContent(&$smarty, $module_name)
     $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
     
     //user credentials
-    $arrCredentiasls=getUserCredentials($_SESSION['elastix_user']);
-    
-    //user permissions
-    global $arrPermission;
-    $arrPermission=getResourceActionsByUser($arrCredentiasls['idUser'],$module_name);
-    if($arrPermission==false)
-       header("Location: index.php");
+    global $arrCredentials;
     
     $action = getAction();
     $content = "";
 
     switch($action){
         case "new_organization":
-            $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "view":
-            $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "edit":
-            $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$arrCredentiasls);
+            $content = viewFormOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$arrCredentials);
             break;
         case "save_new":
-            $content = saveNewOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = saveNewOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "save_edit":
-            $content = saveEditOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = saveEditOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "delete":
-            $content = deleteOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = deleteOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "get_country_code":
             $content=get_country_code();
             break;
         case "reportDIDs":
-            $content=reportDIDorganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content=reportDIDorganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "didAssign":
-            $content=didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content=didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "saveDidAssign":
-            $content=didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content=didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "changeDIDfilter":
-            $content=changeDIDfilter($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content=changeDIDfilter($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "removeDID":
-            $content=removeDID($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content=removeDID($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "reloadAsterisk":
-            $content = reloadAsterisk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = reloadAsterisk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "change_state":
-            $content = change_state($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = change_state($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "delete_org_2":
-            $content = delete_org_2($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = delete_org_2($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         default: // report
-            $content = reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
     }
     return $content;

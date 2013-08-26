@@ -1304,6 +1304,7 @@ class paloSantoOrganization{
 
     function setParameterFaxExtension($domain,$type,$exten,$secret,$clid_name,$clid_number,$port=null)
     {
+        
         $pDevice=new paloDevice($domain,$type,$this->_DB);
         if($pDevice->errMsg!=""){
             $this->errMsg=_tr("Error getting settings from fax extension user").$pDevice->errMsg;
@@ -1341,6 +1342,8 @@ class paloSantoOrganization{
     */
     function createUserOrganization($idOrganization, $username, $name, $md5password, $password, $idGroup, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $quota, &$lastId,$transaction=true)
     {
+        require_once "apps/general_settings/libs/paloSantoGlobalsPBX.class.php";
+        
         $pACL=new paloACL($this->_DB);
         $pEmail = new paloEmail($this->_DB);
         $pFax = new paloFax($this->_DB);
@@ -1574,6 +1577,7 @@ class paloSantoOrganization{
     }
 
     function updateUserOrganization($idUser, $name, $md5password, $password1, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $idGrupo, $quota, $userLevel1,&$reAsterisk){
+        require_once "apps/general_settings/libs/paloSantoGlobalsPBX.class.php";
         include_once "libs/cyradm.php";
         include_once "configs/email.conf.php";
         $pACL=new paloACL($this->_DB);
@@ -1921,7 +1925,7 @@ class paloSantoOrganization{
         if($pACL->deleteUser($idUser)){
             if($pDevice->deleteExtension($arrUser[0][5]) && $pDevice->deleteFaxExtension($arrUser[0][6])){
                 if($pFax->deleteFax($devId)){
-                    if($pEmail->eliminar_cuenta($arrUser[0][1])){
+                    if($pEmail->deleteAccount($arrUser[0][1])){
                         $Exito=true;
                         $this->_DB->commit();
                         $pDevice->tecnologia->prunePeer($arrExten["device"],$arrExten["tech"]);

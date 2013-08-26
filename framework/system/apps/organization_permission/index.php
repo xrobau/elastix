@@ -43,18 +43,11 @@ function _moduleContent(&$smarty, $module_name)
     //conexion resource
     $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
-    //comprobacion de la credencial del usuario, el usuario superadmin es el unica capaz de dar 
-    //y eliminar permisos de recursos a las organizaciones
-    $arrCredentiasls=getUserCredentials($_SESSION['elastix_user']);
-
-    //user permissions
-    global $arrPermission;
-    $arrPermission=getResourceActionsByUser($arrCredentiasls['idUser'],$module_name);
-    if($arrPermission==false)
-       header("Location: index.php");
+    //user credentials
+    global $arrCredentials;
        
     //solo el susperadmin puede acceder a este modulo
-    if($arrCredentiasls["userlevel"]!="superadmin"){
+    if($arrCredentials["userlevel"]!="superadmin"){
         header("Location: index.php");
     }
     
@@ -64,13 +57,13 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($accion){
         case "apply":
-            $content = applyOrgPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = applyOrgPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "getSelected":
-            $content = getSelected($pDB, $arrCredentiasls["userlevel"]);
+            $content = getSelected($pDB, $arrCredentials["userlevel"]);
             break;
         default:
-            $content = reportOrgPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
+            $content = reportOrgPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
     }
     return $content;

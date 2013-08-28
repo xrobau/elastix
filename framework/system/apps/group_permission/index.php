@@ -29,406 +29,462 @@
 //include elastix framework
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
-include_once "libs/paloSantoDB.class.php";
-include_once "libs/paloSantoMenu.class.php";
-include_once "libs/paloSantoOrganization.class.php";
+include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoGroupPermission.class.php";
-
-    load_language_module($module_name);
-
-    //global variables
     global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-
+    //include module files
+    include_once "libs/paloSantoOrganization.class.php";   
+    
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
-     //conexion acl.db
+    $local_templates_dir=getWebDirModule($module_name);
+    
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-	$pACL = new paloACL($pDB);
-
-	//verificar que tipo de usurio es: superadmin, admin o other
-	$arrCredentiasls=getUserCredentials();
-	$userLevel1=$arrCredentiasls["userlevel"];
-	$userAccount=$arrCredentiasls["userAccount"];
-	$idOrganization=$arrCredentiasls["id_organization"];
+    
+    //user credentials
+    global $arrCredentials;
 
     //actions
     $accion = getAction();
     $content = "";
-    
-    if($userLevel1=="superadmin"){
-        header("Location: index.php?menu=system");
-    }
 
     switch($accion){
         case "apply":
-            $content = applyGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization);
+            $content = applyGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         default:
-            $content = reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization);
+            $content = reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$arrCredentials);
             break;
     }
     return $content;
 }
 
-function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization)
+function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials)
 {
     global $arrLang;
-    
+
     $pACL = new paloACL($pDB);
-	$pORGZ = new paloSantoOrganization($pDB);
+    $pORGZ = new paloSantoOrganization($pDB);
     $filter_resource = getParameter("resource_apply");
     $limit = getParameter("limit_apply");
     $offset = getParameter("offset_apply");
+    $idGroup = getParameter("filter_group");
 
-	$idOrgFil=getParameter("idOrganization");
-	$idGroup = getParameter("filter_group");
+    if($credentials['userlevel']=="superadmin"){
+        $idOrgFil=getParameter("idOrganization");
+        if(empty($idOrgFil)){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("Invalid Organization"));
+            return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+        }
+    }else{
+        $idOrgFil=$credentials['id_organization'];
+    }
 
-	if(!isset($idOrgFil) || $idOrgFil===""){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You need have one organization selected"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
-	}
+    if(empty($idGroup)){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid Group"));
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }
 
-	if(!isset($idGroup) || $idGroup===""){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("You are not set a group"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
-	}
+    //valido exista una organizacion con dicho id y que no sea la organizacion 1
+    $orgTmp=$pORGZ->getOrganizationById($idOrgFil);
+    if($orgTmp===false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr($pORGZ->errMsg));
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }elseif(count($orgTmp)==0){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Organization doesn't exist"));
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }
 
-	if($userLevel1!="superadmin"){
-		if($idOrgFil!=$idOrganization){
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr("You are not set a group"));
-			return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
-		}
-	}
+    if($idOrgFil==1){
+        $error=true;
+        $msg_error=_tr("Invalid Organization");
+    }
 
-	//valido exista una organizacion con dicho id y que no sea la organizacion 1
-	$orgTmp=$pORGZ->getOrganizationById($idOrgFil);
-	if($orgTmp===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
-	}elseif(count($orgTmp)<=0){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Organization doesn't exist"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
-	}
+    //valido que el grupo pertenezca a la organizacion
+    if($pACL->getGroups($idGroup,$idOrgFil)==false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid Group"));
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }
 
-	if($idOrgFil==1){
-		$error=true;
-		$msg_error=_tr("Invalid Organization");
-	}
-
-	//valido que el grupo pertenezca a la organizacion
-	if($pACL->getGroups($idGroup,$idOrgFil)==false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Invalid Group"));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
-	}
-
-	//obtenemos las traducciones del parametro filtrado
     $lang = get_language();
-	if($lang != "en"){
-		$filter_value = strtolower(trim($filter_resource));
-		foreach($arrLang as $key=>$value){
-			$langValue    = strtolower(trim($value));
-			if($filter_value!=""){
-				if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-					if(strpos($langValue, $filter_value) !== FALSE)
-						$parameter_to_find[] = $key;
-			}
-		}
-	}
+    if($lang != "en"){
+        global $arrLang;
+        $filter_value = strtolower(trim($filter_resource));
+        $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
+        foreach($arrLang as $key=>$value){
+            $langValue=strtolower(trim($value));
+            if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
+                if(strpos($langValue, $filter_value) !== FALSE)
+                    $parameter_to_find[] = $key;
+        }
+    }
 
-	if(isset($filter_resource)){
-		$parameter_to_find[] = $filter_resource;
-	}else{
-		$parameter_to_find=null;
-	}
+    if(isset($filter_resource)){
+        $parameter_to_find[] = $filter_resource;
+    }else{
+        $parameter_to_find=null;
+    }
 
-    $arrResources = $pACL->getResourcesByOrg($idOrgFil,  $parameter_to_find);
-	if($arrResources===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pACL->errMsg));
-		return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
-	}
+    //obtenemos los recursos a los que la organizacion tiene acceso
+    $arrResourcesOrg = $pACL->getResourcesByOrg($idOrgFil,  $parameter_to_find);
+    if($arrResourcesOrg===false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr($pACL->errMsg));
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }
 
-	$arrResources=array_slice($arrResources,$offset,$limit);
-    //****************************************************************************************************
-    // ACTION -> access
-    //****************************************************************************************************
-
-    //permisos recursos seleccionados en el grid
-    $selectedAccess = isset( $_POST['groupPermission'] ) ? array_keys($_POST['groupPermission']) : array();
-
+    $arrResources=array_slice($arrResourcesOrg,$offset,$limit);
+    foreach($arrResources as $resource){
+        $listResource[]=$resource['id']; //lista de id de los recursos que queremos consultar
+    }
+    
+    //el grupo administrator de cada organizacion tiene ciertos recursos siempre activos
+    //por ello sacamos esos recursos de la lista de recursos cuyos permisos se van a editar
     $isAdministrator = ($pACL->getGroupNameByid($idGroup) == "administrator") ? true :false;
-
     if( $isAdministrator ){
-        $selectedAccess[] = "usermgr";
-        $selectedAccess[] = "grouplist";
-        $selectedAccess[] = "userlist";
-        $selectedAccess[] = "group_permission";
+        $listResource = array_diff($listResource,array("usermgr","grouplist","userlist","group_permission"));
+    }
+    
+    //las acciones que tiene cada drecurso
+    $arrResourceActions=$pACL->getResourcesActions($listResource);
+    if($arrResourceActions===false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("An error has ocurred to retrieved Resources Actions"));
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }
+    
+    //para el casos de los recursos organization y dashboard ahi acciones que no se les puede otorgar a los usuarios
+    if(isset($arrResourceActions['organization'])){
+        $arrResourceActions['organization']=array_diff($arrResourceActions['organization'],array('change_org_status','create_org','delete_org','edit_did'));
+    }
+    if(isset($arrResourceActions['dashboard'])){
+        $arrResourceActions['dashboard']=array('access');
+    }
+    
+    //los premisos que tiene el grupo
+    $arrPermisos = $pACL->loadGroupPermissions($idGroup,$listResource);
+    if($arrPermisos===false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("An error has ocurred to retrieved Group Permissions"));
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }
+    
+    $arrNewPermissions=array();
+    $arrDelPermissions=array();
+    $arrSelectdPermissions=array();
+    if(isset($_POST['groupPermission'])){
+        foreach($_POST['groupPermission'] as $resource => $actions){
+            if(isset($arrResourceActions[$resource])){
+                $res_actions=array_intersect(array_keys($actions),$arrResourceActions[$resource]);
+                if(in_array('access',$res_actions)){
+                    $arrSelectdPermissions[$resource]=$res_actions;
+                }
+            }
+        }
+    }
+    
+    //sacamos la lista de los permisos nuevos
+    foreach($arrSelectdPermissions as $resource => $actions){
+        if(isset($arrPermisos[$resource])){
+            $new_actions=array_diff($actions,$arrPermisos[$resource]);
+            if(count($new_actions)>0){
+                $arrNewPermissions[$resource]=$new_actions;
+            }
+        }else{
+            //no se hallaba antes lo agregamos a la lista de recursos nuevos
+            $arrNewPermissions[$resource]=$actions;
+        }
+    }
+    
+    //sacamos la lista de los recursos ausentes
+    foreach($arrPermisos as $resource => $actions){
+        if(isset($arrSelectdPermissions[$resource])){
+            $del_actions=array_diff($actions,$arrSelectdPermissions[$resource]);
+            if(count($del_actions)>0){
+                $arrDelPermissions[$resource]=$del_actions;
+            }
+        }else{
+            //no se halla entre los recursos seleccionados lo agregamos a la lista de recursos ausentes
+            $arrDelPermissions[$resource]=$actions;
+        }
     }
 
-    $listaPermisos = OrderResourceGroupPermissions( $pACL->loadGroupPermissions($idGroup) );
-
-    $listaPermisosNuevos = array_diff( $selectedAccess, $listaPermisos);
-    $listaPermisosAusentes = array_diff( $listaPermisos, $selectedAccess);
-    $listaPermisosNuevosGrupo = array();
-    $listaPermisosAusentesGrupo = array();
-
-    foreach($arrResources as $resource) {
-        if( in_array( $resource["id"], $listaPermisosNuevos) )    $listaPermisosNuevosGrupo[]   = $resource["id"];
-        if( in_array( $resource["id"], $listaPermisosAusentes) )  $listaPermisosAusentesGrupo[] = $resource["id"];
+    $pACL->_DB->beginTransaction();
+    if( count($arrDelPermissions) > 0 ){
+        if(!$pACL->deleteGroupPermission($idGroup, $arrDelPermissions)){
+            $smarty->assign("mb_title", "ERROR");
+            $smarty->assign("mb_message",_tr("A error has been ocurred. ").$pACL->errMsg);
+            return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+        }
     }
 
-	$pACL->_DB->beginTransaction();
-    if( count($listaPermisosAusentesGrupo) > 0 ){
-        $bExito = $pACL->deleteGroupPermissions($idGroup, $listaPermisosAusentesGrupo);
-        if (!$bExito){
-            $msgError = "ERROR";
-			$pACL->_DB->rollBack();
-		}
+    if( count($arrNewPermissions) > 0 ){
+        if(!$pACL->saveGroupPermission($idGroup, $arrNewPermissions)){
+            $smarty->assign("mb_title", "ERROR");
+            $smarty->assign("mb_message",_tr("A error has been ocurred. ").$pACL->errMsg);
+            return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+        }
     }
 
-    if( count($listaPermisosNuevosGrupo) > 0 ){
-        $bExito = $pACL->saveGroupPermissions($idGroup, $listaPermisosNuevosGrupo);
-        if (!$bExito){
-            $msgError = "ERROR";
-			$pACL->_DB->rollBack();
-		}
-    }
-
-    if (!empty($msgError)){
-		$smarty->assign("mb_title", $msgError);
-		$smarty->assign("mb_message",_tr("A error has been ocurred. ").$pACL->errMsg);
-	}else{
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		$smarty->assign("mb_message",_tr("Successfull change"));
-		$pACL->_DB->commit();
-	}
+    $smarty->assign("mb_title", _tr("MESSAGE"));
+    $smarty->assign("mb_message",_tr("Changes was applied successfully"));
+    $pACL->_DB->commit();
 
     //borra los menus q tiene de permisos que estan guardados en la session, el index.php principal (html) volvera a generar esta arreglo de permisos.
     unset($_SESSION['elastix_user_permission']);
-    return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userAccount, $userAccount, $userLevel1,$idOrganization);
+    return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
 }
 
-function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userAccount, $userAccount, $userLevel1, $idOrganization)
+function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials)
 {
-    global $arrLang;
+    $pACL = new paloACL($pDB);
+    $pORGZ = new paloSantoOrganization($pDB);
+    $arrGroups=array();
+    $arrOrgz=array();
+    $idOrgFil=getParameter("idOrganization");
     
-	$pACL = new paloACL($pDB);
-	$pORGZ = new paloSantoOrganization($pDB);
-	$arrGroups=array();
-	$arrOrgz=array();
-
-	$idOrgFil=getParameter("idOrganization");
-
-	if($userLevel1=="superadmin")
-	{
-		$orgTmp=$pORGZ->getOrganization("","","","");
-	}else{
-		$orgTmp=$pORGZ->getOrganization("","","id",$idOrganization);
-	}
-
-	//valido que al menos exista una organizacion creada
-	if($orgTmp===false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr($pORGZ->errMsg));
-	}else{
-		foreach($orgTmp as $value){
-			if($value["id"]!="1")
-				$arrOrgz[$value["id"]]=$value["name"];
-		}
-	}
-
-
-	$arrIdOrg=array_keys($arrOrgz);
-	if($userLevel1!="superadmin"){
-		$idOrgFil=$idOrganization;
-	}else{
-		if(!isset($idOrgFil)){
-			if($arrIdOrg!=false)
-				$idOrgFil=$arrIdOrg[0];
-			else
-				$idOrgFil=0;
-		}else{
-			if(!in_array($idOrgFil,$arrIdOrg)){
-				$idOrgFil=0;
-				$smarty->assign("mb_title", _tr("EROOR"));
-				$smarty->assign("mb_message",_tr("INVALID ORGANIZATION"));
-			}
-		}
-	}
-
-	if(count($arrOrgz)>0){
-		$temp = $pACL->getGroupsPaging(null,null,$idOrgFil);
-		if($temp===false){
-			$smarty->assign("mb_title", _tr("ERROR"));
-			$smarty->assign("mb_message",_tr($pACL->errMsg));
-		}else{
-			foreach($temp as $value){
-				$arrGroups[$value[0]]=$value[1];
-			}
-		}
-	}
+    if($credentials['userlevel']=="superadmin"){
+        $orgTmp=$pORGZ->getOrganization(array());
+        if($orgTmp===false){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr($pORGZ->errMsg));
+        }elseif(count($orgTmp)==0){
+            $smarty->assign("mb_title", _tr("MESSAGE"));
+            $msg=_tr("You haven't created any organization");
+            $smarty->assign("mb_message",$msg);
+        }else{
+            //si el usuario a selecionado una organizacion comprobamos que esta exista
+            //caso contrario procedemos a sellecionar la primera disponible
+            $flag=false;
+            foreach($orgTmp as $value){
+                $arrOrgz[$value["id"]]=$value["name"];
+                if($value["id"]==$idOrgFil)
+                    $flag=true;
+            }
+            if(!$flag)
+                $idOrgFil=$orgTmp[0]['id'];
+        }
+    }else{
+        $idOrgFil=$credentials['id_organization'];
+        $orgTmp=$pORGZ->getOrganizationById($idOrgFil);
+        if($orgTmp==false){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("An error has ocurred to retrieved organization data"));
+        }else{
+            $arrOrgz=$orgTmp;
+        }
+    }
+    
+    
+    if(count($arrOrgz)>0){ //que se un arreglo y que tenga al menos una organizacion
+        $groupTmp = $pACL->getGroupsPaging(null,null,$idOrgFil);
+        if($groupTmp===false){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr($pACL->errMsg));
+        }else{
+            foreach($groupTmp as $value){
+                $arrGroups[$value[0]]=$value[1];
+            }
+        }
+    }
 
     $filter_group = getParameter("filter_group");
-
-	$defaulGroup=array_keys($arrGroups);
-	if($defaulGroup==false)
-		$defaulGroup=array("any");
-
-	if(getParameter("show") || isset($_GET["nav"]) || getParameter("apply"))
-	{
-		$filter_group = isset( $filter_group ) ? $filter_group : $defaulGroup[0];
-	}else{
-		$filter_group=$defaulGroup[0];
-	}
-
-	//valido que el grupo pertenzca a la organizacion
-	if($pACL->getGroups($filter_group,$idOrgFil)==false){
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",_tr("Invalid Group"));
-		$filter_group=$defaulGroup[0];
-	}
-
-	$filter_resource = getParameter("filter_resource");
-	$filter_resource = htmlentities($filter_resource);
-
-	$lang = get_language();
+    if(count($arrGroups)>0){
+        if(empty($filter_group)){
+            //seleccionamos el primer grupo de la lista de grupos
+            $filter_group=$groupTmp[0][0];
+        }
+    
+        //valido que el grupo pertenzca a la organizacion
+        if($pACL->getGroups($filter_group,$idOrgFil)==false){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("Invalid Group"));
+            $filter_group=$groupTmp[0][0];
+        }
+    }
+    
+    $filter_resource = getParameter("filter_resource");
+    $lang = get_language();
     if($lang != "en"){
-		$filter_value = strtolower(trim($filter_resource));
-		foreach($arrLang as $key=>$value){
-			$langValue    = strtolower(trim($value));
-			if($filter_value!=""){
-				if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-					if(strpos($langValue, $filter_value) !== FALSE)
-						$parameter_to_find[] = $key;
-			}
-		}
-	}
+        global $arrLang;
+        $filter_value = strtolower(trim($filter_resource));
+        $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
+        foreach($arrLang as $key=>$value){
+            $langValue=strtolower(trim($value));
+            if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
+                if(strpos($langValue, $filter_value) !== FALSE)
+                    $parameter_to_find[] = $key;
+        }
+    }
 
-	if(isset($filter_resource)){
-		$parameter_to_find[] = $filter_resource;
-	}else{
-		$parameter_to_find=null;
-	}
+    if(isset($filter_resource)){
+        $parameter_to_find[] = $filter_resource;
+    }else{
+        $parameter_to_find=null;
+    }
+    
+    $totalGroupPermission=0;
+    if(count($arrGroups)>0){
+        $arrResourceOrg=$pACL->getResourcesByOrg($idOrgFil, $parameter_to_find);
+        if($arrResourceOrg===false){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("An error has ocurred to retrieved Resources"));
+        }else
+            $totalGroupPermission = count($arrResourceOrg);
+    }
 
-	$arrResource=$pACL->getResourcesByOrg($idOrgFil, $parameter_to_find);
-	$totalGroupPermission = count($arrResource);
-
-	//begin grid parameters
+    //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
-    $parameter_to_find = array();
 
     $limit  = 25;
     $total  = $totalGroupPermission;
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
-
-	$offset = $oGrid->calculateOffset();
+    $offset = $oGrid->calculateOffset();
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
-
-    $arrData = null;
-	if($filter_group!="any"){
-		$arrResult = array_slice($arrResource,$offset,$limit);
-		$idGroup = $filter_group;
-		$arrPermisos = $pACL->loadGroupPermissions($idGroup);
-		$arrPermisos = OrderGroupPermissions($arrPermisos);
-	}else{
-		$arrResult = array();
-		$total=0;
-		$idGroup = "any";
-	}
-
-
-	$url = "?menu=$module_name&idOrganization=$idOrgFil&filter_group=$filter_group&filter_resource=$filter_resource";
-	
-	$isAdministrator = ($pACL->getGroupNameByid($idGroup) == "administrator") ? true :false;
-
-    if( is_array($arrResult) && $total > 0){
-        foreach( $arrResult as $key => $resource ){
-            $disabled = "";
-            if( ( $resource["id"] == 'usermgr'   || $resource["id"] == 'grouplist' || $resource["id"] == 'userlist'  ||
-                  $resource["id"] == 'group_permission') & $isAdministrator ){
-                $disabled = "disabled='disabled'";
-            }
-
-            $checked0 = "";
-
-            if(in_array($resource["id"],$arrPermisos)){
-				$checked0 = "checked";
-            }
-
-            $arrTmp[0] = "<input type='checkbox' $disabled name='groupPermission[".$resource["id"]."][".$resource["id"]."]' $checked0>";
-            $arrTmp[1] = _tr($resource["description"]);
-            $arrData[] = $arrTmp;
+    $url['menu']=$module_name;
+    $url['idOrganization']=$idOrgFil;
+    $url['filter_group']=$filter_group;
+    $url['filter_resource']=$filter_resource;
+    
+    $arrData = $arrResourceActions = $arrPermisos = array();
+    $error=false;
+    if(count($arrGroups)>0 && $totalGroupPermission>0){
+        $arrResource = array_slice($arrResourceOrg,$offset,$limit);
+        $idGroup = $filter_group;
+        
+        foreach($arrResource as $resource){
+            $listResource[]=$resource['id']; //lista de id de los recursos que queremos consulta
+            $listResDes[$resource['id']]=$resource['description'];
+        }
+        
+        //las acciones que tiene cada drecurso
+        $arrResourceActions=$pACL->getResourcesActions($listResource);
+        if($arrResourceActions===false){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("An error has ocurred to retrieved Resources Actions"));
+            $error=true;
+        }
+        
+        //los premisos que tiene el grupo
+        $arrPermisos = $pACL->loadGroupPermissions($idGroup,$listResource);
+        if($arrPermisos===false){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("An error has ocurred to retrieved Group Permissions"));
+            $error=true;
         }
     }
 
-    $arrGrid = array(   "title"    => _tr("Group Permission"),
-                        "icon"     => "images/list.png",
-                        "width"    => "99%",
-                        "start"    => ($total==0) ? 0 : $offset + 1,
-                        "end"      => $end,
-                        "total"    => $total,
-                        "url"      => $url,
-                        "columns"  => array(0 => array("name"      => _tr("Permit Access"),
-                                                        "property1" => ""),
-                                            1 => array("name"      => _tr("Resource"),
-                                                        "property1" => ""),
-                        ));
-
+    $max_actions = 0;
+    $isAdministrator = ($pACL->getGroupNameByid($idGroup) == "administrator") ? true :false;
+    if($totalGroupPermission>0 && !$error){
+        foreach($arrResourceActions as $resource => $actions){
+            $arrTmp=array();
+            $arrTmp[] = _tr($listResDes[$resource]);
+            $disabled = "";
+            if( $isAdministrator && ( $resource == 'usermgr'   || $resource == 'grouplist' || $resource == 'userlist'  || $resource == 'group_permission')){
+                $disabled = "disabled='disabled'";
+            }
+            
+            //dentro del modulo organizacion ahi acciones que unicamente las puede realizar el superadmin
+            //por lo tando no deben aparecer listadas
+            if($resource=="organization"){
+                $actions=array_diff($actions,array('change_org_status','create_org','delete_org','edit_did'));
+            }elseif($resource=="dashboard"){
+                $actions=array('access');
+            }
+            
+            if(count($actions)>$max_actions){
+                $max_actions=count($actions);
+            }
+            
+            $desactivar=false;
+            if(isset($arrPermisos[$resource])){ //grupo no tiene nigun permiso
+                if(!in_array('access',$arrPermisos[$resource])){
+                    $desactivar=true;
+                }
+            }else{
+                $desactivar=true;
+                $arrPermisos[$resource]=array();
+            }
+                
+            foreach($actions as $action){
+                $class='other_act';
+                if($action=='access')
+                    $class='access_act';
+                elseif($desactivar){
+                    $disabled = "disabled='disabled'";
+                }
+                
+                $checked0 = '';
+                //chequeamos si la accion se encuentra en la lista de acciones permitidas en el recurso
+                if(in_array($action,$arrPermisos[$resource])){ 
+                    $checked0 = "checked";
+                }
+                $arrTmp[] = "<input type='checkbox' class='$class' $disabled name='groupPermission[".$resource."][$action]' $checked0> $action";
+            }
+            $arrData[] = $arrTmp;
+        }
+    }
+    
+     
+    $oGrid->setTitle(_tr("Group Permission"));
+    $oGrid->setURL($url);
+    $oGrid->setWidth("99%");
+    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
+    $oGrid->setEnd($end);
+    $oGrid->setTotal($total);
+    $arrColumn[]=_tr("Resource");
+    for($i=1;$i<=$max_actions;$i++){
+        $arrColumn[]="Action $i";
+    }
+    $oGrid->setColumns($arrColumn);
+    
     //begin section filter
-    $arrFormFilterGroupPermission = createFieldFilter($arrGroups, $arrOrgz);
-    $oFilterForm = new paloForm($smarty, $arrFormFilterGroupPermission);
+    $arrFormFilter = createFieldFilter($arrGroups);
+    $oFilterForm = new paloForm($smarty, $arrFormFilter);
 
     $smarty->assign("SHOW", _tr("Show"));
-	$smarty->assign("userLevel", $userLevel1);
-	$smarty->assign("resource_apply", $filter_resource);
-	$smarty->assign("limit_apply", htmlspecialchars($limit, ENT_COMPAT, 'UTF-8'));
-	$smarty->assign("offset_apply", htmlspecialchars($offset, ENT_COMPAT, 'UTF-8'));
+    $smarty->assign("limit_apply", htmlspecialchars($limit, ENT_COMPAT, 'UTF-8'));
+    $smarty->assign("offset_apply", htmlspecialchars($offset, ENT_COMPAT, 'UTF-8'));
+    $smarty->assign("resource_apply", htmlentities($filter_resource));
 
-    $_POST["filter_group"] = $filter_group;
-    $_POST["filter_resource"] = $filter_resource;
-	$_POST["idOrganization"] = $idOrgFil;
+    $_POST["filter_group"] = htmlspecialchars($filter_group, ENT_COMPAT, 'UTF-8');
+    $_POST["filter_resource"] = htmlspecialchars($filter_resource, ENT_COMPAT, 'UTF-8');
+    $_POST["idOrganization"] = $idOrgFil;
 
-	if(count($arrOrgz)>0){
-		$nameGroup=isset($arrGroups[$filter_group])?$arrGroups[$filter_group]:"";
-		$nameOrganization=isset($arrOrgz[$idOrgFil])?$arrOrgz[$idOrgFil]:"";
-		$oGrid->addFilterControl(_tr("Filter applied ")._tr("Group")." = $nameGroup", $_POST, array("filter_group" => $defaulGroup[0]),true);
-		$oGrid->addFilterControl(_tr("Filter applied ")._tr("Resource")." = $filter_resource", $_POST, array("filter_resource" =>""));
-		if($userLevel1=="superadmin"){
-			$oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$nameOrganization, $_POST, array("idOrganization" =>1),true);
-		}
-		$oGrid->addSubmitAction("apply",_tr("Save"));
-		$htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
-		$oGrid->showFilter(trim($htmlFilter));
-	}else{
-		$smarty->assign("mb_title", _tr("MESSAGE"));
+    if(count($arrOrgz)>0){
+        global $arrPermission;
+        if(in_array('edit_permission',$arrPermission)){
+            $oGrid->addSubmitAction("apply",_tr("Save"));
+        }
+        if($credentials['userlevel']=="superadmin"){
+            $oGrid->addComboAction("idOrganization",_tr("Organization"),$arrOrgz,$idOrgFil,"report");
+        }
+        $nameGroup=isset($arrGroups[$filter_group])?$arrGroups[$filter_group]:"";
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Group")." = $nameGroup", $_POST, array("filter_group" => $groupTmp[0][0]),true);
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Resource")." = $filter_resource", $_POST, array("filter_resource" =>""));
+        $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
+        $oGrid->showFilter(trim($htmlFilter));
+    }else{
+        $smarty->assign("mb_title", _tr("MESSAGE"));
         $smarty->assign("mb_message",_tr("You haven't created any organization"));
-	}
+    }
 
-    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+    $contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
     //end grid parameters
 
     return $contenidoModulo;
 }
 
 
-function createFieldFilter($arrGrupos, $arrOrgz)
+function createFieldFilter($arrGrupos)
 {
     $arrFormElements = array(
             "filter_group" => array(    "LABEL"                  => _tr("Group"),
@@ -443,56 +499,16 @@ function createFieldFilter($arrGrupos, $arrOrgz)
                                         "INPUT_EXTRA_PARAM"      => "",
                                         "VALIDATION_TYPE"        => "text",
                                         "VALIDATION_EXTRA_PARAM" => ""),
-			"idOrganization" => array( "LABEL"                  => _tr("Organization"),
-                                        "REQUIRED"               => "no",
-                                        "INPUT_TYPE"             => "SELECT",
-                                        "INPUT_EXTRA_PARAM"      => $arrOrgz,
-                                        "VALIDATION_TYPE"        => "text",
-                                        "VALIDATION_EXTRA_PARAM" => "",
-										"ONCHANGE"	       => "javascript:submit();"),
-                    );
+    );
     return $arrFormElements;
 }
 
 function getAction()
 {
+    global $arrPermission;
     if(getParameter("apply")) //Get parameter by POST (submit)
-        return "apply";
-    //else if(getParameter("new"))
-    //    return "new";
-    //else if(getParameter("action")=="show") //Get parameter by GET (command pattern, links)
-    //    return "show";
+        return (in_array('edit_permission',$arrPermission))?'apply':'report';
     else
         return "report";
-}
-
-//**************************************************************************************************************************
-
-//FUNCIONES DE AYUDA
-
-function OrderResourceGroupPermissions( $arrPermisos )
-{
-    $arrResult = array();
-
-    //Array ( [0] => Array ( [resource_name] => bib_consultaLibro )
-    //        [1] => Array ( [resource_name] => build_module )
-    //        [2] => Array ( [resource_name] => con )
-
-    foreach( $arrPermisos as $num => $data )
-        $arrResult[] = $data["id"];
-
-    return $arrResult;
-}
-
-function OrderGroupPermissions($arrPermisos)
-{
-    $result = array();
-
-    foreach($arrPermisos as $num => $data)
-    {
-        $result[]=$data["id"];
-    }
-
-    return $result;
 }
 ?>

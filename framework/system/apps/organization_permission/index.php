@@ -84,7 +84,7 @@ function applyOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB, 
     if($orgTmp===false){
         $error=true;
         $msg_error=_tr($pORGZ->errMsg);
-    }elseif(count($orgTmp)<=0){
+    }elseif(count($orgTmp)==0){
         $error=true;
         $msg_error=_tr("Organization doesn't exist");
     }
@@ -95,6 +95,7 @@ function applyOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB, 
     }
 
     //obtenemos las traducciones del parametro filtrado
+    $filter_resource = htmlentities($filter_resource);
     $lang = get_language();
     if($lang != "en"){
         global $arrLang;

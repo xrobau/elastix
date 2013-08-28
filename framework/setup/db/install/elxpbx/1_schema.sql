@@ -131,6 +131,7 @@ CREATE TABLE IF NOT EXISTS resource_action
     id_resource varchar(50) NOT NULL,
     action VARCHAR(50) NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (id_resource) REFERENCES acl_resource(id) ON DELETE CASCADE,
     UNIQUE INDEX resource_action (id_resource,action)
 ) ENGINE = INNODB;
 
@@ -489,6 +490,7 @@ INSERT INTO resource_action (id,id_resource,action) VALUES(19,'userlist','access
 INSERT INTO resource_action (id,id_resource,action) VALUES(11,'userlist','create_user');
 INSERT INTO resource_action (id,id_resource,action) VALUES(20,'userlist','edit_user');
 INSERT INTO resource_action (id,id_resource,action) VALUES(21,'userlist','delete_user');
+INSERT INTO resource_action (id,id_resource,action) VALUES(78,'userlist','reconstruct_mailbox');
 
 INSERT INTO resource_action (id,id_resource,action) VALUES(22,'grouplist','access');
 INSERT INTO resource_action (id,id_resource,action) VALUES(23,'grouplist','create_group');
@@ -550,6 +552,18 @@ INSERT INTO resource_action (id,id_resource,action) VALUES(66,'email_list','edit
 INSERT INTO resource_action (id,id_resource,action) VALUES(67,'email_list','delete');
 INSERT INTO resource_action (id,id_resource,action) VALUES(68,'email_stats','access');
 
+-- fax
+INSERT INTO resource_action (id,id_resource,action) VALUES(69,'faxmaster','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(70,'faxmaster','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(71,'faxclients','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(72,'faxclients','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(73,'faxviewer','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(74,'faxviewer','edit_company');
+INSERT INTO resource_action (id,id_resource,action) VALUES(75,'faxviewer','delete');
+INSERT INTO resource_action (id,id_resource,action) VALUES(76,'fax_email_template','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(77,'fax_email_template','edit');
+
+
 -- system
 -- dashboard
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,1);
@@ -583,10 +597,12 @@ INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,19);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,11);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,20);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,21);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,78);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,19);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,11);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,20);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,21);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,78);
 -- grouplist
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,22);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,23);
@@ -673,3 +689,19 @@ INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,66);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,67);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,68);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,68);
+
+-- faxs
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,69);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,70);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,71);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,72);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,73);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,74);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,75);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,73);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,74);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,75);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,76);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,77);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,76);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,77);

@@ -107,6 +107,7 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials)
 {
+    global $arrPermission;
     $pOrganization = new paloSantoOrganization($pDB);
     $pACL = new paloACL($pDB);
     $arrData = array();
@@ -153,7 +154,9 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
     if($credentials["userlevel"]=="superadmin"){
         $arrColumns[]=""; //delete
     }
-    $arrColumns[]=""; //did
+    if(in_array('access_did',$arrPermission)){
+        $arrColumns[]=""; //did
+    }
     $arrColumns[]=_tr("Domain");
     $arrColumns[]=_tr("Name");
     $arrColumns[]=_tr("State");
@@ -182,9 +185,11 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
         {
             $arrTmp = array();
             if($credentials["userlevel"]=="superadmin"){
-                $arrTmp[] = "<input type='checkbox' class='chk_id' value='{$value['id']}' />";
+                $arrTmp[] = "<input type='checkbox' class='chk_id' value='{$value['id']}' />"; //checkbox selet
             }
-            $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=reportDIDs&domain=".$value['domain']."'>"._tr("Assign DIDs")."</a>";
+            if(in_array('access_did',$arrPermission)){
+                $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=reportDIDs&domain=".$value['domain']."'>"._tr("Assign DIDs")."</a>"; //did
+            }
             $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".htmlentities($value['domain'], ENT_COMPAT, 'UTF-8')."</a>";
             $arrTmp[] = htmlentities($value['name'], ENT_COMPAT, 'UTF-8');
             
@@ -1181,7 +1186,7 @@ function getAction()
         return (in_array('delete_org',$arrPermission))?'change_state':'report';
     }else if(getParameter("action")=="delete_org_2"){
         //preguntar si el usuario puede hacer accion
-        return (in_array('delete_org',$arrPermission))?'delete':'report';
+        return (in_array('delete_org',$arrPermission))?'delete_org_2':'report';
     }else
         return "report"; //cancel
 }

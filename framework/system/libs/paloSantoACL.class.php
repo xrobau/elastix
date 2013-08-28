@@ -292,7 +292,7 @@ class paloACL {
 		}
 		
         $this->errMsg = "";
-        $sPeticionSQL = "SELECT id, name, description, id_organization FROM acl_group $where $paging";
+        $sPeticionSQL = "SELECT id, name, description, id_organization FROM acl_group $where ORDER BY id_organization $paging";
 
         $arr_result = $this->_DB->fetchTable($sPeticionSQL,false,$arrParams);
         if (!is_array($arr_result)) {
@@ -1308,14 +1308,14 @@ INFO_AUTH_MODULO;
                 if(is_array($filter_resource) && count($filter_resource)>0){
                     $where .=" AND (";
                     for($i=0;$i<count($filter_resource)-1;$i++){
-                        $where .=" UPPER(description) LIKE ? OR ";
+                        $where .=" LOWER(description) LIKE ? OR ";
                         $arrParam[] = "%".strtoupper($filter_resource[$i])."%";
                     }
-                    $where .=" UPPER(description) LIKE ? )";
+                    $where .=" LOWER(description) LIKE ? )";
                     $arrParam[] = "%".strtoupper($filter_resource[count($filter_resource)-1])."%";
                     
                 }else{
-                    $where .=" AND UPPER(description) LIKE ? ";
+                    $where .=" AND LOWER(description) LIKE ? ";
                     $arrParam = "%".strtoupper($filter_resource)."%";
                 }
             }
@@ -1405,14 +1405,14 @@ INFO_AUTH_MODULO;
             if(is_array($filter_resource) && count($filter_resource)>0){
                 $where .=" AND (";
                 for($i=0;$i<count($filter_resource)-1;$i++){
-                    $where .=" UPPER(description) LIKE ? OR ";
+                    $where .=" LOWER(description) LIKE ? OR ";
                     $arrParam[] = "%".strtoupper($filter_resource[$i])."%";
                 }
-                $where .=" UPPER(description) LIKE ? )";
+                $where .=" LOWER(description) LIKE ? )";
                 $arrParam[] = "%".strtoupper($filter_resource[count($filter_resource)-1])."%";
                 
             }else{
-                $where .=" AND UPPER(description) LIKE ? ";
+                $where .=" AND LOWER(description) LIKE ? ";
                 $arrParam = "%".strtoupper($filter_resource)."%";
             }
         }
@@ -1454,14 +1454,14 @@ INFO_AUTH_MODULO;
             if(is_array($filter_resource) && count($filter_resource)>0){
                 $where .=" AND (";
                 for($i=0;$i<count($filter_resource)-1;$i++){
-                    $where .=" UPPER(description) LIKE ? OR ";
+                    $where .=" LOWER(description) LIKE ? OR ";
                     $arrParam[] = "%".strtoupper($filter_resource[$i])."%";
                 }
-                $where .=" UPPER(description) LIKE ? )";
+                $where .=" LOWER(description) LIKE ? )";
                 $arrParam[] = "%".strtoupper($filter_resource[count($filter_resource)-1])."%";
                 
             }else{
-                $where = " AND UPPER(description) LIKE ? ";
+                $where = " AND LOWER(description) LIKE ? ";
                 $arrParam = "%".strtoupper($filter_resource)."%";
             }
         }
@@ -1479,11 +1479,81 @@ INFO_AUTH_MODULO;
         }
         return $result;
     }
+    
+    /**
+     * Procedimiento para eliminar el recurso dado su id. 
+     * Antes de eliminar el recurso se debe elminar las entradas de dicho recurso de las tabla group_resource
+     * y organization_resource
+     * @param integer   $idresource
+     *
+     * @return bool     si es verdadero entonces se elimino bien
+     ******************************************************************/
+    function deleteResource($idresource)
+    {
+        $this->errMsg = "";
+        $query = "DELETE FROM acl_resource WHERE id = ?";
+        $result = $this->_DB->genQuery($query,array($idresource));
+        if($result==FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else
+            return true;
+    }
 
+    /**
+     * Procedimiento que devuelve un arreglo de dos dimensiones con las accciones por recurso.
+     * Se realiza un filtrado en la busqueda por los nombres de los recursos pasados en el parametro
+     * $listResource
+     * @param array $listResource => array(resource1,resource2,resource3)
+     * @param string $organization_access => ('yes','no')
+     * @return mixed false en caso de error
+                     array = ( id_resource1 => array(action1,action2,..),
+                               id_resource2 => array(action1,action2,..),
+                               id_resource3 => array(action1,action2,..),
+                         )
+     */
+    function getResourcesActions($listResource=null,$organization_access=null){
+        $where=array();
+        $arrParam=null;
+        $query="SELECT ra.id_resource,ra.action FROM resource_action ra";
+        if(is_array($listResource) && count($listResource)>0){
+            $q="";
+            foreach($listResource as $resource){
+                $arrParam[]=$resource;
+                $q .="?,"; 
+            }
+            $q=substr($q,0,-1);
+            $where[]= " ra.id_resource IN ($q) ";
+        }
+        if(isset($organization_access)){
+            $query .=" JOIN acl_resource r ON r.id=ra.id_resource ";
+            $where[]=" r.organization_access=? ";
+            $arrParam[]=$organization_access;
+        }
+        if(count($where)>0){
+            $query .=" WHERE ".implode(" AND ",$where);
+        }
+        
+        $result = $this->_DB->fetchTable($query,true,$arrParam);
+        if( $result === false ) {
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else{
+            $resourceActions=array();
+            foreach($result as $value){
+                $resourceActions[$value['id_resource']][]=$value['action'];
+            }
+            return $resourceActions;
+        }
+    }
+    
     /**
     * Procedimiento que devuelve un arreglo de dos dimensiones con las accciones por recursos
     * que un grupo, identificado por du id, puede realizar
+    * Se realiza un filtrado en la busqueda por los nombres de los recursos pasados en el parametro
+    * $listResource
     * @param int   $id_group    ID del grupo del que se desea saber sus permisos
+    * @param array $listResource => array(resource1,resource2,resource3)
     * @return array Un arreglo con todos los recursos a los que los los miembros del grupo dado tienen
                     acceso
             false en caso de error
@@ -1492,17 +1562,26 @@ INFO_AUTH_MODULO;
                       id_resource3 => array(action1,action2,..),
                 )
     */
-    function loadGroupPermissions($id_group)
+    function loadGroupPermissions($id_group,$listResource=null)
     {
         if (!preg_match('/^[[:digit:]]+$/', "$id_group")) {
             $this->errMsg = _tr("Group ID must be numeric");
             return false;
         }else{
-            $arrParams=array($id_group);
+            $arrParam=array($id_group);
             $query = "SELECT ract.id_resource,ract.action FROM resource_action ract 
                         JOIN group_resource_action gract ON ract.id=gract.id_resource_action
                         WHERE gract.id_group=?";        
-            $result = $this->_DB->fetchTable($query,true,array($id_group));
+            if(is_array($listResource) && count($listResource)>0){
+                $q="";
+                foreach($listResource as $resource){
+                    $arrParam[]=$resource;
+                    $q .="?,"; 
+                }
+                $q=substr($q,0,-1);
+                $query .=" AND ract.id_resource IN ($q) ";
+            }
+            $result = $this->_DB->fetchTable($query,true,$arrParam);
             if( $result === false ) {
                 $this->errMsg = $this->_DB->errMsg;
                 return false;
@@ -1627,25 +1706,103 @@ INFO_AUTH_MODULO;
         }
         return true;
     }
-
+    
     /**
-     * Procedimiento para eliminar el recurso dado su id. 
-     * Antes de eliminar el recurso se debe elminar las entradas de dicho recurso de las tabla group_resource
-     * y organization_resource
-     * @param integer   $idresource
-     *
-     * @return bool     si es verdadero entonces se elimino bien
-     ******************************************************************/
-    function deleteResource($idresource)
-    {
-        $this->errMsg = "";
-        $query = "DELETE FROM acl_resource WHERE id = ?";
-        $result = $this->_DB->genQuery($query,array($idresource));
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
+     * Procedimiento que almacena acciones que un grupo puede realizar dentro de un recurso
+     * @param integer $idGroup -> Id del grupo al que se le van asignar las acciones
+     * @param array array(resource1=>array(action1,action2,...,actionN),
+                          resource2=>array(action1,action2,...,actionN))
+     * @return boolean true en caso de existo
+     *                 false en caso de error 
+     */
+    function saveGroupPermission($idGroup,$arrResourceAction){
+        //verificamos que le recurso exista, que este pueda ser accedido por una organizacion
+        //y que se encuentre en la tabla organization_resource de la organizacion a la que pertenece el grupo
+        if(is_array($arrResourceAction) && count($arrResourceAction)>0){
+            $arrParam[]=$idGroup;
+            $q='';
+            foreach($arrResourceAction as $resource => $value){
+                $arrParam[]=$resource;
+                $q .='?,';
+            }
+            $q=substr($q,0,-1);
+            $query="SELECT r.id FROM acl_resource r JOIN organization_resource org ON r.id=org.id_resource
+                    JOIN acl_group g ON g.id_organization=org.id_organization 
+                        WHERE g.id=? AND r.organization_access='yes' AND r.id IN ($q)";
+            $resources=$this->_DB->fetchTable($query,true,$arrParam);
+            if($resources===false){
+                $this->errMsg=_tr('An error has ocurred to retrieve Resources data');
+                return false;
+            }else{
+                foreach($resources as $value){
+                    $arrParam=array();
+                    if(is_array($arrResourceAction[$value['id']]) && count($arrResourceAction[$value['id']])>0){
+                        $arrParam[]=$idGroup;
+                        $arrParam[]=$value['id'];
+                        $q='';
+                        foreach($arrResourceAction[$value['id']] as $action){
+                            $arrParam[]=$action;
+                            $q .='?,';
+                        }
+                        $q=substr($q,0,-1);
+                        $arrParam[]=$value['id'];
+                        $arrParam[]=$idGroup;
+                        $query="INSERT INTO group_resource_action (id_group,id_resource_action) 
+                                    SELECT ?,ra.id FROM resource_action ra 
+                                        WHERE ra.id_resource=? AND ra.action IN ($q) AND ra.id NOT IN 
+                                            (SELECT gra.id_resource_action FROM group_resource_action gra JOIN resource_action ra ON gra.id_resource_action=ra.id WHERE ra.id_resource=? AND gra.id_group=?)";
+                        $result=$this->_DB->genQuery($query,$arrParam);
+                        if($result==false){
+                            $this->errMsg=("DATABASE ERROR");
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+        }else{
+            $this->errMsg=_tr('Invalid Resources');
             return false;
-        }else
+        }
+    }
+    
+    /**
+     * Procedimiento que elimina acciones que un grupo puede realizar dentro de un recurso
+     * @param integer $idGroup -> Id del grupo al que se le van a eliminar las acciones
+     * @param array array(resource1=>array(action1,action2,...,actionN),
+                          resource2=>array(action1,action2,...,actionN))
+     * @return boolean true en caso de existo
+     *                 false en caso de error 
+     */
+    function deleteGroupPermission($idGroup,$arrResourceAction){
+        if(is_array($arrResourceAction) && count($arrResourceAction)>0){
+            foreach($arrResourceAction as $resource => $actions){
+                $arrParam=array();
+                if(is_array($actions) && count($actions)>0){
+                    $arrParam[]=$idGroup;
+                    $arrParam[]=$resource;
+                    $q='';
+                    foreach($actions as $action){
+                        $arrParam[]=$action;
+                        $q .='?,';
+                    }
+                    $q=substr($q,0,-1);
+                    $query="DELETE gra FROM group_resource_action gra 
+                            WHERE gra.id_group=? AND gra.id_resource_action IN 
+                                (SELECT ra.id FROM resource_action ra 
+                                    WHERE ra.id_resource=? AND ra.action IN ($q))";
+                    $result=$this->_DB->genQuery($query,$arrParam);
+                    if($result==false){
+                        $this->errMsg=_tr("DATABASE ERROR");
+                        return false;
+                    }
+                }
+            }
             return true;
+        }else{
+            $this->errMsg=_tr('Invalid Resources');
+            return false;
+        }
     }
 }
 ?>

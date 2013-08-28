@@ -9,7 +9,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildArch: noarch
 Requires: php >= 5.0.0
 Requires: elastix-framework
-Requires: lcdproc >= 1:0.5.5
+Requires: lcdproc >= 1:0.5.6-1
 
 %description
 
@@ -56,6 +56,8 @@ fi
 
 %changelog
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Add and require support for setting logo in jbc1602 case.
+  SVN Rev[5815]
 - FIXED: Use correct units in memory applet in one line case.
   SVN Rev[5814]
 

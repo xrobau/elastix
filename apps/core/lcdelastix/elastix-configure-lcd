@@ -108,9 +108,9 @@ NEW_SECTION;
 	system("/sbin/service lcdelastix stop > /dev/null 2>&1");
 	system("/sbin/service LCDd stop >/dev/null 2>&1");
 	
-	$sBootMsg = "Booting Elastix...";
 	switch ($sDriver) {
 	case 'CFontzPacket':
+    	$sBootMsg = "Booting Elastix...";
 		$sCmds = <<<CFONTZ_CMDS
 clear
 pos_data 2 2 $sBootMsg
@@ -118,10 +118,19 @@ store_state
 quit
 
 CFONTZ_CMDS;
-		$p = popen('/usr/bin/crystalfontz.pl ' + escapeshellarg($sDevice), 'w');
+		$p = popen('/usr/bin/crystalfontz.pl '.escapeshellarg($sDevice), 'w');
 		fwrite($p, $sCmds);
 		pclose($p);
 		break;
+	case 'jbc1602':
+	    $bootMsg = array(
+	        "    Booting     ",
+	        "   Elastix...   "
+	    );
+	    system('/usr/bin/jbc1602-setlogo '.escapeshellarg($sDevice).
+	        ' '.escapeshellarg($bootMsg[0]).
+	        ' '.escapeshellarg($bootMsg[1]));
+	    break;
 	}
 
 	system("/sbin/service LCDd restart >/dev/null 2>&1");

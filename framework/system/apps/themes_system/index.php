@@ -66,7 +66,7 @@ function _moduleContent(&$smarty, $module_name)
 
 function formThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid){
    
-
+    global $arrPermission;
     if(!empty($pDB->errMsg)) {
         $smarty->assign("mb_message", _tr("Error when connecting to database")."<br/>".$pDB->errMsg);
     }
@@ -81,10 +81,13 @@ function formThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
     $formThemes= createFieldForm($arr_themes);
     $oForm = new paloForm($smarty, $formThemes);
     
+    if((in_array('edit',$arrPermission)))
+            $smarty->assign('EDIT_THEME',true);
+            
     $tema_actual = $oThemes->getThemeActual($uid); 
     $arrTmp['themes'] = $tema_actual;
    
-   $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Change Theme"),$arrTmp);
+    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Change Theme"),$arrTmp);
     return $contenidoModulo;
 
 }
@@ -107,37 +110,34 @@ function createFieldForm($arr_themes){
 function saveThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid){
            
         
-        $oThemes = new PaloSantoThemes($pDB);
-        $arr_themes = $oThemes->getThemes("/var/www/html/admin/web/themes/");
-        $formThemes= createFieldForm($arr_themes);
-        $oForm = new paloForm($smarty, $formThemes);
-        print($_POST['themes']);
-        $exito   = $oThemes->updateTheme($_POST['themes'],$uid);
+    $oThemes = new PaloSantoThemes($pDB);
+    $arr_themes = $oThemes->getThemes("/var/www/html/admin/web/themes/");
+    $formThemes= createFieldForm($arr_themes);
+    $oForm = new paloForm($smarty, $formThemes);
+    
+    $exito   = $oThemes->updateTheme($_POST['themes'],$uid);
 
-        if ($exito) {
-            if($oThemes->smartyRefresh($_SERVER['DOCUMENT_ROOT'])){
-		header("Location: ?menu=$module_name");
-		die();
-	    }
-	    else{
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message", _tr("The smarty cache could not be deleted"));
-	    }
-        } else {
+    if ($exito) {
+        if($oThemes->smartyRefresh($_SERVER['DOCUMENT_ROOT'])){
+            header("Location: index.php?menu=themes_system");
+            die();
+        }else{
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message", _tr("The smarty cache could not be deleted"));
+        }
+    } else {
         $smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $oThemes->errMsg);
-        } 
-    
-    
-
-   return formThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid);
+    } 
+    return formThemes($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $uid);
 }
 
 
 function getAction()
 {
+    global $arrPermission;
     if(getParameter("changeTheme")) //Get parameter by POST (submit)
-        return "save";
+        return (in_array('edit',$arrPermission))?'save':'report';
     else
         return "report";
 }

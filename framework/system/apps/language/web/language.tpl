@@ -3,9 +3,9 @@
     <tr class="letra12">
 	<td>
         {if $conectiondb}
-        <input class="button" type="submit" name="save_language" value="{$CAMBIAR}" >
+            {if $EDIT_LANG}<input class="button" type="submit" name="save_language" value="{$CAMBIAR}">{/if}
         {else}
-        {$MSG_ERROR}
+            {$MSG_ERROR}
         {/if}
 	</td>
     </tr>

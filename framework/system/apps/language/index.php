@@ -27,56 +27,53 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
-    include_once "libs/paloSantoDB.class.php";
-    include_once "libs/paloSantoForm.class.php";
+include_once "libs/paloSantoDB.class.php";
+include_once "libs/paloSantoForm.class.php";
    
 function _moduleContent(&$smarty, $module_name)
 {
-	include      "configs/languages.conf.php";
-
-    //global variables
     global $arrConf;
-    global $arrConfModule;
-   
-    $arrConf = array_merge($arrConf,$arrConfModule);
     
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
    	
     //conexion resource
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-   	$pACL = new paloACL($pDB);
+    $pACL = new paloACL($pDB);
     
-    //get actual User Id
-    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $uid = $pACL->getIdUser($user);
+    //user credentials
+    global $arrCredentials;
+    $uid = $arrCredentials['idUser'];
     
     //actions
     $accion = getAction();
  
     switch($accion){
         case "save":
-            $content = saveLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages,$uid); 
+            $content = saveLanguage($smarty, $module_name, $local_templates_dir, $arrConf, $pACL, $uid); 
             break;
         default:
-            $content = formLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages,$uid);
+            $content = formLanguage($smarty, $module_name, $local_templates_dir, $arrConf, $pACL, $uid);
             break;
     }
     return $content;
 }
 
-function formLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages,$uid)
+function formLanguage($smarty, $module_name, $local_templates_dir, $arrConf, $pACL, $uid)
 {   
-  $lang=get_language();
-  $error_msg='';
-  $archivos=array();
-  $langElastix=array();
-  $contenido=''; 
-  $msgError='';
-  $arrDefaultRate=array();
-  $conexionDB=FALSE;
-  
-  leer_directorio("/usr/share/elastix/lang",$error_msg,$archivos);
+    global $arrPermission;
+    $lang=get_language();
+    $error_msg='';
+    $archivos=array();
+    $langElastix=array();
+    $contenido=''; 
+    $msgError='';
+    $arrDefaultRate=array();
+    $conexionDB=FALSE;
+    
+    include "configs/languages.conf.php"; //este archivo crea el arreglo language que contine los idiomas soportados
+                                          //por elastix
+    leer_directorio("/usr/share/elastix/lang",$error_msg,$archivos);
     if (count($archivos)>0){
         foreach ($languages as $lang=>$lang_name){
             if (in_array("$lang.lang",$archivos))
@@ -98,37 +95,37 @@ function formLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrCo
         $smarty->assign("MSG_ERROR",$msgError);
         $smarty->assign("conectiondb",$conexionDB);
 	    $smarty->assign("icon","web/apps/$module_name/images/system_preferencies_language.png");
-   
-          
-        //obtener el valor de la tarifa por defecto
+        
+        if((in_array('edit',$arrPermission)))
+            $smarty->assign('EDIT_LANG',true);
+        
+        //obtener el valor del lenguage por defecto
         $defLang=$pACL->getUserProp($uid,'language');
         if (empty($defLang) || $defLang===false) $defLang="en";
             $arrDefault['language']=$defLang;
         $htmlForm = $oForm->fetchForm("$local_templates_dir/language.tpl", _tr("Language"), $arrDefault);
         $contenido = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>"; 
-}
+    }
 
      return $contenido;
 }
 
-function saveLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages, $uid){
-     
+function saveLanguage($smarty, $module_name, $local_templates_dir, $arrConf, $pACL, $uid){
     //guardar el nuevo valor
     $lang = $_POST['language'];
     if($uid!==false){
-		$bExito=$pACL->setUserProp($uid,'language',$lang,"system");
-   
-    }
-	else
-	$bExito=false;
-        //redirigir a la pagina nuevamente
+        $bExito=$pACL->setUserProp($uid,'language',$lang,"system");
+    }else
+        $bExito=false;
+    
+    //redirigir a la pagina nuevamente
     if ($bExito){
        header("Location: index.php?menu=language");
         
     }else{
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", $pACL->errMsg);
-        return formLanguage($smarty, $module_name, $local_templates_dir, $pACL, $arrConf, $languages, $uid, $lang);
+        return formLanguage($smarty, $module_name, $local_templates_dir, $arrConf, $pACL, $uid);
     }
  
 }
@@ -167,8 +164,9 @@ function leer_directorio($directorio,$error_msg,&$archivos){
 
 function getAction()
 {
+    global $arrPermission;
     if(getParameter("save_language")) //Get parameter by POST (submit)
-        return "save";
+        return (in_array('edit',$arrPermission))?'save':'report';
     else
         return "report";
 }

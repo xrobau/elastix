@@ -412,7 +412,7 @@ function viewFormOrganization($smarty, $module_name, $local_templates_dir, &$pDB
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
-    $smarty->assign("icon", "web/apps/organizaciones/images/organization.png");
+   // $smarty->assign("icon", "web/apps/organizaciones/images/organization.png");
 
     //variable usadas en el tpl
     //estas acciones solosp pueden ser realizadas por el susperadmin

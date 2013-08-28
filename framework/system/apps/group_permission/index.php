@@ -114,14 +114,18 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
 
     $lang = get_language();
     if($lang != "en"){
-        global $arrLang;
-        $filter_value = strtolower(trim($filter_resource));
-        $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
-        foreach($arrLang as $key=>$value){
-            $langValue=strtolower(trim($value));
-            if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-                if(strpos($langValue, $filter_value) !== FALSE)
-                    $parameter_to_find[] = $key;
+        if(isset($filter_resource)){
+            if(trim($filter_resource)!=""){
+                global $arrLang;
+                $filter_value = strtolower(trim($filter_resource));
+                $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
+                foreach($arrLang as $key=>$value){
+                    $langValue=strtolower(trim($value));
+                    if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
+                        if(strpos($langValue, $filter_value) !== FALSE)
+                            $parameter_to_find[] = $key;
+                }
+            }
         }
     }
 
@@ -312,14 +316,18 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
     $filter_resource = getParameter("filter_resource");
     $lang = get_language();
     if($lang != "en"){
-        global $arrLang;
-        $filter_value = strtolower(trim($filter_resource));
-        $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
-        foreach($arrLang as $key=>$value){
-            $langValue=strtolower(trim($value));
-            if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-                if(strpos($langValue, $filter_value) !== FALSE)
-                    $parameter_to_find[] = $key;
+        if(isset($filter_resource)){
+            if(trim($filter_resource)!=""){
+                global $arrLang;
+                $filter_value = strtolower(trim($filter_resource));
+                $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
+                foreach($arrLang as $key=>$value){
+                    $langValue=strtolower(trim($value));
+                    if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
+                        if(strpos($langValue, $filter_value) !== FALSE)
+                            $parameter_to_find[] = $key;
+                }
+            }
         }
     }
 

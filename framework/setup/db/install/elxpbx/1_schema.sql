@@ -321,7 +321,7 @@ INSERT INTO acl_resource VALUES('preferences', 'Preferences', 'system', '', '', 
 INSERT INTO acl_resource VALUES('language', 'Language', 'preferences', '', 'module', 1,'yes','yes');
 INSERT INTO acl_resource VALUES('themes_system', 'Themes', 'preferences', '', 'module', 2,'yes','yes');
 INSERT INTO acl_resource VALUES('time_config', 'Date/Time', 'preferences', '', 'module', 3,'yes','no'); -- superadmin
-INSERT INTO acl_resource VALUES('currency', 'Currency', 'preferences', '', 'module', 4,'yes','no'); 
+INSERT INTO acl_resource VALUES('currency', 'Currency', 'preferences', '', 'module', 4,'yes','yes'); 
 INSERT INTO acl_resource VALUES('email_admin', 'Email', '', '', '', 2,'yes','yes');
 INSERT INTO acl_resource VALUES('email_relay', 'Relay', 'email_admin', '', 'module', 2,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('antispam', 'Antispam', 'email_admin', '', 'module', 3,'yes','no'); -- superadmin

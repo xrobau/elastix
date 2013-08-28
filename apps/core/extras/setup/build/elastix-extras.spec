@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Instant Messaging: fix references to uninitialized variables.
+  SVN Rev[5811]
+
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents

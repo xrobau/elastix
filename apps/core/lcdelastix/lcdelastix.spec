@@ -56,6 +56,8 @@ fi
 
 %changelog
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Add and require support for setting logo in jbc1602 case.
+  SVN Rev[5815]
 - FIXED: Use correct units in memory applet in one line case.
   SVN Rev[5814]
 

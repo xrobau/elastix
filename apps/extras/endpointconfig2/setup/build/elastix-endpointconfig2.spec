@@ -128,6 +128,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add static provisioning support for 
+  Grandstream GXP1450.
+  SVN Rev[5817]
+
 * Tue Aug 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add support for Elastix LXP100
   SVN Rev[5777]

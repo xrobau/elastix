@@ -221,6 +221,22 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s failed to connect - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
+        try:
+            # Interface for GXP1450 firmware or similar
+            response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/update')
+            body = response.read()
+            logging.info('Endpoint %s@%s appears to have GXP1450 interface...' %
+                        (self._vendorname, self._ip))
+            return self._enableStaticProvisioning_GXP1450(vars)
+        except urllib2.HTTPError, e:
+            if e.code != 404:
+                logging.error('Endpoint %s@%s failed to detect GXP1450 - %s' %
+                    (self._vendorname, self._ip, str(e)))
+                return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
 
 
         
@@ -398,6 +414,32 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s GXV failed to connect - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
+
+    def _enableStaticProvisioning_GXP1450(self, vars):
+        try:
+            # Login into interface
+            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+            response = opener.open('http://' + self._ip + '/cgi-bin/dologin',
+                urllib.urlencode({'Login' : 'Login', 'P2' : self._http_password, 'gnkey' : '0b82'}))
+            body = response.read()
+            if 'dologin' in body:
+                logging.error('Endpoint %s@%s GXP1450 - dologin failed login' %
+                    (self._vendorname, self._ip))
+                return False
+
+            response = opener.open('http://' + self._ip + '/cgi-bin/update',
+                urllib.urlencode(vars) + '&gnkey=0b82')
+            body = response.read()
+            if 'dologin' in body:
+                logging.error('Endpoint %s@%s GXP1450 - dologin failed to keep session' %
+                    (self._vendorname, self._ip))
+                return False
+            return True
+        except socket.error, e:
+            logging.error('Endpoint %s@%s GXP1450 failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        
 
     def _rebootbytelnet(self):
         '''Start reboot of Grandstream phone by telnet'''

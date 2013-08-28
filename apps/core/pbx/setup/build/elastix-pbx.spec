@@ -307,6 +307,8 @@ fi
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+- ADDED: pbx -Build/elastix-pbx.spec: From this release onwards, the package 
+  has as a prerequisite the new version of FreePBX => 2.11.0 to be installed. 
 
 * Tue Aug 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: add support for Elastix LXP100.

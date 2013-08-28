@@ -85,3 +85,15 @@ network.bridge_mode = {{enable_bridge}}
 #######################################################################################
 #Configure the time zone and time zone name. The time zone ranges from -11 to +12, the default value is +8. 
 local_time.time_zone = {{time_zone}}
+
+
+#######################################################################################
+##            Contacts                                                               ##                                            
+#######################################################################################
+#Remote Phonebook 
+remote_phonebook.data.1.url = {{phonesrv}}/internal
+remote_phonebook.data.1.name = Elastix Phonebook - Internal
+remote_phonebook.data.2.url = {{phonesrv}}/external
+remote_phonebook.data.2.name = Elastix Phonebook - External
+directory.update_time_interval = 20
+

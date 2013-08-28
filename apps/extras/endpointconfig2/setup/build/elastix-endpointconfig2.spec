@@ -129,6 +129,8 @@ fi
 
 %changelog
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add phonebook support for Yealink.
+  SVN Rev[5818]
 - CHANGED: New Endpoint Configurator: add static provisioning support for 
   Grandstream GXP1450.
   SVN Rev[5817]

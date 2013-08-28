@@ -18,7 +18,7 @@ $mem_usage = ($arrInfo['MemTotal'] - $arrInfo['MemFree'] - $arrInfo['MemBuffers'
 $mem_usage = number_format($mem_usage * 100, 0);
 $mem_total = number_format($arrInfo['MemTotal']/1024, 0);
 if (count($argv) > 1) {
-    echo "{$mem_usage}% of {$mem_total}GB\n";
+    echo "{$mem_usage}% of {$mem_total}MB\n";
 } else {
     echo "MemUsage: $mem_usage%\n" .
          "MemTotal:{$mem_total}MB\n";

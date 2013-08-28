@@ -55,6 +55,10 @@ fi
 /opt/lcdelastix/*
 
 %changelog
+* Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Use correct units in memory applet in one line case.
+  SVN Rev[5814]
+
 * Fri Jul 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.0-0
 - CHANGED: Modify crystalfontz.pl to accept an optional argument to point the
   LCD character device.

@@ -35,11 +35,6 @@ function _moduleContent(&$smarty, $module_name)
 {
     //global variables
     global $arrConf;
-    global $arrConfModule;
-    
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-   
 
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -64,13 +59,12 @@ function _moduleContent(&$smarty, $module_name)
 
 function formCurrency($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
-    $pCurrency = new paloSantoCurrency($pDB);
+    global $arrPermission;
     $arrFormCurrency = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormCurrency);
 
     //CARGAR CURRENCY GUARDADO
     $curr = loadCurrentCurrency($pDB);
-
 
     if( $curr == false ) $curr = "$";
     $smarty->assign("SAVE", _tr("Save"));
@@ -79,6 +73,9 @@ function formCurrency($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     $smarty->assign("icon", "web/apps/$module_name/images/system_preferences_currency.png");
     $_POST['currency'] = $curr;
 
+    if((in_array('edit',$arrPermission)))
+        $smarty->assign('EDIT_CURR',true);
+    
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Currency"), $_POST);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
@@ -87,10 +84,11 @@ function formCurrency($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
 function saveCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
 {   
+    global $arrCredentials;
     $curr = getParameter("currency");
     $oPalo = new paloSantoCurrency($pDB);
     //print_r($curr);
-    $bandera = $oPalo->SaveOrUpdateCurrency($curr);
+    $bandera = $oPalo->SaveOrUpdateCurrency($arrCredentials['id_organization'],$curr);
 
     if($bandera == true ){
         $smarty->assign("mb_title", _tr("Message"));
@@ -123,16 +121,18 @@ function createFieldForm()
 
 function getAction()
 {
+    global $arrPermission;
     if(getParameter("save"))
-        return "save";
+        return (in_array('edit',$arrPermission))?'save':'report';
     else
         return "report";
 }
 
 function loadCurrentCurrency($pDB)
 {
+    global $arrCredentials;
     $oPalo = new paloSantoCurrency($pDB);
-    return $oPalo->loadCurrency();
+    return $oPalo->loadCurrency($arrCredentials['id_organization']);
 }
 
 function getCurrencys()

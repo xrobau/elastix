@@ -52,20 +52,18 @@ class paloSantoCurrency {
         }
     }
 
-    function loadCurrency()
+    function loadCurrency($idOrganization)
     {
         $pORGZ = new paloSantoOrganization($this->_DB);
-        $arrCredentials = getUserCredentials();
-        $currency = $pORGZ->getOrganizationProp($arrCredentials['id_organization'], 'currency');
+        $currency = $pORGZ->getOrganizationProp($idOrganization, 'currency');
         if ($currency === false) $this->errMsg = $pORGZ->errMsg;
         return $currency;
     }
 
-    function SaveOrUpdateCurrency($curr)
+    function SaveOrUpdateCurrency($idOrganization,$curr)
     {
         $pORGZ = new paloSantoOrganization($this->_DB);
-        $arrCredentials = getUserCredentials();
-        $r = $pORGZ->setOrganizationProp($arrCredentials['id_organization'], 'currency', $curr);
+        $r = $pORGZ->setOrganizationProp($idOrganization, 'currency', $curr);
         if (!$r) $this->errMsg = $pORGZ->errMsg;
         return $r;
     }

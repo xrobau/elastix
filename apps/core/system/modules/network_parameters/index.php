@@ -230,7 +230,7 @@ function saveNetwork($smarty, $module_name, $local_templates_dir,$pNet){
                 $smarty->assign("mb_message", $pNet->errMsg);
             } else {
               
-            header("Location: index.php?menu=network");
+                header("Location: index.php?menu=network");
 
             }
         } else {
@@ -318,14 +318,15 @@ function editInterface($smarty, $module_name, $local_templates_dir,$pNet,$arrEth
         
     
 function getAction(){
-    if(getParameter("edit")) 
-        return "edit_network";
+    global $arrPermission;
+    if(getParameter("edit"))
+        return (in_array('edit_network',$arrPermission))?'edit_network':'report';
     if(getParameter("save_interfase_changes"))
-        return "save_interface";
+        return (in_array('edit_interface',$arrPermission))?'save_interface':'report';
     if(getParameter("save_network_changes"))
-        return "save_network";
+        return (in_array('edit_network',$arrPermission))?'save_network':'report';
     if (getParameter("action") == "editInterfase")
-        return "edit_interface";
+        return (in_array('access_interface',$arrPermission))?'edit_interface':'report';
     else
         return "report";
 }

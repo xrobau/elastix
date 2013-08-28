@@ -130,7 +130,6 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $oGrid->setWidth("99%");
     $oGrid->setStart(($total==0) ? 0 : $offset + 1);
     $oGrid->setEnd($end);
-    $oGrid->setTotal($total);
     
     $arrColumns=array();
     if($credentials["userlevel"]=="superadmin"){

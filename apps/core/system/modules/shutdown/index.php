@@ -32,15 +32,13 @@
  *                     shutdown
  */
 function _moduleContent(&$smarty, $module_name) {
-
-    //global variables
-    global $arrConf;
-    
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
     
     //user credentials
     global $arrCredentials;
+    
+    global $arrPermission;
     
     $action=getAction();
     $content = "";

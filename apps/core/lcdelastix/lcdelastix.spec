@@ -1,6 +1,6 @@
 Summary: LCDproc client for Elastix status display
 Name: lcdelastix
-Version: 1.4.0
+Version: 1.4.1
 Release: 0
 License: GPL
 Group: Applications/System
@@ -55,7 +55,8 @@ fi
 /opt/lcdelastix/*
 
 %changelog
-* Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.1-0
+- Bump version for release.
 - CHANGED: Add and require support for setting logo in jbc1602 case.
   SVN Rev[5815]
 - FIXED: Use correct units in memory applet in one line case.

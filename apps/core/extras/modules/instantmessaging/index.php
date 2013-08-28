@@ -58,6 +58,7 @@ function _moduleContent(&$smarty, $module_name)
 
     $content = "";
 
+    $action = NULL;
     switch($action){
         default: // view_form
             $content = viewFormInstant_Messaging($smarty, $module_name, $local_templates_dir, $arrConf);
@@ -79,7 +80,7 @@ function viewFormInstant_Messaging($smarty, $module_name, $local_templates_dir, 
     $smarty->assign("imess1_manufacturer_description", _tr("spark_manufacturer_description"));
 
     $oForm    = new paloForm($smarty,array());
-    $content = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Instant Messaging"), $_DATA);
+    $content = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Instant Messaging"));
 
     return $content;
 }

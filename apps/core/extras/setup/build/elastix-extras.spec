@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Instant Messaging: fix references to uninitialized variables.
+  SVN Rev[5811]
+
 * Wed Aug 21 2012 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
   SVN history. Bumped release in specfile.

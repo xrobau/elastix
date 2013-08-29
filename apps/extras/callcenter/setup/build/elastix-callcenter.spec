@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Aug 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: initialize variable to NULL in case the regexp does not match
+  on msg_Dial. Also relax the regexp a bit. Attempt to fix Elastix bug #1682.
+  SVN Rev[5819]
+
 * Mon Aug  5 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Incoming Campaigns: fix missing SQL parameter to UNION query for 
   campaign forms. Fixes Elastix bug #1641.

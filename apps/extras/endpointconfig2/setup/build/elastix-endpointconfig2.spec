@@ -128,6 +128,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Aug 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add phonebook search capability to Cisco 
+  XML services.
+  SVN Rev[5820]
+
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add phonebook support for Yealink.
   SVN Rev[5818]

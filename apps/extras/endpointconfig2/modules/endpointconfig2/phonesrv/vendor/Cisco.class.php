@@ -134,7 +134,7 @@ HELPTEXT;
         header('Content-Type: text/xml');
         print $xml->asXML();
     }
-    
+
     private function _handle_directory($id_endpoint, $pathList)
     {
         $limit = 32;    // Máximo número de entradas por directorio
@@ -144,14 +144,24 @@ HELPTEXT;
         
         $userdata = $this->obtenerUsuarioElastix($id_endpoint);
         if (!is_null($userdata)) $_SERVER['PHP_AUTH_USER'] = $userdata['name_user'];
+
+        if (isset($_GET['search']) && empty($_GET['search'])) unset($_GET['search']);
         
         $pCore_AddressBook = new core_AddressBook();
 
         if (count($pathList) <= 0) {
     		// Se elaboran tantos menús como sea requerido para cubrir todas las páginas
             $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneMenu/>');
-            $xml->addChild('Title', str_replace('&', '&amp;', _tr('Phone Directory')));
+            
+            if (!isset($_GET['search'])) {
+                $xml->addChild('Title', str_replace('&', '&amp;', _tr('Phone Directory')));
+                $this->_ciscoMenuItem($xml, _tr('Search'), 
+                    $this->_baseurl.'/directorysearch/?name='.$_GET['name']);
+            } else {
+                $xml->addChild('Title', str_replace('&', '&amp;', _tr('Search Results')));
+            }
             $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
+            
             foreach ($typemap as $addressBookType => $v) {
                 $result = $pCore_AddressBook->listAddressBook($addressBookType, NULL, NULL, NULL);
                 if (!is_array($result)) {
@@ -164,10 +174,19 @@ HELPTEXT;
                     return;
                 }
                 
-                for ($offset = 0, $page = 1; $offset < $result['totalCount']; $offset += $limit, $page++) {
-                    $this->_ciscoMenuItem($xml,
-                        "$v - "._tr('Page')." $page",
-                        $this->_baseurl.'/directory/'.$addressBookType.'?name='.$_GET['name'].'&offset='.$offset);
+                if (!isset($_GET['search']))
+                    $total = $result['totalCount'];
+                else {
+                	$total = 0;
+                    foreach ($result['extension'] as $contact) {
+                        if ($this->_filter_direntry_name($contact, $_GET['search'])) $total++;
+                    }
+                }
+                
+                for ($offset = 0, $page = 1; $offset < $total; $offset += $limit, $page++) {
+                    $url = $this->_baseurl.'/directory/'.$addressBookType.'?name='.$_GET['name'].'&offset='.$offset;
+                    if (isset($_GET['search'])) $url .= '&search='.urlencode($_GET['search']);
+                    $this->_ciscoMenuItem($xml, "$v - "._tr('Page')." $page", $url);
                 }
             }
     	} else {
@@ -179,7 +198,21 @@ HELPTEXT;
                 header('Location: '.$this->_baseurl.'/directory?name='.$_GET['name']);
             	return;
             }
-            $result = $pCore_AddressBook->listAddressBook($addressBookType, $offset, $limit, NULL);
+            if (!isset($_GET['search'])) {
+                $result = $pCore_AddressBook->listAddressBook($addressBookType, $offset, $limit, NULL);
+            } else {
+            	$t = $pCore_AddressBook->listAddressBook($addressBookType, NULL, NULL, NULL);
+                $result = array(
+                    'totalCount' => 0,
+                    'extension' =>  array(),
+                );
+                foreach ($t['extension'] as $contact) {
+                    if ($this->_filter_direntry_name($contact, $_GET['search'])) {
+                    	$result['extension'][] = $contact;
+                        $result['totalCount']++;
+                    }
+                }
+            }
             if (!is_array($result)) {
                 $error = $pCore_AddressBook->getError();
                 if ($error["fc"] == "DBERROR")
@@ -202,6 +235,33 @@ HELPTEXT;
                 $xml_direntry->addChild('Telephone', str_replace('&', '&amp;', $contact['work_phone']));
             }
     	}
+    
+        header('Content-Type: text/xml');
+        print $xml->asXML();
+    }
+
+    private function _filter_direntry_name(&$contact, $name)
+    {
+        $fullname = $contact['name'];
+        if (isset($contact['last_name'])) {
+            $fullname .= ' '.$contact['last_name'];
+        }
+
+        return (stripos($fullname, $name) !== FALSE);
+    }
+    
+
+    private function _handle_directorysearch($id_endpoint, $pathList)
+    {
+    	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneInput/>');
+        $xml->addChild('Title', str_replace('&', '&amp;', _tr('Search Phone Directory')));
+        $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Enter text to search')));
+        $xml->addChild('URL', $this->_baseurl.'/directory?name='.$_GET['name']);
+        $xml_inputitem = $xml->addChild('InputItem');
+        $xml_inputitem->addChild('DisplayName', str_replace('&', '&amp;', _tr('Text')));
+        $xml_inputitem->addChild('QueryStringParam', 'search');
+        $xml_inputitem->addChild('InputFlags');
+        $xml_inputitem->addChild('DefaultValue');
     
         header('Content-Type: text/xml');
         print $xml->asXML();

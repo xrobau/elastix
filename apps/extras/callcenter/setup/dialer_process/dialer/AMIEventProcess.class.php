@@ -1315,7 +1315,8 @@ class AMIEventProcess extends TuberiaProcess
                         $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
                     } elseif ($llamada->actualchannel != $params['Destination']) {
                         $regs = NULL;
-                        if (preg_match('|^(\w+/\d+)(\-\w+)?$|', $params['Destination'], $regs)) {
+                        $sCanalPosibleAgente = NULL;
+                        if (preg_match('|^(\w+/\w+)(\-\w+)?$|', $params['Destination'], $regs)) {
                         	$sCanalPosibleAgente = $regs[1];
                             $a = $this->_listaAgentes->buscar('agentchannel', $sCanalPosibleAgente);
                             if (!is_null($a) && $a->estado_consola == 'logged-in') {

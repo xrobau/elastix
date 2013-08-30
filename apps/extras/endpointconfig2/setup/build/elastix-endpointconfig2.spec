@@ -129,6 +129,8 @@ fi
 
 %changelog
 * Fri Aug 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add basic Digium phones support.
+  SVN Rev[5822] 
 - CHANGED: New Endpoint Configurator: update Ember.js to 1.0.0-rc8
   SVN Rev[5821]
 

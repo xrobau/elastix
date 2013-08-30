@@ -46,7 +46,7 @@ class Endpoint(BaseEndpoint):
                 (Endpoint._global_serverip, sIP, sServerIP))
 
     @staticmethod
-    def updateGlobalConfig(serverip):
+    def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Zultys endpoints (global):
         
         Apparently, each supported model fetches a common file named 

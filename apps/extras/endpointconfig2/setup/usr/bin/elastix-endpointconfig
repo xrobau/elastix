@@ -248,12 +248,14 @@ def applyConfig():
     
     # Dynamically load all of the endpoint classes
     endpointClasses = {}
+    endpointByClass = {}
     for ip in endpointList:
         if not (endpointList[ip]['manufacturer'] in endpointClasses):
             pkgname = endpointList[ip]['manufacturer'].replace('-', '')
             pkg = 'elastix.vendor.' + pkgname
             vendormodule = __import__(pkg, {}, {}, pkg.split('.')[:-1])
             endpointClasses[endpointList[ip]['manufacturer']] = vendormodule.Endpoint
+            endpointByClass[endpointList[ip]['manufacturer']] = []
         eclass = endpointClasses[endpointList[ip]['manufacturer']]
         
         # Create the manufacturer-specific Endpoint object
@@ -273,6 +275,7 @@ def applyConfig():
             return
         endpoint.setAccountList(endpointList[ip]['accounts'])
         endpointList[ip]['endpoint'] = endpoint
+        endpointByClass[endpointList[ip]['manufacturer']].append(endpoint)
     
     # Update global configuration for all the endpoint vendors
     iTotalSteps = len(endpointClasses) + 2 * len(endpointList)
@@ -281,7 +284,8 @@ def applyConfig():
         eclass = endpointClasses[endpointVendor]
         logging.info('(%d/%d) global configuration update for %s...' %
             (iCurrentStep, iTotalSteps, endpointVendor))
-        if not eclass.updateGlobalConfig(serveriplist.keys()[0]):
+        #if not eclass.updateGlobalConfig(serveriplist.keys()[0], amipool, endpointByClass[endpointVendor]):
+        if not eclass.updateGlobalConfig(serveriplist, amipool, endpointByClass[endpointVendor]):
             logging.error('ERR: global configuration update failed for %s' % (endpointVendor,))
             return
         iCurrentStep += 1
@@ -433,7 +437,7 @@ def listIpAddresses():
 				sIpAddr = regs.group(1)
 				ip = sIpAddr.split('.')
 				ipval = (int(ip[0]) << 24) | (int(ip[1]) << 16) | (int(ip[2]) << 8) | int(ip[3])
-				iflist[sIpAddr] = { 'netmask': iMask, 'network': (ipval & iMask) }
+				iflist[sIpAddr] = { 'netbits' : iMaskBits, 'netmask': iMask, 'network': (ipval & iMask) }
 	return iflist
 
 def chooseServerIP(iplist, endpointIp):

@@ -40,13 +40,26 @@ TFTP_DIR = '/tftpboot'
 class BaseEndpoint(object):
     
     @staticmethod
-    def updateGlobalConfig(serverip):
+    def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Set up global environment for this manufacturer
         
         Typically this entails creating a directory structure under /tftpboot 
         and/or creating global configuration files under same directory.
         '''
         return True
+
+    @staticmethod
+    def chooseServerIP(iplist, endpointIp):
+        '''Choose a server IP whose network matches the one of the endpoint'''
+        defaultip = None
+        ip = endpointIp.split('.')
+        ipval = (int(ip[0]) << 24) | (int(ip[1]) << 16) | (int(ip[2]) << 8) | int(ip[3])
+        for serverip in iplist:
+            netinfo = iplist[serverip]
+            if defaultip == None: defaultip = serverip
+            if (ipval & netinfo['netmask']) == netinfo['network']:
+                return serverip
+        return defaultip
     
     def __init__(self, sVendorName, amipool, dbpool, sServerIP, sIP, mac):
         '''Base class constructor for an endpoint. '''

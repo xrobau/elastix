@@ -47,7 +47,7 @@ class Endpoint(BaseEndpoint):
     # FIXME: currently no known way to probe phone model remotely
 
     @staticmethod
-    def updateGlobalConfig(serverip):
+    def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Polycom endpoints (global):
         
         Server definition goes in /tftpboot/server.cfg

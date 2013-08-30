@@ -33,8 +33,16 @@ from elastix.BaseEndpoint import BaseEndpoint
 from eventlet.green import urllib2
 
 class Endpoint(BaseEndpoint):
+    _global_serverip = None
+    
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Aastra', amipool, dbpool, sServerIP, sIP, mac)
+        if Endpoint._global_serverip == None:
+            Endpoint._global_serverip = sServerIP
+        elif Endpoint._global_serverip != sServerIP:
+            logging.warning('global server IP is %s but endpoint %s requires ' + 
+                'server IP %s - this endpoint might not work correctly.' %
+                (Endpoint._global_serverip, sIP, sServerIP))
 
     def probeModel(self):
         '''Probe specific model of Aastra phone
@@ -85,7 +93,7 @@ class Endpoint(BaseEndpoint):
         if sModel != None: self._saveModel(sModel)
 
     @staticmethod
-    def updateGlobalConfig(serverip):
+    def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Aastra endpoints (global)
         
         SIP global definition goes in /tftpboot/aastra.cfg. Even though its 
@@ -93,7 +101,7 @@ class Endpoint(BaseEndpoint):
         a SIP server, this file must exist and have a "valid" (even if redundant)
         configuration, or the phone will refuse to boot.
         '''
-        vars = {'server_ip' : serverip}
+        vars = {'server_ip' : Endpoint._global_serverip}
         try:
             sConfigFile = 'aastra.cfg'
             sConfigPath = elastix.BaseEndpoint.TFTP_DIR + '/' + sConfigFile

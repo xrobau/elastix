@@ -84,7 +84,7 @@ class Endpoint(BaseEndpoint):
         if sModel != None: self._saveModel(sModel)
 
     @staticmethod
-    def updateGlobalConfig(serverip):
+    def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Snom endpoints (global):
         
         SIP global definition goes in /tftpboot/snom{300|320|360}.htm

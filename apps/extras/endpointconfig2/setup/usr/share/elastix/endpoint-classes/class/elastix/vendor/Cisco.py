@@ -37,8 +37,16 @@ telnetlib = eventlet.import_patched('telnetlib')
 
 
 class Endpoint(BaseEndpoint):
+    _global_serverip = None
+    
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Cisco', amipool, dbpool, sServerIP, sIP, mac)
+        if Endpoint._global_serverip == None:
+            Endpoint._global_serverip = sServerIP
+        elif Endpoint._global_serverip != sServerIP:
+            logging.warning('global server IP is %s but endpoint %s requires ' + 
+                'server IP %s - this endpoint might not work correctly.' %
+                (Endpoint._global_serverip, sIP, sServerIP))
 
     # TODO: might be possible to derive model from MAC range, requires database change
 
@@ -89,7 +97,7 @@ class Endpoint(BaseEndpoint):
         
 
     @staticmethod
-    def updateGlobalConfig(serverip):
+    def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Cisco endpoints (global)
         
         SIP global definition goes in /tftpboot/SIPDefault.cnf and has a 
@@ -107,7 +115,7 @@ class Endpoint(BaseEndpoint):
         
         vars = {
             'firmware_version'  : sFirmwareVersion,
-            'phonesrv'          : BaseEndpoint._buildPhoneProv(serverip, 'Cisco', 'GLOBAL'),
+            'phonesrv'          : BaseEndpoint._buildPhoneProv(Endpoint._global_serverip, 'Cisco', 'GLOBAL'),
         }
         try:
             sConfigFile = 'SIPDefault.cnf'

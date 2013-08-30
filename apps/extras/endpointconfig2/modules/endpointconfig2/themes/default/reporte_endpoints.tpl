@@ -172,11 +172,11 @@
 </script>
 
 <script type="text/x-handlebars" data-template-name="neo-navigation">
-    <span {literal}{{action displayStart}}{/literal}><img style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-first.gif" width="16" height="16" alt='{$lblStart}' align='absmiddle' /></span>
-    <span {literal}{{action displayPrevious }}{/literal}><img  style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-previous.gif" width="16" height="16" alt='{$lblPrevious}' align='absmiddle' /></span>
+    <span {literal}{{action "displayStart"}}{/literal}><img style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-first.gif" width="16" height="16" alt='{$lblStart}' align='absmiddle' /></span>
+    <span {literal}{{action "displayPrevious" }}{/literal}><img  style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-previous.gif" width="16" height="16" alt='{$lblPrevious}' align='absmiddle' /></span>
     ({$showing} {literal}{{startPosition}} - {{endPosition}}{/literal} {$of} <span>{literal}{{completeList.length}}{/literal}</span>)
-    <span {literal}{{action displayNext}}{/literal}><img style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-next.gif" width="16" height="16" alt='{$lblNext}' align='absmiddle' /></span>
-    <span {literal}{{action displayEnd}}{/literal}><img style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-last.gif" width="16" height="16" alt='{$lblEnd}' align='absmiddle' /></span>
+    <span {literal}{{action "displayNext"}}{/literal}><img style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-next.gif" width="16" height="16" alt='{$lblNext}' align='absmiddle' /></span>
+    <span {literal}{{action "displayEnd"}}{/literal}><img style="cursor: pointer;" src="modules/{$module_name}/images/table-arrow-last.gif" width="16" height="16" alt='{$lblEnd}' align='absmiddle' /></span>
 </script>
 </div>
 

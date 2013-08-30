@@ -35,7 +35,7 @@
         <td valign="top" width="50%">
             {{#view App.StandardUnboundAccountsView controllerBinding="App.accountsController"}}
             {{#each controller}}
-                <li {{bindAttr id="idattr"}} {{action selectAccount this }} >{{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}</li>
+                <li {{bindAttr id="idattr"}} {{action "selectAccount" this }} >{{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}</li>
             {{/each}}
             {{/view}}
         </td>
@@ -43,7 +43,7 @@
             <table border="0" width="100%"><tbody><tr><td>
             {{#view App.StandardBoundAccountsView controllerBinding="details.accountsController"}}
             {{#each controller}}
-                <li {{bindAttr id="idattr"}} {{action selectAccount this }} >{{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}</li>
+                <li {{bindAttr id="idattr"}} {{action "selectAccount" this }} >{{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}</li>
             {{/each}}
             {{/view}}
             </td></tr>
@@ -65,9 +65,9 @@
     </div>
     <div id="endpointconfig-standard-network">
         {literal}{{#view App.NetworkTypeView controllerBinding="controller" }}
-            <input value="1" id="networktype-isDHCP" type="radio" name="networktype" {{action setDHCP on="change"}} {{bindAttr checked="isDHCP"}} />
+            <input value="1" id="networktype-isDHCP" type="radio" name="networktype" {{action "setDHCP" on="change"}} {{bindAttr checked="isDHCP"}} />
             <label for="networktype-isDHCP">{/literal}{$DIALOG_STANDARD_LBL_DYNIP}{literal}</label>
-            <input value="0" id="networktype-isStatic" type="radio" name="networktype" {{action setStatic on="change"}} {{bindAttr checked="isStatic"}} />
+            <input value="0" id="networktype-isStatic" type="radio" name="networktype" {{action "setStatic" on="change"}} {{bindAttr checked="isStatic"}} />
             <label for="networktype-isStatic">{/literal}{$DIALOG_STANDARD_LBL_STATICIP}{literal}</label>
         {{/view}}{/literal}
         {literal}{{#if isStatic}}{/literal}

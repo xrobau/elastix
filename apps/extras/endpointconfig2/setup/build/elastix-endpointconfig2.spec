@@ -2,7 +2,7 @@
 
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
-Version: 0.0.1
+Version: 0.0.2
 Release: 0
 License: GPL
 Group:   Applications/System
@@ -128,7 +128,8 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Fri Aug 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Aug 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.2-0
+- Bump version for release
 - CHANGED: New Endpoint Configurator: add basic Digium phones support.
   SVN Rev[5822] 
 - CHANGED: New Endpoint Configurator: update Ember.js to 1.0.0-rc8

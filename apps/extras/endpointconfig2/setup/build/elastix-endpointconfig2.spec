@@ -128,6 +128,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sun Sep  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: update Ember.js to 1.0.0
+  SVN Rev[5824]
+
 * Fri Aug 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.2-0
 - Bump version for release
 - CHANGED: New Endpoint Configurator: add basic Digium phones support.

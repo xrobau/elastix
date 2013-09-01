@@ -129,6 +129,9 @@ fi
 
 %changelog
 * Sun Sep  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: use GET for read requests whenever 
+  possible.
+  SVN Rev[5825]
 - CHANGED: New Endpoint Configurator: update Ember.js to 1.0.0
   SVN Rev[5824]
 

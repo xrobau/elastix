@@ -143,7 +143,7 @@ $(document).ready(function() {
 		// Iniciar la carga de los detalles del endpoint
 		loadDetails: function() {
 			// Carga de los detalles del endpoint elegido
-			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
+			$.get('index.php', {
 				menu:		module_name, 
 				rawmode:	'yes',
 				action:		this.get('detail_dialog') + '_loadDetails',
@@ -212,7 +212,7 @@ $(document).ready(function() {
 	App.ConfigLog = Ember.Object.extend({
 		log: null,
 		init: function() {
-			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
+			$.get('index.php', {
 				menu:		module_name, 
 				rawmode:	'yes',
 				action:		'getConfigLog'
@@ -322,7 +322,7 @@ $(document).ready(function() {
 		},
 		loadEndpoints: function() {
 			this.set('loading', true);
-			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
+			$.get('index.php', {
 				menu:		module_name, 
 				rawmode:	'yes',
 				action:		'loadEndpoints'
@@ -354,7 +354,7 @@ $(document).ready(function() {
 		loadModels: function() {
 			if (App.modelos == null) {
 				this.set('loading', true);
-				$.post('index.php?menu=' + module_name + '&rawmode=yes', {
+				$.get('index.php', {
 					menu:		module_name, 
 					rawmode:	'yes',
 					action:		'loadModels'
@@ -400,7 +400,7 @@ $(document).ready(function() {
 		}.property('scanInProgress', 'unsetInProgress', 'configInProgress'),		
 		
 		loadStatus: function() {
-			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
+			$.get('index.php', {
 				menu:		module_name, 
 				rawmode:	'yes',
 				action:		'loadStatus'
@@ -616,7 +616,7 @@ $(document).ready(function() {
 		content: null,
 		loadUnassignedAccounts: function() {
 			// Carga de las cuentas SIP e IAX disponibles para asignar al endpoint
-			$.post('index.php?menu=' + module_name + '&rawmode=yes', {
+			$.get('index.php', {
 				menu:		module_name, 
 				rawmode:	'yes',
 				action:		'loadUnassignedAccounts'

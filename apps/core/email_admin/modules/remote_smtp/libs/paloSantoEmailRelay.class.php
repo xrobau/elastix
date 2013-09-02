@@ -51,7 +51,7 @@ class paloSantoEmailRelay {
 
     function getMainConfigByAll()
     {
-        $query  = "SELECT id, name, value FROM email_relay ";
+        $query  = "SELECT name, value FROM email_relay ";
         $result = $this->_DB->fetchTable($query, true);
 
         if($result==FALSE){

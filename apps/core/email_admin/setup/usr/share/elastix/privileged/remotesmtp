@@ -31,6 +31,9 @@
 
 require_once 'Console/Getopt.php';
 
+// Ugly - should not depend on anything under /var/www/html
+$elxPath="/usr/share/elastix";
+ini_set('include_path',"$elxPath:".ini_get('include_path'));
 
 $opt = Console_Getopt::getopt($argv, '', array(
     'enableremote', // Enable remote SMPT if set
@@ -94,7 +97,9 @@ function action_enableremotesmtp($opt)
     }
 
     try {
-        $conn = new PDO('sqlite:/var/www/db/email.db');
+        require_once('libs/misc.lib.php');
+        $arrDBConn=parseDSN(generarDSNSistema("asteriskuser","elxpbx"));
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $conn->beginTransaction();
         
@@ -207,5 +212,44 @@ function action_enableremotesmtp($opt)
         system('/sbin/service postfix restart');
     }
     return $bSuccess;
+}
+
+function parseDSN($dsn){
+    //$dsn => databasemotor://username:password@hostspec/database
+    //mysql => mysql://username:password@hostspec/database
+    //squlite => sqlite:///database
+    $database=$username=$password=$hostspec=$dbname=false;
+    //get the technology
+    if(($pos = strpos($dsn, '://')) !== false) {
+        $database = substr($dsn, 0, $pos);
+        $dsn = substr($dsn, $pos + 3);
+    } else {
+        return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
+    }
+     
+    //username y password en caso de haberlos
+    if (($at = strrpos($dsn,'@')) !== false) {
+        $str = substr($dsn, 0, $at);
+        $dsn = substr($dsn, $at + 1);
+        if (($pos = strpos($str, ':')) !== false) {
+            $username = rawurldecode(substr($str, 0, $pos));
+            $password = rawurldecode(substr($str, $pos + 1));
+        } else {
+            $username = rawurldecode($str);
+        }
+    }
+    
+    //hostspec 
+    if (strpos($dsn, '/') !== false) {
+        list($hostspec, $dbname) = explode('/', $dsn, 2);
+    }
+        
+    if($database=="squlite" || $database=="squlite3"){
+        $dsn="squlite:$dbname";
+    }elseif($database=="mysql"){
+        $dsn="$database:dbname=$dbname;host=$hostspec";
+    }
+    
+    return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
 }
 ?>

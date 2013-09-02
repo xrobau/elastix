@@ -32,7 +32,8 @@
 require_once 'Console/Getopt.php';
 
 // Ugly - should not depend on anything under /var/www/html
-ini_set('include_path', '/var/www/html:'.ini_get('include_path'));
+$elxPath="/usr/share/elastix";
+ini_set('include_path',"$elxPath:".ini_get('include_path'));
 
 $opt = Console_Getopt::getopt($argv, '', array(
     'getdeleteperiod',  // Dump spam delete period
@@ -245,8 +246,8 @@ function _enable_sieve($iDeletePeriod)
     if (!is_null($iDeletePeriod)) {
         // Enable cronjob for removal of old spam messages
     	$sContentCron = <<<CRON_JOB
-55 23 * * *  root /usr/bin/php -q /var/www/checkSpamFolder.php
-59 23 * * *  root /usr/bin/php -q /var/www/deleteSpam.php $iDeletePeriod
+55 23 * * *  root /usr/bin/php -q /var/www/elastixdir/scripts/checkSpamFolder.php
+59 23 * * *  root /usr/bin/php -q /var/www/elastixdir/scripts/deleteSpam.php $iDeletePeriod
 CRON_JOB;
         if  (FALSE === file_put_contents('/etc/cron.d/checkSpamFolder.cron', $sContentCron)) {
             error_exit("ERR: failed to write cronjob\n");
@@ -269,16 +270,17 @@ function _toggleAntispamScripts($bEnable)
     // Load all accounts and passwords - we need this list several times later
     $userInfoList = array();
     try {
-        $conn = new PDO('sqlite:/var/www/db/email.db');
+        require_once('libs/misc.lib.php');
+        $arrDBConn=parseDSN(generarDSNSistema("asteriskuser","elxpbx"));
+        $conn = new PDO($arrDBConn["dsn"],$arrDBConn["user"],$arrDBConn["passwd"]);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         $sqlEmailInfo = <<<EMAIL_INFO
-SELECT username, password, subject, end_date, body FROM accountuser
-LEFT JOIN messages_vacations on accountuser.username = messages_vacations.account
+SELECT username, subject, end_date, body FROM acl_user u
+LEFT JOIN messages_vacations ON u.username = messages_vacations.account
 EMAIL_INFO;
         foreach ($conn->query($sqlEmailInfo) as $row) {
         	$userInfoList[$row['username']] = array(
-                'password'  =>  $row['password'],
                 'subject'   =>  $row['subject'],
                 'end_date'  =>  $row['end_date'],
                 'body'      =>  $row['body'],
@@ -296,91 +298,82 @@ EMAIL_INFO;
         error_exit("ERR: failed to login to IMAP\n");
     }
     
+    $regexpUsuario =  '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
     // Check all accounts for a spam folder and create it if it does not exist
     foreach ($userInfoList as $email => $emailInfo) {
-    	// This assumes $email is a proper username@domain string
-        list($sUsername, $sDomain) = explode('@', $email);
-        $sSpamDomainFolder = 'Spam@'.str_replace('.', '/', $sDomain);
-        $bSpamFound = FALSE;
-        foreach ($cyr_conn->GetFolders("*{$sUsername}*") as $sFolder) {
-        	if (strpos($sFolder, $sSpamDomainFolder)) {
-                $bSpamFound = TRUE;
-        	}
-        }
-        if (!$bSpamFound) {
-            // No spam folder, proceed to create
-            if (!$cyr_conn->createmb("user/{$sUsername}/Spam@{$sDomain}")) {
-                fwrite(STDERR, 'ERR: Error creating Spam folder: '.$cyr_conn->getMessage()."\n");
-            } elseif ($emailInfo['password'] != '') {
-                // Subscribe user to newly created spam folder
-                $cyr_conn_user = new cyradm;
-                $cyr_conn_user->admin = $email;
-                $cyr_conn_user->pass = $emailInfo['password'];
-                if (FALSE === $cyr_conn_user->imap_login()) {
-                    fwrite(STDERR, 'WARN: IMAP login error for user '.$email."\n");
-                } else {
-                    if ($cyr_conn_user->command('. subscribe Spam') === FALSE) {
-                        fwrite(STDERR, 'WARN: Error subscribe Spam folder: '.$cyr_conn->getMessage()."\n");
-                    }
-                    $cyr_conn_user->imap_logout();
+        if(preg_match($regexpUsuario, $email)){
+            // This assumes $email is a proper username@domain string
+            list($sUsername, $sDomain) = explode('@', $email);
+            $sSpamDomainFolder = 'Spam@'.str_replace('.', '/', $sDomain);
+            $bSpamFound = FALSE;
+            foreach ($cyr_conn->GetFolders("*{$sUsername}*") as $sFolder) {
+                if (strpos($sFolder, $sSpamDomainFolder)) {
+                    $bSpamFound = TRUE;
                 }
+            }
+            if (!$bSpamFound) {
+                // No spam folder, proceed to create
+                if (!$cyr_conn->createmb("user/{$sUsername}/Spam@{$sDomain}")) {
+                    fwrite(STDERR, 'ERR: Error creating Spam folder: '.$cyr_conn->getMessage()."\n");
+                } 
             }
         }
     }    
-    $cyr_conn->imap_logout();
     
     // Write antispam scripts to sieve configuration
-    require_once('modules/antispam/libs/sieve-php.lib.php');
+    require_once('apps/antispam/libs/sieve-php.lib.php');
     $sVacationName = 'vacations.sieve';
     $sAntispamName = 'scriptTest.sieve';
     $sAntispamScript = _getContentAntispamScript();
     foreach ($userInfoList as $email => $emailInfo) {
-        $sieve = new sieve('localhost', 4190, 'cyrus', $CYRUS['PASS'], $email);
-        if (!$sieve->sieve_login()) {
-        	fwrite(STDERR, "WARN: failed to login to sieve using admin password!\n");
-            break;
-        }
-        
-        // Check for vacation script
-        $sieve->sieve_listscripts();
-        if (isset($sieve->response) && isset($sieve->response['ACTIVE']) && 
-            $sieve->response['ACTIVE'] == $sVacationName && !empty($emailInfo['subject'])) {
-            // Active vacation script
-            $r = $sieve->sieve_sendscript($sVacationName,
-                ($bEnable 
-                    ? str_replace(
-                        'require "fileinto";',
-                        'require ["fileinto","vacation"];',
-                        $sAntispamScript)
-                    : 'require ["fileinto","vacation"];'
-                ).
-                "\n".
-                _getContentVacationScript(
-                    $emailInfo['subject'],
-                    str_replace('{END_DATE}', $emailInfo['end_date'], $emailInfo['body']))
-                );
-            if (!$r) fwrite(STDERR, "WARN: failed to upload patched vacation script for $email\n");
-            $r = $sieve->sieve_setactivescript($sVacationName);
-            if (!$r) fwrite(STDERR, "WARN: failed to activate vacation script for $email\n");
-            if ($bEnable) {
-            	$r = $sieve->sieve_sendscript($sAntispamName, $sAntispamScript);
-                if (!$r) fwrite(STDERR, "WARN: failed to upload antispam script for $email\n");
+        if(preg_match($regexpUsuario, $email)){
+            $sieve = new sieve('localhost', 4190, 'cyrus', $CYRUS['PASS'], $email);
+            if (!$sieve->sieve_login()) {
+                fwrite(STDERR, "WARN: failed to login to sieve using admin password!\n");
+                break;
             }
-        } else {
-            // There is no active vacation script
-            if ($bEnable) {
-                $r = $sieve->sieve_sendscript($sAntispamName, $sAntispamScript);
-                if (!$r) fwrite(STDERR, "WARN: failed to upload antispam script for $email\n");
-                $r = $sieve->sieve_setactivescript($sAntispamName);
-                if (!$r) fwrite(STDERR, "WARN: failed to activate antispam script for $email\n");
+            
+            // Check for vacation script
+            $sieve->sieve_listscripts();
+            if (isset($sieve->response) && isset($sieve->response['ACTIVE']) && 
+                $sieve->response['ACTIVE'] == $sVacationName && !empty($emailInfo['subject'])) {
+                // Active vacation script
+                $r = $sieve->sieve_sendscript($sVacationName,
+                    ($bEnable 
+                        ? str_replace(
+                            'require "fileinto";',
+                            'require ["fileinto","vacation"];',
+                            $sAntispamScript)
+                        : 'require ["fileinto","vacation"];'
+                    ).
+                    "\n".
+                    _getContentVacationScript(
+                        $emailInfo['subject'],
+                        str_replace('{END_DATE}', $emailInfo['end_date'], $emailInfo['body']))
+                    );
+                if (!$r) fwrite(STDERR, "WARN: failed to upload patched vacation script for $email\n");
+                $r = $sieve->sieve_setactivescript($sVacationName);
+                if (!$r) fwrite(STDERR, "WARN: failed to activate vacation script for $email\n");
+                if ($bEnable) {
+                    $r = $sieve->sieve_sendscript($sAntispamName, $sAntispamScript);
+                    if (!$r) fwrite(STDERR, "WARN: failed to upload antispam script for $email\n");
+                }
+            } else {
+                // There is no active vacation script
+                if ($bEnable) {
+                    $r = $sieve->sieve_sendscript($sAntispamName, $sAntispamScript);
+                    if (!$r) fwrite(STDERR, "WARN: failed to upload antispam script for $email\n");
+                    $r = $sieve->sieve_setactivescript($sAntispamName);
+                    if (!$r) fwrite(STDERR, "WARN: failed to activate antispam script for $email\n");
+                }
             }
+            if (!$bEnable) {
+                $r = $sieve->sieve_deletescript($sAntispamName);
+                if (!$r) fwrite(STDERR, "WARN: failed to delete antispam script for $email\n");
+            }
+            
+            $sieve->sieve_logout();
         }
-        if (!$bEnable) {
-        	$r = $sieve->sieve_deletescript($sAntispamName);
-            if (!$r) fwrite(STDERR, "WARN: failed to delete antispam script for $email\n");
-        }
-        
-        $sieve->sieve_logout();
     }
 }
 
@@ -428,5 +421,44 @@ $body
 
 SCRIPT;
         return $script;
+}
+
+function parseDSN($dsn){
+    //$dsn => databasemotor://username:password@hostspec/database
+    //mysql => mysql://username:password@hostspec/database
+    //squlite => sqlite:///database
+    $database=$username=$password=$hostspec=$dbname=false;
+    //get the technology
+    if(($pos = strpos($dsn, '://')) !== false) {
+        $database = substr($dsn, 0, $pos);
+        $dsn = substr($dsn, $pos + 3);
+    } else {
+        return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
+    }
+     
+    //username y password en caso de haberlos
+    if (($at = strrpos($dsn,'@')) !== false) {
+        $str = substr($dsn, 0, $at);
+        $dsn = substr($dsn, $at + 1);
+        if (($pos = strpos($str, ':')) !== false) {
+            $username = rawurldecode(substr($str, 0, $pos));
+            $password = rawurldecode(substr($str, $pos + 1));
+        } else {
+            $username = rawurldecode($str);
+        }
+    }
+    
+    //hostspec 
+    if (strpos($dsn, '/') !== false) {
+        list($hostspec, $dbname) = explode('/', $dsn, 2);
+    }
+        
+    if($database=="sqlite" || $database=="sqlite3"){
+        $dsn="sqlite:$dbname";
+    }elseif($database=="mysql"){
+        $dsn="$database:dbname=$dbname;host=$hostspec";
+    }
+    
+    return array("dsn"=>$dsn,"user"=>$username,"passwd"=>$password);
 }
 ?>

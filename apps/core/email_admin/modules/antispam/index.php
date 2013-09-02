@@ -27,57 +27,43 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1 2008-09-01 05:09:56 Bruno Macias <bmacias@palosanto.com> Exp $ */
 
+
 function _moduleContent(&$smarty, $module_name)
 {
-    //include elastix framework
-    include_once "libs/paloSantoGrid.class.php";
+    global $arrConf;
+    //include framework lib form
     include_once "libs/paloSantoForm.class.php";
-    include_once "libs/paloSantoConfig.class.php";
+    //include email configuration files
     include_once "configs/email.conf.php";
     include_once "libs/cyradm.php";
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoAntispam.class.php";
-
-    $lang=get_language();
-    $script_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-
-    if (file_exists("$script_dir/$lang_file"))
-        include_once($lang_file);
-    else
-        include_once("modules/$module_name/lang/en.lang");
-
-    global $arrConf;
-    global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConfModule['templates_dir']))?$arrConfModule['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $local_templates_dir=getWebDirModule($module_name);
+
+    //conexion resource
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    
+    //user credentials
+    global $arrCredentials;
+    
     $accion = getAction();
 
     $content = "";
     switch($accion)
     {
-
         case "update":
-            $content = updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $arrLangModule, $arrConf, $arrConfModule);
+            $content = updateAntispam($smarty, $module_name, $local_templates_dir, $arrConf);
             break;
 
         default:
-            $content = formAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $arrLangModule, $arrConf, $arrConfModule);
+            $content = formAntispam($smarty, $module_name, $local_templates_dir, $arrConf);
             break;
     }
 
     return $content;
 }
 
-function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $arrLangModule, $arrConf, $arrConfModule)
+function updateAntispam($smarty, $module_name, $local_templates_dir, $arrConf)
 {
     $status    = getParameter("status");
     $level     = getParameter("levelnum");
@@ -86,13 +72,13 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
     $politica  = getParameter("politica");
 
     $objAntispam = new paloSantoAntispam(
-        $arrConfModule['path_postfix'],
-        $arrConfModule['path_spamassassin'],
-        $arrConfModule['file_master_cf'],
-        $arrConfModule['file_local_cf']);
+        $arrConf['path_postfix'],
+        $arrConf['path_spamassassin'],
+        $arrConf['file_master_cf'],
+        $arrConf['file_local_cf']);
     $isOk = $objAntispam->changeFileLocal($level,$header);
     if($isOk === false){
-        $smarty->assign("mb_title", $arrLang["Error"]);
+        $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", $objAntispam->errMsg);
     }
 
@@ -100,39 +86,40 @@ function updateAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $
         $isOk = $objAntispam->activateSpamFilter(($politica == 'capturar_spam') ? $time_spam : NULL);
 
         if($isOk === false){
-            $smarty->assign("mb_title", $arrLang["Error"]);
+            $smarty->assign("mb_title", _tr("Error"));
             $smarty->assign("mb_message", $objAntispam->errMsg);
         }else{
-            $smarty->assign("mb_title", $arrLang["Message"]);
-            $smarty->assign("mb_message", $arrLang["Successfully Activated Service Antispam"]);
+            $smarty->assign("mb_title", _tr("Message"));
+            $smarty->assign("mb_message", _tr("Successfully Activated Service Antispam"));
         }
     }else if($status == "off"){
         $isOk = $objAntispam->disactivateSpamFilter();
 
         if($isOk === false){
-            $smarty->assign("mb_title", $arrLang["Error"]);
+            $smarty->assign("mb_title", _tr("Error"));
             $smarty->assign("mb_message", $objAntispam->errMsg);
         }else{
-            $smarty->assign("mb_title", $arrLang["Message"]);
-            $smarty->assign("mb_message", $arrLang["Successfully Desactivated Service Antispam"]);
+            $smarty->assign("mb_title", _tr("Message"));
+            $smarty->assign("mb_message",_tr("Successfully Desactivated Service Antispam"));
         }
     }
 
-    return formAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $arrLangModule, $arrConf, $arrConfModule);
+    return formAntispam($smarty, $module_name, $local_templates_dir, $arrConf);
 }
 
-function formAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $arrLangModule, $arrConf, $arrConfModule)
+function formAntispam($smarty, $module_name, $local_templates_dir, $arrConf)
 {
-    $arrFormConference = createFieldForm($arrLang, $arrLangModule);
+    global $arrPermission;
+    $arrFormConference = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormConference);
 
-    $smarty->assign("LEGEND", $arrLang["Legend"]);
-    $smarty->assign("UPDATE", $arrLang["Save"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("icon", "modules/$module_name/images/email_antispam.png");
+    $smarty->assign("LEGEND", _tr("Legend"));
+    $smarty->assign("UPDATE", _tr("Save"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("icon", "web/apps/$module_name/images/email_antispam.png");
 
 
-    $objAntispam = new paloSantoAntispam($arrConfModule['path_postfix'], $arrConfModule['path_spamassassin'],$arrConfModule['file_master_cf'], $arrConfModule['file_local_cf']);
+    $objAntispam = new paloSantoAntispam(_tr('path_postfix'), $arrConf['path_spamassassin'],$arrConf['file_master_cf'], $arrConf['file_local_cf']);
     $activated = $objAntispam->isActiveSpamFilter();
     if($activated){
         $arrData['status'] = "on";
@@ -147,40 +134,43 @@ function formAntispam($smarty, $module_name, $local_templates_dir, $arrLang, $ar
     $statusSieve = ($activated && $val != '') ? 'on' : 'off';
     $arrData['politica'] = ($statusSieve == 'on') ? 'capturar_spam' : 'marcar_asusto';
 
+    if(in_array('edit',$arrPermission))
+        $smarty->assign("EDIT",true);
+    
     $smarty->assign("statusSieve", $statusSieve);
     $valueRequiredHits = $objAntispam->getValueRequiredHits();
     $arrData['levelNUM'] = $valueRequiredHits['level'];
     $arrData['header'] = $valueRequiredHits['header'];
     $smarty->assign("levelNUM", $arrData['levelNUM']);
-    $smarty->assign("level", $arrLang['Level']);
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLangModule["Antispam"], $arrData);
+    $smarty->assign("level",_tr('Level'));
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr("Antispam"), $arrData);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $contenidoModulo;
 }
 
-function createFieldForm($arrLang, $arrLangModule)
+function createFieldForm()
 {
 
-    $arrPolitics    = array('marcar_asusto' => $arrLang['Mark Subject']."...", 'capturar_spam' => $arrLang['Spam Capture']);
+    $arrPolitics    = array('marcar_asusto' => _tr('Mark Subject')."...", 'capturar_spam' => _tr('Spam Capture'));
     $arrSpamFolders = array("one_week"=>_tr("Delete Spam for more than one week"), "two_week"=>_tr("Delete Spam for more than two week"), "one_month"=>_tr("Delete Spam for more than one month"));
 
     $arrFields = array(
-            "status"            => array(   "LABEL"                  => $arrLang["Status"],
+            "status"            => array(   "LABEL"                  => _tr("Status"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "CHECKBOX",
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => "",
                                 ),
-            "header"            => array(   "LABEL"                  => $arrLang["Rewrite Header"],
+            "header"            => array(   "LABEL"                  => _tr("Rewrite Header"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => "",
                                 ),
-            "politica"          => array(   "LABEL"                  => $arrLang["Politics"],
+            "politica"          => array(   "LABEL"                  => _tr("Politics"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "SELECT",
                                             "INPUT_EXTRA_PARAM"      => $arrPolitics,
@@ -200,14 +190,10 @@ function createFieldForm($arrLang, $arrLangModule)
 
 function getAction()
 {
-    if(getParameter("show")) //Get parameter by POST (submit)
-        return "show";
+    global $arrPermission;
     if(getParameter("update"))
-        return "update";
-    else if(getParameter("new"))
-        return "new";
-    else if(getParameter("action")=="show") //Get parameter by GET (command pattern, links)
-        return "show";
+        return (in_array('edit',$arrPermission))?'update':'report';
     else
         return "report";
-}?>
+}
+?>

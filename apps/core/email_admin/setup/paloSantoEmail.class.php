@@ -306,18 +306,18 @@ class paloEmail {
         $configPostfix2 = isPostfixToElastix2();// in misc.lib.php
         $regularExpresion = "";
         if($configPostfix2)
-        $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
+            $regularExpresion = '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
         else
-        $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
+            $regularExpresion = '/^([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*)$/';
 
         if(!is_null($username)){
-        if(!preg_match($regularExpresion,$username)){
-                $this->errMsg = _tr("Username is not valid");
+            if(!preg_match($regularExpresion,$username)){
+                    $this->errMsg = _tr("Username is not valid");
+            }else{
+                    exec('/usr/bin/elastix-helper email_account --reconstruct_mailbox  --mailbox '.escapeshellarg($username).' 2>&1', $output, $retval);
+            }
         }else{
-                exec('/usr/bin/elastix-helper email_account --reconstruct_mailbox  --mailbox '.escapeshellarg($username).' 2>&1', $output, $retval);
-        }
-        }else{
-        $this->errMsg = _tr("Username can't be empty");
+            $this->errMsg = _tr("Username can't be empty");
         }
 
         if ($retval != 0) {

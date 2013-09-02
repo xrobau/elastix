@@ -584,27 +584,25 @@ function reconstruct_mailbox($opt)
     }
 
     $regexpUsuario =  '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/';
-
+    
     if (is_null($username)) {
-        $bExito = FALSE;
         fprintf(STDERR, "ERR: mailbox must be specified\n");
+        return false;
     } elseif (!preg_match($regexpUsuario, $username)) {
-        error_exit("ERR: invalid username\n");
+        fprintf(STDERR, "ERR: invalid username\n");
+        return false;
     } else {
         $sMailboxPath = escapeshellarg("user/$username");
-        $sCmdReconstruct = escapeshellarg("/usr/lib/cyrus-imapd/reconstruct -r -f $sMailboxPath");
-        $sCmdSu = "su - cyrus -c $sCmdReconstruct";
+        $sCmdReconstruct = "/usr/lib/cyrus-imapd/reconstruct -r -f $sMailboxPath";
+        $sCmdSu = 'sudo -u cyrus '.$sCmdReconstruct;
         exec($sCmdSu, $output, $ret);
-        
-        if ($ret == 0) {
-            exec("/etc/init.d/cyrus-imapd restart", $output, $ret);
-        }
-        if($ret == 0){
-            sleep(8);
+        if($ret != 0){
+            fprintf(STDERR, implode('', $output));
+            return false;
+        }else{
+            return true;
         }
     }
-
-    return ($ret == 0);
 }
 
 function parseDSN($dsn){
@@ -637,8 +635,8 @@ function parseDSN($dsn){
         list($hostspec, $dbname) = explode('/', $dsn, 2);
     }
         
-    if($database=="squlite" || $database=="squlite3"){
-        $dsn="squlite:$dbname";
+    if($database=="sqlite" || $database=="sqlite3"){
+        $dsn="sqlite:$dbname";
     }elseif($database=="mysql"){
         $dsn="$database:dbname=$dbname;host=$hostspec";
     }

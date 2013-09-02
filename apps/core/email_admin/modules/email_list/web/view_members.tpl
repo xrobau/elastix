@@ -7,3 +7,4 @@
     </tr>
 </table>
 <input class="button" type="hidden" name="id" value="{$IDEMAILLIST}" />
+<input class="button" type="hidden" name="action" value="{$ACTION}" />

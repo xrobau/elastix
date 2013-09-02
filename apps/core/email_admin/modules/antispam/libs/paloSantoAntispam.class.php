@@ -27,16 +27,15 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1 2008-09-01 05:09:57 Bruno Macias <bmacias@palosanto.com> Exp $ */
 
-include_once "/var/www/html/libs/cyradm.php";
-include_once "/var/www/html/modules/antispam/libs/sieve-php.lib.php";
-include_once "/var/www/html/modules/vacations/libs/paloSantoVacations.class.php";
+include_once "libs/cyradm.php";
+include_once "apps/antispam/libs/sieve-php.lib.php";
 
 class paloSantoAntispam {
-    var $fileMaster;
-    var $fileLocal;
-    var $folderPostfix;
-    var $folderSpamassassin;
-    var $errMsg;
+    public $fileMaster;
+    public $fileLocal;
+    public $folderPostfix;
+    public $folderSpamassassin;
+    public $errMsg;
 
     function paloSantoAntispam($pathPostfix,$pathSpamassassin,$fileMaster,$fileLocal)
     {
@@ -141,135 +140,18 @@ class paloSantoAntispam {
         return TRUE;
     }
     
-/********************************************************************************************************************/
-    //funcion que devuelve todas las cuentas de correos
-    function getEmailList($pDB)
-    {
-        $query = "SELECT username, password FROM accountuser";
-        $result=$pDB->fetchTable($query, true);
-
-        if($result==FALSE){
-            $this->errMsg = $pDB->errMsg;
-            return array();
-        }
-        return $result;
-    }
-
-    function getContentScript(){
-        $script = <<<SCRIPT
-require "fileinto";
-if exists "X-Spam-Flag" {
-    if header :is "X-Spam-Flag" "YES" {
-        fileinto "Spam";
-        stop;
-    }
-}
-if exists "X-Spam-Status" {
-    if header :contains "X-Spam-Status" "Yes," {
-        fileinto "Spam";
-        stop;
-    }
-}
-SCRIPT;
-        return $script;
-    }
-
-    //funcion que crea la carpeta de Spam dado un email en el servidor IMAP mediante telnet, y la fecha desde donde no va a borrar los mensajes
-    function deleteSpamMessages($email, $dateSince)
-    {
-        global $CYRUS;
-        $cyr_conn = new cyradm;
-        $error_msg = "";
-        $error = $cyr_conn->imap_login();
-        $dataEmail = explode("@",$email);
-        if ($error===FALSE){
-            $error_msg = "IMAP login error: $error <br>";
-        }else{
-            $seperator  = '/';
-            $bValido=$cyr_conn->command(". select \"user" . $seperator . $dataEmail[0] . $seperator . "Spam@" . $dataEmail[1] ."\"");
-            if(!$bValido)
-                $error_msg = "Error selected Spam folder:".$cyr_conn->getMessage()."<br>";
-            else{
-                $bValido=$cyr_conn->command(". SEARCH NOT SINCE $dateSince"); // busca los email que no empiecen desde la fecha dada
-                if(!$bValido)
-                    $error_msg = "error cannot be added flags Deleted to the messages of Spam folder for $email:".$cyr_conn->getMessage()."<br>";
-                else{
-                    $sal  = explode("SEARCH", $bValido[0]);
-                    $uids = trim($sal[1]); //ids de mensajes
-                    if($uids != ""){
-                        //$bValido=$cyr_conn->command(". store 1:* +flags \Deleted");
-                        $uids = trim($uids);
-                        $uids = str_replace(" ", ",",$uids);
-                        if(strlen($uids)>100){
-                            $arrID = explode(",","$uids");
-                            $size = count($arrID);
-                            $limitID = $arrID[0].":".$arrID[$size-1];
-                            $bValido=$cyr_conn->command(". store $limitID +flags \Deleted");
-                        }else
-                            $bValido=$cyr_conn->command(". store $uids +flags \Deleted"); // messages $uids = 1 2 4 5 7 8
-                        if(!$bValido)
-                            $error_msg = "error cannot be deleted the messages of Spam folder for $email:".$cyr_conn->getMessage()."<br>";
-                        else{
-                            $bValido=$cyr_conn->command(". expunge");
-                            if(!$bValido)
-                                $error_msg = "error cannot be deleted the messages of Spam folder for $email:".$cyr_conn->getMessage()."<br>";
-                            /*else{
-                                $bValido=$cyr_conn->command(". noop");
-                                if(!$bValido)
-                                    $error_msg = "error cannot be deleted the messages of Spam folder for $email:".$cyr_conn->getMessage()."<br>";
-                            }*/
-                        }
-                    }
-                }
-            }
-            $cyr_conn->imap_logout();
-        }
-        return $error_msg;
-    }
-
     function getTimeDeleteSpam()
     {
         $output = $retval = NULL;
         exec('/usr/bin/elastix-helper spamconfig --getdeleteperiod 2>&1', $output, $retval);
         if ($retval != 0 || count($output) < 1) return '';
         switch (trim($output[0])) {
-        case '7':   return 'one_week';
-        case '14':  return 'two_week';
-        case '30':  return 'one_month';
-        default:    return '';
+            case '7':   return 'one_week';
+            case '14':  return 'two_week';
+            case '30':  return 'one_month';
+            default:    return '';
         }
     }
-
-    function existScriptSieve($email, $search)
-    {
-        $SIEVE  = array();
-        $SIEVE['HOST'] = "localhost";
-        $SIEVE['PORT'] = 4190;
-        $SIEVE['USER'] = "";
-        $SIEVE['PASS'] = obtenerClaveCyrusAdmin("/var/www/html/");
-        $SIEVE['AUTHTYPE'] = "PLAIN";
-        $SIEVE['AUTHUSER'] = "cyrus";
-        $SIEVE['USER'] = $email;
-        $result['status']  = false;
-        $result['actived'] = "";
-
-        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'list'",$flags, $status);
-
-        if($status != 0){
-            return null;
-        }else{
-            for($i=0; $i<count($flags); $i++){
-                $value = trim($flags[$i]);
-                if(preg_match("/$search/", $value)){
-                    $result['status'] = true;
-                }
-                if(preg_match("/active script/", $value)){
-                    $result['actived'] = $value;
-                }
-            }
-        }
-        return $result;
-    }
-
+    
 }
 ?>

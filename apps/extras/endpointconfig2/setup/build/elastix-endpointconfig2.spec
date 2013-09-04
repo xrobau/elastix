@@ -18,7 +18,7 @@ Requires: python-tempita
 Requires: pyOpenSSL
 Requires: python-daemon
 Requires: MySQL-python
-Requires: python-json
+Requires: python-cjson
 
 %description
 The Elastix Endpoint Configurator is a complete rewrite and reimplementation of
@@ -130,6 +130,9 @@ fi
 %changelog
 * Wed Sep  4 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.3-0
 - Bump version for release.
+- CHANGED: New Endpoint Configurator: switch from python-json to python-cjson
+  since the latter module exists in both CentOS and Fedora 17.
+  SVN Rev[5834]
 - CHANGED: New Endpoint Configurator: merge the functionality of the program
   elastix-endpointclear into elastix-endpointconfig, and remove the large code
   duplication.

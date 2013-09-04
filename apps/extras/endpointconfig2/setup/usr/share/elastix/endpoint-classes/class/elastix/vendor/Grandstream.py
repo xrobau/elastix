@@ -32,7 +32,7 @@ import struct
 import eventlet
 from eventlet.green import socket, urllib2, urllib, os
 import errno
-import json
+import cjson
 from elastix.BaseEndpoint import BaseEndpoint
 telnetlib = eventlet.import_patched('telnetlib')
 import cookielib
@@ -256,7 +256,7 @@ class Endpoint(BaseEndpoint):
                 return False
             
             # Check successful login and get sid
-            jsonvars = json.read(body)
+            jsonvars = cjson.decode(body)
             if not ('body' in jsonvars and 'sid' in jsonvars['body']):
                 logging.error('Endpoint %s@%s GXP140x - dologin failed login' %
                     (self._vendorname, self._ip))
@@ -273,7 +273,7 @@ class Endpoint(BaseEndpoint):
                     logging.error('Endpoint %s@%s GXP140x - api.values.post answered not application/json but %s' %
                         (self._vendorname, self._ip, response.info()['Content-Type']))
                     return False
-                jsonvars = json.read(body)
+                jsonvars = cjson.decode(body)
             else:
                 # The GXP1400 has been discovered to violate the HTTP protocol.
                 # The response for /cgi-bin/api.values.post sticks a shebang
@@ -293,7 +293,7 @@ class Endpoint(BaseEndpoint):
                             expectbody = True
                     else:
                         # This expects the body to be a single JSON string in one line
-                        jsonvars = json.read(s)
+                        jsonvars = cjson.decode(s)
                         break
             if not ('response' in jsonvars and jsonvars['response'] == 'success' \
                     and 'body' in jsonvars and 'status' in jsonvars['body'] and jsonvars['body']['status'] == 'right' ):
@@ -302,7 +302,7 @@ class Endpoint(BaseEndpoint):
                 return False
             
             return True
-        except json.ReadException, e:
+        except cjson.DecodeError, e:
             logging.error('Endpoint %s@%s GXP140x received invalid JSON - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False

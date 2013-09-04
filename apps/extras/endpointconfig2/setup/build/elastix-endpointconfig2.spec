@@ -2,7 +2,7 @@
 
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
-Version: 0.0.2
+Version: 0.0.3
 Release: 0
 License: GPL
 Group:   Applications/System
@@ -128,7 +128,8 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Wed Sep  4 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Sep  4 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.3-0
+- Bump version for release.
 - CHANGED: New Endpoint Configurator: merge the functionality of the program
   elastix-endpointclear into elastix-endpointconfig, and remove the large code
   duplication.

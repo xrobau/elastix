@@ -8,7 +8,7 @@
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=trunks"  >{$Trunks}</a></li>
     <li>{$Inbound_Call_Control}</li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=did"  >{$Inbound_Routes}</a></li>
-    <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=zapchandids"  >{$Zap_Channel_DIDs}</a></li>
+    <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=dahdichandids"  >{$DAHDI_Channel_DIDs}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=announcement"  >{$Announcements}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=blacklist"  >{$Blacklist}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=cidlookup"  >{$CallerID_Lookup_Sources}</a></li>

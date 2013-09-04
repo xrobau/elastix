@@ -554,7 +554,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
             $smarty->assign("Callback", _tr('Callback'));
             $smarty->assign("DISA", _tr('DISA'));
 
-            $smarty->assign("Zap_Channel_DIDs", _tr('Zap Channel DIDs'));
+            $smarty->assign("DAHDI_Channel_DIDs", _tr('DAHDI Channel DIDs'));
             $smarty->assign("Blacklist", _tr('Blacklist'));
             $smarty->assign("CallerID_Lookup_Sources", _tr('CallerID Lookup Sources'));
             $smarty->assign("Call_Flow_Control", _tr('Call Flow Control'));

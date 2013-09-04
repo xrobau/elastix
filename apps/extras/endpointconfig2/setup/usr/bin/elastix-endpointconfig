@@ -136,14 +136,26 @@ import elastix
 
 def main():
     '''Entry point'''
+    global iTotalSteps
+    global iCurrentStep
+    
+    exitstatus = 0
     socket.setdefaulttimeout(5)
     
     # Parse and validate commandline options
     parser = OptionParser()
-    parser.add_option('--progressfile', dest='progressfile',
+    parser.add_option('--progressfile', dest='progressfile', action='store',
                       help='(optional) Progress logfile for endpoint configuration')
+    parser.add_option('--applyconfig', dest='applyconfig', action='store_true', default=False,
+                      help='Apply configuration to all endpoints selected in database')
+    parser.add_option('--clearconfig', dest='clearconfig', action='store_true', default=False,
+                      help='Remove configuration files for all endpoints selected in database')
     (options, args) = parser.parse_args()
-        
+
+    if not (options.applyconfig or options.clearconfig):
+        sys.stderr.write('FATAL: must specify one of --applyconfig, --clearconfig\n')
+        return 1
+
     # Set up logging, and daemonize if logfile is specified
     logconfig = {
         'filemode'  : 'w',
@@ -157,145 +169,157 @@ def main():
         daemonctx.open()
     logging.basicConfig(**logconfig)
     
-    logging.info('BEGIN ENDPOINT CONFIGURATION')    
+    if options.applyconfig:
+        logging.info('BEGIN ENDPOINT CONFIGURATION')
+    elif options.clearconfig:
+        logging.info('BEGIN ENDPOINT CLEAR')
     try:
-        #applyConfig(options.endpointfile)
-        applyConfig()
+        # Set up database connection pool
+        dbcred = get_database_credentials()
+        if dbcred == None:
+            logging.error('Failed to get database credentials\n')
+            return 1
+        dbpool = ConnectionPool(MySQLdb,
+                    host = 'localhost',
+                    user = dbcred[0],
+                    passwd = dbcred[1],
+                    db = 'endpointconfig',
+                    charset = 'utf8',
+                    use_unicode = True)
+        
+        # Load Asterisk credentials
+        config = RawConfigParser()
+        config.read(['/etc/asterisk/manager.conf'])
+        asteriskaddr = ('127.0.0.1', 5038)
+        asteriskcred = [None, None]
+        for section in config.sections():
+            if section == 'general':
+                asteriskaddr[1] = config.getint(section, 'port')
+            else:
+                asteriskcred[0] = section
+                asteriskcred[1] = config.get(section, 'secret')
+                break
+        
+        # Load dictionary of IPs for endpoints, along with vendor and model 
+        # identification
+        endpointList = loadEndpointIP(dbpool)
+        if endpointList == None: return 1
+        if len(endpointList) <= 0: return 1
+        
+        # Connect to Asterisk and read registered peers for supported techs
+        amipool = AsteriskManagerPool(max_size=1)
+        amipool.credentials(asteriskaddr, asteriskcred[0], asteriskcred[1])
+        ami = amipool.get()
+        
+        # TODO: truncation of long account names in Elastix 3
+        r = ami.Command('sip show peers')
+        
+        for s in r:
+            logging.debug(s)
+            l = s.split()
+            # 1064/1064    192.168.3.1  D   N  A  5060  OK (13 ms)
+            if len(l) > 6 and re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', l[1]):
+                peerIP = l[1]
+                if peerIP in endpointList:
+                    extArray = l[0].split('/')
+                    logging.info('SIP/%s registered in Asterisk as account %s' % (peerIP, extArray[0]))
+                    for endpoint in endpointList[peerIP]['accounts']:
+                        if endpoint.tech == 'sip' and endpoint.account == extArray[0]:
+                            endpoint.registered = True
+    
+        # TODO: truncation of long account names in Elastix 3
+        r = ami.Command('iax2 show peers')
+    
+        for s in r:
+            logging.debug(s)
+            l = s.split()
+            # 2002   127.0.0.1  (D)  255.255.255.255  40001    OK (1 ms)
+            if len(l) > 5 and re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', l[1]) and l[5] == 'OK':
+                peerIP = l[1]
+                if peerIP in endpointList:
+                    logging.info('IAX2/%s registered in Asterisk as account %s' % (peerIP, l[0]))
+                    for endpoint in endpointList[peerIP]['accounts']:
+                        if endpoint.tech == 'iax2' and endpoint.account == l[0]:
+                            endpoint.registered = True
+        amipool.put(ami)
+        ami = None
+            
+        # List all of the IPs assigned to this server. If there are several IPs,
+        # each endpoint will be given the one that shares the most specific netmask
+        serveriplist = listIpAddresses()
+        
+        # Dynamically load all of the endpoint classes
+        endpointClasses = {}
+        endpointByClass = {}
+        for ip in endpointList:
+            if not (endpointList[ip]['manufacturer'] in endpointClasses):
+                pkgname = endpointList[ip]['manufacturer'].replace('-', '')
+                pkg = 'elastix.vendor.' + pkgname
+                vendormodule = __import__(pkg, {}, {}, pkg.split('.')[:-1])
+                endpointClasses[endpointList[ip]['manufacturer']] = vendormodule.Endpoint
+                endpointByClass[endpointList[ip]['manufacturer']] = []
+            eclass = endpointClasses[endpointList[ip]['manufacturer']]
+            
+            # Create the manufacturer-specific Endpoint object
+            endpoint = eclass(amipool, dbpool, chooseServerIP(serveriplist, ip),
+                ip, endpointList[ip]['mac'])        
+            if not endpoint.setModel(endpointList[ip]['model']):
+                logging.error('manufacturer %s does not implement model: %s' % 
+                    (endpointList[ip]['manufacturer'], endpointList[ip]['model']))
+                return 1
+            endpoint.max_accounts = endpointList[ip]['max_accounts']
+            endpoint.static_ip_supported = bool(endpointList[ip]['static_ip_supported'])
+            endpoint.dynamic_ip_supported = bool(endpointList[ip]['dynamic_ip_supported'])
+            if not endpoint.setExtraParameters(endpointList[ip]['properties']):
+                logging.error('manufacturer %s model %s rejected parameters: %s' %
+                    (endpointList[ip]['manufacturer'], endpointList[ip]['model'],
+                     str(endpointList[ip]['parameters'])))
+                return 1
+            endpoint.setAccountList(endpointList[ip]['accounts'])
+            endpointList[ip]['endpoint'] = endpoint
+            endpointByClass[endpointList[ip]['manufacturer']].append(endpoint)
+        
+        if options.applyconfig:
+            # Update global configuration for all the endpoint vendors
+            iTotalSteps = len(endpointClasses) + 2 * len(endpointList)
+            iCurrentStep = 1
+            for endpointVendor in endpointClasses:
+                eclass = endpointClasses[endpointVendor]
+                logging.info('(%d/%d) global configuration update for %s...' %
+                    (iCurrentStep, iTotalSteps, endpointVendor))
+                if not eclass.updateGlobalConfig(serveriplist, amipool, endpointByClass[endpointVendor]):
+                    logging.error('ERR: global configuration update failed for %s' % (endpointVendor,))
+                    return 1
+                iCurrentStep += 1
+            
+            # Update local configuration for all the endpoints. Each endpoint gets its
+            # own greenthread from a green pool
+            gpool = GreenPool()
+            for ip in endpointList:
+                gpool.spawn_n(spawn_endpoint, endpointList[ip])
+            gpool.waitall()
+        elif options.clearconfig:
+            # Clear global configuration for all endpoints per vendor
+            for endpointVendor in endpointClasses:
+                eclass = endpointClasses[endpointVendor]
+                if not eclass.deleteGlobalContent(serveriplist, amipool, endpointByClass[endpointVendor]):
+                    logging.error('ERR: global configuration clear failed for %s' % (endpointVendor,))
+                    return 1
+
+            # Execute the deleteContent method on all of the endpoints
+            for ip in endpointList:
+                endpointList[ip]['endpoint'].deleteContent()
     except Exception, e:
         logging.error('Uncaught exception: \n' + traceback.format_exc())
-    logging.info('END ENDPOINT CONFIGURATION')
+        exitstatus = 1
+    if options.applyconfig:
+        logging.info('END ENDPOINT CONFIGURATION')
+    elif options.clearconfig:
+        logging.info('END ENDPOINT CLEAR')
+    return exitstatus
 
 iTotalSteps = 0
 iCurrentStep = 0
-
-def applyConfig():
-    global iTotalSteps
-    global iCurrentStep
-    
-    # Set up database connection pool
-    dbcred = get_database_credentials()
-    if dbcred == None:
-        logging.error('Failed to get database credentials\n')
-        return
-    dbpool = ConnectionPool(MySQLdb,
-                host = 'localhost',
-                user = dbcred[0],
-                passwd = dbcred[1],
-                db = 'endpointconfig',
-                charset = 'utf8',
-                use_unicode = True)
-    
-    # Load Asterisk credentials
-    config = RawConfigParser()
-    config.read(['/etc/asterisk/manager.conf'])
-    asteriskaddr = ('127.0.0.1', 5038)
-    asteriskcred = [None, None]
-    for section in config.sections():
-        if section == 'general':
-            asteriskaddr[1] = config.getint(section, 'port')
-        else:
-            asteriskcred[0] = section
-            asteriskcred[1] = config.get(section, 'secret')
-            break
-    
-    # Load dictionary of IPs for endpoints, along with vendor and model 
-    # identification
-    endpointList = loadEndpointIP(dbpool)
-    if endpointList == None: return
-    if len(endpointList) <= 0: return
-    
-    # Connect to Asterisk and read registered peers for supported techs
-    amipool = AsteriskManagerPool(max_size=1)
-    amipool.credentials(asteriskaddr, asteriskcred[0], asteriskcred[1])
-    ami = amipool.get()
-    
-    # TODO: truncation of long account names in Elastix 3
-    r = ami.Command('sip show peers')
-    
-    for s in r:
-        logging.debug(s)
-        l = s.split()
-        # 1064/1064    192.168.3.1  D   N  A  5060  OK (13 ms)
-        if len(l) > 6 and re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', l[1]):
-            peerIP = l[1]
-            if peerIP in endpointList:
-                extArray = l[0].split('/')
-                logging.info('SIP/%s registered in Asterisk as account %s' % (peerIP, extArray[0]))
-                for endpoint in endpointList[peerIP]['accounts']:
-                    if endpoint.tech == 'sip' and endpoint.account == extArray[0]:
-                        endpoint.registered = True
-
-    # TODO: truncation of long account names in Elastix 3
-    r = ami.Command('iax2 show peers')
-
-    for s in r:
-        logging.debug(s)
-        l = s.split()
-        # 2002   127.0.0.1  (D)  255.255.255.255  40001    OK (1 ms)
-        if len(l) > 5 and re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', l[1]) and l[5] == 'OK':
-            peerIP = l[1]
-            if peerIP in endpointList:
-                logging.info('IAX2/%s registered in Asterisk as account %s' % (peerIP, l[0]))
-                for endpoint in endpointList[peerIP]['accounts']:
-                    if endpoint.tech == 'iax2' and endpoint.account == l[0]:
-                        endpoint.registered = True
-    amipool.put(ami)
-    ami = None
-        
-    # List all of the IPs assigned to this server. If there are several IPs,
-    # each endpoint will be given the one that shares the most specific netmask
-    serveriplist = listIpAddresses()
-    
-    # Dynamically load all of the endpoint classes
-    endpointClasses = {}
-    endpointByClass = {}
-    for ip in endpointList:
-        if not (endpointList[ip]['manufacturer'] in endpointClasses):
-            pkgname = endpointList[ip]['manufacturer'].replace('-', '')
-            pkg = 'elastix.vendor.' + pkgname
-            vendormodule = __import__(pkg, {}, {}, pkg.split('.')[:-1])
-            endpointClasses[endpointList[ip]['manufacturer']] = vendormodule.Endpoint
-            endpointByClass[endpointList[ip]['manufacturer']] = []
-        eclass = endpointClasses[endpointList[ip]['manufacturer']]
-        
-        # Create the manufacturer-specific Endpoint object
-        endpoint = eclass(amipool, dbpool, chooseServerIP(serveriplist, ip),
-            ip, endpointList[ip]['mac'])        
-        if not endpoint.setModel(endpointList[ip]['model']):
-        	logging.error('manufacturer %s does not implement model: %s' % 
-				(endpointList[ip]['manufacturer'], endpointList[ip]['model']))
-        	return
-        endpoint.max_accounts = endpointList[ip]['max_accounts']
-        endpoint.static_ip_supported = bool(endpointList[ip]['static_ip_supported'])
-        endpoint.dynamic_ip_supported = bool(endpointList[ip]['dynamic_ip_supported'])
-        if not endpoint.setExtraParameters(endpointList[ip]['properties']):
-            logging.error('manufacturer %s model %s rejected parameters: %s' %
-                (endpointList[ip]['manufacturer'], endpointList[ip]['model'],
-                 str(endpointList[ip]['parameters'])))
-            return
-        endpoint.setAccountList(endpointList[ip]['accounts'])
-        endpointList[ip]['endpoint'] = endpoint
-        endpointByClass[endpointList[ip]['manufacturer']].append(endpoint)
-    
-    # Update global configuration for all the endpoint vendors
-    iTotalSteps = len(endpointClasses) + 2 * len(endpointList)
-    iCurrentStep = 1
-    for endpointVendor in endpointClasses:
-        eclass = endpointClasses[endpointVendor]
-        logging.info('(%d/%d) global configuration update for %s...' %
-            (iCurrentStep, iTotalSteps, endpointVendor))
-        #if not eclass.updateGlobalConfig(serveriplist.keys()[0], amipool, endpointByClass[endpointVendor]):
-        if not eclass.updateGlobalConfig(serveriplist, amipool, endpointByClass[endpointVendor]):
-            logging.error('ERR: global configuration update failed for %s' % (endpointVendor,))
-            return
-        iCurrentStep += 1
-    
-    # Update local configuration for all the endpoints. Each endpoint gets its
-    # own greenthread from a green pool
-    gpool = GreenPool()
-    for ip in endpointList:
-        gpool.spawn_n(spawn_endpoint, endpointList[ip])
-    gpool.waitall()
 
 def spawn_endpoint(endpointInfo):
     global iTotalSteps
@@ -463,4 +487,4 @@ class AsteriskManagerPool(pools.Pool):
             listen_events = False)
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

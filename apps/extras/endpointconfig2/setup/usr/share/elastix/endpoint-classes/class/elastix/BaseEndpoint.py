@@ -420,6 +420,11 @@ class BaseEndpoint(object):
         f.write(content)
         f.close()
 
+    @staticmethod
+    def deleteGlobalContent(serveriplist, amipool, endpoints):
+        # The default implementation does nothing
+        return True
+
     def deleteContent(self):
         # The default implementation deletes all files under the TFTP directory
         # with a name containing a lowercase or uppercase MAC address that 

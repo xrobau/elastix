@@ -65,9 +65,8 @@ class Endpoint(BaseEndpoint):
     @staticmethod
     def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Set up global environment for this manufacturer
-        
-        First of all, check if DPMA is available and properly licensed.        
         '''
+        # First of all, check if DPMA is available and properly licensed.
         if not Endpoint._isDPMAAvailable(amipool):
             return False
         
@@ -85,83 +84,8 @@ class Endpoint(BaseEndpoint):
         For each context, its name will be extracted to a separate dictionary, 
         with the corresponding array index as a value.
         '''
-        configsections = []
-        contexts = {}
-        try:
-            configfile = open('/etc/asterisk/res_digium_phone.conf', 'r')
-            currentcontext = None
-            commentspan = None
-            for configline in configfile:
-                # Detect the start of a context
-                m = re.search(r'^\s*\[(.+?)\]', configline)
-                if m != None:
-                    # If there was a previous context, it should be added to the list
-                    if currentcontext != None:
-                        configsections.append(currentcontext)
-                    
-                    # If there was a comment span, add as its own section
-                    if commentspan != None:
-                        configsections.append({
-                            'type'      : 'commentspan',
-                            'name'      : None,
-                            'rawtext'   : commentspan,
-                            'properties': None
-                        })
-                        commentspan = None
-                    
-                    # Create new named context
-                    currentcontext = {
-                        'type'      : 'context',
-                        'name'      : m.group(1),
-                        'rawtext'   : configline,
-                        'properties': {}
-                    }
-                    
-                    contexts[m.group(1)] = currentcontext
-                    continue
-                
-                # Detect a property setting
-                m = re.search(r'^\s*(\S+)\s*=\s*(.*?\S)?\s*(;.*)?$', configline)
-                if m != None:
-                    if currentcontext == None:
-                        logging.warning('Discarding property set prior to any context!')
-                        continue
-                    
-                    # The current comment span was part of the context
-                    if commentspan != None:
-                        currentcontext['rawtext'] += commentspan
-                        commentspan = None
-                    
-                    currentcontext['rawtext'] += configline
-                    # FIXME: this discards duplicate keys
-                    currentcontext['properties'][m.group(1)] = m.group(2)
-                    continue
-                
-                # Anything else is a comment
-                if commentspan == None:
-                    commentspan = ''
-                commentspan += configline
-            
-            # Add any pending context, then any pending comments
-            if currentcontext != None:
-                configsections.append(currentcontext)
-                currentcontext = None
-            
-            # If there was a comment span, add as its own section
-            if commentspan != None:
-                configsections.append({
-                    'type'      : 'commentspan',
-                    'name'      : None,
-                    'rawtext'   : commentspan,
-                    'properties': None
-                })
-                commentspan = None
-                
-        except IOError, e:
-            if e.errno != errno.ENOENT:
-                logging.error('Failed to read current res_digium_phone.conf - %s' % str(e))
-                return False
-
+        configsections, contexts = Endpoint._readDPMAConfig()
+        if configsections == None: return False
 
         ''' First, we parse the general context. If any modifications are made,
         its raw text will be replaced. It is assumed that there are no
@@ -289,21 +213,133 @@ class Endpoint(BaseEndpoint):
                 configsections.append(newcontexts[k])
         
         # Write out final configuration
-        try:
-            f = open('/etc/asterisk/res_digium_phone.conf', 'w')
-            for currentsection in configsections:
-                f.write(currentsection['rawtext'])
-            f.close()
-        except IOError, e:
-            logging.error('Failed to write new res_digium_phone.conf - %s' % str(e))
+        if not Endpoint._writeDPMAConfig(configsections):
             return False
 
-        # Reconfigurando todos los teléfonos
+        # Reconfigure all the phones
         ami = amipool.get()
         ami.Command('module reload res_digium_phone.so');
         ami.Command('digium_phones reconfigure all');
         amipool.put(ami)
         return True
+
+    @staticmethod
+    def deleteGlobalContent(serveriplist, amipool, endpoints):
+        # First of all, check if DPMA is available and properly licensed.
+        if not Endpoint._isDPMAAvailable(amipool):
+            return False
+        
+        configsections, contexts = Endpoint._readDPMAConfig()
+        if configsections == None: return False
+
+        # Remove referenced endpoint
+        for endpoint in endpoints:
+            endpoint_key = 'Phone_' + (endpoint._mac.replace(':', '').upper())
+            if endpoint_key in contexts:
+                contexts[endpoint_key]['rawtext'] = ''
+
+        # Write out final configuration
+        if not Endpoint._writeDPMAConfig(configsections):
+            return False
+
+        # Reconfigure all the phones
+        ami = amipool.get()
+        ami.Command('module reload res_digium_phone.so');
+        ami.Command('digium_phones reconfigure all');
+        amipool.put(ami)
+        return True
+
+    @staticmethod
+    def _readDPMAConfig():
+        configsections = []
+        contexts = {}
+        try:
+            configfile = open('/etc/asterisk/res_digium_phone.conf', 'r')
+            currentcontext = None
+            commentspan = None
+            for configline in configfile:
+                # Detect the start of a context
+                m = re.search(r'^\s*\[(.+?)\]', configline)
+                if m != None:
+                    # If there was a previous context, it should be added to the list
+                    if currentcontext != None:
+                        configsections.append(currentcontext)
+                    
+                    # If there was a comment span, add as its own section
+                    if commentspan != None:
+                        configsections.append({
+                            'type'      : 'commentspan',
+                            'name'      : None,
+                            'rawtext'   : commentspan,
+                            'properties': None
+                        })
+                        commentspan = None
+                    
+                    # Create new named context
+                    currentcontext = {
+                        'type'      : 'context',
+                        'name'      : m.group(1),
+                        'rawtext'   : configline,
+                        'properties': {}
+                    }
+                    
+                    contexts[m.group(1)] = currentcontext
+                    continue
+                
+                # Detect a property setting
+                m = re.search(r'^\s*(\S+)\s*=\s*(.*?\S)?\s*(;.*)?$', configline)
+                if m != None:
+                    if currentcontext == None:
+                        logging.warning('Discarding property set prior to any context!')
+                        continue
+                    
+                    # The current comment span was part of the context
+                    if commentspan != None:
+                        currentcontext['rawtext'] += commentspan
+                        commentspan = None
+                    
+                    currentcontext['rawtext'] += configline
+                    # FIXME: this discards duplicate keys
+                    currentcontext['properties'][m.group(1)] = m.group(2)
+                    continue
+                
+                # Anything else is a comment
+                if commentspan == None:
+                    commentspan = ''
+                commentspan += configline
+            
+            # Add any pending context, then any pending comments
+            if currentcontext != None:
+                configsections.append(currentcontext)
+                currentcontext = None
+            
+            # If there was a comment span, add as its own section
+            if commentspan != None:
+                configsections.append({
+                    'type'      : 'commentspan',
+                    'name'      : None,
+                    'rawtext'   : commentspan,
+                    'properties': None
+                })
+                commentspan = None
+                
+        except IOError, e:
+            if e.errno != errno.ENOENT:
+                logging.error('Failed to read current res_digium_phone.conf - %s' % str(e))
+                return [None, None]
+        return [configsections, contexts]
+
+    @staticmethod
+    def _writeDPMAConfig(configsections):
+        try:
+            f = open('/etc/asterisk/res_digium_phone.conf', 'w')
+            for currentsection in configsections:
+                f.write(currentsection['rawtext'])
+            f.close()
+            return True
+        except IOError, e:
+            logging.error('Failed to write new res_digium_phone.conf - %s' % str(e))
+            return False
     
     @staticmethod
     def _isDPMAAvailable(amipool):
@@ -379,7 +415,7 @@ class Endpoint(BaseEndpoint):
             return
     
     def updateLocalConfig(self):
-        # Ya todo se hizo en la configuración global.
+        # All configuration was already done in global configuration
         self._unregister()
         self._setConfigured()
         return True

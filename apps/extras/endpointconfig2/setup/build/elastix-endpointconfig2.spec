@@ -129,6 +129,12 @@ fi
 
 %changelog
 * Wed Sep  4 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: merge the functionality of the program
+  elastix-endpointclear into elastix-endpointconfig, and remove the large code
+  duplication.
+- CHANGED: New Endpoint Configurator: implement clearing of endpoint 
+  configuration for Digium phones. This required a change in the python API.
+  SVN Rev[5832]
 - FIXED: New Endpoint Configurator: request dhcp property in view init so change
   to defined value will be observed, as noted in Ember.js rc8 changelog.
   SVN Rev[5829]

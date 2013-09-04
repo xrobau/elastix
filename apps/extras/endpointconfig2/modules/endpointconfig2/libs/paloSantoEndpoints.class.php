@@ -417,7 +417,7 @@ SQL_CUENTAS_NO_ASIGNADAS;
         
         // Invocar el programa python para borrar los archivos de configuración
         $output = $ret = NULL;
-        exec('/usr/bin/elastix-endpointclear 2>&1', $output, $ret);
+        exec('/usr/bin/elastix-endpointconfig --clearconfig 2>&1', $output, $ret);
         if ($ret != 0) {
             $this->_errMsg = implode("\n", $output);
             return NULL;
@@ -440,7 +440,7 @@ SQL_CUENTAS_NO_ASIGNADAS;
         // Invocar el programa python para ejecutar la configuración de endpoints
         $logfile = tempnam('/tmp', 'endpointconfig-');
         $output = $retval = NULL;
-        exec('/usr/bin/elastix-endpointconfig --progressfile '.escapeshellarg($logfile).' 2>&1',
+        exec('/usr/bin/elastix-endpointconfig --applyconfig --progressfile '.escapeshellarg($logfile).' 2>&1',
             $output, $retval);
         if ($retval != 0) {
             $this->_errMsg = implode("\n", $output);

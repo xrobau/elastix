@@ -12,7 +12,7 @@
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=announcement"  >{$Announcements}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=blacklist"  >{$Blacklist}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=cidlookup"  >{$CallerID_Lookup_Sources}</a></li>
-    <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=daynight"  >{$Day_Night_Control}</a></li>
+    <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=daynight"  >{$Call_Flow_Control}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=findmefollow"  >{$Follow_Me}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=ivr"  >{$IVR}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=queueprio"  >{$Queue_Priorities}</a></li>

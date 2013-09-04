@@ -557,7 +557,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
             $smarty->assign("Zap_Channel_DIDs", _tr('Zap Channel DIDs'));
             $smarty->assign("Blacklist", _tr('Blacklist'));
             $smarty->assign("CallerID_Lookup_Sources", _tr('CallerID Lookup Sources'));
-            $smarty->assign("Day_Night_Control", _tr('Day/Night Control'));
+            $smarty->assign("Call_Flow_Control", _tr('Call Flow Control'));
             $smarty->assign("Queue_Priorities", _tr('Queue Priorities'));
             $smarty->assign("Time_Groups", _tr('Time Groups'));
             $smarty->assign("Languages", _tr('Languages'));

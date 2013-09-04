@@ -128,6 +128,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Sep  4 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: request dhcp property in view init so change
+  to defined value will be observed, as noted in Ember.js rc8 changelog.
+  SVN Rev[5829]
+
 * Sun Sep  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: use GET for read requests whenever 
   possible.

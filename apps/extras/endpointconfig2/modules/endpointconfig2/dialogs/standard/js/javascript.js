@@ -20,6 +20,12 @@ endpointConfigDlgInit['standard'] = function() {
 	});
 	
 	App.NetworkTypeView = JQ.ButtonSet.extend({
+		init: function() {
+			this._super();
+			/* Force dhcp to be requested as null so change to defined value is
+			 * noted in observer. */
+			this.get('controller.model.details.dhcp');
+		},
 		reapply: function() {
 			// Required to apply the changes after property is updated
 			Ember.run.scheduleOnce('afterRender', this, function() {

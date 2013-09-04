@@ -2,7 +2,7 @@
   <tr>
     <td valign="top" width="220"><div id="nav"><div id="nav-setup" class="tabs-container"><ul>
     <li class="category category-header">{$Basic}</li>
-    <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=extensions"  >{$Extensions}</a></li>
+    <li><a class="current" href="/?menu=pbxconfig&amp;type=setup&amp;display=extensions"  >{$Extensions}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=featurecodeadmin"  >{$Feature_Codes}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=routing"  >{$Outbound_Routes}</a></li>
     <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=trunks"  >{$Trunks}</a></li>

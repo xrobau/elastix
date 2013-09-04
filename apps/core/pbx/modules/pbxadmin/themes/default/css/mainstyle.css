@@ -164,7 +164,12 @@ div.attention {
 	/*border-radius: 8px;*/
 }
 #nav ul li a:hover {
-	color: #ff8a00; 
+	color: #ff8a00;
+	background: #D6D4D6 
+}
+#nav ul li a.current{ 
+	color: #ff8a00;
+	background: #D6D4D6
 }
 #nav li.current, #nav li.current a { /* active item */
 	background: white;

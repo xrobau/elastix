@@ -130,6 +130,9 @@ fi
 %changelog
 * Wed Sep  4 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.3-0
 - Bump version for release.
+- CHANGED: New Endpoint Configurator: fix attempt to assign to immutable tuple
+  that only raises an error in python 2.7
+  SVN Rev[5835]
 - CHANGED: New Endpoint Configurator: switch from python-json to python-cjson
   since the latter module exists in both CentOS and Fedora 17.
   SVN Rev[5834]

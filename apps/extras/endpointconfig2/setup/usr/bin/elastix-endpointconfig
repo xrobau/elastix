@@ -190,7 +190,7 @@ def main():
         # Load Asterisk credentials
         config = RawConfigParser()
         config.read(['/etc/asterisk/manager.conf'])
-        asteriskaddr = ('127.0.0.1', 5038)
+        asteriskaddr = ['127.0.0.1', 5038]
         asteriskcred = [None, None]
         for section in config.sections():
             if section == 'general':
@@ -208,7 +208,7 @@ def main():
         
         # Connect to Asterisk and read registered peers for supported techs
         amipool = AsteriskManagerPool(max_size=1)
-        amipool.credentials(asteriskaddr, asteriskcred[0], asteriskcred[1])
+        amipool.credentials(tuple(asteriskaddr), asteriskcred[0], asteriskcred[1])
         ami = amipool.get()
         
         # TODO: truncation of long account names in Elastix 3

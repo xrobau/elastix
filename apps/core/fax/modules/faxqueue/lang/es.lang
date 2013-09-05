@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.8                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,10 +25,29 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
-global $arrConf;
-global $arrConfModule;
-$arrConfModule['module_name'] = 'faxmaster';
-$arrConfModule['templates_dir'] = 'themes';
-
+  $Id: en.lang,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+global $arrLangModule;
+$arrLangModule = array(
+'Fax Queue' => 'Cola de Fax',
+'Job ID' => 'ID de trabajo',
+'Priority' => 'Prioridad',
+'Destination' => 'Destino',
+'Pages' =>  'Páginas',
+'Retries' => 'Reintentos',
+'Status' => 'Estado',
+'Sent %d pages of %d' => 'Enviadas %d páginas de %d',
+'Try %d of %d' => 'Intento %d de %d',
+'Busy signal detected' => 'Se detectó señal de ocupado',
+'No carrier detected' => 'No se detecta portadora',
+'No answer from remote' => 'No hay respuesta del lado remoto',
+'Could not read request file' => 'No se puede leer archivo de petición',
+'Blocked by another job' => 'Bloqueado por otro trabajo',
+'Delayed by prior call' => 'Detenido por llamada anterior',
+'Are you sure to cancel selected jobs?' => '¿Está seguro de cancelar el trabajo?',
+'Cancel job' => 'Cancelar trabajo',
+'Failed to cancel job' => 'No se pudo cancelar trabajo',
+// Note: truncation on faxstat output
+'Blocked by concurrent cal' => 'Bloqueado por llamada concurrente',
+);
 ?>

@@ -49,28 +49,36 @@ class paloFaxVisor
     private $_db;
     var $errMsg;
 
-    function paloFaxVisor()
+    function paloFaxVisor($pDB)
     {
-        global $arrConf;
-        
-        //instanciar clase paloDB
-        $pDB = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/elastix.db");
-    	if (!empty($pDB->errMsg)) {
-            $this->errMsg = $pDB->errMsg;
-    	} else{
-       		$this->_db = $pDB;
-    	}
+        // Se recibe como parámetro una referencia a una conexión paloDB
+        if (is_object($pDB)) {
+            $this->_db =& $pDB;
+            $this->errMsg = $this->_db->errMsg;
+        } else {
+            $dsn = (string)$pDB;
+            $this->_db = new paloDB($dsn);
+
+            if (!$this->_db->connStatus) {
+                $this->errMsg = $this->_db->errMsg;
+                // debo llenar alguna variable de error
+            } else {
+                // debo llenar alguna variable de error
+            }
+        }
     }
 
     function obtener_faxes($idOrg, $company_name, $company_fax, $fecha_fax, $offset, $cantidad, $type)
     {
-		$listaWhere = "";
-		$paramSQL = array();
+        $listaWhere = "";
+        $paramSQL = array();
 
-		if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
-			$this->errMsg = _tr("Organization ID is not valid");
-			return false;
-		}
+        if(!is_null($idOrg)){
+            if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
+                $this->errMsg = _tr("Organization ID is not valid");
+                return false;
+            }
+        }
 
         if (empty($company_name)) $company_name = NULL;
         if (empty($company_fax)) $company_fax = NULL;
@@ -90,12 +98,15 @@ class paloFaxVisor
         }
         
         $sPeticionSQL = 
-            'SELECT f.id, f.pdf_file, f.modemdev, f.commID, f.errormsg, '.
+            'SELECT f.id, f.pdf_file, f.modemdev, f.commID, f.status, f.errormsg, '.
                 'f.company_name, f.company_fax, f.date, '.
                 'f.type, f.faxpath, u.name destiny_name, u.fax_extension destiny_fax '.
-            'FROM fax_docs f join acl_user u on f.id_user = u.id WHERE u.id_group in (SELECT id from acl_group where id_organization=?)';
+            'FROM fax_docs f join acl_user u on f.id_user = u.id WHERE 1=1 ';
 
-		$paramSQL[]=$idOrg;
+		if (!is_null($idOrg)){
+            $sPeticionSQL .= " and u.id_group in (SELECT id from acl_group where id_organization=?)";
+            $paramSQL[] = $idOrg;
+        }
         if (!is_null($company_name)) {
         	$listaWhere .= ' and f.company_name LIKE ?';
             $paramSQL[] = "%$company_name%";
@@ -126,13 +137,15 @@ class paloFaxVisor
 
     function obtener_cantidad_faxes($idOrg, $company_name, $company_fax, $fecha_fax, $type)
     {
-		$listaWhere = "";
-		$paramSQL = array();
+        $listaWhere = "";
+        $paramSQL = array();
 
-		if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
-			$this->errMsg = _tr("Organization ID is not valid");
-			return false;
-		}
+        if(!is_null($idOrg)){
+            if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
+                $this->errMsg = _tr("Organization ID is not valid");
+                return false;
+            }
+        }
 
         if (empty($company_name)) $company_name = NULL;
         if (empty($company_fax)) $company_fax = NULL;
@@ -147,9 +160,12 @@ class paloFaxVisor
             if (!in_array($type, array('in', 'out'))) $type = NULL;
         }
 
-        $sPeticionSQL = 'SELECT COUNT(*) cantidad FROM fax_docs f join acl_user u on f.id_user = u.id WHERE u.id_group in (SELECT id from acl_group where id_organization=?)';
+        $sPeticionSQL = 'SELECT COUNT(*) cantidad FROM fax_docs f join acl_user u on f.id_user = u.id WHERE 1=1';
        
-        $paramSQL[] = $idOrg;
+        if (!is_null($idOrg)){
+            $sPeticionSQL .= " and u.id_group in (SELECT id from acl_group where id_organization=?)";
+            $paramSQL[] = $idOrg;
+        }
         if (!is_null($company_name)) {
             $listaWhere .= ' and company_name LIKE ?';
             $paramSQL[] = "%$company_name%";
@@ -196,35 +212,35 @@ class paloFaxVisor
             TRUE, array($idFax));
         if ($arrReturn == FALSE){
             $this->errMsg = $this->_db->errMsg;
-            return array();
+            return false;
         }
         return $arrReturn;
 	}
 
-    function deleteInfoFax($idFax,$idOrg)
+    function deleteInfoFax($idFax,$idOrg=null)
     {
         $this->errMsg = '';
         $bExito = TRUE;
 
-		if(!preg_match("/^[[:digit:]]+$/","$idOrg")){
-			$this->errMsg = _tr("Organization ID is not valid");
-			return false;
-		}
 
         // Leer la información del fax
         $infoFax = $this->obtener_fax($idFax);
-        if (count($infoFax) == 0) return ($this->errMsg == '');
-
-		//comprobamos que el fax le pertenezca a la misma organizacion que el usuario
+        if ($infoFax == false) return ($this->errMsg == '');
 
         // Borrar la información y el documento asociado
         $this->_db->conn->beginTransaction();
-        $bExito = $this->_db->genQuery(
-            'DELETE from fax_docs WHERE id=? and id_user in (SELECT u.id from acl_group g join acl_user u on u.id_group=g.id where id_organization=?)',
-            array($infoFax['id'],$idOrg));
+        if(!is_null($idOrg)){
+            $bExito = $this->_db->genQuery(
+                'DELETE from fax_docs WHERE id=? and id_user in (SELECT u.id from acl_group g join acl_user u on u.id_group=g.id where id_organization=?)',
+                array($infoFax['id'],$idOrg));
+        }else{
+            $bExito = $this->_db->genQuery(
+                'DELETE from fax_docs WHERE id=?;',
+                array($infoFax['id'],$idOrg));
+        }
         if (!$bExito) $this->errMsg = $this->_db->errMsg;
         if ($bExito) {
-            $file = "/var/www/faxes/{$infoFax['faxpath']}/fax.pdf";
+            $file = "/var/www/elastixdir/faxdocs/{$infoFax['faxpath']}/fax.pdf";
             $bExito = file_exists($file) ? unlink($file) : TRUE;
         } 
         if ($bExito)

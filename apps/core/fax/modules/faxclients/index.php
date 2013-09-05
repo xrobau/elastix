@@ -31,92 +31,114 @@ require_once "libs/paloSantoValidar.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-
-    load_language_module($module_name);
-
-    //global variables
     global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
+    include_once "libs/paloSantoForm.class.php";
+    
+     //folder path for custom templates
+    $local_templates_dir=getWebDirModule($module_name);
 
-    //folder path for custom templates
-    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    //conexion resource
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
+    //user credentials
+    global $arrCredentials;
+
+    switch (getAction()) {
+        case 'save':
+            return saveConfigs($smarty, $module_name, $local_templates_dir, $pDB, $arrCredentials);
+        default:
+            return showConfigs($smarty, $module_name, $local_templates_dir, $pDB, $arrCredentials);
+    }
+}
+
+function showConfigs($smarty, $module_name, $local_templates_dir, $pDB, $arrCredentials){
+    global $arrPermission;
+    $smarty->assign("EDIT",in_array('edit',$arrPermission));
+    
     // Textos estáticos
     $smarty->assign(array(
         'APPLY_CHANGES'     =>  _tr('Save'),
         'EMAIL_RELAY_MSG'   =>  _tr('These IPs are allowed to send faxes through Elastix.  You must insert one IP per row.  We recommend keeping localhost and 127.0.0.1  in the configuration because some processes could need them.'),
         'title'             =>  _tr('Clients allowed to send faxes'),
     ));
-    $smarty->assign("icon", "/modules/$module_name/images/fax_fax_clients.png");
-
-    if (isset($_POST['update_hosts']) ) {
-        $val = new PaloValidar();
-        $bGuardar = TRUE;
-
-        // Validar toda la lista de IPs
-        $_POST['lista_hosts'] = trim($_POST['lista_hosts']);
-        $arrHostsFinal = empty($_POST['lista_hosts']) ? array() : explode("\n", $_POST['lista_hosts']);
-        if (count($arrHostsFinal) <= 0) {
-        	$bGuardar = FALSE;
+    $smarty->assign("icon", "web/apps/$module_name/images/fax_fax_clients.png");
+    
+    if(getParameter("update_hosts")){
+        $smarty->assign("RELAY_CONTENT", trim($_POST['lista_hosts']));
+    }else{
+        // Listar IPs actualmente permitidas
+        $output = NULL; $retval = NULL;
+        exec('/usr/bin/elastix-helper faxconfig getfaxhosts 2>&1', $output, $retval);
+        if ($retval != 0) {
             $smarty->assign(array(
                 'mb_title'      =>  _tr('Error'),
-                'mb_message'    =>  _tr('No IP entered, you must keep at least the IP 127.0.0.1'),
+                'mb_message'    =>  _tr('Could not read the clients configuration.'),
             ));
-        } else foreach (array_keys($arrHostsFinal) as $k) {
-        	$arrHostsFinal[$k] = trim($arrHostsFinal[$k]);
-            $bGuardar = $bGuardar && (
-                $arrHostsFinal[$k] == 'localhost' || 
-                $val->validar(_tr('IP').' '.$arrHostsFinal[$k], $arrHostsFinal[$k], 'ip')
-            ); 
         }
-
-        // Formato de errores de validación
-        if ($val->existenErroresPrevios()) {
-            $msgErrorVal = _tr('Validation Error').'<br/><br/>';
-            foreach($val->arrErrores as $nombreVar => $arrVar) {
-                $msgErrorVal .= "<b>$nombreVar</b>: {$arrVar['mensaje']}<br/>";
-            }
-            $smarty->assign(array(
-                'mb_title'      =>  _tr('Error'),
-                'mb_message'    =>  $msgErrorVal,
-            ));
-            $bGuardar = FALSE;
-        } 
-
-        if ($bGuardar) {
-            // Si no hay errores de validacion entonces ingreso las redes al archivo de host
-            $output = NULL; $retval = NULL;
-            exec('/usr/bin/elastix-helper faxconfig --setfaxhosts '.implode(' ', $arrHostsFinal).' 2>&1', $output, $retval);
-            if ($retval == 0) {
-            	$smarty->assign(array(
-                    'mb_title'      =>  _tr('Message'),
-                    'mb_message'    =>  _tr('Configuration updated successfully'),
-                ));
-            } else {
-                $smarty->assign(array(
-                    'mb_title'      =>  _tr('Error'),
-                    'mb_message'    =>  _tr('Write error when writing the new configuration.').
-                                        ' '.implode(' ', $output),
-                ));
-            }
-        }
+        $smarty->assign("RELAY_CONTENT", implode("\n", $output));
     }
+    return $smarty->fetch("$local_templates_dir/form_hosts.tpl");
+}
 
-    // Listar IPs actualmente permitidas
-    $output = NULL; $retval = NULL;
-    exec('/usr/bin/elastix-helper faxconfig --getfaxhosts 2>&1', $output, $retval);
-    if ($retval != 0) {
-    	$smarty->assign(array(
+function saveConfigs($smarty, $module_name, $local_templates_dir, $pDB, $arrCredentials){
+    $val = new PaloValidar();
+    $bGuardar = TRUE;
+
+    // Validar toda la lista de IPs
+    $_POST['lista_hosts'] = trim($_POST['lista_hosts']);
+    $arrHostsFinal = empty($_POST['lista_hosts']) ? array() : explode("\n", $_POST['lista_hosts']);
+    if (count($arrHostsFinal) <= 0) {
+        $bGuardar = FALSE;
+        $smarty->assign(array(
             'mb_title'      =>  _tr('Error'),
-            'mb_message'    =>  _tr('Could not read the clients configuration.'),
+            'mb_message'    =>  _tr('No IP entered, you must keep at least the IP 127.0.0.1'),
         ));
+    } else foreach (array_keys($arrHostsFinal) as $k) {
+        $arrHostsFinal[$k] = trim($arrHostsFinal[$k]);
+        $bGuardar = $bGuardar && (
+            $arrHostsFinal[$k] == 'localhost' || 
+            $val->validar(_tr('IP').' '.$arrHostsFinal[$k], $arrHostsFinal[$k], 'ip')
+        ); 
     }
-    $smarty->assign("RELAY_CONTENT", implode("\n", $output));
-    return $smarty->fetch("file:$local_templates_dir/form_hosts.tpl");
+
+    // Formato de errores de validación
+    if ($val->existenErroresPrevios()) {
+        $msgErrorVal = _tr('Validation Error').'<br/><br/>';
+        foreach($val->arrErrores as $nombreVar => $arrVar) {
+            $msgErrorVal .= "<b>$nombreVar</b>: {$arrVar['mensaje']}<br/>";
+        }
+        $smarty->assign(array(
+            'mb_title'      =>  _tr('Error'),
+            'mb_message'    =>  $msgErrorVal,
+        ));
+        $bGuardar = FALSE;
+    } 
+
+    if ($bGuardar) {
+        // Si no hay errores de validacion entonces ingreso las redes al archivo de host
+        $output = NULL; $retval = NULL;
+        exec('/usr/bin/elastix-helper faxconfig setfaxhosts '.implode(' ', $arrHostsFinal).' 2>&1', $output, $retval);
+        if ($retval == 0) {
+            $smarty->assign(array(
+                'mb_title'      =>  _tr('Message'),
+                'mb_message'    =>  _tr('Configuration updated successfully'),
+            ));
+        } else {
+            $smarty->assign(array(
+                'mb_title'      =>  _tr('Error'),
+                'mb_message'    =>  _tr('Write error when writing the new configuration.').
+                                    ' '.implode(' ', $output),
+            ));
+        }
+    }
+    return showConfigs($smarty, $module_name, $local_templates_dir, $pDB, $arrCredentials);
+}
+
+function getAction(){
+    global $arrPermission;
+    if(getParameter("update_hosts")) //Get parameter by POST (submit)
+        return (in_array('edit',$arrPermission))?'save':'show';
+    else
+        return "show"; //cancel
 }
 ?>

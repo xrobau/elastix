@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.8                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,10 +25,29 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
-global $arrConf;
-global $arrConfModule;
-$arrConfModule['module_name'] = 'faxmaster';
-$arrConfModule['templates_dir'] = 'themes';
-
+  $Id: en.lang,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
+global $arrLangModule;
+$arrLangModule = array(
+'Fax Queue' => 'Fax Queue',
+'Job ID' => 'Job ID',
+'Priority' => 'Priority',
+'Destination' => 'Destination',
+'Pages' =>  'Pages',
+'Retries' => 'Retries',
+'Status' => 'Status',
+'Sent %d pages of %d' => 'Sent %d pages of %d',
+'Try %d of %d' => 'Try %d of %d',
+'Busy signal detected' => 'Busy signal detected',
+'No carrier detected' => 'No carrier detected',
+'No answer from remote' => 'No answer from remote',
+'Could not read request file' => 'Could not read request file',
+'Blocked by another job' => 'Blocked by another job',
+'Delayed by prior call' => 'Delayed by prior call',
+'Are you sure to cancel selected jobs?' => 'Are you sure to cancel selected jobs?',
+'Cancel job' => 'Cancel job',
+'Failed to cancel job' => 'Failed to cancel job',
+// Note: truncation on faxstat output
+'Blocked by concurrent cal' => 'Blocked by concurrent call',
+);
 ?>

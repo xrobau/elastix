@@ -23,11 +23,7 @@
 <table class="tabForm" style="font-size: 16px;" width="100%" >
     <tr class="letra12">
         <td align="left" width="180"><b>{$from.LABEL}: <span  class="required">*</span></b></td>
-		{if !$isOther }
-			<td>{$FAX_USER}</td>
-		{else}
-			<td>{$from.INPUT}</td>
-		{/if}
+        <td>{$FAX_USER}</td>
     </tr>
 
     <tr class="letra12">
@@ -58,9 +54,10 @@
     </tr>
 
 </table>
-<input type='hidden' name='jid' id='jid' value='' />
 <input class="button" type="hidden" name="id" value="{$ID}" />
 <input type='hidden' name='filename' value='{$filename}' />
+<input type='hidden' name='jobid' id='jobid' value='{$JOBID}' />
+<input type='hidden' name='from' id='from' value='{$FAX_DEV}' />
 
 {literal}
     <script type="text/javascript">

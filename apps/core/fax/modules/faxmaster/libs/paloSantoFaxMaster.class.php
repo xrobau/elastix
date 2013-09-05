@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 2.0.0-7                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,12 +25,12 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: paloSantoSendFax.class.php,v 1.1 2009-12-14 02:12:12 Oscar Navarrete J. onavarrete@palosanto.com Exp $ */
-class paloSantoSendFax {
-    var $_DB;
-    var $errMsg;
+  $Id: paloSantoFaxVisor.class.php,v 1.1.1.1 2008/12/09 18:00:00 aflores Exp $ */
+class paloFaxMaster{
+    private $_DB;
+    private $errMsg;
 
-    function paloSantoSendFax(&$pDB)
+    function paloFaxMaster($pDB)
     {
         // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
@@ -48,55 +48,67 @@ class paloSantoSendFax {
             }
         }
     }
-
-    function generarArchivoTextoPS(&$data_content)
-    {
-        // Si el contenido es ASCII se escribe directamente al archivo
-        $bEsAscii = TRUE;
-        foreach (str_split($data_content) as $c) if (ord($c) >= 127) {
-             $bEsAscii = FALSE; break;
+    
+    function getErrorMsg(){
+        return $this->errMsg;
+    }
+    
+    /**
+     * Funcion que devuelve la direecion de correo a notificar en caso 
+     * que algun evento ocurra con el fax. Este parametro se enceuntra en la tabla 
+     * settings. Esta es un tabla clave valor. Las clave es fax_master
+     */
+    function getFaxMaster(){
+        $query="SELECT value FROM settings WHERE property='fax_master'";
+        $result=$this->_DB->getFirstRowQuery($query);
+        if($result===false){
+            $this->errMsg=_tr("DATABASE ERROR");
+            return false;
+        }elseif(count($result)==0){
+            return '';
+        }else
+            return $result[0];
+    }
+    
+    function setFaxMaster($email_account){
+        if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/",$email_account)){
+            $this->errMsg=_tr("Invalid Email Address");
+            return false;
         }
-        if ($bEsAscii) {
-            $ruta_archivo = tempnam('/tmp', 'data_');
-            file_put_contents($ruta_archivo, $data_content);
-            return $ruta_archivo;
+    
+        $this->_DB->beginTransaction();
+        $query="DELETE from settings WHERE property='fax_master'";
+        if(!$this->_DB->genQuery($query)){
+            $this->_DB->rollBack();
+            $this->_tr("DATABASE ERROR");
+            return false;
         }
         
-        /* El contenido a escribir no es ASCII. Ya que la página web emite 
-         * UTF-8, se asumirá que el contenido está también codificado en UTF-8
-         * (verificado en Firefox 16 e Internet Explorer 6). 
-         * 
-         * El código de abajo es necesario debido a que
-         * 1) /usr/bin/sendfax no reconoce como texto un archivo en codificación
-         *    distinta de ASCII
-         * 2) /usr/sbin/textfmt sólo puede convertir desde una fuente ISO-8859-15
-         */
-        $ruta_temp = tempnam('/tmp', 'data_');
-        file_put_contents($ruta_temp, iconv('UTF-8', 'ISO-8859-15//TRANSLIT', $data_content));
-        $ruta_archivo = tempnam('/tmp', 'data_');
-        $output = $retval = NULL;
-        exec('/usr/sbin/textfmt -B -f Courier-Bold -Ml=0.4in -p11 < '.
-            escapeshellarg($ruta_temp).' > '.escapeshellarg($ruta_archivo),
-            $output, $retval);
-        unlink($ruta_temp);
-
-        return ($retval == 0) ? $ruta_archivo : NULL;
-    }
-
-    /*HERE YOUR FUNCTIONS*/
-    function sendFax($faxexten, $destine, $data)
-    {
-        $faxhost = escapeshellarg("$faxexten@127.0.0.1");
-        $destine = escapeshellarg($destine);
-        $data = escapeshellarg($data);
-        $output = $retval = NULL;
-        exec("sendfax -D -h $faxhost -n -d $destine $data 2>&1", $output, $retval);
-        $regs = NULL;
-        if ($retval != 0 || !preg_match('/request id is (\d+)/', implode('', $output), $regs)) {
-            $this->errMsg = implode('<br/>', $output);
-            return NULL;
+        $query="INSERT INTO settings(property,value) VALUES(?,?)";
+        if(!$this->_DB->genQuery($query,array('fax_master',$email_account))){
+            $this->_DB->rollBack();
+            $this->_tr("DATABASE ERROR");
+            return false;
         }
-        return $regs[1]; //devolvmos el jobid del fax que se esta enviando
+        
+        //realizamos el cambios en los archivos del email
+        if(!$this->modificar_archivos_mail($email_account)){
+            $this->_DB->rollBack();
+            $this->errMsg = 'Error in mail configuration. '.$this->errMsg;
+            return false;
+        }else{
+            $this->_DB->commit();
+            return true;
+        }
+    }
+    
+    private function modificar_archivos_mail($email)
+    {
+        $output = $retval = NULL;
+        exec('/usr/bin/elastix-helper faxconfig faxmaster '.escapeshellarg($email).' 2>&1', $output, $retval);
+        if (is_array($output)) 
+            $this->errMsg = implode('<br/>', $output);
+        return ($retval == 0);
     }
 }
 ?>

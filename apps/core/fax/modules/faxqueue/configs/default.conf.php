@@ -25,10 +25,9 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
-global $arrConf;
+  $Id: en.lang,v 1.1 2007/01/09 23:49:36 alex Exp $
+*/
 global $arrConfModule;
-$arrConfModule['module_name'] = 'faxmaster';
+$arrConfModule['module_name'] = 'faxqueue';
 $arrConfModule['templates_dir'] = 'themes';
-
 ?>

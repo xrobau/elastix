@@ -1,4 +1,10 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="4">
+    {if $USERLEVEL eq superadmin}
+        <tr>
+            <td width="12%" align="right">{$organization.LABEL}:</td>
+            <td width="10%"align="left">{$organization.INPUT}</td>
+        </tr>
+    {/if}
     <tr>
         <td width="12%" align="right">{$name_company.LABEL}:</td>
         <td width="10%"align="left">{$name_company.INPUT}</td>

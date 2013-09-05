@@ -4,8 +4,7 @@
   <td>
     <table width="100%" cellpadding="4" cellspacing="0" border="0">
       <tr>
-        <td align="left">
-        <input class='button' type='submit' name='save_default' value='{$APPLY_CHANGES}'></td>
+        {if $EDIT}<td align="left"><input class='button' type='submit' name='save_default' value='{$APPLY_CHANGES}'></td>{/if}
      </tr>
    </table>
   </td>

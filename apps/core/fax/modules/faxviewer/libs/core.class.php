@@ -29,11 +29,11 @@
 
 define('SOAP_DATETIME_FORMAT', 'Y-m-d\TH:i:sP');
 
-$root = $_SERVER["DOCUMENT_ROOT"];
-require_once("$root/libs/misc.lib.php");
-require_once("$root/configs/default.conf.php");
-require_once("$root/libs/paloSantoACL.class.php");
-require_once("$root/modules/faxviewer/libs/paloSantoFaxVisor.class.php");
+$elxPath="/usr/share/elastix";
+require_once "$elxPath/libs/misc.lib.php";
+require_once "$elxPath/configs/default.conf.php";
+require_once "$elxPath/libs/paloSantoACL.class.php";
+require_once "$elxPath/apps/faxviewer/libs/paloSantoFaxVisor.class.php";
 
 
 class core_Fax

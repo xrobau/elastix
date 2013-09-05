@@ -329,6 +329,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Sep 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: for SQL parameters to queries, conversion of a numeric 
+  string into an integer should not be done for numeric strings that start with
+  a zero. Fixes Elastix bug #1694.
+  SVN Rev[5840] 
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

@@ -105,7 +105,14 @@ class paloDB {
                 $data_type = PDO::PARAM_BOOL;
                 break;
             case 'string':
-                $data_type = ctype_digit("{$param[$i]}") ? PDO::PARAM_INT : PDO::PARAM_STR;
+                /* La sentencia LIMIT '1' es ilegal en MySQL debido a las 
+                 * comillas. Por lo tanto, las cadenas numéricas deben insertarse
+                 * como enteros. Sin embargo se debe evitar la conversión si la
+                 * cadena numérica tiene un cero por delante, para evitar el
+                 * truncamiento de dicho cero. Véase bug Elastix #1694. */
+                $data_type = 
+                    (ctype_digit("{$param[$i]}") && ($param[$i][0] != '0' || strlen($param[$i]) == 1))
+                    ? PDO::PARAM_INT : PDO::PARAM_STR;
                 break;
             }
             $sth->bindValue($i + 1, $param[$i], $data_type);

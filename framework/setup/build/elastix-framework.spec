@@ -335,6 +335,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Sep 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: for SQL parameters to queries, conversion of a numeric 
+  string into an integer should not be done for numeric strings that start with
+  a zero. Fixes Elastix bug #1694.
+  SVN Rev[5840] 
+
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: it is legal to return an empty list for getOrganization()
   if no organization has been created.

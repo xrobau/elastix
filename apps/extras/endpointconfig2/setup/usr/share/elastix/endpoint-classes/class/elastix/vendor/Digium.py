@@ -416,6 +416,7 @@ class Endpoint(BaseEndpoint):
     
     def updateLocalConfig(self):
         # All configuration was already done in global configuration
+        self._amireboot('cisco-check-cfg')  # NOP for already-configured
         self._unregister()
         self._setConfigured()
         return True

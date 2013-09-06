@@ -128,6 +128,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Sep  6 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
+- CHANGED: New Endpoint Configurator: add sip notify call to Digium 
+  implementation in order to reboot the phone when not (yet) configured for
+  DPMA.
+  SVN Rev[5841]
+
 * Wed Sep  4 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.3-0
 - Bump version for release.
 - CHANGED: New Endpoint Configurator: fix attempt to assign to immutable tuple

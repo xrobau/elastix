@@ -1293,44 +1293,51 @@ class AMIEventProcess extends TuberiaProcess
 
                 if (strpos($params['Destination'], 'Local/') !== 0) {
                     if (is_null($llamada->actualchannel)) {
-                        $llamada->actualchannel = $params['Destination'];
-                        if ($this->DEBUG) {
-                            $this->_log->output('DEBUG: '.__METHOD__.
-                                ': capturado canal remoto real: '.$params['Destination']);
-                        }
-                        
-                        // Notificar el progreso de la llamada
-                        $paramProgreso = array(
-                            'datetime_entry'=>  date('Y-m-d H:i:s', $params['local_timestamp_received']),
-                            'new_status'    =>  'Dialing',
-                            'trunk'         =>  $llamada->trunk,                            
-                        );
-                        if ($llamada->tipo_llamada == 'outgoing') {
-                            $paramProgreso['id_call_outgoing'] = $llamada->id_llamada;
-                            $paramProgreso['id_campaign_outgoing'] = $llamada->campania->id;
-                        } else {
-                            $paramProgreso['id_call_incoming'] = $llamada->id_llamada;
-                            if (!is_null($llamada->campania)) $paramProgreso['id_campaign_incoming'] = $llamada->campania->id;
-                        }
-                        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+                        // Primer Dial observado, se asigna directamente
+                        $this->_asignarCanalRemotoReal($params, $llamada);
                     } elseif ($llamada->actualchannel != $params['Destination']) {
-                        $regs = NULL;
-                        $sCanalPosibleAgente = NULL;
-                        if (preg_match('|^(\w+/\w+)(\-\w+)?$|', $params['Destination'], $regs)) {
-                        	$sCanalPosibleAgente = $regs[1];
-                            $a = $this->_listaAgentes->buscar('agentchannel', $sCanalPosibleAgente);
-                            if (!is_null($a) && $a->estado_consola == 'logged-in') {
-                            	if ($this->DEBUG) {
-                            		$this->_log->output('DEBUG: '.__METHOD__.': canal remoto es agente, se ignora.');
-                            	}
-                            } else {
-                                $sCanalPosibleAgente = NULL;
+                        
+                        /* Es posible que el plan de marcado haya colgado por congestión
+                         * al canal en $llamada->actualchannel y este Dial sea el 
+                         * siguiente intento usando una troncal distinta en la ruta
+                         * saliente. Se verifica si el canal auxiliar ya tiene un
+                         * Hangup registrado. */
+                        $bCanalPrevioColgado = FALSE;
+                        foreach ($llamada->AuxChannels as $uid => &$auxevents) {
+                        	if (isset($auxevents['Dial']) &&
+                                $auxevents['Dial']['Destination'] == $llamada->actualchannel &&
+                                isset($auxevents['Hangup'])) {
+                                $bCanalPrevioColgado = TRUE;
+                                break;
                             }
                         }
-                        if (is_null($sCanalPosibleAgente)) {
-                            $this->_log->output('WARN: '.__METHOD__.': canal remoto en '.
-                                'conflicto, anterior '.$llamada->actualchannel.' nuevo '.
-                                $params['Destination']);
+                                                
+                        if ($bCanalPrevioColgado) {
+                        	if ($this->DEBUG) {
+                        		$this->_log->output("DEBUG: ".__METHOD__.": canal ".
+                                    "auxiliar previo para llamada {$llamada->actionid} ".
+                                    "ha colgado, se renueva.");
+                        	}
+                            $this->_asignarCanalRemotoReal($params, $llamada);
+                        } else {
+                            $regs = NULL;
+                            $sCanalPosibleAgente = NULL;
+                            if (preg_match('|^(\w+/\w+)(\-\w+)?$|', $params['Destination'], $regs)) {
+                            	$sCanalPosibleAgente = $regs[1];
+                                $a = $this->_listaAgentes->buscar('agentchannel', $sCanalPosibleAgente);
+                                if (!is_null($a) && $a->estado_consola == 'logged-in') {
+                                	if ($this->DEBUG) {
+                                		$this->_log->output('DEBUG: '.__METHOD__.': canal remoto es agente, se ignora.');
+                                	}
+                                } else {
+                                    $sCanalPosibleAgente = NULL;
+                                }
+                            }
+                            if (is_null($sCanalPosibleAgente)) {
+                                $this->_log->output('WARN: '.__METHOD__.': canal remoto en '.
+                                    'conflicto, anterior '.$llamada->actualchannel.' nuevo '.
+                                    $params['Destination']);
+                            }
                         }
                     }
                 }
@@ -1338,6 +1345,30 @@ class AMIEventProcess extends TuberiaProcess
         }
         
         return FALSE;
+    }
+    
+    private function _asignarCanalRemotoReal(&$params, $llamada)
+    {
+        $llamada->actualchannel = $params['Destination'];
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                ': capturado canal remoto real: '.$params['Destination']);
+        }
+        
+        // Notificar el progreso de la llamada
+        $paramProgreso = array(
+            'datetime_entry'=>  date('Y-m-d H:i:s', $params['local_timestamp_received']),
+            'new_status'    =>  'Dialing',
+            'trunk'         =>  $llamada->trunk,                            
+        );
+        if ($llamada->tipo_llamada == 'outgoing') {
+            $paramProgreso['id_call_outgoing'] = $llamada->id_llamada;
+            $paramProgreso['id_campaign_outgoing'] = $llamada->campania->id;
+        } else {
+            $paramProgreso['id_call_incoming'] = $llamada->id_llamada;
+            if (!is_null($llamada->campania)) $paramProgreso['id_campaign_incoming'] = $llamada->campania->id;
+        }
+        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
     }
     
     public function msg_OriginateResponse($sEvent, $params, $sServer, $iPort)

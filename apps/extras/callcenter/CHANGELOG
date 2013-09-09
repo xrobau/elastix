@@ -1,3 +1,7 @@
+2.2.0-3 (SVN revision 5843)
+* FIXED: Dialer: an outgoing route with multiple trunks may produce multiple
+  Dial events as each trunk is tried and fails in turn. Must collect actual
+  channel each time the next trunk is retried. Fixes Elastix bug #1682.
 * FIXED: Dialer: initialize variable to NULL in case the regexp does not match
   on msg_Dial. Also relax the regexp a bit. Attempt to fix Elastix bug #1682.
 * FIXED: Incoming Campaigns: fix missing SQL parameter to UNION query for 

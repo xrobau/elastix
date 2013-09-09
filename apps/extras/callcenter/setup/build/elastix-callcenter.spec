@@ -97,6 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Monitoring: emit campaign log entry ID on agentlinked and
+  agentunlinked events in order to fill required ID of log event. Fixes Elastix
+  bug #1681.
+  SVN Rev[5842]
+
 * Thu Aug 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: initialize variable to NULL in case the regexp does not match
   on msg_Dial. Also relax the regexp a bit. Attempt to fix Elastix bug #1682.

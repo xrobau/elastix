@@ -855,6 +855,7 @@ LISTA_EXTENSIONES;
                     $evento['campaign_id'] = isset($evt->campaign_id) ? (int)$evt->campaign_id : NULL;
                     $evento['call_id'] = (int)$evt->call_id;
                     $evento['phone'] = (string)$evt->phone;
+                    $evento['campaignlog_id'] = isset($evt->campaignlog_id) ? (int)$evt->campaignlog_id : NULL;
                     break;
                 case 'pauseend':
                     $evento['pause_end'] = (string)$evt->pause_end;

@@ -458,7 +458,7 @@ function manejarRespuestaStatus(respuesta)
 	for (var i = 0; i < respuesta.log.length; i++) {
 		var registro = respuesta.log[i];
 		App.campaniaActual.registro.addObject({
-			id:			registro.id,
+			id:			registro.id,	// <--- id puede ser null en caso de link/unlink
 			timestamp:	registro.timestamp,
 			mensaje: 	registro.mensaje
 		});

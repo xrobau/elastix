@@ -597,6 +597,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                         $respuesta['log'][] = formatoLogCampania(array(
+                            'id'                =>  $evento['campaignlog_id'],
                             'new_status'        =>  'Success',
                             'datetime_entry'    =>  $evento['datetime_linkstart'],
                             'campaign_type'     =>  $evento['call_type'],
@@ -630,6 +631,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                         $respuesta['log'][] = formatoLogCampania(array(
+                            'id'                =>  $evento['campaignlog_id'],
                             'new_status'        =>  $evento['shortcall'] ? 'ShortCall' : 'Hangup',
                             'datetime_entry'    =>  $evento['datetime_linkend'],
                             'campaign_type'     =>  $evento['call_type'],

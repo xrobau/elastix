@@ -850,7 +850,6 @@ INFO_FORMULARIOS;
             $infoLlamada['datetime_linkstart'] = $sFechaLink;
             if (!isset($infoLlamada['trunk']) || is_null($infoLlamada['trunk']))
                 $infoLlamada['trunk'] = $trunk;
-            $this->_multiplex->notificarEvento_AgentLinked($sChannel, $sRemChannel, $infoLlamada);
 
             // Notificar el progreso de la llamada
             $paramProgreso = array(
@@ -865,7 +864,9 @@ INFO_FORMULARIOS;
                 $paramProgreso['id_call_incoming'] = $idLlamada;
                 if (!is_null($idCampania)) $paramProgreso['id_campaign_incoming'] = $idCampania;
             }
-            $this->notificarProgresoLlamada($paramProgreso);
+
+            $infoLlamada['campaignlog_id'] = $this->notificarProgresoLlamada($paramProgreso); 
+            $this->_multiplex->notificarEvento_AgentLinked($sChannel, $sRemChannel, $infoLlamada);
         } catch (PDOException $e) {
         	$this->_stdManejoExcepcionDB($e, 'no se puede leer información de llamada para AgentLinked');
         }   	
@@ -879,7 +880,8 @@ INFO_FORMULARIOS;
         }
 
         list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada, $sPhone,
-            $sFechaFin, $iDuracion, $bShortFlag) = $datos;
+            $sFechaFin, $iDuracion, $bShortFlag, $paramProgreso) = $datos;
+        $campaignlog_id = $this->notificarProgresoLlamada($paramProgreso);
         $this->_multiplex->notificarEvento_AgentUnlinked($sAgente, array(
             'calltype'      =>  $sTipoLlamada,
             'campaign_id'   =>  $idCampaign,
@@ -888,6 +890,7 @@ INFO_FORMULARIOS;
             'datetime_linkend'  =>  $sFechaFin,
             'duration'      =>  $iDuracion,
             'shortcall'     =>  $bShortFlag ? 1 : 0,
+            'campaignlog_id'=>  $campaignlog_id,
         ));
     }
 
@@ -958,11 +961,13 @@ INFO_FORMULARIOS;
     
     public function notificarProgresoLlamada($prop)
     {
+        $id_campaignlog = NULL;
+        
         if (isset($prop['id_call_incoming'])) $sColLlamada = 'id_call_incoming';
         elseif (isset($prop['id_call_outgoing'])) $sColLlamada = 'id_call_outgoing';
         else {
         	$this->_log->output('WARN: '.__METHOD__.' - no hay asociación con llamada, se ignora.');
-            return;
+            return NULL;
         }
         try {
             /* Se leen las propiedades del último log de la llamada, o NULL si no 
@@ -1003,7 +1008,7 @@ INFO_FORMULARIOS;
             $sth = $this->_db->prepare($sPeticionSQL);
             $sth->execute($paramSQL);
             
-            $tuplaAnterior['id'] = $this->_db->lastInsertId();
+            $id_campaignlog = $tuplaAnterior['id'] = $this->_db->lastInsertId();
 
             /* Emitir el evento a las conexiones ECCP. Para mantener la 
              * consistencia con el resto del API, se quitan los valores de 
@@ -1045,6 +1050,8 @@ INFO_FORMULARIOS;
         } catch (PDOException $e) {
         	$this->_stdManejoExcepcionDB($e, 'no se puede escribir bitácora de estado de llamada');
         }
+        
+        return $id_campaignlog;
     }
 }
 ?>

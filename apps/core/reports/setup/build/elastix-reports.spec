@@ -92,6 +92,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Billing Report: move filter widgets to separate row in order to avoid
+  misplacement. Fixes Elastix bug #1637.
+  SVN Rev[5844] 
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.

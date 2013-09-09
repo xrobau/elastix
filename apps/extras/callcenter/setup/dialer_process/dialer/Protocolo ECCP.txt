@@ -443,6 +443,7 @@ Elementos informativos:
   siguientes elementos:
   * label: Etiqueta del elemento de formulario
   * value: Valor que fue recogido en el formulario
+* campaignlog_id: ID del registro de bitácora. Para monitoreo de campaña.
 
 NOTA: para averiguar los formularios aplicables a una llamada que no ha sido
 previamente llenada, se debe usar el requerimiento getcampaigninfo.
@@ -584,6 +585,7 @@ Elementos informativos:
 * duration: Duración en segundos de la llamada.
 * shortcall: Bandera puesta a 1 si la llamada es demasiado corta según la 
   configuración del sistema, o 0 si es una llamada de duración normal.
+* campaignlog_id: ID del registro de bitácora. Para monitoreo de campaña.
 
 Ejemplo:
 <event>

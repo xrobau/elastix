@@ -772,7 +772,6 @@ class Llamada
                 if (!is_null($this->campania)) $paramProgreso['id_campaign_incoming'] = $this->campania->id;
             }
             $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
 
             if (!is_null($this->agente)) {
                 $this->_tuberia->msg_ECCPProcess_AgentUnlinked(
@@ -780,7 +779,11 @@ class Llamada
                     is_null($this->campania) ? NULL : $this->campania->id,
                     $this->id_llamada, $this->phone, 
                     date('Y-m-d H:i:s', $this->timestamp_hangup),
-                    $this->duration, ($this->status == 'ShortCall'));
+                    $this->duration, ($this->status == 'ShortCall'),
+                    $paramProgreso);
+            } else {
+            	// Emitir el evento directamente
+                $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
             }
         }
         

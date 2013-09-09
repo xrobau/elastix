@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,7 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-3
+- Bump version for release.
+- FIXED: Dialer: an outgoing route with multiple trunks may produce multiple
+  Dial events as each trunk is tried and fails in turn. Must collect actual
+  channel each time the next trunk is retried. Fixes Elastix bug #1682.
+  SVN Rev[5843]
 - FIXED: Campaign Monitoring: emit campaign log entry ID on agentlinked and
   agentunlinked events in order to fill required ID of log event. Fixes Elastix
   bug #1681.

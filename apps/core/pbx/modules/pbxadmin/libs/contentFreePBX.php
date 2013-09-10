@@ -103,6 +103,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
     global $use_popover_css;
     global $popover_mode;
     global $quietmode;
+    global $recordings_save_path;
     $return_HTML = "";
     
     // This needs to be included BEFORE the session_start or we fail so

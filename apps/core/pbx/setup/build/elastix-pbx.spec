@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 11
+Release: 12
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -22,8 +22,6 @@ Requires: festival >= 1.95
 Elastix Module PBX
 
 %prep
-
-
 %setup -n %{modname}
 
 %install
@@ -304,11 +302,68 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Sep 10 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-12
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Sep 10 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: Problem about upload a recorded file with a registered extension its
+  now solved.
+  SVN Rev[5846]
+
+* Wed Sep 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: pbx - pbxadmin/contentFreePBX.php,main.tpl,es.lang: Changed the name
+  of the link 'Zap Channel DIDs' to 'DAHDI Channel DIDs', and fixed the url to
+  this module.
+  SVN Rev[5836]
+
+* Wed Sep 04 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: pbx - pbxadmin/mainstyle.css,current.js,main.tpl: Now the left menu
+  shows a current link indicator of navigation.
+  SVN Rev[5831]
+
+* Wed Sep 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: pbx - pbxadmin/contentFreePBX.php,main.tpl,es.lang: Changed the name
+  of the link 'Day/Night Control' to 'Call Flow Control'.
+  SVN Rev[5830]
+
+* Wed Aug 28 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: pbx -Build/elastix-pbx.spec: From this release onwards, the package
+  now have as a prerequisite the new version of FreePBX => 2.11.0 to be
+  installed.
+  SVN Rev[5810]
+
+* Thu Aug 22 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: pbx - menu.xml: Another correction to the FOP link for proper
+  operation of module.
+  SVN Rev[5798]
+
+* Thu Aug 22 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: pbx - menu.xml: Now the link to FOP its corrected for proper operation
+  of module.
+  SVN Rev[5797]
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: pbx - modules/pbxadmin/themes/default: A total change in this folder
+  for better support to new FreePBX.
+  SVN Rev[5796]
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
+- REMOVED: pbx - modules/pbxadmin: Its no longer necesary the use of a folder
+  with the js's files.
+  SVN Rev[5795]
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: pbx - pbxadmin/contentFreePBX.php: This library now its updated for
+  better support to new FreePBX.
+  SVN Rev[5794]
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 - ADDED: pbx -Build/elastix-pbx.spec: From this release onwards, the package 
   has as a prerequisite the new version of FreePBX => 2.11.0 to be installed. 
+  SVN Rev[5792]
 
 * Tue Aug 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: add support for Elastix LXP100.

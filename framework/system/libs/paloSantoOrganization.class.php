@@ -278,26 +278,22 @@ class paloSantoOrganization{
         }
     }
 
-    //esta funcion se usa para setear las propiedades de una organizacion que pertenecen a la categoria system
-    //al momento de crear una nueva organizacion
-    //se usa como valor de cada una de la propiedades los valores respectivos que tiene seteados la organizacion
+    //esta funcion se usa para setear las propiedades de una organizacion por default que pertenecen a la categoria
+    //system y fax. Los valores por default son tomados de los valores configurados en la organizacion principal
     //principal
-    function setOrganizationPropSys($idOrganization){
+    private function setDefaultOrganizationProp($idOrganization){
         $Exito=false;
         if (is_null($idOrganization) || !preg_match('/^[[:digit:]]+$/', "$idOrganization")) {
             $this->errMsg = "Invalid ID Organization";
         }
-        $result=$this->getOrganizationPropByCategory(1,"system");
-        if($result!=false){
-            foreach($result as $tmp){
-                $Exito=$this->setOrganizationProp($idOrganization,$tmp["property"],$tmp["value"],"system");
-                if(!$Exito){
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                }
-            }
+        $query="INSERT INTO organization_properties (id_organization,property,value,category) 
+                    SELECT ?,property,value,category FROM organization_properties 
+                        WHERE id_organization=? and category IN ('system','fax')";
+        $result=$this->_DB->genQuery($query,array($idOrganization,'1'));
+        if($result==false){
+            return false;
         }
-        return $Exito;
+        return true;
     }
 
     private function getNewPBXCode($domain)
@@ -671,8 +667,8 @@ class paloSantoOrganization{
                     return false;
                 //obtenemos la organizacion recien creada
                 $resultOrgz=$this->getOrganizationByDomain_Name($domain);
-                //seteamos los valores de organization_properties correspondientes a la categoria system
-                $proExito=$this->setOrganizationPropSys($resultOrgz['id']);
+                //seteamos los valores de organization_properties por default tomados de la organizacion 1
+                $proExito=$this->setDefaultOrganizationProp($resultOrgz['id']);
                 //seteamos las demas propiedades de la organization
                 $cExito=$this->setOrganizationProp($resultOrgz['id'],"country_code",$country_code,"fax");
                 $aExito=$this->setOrganizationProp($resultOrgz['id'],"area_code",$area_code,"fax");
@@ -719,13 +715,13 @@ class paloSantoOrganization{
                                 }
                             }
                         }else{
-                            $error=_tr("Error have ocurred to create dialplan for new organization. ").$pAstConf->errMsg;
+                            $error=_tr("An Error has ocurred to create dialplan for new organization. ").$pAstConf->errMsg;
                             $this->_DB->rollBAck();
                             $this->cleanFailCreation($resultOrgz["domain"]); //eliminamos cualquier rastro de la organizacion
                         }
                     }
                 }else{
-                    $error=_tr("Errors trying set organization properties").$this->errMsg;
+                    $error=_tr("An Error has ocurred to set organization properties").$this->errMsg;
                     $this->_DB->rollBAck();
                 }
             }
@@ -818,7 +814,6 @@ class paloSantoOrganization{
             $this->errMsg=$this->_DB->errMsg;
             $this->_DB->rollBack();
         }else{
-			$this->setOrganizationPropSys($id);
             $cExito=$this->setOrganizationProp($id,"country_code",$country_code,"fax");
             $aExito=$this->setOrganizationProp($id,"area_code",$area_code,"fax");
             $qExito=$this->setOrganizationProp($id,"email_quota",$quota,"email");
@@ -1409,8 +1404,11 @@ class paloSantoOrganization{
                 if($areaCode=="" || $areaCode==null) $areaCode= $this->getOrganizationProp($idOrganization,"area_code");
                 if($clidNumber=="" || $clidNumber==null) $clidNumber = $fax_extension;
                 if($cldiName=="" || $cldiName==null) $cldiName = $name;
-                $fax_subject = "Fax attached (ID: {NAME_PDF})";
-                $fax_content = "Fax sent from '{COMPANY_NAME_FROM}'. The phone number is {COMPANY_NUMBER_FROM}. \n This email has a fax attached with ID {NAME_PDF}.";
+                $fax_subject=$this->getOrganizationProp($idOrganization,"fax_subject");
+                $fax_content=$this->getOrganizationProp($idOrganization,"fax_content");
+                $fax_subject = (empty($fax_subject))?"Fax attached (ID: {NAME_PDF})":$fax_subject;
+                $fax_content = (empty($fax_content))?"Fax sent from '{COMPANY_NAME_FROM}'. The phone number is {COMPANY_NUMBER_FROM}. \n This email has a fax attached with ID {NAME_PDF}.":$fax_content;
+                
                 $faxProperties=array("country_code"=>$countryCode,"area_code"=>$areaCode,"clid_number"=>$clidNumber,"clid_name"=>$cldiName,"fax_subject"=>$fax_subject,"fax_content"=>$fax_content);
 
                 //obtenemos el id del usuario que acabmos de crear

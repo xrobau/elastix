@@ -96,16 +96,23 @@ function applyOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB, 
 
     //obtenemos las traducciones del parametro filtrado
     $filter_resource = htmlentities($filter_resource);
-    $lang = get_language();
-    if($lang != "en"){
-        global $arrLang;
-        $filter_value = strtolower(trim($filter_resource));
-        $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
-        foreach($arrLang as $key=>$value){
-            $langValue=strtolower(trim($value));
-            if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
-                if(strpos($langValue, $filter_value) !== FALSE)
-                    $parameter_to_find[] = $key;
+    $lang = get_language(); //lenguage que esta siendo usado
+    $parameter_to_find=null;
+    if(isset($filter_resource)){
+        if(trim($filter_resource)!=""){
+            if($lang != "en"){
+                global $arrLang;
+                $filter_value = strtolower(trim($filter_resource));
+                $parameter_to_find[]=$filter_value; //parametro de busqueda sin traduccion
+                foreach($arrLang as $key=>$value){
+                    $langValue=strtolower(trim($value));
+                    if(preg_match("/^[[:alnum:]| ]*$/",$filter_value))
+                        if(strpos($langValue, $filter_value) !== FALSE)
+                            $parameter_to_find[] = $key;
+                }
+            }else{
+                $parameter_to_find[]=$filter_resource;
+            }
         }
     }
 

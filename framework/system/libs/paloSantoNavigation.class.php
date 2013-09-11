@@ -43,7 +43,7 @@ class paloSantoNavigationBase
      *  id          Valor de item del menú, debe ser idéntico a la clave de tupla
      *  IdParent    Valor de item del menú que contiene a este menú, o es empty()
      *              si es un item de primer nivel de menú.
-     *  Name        Etiqueta a mostrar en el menú para este item
+     *  Description        Etiqueta a mostrar en el menú para este item
      *  Type        module|framed|empty() 
      *  Link        Si no es empty(), plantilla de enlace para Type=framed
      *  order_no    (no se usa)

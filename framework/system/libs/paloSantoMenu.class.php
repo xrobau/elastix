@@ -124,7 +124,7 @@ class paloMenu {
                             SELECT ract.id_resource FROM user_resource_action as ur  
                                     JOIN resource_action ract ON ract.id=ur.id_resource_action  
                                     WHERE ur.id_user=? AND ract.action='access') ORDER BY ar.order_no";
-        $arrMenuFiltered = array();
+        $arrModulesFiltered = array();
         
         $r = $this->_DB->fetchTable($query, TRUE, array($idGroup,$administrative,$idGroup,$idUser));
         if (!is_array($r)) {
@@ -134,62 +134,43 @@ class paloMenu {
 
         foreach ($r as $tupla) {
         	$tupla['HasChild'] = FALSE;
-            $arrMenuFiltered[$tupla['id']] = $tupla;
+            $arrModulesFiltered[$tupla['id']] = $tupla;
         }
 
-        //Leer los menús de segundo nivel 
+        //Leer el nombre de todos los menus dentro de acl_resource 
         $r = $this->_DB->fetchTable(
             'SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no, 1 AS HasChild '.
-            "FROM acl_resource ar WHERE ar.IdParent!='' and type='' AND ar.administrative=? $org_access ORDER BY ar.order_no", TRUE, array($administrative));
+            "FROM acl_resource ar WHERE ar.administrative=? $org_access ORDER BY ar.order_no", TRUE, array($administrative));
         if (!is_array($r)) {
             $this->errMsg = $this->_DB->errMsg;
             return NULL;
-        }
-        $menuSegundoNivel = array();
-        foreach ($r as $tupla) {
-            $tupla['HasChild'] = (bool)$tupla['HasChild'];
-            $menuSegundoNivel[$tupla['id']] = $tupla;
         }
         
-        // Leer los menús de primer nivel
-        $r = $this->_DB->fetchTable(
-            'SELECT ar.id, ar.IdParent, ar.Link, ar.description, ar.Type, ar.order_no, 1 AS HasChild '.
-            "FROM acl_resource ar WHERE ar.IdParent='' AND ar.administrative=? $org_access ORDER BY ar.order_no", TRUE, array($administrative));
-        if (!is_array($r)) {
-            $this->errMsg = $this->_DB->errMsg;
-            return NULL;
-        }
-        $menuPrimerNivel = array();
+        $allMenus = array();
         foreach ($r as $tupla) {
-            $tupla['HasChild'] = (bool)$tupla['HasChild'];
-            $menuPrimerNivel[$tupla['id']] = $tupla;
+            $tupla['HasChild'] = FALSE;
+            $allMenus[$tupla['id']] = $tupla;
         }
-
-        // Resolver internamente las referencias de menú superior
-        $menuPrimer = $menuSegundo = array();
-        foreach (array_keys($arrMenuFiltered) as $k) {
-            $kp = $arrMenuFiltered[$k]['IdParent'];
-            if (isset($arrMenuFiltered[$kp])) {
-                $arrMenuFiltered[$kp]['HasChild'] = TRUE;
-            } elseif (isset($menuSegundoNivel[$kp])) { //menu de segundo nivel
-                $menuSegundo[$kp] = $kp;
-                //si es menu de segundo nivel procemos a incluir al menu de primer nivel al cual pertenece
-                if(isset($menuSegundoNivel[$kp]['IdParent'])){
-                    if(isset($menuPrimerNivel[$menuSegundoNivel[$kp]['IdParent']])){
-                        $menuPrimer[$menuSegundoNivel[$kp]['IdParent']] = $menuSegundoNivel[$kp]['IdParent'];
-                    }
+                
+        //resolveoms referencia a los niveles superiores
+        $menuMenus = array();
+        foreach (array_keys($arrModulesFiltered) as $k) {
+            if($arrModulesFiltered[$k]['Type']=='module'){
+                $menuMenus[$k]=$k;
+            }
+            $kp = $arrModulesFiltered[$k]['IdParent'];
+            if (isset($allMenus[$kp])) { //menu de segundo o tercer nivel
+                $menuMenus[$kp] = $kp;
+                //se hace esta verificacion para que loe menus de primer nivel sean incluidos
+                if(isset($allMenus[$kp]['IdParent'])){
+                    $menuMenus[$allMenus[$kp]['IdParent']] = $allMenus[$kp]['IdParent'];
                 }
-            } elseif (isset($menuPrimerNivel[$kp])){
-                $menuPrimer[$kp] = $kp;
             } 
         }
         
 
-        // Copiar al arreglo filtrado los menús de primer nivel EN EL ORDEN LEÍDO
-        $arrMenuFiltered = array_merge(
-            $arrMenuFiltered,
-            array_intersect_key($menuSegundoNivel, $menuSegundo),
-            array_intersect_key($menuPrimerNivel, $menuPrimer));
+        // Copiar al arreglo filtrado los menús de primer nivel y segundo nivel EN EL ORDEN LEÍDO
+        $arrMenuFiltered = array_intersect_key($allMenus, $menuMenus);
         
         if ($uelastix) $_SESSION['elastix_user_permission'] = $arrMenuFiltered;
         return $arrMenuFiltered;

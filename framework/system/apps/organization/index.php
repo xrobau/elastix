@@ -922,7 +922,7 @@ function reportDIDorganization($smarty, $module_name, $local_templates_dir, $pDB
     $oGrid->setColumns($arrColumns);
     
     $arrData=array();
-    $arrDID=$pDID->getDIDs($domain,$limit,$offset);
+    $arrDID=$pDID->getDIDs($domain,null,null,null,$limit,$offset);
     
     if($arrDID===false){
         $smarty->assign("mb_title", _tr("ERROR"));

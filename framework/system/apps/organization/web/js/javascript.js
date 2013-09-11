@@ -50,9 +50,6 @@ function filer_did(){
     arrAction["rawmode"]="yes";
     request("index.php", arrAction, false,
         function(arrData,statusResponse,error){
-            alert(arrData);
-            alert(statusResponse);
-            alert(error);
             if(error!=""){
                 alert(error);
             }else{

@@ -29,9 +29,9 @@
 
 class paloSampler {
 
-    var $rutaDB;
-    var $errMsg;
-    var $_db;
+    private $rutaDB;
+    private $errMsg;
+    private $_db;
 
     function paloSampler()
     {

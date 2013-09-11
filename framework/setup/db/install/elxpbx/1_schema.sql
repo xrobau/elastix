@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS organization
 CREATE TABLE IF NOT EXISTS organization_properties
 (
     id_organization   INTEGER     NOT NULL AUTO_INCREMENT, 
-    property             VARCHAR(50) NOT NULL,
-    value             VARCHAR(50) NOT NULL,
+    property          VARCHAR(100) NOT NULL,
+    value             TEXT NOT NULL,
     category          VARCHAR(50),
     PRIMARY KEY (id_organization,property),
     FOREIGN KEY (id_organization) REFERENCES organization(id)  ON DELETE CASCADE
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS org_email_template(
     PRIMARY KEY (category)
 ) ENGINE = INNODB;
 
-insert into org_email_template (from_email,from_name,subject,content,category) values("elastix@example.com","Elastix Admin","Create Company in Elastix Server",'Welcome to Elastix Server.\nYour company {COMPANY_NAME} with domain {DOMAIN} has been created.\nTo start to configurate you elastix server go to {HOST_IP} and login into elastix as:\nUsername: admin@{DOMAIN}\nPassword: {USER_PASSWORD}',"create");
+insert into org_email_template (from_email,from_name,subject,content,category) values("elastix@example.com","Elastix Admin","Create Company in Elastix Server",'Welcome to Elastix Server.<br>Your company {COMPANY_NAME} with domain {DOMAIN} has been created.<br>To start to configurate you elastix server go to {HOST_IP} and login into elastix as:<br>Username: admin@{DOMAIN}<br>Password: {USER_PASSWORD}',"create");
 insert into org_email_template (from_email,from_name,subject,content,category) values("elastix@example.com","Elastix Admin","Deleted Company in Elastix Server","","delete");
 insert into org_email_template (from_email,from_name,subject,content,category) values("elastix@example.com","Elastix Admin","Suspended Company in Elastix Server","","suspend");
 
@@ -202,56 +202,10 @@ CREATE TABLE IF NOT EXISTS user_properties
 (
     id_user   INTEGER     NOT NULL AUTO_INCREMENT,
     property     VARCHAR(100) NOT NULL,
-    value        VARCHAR(150) NOT NULL,
+    value        TEXT NOT NULL,
     category     VARCHAR(50),
     PRIMARY KEY (id_user,property,category),
     FOREIGN KEY (id_user) REFERENCES acl_user(id) ON DELETE CASCADE
-) ENGINE = INNODB;
-
-CREATE TABLE IF NOT EXISTS email_list
-(
-    id               INTEGER AUTO_INCREMENT,
-    id_organization  INTEGER,
-    listname    VARCHAR(50),
-    password    VARCHAR(15),
-    mailadmin   VARCHAR(150),
-    PRIMARY KEY (id),
-    FOREIGN KEY (id_organization) REFERENCES organization(id) ON DELETE CASCADE
-) ENGINE = INNODB;
-
-CREATE TABLE IF NOT EXISTS member_list
-(
-    id              INTEGER NOT null AUTO_INCREMENT ,
-    mailmember      VARCHAR(150),
-    id_emaillist    INTEGER,
-    namemember      VARCHAR(50),
-    PRIMARY KEY (id),
-    FOREIGN KEY(id_emaillist) REFERENCES email_list(id) ON DELETE CASCADE
-) ENGINE = INNODB;
-
-CREATE TABLE IF NOT EXISTS messages_vacations
-(
-    id          INTEGER NOT NULL AUTO_INCREMENT,
-    account     varchar(150) NOT NULL,
-    subject     varchar(150) NOT NULL,
-    body        text,
-    vacation varchar(5) default 'no',
-    ini_date date NOT NULL,
-    end_date date NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (account) REFERENCES acl_user(username) ON DELETE CASCADE
-) ENGINE = INNODB;
-
-
-CREATE TABLE IF NOT EXISTS email_statistics(
-    id                 integer not null AUTO_INCREMENT,
-    date               datetime,
-    unix_time          integer,
-    total              integer,
-    type               integer,
-    id_organization    integer,
-    PRIMARY KEY (id),
-    FOREIGN KEY (id_organization) REFERENCES organization(id) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
 CREATE TABLE IF NOT EXISTS settings
@@ -261,33 +215,21 @@ CREATE TABLE IF NOT EXISTS settings
     PRIMARY KEY (property)
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS fax_docs
-(
-    id             integer          NOT NULL AUTO_INCREMENT,
-    pdf_file       varchar(255)     NOT NULL DEFAULT '',
-    modemdev       varchar(255)     NOT NULL DEFAULT '',
-    status         varchar(255)     NOT NULL DEFAULT '',
-    commID         varchar(255)     NOT NULL DEFAULT '',
-    errormsg       varchar(255)     NOT NULL DEFAULT '',
-    company_name   varchar(255)     NOT NULL DEFAULT '',
-    company_fax    varchar(255)     NOT NULL DEFAULT '',
-    date           timestamp        NOT NULL,
-    type           varchar(3)       default 'in',
-    faxpath        varchar(255)     default '',
-    id_user        integer          not null,
-    PRIMARY KEY (id),
-    FOREIGN KEY    (id_user) REFERENCES acl_user(id) ON DELETE CASCADE
-) ENGINE = INNODB;
+INSERT INTO settings VALUES('elastix_version_release', '3.0.0-alpha3');
+INSERT INTO settings VALUES('fax_master', 'elastix@example.org');
 
-
-
-INSERT INTO settings VALUES('elastix_version_release', '3.0.0-1');
 INSERT INTO organization VALUES(1,'NONE','','','','','','','','active');
 INSERT INTO organization_properties VALUES(1,'language','en','system');
 INSERT INTO organization_properties VALUES(1,'default_rate',0.50,'system');
 INSERT INTO organization_properties VALUES(1,'default_rate_offset',1,'system');
 INSERT INTO organization_properties VALUES(1,'currency','$','system');
 INSERT INTO organization_properties VALUES(1,'theme','elastixneo','system');
+-- properties used for fax settings
+INSERT INTO organization_properties VALUES(1,'fax_remite','fax@faxelastix.com','fax');
+INSERT INTO organization_properties VALUES(1,'fax_remitente','Fax Elastix','fax');
+INSERT INTO organization_properties VALUES(1,'fax_subject','Fax attached (ID: {NAME_PDF})','fax');
+INSERT INTO organization_properties VALUES(1,'fax_content','Fax sent from {COMPANY_NAME_FROM}. The phone number is {COMPANY_NUMBER_FROM}. <br> This email has a fax attached with ID {NAME_PDF}.','fax');
+
 INSERT INTO acl_group VALUES( 1,'superadmin','super elastix admin',1);
 INSERT INTO acl_group VALUES( 2,'administrator','Administrator',1);
 INSERT INTO acl_group VALUES( 3,'supervisor','Supervisor',1);
@@ -297,11 +239,11 @@ INSERT INTO acl_user (id,username,name,md5_password,id_group) VALUES(1,'admin','
 
 INSERT INTO acl_resource VALUES('system', 'System', '', '', '', 0,'yes','yes');
 INSERT INTO acl_resource VALUES('sysdash', 'Dashboard Manager', 'system', '', '', 1,'yes','yes'); 
-INSERT INTO acl_resource VALUES('dashboard', 'Dashboard', 'sysdash', '', 'module', 11,'yes','yes'); 
-INSERT INTO acl_resource VALUES('applet_admin', 'Dashboard Applet Admin', 'sysdash', '', 'module', 12,'yes','yes'); 
+INSERT INTO acl_resource VALUES('dashboard', 'Dashboard', 'sysdash', '', 'module', 1,'yes','yes'); 
+INSERT INTO acl_resource VALUES('applet_admin', 'Dashboard Applet Admin', 'sysdash', '', 'module', 1,'yes','yes'); 
 INSERT INTO acl_resource VALUES('orgmgr', 'Organization Manager', 'system', '', '', 2,'yes','yes');
-INSERT INTO acl_resource VALUES('organization', 'Organization', 'orgmgr', '', 'module', 21,'yes','yes');
-INSERT INTO acl_resource VALUES('organization_permission', 'Organization Resource', 'orgmgr', '', 'module', 22,'yes','no'); -- superadmin
+INSERT INTO acl_resource VALUES('organization', 'Organization', 'orgmgr', '', 'module', 1,'yes','yes');
+INSERT INTO acl_resource VALUES('organization_permission', 'Organization Resource', 'orgmgr', '', 'module', 2,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('usermgr', 'User/Group Manager', 'system', '', '', 3,'yes','yes');
 INSERT INTO acl_resource VALUES('userlist', 'Users', 'usermgr', '', 'module', 1,'yes','yes'); 
 INSERT INTO acl_resource VALUES('grouplist', 'Groups', 'usermgr', '', 'module', 2,'yes','yes'); 
@@ -329,38 +271,48 @@ INSERT INTO acl_resource VALUES('remote_smtp', 'Remote SMTP', 'email_admin', '',
 INSERT INTO acl_resource VALUES('email_list', 'Email list', 'email_admin', '', 'module', 5,'yes','yes');
 INSERT INTO acl_resource VALUES('email_stats', 'Email stats', 'email_admin', '', 'module', 6,'yes','yes');
 INSERT INTO acl_resource VALUES('fax', 'Fax', '', '', '', 3,'yes','yes');
-INSERT INTO acl_resource VALUES('faxviewer', 'Fax Viewer', 'fax', '', 'module', 1,'yes','yes');
-INSERT INTO acl_resource VALUES('faxmaster', 'Fax Master', 'fax', '', 'module', 2,'yes','no'); -- superadmin
-INSERT INTO acl_resource VALUES('faxclients', 'Fax Clients', 'fax', '', 'module', 3,'yes','no'); -- superadmin
-INSERT INTO acl_resource VALUES('fax_email_template', 'Fax Email Template', 'fax', '', 'module', 4,'yes','yes'); 
+INSERT INTO acl_resource VALUES('faxmgr', 'Virtual Fax', 'fax', '', '', 1,'yes','yes');
+INSERT INTO acl_resource VALUES('sendfax', 'Send Fax', 'faxmgr', '', 'module', 1,'yes','yes');
+INSERT INTO acl_resource VALUES('faxqueue', 'Fax Queue', 'faxmgr', '', 'module', 2,'yes','yes');
+INSERT INTO acl_resource VALUES('faxviewer', 'Fax Viewer', 'fax', '', 'module', 2,'yes','yes');
+INSERT INTO acl_resource VALUES('faxmaster', 'Fax Master', 'fax', '', 'module', 3,'yes','no'); -- superadmin
+INSERT INTO acl_resource VALUES('faxclients', 'Fax Clients', 'fax', '', 'module', 4,'yes','no'); -- superadmin
+INSERT INTO acl_resource VALUES('fax_email_template', 'Fax Email Template', 'fax', '', 'module', 5,'yes','yes'); --no para el superadmin
+
 INSERT INTO acl_resource VALUES('pbxconfig', 'PBX', '', '', '', 4,'yes','yes');
-INSERT INTO acl_resource VALUES('pbxadmin', 'PBX Configuration', 'pbxconfig', '', '', 1,'yes','yes');
-INSERT INTO acl_resource VALUES('trunks', 'Trunks', 'pbxadmin', '', 'module', 1,'yes','no'); -- superadmin
-INSERT INTO acl_resource VALUES('did', 'DID', 'pbxadmin', '', 'module', 2,'yes','no'); -- superadmin
-INSERT INTO acl_resource VALUES('general_settings_admin', 'General Settings Admin', 'pbxadmin', '', 'module', 3,'yes','no'); -- superadmin
-INSERT INTO acl_resource VALUES('extensions', 'Extensions', 'pbxadmin', '', 'module', 4,'yes','yes');
-INSERT INTO acl_resource VALUES('outbound_route', 'Outbound Routes', 'pbxadmin', '', 'module', 5,'yes','yes');
-INSERT INTO acl_resource VALUES('inbound_route', 'Inbound Routes', 'pbxadmin', '', 'module', 6,'yes','yes');
-INSERT INTO acl_resource VALUES('ivr', 'IVR', 'pbxadmin', '', 'module', 7,'yes','yes');
-INSERT INTO acl_resource VALUES('queues', 'Queues', 'pbxadmin', '', 'module', 8,'yes','yes');
-INSERT INTO acl_resource VALUES('features_code', 'Features Codes', 'pbxadmin', '', 'module', 9,'yes','yes');
-INSERT INTO acl_resource VALUES('general_settings', 'General Settings', 'pbxadmin', '', 'module', 10,'yes','yes');
-INSERT INTO acl_resource VALUES('ring_group', 'Ring Groups', 'pbxadmin', '', 'module', 11,'yes','yes');
-INSERT INTO acl_resource VALUES('time_group', 'Time Group', 'pbxadmin', '', 'module', 12,'yes','yes');
-INSERT INTO acl_resource VALUES('time_conditions', 'Time Conditions', 'pbxadmin', '', 'module', 13,'yes','yes');
-INSERT INTO acl_resource VALUES('musiconhold', 'Music On Hold', 'pbxadmin', '', 'module', 14,'yes','yes');
-INSERT INTO acl_resource VALUES('recordings', 'Recordings', 'pbxadmin', '', 'module', 15,'yes','yes');
-INSERT INTO acl_resource VALUES('control_panel', 'Operator Panel', 'pbxconfig', '', 'module', 2,'yes','yes');
-INSERT INTO acl_resource VALUES('voicemail', 'Voicemail', 'pbxconfig', '', 'module', 3,'yes','yes');
-INSERT INTO acl_resource VALUES('monitoring', 'Monitoring', 'pbxconfig', '', 'module', 4,'yes','yes');
-INSERT INTO acl_resource VALUES('batch_conf', 'Batch Configurations', 'pbxconfig', '', '', 5,'yes','yes'); 
-INSERT INTO acl_resource VALUES('extensions_batch', 'Batch of Extensions', 'batch_conf', '', 'module', 3,'yes','yes'); 
-INSERT INTO acl_resource VALUES('conference', 'Conference', 'pbxconfig', '', 'module', 6,'yes','yes'); 
+INSERT INTO acl_resource VALUES('outconnection', 'PBX Connection', 'pbxconfig', '', '', 1,'yes','yes');
+INSERT INTO acl_resource VALUES('trunks', 'Trunks', 'outconnection', '', 'module', 1,'yes','no'); -- superadmin
+INSERT INTO acl_resource VALUES('did', 'DID', 'outconnection', '', 'module', 2,'yes','no'); -- superadmin
+INSERT INTO acl_resource VALUES('outbound_route', 'Outbound Routes', 'outconnection', '', 'module', 3,'yes','yes');
+INSERT INTO acl_resource VALUES('inbound_route', 'Inbound Routes', 'outconnection', '', 'module', 4,'yes','yes');
+INSERT INTO acl_resource VALUES('ivr', 'IVR', 'outconnection', '', 'module', 5,'yes','yes');
+
+INSERT INTO acl_resource VALUES('pbxapplications', 'PBX Applications', 'pbxconfig', '', '', 2,'yes','yes');
+INSERT INTO acl_resource VALUES('extensions', 'Extensions', 'pbxapplications', '', 'module', 1,'yes','yes');
+INSERT INTO acl_resource VALUES('queues', 'Queues', 'pbxapplications', '', 'module', 2,'yes','yes');
+INSERT INTO acl_resource VALUES('ring_group', 'Ring Groups', 'pbxapplications', '', 'module', 3,'yes','yes');
+INSERT INTO acl_resource VALUES('time_group', 'Time Group', 'pbxapplications', '', 'module', 4,'yes','yes');
+INSERT INTO acl_resource VALUES('time_conditions', 'Time Conditions', 'pbxapplications', '', 'module', 5,'yes','yes');
+
+INSERT INTO acl_resource VALUES('pbxsettings', 'PBX Admin Settings', 'pbxconfig', '', '', 3,'yes','yes');
+INSERT INTO acl_resource VALUES('general_settings_admin', 'General Settings Admin', 'pbxsettings', '', 'module', 1, 'yes','no'); -- superadmin
+INSERT INTO acl_resource VALUES('features_code', 'Features Codes', 'pbxsettings', '', 'module', 2,'yes','yes');
+INSERT INTO acl_resource VALUES('general_settings', 'General Settings', 'pbxsettings', '', 'module', 3,'yes','yes');
+INSERT INTO acl_resource VALUES('musiconhold', 'Music On Hold', 'pbxsettings', '', 'module', 4,'yes','yes');
+INSERT INTO acl_resource VALUES('recordings', 'Recordings', 'pbxsettings', '', 'module', 5,'yes','yes');
+
+INSERT INTO acl_resource VALUES('conference', 'Conference', 'pbxconfig', '', 'module', 4,'yes','yes'); 
+
+INSERT INTO acl_resource VALUES('voicemail', 'Voicemail Report', 'pbxconfig', '', 'module', 5,'yes','yes');
+INSERT INTO acl_resource VALUES('monitoring', 'Monitoring', 'pbxconfig', '', 'module', 6,'yes','yes');
+
 INSERT INTO acl_resource VALUES('tools', 'Tools', 'pbxconfig', '', '', 7,'yes','yes');
 INSERT INTO acl_resource VALUES('asterisk_cli', 'Asterisk-Cli', 'tools', '', 'module', 1,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('file_editor', 'Asterisk File Editor', 'tools', '', 'module', 2,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('text_to_wav', 'Text to Wav', 'tools', '', 'module', 3,'yes','yes');
 INSERT INTO acl_resource VALUES('festival', 'Festival', 'tools', '', 'module', 4,'yes','no'); -- superadmin
+
+
 INSERT INTO acl_resource VALUES('reports', 'Reports', '', '', '', 5,'yes','yes');
 INSERT INTO acl_resource VALUES('cdrreport', 'CDR Report', 'reports', '', 'module', 1,'yes','yes');
 INSERT INTO acl_resource VALUES('channelusage', 'Channels Usage', 'reports', '', 'module', 2,'yes','no'); -- superadmin
@@ -368,6 +320,8 @@ INSERT INTO acl_resource VALUES('asterisk_log', 'Asterisk Logs', 'reports', '', 
 INSERT INTO acl_resource VALUES('graphic_report', 'Graphic Report', 'reports', '', 'module', 5,'yes','yes');
 INSERT INTO acl_resource VALUES('summary_by_extension', 'Summary', 'reports', '', 'module', 6,'yes','yes');
 INSERT INTO acl_resource VALUES('missed_calls', 'Missed Calls', 'reports', '', 'module', 7,'yes','yes');
+
+
 INSERT INTO acl_resource VALUES('security', 'Security', '', '', '', 7,'yes','yes'); 
 INSERT INTO acl_resource VALUES('sec_firewall', 'Firewall', 'security', '', 'module', 1,'yes','no'); -- superadmin 
 INSERT INTO acl_resource VALUES('sec_rules', 'Firewall Rules', 'sec_firewall', '', 'module', 1,'yes','no'); -- superadmin
@@ -379,9 +333,10 @@ INSERT INTO acl_resource VALUES('sec_weak_keys', 'Weak Keys', 'security', '', 'm
 INSERT INTO acl_resource VALUES('sec_advanced_settings', 'Advanced Settings', 'security', '', 'module', 4,'yes','no'); -- superadmin
 
 -- Modulos de final_user
-INSERT INTO acl_resource VALUES('user_home', 'My Home', '', '', 'module', 1,'no','yes');
-INSERT INTO acl_resource VALUES('user_setting', 'My settings', '', '', 'module', 2,'no','yes');
-INSERT INTO acl_resource VALUES('vacations_msg', 'Vacations', 'user_setting', '', 'module', 3,'no','yes');
+INSERT INTO acl_resource VALUES('user_home', 'Home', '', '', 'module', 1,'no','yes');
+INSERT INTO acl_resource VALUES('user_setting', 'Settings', '', '', 'module', 2,'no','yes');
+INSERT INTO acl_resource VALUES('usersettings', 'My settings', 'user_setting', '', 'module', 1,'no','yes');
+INSERT INTO acl_resource VALUES('vacations', 'Vacations', 'user_setting', '', 'module', 2,'no','yes');
 INSERT INTO acl_resource VALUES('agenda', 'Agenda', '', '', '', 3,'no','yes');
 INSERT INTO acl_resource VALUES('calendar', 'Calendar', 'agenda', '', 'module', 1,'no','yes');
 INSERT INTO acl_resource VALUES('address_book', 'Address Book', 'agenda', '', 'module', 2,'no','yes');
@@ -411,43 +366,44 @@ INSERT INTO organization_resource VALUES(32, 1, 'antispam');
 INSERT INTO organization_resource VALUES(33, 1, 'remote_smtp');
 INSERT INTO organization_resource VALUES(34, 1, 'email_list');
 INSERT INTO organization_resource VALUES(35, 1, 'email_stats');
+INSERT INTO organization_resource VALUES(107, 1, 'sendfax');
+INSERT INTO organization_resource VALUES(108, 1, 'faxqueue');
 INSERT INTO organization_resource VALUES(39, 1, 'fax_email_template');
 INSERT INTO organization_resource VALUES(40, 1, 'faxmaster');
 INSERT INTO organization_resource VALUES(41, 1, 'faxclients');
 INSERT INTO organization_resource VALUES(42, 1, 'faxviewer');
-INSERT INTO organization_resource VALUES(43, 1, 'pbxadmin');
 INSERT INTO organization_resource VALUES(44, 1, 'trunks'); -- superadmin
 INSERT INTO organization_resource VALUES(45, 1, 'did'); -- superadmin
-INSERT INTO organization_resource VALUES(46, 1, 'general_settings_admin'); -- superadmin
-INSERT INTO organization_resource VALUES(47, 1, 'extensions');
-INSERT INTO organization_resource VALUES(48, 1, 'outbound_route');
-INSERT INTO organization_resource VALUES(49, 1, 'inbound_route');
-INSERT INTO organization_resource VALUES(50, 1, 'ivr');
-INSERT INTO organization_resource VALUES(51, 1, 'queues');
-INSERT INTO organization_resource VALUES(52, 1, 'features_code');
-INSERT INTO organization_resource VALUES(53, 1, 'general_settings');
-INSERT INTO organization_resource VALUES(54, 1, 'ring_group');
-INSERT INTO organization_resource VALUES(55, 1, 'time_group');
-INSERT INTO organization_resource VALUES(56, 1, 'time_conditions');
-INSERT INTO organization_resource VALUES(57, 1, 'musiconhold');
-INSERT INTO organization_resource VALUES(58, 1, 'recordings');
-INSERT INTO organization_resource VALUES(59, 1, 'control_panel');
-INSERT INTO organization_resource VALUES(60, 1, 'voicemail');
-INSERT INTO organization_resource VALUES(61, 1, 'monitoring');
-INSERT INTO organization_resource VALUES(62, 1, 'batch_conf'); -- superadmin
-INSERT INTO organization_resource VALUES(64, 1, 'extensions_batch'); -- superadmin
-INSERT INTO organization_resource VALUES(65, 1, 'conference');
+INSERT INTO organization_resource VALUES(46, 1, 'outbound_route');
+INSERT INTO organization_resource VALUES(47, 1, 'inbound_route');
+INSERT INTO organization_resource VALUES(48, 1, 'ivr');
+INSERT INTO organization_resource VALUES(49, 1, 'extensions');
+INSERT INTO organization_resource VALUES(50, 1, 'queues');
+INSERT INTO organization_resource VALUES(51, 1, 'ring_group');
+INSERT INTO organization_resource VALUES(52, 1, 'time_group');
+INSERT INTO organization_resource VALUES(53, 1, 'time_conditions');
+INSERT INTO organization_resource VALUES(54, 1, 'general_settings_admin'); -- superadmin
+INSERT INTO organization_resource VALUES(57, 1, 'features_code'); 
+INSERT INTO organization_resource VALUES(58, 1, 'general_settings'); 
+INSERT INTO organization_resource VALUES(59, 1, 'musiconhold');
+INSERT INTO organization_resource VALUES(60, 1, 'recordings');
+INSERT INTO organization_resource VALUES(61, 1, 'conference');
+INSERT INTO organization_resource VALUES(62, 1, 'voicemail');
+INSERT INTO organization_resource VALUES(63, 1, 'monitoring');
+
 INSERT INTO organization_resource VALUES(66, 1, 'tools');
 INSERT INTO organization_resource VALUES(67, 1, 'asterisk_cli'); -- superadmin
 INSERT INTO organization_resource VALUES(68, 1, 'file_editor'); -- superadmin
 INSERT INTO organization_resource VALUES(69, 1, 'text_to_wav'); 
 INSERT INTO organization_resource VALUES(70, 1, 'festival'); -- superadmin
+
 INSERT INTO organization_resource VALUES(73, 1, 'cdrreport');
 INSERT INTO organization_resource VALUES(74, 1, 'channelusage'); -- superadmin
 INSERT INTO organization_resource VALUES(75, 1, 'asterisk_log'); -- superadmin
 INSERT INTO organization_resource VALUES(76, 1, 'graphic_report');
 INSERT INTO organization_resource VALUES(77, 1, 'summary_by_extension');
 INSERT INTO organization_resource VALUES(78, 1, 'missed_calls');
+
 INSERT INTO organization_resource VALUES(82, 1, 'sec_firewall'); -- superadmin
 INSERT INTO organization_resource VALUES(83, 1, 'sec_rules'); -- superadmin
 INSERT INTO organization_resource VALUES(84, 1, 'sec_ports'); -- superadmin
@@ -459,8 +415,9 @@ INSERT INTO organization_resource VALUES(89, 1, 'sec_advanced_settings'); -- sup
 
 -- final_user
 INSERT INTO organization_resource VALUES(100, 1, 'user_home'); 
-INSERT INTO organization_resource VALUES(102, 1, 'user_setting');
-INSERT INTO organization_resource VALUES(104, 1, 'vacations_msg');
+INSERT INTO organization_resource VALUES(102, 1, 'usersettings');
+INSERT INTO organization_resource VALUES(104, 1, 'vacations');
+INSERT INTO organization_resource VALUES(104, 1, 'vacations');
 INSERT INTO organization_resource VALUES(105, 1, 'calendar'); 
 INSERT INTO organization_resource VALUES(106, 1, 'address_book'); 
 
@@ -559,9 +516,98 @@ INSERT INTO resource_action (id,id_resource,action) VALUES(71,'faxclients','acce
 INSERT INTO resource_action (id,id_resource,action) VALUES(72,'faxclients','edit');
 INSERT INTO resource_action (id,id_resource,action) VALUES(73,'faxviewer','access');
 INSERT INTO resource_action (id,id_resource,action) VALUES(74,'faxviewer','edit_company');
-INSERT INTO resource_action (id,id_resource,action) VALUES(75,'faxviewer','delete');
+INSERT INTO resource_action (id,id_resource,action) VALUES(75,'faxviewer','delete_fax');
 INSERT INTO resource_action (id,id_resource,action) VALUES(76,'fax_email_template','access');
 INSERT INTO resource_action (id,id_resource,action) VALUES(77,'fax_email_template','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(79,'sendfax','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(80,'faxqueue','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(81,'faxqueue','cancel_job');
+INSERT INTO resource_action (id,id_resource,action) VALUES(82,'faxviewer','download_fax');
+INSERT INTO resource_action (id,id_resource,action) VALUES(83,'faxviewer','edit_fax');
+
+
+-- pbx
+INSERT INTO resource_action (id,id_resource,action) VALUES(84,'trunks','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(85,'trunks','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(86,'trunks','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(87,'trunks','delete');
+INSERT INTO resource_action (id,id_resource,action) VALUES(88,'trunks','set_organization_allowed');
+INSERT INTO resource_action (id,id_resource,action) VALUES(89,'did','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(90,'did','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(91,'did','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(92,'did','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(93,'outbound_route','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(94,'outbound_route','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(95,'outbound_route','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(96,'outbound_route','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(97,'inbound_route','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(98,'inbound_route','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(99,'inbound_route','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(100,'inbound_route','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(101,'ivr','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(102,'ivr','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(103,'ivr','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(104,'ivr','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(130,'extensions','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(131,'extensions','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(132,'extensions','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(133,'extensions','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(134,'queues','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(135,'queues','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(136,'queues','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(137,'queues','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(138,'ring_group','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(139,'ring_group','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(140,'ring_group','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(141,'ring_group','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(142,'time_group','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(143,'time_group','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(144,'time_group','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(145,'time_group','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(147,'time_conditions','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(148,'time_conditions','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(149,'time_conditions','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(150,'time_conditions','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(151,'general_settings_admin','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(152,'general_settings_admin','edit');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(153,'features_code','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(154,'features_code','edit');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(155,'general_settings','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(156,'general_settings','edit');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(157,'musiconhold','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(158,'musiconhold','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(159,'musiconhold','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(160,'musiconhold','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(161,'recordings','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(162,'recordings','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(163,'recordings','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(164,'recordings','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(165,'conference','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(166,'conference','create');
+INSERT INTO resource_action (id,id_resource,action) VALUES(167,'conference','edit');
+INSERT INTO resource_action (id,id_resource,action) VALUES(168,'conference','delete');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(169,'voicemail','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(170,'voicemail','delete');
+INSERT INTO resource_action (id,id_resource,action) VALUES(171,'voicemail','download');
+
+INSERT INTO resource_action (id,id_resource,action) VALUES(172,'monitoring','access');
+INSERT INTO resource_action (id,id_resource,action) VALUES(173,'monitoring','delete');
+INSERT INTO resource_action (id,id_resource,action) VALUES(174,'monitoring','download');
 
 
 -- system
@@ -701,7 +747,153 @@ INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,75);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,73);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,74);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,75);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,76);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,77);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,76);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,77);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,77)
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,79);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,80);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,81);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,80);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,81);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,82);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,83);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,82);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,83);
+
+
+-- pbx
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,84);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,85);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,86);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,87);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,88);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,89);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,90);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,91);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,92);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,93);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,94);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,95);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,96);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,93);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,94);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,95);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,96);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,97);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,98);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,99);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,100);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,97);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,98);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,99);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,100);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,101);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,102);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,103);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,104);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,101);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,102);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,103);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,104);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,130);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,131);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,132);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,133);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,130);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,131);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,132);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,133);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,134);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,135);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,136);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,137);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,134);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,135);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,136);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,137);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,138);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,139);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,140);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,141);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,138);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,139);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,140);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,141);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,142);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,143);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,144);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,145);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,142);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,143);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,144);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,145);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,147);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,148);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,149);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,150);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,147);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,148);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,149);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,150);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,151);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,152);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,153);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,154);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,153);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,154);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,155);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,156);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,155);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,156);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,157);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,158);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,159);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,160);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,157);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,158);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,159);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,160);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,161);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,162);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,163);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,164);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,161);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,162);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,163);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,164);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,165);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,166);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,167);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,168);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,169);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,170);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,171);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,169);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,170);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,171);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,169);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,171);
+
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,172);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,173);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,174);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,172);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,173);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,174);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,172);
+INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,174);

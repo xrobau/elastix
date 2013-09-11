@@ -215,7 +215,7 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         $oGrid->showFilter(trim($htmlFilter));
     }else{
         $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",_tr("It's necesary you create a new organization so you can create new user"));
+        $smarty->assign("mb_message",_tr("In order to use this module must exist at least 1 organization in the Elastix Server"));
     }
 
     $contenidoModulo = $oGrid->fetchGrid(array(), $arrData);
@@ -1073,16 +1073,16 @@ function createFieldFilter($arrOrgz){
 
 
 function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrCredentiasls){
-    $pACL = new paloACL($pDB);
     $showMsg=false;
     $continue=false;
 
-    if($userLevel1=="other"){
+    /*if($arrCredentiasls['userlevel']=="other"){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You are not authorized to perform this action"));
-    }
+    }*/
 
-    if($userLevel1=="superadmin"){
+    $idOrganization=$arrCredentiasls['id_organization'];
+    if($arrCredentiasls['userlevel']=="superadmin"){
         $idOrganization = getParameter("organization_id");
     }
 
@@ -1091,14 +1091,14 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     }
 
     $query="select domain from organization where id=?";
-    $result=$pACL->_DB->getFirstRowQuery($query, false, array($idOrganization));
+    $result=$pDB->getFirstRowQuery($query, false, array($idOrganization));
     if($result===false){
         $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pACL->_DB->errMsg));
+        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr($pDB->errMsg));
         $showMsg=true;
     }elseif(count($result)==0){
         $smarty->assign("mb_title", _tr("ERROR"));
-        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. "));
+        $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ")._tr("Invalid Organization. "));
         $showMsg=true;
     }else{
         $domain=$result[0];
@@ -1106,8 +1106,7 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     }
 
     if($continue){
-        $pDBMySQL=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-        $pAstConf=new paloSantoASteriskConfig($pDBMySQL,$pACL->_DB);
+        $pAstConf=new paloSantoASteriskConfig($pDB);
         if($pAstConf->generateDialplan($domain)===false){
             $pAstConf->setReloadDialplan($domain,true);
             $smarty->assign("mb_title", _tr("ERROR"));

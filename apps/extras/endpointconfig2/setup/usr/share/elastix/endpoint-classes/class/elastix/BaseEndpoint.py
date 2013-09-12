@@ -33,8 +33,10 @@ from eventlet.green import os, socket, urllib2, urllib
 import errno
 import sha
 import random
+from os.path import isfile
 
 ENDPOINT_DIR = '/usr/share/elastix/endpoint-classes'
+ENDPOINT_CUSTOM_DIR = '/usr/local/share/elastix/endpoint-classes'
 TFTP_DIR = '/tftpboot'
 
 class BaseEndpoint(object):
@@ -402,6 +404,9 @@ class BaseEndpoint(object):
     @staticmethod
     def _fetchTemplate(sTemplate, vars):
         tmpl = tempita.Template.from_filename(ENDPOINT_DIR + '/tpl/' + sTemplate)
+        # Check for custom DIR
+        if isfile (ENDPOINT_CUSTOM_DIR + '/tpl/' + sTemplate):
+            tmpl = tempita.Template.from_filename(ENDPOINT_CUSTOM_DIR + '/tpl/' + sTemplate)
         return tmpl.substitute(vars)
     
     @staticmethod

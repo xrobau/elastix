@@ -65,6 +65,7 @@ mv modules/                     $RPM_BUILD_ROOT/var/www/html/
 # Additional (module-specific) files that can be handled by RPM
 mv setup/etc/ $RPM_BUILD_ROOT/
 mv setup/usr/ $RPM_BUILD_ROOT/
+mkdir -p $RPM_BUILD_ROOT/usr/local/share/elastix/endpoint-classes/tpl
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -121,6 +122,7 @@ fi
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /usr/share/elastix/endpoint-classes
+/usr/local/share/elastix/endpoint-classes
 %defattr(644, root, root)
 /etc/httpd/conf.d/elastix-endpointconfig.conf
 %defattr(755, root, root)
@@ -128,6 +130,13 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Sep 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add the ability to store custom templates
+  that will override the default ones if required, at the directory 
+  /usr/local/share/elastix/endpoint-classes/tpl . Based on a patch by Israel 
+  Santana Alemán.
+  SVN Rev[5872]
+
 * Fri Sep  6 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - CHANGED: New Endpoint Configurator: add sip notify call to Digium 
   implementation in order to reboot the phone when not (yet) configured for

@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -25,6 +25,7 @@ Elastix Module Email
 rm -rf $RPM_BUILD_ROOT
 
 # ** /etc path ** #
+mkdir -p    $RPM_BUILD_ROOT/etc/logrotate.d/
 mkdir -p    $RPM_BUILD_ROOT/etc/postfix
 mkdir -p    $RPM_BUILD_ROOT/usr/local/bin/
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -32,14 +33,13 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/html/libs/
 mkdir -p    $RPM_BUILD_ROOT/etc/cron.d/
 mkdir -p    $RPM_BUILD_ROOT/usr/local/elastix/
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mkdir -p    $RPM_BUILD_ROOT/var/www/
+mkdir -p    $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
 
 # ** libs ** #
 mv setup/paloSantoEmail.class.php        $RPM_BUILD_ROOT/var/www/html/libs/
 mv setup/cyradm.php                      $RPM_BUILD_ROOT/var/www/html/libs/
-mv setup/checkSpamFolder.php             $RPM_BUILD_ROOT/var/www/
-mv setup/deleteSpam.php                  $RPM_BUILD_ROOT/var/www/
-mv setup/disable_vacations.php           $RPM_BUILD_ROOT/var/www/
+mv setup/var/www/elastixdir/scripts/checkSpamFolder.php             $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
+mv setup/var/www/elastixdir/scripts/deleteSpam.php                  $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
 mv setup/stats/postfix_stats.cron        $RPM_BUILD_ROOT/etc/cron.d/
 mv setup/stats/postfix_stats.php         $RPM_BUILD_ROOT/usr/local/elastix/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
@@ -49,14 +49,45 @@ rmdir setup/stats
 chmod 644 $RPM_BUILD_ROOT/usr/local/elastix/postfix_stats.php
 
 # ** dando permisos de ejecucion ** #
-chmod +x $RPM_BUILD_ROOT/var/www/checkSpamFolder.php
-chmod +x $RPM_BUILD_ROOT/var/www/deleteSpam.php
-chmod +x $RPM_BUILD_ROOT/var/www/disable_vacations.php
+chmod +x $RPM_BUILD_ROOT/var/www/elastixdir/scripts/checkSpamFolder.php
+chmod +x $RPM_BUILD_ROOT/var/www/elastixdir/scripts/deleteSpam.php
 chmod +x $RPM_BUILD_ROOT/usr/share/elastix/privileged/*
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/
-mv modules/ $RPM_BUILD_ROOT/var/www/html/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+bdir=%{_builddir}/%{modname}
+for FOLDER0 in $(ls -A modules/)
+do
+		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
+		do
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
+				do
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
+						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
+						fi
+					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+					fi
+				done
+				case "$FOLDER0" in 
+				frontend)
+					mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+				;;
+				backend)
+					mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
+				;;
+				esac
+		done
+done
+
+# ** ElastixDir ** #
+#mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/
+#mv setup/elastixdir/(checkSpamFolder.php|deleteSpam.php)      $RPM_BUILD_ROOT/var/www/elastixdir/
 
 # Additional (module-specific) files that can be handled by RPM
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
@@ -72,11 +103,12 @@ mv setup/etc/postfix/virtual.db               $RPM_BUILD_ROOT/usr/share/elastix/
 mv setup/etc/imapd.conf.elastix               $RPM_BUILD_ROOT/etc/
 mv setup/etc/postfix/main.cf.elastix          $RPM_BUILD_ROOT/etc/postfix/
 mv setup/etc/cyrus.conf.elastix               $RPM_BUILD_ROOT/etc/
+mv setup/etc/logrotate.d/emailspam	      $RPM_BUILD_ROOT/etc/logrotate.d/emailspam
 
 # ** /usr/local/ files ** #
 mv setup/usr/local/bin/spamfilter.sh          $RPM_BUILD_ROOT/usr/local/bin/
 
-rmdir setup/etc/postfix setup/etc
+rmdir setup/etc/postfix setup/etc/logrotate.d setup/etc
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
 rmdir setup/usr/local/bin setup/usr/local setup/usr 
 
@@ -181,21 +213,55 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+/usr/share/elastix/apps/*
 /usr/local/bin/spamfilter.sh
 /etc/imapd.conf.elastix
 /etc/postfix/main.cf.elastix
 /etc/cyrus.conf.elastix
+/etc/logrotate.d/emailspam
 /usr/share/elastix/virtual.db
-/var/www/checkSpamFolder.php
-/var/www/deleteSpam.php
+/var/www/elastixdir/scripts/checkSpamFolder.php
+/var/www/elastixdir/scripts/deleteSpam.php
 /usr/local/elastix/postfix_stats.php
-/var/www/disable_vacations.php
 %defattr(644, root, root)
 /etc/cron.d/postfix_stats.cron
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: email_admin - setup/infomodules.xml/: Within this folder are placed
+  the new xml files that will be in charge of creating the menus for each
+  module.
+  SVN Rev[5851]
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: email_admin - modules: The modules were relocated under the new
+  scheme that differentiates administrator modules and end user modules .
+  SVN Rev[5850]
+
+* Mon Sep 02 2013 Rocio Mera <rmera@palosanto.com> 
+- ADDED: Trunk - Apps/Email_Admin: Was added file emailspam to /etc/logrotate.d
+  SVN Rev[5828]
+
+* Mon Sep 02 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: Trunk - Apps/Email_Admin: Was deleted script disable_vacations
+  SVN Rev[5827]
+
+* Mon Sep 02 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps/Email_admin: Was made changes in modules antispam,
+  email_relay, remote_smtp,  email_stats, email_list to adatpt this module to
+  new directory schemas
+- DELETED: Trunk - Apps/Email_admin: Was deleted modules email_accounts and
+  vacations. Module email_accounts is not more usefull because is not possible
+  create account that not belong to any user. Module vacations is replaced by a
+  new module that belong to end_user interface
+  SVN Rev[5826]
+
 * Fri Aug  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email Stats: fix mispackaging of crontab file that results in crond
   refusing to run mail traffic sampler. Fixes Elastix bug #1635.

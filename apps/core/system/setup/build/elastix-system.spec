@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -27,11 +27,39 @@ Elastix Module System
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mkdir -p    $RPM_BUILD_ROOT/var/www/html/libs/
 mkdir -p    $RPM_BUILD_ROOT/var/www/backup
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mv modules/ $RPM_BUILD_ROOT/var/www/html/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+bdir=%{_builddir}/%{modname}
+for FOLDER0 in $(ls -A modules/)
+do
+		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
+		do
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
+				do
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
+						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
+						fi
+					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+					fi
+				done
+				case "$FOLDER0" in 
+					frontend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+					;;
+					backend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
+					;;
+				esac
+		done
+done
 
 mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
 mv setup/automatic_backup.php            $RPM_BUILD_ROOT/var/www/backup/
@@ -123,6 +151,7 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+/usr/share/elastix/apps/*
 /var/www/backup/automatic_backup.php
 %defattr(755, root, root)
 /usr/sbin/switch_wanpipe_media
@@ -130,6 +159,43 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: system - setup/infomodules.xml/: Within this folder are placed the new
+  xml files that will be in charge of creating the menus for each module.
+  SVN Rev[5871]
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: system - modules: The modules were relocated under the new scheme
+  that differentiates administrator modules and end user modules .
+  SVN Rev[5870]
+
+* Wed Sep 11 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/System: Was made changes in module userlist
+  SVN Rev[5849]
+
+* Wed Aug 28 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps/System: Was made changes in some modules in order to
+  adap this modules to new permissions schemas
+  SVN Rev[5813]
+
+* Mon Aug 26 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Apps - System/userlist: Was made changes in module userlist and
+  shutdown to adapt this modules to the new permission schemas
+  SVN Rev[5808]
+
+* Fri Aug 23 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps/System: Was made changes in modules applet_admin,
+  shutdown to addapt this modules to the new permissions schemas
+  SVN Rev[5802]
+
+* Tue Aug 13 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: APPS - core/system/modules/userlist/index.php: code upgrade
+  SVN Rev[5721]
+
 * Fri Aug  9 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: further to choosing between astdb and astdb.sqlite3,
   astdb.sqlite3 must be deleted before running astdb2sqlite3.
@@ -152,6 +218,31 @@ fi
   Asterisk 11, as well as handling the case of an Asterisk 1.8 backup being
   restored in Asterisk 11.
   SVN Rev[5478]
+
+* Tue Jul 30 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - System/Module: Was made changes in module userlits to adap
+  it to the directory organization changes
+  SVN Rev[5452]
+
+* Fri Jul 19 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: APPS - Core/System/Modules/packages: code upgrade
+  SVN Rev[5383]
+- CHANGED: APPS - Core/System/Modules/repositories: code upgrade
+  SVN Rev[5382]
+- CHANGED: APPS - Core/System/Modules/hardware_detector: code upgrade
+  SVN Rev[5377]
+- CHANGED: APPS - Core/System/Modules/shutdown: code upgrade
+  SVN Rev[5376]
+- CHANGED: APPS - Core/System/Modules/dhcp_by_mac: code upgrade
+  SVN Rev[5375]
+- CHANGED: APPS - Core/System/Modules/dhcp_clientlist: code upgrade
+  SVN Rev[5374]
+- CHANGED: APPS - Core/System/Modules/dhcp_server: code upgrade
+  SVN Rev[5373]
+- CHANGED: APPS - Core/System/Modules/dhcp_server: code upgrade
+  SVN Rev[5370]
+- CHANGED: APPS - Core/System/Modules/network_parameters: code upgrade
+  SVN Rev[5369]
 
 * Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: Dashboard: remove applets obsoleted by usermode interface.
@@ -184,9 +275,130 @@ fi
   realtime DB. Some applets are obsoleted by usermode interface.
   SVN Rev[5343]
 
+* Wed Jul 17 2013 Washington Reyes <wreyes@palosanto.com>
+- CHANGED: APPS - Core/System/Modules/time_Config: code upgrade
+  SVN Rev[5335]
+
+* Mon Jul 15 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: APPS - Core/System/Modules/Currency: code upgrade
+  SVN Rev[5315]ç
+- CHANGED: APPS - Core/System/Modules/Currency: code upgrade
+  SVN Rev[5314]
+
+* Wed Jul 10 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: APPS - system: Was made changes in lib
+  paloSantoDataApplets.class.php in order to modify wrong inclusion
+  paloSantpDB.class.php
+  SVN Rev[5307]
+
+* Fri Jul 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGES: APPS - PBX: Was made changes in modules dashboard, applet_admin to
+  add elastix restructuration directory.
+  SVN Rev[5300]
+
+* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - userlist/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5295]
+- CHANGED: trunk - time_config/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5294]
+- CHANGED: trunk - shutdown/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5293]
+- CHANGED: trunk - repositories/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5292]
+- CHANGED: trunk - packages/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5291]
+- CHANGED: trunk - network_parameters/: It was corrected a configuration in the
+  web folder.
+  SVN Rev[5290]
+- CHANGED: trunk - hardware_detector/: It was corrected a configuration in the
+  web folder.
+  SVN Rev[5289]
+- CHANGED: trunk - dhcp_server/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5288]
+- CHANGED: trunk - dhcp_clientlist/: It was corrected a configuration in the
+  web folder.
+  SVN Rev[5287]
+- CHANGED: trunk - dhcp_by_mac/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5286]
+- CHANGED: trunk - dashboard/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5285]
+- CHANGED: trunk - currency/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5284]
+- CHANGED: trunk - applet_admin/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5283] 
+- CHANGED: trunk - backup_restore/: The svn repository for module
+  backup_restore in trunk (Elx 3) was restructured in order to accomplish a new
+  schema.
+  SVN Rev[5214]
+
+* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - userlist/: The svn repository for module userlist in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5208]
+- CHANGED: trunk - time_config/: The svn repository for module time_config in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5207]
+- CHANGED: trunk - shutdown/: The svn repository for module shutdown in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5206]
+- CHANGED: trunk - repositories/: The svn repository for module repositories in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5205]
+- CHANGED: trunk - packages/: The svn repository for module packages in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5204]
+- CHANGED: trunk - network_parameters/: The svn repository for module
+  network_parameters in trunk (Elx 3) was restructured in order to accomplish a
+  new schema.
+  SVN Rev[5203]
+- CHANGED: trunk - hardware_detector/: The svn repository for module
+  hardware_detector in trunk (Elx 3) was restructured in order to accomplish a
+  new schema.
+  SVN Rev[5202]
+- CHANGED: trunk - dhcp_server/: The svn repository for module dhcp_server in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5201]
+- CHANGED: trunk - dhcp_clientlist/: The svn repository for module
+  dhcp_clientlist in trunk (Elx 3) was restructured in order to accomplish a
+  new schema.
+  SVN Rev[5200]
+- CHANGED: trunk - dhcp_by_mac/: The svn repository for module dhcp_by_mac in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5199]
+- CHANGED: trunk - dashboard/: The svn repository for module dashboard in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5198] 
+- CHANGED: trunk - currency/: The svn repository for module currency in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5197]
+- CHANGED: trunk - applet_admin/: The svn repository for module applet_admin in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5196]
+
 * Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: remove stray debugging statements.
   SVN Rev[5116]
+
+* Thu Jun 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was made chanes in elxpbx databse schema. This
+  database contain data from pbx and now is integrated with framework database.
+- CHANGED: Trunk - Apps: Was made change in privileged script asteriskconfig,
+  email_account and faxconfig. This changes was made to incorpora the elastix
+  framework database changes from sqlite to mysql
+- CHANGED: Trunk - Apss: Was made change in some module of pbx. This changes
+  are part of  elastix framework database changes from sqlite to mysql
+  SVN Rev[5114]
+
 
 * Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix botched detail window for package version mismatch.
@@ -257,9 +469,15 @@ fi
   process spawns and at least one disk hit for unused free space information.
   SVN Rev[5036]
 
+* Tue May 28 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Dashboard: synchronize as much as possible between 2.4 and trunk for
+  easier analysys.
+  SVN Rev[5035]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5032]
 
 * Tue May 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Hardware Detector: move hardware_detector script to the directory

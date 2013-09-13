@@ -364,7 +364,7 @@ a array with the field "total" containing the total of records.
             $arrVMs     = $this->getMailsFromVoicemail();
             $arrContact = $this->getInternalContacts($arrDevices);
 
-            if(count($arrDevices) > 0 && is_array($arrDevices)){
+            if(is_array($arrDevices)){
                 foreach($arrDevices as &$device){
                     $device['name']          = $device['description'];
                     $device['work_phone']    = $device['id'];

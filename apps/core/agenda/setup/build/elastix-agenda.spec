@@ -109,6 +109,12 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Fri Sep 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: when fetching the internal contact list, an empty recordset (as
+  returned from a non-matching search) is a valid scenario and therefore not an
+  error.
+  SVN Rev[5880]
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

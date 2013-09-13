@@ -171,7 +171,7 @@ class Endpoint(BaseEndpoint):
         vars = self._prepareVarList()
         vars.update({
             'enable_bridge'     :   int(self._bridge),
-            'time_zone'         :   self._timeZone,
+            'time_zone'         :   self._timeZone, # Time Zone, hour offset from GMT
         })
         try:
             self._writeTemplate(sTemplate, vars, sConfigPath)

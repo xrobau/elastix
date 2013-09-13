@@ -522,7 +522,7 @@ class Endpoint(BaseEndpoint):
             'P237'  :   stdvars['server_ip'], # Config Server Path
             'P212'  :   '0',            # Firmware Upgrade. 0 - TFTP Upgrade,  1 - HTTP Upgrade.
             'P290'  :   '{ x+ | *x+ | *xx*x+ }', # (GXV3175 specific) Dialplan string
-            'P64'   :   self._timeZone, # Time Zone
+            'P64'   :   self._timeZone, # Time Zone, 'auto' or GMT offset in minutes +720
 
             'P8'    :   '0',            # DHCP=0 o static=1
             'P41': o[0], 'P42': o[1], 'P43': o[2], 'P44': o[3], # TFTP Server
@@ -530,6 +530,7 @@ class Endpoint(BaseEndpoint):
             'P330'  :   1,    # 0-Disable phonebook download 1-HTTP 2-TFTP 3-HTTPS
             'P331'  :   stdvars['phonesrv'],
             'P332'  :   20,   # Minutes between XML phonebook fetches, or 0 to disable
+            'P143'  :   1,    # Allow DHCP to override timezone setting.
         }
         if self._model in ('GXP280',):
             vars.update({'P73' : '1'})  # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO

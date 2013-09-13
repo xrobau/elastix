@@ -28,6 +28,12 @@
   $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
 
+require_once(ELASTIX_BASE.'configs/default.conf.php');
+require_once(ELASTIX_BASE.'modules/address_book/libs/paloSantoAdressBook.class.php');
+require_once(ELASTIX_BASE.'modules/address_book/configs/default.conf.php');
+
+$arrConf = array_merge($arrConf, $arrConfModule);
+
 class BaseVendorResource
 {
     protected $_db;
@@ -70,6 +76,74 @@ class BaseVendorResource
             if (count($tupla) > 0) return $tupla;
         }
         return NULL;
+    }
+    
+    /**
+     * Procedimiento para listar y buscar en las agendas de Elastix. Este método
+     * implementa el comportamiento de que un id_user puesto a NULL debe de
+     * tener acceso a la lista de contactos internos, y también a los contactos
+     * públicos de la lista de contactos externos. 
+     * 
+     * @param   mixed   $id_user    NULL para extensión anónima, o ID del usuario
+     * @param   string  $addressBookType    'internal' o 'external'
+     * @param   mixed   NULL para cualquier contacto, o cadena para buscar en nombre
+     * 
+     * @return  array   Arreglo de estado con los siguientes campos:
+     *      contacts    La lista de contactos devuelta, o NULL en caso de error.
+     *      fc          NULL en éxito, 'PARAMERROR', 'DBERROR'
+     *      fm          NULL en éxito, o mensaje de error corto
+     *      fd          NULL en éxito, o mensaje largo
+     */
+    protected function listarAgendaElastix($id_user, $addressBookType,
+        $sBuscarNombre = NULL)
+    {
+        global $arrConf;
+    	$result = array(
+            'contacts'  =>  NULL,
+            'fc'        =>  NULL,
+            'fm'        =>  NULL,
+            'fd'        =>  NULL,
+        );
+        
+        $field_name = $field_pattern = NULL;
+        $addressBook = new paloAdressBook($arrConf['dsn_conn_database']);
+        switch ($addressBookType) {
+        case 'internal':
+            $astDSN = generarDSNSistema('asteriskuser', 'asterisk', ELASTIX_BASE.'/');
+            if (!is_null($sBuscarNombre)) {
+            	$field_name = 'name';
+                $field_pattern = "%{$sBuscarNombre}%";
+            }
+            $result['contacts'] = $addressBook->getDeviceFreePBX_Completed($astDSN, NULL, NULL, $field_name, $field_pattern);
+            break;
+        case 'external':
+            $result['contacts'] = $addressBook->getAddressBook(NULL, NULL, $field_name, $field_pattern, FALSE, $id_user);
+            if (is_array($result['contacts']) && !is_null($sBuscarNombre)) {
+            	$t = array();
+                foreach ($result['contacts'] as $contact) {
+                    $fullname = $contact['name'];
+                    if (isset($contact['last_name'])) {
+                        $fullname .= ' '.$contact['last_name'];
+                    }
+                	if ((stripos($fullname, $sBuscarNombre) !== FALSE)) $t[] = $contact;
+                }
+                $result['contacts'] = $t;
+            }
+            break;
+        default:
+            $result['fc'] = 'PARAMERROR';
+            $result['fm'] = 'Invalid format';
+            $result['fd'] = 'Unrecognized address book type, must be internal or external';
+            return $result;
+        }
+        if (!is_array($result['contacts'])) {
+            $result['fc'] = 'DBERROR';
+            $result['fm'] = 'Database operation failed';
+            $result['fd'] = 'Unable to read data from '.$addressBookType.' phonebook - '.$addressBook->_DB->errMsg;
+            $result['contacts'] = NULL;
+        }
+        
+        return $result;
     }
 }
 ?>

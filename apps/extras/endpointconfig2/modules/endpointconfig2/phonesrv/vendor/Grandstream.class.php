@@ -29,7 +29,6 @@
 */
 
 require_once 'vendor/BaseVendorResource.class.php';
-require_once ELASTIX_BASE.'modules/address_book/libs/core.class.php';
 
 class Grandstream extends BaseVendorResource
 {
@@ -56,34 +55,31 @@ class Grandstream extends BaseVendorResource
     // Fuente: http://www.grandstream.com/products/gxp_series/general/documents/gxp_wp_xml_phonebook.pdf
     private function _handle_phonebook($id_endpoint)
     {
-        $typemap = array('internal', 'external');
-        $userdata = $this->obtenerUsuarioElastix($id_endpoint);
-        if (is_null($userdata)) {
+        if (is_null($id_endpoint)) {
             header('HTTP/1.1 403 Forbidden');
             print 'Unauthorized for phonebook!';
-        	return;
+            return;
         } 
-        else $_SERVER['PHP_AUTH_USER'] = $userdata['name_user'];
+
+        $typemap = array('internal', 'external');
+        $userdata = $this->obtenerUsuarioElastix($id_endpoint);
         
         $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8" ?><AddressBook/>');
         
         // GXV3140 aparentemente requiere esto
         $xml->addChild('version', 1);
 
-        $pCore_AddressBook = new core_AddressBook();
         foreach ($typemap as $addressBookType) {
-            $result = $pCore_AddressBook->listAddressBook($addressBookType, NULL, NULL, NULL);
-            if (!is_array($result)) {
-                $error = $pCore_AddressBook->getError();
-                if ($error["fc"] == "DBERROR")
-                    header("HTTP/1.1 500 Internal Server Error");
-                else
-                    header("HTTP/1.1 400 Bad Request");
-                print $error['fm'].' - '.$error['fd'];
+            $result = $this->listarAgendaElastix(is_null($userdata) ? NULL : $userdata['id_user'], $addressBookType);
+            if (!is_array($result['contacts'])) {
+                Header(($result["fc"] == "DBERROR") 
+                    ? 'HTTP/1.1 500 Internal Server Error' 
+                    : 'HTTP/1.1 400 Bad Request');
+                print $result['fm'].' - '.$result['fd'];
                 return;
             }
             
-            foreach ($result['extension'] as $contact) {
+            foreach ($result['contacts'] as $contact) {
                 $xml_contact = $xml->addChild('Contact');
                 // LastName y FirstName deben estar presentes, incluso si vacíos
                 if (isset($contact['last_name'])) {

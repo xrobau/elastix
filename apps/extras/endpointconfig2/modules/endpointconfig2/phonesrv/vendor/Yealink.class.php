@@ -29,7 +29,6 @@
 */
 
 require_once 'vendor/BaseVendorResource.class.php';
-require_once ELASTIX_BASE.'modules/address_book/libs/core.class.php';
 
 class Yealink extends BaseVendorResource
 {
@@ -74,48 +73,46 @@ class Yealink extends BaseVendorResource
     
     private function _handle_phonebook($id_endpoint, $addressBookType, $pathList)
     {
+        if (is_null($id_endpoint)) {
+            header('HTTP/1.1 403 Forbidden');
+            print 'Unauthorized for phonebook!';
+            return;
+        } 
+
         $typemap = array(
             'internal' => _tr('Internal'),
             'external' => _tr('External'));
 
         $userdata = $this->obtenerUsuarioElastix($id_endpoint);
-        if (is_null($userdata)) {
-            header('HTTP/1.1 403 Forbidden');
-            print 'Unauthorized for phonebook!';
-            return;
-        } 
-        else $_SERVER['PHP_AUTH_USER'] = $userdata['name_user'];
-        
+
         $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8" ?><ElastixIPPhoneDirectory/>');
         $xml->addChild('Title', str_replace('&', '&amp;', _tr('Phone Directory').' - '.$typemap[$addressBookType]));
         $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
     	
-        $pCore_AddressBook = new core_AddressBook();
-        $result = $pCore_AddressBook->listAddressBook($addressBookType, NULL, NULL, NULL);
-        if (!is_array($result)) {
-            $error = $pCore_AddressBook->getError();
-            if ($error["fc"] == "DBERROR")
-                header("HTTP/1.1 500 Internal Server Error");
-            else
-                header("HTTP/1.1 400 Bad Request");
-            print $error['fm'].' - '.$error['fd'];
+        $result = $this->listarAgendaElastix(
+            is_null($userdata) ? NULL : $userdata['id_user'],
+            $addressBookType,
+            (isset($_GET['name']) && trim($_GET['name']) != '') ? trim($_GET['name']) : NULL);
+        if (!is_array($result['contacts'])) {
+            Header(($result["fc"] == "DBERROR") 
+                ? 'HTTP/1.1 500 Internal Server Error' 
+                : 'HTTP/1.1 400 Bad Request');
+            print $result['fm'].' - '.$result['fd'];
             return;
         }
         
-        foreach ($result['extension'] as $contact) {
+        foreach ($result['contacts'] as $contact) {
             $fullname = $contact['name'];
             if (isset($contact['last_name'])) {
                 $fullname .= ' '.$contact['last_name'];
             }
 
-            if (!isset($_GET['name']) || trim($_GET['name']) == '' || stripos($fullname, $_GET['name']) !== FALSE) {
-                $xml_contact = $xml->addChild('DirectoryEntry');
-                $xml_contact->addChild('Name', str_replace('&', '&amp;', $fullname));
-                
-                foreach (array('work_phone', 'cell_phone', 'home_phone') as $k) {
-                    if (!empty($contact[$k])) {
-                        $xml_phone = $xml_contact->addChild('Telephone', str_replace('&', '&amp;', $contact[$k]));
-                    }
+            $xml_contact = $xml->addChild('DirectoryEntry');
+            $xml_contact->addChild('Name', str_replace('&', '&amp;', $fullname));
+            
+            foreach (array('work_phone', 'cell_phone', 'home_phone') as $k) {
+                if (!empty($contact[$k])) {
+                    $xml_phone = $xml_contact->addChild('Telephone', str_replace('&', '&amp;', $contact[$k]));
                 }
             }
         }

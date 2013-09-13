@@ -29,7 +29,6 @@
 */
 
 require_once 'vendor/BaseVendorResource.class.php';
-require_once ELASTIX_BASE.'modules/address_book/libs/core.class.php';
 require_once ELASTIX_BASE.'libs/magpierss/rss_fetch.inc';
 
 class Cisco extends BaseVendorResource
@@ -143,12 +142,9 @@ HELPTEXT;
             'external' => _tr('External'));
         
         $userdata = $this->obtenerUsuarioElastix($id_endpoint);
-        if (!is_null($userdata)) $_SERVER['PHP_AUTH_USER'] = $userdata['name_user'];
 
         if (isset($_GET['search']) && empty($_GET['search'])) unset($_GET['search']);
         
-        $pCore_AddressBook = new core_AddressBook();
-
         if (count($pathList) <= 0) {
     		// Se elaboran tantos menús como sea requerido para cubrir todas las páginas
             $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneMenu/>');
@@ -163,25 +159,18 @@ HELPTEXT;
             $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
             
             foreach ($typemap as $addressBookType => $v) {
-                $result = $pCore_AddressBook->listAddressBook($addressBookType, NULL, NULL, NULL);
-                if (!is_array($result)) {
-                    $error = $pCore_AddressBook->getError();
-                    if ($error["fc"] == "DBERROR")
-                        header("HTTP/1.1 500 Internal Server Error");
-                    else
-                        header("HTTP/1.1 400 Bad Request");
-                    print $error['fm'].' - '.$error['fd'];
+                $result = $this->listarAgendaElastix(
+                    is_null($userdata) ? NULL : $userdata['id_user'],
+                    $addressBookType,
+                    (isset($_GET['search']) && trim($_GET['search']) != '') ? trim($_GET['search']) : NULL);
+                if (!is_array($result['contacts'])) {
+                    Header(($result["fc"] == "DBERROR") 
+                        ? 'HTTP/1.1 500 Internal Server Error' 
+                        : 'HTTP/1.1 400 Bad Request');
+                    print $result['fm'].' - '.$result['fd'];
                     return;
                 }
-                
-                if (!isset($_GET['search']))
-                    $total = $result['totalCount'];
-                else {
-                	$total = 0;
-                    foreach ($result['extension'] as $contact) {
-                        if ($this->_filter_direntry_name($contact, $_GET['search'])) $total++;
-                    }
-                }
+                $total = count($result['contacts']);
                 
                 for ($offset = 0, $page = 1; $offset < $total; $offset += $limit, $page++) {
                     $url = $this->_baseurl.'/directory/'.$addressBookType.'?name='.$_GET['name'].'&offset='.$offset;
@@ -198,28 +187,15 @@ HELPTEXT;
                 header('Location: '.$this->_baseurl.'/directory?name='.$_GET['name']);
             	return;
             }
-            if (!isset($_GET['search'])) {
-                $result = $pCore_AddressBook->listAddressBook($addressBookType, $offset, $limit, NULL);
-            } else {
-            	$t = $pCore_AddressBook->listAddressBook($addressBookType, NULL, NULL, NULL);
-                $result = array(
-                    'totalCount' => 0,
-                    'extension' =>  array(),
-                );
-                foreach ($t['extension'] as $contact) {
-                    if ($this->_filter_direntry_name($contact, $_GET['search'])) {
-                    	$result['extension'][] = $contact;
-                        $result['totalCount']++;
-                    }
-                }
-            }
-            if (!is_array($result)) {
-                $error = $pCore_AddressBook->getError();
-                if ($error["fc"] == "DBERROR")
-                    header("HTTP/1.1 500 Internal Server Error");
-                else
-                    header("HTTP/1.1 400 Bad Request");
-                print $error['fm'].' - '.$error['fd'];
+            $result = $this->listarAgendaElastix(
+                is_null($userdata) ? NULL : $userdata['id_user'],
+                $addressBookType,
+                (isset($_GET['search']) && trim($_GET['search']) != '') ? trim($_GET['search']) : NULL);
+            if (!is_array($result['contacts'])) {
+                Header(($result["fc"] == "DBERROR") 
+                    ? 'HTTP/1.1 500 Internal Server Error' 
+                    : 'HTTP/1.1 400 Bad Request');
+                print $result['fm'].' - '.$result['fd'];
                 return;
             }
 
@@ -227,7 +203,7 @@ HELPTEXT;
             $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneDirectory/>');
             $xml->addChild('Title', str_replace('&', '&amp;', _tr('Phone Directory').' - '.$typemap[$addressBookType].' - '._tr('Page')." $page"));
             $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
-            foreach ($result['extension'] as $contact) {
+            foreach ($result['contacts'] as $contact) {
                 $nombre = $contact['name'];
                 if (isset($contact['last_name'])) $nombre .= ' '.$contact['last_name'];
                 $xml_direntry = $xml->addChild('DirectoryEntry');

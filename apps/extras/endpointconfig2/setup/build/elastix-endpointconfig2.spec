@@ -130,12 +130,19 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Sep 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: rework the remote phonebook support to
+  allow authenticated endpoints that do not have extensions associated with an
+  Elastix user to still access the internal contact list and the public contacts
+  of the external contact list.
+  SVN Rev[5879]
+
 * Thu Sep 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add the ability to store custom templates
   that will override the default ones if required, at the directory 
   /usr/local/share/elastix/endpoint-classes/tpl . Based on a patch by Israel 
   Santana Alemán.
-  SVN Rev[5872]
+  SVN Rev[5875]
 
 * Fri Sep  6 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
 - CHANGED: New Endpoint Configurator: add sip notify call to Digium 

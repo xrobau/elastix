@@ -94,7 +94,7 @@ fi
 
 %files
 %defattr(-, root, root)
-#%{_localstatedir}/www/html/*
+%{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /usr/share/elastix/apps/*
 

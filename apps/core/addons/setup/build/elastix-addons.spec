@@ -125,6 +125,20 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: addons - setup/infomodules.xml/: Within this folder are placed the new
+  xml files that will be in charge of creating the menus for each module.
+  SVN Rev[5853]
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: addons - modules: The modules were relocated under the new scheme
+  that differentiates administrator modules and end user modules .
+  SVN Rev[5852]
+
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: update code to use new filesystem layout.
   SVN Rev[5762]
@@ -149,9 +163,19 @@ fi
   Account for differences in sqlite database locations in Fedora 17.
   SVN Rev[5340]
 
+* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - addons/: It was corrected a configuration in the web folder.
+  SVN Rev[5212]
+
+* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - addons/: The svn repository for module Addons in trunk (Elx
+  3) was restructured in order to accomplish a new schema.
+  SVN Rev[5136]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5023]
 
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: enforce single rpm per request. Fix potential limited command

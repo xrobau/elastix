@@ -26,13 +26,50 @@ Elastix Security
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT%{_localstatedir}/www/html/
+#mkdir -p    $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
-mv modules/ $RPM_BUILD_ROOT%{_localstatedir}/www/html/
+#mv modules/ $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
 rmdir setup/usr/share/elastix/privileged
 
 chmod +x setup/updateDatabase
+
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+bdir=%{_builddir}/%{modname}
+if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+for FOLDER0 in $(ls -A modules/)
+do
+		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
+		do
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
+				do
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
+						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
+						fi
+					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+					fi
+				done
+				case "$FOLDER0" in 
+					frontend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						fi
+					;;
+					backend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						fi	
+					;;
+				esac
+		done
+done
+fi
 
 # Crontab for portknock authorization cleanup
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
@@ -115,7 +152,8 @@ fi
 
 %files
 %defattr(-, root, root)
-%{_localstatedir}/www/html/*
+#%{_localstatedir}/www/html/*
+%{_datadir}/elastix/apps/*
 %{_datadir}/elastix/module_installer/*
 %defattr(644, root, root)
 %{_sysconfdir}/cron.d/elastix-portknock.cron
@@ -126,13 +164,96 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: security - setup/infomodules.xml/: Within this folder are placed the
+  new xml files that will be in charge of creating the menus for each module.
+  SVN Rev[5869]
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: security - modules: The modules were relocated under the new scheme
+  that differentiates administrator modules and end user modules .
+  SVN Rev[5868]
+
+* Wed Aug 07 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: APPS - Core/Security/Modules/sec_weak_keys: code upgrade
+  SVN Rev[5588]
+- CHANGED: APPS - Core/Security/Modules/sec_rules: code upgrade
+  SVN Rev[5587] 
+- CHANGED: APPS - Core/Security/Modules/sec_ports: code upgrade
+  SVN Rev[5586]
+- CHANGED: APPS - Core/Security/Modules/sec_portknock_users: code upgrade
+  SVN Rev[5585]
+- CHANGED: APPS - Core/Security/Modules/sec_portknock_if: code upgrade
+  SVN Rev[5584]
+- CHANGED: APPS - Core/Security/Modules/sec_accessaudit: code upgrade
+  SVN Rev[5583]
+- CHANGED: APPS - Core/Security/Modules/sec_advanced_settings: code upgrade
+  SVN Rev[5582]
+
 * Fri Aug  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Firewall Rules: add new rule for DHCP. Fixes Elastix bug #1645.
   SVN Rev[5504]
 
+* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - sec_weak_keys/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5282]
+- CHANGED: trunk - sec_rules/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5281]
+- CHANGED: trunk - sec_ports/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5280]
+- CHANGED: trunk - sec_portknock_users/: It was corrected a configuration in
+  the web folder.
+  SVN Rev[5279]
+- CHANGED: trunk - sec_portknock_if/: It was corrected a configuration in the
+  web folder.
+  SVN Rev[5278]
+- CHANGED: trunk - sec_advanced_settings/: It was corrected a configuration in
+  the web folder.
+  SVN Rev[5277]
+- CHANGED: trunk - sec_accessaudit/: It was corrected a configuration in the
+  web folder.
+  SVN Rev[5276]
+
+* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - sec_weak_keys/: The svn repository for module sec_weak_keys
+  in trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5195]
+- CHANGED: trunk - sec_rules/: The svn repository for module sec_rules in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5194]
+- CHANGED: trunk - sec_ports/: The svn repository for module sec_ports in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5193]
+- CHANGED: trunk - sec_portknock_users/: The svn repository for module
+  sec_portknock_users in trunk (Elx 3) was restructured in order to accomplish
+  a new schema.
+  SVN Rev[5192]
+- CHANGED: trunk - sec_portknock_if/: The svn repository for module
+  sec_portknock_if in trunk (Elx 3) was restructured in order to accomplish a
+  new schema.
+  SVN Rev[5191]
+- CHANGED: trunk - sec_advanced_settings/: The svn repository for module
+  sec_advanced_settings in trunk (Elx 3) was restructured in order to
+  accomplish a new schema.
+  SVN Rev[5190]
+
+* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - sec_accessaudit/: The svn repository for module
+  sec_accessaudit in trunk (Elx 3) was restructured in order to accomplish a
+  new schema.
+  SVN Rev[5189]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5031]
 
 * Tue May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Weak Keys: expose database errors for later debugging.

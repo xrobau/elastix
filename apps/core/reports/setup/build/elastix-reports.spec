@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 3.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -23,8 +23,43 @@ Elastix Module Reports
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/
-mv modules/ $RPM_BUILD_ROOT/var/www/html/
+#mkdir -p    $RPM_BUILD_ROOT/var/www/html/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+bdir=%{_builddir}/%{modname}
+if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+for FOLDER0 in $(ls -A modules/)
+do
+		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
+		do
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
+				do
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
+						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
+						fi
+					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+					fi
+				done
+				case "$FOLDER0" in 
+					frontend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						fi
+					;;
+					backend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						fi	
+					;;
+				esac
+		done
+done
+fi
 
 # Additional (module-specific) files that can be handled by RPM
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
@@ -90,12 +125,27 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+/usr/share/elastix/apps/*
 
 %changelog
-* Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: reports - setup/infomodules.xml/: Within this folder are placed the
+  new xml files that will be in charge of creating the menus for each module.
+  SVN Rev[5867]
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: reports - modules: The modules were relocated under the new scheme
+  that differentiates administrator modules and end user modules .
+  SVN Rev[5866]
+
+* Mon Sep 09 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
 - FIXED: Billing Report: move filter widgets to separate row in order to avoid
   misplacement. Fixes Elastix bug #1637.
-  SVN Rev[5844] 
+  SVN Rev[5844]
 
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: update code to use new filesystem layout.
@@ -108,6 +158,74 @@ fi
   SVN Rev[5755]
 - CHANGED: Asterisk Logs: convert uses of arrLang to _tr. Sync with trunk.
   SVN Rev[5725]
+
+* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - summary_by_extension/: It was corrected a configuration in
+  the web folder.
+  SVN Rev[5275]
+- CHANGED: trunk - missed_calls/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5274]
+- CHANGED: trunk - graphic_report/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5273]
+- CHANGED: trunk - dest_distribution/: It was corrected a configuration in the
+  web folder.
+  SVN Rev[5272]
+- CHANGED: trunk - channelusage/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5271]
+- CHANGED: trunk - cdrreport/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5270]
+- CHANGED: trunk - billing_setup/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5269]
+- CHANGED: trunk - billing_report/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5268]
+- CHANGED: trunk - billing_rates/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5267]
+- CHANGED: trunk - asterisk_log/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5266]
+
+* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - summary_by_extension/: The svn repository for module
+  summary_by_extension in trunk (Elx 3) was restructured in order to accomplish
+  a new schema.
+  SVN Rev[5188]
+- CHANGED: trunk - missed_calls/: The svn repository for module missed_calls in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5187]
+- CHANGED: trunk - graphic_report/: The svn repository for module
+  graphic_report in trunk (Elx 3) was restructured in order to accomplish a new
+  schema.
+  SVN Rev[5186]
+- CHANGED: trunk - dest_distribution/: The svn repository for module
+  dest_distribution in trunk (Elx 3) was restructured in order to accomplish a
+  new schema.
+  SVN Rev[5185]
+- CHANGED: trunk - channelusage/: The svn repository for module channelusage in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5184]
+- CHANGED: trunk - cdrreport/: The svn repository for module cdrreport in trunk
+  (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5183]
+- CHANGED: trunk - billing_setup/: The svn repository for module billing_setup
+  in trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5182]
+- CHANGED: trunk - billing_report/: The svn repository for module
+  billing_report in trunk (Elx 3) was restructured in order to accomplish a new
+  schema.
+  SVN Rev[5181]
+- CHANGED: trunk - billing_rates/: The svn repository for module billing_rates
+  in trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5180]
+- CHANGED: trunk - asterisk_log/: The svn repository for module asterisk_log in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5179]
 
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Summary By Extension: tweak SQL query used to report summary, 
@@ -146,6 +264,7 @@ fi
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5030]
 
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Rates: remove unnecessary and risky copy of uploaded file, and

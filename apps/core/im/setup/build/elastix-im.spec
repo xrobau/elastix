@@ -24,7 +24,7 @@ Elastix IM
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-#mkdir -p $RPM_BUILD_ROOT/var/www/html/
+mkdir -p $RPM_BUILD_ROOT/var/www/html/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
 bdir=%{_builddir}/%{modname}
 if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then

@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 3.0.0
-Release: 3
+Release: 4
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -70,6 +70,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 # ** Installating framework elastix webinterface ** #
 rm -rf $RPM_BUILD_DIR/elastix-framework/framework/html/modules/userlist/  # Este modulo no es el modificado para soporte de correo, eso se encuentra en modules-core
 mv $RPM_BUILD_DIR/elastix-framework/framework/html/*                              $RPM_BUILD_ROOT/var/www/html/
+mv $RPM_BUILD_DIR/elastix-framework/framework/system/*				  $RPM_BUILD_ROOT/usr/share/elastix/
 
 # ** Installating modules elastix webinterface ** #
 #mv $RPM_BUILD_DIR/elastix/modules-core/*                                $RPM_BUILD_ROOT/var/www/html/modules/
@@ -335,11 +336,77 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+- CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Sep 11 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework: Was made changes in lib paloSantoMenu to fix bug
+  at the moment to order the menu in the GUI.
+  SVN Rev[5848]
+
 * Thu Sep 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: for SQL parameters to queries, conversion of a numeric 
   string into an integer should not be done for numeric strings that start with
   a zero. Fixes Elastix bug #1694.
   SVN Rev[5840] 
+
+* Wed Aug 28 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework: Was made changes in modules language,
+  themes_system to adap this modules to new permissions schemas
+Trunk - Framework: Was made changes in module group_permission to fix bug at
+  the moment to read filter parameters
+  SVN Rev[5812]
+
+* Wed Aug 28 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework: Was made change in lib paloSantoACL in order to
+  add new function used in module group_permissions. This functions are used to
+  add and delete permission to a group.
+Trunk - Framework: Was made change in module group_permission to adapt this
+  module to new permissions schema
+  SVN Rev[5809]
+
+* Mon Aug 26 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/modules. Was made changes in modules
+  organization,organiztion_permission,shutdown in order to not load user
+  permissions. Now, This actions is performed in lib paloSantoNavigation
+  SVN Rev[5807]
+
+* Mon Aug 26 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/libs: Was made changes in function includeModule
+  that belong to lib paloSantoNavigation. This function create to new globals
+  variables called  and .  store the actions that the login user can perform in
+  the selected module.  store the login user credentials
+  (isUser,id_organization,domain,userlevel)
+- CHANGED: Trunk - Framework/libs: Was made changes in lib
+  paloSantoOrganization to fix some bugs that happened at the moment to create
+  and delete a user
+  SVN Rev[5806]
+
+* Fri Aug 23 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/libs: Was made change in lib paloSantoACL in
+  function saveOrgPermission and deleteOrgPermissions. This change was made as
+  result of new permissions schema
+  SVN Rev[5805]
+- CHANGED: Trunk - Framework/apps: Was made changes in module
+  organization_permission to adapt this module to the new permissions schema
+  SVN Rev[5804]
+
+* Thu Aug 22 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Framework: Was made changes in the schema of elxpbx
+  database. This changes were made to create a new schemas of resource
+  permissions. A resource as a set of actions. A group as a set pf actions that
+  can perform in a resource
+  SVN Rev[5801]
+- CHANGED: TRUNK - Framework/HTML/admin/index: Was made a change in
+  admin/index.php to add a die clauses in case a user has not defined a
+  organization
+  SVN Rev[5800] 
+- CHANGED: TRUNK - Framework/Libs: Was made changes in function that bellow to
+  paloSantACL to adapted the funcitons to new permissions schemas. In the new
+  permission schemas are defined a set of action for each module. To each group
+  is assigned a set of actions that can perform
+  SVN Rev[5799]
 
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: it is legal to return an empty list for getOrganization()
@@ -354,6 +421,14 @@ rm -rf $RPM_BUILD_ROOT
 - FIXED: Framework: fix blackmin and giox themes to work with new filesystem
   layout. Add images referenced by themes but not included.
   SVN Rev[5754]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- REMOVED: Module Downloads, Old help files were deleted
+  SVN Rev[5731]
+
+* Tue Aug 13 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: FRAMEWORK - system/apps/grouplist/index.php: code upgrade
+  SVN Rev[5720]
 
 * Fri Aug  9 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: switch PHP session directory from /tmp to 
@@ -372,11 +447,56 @@ rm -rf $RPM_BUILD_ROOT
 - FIXED: Framework: fix sampler.php to comply with new location of libraries.
   SVN Rev[5344]
 
+* Wed Jul 17 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/Libs: Was made changed in lib
+  paloSantoAsteriskConfig to quit inclusion file astManager lib from lib header
+  to the function that make use of the library
+  SVN Rev[5334]
+
+* Wed Jul 17 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/Libs: Was made changed in lib paloSantoNavigation
+  in function include modelu to fix error
+  SVN Rev[5332]
+
+* Wed Jul 17 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/System: Was made a reorganization of file inside
+  web directory of registration module
+  SVN Rev[5331]
+
+* Wed Jul 17 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/System: Was made a reorganization of file inside
+  web directory of group_permission module
+  SVN Rev[5330]
+
+* Wed Jul 17 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/System: Was made a reorganization of file inside
+  web directory of grouplis module
+  SVN Rev[5329]
+
+* Wed Jul 17 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework/System: Was made a reorganization of file inside
+  web directory of organization module
+  SVN Rev[5328]
+
+* Tue Jul 16 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: FRAMEWORK - System/Apps/themes_system: code upgrade
+  SVN Rev[5318]
+
 * Tue Jul 16 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix /etc/init.d/generic-cloexec script to be aware of
   systemctl and run it instead of blindly running a /etc/init.d/ script that
   might not exist in a systemctl system. Fixes Elastix bug #1632.
   SVN Rev[5317]
+
+* Tue Jul 16 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: Framework - System/apps/themes_system: was fixed the directory Web.
+  The file new.tpl was moved from Web/default to Web and directory default was
+  deleted
+  SVN Rev[5316]
+
+* Mon Jul 15 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: Framework - System/apps/language: code upgrade
+  SVN Rev[5313]
 
 * Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: reorganize the API provided by paloSantoGraphImage in 
@@ -387,6 +507,83 @@ rm -rf $RPM_BUILD_ROOT
   having to place the function inside a class that resides in any specific path.
   This is required for the dashboard applet reorganization.
   SVN Rev[5310] 
+
+* Fri Jul 12 2013 Washington Reyes <wreyes@palosanto.com> 
+- CHANGED: Framework - APPS/Language: was fixed the directory Web. The file
+  language.tpl was moved from Web/default to Web and directory default was
+  deleted
+  SVN Rev[5309]
+
+* Wed Jul 10 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Framework - SYSTEM/LIBS: Was made changes in lib
+  paloSantoNavigation.class.php
+  SVN Rev[5308]
+
+* Fri Jul 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Framework - System: Was changes in the order of directprios in
+  modulo organization_permission
+  SVN Rev[5304]
+
+* Fri Jul 05 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - framework/: The svn repository in trunk (Elx 3) was
+  restructured in order to accomplish a new schema.
+  SVN Rev[5302]
+
+* Fri Jul 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Framework - System: Was made changes in apps/_elxutils.php to fix
+  bug of file inclusion. Also was made change in admin/index.php to add
+  validation in case arrConfModule doesn't exist
+  SVN Rev[5301]
+
+* Fri Jul 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Framework - System: Was made changes in module organization,
+  _elxutils and in libs to fix erros caused by the elastix directories
+  restructuration
+  SVN Rev[5298]
+
+* Fri Jul 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Framework - HTML: Was made changes in theme elastixneo, in the
+  index.php in js/base.js and other file to include support the changes in the
+  restructuration of elastix directories
+  SVN Rev[5297]
+
+* Fri Jul 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Framework - DB: Was made changes in database elxpbx. This changes
+  modify table acl_resources, delete table acL_group, add table
+  acl_group_action and acl_user_action. This was neccesary to do to add support
+  to elastix framework to  manage action based in groups
+  SVN Rev[5296]
+
+* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - themes_system/: The svn repository for module graphic_report
+  in trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5224]
+- CHANGED: trunk - registration/: The svn repository for module graphic_report
+  in trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5223]
+- CHANGED: trunk - organization_permission/: The svn repository for module
+  graphic_report in trunk (Elx 3) was restructured in order to accomplish a new
+  schema.
+  SVN Rev[5222]
+- CHANGED: trunk - organization/: The svn repository for module graphic_report
+  in trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5221]
+- CHANGED: trunk - language/: The svn repository for module graphic_report in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5220]
+- CHANGED: trunk - group_permission/: The svn repository for module
+  graphic_report in trunk (Elx 3) was restructured in order to accomplish a new
+  schema.
+  SVN Rev[5219]
+- CHANGED: trunk - grouplist/: The svn repository for module graphic_report in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5218]
+- CHANGED: trunk - _elastixutils/: The svn repository for module graphic_report
+  in trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5217]
+- CHANGED: trunk - framework/: The svn repository for framework in trunk (Elx
+  3) was restructured in order to accomplish a new schema.
+  SVN Rev[5216]
 
 * Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: move several CSS files out of the ui-lightness jQueryUI
@@ -403,6 +600,24 @@ rm -rf $RPM_BUILD_ROOT
 - FIXED: Framework: fix blackmin style so padding is not incorrectly applied to
   buttons in Calendar menu.
   SVN Rev[5124]
+
+* Thu Jun 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - framework: Was made changed in framework libs to incorporate
+  to elxpbx as the new database framework.
+- CHANGED: Trunk - framework/modules: Was made changes in module organization
+  in teh function that create a organization. Before the process of create an
+  organization was separate fro process to create its admin user. Now the
+  function create organization do both actions
+  SVN Rev[5113]
+- CHANGED: Trunk - Framework: Was changed name directory from elastix to elxpbx
+  SVN Rev[5111]
+- CHANGED: Trunk - Framework: Was made change in file dbinfo to change database
+  name from elastix to elxpbx
+  SVN Rev[5110]
+- CHANGED: Trunk - Framework: Was added changed database elxpbx from sqlite
+  motor to mysql motor. The name of database was changed , it is know called
+  elxpbx
+  SVN Rev[5109]
 
 * Mon Jun 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: rewrite menu selection for blackmin theme using CSS 
@@ -438,6 +653,8 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[5078]
 - FIXED: Registration: fix references to data sources that changed in Elastix 3.
   SVN Rev[5073]
+- FIXED: Group Permission: fix regression from commit #5071.
+  SVN Rev[5072]
 
 * Sat Jun 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Group Permission: use _tr instead of arrLang, use load_language_module().
@@ -457,6 +674,18 @@ rm -rf $RPM_BUILD_ROOT
   branch. Remove references to arrLang and use _tr instead.
   SVN Rev[5065]
 
+* Thu Jun 06 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Framework: partially revert loading of module configuration and i18n
+  from framework. Too many modules use require_once which does not work after a
+  plain require. This must be attempted after converting all modules to
+  load_language_module().
+  SVN Rev[5062]
+
+* Thu Jun 06 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- Define global $arrLangModule in case load_language_module() has been
+  previously invoked.
+  SVN Rev[5061]
+
 * Thu Jun 06 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: lay foundation to remove some boilerplate from all Elastix
   modules:
@@ -471,7 +700,8 @@ rm -rf $RPM_BUILD_ROOT
   - Finally, many modules use the convention that class XYZ is defined in the
     file XYZ.class.php. The framework can now support this convention to 
     implement autoloading, so that modules do not need to require() every single
-    class file anymore. 
+    class file anymore.
+  SVN Rev[5060] 
 
 * Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: require paloSantoPDF.class.php inside the only method that
@@ -492,6 +722,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5022]
 
 * Mon May 27 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: do not use HTTP_HOST to build redirects and other URLs in

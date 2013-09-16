@@ -3,7 +3,7 @@
 Summary: Elastix My Extension 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -23,8 +23,43 @@ Elastix My Extension
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/
-mv modules/ $RPM_BUILD_ROOT/var/www/html/
+#mkdir -p    $RPM_BUILD_ROOT/var/www/html/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+bdir=%{_builddir}/%{modname}
+if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+for FOLDER0 in $(ls -A modules/)
+do
+		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
+		do
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
+				do
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
+						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
+						fi
+					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+					fi
+				done
+				case "$FOLDER0" in 
+					frontend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						fi
+					;;
+					backend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						fi	
+					;;
+				esac
+		done
+done
+fi
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -80,13 +115,40 @@ fi
 
 %files
 %defattr(-, root, root)
-%{_localstatedir}/www/html/*
+#%{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+/usr/share/elastix/apps/*
 
 %changelog
+* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: my_extension - setup/infomodules.xml/: Within this folder are placed
+  the new xml files that will be in charge of creating the menus for each
+  module.
+  SVN Rev[5863]
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: my_extension - modules: The modules were relocated under the new
+  scheme that differentiates administrator modules and end user modules .
+  SVN Rev[5862]
+
+* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - myex_config/: It was corrected a configuration in the web
+  folder.
+  SVN Rev[5239]
+
+* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - myex_config/: The svn repository for module myex_config in
+  trunk (Elx 3) was restructured in order to accomplish a new schema.
+  SVN Rev[5152]
+
 * Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5028]
 
 * Tue Mar 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: My Extension: check that the values for record_in and record_out are

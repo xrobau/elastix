@@ -292,21 +292,17 @@ rm -rf $RPM_BUILD_ROOT
 # basic contains some reasonable sane basic tiles
 %files
 %defattr(-, asterisk, asterisk)
-/var/www/html/var
+#/var/www/html/var
 /var/www/db
 /var/www/backup
 /var/log/elastix
 /var/log/elastix/*
 # %config(noreplace) /var/www/db/
 %defattr(-, root, root)
-/var/www/html/configs
 /var/www/html/favicon.ico
-/var/www/html/help
-/var/www/html/images
-/var/www/html/lang
-/var/www/html/libs
-/var/www/html/modules
-/var/www/html/themes
+/var/www/html/admin
+/var/www/html/tmp
+/var/www/html/web
 /var/www/html/*.php
 /var/www/html/robots.txt
 /usr/share/elastix/*

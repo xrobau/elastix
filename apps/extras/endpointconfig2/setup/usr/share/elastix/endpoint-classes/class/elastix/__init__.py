@@ -1,3 +1,4 @@
-from elastix import BaseEndpoint, Extension
+from elastix import BaseEndpoint, Extension, ConfigException
 
 Extension = Extension.Extension
+ConfigException = ConfigException.ConfigException

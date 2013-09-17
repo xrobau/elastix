@@ -130,6 +130,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Sep 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: do not allow any code path to exit the 
+  configurator without printing the end banner. This is required for the GUI to
+  know that the configurator stopped running.
+  SVN Rev[5894]
+
 * Fri Sep 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: rework the remote phonebook support to
   allow authenticated endpoints that do not have extensions associated with an

@@ -19,6 +19,14 @@ $(document).ready(function(){
     });
 });
 
+$('.file_upload').live('change', function() {
+ var max_size = $("#max_size").val();
+ var file_size = this.files[0].size;
+    if(file_size> max_size){
+       alert($("#alert_max_size").val()+"Max: "+max_size/1048576 + " MB.");
+       $('#file_record').val("");
+    }
+});
     
 var add = function() {    
     index ++;

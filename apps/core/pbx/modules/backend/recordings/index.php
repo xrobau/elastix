@@ -152,7 +152,7 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     if($credentials['userlevel']=='superadmin')
         $arrColumns[]=_tr("Organization");
     $arrColumns[]=_tr("Name");
-    $arrColumns[]=_tr("Source");
+    //$arrColumns[]=_tr("Source");
     $arrColumns[]=_tr("");
     $oGrid->setColumns($arrColumns);
 
@@ -178,16 +178,17 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         if($credentials['userlevel']=='superadmin'){
             $arrTmp[] = ($recording["organization_domain"]=='')?'':$arrOrgz[$recording["organization_domain"]];
         }
-        $arrTmp[] = $recording["source"];
+        //$arrTmp[] = $recording["source"];
         $idfile = $recording['uniqueid'];
         if($ext[1]=="gsm"){
-            $arrTmp[] = "<span>".$recording['name']."</span>";
-            $arrTmp[] = "";
+            $div_display = '';
         }else{
-            $arrTmp[] = "<div class='single' id='$i'><span data-src='index.php?menu=$module_name&action=download&id=$idfile&rawmode=yes'><img style='cursor:pointer;' width='13px' src='web/apps/recordings/images/sound.png'/>&nbsp;&nbsp;".$recording['name']."</span>";
-            $arrTmp[] = "<audio></audio>";
-            $i++;
+            $div_display = "<div class='single' id='$i' style='display:inline;'><span data-src='index.php?menu=$module_name&action=download&id=$idfile&rawmode=yes'><img style='cursor:pointer;' width='13px' src='web/apps/recordings/images/sound.png'/>&nbsp;&nbsp;</span></div>";
         }
+        $download = "<a href='index.php?menu=$module_name&action=download&id=$idfile&rawmode=yes'>".$recording['name']."</a>";
+        $arrTmp[] = $div_display.$download;
+        $arrTmp[] = "<audio></audio>";
+        $i++;
         $arrData[] = $arrTmp;
     }
     
@@ -243,21 +244,32 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     // File Exists? 
     if(file_exists($fullPath)){ 
             
+        //get mime type
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $ctype = finfo_file($finfo, $fullPath);
+        finfo_close($finfo);
+        
+        if($ctype==false){
+            $ctype="application/force-download";
+        }
+        
         // Parse Info / Get Extension 
         $fsize = filesize($fullPath); 
 
-        $path_parts = pathinfo($fullPath); 
+        /*$path_parts = pathinfo($fullPath); 
         $ext = strtolower($path_parts["extension"]); 
         
         // Determine Content Type 
         switch ($ext) { 
-            case "wav": $ctype="audio/x-wav"; break;
-            case "Wav": $ctype="audio/x-wav"; break;
-            case "WAV": $ctype="audio/x-wav"; break;
-            case "gsm": $ctype="audio/x-gsm"; break;
-            case "GSM": $ctype="audio/x-gsm"; break;
+            case "wav":   $ctype="audio/x-wav"; break;
+            case "Wav":   $ctype="audio/x-wav"; break;
+            case "WAV":   $ctype="audio/x-wav"; break;
+            case "WAV49": $ctype="audio/x-wav"; break;
+            case "gsm":   $ctype="audio/x-gsm"; break;
+            case "GSM":   $ctype="audio/x-gsm"; break;
+            case 'mp3':   $ctype='audio/mpeg'; break;
             default: $ctype="application/force-download"; 
-        } 
+        } */
    
         header("Pragma: public"); // required 
         header("Expires: 0"); 
@@ -394,7 +406,7 @@ function remove_recording($smarty, $module_name, $local_templates_dir, &$pDB, $a
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("You must select at least one record"));
     }
-    return reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials);
+    return reportRecording($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
 }
 
 function save_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials)

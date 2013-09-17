@@ -774,7 +774,8 @@ function generateDialPlan($domain,$reload=false){
     require_once "apps/ring_group/libs/paloSantoRG.class.php";
     require_once "apps/time_conditions/libs/paloSantoTC.class.php";
     require_once "apps/conference/libs/paloSantoConference.class.php";
-   
+    require_once "apps/features_code/libs/paloSantoFeaturesCode.class.php";
+    
     if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
         fprintf(STDERR, "Invalid domain format");
         return false;
@@ -789,7 +790,7 @@ function generateDialPlan($domain,$reload=false){
         fprintf(STDERR, "ERR: Database connection elxpbx - %s\n", $pDB->errMsg);
         return false;
     }elseif(count($resultc)==0){
-        fprintf(STDERR, "ERR: Organization dosen't exist\n");
+        fprintf(STDERR, "ERR: Organization does not exist\n");
         return false;
     }
     $code=$resultc[0];
@@ -888,11 +889,11 @@ function generateDialPlan($domain,$reload=false){
         
     //genero plan de marcado relacionado con los ring-groups
     $pConf=new paloConference($pDB,$domain);
-    $arrConf=$pConf->createDialplanConf($arrFromInt);
-    if($arrConf===false || !is_array($arrConf))
+    $Conferences=$pConf->createDialplanConf($arrFromInt);
+    if($Conferences===false || !is_array($Conferences))
         fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pConf->errMsg);
     else
-        $arrContext=array_merge($arrContext,$arrConf);
+        $arrContext=array_merge($arrContext,$Conferences);
 
     //genero plan de marcado relacionado con los time_conditions
     $pTC=new paloSantoTC($pDB,$domain);

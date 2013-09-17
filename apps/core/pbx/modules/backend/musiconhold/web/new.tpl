@@ -60,12 +60,12 @@
     {else}
         <tr id="test" style="display:none;">
             <td width="20%" nowrap> <label for="file__">Filename:</label> </td> 
-            <td > <input type="file" name="file[]" style='width=400px'/> <input type="image" class='delete' src='web/apps/{$MODULE_NAME}/images/remove1.png' title='Remove' /></td>
+            <td > <input type="file" class='file_upload' name="file[]" style='width=400px'/> <input type="image" class='delete' src='web/apps/{$MODULE_NAME}/images/remove1.png' title='Remove' /></td>
         </tr>
         {if count($items) eq 0}
             <tr class="content-files" id="1">
                 <td width="20%" nowrap> <label for="file">Filename:</label> </td>
-                <td ><input type="file" name="file[]" id="file1" /> <input type="image" class='delete' src='web/apps/{$MODULE_NAME}/images/remove1.png' title='Remove' /></td>
+                <td ><input type="file" class='file_upload' name="file[]" id="file1" /> <input type="image" class='delete' src='web/apps/{$MODULE_NAME}/images/remove1.png' title='Remove' /></td>
             </tr>
         {else}
             {foreach from=$items item=i}
@@ -90,6 +90,8 @@
 <input type="hidden" name="mostra_adv" id="mostra_adv" value="{$mostra_adv}">
 <input type="hidden" name="mode_input" id="mode_input" value="{$mode}">
 <input type="hidden" name="moh_mode" id="moh_mode" value="{$MODE_MOH}">
+<input type='hidden' name='max_size' id='max_size' value='{$max_size}' />
+<input type='hidden' name='alert_max_size' id='alert_max_size' value='{$alert_max_size}' />
 
 {literal}
 <style type="text/css">

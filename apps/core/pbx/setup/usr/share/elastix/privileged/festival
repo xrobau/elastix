@@ -54,7 +54,7 @@ function error_exit($sMsg, $errorcode = 1)
 function action_enableFestival($opt)
 {
     // Add function definition to configuration file
-    $sArchivo = '/usr/share/festival/festival.scm';
+    $sArchivo = '/usr/share/festival/lib/festival.scm';
     if (!file_exists($sArchivo)) {
         error_exit("FATAL: $sArchivo not found!\n");
     }

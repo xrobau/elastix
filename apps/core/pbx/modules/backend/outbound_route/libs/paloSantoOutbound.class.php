@@ -770,11 +770,19 @@ class paloSantoOutbound extends paloAsteriskDB{
                         }
                         $arrExt[$context][]=new paloExtensions($exten,new ext_set("_NODEST",""));
                         $arrExt[$context][]=new paloExtensions($exten,new ext_macro($this->code.'-record-enable','${EXTUSER},OUT'));
+                        $numTrunk=count($arrTrunk);
+                        $i=0;
                         foreach($arrTrunk as $key => $trunk){
+                            $i++;
                             $len="";
                             if($value["prefix"]!="")
                                 $len=":".strlen($value["prefix"]);
-                            $arrExt[$context][]=new paloExtensions($exten,new ext_macro($this->code."-dialout-trunk","$key,".$value["prepend"].'${EXTEN'.$len.'},'.$route["routepass"]));
+                            //ARG1 TRUNK ID
+                            //ARG2 DIALNUMBER
+                            //ARG3 ROUTE_PASS
+                            //ARG4 ON or OFF -> check for other trunk or stop
+                            $continue=($i==$numTrunk)?'off':'on';
+                            $arrExt[$context][]=new paloExtensions($exten,new ext_macro($this->code."-dialout-trunk","$key,".$value["prepend"].'${EXTEN'.$len.'},'.$route["routepass"].",$continue"));
                         }
                         $arrExt[$context][]=new paloExtensions($exten,new ext_macro($this->code.'-outisbusy'));
                     }

@@ -64,10 +64,13 @@
         <td align="left">{$announce_intro.INPUT}</td>
     </tr>
     <tr>
+        <td align="left"><b>{$record_conf.LABEL}: </b></td>
+        <td align="left">{$record_conf.INPUT}</td>
+    </tr>
+    <tr>
         <td align="left"><b>{$moderator_options_1.LABEL}: </b></td>
         <td align="left" colspan="3">
             {$moderator_options_1.INPUT}{$announce}&nbsp;&nbsp;&nbsp;
-            {$moderator_options_2.INPUT}{$record}
         </td>
     </tr>
     <tr>

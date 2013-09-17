@@ -31,36 +31,41 @@ require_once("libs/paloSantoGrid.class.php");
 require_once "libs/misc.lib.php";
 
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
-require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
+    require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
 
 function _moduleContent(&$smarty, $module_name)
 {
     global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-
-    //folder path for custom templates
+    //user credentials
+    global $arrCredentials;
+    
+    //solo superadmin puede ejecutar esta accion
+    if($arrCredentials['userlevel']!='superadmin'){
+        return _tr('Invalid Action');
+    }
+    
+     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
 
     $sContenidoModulo = '';
     $sAccion = getParameter('action');
     switch ($sAccion) {
-    case 'new':
-    case 'edit':
-        $sContenidoModulo = modificarArchivo($module_name, $smarty, $local_templates_dir, $arrConf['astetcdir'], $sAccion);
-        break;
-    case 'list':
-    default:
-        $sContenidoModulo = listarArchivos($module_name, $smarty, $local_templates_dir, $arrConf['astetcdir']);
-        break;
+        case 'new':
+        case 'edit':
+            $sContenidoModulo = modificarArchivo($module_name, $smarty, $local_templates_dir, $arrConf['astetcdir'], $sAccion);
+            break;
+        case 'list':
+        default:
+            $sContenidoModulo = listarArchivos($module_name, $smarty, $local_templates_dir, $arrConf['astetcdir']);
+            break;
     }
     return $sContenidoModulo;
 }
 
 function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectorio)
 {
-    global $arrLang;
+    global $arrPermission;
 
     // Función que rechaza los directorios punto y doble punto
     function _reject_dotdirs($s) { return !($s == '.' || $s == '..'); }
@@ -81,6 +86,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
         }
         $listaArchivos = $t;
     }
+    
     // Mapear de la lista de archivos al listado completo con URLs
     $arrData = array();
     foreach ($listaArchivos as $sArchivo) {
@@ -90,9 +96,9 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
                     'menu'      =>  $module_name,
                     'action'    =>  'edit',
                     'file'      =>  $sArchivo,
-		    'search'	=>  $sSubStrArchivo,
-		    'nav'	=>  getParameter('nav'),
-		    'page'	=>  getParameter('page'),
+                    'search'	=>  $sSubStrArchivo,
+                    'nav'	=>  getParameter('nav'),
+                    'page'	=>  getParameter('page'),
                 )),
                 htmlentities($sArchivo, ENT_COMPAT, 'UTF-8')),
             filesize($sDirectorio.$sArchivo),
@@ -105,7 +111,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
         array(
             "file"  => array(
                 "LABEL"                  => _tr("File"),
-		"REQUIRED"               => "no",
+                "REQUIRED"               => "no",
                 "INPUT_TYPE"             => "TEXT",
                 "INPUT_EXTRA_PARAM"      => "",
                 "VALIDATION_TYPE"        => "text",
@@ -149,76 +155,95 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
                         "property1" => ""),
             )
     );
-    $oGrid->addNew("?menu=$module_name&action=new",_tr("New File"),true);
+    if(in_array('new_file',$arrPermission)){
+        $oGrid->addNew("?menu=$module_name&action=new",_tr("New File"),true);
+    }
     $oGrid->showFilter($htmlFilter);
-    return $oGrid->fetchGrid($arrGrid, $arrDatosGrid, $arrLang);
+    return $oGrid->fetchGrid($arrGrid, $arrDatosGrid);
 }
 
 function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirectorio, $sAccion)
 {
+    global $arrPermission;
+    
     $sNombreArchivo = '';
     $sMensajeStatus = '';
 
     if(isset($_POST['Reload'])){
-        $parameters = array('Command'=>"module reload");
-        $result = AsteriskManagerAPI("Command",$parameters,true);
-        if($result){
-            $smarty->assign("mb_title", "MESSAGE");
-            $smarty->assign("mb_message", _tr("Asterisk has been reloaded"));
+        if(in_array('reload_asterisk',$arrPermission)){
+            $parameters = array('Command'=>"module reload");
+            $result = AsteriskManagerAPI("Command",$parameters,true);
+            if($result){
+                $smarty->assign("mb_title", "MESSAGE");
+                $smarty->assign("mb_message", _tr("Asterisk has been reloaded"));
+            }else{
+                $smarty->assign("mb_title", "ERROR");
+                $smarty->assign("mb_message", _tr("Error when connecting to Asterisk Manager"));
+            }
         }else{
-            $smarty->assign("mb_title", "ERROR");
-            $smarty->assign("mb_message", _tr("Error when connecting to Asterisk Manager"));
+            $smarty->assign("mb_title", "Error");
+            $smarty->assign("mb_message", _tr("You are not authorized to perform this action"));
         }
     }
 
     if ($sAccion == 'new') {
-        $smarty->assign('LABEL_COMPLETADO', '.conf');
-        if (isset($_POST['Guardar'])) {
-            if (!isset($_POST['basename']) || trim($_POST['basename']) == '') {
-                $sMensajeStatus .= _tr('Please write the file name').'<br/>';
-            } else {
-                $sNombreArchivo = basename($_POST['basename'].'.conf');
+        if(!in_array('new_file',$arrPermission)){
+            $smarty->assign("mb_title", "Error");
+            $smarty->assign("mb_message", _tr("You are not authorized to perform this action"));
+        }else{
+            $smarty->assign('LABEL_COMPLETADO', '.conf');
+            if (isset($_POST['Guardar'])) {
+                if (!isset($_POST['basename']) || trim($_POST['basename']) == '') {
+                    $sMensajeStatus .= _tr('Please write the file name').'<br/>';
+                } else {
+                    $sNombreArchivo = basename($_POST['basename'].'.conf');
+                    /* Los datos del archivo se envían desde el navegador con líneas
+                    separadas por CRLF que debe ser convertido a LF para estilo Unix
+                    */
+                    if (file_put_contents($sDirectorio.$sNombreArchivo,
+                            str_replace("\r\n", "\n", $_POST['content'])) === FALSE) {
+                        $sMensajeStatus .= _tr("This file doesn't have permisses to write").'<br/>';
+                    } else {
+                        $sMensajeStatus .= _tr("The changes was saved in the file").'<br/>';
+                    }
+                }
+            }
+        }
+    } elseif ($sAccion == 'edit') {
+        if(!in_array('edit_file',$arrPermission)){
+            $smarty->assign("mb_title", "Error");
+            $smarty->assign("mb_message", _tr("You are not authorized to perform this action"));
+        }else{
+            $sNombreArchivo = basename(getParameter('file'));
+            if (is_null($sNombreArchivo) ||
+                !file_exists($sDirectorio.$sNombreArchivo)) {
+                Header("Location: ?menu=$module_name");
+                return '';
+            }
+
+            if (isset($_POST['Guardar'])) {
                 /* Los datos del archivo se envían desde el navegador con líneas
-                   separadas por CRLF que debe ser convertido a LF para estilo Unix
-                 */
-                if (file_put_contents($sDirectorio.$sNombreArchivo,
+                separadas por CRLF que debe ser convertido a LF para estilo Unix
+                */
+                if (!is_writable($sDirectorio.$sNombreArchivo) ||
+                    file_put_contents($sDirectorio.$sNombreArchivo,
                         str_replace("\r\n", "\n", $_POST['content'])) === FALSE) {
                     $sMensajeStatus .= _tr("This file doesn't have permisses to write").'<br/>';
                 } else {
                     $sMensajeStatus .= _tr("The changes was saved in the file").'<br/>';
                 }
-            }
-        }
-    } elseif ($sAccion == 'edit') {
-        $sNombreArchivo = basename(getParameter('file'));
-        if (is_null($sNombreArchivo) ||
-            !file_exists($sDirectorio.$sNombreArchivo)) {
-            Header("Location: ?menu=$module_name");
-            return '';
-        }
-
-        if (isset($_POST['Guardar'])) {
-            /* Los datos del archivo se envían desde el navegador con líneas
-               separadas por CRLF que debe ser convertido a LF para estilo Unix
-             */
-            if (!is_writable($sDirectorio.$sNombreArchivo) ||
-                file_put_contents($sDirectorio.$sNombreArchivo,
-                    str_replace("\r\n", "\n", $_POST['content'])) === FALSE) {
-                $sMensajeStatus .= _tr("This file doesn't have permisses to write").'<br/>';
             } else {
-                $sMensajeStatus .= _tr("The changes was saved in the file").'<br/>';
+                if (!is_writable($sDirectorio.$sNombreArchivo)) {
+                    $sMensajeStatus .= _tr("This file doesn't have permisses to write").'<br/>';
+                }
             }
-        } else {
-            if (!is_writable($sDirectorio.$sNombreArchivo)) {
-                $sMensajeStatus .= _tr("This file doesn't have permisses to write").'<br/>';
+            $sContenido = file_get_contents($sDirectorio.$sNombreArchivo);
+            if ($sContenido === FALSE) {
+                $sMensajeStatus .= _tr("This file doesn't have permisses to read").'<br/>';
             }
+            if (!isset($_POST['content'])) $_POST['content'] = $sContenido;
+            $_POST['basename'] = basename($sNombreArchivo);
         }
-        $sContenido = file_get_contents($sDirectorio.$sNombreArchivo);
-        if ($sContenido === FALSE) {
-            $sMensajeStatus .= _tr("This file doesn't have permisses to read").'<br/>';
-        }
-        if (!isset($_POST['content'])) $_POST['content'] = $sContenido;
-        $_POST['basename'] = basename($sNombreArchivo);
     }
 
     $oForm = new paloForm($smarty,
@@ -245,7 +270,11 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
         )
     );
     $oForm->setEditMode();
-  
+    
+    //permission
+    $smarty->assign('EDIT_FILE',in_array('edit_file',$arrPermission));
+    $smarty->assign('RELOAD_AST',in_array('reload_asterisk',$arrPermission));
+    
     $smarty->assign('url_edit', construirURL(array('menu' => $module_name, 'action' => $sAccion, 'file' => $sNombreArchivo)));
     $smarty->assign('url_back', construirURL(array('menu' => $module_name), array('action', 'file', 'nav'=>getParameter('nav'), 'page'=>getParameter('page'))));
     $smarty->assign('search',getParameter('search'));
@@ -253,7 +282,7 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
     $smarty->assign('RELOAD_ASTERISK', _tr('Reload Asterisk'));
     $smarty->assign('LABEL_BACK', _tr('Back'));
     $smarty->assign('msg_status', $sMensajeStatus);
-    $smarty->assign('icon',"images/user.png");
+    $smarty->assign('icon',"web/apps/$module_name/images/pbx_tools_asterisk_file_editor.png");
     
     return $oForm->fetchForm("$local_templates_dir/file_editor.tpl", _tr("File Editor"), $_POST);
 }

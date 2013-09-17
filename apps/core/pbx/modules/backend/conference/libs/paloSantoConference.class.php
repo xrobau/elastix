@@ -266,6 +266,20 @@ class paloConference extends paloAsteriskDB{
             } 
         }
         
+        //check for recording
+        if($arrProp['record_conf']=='no'){ //disable recording
+            $arrProp['moderator_options_2']="off";
+            $arrProp['user_options_4']="off";
+        }else{
+            if($arrProp['record_conf']!='wav' && $arrProp['record_conf']!='wav49' && $arrProp['record_conf']!='gsm'){
+                $arrProp['record_conf']='wav';
+            }
+            $arrProp['moderator_options_2']="on"; 
+            $arrProp['user_options_4']="on"; 
+            $query .="recordingformat,";
+            $arrOpt[]=$arrProp['record_conf'];
+        }
+        
         $optAd="aAs";
         $optUser="";
         
@@ -274,6 +288,7 @@ class paloConference extends paloAsteriskDB{
         $optUser .=($arrProp['user_options_1']=="on")?"i":"";
         $optUser .=($arrProp['user_options_2']=="on")?"m":"";
         $optUser .=($arrProp['user_options_3']=="on")?"w":"";
+        $optUser .=($arrProp['user_options_4']=="on")?"r":"";
         
         if($arrProp['moh']!=""){
             if($this->existMoHClass($arrProp['moh'],$this->domain)){
@@ -333,26 +348,35 @@ class paloConference extends paloAsteriskDB{
             if(!preg_match("/^[0-9]*$/",$arrProp['adminpin'])){
                 $this->errMsg=_tr("Invalid Field 'Admin PIN'")._tr("Must contain only Digits");
                 return false;
+            }else{
+                $query .="adminpin=?,";
+                $arrOpt[]=$arrProp["adminpin"];
             }
         }else{
             $query .="adminpin=?,";
-            $arrOpt[]=$arrProp["adminpin"];
+            $arrOpt[]=NULL;
         }
         
         if($arrProp['pin']!=""){
             if(!preg_match("/^[0-9]*$/",$arrProp['pin'])){
                 $this->errMsg=_tr("Invalid Field 'User PIN'")._tr("Must contain only Digits");
                 return false;
+            }else{
+                $query .="pin=?,";
+                $arrOpt[]=$arrProp["pin"];
             }
         }else{
             $query .="pin=?,";
-            $arrOpt[]=$arrProp["pin"];
+            $arrOpt[]=NULL;
         }
         
         if($arrProp['maxusers']!=""){
             if(!preg_match("/^[0-9]*$/",$arrProp['maxusers'])){
                 $this->errMsg=_tr("Invalid Field 'maxusers'")._tr("Must contain only Digits");
                 return false;
+            }else{
+                $query .="maxusers=?,";
+                $arrOpt[]=$arrProp['maxusers'];
             }
         }else{
             $query .="maxusers=?,";
@@ -380,6 +404,21 @@ class paloConference extends paloAsteriskDB{
             $arrOpt[]='2999-01-01 12:00:00';
         }
         
+         //check for recording
+        if($arrProp['record_conf']=='no'){ //disable recording
+            $arrProp['moderator_options_2']="off";
+            $arrProp['user_options_4']="off";
+            $query .="recordingformat=?,";
+            $arrOpt[]='';
+        }else{
+            if($arrProp['record_conf']!='wav' && $arrProp['record_conf']!='wav49' && $arrProp['record_conf']!='gsm'){
+                $arrProp['record_conf']='wav';
+            }
+            $arrProp['moderator_options_2']="on"; 
+            $arrProp['user_options_4']="on"; 
+            $query .="recordingformat=?,";
+            $arrOpt[]=$arrProp['record_conf'];
+        }
         
         $optAd="aAs";
         $optUser="";
@@ -389,6 +428,7 @@ class paloConference extends paloAsteriskDB{
         $optUser .=($arrProp['user_options_1']=="on")?"i":"";
         $optUser .=($arrProp['user_options_2']=="on")?"m":"";
         $optUser .=($arrProp['user_options_3']=="on")?"w":"";
+        $optUser .=($arrProp['user_options_4']=="on")?"r":"";
         
         if($arrProp['moh']!=""){
             if($this->existMoHClass($arrProp['moh'],$this->domain)){
@@ -574,7 +614,7 @@ class paloConference extends paloAsteriskDB{
             return false;
     
         $arrExt=array();
-        $query="SELECT ext_conf,confno from meetme where organization_domain=?";
+        $query="SELECT ext_conf,confno,recordingformat from meetme where organization_domain=?";
         $result=$this->_DB->fetchTable($query,true,array($this->domain));
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;
@@ -583,7 +623,10 @@ class paloConference extends paloAsteriskDB{
             foreach($result as $value){
                 if(isset($value["ext_conf"]) && $value["ext_conf"]!=""){
                     $exten=$value["ext_conf"];
-                    $arrExt[]=new paloExtensions($exten,new ext_setvar('MEETME_RECORDINGFILE', '/var/spool/asterisk/monitor/palosanto.com/meetme-conf-rec-'.$value["ext_conf"].'-${UNIQUEID}'),1);
+                    $arrExt[]=new paloExtensions($exten,new ext_setvar('MEETME_RECORDINGFILE', '/var/spool/asterisk/monitor/'.$this->domain.'/meetme-conf-rec-'.$value["ext_conf"].'-${UNIQUEID}'),1);
+                    //los archivos con extension wav49 se guardan dentro de asterisk com WAV
+                    $arrExt[]=new paloExtensions($exten,new ext_setvar('MEETME_RECORDINGFORMAT',$value["recordingformat"]));
+                    $arrExt[]=new paloExtensions($exten,new ext_execif('$["${MEETME_RECORDINGFORMAT}"="wav49"]','Set','MEETME_RECORDINGFORMAT=WAV'));
                     $arrExt[]=new paloExtensions($exten,new ext_macro($this->code.'-user-callerid',"SKIPTTL"));
                     $arrExt[]=new paloExtensions($exten,new ext_meetme($value["confno"]));
                     $arrExt[]=new paloExtensions($exten,new ext_hangup());

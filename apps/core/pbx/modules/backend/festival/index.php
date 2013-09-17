@@ -33,11 +33,8 @@ include_once "libs/paloSantoJSON.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-
     //global variables
     global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
     
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);

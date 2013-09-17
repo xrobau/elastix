@@ -3,14 +3,10 @@ require_once "libs/paloSantoForm.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    
-    //global variables
     global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
-
-    //folder path for custom templates
-   $local_templates_dir=getWebDirModule($module_name);
+    
+     //folder path for custom templates
+    $local_templates_dir=getWebDirModule($module_name);
 
     $txtCommand = isset($_POST['txtCommand'])? trim($_POST['txtCommand']) : '';
     $oForm = new paloForm($smarty, array());

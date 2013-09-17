@@ -494,6 +494,9 @@ function viewFormConference($smarty, $module_name, $local_templates_dir, &$pDB, 
                         $Conf["duration"]=floor($elap/3600);
                         $Conf["duration_min"]=floor(fmod($elap,3600)/60);
                     }
+                    
+                    $Conf["record_conf"]=(empty($Conf["recordingformat"]))?'no':$Conf["recordingformat"];
+                    
                     //adminopts
                     preg_match_all("/^aAs(i){0,1}(r){0,1}(M\(([[:alnum:]_]+)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["adminopts"],$match);
                     $Conf["moderator_options_1"]=empty($match[1][0])?"off":"on";
@@ -511,10 +514,11 @@ function viewFormConference($smarty, $module_name, $local_templates_dir, &$pDB, 
                     }
                     
                     //useropts
-                    preg_match_all("/^(i){0,1}(m){0,1}(w){0,1}(M\(([[:alnum:]_]+)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["opts"],$matchu);
+                    preg_match_all("/^(i){0,1}(m){0,1}(w){0,1}(r){0,1}(M\(([[:alnum:]_]+)\)){0,1}(G\((.*)\)){0,1}$/",$Conf["opts"],$matchu);
                     $Conf["user_options_1"]=empty($matchu[1][0])?"off":"on";
                     $Conf["user_options_2"]=empty($matchu[2][0])?"off":"on";
                     $Conf["user_options_3"]=empty($matchu[3][0])?"off":"on";
+                    $Conf["user_options_4"]=empty($matchu[4][0])?"off":"on";
                 }
             }  
         }
@@ -633,11 +637,13 @@ function saveNewConference($smarty, $module_name, $local_templates_dir, &$pDB, $
         $arrProp['duration_min']=getParameter("duration_min");
         $arrProp['announce_intro']=getParameter("announce_intro");
         $arrProp['moh']=getParameter("moh");
+        $arrProp['record_conf']=getParameter("record_conf");
         $arrProp['moderator_options_1']=getParameter("moderator_options_1"); //announce join/leave
         $arrProp['moderator_options_2']=getParameter("moderator_options_2"); //record
         $arrProp['user_options_1']=getParameter("user_options_1"); //announce join/leave
         $arrProp['user_options_2']=getParameter("user_options_2"); //mute
         $arrProp['user_options_3']=getParameter("user_options_3"); //waitlider
+        $arrProp['user_options_4']=getParameter("user_options_4"); //record
         
         if($arrProp['schedule']=="on"){
             if(!preg_match("/^(([1-2][0,9][0-9][0-9])-((0[1-9])|(1[0-2]))-((0[1-9])|([1-2][0-9])|(3[0-1]))) (([0-1][0-9]|2[0-3]):[0-5][0-9])$/",$arrProp['start_time']))
@@ -705,11 +711,13 @@ function saveEditConference($smarty, $module_name, $local_templates_dir, $pDB, $
         $arrProp['maxusers']=getParameter("maxusers");
         $arrProp['announce_intro']=getParameter("announce_intro");
         $arrProp['moh']=getParameter("moh");
+        $arrProp['record_conf']=getParameter("record_conf");
         $arrProp['moderator_options_1']=getParameter("moderator_options_1"); //announce join/leave
         $arrProp['moderator_options_2']=getParameter("moderator_options_2"); //record
         $arrProp['user_options_1']=getParameter("user_options_1"); //announce join/leave
         $arrProp['user_options_2']=getParameter("user_options_2"); //mute
         $arrProp['user_options_3']=getParameter("user_options_3"); //waitlider
+        $arrProp['user_options_4']=getParameter("user_options_4"); //record
         $arrProp['schedule']=getParameter("schedule");
         
         if($arrProp['schedule']=="on"){
@@ -744,7 +752,9 @@ function saveEditConference($smarty, $module_name, $local_templates_dir, $pDB, $
 
     if($success){
         $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message",_tr("Conference has been edited successfully"));
+        $smarty->assign("mb_message",_tr("conference has been created successfully."));
+        $pAstConf=new paloSantoASteriskConfig($pDB);
+        $pAstConf->setReloadDialplan($domain,true);
         $content = reportConference($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
         $smarty->assign("mb_title", _tr("ERROR"));
@@ -1231,6 +1241,9 @@ function createFieldForm($recordings,$music){
             $arrRecording[$key]=$value;
         }
     }
+    
+    $arrMonitor=array("no"=>_tr("No"),"gsm"=>"gsm","wav"=>"wav","wav49"=>"wav49");
+    
     $arrFields =       array("name"  => array("LABEL"              => _tr('Conference Name'),
                                                      "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "TEXT",
@@ -1285,6 +1298,12 @@ function createFieldForm($recordings,$music){
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
+                            "user_options_4"    => array("LABEL"              => "",
+                                                     "REQUIRED"               => "no",
+                                                     "INPUT_TYPE"             => "CHECKBOX",
+                                                     "INPUT_EXTRA_PARAM"      => "",
+                                                     "VALIDATION_TYPE"        => "",
+                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "start_time"        => array("LABEL"              => _tr('Start Time'),
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "DATE",
@@ -1316,17 +1335,23 @@ function createFieldForm($recordings,$music){
                                                      "VALIDATION_TYPE"        => "text",
                                                      "VALIDATION_EXTRA_PARAM" => ""), 
                             "moh"              => array("LABEL"              => _tr('Music on Hold'),
-                                                     "REQUIRED"               => "no",
-                                                     "INPUT_TYPE"             => "SELECT",
-                                                     "INPUT_EXTRA_PARAM"      => $arrMusic,
-                                                     "VALIDATION_TYPE"        => "text",
-                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrMusic,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
                             "schedule"        => array("LABEL"              => "Schedule Conference",
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "CHECKBOX",
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
+                            "record_conf"              => array("LABEL"      => _tr('Record Call'),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrMonitor,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(wav|no|gsm|wav49){1}$"),
                             );
 	return $arrFields;
 }
@@ -1373,7 +1398,7 @@ function getAction(){
     else if(getParameter("edit"))
         return (in_array('edit_conf',$arrPermission))?'view_edit':'report';
     else if(getParameter("delete_conference"))
-        return (in_array('delete_conf',$arrPermission))?'delete_conference':'report';
+        return (in_array('delete_conf',$arrPermission))?'delete':'report';
     else if(getParameter("action")=="view")      //Get parameter by GET (command pattern, links)
         return "view";
     else if(getParameter("action")=="getConferenceMemb")

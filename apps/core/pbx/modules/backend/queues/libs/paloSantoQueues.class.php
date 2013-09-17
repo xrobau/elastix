@@ -780,7 +780,26 @@ class paloQueuePBX extends paloAsteriskDB{
                 //se desean graban las llamadas que llegan a esta cola
                 if(isset($value["monitor_format"])){
                     $arrQ[]=new paloExtensions($exten,new ext_setvar('MONITOR_FILENAME','/var/spool/asterisk/monitor/'.$this->domain.'/q${EXTEN}-${STRFTIME(${EPOCH},,%Y%m%d-%H%M%S)}-${UNIQUEID}'));
+                    $arrQ[]=new paloExtensions($exten,new ext_setvar('MONITOR_FILENAME_FORMAT',$value["monitor_format"]));
+                    $arrQ[]=new paloExtensions($exten,new ext_execif('$["${MONITOR_FILENAME_FORMAT}"="wav49"]','Set','MONITOR_FILENAME_FORMAT=WAV'));
+                    //se pueden especificar opciones para la grabacion, estas opciones son la opciones soportadas por mixmonitor application
+                    /*
+                    a - Append to the file instead of overwriting it.
+                    b - Only save audio to the file while the channel is bridged.
+                    v - Adjust the heard volume by a factor of x (range -4 to 4)
+                    x
+                    V - Adjust the spoken volume by a factor of x (range -4 to 4)
+                    x
+                    W - Adjust both, heard and spoken volumes by a factor of x (range -4 to 4)
+                    x*/
+                    //TODO:AUN NO ESTA IMPLEMENTADO, PENDIENTE DE HACER
+                    /*if(isset($value["monitor_options"])){
+                        $arrQ[]=new paloExtensions($exten,new ext_setvar('MONITOR_OPTIONS'=$value["monitor_options"]);
+                    }*/
+                    
                 }
+                
+                
                 
                 //si se desea reproducir un anuncio a la persona que llama antes de unirla a la cola
                 if(isset($value["announce_caller_detail"]) && $value["announce_caller_detail"]!=""){

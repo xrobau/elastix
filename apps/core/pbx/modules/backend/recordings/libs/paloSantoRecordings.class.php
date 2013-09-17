@@ -354,6 +354,7 @@ class paloSantoRecordings extends paloAsteriskDB{
                 $this->_DB->beginTransaction();
                 if(!$this->_DB->genQuery($query,array($value['uniqueid']))){
                     $error[]=$value['name']." - DATABASE ERROR";
+                    $this->_DB->rollBack();
                     continue;
                 }
                 
@@ -375,6 +376,8 @@ class paloSantoRecordings extends paloAsteriskDB{
                     }else{
                         $this->_DB->commit();
                     }
+                }else{
+                    $this->_DB->commit();
                 }
             }
             if(count($error)>0){

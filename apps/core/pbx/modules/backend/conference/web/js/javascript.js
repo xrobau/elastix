@@ -4,7 +4,7 @@ var conf_kick=false;
 $(document).ready(function(){
 	if($("#schedule").val()=="off") 
         $(".schedule").css("display","none");
-
+    
     $("input[name='chkoldschedule']").change(function(){
         if($("input[name='chkoldschedule']").is(':checked')){
             $(".schedule").css("display","table-row");
@@ -18,8 +18,9 @@ $(document).ready(function(){
             getConferenceMemb();
         else
             updateShowCallers();
-   }
+   }   
 });
+
 
 function getConferenceMemb(){
     var arrAction        = new Array();

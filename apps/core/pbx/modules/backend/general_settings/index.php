@@ -254,6 +254,7 @@ function getParameterGeneralSettings(){
         $arrPropGen["DIAL_OPTIONS"]=getParameter("DIAL_OPTIONS");
         $arrPropGen["TRUNK_OPTIONS"]=getParameter("TRUNK_OPTIONS");
         $arrPropGen["RECORDING_STATE"]=getParameter("RECORDING_STATE");
+        $arrPropGen["MIXMON_FORMAT"]=getParameter("MIXMON_FORMAT");
         $arrPropGen["RINGTIMER"]=getParameter("RINGTIMER");
         if(isset($arrPropGen["RINGTIMER"])){
             if($arrPropGen["RINGTIMER"]==0)

@@ -270,6 +270,12 @@ function viewFormMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     $smarty->assign("id_moh", $idMoH);
     $smarty->assign("USERLEVEL",$credentials['userlevel']);
     $smarty->assign("ADD_FILE",_tr("Add New file"));
+    $max_upload = (int)(ini_get('upload_max_filesize'));
+    $max_post = (int)(ini_get('post_max_size'));
+    $memory_limit = (int)(ini_get('memory_limit'));
+    $upload_mb = min($max_upload, $max_post, $memory_limit)*1048576;
+    $smarty->assign("max_size", $upload_mb);
+    $smarty->assign("alert_max_size", _tr("File size exceeds the limit. "));
         
     $htmlForm = $oForm->fetchForm("$local_templates_dir/new.tpl",_tr("MoH Route"), $arrMoH);
     $content = "<form  method='POST' enctype='multipart/form-data' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";

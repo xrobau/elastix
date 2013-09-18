@@ -39,12 +39,7 @@ var rte_script = new richTextEditor('rte_script');
           <input class="button" type="submit" name="cancel" value="{$CANCEL}" />
         </td>
           {else}
-        <td align="left">
-          <input class="button" type="submit" name="edit" value="{$EDIT}" />
-          <input class="button" type="button" name="desactivar" value="{$DESCATIVATE}"  onClick="if(confirmSubmit('{$CONFIRM_CONTINUE}'))desactivar_campania();" />
-          <input class="button" type="submit" name="delete" value="{$DELETE}"  onClick="return confirmSubmit('{$CONFIRM_DELETE}');" />
-          <input class="button" type="button" name="cancel_view" value="{$CANCEL}" onclick="window.open('?menu=campaign_out','_parent');" />
-        </td>
+{* Removido para eliminar xajax *}        
           {/if}          
      </tr>
    </table>
@@ -169,15 +164,6 @@ var rte_script = new richTextEditor('rte_script');
 
 {literal}
 <script type="text/javascript">
-function desactivar_campania()
-{
-    var id_campaign = document.getElementById("id_campaign").value;
-    xajax_desactivar_campania(id_campaign);
-}
-
-function delete_campania() {
-}
-
 /* Función para recoger todas las variables del formulario y procesarlas. Sólo
    se requiere atención especial para el RTF del script, y para la lista de 
    formularios elegidos. */
@@ -268,5 +254,4 @@ function listaControlesFormularios()
 }
 </script>
 {/literal}
-{$xajax_javascript}
 {/if} {* $no_queues *}

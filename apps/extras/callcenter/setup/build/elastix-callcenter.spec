@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Sep 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
+- CHANGED: Campaign Out: remove last traces of xajax dead code from the module.
+  SVN Rev[5895]
+
 * Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-3
 - Bump version for release.
 - FIXED: Dialer: an outgoing route with multiple trunks may produce multiple

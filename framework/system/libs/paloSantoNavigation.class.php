@@ -365,6 +365,17 @@ class paloSantoNavigation extends paloSantoNavigationBase
                     }
                 }
             }
+            
+            $jqueryUICss = "$documentRoot/web/_common/js/jquery/widgetcss/";
+            if(is_dir($jqueryUICss)){
+                $arr_css = $this->obtainFiles($jqueryUICss,"css");
+                if($arr_css!=false && count($arr_css)>0){
+                    for($i=0; $i<count($arr_css); $i++){
+                        $dir_css = "{$arrConf['webCommon']}/js/jquery/widgetcss/".$arr_css[$i];
+                        $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
+                    }
+                }
+            }
             //$HEADER_LIBS_JQUERY
         }
         $this->_smarty->assign("HEADER_LIBS_JQUERY", implode("\n", $HEADER_LIBS_JQUERY));

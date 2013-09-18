@@ -163,12 +163,15 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
         return reportGroupPermission($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }
     
-    //para el casos de los recursos organization y dashboard ahi acciones que no se les puede otorgar a los usuarios
+    //para el casos de los recursos organization, dashboard, cdrreport ahi acciones que no se les puede otorgar a los usuarios
     if(isset($arrResourceActions['organization'])){
         $arrResourceActions['organization']=array_diff($arrResourceActions['organization'],array('change_org_status','create_org','delete_org','edit_did'));
     }
     if(isset($arrResourceActions['dashboard'])){
         $arrResourceActions['dashboard']=array('access');
+    }
+    if(isset($arrResourceActions['cdrreport'])){
+        $arrResourceActions['cdrreport']=array('access','export');
     }
     
     //los premisos que tiene el grupo
@@ -406,6 +409,8 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
                 $actions=array_diff($actions,array('change_org_status','create_org','delete_org','edit_did'));
             }elseif($resource=="dashboard"){
                 $actions=array('access');
+            }elseif($resource='cdrreport'){
+                $actions=array('access','export');
             }
             
             if(count($actions)>$max_actions){

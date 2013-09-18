@@ -49,36 +49,36 @@ function obtenerDetallesRPMS()
     );
     $sCommand = 'rpm -qa  --queryformat "%{name} %{version} %{release}\n"';
     foreach ($packageClass as $packageLists) {
-    	if (is_array($packageLists)) $sCommand .= ' '.implode(' ', array_map('escapeshellarg', $packageLists));
+        if (is_array($packageLists)) $sCommand .= ' '.implode(' ', array_map('escapeshellarg', $packageLists));
     }
     $output = $retval = NULL;
     exec($sCommand, $output, $retval);
     $packageVersions = array();
     foreach ($output as $s) {
-    	$fields = explode(' ', $s);
+        $fields = explode(' ', $s);
         $packageVersions[$fields[0]] = $fields;
     }
     
     $result = array();
     foreach ($packageClass as $sTag => $packageLists) {
-    	if (!isset($result[$sTag])) $result[$sTag] = array();
+        if (!isset($result[$sTag])) $result[$sTag] = array();
         if ($sTag == 'Kernel') {
-    		// Caso especial
+            // Caso especial
             $result[$sTag][] = explode(' ', trim(`uname -s -r -i`));
-    	} elseif ($sTag == 'Elastix') {
-    		// El paquete elastix debe ir primero
+        } elseif ($sTag == 'Elastix') {
+            // El paquete elastix debe ir primero
             if (isset($packageVersions['elastix']))
                 $result[$sTag][] = $packageVersions['elastix'];
             foreach ($packageVersions as $packageName => $fields) {
-            	if (substr($packageName, 0, 8) == 'elastix-')
+                if (substr($packageName, 0, 8) == 'elastix-')
                     $result[$sTag][] = $fields;
             }
-    	} else {
-    		foreach ($packageLists as $packageName)
+        } else {
+            foreach ($packageLists as $packageName)
                 $result[$sTag][] = isset($packageVersions[$packageName])
                     ? $packageVersions[$packageName]
                     : array($packageName, '(not installed)', ' ');
-    	}
+        }
     }
     return $result;
 }
@@ -86,7 +86,8 @@ function obtenerDetallesRPMS()
 function setUserPassword()
 {
     global $arrConf;
-    include_once "{$arrConf['elxPath']}/libs/paloSantoACL.class.php";
+    include_once "libs/paloSantoACL.class.php";
+    include_once "libs/paloSantoOrganization.class.php";
 
     $old_pass   = getParameter("oldPassword");
     $new_pass   = getParameter("newPassword");
@@ -106,15 +107,14 @@ function setUserPassword()
       return $arrResult;
     }
     //verificamos que la nueva contraseña sea fuerte
-    if(isStrongPassword($new_pass)){
+    if(!isStrongPassword($new_pass)){
         $arrResult['msg'] = _tr("The new password can not be empty. It must have at least 10 characters and contain digits, uppers and little case letters");
         return $arrResult;
     }
 
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    global $arrConf;
-    $pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
-    $pACL = new paloACL($pdbACL);
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB);
     $uid = $pACL->getIdUser($user);
     if($uid===FALSE)
         $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
@@ -122,13 +122,14 @@ function setUserPassword()
         // verificando la clave vieja
         $val = $pACL->authenticateUser($user, md5($old_pass));
         if($val === TRUE){
-            $status = $pACL->changePassword($uid, md5($new_pass));
+            $pORG=new paloSantoOrganization($pDB);
+            $status = $pORG->changeUserPassword($user,$new_pass);
             if($status){
                 $arrResult['status'] = TRUE;
                 $arrResult['msg'] = _tr("Elastix password has been changed.");
                 $_SESSION['elastix_pass'] = md5($new_pass);
             }else{
-                $arrResult['msg'] = _tr("Impossible to change your Elastix password.");
+                $arrResult['msg'] = _tr("Impossible to change your Elastix password.")." ".$pORG->errMsg;
             }
         }else{
             $arrResult['msg'] = _tr("Impossible to change your Elastix password. User does not exist or password is wrong");
@@ -141,8 +142,9 @@ function setUserPassword()
 function searchModulesByName()
 {
     global $arrConf;
-    include_once "{$arrConf['elxPath']}/libs/JSON.php";
-    include_once "{$arrConf['elxPath']}/apps/group_permission/libs/paloSantoGroupPermission.class.php";
+    include_once "libs/paloSantoACL.class.php";
+    include_once "libs/JSON.php";
+    include_once "apps/group_permission/libs/paloSantoGroupPermission.class.php";
     $json = new Services_JSON();
 
     $pGroupPermission = new paloSantoGroupPermission();
@@ -164,6 +166,11 @@ function searchModulesByName()
         $administrative="yes";
     else
         $administrative="no";
+    
+    $org_access=null;
+    if(!$pACL->isUserSuperAdmin($_SESSION['elastix_user'])){
+        $org_access='yes';
+    }
         
     $arrSessionPermissions = $pMenu->filterAuthorizedMenus($pACL->getIdUser($_SESSION['elastix_user']),$administrative);
     if(!is_array($arrSessionPermissions))
@@ -192,9 +199,9 @@ function searchModulesByName()
 
     // buscando en la base de datos acl.db tabla acl_resource con el campo description
     if(empty($parameter_to_find))
-        $arrResult = $pACL->getListResources(25, 0, $name);
+        $arrResult = $pACL->getListResources(25, 0, $name, $org_access, $administrative);
     else
-        $arrResult = $pACL->getListResources(25, 0, $parameter_to_find);
+        $arrResult = $pACL->getListResources(25, 0, $parameter_to_find, $org_access, $administrative);
 
     foreach($arrResult as $key2 => $value2){
         // leyendo el resultado del query
@@ -212,7 +219,7 @@ function searchModulesByName()
 function changeMenuColorByUser()
 {
     global $arrConf;
-    include_once "{$arrConf['elxPath']}/paloSantoACL.class.php";
+    include_once "libs/paloSantoACL.class.php";
 
     $color = getParameter("menuColor");
     $arrResult  = array();
@@ -244,7 +251,7 @@ function changeMenuColorByUser()
 function putMenuAsBookmark($menu)
 {
     global $arrConf;
-    include_once "{$arrConf['elxPath']}/paloSantoACL.class.php";
+    include_once "libs/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['data'] = array("action" => "none", "menu" => "$menu");
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
@@ -254,8 +261,22 @@ function putMenuAsBookmark($menu)
         $pACL = new paloACL($pdbACL);
         $uid = $pACL->getIdUser($user);
         if($uid!==FALSE){
-            //$id_resource = $pACL->getIdResource($menu);
-            $resource = $pACL->getResources($menu);
+            //antes de obtener el listado de los modulos debemos determinar
+            //si la interfaz desde la cual se esta llamando a los metodos es administrativa o 
+            //es de usuario final. 
+            $tmpPath=explode("/",$arrConf['basePath']);
+            if($tmpPath[count($tmpPath)-1]=='admin')
+                $administrative="yes";
+            else
+                $administrative="no";
+        
+            //si el que realiza la accion no es el superadmin incluir en la busqueda la restriccion
+            //de que el modulo puede ser accedido por la organizacion
+            $org_access=(!$pACL->isUserSuperAdmin($_SESSION['elastix_user']))?'yes':NULL;
+            
+            //OBTENEMOS EL RECURSO
+            $resource = $pACL->getResources($menu,$org_access,$administrative);
+            
             $exist = false;
             $bookmarks = "SELECT aus.id AS id, ar.id AS id_menu,  ar.description AS description FROM user_shortcut aus, acl_resource ar WHERE id_user = ? AND aus.type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
             $arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
@@ -266,6 +287,7 @@ function putMenuAsBookmark($menu)
                     if($value['id_menu'] == $menu)
                         $exist = true;
                 }
+                //existia anteriormente se procede a eliminarlo del bookmark
                 if($exist){
                     $pdbACL->beginTransaction();
                     $query = "DELETE FROM user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
@@ -285,6 +307,7 @@ function putMenuAsBookmark($menu)
                     }
                 }
 
+                //no existia anteriormente se lo agrega
                 if(count($arr_result1) > 4){
                     $arrResult['msg'] = _tr("The bookmark maximum is 5. Please uncheck one in order to add this bookmark");
                 }else{
@@ -323,7 +346,7 @@ function putMenuAsBookmark($menu)
 function saveStickyNote($menu, $description, $popup)
 {
     global $arrConf;
-    include_once "{$arrConf['elxPath']}/libs/paloSantoACL.class.php";
+    include_once "libs/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     if($menu != ""){
@@ -379,7 +402,7 @@ function saveStickyNote($menu, $description, $popup)
 function saveNeoToggleTabByUser($menu, $action_status)
 {
     global $arrConf;
-    include_once "{$arrConf['elxPath']}/paloSantoACL.class.php";
+    include_once "libs/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     if($menu != ""){

@@ -1262,18 +1262,18 @@ INFO_AUTH_MODULO;
         $arrParams = null;
         $this->errMsg = "";
         
-        $sPeticionSQL = "SELECT id, description FROM acl_resource WHERE Type!='' $where";
+        $sPeticionSQL = "SELECT id, description FROM acl_resource WHERE Type!=''";
         if(!is_null($id_rsrc)){
             $sPeticionSQL .= " and id = ?";
-            $arrParams = array($id_rsrc);
+            $arrParams[] = $id_rsrc;
         }
         if(!is_null($orgAccess)){
             $sPeticionSQL .= " and organization_access = ?";
-            $arrParams = array($orgAccess);
+            $arrParams[] = $orgAccess;
         }
         if(!is_null($administrative)){
             $sPeticionSQL .= " and administrative = ?";
-            $arrParams = array($administrative);
+            $arrParams[] = $administrative;
         }
         $arr_result = $this->_DB->fetchTable($sPeticionSQL, false,$arrParams);
         if (!is_array($arr_result)) {

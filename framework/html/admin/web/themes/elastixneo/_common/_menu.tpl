@@ -174,7 +174,7 @@ $(document).ready(function(){
 		});
 	});
 
-        $('#neo-cmenu-cpallet').click(function(e){
+    $('#neo-cmenu-cpallet').click(function(e){
 		if($("#colorpicker_framework").css("display")=="none")
 			$("#colorpicker_framework").fadeIn(500);
 		else
@@ -439,7 +439,6 @@ function oneClickEvent()
 		<div id="neo-cmenu-cpallet" class="neo-cmenutableft"><img src="{$WEBPATH}themes/{$THEMENAME}/images/cpallet.png" width="19" height="21" alt="color" /></div>
 		<div id="neo-cmenu-search" class="neo-cmenutab"><img src="{$WEBPATH}themes/{$THEMENAME}/images/searchw.png" width="19" height="21" alt="user_search" border="0" /></div>
 		<div id="neo-cmenu-info" class="neo-cmenutab"><img src="{$WEBPATH}themes/{$THEMENAME}/images/information.png" width="19" height="21" alt="user_info" border="0" /></div>
-		<div id="neo-cmenu-addons" class="neo-cmenutab"><a href="index.php?menu=addons"><img src="{$WEBPATH}themes/{$THEMENAME}/images/toolbar_addons.png" width="19" height="21" alt="elastix_addons" border="0" /></a></div>
 		<div id="neo-cmenu-user" class="neo-cmenutab"><img src="{$WEBPATH}themes/{$THEMENAME}/images/user.png" width="19" height="21" alt="user" border="0" /></div>
 	  </div>
 	</div>
@@ -510,8 +509,7 @@ function oneClickEvent()
 		  {else}
 		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/index.php?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
-	      <img src="{$WEBCOMMON}images/icon-help.png" width="24" height="24" alt="help" title="{$HELP}" class="neo-picker" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
+	      </span><div class="neo-module-title-buttonstab-left"></div></div>
           <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
           <input type="hidden" id="elastix_framework_webCommon" value="{$WEBCOMMON}" />
 	      <div class="neo-module-content">

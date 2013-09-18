@@ -44,7 +44,7 @@ function _moduleContent(&$smarty, $module_name)
 
 function handleJSON_versionRPM($smarty, $module_name)
 {
-	$json = new Services_JSON();
+    $json = new Services_JSON();
     return $json->encode(obtenerDetallesRPMS());
 }
 
@@ -146,6 +146,31 @@ function handleJSON_saveNeoToggleTab($smarty, $module_name)
         $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
         $jsonObject->set_error($output['msg']);
     }
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_showAboutAs($smarty, $module_name)
+{
+    global $arrConf;
+    $jsonObject   = new PaloSantoJSON();
+    $about_us_content=_tr('About Elastix Content');
+    $html="<table border='0' cellspacing='0' cellpadding='2' width='100%'>".
+            "<tr class='tabForm' >".
+                "<td class='tabForm' align='center'>".
+                    "$about_us_content<br />".
+                    "<a href='http://www.elastix.org' target='_blank'>www.elastix.org</a>".
+                "</td>".
+            "</tr>".
+          "</table>";
+
+
+    $response['html']  = $html;
+    $response['title'] = _tr('About Elastix')." ".$arrConf['elastix_version'];
+
+    if($arrConf['mainTheme']=="elastixwave" || $arrConf['mainTheme']=="elastixneo")
+        $response['title'] = _tr('About Elastix2');
+
+    $jsonObject->set_message($response);
     return $jsonObject->createJSON();
 }
 ?>

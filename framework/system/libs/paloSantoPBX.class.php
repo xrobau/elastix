@@ -135,7 +135,7 @@ class paloAsteriskDB {
                         $this->errMsg=_tr("Already exits a queue with same pattern").$this->errMsg;
                     }else{
                         //valido que el patron de marcado no este siendo usado por un ring_group
-                        $query="SELECT 1 from ring_group where organization_domain=? and rg_number=?";
+                        $query="SELECT 1 from ring_group where rg_number=? and organization_domain=?";
                         $result=$this->getFirstResultQuery($query,array($extension,$domain));
                         if(count($result)>0 || $result===false){
                             $this->errMsg=_tr("Already exits a ring group with same pattern").$this->errMsg;
@@ -625,6 +625,18 @@ class paloAsteriskDB {
             }
         }
         return $arrTz;
+    }
+    
+    function getRegexPatternFromAsteriskPattern($asteriskExpression){
+        if(!preg_match("/^([XxZzNn[:digit:]]*(\[[0-9]+\-{1}[0-9]+\])*(\[[0-9]+\])*\.{0,1})+$/",$asteriskExpression)){
+            return false;
+        }
+        $expression = str_replace(
+                array('X','Z','N','.','*','+'),
+                array('[0-9]','[1-9]','[2-9]','[0-9#*\\\$]$','\\\*','\\\$'),
+                $asteriskExpression);
+            $expression = strtr($expression,"$","+");
+        return $expression;
     }
 }
 

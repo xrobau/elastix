@@ -241,7 +241,8 @@ function mostrar()
     var arrAction = new Array();
     arrAction["action"]  = "showAboutAs";
     arrAction["rawmode"] = "yes";
-    request("register.php",arrAction,false,
+    arrAction["menu"] = "_elastixutils";
+    request("index.php",arrAction,false,
         function(arrData,statusResponse,error)
         {
             ShowModalPopUP(arrData['title'],380,100,arrData['html']);

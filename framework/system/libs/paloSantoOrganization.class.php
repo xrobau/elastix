@@ -658,7 +658,7 @@ class paloSantoOrganization{
             $arr_params = array($name,$domain,$pbxcode,$idcode,$country,$city,$address,$email_contact,"active");
             $result=$this->_DB->genQuery($query,$arr_params);
             if($result==FALSE){
-                $this->_DB->rollBAck();
+                $this->_DB->rollBack();
                 $this->errMsg=$this->_DB->errMsg;    
             }else{
                 if(!$this->orgHistoryRegister("create",$idcode))
@@ -684,7 +684,7 @@ class paloSantoOrganization{
                     $gExito=$this->assignResource($resultOrgz['id']);
                     if($gExito==false){
                         $error=$this->errMsg;
-                        $this->_DB->rollBAck();
+                        $this->_DB->rollBack();
                     }else{
                         //procedo a crear el plan de marcado para la organizacion
                         $pAstConf=new paloSantoASteriskConfig($this->_DB);
@@ -694,7 +694,7 @@ class paloSantoOrganization{
                             if(!($this->createDomain($domain))){
                                 $error=$this->errMsg;
                                 //no se puede crear el dominio
-                                $this->_DB->rollBAck(); //desasemos los cambios en la base
+                                $this->_DB->rollBack(); //desasemos los cambios en la base
                                 $this->cleanFailCreation($resultOrgz["domain"]); //eliminamos cualquier rastro de la organizacion
                             }else{
                                 //creamos al usuario administrador de las organizacion
@@ -705,7 +705,7 @@ class paloSantoOrganization{
                                 }else{
                                     $error=$this->errMsg;
                                     //revertimos los cambios realizados
-                                    $this->_DB->rollBAck(); //desasemos los cambios en la base
+                                    $this->_DB->rollBack(); //desasemos los cambios en la base
                                     //eliminamos cualquier rastro de la oprganizacion de asterisk
                                     $pAstConf->writeExtesionConfFile();
                                     $this->cleanFailCreation($resultOrgz["domain"]);
@@ -716,13 +716,13 @@ class paloSantoOrganization{
                             }
                         }else{
                             $error=_tr("An Error has ocurred to create dialplan for new organization. ").$pAstConf->errMsg;
-                            $this->_DB->rollBAck();
+                            $this->_DB->rollBack();
                             $this->cleanFailCreation($resultOrgz["domain"]); //eliminamos cualquier rastro de la organizacion
                         }
                     }
                 }else{
                     $error=_tr("An Error has ocurred to set organization properties").$this->errMsg;
-                    $this->_DB->rollBAck();
+                    $this->_DB->rollBack();
                 }
             }
         }else{
@@ -967,8 +967,6 @@ class paloSantoOrganization{
     }
 
     private function deleteOrganizationDB($id,&$idcode){
-        include_once "libs/cyradm.php";
-        include_once "configs/email.conf.php";
 		$dGroup=true;
 		$pACL=new paloACL($this->_DB);
 		$error="";
@@ -1576,8 +1574,6 @@ class paloSantoOrganization{
 
     function updateUserOrganization($idUser, $name, $md5password, $password1, $extension, $fax_extension,$countryCode, $areaCode, $clidNumber, $cldiName, $idGrupo, $quota, $userLevel1,&$reAsterisk){
         require_once "apps/general_settings/libs/paloSantoGlobalsPBX.class.php";
-        include_once "libs/cyradm.php";
-        include_once "configs/email.conf.php";
         $pACL=new paloACL($this->_DB);
         $pEmail = new paloEmail($this->_DB);
         $pFax = new paloFax($this->_DB);
@@ -1811,6 +1807,119 @@ class paloSantoOrganization{
         return $Exito;
     }
 
+    /**
+     * Procedimiento que actualiza los passwords de un usuario dentro de elastix
+     * La calve ingresada sera configurada para la cuenta de interfaz web, para su cuenta
+     * de email, su secret en el caso de las extensiones sip e iax
+     */
+    function changeUserPassword($username,$password){
+        $pEmail = new paloEmail($this->_DB);
+        $pFax = new paloFax($this->_DB);
+        $pACL=new paloACL($this->_DB);
+        
+        //comprobamos que la calve este seteada y sea una clave fuerte
+        //verificamos que la nueva contraseña sea fuerte
+        if(!isStrongPassword($password)){
+            $this->errMsg = _tr("The new password can not be empty. It must have at least 10 characters and contain digits, uppers and little case letters");
+            return false;
+        }
+        //obtenemos la conversion md5 de la clave
+        $md5_password=md5($password);
+        
+        //verficamos que el usuario exista
+        $idUser = $pACL->getIdUser($username);
+        if($idUser==false){
+            $this->errMsg=($pACL->errMsg=='')?_tr("User does not exist"):_tr("DATABASE ERROR");
+            return false;
+        }
+        
+        //obtenemos los datos del usuario
+        //extension de fax y de telefonia
+        $arrUser=$pACL->getUsers($idUser);
+        if($arrUser==false){
+            $this->errMsg=($arrUser===false)?_tr("DATABASE ERROR"):_tr("User dosen't exist");
+            return false;
+        }
+        
+        $this->_DB->beginTransaction();
+        if($pACL->isUserSuperAdmin($username)){
+            //si es superadmin solo se cambia la clave de interfaz administrativa
+            //cambiamos la clave en la insterfax administrativa
+            if(!$pACL->changePassword($idUser,$md5_password)){
+                $this->_DB->rollBack();
+                $this->errMsg=$pACL->errMsg;
+                return false;
+            }else{
+                $this->_DB->commit();
+                return true;
+            }
+        }else{
+            //obtenemos el dominio al cual pertenece el usuario
+            $arrOrgz=$this->getOrganizationById($arrUser[0][4]);
+            if($arrOrgz==false){
+                $this->errMsg=_tr("An error has ocurred to retrieve organization data");
+                return false;
+            }
+            
+            $domain=$arrOrgz['domain'];
+            $extension=$arrUser[0][5];
+            $fax_extension=$arrUser[0][6];
+            $areaCode=$pACL->getUserProp($idUser,"area_code");
+            $cldiName=$pACL->getUserProp($idUser,"clid_number");
+            $countryCode=$pACL->getUserProp($idUser,"country_code");
+            $clidNumber=$pACL->getUserProp($idUser,"clid_name");
+            
+            $pDevice=new paloDevice($domain,"sip",$this->_DB);
+            $arrExtUser=$pDevice->getExtension($extension);
+            $arrFaxExtUser=$pDevice->getFaxExtension($fax_extension);
+            
+            //cambiamos la clave en la insterfax administrativa
+            if(!$pACL->changePassword($idUser,$md5_password)){
+                $this->_DB->rollBack();
+                $this->errMsg=$pACL->errMsg;
+                return false;
+            }
+            //cambiamos la clave en la extension telefonica
+            if(!$pDevice->changePasswordExtension($password,$extension)){
+                $this->_DB->rollBack();
+                $this->errMsg=_tr("Extension password couldn't be updated").$pDevice->errMsg;
+                return false;
+            }
+            //cambiamos la clave en la extension de fax
+            if(!$pDevice->changePasswordFaxExtension($password,$fax_extension)){
+                $this->_DB->rollBack();
+                $this->errMsg=_tr("Fax Extension password couldn't be updated").$pDevice->errMsg;
+                return false;
+            }
+            //cambiamos la clave en los archivos de configuracion del fax
+            if(!$pFax->editFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$arrFaxExtUser["device"],$md5_password,$username)){
+                $this->_DB->rollBack();
+                $this->errMsg=_tr("Error Updating fax configuration").$pFax->errMsg;
+                return false;
+            }
+            
+            //cambiamos la clave en el correo
+            if(!$pEmail->setAccountPassword($username,$password)){
+                $this->_DB->rollBack();
+                $this->errMsg=_tr("Error to update email account password");
+                //reestauramos la configuracion anterior en los archivos de fax
+                $pFax->editFax($idUser,$countryCode,$areaCode,$cldiName,$clidNumber,$arrFaxExtUser["device"],$arrUser[0][3],$username);
+                return false;
+            }else{
+                $this->_DB->commit();
+                //recargamos la configuracion en realtime de los dispositivos para que tomen efectos los cambios
+                $pDevice->tecnologia->prunePeer($arrExtUser["device"],$arrExtUser["tech"]);
+                $pDevice->tecnologia->loadPeer($arrExtUser["device"],$arrExtUser["tech"]);
+                
+                //se recarga la faxextension del usuario por los cambios que pudo haber
+                $pDevice->tecnologia->prunePeer($arrFaxExtUser["device"],$arrFaxExtUser["tech"]);
+                $pDevice->tecnologia->loadPeer($arrFaxExtUser["device"],$arrFaxExtUser["tech"]);  
+                $pFax->restartService();
+                return true;
+            } 
+        }
+    }
+    
     private function modificarExtensionsUsuario(&$EXTEN,&$FEXTEN,$domain,$oldExten,$oldFaxExten,$extension,$fax_extension,$password,$md5password,$name,$username,$cldiName,$clidNumber,$port,&$arrBackup){
         $continuar=true;
         $pDevice=new paloDevice($domain,"sip",$this->_DB);
@@ -1871,8 +1980,6 @@ class paloSantoOrganization{
 
 
     function deleteUserOrganization($idUser){
-        include_once "libs/cyradm.php";
-        include_once "configs/email.conf.php";
         $pACL=new paloACL($this->_DB);
         $pEmail = new paloEmail($this->_DB);
         $pFax = new paloFax($this->_DB);

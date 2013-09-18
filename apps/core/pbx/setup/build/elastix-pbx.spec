@@ -302,6 +302,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Sep 18 2013 Jose Briones <jbriones@elastix.com>
+- UPDATED: Module control_panel. The help section was updated
+  SVN Rev[5897]
+
 * Tue Sep 10 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-12
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

@@ -29,7 +29,6 @@
 
 include_once("libs/paloSantoDB.class.php");
 
-/* Clase que implementa campaña (saliente por ahora) de CallCenter (CC) */
 class paloSantoHoldTime
 {
     var $_DB; // instancia de la clase paloDB
@@ -54,226 +53,123 @@ class paloSantoHoldTime
         }
     }
 
-
-
-     //Procedimiento para obtener el número de llamadas entrantes agrupadas por colas
-
-    function getHoldTime($tipo='all',$entrantes='all', $salientes='all',$fecha_init, $fecha_end, $limit, $offset)
+    /**
+     * Procedimiento para construir un histograma de los tiempos de espera de las
+     * llamadas en la cola de atención.
+     * 
+     * @param   string  $sTipoLlamada   Tipo de llamada a mostrar: 'incoming', 'outgoing'
+     * @param   string  $sEstadoLlamada Estado de las llamadas a considerar. Los
+     *                  valores son NULL para cualquier llamada, 'Success' para
+     *                  las llamadas conectadas, 'NoAnswer' para llamadas que no
+     *                  se conectaron pero que entraron en la cola (sólo llamadas
+     *                  salientes), o 'Abandoned' para llamadas cuyo lado remoto
+     *                  cerró mientras esperaban en la cola.
+     * @param   string  $sFechaInicio   Inicio de periodo yyyy-mm-dd hh:mm:ss
+     * @param   string  $sFechaFinal    Final de periodo yyyy-mm-dd hh:mm:ss
+     * @param   int     Tamaño del intervalo del histograma. Como caso especial
+     *                  el primer intervalo incluye al 0. Por omisión es 10.
+     * @param   int     Valor más allá del cual se coloca las contribuciones en
+     *                  el último intervalo. Por omisión es 61.
+     * 
+     * @return  mixed   NULL en caso de error, o la siguiente estructura:
+     */
+    function leerHistogramaEsperaCola($sTipoLlamada, $sEstadoLlamada, $sFechaInicio,
+        $sFechaFinal, $iLongDiv = 10, $iValorDivFinal = 61)
     {
-        //validamos la fecha
-        if($fecha_init!="" && $fecha_end!="" ) {
-            $fecha_init = explode('-',$fecha_init);
-            $fecha_end  = explode('-',$fecha_end);
-        }else {
-            $this->msgError .= "Debe ingresarse una fecha inicio y una fecha fin";
-            return false;
+    	$sRegexpFecha = '/^\d{4}-\d{2}-\d{2}$/';
+        if (!(preg_match($sRegexpFecha, $sFechaInicio) && preg_match($sRegexpFecha, $sFechaFinal))) {
+            $this->errMsg = _tr('Invalid start or end date');
+        	return NULL;
         }
-        // pregunto si la fecha inicial existe
-        if( is_array( $fecha_init ) && count( $fecha_init )==3 && is_array( $fecha_end ) && count( $fecha_end )==3 ) {
-            $year_init  = $fecha_init[0];
-            $month_init = $fecha_init[1];
-            $day_init   = $fecha_init[2];
-            $year_end   = $fecha_end[0];
-            $month_end  = $fecha_end[1];
-            $day_end    = $fecha_end[2];
-            $fechaInicial = $fecha_init[0]."-".$fecha_init[1]."-".$fecha_init[2]." "."00:00:00";
-            $fechaFinal = $fecha_end[0]."-".$fecha_end[1]."-".$fecha_end[2]." "."23:59:59";
-        //si fecha_init y fecha_end no existen envio un mensaje de error
-        }else {
-            $this->msgError .= "Fecha Inicio y/o Fecha Fin no valida";
-            return false;
+        if (!in_array($sTipoLlamada, array('incoming', 'outgoing'))) {
+            $this->errMsg = _tr('Invalid call type');
+        	return NULL;
         }
-
-        $arreglo = array();
-        $where = "";
-        if($tipo=='E'){//hacemos consulta en tabla call_entry
-        //validamos las opciones del combo de ENTRANTES
-            if($entrantes=='T')
-                 $where .= " WHERE  (
-                                    (datetime_init>='{$fechaInicial}' or datetime_entry_queue >='{$fechaInicial}')
-
-                                           AND
-
-                                    datetime_end<='{$fechaFinal}'
-                                )";
-            elseif($entrantes=='E')
-                 $where .= "WHERE  (
-                                    datetime_init>='{$fechaInicial}'
-
-                                           AND
-
-                                    datetime_end<='{$fechaFinal}'
-                                ) and status='terminada'";
-            elseif($entrantes=='A')
-                 $where .= "WHERE  (
-                                    datetime_entry_queue >='{$fechaInicial}'
-
-                                           AND
-
-                                    datetime_end<='{$fechaFinal}'
-                                ) and status='abandonada'";
-
-            $arr_result = FALSE;
-            $this->errMsg = "";
-            //Query para llamadas entrantes (call_entry)
-            $sPeticionSQL = "SELECT  queue_ce.queue as queue, TIME(call_e.datetime_init) as hora,                   call_e.duration_wait as duration_wait, max(call_e.duration_wait) as                    maximo
-                             FROM call_entry call_e, queue_call_entry queue_ce 
-                             ".$where. "
-                                AND call_e.id_queue_call_entry=queue_ce.id AND status is not null AND  duration_wait is not null GROUP BY call_e.id";
+        if (!in_array($sEstadoLlamada, array(NULL, 'Success', 'NoAnswer', 'Abandoned'))) {
+            $this->errMsg = _tr('Invalid call state');
+            return NULL;
         }
-        else if($tipo=='S'){//hacemos consulta en tabla calls
-        //validamos las opciones del combo de SALIENTES
-            if($salientes=='T')
-                 $where .= " ";
-            elseif($salientes=='E')
-                 $where .= " and status='Success'";
-            elseif($salientes=='N')
-                 $where .= " and (status='NoAnswer' OR status='ShortCall')";
-            elseif($salientes=='A')
-                 $where .= " and status='Abandoned'";
+        if ($sFechaInicio > $sFechaFinal) { $t = $sFechaInicio; $sFechaInicio = $sFechaFinal; $sFechaFinal = $t; }
+        
+        $sFechaInicio .= ' 00:00:00';
+        $sFechaFinal .= ' 23:59:59';
 
-            //Query para llamadas salientes (calls)
-            $sPeticionSQL = "SELECT camp.queue as queue,  TIME(c.start_time) as hora,                               c.duration_wait as duration_wait, max(c.duration_wait) as                               maximo
-                            FROM calls c , campaign camp
-                             WHERE   (
-                                    start_time>='{$fechaInicial}'
-
-                                           AND
-                                    end_time<='{$fechaFinal}'
-                                )
-                                AND c.id_campaign=camp.id AND c.status is not null AND  duration_wait is not null ".$where. " GROUP BY c.id";
+        // Construir petición WHERE
+        $whereCond = array('datetime_entry_queue >= ?');
+        $paramSQL = array($sFechaInicio);
+        if (!is_null($sEstadoLlamada)) switch ($sEstadoLlamada) {
+        case 'Success':
+            $whereCond[] = ($sTipoLlamada == 'incoming') ? 'terminada' : 'Success';
+            break;
+        case 'NoAnswer':
+            $whereCond[] = ($sTipoLlamada == 'incoming') ? 'abandonada' : 'NoAnswer';
+            break;
+        case 'Abandoned':
+            $whereCond[] = ($sTipoLlamada == 'incoming') ? 'abandonada' : 'Abandoned';
+            break;
         }
+        $sWhereCond = implode(' AND ', $whereCond);
+        
+        if ($sTipoLlamada == 'incoming') {
+        	$sPeticionSQL = <<<SQL_INCOMING
+SELECT queue_call_entry.queue, call_entry.duration_wait, COUNT(*) AS N
+FROM call_entry, queue_call_entry
+WHERE $sWhereCond AND call_entry.datetime_end <= ?
+    AND call_entry.id_queue_call_entry = queue_call_entry.id
+    AND call_entry.status IS NOT NULL
+    AND call_entry.duration_wait IS NOT NULL
+GROUP BY queue, duration_wait
+SQL_INCOMING;
+        } else {
+            $sPeticionSQL = <<<SQL_OUTGOING
+SELECT campaign.queue, calls.duration_wait, COUNT(*) AS N
+FROM calls, campaign
+WHERE $sWhereCond AND calls.end_time <= ?
+    AND calls.id_campaign = campaign.id
+    AND calls.status IS NOT NULL
+    AND calls.duration_wait IS NOT NULL
+GROUP BY queue, duration_wait
+SQL_OUTGOING;
+        }
+        $paramSQL[] = $sFechaFinal;
 
-
-//echo $sPeticionSQL."<br><br>";
-        $arr_result =& $this->_DB->fetchTable($sPeticionSQL, true);
+        $arr_result = $this->_DB->fetchTable($sPeticionSQL, TRUE, $paramSQL);
         if (!is_array($arr_result)) {
-            $arr_result = FALSE;
             $this->errMsg = $this->_DB->errMsg;
+            return NULL;
         }
-
-
+        
         $resultado = array();
-        //armamos el arreglo de todos los datos a presentar clasificandolos por cola e intervalo de duración
-    if(is_array($arr_result)){
-        foreach($arr_result as $intervalo){
-            if(!isset($resultado[$intervalo['queue']]['cola']))
-                $resultado[$intervalo['queue']]['cola']="";
-            if(!isset($intervalo['queue']))
-                $intervalo['queue'] = "";
-            if(!isset($resultado[$intervalo['queue']]['nuevo_valor_maximo']))
-                $resultado[$intervalo['queue']]['nuevo_valor_maximo']=0;
-            if(!isset($resultado[$intervalo['queue']][0]))
-                    $resultado[$intervalo['queue']][0] =0;
-            if(!isset($resultado[$intervalo['queue']][1]))
-                    $resultado[$intervalo['queue']][1] =0;
-            if(!isset($resultado[$intervalo['queue']][2]))
-                    $resultado[$intervalo['queue']][2] =0;
-            if(!isset($resultado[$intervalo['queue']][3]))
-                    $resultado[$intervalo['queue']][3] =0;
-            if(!isset($resultado[$intervalo['queue']][4]))
-                    $resultado[$intervalo['queue']][4] =0;
-            if(!isset($resultado[$intervalo['queue']][5]))
-                    $resultado[$intervalo['queue']][5] =0;
-            if(!isset($resultado[$intervalo['queue']][6]))
-                    $resultado[$intervalo['queue']][6] =0;
-            if(!isset($resultado[$intervalo['queue']]['suma_duracion']))
-                $resultado[$intervalo['queue']]['suma_duracion']=0;
-
-            if($intervalo['duration_wait']>="0" && $intervalo['duration_wait']<"11"){
-                $resultado[$intervalo['queue']][0] += 1;
-                $resultado[$intervalo['queue']]['cola'] = $intervalo['queue'];
-                $resultado[$intervalo['queue']]['suma_duracion'] += $intervalo['maximo'];
-                //para obtener el valor mayor de los segundos
-                $resultado[$intervalo['queue']]['valor_maximo'] = $intervalo['maximo'];
-                if($resultado[$intervalo['queue']]['valor_maximo']>$resultado[$intervalo['queue']]['nuevo_valor_maximo'])
-                    $resultado[$intervalo['queue']]['nuevo_valor_maximo'] = $resultado[$intervalo['queue']]['valor_maximo'];
-            }
-            if($intervalo['duration_wait']>="11" && $intervalo['duration_wait']<"21"){
-                $resultado[$intervalo['queue']][1] += 1;
-                $resultado[$intervalo['queue']]['cola'] = $intervalo['queue'];
-                $resultado[$intervalo['queue']]['suma_duracion'] += $intervalo['maximo'];
-                //para obtener el valor mayor de los segundos
-                $resultado[$intervalo['queue']]['valor_maximo'] = $intervalo['maximo'];
-                if($resultado[$intervalo['queue']]['valor_maximo']>$resultado[$intervalo['queue']]['nuevo_valor_maximo'])
-                    $resultado[$intervalo['queue']]['nuevo_valor_maximo'] = $resultado[$intervalo['queue']]['valor_maximo'];
-            }
-            if($intervalo['duration_wait']>="21" && $intervalo['duration_wait']<"31") {
-                $resultado[$intervalo['queue']][2] += 1;
-                $resultado[$intervalo['queue']]['cola'] = $intervalo['queue'];
-                $resultado[$intervalo['queue']]['suma_duracion'] += $intervalo['maximo'];
-                //para obtener el valor mayor de los segundos
-                $resultado[$intervalo['queue']]['valor_maximo'] = $intervalo['maximo'];
-                if($resultado[$intervalo['queue']]['valor_maximo']>$resultado[$intervalo['queue']]['nuevo_valor_maximo'])
-                    $resultado[$intervalo['queue']]['nuevo_valor_maximo'] = $resultado[$intervalo['queue']]['valor_maximo'];
-            }
-            if($intervalo['duration_wait']>="31" && $intervalo['duration_wait']<"41"){
-                $resultado[$intervalo['queue']][3] += 1;
-                $resultado[$intervalo['queue']]['cola'] = $intervalo['queue'];
-                $resultado[$intervalo['queue']]['suma_duracion'] += $intervalo['maximo'];
-                //para obtener el valor mayor de los segundos
-                $resultado[$intervalo['queue']]['valor_maximo'] = $intervalo['maximo'];
-                if($resultado[$intervalo['queue']]['valor_maximo']>$resultado[$intervalo['queue']]['nuevo_valor_maximo'])
-                    $resultado[$intervalo['queue']]['nuevo_valor_maximo'] = $resultado[$intervalo['queue']]['valor_maximo'];
-            }
-            if($intervalo['duration_wait']>="41" && $intervalo['duration_wait']<"51"){
-                $resultado[$intervalo['queue']][4] += 1;
-                $resultado[$intervalo['queue']]['cola'] = $intervalo['queue'];
-                $resultado[$intervalo['queue']]['suma_duracion'] += $intervalo['maximo'];
-                //para obtener el valor mayor de los segundos
-                $resultado[$intervalo['queue']]['valor_maximo'] = $intervalo['maximo'];
-                if($resultado[$intervalo['queue']]['valor_maximo']>$resultado[$intervalo['queue']]['nuevo_valor_maximo'])
-                    $resultado[$intervalo['queue']]['nuevo_valor_maximo'] = $resultado[$intervalo['queue']]['valor_maximo'];
-            }
-            if($intervalo['duration_wait']>="51" && $intervalo['duration_wait']<"61"){
-                $resultado[$intervalo['queue']][5] += 1;
-                $resultado[$intervalo['queue']]['cola'] = $intervalo['queue'];
-                $resultado[$intervalo['queue']]['suma_duracion'] += $intervalo['maximo'];
-                //para obtener el valor mayor de los segundos
-                $resultado[$intervalo['queue']]['valor_maximo'] = $intervalo['maximo'];
-                if($resultado[$intervalo['queue']]['valor_maximo']>$resultado[$intervalo['queue']]['nuevo_valor_maximo'])
-                    $resultado[$intervalo['queue']]['nuevo_valor_maximo'] = $resultado[$intervalo['queue']]['valor_maximo'];
-            }
-            if($intervalo['duration_wait']>="61"){
-                $resultado[$intervalo['queue']][6] += 1;
-                $resultado[$intervalo['queue']]['cola'] = $intervalo['queue'];
-                $resultado[$intervalo['queue']]['suma_duracion'] += $intervalo['maximo'];
-                //para obtener el valor mayor de los segundos
-                $resultado[$intervalo['queue']]['valor_maximo'] = $intervalo['maximo'];
-                if($resultado[$intervalo['queue']]['valor_maximo']>$resultado[$intervalo['queue']]['nuevo_valor_maximo'])
-                    $resultado[$intervalo['queue']]['nuevo_valor_maximo'] = $resultado[$intervalo['queue']]['valor_maximo'];
-            }
-            //suma de todos los intervalos clasificados por cola
-            $resultado[$intervalo['queue']]['cantidad_intervalos'] =  $resultado[$intervalo['queue']][0]+$resultado[$intervalo['queue']][1]+$resultado[$intervalo['queue']][2]+$resultado[$intervalo['queue']][3]+$resultado[$intervalo['queue']][4]+$resultado[$intervalo['queue']][5]+$resultado[$intervalo['queue']][6];
-           //promedio de los intervalos por cola
-            $resultado[$intervalo['queue']]['tiempo_promedio'] =  $resultado[$intervalo['queue']]['suma_duracion']/$resultado[$intervalo['queue']]['cantidad_intervalos'];
+        $iPosMaxDiv = (int)(($iValorDivFinal) / $iLongDiv);
+        foreach ($arr_result as $tupla) {
+        	
+            // Inicializar la estructura del histograma
+            if (!isset($resultado[$tupla['queue']])) {
+                $resultado[$tupla['queue']] = array(
+                    'hist'          =>  array_fill(0, $iPosMaxDiv + 1, 0),
+                    'total_calls'   =>  0,
+                    'total_wait'    =>  0,
+                    'max_wait'      =>  0,
+                );
+        	}
+            
+            // Posición de la contribución de la muestra al histograma
+            if ($tupla['duration_wait'] >= $iValorDivFinal)
+                $iPos = $iPosMaxDiv;
+            elseif ($tupla['duration_wait'] <= 0)
+                $iPos = 0;
+            else
+                $iPos = (int)(($tupla['duration_wait'] - 1) / $iLongDiv);
+            $resultado[$tupla['queue']]['hist'][$iPos] += $tupla['N'];
+            
+            // Actualización de los totales
+            $resultado[$tupla['queue']]['total_calls'] += $tupla['N'];
+            $resultado[$tupla['queue']]['total_wait'] += $tupla['duration_wait'] * $tupla['N'];
+            if ($tupla['duration_wait'] > $resultado[$tupla['queue']]['max_wait'])
+                $resultado[$tupla['queue']]['max_wait'] = $tupla['duration_wait'];
         }
-    }//fin de si existe al arreglo
-
-
-    //convertimos los indices desde "0" ordenados
-    sort($resultado);
-    reset($resultado);
-
-    $arrResult['Data'] = $resultado;//toda la data
-    $arrResult['NumRecords'] = count($arrResult['Data']); //contabilizamos la cantidad de datos
-    $arrResult['Data'] = array_slice($arrResult['Data'], $offset, $limit);//para presentar segun el limit y offset enviado
-
-    return $arrResult;//retorno el arreglo
-
+        
+        return $resultado;
     }
-
-    function getMaxWait($time1,$time2){
-        if($time1 > $time2) {
-            return $time1;
-        }elseif($time1 < $time2){
-            return $time2;
-        }else {
-            return $time1;
-        }
-    }
-
-
 }
-
 ?>

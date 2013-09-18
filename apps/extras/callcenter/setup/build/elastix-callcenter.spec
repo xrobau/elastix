@@ -98,6 +98,12 @@ fi
 
 %changelog
 * Wed Sep 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Hold Time: complete rewrite. This rewrite reimplements the histogram
+  code to be more generic as well as smaller, and to use SQL parameters. It also
+  removes dead references to xajax and other unneeded libraries, and brings the
+  code up to newer coding standards. The filter template is exported to a
+  separate file.
+  SVN Rev[5900] 
 - FIXED: Calls Per Agent: remove pagination code as this report is actually a 
   summary report. Fixes Elastix bug #1710.
   SVN Rev[5896] 

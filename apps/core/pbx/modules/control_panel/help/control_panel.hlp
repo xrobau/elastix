@@ -5,12 +5,12 @@
     </header>
     <body>
         <h1>{$node_name}</h1>
-        <p align="Justify"></p>
+        <p align="Justify">The option "Operator Panel" of the menu "PBX" in Elastix allows managing the telephony operations. You can control inbound calls, outbound calls, the order in which the calls are taken, the area that is designated to attend a call, etc.</p>
+Thlign="Justify">is module is useful for receptionists who have a general view of the queues, conferences, parking lots, internal extensions, trunks. Here the recepcionist can start a call or transfer a call by dragging one extension to another, or include several extension to a conference room, or a queue. The receptionist can also see the busy extensions, the elapsed time and the caller ID.</p>
 
         <!-- Form to add images -->
-        <div><img src="../modules/{$node_id}/images/help_operator_panel.png" border="0"></div>
-	<p>Figura 1</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_operator_panel.png" border="0" />
+	<p>Figure 1</p></div>
 	<p></p>
-	<p>La opción "Control Panel" del menú "PBX" de Elastix permite administrar de una manera más fácil el control de llamadas, ya sean llamadas entrantes, llamadas de salida, el orden de las llamadas que serán atendidas, el área que atenderá la llamada, entre otros.   (Figura 1).</p>
     </body>
 </html>

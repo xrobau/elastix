@@ -766,28 +766,4 @@ SQL_DATOS_FORM;
         return $datosCampania;
     }
 }
-
-//FUNCIONES AJAX
-function desactivar_campania($idCampaign)
-{
-    global $arrConf;
-    $respuesta = new xajaxResponse();
-    
-    // se conecta a la base
-    $pDB = new paloDB($arrConf["cadena_dsn"]);
-
-    if($pDB->errMsg != "") {
-        $respuesta->addAssign("mb_message","innerHTML",_tr("Error when connecting to database")."<br/>".$pDB->errMsg);
-    }
-
-    $oCampaign = new paloSantoCampaignCC($pDB);
-
-    if($oCampaign->activar_campaign($idCampaign,'I'))
-        $respuesta->addScript("window.open('?menu=campaign_out','_parent')");
-    else{
-        $respuesta->addAssign("mb_title","innerHTML",_tr("Desactivate Error")."<br/>".$pDB->errMsg); 
-        $respuesta->addAssign("mb_message","innerHTML",_tr("Error when desactivating the Campaign")."<br/>".$pDB->errMsg); 
-    }
-    return $respuesta;
-}
 ?>

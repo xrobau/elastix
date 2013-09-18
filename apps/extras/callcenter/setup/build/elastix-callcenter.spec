@@ -98,6 +98,9 @@ fi
 
 %changelog
 * Wed Sep 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
+- FIXED: Calls Per Agent: remove pagination code as this report is actually a 
+  summary report. Fixes Elastix bug #1710.
+  SVN Rev[5896] 
 - CHANGED: Campaign Out: remove last traces of xajax dead code from the module.
   SVN Rev[5895]
 

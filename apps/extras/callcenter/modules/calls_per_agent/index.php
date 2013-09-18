@@ -148,8 +148,6 @@ function _moduleContent(&$smarty, $module_name)
         (isset( $_GET['exportspreadsheet'] ) && $_GET['exportspreadsheet'] == 'yes') || 
         (isset( $_GET['exportpdf'] ) && $_GET['exportpdf'] == 'yes')
       ) ;
-    $offset = 0;
-    $limit = 20;
 
     if (isset($fieldPat['type'])) $fieldPat['type'] = array_map('strtoupper', $fieldPat['type']);
     $arrCallsAgentTmp = $oCallsAgent->obtenerCallsAgent($date_start, $date_end, $fieldPat);
@@ -161,37 +159,19 @@ function _moduleContent(&$smarty, $module_name)
     	$arrCallsAgentTmp = array();
     }
     $totalCallsAgents = count($arrCallsAgentTmp);
+    $offset = 0;
+
     // Si se quiere avanzar a la sgte. pagina
     if($bElastixNuevo){
-        $oGrid->setLimit($limit);
+        $oGrid->setLimit($totalCallsAgents);
         $oGrid->setTotal($totalCallsAgents + 1);
         $offset = $oGrid->calculateOffset();
-    } else {
-        if(isset($_GET['nav']) && $_GET['nav']=="end") {
-            // Mejorar el sgte. bloque.
-            if(($totalCallsAgents%$limit)==0) {
-                $offset = $totalCallsAgents - $limit;
-            } else {
-                $offset = $totalCallsAgents - $totalCallsAgents%$limit;
-            }
-        }
-    
-        // Si se quiere avanzar a la sgte. pagina
-        if(isset($_GET['nav']) && $_GET['nav']=="next") {
-            $offset = $_GET['start'] + $limit - 1;
-        }
-    
-        // Si se quiere retroceder
-        if(isset($_GET['nav']) && $_GET['nav']=="previous") {
-            $offset = $_GET['start'] - $limit - 1;
-        }
     }
 
     // Bloque comun
-    $arrCallsAgent = array_slice($arrCallsAgentTmp, $offset, $limit);
     $arrData = array();
     $sumCallAnswered = $sumDuration = $timeMayor = 0;
-    foreach($arrCallsAgent as $cdr) {
+    foreach($arrCallsAgentTmp as $cdr) {
         $arrData[] = array(
             $cdr['agent_number'],
             htmlentities($cdr['agent_name'], ENT_COMPAT, 'UTF-8'),
@@ -229,7 +209,7 @@ function _moduleContent(&$smarty, $module_name)
         $arrColumnas = array(_tr("No.Agent"), _tr("Agent"), _tr("Type"), _tr("Queue"),_tr("Calls answered"),_tr("Duration"),_tr("Average"),_tr("Call longest"));
         $oGrid->setColumns($arrColumnas);
         $oGrid->setTitle(_tr("Calls per Agent"));
-        $oGrid->pagingShow(true); 
+        $oGrid->pagingShow(false); 
         $oGrid->setNameFile_Export(_tr("Calls per Agent"));
      
         $smarty->assign("SHOW", _tr("Show"));

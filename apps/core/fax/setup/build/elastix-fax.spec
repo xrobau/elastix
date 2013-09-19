@@ -92,8 +92,8 @@ chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/notify.php
 chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/notify-elastix.php
 
 # move main library of FAX. 
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/libs
-mv setup/paloSantoFax.class.php               $RPM_BUILD_ROOT/var/www/html/libs/
+mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/libs
+mv setup/paloSantoFax.class.php               $RPM_BUILD_ROOT/usr/share/elastix/libs/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -226,6 +226,7 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+/usr/share/elastix/libs/*
 /usr/share/elastix/apps/*
 /var/spool/hylafax/bin/*
 /var/spool/hylafax/etc/setup.cache

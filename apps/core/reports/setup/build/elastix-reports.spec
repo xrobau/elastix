@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,14 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Wed Sep 18 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: Some new fields has been added to the CDR table.
+  SVN Rev[5898]
+
 * Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Report: move filter widgets to separate row in order to avoid
   misplacement. Fixes Elastix bug #1637.
@@ -100,6 +108,7 @@ fi
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5789]
 
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Channel Usage: convert uses of arrLang to _tr. Sync with trunk.

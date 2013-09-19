@@ -303,6 +303,10 @@ fi
 
 %changelog
 * Thu Sep 19 2013 Jose Briones <jbriones@elastix.com>
+- UPDATED: Module endpoints_batch, the help section was updated
+  SVN Rev[5907]
+
+* Thu Sep 19 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module control_panel, the help section was updated
   SVN Rev[5905]
 

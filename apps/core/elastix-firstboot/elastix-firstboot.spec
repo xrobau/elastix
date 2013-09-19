@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,9 +102,19 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
+  SVN history. Bumped Release in specfile.
+
+* Mon Sep 09 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: Now the update of the passwords made in the asterisk database for ami,
+  ari and fop its working properly.
+  SVN Rev[5845]
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
   SVN history. Bumped Release in specfile.
+  SVN Rev[5784]
 
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
 - CHANGED: elastix-admin-passwords: Reversed and fixed some changes in this

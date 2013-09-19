@@ -302,6 +302,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Sep 19 2013 Jose Briones <jbriones@elastix.com>
+- UPDATED: Module control_panel, the help section was updated
+  SVN Rev[5905]
+
 * Wed Sep 18 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module control_panel. The help section was updated
   SVN Rev[5897]

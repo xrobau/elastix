@@ -5,7 +5,7 @@
     </header>
     <body>
         <h1>{$node_name}</h1>
-        <p>The option "Batch of Endpoints" in Elastix allows configuring many phones automatically by uploading a CSV file. It's recommended that all the phones in the file belong to the same. This file must contain at least 4 columns that are "Vendor","Model","MAC" and "Ext".</p>
+        <p>The option "Batch of Endpoints" in Elastix allows configuring many phones automatically by uploading a CSV file. It's recommended that all the phones in the file belong to the same manufacturer. This file must contain at least 4 columns that are "Vendor","Model","MAC" and "Ext".</p>
 
         <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_endpoints_batch.png" border="0" />
         <p>Figure 1</p></div>

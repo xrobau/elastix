@@ -26,6 +26,8 @@ Elastix Module Fax
 %install
 rm -rf $RPM_BUILD_ROOT
 
+mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/faxdocs
+
 # Files provided by all Elastix modules
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
 bdir=%{_builddir}/%{modname}
@@ -219,6 +221,8 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
+%defattr(-, asterisk, asterisk)
+/var/www/elastixdir/*
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*

@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 12
+Release: 13
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -302,6 +302,15 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-13
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: pbx - index.php,paloSantoMonitoring.class.php,filter.tpl,javascript.js: It was
+  corrected the bug where the recordings were not showing in the module.
+  SVN Rev[5911]
+
 * Thu Sep 19 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module endpoint_configurator, the help section was updated
   SVN Rev[5909]

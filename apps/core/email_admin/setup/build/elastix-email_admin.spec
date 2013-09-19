@@ -36,8 +36,8 @@ mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
 mkdir -p    $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
 
 # ** libs ** #
-mv setup/paloSantoEmail.class.php        $RPM_BUILD_ROOT/var/www/html/libs/
-mv setup/cyradm.php                      $RPM_BUILD_ROOT/var/www/html/libs/
+mv setup/paloSantoEmail.class.php        $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mv setup/cyradm.php                      $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mv setup/var/www/elastixdir/scripts/checkSpamFolder.php             $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
 mv setup/var/www/elastixdir/scripts/deleteSpam.php                  $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
 mv setup/stats/postfix_stats.cron        $RPM_BUILD_ROOT/etc/cron.d/
@@ -214,6 +214,7 @@ fi
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /usr/share/elastix/apps/*
+/usr/share/elastix/libs/*
 /usr/local/bin/spamfilter.sh
 /etc/imapd.conf.elastix
 /etc/postfix/main.cf.elastix

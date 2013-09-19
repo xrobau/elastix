@@ -56,25 +56,25 @@ class paloSantoMonitoring {
         $where = "";
 	$arrParam = array();
         if(isset($filter_field) && $filter_field !="" && isset($filter_value) && $filter_value !=""){
-            if($filter_field == "userfield"){
+            if($filter_field == "recordingfile"){
                 $in_val = strtolower($filter_value);
                 switch($in_val){
                     case "outgoing":
-                        $where = " AND (userfield like 'audio:O%' OR userfield like 'audio:/var/spool/asterisk/monitor/O%') ";
+                        $where = " AND (recordingfile like 'O%' OR recordingfile like '/var/spool/asterisk/monitor/O%') ";
                         break;
                     case "group":
-                        $where = " AND (userfield like 'audio:g%' OR userfield like 'audio:/var/spool/asterisk/monitor/g%') ";
+                        $where = " AND (recordingfile like 'g%' OR recordingfile like '/var/spool/asterisk/monitor/g%') ";
                         break;
                     case "queue":
-                        $where = " AND (userfield like 'audio:q%' OR userfield like 'audio:/var/spool/asterisk/monitor/q%') ";
+                        $where = " AND (recordingfile like 'q%' OR recordingfile like '/var/spool/asterisk/monitor/q%') ";
                         break;
                     default :
-                        $where = " AND userfield REGEXP '[[:<:]]audio:[0-9]' ";
+                        $where = " AND recordingfile REGEXP '[[:<:]][0-9]' ";
                         break;
                 }
             }else{
 		$arrParam[] = "$filter_value%";
-                $where = " AND $filter_field like ? AND userfield LIKE 'audio:%' ";
+                $where = " AND $filter_field like ? AND recordingfile LIKE '%' ";
             }
          }
 
@@ -97,7 +97,7 @@ class paloSantoMonitoring {
             $where .= " AND (src=? OR dst=?)";
 	}
 
-        $query   = "SELECT COUNT(*) FROM cdr WHERE userfield <> '' $where";
+        $query   = "SELECT COUNT(*) FROM cdr WHERE recordingfile <> '' $where";
 
         $result=$this->_DB->getFirstRowQuery($query,false,$arrParam);
 
@@ -113,25 +113,25 @@ class paloSantoMonitoring {
         $where = "";
 	$arrParam = array();
         if(isset($filter_field) & $filter_field !=""){
-            if($filter_field == "userfield"){
+            if($filter_field == "recordingfile"){
                 $in_val = strtolower($filter_value);
                 switch($in_val){
                     case "outgoing":
-                        $where = " AND (userfield like 'audio:O%' OR userfield like 'audio:/var/spool/asterisk/monitor/O%') ";
+                        $where = " AND (recordingfile like 'O%' OR recordingfile like '/var/spool/asterisk/monitor/O%') ";
                         break;
                     case "group":
-                        $where = " AND (userfield like 'audio:g%' OR userfield like 'audio:/var/spool/asterisk/monitor/g%') ";
+                        $where = " AND (recordingfile like 'g%' OR recordingfile like '/var/spool/asterisk/monitor/g%') ";
                         break;
                     case "queue":
-                        $where = " AND (userfield like 'audio:q%' OR userfield like 'audio:/var/spool/asterisk/monitor/q%') ";
+                        $where = " AND (recordingfile like 'q%' OR recordingfile like '/var/spool/asterisk/monitor/q%') ";
                         break;
                     default :
-                        $where = " AND userfield REGEXP '[[:<:]]audio:[0-9]' ";
+                        $where = " AND recordingfile REGEXP '[[:<:]][0-9]' ";
                         break;
                 }
             }else{
 		$arrParam[] = "$filter_value%";
-                $where = " AND $filter_field like ? AND userfield LIKE 'audio:%' ";
+                $where = " AND $filter_field like ? AND recordingfile LIKE '%' ";
             }
          }
 
@@ -155,7 +155,7 @@ class paloSantoMonitoring {
 
 	$arrParam[] = $limit;
 	$arrParam[] = $offset;
-        $query   = "SELECT * FROM cdr WHERE userfield <> '' $where ORDER BY uniqueid DESC LIMIT ? OFFSET ?";
+        $query   = "SELECT * FROM cdr WHERE recordingfile <> '' $where ORDER BY uniqueid DESC LIMIT ? OFFSET ?";
         $result=$this->_DB->fetchTable($query, true, $arrParam);
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
@@ -200,8 +200,8 @@ class paloSantoMonitoring {
 
     function deleteRecordFile($id){
         $result = $this->_DB->genQuery(
-            'UPDATE cdr SET userfield = ? WHERE uniqueid = ?',
-            array('audio:deleted', $id));
+            'UPDATE cdr SET recordingfile = ? WHERE uniqueid = ?',
+            array('deleted', $id));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return null;
@@ -210,23 +210,23 @@ class paloSantoMonitoring {
     }
 
     function getRecordName($id){
-        $query = "SELECT userfield FROM cdr WHERE uniqueid=?";
+        $query = "SELECT recordingfile FROM cdr WHERE uniqueid=?";
         $result = $this->_DB->getFirstRowQuery($query,true,array($id));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return null;
         }
-        return $result['userfield'];
+        return $result['recordingfile'];
     }
 
     function getAudioByUniqueId($id, $namefile = NULL)
     {
         
-        $query = 'SELECT userfield FROM cdr WHERE uniqueid = ?';
+        $query = 'SELECT recordingfile FROM cdr WHERE uniqueid = ?';
         $parame = array($id);
         if (!is_null($namefile)) {
-            $query .= ' AND userfield LIKE ?';
-            $parame[] = 'audio:%'.$namefile.'%';
+            $query .= ' AND recordingfile LIKE ?';
+            $parame[] = '%'.$namefile.'%';
         }
         $result=$this->_DB->getFirstRowQuery($query, true, $parame);
         if($result==FALSE){

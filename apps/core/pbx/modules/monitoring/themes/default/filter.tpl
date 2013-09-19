@@ -6,7 +6,7 @@
 	<td width="4%" align="left" nowrap>{$date_end.INPUT}</td>
 	<td align="right">
 	{$filter_field.LABEL}:&nbsp;&nbsp;{$filter_field.INPUT}&nbsp;&nbsp;{$filter_value.INPUT}
-	  <select id="filter_value_userfield" name="filter_value_userfield" size="1" style="display:none">
+	  <select id="filter_value_recordingfile" name="filter_value_recordingfile" size="1" style="display:none">
                 <option value="incoming" {$SELECTED_1} >{$INCOMING}</option>
                 <option value="outgoing" {$SELECTED_2} >{$OUTGOING}</option>
                 <option value="queue" {$SELECTED_3} >{$QUEUE}</option>

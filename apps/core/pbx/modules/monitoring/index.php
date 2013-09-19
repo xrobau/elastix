@@ -116,8 +116,8 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
             $filter_field = "dst";
             $nameFilterField = _tr("Destination");
             break;
-        case "userfield":
-            $filter_field = "userfield";
+        case "recordingfile":
+            $filter_field = "recordingfile";
             $nameFilterField = _tr("Type");
             break;
         default:
@@ -125,15 +125,15 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
             $nameFilterField = _tr("Source");
             break;
     }
-    if($filter_field == "userfield"){
-        $filter_value     = getParameter("filter_value_userfield");
+    if($filter_field == "recordingfile"){
+        $filter_value     = getParameter("filter_value_recordingfile");
         $filter           = "";
-        $filter_userfield = $filter_value;
+        $filter_recordingfile = $filter_value;
     }
     else{
         $filter_value     = getParameter("filter_value");
         $filter           = $filter_value;
-        $filter_userfield = "";
+        $filter_recordingfile = "";
     }
     switch($filter_value){
         case "outgoing":
@@ -195,7 +195,7 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     $paramFilter = array(
        'filter_field'           => $filter_field,
        'filter_value'           => $filter,
-       'filter_value_userfield' => $filter_userfield,
+       'filter_value_recordingfile' => $filter_recordingfile,
        'date_start'             => $_POST['date_start'],
        'date_end'               => $_POST['date_end']
     );
@@ -225,8 +225,7 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
                 $arrTmp[3] = $value['dst'];
                 $arrTmp[4] = SecToHHMMSS($value['duration']);
                 $file = $value['uniqueid'];
-                    $namefile = basename($value['userfield']);
-                    $namefile = str_replace("audio:","",$namefile);
+                    $namefile = basename($value['recordingfile']);
                     if ($namefile == 'deleted') {
                         $arrTmp[5] = _tr('Deleted');
                     } else switch($namefile[0]){
@@ -294,10 +293,9 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
                 $arrTmp[4] = $dst;
                 $arrTmp[5] = "<label title='".$value['duration']." seconds' style='color:green'>".SecToHHMMSS( $value['duration'] )."</label>";
 
-                //$file = base64_encode($value['userfield']);
+                //$file = base64_encode($value['recordingfile']);
                 $file = $value['uniqueid'];
-                $namefile = basename($value['userfield']);
-                $namefile = str_replace("audio:","",$namefile);
+                $namefile = basename($value['recordingfile']);
                 if ($namefile == 'deleted') {
                     $arrTmp[6] = _tr('Deleted');
                 } else switch($namefile[0]){
@@ -339,12 +337,12 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     $smarty->assign("SHOW", _tr("Show"));
     $_POST["filter_field"]           = $filter_field;
     $_POST["filter_value"]           = $filter;
-    $_POST["filter_value_userfield"] = $filter_userfield;
+    $_POST["filter_value_recordingfile"] = $filter_recordingfile;
 
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Start Date")." = ".$paramFilter['date_start'].", "._tr("End Date")." = ".$paramFilter['date_end'], $paramFilter,  array('date_start' => date("d M Y"),'date_end' => date("d M Y")),true);
 
-    if($filter_field == "userfield"){
-        $oGrid->addFilterControl(_tr("Filter applied ")." $nameFilterField = $nameFilterUserfield", $_POST, array('filter_field' => "src",'filter_value_userfield' => "incoming"));
+    if($filter_field == "recordingfile"){
+        $oGrid->addFilterControl(_tr("Filter applied ")." $nameFilterField = $nameFilterUserfield", $_POST, array('filter_field' => "src",'filter_value_recordingfile' => "incoming"));
     }
     else{
         $oGrid->addFilterControl(_tr("Filter applied ")." $nameFilterField = $filter", $_POST, array('filter_field' => "src","filter_value" => ""));
@@ -388,7 +386,7 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
         Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
     }
-    $file = basename(str_replace('audio:', '', $filebyUid['userfield']));
+    $file = basename($filebyUid['recordingfile']);
     $path = $path_record.$file;
     if ($file == 'deleted') {
         // Specified file has been deleted
@@ -403,7 +401,11 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
             $file = basename($path);
         }
     }
-    if (!file_exists($path) || !is_file($path)) {
+
+    $path2 = $path_record.getPathFile($file);
+    if(file_exists($path) && is_file($path)) $ok_path = $path;
+    else if(file_exists($path2) && is_file($path2)) $ok_path = $path2;
+    else{
         // Failed to find specified file
         Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
@@ -423,7 +425,7 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     }
     
     // Actually open and transmit the file
-    $fp = fopen($path, 'rb');
+    $fp = fopen($ok_path, 'rb');
     if (!$fp) {
         Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
@@ -450,10 +452,8 @@ function record_format(&$pDB, $arrConf){
 
         $filebyUid   = $pMonitoring->getAudioByUniqueId($record);
 
-        $file = basename($filebyUid['userfield']);
-        $file = str_replace("audio:","",$file);
-
-        $path = $path_record.$file;
+        $file   = basename($filebyUid['recordingfile']);
+        $path   = $path_record.$file;
 
         if($file[0] == "q"){// caso de archivos de colas no se tiene el tipo de archivo gsm, wav,etc
             $arrData  = glob("$path*");
@@ -465,7 +465,13 @@ function record_format(&$pDB, $arrConf){
             return "";
         }
 
-        $name = basename($path);
+
+        $path2  = $path_record.getPathFile($file);
+        if(file_exists($path) && is_file($path)) $ok_path = $path;
+        else if(file_exists($path2) && is_file($path2)) $ok_path = $path2;
+        else return "";
+
+        $name = basename($ok_path);
 
     //$extension = strtolower(substr(strrchr($name,"."),1));
         $extension=substr(strtolower($name), -3);
@@ -533,12 +539,19 @@ function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
             $recordName = $pMonitoring->getRecordName($ID);
             $record = substr($recordName,6);
             $record = basename($record);
-            $path = $path_record.$record;
+            $path   = $path_record.$record;
+            $path2  = $path_record.getPathFile($record);
             if(is_file($path)){
                 // Archivo existe. Se borra si se puede actualizar CDR
                 if($pMonitoring->deleteRecordFile($ID))
                     unlink($path);
-            } else {
+            }
+            else if(is_file($path2)){
+                // Archivo existe. Se borra si se puede actualizar CDR
+                if($pMonitoring->deleteRecordFile($ID))
+                    unlink($path2);
+            }
+            else {
                 // Archivo no existe. Se actualiza CDR para mantener consistencia
                 $pMonitoring->deleteRecordFile($ID);
             }
@@ -561,11 +574,20 @@ function SecToHHMMSS($sec)
     return "$HH:$MM:$SS";
 }
 
+function getPathFile($file)
+{
+    $arrTokens = explode('-',$file);
+    $fyear     = substr($arrTokens[3],0,4);
+    $fmonth    = substr($arrTokens[3],4,2);
+    $fday      = substr($arrTokens[3],6,2);
+    return  "/$fyear/$fmonth/$fday/$file";
+}
+
 function createFieldFilter(){
     $arrFilter = array(
             "src"       => _tr("Source"),
             "dst"       => _tr("Destination"),
-            "userfield" => _tr("Type"),
+            "recordingfile" => _tr("Type"),
                     );
 
     $arrFormElements = array(

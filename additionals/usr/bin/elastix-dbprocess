@@ -87,7 +87,7 @@ if ($argc < 2){
    die("Please specify the action and folder path files sqls.\n Usage: {$_SERVER['argv'][0]} install /usr/share/elastix/.../db/  version sql_export\n");
 }
 
-$documentRoot="/var/www/html";
+$documentRoot="/usr/share/elastix";
 require_once("$documentRoot/libs/misc.lib.php");
 require_once("$documentRoot/configs/default.conf.php");
 load_default_timezone();

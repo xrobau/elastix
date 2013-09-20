@@ -26,7 +26,6 @@ rm -rf $RPM_BUILD_ROOT
 #mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
 bdir=%{_builddir}/%{modname}
-if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
 for FOLDER0 in $(ls -A modules/)
 do
 		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
@@ -59,7 +58,6 @@ do
 				esac
 		done
 done
-fi
 
 # Additional (module-specific) files that can be handled by RPM
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
@@ -68,11 +66,11 @@ fi
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p                             $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mkdir -p                             $RPM_BUILD_ROOT/var/www/html/libs/
-mv setup/paloSantoCDR.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
-mv setup/paloSantoTrunk.class.php    $RPM_BUILD_ROOT/var/www/html/libs/
-mv setup/paloSantoRate.class.php     $RPM_BUILD_ROOT/var/www/html/libs/
-mv setup/paloSantoQueue.class.php    $RPM_BUILD_ROOT/var/www/html/libs/
+mkdir -p                             $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mv setup/paloSantoCDR.class.php      $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mv setup/paloSantoTrunk.class.php    $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mv setup/paloSantoRate.class.php     $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mv setup/paloSantoQueue.class.php    $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mv setup/                            $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml                          $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -126,6 +124,7 @@ fi
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /usr/share/elastix/apps/*
+/usr/share/elastix/libs/*
 
 %changelog
 * Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4

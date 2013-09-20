@@ -133,6 +133,17 @@ class paloSantoExtensions{
             return $result;
     }
 
+    private function getOrganizationCode($domain){
+        $query="SELECT code FROM organization WHERE domain=?";
+        $result=$this->_DB->getFirstRowQuery($query,false,array($domain));
+        if($result==false){
+            $this->errMsg=_tr("An error has ocurred to get organization code");
+            return false;
+        }else{
+            return $result[0];
+        }
+    }
+    
     //debo devolver un arreglo que contengan los parametros de la extension, dispositivo y voicemail
     function getExtensionById($id,$domain=null){
         global $arrConf;
@@ -160,6 +171,12 @@ class paloSantoExtensions{
             $this->errMsg=$this->_DB->errMsg;
             return false;
         }elseif(count($result)>0){
+            //get organization_code
+            $org_code=$this->getOrganizationCode($result["organization_domain"]);
+            if($org_code===false){
+                return false;
+            }
+            
             $arrExtension["technology"]=$result["tech"];
             $arrExtension["exten"]=$result["exten"];
             //$arrExtension["clid_name"]=$result["clid_name"];
@@ -201,7 +218,7 @@ class paloSantoExtensions{
                                 $arrExtension["vmenvelope"]=$value;
                                 break;
                             case "context":
-                                $arrExtension["vmcontext"]=$value;
+                                $arrExtension["vmcontext"]=substr_replace($value,'',0,strlen($org_code)+1); //eliminamos la parte del string que contiene el codigo de la organization
                                 break;
                             case "emailsubject":
                                 $arrExtension["vmemailsubject"]=$value;
@@ -234,20 +251,26 @@ class paloSantoExtensions{
                 $queryDev .="codecpriority,qualifysmoothing,qualifyfreqok,qualifyfreqnotok,encryption,timezone,sendani,adsi from iax where name=? and organization_domain=?";
             }elseif($result["tech"]=="sip"){
                 $queryDev="SELECT context,dial,host,type,allow,disallow,port,qualify,accountcode,deny,permit,language,amaflags,";
-                $queryDev .="defaultip,username,mohinterpret,mohsuggest,dtmfmode,nat,allowtransfer,callgroup,pickupgroup,";
+                $queryDev .="defaultip,username,mohinterpret,mohsuggest,dtmfmode,nat,allowtransfer,namedcallgroup,namedpickupgroup,";
                 $queryDev .="mailbox,vmexten,defaultuser,useragent,directmedia,sendrpid,trustrpid,transport,callcounter,busylevel,videosupport,maxcallbitrate,";
                 $queryDev .="qualifyfreq,rtptimeout,rtpholdtimeout,rtpkeepalive,progressinband,g726nonstandard,vmexten from sip where name=?   and organization_domain=?";
             }else{
                 $this->errMsg .=_tr("Invalid Technology");
+                return false;
             }
             if(isset($queryDev)){
                 $device=$this->_DB->getFirstRowQuery($queryDev,true,array($result["device"],trim($result["organization_domain"])));
                 if($device==false){
                     $this->errMsg .=_tr("Error getting device settings").$this->_DB->errMsg;
+                    return false;
                 }else{
                     foreach($device as $key => $value){
                         if(isset($value)){
-                            $arrExtension[$key]=$value;
+                            if($key=="namedcallgroup" || $key=="namedpickupgroup" || $key=="context"){
+                                $arrExtension[$key]=substr_replace($value,'',0,strlen($org_code)+1);
+                            }else{
+                                $arrExtension[$key]=$value;
+                            }
                         }
                     }
                 }
@@ -262,6 +285,7 @@ class paloSantoExtensions{
                 $astMang=AsteriskManagerConnect($errorM);
                 if($astMang==false){
                     $this->errMsg .=$errorM;
+                    return false;
                 }else{
                     $familia="EXTUSER/".$orgTmp["code"]."/".$result["exten"];
                     $arrExtension["clid_name"]=$astMang->database_get($familia, "cidname");

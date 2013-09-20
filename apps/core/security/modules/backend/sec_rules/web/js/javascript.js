@@ -109,7 +109,7 @@ $(document).ready(function(){
 				changeRule = false;
 			}else if(p1!=""){
 			    response = statusResponse.split(':');
-				button = response[1] + "<form  method='POST' style='margin-bottom:0;' action='?menu_sec_rules'><input class='button' type='submit' name='exec' value="+response[2]+"></form>"
+				button = response[1] + "<form  method='POST' style='margin-bottom:0;' action='?menu=sec_rules'><input class='button' type='submit' name='exec' value="+response[2]+"></form>"
 				createMsg(response[4],button,response[3],response[0]);
 			    neighborrow = neighborrow.split('_');
 			    actualrow = info.split('_');
@@ -155,7 +155,7 @@ $(document).ready(function(){
 				changeRule = false;
 			}else if(arrData){
 			    response = statusResponse.split(':');
-				button = response[1] + "<form  method='POST' style='margin-bottom:0;' action='?menu_sec_rules'><input class='button' type='submit' name='exec' value="+response[2]+"></form>"
+				button = response[1] + "<form  method='POST' style='margin-bottom:0;' action='?menu=sec_rules'><input class='button' type='submit' name='exec' value="+response[2]+"></form>"
 				createMsg(response[4],button,response[3],response[0]);
 			    actualrow = info.split('_');
 			    if(direction == "up"){

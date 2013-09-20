@@ -38,8 +38,6 @@ function _moduleContent(&$smarty, $module_name)
    
 
     global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf, $arrConfModule);
 
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -186,7 +184,7 @@ function addRemovePortsUser($smarty, $module_name, $local_templates_dir, $pDB, $
         if ($bExito) {
             if ($bReglasBorradas) {
                 // Ejecutar iptables para revocar las reglas del usuario
-                require_once "modules/sec_rules/libs/paloSantoRules.class.php";
+                require_once "apps/sec_rules/libs/paloSantoRules.class.php";
                 $pr = new paloSantoRules($pDB);
                 $pr->activateRules();
             }
@@ -230,7 +228,7 @@ function addRemovePortsUser($smarty, $module_name, $local_templates_dir, $pDB, $
     $oGrid  = new paloSantoGrid($smarty);
     $oGrid->setTitle(_tr('Add/remove ports for user'));
     $oGrid->setColumns(array('', _tr('Port'), _tr('Protocol'), _tr('Details')));
-    $oGrid->addSubmitAction('apply', _tr('Apply changes'), "modules/$module_name/images/Check.png");
+    $oGrid->addSubmitAction('apply', _tr('Apply changes'), "apps/web/$module_name/images/Check.png");
     $oGrid->addComboAction('id_user', _tr('User'), $cbo_users, $id_user, 'refresh', 'submit();');
 	
     // Construcción de la vista de puertos autorizados

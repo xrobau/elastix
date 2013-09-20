@@ -1,4 +1,7 @@
 -- PBX
+
+USE elxpbx;
+
 CREATE TABLE IF NOT EXISTS globals (
   organization_domain varchar(100) NOT NULL,
   variable varchar(255) NOT NULL,
@@ -43,6 +46,8 @@ insert into sip_general (property_name,property_val,cathegory) values ('default_
 insert into sip_general (property_name,property_val,cathegory) values ('allowguest','no','general');
 insert into sip_general (property_name,property_val,cathegory) values ('allowoverlap','no','general');
 insert into sip_general (property_name,property_val,cathegory) values ('allowtransfer','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('realm','asterisk','general');
+insert into sip_general (property_name,property_val,cathegory) values ('transport','udp,ws,wss','general');
 insert into sip_general (property_name,property_val,cathegory) values ('srvlookup','yes','general');
 insert into sip_general (property_name,property_val,cathegory) values ('maxexpiry','3600','general');
 insert into sip_general (property_name,property_val,cathegory) values ('minexpiry','60','general');
@@ -70,13 +75,13 @@ insert into sip_general (property_name,property_val,cathegory) values ('vmexten'
 insert into sip_general (property_name,property_val,cathegory) values ('language','en','general');
 insert into sip_general (property_name,property_val,cathegory) values ('contactdeny','','general');
 insert into sip_general (property_name,property_val,cathegory) values ('contactpermit','','general');
+insert into sip_general (property_name,property_val,cathegory) values ('contactacl','','general');
 insert into sip_general (property_name,property_val,cathegory) values ('disallow','all','general');
 insert into sip_general (property_name,property_val,cathegory) values ('allow','ulaw,alaw,gsm','general');
 insert into sip_general (property_name,property_val,cathegory) values ('g726nonstandard','en','general');
 insert into sip_general (property_name,property_val,cathegory) values ('preferred_codec_only','','general');
-insert into sip_general (property_name,property_val,cathegory) values ('nat','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('nat','force_rport,comedia','general'); -- equivalent  of depreced nat=yes
 insert into sip_general (property_name,property_val,cathegory) values ('nat_type','public','general');
-
 
 -- seccion general archivo iax.conf
 -- editable solo por el superadmin
@@ -199,10 +204,16 @@ CREATE TABLE IF NOT EXISTS sip_settings (
       context varchar(40) DEFAULT 'from-internal',
       deny varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
       permit varchar(40) DEFAULT "0.0.0.0/0.0.0.0",
-      transport enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
+      acl varchar(200) DEFAULT NULL,
+      `contactpermit` varchar(40) DEFAULT NULL,
+      `contactdeny` varchar(40) DEFAULT NULL,
+      `contactacl` varchar(200) DEFAULT NULL,
+      transport varchar(40) DEFAULT NULL,
       dtmfmode enum('rfc2833','info','shortinfo','inband','auto') DEFAULT 'auto',
-      directmedia enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT 'no',
-      nat enum('yes','no','force_rport','comedia') DEFAULT NULL,
+      directmedia enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT NULL,
+      directmediapermit varchar(200) DEFAULT NULL,
+      directmediaacl varchar(200) DEFAULT NULL,
+      nat varchar(100) DEFAULT NULL,
       language varchar(40) DEFAULT NULL,
       tonezone varchar(3) DEFAULT NULL,
       disallow varchar(40) DEFAULT 'all',
@@ -251,6 +262,10 @@ CREATE TABLE IF NOT EXISTS sip_settings (
       g726nonstandard enum('yes','no') DEFAULT NULL,
       ignoresdpversion enum('yes','no') DEFAULT NULL,
       allowtransfer enum('yes','no') DEFAULT NULL,
+      `subscribecontext` varchar(200) DEFAULT NULL,
+      `template` varchar(200) DEFAULT NULL,
+      `keepalive` varchar(200) DEFAULT NULL,
+      `t38pt_usertpsource` enum('yes','no') DEFAULT NULL,
       PRIMARY KEY (organization_domain),
       INDEX organization_domain (organization_domain),
       FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE
@@ -366,18 +381,25 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `callingpres` enum('allowed_not_screened','allowed_passed_screen','allowed_failed_screen','allowed','prohib_not_screened','prohib_passed_screen','prohib_failed_screen','prohib') DEFAULT NULL,
       `deny` varchar(40) DEFAULT NULL,
       `permit` varchar(40) DEFAULT NULL,
+      `acl` varchar(200) DEFAULT NULL,
       `secret` varchar(40) DEFAULT NULL,
       `md5secret` varchar(40) DEFAULT NULL,
       `remotesecret` varchar(40) DEFAULT NULL,
-      `transport` enum('udp','tcp','udp,tcp','tcp,udp') DEFAULT NULL,
+      `transport` varchar(40) DEFAULT NULL,
       `host` varchar(40) NOT NULL DEFAULT 'dynamic',
-      `nat` enum('yes','no','force_rport','comedia') DEFAULT NULL,
+      `nat` varchar(100) DEFAULT NULL,
       `type` enum('friend','user','peer') DEFAULT 'friend',
       `accountcode` varchar(40) DEFAULT NULL,
       `amaflags` varchar(40) DEFAULT NULL,
       `callgroup` varchar(40) DEFAULT NULL,
+      `pickupgroup` varchar(40) DEFAULT NULL,
+      `namedcallgroup` varchar(200) DEFAULT NULL,
+      `namedpickupgroup` varchar(200) DEFAULT NULL,
       `callerid` varchar(40) DEFAULT NULL,
       `directmedia` enum('yes','no','nonat','update','outgoing','update,nonat') DEFAULT NULL,
+      `directmediapermit` varchar(200) DEFAULT NULL,
+      `directmediaacl` varchar(200) DEFAULT NULL,
+      `description` varchar(200) DEFAULT NULL,
       `defaultip` varchar(40) DEFAULT NULL,
       `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT NULL,
       `fromuser` varchar(40) DEFAULT NULL,
@@ -386,7 +408,6 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `language` varchar(40) DEFAULT NULL,
       `tonezone` varchar(3) DEFAULT NULL,
       `mailbox` varchar(40) DEFAULT NULL,
-      `pickupgroup` varchar(40) DEFAULT NULL,
       `qualify` char(3) DEFAULT 'yes',
       `regexten` varchar(40) DEFAULT NULL,
       `rtptimeout` int(11) DEFAULT NULL,
@@ -430,6 +451,7 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `constantssrc` enum('yes','no') DEFAULT NULL,
       `contactpermit` varchar(40) DEFAULT NULL,
       `contactdeny` varchar(40) DEFAULT NULL,
+      `contactacl` varchar(200) DEFAULT NULL,
       `usereqphone` enum('yes','no') DEFAULT NULL,
       `textsupport` enum('yes','no') DEFAULT NULL,
       `faxdetect` enum('yes','no') DEFAULT NULL,
@@ -447,6 +469,10 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `rtpkeepalive` int(11) DEFAULT NULL,
       `g726nonstandard` enum('yes','no') DEFAULT NULL,
       `ignoresdpversion` enum('yes','no') DEFAULT NULL,
+      `subscribecontext` varchar(200) DEFAULT NULL,
+      `template` varchar(200) DEFAULT NULL,
+      `keepalive` varchar(200) DEFAULT NULL,
+      `t38pt_usertpsource` enum('yes','no') DEFAULT NULL,
       `organization_domain` varchar(100) NOT NULL,
       PRIMARY KEY (`id`),
       UNIQUE KEY `name` (`name`),
@@ -509,6 +535,8 @@ CREATE TABLE `iax` (
   `setvar` varchar(200) NULL, 
   `permit` varchar(40) DEFAULT NULL,
   `deny` varchar(40) DEFAULT NULL,
+  `acl` varchar(200) DEFAULT NULL,
+  `maxcallnumbers` varchar(40) DEFAULT NULL,
   PRIMARY KEY  (`name`),
   FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
   INDEX name (name, host),

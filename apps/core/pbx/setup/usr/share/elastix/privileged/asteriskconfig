@@ -183,7 +183,7 @@ function createOrganizationAsterisk($domain){
         return false;
     }
     
-    if(createFeaturesFile()==false){
+    if(createFeaturesFile($pDB)==false){
         fprintf(STDERR, "ERR:Error trying set Features Codes\n");
         return false;
     }
@@ -947,12 +947,11 @@ function generateDialPlan($domain,$reload=false){
     }
 }
 
-function createFeaturesFile(){
+function createFeaturesFile(&$pDB){
     $file="/etc/asterisk/features.conf";
     
-    //si no existe el archivo features.conf este se crea
-    if(is_file($file)===false){
-            $contenido = <<<FEATURES_CONFIG
+    //se crea el archivo features.conf
+    $contenido = <<<FEATURES_CONFIG
 [general]
 #include features_general.conf
 #include features_general_custom.conf
@@ -967,15 +966,14 @@ function createFeaturesFile(){
 FEATURES_CONFIG;
 
     if(file_put_contents("$file", $contenido)===false){
-            fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
-            return false;
-        }else{
-            changeFilePermission($file);
-        }
+        fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);
+        return false;
+    }else{
+        changeFilePermission($file);
     }
     
-    if(createFeatureMapfile()){
-        if(createFeatureGeneralfile())
+    if(createFeatureMapfile($pDB)){
+        if(createFeatureGeneralfile($pDB))
             return createFeatureApplicationMapfile();
         else
             return false;
@@ -983,9 +981,7 @@ FEATURES_CONFIG;
         return false;
 }
 
-function createFeatureMapfile(){
-    $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-    
+function createFeatureMapfile(&$pDB){
     $contenido="";
     $file="/etc/asterisk/features_map.conf";
     $query="SELECT name, default_code FROM features_code_settings WHERE (name=? or name=? or name=? or name=?) and estado=?";
@@ -1037,9 +1033,26 @@ function createFeatureMapfile(){
 //TODO
 //falta ver que se va ha hacer con el asunto de la llamadas parqueadas
 //en caso de existir debe definirse aqui el numero de la estension
-function createFeatureGeneralfile(){
+function createFeatureGeneralfile(&$pDB){
     $file="/etc/asterisk/features_general.conf";
     $contenido="";
+    
+    $file="/etc/asterisk/features_map.conf";
+    $query="SELECT name, default_code FROM features_code_settings WHERE name=?";
+    $result=$pDB->fetchTable($query,true,array("pickup"));
+    if($result===false){
+        fprintf(STDERR, "ERR: Database connection globals_settings - %s\n", $pDB->errMsg);
+        return false;
+    }else{
+        foreach($result as $value){
+            switch ($value["name"]) {
+                case "pickup":
+                    $feature="pickup";
+                    break;
+            }
+            $contenido .= $feature."=".$value["default_code"]."\n";
+        }
+    }
     
     if(file_put_contents("$file", $contenido)===false){
         fprintf(STDERR, "ERR: Couldn't be written file - %s\n", $file);

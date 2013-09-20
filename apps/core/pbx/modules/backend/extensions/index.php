@@ -293,14 +293,7 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 
             if(getParameter("save_edit"))
                 $arrExten=$_POST;
-            else{
-                if(isset($arrExten["context"])){
-                    $arrExten["context"]=substr($arrExten["context"],16);
-                }
-                if(isset($arrExten["vmcontext"])){
-                    $arrExten["vmcontext"]=substr($arrExten["vmcontext"],16);
-                }
-            }
+            
 
             $smarty->assign("DISPLAY_VM","style='display: none;'");
             if(isset($arrExten["create_vm"])){
@@ -489,6 +482,7 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
                     $arrProp["vmx_extension_1"]=getParameter("vmx_extension_1");
                     $arrProp["vmx_extension_2"]=getParameter("vmx_extension_2");
                     $arrProp["vmx_operator"]=getParameter("vmx_operator");
+                    
                 }
             }else{
                 $arrProp["create_vm"]="no";
@@ -667,7 +661,7 @@ function propersParamByTech($tech){
         $arrProp['allowtransfer']=getParameter("allowtransfer");
         $arrProp['deny']=getParameter("deny");
         $arrProp['permit']=getParameter("permit");
-        $arrProp['mailbox']=getParameter("mailbox");
+        //$arrProp['mailbox']=getParameter("mailbox");
         $arrProp["vmexten"]=getParameter("vmexten");
         $arrProp['username']=getParameter("username");
         $arrProp['amaflags']=getParameter("amaflags");
@@ -690,6 +684,8 @@ function propersParamByTech($tech){
         $arrProp['rtpkeepalive']=getParameter("rtpkeepalive");
         $arrProp['progressinband']=getParameter("progressinband");
         $arrProp['g726nonstandard']=getParameter("g726nonstandard");
+        $arrProp['namedcallgroup']=getParameter("namedcallgroup");
+        $arrProp['namedpickupgroup']=getParameter("namedpickupgroup");
     }else{
         $arrProp["context"]=getParameter("context");
         $arrProp['host']=getParameter("host");
@@ -792,9 +788,6 @@ function createFieldForm($tech=null)
     $arrTech=array("sip"=>strtoupper("Sip"),"iax2"=>strtoupper("Iax2"));
     $arrRings=range("1","120");
     $arrRings[""]=_tr("Default");
-    /*
-    array(""=>_tr("Default"),"1"=>1,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"11"=>11,"12"=>12,"13"=>13,"14"=>14,"15"=>15,"16"=>16,"17"=>17,"18"=>18,"19"=>19,"20"=>20,"21"=>21,"22"=>22,"23"=>23,"24"=>24,"25"=>25,"26"=>26,"27"=>27,"28"=>28,"29"=>29,"30"=>30,"31"=>31,"32"=>32,"33"=>33,"34"=>34,"35"=>35,"36"=>36,"37"=>37,"38"=>38,"39"=>39,"40"=>40,"41"=>41,"42"=>42,"43"=>43,"44"=>44,"45"=>45,"46"=>46,"47"=>47,"48"=>48,"49"=>49,"50"=>50,"51"=>51,"52"=>52,"53"=>53,"54"=>54,"55"=>55,"56"=>56,"57"=>57,"58"=>58,"59"=>59,"60"=>60,"61"=>61,"62"=>62,"63"=>63,"64"=>64,"65"=>65,"66"=>66,"67"=>67,"68"=>68,"69"=>69,"70"=>70,"71"=>71,"72"=>72,"73"=>73,"74"=>74,"75"=>75,"76"=>76,"77"=>77,"78"=>78,"79"=>79,"80"=>80,"81"=>81,"82"=>82,"83"=>83,"84"=>84,"85"=>85,"86"=>86,"87"=>87,"88"=>88,"89"=>89,"90"=>90,"91"=>91,"92"=>92,"93"=>93,"94"=>94,"95"=>95,"96"=>96,"97"=>97,"98"=>98,"99"=>99,"100"=>100,"101"=>101,"102"=>102,"103"=>103,"104"=>104,"105"=>105,"106"=>106,"107"=>107,"108"=>108,"109"=>109,"
-    110"=>110,"111"=>111,"112"=>112,"113"=>113,"114"=>114,"115"=>115,"116"=>116,"117"=>117,"118"=>118,"119"=>119,"120"=>120);*/
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrWait=array("no"=>_tr("Disabled"),"yes"=>_tr("Enabled"));
@@ -1008,7 +1001,6 @@ function createFieldForm($tech=null)
 }
 
 function createSipForm(){
-    $arrNat=array("noset"=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
@@ -1065,9 +1057,10 @@ function createSipForm(){
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "nat"  => array("LABEL"                  => _tr("nat"),
+                                                "DESCRIPTION"            => _tr("Address NAT-related issues in incoming SIP or media sessions.\nnat = no; Use rport if the remote side says to use it.\nnat = force_rport ; Pretend there was an rport parameter even if there wasn't.\nnat = comedia; Use rport if the remote side says to use it and perform comedia RTP handling.\nnat = auto_force_rport  ; Set the force_rport option if Asterisk detects NAT (default)\nnat = auto_comedia      ; Set the comedia option if Asterisk detects NAT\nNAT settings are a combinable list of options.\n The equivalent of the deprecated nat=yes is nat=force_rport,comedia.\nNot set this field if you do not know what are you doing"),
                                                 "REQUIRED"               => "no",
-                                                "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => $arrNat,
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => '',
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "dtmfmode"   => array( "LABEL"                  => _tr("dtmfmode"),
@@ -1100,7 +1093,7 @@ function createSipForm(){
                             "mailbox"   => array( "LABEL"                  => _tr("mailbox"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px;","disabled"=>"disabled"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "vmexten" => array("LABEL"             => _tr("vmexten"),
@@ -1218,6 +1211,20 @@ function createSipForm(){
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "g726nonstandard" => array("LABEL"             => _tr("g726nonstandard"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "namedcallgroup" => array("LABEL"             => _tr("Named Call Group"),
+                                                    "DESCRIPTION"            => _tr("It works like callgroup parameter. The different is that parameter is not limit to number from 0 to 63"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "namedpickupgroup" => array("LABEL"             => _tr("Named PickUp Group"),
+                                                    "DESCRIPTION"            => _tr("It works like pickupgroup parameter. The different is that parameter is not limit to number from 0 to 63"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),

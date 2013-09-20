@@ -437,7 +437,6 @@ function createFieldForm($arrTone,$arrMOH,$arrZoneMessage)
 }
 
 function createSipForm($arrMOH){
-    $arrNat=array("noset"=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrCallingpres=array(""=>"",'allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
     $arrYesNo=array("yes"=>"yes","no"=>"no");
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
@@ -493,9 +492,10 @@ function createSipForm($arrMOH){
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_nat"  => array("LABEL"                  => _tr("nat"),
+                                                "DESCRIPTION"            => _tr("Address NAT-related issues in incoming SIP or media sessions.\nnat = no; Use rport if the remote side says to use it.\nnat = force_rport ; Pretend there was an rport parameter even if there wasn't.\nnat = comedia; Use rport if the remote side says to use it and perform comedia RTP handling.\nnat = auto_force_rport  ; Set the force_rport option if Asterisk detects NAT (default)\nnat = auto_comedia      ; Set the comedia option if Asterisk detects NAT\nNAT settings are a combinable list of options.\n The equivalent of the deprecated nat=yes is nat=force_rport,comedia."),
                                                 "REQUIRED"               => "no",
-                                                "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => $arrNat,
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => "",
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_dtmfmode"   => array( "LABEL"                  => _tr("dtmfmode"),

@@ -409,7 +409,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
                 $actions=array_diff($actions,array('change_org_status','create_org','delete_org','edit_did'));
             }elseif($resource=="dashboard"){
                 $actions=array('access');
-            }elseif($resource='cdrreport'){
+            }elseif($resource=='cdrreport'){
                 $actions=array('access','export');
             }
             

@@ -717,7 +717,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
             $contextoCF->errMsg="app-cf-unavailable-off. Error: ".$contextoCF->errMsg;
         }else{
             $contextoCF->arrExtensions=$arrCF;
-            $arrFromInt[]["name"]="app-cf-unavailable-on";
+            $arrFromInt[]["name"]="app-cf-unavailable-off";
         }
 
         return array($contextoCF);
@@ -776,9 +776,9 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         if(is_array($result)){
             foreach($result as $value){
                 $offset=$length+strlen($value["exten"]);
-                $arrCFhint[]=new paloExtensions($fcode.$value["exten"], new ext_goto("1",$fcode,$this->code."-app-cf-toggle"));
+                $arrCFhint[]=new paloExtensions($fcode.$value["exten"], new ext_goto("1",$fcode,$this->code."-app-cf-toggle"),"1");
                 $arrCFhint[]=new paloExtensions($fcode.$value["exten"], new extension("Custom:DEVCF".$value['device']),"hint");
-                $arrCFhint[]=new paloExtensions('_'.$fcode.$value["exten"].".", new ext_set("toext",'${EXTEN:'.$offset.'}'));
+                $arrCFhint[]=new paloExtensions('_'.$fcode.$value["exten"].".", new ext_set("toext",'${EXTEN:'.$offset.'}'),"1");
                 $arrCFhint[]=new paloExtensions('_'.$fcode.$value["exten"].".", new ext_goto("setdirect",$fcode,$this->code."-app-cf-toggle"));
             }
             $contextoCFhint=new paloContexto($this->code,"ext-cf-hints");
@@ -1040,7 +1040,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrhint=array();
         if(is_array($result)){
             foreach($result as $value){
-                $arrhint[]=new paloExtensions($fcode.$value["exten"], new ext_goto("1",$fcode,$this->code."-app-dnd-toggle"));
+                $arrhint[]=new paloExtensions($fcode.$value["exten"], new ext_goto("1",$fcode,$this->code."-app-dnd-toggle"),'1');
                 $arrhint[]=new paloExtensions($fcode.$value["exten"], new extension("Custom:DEVDND".$value['device']),"hint");
             }
             $contextohint=new paloContexto($this->code,"ext-dnd-hints");

@@ -33,13 +33,8 @@ include_once "libs/paloSantoDB.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-     
-
     //global variables
     global $arrConf;
-    global $arrConfModule;
-    
-    $arrConf = array_merge($arrConf,$arrConfModule);
    
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -73,14 +68,22 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
+    global $arrPermission;
     $pPuertos = new paloSantoPortService($pDB);
 
     $field_type = getParameter("filter_type");
     $field_pattern = getParameter("filter_txt");
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
-    $oGrid->addNew("new",_tr("Define Port"));
-    $oGrid->deleteList("Are you sure you wish to delete the port(s).?","delete",_tr("Delete"));
+    
+    //permission
+    $define_port=in_array("define_port",$arrPermission);
+    $delete_port=in_array("delete_port",$arrPermission);
+    
+    if($define_port)
+        $oGrid->addNew("new",_tr("Define Port"));
+    if($delete_port)
+        $oGrid->deleteList("Are you sure you wish to delete the port(s).?","delete",_tr("Delete"));
 
     $totalPuertos = $pPuertos->ObtainNumPuertos($field_type, $field_pattern);
 
@@ -106,19 +109,21 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $oGrid->setColumns($arrColumns);
     if( is_array($arrResult) && $total>0 ){
         foreach($arrResult as $key => $value){
-            $arrTmp[0] = "<input type='checkbox' name='".$value['id']."' id='".$value['id']."'>";
-            $arrTmp[1] = $value['name'];
-            $arrTmp[2] = $value['protocol'];
+            $arrTmp=array();
+            if($delete_port)
+                $arrTmp[] = "<input type='checkbox' name='".$value['id']."' id='".$value['id']."'>";
+            $arrTmp[] = $value['name'];
+            $arrTmp[] = $value['protocol'];
             if($value['protocol'] == "TCP" || $value['protocol'] == "UDP"){
                 $port = $value['details'];
-                $arrTmp[3] = ( stripos($port,":") === false ) ? _tr('Port')."  ".$value['details'] : _tr('Ports')."  ".$value['details'];
+                $arrTmp[] = ( stripos($port,":") === false ) ? _tr('Port')."  ".$value['details'] : _tr('Ports')."  ".$value['details'];
             }elseif($value['protocol'] == "ICMP"){
                 $arr = explode(":",$value['details']);
                 if(isset($arr[1]))
-                    $arrTmp[3] = "Type: ".$arr[0]." Code: ".$arr[1];
+                    $arrTmp[] = "Type: ".$arr[0]." Code: ".$arr[1];
             }else
-                $arrTmp[3] = "Protocol Number: ".$value['details'];
-            $arrTmp[4] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>"._tr('View')."</a>";
+                $arrTmp[] = "Protocol Number: ".$value['details'];
+            $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>"._tr('View')."</a>";
             $arrData[] = $arrTmp;
         }
     }
@@ -174,12 +179,13 @@ function createFieldForm()
 
 function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $action)
 {
+    global $arrPermission;
     $arrFormNew = createFieldFormNew();
     $oForm = new paloForm($smarty, $arrFormNew);
     $titulo = "";
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    $smarty->assign("icon", "../../../../../var/www/html/admin/web/_common/images/list.png");
+    $smarty->assign("icon", "../web/_common/images/list.png");
     $protocol = getParameter("protocol");
     
     if( $action == 'new' )
@@ -285,6 +291,9 @@ function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
      
     }
     
+    //permission
+    $smarty->assign("NEW_PORT",in_array("define_port",$arrPermission));
+    $smarty->assign("EDIT_PORT",in_array("edit_port",$arrPermission));
     $smarty->assign("MODE", $action);
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $titulo, $_POST);
@@ -354,6 +363,7 @@ function createFieldFormNew()
 
 function savePuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
+    global $arrPermission;
     $arrFormNew = createFieldFormNew();
     $oForm      = new paloForm($smarty, $arrFormNew);
     $mode       = getParameter('mode');
@@ -406,6 +416,11 @@ function savePuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         return NewViewPuerto($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $mode);
     }
     else if($mode == 'new'){
+        if(!in_array("define_port",$arrPermission)){
+            $smarty->assign("mb_title", "Error");
+            $smarty->assign("mb_message", "You are not authorized to perform this action");
+            return NewViewPuerto($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $mode);
+        }
         if($oPalo->savePuertos($name, $protocol, $port, $type, $code, $protocol_number, $comment)){
             $smarty->assign("mb_title", _tr("Message"));
             $smarty->assign("mb_message", _tr("Save correctly"));
@@ -415,8 +430,12 @@ function savePuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
             $smarty->assign("mb_message", $oPalo->errMsg);
             return NewViewPuerto($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $mode);
         }
-    }
-    else{//edit
+    }else{//edit
+        if(!in_array("edit_port",$arrPermission)){
+            $smarty->assign("mb_title", "Error");
+            $smarty->assign("mb_message", "You are not authorized to perform this action");
+            return NewViewPuerto($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $mode);
+        }
         if($oPalo->updatePuertos($id_except, $name, $protocol, $port, $type, $code, $protocol_number, $comment, $desactivated)){
 	    $msg = _tr("Update correctly");
 	    if($desactivated)
@@ -464,20 +483,17 @@ function deletePuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 
 function getAction()
 {
-    if(getParameter("show")) //Get parameter by POST (submit)
-        return "show";
+    global $arrPermission;
     if(getParameter("delete")) //Get parameter by POST (submit)
-        return "delete";
+        return (in_array("delete_port",$arrPermission))?"delete":"report";
     else if(getParameter("new"))
-        return "new";
+        return (in_array("define_port",$arrPermission))?"new":"report";
     else if(getParameter("save"))
         return "save";
     else if(getParameter("edit"))
-        return "edit";
+        return (in_array("edit_port",$arrPermission))?"edit":"report";
     else if(getParameter("cancel"))
         return "cancel";
-    else if(getParameter("action")=="show") //Get parameter by GET (command pattern, links)
-        return "show";
     else if(getParameter("action")=="view") //Get parameter by GET (command pattern, links)
         return "view";
     else

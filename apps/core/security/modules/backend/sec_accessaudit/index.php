@@ -36,9 +36,6 @@ function _moduleContent(&$smarty, $module_name)
 
     //global variables
     global $arrConf;
-    global $arrConfModule;
-    global $arrLangModule;
-    $arrConf = array_merge($arrConf,$arrConfModule);
     
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -57,6 +54,7 @@ function _moduleContent(&$smarty, $module_name)
 
 function report_AccessAudit($smarty, $module_name, $local_templates_dir)
 {
+    global $arrPermission;
     $pAccessLogs   = new paloSantoAccessaudit();
     $listaFechas     = $pAccessLogs->astLog->listarFechas();
     $arrFormElements = createFieldFilter($listaFechas);
@@ -85,9 +83,13 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     $oGrid->setTitle(_tr("Audit"));
     $oGrid->setIcon("web/apps/$module_name/images/security_audit.png");
     $oGrid->pagingShow(true); // show paging section.
-    $oGrid->enableExport();   // enable export.
+    if(in_array("export",$arrPermission))
+        $oGrid->enableExport();   // enable export.
     $oGrid->setNameFile_Export(_tr("Access audit"));
-    $isExport = $oGrid->isExportAction();
+    if(in_array("export",$arrPermission))
+        $isExport = $oGrid->isExportAction();
+    else
+        $isExport = false;
 
     $total_datos = $pAccessLogs->ObtainNumAccessLogs($field_pattern);
     $totalBytes  = $total_datos[0];

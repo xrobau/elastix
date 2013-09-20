@@ -146,7 +146,6 @@
                     <td nowrap>{$requirecalltoken.LABEL}:</td>
                     <td>{$requirecalltoken.INPUT}</td>
                 </tr>
-                {if $mode eq 'edit'}
                 <tr>
                     <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
                 </tr>
@@ -198,7 +197,6 @@
                     <td nowrap>{$adsi.LABEL}:</td>
                     <td>{$adsi.INPUT}</td>
                 </tr>
-               {/if}
             </table>
         </div>
         {else}
@@ -241,6 +239,12 @@
                     <td>{$vmexten.INPUT}</td>
                 </tr>
                 <tr class="sip_settings">
+                    <td nowrap>{$namedcallgroup.LABEL}: </td>
+                    <td>{$namedcallgroup.INPUT}</td>
+                    <td nowrap>{$namedpickupgroup.LABEL}: </td>
+                    <td>{$namedpickupgroup.INPUT}</td>
+                </tr>
+                <tr class="sip_settings">
                     <td nowrap>{$allowtransfer.LABEL}: </td>
                     <td>{$allowtransfer.INPUT}</td>
                     <td nowrap>{$directmedia.LABEL}: </td>
@@ -256,7 +260,6 @@
                     <td nowrap>{$transport.LABEL}: </td>
                     <td>{$transport.INPUT}</td>
                 </tr>
-             {if $mode eq 'edit'}
                 <tr>
                     <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
                 </tr>
@@ -312,7 +315,6 @@
                     <td nowrap>{$progressinband.LABEL}:</td>
                     <td>{$progressinband.INPUT}</td>
                 </tr>
-              {/if}
             </table>
         </div>
         {/if}

@@ -148,12 +148,7 @@ class paloSantoTrunk extends paloAsteriskDB{
             
             //obtenemos los detalles del peer si la truncal es de tipo sip o iax2
             if($tech=="sip" || $tech=="iax"){
-                if($arrTrunk["tech"]=="sip"){
-                    $queryT="insecure,nat,dtmfmode,fromuser,fromdomain,sendrpid,directmedia,useragent,videosupport,maxcallbitrate,qualifyfreq,rtptimeout,rtpholdtimeout,rtpkeepalive";
-                }else{
-                    $queryT="auth,trunk,trunkfreq,trunktimestamps,sendani,adsi,requirecalltoken,encryption,jitterbuffer,forcejitterbuffer,codecpriority,qualifysmoothing,qualifyfreqok,qualifyfreqnotok";
-                }
-                $query="SELECT context,name,type,username,host,qualify,disallow,allow,amaflags,deny,permit, $queryT from ".$tech." where name=?";
+                $query="SELECT * from $tech where name=?";
                 $result=$this->_DB->getFirstRowQuery($query,true,array($arrTrunk["channelid"]));
                 if($result==false){
                     $this->errMsg=_tr("Error getting peer details. ").$this->_DB->errMsg;

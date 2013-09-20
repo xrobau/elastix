@@ -727,40 +727,53 @@ function getSipIaxParam($tech,$edit=false){
     $arrProp["amaflags"]=getParameter("amaflags");
     $arrProp["deny"]=getParameter("deny");
     $arrProp["permit"]=getParameter("permit");
+    $arrProp["acl"]=getParameter("acl");
     if($tech=="sip"){
         $arrProp["insecure"]=getParameter("insecure");
         $arrProp["nat"]=getParameter("nat");
         $arrProp["dtmfmode"]=getParameter("dtmfmode");
-        if($edit){
-            $arrProp["fromuser"]=getParameter("fromuser");
-            $arrProp["fromdomain"]=getParameter("fromdomain");
-            $arrProp["sendrpid"]=getParameter("sendrpid");
-            $arrProp["directmedia"]=getParameter("directmedia");
-            $arrProp["useragent"]=getParameter("useragent");
-            $arrProp["videosupport"]=getParameter("videosupport");
-            $arrProp["maxcallbitrate"]=getParameter("maxcallbitrate");
-            $arrProp["qualifyfreq"]=getParameter("qualifyfreq");
-            $arrProp["rtptimeout"]=getParameter("rtptimeout");
-            $arrProp["rtpholdtimeout"]=getParameter("rtpholdtimeout");
-            $arrProp["rtpkeepalive"]=getParameter("rtpkeepalive");
-        }
+        $arrProp["fromuser"]=getParameter("fromuser");
+        $arrProp["fromdomain"]=getParameter("fromdomain");
+        $arrProp["sendrpid"]=getParameter("sendrpid");
+        $arrProp["directmedia"]=getParameter("directmedia");
+        $arrProp["useragent"]=getParameter("useragent");
+        $arrProp["videosupport"]=getParameter("videosupport");
+        $arrProp["maxcallbitrate"]=getParameter("maxcallbitrate");
+        $arrProp["qualifyfreq"]=getParameter("qualifyfreq");
+        $arrProp["rtptimeout"]=getParameter("rtptimeout");
+        $arrProp["rtpholdtimeout"]=getParameter("rtpholdtimeout");
+        $arrProp["keepalive"]=getParameter("keepalive");
+        $arrProp["contactdeny"]=getParameter("contactdeny");
+        $arrProp["contactpermit"]=getParameter("contactpermit");
+        $arrProp["contactacl"]=getParameter("contactacl");
+        $arrProp["callcounter"]=getParameter("callcounter");
+        $arrProp["busylevel"]=getParameter("busylevel");
+        $arrProp["allowoverlap"]=getParameter("allowoverlap");
+        $arrProp["allowsubscribe"]=getParameter("allowsubscribe");
+        $arrProp["allowtransfer"]=getParameter("allowtransfer");
+        $arrProp["defaultip"]=getParameter("defaultip");
+        $arrProp["defaultuser"]=getParameter("defaultuser");
+        $arrProp["transport"]=getParameter("transport");
+        $arrProp["outboundproxy"]=getParameter("outboundproxy");
     }elseif($tech=="iax2"){
         $arrProp["auth"]=getParameter("auth");
         $arrProp["trunk"]=getParameter("trunk");
-        if($edit){
-            $arrProp["trunkfreq"]=getParameter("trunkfreq");
-            $arrProp["trunktimestamps"]=getParameter("trunktimestamps");
-            $arrProp["sendani"]=getParameter("sendani");
-            $arrProp["adsi"]=getParameter("adsi");
-            $arrProp["requirecalltoken"]=getParameter("requirecalltoken");
-            $arrProp["encryption"]=getParameter("encryption");
-            $arrProp["jitterbuffer"]=getParameter("jitterbuffer");
-            $arrProp["forcejitterbuffer"]=getParameter("forcejitterbuffer");
-            $arrProp["codecpriority"]=getParameter("codecpriority");
-            $arrProp["qualifysmoothing"]=getParameter("qualifysmoothing");
-            $arrProp["qualifyfreqok"]=getParameter("qualifyfreqok");
-            $arrProp["qualifyfreqnotok"]=getParameter("qualifyfreqnotok");
-        }
+        $arrProp["trunkfreq"]=getParameter("trunkfreq");
+        $arrProp["trunktimestamps"]=getParameter("trunktimestamps");
+        $arrProp["sendani"]=getParameter("sendani");
+        $arrProp["adsi"]=getParameter("adsi");
+        $arrProp["requirecalltoken"]=getParameter("requirecalltoken");
+        $arrProp["encryption"]=getParameter("encryption");
+        $arrProp["jitterbuffer"]=getParameter("jitterbuffer");
+        $arrProp["forcejitterbuffer"]=getParameter("forcejitterbuffer");
+        $arrProp["codecpriority"]=getParameter("codecpriority");
+        $arrProp["qualifysmoothing"]=getParameter("qualifysmoothing");
+        $arrProp["qualifyfreqok"]=getParameter("qualifyfreqok");
+        $arrProp["qualifyfreqnotok"]=getParameter("qualifyfreqnotok");
+        $arrProp["transfer"]=getParameter("transfer");
+        $arrProp["defaultip"]=getParameter("defaultip");
+        $arrProp["maxcallnumbers"]=getParameter("defaultip");
+        $arrProp["inkeys"]=getParameter("inkeys");
     }
     return $arrProp;
 }
@@ -857,7 +870,6 @@ function createFieldForm($tech,$arrOrgz)
     $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
     $arrNat=array("noset"=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrType=array("friend"=>"friend","peer"=>"peer");
-    $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
     $arrPeriod=array(5=>"5 min",10=>"10 min",15=>"15 min",30=>"30 min",45=>"45",60=>"1 hora",120=>"2 horas",180=>"3 horas",240=>"4 horas",300=>"5 horas",360=>"6 horas",600=>"10 horas",720=>"12 horas",900=>"15 horas",1200=>"20 horas",1440=>"1 dia");
     
     $arrStatus=array('off'=>_tr('Enabled'),'on'=>_tr('Disabled'));
@@ -1022,6 +1034,12 @@ function createFieldForm($tech,$arrOrgz)
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => "");
+        $arrFormElements["acl"] =  array("LABEL"                  => _tr("acl"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => "");
         $arrFormElements["amaflags"] =  array("LABEL"                  => _tr("amaflags"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
@@ -1029,39 +1047,9 @@ function createFieldForm($tech,$arrOrgz)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => "");
         if($tech=="sip"){
-        $arrFormElements["insecure"] =  array("LABEL"                  => _tr("insecure"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("invite"=>"invite","port"=>"port","port,invite"=>"port,invite"),
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(invite|port|port,invite){1}$");
-        $arrFormElements["nat"] =  array("LABEL"                  => _tr("nat"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrNat,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["dtmfmode"] =  array("LABEL"                  => _tr("dtmfmode"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrDtmf,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements=array_merge($arrFormElements,createSipFrom());
+            $arrFormElements=array_merge($arrFormElements,createSipFrom());
         }elseif($tech=="iax2"){
-        $arrFormElements["auth"] =  array("LABEL"                  => _tr("auth"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $auth,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(md5|plaintext|rsa){1}$");
-        $arrFormElements["trunk"] =  array("LABEL"                  => _tr("trunk"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$");
-        $arrFormElements=array_merge($arrFormElements,createIaxFrom());
+            $arrFormElements=array_merge($arrFormElements,createIaxFrom());
         }
     }
 	
@@ -1069,32 +1057,53 @@ function createFieldForm($tech,$arrOrgz)
 }
 
 function createSipFrom(){
-    $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
+    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrMedia=array("noset"=>"",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
-    $arrFormElements = array("fromuser" => array("LABEL"             => _tr("fromuser"),
+    $arrFormElements = array("insecure" =>  array("LABEL"                  => _tr("insecure"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      =>array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                             "nat"  =>  array("LABEL"                  => _tr("nat"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "dtmfmode" =>  array("LABEL"                  => _tr("dtmfmode"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrDtmf,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "fromuser" => array("LABEL"             => _tr("fromuser"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "fromdomain" => array("LABEL"             => _tr("fromdomain"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "sendrpid" => array("LABEL"             => _tr("sendrpid"),
+                                                    "DESCRIPTION"            => _tr("If Remote-Party-ID should be sent"),
                                                     "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "trustrpid" => array("LABEL"             => _tr("trustrpid"),
+                                                    "DESCRIPTION"            => _tr("If Remote-Party-ID should be trusted"),
                                                     "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "directmedia"   => array( "LABEL"              => _tr("directmedia"),
                                                     "REQUIRED"               => "no",
@@ -1112,8 +1121,8 @@ function createSipFrom(){
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
                             "maxcallbitrate" => array("LABEL"             => _tr("maxcallbitrate"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
@@ -1138,12 +1147,6 @@ function createSipFrom(){
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                            "rtpkeepalive" => array("LABEL"             => _tr("rtpkeepalive"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
                             "progressinband" => array("LABEL"             => _tr("progressinband"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
@@ -1156,17 +1159,110 @@ function createSipFrom(){
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
+                            "contactdeny" => array("LABEL"             => _tr("contactdeny"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "contactpermit" => array("LABEL"             => _tr("contactpermit"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "contactacl" => array("LABEL"             => _tr("contactacl"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "callcounter" => array("LABEL"             => _tr("callcounter"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "busylevel" => array("LABEL"             => _tr("busylevel"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "allowoverlap" => array("LABEL"             => _tr("allowoverlap"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "allowsubscribe" => array("LABEL"             => _tr("allowsubscribe"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "allowtransfer" => array("LABEL"             => _tr("allowtransfer"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "defaultip" => array("LABEL"             => _tr("defaultip"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "defaultuser" => array("LABEL"             => _tr("defaultuser"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "keepalive" => array("LABEL"             => _tr("keepalive"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "transport" => array("LABEL"             => _tr("transport"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "outboundproxy" => array("LABEL"             => _tr("outboundproxy"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            
     );
     return $arrFormElements;
 }
 
 function createIaxFrom(){
+    $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
+    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
     $arrCodecPrio=array("noset"=>"noset","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
     $encryption=array("noset"=>"noset","aes128"=>"aes128","yes"=>"yes","no"=>"no");
-    
-    $arrFormElements = array("requirecalltoken" => array("LABEL"             => _tr("requirecalltoken"),
+    $arrFormElements = array("auth"   =>      array("LABEL"                  => _tr("auth"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $auth,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(md5|plaintext|rsa){1}$"),
+                             "trunk"   =>      array("LABEL"                  => _tr("trunk"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "ereg",
+                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                        
+                            "requirecalltoken" => array("LABEL"             => _tr("requirecalltoken"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrCallTok,
@@ -1236,6 +1332,30 @@ function createIaxFrom(){
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "transfer" => array("LABEL"             => _tr("transfer"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No","mediaonly"=>"mediaonly"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "defaultip" => array("LABEL"             => _tr("defaultip"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "maxcallnumbers" => array("LABEL"             => _tr("maxcallnumbers"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "inkeys" => array("LABEL"             => _tr("inkeys"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
     );

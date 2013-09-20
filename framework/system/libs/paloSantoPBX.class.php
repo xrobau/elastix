@@ -646,16 +646,19 @@ class paloSip extends paloAsteriskDB {
 	public $callingpres;
 	public $permit; //="0.0.0.0/0.0.0.0";
 	public $deny; //="0.0.0.0/0.0.0.0";
+	public $acl; // a named acl define in acl.conf
 	public $secret;
 	public $md5secret;
-	public $remotesecret;
+	public $remotesecret; // secret used in outbound resgistration if it is not set then use secret field
 	public $dial;
 	public $transport;
 	public $dtmfmode; //="rfc2833";
 	public $directmedia;
 	public $nat; //="yes";
-	public $callgroup;
-	public $pickupgroup;
+	public $callgroup; //estos campos no se van a configurar por e momento ya qeu puede haber conflicto entre organizaciones
+	public $pickupgroup; //estos campos no se van a configurar por e momento ya qeu puede haber conflicto entre organizaciones
+	public $namedcallgroup; //reemplaza a campo callgroup, este campo siempre tiene como prefico el codigo de la organizacion
+    public $namedpickupgroup; //reemplaza a campo callgroup, este campo siempre tiene como prefico el codigo de la organizacion
 	public $language;
 	public $allow;
 	public $disallow;
@@ -710,6 +713,7 @@ class paloSip extends paloAsteriskDB {
 	public $vmexten;
 	public $contactpermit;
 	public $contactdeny;
+	public $contactacl;
 	public $lastms;
 	public $regserver;
 	public $regseconds;
@@ -798,6 +802,14 @@ class paloSip extends paloAsteriskDB {
 							$Prop .=$key.",";
 							$value = $code."_".$value;
 							break;
+                        case "namedpickupgroup":
+                            $Prop .=$key.",";
+                            $value = $code."_".$value;
+                            break;
+                        case "namedcallgroup":
+                            $Prop .=$key.",";
+                            $value = $code."_".$value;
+                            break;
 						default:
 							$Prop .=$key.",";
 							break;
@@ -871,6 +883,14 @@ class paloSip extends paloAsteriskDB {
                                 case "context":
                                     $arrQuery[]="context=?";
                                     $value = $code."-".$value;
+                                    break;
+                                case "namedpickupgroup":
+                                    $arrQuery[]="namedpickupgroup=?";
+                                    $value = $code."_".$value;
+                                    break;
+                                case "namedcallgroup":
+                                    $arrQuery[]="namedcallgroup=?";
+                                    $value = $code."_".$value;
                                     break;
                                 default:
                                     $arrQuery[]="$name=?";
@@ -1100,7 +1120,9 @@ class paloIax extends paloAsteriskDB {
 	public $setvar;
 	public $deny; //no llenar nada menos que sea necesario
 	public $permit; //no llenar nada menos que sea necesario
+	public $acl;
 	public $organization_domain;
+	public $maxcallnumbers;
 
 	function paloIax(&$pDB)
 	{
@@ -1786,6 +1808,7 @@ class paloDevice{
 				$arrVoicemail["envelope"] = isset($arrProp["vmenvelope"])?$arrProp["vmenvelope"]:null;
 				$arrVoicemail["deletevoicemail"] = isset($arrProp["vmdelete"])?$arrProp["vmdelete"]:null;
 				$arrVoicemail["fullname"] = isset($arrProp["fullname"])?$arrProp["fullname"]:$arrProp['name'];
+				$arrVoicemail["language"] = isset($arrProp["language"])?$arrProp["language"]:null;
 				//leer las caractirsiticas que el usuario puede poner en vmoptions, estas deben estar separadas por un " | "
 				if(isset($arrProp['vmoptions'])){
 					$arrTemp=explode("|",$arrProp['vmoptions']);
@@ -2226,6 +2249,7 @@ class paloDevice{
 				$arrVoicemail["envelope"] = isset($arrProp["vmenvelope"])?$arrProp["vmenvelope"]:null;
 				$arrVoicemail["deletevoicemail"] = isset($arrProp["vmdelete"])?$arrProp["vmdelete"]:null;
 				$arrVoicemail["fullname"] = isset($arrProp["fullname"])?$arrProp["fullname"]:$arrProp['name'];
+				$arrVoicemail["language"] = isset($arrProp["language"])?$arrProp["language"]:null;
 				//leer las caractirsiticas que el usuario puede poner en vmoptions, estas deben estar separadas por un " | "
 				if(isset($arrProp['vmoptions'])){
 					$arrTemp=explode("|",$arrProp['vmoptions']);

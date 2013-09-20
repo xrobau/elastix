@@ -174,27 +174,46 @@
                 <td>{$host.INPUT}</td>
             </tr>
             <tr class="tech">
-                {if $TECH eq 'SIP'}
-                    <td nowrap>{$insecure.LABEL}: </td>
-                    <td >{$insecure.INPUT}</td>
-                {else}
-                    <td nowrap>{$auth.LABEL}: </td>
-                    <td >{$auth.INPUT}</td>
-                {/if}
-                <td nowrap>{$qualify.LABEL}: </td>
-                <td>{$qualify.INPUT}</td>
-            </tr>
-            <tr class="tech">
-                {if $TECH eq 'SIP'}
-                    <td nowrap>{$nat.LABEL}: </td>
-                    <td >{$nat.INPUT}</td>
-                {else}
-                    <td nowrap>{$trunk.LABEL}: </td>
-                    <td >{$trunk.INPUT}</td>
-                {/if}
-                <td nowrap>{$context.LABEL}: </td>
+                <td nowrap>{$context.LABEL}:</td>
                 <td>{$context.INPUT}</td>
             </tr>
+            {if $TECH eq 'SIP'}
+                <tr class="tech">
+                    <td nowrap>{$transport.LABEL}: </td>
+                    <td>{$transport.INPUT}</td>
+                    <td nowrap>{$dtmfmode.LABEL}: </td>
+                    <td >{$dtmfmode.INPUT}</td>
+                </tr>
+                <tr class="tech">
+                    <td nowrap>{$directmedia.LABEL}: </td>
+                    <td>{$directmedia.INPUT}</td>
+                    <td nowrap>{$nat.LABEL}: </td>
+                    <td >{$nat.INPUT}</td>
+                </tr>
+                <tr class="tech">
+                    <td nowrap>{$insecure.LABEL}: </td>
+                    <td >{$insecure.INPUT}: </td>
+                    <td nowrap>{$qualify.LABEL}: </td>
+                    <td>{$qualify.INPUT}</td>
+                </tr>
+                <tr class="tech">
+                    <td nowrap>{$qualifyfreq.LABEL}: </td>
+                    <td>{$qualifyfreq.INPUT}</td>
+                </tr>
+            {else}
+                <tr class="tech">
+                    <td nowrap>{$trunk.LABEL}: </td>
+                    <td >{$trunk.INPUT}</td>
+                    <td nowrap>{$qualify.LABEL}: </td>
+                    <td>{$qualify.INPUT}</td>
+                </tr>
+                <tr class="tech">
+                    <td nowrap>{$auth.LABEL}: </td>
+                    <td >{$auth.INPUT}</td>
+                    <td nowrap>{$inkeys.LABEL}: </td>
+                    <td >{$inkeys.INPUT}</td>
+                </tr>
+            {/if}
             <tr class="tech">
                 <td nowrap>{$disallow.LABEL}: </td>
                 <td>{$disallow.INPUT}</td>
@@ -208,92 +227,131 @@
                 <td>{$permit.INPUT}</td>
             </tr>
             <tr class="tech">
+                <td nowrap>{$acl.LABEL}: </td>
+                <td>{$acl.INPUT}</td>
+            </tr>
+            {if $TECH eq 'SIP'}
+                <tr class="tech">
+                    <td nowrap>{$callcounter.LABEL}: </td>
+                    <td>{$callcounter.INPUT}</td>
+                    <td nowrap>{$busylevel.LABEL}: </td>
+                    <td >{$busylevel.INPUT}</td>
+                </tr>
+            {else}
+                <tr class="tech">
+                    <td nowrap>{$transfer.LABEL}: </td>
+                    <td>{$transfer.INPUT}</td>
+                    <td nowrap>{$defaultip.LABEL}: </td>
+                    <td >{$defaultip.INPUT}</td>
+                </tr>
+            {/if}
+            <tr class="tech">
                 <td nowrap>{$amaflags.LABEL}: </td>
                 <td>{$amaflags.INPUT}</td>
-                {if $TECH eq 'SIP'}
-                    <td nowrap>{$dtmfmode.LABEL}: </td>
-                    <td>{$dtmfmode.INPUT}</td>
-                {/if}
             </tr>
-            {if $mode eq 'edit'}
-                <tr>
-                    <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
+            <tr>
+                <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
+            </tr>
+            {if $TECH eq 'SIP'}
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$allowoverlap.LABEL}: </td>
+                    <td >{$allowoverlap.INPUT}</td>
+                    <td nowrap>{$allowsubscribe.LABEL}: </td>
+                    <td>{$allowsubscribe.INPUT}</td>
                 </tr>
-                {if $TECH eq 'SIP'}
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$fromuser.LABEL}: </td>
-                        <td >{$fromuser.INPUT}</td>
-                        <td nowrap>{$fromdomain.LABEL}: </td>
-                        <td>{$fromdomain.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td align="left">{$sendrpid.LABEL}: </td>
-                        <td >{$sendrpid.INPUT}</td>
-                        <td align="left">{$trustrpid.LABEL}: </td>
-                        <td >{$trustrpid.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$directmedia.LABEL}: </td>
-                        <td>{$directmedia.INPUT}</td>
-                        <td nowrap>{$useragent.LABEL}: </td>
-                        <td>{$useragent.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$videosupport.LABEL}: </td>
-                        <td>{$videosupport.INPUT}</td>
-                        <td nowrap>{$maxcallbitrate.LABEL}: </td>
-                        <td>{$maxcallbitrate.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$qualifyfreq.LABEL}: </td>
-                        <td>{$qualifyfreq.INPUT}</td>
-                        <td nowrap>{$rtptimeout.LABEL}: </td>
-                        <td>{$rtptimeout.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$rtpholdtimeout.LABEL}: </td>
-                        <td>{$rtpholdtimeout.INPUT}</td>
-                        <td nowrap>{$rtpkeepalive.LABEL}: </td>
-                        <td>{$rtpkeepalive.INPUT}</td>
-                    </tr>
-                {else}
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$trunkfreq.LABEL}: </td>
-                        <td>{$trunkfreq.INPUT}</td>
-                        <td nowrap>{$trunktimestamps.LABEL}: </td>
-                        <td>{$trunktimestamps.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$sendani.LABEL}: </td>
-                        <td>{$sendani.INPUT}</td>
-                        <td nowrap>{$adsi.LABEL}: </td>
-                        <td>{$adsi.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$requirecalltoken.LABEL}: </td>
-                        <td>{$requirecalltoken.INPUT}</td>
-                        <td nowrap>{$encryption.LABEL}: </td>
-                        <td>{$encryption.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$jitterbuffer.LABEL}: </td>
-                        <td>{$jitterbuffer.INPUT}</td>
-                        <td nowrap>{$forcejitterbuffer.LABEL}: </td>
-                        <td>{$forcejitterbuffer.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$codecpriority.LABEL}: </td>
-                        <td>{$codecpriority.INPUT}</td>
-                        <td nowrap>{$qualifysmoothing.LABEL}: </td>
-                        <td>{$qualifysmoothing.INPUT}</td>
-                    </tr>
-                    <tr class="tech show_more" {$SHOW_MORE}>
-                        <td nowrap>{$qualifyfreqok.LABEL}: </td>
-                        <td>{$qualifyfreqok.INPUT}</td>
-                        <td nowrap>{$qualifyfreqnotok.LABEL}: </td>
-                        <td>{$qualifyfreqnotok.INPUT}</td>
-                    </tr>
-                {/if}
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$allowtransfer.LABEL}: </td>
+                    <td >{$allowtransfer.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$fromuser.LABEL}: </td>
+                    <td >{$fromuser.INPUT}</td>
+                    <td nowrap>{$fromdomain.LABEL}: </td>
+                    <td>{$fromdomain.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$defaultip.LABEL}: </td>
+                    <td >{$defaultip.INPUT}</td>
+                    <td nowrap>{$defaultuser.LABEL}: </td>
+                    <td>{$defaultuser.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$keepalive.LABEL}: </td>
+                    <td >{$keepalive.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$rtptimeout.LABEL}: </td>
+                    <td>{$rtptimeout.INPUT}</td>
+                    <td nowrap>{$rtpholdtimeout.LABEL}: </td>
+                    <td>{$rtpholdtimeout.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td align="left">{$sendrpid.LABEL}: </td>
+                    <td >{$sendrpid.INPUT}</td>
+                    <td align="left">{$trustrpid.LABEL}: </td>
+                    <td >{$trustrpid.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td align="left">{$outboundproxy.LABEL}: </td>
+                    <td >{$outboundproxy.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$contactdeny.LABEL}: </td>
+                    <td>{$contactdeny.INPUT}</td>
+                    <td nowrap>{$contactpermit.LABEL}: </td>
+                    <td>{$contactpermit.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$contactacl.LABEL}: </td>
+                    <td>{$contactacl.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$videosupport.LABEL}: </td>
+                    <td>{$videosupport.INPUT}</td>
+                    <td nowrap>{$maxcallbitrate.LABEL}: </td>
+                    <td>{$maxcallbitrate.INPUT}</td>
+                </tr>
+            {else}
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$trunkfreq.LABEL}: </td>
+                    <td>{$trunkfreq.INPUT}</td>
+                    <td nowrap>{$trunktimestamps.LABEL}: </td>
+                    <td>{$trunktimestamps.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$sendani.LABEL}: </td>
+                    <td>{$sendani.INPUT}</td>
+                    <td nowrap>{$adsi.LABEL}: </td>
+                    <td>{$adsi.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$requirecalltoken.LABEL}: </td>
+                    <td>{$requirecalltoken.INPUT}</td>
+                    <td nowrap>{$maxcallnumbers.LABEL}: </td>
+                    <td>{$maxcallnumbers.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$jitterbuffer.LABEL}: </td>
+                    <td>{$jitterbuffer.INPUT}</td>
+                    <td nowrap>{$forcejitterbuffer.LABEL}: </td>
+                    <td>{$forcejitterbuffer.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$codecpriority.LABEL}: </td>
+                    <td>{$codecpriority.INPUT}</td>
+                    <td nowrap>{$qualifysmoothing.LABEL}: </td>
+                    <td>{$qualifysmoothing.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$qualifyfreqok.LABEL}: </td>
+                    <td>{$qualifyfreqok.INPUT}</td>
+                    <td nowrap>{$qualifyfreqnotok.LABEL}: </td>
+                    <td>{$qualifyfreqnotok.INPUT}</td>
+                </tr>
+                <tr class="tech show_more" {$SHOW_MORE}>
+                    <td nowrap>{$encryption.LABEL}: </td>
+                    <td>{$encryption.INPUT}</td>
+                </tr>
             {/if}
          </table>
         </div>

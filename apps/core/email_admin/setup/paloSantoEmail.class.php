@@ -31,6 +31,7 @@ $elxPath="/usr/share/elastix";
 include_once("$elxPath/libs/paloSantoDB.class.php");
 include_once("$elxPath/libs/paloSantoConfig.class.php");
 include_once("$elxPath/libs/misc.lib.php");
+include_once("$elxPath/configs/email.conf.php");
 include_once("$elxPath/libs/cyradm.php");
 
 

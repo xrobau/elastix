@@ -2,13 +2,13 @@
     <tr class="letra12">
         <td align="left">
         {if $MODE eq "new"}
-            <input class="button" type="submit" name="save" value="{$SAVE}">&nbsp;
+            {if $NEW_PORT}<input class="button" type="submit" name="save" value="{$SAVE}">&nbsp;{/if}
         {/if}
         {if $MODE eq "edit"}
-            <input class="button" type="submit" name="save" value="{$SAVE}">&nbsp;
+            {if $EDIT_PORT}<input class="button" type="submit" name="save" value="{$SAVE}">&nbsp;{/if}
         {/if}
         {if $MODE eq "view"}
-            <input class="button" type="submit" name="edit" value="{$EDIT}">&nbsp;
+            {if $EDIT_PORT}<input class="button" type="submit" name="edit" value="{$EDIT}">&nbsp;{/if}
         {/if}
             <input class="button" type="submit" name="cancel" value="{$CANCEL}"></td>
 	{if $MODE ne "view"}

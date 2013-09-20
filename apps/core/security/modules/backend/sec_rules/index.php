@@ -30,17 +30,14 @@
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoDB.class.php";
+include_once "apps/sec_ports/libs/paloSantoPortService.class.php";
 include_once "libs/paloSantoJSON.class.php";
 require_once "libs/paloSantoNetwork.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-      
     //global variables
     global $arrConf;
-    global $arrConfModule;
-   
-    $arrConf = array_merge($arrConf,$arrConfModule);
    
    //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -67,9 +64,9 @@ function _moduleContent(&$smarty, $module_name)
         case "change":
             $content = change($pDB);
             break;
-	case "changeOtherPage":
-	    $content = changeOtherPage($pDB, $module_name);
-	    break;
+        case "changeOtherPage":
+            $content = changeOtherPage($pDB, $module_name);
+            break;
         case "exec":
             $content = execRules($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
@@ -715,7 +712,7 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         if(!$first_time){
         if(!$pRules->isExecutedInSystem()){
         $smarty->assign("mb_title", _tr("MESSAGE"));
-        $smarty->assign("mb_message", $mensaje." &nbsp;&nbsp;&nbsp;<form  method='POST' style='margin-bottom:0;' action='?menu_sec_rules'><input class='button' type='submit' name='exec' value='$mensaje2'></form>");}}
+        $smarty->assign("mb_message", $mensaje." &nbsp;&nbsp;&nbsp;<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'><input class='button' type='submit' name='exec' value='$mensaje2'></form>");}}
 
     $contenidoModulo = $oGrid->fetchGrid();
 
@@ -723,7 +720,7 @@ function reportRules($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
 		$contenidoModulo = "<div id='msg_status' class='mensajeStatus'></div>".$contenidoModulo;
 	}
     if (strpos($contenidoModulo, '<form') === FALSE)
-        $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=$url>$contenidoModulo</form>";
+        $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=?menu=$module_name>$contenidoModulo</form>";
     //end grid parameters
 
     return $contenidoModulo;
@@ -787,6 +784,12 @@ function getPorts($pDB)
 
 function change($pDB)
 {
+    global $arrPermission;
+    
+    if(!in_array("edit_rule",$arrPermission)){
+        $jsonObject->set_error(_tr("You are not authorized to perform this action"));
+        return $jsonObject->createJSON();
+    }
     $jsonObject = new PaloSantoJSON();
     $pRules = new paloSantoRules($pDB);
     $neighborrow = getParameter("neighborrow");
@@ -932,6 +935,7 @@ function desactivateFirewall($smarty,$module_name,$local_templates_dir,$pDB,$arr
 
 function getAction()
 {
+    global $arrPermission;
     if(getParameter("new"))
         return "new";
     else if(getParameter("save"))

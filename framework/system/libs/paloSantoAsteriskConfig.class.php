@@ -318,74 +318,74 @@ class paloSantoASteriskConfig{
 }
 
 class paloContexto{
-	public $name; //nombre de contexto sin el code de la organizacion a la que pertences
-	public $arrExtensions; //arreglo de extensiones que pertenecen al contexto
-	public $arrInclude; //include tipo de extension especial, arreglo que ocntige extensiones de este tipo
-	public $switch; //swtich tipo de extension especial, arreglo que ocntige extensiones de este tipo
-	public $code; //code de la organizacion a la que pertence el contexto
-	public $errMsg;
+    public $name; //nombre de contexto sin el code de la organizacion a la que pertences
+    public $arrExtensions; //arreglo de extensiones que pertenecen al contexto
+    public $arrInclude; //include tipo de extension especial, arreglo que ocntige extensiones de este tipo
+    public $switch; //swtich tipo de extension especial, arreglo que ocntige extensiones de este tipo
+    public $code; //code de la organizacion a la que pertence el contexto
+    public $errMsg;
 
-	function paloContexto($code,$name){
-		global $arrConf;
-		//valido que el codigo exista
-		$pDB=new paloDB($arrConf['elastix_dsn']['elastix']);
-		$queryCode="SELECT count(code) from organization where code=?";
-		$recode=$pDB->getFirstRowQuery($queryCode, false, array($code));
-		if($recode===false){
-			$this->errMsg = $pDB->errMsg;
-			return false;
-		}elseif(count($recode)==0){
-			$this->errMsg = _tr("Organization doesn't exist");
-			return false;
-		}
+    function paloContexto($code,$name){
+        global $arrConf;
+        //valido que el codigo exista
+        $pDB=new paloDB($arrConf['elastix_dsn']['elastix']);
+        $queryCode="SELECT count(code) from organization where code=?";
+        $recode=$pDB->getFirstRowQuery($queryCode, false, array($code));
+        if($recode===false){
+            $this->errMsg = $pDB->errMsg;
+            return false;
+        }elseif(count($recode)==0){
+            $this->errMsg = _tr("Organization doesn't exist");
+            return false;
+        }
 
-		$this->code=$code;
+        $this->code=$code;
 
-		if(preg_match("/^[A-Za-z0-9\-_]+$/",$name) || strlen($name)>62){
-			if(substr($name,0,6)=="macro-")
-				$this->name="[macro-".$this->code."-".substr($name,6)."]";
-			else
-				$this->name="[".$this->code."-".$name."]";
-		}else{
-			$this->errMsg=_tr("Context names cannot contain special characters and have a maximum length of 62 characters");
-			return false;
-		}
-	}
-	
+        if(preg_match("/^[A-Za-z0-9\-_]+$/",$name) || strlen($name)>62){
+            if(substr($name,0,6)=="macro-")
+                $this->name="[macro-".$this->code."-".substr($name,6)."]";
+            else
+                $this->name="[".$this->code."-".$name."]";
+        }else{
+            $this->errMsg=_tr("Context names cannot contain special characters and have a maximum length of 62 characters");
+            return false;
+        }
+    }
 
-	//retorna el contexto como un string para se añadido
-	//al plan de marcado, esto es de una contexto especifico
-	function stringContexto($arrInclude,$arrExtensions){
-		$contexto="\n".$this->name."\n";
-		//incluimos los contextos personalizados , TODO: falta preguntar si se los quiere o no incluir
-		$contexto .="include =>".substr($this->name,1,-1)."-custom\n";
-		if(isset($arrInclude)){
-			foreach($arrInclude as $value){
-				if(preg_match("/^[A-Za-z0-9\-_]+$/",$value["name"]) || strlen($value["name"])>62){
-					if(substr($this->name,0,6)=="macro-")
-						$contexto .="include =>macro-".$this->code."-".substr($value["name"],6);
-					else
-						$contexto .="include =>".$this->code."-".$value["name"];
+
+    //retorna el contexto como un string para se añadido
+    //al plan de marcado, esto es de una contexto especifico
+    function stringContexto($arrInclude,$arrExtensions){
+        $contexto="\n".$this->name."\n";
+        //incluimos los contextos personalizados , TODO: falta preguntar si se los quiere o no incluir
+        $contexto .="include =>".substr($this->name,1,-1)."-custom\n";
+        if(isset($arrInclude)){
+            foreach($arrInclude as $value){
+                if(preg_match("/^[A-Za-z0-9\-_]+$/",$value["name"]) || strlen($value["name"])>62){
+                    if(substr($this->name,0,6)=="macro-")
+                        $contexto .="include =>macro-".$this->code."-".substr($value["name"],6);
+                    else
+                        $contexto .="include =>".$this->code."-".$value["name"];
                     
                     if(isset($value["extra"])){
                         $contexto .=$value["extra"];
                     }
                     $contexto .="\n";
-				}else{
-					$this->errMsg=_tr("Context names cannot contain special characters and have a maximum length of 62 characters");
-					return "";
-				}
-			}
-		}
+                }else{
+                    $this->errMsg=_tr("Context names cannot contain special characters and have a maximum length of 62 characters");
+                    return "";
+                }
+            }
+        }
 
-		if(is_array($arrExtensions)){
-			foreach($arrExtensions as $extension){
-				if(!is_null($extension) && is_object($extension))
-					$contexto .=$extension->data."\n";
-			}
-		}
-		return $contexto;
-	}
+        if(is_array($arrExtensions)){
+            foreach($arrExtensions as $extension){
+                if(!is_null($extension) && is_object($extension))
+                    $contexto .=$extension->data."\n";
+            }
+        }
+        return $contexto;
+    }
 }
 
 class paloExtensions{

@@ -310,7 +310,6 @@ function createFieldForm($arrTZ){
 }
 
 function createSipForm($arrLang){
-    $arrNat=array("no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrYesNo=array("yes"=>"yes","no"=>"no");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
     $arrMedia=array('yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
@@ -323,7 +322,7 @@ function createSipForm($arrLang){
                                                 "VALIDATION_TYPE"        => "text", //default
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                              "sip_allowguest"  => array("LABEL"                  => _tr("allowguest"),
-                                                "DESCRIPTION"            => _tr(" Allow or reject guest calls (default is yes).\n If your Asterisk is connected to the Internet and you have allowguest=yes you want to check\n which services you offer everyone out there, by enabling them in the default context"),
+                                                "DESCRIPTION"            => _tr(" Allow or reject guest calls (default is yes).\n If your Asterisk is connected to the Internet and you have allowguest=yes you want to check\n which services you offer everyone out there, by enabling them in the default context.\nWe strong recomend you let it as 'no'"),
                                                 "REQUIRED"               => "yes",
                                                 "INPUT_TYPE"             => "SELECT",
                                                 "INPUT_EXTRA_PARAM"      => $arrYesNo, //no
@@ -343,12 +342,19 @@ function createSipForm($arrLang){
                                                 "INPUT_EXTRA_PARAM"      => $arrYesNo, //yes
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
+                            "sip_realm"            => array("LABEL"         => _tr("realm"),
+                                                "DESCRIPTION"            => _tr("Realm for digest authenticationRealm for digest authentication defaults to 'asterisk'\n. Realms MUST be globally unique according to RFC 3261;\n Set this to your host name or domain name\n. If you do not how to configure it, set this field with  its default value 'asterisk'"),
+                                                "REQUIRED"               => "yes",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => '', //default asterisk
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_transport"    =>  array("LABEL"        => _tr("transport"),
-                                                "DESCRIPTION"            => _tr("This sets the default transport type for outgoing.\nIt's also possible to list several supported transport types for the peer by separating them with commas.\nThe order determines the primary default transport.\nThe default transport type is only used for\noutbound messages until a Registration takes place.  During the\npeer Registration the transport type may change to another supported\ntype if the peer requests so.\nThe 'transport' part defaults to 'udp' but may also be 'tcp', 'tls', 'ws', or 'wss'\n"),
+                                                "DESCRIPTION"            => _tr("This sets the default transport type for outgoing.\nIt's also possible to list several supported transport types for the peer by separating them with commas.\nThe order determines the primary default transport.\nThe default transport type is only used for\noutbound messages until a Registration takes place.  During the\npeer Registration the transport type may change to another supported\ntype if the peer requests so.\nThe 'transport' part defaults to 'udp' but may also be 'tcp', 'tls', 'ws', or 'wss'\nIt also can be configured by peer"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "TEXT",
                                                 "INPUT_EXTRA_PARAM"      => "",
-                                                "VALIDATION_TYPE"        => "text", //ws,wss,udp
+                                                "VALIDATION_TYPE"        => "text", //udp,ws,wss
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_srvlookup" => array("LABEL"         => _tr("srvlookup"),
                                                 "DESCRIPTION"            => _tr("Enable DNS SRV lookups on outbound calls Note: Asterisk only uses the first host in SRV records"),
@@ -476,10 +482,10 @@ function createSipForm($arrLang){
                                                 "VALIDATION_EXTRA_PARAM" => ""), 
                              //NAT SUPPORT
                              "sip_nat"     =>   array("LABEL"        => _tr("nat"),
-                                                "DESCRIPTION"            => _tr("Address NAT-related issues in incoming SIP or media sessions.\nnat = no; Use rport if the remote side says to use it.\nnat = force_rport; Force rport to always be on. (default).\nnat = yes; Force rport to always be on and perform comedia RTP handling.\nnat = comedia; Use rport if the remote side says to use it and perform comedia RTP handling."),
+                                                "DESCRIPTION"            => _tr("Address NAT-related issues in incoming SIP or media sessions.\nnat = no; Use rport if the remote side says to use it.\nnat = force_rport ; Pretend there was an rport parameter even if there wasn't.\nnat = comedia; Use rport if the remote side says to use it and perform comedia RTP handling.\nnat = auto_force_rport  ; Set the force_rport option if Asterisk detects NAT (default)\nnat = auto_comedia      ; Set the comedia option if Asterisk detects NAT\nNAT settings are a combinable list of options.\n The equivalent of the deprecated nat=yes is nat=force_rport,comedia."),
                                                 "REQUIRED"               => "no",
-                                                "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => $arrNat,
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => "",
                                                 "VALIDATION_TYPE"        => "text", //yes
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                              "sip_nat_type"     =>   array("LABEL"       => _tr("Type Of Nat"),
@@ -974,6 +980,9 @@ function getParameterGeneralSettings(){
         $arrPropSip["allowguest"]=getParameter("sip_allowguest");
         $arrPropSip['allowoverlap']=getParameter("sip_allowoverlap");
         $arrPropSip['allowtransfer']=getParameter("sip_allowtransfer");
+        //$arrPropSip['realm']=getParameter("sip_realm");
+        //no se lo setea porque despues de esto se habaria que generar nuevamente todos
+        //las calves de los archivos sip
         $arrPropSip['transport']=getParameter("sip_transport");
         $arrPropSip['srvlookup']=getParameter("sip_srvlookup");
         $arrPropSip['vmexten']=getParameter("sip_vmexten");        

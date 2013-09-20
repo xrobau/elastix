@@ -36,8 +36,6 @@ function _moduleContent(&$smarty, $module_name)
 {
     
     global $arrConf;
-    global $arrConfModule;
-    $arrConf = array_merge($arrConf, $arrConfModule);
 
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
@@ -166,7 +164,7 @@ function setPortKnockPort(&$smarty, $module_name, $local_templates_dir, &$pDB, $
         'CANCEL'        =>  _tr('Cancel'),
         'SAVE'          =>  _tr('Save'),
         'REQUIRED_FIELD'=>  _tr('Required field'),
-        'icon'          =>  'images/list.png',
+        'icon'          =>  '../web/_common/images/list.png',
     ));
 
     // Guardar los cambios

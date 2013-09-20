@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Sep 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Monitoring: fix swapped labels in display. Fixes Elastix 
+  bug #1707.
+  SVN Rev[5917]
+
 * Wed Sep 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Hold Time: complete rewrite. This rewrite reimplements the histogram
   code to be more generic as well as smaller, and to use SQL parameters. It also

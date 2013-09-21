@@ -635,7 +635,7 @@ INSERT INTO resource_action (id,id_resource,action) VALUES(194,'asterisk_log','a
 -- INSERT INTO resource_action (id,id_resource,action) VALUES(197,'missed_calls','access');
 -- INSERT INTO resource_action (id,id_resource,action) VALUES(198,'missed_calls','export');
 
---security
+-- security
 INSERT INTO resource_action (id,id_resource,action) VALUES(200,'sec_rules','access');
 INSERT INTO resource_action (id,id_resource,action) VALUES(201,'sec_rules','new_rule');
 INSERT INTO resource_action (id,id_resource,action) VALUES(202,'sec_rules','edit_rule');

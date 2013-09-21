@@ -306,7 +306,7 @@ INSERT INTO acl_resource VALUES('recordings', 'Recordings', 'pbxsettings', '', '
 
 INSERT INTO acl_resource VALUES('conference', 'Conference', 'pbxconfig', '', 'module', 4,'yes','yes'); 
 
-INSERT INTO acl_resource VALUES('voicemail', 'Voicemail Report', 'pbxconfig', '', 'module', 5,'yes','yes');
+-- INSERT INTO acl_resource VALUES('voicemail', 'Voicemail Report', 'pbxconfig', '', 'module', 5,'yes','yes');
 INSERT INTO acl_resource VALUES('monitoring', 'Monitoring', 'pbxconfig', '', 'module', 6,'yes','yes');
 
 INSERT INTO acl_resource VALUES('tools', 'Tools', 'pbxconfig', '', '', 7,'yes','yes');
@@ -390,7 +390,7 @@ INSERT INTO organization_resource VALUES(58, 1, 'general_settings');
 INSERT INTO organization_resource VALUES(59, 1, 'musiconhold');
 INSERT INTO organization_resource VALUES(60, 1, 'recordings');
 INSERT INTO organization_resource VALUES(61, 1, 'conference');
-INSERT INTO organization_resource VALUES(62, 1, 'voicemail');
+-- INSERT INTO organization_resource VALUES(62, 1, 'voicemail');
 INSERT INTO organization_resource VALUES(63, 1, 'monitoring');
 
 INSERT INTO organization_resource VALUES(67, 1, 'asterisk_cli'); -- superadmin
@@ -594,9 +594,9 @@ INSERT INTO resource_action (id,id_resource,action) VALUES(162,'recordings','cre
 INSERT INTO resource_action (id,id_resource,action) VALUES(163,'recordings','edit');
 INSERT INTO resource_action (id,id_resource,action) VALUES(164,'recordings','delete');
 
-INSERT INTO resource_action (id,id_resource,action) VALUES(169,'voicemail','access');
-INSERT INTO resource_action (id,id_resource,action) VALUES(170,'voicemail','delete');
-INSERT INTO resource_action (id,id_resource,action) VALUES(171,'voicemail','download');
+-- INSERT INTO resource_action (id,id_resource,action) VALUES(169,'voicemail','access');
+-- INSERT INTO resource_action (id,id_resource,action) VALUES(170,'voicemail','delete');
+-- INSERT INTO resource_action (id,id_resource,action) VALUES(171,'voicemail','download');
 
 INSERT INTO resource_action (id,id_resource,action) VALUES(172,'monitoring','access');
 INSERT INTO resource_action (id,id_resource,action) VALUES(173,'monitoring','delete');
@@ -924,14 +924,14 @@ INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,162);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,163);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,164);
 
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,169);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,170);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,171);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,169);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,170);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,171);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,169);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,171);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,169);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,170);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,171);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,169);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,170);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,171);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,169);
+-- INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,171);
 
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,172);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,173);

@@ -303,6 +303,10 @@ fi
 
 %changelog
 * Mon Sep 23 2013 Jose Briones <jbriones@elastix.com>
+- UPDATED: Module voicemail, the file es.lang was updated
+  SVN Rev[5930]
+
+* Mon Sep 23 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module conference, the file es.lang was updated 
   SVN Rev[5927]
 

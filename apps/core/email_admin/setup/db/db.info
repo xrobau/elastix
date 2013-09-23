@@ -1,5 +1,5 @@
 [elxpbx]
-ignore_backup = no
+ignore_backup = yes
 engine = mysql
 path = /var/lib/mysql
 deletable = yes

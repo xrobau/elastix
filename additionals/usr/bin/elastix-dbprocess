@@ -157,7 +157,7 @@ return 1;
  * @return bool     True if everything was OK, False if an error occurs
  * 
  */
-function createSQLFile($action, $path_folder, $dbName, $engine, $sql_export, $password, $version, $ignore_backup, $overwritten)
+function createSQLFile($action, $path_folder, $dbName, $engine, $sql_export, $password, $version, $ignore_backup)
 {
     $stringSQL = "";
     $successfull = true;

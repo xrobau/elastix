@@ -87,14 +87,14 @@ if ($argc < 2){
    die("Please specify the action and folder path files sqls.\n Usage: {$_SERVER['argv'][0]} install /usr/share/elastix/.../db/  version sql_export\n");
 }
 
-$documentRoot="/usr/share/elastix";
-require_once("$documentRoot/libs/misc.lib.php");
-require_once("$documentRoot/configs/default.conf.php");
+$elxPath="/usr/share/elastix";
+require_once("$elxPath/libs/misc.lib.php");
+require_once("$elxPath/configs/default.conf.php");
 load_default_timezone();
 
 //global variables framework
 global $arrConf;
-require_once("$arrConf[basePath]/libs/paloSantoConfig.class.php");
+require_once("$elxPath/libs/paloSantoConfig.class.php");
 
 $arrActions = array("install","update","delete");
 if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
@@ -155,13 +155,15 @@ return 1;
  * @param  string   $version        Version for action update
  * @param  string   $ignore_backup  if its boolean value is True the database is not renamed, if False it is renamed
  * @return bool     True if everything was OK, False if an error occurs
+ * 
  */
-function createSQLFile($action, $path_folder, $dbName, $engine, $sql_export, $password, $version, $ignore_backup)
+function createSQLFile($action, $path_folder, $dbName, $engine, $sql_export, $password, $version, $ignore_backup, $overwritten)
 {
     $stringSQL = "";
     $successfull = true;
     if(databaseExists($engine,$dbName) && $action == "install" && $sql_export == false && !(bool)$ignore_backup)
         $successfull = renameDatabase($engine,$dbName,$password,$path_folder);
+
     switch($action){
         case "install":
         case "delete":
@@ -285,6 +287,7 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
 {
     if($sql_export==false){
         if(file_get_contents("$path_folder/1_sqlFile.sql") == ""){
+	$overwritten=(isset($data['overwritten']))?$data['overwritten']:'yes';
             echo "Nothing to be done in database $dbName.\n";
             unlink("$path_folder/1_sqlFile.sql");
             return true;
@@ -300,7 +303,7 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
 		   $db = "";
                 $command = "mysql -uroot \"-p$password\" $db < $path_folder/1_sqlFile.sql";
 	    }
-            echo "Executing $command ... \n";
+            echo "Executing database 1_sqlFile.sql for database $dbName ... \n";
             exec($command,$arrConsole,$status);
             echo "RETURN $status\n";
             if($status != 0){

@@ -332,7 +332,6 @@ INSERT INTO acl_resource VALUES('sec_ports', 'Define Ports', 'sec_firewall', '',
 INSERT INTO acl_resource VALUES('sec_portknock_if', 'Port Knocking Interfaces', 'sec_firewall', '', 'module', 3,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('sec_portknock_users', 'Port Knocking Users', 'sec_firewall', '', 'module', 4,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('sec_accessaudit', 'Audit', 'security', '', 'module', 2,'yes','no'); -- superadmin
-INSERT INTO acl_resource VALUES('sec_weak_keys', 'Weak Keys', 'security', '', 'module', 3,'yes','yes'); 
 
 -- Modulos de final_user
 INSERT INTO acl_resource VALUES('user_home', 'Home', '', '', 'module', 1,'no','yes');
@@ -410,7 +409,6 @@ INSERT INTO organization_resource VALUES(84, 1, 'sec_ports'); -- superadmin
 INSERT INTO organization_resource VALUES(85, 1, 'sec_portknock_if'); -- superadmin
 INSERT INTO organization_resource VALUES(86, 1, 'sec_portknock_users'); -- superadmin
 INSERT INTO organization_resource VALUES(87, 1, 'sec_accessaudit'); -- superadmin
-INSERT INTO organization_resource VALUES(88, 1, 'sec_weak_keys');
 
 -- final_user
 INSERT INTO organization_resource VALUES(100, 1, 'user_home'); 
@@ -654,9 +652,6 @@ INSERT INTO resource_action (id,id_resource,action) VALUES(210,'sec_portknock_us
 INSERT INTO resource_action (id,id_resource,action) VALUES(211,'sec_accessaudit','access');
 INSERT INTO resource_action (id,id_resource,action) VALUES(212,'sec_accessaudit','export');
 
-INSERT INTO resource_action (id,id_resource,action) VALUES(213,'sec_weak_keys','access');
-INSERT INTO resource_action (id,id_resource,action) VALUES(215,'sec_weak_keys','export');
-INSERT INTO resource_action (id,id_resource,action) VALUES(216,'sec_weak_keys','change_secret');
 
 
 -- system
@@ -1014,11 +1009,3 @@ INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,210);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,211);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,212);
 
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,213);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,215);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,216);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,213);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,215);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,216);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,213);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(3,215);

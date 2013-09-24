@@ -271,7 +271,7 @@ INSERT INTO acl_resource VALUES('email_relay', 'Relay', 'email_admin', '', 'modu
 INSERT INTO acl_resource VALUES('antispam', 'Antispam', 'email_admin', '', 'module', 3,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('remote_smtp', 'Remote SMTP', 'email_admin', '', 'module', 4,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('email_list', 'Email list', 'email_admin', '', 'module', 5,'yes','yes');
-INSERT INTO acl_resource VALUES('email_stats', 'Email stats', 'email_admin', '', 'module', 6,'yes','yes');
+INSERT INTO acl_resource VALUES('email_stats', 'Email stats', 'email_admin', '', 'module', 6,'yes','no');
 
 INSERT INTO acl_resource VALUES('fax', 'Fax', '', '', '', 3,'yes','yes');
 INSERT INTO acl_resource VALUES('faxmgr', 'Virtual Fax', 'fax', '', '', 1,'yes','yes');
@@ -778,7 +778,6 @@ INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,65);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,66);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,67);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,68);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,68);
 
 -- faxs
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,69);

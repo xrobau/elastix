@@ -160,8 +160,8 @@ function listarFaxes(&$smarty, $module_name, $local_templates_dir, $pDB, $creden
     }
     $columns[]=_tr('Type');
     $columns[]=_tr('File');
-    $columns[]=_tr('Company Name');
-    $columns[]=_tr('Company Fax');
+    $columns[]=_tr('Fax Cid Name');
+    $columns[]=_tr('Fax Cid Number');
     $columns[]=_tr('Fax Destiny');
     $columns[]=_tr('Fax Date');
     $columns[]=_tr('Status');
@@ -286,14 +286,14 @@ function getFormElements($arrOrg)
              "VALIDATION_TYPE"        => "numeric",
              "VALIDATION_EXTRA_PARAM" => $arrOrg),
         "name_company"=> array(
-            "LABEL"                  => _tr('Company Name'),
+            "LABEL"                  => _tr('Fax Cid Name'),
              "REQUIRED"               => "no",
              "INPUT_TYPE"             => "TEXT",
              "INPUT_EXTRA_PARAM"      => "",
              "VALIDATION_TYPE"        => "text",
              "VALIDATION_EXTRA_PARAM" => ""),
         "fax_company" => array(
-            "LABEL"                  => _tr('Company Fax'),
+            "LABEL"                  => _tr('Fax Cid Number'),
              "REQUIRED"               => "no",
              "INPUT_TYPE"             => "TEXT",
              "INPUT_EXTRA_PARAM"      => "",

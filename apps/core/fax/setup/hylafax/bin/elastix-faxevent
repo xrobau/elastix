@@ -499,8 +499,8 @@ function sendEmailFax($conn, $idUser, $domain, $sRepresentativeName, $sDestinati
     );
     $replaceStrings = array(
         array('{NAME_PDF}',             basename($sRepresentativeName, '.pdf')),
-        array('{COMPANY_NAME_FROM}',    $sCompanyName),
-        array('{COMPANY_NUMBER_FROM}',  $sCompanyNumber),
+        array('{FAX_CID_NAME}',    $sCompanyName),
+        array('{FAX_CID_NUMBER}',  $sCompanyNumber),
         array('{JOB_STATUS}',           ($status == 'done') ? $status : "$status: $errmsg"),
     );
     $sql  = "SELECT value,property from user_properties where property IN ('fax_subject','fax_content') and id_user=?";

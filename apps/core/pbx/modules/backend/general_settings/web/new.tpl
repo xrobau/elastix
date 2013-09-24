@@ -172,8 +172,6 @@
                     <td>{$sip_sendrpid.INPUT}</td>
                 </tr>
                 <tr class="sip_settings">
-                    <td nowrap>{$sip_useragent.LABEL}:</td>
-                    <td>{$sip_useragent.INPUT}</td>
                     <td nowrap>{$sip_callingpres.LABEL}: </td>
                     <td>{$sip_callingpres.INPUT}</td>
                 </tr>

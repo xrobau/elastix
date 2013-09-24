@@ -552,7 +552,7 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     }
 
     if($idOrganization==1){
-        return reportTC($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+        return reportTG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }
 
     $query="select domain from organization where id=?";
@@ -584,7 +584,7 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         }
     }
 
-    return reportTC($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    return reportTG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
 }
 
 function getAction(){

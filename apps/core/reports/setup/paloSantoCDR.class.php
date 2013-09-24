@@ -87,7 +87,7 @@ class paloSantoCDR
         }
         
         if (isset($param['date_end'])) {
-            $end=date('Y-m-d',strtotime($param['date_end']))." 00:00:00";
+            $end=date('Y-m-d',strtotime($param['date_end']))." 23:59:59";
             $condSQL[] = 'calldate <= ?';
             $paramSQL[] = $end;
         }
@@ -235,8 +235,7 @@ SQL_COND_EXTENSION;
             'SELECT COUNT(*) FROM cdr LEFT JOIN elxpbx.ring_group rg '.
                 'ON asteriskcdrdb.cdr.dst = elxpbx.rg.rg_number '.
             $sWhere;
-            
-        $r = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramSQL);
+	$r = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramSQL);
         if (!is_array($r)) {
             $this->errMsg = '(internal) Failed to count CDRs - '.$this->_DB->errMsg;
             return false;

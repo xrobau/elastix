@@ -298,7 +298,6 @@ function getParameterGeneralSettings(){
         $arrPropSip["vmexten"]=getParameter("sip_vmexten");
         $arrPropSip['mohinterpret']=getParameter("sip_mohinterpret");
         $arrPropSip['mohsuggest']=getParameter("sip_mohsuggest");
-        $arrPropSip['useragent']=getParameter("sip_useragent");
         $arrPropSip['directmedia']=getParameter("sip_directmedia");
         $arrPropSip['callcounter']=getParameter("sip_callcounter");
         $arrPropSip['busylevel']=getParameter("sip_busylevel");
@@ -520,12 +519,6 @@ function createSipForm($arrMOH){
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrMedia,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "sip_useragent" => array("LABEL"             => _tr("useragent"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_busylevel" => array("LABEL"             => _tr("busylevel"),

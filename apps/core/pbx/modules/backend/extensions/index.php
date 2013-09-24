@@ -669,7 +669,6 @@ function propersParamByTech($tech){
         $arrProp['defaultip']=getParameter("defaultip");
         $arrProp['mohinterpret']=getParameter("mohinterpret");
         $arrProp['mohsuggest']=getParameter("mohsuggest");
-        $arrProp['useragent']=getParameter("useragent");
         $arrProp['directmedia']=getParameter("directmedia");
         $arrProp['trustrpid']=getParameter("trustrpid");
         $arrProp['sendrpid']=getParameter("sendrpid");
@@ -1145,12 +1144,6 @@ function createSipForm(){
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "defaultip" => array("LABEL"             => _tr("defaultip"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "useragent" => array("LABEL"             => _tr("useragent"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),

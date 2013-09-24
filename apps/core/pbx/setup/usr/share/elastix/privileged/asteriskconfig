@@ -1037,7 +1037,6 @@ function createFeatureGeneralfile(&$pDB){
     $file="/etc/asterisk/features_general.conf";
     $contenido="";
     
-    $file="/etc/asterisk/features_map.conf";
     $query="SELECT name, default_code FROM features_code_settings WHERE name=?";
     $result=$pDB->fetchTable($query,true,array("pickup"));
     if($result===false){
@@ -1047,7 +1046,7 @@ function createFeatureGeneralfile(&$pDB){
         foreach($result as $value){
             switch ($value["name"]) {
                 case "pickup":
-                    $feature="pickup";
+                    $feature="pickupexten";
                     break;
             }
             $contenido .= $feature."=".$value["default_code"]."\n";

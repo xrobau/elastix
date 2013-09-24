@@ -282,8 +282,6 @@
                     <td>{$mohsuggest.INPUT}</td>
                 </tr>
                 <tr class="sip_settings show_more" {$SHOW_MORE}>
-                    <td nowrap>{$useragent.LABEL}:</td>
-                    <td>{$useragent.INPUT}</td>
                     <td nowrap>{$g726nonstandard.LABEL}:</td>
                     <td>{$g726nonstandard.INPUT}</td>
                 </tr>

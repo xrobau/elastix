@@ -229,7 +229,7 @@ INSERT INTO organization_properties VALUES(1,'theme','elastixneo','system');
 INSERT INTO organization_properties VALUES(1,'fax_remite','fax@faxelastix.com','fax');
 INSERT INTO organization_properties VALUES(1,'fax_remitente','Fax Elastix','fax');
 INSERT INTO organization_properties VALUES(1,'fax_subject','Fax attached (ID: {NAME_PDF})','fax');
-INSERT INTO organization_properties VALUES(1,'fax_content','Fax sent from {COMPANY_NAME_FROM}. The phone number is {COMPANY_NUMBER_FROM}. <br> This email has a fax attached with ID {NAME_PDF}.','fax');
+INSERT INTO organization_properties VALUES(1,'fax_content','Fax sent from {FAX_CID_NAME}. The phone number is {FAX_CID_NUMBER}. <br> This email has a fax attached with ID {NAME_PDF}.','fax');
 
 INSERT INTO acl_group VALUES( 1,'superadmin','super elastix admin',1);
 INSERT INTO acl_group VALUES( 2,'administrator','Administrator',1);
@@ -277,7 +277,7 @@ INSERT INTO acl_resource VALUES('email_stats', 'Email stats', 'email_admin', '',
 INSERT INTO acl_resource VALUES('fax', 'Fax', '', '', '', 3,'yes','yes');
 INSERT INTO acl_resource VALUES('faxmgr', 'Virtual Fax', 'fax', '', '', 1,'yes','yes');
 INSERT INTO acl_resource VALUES('sendfax', 'Send Fax', 'faxmgr', '', 'module', 1,'yes','yes');
-INSERT INTO acl_resource VALUES('faxqueue', 'Fax Queue', 'faxmgr', '', 'module', 2,'yes','yes');
+INSERT INTO acl_resource VALUES('faxqueue', 'Fax Queue', 'faxmgr', '', 'module', 2,'yes','no');
 INSERT INTO acl_resource VALUES('faxviewer', 'Fax Viewer', 'fax', '', 'module', 2,'yes','yes');
 INSERT INTO acl_resource VALUES('faxmaster', 'Fax Master', 'fax', '', 'module', 3,'yes','no'); -- superadmin
 INSERT INTO acl_resource VALUES('faxclients', 'Fax Clients', 'fax', '', 'module', 4,'yes','no'); -- superadmin
@@ -501,9 +501,9 @@ INSERT INTO resource_action (id,id_resource,action) VALUES(61,'antispam','edit')
 INSERT INTO resource_action (id,id_resource,action) VALUES(62,'remote_smtp','access');
 INSERT INTO resource_action (id,id_resource,action) VALUES(63,'remote_smtp','edit');
 INSERT INTO resource_action (id,id_resource,action) VALUES(64,'email_list','access');
-INSERT INTO resource_action (id,id_resource,action) VALUES(65,'email_list','create');
-INSERT INTO resource_action (id,id_resource,action) VALUES(66,'email_list','edit');
-INSERT INTO resource_action (id,id_resource,action) VALUES(67,'email_list','delete');
+INSERT INTO resource_action (id,id_resource,action) VALUES(65,'email_list','create_list');
+INSERT INTO resource_action (id,id_resource,action) VALUES(66,'email_list','edit_list');
+INSERT INTO resource_action (id,id_resource,action) VALUES(67,'email_list','delete_list');
 INSERT INTO resource_action (id,id_resource,action) VALUES(68,'email_stats','access');
 
 -- fax
@@ -796,8 +796,6 @@ INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,77);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,79);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,80);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,81);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,80);
-INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,81);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,82);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(1,83);
 INSERT INTO group_resource_action (id_group,id_resource_action) VALUES(2,82);

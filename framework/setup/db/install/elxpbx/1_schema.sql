@@ -155,7 +155,8 @@ CREATE TABLE IF NOT EXISTS acl_user
     id_group INTEGER NOT NULL,
     extension VARCHAR(20),
     fax_extension VARCHAR(20),
-    picture varchar(50),
+    `picture_content` mediumblob,
+    `picture_type` varchar(50) DEFAULT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (id_group) REFERENCES acl_group(id) ON DELETE CASCADE,
     UNIQUE INDEX username (username)

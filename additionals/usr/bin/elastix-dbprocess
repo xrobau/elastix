@@ -124,8 +124,10 @@ if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
                 if($success)
                    $result = executeSQL($db,$path_folder,$sql_export,$key,$action,$password);
                 //If any error occur the SQL file will be copy to the path of FirstBoot
-                if(!$success || !$result)
-                    $result = copyToFirstBoot($path_folder,$key,$action);
+                if(!$success || !$result){
+                    $prefix=(isset($db['prefix']))?$db['prefix']:"";
+                    $result = copyToFirstBoot($path_folder,$key,$action,$prefix);
+                }
             }
         }
         if($result)
@@ -341,10 +343,15 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
  * @param  string   $action         Can be 'install' 'update' or 'delete'
  * @return bool     True if the SQL file was successfully copied, False if an error occurs
  */
-function copyToFirstBoot($path_folder, $dbName, $action)
+function copyToFirstBoot($path_folder, $dbName, $action, $prefix)
 {
-    echo "Copying $path_folder/1_sqlFile.sql to /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql\n";
-    exec("cp $path_folder/1_sqlFile.sql /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql",$arrConsole,$status);
+    if($prefix!=''){
+        $file="/var/spool/elastix-mysqldbscripts/$prefix"."_$dbName"."_$action.sql";
+    }else{
+        $file="/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql";
+    }
+    echo "Copying $path_folder/1_sqlFile.sql to $file\n";
+    exec("cp $path_folder/1_sqlFile.sql $file",$arrConsole,$status);
     echo "RETURN $status.\n";
     if($status != 0){
         echo "Error, Could not copy the file $path_folder/1_sqlFile.sql to FirstBoot.\n";

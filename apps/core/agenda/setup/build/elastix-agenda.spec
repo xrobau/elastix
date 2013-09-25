@@ -30,28 +30,18 @@ for FOLDER0 in $(ls -A modules/)
 do
 		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
 		do
-				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
-				do
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
-						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
-						fi
-					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-					fi
-				done
-				case "$FOLDER0" in 
-					frontend)
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-					;;
-					backend)
-							mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
-					;;
-				esac
+			case "$FOLDER0" in 
+				frontend)
+					mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+				;;
+				backend)
+					mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
+				;;
+			esac
+			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+			mv $bdir/modules/$FOLDER0/$FOLDER1/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
 		done
 done
 
@@ -138,10 +128,11 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, root, root)
-%{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
+%defattr(-, asterisk, asterisk)
 /usr/share/elastix/apps/*
+%{_localstatedir}/www/html/*
+%defattr(-, root, root)
+/usr/share/elastix/module_installer/*
 %defattr(-, asterisk, asterisk)
 /var/lib/asterisk/sounds/custom
 /var/lib/asterisk/sounds/custom/calendarEvent.gsm

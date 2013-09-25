@@ -3,7 +3,7 @@
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -23,13 +23,44 @@ Elastix EXTRA
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p                   $RPM_BUILD_ROOT/var/www/html/
-mv modules/                $RPM_BUILD_ROOT/var/www/html/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
+bdir=%{_builddir}/%{modname}
+for FOLDER0 in $(ls -A modules/)
+do
+		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
+		do
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
+				do
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/$FOLFI
+						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/$FOLFI/
+						fi
+					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+					fi
+				done
+				case "$FOLDER0" in 
+					frontend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						fi
+					;;
+					backend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						fi	
+					;;
+				esac
+		done
+done
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p                   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv -f setup/static/        $RPM_BUILD_ROOT/var/www/html/
 mv -f setup/xmlservices/   $RPM_BUILD_ROOT/var/www/html/
 mv setup/                  $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml                $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -61,11 +92,38 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+/usr/share/elastix/apps/*
 
 %changelog
+* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: extras - setup/infomodules.xml/: Within this folder are placed the new
+  xml files that will be in charge of creating the menus for each module.
+  SVN Rev[5857]
+
+* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: extras - modules: The modules were relocated under the new scheme
+  that differentiates administrator modules and end user modules .
+  SVN Rev[5856]
+
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Instant Messaging: fix references to uninitialized variables.
   SVN Rev[5811]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- REMOVED: Module Downloads, Help files with wrong names were deleted
+  SVN Rev[5730]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: The names of the Downloads module's help files were changed.
+  SVN Rev[5727]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- ADDED: extras modules, Static pages on Donwloads menu, were added as modules.
+  SVN Rev[5724]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -83,10 +141,12 @@ fi
 * Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 3.0.0-1
+  SVN Rev[4225]
 
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-1
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-18
+  SVN Rev[3832]
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
 - CHANGED: The split function of these modules was replaced by 

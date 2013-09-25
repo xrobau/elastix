@@ -34,42 +34,30 @@ rmdir setup/usr/share/elastix/privileged
 
 chmod +x setup/updateDatabase
 
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
 bdir=%{_builddir}/%{modname}
-if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
 for FOLDER0 in $(ls -A modules/)
 do
 		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
 		do
-				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
-				do
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
-						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
-						fi
-					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-					fi
-				done
-				case "$FOLDER0" in 
-					frontend)
+			case "$FOLDER0" in 
+				frontend)
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
 						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						fi
-					;;
-					backend)
+						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+					fi
+				;;
+				backend)
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
 						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						fi	
-					;;
-				esac
+						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+					fi	
+				;;
+			esac
+			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+			mv $bdir/modules/$FOLDER0/$FOLDER1/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
 		done
 done
-fi
 
 # Crontab for portknock authorization cleanup
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
@@ -151,9 +139,10 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, root, root)
-#%{_localstatedir}/www/html/*
+%defattr(-, asterisk, asterisk)
 %{_datadir}/elastix/apps/*
+%{_localstatedir}/www/html/*
+%defattr(-, root, root)
 %{_datadir}/elastix/module_installer/*
 %defattr(644, root, root)
 %{_sysconfdir}/cron.d/elastix-portknock.cron

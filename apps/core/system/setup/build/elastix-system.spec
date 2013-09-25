@@ -27,41 +27,31 @@ Elastix Module System
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/libs/
+mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mkdir -p    $RPM_BUILD_ROOT/var/www/backup
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
 bdir=%{_builddir}/%{modname}
 for FOLDER0 in $(ls -A modules/)
 do
 		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
 		do
-				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
-				do
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
-						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
-						fi
-					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-					fi
-				done
-				case "$FOLDER0" in 
-					frontend)
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-					;;
-					backend)
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
-					;;
-				esac
+			case "$FOLDER0" in 
+				frontend)
+					mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+				;;
+				backend)
+					mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
+				;;
+			esac
+			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+			mv $bdir/modules/$FOLDER0/$FOLDER1/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
 		done
 done
 
-mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
+mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mv setup/automatic_backup.php            $RPM_BUILD_ROOT/var/www/backup/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
 
@@ -136,8 +126,7 @@ rm -rf /tmp/new_module
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
-%preun
+*%preun
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete System menus"
@@ -148,10 +137,13 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, root, root)
+%defattr(-, asterisk, asterisk)
 %{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
 /usr/share/elastix/apps/*
+%defattr(644, asterisk, asterisk)
+/usr/share/elastix/libs/*
+%defattr(-, root, root)
+/usr/share/elastix/module_installer/*
 /var/www/backup/automatic_backup.php
 %defattr(755, root, root)
 /usr/sbin/switch_wanpipe_media

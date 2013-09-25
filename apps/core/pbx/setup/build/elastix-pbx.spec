@@ -41,8 +41,40 @@ mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
 mkdir -p $RPM_BUILD_ROOT/bin
 
 # Files provided by all Elastix modules
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/
-mv modules/ $RPM_BUILD_ROOT/var/www/html/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
+bdir=%{_builddir}/%{modname}
+for FOLDER0 in $(ls -A modules/)
+do
+		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
+		do
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
+				do
+					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/$FOLFI
+						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/ $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+						fi
+					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
+						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+					fi
+				done
+				case "$FOLDER0" in 
+					frontend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
+						fi
+					;;
+					backend)
+						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
+							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
+						fi	
+					;;
+				esac
+		done
+done
 
 # ** files ftp ** #
 #mkdir -p $RPM_BUILD_ROOT/var/ftp/config
@@ -269,12 +301,11 @@ touch /etc/asterisk/manager_additional.conf
 touch /etc/asterisk/features_general_additional.conf
 touch /etc/asterisk/dahdi-channels.conf
 touch /etc/asterisk/musiconhold_custom.conf
-touch /etc/asterisk/features_general_custom.conf
 touch /etc/asterisk/chan_dahdi_additional.conf
-touch /etc/asterisk/features_applicationmap_additional.conf
+#touch /etc/asterisk/features_applicationmap_additional.conf
+touch /etc/asterisk/features_general_custom.conf
 touch /etc/asterisk/features_applicationmap_custom.conf
-touch /etc/asterisk/features_featuremap_additional.conf
-touch /etc/asterisk/features_featuremap_custom.conf
+touch /etc/asterisk/features_map_custom.conf
 touch /etc/asterisk/extensions_globals.conf
 touch /etc/asterisk/sip_notify_additional.conf
 touch /etc/asterisk/sip_notify_custom.conf
@@ -305,6 +336,7 @@ if [ ! -e /var/lib/asterisk/sounds/tss/ ] ; then
 fi
 
 # Copy any unaccounted files from moh to mohmp3
+mkdir -p /var/lib/asterisk/mohmp3/none
 for i in /var/lib/asterisk/moh/* ; do
     if [ -e $i ] ; then
         BN=`basename "$i"`
@@ -342,14 +374,16 @@ fi
 /var/www/elastixdir/*
 /var/lib/asterisk/*
 /var/lib/asterisk/agi-bin
+/var/lib/asterisk/agi-bin/*
 /var/log/festival
 /var/lib/asterisk/sounds
 /var/lib/asterisk/sounds/conf-call-recorded.wav
 /var/lib/asterisk/sounds/conf-has-not-started.wav
 /var/lib/asterisk/sounds/conf-will-end-in.wav
 /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
-%defattr(-, root, root)
 %{_localstatedir}/www/html/*
+/usr/share/elastix/apps/*
+%defattr(-, root, root)
 /usr/share/elastix/module_installer/*
 /tftpboot/*
 /usr/share/elastix/tftp
@@ -359,7 +393,6 @@ fi
 /etc/init.d/festival
 /bin/asterisk.reload
 /usr/share/elastix/privileged/*
-/var/lib/asterisk/agi-bin/*
 /etc/cron.daily/asterisk_cleanup
 
 %changelog

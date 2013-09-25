@@ -34,6 +34,8 @@ mkdir -p    $RPM_BUILD_ROOT/etc/cron.d/
 mkdir -p    $RPM_BUILD_ROOT/usr/local/elastix/
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
 mkdir -p    $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
+mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/libs/
+
 
 # ** libs ** #
 mv setup/paloSantoEmail.class.php        $RPM_BUILD_ROOT/usr/share/elastix/libs/
@@ -60,19 +62,7 @@ for FOLDER0 in $(ls -A modules/)
 do
 		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
 		do
-				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
-				do
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
-						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
-						fi
-					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
-					fi
-				done
-				case "$FOLDER0" in 
+			case "$FOLDER0" in 
 				frontend)
 					mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
 					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
@@ -81,7 +71,9 @@ do
 					mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
 					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
 				;;
-				esac
+			esac
+			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
+			mv $bdir/modules/$FOLDER0/$FOLDER1/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
 		done
 done
 
@@ -210,11 +202,13 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, root, root)
+%defattr(-, asterisk, asterisk)
 %{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
 /usr/share/elastix/apps/*
+%defattr(644, asterisk, asterisk)
 /usr/share/elastix/libs/*
+%defattr(-, root, root)
+/usr/share/elastix/module_installer/*
 /usr/local/bin/spamfilter.sh
 /etc/imapd.conf.elastix
 /etc/postfix/main.cf.elastix

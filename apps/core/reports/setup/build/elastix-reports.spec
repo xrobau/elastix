@@ -24,22 +24,22 @@ rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
 #mkdir -p    $RPM_BUILD_ROOT/var/www/html/
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
 bdir=%{_builddir}/%{modname}
 for FOLDER0 in $(ls -A modules/)
 do
 		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
 		do
-				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
 				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
 				do
 					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI
+						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/$FOLFI
 						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/$FOLFI/
+							mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/ $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
 						fi
 					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/$FOLDER1/
+							mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
 					fi
 				done
 				case "$FOLDER0" in 
@@ -120,11 +120,13 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, root, root)
+%defattr(-, asterisk, asterisk)
 %{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
 /usr/share/elastix/apps/*
+%defattr(644, asterisk, asterisk)
 /usr/share/elastix/libs/*
+%defattr(-, root, root)
+/usr/share/elastix/module_installer/*
 
 %changelog
 * Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4

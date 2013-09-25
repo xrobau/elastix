@@ -240,7 +240,7 @@ INSERT INTO acl_user (id,username,name,md5_password,id_group) VALUES(1,'admin','
 INSERT INTO acl_resource VALUES('manager', 'Manager', '', '', '', 0,'yes','yes');
 INSERT INTO acl_resource VALUES('sysdash', 'Dashboard Manager', 'manager', '', '', 1,'yes','yes'); 
 INSERT INTO acl_resource VALUES('dashboard', 'Dashboard', 'sysdash', '', 'module', 1,'yes','yes'); 
-INSERT INTO acl_resource VALUES('applet_admin', 'Dashboard Applet Admin', 'sysdash', '', 'module', 1,'yes','yes'); 
+INSERT INTO acl_resource VALUES('applet_admin', 'Dashboard Applet Admin', 'sysdash', '', 'module', 2,'yes','yes'); 
 INSERT INTO acl_resource VALUES('orgmgr', 'Organization Manager', 'manager', '', '', 2,'yes','yes');
 INSERT INTO acl_resource VALUES('organization', 'Organization', 'orgmgr', '', 'module', 1,'yes','yes');
 INSERT INTO acl_resource VALUES('organization_permission', 'Organization Resource', 'orgmgr', '', 'module', 2,'yes','no'); -- superadmin

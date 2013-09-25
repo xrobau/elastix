@@ -946,6 +946,8 @@ class paloSip extends paloAsteriskDB {
         $arrQuery=array();
         $arrParam=array();
         
+        $table_params=array("organization_domain","port","defaultuser","host","type","context","deny","permit","acl","contactpermit","contactdeny","contactacl","transport","dtmfmode","directmedia","directmediapermit","directmediaacl","nat","language","tonezone","disallow","allow","trustrpid","progressinband","promiscredir","useclientcode","accountcode","callcounter","busylevel","allowoverlap","allowsubscribe","videosupport","maxcallbitrate","rfc2833compensate","session-timers","session-expires","session-minse","session-refresher","regexten","qualify","rtptimeout","rtpholdtimeout","sendrpid","timert1","timerb","qualifyfreq","constantssrc","usereqphone","textsupport","faxdetect","buggymwi","cid_number","callingpres","mohinterpret","mohsuggest","parkinglot","hasvoicemail","subscribemwi","vmexten","rtpkeepalive","g726nonstandard","ignoresdpversion","allowtransfer","subscribecontext","template","keepalive","t38pt_usertpsource");
+        
         $result=$this->getCodeByDomain($arrProp["organization_domain"]);
         if($result==false){
             $this->errMsg =_tr("Couldn't be set sip default parameters").$this->errMsg;
@@ -954,7 +956,7 @@ class paloSip extends paloAsteriskDB {
         
         $code=$result["code"];
         foreach($arrProp as $name => $value){
-            if(property_exists($this,$name)){
+            if(in_array($name,$table_params)){
                 if(isset($value)){
                     if($name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
                         if($value=="" || $value=="noset"){
@@ -995,6 +997,8 @@ class paloSip extends paloAsteriskDB {
         $Prop=array();
         $arrParam=array();
         
+        $table_params=array("organization_domain","port","defaultuser","host","type","context","deny","permit","acl","contactpermit","contactdeny","contactacl","transport","dtmfmode","directmedia","directmediapermit","directmediaacl","nat","language","tonezone","disallow","allow","trustrpid","progressinband","promiscredir","useclientcode","accountcode","callcounter","busylevel","allowoverlap","allowsubscribe","videosupport","maxcallbitrate","rfc2833compensate","session-timers","session-expires","session-minse","session-refresher","regexten","qualify","rtptimeout","rtpholdtimeout","sendrpid","timert1","timerb","qualifyfreq","constantssrc","usereqphone","textsupport","faxdetect","buggymwi","cid_number","callingpres","mohinterpret","mohsuggest","parkinglot","hasvoicemail","subscribemwi","vmexten","rtpkeepalive","g726nonstandard","ignoresdpversion","allowtransfer","subscribecontext","template","keepalive","t38pt_usertpsource");
+        
         if(empty($arrProp["organization_domain"]) || empty($arrProp["code"])){
             $this->errMsg =_tr("Couldn't be set sip default parameters.");
             return false;
@@ -1002,7 +1006,7 @@ class paloSip extends paloAsteriskDB {
         
         $code=$arrProp["code"];
         foreach($arrProp as $name => $value){
-            if(property_exists($this,$name)){
+            if(in_array($name,$table_params)){
                 if(isset($value)){
                     if($name!="_DB" && $name!="errMsg"){
                         if($value=="" || $value=="noset"){
@@ -1285,9 +1289,11 @@ class paloIax extends paloAsteriskDB {
             return false;
         }
         
+        $table_params=array("organization_domain","type","context","host","port","sourceaddress","mask","regexten","regseconds","accountcode","mohinterpret","mohsuggest","inkeys","outkey","language","sendani","maxauthreq","requirecalltoken","encryption","transfer","jitterbuffer","forcejitterbuffer","disallow","allow","codecpriority","qualify","qualifysmoothing","qualifyfreqok","qualifyfreqnotok","timezone","adsi","amaflags","setvar","permit","deny");
+        
         $code=$result["code"];
         foreach($arrProp as $name => $value){
-            if(property_exists($this,$name)){
+            if(in_array($name,$table_params)){
                 if(isset($value)){
                     if($name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
                         if($value=="" || $value=="noset"){
@@ -1312,6 +1318,8 @@ class paloIax extends paloAsteriskDB {
         $Prop=array();
         $arrParam=array();
         
+        $table_params=array("organization_domain","type","context","host","port","sourceaddress","mask","regexten","regseconds","accountcode","mohinterpret","mohsuggest","inkeys","outkey","language","sendani","maxauthreq","requirecalltoken","encryption","transfer","jitterbuffer","forcejitterbuffer","disallow","allow","codecpriority","qualify","qualifysmoothing","qualifyfreqok","qualifyfreqnotok","timezone","adsi","amaflags","setvar","permit","deny");
+        
         if(empty($arrProp["organization_domain"]) || empty($arrProp["code"])){
             $this->errMsg =_tr("Couldn't be set iax default parameters.");
             return false;
@@ -1319,7 +1327,7 @@ class paloIax extends paloAsteriskDB {
         
         $code=$arrProp["code"];
         foreach($arrProp as $name => $value){
-            if(property_exists($this,$name)){
+            if(in_array($name,$table_params)){
                 if(isset($value)){
                     if($name!="_DB" && $name!="errMsg"){
                         if($value=="" || $value=="noset"){
@@ -1571,9 +1579,11 @@ class paloVoicemail extends paloAsteriskDB{
             return false;
         }
         
+        $table_params=array("organization_domain","context","attach","attachfmt","serveremail","language","tz","deletevoicemail","saycid","sendvoicemail","emailsubject","emailbody","review","tempgreetwarn","operator","envelope","sayduration","saydurationm","forcename","forcegreetings","callback","dialout","exitcontext","maxmsg","volgain");
+        
         $code=$result["code"];
         foreach($arrProp as $name => $value){
-            if(property_exists($this,$name)){
+            if(in_array($name,$table_params)){
                 if(isset($value)){
                     if($name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
                         if($value=="" || $value=="noset"){
@@ -1603,9 +1613,11 @@ class paloVoicemail extends paloAsteriskDB{
             return false;
         }
         
+        $table_params=array("organization_domain","context","attach","attachfmt","serveremail","language","tz","deletevoicemail","saycid","sendvoicemail","emailsubject","emailbody","review","tempgreetwarn","operator","envelope","sayduration","saydurationm","forcename","forcegreetings","callback","dialout","exitcontext","maxmsg","volgain");
+        
         $code=$arrProp["code"];
         foreach($arrProp as $name => $value){
-            if(property_exists($this,$name)){
+            if(in_array($name,$table_params)){
                 if(isset($value)){
                     if($name!="_DB" && $name!="errMsg"){
                         if($value=="" || $value=="noset"){

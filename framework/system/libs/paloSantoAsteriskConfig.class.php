@@ -209,16 +209,6 @@ class paloSantoASteriskConfig{
                 }
             }
             
-            
-            //esto se hace para que el parametro nat de los peers sea llenado 
-            //con el valor yes por default. De pruebas internas realizadas se
-            //probo que si se ponia otro valor la media de las llamdas no alcanzaba
-            //al otro peers. 
-            //TODO: Averiguar porque sucede eso
-            if($tech=="sip"){
-                $arrSettings["nat"]="yes";
-            }
-            
             $arrSettings["organization_domain"]=$domain;
             $arrSettings["code"]=$codeOrg;
             if(!empty($language)){

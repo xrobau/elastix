@@ -3,7 +3,7 @@ ignore_backup = no
 engine = mysql
 path = /var/lib/mysql
 deletable = yes
-prefix = framework  
+prefix = 1  
 
 [register]
 ignore_backup = no

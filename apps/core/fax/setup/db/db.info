@@ -3,4 +3,4 @@ ignore_backup = yes
 engine = mysql
 path = /var/lib/mysql
 deletable = yes
-prefix = fax
+prefix = 3

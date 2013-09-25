@@ -865,7 +865,7 @@ function createFieldForm($tech,$arrOrgz)
 {
     $arrCid=array("off"=>_tr("Allow Any CID"), "on"=>_tr("Block Foreign CIDs"), "cnum"=>_tr("Remove CNAM"), "all"=>_tr("Force Trunk CID"));
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrAmaflag=array(""=>"noset","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
+    $arrAmaflag=array("noset"=>"","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
     $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
     $arrNat=array(""=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
     $arrType=array("friend"=>"friend","peer"=>"peer");
@@ -1040,7 +1040,7 @@ function createFieldForm($tech,$arrOrgz)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => "");
         $arrFormElements["amaflags"] =  array("LABEL"                  => _tr("amaflags"),
-                                                    "REQUIRED"               => "yes",
+                                                    "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrAmaflag,
                                                     "VALIDATION_TYPE"        => "text",
@@ -1238,10 +1238,10 @@ function createSipFrom(){
 function createIaxFrom(){
     $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrYesNod=array(""=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
-    $arrCodecPrio=array(""=>"noset","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
-    $encryption=array(""=>"noset","aes128"=>"aes128","yes"=>"yes","no"=>"no");
+    $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
+    $encryption=array("noset"=>"","aes128"=>"aes128","yes"=>"yes","no"=>"no");
     $arrFormElements = array("auth"   =>      array("LABEL"                  => _tr("auth"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",

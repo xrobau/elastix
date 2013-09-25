@@ -153,7 +153,7 @@ class paloFaxVisor
         if (empty($type)) $type = NULL;
         if (!is_null($fecha_fax) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_fax)) {
             $this->errMsg = '(internal) Invalid date for query, expected yyyy-mm-dd';
-            return NULL;
+            return false;
         }
         if (!is_null($type)) {
             $type = strtolower($type);
@@ -188,9 +188,9 @@ class paloFaxVisor
         
         $arrReturn = $this->_db->getFirstRowQuery($sPeticionSQL, TRUE, $paramSQL);
 
-        if ($arrReturn == FALSE) {
+        if ($arrReturn === FALSE) {
             $this->errMsg = $this->_db->errMsg;
-            return array();
+            return false;
         }
         return $arrReturn['cantidad'];
     }

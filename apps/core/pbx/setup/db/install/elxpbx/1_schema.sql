@@ -238,8 +238,6 @@ CREATE TABLE IF NOT EXISTS sip_settings (
       rtptimeout int(11) DEFAULT NULL,
       rtpholdtimeout int(11) DEFAULT NULL,
       sendrpid enum('yes','no','pai','yes,pai') DEFAULT 'no',
-      outboundproxy varchar(40) DEFAULT NULL,
-      callbackextension varchar(40) DEFAULT NULL,
       timert1 int(11) DEFAULT NULL,
       timerb int(11) DEFAULT NULL,
       qualifyfreq int(11) DEFAULT NULL,

@@ -627,11 +627,11 @@ function createSipForm($arrMOH){
 function createIaxForm(){
     $arrTrans=array("yes"=>"yes","no"=>"no","mediaonly"=>"mediaonly");
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrYesNod=array("noset"=>"noset","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
     $arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
-    $arrCodecPrio=array("noset"=>"noset","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
-    $encryption=array("noset"=>"noset","aes128"=>"aes128","yes"=>"yes","no"=>"no");
+    $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
+    $encryption=array("noset"=>"","aes128"=>"aes128","yes"=>"yes","no"=>"no");
     $arrFormElements = array("iax_transfer"  => array("LABEL"                  => _tr("transfer"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",

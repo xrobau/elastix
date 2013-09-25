@@ -90,11 +90,12 @@ class paloSantoAddons
 	try {
 	    if(is_null($sNombre))
 		$sNombre = '';
+	    $architect = shell_exec('uname -i');	
 	    $iNumAddons = $client->getNumAddonsAvailables(
-		ELASTIX_WEBSERVICE_API_VERSION, 'name', $sNombre, 'all');
+		ELASTIX_WEBSERVICE_API_VERSION, 'name', $sNombre, 'all', FALSE,$architect);
 	    $recordset = $client->getAddonsAvailables(
 		ELASTIX_WEBSERVICE_API_VERSION, $iNumAddons, 0, 'name', $sNombre, 
-		$this->getSID(), 'all');
+		$this->getSID(), 'all', FALSE, $architect);
 
 	    // Listar los RPMS instalados en el sistema
 	    $listaRPMS = array();

@@ -69,8 +69,49 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 ## ** Step 2: Installation of files and folders ** ##
 # ** Installating framework elastix webinterface ** #
 rm -rf $RPM_BUILD_DIR/elastix-framework/framework/html/modules/userlist/  # Este modulo no es el modificado para soporte de correo, eso se encuentra en modules-core
+
 mv $RPM_BUILD_DIR/elastix-framework/framework/html/*                              $RPM_BUILD_ROOT/var/www/html/
-mv $RPM_BUILD_DIR/elastix-framework/framework/system/*				  $RPM_BUILD_ROOT/usr/share/elastix/
+if [ -d $RPM_BUILD_ROOT/var/www/html/admin/web/themes/giox ]; then
+	rm -rf $RPM_BUILD_ROOT/var/www/html/admin/web/themes/giox
+fi
+
+if [ -d $RPM_BUILD_ROOT/var/www/html/admin/web/themes/blackmin ]; then
+	rm -rf $RPM_BUILD_ROOT/var/www/html/admin/web/themes/blackmin
+fi
+#mv $RPM_BUILD_DIR/elastix-framework/framework/system/*				  $RPM_BUILD_ROOT/usr/share/elastix/
+
+mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
+bdir=%{_builddir}/%{name}/framework/system
+for FOLDER0 in $(ls -A $bdir/)
+do
+		if [ "$FOLDER0" == "apps" ]; then
+			for FOLDER1 in $(ls -A $bdir/$FOLDER0/)
+			do
+				for FOLFI in $(ls -A $bdir/$FOLDER0/$FOLDER1/)
+				do
+					case "$FOLDER1" in 
+						frontend)
+							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/ ]; then
+								mkdir -p $RPM_BUILD_ROOT/var/www/html/web/$FOLDER0/$FOLFI/
+								mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/web/$FOLDER0/$FOLFI/
+							fi
+						;;
+						backend)
+							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/ ]; then
+								mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/$FOLDER0/$FOLFI/
+							mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/$FOLDER0/$FOLFI/
+							fi
+						;;
+					esac
+					mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/$FOLFI
+					mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/$FOLFI/
+				done 
+			done
+		else
+			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0
+			mv $bdir/$FOLDER0/* $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/
+		fi
+done
 
 # ** Installating modules elastix webinterface ** #
 #mv $RPM_BUILD_DIR/elastix/modules-core/*                                $RPM_BUILD_ROOT/var/www/html/modules/
@@ -256,7 +297,8 @@ fi
 rm -rf /var/www/html/var/templates_c/*
 
 # Patch elastix.ini to work around %config(noreplace) in previous versions 
-sed --in-place "s,/tmp,/var/lib/php/session-asterisk,g" /etc/php.d/elastix.ini 
+sed --in-place "s,/tmp,/var/lib/php/session-asterisk,g" /etc/php.d/elastix.ini
+umask 007 /var/lib/php/session-asterisk
 if [ $1 -eq 1 ]; then #install
     /sbin/service httpd status > /dev/null 2>&1
     if [ "$?" == "0" ]; then
@@ -292,19 +334,22 @@ rm -rf $RPM_BUILD_ROOT
 # basic contains some reasonable sane basic tiles
 %files
 %defattr(-, asterisk, asterisk)
-#/var/www/html/var
+#/var/www/html/
 /var/www/db
 /var/www/backup
 /var/log/elastix
 /var/log/elastix/*
-# %config(noreplace) /var/www/db/
-%defattr(-, root, root)
 /var/www/html/favicon.ico
 /var/www/html/admin
 /var/www/html/tmp
 /var/www/html/web
 /var/www/html/*.php
 /var/www/html/robots.txt
+/usr/share/elastix/apps/*
+%defattr(644, asterisk, asterisk)
+/usr/share/elastix/libs/*
+# %config(noreplace) /var/www/db/
+%defattr(-, root, root)
 /usr/share/elastix/*
 /usr/share/pear/DB/sqlite3.php
 /usr/local/elastix/sampler.php
@@ -328,7 +373,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/generic-cloexec
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
-%defattr(770, root, asterisk)
+%defattr(770, root, asterisk, 770)
 /var/lib/php/session-asterisk
 
 %changelog

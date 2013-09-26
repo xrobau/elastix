@@ -130,6 +130,9 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Sep 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.4-0
+- Bump version for release
+
 * Tue Sep 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: do not allow any code path to exit the 
   configurator without printing the end banner. This is required for the GUI to

@@ -2,7 +2,7 @@
 
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
-Version: 0.0.3
+Version: 0.0.4
 Release: 0
 License: GPL
 Group:   Applications/System

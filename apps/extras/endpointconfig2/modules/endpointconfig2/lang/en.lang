@@ -106,5 +106,7 @@ $arrLangModule = array(
     "Log of last configuration" => "Log of last configuration",
     "Apply" => "Apply",
     "Dismiss" => "Dismiss",
+    "All endpoints were successfully configured" => "All endpoints were successfully configured",
+    "Endpoint configuration completed with %d warnings and %d errors. Please examine the log for details." => "Endpoint configuration completed with %d warnings and %d errors. Please examine the log for details.",
 );
 ?>

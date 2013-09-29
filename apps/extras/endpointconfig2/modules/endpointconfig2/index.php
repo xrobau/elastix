@@ -141,6 +141,7 @@ function handleHTML_mainReport($smarty, $module_name, $local_templates_dir, $dlg
             'CONFIRM_FORGET'        =>  _tr('Please confirm in order to remove tracking of selected endpoints. All configuration files for selections will be removed but no accounts will be removed from the phone or this system.'),
             'TITLE_ENDPOINT_CONFIG' =>  _tr('Endpoint configuration for'),
             'TITLE_LASTLOG'         =>  _tr('Log of last configuration'),
+            'CONFIGURATION_SUCCESS' =>  _tr('All endpoints were successfully configured'),
             'LBL_APPLY'             =>  _tr('Apply'),
             'LBL_DISMISS'           =>  _tr('Dismiss'),
         )),

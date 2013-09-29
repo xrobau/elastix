@@ -130,6 +130,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sun Sep 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add status message at the end of the 
+  configuration process indicating whether there were warnings or errors.
+  SVN Rev[5953]
+
 * Thu Sep 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.4-0
 - Bump version for release
 

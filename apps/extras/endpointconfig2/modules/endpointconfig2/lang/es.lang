@@ -106,5 +106,7 @@ $arrLangModule = array(
     "Log of last configuration" => "Registro de última configuración",
     "Apply" => "Aplicar",
     "Dismiss" => "Cerrar",
+    "All endpoints were successfully configured" => "Todos los endpoints se configuraron exitosamente",
+    "Endpoint configuration completed with %d warnings and %d errors. Please examine the log for details." => "Configuración de endpoints completada con %d advertencias y %d errores. Por favor examine el registro para más detalles.",
 );
 ?>

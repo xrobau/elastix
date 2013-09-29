@@ -1,3 +1,13 @@
+{* Este DIV se usa para mostrar los mensajes de información *}
+<div
+    id="elastix-module-info-message"
+    class="ui-state-highlight ui-corner-all"
+    style="display: none;">
+    <p>
+        <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+        <span id="elastix-module-info-message-text"></span>
+    </p>
+</div>
 {* Este DIV se usa para mostrar los mensajes de error *}
 <div
     id="elastix-module-error-message"

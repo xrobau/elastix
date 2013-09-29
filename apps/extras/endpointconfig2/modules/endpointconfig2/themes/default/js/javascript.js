@@ -529,6 +529,8 @@ $(document).ready(function() {
 			}
 		},
 		manejarRespuestaStatus: function(respuesta) {
+			console.debug(respuesta);
+			
 			// Intentar recargar la página en caso de error
 			if (respuesta.error != null) {
 				window.alert(respuesta.error);
@@ -557,7 +559,7 @@ $(document).ready(function() {
 			if (respuesta.completedsteps != null) this.set('completedsteps', respuesta.completedsteps);
 			if (respuesta.founderror != null) this.set('founderror', respuesta.founderror);
 			
-			for (var i = 0; i < respuesta.endpointchanges.length; i++) {
+			if (respuesta.endpointchanges != null) for (var i = 0; i < respuesta.endpointchanges.length; i++) {
 				epinfo = respuesta.endpointchanges[i][1];
 				switch (respuesta.endpointchanges[i][0]) {
 				case 'insert':
@@ -600,6 +602,14 @@ $(document).ready(function() {
 						this.longPoll.abort();
 						this.longPoll = null;
 					}
+					
+					// Mostrar posible mensaje de error
+					if (epinfo != null) {
+						mostrar_mensaje_error(epinfo);
+					} else {
+						mostrar_mensaje_info(arrLang_main['CONFIGURATION_SUCCESS']);
+					}
+					
 					return false;	// Se aborta la petición periódica
 				}
 			}
@@ -1044,6 +1054,16 @@ function mostrar_mensaje_error(s)
 	$('#elastix-module-error-message').show('slow', 'linear', function() {
 		setTimeout(function() {
 			$('#elastix-module-error-message').fadeOut();
+		}, 10000);
+	});
+}
+
+function mostrar_mensaje_info(s)
+{
+	$('#elastix-module-info-message-text').text(s);
+	$('#elastix-module-info-message').show('slow', 'linear', function() {
+		setTimeout(function() {
+			$('#elastix-module-info-message').fadeOut();
 		}, 10000);
 	});
 }

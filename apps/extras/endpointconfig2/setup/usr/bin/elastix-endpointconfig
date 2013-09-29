@@ -236,7 +236,7 @@ def main():
                 logging.info('(%d/%d) global configuration update for %s...' %
                     (iCurrentStep, iTotalSteps, endpointVendor))
                 if not eclass.updateGlobalConfig(serveriplist, amipool, endpointByClass[endpointVendor]):
-                    raise elastix.ConfigException('ERR: global configuration update failed for %s' % (endpointVendor,))
+                    raise elastix.ConfigException('global configuration update failed for %s' % (endpointVendor,))
                 iCurrentStep += 1
             
             # Update local configuration for all the endpoints. Each endpoint gets its
@@ -250,7 +250,7 @@ def main():
             for endpointVendor in endpointClasses:
                 eclass = endpointClasses[endpointVendor]
                 if not eclass.deleteGlobalContent(serveriplist, amipool, endpointByClass[endpointVendor]):
-                    raise elastix.ConfigException('ERR: global configuration clear failed for %s' % (endpointVendor,))
+                    raise elastix.ConfigException('global configuration clear failed for %s' % (endpointVendor,))
 
             # Execute the deleteContent method on all of the endpoints
             for ip in endpointList:
@@ -313,7 +313,7 @@ def getDatabaseCredentials():
     if dbcred[0] != None and dbcred[1] != None:
         return dbcred
     else:
-        raise elastix.ConfigException('Failed to get database credentials\n')
+        raise elastix.ConfigException('failed to get database credentials\n')
 
 def getAsteriskCredentials():
     '''Get Asterisk credentials to connect to AMI '''

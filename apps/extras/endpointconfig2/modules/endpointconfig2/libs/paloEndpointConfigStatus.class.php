@@ -77,7 +77,9 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
     	$this->_logfd = @fopen($currentClientState['configLog'], 'r');
         if (!$this->_logfd) {
         	// Archivo no existe, no se puede monitorear
-            $jsonResponse['endpointchanges'][] = array('quit', NULL);
+            $jsonResponse['endpointchanges'][] = array(
+                'quit',
+                _tr('(internal) No configuration log found - configuration process not started!'));
             $currentClientState['logOffset'] = 0;
             $currentClientState['configLog'] = NULL;
             return FALSE;
@@ -97,7 +99,7 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
             if ($fstat['size'] > $curpos) {
             	break;
             } else {
-            	usleep(500000);
+            	usleep(250 * 1000);
             }
     	} while (microtime(TRUE) - $a < 1.0);
         return TRUE;
@@ -114,6 +116,22 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
             unlink($currentClientState['configLog']);
             $currentClientState['logOffset'] = 0;
             $currentClientState['configLog'] = NULL;
+            
+            // Contar los mensajes de advertencias y errores
+            $iQuitMsg = count($jsonResponse) - 1;
+            if ($iQuitMsg >= 0 && $jsonResponse['endpointchanges'][$iQuitMsg][0] == 'quit') {
+            	$lineas = explode("\n", $s);
+                $warnings = $errors = 0;
+                foreach ($lineas as $l) {
+                	if (strpos($l, 'WARNING: ') !== FALSE) $warnings++;
+                    if (strpos($l, 'ERROR: ') !== FALSE) $errors++;
+                }
+                if ($warnings + $errors > 0) {
+                	$jsonResponse['endpointchanges'][$iQuitMsg][1] = sprintf(
+                        _tr('Endpoint configuration completed with %d warnings and %d errors. Please examine the log for details.'),
+                        $warnings, $errors);
+                }
+            }
             
             $this->_db->genQuery('DELETE FROM configlog WHERE 1');
             $this->_db->genQuery('INSERT INTO configlog (lastlog) VALUES (?)', array($s));
@@ -136,6 +154,10 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
                 fseek($this->_logfd, $currentClientState['logOffset'], SEEK_SET);
             	break;
             }
+
+            if (!isset($jsonResponse['endpointchanges']))
+                $jsonResponse['endpointchanges'] = array();
+
             if (strpos($s, 'END ENDPOINT CONFIGURATION') !== FALSE) {
                 $jsonResponse['endpointchanges'][] = array('quit', NULL);
                 $currentClientState['endpoints'] = NULL;
@@ -145,13 +167,17 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
             
             $regs = NULL;
             // 2013-07-03 12:24:25 : INFO: (elastix-endpointconfig) (1/3) global configuration update for VOPTech...
-            if (preg_match('|^(\S+ \S+) : \w+: \(elastix-endpointconfig\) \((\d+)/(\d+)\) global configuration update for|', $s, $regs)) {
+            if (preg_match('|^(\S+ \S+) : \w+: \(elastix-endpointconfig\) \((\d+)/(\d+)\) global configuration update (failed)?\s*for|', $s, $regs)) {
                 $logdate = $regs[1];
                 $curstep = $regs[2];
                 $totalstep = $regs[3];
+                $failed = $regs[4];
                 
                 $jsonResponse['totalsteps'] = (int)$totalstep;
                 $jsonResponse['completedsteps'] = (int)$curstep;
+                if ($failed == 'failed') {
+                	$jsonResponse['founderror'] = TRUE;
+                }
                 
             // 2013-07-03 12:24:25 : INFO: (elastix-endpointconfig) (2/3) starting configuration for endpoint VOPTech@192.168.254.245 (1)...
             } elseif (preg_match('|^(\S+ \S+) : \w+: \(elastix-endpointconfig\) \((\d+)/(\d+)\) (\w+) configuration for endpoint \S+@(\S+) \((\d+)\)|', $s, $regs)) {
@@ -164,8 +190,6 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
 
                 $jsonResponse['totalsteps'] = (int)$totalstep;
                 $jsonResponse['completedsteps'] = (int)$curstep;
-                if (!isset($jsonResponse['endpointchanges']))
-                    $jsonResponse['endpointchanges'] = array();
                 if ($type == 'finished') {
                     $this->_procesarRegistroCambio('update', $id_endpoint, $currentClientState['endpoints'], $jsonResponse['endpointchanges']);
                 } elseif ($type == 'failed') {

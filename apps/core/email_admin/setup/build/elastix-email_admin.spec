@@ -158,7 +158,7 @@ fi
 
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge $pathModule/setup/infomudules
+elastix-menumerge $pathModule/setup/infomodules
 
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`

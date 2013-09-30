@@ -1125,32 +1125,19 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 function getAction(){
     global $arrPermission;
     if(getParameter("create_user")){
-        //preguntar si el usuario puede hacer accion
         return (in_array('create_user',$arrPermission))?'new_user':'report';
-        //return 'new_user';
     }else if(getParameter("save_new")){ //Get parameter by POST (submit)
-        //preguntar si el usuario puede hacer accion
         return (in_array('create_user',$arrPermission))?'save_new':'report';
-        //return 'save_new';
     }else if(getParameter("save_edit")){
-        //preguntar si el usuario puede hacer accion
         return (in_array('edit_user',$arrPermission))?'save_edit':'report';
-        //return 'save_edit';
     }else if(getParameter("edit")){
-        //preguntar si el usuario puede hacer accion
         return (in_array('edit_user',$arrPermission))?'edit':'report';
-        //return 'edit';
     }else if(getParameter("delete")){
-        //preguntar si el usuario puede hacer accion
         return (in_array('delete_user',$arrPermission))?'delete':'report';
-        //return 'delete';
     }else if(getParameter("action")=="view"){      //Get parameter by GET (command pattern, links)
-        return 'view'; //con el permison de acceso puede revisar la informacion que este dentro del modulo
+        return 'view'; 
     }else if(getParameter("action")=="reconstruct_mailbox"){
         return (in_array('reconstruct_mailbox',$arrPermission))?'reconstruct_mailbox':'report';
-        //return 'reconstruct_mailbox';
-    /*else if(getParameter("action")=="changes_email_quota"){
-        //return (in_array('edit_user',$arrPermission))?'changes_email_quota':'report';*/
     }else if(getParameter("action")=="get_groups"){
         return "getGroups";
     }else if(getParameter("action")=="getImage"){

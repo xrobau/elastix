@@ -97,9 +97,9 @@ rmdir setup/elastixdir
 
 # **Recordings use by Conference Module
 mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
-cp %{SOURCE1}             	$RPM_BUILD_ROOT/var/lib/asterisk/sounds/
-cp %{SOURCE2}           	$RPM_BUILD_ROOT/var/lib/asterisk/sounds/
-cp %{SOURCE3}               	$RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+cp %{SOURCE1}           $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+cp %{SOURCE2}           $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
+cp %{SOURCE3}           $RPM_BUILD_ROOT/var/lib/asterisk/sounds/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -155,10 +155,6 @@ mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{versi
 
 
 %pre
-#Para migrar monitor
-touch /tmp/migration_version_monitor.info
-rpm -q --queryformat='%{VERSION}\n%{RELEASE}' elastix > /tmp/migration_version_monitor.info
-
 # TODO: TAREA DE POST-INSTALACIÓN
 #useradd -d /var/ftp -M -s /sbin/nologin ftpuser
 
@@ -187,43 +183,10 @@ chmod 777 /tftpboot/
 # Reemplazo archivos de otros paquetes: tftp, vsftp
 cat /usr/share/elastix/tftp   > /etc/xinetd.d/tftp
 
-######### Para ejecucion del migrationFilesMonitor.php ##############
 
-#/usr/share/elastix/migration_version_monitor.info
-#obtener la primera linea que contiene la version
-
-vers=`sed -n '1p' "/tmp/migration_version_monitor.info"`
-if [ "$vers" = "1.6.2" ]; then
-  rels=`sed -n '2p' "/tmp/migration_version_monitor.info"`
-  if [ $rels -le 13 ]; then # si el release es menor o igual a 13 entonces ejecuto el script
-
-    echo "Executing process migration audio files Monitor"
-    chmod +x /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/migrationFilesMonitor.php
-    php /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/migrationFilesMonitor.php
-  fi
-fi
-rm -rf /tmp/migration_version_monitor.info
 ###################################################################
 
 varwriter=0
-
-if [ -f "/etc/asterisk/extensions_override_freepbx.conf" ]; then
-    echo "File extensions_override_freepbx.conf in asterisk exits, verifying macro record-enable and hangupcall exists..."
-    grep "#include extensions_override_elastix.conf" /etc/asterisk/extensions_override_freepbx.conf &>/dev/null
-    res=$?
-    if [ $res -eq 1 ]; then #macro record-enable not exists
-	echo "#include extensions_override_elastix.conf" > /tmp/ext_over_freepbx.conf
-        cat /etc/asterisk/extensions_override_freepbx.conf >> /tmp/ext_over_freepbx.conf
-        cat /tmp/ext_over_freepbx.conf > /etc/asterisk/extensions_override_freepbx.conf
-	rm -rf /tmp/ext_over_freepbx.conf
-        echo "macros elastix was written."
-    fi
-else
-    echo "File extensions_override_freepbx.conf in asterisk not exits, copying include macros elastix..."
-    touch /etc/asterisk/extensions_override_freepbx.conf
-    echo "#include extensions_override_elastix.conf" > /etc/asterisk/extensions_override_freepbx.conf
-fi
-
 # verifico si se incluye a sip_notify_custom_elastix.conf
 if [ -f "/etc/asterisk/sip_notify_custom.conf" ]; then
     echo "/etc/asterisk/sip_notify_custom.conf exists, verifying the inclusion of sip_notify_custom_elastix.conf"
@@ -244,7 +207,6 @@ else
 fi
 
 varwriter=1
-mv /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf /etc/asterisk/
 chown -R asterisk.asterisk /etc/asterisk
 
 if [ $varwriter -eq 1  ]; then
@@ -257,7 +219,7 @@ fi
 
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
+elastix-menumerge $pathModule/setup/infomodules
 
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
@@ -266,7 +228,7 @@ rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
-  elastix-dbprocess "install" "/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/db"
+  elastix-dbprocess "install" "$pathModule/setup/db"
 
   # Ruta a módulos es incorrecta en 64 bits. Se corrige a partir de ruta de Asterisk.
   RUTAREAL=`grep astmoddir /etc/asterisk/asterisk.conf | sed 's|^.* \(/.\+\)$|\1|' -`
@@ -346,20 +308,12 @@ for i in /var/lib/asterisk/moh/* ; do
     fi
 done
 
-# Change moh to mohmp3 on all Asterisk configuration files touched by FreePBX
-for i in /etc/asterisk/musiconhold*.conf ; do
-    if ! grep -q -s '^directory=/var/lib/asterisk/moh$' $i ; then
-        echo "Replacing instances of moh with mohmp3 in $i ..."
-        sed -i "s|^directory=/var/lib/asterisk/moh\(/\)\?$|directory=/var/lib/asterisk/mohmp3/|" $i
-    fi
-done
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %preun
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm; delete
-pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
+  pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
   echo "Delete System menus"
   elastix-menuremove "pbxconfig"
 

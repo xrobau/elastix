@@ -81,7 +81,6 @@ rmdir setup/usr/share/elastix setup/usr/share setup/usr
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/   $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
 
 %pre
 mkdir -p %{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -94,7 +93,7 @@ fi
 pathModule="%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}"
 
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge $pathModule/menu.xml
+elastix-menumerge $pathModule/setup/infomodules
 pathSQLiteDB="%{_localstatedir}/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
@@ -117,8 +116,6 @@ chown -R asterisk.asterisk /tmp/new_module/%{modname}
 
 php /tmp/new_module/%{modname}/setup/installer.php
 rm -rf /tmp/new_module
-
-%{_datadir}/elastix/privileged/anonymoussip --conddisable
 
 # Install elastix-portknock as a service
 chkconfig --add elastix-portknock

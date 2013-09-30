@@ -88,19 +88,11 @@ mv setup/paloSantoFax.class.php               $RPM_BUILD_ROOT/usr/share/elastix/
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 # new for fax
 mkdir -p $RPM_BUILD_ROOT/var/log/iaxmodem
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc
-mkdir -p $RPM_BUILD_ROOT/var/www/faxes
-mkdir -p $RPM_BUILD_ROOT/var/www/faxes/recvd
-mkdir -p $RPM_BUILD_ROOT/var/www/faxes/sent
-
-# ** Fax Visor additional config ** #
-chmod 755 $RPM_BUILD_ROOT/var/www/faxes
-chmod 775 $RPM_BUILD_ROOT/var/www/faxes/recvd $RPM_BUILD_ROOT/var/www/faxes/sent
 
 %pre
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -140,38 +132,15 @@ for i in `ls /var/spool/hylafax/etc/config.* 2>/dev/null`; do
   fi
 done
 
-# Cambio de nombre de carpetas de faxes, esto es desde elastix 1.4
-if [ -d "/var/www/html/faxes/recvq" ]; then
-        mv /var/www/html/faxes/recvq/* /var/www/faxes/recvd
-        rm -rf /var/www/html/faxes/recvq
-fi
-
-if [ -d "/var/www/html/faxes/sendq" ]; then
-        mv /var/www/html/faxes/sendq/* /var/www/faxes/sent
-        rm -rf /var/www/html/faxes/sendq
-fi
-
-if [ -d "/var/www/html/faxes" ]; then
-        mv /var/www/html/faxes/* /var/www/faxes
-fi
-
-# Fix ownership and permission for sudo-less notification scripts
-if [ $1 -eq 2 ]; then
-	chmod 775 /var/www/faxes/recvd /var/www/faxes/sent
-	chown asterisk.uucp /var/www/faxes/recvd /var/www/faxes/sent
-fi
-
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
+elastix-menumerge $pathModule/setup/infomodules
 
-pathSQLiteDB="/var/www/db"
-mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
 rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
-  # en caso de instalacion movemos el archivo FaxDispatch
+# en caso de instalacion movemos el archivo FaxDispatch
     if [ -f /var/spool/hylafax/etc/FaxDispatch ]; then
         fecha=$(date +%F.%T) 
         mv /var/spool/hylafax/etc/FaxDispatch /var/spool/hylafax/etc/FaxDispatch_$fecha
@@ -179,7 +148,7 @@ if [ $1 -eq 1 ]; then #install
     mv $pathModule/FaxDispatch /var/spool/hylafax/etc/FaxDispatch
     chmod 644 /var/spool/hylafax/etc/FaxDispatch
     chown uucp.uucp /var/spool/hylafax/etc/FaxDispatch
-  # The installer database
+# The installer database
     elastix-dbprocess "install" "$pathModule/setup/db"
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"

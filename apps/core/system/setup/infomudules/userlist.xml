@@ -9,7 +9,7 @@
 						<group id="2" name="administrator" desc="Administrator" />
 					</groups>
 				</action>
-				<action name="create_user|delete_user|edit_user|reconstruct_mailbox">
+				<action name="create_user|delete_user|edit_user|reconstruct_mailbox|edit_email_quota">
 					<groups>
 						<group id="1" name="superadmin"    desc="Super Admin"   />
 						<group id="2" name="administrator" desc="Administrator" />

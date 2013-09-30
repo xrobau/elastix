@@ -3,12 +3,7 @@
 	<menu id="organization_permission" name="Organization Resource" idParent="orgmgr" type="module" link=""  order_no="2">
 		<permissions administrative="yes" organization_access="no" >
 			<actions>
-				<action name="access">
-					<groups>
-						<group id="1" name="superadmin"    desc="Super Admin"   />
-					</groups>
-				</action>
-				<action name="edit">
+				<action name="access|edit">
 					<groups>
 						<group id="1" name="superadmin"    desc="Super Admin"   />
 					</groups>

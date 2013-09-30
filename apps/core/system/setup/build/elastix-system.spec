@@ -79,7 +79,6 @@ rmdir setup/usr
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 %pre
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -92,7 +91,7 @@ fi
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge $pathModule/menu.xml
+elastix-menumerge $pathModule/setup/infomodules
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
@@ -103,16 +102,6 @@ if [ $1 -eq 1 ]; then #install
     elastix-dbprocess "install" "$pathModule/setup/db"
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
-fi
-
-# If openfire is not running probably we're in the distro installation process
-# So, i configure openfire init script as stopped by default
-/sbin/service openfire status | grep "not running" &>/dev/null
-res=$?
-# Openfire esta apagado
-if [ $res -eq 0 ]; then
-    # Desactivo el servicio openfire al inicio
-    chkconfig --level 2345 openfire off
 fi
 
 
@@ -126,11 +115,14 @@ rm -rf /tmp/new_module
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-*%preun
+
+%preun
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete System menus"
   elastix-menuremove "%{modname}"
+# this is necesary because system put to main menus 
+  elastix-menuremove "manager" 
 
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"

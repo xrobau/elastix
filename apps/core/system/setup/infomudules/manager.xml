@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>	
 <module>
-	<menu id="usermgr" name="User/Group Manager" idParent="system" type="" link=""  order_no="3">
+	<menu id="manager" name="Manager" idParent="" type="" link=""  order_no="0">
 		<permissions administrative="yes" organization_access="yes" >       
 		</permissions>  
 	</menu>

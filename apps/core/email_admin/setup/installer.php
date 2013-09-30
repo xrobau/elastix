@@ -28,13 +28,4 @@
 */
 
 $DocumentRoot = (isset($_SERVER['argv'][1]))?$_SERVER['argv'][1]:"/var/www/html";
-$DataBaseRoot = "/var/www/db";
-$tmpDir = '/tmp/new_module/email_admin';  # in this folder the load module extract the package content
-
-if(!file_exists("$DataBaseRoot/email.db")){
-    $cmd_mv    = "mv $tmpDir/setup/email.db $DataBaseRoot/";
-    $cmd_chown = "chown asterisk.asterisk $DataBaseRoot/email.db";
-    exec($cmd_mv);
-    exec($cmd_chown);
-}
 ?>

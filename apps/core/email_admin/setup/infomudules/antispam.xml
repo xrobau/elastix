@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>	
 <module>
-	<menu id="remote_smtp" name="Remote SMTP" idParent="email_admin" type="module" link=""  order_no="4">
+	<menu id="antispam" name="Antispam" idParent="email_admin" type="module" link=""  order_no="2">
 		<permissions administrative="yes" organization_access="no" >
 			<actions>
 				<action name="access">

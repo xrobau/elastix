@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>	
 <module>
-	<menu id="email_stats" name="Email stats" idParent="email_admin" type="module" link=""  order_no="6">
+	<menu id="remote_smtp" name="Remote SMTP" idParent="email_admin" type="module" link=""  order_no="3">
 		<permissions administrative="yes" organization_access="no" >
 			<actions>
 				<action name="access">
+					<groups>
+						<group id="1" name="superadmin"    desc="Super Admin"   />
+					</groups>
+				</action>
+				<action name="edit">
 					<groups>
 						<group id="1" name="superadmin"    desc="Super Admin"   />
 					</groups>

@@ -29,7 +29,6 @@ mkdir -p    $RPM_BUILD_ROOT/etc/logrotate.d/
 mkdir -p    $RPM_BUILD_ROOT/etc/postfix
 mkdir -p    $RPM_BUILD_ROOT/usr/local/bin/
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mkdir -p    $RPM_BUILD_ROOT/var/www/html/libs/
 mkdir -p    $RPM_BUILD_ROOT/etc/cron.d/
 mkdir -p    $RPM_BUILD_ROOT/usr/local/elastix/
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
@@ -105,7 +104,6 @@ rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
 rmdir setup/usr/local/bin setup/usr/local setup/usr 
 
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 %pre
 # ****Agregar el usuario cyrus con el comando saslpasswd2:
@@ -160,9 +158,8 @@ fi
 
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
+elastix-menumerge $pathModule/setup/infomudules
 
-pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
 rm -f $pathModule/preversion_%{modname}.info
@@ -224,6 +221,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: Was made changes in spec
+  to change path where menuxml path are saved. 
+
 * Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.

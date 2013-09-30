@@ -402,13 +402,17 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
         }
     }
 
-    $path2 = $path_record.getPathFile($file);
-    if(file_exists($path) && is_file($path)) $ok_path = $path;
-    else if(file_exists($path2) && is_file($path2)) $ok_path = $path2;
-    else{
-        // Failed to find specified file
-        Header('HTTP/1.1 404 Not Found');
-        die("<b>404 "._tr("no_file")." </b>");
+    if (file_exists($path) && is_file($path)) {
+    	$ok_path = $path;
+    } else {
+        $path2 = $path_record.getPathFile($file);
+        if (file_exists($path2) && is_file($path2)) {
+            $ok_path = $path2;
+        } else {
+            // Failed to find specified file
+            Header('HTTP/1.1 404 Not Found');
+            die("<b>404 "._tr("no_file")." </b>");
+        }
     }
     
     // Set Content-Type according to file extension
@@ -451,7 +455,6 @@ function record_format(&$pDB, $arrConf){
     if (isset($record) && preg_match("/^[[:digit:]]+\.[[:digit:]]+$/",$record)) {
 
         $filebyUid   = $pMonitoring->getAudioByUniqueId($record);
-
         $file   = basename($filebyUid['recordingfile']);
         $path   = $path_record.$file;
 
@@ -465,11 +468,16 @@ function record_format(&$pDB, $arrConf){
             return "";
         }
 
-
-        $path2  = $path_record.getPathFile($file);
-        if(file_exists($path) && is_file($path)) $ok_path = $path;
-        else if(file_exists($path2) && is_file($path2)) $ok_path = $path2;
-        else return "";
+        if (file_exists($path) && is_file($path)) {
+        	$ok_path = $path;
+        } else {
+        	$path2  = $path_record.getPathFile($file);
+            if (file_exists($path2) && is_file($path2)) {
+            	$ok_path = $path2;
+            } else {
+            	return '';
+            }
+        }
 
         $name = basename($ok_path);
 
@@ -577,6 +585,7 @@ function SecToHHMMSS($sec)
 function getPathFile($file)
 {
     $arrTokens = explode('-',$file);
+    if (count($arrTokens) < 4) return '/'.$file;
     $fyear     = substr($arrTokens[3],0,4);
     $fmonth    = substr($arrTokens[3],4,2);
     $fday      = substr($arrTokens[3],6,2);

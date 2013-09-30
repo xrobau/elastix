@@ -302,6 +302,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Sep 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: fix parsing of filename to avoid triggering PHP warnings.
+  Verify that old FreePBX path does not exist before trying parsing as new 
+  FreePBX path. Fixes Elastix bug #1716 point 4.
+  SVN Rev[5954]
+
 * Mon Sep 23 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module voicemail, the file es.lang was updated
   SVN Rev[5930]

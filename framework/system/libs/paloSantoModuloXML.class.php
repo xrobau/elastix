@@ -24,76 +24,72 @@
   $Id: paloSantoModuloXML.class.php,v 1.1 2007/09/05 00:25:25 gcarrillo Exp $
   $Id: paloSantoModuloXML.class.php,v 1.1 2008/05/29 11:25:25 afigueroa Exp $
   $Id: paloSantoModuloXML.class.php,v 1.1 2011/01/31 10:00:00 ecueva Exp $
+  $Id: paloSantoModuloXML.class.php,v 3.1 2013/09/27 10:00:00 rmera@palosato.com Exp $
 */
 
 
 class ModuloXML
 {
-    var $_arbolMenu;// Árbol de menú construido a partir de archivo XML
-    
-    var $_tempMenuList;
-    var $_rutaArchivo;
-    var $_errMsg;
+    private $arbolResource;// 
+    private $xmlFile;
+    private $errMsg;
     /**
      * Constructor del objeto ModuloXML
      * 
      * @param string    $sRutaArchivo   Ruta al archivo donde se encuentra el menú XML
      */
-    function ModuloXML($sRutaArchivo)
+    function ModuloXML($xmlFile)
     {
-        $this->_rutaArchivo=$sRutaArchivo;
+        $this->xmlFile=$xmlFile;
         $this->_privado_construirArbolMenu();
     }
 
-    function _privado_construirArbolMenu()
+    private function _privado_construirArbolMenu()
     {
-        $this->_arbolMenu = array();
+        $this->arbolResource = array();
 
-        $xmlDoc = new DOMDocument();
-        $xmlDoc->load($this->_rutaArchivo);
-
-        //copio el archivo en memoria
-        $root = $xmlDoc->documentElement;//apunto a el tag raiz
-
-        $arrMenuItem = $root->getElementsByTagName("menuitem");
-        $menu = array();
-        foreach($arrMenuItem as $menuitem)
-        {
-            $attID      = $menuitem->getAttribute("menuid");
-            $attDesc    = $menuitem->getAttribute("desc");
-            $attParent  = $menuitem->getAttribute("parent");
-            $attModule  = $menuitem->getAttribute("module");
-     	    $attLink    = $menuitem->getAttribute("link");
-            $attOrder   = $menuitem->getAttribute("order");
-
-            $itemPermission = $menuitem->getElementsByTagName("permissions");
-            $arrGroup = array();
-            if($itemPermission->item(0))
-            {
-                $arrItemGroup   = $itemPermission->item(0)->getElementsByTagName("group");
-                foreach($arrItemGroup as $itemGroup){
-                    $id   = $itemGroup->getAttribute("id");
-                    $name = $itemGroup->getAttribute("name");
-                    $desc = $itemGroup->getAttribute("desc");
-                    $arrTmp['id']   = $id;
-                    $arrTmp['name']    = $name;
-                    $arrTmp['desc'] = $desc;
-                    $arrGroup[] = $arrTmp;
+        //comprabamos que realmente sea un archivo
+        if (!is_file($this->xmlFile)) 
+            return false;
+        
+        $xmlObj=simplexml_load_file($this->xmlFile);
+        if($xmlObj===false){
+            return false;
+        }
+        //atributos del recurso
+        //id="email_stats" name="Email stats" idParent="email_admin" type="module" link=""  order_no="5"
+        if(!isset($xmlObj->menu)){
+            return false;
+        }
+        
+        $resource['id']=(string)$xmlObj->menu['id'];
+        $resource['description']=(string)$xmlObj->menu['name'];
+        $resource['idParent']=(string)$xmlObj->menu['idParent'];
+        $resource['type']=(string)$xmlObj->menu['type'];
+        $resource['link']=(string)$xmlObj->menu['link'];
+        $resource['order_no']=(string)$xmlObj->menu['order_no'];
+        $resource['administrative']=(string)$xmlObj->menu->permissions['administrative'];
+        $resource['org_access']=(string)$xmlObj->menu->permissions['organization_access'];
+        if(isset($xmlObj->menu->permissions->actions)){
+            foreach($xmlObj->menu->permissions->actions->action as $actiontag){
+                $tmpAction=explode("|",(string)$actiontag['name']);
+                $arrGroup=array();
+                if(isset($actiontag->groups)){
+                    foreach($actiontag->groups->group as $group){
+                        $arrGroup[(string)$group['name']]=(string)$group['desc'];
+                    }
+                }
+                foreach($tmpAction as $action){
+                    $resource['actions'][$action]=$arrGroup;
                 }
             }
-
-            $menu[] = array(
-                            'mName'    => $attID,
-                            'desc'      => $attDesc,
-                            'parent'    => $attParent,
-                            'module'    => $attModule,
-                            'link'      => $attLink,
-                            'order'     => $attOrder,
-                            'groups'    => $arrGroup,
-                        );
         }
-
-        $this->_arbolMenu = $menu;
+        $this->arbolResource = $resource;
+        return true;
+    }
+    
+    function getArbolResource(){
+        return $this->arbolResource;
     }
 }
 ?>

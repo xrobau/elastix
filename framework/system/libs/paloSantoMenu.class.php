@@ -201,53 +201,25 @@ class paloMenu {
     }
 
     
-    /*********************************************************************************************/
-    function updateItemMenu($name, $description, $id_parent, $type='module', $link='', $order=-1){
-        $bExito = FALSE;
-        if ($name == "" && $description == "") {
-            $this->errMsg = "Name and description module can't be empty";
-        }else{
-            $query = "";
-            if($order != -1){
-                $query = "UPDATE acl_resource SET ".
-                    "description=?, IdParent=?, Link=?, Type=?, order_no=?".
-                    " WHERE id=?";
-				$arrayParam=array($id_parent,$link,$type,$order,$name);
-            }else{
-                $query = "UPDATE acl_resource SET ".
-                    "description=?, IdParent=?, Link=?, Type=?".
-                    " WHERE id=?";
-				$arrayParam=array($id_parent,$link,$type,$name);
-            }
-            $result=$this->_DB->genQuery($query,$arrayParam);
-            if($result==FALSE){
-                $this->errMsg = $this->_DB->errMsg;
-                return 0;
-            }
-            return 1;
-        }
-    }
-
-
- /**
+    /**
      * This function is for obtaining all the submenu from menu 
      *
      * @param string    $menu_name   The name of the main menu or menu father       
      *
      * @return array    $result      An array of children or submenu where the father or main menu is $menu_name
      */
-   function getChilds($menu_name){
-        $query   = "SELECT id, IdParent, Link, description, Type, order_no FROM acl_resource where IdParent=?";
-        $result=$this->_DB->fetchTable($query, true, array($menu_name));
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result;
-   }
+    function getChilds($menu_name){
+            $query   = "SELECT id, IdParent, Link, description, Type, order_no FROM acl_resource where IdParent=?";
+            $result=$this->_DB->fetchTable($query, true, array($menu_name));
+            if($result==FALSE){
+                $this->errMsg = $this->_DB->errMsg;
+                return 0;
+            }
+            return $result;
+    }
 
 
-/**
+    /**
      * This function is a recursive function. The input is the name of main menu or father menu which will be removed from database with all children and the children of its children 
      *
      * @param string    $menu_name   The name of the main menu or menu father       
@@ -256,30 +228,30 @@ class paloMenu {
      * @return $menu_name   The menu which will be removed
      */
     function deleteFather($name){
-		$pACL = new paloACL($this->_DB);
+        $pACL = new paloACL($this->_DB);
         $childs = $this->getChilds($name);
         if(!$childs){
-			//$id_resource = $pACL->getIdResource($name); // get id Resource
-			if($pACL->deleteResource($name))
-				return true;
-			else{
-				$this->errMsg=$pACL->errMsg;
-				return false;
-			}
+            //$id_resource = $pACL->getIdResource($name); // get id Resource
+            if($pACL->deleteResource($name))
+                return true;
+            else{
+                $this->errMsg=$pACL->errMsg;
+                return false;
+            }
         }
         else{
             foreach($childs as $key => $value){
-                $ok = $this->deleteFather($value['id'],$acl);
+                $ok = $this->deleteFather($value['id']);
                 if(!$ok) return false;
             }
 
             //$id_resource = $pACL->getIdResource($name); // get id Resource
-			if($pACL->deleteResource($name))
-				return true;
-			else{
-				$this->errMsg=$pACL->errMsg;
-				return false;
-			}
+            if($pACL->deleteResource($name))
+                return true;
+            else{
+                $this->errMsg=$pACL->errMsg;
+                return false;
+            }
         }
     }
 }

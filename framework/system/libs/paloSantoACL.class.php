@@ -1329,54 +1329,6 @@ INFO_AUTH_MODULO;
         }
         return $arr_result;
     }
-
-
-    /**
-     * Procedimiento para crear un recurso bajo el nombre descrito, con una descripción opcional.
-     * Si un recurso con el nombre indicado ya existe, se reemplaza la descripción.
-     *
-     * @param string    $name           Nombre del grupo a crear
-     * @param string    $description    Descripción del grupo a crear, opcional
-     *
-     * @return bool     VERDADERO si el grupo ya existe o fue creado/actualizado correctamente
-     */
-    function createResource($name, $description, $id_parent, $type='module', $link='', $orgAccess, $administrative,$order=null)
-    {
-        $bExito = FALSE;
-        $this->errMsg = "";
-        if ($name == "") {
-            $this->errMsg = _tr("Resource Name can't be empty");
-        } else {
-            if ($description == '') $description = $name;
-
-            // Verificar si el recurso ya existe
-            $sPeticionSQL = "SELECT id FROM acl_resource WHERE id = ? AND description = ? AND IdParent = ?";
-
-            $tupla = $this->_DB->getFirstRowQuery($sPeticionSQL,false,array($name,$description,$id_parent));
-            if (!is_array($tupla)) {
-                // Ocurre error de DB en consulta
-                $this->errMsg = $this->_DB->errMsg;
-            } else if (is_array($tupla) && count($tupla) > 0) {
-                $bExito = FALSE;
-                $this->errMsg = _tr("Menu already exists");
-            }else{
-                $sPeticionSQL = "Insert INTO acl_resource (id, description, Type, Link, IdParent, organization_access, administrative";
-                $arrParams=array($name, $description,$type,$link,$id_parent,$orgAccess,$administrative);
-                if(isset($order)){
-                    $sPeticionSQL .=",order_no"; 
-                    $arrParams[]=$order;
-                }
-                $sPeticionSQL .=") VALUES(".implode(",",array_fill(0,count($arrParams),"?")).")";
-                
-                if ($this->_DB->genQuery($sPeticionSQL,$arrParams)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                }
-            }
-        }
-        return $bExito;
-    }
     
     /**
      * Esta funcion retirna el numero de resursos disponibles en el sistema
@@ -1482,8 +1434,10 @@ INFO_AUTH_MODULO;
     
     /**
      * Procedimiento para eliminar el recurso dado su id. 
-     * Antes de eliminar el recurso se debe elminar las entradas de dicho recurso de las tabla group_resource
-     * y organization_resource
+     * Se elimina el recurso de la tabla acl_resource asi como cualquier otra
+     * referencia al mismo en la tablas de permisos hacia este recurso
+     * Como la tablas estan indexadas y con constraint al elminar el recurso de acl_resource
+     * se hace tambien estas acciones
      * @param integer   $idresource
      *
      * @return bool     si es verdadero entonces se elimino bien
@@ -1803,6 +1757,355 @@ INFO_AUTH_MODULO;
             $this->errMsg=_tr('Invalid Resources');
             return false;
         }
+    }
+    
+    //para la creacion de recursos al momento de instalar o actualizar un paquete
+    /**
+     * Procedimiento que crea un nuevo recurso o actualiza uno existen dentro del Sistema
+     * El recurso en creado o actualizado dentro de la tabla acl_resource
+     * A continuación revisa el conjunto de acciones que el recurso posee
+     * En caso de un recuros nuevo estas acciones son añadidas a la tabla resource_action
+     * Si el recurso existiece se revisan el conjunto de acciones. Si existe alguna accion nueva
+     * esta es agregada, Si una accion actual no existe entra la pasadas como parametro esta 
+     * es eliminada
+     * En caso de agragar nuevas acciones se le da los permisos por default indicados en el parametro
+     * estos permisos se setean para las grupos que pertenecen a la organizacion 1  para nadie mas
+     *
+     * @param array $resource arreglo multidimension que tiene la siguiente estructura
+     *              $resurce[id] -> id del recurso es unico en el sistema
+     *              $resurce[description] -> nombre del recurso que aparece en los menus
+     *              $resurce[idParent] -> nombre del modulo padre
+     *              $resurce[link] -> este capo indica si el modulo se trata de un recurso externo
+     *              $resurce[type] -> 'module', 'link', ''
+     *              $resurce[org_access] -> 'yes' or 'no' 
+     *              $resurce[administrative] -> 'yes' or 'no' 
+     *              $resurce[actions] => array(action1 =>  array(group1=>description, group2=>description,                  group3=>description),
+                                               action2 => array(group1=>description,group2=>description)),
+     */
+    function createResource($resource)
+    {
+        //validamos el id del recurso
+        if(!preg_match("/^[[:word:]]+$/",$resource['id'])){
+            $this->errMsg=_tr("Invalid Resource");
+            return false;
+        }
+        
+        //comprobamos si el recurso dado existe
+        $db_resource=$this->getResourceById($resource['id']);
+        if($db_resource===false){
+            //problemas con la base de datos no podemos continuar
+            return false;
+        }
+        
+        $this->_DB->beginTransaction();
+        if(count($db_resource)>0){//recurso existe
+            //actualizamos el recurso existen en la tabla acl_resource
+            if(empty($resource['description']))
+                $resource['description']=$db_resource['description'];
+            $resource['org_access']=(isset($resource['org_access']))?$resource['org_access']:$db_resource['org_access'];
+            $resource['administrative']=(isset($resource['administrative']))?$resource['administrative']:$db_resource['administrative'];
+            
+            if(!$this->updateResource($resource)){
+                $this->errMsg=_tr("Resource could not be updated in table acl_resource")." ".$this->errMsg;
+                $this->_DB->rollBack();
+                return false;
+            }
+            
+            //si el recurso no llegase a exixtir en la tabla organization_resource resource se ingresa
+            //este se hace solo para la organizacion 1
+            if(!$this->saveOrgAccessDefault($resource)){
+                $this->errMsg=_tr("Resource could not be updated in table organization_resource")." ".$this->errMsg;
+                $this->_DB->rollBack();
+                return false;
+            }
+            
+            //comparamos las acciones existen con las anteriores y sacamos una lista de las acciones nuevas
+            //y las acciones que ya no existen
+            if(!isset($resource['actions']))
+                $resource['actions']=array();
+                
+            if(!is_array($resource['actions'])){
+                $resource['actions']=array();
+            }
+            
+            $actions=array_keys($resource['actions']);
+            $cu_actions=$this->getResourcesActions(array($resource['id']));
+            if($cu_actions===false){
+                $this->errMsg=_tr("An error has ocurred to retrieved current resource actions");
+                return false;
+            }if(count($cu_actions)==0){
+                $cuActions=array();
+            }else{
+                $cuActions=$cu_actions[$resource['id']];
+            }
+            
+            $new_actions=array_diff($actions,$cuActions);
+            $del_actions=array_diff($cuActions,$actions);
+                       
+            if(!$this->delActions($resource['id'],$del_actions)){
+                $this->errMsg=_tr("Actions could not be deleted")." ".$this->errMsg;
+                $this->_DB->rollBack();
+                return false;
+            }
+            
+            //nuevas acciones
+            //creamos las acciones
+            if(!$this->insertActions($resource['id'],$new_actions)){
+                $this->errMsg=_tr("Actions could not be created")." ".$this->errMsg;
+                $this->_DB->rollBack();
+                return false;
+            }
+            
+            //ordenamos los permisos por default del recuros en funcion de los grupos
+            //en esta funcion se comprueba si los grupos que intervienen en los permisos
+            //para las acciones existan y se obtiene el id de los mismos
+            //si un grupo listado no existe entonces se lo intenta crear
+            $groupActions=$this->orderActionsByGroup($resource['actions']);
+            if($groupActions===false){
+                return false;
+            }
+                        
+            //primero procedemos a eliminar los permisos actuales de la table group_resource_action 
+            //insertar los permisos usando el esquema dado en los xmls
+            if(!$this->deleteGroupPermissionDefault($resource['id'],$actions)){
+                $this->errMsg=_tr("Default permissions could not be created");
+                $this->_DB->rollBack();
+                return false;
+            }
+            
+            //insertamos los permisos por default de las nuevas acciones
+            if(!$this->insertGroupPermissionDefault($resource['id'],$groupActions)){
+                $this->errMsg=_tr("Default permissions could not be created");
+                $this->_DB->rollBack();
+                return false;
+            }
+            $this->_DB->commit();
+            return true;
+        }else{//recurso no existe
+            if(empty($resource['description']))
+                $resource['description']=$resource['id'];
+                
+            $resource['org_access']=(isset($resource['org_access']))?$resource['org_access']:'yes';
+            $resource['administrative']=(isset($resource['administrative']))?$resource['administrative']:'yes';
+            
+            //insertamos el recurso en la base
+            if(!$this->insertResource($resource)){
+                $this->errMsg=_tr("Resource could not be inserted in database acl_resource")." ".$this->errMsg;
+                $this->_DB->rollBack();
+                return false;
+            }
+            
+            //si el recurso no llegase a exixtir en la tabla organization_resource resource se ingresa
+            //este se hace solo para la organizacion 1
+            if(!$this->saveOrgAccessDefault($resource,true)){
+                $this->errMsg=_tr("Resource could not be updated in table organization_resource")." ".$this->errMsg;
+                $this->_DB->rollBack();
+                return false;
+            }
+            
+            if(isset($resource['actions']) && is_array($resource['actions'])){
+                $actions=array_keys($resource['actions']);
+            
+                //creamos las acciones
+                if(!$this->insertActions($resource['id'],$actions)){
+                    $this->errMsg=_tr("Actions could not be created");
+                    $this->_DB->rollBack();
+                    return false;
+                }
+                
+                //ordenamos los permisos por default del recuros en funcion de los grupos
+                //en esta funcion se comprueba si los grupos que intervienen en los permisos
+                //para las acciones existan y se obtiene el id de los mismos
+                //si un grupo listado no existe entonces se lo intenta crear
+                $groupActions=$this->orderActionsByGroup($resource['actions']);
+                if($groupActions===false){
+                    return false;
+                }
+                
+                //insertamos los permisos por default
+                if(!$this->insertGroupPermissionDefault($resource['id'],$groupActions)){
+                    $this->errMsg=_tr("Default permissions could not be created");
+                    $this->_DB->rollBack();
+                    return false;
+                }
+            }
+            $this->_DB->commit();
+            return true;
+        }
+    }
+    
+    /**
+     * Procedimiento que retorna un recurso dado su id
+     */
+    function getResourceById($resource){
+        $query="SELECT * FROM acl_resource WHERE id=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($resource));
+        if($result===false){
+            $this->errMsg=_tr("DATABASE ERROR");
+        }
+        return $result;
+    }
+    
+    private function insertResource($resource){
+        $query="INSERT INTO acl_resource (id, description, IdParent, Link, Type, order_no, organization_access, administrative) VALUES (?,?,?,?,?,?,?,?)";
+        if($this->_DB->genQuery($query,array($resource['id'], $resource['description'], $resource['idParent'], $resource['link'], $resource['type'], $resource['order_no'], $resource['org_access'], $resource['administrative']))){
+            return true;
+        }else{
+            $this->errMsg=("DATABASE ERROR");
+            return false;
+        }
+    }
+    
+    private function updateResource($resource){
+        $query="UPDATE acl_resource SET description=?, IdParent=?, Link=?, Type=?, order_no=?, organization_access=?, administrative=? WHERE id=?";
+        if($this->_DB->genQuery($query,array($resource['description'], $resource['idParent'], $resource['link'], $resource['type'], $resource['order_no'], $resource['org_access'], $resource['administrative'],$resource['id']))){
+            return true;
+        }else{
+            $this->errMsg=("DATABASE ERROR");
+            return false;
+        }
+    }
+    
+    private function saveOrgAccessDefault($resource,$insert=false){
+        //solo se ingresa en caso que el recurso sea de tipo module
+        if($resource['type']!="module")
+            return true;
+            
+        if(!$insert){
+            //comprobamos que el recurso no exista actualemente
+            $query="SELECT 1 from organization_resource WHERE id_organization=1 and id_resource=?";
+            $result=$this->_DB->getFirstRowQuery($query,false,array($resource['id']));
+            if(is_array($result) && count($result)==1){
+                //recurso ya existe, regresamos a la funcion principal
+                return true;
+            }
+        }
+        //insertamos el recurso en la table organization_resource
+        $sPeticionSQL = "INSERT INTO organization_resource (id_organization, id_resource) VALUES (?,?)";
+        if (!$this->_DB->genQuery($sPeticionSQL, array(1,$resource['id']))){
+            $this->errMsg = _tr("DATABASE ERROR").". ".$this->_DB->errMsg;
+            return false;
+        }
+        return true;
+    }
+    
+    private function insertActions($id_resource,$actions){
+        if(!is_array($actions)){
+            $this->errMsg=_tr("Invalid parameter actions");
+            return false;
+        }
+        if(count($actions)==0)
+            return true; //no ahi nada que hacer
+            
+        $query="INSERT INTO resource_action (id_resource,action) VALUES (?,?)";
+        foreach($actions as $action){
+            if(!$this->_DB->genQuery($query,array($id_resource,$action))){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private function delActions($id_resource,$actions){
+        if(!is_array($actions)){
+            $this->errMsg=_tr("Invalid parameter actions");
+            return false;
+        }
+        if(count($actions)==0)
+            return true; //no ahi nada que hacer
+        
+        $param[]=$id_resource;
+        foreach($actions as $action){
+            $param[]=$action;
+            $q="?,";
+        }
+        $q=substr($q,0,-1);
+        $query="DELETE FROM resource_action WHERE id_resource=? and action IN ($q)";
+        if(!$this->_DB->genQuery($query,$param)){
+            $this->errMsg=_tr("DATABASE ERROR");
+            return false;
+        }
+        return true;
+    }
+    
+    private function orderActionsByGroup($actionGroups){
+        $groupActions=$arrGroups=array();
+        
+        foreach($actionGroups as $action => $groups){
+            foreach($groups as $group => $description){
+                $groupActions[$group]['actions'][]=$action;
+                $arrGroups[$group]=$description;
+            }
+        }
+                
+        //obtenemos el id de los grupos a los que ahi que insertarle permisos
+        //estos son los grupos que pertenecen a la organizacion 1 
+        //si el grupo no existe se lo crea
+        foreach($arrGroups as $group => $description){
+            $query="SELECT id FROM acl_group WHERE name=? and id_organization=1";
+            $result=$this->_DB->getFirstRowQuery($query,true,array($group));
+            if($result===false){
+                //database error
+                $this->errMsg=_tr("An error has ocurred to retrieved group info");
+                return false;
+            }elseif(count($result)==0){
+                //no existe el grupo - lo creamos
+                $query="INSERT INTO acl_group (name,description,id_organization) VALUES (?,?,1)";
+                if(!$this->_DB->genQuery($query,array($group,$description))){
+                    $this->errMsg=_tr("An error has ocurred to create group");
+                    return false;
+                }
+                $groupActions[$group]['idGroup']=$this->_DB->getLastInsertId();
+            }else
+                $groupActions[$group]['idGroup']=$result['id'];
+        }
+        return $groupActions;
+    }
+    
+    private function insertGroupPermissionDefault($id_resource,$groupActions){
+        if(count($groupActions)==0) //no han sido definido acciones para el grupo
+            return true;
+            
+        foreach($groupActions as $value){
+            $param=array();
+            $param[]=$value['idGroup'];
+            $param[]=$id_resource;
+            $q='';
+            foreach($value['actions'] as $action){
+                $param[]=$action;
+                $q .="?,";
+            }
+            $q=substr($q,0,-1);
+            $query="INSERT INTO group_resource_action (id_group,id_resource_action) SELECT ?,ra.id FROM resource_action ra WHERE id_resource=? and action IN ($q)";
+            if(!$this->_DB->genQuery($query,$param)){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private function deleteGroupPermissionDefault($id_resource,$actions){
+        if(!is_array($actions)){
+            $this->errMsg=_tr("Invalid parameter actions");
+            return false;
+        }
+        if(count($actions)==0)
+            return true; //no ahi nada que hacer
+        
+        $q='';
+        $param[]=$id_resource;
+        foreach($actions as $action){
+            $param[]=$action;
+            $q .="?,";
+        }
+        $q=substr($q,0,-1);
+        //borramos los permisos actuales de estas acciones
+        $query="DELETE gra FROM group_resource_action gra JOIN resource_action ra ON gra.id_resource_action=ra.id WHERE ra.id_resource=? and ra.action IN ($q)";
+        if(!$this->_DB->genQuery($query,$param)){
+            $this->errMsg=_tr("DATABASE ERROR");
+            return false;
+        }
+        return true;
     }
 }
 ?>

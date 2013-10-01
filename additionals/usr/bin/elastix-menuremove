@@ -35,16 +35,16 @@ This script delete menus and resources elastix.
 
 if ($argc < 2) die("Please specify the name of parent id menu.\n");
 
-$documentRoot="/var/www/html";
-require_once("$documentRoot/libs/misc.lib.php");
-require_once("$documentRoot/configs/default.conf.php");
+$elxPath="/usr/share/elastix";
+require_once("$elxPath/libs/misc.lib.php");
+require_once("$elxPath/configs/default.conf.php");
 
 //global variables framework
 global $arrConf;
 global $arrLang;
-require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
-require_once("$arrConf[basePath]/libs/paloSantoMenu.class.php");
-require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
+require_once("$elxPath/libs/paloSantoDB.class.php");
+require_once("$elxPath/libs/paloSantoMenu.class.php");
+require_once("$elxPath/libs/paloSantoACL.class.php");
 
 $pDBACL = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
@@ -59,11 +59,11 @@ if(isset($_SERVER['argv'][1])){
  
     if($oMenu->deleteFather($menuName)){
         $oMenu->_DB->commit();
-	echo "The resorces and menus have been removed\n";
+        echo "The menus have been removed\n";
     }
     else{
         $oMenu->_DB->rollBack();
-	echo "Error: The resorces and menus haven't been removed\n";
+        echo "Error: The menus haven't been removed\n";
     }
 }
 else{

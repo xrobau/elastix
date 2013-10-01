@@ -37,80 +37,72 @@ installation. The corresponding folders in /var/www/html/modules/MENU must exist
 if ($argc < 2) die("Please specify path to menu.xml for module to be installed.\n");
 if (!is_readable($argv[1])) die("FATAL: unable to read $argv[1] \n");
 
-$documentRoot="/var/www/html";
-require_once("$documentRoot/libs/misc.lib.php");
-require_once("$documentRoot/configs/default.conf.php");
+$elxPath="/usr/share/elastix";
+require_once("$elxPath/libs/misc.lib.php");
+require_once("$elxPath/configs/default.conf.php");
 
 //global variables framework
 global $arrConf;
-global $arrLang;
-require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
-require_once("$arrConf[basePath]/libs/paloSantoMenu.class.php");
-require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
-require_once("$arrConf[basePath]/libs/paloSantoModuloXML.class.php");
-require_once("$arrConf[basePath]/libs/paloSantoInstaller.class.php");
+require_once("$elxPath/libs/paloSantoDB.class.php");
+require_once("$elxPath/libs/paloSantoACL.class.php");
+require_once("$elxPath/libs/paloSantoMenu.class.php");
+require_once("$elxPath/libs/paloSantoModuloXML.class.php");
+require_once("$elxPath/libs/paloSantoInstaller.class.php");
 
-$pDBACL = new paloDB($arrConf['elastix_dsn']["elastix"]);
+$pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
 if(!empty($pDB->errMsg)) echo "ERROR DE DB: {$pDB->errMsg}\n";
-if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
 
-$oMenu = new paloMenu($pDBACL);
-$oACL = new paloACL($pDBACL);
-$oInstaller = new Installer();
+$pACL = new paloACL($pDB);
+
+// $_SERVER['argv'][1] = path to the folder that containst the apps xml files
 
 if(isset($_SERVER['argv'][1])){
-    $file_xml = $_SERVER['argv'][1];
-    $oModuloXML= new ModuloXML($file_xml);
-
-    if(count($oModuloXML->_arbolMenu)>0){
-        foreach ($oModuloXML->_arbolMenu as $menuitem){
-            $mName=$menuitem['mName'];
-            echo "Menu: $mName found\n";
-            if(!empty($mName)){
-                //buscar si ya existe ese menu - Si no existe se lo crea
-                if(!$oACL->getResources($mName)){
-                    $newMenu["mName"]=$mName;
-                    $newMenu["module"]=$menuitem['module'];
-                    $newMenu["parent"]=$menuitem['parent'];
-                    $newMenu["tag"]=$menuitem['desc'];
-                    $newMenu["link"]=$menuitem['link'];
-                    $newMenu["order"]=$menuitem['order'];
-                    $newPermission = array();
-                    $newPermission = $menuitem['groups'];
-
-					//se debe crear el nuevo recurso dentro de acl_resource
-					//esto incluye los campos usados para crear los menus de elastix
-                    if($newMenu['parent']!="") 
-                        $oInstaller->addResource($oACL,$newMenu,$newPermission);
-                }else{// si ya existe solo se debe actualizar el Parent, tag, link y order
-                    echo "Updating: $mName found\n";
-                    $newMenu["mName"]=$mName;
-                    $newMenu["module"]=$menuitem['module'];
-                    $newMenu["parent"]=$menuitem['parent'];
-                    $newMenu["tag"]=$menuitem['desc'];
-                    $newMenu["link"]=$menuitem['link'];
-                    $newMenu["order"]=$menuitem['order'];
-                    $oInstaller->UpdateMenu($oMenu,$newMenu);
-                }
+    if(!is_dir($_SERVER['argv'][1])){
+        echo "{$_SERVER['argv'][1]} is not a directory\n";
+        return 1;
+    }
+    
+    $dir=$_SERVER['argv'][1];
+    
+    //obtenmos los nombres de los archivos xml que reprensantan recursos o menus dentro de elastix
+    $arrXMLs=obtainFiles($dir,"xml");
+    if($arrXMLs==false)
+        return 0; //no existen archivos dentro dle directorio
+    
+    foreach($arrXMLs as $file_xml){
+        //leemos el modulo xml
+        $oModuloXML= new ModuloXML($dir."/".$file_xml);
+        if($oModuloXML){
+            if($pACL->createResource($oModuloXML->getArbolResource())){
+                echo "Resource for file $file_xml was created successfully.\n";
+            }else{
+                echo "Resource for file $file_xml can not be created. ".$pACL->errMsg."\n";
             }
-            else{
-                echo "Menu for module is not defined\n";
-                return 1;
-            }
+        }else{
+            echo "$file_xml is bad former, can not be readen\n";
         }
     }
-}
-else{
-    echo "Error: File xml not defined. Usage: {$_SERVER['argv'][0]} menu.xml\n";
+}else{
+    echo "Error: Directory that contains xml files is not defined. Usage: {$_SERVER['argv'][0]} menu.xml\n";
     return 1;
 }
 
 deleteSmartyCompileFiles();
 function deleteSmartyCompileFiles()
 {
-    $files="/var/www/html/var/templates_c/*.php";
+    global $arrConf;
+    $files="{$arrConf['documentRoot']}/tmp/smarty/templates_c/*.php";
     foreach(glob($files) as $filename)
         unlink($filename);
+}
+
+function obtainFiles($dir,$type){
+    $files =  glob($dir."/{*.$type}",GLOB_BRACE);
+    $names ="";
+    foreach ($files as $ima)
+        $names[]=array_pop(explode("/",$ima));
+    if(!$names) return false;
+    return $names;
 }
 ?>

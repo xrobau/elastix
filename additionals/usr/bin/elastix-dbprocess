@@ -112,7 +112,8 @@ if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
 
         //Doing the action for each database according to the file db.info
         foreach($data as $key => $db){
-            deleteFileinFirstBoot($key,$action);
+            $prefix=(isset($db['prefix']))?$db['prefix']:"";
+            deleteFileinFirstBoot($key,$action,$prefix);
             if($db["engine"] != "mysql" && $db["engine"] != "sqlite3")
                 echo "Engine $db[engine] is not supported. Aborting action $action in database $key\n";
             else{
@@ -125,7 +126,6 @@ if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
                    $result = executeSQL($db,$path_folder,$sql_export,$key,$action,$password);
                 //If any error occur the SQL file will be copy to the path of FirstBoot
                 if(!$success || !$result){
-                    $prefix=(isset($db['prefix']))?$db['prefix']:"";
                     $result = copyToFirstBoot($path_folder,$key,$action,$prefix);
                 }
             }
@@ -367,11 +367,16 @@ function copyToFirstBoot($path_folder, $dbName, $action, $prefix)
  * @param  string   $dbName         Name of the Database
  * @param  string   $action         Can be 'install' 'update' or 'delete'
  */
-function deleteFileinFirstBoot($dbName,$action)
+function deleteFileinFirstBoot($dbName,$action,$prefix)
 {
-    if(file_exists("/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql")){
-        echo "Removing file /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql\n";
-        unlink("/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql");
+    if($prefix!=''){
+        $file="/var/spool/elastix-mysqldbscripts/$prefix"."_$dbName"."_$action.sql";
+    }else{
+        $file="/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql";
+    }
+    if(file_exists($file)){
+        echo "Removing file $file\n";
+        unlink($file);
     }
 }
 

@@ -30,7 +30,7 @@
 
 if ($argc < 2) die("Please specify path to menu.lang for module to be installed.\n");
 
-$documentRoot="/var/www/html";
+$elxPath="/usr/share/elastix";
 $pathMenuLang = $argv[1];
 
 if(file_exists($pathMenuLang)){
@@ -41,20 +41,20 @@ if(file_exists($pathMenuLang)){
 		exit;
 	}
 	if(is_array($arrTranslateMenu)){
-		if(!file_exists("$documentRoot/langmenus")){
-			mkdir("$documentRoot/langmenus",0755);
-			if(!chown("$documentRoot/langmenus","asterisk")){
-				echo "Could not change the owner to asterisk in file $documentRoot/langmenus\n";
+		if(!file_exists("$elxPath/langmenus")){
+			mkdir("$elxPath/langmenus",0755);
+			if(!chown("$elxPath/langmenus","asterisk")){
+				echo "Could not change the owner to asterisk in file $elxPath/langmenus\n";
 				exit(1);
 			}
-			if(!chgrp("$documentRoot/langmenus","asterisk")){
-				echo "Could not change the group to asterisk in file $documentRoot/langmenus\n";
+			if(!chgrp("$elxPath/langmenus","asterisk")){
+				echo "Could not change the group to asterisk in file $elxPath/langmenus\n";
                                 exit(1);
 			}
 		}
 		foreach($arrTranslateMenu as $language => $translations){
-			if(file_exists("$documentRoot/langmenus/$language.lang")){
-                                include_once "$documentRoot/langmenus/$language.lang";
+			if(file_exists("$elxPath/langmenus/$language.lang")){
+                                include_once "$elxPath/langmenus/$language.lang";
                                 global $arrLangMenu;
                         }
 			else
@@ -96,13 +96,13 @@ $arrLangMenu
 );
 ?>
 FILECONTENT;
-                        file_put_contents("$documentRoot/langmenus/$language.lang",$fileContent);
-			if(!chown("$documentRoot/langmenus/$language.lang","asterisk")){
-                                echo "Could not change the owner to asterisk in file $documentRoot/langmenus/$language.lang\n";
+                        file_put_contents("$elxPath/langmenus/$language.lang",$fileContent);
+			if(!chown("$elxPath/langmenus/$language.lang","asterisk")){
+                                echo "Could not change the owner to asterisk in file $elxPath/langmenus/$language.lang\n";
                                 exit(1);
                         }
-                        if(!chgrp("$documentRoot/langmenus/$language.lang","asterisk")){
-                                echo "Could not change the group to asterisk in file $documentRoot/langmenus/$language.lang\n";
+                        if(!chgrp("$elxPath/langmenus/$language.lang","asterisk")){
+                                echo "Could not change the group to asterisk in file $elxPath/langmenus/$language.lang\n";
                                 exit(1);
                         }		
 		}

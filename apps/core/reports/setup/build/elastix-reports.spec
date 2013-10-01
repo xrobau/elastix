@@ -72,7 +72,6 @@ mv setup/paloSantoTrunk.class.php    $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mv setup/paloSantoRate.class.php     $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mv setup/paloSantoQueue.class.php    $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mv setup/                            $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml                          $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 %pre
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -84,7 +83,7 @@ fi
 %post
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
+elastix-menumerge $pathModule/setup/infomodules
 
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB

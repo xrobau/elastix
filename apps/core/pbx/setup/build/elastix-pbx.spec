@@ -302,6 +302,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Oct 3 2013 Jose Briones <jbriones@elastix.com>
+- UPDATED: Module recordings. A mistake in the file recordings.hlp was fixed.
+  SVN Rev[5967]
+
 * Mon Sep 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: fix parsing of filename to avoid triggering PHP warnings.
   Verify that old FreePBX path does not exist before trying parsing as new 

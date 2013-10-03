@@ -389,7 +389,7 @@ function status($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
     $view="<a href='?menu=$module_name&action=view&peerId=".$dataPeer['id']."&opcion=1'>"._tr('View')."</a>&nbsp;&nbsp;";
     $con=0;
     if($status == "request reject"){
-        $status="Request Connection has been Rejected";
+        $status=_tr("Request Connection has been Rejected");
         $color="red";
         $view="";
     }    

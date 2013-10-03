@@ -377,6 +377,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Oct 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove xajax library. This library is no longer used in
+  Elastix 3 and is pointed out as vulnerable by Fortify.
+  SVN Rev[5971]
+
 * Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

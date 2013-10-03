@@ -90,6 +90,10 @@ fi
 /var/www/html/elastixConnection/*
 
 %changelog
+* Thu Oct 3 2013 Jose Briones <jbriones@elastix.com> 
+- UPDATED: Module peer_information. Translation support for a message was added
+  SVN Rev[5969]
+
 * Wed May 2 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-1
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.3.0-9

@@ -377,6 +377,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Oct 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: fix paloSantoOrganization::getOrganization() method to
+  return an empty array instead of FALSE when there are no organizations.
+  SVN Rev[5973]
+
 * Thu Oct 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: Framework: remove xajax library. This library is no longer used in
   Elastix 3 and is pointed out as vulnerable by Fortify.

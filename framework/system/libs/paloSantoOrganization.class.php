@@ -137,7 +137,7 @@ class paloSantoOrganization{
         }
         
         $result=$this->_DB->fetchTable($query, true, $arrParam);
-        if($result==FALSE){
+        if($result === FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }else

@@ -330,6 +330,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Oct 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove KendoUI javascript library. Nowhere in the code is
+  this library used.
+  SVN Rev[5985]
 - DELETED: Framework: remove AeroWindow javascript library. Nowhere in the code
   is this library used anymore, and contains styles that conflict with jQueryUI.
   SVN Rev[5984]

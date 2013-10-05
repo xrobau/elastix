@@ -233,10 +233,6 @@
             $("#pageup").val(val);
     });
 
-    //   $(document).ready(function(){
-    //     $("#neo-combo-example-ringgroup, #neo-combo-example-fieldname, #neo-combo-example-status").kendoComboBox();
-    //   });
-
     $("#neo-tabla-header-row-filter-1").click(function() {
 {/literal}
     {if $AS_OPTION}

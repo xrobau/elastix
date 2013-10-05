@@ -143,6 +143,13 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Sat Oct 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: prefer system-installed magpierss to bundled magpierss if
+  available. This is preparation for unbundling of magpierss library. Eventually
+  elastix-framework should remove magpierss and elastix-system should have an
+  additional Requires: php-magpierss.
+  SVN Rev[5990]
+
 * Mon Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

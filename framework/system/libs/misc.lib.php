@@ -1494,7 +1494,9 @@ function getSmarty($mainTheme)
 {   
     global $elxPath;
     global $arrConf;
-    require_once("$elxPath/libs/smarty/libs/Smarty.class.php");     
+    if (file_exists('/usr/share/php/Smarty/Smarty.class.php'))
+        require_once('Smarty/Smarty.class.php');
+    else require_once("$elxPath/libs/smarty/libs/Smarty.class.php");     
     $smarty = new Smarty();     
     
     $smarty->template_dir = "{$arrConf['basePath']}/web/themes/$mainTheme";   

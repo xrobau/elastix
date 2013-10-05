@@ -377,6 +377,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Sat Oct 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: prefer system-installed Smarty instead of bundled Smarty
+  if available. This is a preparation for unbundling Smarty.
+  SVN Rev[5989]
+
 * Fri Oct 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: fix paloSantoOrganization::getOrganization() method to
   return an empty array instead of FALSE when there are no organizations.

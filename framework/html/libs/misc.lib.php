@@ -789,7 +789,9 @@ function load_default_timezone()
 // Create a new Smarty object and initialize template directories
 function getSmarty($mainTheme, $basedir = '/var/www/html')
 {
-    require_once("$basedir/libs/smarty/libs/Smarty.class.php");
+    if (file_exists('/usr/share/php/Smarty/Smarty.class.php'))
+        require_once('Smarty/Smarty.class.php');
+    else require_once("$basedir/libs/smarty/libs/Smarty.class.php");
     $smarty = new Smarty();
     
     $smarty->template_dir = "$basedir/themes/$mainTheme";

@@ -232,5 +232,4 @@ function listaControlesFormularios()
 
 </script>
 {/literal}
-{$xajax_javascript}
 {/if} {* $no_queues *}

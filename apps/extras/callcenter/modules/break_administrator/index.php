@@ -31,7 +31,6 @@ require_once "libs/paloSantoForm.class.php";
 require_once "libs/paloSantoTrunk.class.php";
 include_once "libs/paloSantoConfig.class.php";
 include_once "libs/paloSantoGrid.class.php";
-require_once "libs/xajax/xajax.inc.php";
 
 require_once "modules/agent_console/libs/elastix2.lib.php";
 

@@ -27,7 +27,9 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
-require_once "libs/magpierss/rss_fetch.inc";
+if (file_exists('/usr/share/php/magpierss/rss_fetch.inc'))
+    require_once 'magpierss/rss_fetch.inc';
+else require_once "libs/magpierss/rss_fetch.inc";
 
 class Applet_News
 {

@@ -29,7 +29,7 @@
 */
 
 require_once 'vendor/BaseVendorResource.class.php';
-require_once ELASTIX_BASE.'libs/magpierss/rss_fetch.inc';
+require_once 'magpierss/rss_fetch.inc';
 
 class Cisco extends BaseVendorResource
 {

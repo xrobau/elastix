@@ -19,6 +19,7 @@ Requires: pyOpenSSL
 Requires: python-daemon
 Requires: MySQL-python
 Requires: python-cjson
+Requires: php-magpierss
 
 %description
 The Elastix Endpoint Configurator is a complete rewrite and reimplementation of
@@ -130,6 +131,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sat Oct 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: require and use system-installed magpierss
+  instead of bundled magpierss.
+  SVN Rev[5991]
+
 * Sun Sep 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add status message at the end of the 
   configuration process indicating whether there were warnings or errors.

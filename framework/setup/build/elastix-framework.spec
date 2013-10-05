@@ -329,6 +329,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Sat Oct 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove AeroWindow javascript library. Nowhere in the code
+  is this library used anymore, and contains styles that conflict with jQueryUI.
+  SVN Rev[5984]
+
 * Thu Sep 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: for SQL parameters to queries, conversion of a numeric 
   string into an integer should not be done for numeric strings that start with

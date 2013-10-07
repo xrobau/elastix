@@ -529,7 +529,7 @@ $(document).ready(function() {
 			}
 		},
 		manejarRespuestaStatus: function(respuesta) {
-			console.debug(respuesta);
+			//console.debug(respuesta);
 			
 			// Intentar recargar la página en caso de error
 			if (respuesta.error != null) {
@@ -586,6 +586,7 @@ $(document).ready(function() {
 					break;
 				case 'quit':
 					// Final del escaneo
+					var isConfig = this.get('configInProgress');
 					this.set('scanInProgress', false);
 					this.set('configInProgress', false);
 					this.set('totalsteps', 0);
@@ -604,10 +605,12 @@ $(document).ready(function() {
 					}
 					
 					// Mostrar posible mensaje de error
-					if (epinfo != null) {
-						mostrar_mensaje_error(epinfo);
-					} else {
-						mostrar_mensaje_info(arrLang_main['CONFIGURATION_SUCCESS']);
+					if (isConfig) {
+						if (epinfo != null) {
+							mostrar_mensaje_error(epinfo);
+						} else {
+							mostrar_mensaje_info(arrLang_main['CONFIGURATION_SUCCESS']);
+						}
 					}
 					
 					return false;	// Se aborta la petición periódica

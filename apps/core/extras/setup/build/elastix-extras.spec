@@ -85,7 +85,7 @@ rm -rf $RPM_BUILD_ROOT
 %preun
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Extras menus"
-  elastix-menuremove "%{modname}"
+  elastix-menuremove $pathModule/setup/infomodules
 fi
 
 %files

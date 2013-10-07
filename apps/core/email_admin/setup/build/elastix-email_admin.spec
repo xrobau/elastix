@@ -192,7 +192,7 @@ rm -rf $RPM_BUILD_ROOT
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Email menus"
-  elastix-menuremove "%{modname}"
+  elastix-menuremove $pathModule/setup/infomodules
 
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"

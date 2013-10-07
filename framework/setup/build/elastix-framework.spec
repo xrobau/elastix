@@ -82,22 +82,27 @@ fi
 
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
 bdir=%{_builddir}/%{name}/framework/system
-for FOLDER0 in $(ls -A $bdir/)
+for FOLDER0 in $(ls -A $bdir/)#apps
 do
 		if [ "$FOLDER0" == "apps" ]; then
-			for FOLDER1 in $(ls -A $bdir/$FOLDER0/)
+			for FOLDER1 in $(ls -A $bdir/$FOLDER0/)#manager
 			do
-				for FOLFI in $(ls -A $bdir/$FOLDER0/$FOLDER1/)
+				for FOLDER2 in $(ls -A $bdir/$FOLDER0/$FOLDER1/)#modules
 				do
-					case "$FOLDER1" in 
+				for FOLDER3 in $(ls -A $bdir/$FOLDER0/$FOLDER1/$FOLDER2/)#BackORFront
+				do
+				for FOLFI in $(ls -A $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/)
+				do
+					#case "$FOLDER1" in 
+					case "$FOLDER3" in
 						frontend)
-							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/ ]; then
+							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/$FOLFI/web/ ]; then
 								mkdir -p $RPM_BUILD_ROOT/var/www/html/web/$FOLDER0/$FOLFI/
 								mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/web/$FOLDER0/$FOLFI/
 							fi
 						;;
 						backend)
-							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/ ]; then
+							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/$FOLFI/web/ ]; then
 								mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/$FOLDER0/$FOLFI/
 							mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/$FOLDER0/$FOLFI/
 							fi
@@ -105,7 +110,9 @@ do
 					esac
 					mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/$FOLFI
 					mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/$FOLFI/
-				done 
+				done
+				done
+				done
 			done
 		else
 			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0
@@ -243,6 +250,7 @@ sed --in-place "s,Group\sapache,#Group apache,g" /etc/httpd/conf/httpd.conf
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 preversion=`cat $pathModule/preversion_elastix-framework.info`
 rm -f $pathModule/preversion_elastix-framework.info
+elastix-menumerge $pathModule/setup/infomodules
 
 if [ $1 -eq 1 ]; then #install
     # The installer database
@@ -326,6 +334,7 @@ pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"
+  elastix-menuremove $pathModule/setup/infomodules
 fi
 
 %clean

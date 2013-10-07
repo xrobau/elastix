@@ -315,7 +315,7 @@ rm -rf $RPM_BUILD_ROOT
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm; delete
   pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
   echo "Delete System menus"
-  elastix-menuremove "pbxconfig"
+  elastix-menuremove $pathModule/setup/infomodules
 
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"

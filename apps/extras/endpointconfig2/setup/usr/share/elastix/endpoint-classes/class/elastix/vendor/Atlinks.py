@@ -36,7 +36,9 @@ class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Atlinks', amipool, dbpool, sServerIP, sIP, mac)
         self._bridge = True
-        self._timeZone = ''
+        
+        # Time Zone, hour offset from GMT (assumed from similarity with Yealink)
+        self._timeZone = '%g' % (BaseEndpoint.getTimezoneOffset() / 3600.0)
 
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False

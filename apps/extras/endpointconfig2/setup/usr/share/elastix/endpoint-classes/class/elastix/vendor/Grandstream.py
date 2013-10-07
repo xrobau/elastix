@@ -41,7 +41,9 @@ import time
 class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Grandstream', amipool, dbpool, sServerIP, sIP, mac)
-        self._timeZone = 'auto'
+
+        # Calculate timezone, 'auto' or GMT offset in minutes +720
+        self._timeZone = BaseEndpoint.getTimezoneOffset() / 60 + 720
 
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False
@@ -522,7 +524,7 @@ class Endpoint(BaseEndpoint):
             'P237'  :   stdvars['server_ip'], # Config Server Path
             'P212'  :   '0',            # Firmware Upgrade. 0 - TFTP Upgrade,  1 - HTTP Upgrade.
             'P290'  :   '{ x+ | *x+ | *xx*x+ }', # (GXV3175 specific) Dialplan string
-            'P64'   :   self._timeZone, # Time Zone, 'auto' or GMT offset in minutes +720
+            'P64'   :   self._timeZone,
 
             'P8'    :   '0',            # DHCP=0 o static=1
             'P41': o[0], 'P42': o[1], 'P43': o[2], 'P44': o[3], # TFTP Server

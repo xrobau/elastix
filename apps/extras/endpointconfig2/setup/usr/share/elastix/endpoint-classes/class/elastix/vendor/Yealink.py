@@ -35,7 +35,9 @@ class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Yealink', amipool, dbpool, sServerIP, sIP, mac)
         self._bridge = True
-        self._timeZone = 12
+        
+        # Time Zone, hour offset from GMT
+        self._timeZone = '%g' % (BaseEndpoint.getTimezoneOffset() / 3600.0)
 
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False
@@ -171,7 +173,7 @@ class Endpoint(BaseEndpoint):
         vars = self._prepareVarList()
         vars.update({
             'enable_bridge'     :   int(self._bridge),
-            'time_zone'         :   self._timeZone, # Time Zone, hour offset from GMT
+            'time_zone'         :   self._timeZone,
         })
         try:
             self._writeTemplate(sTemplate, vars, sConfigPath)

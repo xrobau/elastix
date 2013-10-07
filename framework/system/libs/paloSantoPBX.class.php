@@ -2728,6 +2728,8 @@ class paloDevice{
 						$arrExtensionLocal[] = new paloExtensions($exten,new ext_macro($this->code.'-exten-vm',$voicemail.",".$exten));
 					}else
 						$arrExtensionLocal[] = new paloExtensions($exten,new ext_macro($this->code.'-exten-vm',$voicemail.",".$exten),1);
+						
+                    $arrExtensionLocal[] = new paloExtensions($exten, new ext_set('__PICKUPMARK',''),"n",'dest');
 
 					if($voicemail != "novm") {
 						$arrExtensionLocal[] = new paloExtensions($exten,new ext_goto('1','vmret'));

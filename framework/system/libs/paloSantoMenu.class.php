@@ -217,42 +217,5 @@ class paloMenu {
             }
             return $result;
     }
-
-
-    /**
-     * This function is a recursive function. The input is the name of main menu or father menu which will be removed from database with all children and the children of its children 
-     *
-     * @param string    $menu_name   The name of the main menu or menu father       
-     * @param object    $acl   		 The class object ACL
-     *  
-     * @return $menu_name   The menu which will be removed
-     */
-    function deleteFather($name){
-        $pACL = new paloACL($this->_DB);
-        $childs = $this->getChilds($name);
-        if(!$childs){
-            //$id_resource = $pACL->getIdResource($name); // get id Resource
-            if($pACL->deleteResource($name))
-                return true;
-            else{
-                $this->errMsg=$pACL->errMsg;
-                return false;
-            }
-        }
-        else{
-            foreach($childs as $key => $value){
-                $ok = $this->deleteFather($value['id']);
-                if(!$ok) return false;
-            }
-
-            //$id_resource = $pACL->getIdResource($name); // get id Resource
-            if($pACL->deleteResource($name))
-                return true;
-            else{
-                $this->errMsg=$pACL->errMsg;
-                return false;
-            }
-        }
-    }
 }
 ?>

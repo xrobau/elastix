@@ -1444,6 +1444,12 @@ INFO_AUTH_MODULO;
      ******************************************************************/
     function deleteResource($idresource)
     {
+        //validamos el id del recurso
+        if(!preg_match("/^[[:word:]]+$/",$idresource)){
+            $this->errMsg=_tr("Invalid Resource");
+            return false;
+        }
+        
         $this->errMsg = "";
         $query = "DELETE FROM acl_resource WHERE id = ?";
         $result = $this->_DB->genQuery($query,array($idresource));

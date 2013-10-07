@@ -43,31 +43,55 @@ require_once("$elxPath/configs/default.conf.php");
 global $arrConf;
 global $arrLang;
 require_once("$elxPath/libs/paloSantoDB.class.php");
-require_once("$elxPath/libs/paloSantoMenu.class.php");
 require_once("$elxPath/libs/paloSantoACL.class.php");
+require_once("$elxPath/libs/paloSantoModuloXML.class.php");
 
 $pDBACL = new paloDB($arrConf['elastix_dsn']["elastix"]);
 
 if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
 
-$oMenu = new paloMenu($pDBACL);
-
+$pACL = new paloACL($pDBACL);
 if(isset($_SERVER['argv'][1])){
-    $menuName = $_SERVER['argv'][1];
+    if(!is_dir($_SERVER['argv'][1])){
+        echo "{$_SERVER['argv'][1]} is not a directory\n";
+        return 1;
+    }
     
-    $oMenu->_DB->beginTransaction();
- 
-    if($oMenu->deleteFather($menuName)){
-        $oMenu->_DB->commit();
-        echo "The menus have been removed\n";
+    $dir=$_SERVER['argv'][1];
+    
+    //obtenmos los nombres de los archivos xml que reprensantan recursos o menus dentro de elastix
+    $arrXMLs=obtainFiles($dir,"xml");
+    if($arrXMLs==false)
+        return 0; //no existen archivos dentro dle directorio
+    
+    foreach($arrXMLs as $file_xml){
+        //leemos el modulo xml
+        $oModuloXML= new ModuloXML($dir."/".$file_xml);
+        if($oModuloXML){
+            $resource=$oModuloXML->getArbolResource();
+            $pACL->_DB->beginTransaction();
+            if($pACL->deleteResource($resource['id'])){
+                $pACL->_DB->commit();
+                echo "Resource for file $file_xml was removed successfully.\n";
+            }else{
+                $pACL->_DB->rollBack();
+                echo "Resource for file $file_xml can not be removed. ".$pACL->errMsg."\n";
+            }
+        }else{
+            echo "$file_xml is bad former, can not be readen\n";
+        }
     }
-    else{
-        $oMenu->_DB->rollBack();
-        echo "Error: The menus haven't been removed\n";
-    }
-}
-else{
-    echo "Error: arg not defined. Usage: {$_SERVER['argv'][0]} system\n";
+}else{
+    echo "Error: Directory that contains xml files is not defined. Usage: {$_SERVER['argv'][0]} menu.xml\n";
     return 1;
+}
+
+function obtainFiles($dir,$type){
+    $files =  glob($dir."/{*.$type}",GLOB_BRACE);
+    $names ="";
+    foreach ($files as $ima)
+        $names[]=array_pop(explode("/",$ima));
+    if(!$names) return false;
+    return $names;
 }
 ?>

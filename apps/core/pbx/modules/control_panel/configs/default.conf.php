@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.6-3                                               |
+  | Elastix version 1.0                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,12 +25,10 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: default.conf.php,v 1.1 2009-06-08 03:06:39 Oscar Navarrete onavarrete@palosanto.com Exp $ */
-    global $arrConf;
-    global $arrConfModule;
-
-    $arrConfModule['module_name']       = "control_panel";
-    $arrConfModule['templates_dir']     = "themes";
-    $arrConfModule['dsn_conn_database1'] = ""; // A ser resuelto vía /etc/elastix.conf
-    $arrConfModule['dsn_conn_database2'] = "sqlite3:///$arrConf[elastix_dbdir]/control_panel_design.db";
+  $Id: default.conf.php,v 1.1 2008/01/04 10:39:57 bmacias Exp $ */
+global $arrConfModule;
+global $arrConf;
+$arrConfModule['module_name'] = 'control_panel';
+$arrConfModule['templates_dir'] = 'themes';
+$arrConfModule['dsn_conn_database'] = "sqlite3:///$arrConf[elastix_dbdir]/control_panel_design.db";
 ?>

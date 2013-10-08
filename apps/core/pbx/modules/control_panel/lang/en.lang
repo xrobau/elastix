@@ -35,6 +35,15 @@ $arrLangModule=array(
 "Participants" => "Participants",
 "Participant" => "Participant",
 "Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager",
-"Loading" => "Loading"
+"Loading" => "Loading",
+'Members' => 'Members',
+'Not Attended' => 'Not Attended',
+'Callers'   =>  'Callers',
+'No Callers' => 'No Callers',
+'Participant(s)' => 'Participant(s)',
+'Parked' => 'Parked',
+'Invalid or missing parameters' => 'Invalid or missing parameters',
+'Hide All' => 'Hide All',
+'Show All' => 'Show All',
 );
 ?>

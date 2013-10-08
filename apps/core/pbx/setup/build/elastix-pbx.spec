@@ -302,6 +302,44 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Oct 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Control Panel: complete rewrite and code cleanup. This rewrite 
+  addresses design issues with the previous implementation of the Control Panel:
+  - In the previous implementation, the realtime refresh on the displayed 
+    information was implemented as a full query on the relevant Asterisk state
+    every 4 seconds. This query is CPU-intensive and scales linearly with the
+    number of PBX objects displayed (mainly extensions). On very large 
+    implementations, or in Elastix ARM, this can easily tie up the whole CPU
+    for long periods. The new implementation does the query once, and then uses 
+    AMI events to update the browser display.
+  - As a further optimization, the new implementation will use Server-Sent Events
+    whenever supported by the browser. This improves over the previous long-polling
+    implementation by not having to redo the full state query after events are
+    sent to the browser. Long-polling is still supported for old browsers.
+  - Voicemail calls were broken for a long time - fixed.
+  - Queue status information at the top has been broken for a long time - removed.
+  - The previous implementation uses XML updates and JSON inconsistently to
+    update the displayed information. Additionally, there were multiple HTML
+    snippets in both PHP and javascript code, injected through JSON into the 
+    display, which made internationalization difficult and complicated handling 
+    of javascript events. The new client-side implementation is written on top 
+    of Ember.js and Handlebars, in order to organize the layout around a single
+    template file and isolate the HTML from the update logic as much as possible. 
+  - Several non-translated strings were given i18n support.
+  - DAHDI trunks are now grouped by spans, instead of shown as individual 
+    channels. This should help on systems with one or more E1 spans.
+  - Tooltip popups now show more information where relevant. For extensions and
+    IP trunks, the tooltip shows connected calls with more detail than available
+    in the main display. For queues and extensions, the tooltip shows members
+    and callers with time display. DAHDI trunks now show channel alarms and
+    connected calls with timeout.
+  - The previous implementation showed a time counter for each active call. 
+    However, the method used to update this counter was badly implemented, and
+    resulted in lags accumulating and the counter showing a lower time than the
+    one displayed by directly asking the Asterisk server. The new implementation
+    keeps time accurately without accumulating errors.
+  SVN Rev[6001]
+
 * Thu Oct 3 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module recordings. A mistake in the file recordings.hlp was fixed.
   SVN Rev[5967]

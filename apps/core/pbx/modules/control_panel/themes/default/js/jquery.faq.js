@@ -13,24 +13,26 @@
             });
 
             if(!sc) 
-                $('.faqShow').text('Hide All').toggleClass('faqShow').toggleClass('faqHide');
+                $('.faqShow').text(arrLang_main['LBL_HIDE_ALL']).toggleClass('faqShow').toggleClass('faqHide');
             else 
-                $('.faqHide').text('Show All').toggleClass('faqShow').toggleClass('faqHide');
+                $('.faqHide').text(arrLang_main['LBL_SHOW_ALL']).toggleClass('faqShow').toggleClass('faqHide');
             $(this).next().slideToggle();
   		});
 
   		var dd = $('dd', dl).hide().append('<a href="#faqtop" class="faqToTop"></a>');
 
-        $('<a href="#">Show All</a>').addClass('faqShow').click(function(){
+        $('<a href="#">'+arrLang_main['LBL_SHOW_ALL']+'</a>').addClass('faqShow').click(function(){
             if ($(this).hasClass('faqShow')) {
-                $('.faqShow').text('Hide All').toggleClass('faqShow').toggleClass('faqHide');
-                dt.filter('[class=faqClosed]').each(function(){
+                $('.faqShow').text(arrLang_main['LBL_HIDE_ALL']).toggleClass('faqShow').toggleClass('faqHide');
+                //dt.filter('[class=faqClosed]').each(function(){
+                dt.filter('.faqClosed').each(function(){
                     $(this).toggleClass('faqClosed').toggleClass('faqOpen');
                     $(this).next().slideToggle();
                 });
             } else {
-                $('.faqHide').text('Show All').toggleClass('faqShow').toggleClass('faqHide');
-                dt.filter('[class=faqOpen]').each(function(){
+                $('.faqHide').text(arrLang_main['LBL_SHOW_ALL']).toggleClass('faqShow').toggleClass('faqHide');
+                //dt.filter('[class=faqOpen]').each(function(){
+                dt.filter('.faqOpen').each(function(){
                     $(this).toggleClass('faqClosed').toggleClass('faqOpen');
                     $(this).next().slideToggle();
                 });

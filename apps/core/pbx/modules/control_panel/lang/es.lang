@@ -49,5 +49,14 @@ $arrLangModule=array(
 "Half waiting time Queue" => "Medio Tiempo de Espera de Cola",
 "Calls in Queue" => "Llamadas en Cola",
 "Reload" => "Refrescar",
+'Members' => 'Miembros',
+'Not Attended' => 'No Atendida',
+'Callers'   =>  'Llamadas',
+'No Callers' => 'No hay llamadas',
+'Participant(s)' => 'Participante(s)',
+'Parked' => 'Parqueo',
+'Invalid or missing parameters' => 'Parámetros faltantes o inválidos',
+'Hide All' => 'Ocultar Todo',
+'Show All' => 'Mostrar Todo',
 );
 ?>

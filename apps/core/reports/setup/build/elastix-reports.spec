@@ -92,6 +92,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Oct 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: CDR Report: make empty-parameter check more strict to prevent removing
+  a single zero from filter parameters.
+  SVN Rev[5997]
+
 * Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.

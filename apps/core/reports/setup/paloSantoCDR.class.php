@@ -59,7 +59,7 @@ class paloSantoCDR
             return NULL;
         }
         if (!function_exists('_construirWhereCDR_notempty')) {
-        	function _construirWhereCDR_notempty($x) { return !empty($x); }
+        	function _construirWhereCDR_notempty($x) { return ($x != ''); }
         }
         $param = array_filter($param, '_construirWhereCDR_notempty');
 
@@ -149,15 +149,12 @@ SQL_COND_EXTENSION;
                la condición LIKE para que el campo correspondiente contenga como
                subcadena el valor de field_pattern. */
             $sCampo = $param['field_name'];
-            if (!function_exists('_construirWhereCDR_novacio')) {
-                function _construirWhereCDR_novacio($s) { return ($s != ''); }
-            }
             $listaPat = array_filter(
                 array_map('trim', 
                     is_array($param['field_pattern']) 
                         ? $param['field_pattern'] 
                         : explode(',', trim($param['field_pattern']))), 
-                '_construirWhereCDR_novacio');
+                '_construirWhereCDR_notempty');
 
             if (!function_exists('_construirWhereCDR_troncal2like2')) {
                 function _construirWhereCDR_troncal2like2($s) { return '%'.$s.'%'; }

@@ -1,0 +1,125 @@
+
+
+/*****************************************************/
+/*    Styles for screen 450px and lower             */
+/*****************************************************/
+
+@media only screen and (max-width : 450px) {
+
+#tooldiv{
+ margin-top:30px;
+ height: 80px;
+ }
+	
+#cont_logo{
+ width:20%;
+ float:left;
+ }
+
+#logo{
+//float:none;
+ margin:0 auto;
+ }
+
+#icn_pc{
+width:100%;
+float:none;
+margin:0 auto;
+}
+
+#icn_prof{
+float:right;
+}
+			
+#icn_prof ul{
+left:74px;
+}
+	
+nav {
+height: auto;
+border-bottom: 0;
+}
+	
+nav li {
+width: 50%;
+float: left;
+position: relative;
+}
+	
+nav ul {
+display: none;
+height: auto;
+}
+	
+nav a#pull {
+display: block;
+width: 100%;
+position: relative;
+text-indent:40px;
+}
+
+nav a#pull:after {
+content:"";
+background: url('../../apps/user_home/images/nav-icon.png') no-repeat;
+width: 30px;
+height: 30px;
+display: inline-block;
+position: absolute;
+right: 15px;
+top: 5px;		
+}
+
+#icn_prof{
+width:190px;
+}
+	
+#icn_pc{	
+width:240px;	
+}
+	
+.row{
+height:90px;
+}
+	
+.trash{
+float:left;
+margin-right:0px;
+}
+
+.date{
+position:relative;
+top:-25px;
+font-size:11pt;
+float:left;
+width:90%;
+height:12px;
+margin-left:30px;
+padding-top:2px;
+text-align:left;
+}
+
+.sel{
+position:relative;
+top:30px;
+}
+
+#main_opc{
+float:none;
+margin:40px auto;
+margin-left:15%;
+width:80%;
+}
+#filterform input[type="search"]:focus {
+    width:78%;
+    margin-left:2%;
+}
+
+.filter1{
+    margin-left:16%;
+}
+
+.filter2{
+    margin-left:14%;
+}
+
+}

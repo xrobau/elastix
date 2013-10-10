@@ -1217,22 +1217,37 @@ newexten: => Array
         $this->_dumpevent($sEvent, $params);
 
 /*
+peerstatus: => Array
+(
     [Event] => PeerStatus
     [Privilege] => system,all
     [ChannelType] => SIP
     [Peer] => SIP/1064
     [PeerStatus] => Registered
-    [Address] => 192.168.56.1:5060
-    [local_timestamp_received] => 1378847892.3981
+    [Address] => 192.168.0.11:5060
+    [local_timestamp_received] => 1381368086.7617
+)
+2013-10-09 20:21:26: DEBUG: paloControlPanelStatus::_dumpevent
+retraso => 0.022648811340332
+peerstatus: => Array
+(
+    [Event] => PeerStatus
+    [Privilege] => system,all
+    [ChannelType] => SIP
+    [Peer] => SIP/1064
+    [PeerStatus] => Reachable
+    [Time] => 19
+    [local_timestamp_received] => 1381368086.7768
+)
  */
         $trunkinfo =& $this->_identifyTrunk($params['Peer']);
         if (!is_null($trunkinfo)) {
             $regs = NULL;
-            $trunkinfo['registered'] = ($params['PeerStatus'] == 'Registered');
-            if (isset($params['Address']) && preg_match('/^(.+):\d+$/', $params['Address'], $regs)) {
-            	$trunkinfo['ip'] = $regs[1];
-            } else {
+            $trunkinfo['registered'] = in_array($params['PeerStatus'], array('Registered', 'Reachable'));
+            if (!$trunkinfo['registered']) {
             	$trunkinfo['ip'] = NULL;
+            } elseif (isset($params['Address']) && preg_match('/^(.+):\d+$/', $params['Address'], $regs)) {
+            	$trunkinfo['ip'] = $regs[1];
             }
             $this->_bModified = TRUE;
         }

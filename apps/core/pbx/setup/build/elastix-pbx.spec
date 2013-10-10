@@ -302,6 +302,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Oct 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Control Panel: handle PeerStatus event with PeerStatus set to Reachable
+  which must not be interpreted as "not registered".
+  SVN Rev[6004]
+
 * Tue Oct 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Control Panel: complete rewrite and code cleanup. This rewrite 
   addresses design issues with the previous implementation of the Control Panel:

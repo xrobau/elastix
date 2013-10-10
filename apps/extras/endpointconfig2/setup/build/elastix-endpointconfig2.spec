@@ -135,8 +135,8 @@ fi
 * Mon Oct 07 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add support for offset-based timezone
   configuration using the pytz library. The phones by the following manufacturers
-  will now inherit the telephony server timezone: Atlinks, Elastix, Grandstream,
-  Yealink. Based on a patch by Israel Santana Alemán.
+  will now inherit the telephony server timezone: Atlinks, Yealink. Based on a 
+  patch by Israel Santana Alemán.
   SVN Rev[5995]
 
 * Sat Oct 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>

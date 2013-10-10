@@ -43,7 +43,8 @@ class Endpoint(BaseEndpoint):
         BaseEndpoint.__init__(self, 'Grandstream', amipool, dbpool, sServerIP, sIP, mac)
 
         # Calculate timezone, 'auto' or GMT offset in minutes +720
-        self._timeZone = BaseEndpoint.getTimezoneOffset() / 60 + 720
+        #self._timeZone = BaseEndpoint.getTimezoneOffset() / 60 + 720
+        self._timeZone = 'auto'
 
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False

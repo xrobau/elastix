@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Sun Oct 13 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: unlock the session as soon as possible when serving the
+  applets. This allows more parallelism on applet requests and decreases load
+  time.
+  SVN Rev[6007]
+
 * Sat Oct 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: prefer system-installed magpierss to bundled magpierss if
   available. This is preparation for unbundling of magpierss library. Eventually

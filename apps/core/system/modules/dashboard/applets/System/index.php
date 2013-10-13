@@ -33,6 +33,11 @@ class Applet_System
 {
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        $elastixuser = $_SESSION['elastix_user'];
+        session_commit();
+        
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -42,7 +47,7 @@ class Applet_System
         global $arrConf;
         $dbAcl = new paloDB($arrConf["elastix_dsn"]["acl"]);
         $pACL  = new paloACL($dbAcl);
-        $userId  = $pACL->getIdUser($_SESSION['elastix_user']);
+        $userId  = $pACL->getIdUser($elastixuser);
         $mailCred = $this->leerPropiedadesWebmail($dbAcl, $userId);
         if (count($mailCred) <= 0) {
         	$respuesta['status'] = 'error';

@@ -35,6 +35,10 @@ class Applet_News
 {
 	function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        session_commit();
+        
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',

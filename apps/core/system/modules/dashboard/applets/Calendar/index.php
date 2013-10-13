@@ -38,6 +38,11 @@ class Applet_Calendar
 {
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        $elastixuser = $_SESSION['elastix_user'];
+        session_commit();
+        
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -47,7 +52,7 @@ class Applet_Calendar
         global $arrConf;
         $dbAcl = new paloDB($arrConf["elastix_dsn"]["acl"]);
         $pACL  = new paloACL($dbAcl);
-        $userId  = $pACL->getIdUser($_SESSION['elastix_user']);
+        $userId  = $pACL->getIdUser($elastixuser);
         
         $listaEventos = $this->_leerRegistrosEventos($userId);
         $listaEventosDias = $this->_expandirRegistrosEventos($listaEventos);

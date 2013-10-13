@@ -33,6 +33,10 @@ class Applet_SystemResources
 {
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        session_commit();
+
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -82,8 +86,6 @@ class Applet_SystemResources
         $cpu_b = $this->obtener_muestra_actividad_cpu();
         $fraction_cpu_used = $this->calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
 
-        $_SESSION[$module_name]['cpusample'] = $cpu_b;
-
         $smarty->assign(array(
             'fastgauge'     =>  $fastgauge,
             'cpu_info'      =>  $cpu_info,
@@ -96,6 +98,9 @@ class Applet_SystemResources
         $local_templates_dir = dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module_name/applets/SystemResources/tpl";
         $respuesta['html'] = $smarty->fetch("$local_templates_dir/system_resources.tpl");
     
+        @session_start();
+        $_SESSION[$module_name]['cpusample'] = $cpu_b;
+
         $json = new Services_JSON();
         Header('Content-Type: application/json');
         return $json->encode($respuesta);
@@ -103,6 +108,18 @@ class Applet_SystemResources
 
     function handleJSON_updateStatus($smarty, $module_name, $appletlist)
     {
+        $fraction_cpu_used = 0.0;
+        $cpu_b = $this->obtener_muestra_actividad_cpu();
+        if (isset($_SESSION[$module_name]['cpusample'])) {
+            $cpu_a = $_SESSION[$module_name]['cpusample'];
+            $fraction_cpu_used = $this->calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
+        }
+        $_SESSION[$module_name]['cpusample'] = $cpu_b;
+
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        session_commit();
+
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -112,14 +129,6 @@ class Applet_SystemResources
         $fraction_mem_used = ($meminfo['MemTotal'] - $meminfo['MemFree'] - $meminfo['Cached'] - $meminfo['MemBuffers']) / $meminfo['MemTotal'];
         $fraction_swap_used = ($meminfo['SwapTotal'] - $meminfo['SwapFree']) / $meminfo['SwapTotal'];
     
-        $fraction_cpu_used = 0.0;
-        $cpu_b = $this->obtener_muestra_actividad_cpu();
-        if (isset($_SESSION[$module_name]['cpusample'])) {
-            $cpu_a = $_SESSION[$module_name]['cpusample'];
-            $fraction_cpu_used = $this->calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
-        }
-        $_SESSION[$module_name]['cpusample'] = $cpu_b;
-
         $respuesta['status'] = array(
             'cpugauge'  =>  $fraction_cpu_used,
             'memgauge'  =>  $fraction_mem_used,
@@ -286,14 +295,12 @@ class Applet_SystemResources
         global $arrConf;
 
         $uelastix = FALSE;
-        if (isset($_SESSION)) {
-            $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-            if (empty($pDB->errMsg)) {
-                $uelastix = get_key_settings($pDB, 'uelastix');
-                $uelastix = ((int)$uelastix != 0);
-            }
-            unset($pDB);
+        $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+        if (empty($pDB->errMsg)) {
+            $uelastix = get_key_settings($pDB, 'uelastix');
+            $uelastix = ((int)$uelastix != 0);
         }
+        unset($pDB);
         return $uelastix;
     }
 }

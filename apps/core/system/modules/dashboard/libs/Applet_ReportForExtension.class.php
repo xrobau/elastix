@@ -36,6 +36,11 @@ abstract class Applet_ReportForExtension
 {
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        $elastixuser = $_SESSION['elastix_user'];
+        session_commit();
+        
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -45,7 +50,7 @@ abstract class Applet_ReportForExtension
         global $arrConf;
         $dbAcl = new paloDB($arrConf["elastix_dsn"]["acl"]);
         $pACL  = new paloACL($dbAcl);
-        $extension = $pACL->getUserExtension($_SESSION["elastix_user"]);
+        $extension = $pACL->getUserExtension($elastixuser);
         if (empty($extension) || !ctype_digit($extension)) {
             $respuesta['status'] = 'error';
             $respuesta['message'] = _tr("You haven't extension");

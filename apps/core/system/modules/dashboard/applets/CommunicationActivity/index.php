@@ -37,6 +37,10 @@ class Applet_CommunicationActivity
     
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        session_commit();
+
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -87,6 +91,7 @@ class Applet_CommunicationActivity
                 usleep(200000);
                 $muestrared_2 = $this->obtener_muestra_actividad_red();
                 $trafico = $this->calcular_actividad_red($muestrared_1, $muestrared_2);
+                @session_start();
                 $_SESSION[$module_name]['networksample'] = $muestrared_2;
             	
                 $smarty->assign(array(

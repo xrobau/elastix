@@ -33,6 +33,10 @@ class Applet_HardDrives
 {
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        session_commit();
+
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -119,6 +123,10 @@ class Applet_HardDrives
     
     function handleJSON_dirspacereport($smarty, $module_name, $appletlist)
     {
+        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+         * que otras operaciones ajax puedan funcionar. */
+        session_commit();
+
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -159,10 +167,6 @@ class Applet_HardDrives
             ),
         );
         
-        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
-         * que otras operaciones ajax puedan funcionar mientras se espera el 
-         * reporte de espacio por directorio. */
-        session_commit();
         $pipe_dirspace = popen('/usr/bin/elastix-helper dirspacereport', 'r');
         while ($s = fgets($pipe_dirspace)) {
             $s = trim($s); $l = explode(' ', $s);
@@ -170,7 +174,6 @@ class Applet_HardDrives
                 $listaReporteDir[$l[0]]['use'] = $l[1];
         }
         pclose($pipe_dirspace);
-        @session_start();
         
         $smarty->assign('listaReporteDir', $listaReporteDir);
 
@@ -220,14 +223,12 @@ class Applet_HardDrives
         global $arrConf;
 
         $uelastix = FALSE;
-        if (isset($_SESSION)) {
-            $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-            if (empty($pDB->errMsg)) {
-                $uelastix = get_key_settings($pDB, 'uelastix');
-                $uelastix = ((int)$uelastix != 0);
-            }
-            unset($pDB);
+        $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+        if (empty($pDB->errMsg)) {
+            $uelastix = get_key_settings($pDB, 'uelastix');
+            $uelastix = ((int)$uelastix != 0);
         }
+        unset($pDB);
         return $uelastix;
     }
 }

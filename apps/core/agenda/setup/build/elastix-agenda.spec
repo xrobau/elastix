@@ -109,6 +109,12 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Mon Oct 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: the agenda record field expansion renamed phone to work_phone,
+  which breaks the SOAP API. Copy the field back to its old name to keep the
+  SOAP compatibility. Fixes Elastix bug #1730.
+  SVN Rev[6009]
+
 * Fri Sep 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: when fetching the internal contact list, an empty recordset (as
   returned from a non-matching search) is a valid scenario and therefore not an

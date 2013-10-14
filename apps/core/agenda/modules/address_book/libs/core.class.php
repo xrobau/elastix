@@ -385,6 +385,14 @@ class core_AddressBook
             }
             break;
         }
+        
+        /* Para mantener la compatibilidad con el API de SOAP, la extensión debe
+         * de tener un elemento 'phone'. Véase bug Elastix #1730. */
+        for ($i = 0; $i < count($extension); $i++) {
+        	if (!isset($extension[$i]['phone']) && isset($extension[$i]['work_phone']))
+                $extension[$i]['phone'] = $extension[$i]['work_phone'];
+        }
+        
         return array(
                 'totalCount'    =>  $iNumTotal,
                 'extension'     => $extension,

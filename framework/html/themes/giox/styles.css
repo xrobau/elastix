@@ -133,7 +133,7 @@ TABLE.table_data_login{
 }
 table.menumini {
     border-bottom: 1px solid #aaaaaa;
-    background-image: url(images/background_mini.jpg); 
+    background-image: url(../../images/background_mini.jpg); 
 }
 TD.table_data {
 /*    BACKGROUND: #FFFFFF; */

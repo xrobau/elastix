@@ -1,3 +1,6 @@
+{literal}
+<link rel="stylesheet" href="web/_common/js/jquery/css/smoothness/jquery-ui-1.8.24.custom.css">
+{/literal}
 <div id="contsetting">
     
     <div class="my_settings">

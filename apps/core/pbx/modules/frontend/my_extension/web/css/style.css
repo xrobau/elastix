@@ -1,0 +1,39 @@
+.my_settings{
+    padding-top: 30px;
+}
+
+.row{
+    margin-top: 15px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.input-group .form-control{
+    width:200px;
+}
+
+.form-control{
+width: 65px;
+}
+
+input[type=text]{
+width: 200px;
+}
+
+.col-md-8 p{
+color: #E35332;
+font-size: 17px;
+font-weight: bold;
+}
+
+.col-md-3{
+font-weight: bold;
+}
+
+.oculto{
+display:none;
+}
+
+.visible{
+display:block;
+}

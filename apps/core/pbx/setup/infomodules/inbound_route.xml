@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>	
 <module>
-	<menu id="indbound_route" name="Inbound Routes" idParent="outconnection" type="module" link=""  order_no="4">
+	<menu id="inbound_route" name="Inbound Routes" idParent="outconnection" type="module" link=""  order_no="4">
 		<permissions administrative="yes" organization_access="yes" >
 			<actions>
 				<action name="access">

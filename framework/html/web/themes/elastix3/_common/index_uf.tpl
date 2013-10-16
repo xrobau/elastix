@@ -9,7 +9,6 @@
         <!--[if lte IE 8]><link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/ie.css" /><![endif]-->
 	{$HEADER_LIBS_JQUERY}
         <script type='text/javascript' src="{$WEBCOMMON}js/base.js"></script>
-        <script type='text/javascript' src="{$WEBCOMMON}js/jsvalidator.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/uf.js"></script>
         {$HEADER}
 	{$HEADER_MODULES}

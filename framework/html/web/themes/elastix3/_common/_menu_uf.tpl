@@ -27,7 +27,7 @@
 	      <div id="icn_prof">
 		<div id="name">{$USER_NAME}</div>
                 {if $ShowImg}
-                <img id="photo" alt="image" src="index.php?menu={$MODULE_NAME}&action=getImage&ID={$id_user}&rawmode=yes"/>
+                <img id="photo" alt="image" src="index.php?menu=_elastixutils&action=getImage&ID={$id_user}&rawmode=yes"/>
                 {else}
                 <img alt="image" style="margin-top: 2px; height: 36px; width: 38px;" src="web/apps/{$MODULE_NAME}/images/Icon-user.png"/>
                 {/if}

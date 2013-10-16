@@ -5,16 +5,12 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
         <title>Elastix</title>
         <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" />
-		<!--<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/old.theme.elastixwave.styles.css" />-->
-                <link rel="stylesheet" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/960px.css"  media="only screen and (max-width: 960px)" >
-		<link rel="stylesheet" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/700px.css"  media="only screen and (max-width: 700px)" >
-		<link rel="stylesheet" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/450px.css"  media="only screen and (max-width: 450px)" >
-		<link rel="stylesheet" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/260px.css"  media="only screen and (max-width: 260px)" >
+	<!--<link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/old.theme.elastixwave.styles.css" />--> 
         <!--[if lte IE 8]><link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/ie.css" /><![endif]-->
 	{$HEADER_LIBS_JQUERY}
         <script type='text/javascript' src="{$WEBCOMMON}js/base.js"></script>
-        <script type='text/javascript' src="{$WEBCOMMON}js/uf.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/jsvalidator.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/uf.js"></script>
         {$HEADER}
 	{$HEADER_MODULES}
     </head>

@@ -166,7 +166,7 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
     
     //para el casos de los recursos organization, dashboard, cdrreport ahi acciones que no se les puede otorgar a los usuarios
     if(isset($arrResourceActions['organization'])){
-        $arrResourceActions['organization']=array_diff($arrResourceActions['organization'],array('change_org_status','create_org','delete_org','edit_did'));
+        $arrResourceActions['organization']=array_diff($arrResourceActions['organization'],array('change_org_status','create_org','delete_org','edit_DID'));
     }
     if(isset($arrResourceActions['dashboard'])){
         $arrResourceActions['dashboard']=array('access');
@@ -416,7 +416,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
             //dentro del modulo organizacion ahi acciones que unicamente las puede realizar el superadmin
             //por lo tando no deben aparecer listadas
             if($resource=="organization"){
-                $actions=array_diff($actions,array('change_org_status','create_org','delete_org','edit_did'));
+                $actions=array_diff($actions,array('change_org_status','create_org','delete_org','edit_DID'));
             }elseif($resource=="dashboard"){
                 $actions=array('access');
             }elseif($resource=='cdrreport'){

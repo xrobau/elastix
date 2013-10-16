@@ -154,7 +154,7 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
     if($credentials["userlevel"]=="superadmin"){
         $arrColumns[]=""; //delete
     }
-    if(in_array('access_did',$arrPermission)){
+    if(in_array('access_DID',$arrPermission)){
         $arrColumns[]=""; //did
     }
     $arrColumns[]=_tr("Domain");
@@ -187,7 +187,7 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
             if($credentials["userlevel"]=="superadmin"){
                 $arrTmp[] = "<input type='checkbox' class='chk_id' value='{$value['id']}' />"; //checkbox selet
             }
-            if(in_array('access_did',$arrPermission)){
+            if(in_array('access_DID',$arrPermission)){
                 $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=reportDIDs&domain=".$value['domain']."'>"._tr("Assign DIDs")."</a>"; //did
             }
             $arrTmp[] = "&nbsp;<a href='?menu=$module_name&action=view&id=".$value['id']."'>".htmlentities($value['domain'], ENT_COMPAT, 'UTF-8')."</a>";
@@ -1015,7 +1015,7 @@ function didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, 
     }
     
     global $arrPermission;
-    if(in_array('edit_did',$arrPermission)){
+    if(in_array('edit_DID',$arrPermission)){
         $smarty->assign('EDIT_DID',TRUE);
     }
     
@@ -1167,18 +1167,18 @@ function getAction()
         return "get_country_code";
     }else if(getParameter("assignDIDs")){
         //preguntar si el usuario puede hacer accion
-        return (in_array('edit_did',$arrPermission))?'didAssign':'report';
+        return (in_array('edit_DID',$arrPermission))?'didAssign':'report';
     }else if(getParameter("removeDID")){
         //preguntar si el usuario puede hacer accion
-        return (in_array('edit_did',$arrPermission))?'didAssign':'report';
+        return (in_array('edit_DID',$arrPermission))?'didAssign':'report';
     }else if(getParameter("action")=="changeDIDfilter"){
         return "changeDIDfilter";
     }else if(getParameter("action")=="reportDIDs"){
         //preguntar si el usuario puede hacer accion
-        return (in_array('access_did',$arrPermission))?'reportDIDs':'report';
+        return (in_array('access_DID',$arrPermission))?'reportDIDs':'report';
     }else if(getParameter("save_did")){
         //preguntar si el usuario puede hacer accion
-        return (in_array('edit_did',$arrPermission))?'saveDidAssign':'report';
+        return (in_array('edit_DID',$arrPermission))?'saveDidAssign':'report';
     }else if(getParameter("action")=="reloadAsterisk"){
         return "reloadAsterisk";
     }else if(getParameter("action")=="change_org_state"){

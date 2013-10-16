@@ -121,7 +121,6 @@ class paloForm
     function fetchForm($templateName, $title, $arrPreFilledValues = array())
     {
         global $arrConf;
-        
         /* Función interna para convertir un arreglo especificado en 
            INPUT_EXTRA_PARAM en una cadena de atributos clave=valor adecuada 
            para incluir al final de un widget HTML. Si no existe 
@@ -261,6 +260,27 @@ class paloForm
                                     htmlentities($radioValue, ENT_COMPAT, 'UTF-8'),
                                     ($radioValue == $arrPreFilledValues[$varName]) ? 'checked="checked"' : '',
                                     htmlentities($radioLabel, ENT_COMPAT, 'UTF-8'));
+                            }
+                            $strInput = implode("\n", $listaRadio);                            
+                        }
+                    } else {
+                        $strInput = $varValue_escaped;
+                    }
+                    break;
+                case "OPTION":
+                    if($bIngresoActivo) {
+                        $strInput = "";
+                        if(is_array($arrVars['INPUT_EXTRA_PARAM'])) {
+                            $listaRadio = array();
+                            foreach($arrVars['INPUT_EXTRA_PARAM'] as $radioItem) {
+                                $listaRadio[] = sprintf(
+                                    '<input type="radio" id="%s" name="%s" value="%s" %s /><label for="%s">%s</label>',
+                                    htmlentities($radioItem['id'], ENT_COMPAT, 'UTF-8'),
+                                    $varName_escaped,
+                                    htmlentities($radioItem['value'], ENT_COMPAT, 'UTF-8'),
+                                    ($radioItem['value'] == $arrPreFilledValues[$varName]) ? 'checked="checked"' : '',
+                                    htmlentities($radioItem['id'], ENT_COMPAT, 'UTF-8'),
+                                    htmlentities($radioItem['label'], ENT_COMPAT, 'UTF-8'));
                             }
                             $strInput = implode("\n", $listaRadio);                            
                         }

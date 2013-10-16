@@ -314,6 +314,10 @@ function load_theme()
     }
 }
 
+function load_theme_fui()
+{
+    return "elastix3";
+}
 
 function update_theme()
 {

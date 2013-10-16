@@ -1829,12 +1829,9 @@ INFO_AUTH_MODULO;
             //y las acciones que ya no existen
             if(!isset($resource['actions']))
                 $resource['actions']=array();
-                
-            if(!is_array($resource['actions'])){
-                $resource['actions']=array();
-            }
-            
+                          
             $actions=array_keys($resource['actions']);
+            
             $cu_actions=$this->getResourcesActions(array($resource['id']));
             if($cu_actions===false){
                 $this->errMsg=_tr("An error has ocurred to retrieved current resource actions");
@@ -1844,10 +1841,9 @@ INFO_AUTH_MODULO;
             }else{
                 $cuActions=$cu_actions[$resource['id']];
             }
-            
+                        
             $new_actions=array_diff($actions,$cuActions);
             $del_actions=array_diff($cuActions,$actions);
-                       
             if(!$this->delActions($resource['id'],$del_actions)){
                 $this->errMsg=_tr("Actions could not be deleted")." ".$this->errMsg;
                 $this->_DB->rollBack();
@@ -1911,7 +1907,7 @@ INFO_AUTH_MODULO;
             
             if(isset($resource['actions']) && is_array($resource['actions'])){
                 $actions=array_keys($resource['actions']);
-            
+                
                 //creamos las acciones
                 if(!$this->insertActions($resource['id'],$actions)){
                     $this->errMsg=_tr("Actions could not be created");
@@ -2106,8 +2102,9 @@ INFO_AUTH_MODULO;
             $q .="?,";
         }
         $q=substr($q,0,-1);
+        $param[]=1; //id_organization
         //borramos los permisos actuales de estas acciones
-        $query="DELETE gra FROM group_resource_action gra JOIN resource_action ra ON gra.id_resource_action=ra.id WHERE ra.id_resource=? and ra.action IN ($q)";
+        $query="DELETE gra FROM group_resource_action gra JOIN resource_action ra ON gra.id_resource_action=ra.id JOIN acl_group g ON gra.id_group=g.id WHERE ra.id_resource=? and ra.action IN ($q) and g.id_organization=?";
         if(!$this->_DB->genQuery($query,$param)){
             $this->errMsg=_tr("DATABASE ERROR");
             return false;

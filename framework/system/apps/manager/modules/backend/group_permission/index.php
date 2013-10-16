@@ -149,10 +149,11 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
     }
     
     //el grupo administrator de cada organizacion tiene ciertos recursos siempre activos
-    //por ello sacamos esos recursos de la lista de recursos cuyos permisos se van a editar
     $isAdministrator = ($pACL->getGroupNameByid($idGroup) == "administrator") ? true :false;
     if( $isAdministrator ){
-        $listResource = array_diff($listResource,array("usermgr","grouplist","userlist","group_permission"));
+        $listResource[] = "grouplist";
+        $listResource[] = "userlist";
+        $listResource[] = "group_permission";
     }
     
     //las acciones que tiene cada drecurso
@@ -194,6 +195,15 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
                 }
             }
         }
+    }
+    
+     if( $isAdministrator ){
+        if(isset($arrResourceActions['grouplist']))
+            $arrSelectdPermissions["grouplist"]=$arrResourceActions['grouplist'];
+        if(isset($arrResourceActions['userlist']))
+            $arrSelectdPermissions["userlist"]=$arrResourceActions['userlist'];
+        if(isset($arrResourceActions['group_permission']))
+            $arrSelectdPermissions["group_permission"]=$arrResourceActions['group_permission'];
     }
     
     //sacamos la lista de los permisos nuevos
@@ -399,7 +409,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
             $arrTmp=array();
             $arrTmp[] = _tr($listResDes[$resource]);
             $disabled = "";
-            if( $isAdministrator && ( $resource == 'usermgr'   || $resource == 'grouplist' || $resource == 'userlist'  || $resource == 'group_permission')){
+            if( $isAdministrator && ( $resource == 'grouplist' || $resource == 'userlist'  || $resource == 'group_permission')){
                 $disabled = "disabled='disabled'";
             }
             

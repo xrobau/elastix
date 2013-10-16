@@ -1419,7 +1419,7 @@ INFO_AUTH_MODULO;
         }
 
         $query = "SELECT id, description FROM acl_resource WHERE Type!='' $where ";
-        $query .= "LIMIT ? OFFSET ?";
+        $query .= "order by id Asc LIMIT ? OFFSET ?";
         $arrParam[] = $limit;
         $arrParam[] = $offset;
         $result = $this->_DB->fetchTable($query, true, $arrParam);

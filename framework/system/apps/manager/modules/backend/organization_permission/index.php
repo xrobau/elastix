@@ -94,6 +94,7 @@ function applyOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB, 
         $msg_error=_tr("Invalid Organization");
     }
 
+    
     //obtenemos las traducciones del parametro filtrado
     $filter_resource = htmlentities($filter_resource);
     $lang = get_language(); //lenguage que esta siendo usado
@@ -115,6 +116,7 @@ function applyOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB, 
             }
         }
     }
+    
 
     if(isset($filter_resource)){
         $parameter_to_find[] = $filter_resource;
@@ -256,7 +258,7 @@ function reportOrgPermission($smarty, $module_name, $local_templates_dir, &$pDB,
         $smarty->assign("mb_message",_tr("An error has ocurred to retrieved resources data"));
     }
 
-    $limit=20;
+    $limit=25;
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);

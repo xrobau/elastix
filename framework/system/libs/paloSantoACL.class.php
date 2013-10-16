@@ -2021,9 +2021,10 @@ INFO_AUTH_MODULO;
             return true; //no ahi nada que hacer
         
         $param[]=$id_resource;
+        $q='';
         foreach($actions as $action){
             $param[]=$action;
-            $q="?,";
+            $q .="?,";
         }
         $q=substr($q,0,-1);
         $query="DELETE FROM resource_action WHERE id_resource=? and action IN ($q)";

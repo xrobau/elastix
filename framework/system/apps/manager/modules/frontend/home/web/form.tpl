@@ -1,45 +1,4 @@
-     <div id="tooldiv">
-       <div id="cont_logo">
-          <div id="logo"></div>
-       </div>
-       
-	      <div id="icn_prof">
-		<div id="name">{$USER_NAME}</div>
-		<img id="photo" src="{$PHOTO}" alt="photo profile">
-		<ul>
-		 <li>Profile
-		  <ul>
-		   <li>View</li>
-		   <li>Edit Photo</li>
-		   <li>Color
-	        	<ul>
-			  <li>Red</li>
-		          <li>Blue</li>
-			  <li>Green</li>
-			</ul>
-		    </li>
-		    <li>Language
-			<ul>
-	         	  <li>English</li>
-			  <li>Spanish</li>
-			</ul>	
-         	     </li>	
-		  </ul>
-	         </li>
-	         <li><a class="logout" href="?logout=yes">{$LOGOUT}</a></li>
-                </ul>
-	      </div>
-   <div id="main_opc">
-		<div class="icn_m"><span class="lp ml10">&#9993;</span></div>
-		<div class="icn_m"><span class="lp ml10">&#59158;</span></div>	
-		<div class="icn_m"><span class="lp ml10">&#128260;</span></div>	
-                <div class="icn_m" id="filter_but"><span class="lp ml10">&#128269;</span></div>		
-		 
-   </div>
-			
-    </div>
-			</div>
-               </div>
+
 	     	<div id="filterdiv">
                 <form id="filterform">
 			 
@@ -83,13 +42,7 @@
 			 </div>	
 			 </div>
 			
-			
-				<div id="display2" class="color1 ra_disp2_10">
-				<div id="icn_disp2" class="cont_pic_tag ra_disp2_10">
-				<span class="icn_d">h</span>
-				</div>	
-				</div>
-				</div>
+			</div>
                                 
 				<div id="contentdiv">
                                  <div id="bodymail"></div>
@@ -126,3 +79,4 @@
 					</div>
 
 				</div>
+

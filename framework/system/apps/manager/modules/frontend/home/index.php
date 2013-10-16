@@ -2,7 +2,7 @@
   /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                                |
+  | Elastix version 3.0.0                                                |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -35,6 +35,7 @@ function _moduleContent(&$smarty, $module_name)
 {
     //global variables
     global $arrConf;
+    global $arrCredentials;
    // global $arrConfModule;
     //$arrConf = array_merge($arrConf,$arrConfModule);
   
@@ -49,7 +50,12 @@ function _moduleContent(&$smarty, $module_name)
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $uid = $pACL->getIdUser($user);
     $arrUser = $pACL->getUsers($uid);
-    
+      
+     $picture = $pACL->getUserPicture($uid);
+            if($picture!==false){
+                $smarty->assign("ShowImg",1);
+            }
+
     foreach($arrUser as $value){
     $arrFill["username"]=$value[1];
     $arrFill["name"]=$value[2];
@@ -85,11 +91,9 @@ function _moduleContent(&$smarty, $module_name)
     // close the connection
     $imap_login->close_mail_connection();
 
-
-
     $smarty->assign("USER_NAME", $arrFill["name"]);
-    $smarty->assign("PHOTO", "web/apps/$module_name/images/prof.jpg");
-    
+    $smarty->assign("MODULE_NAME", $module_name);
+    $smarty->assign("id_user", $uid);
     $hostname = '{localhost:143/imap/novalidate-cert}INBOX';
     $username =  $arrFill["username"];
     $password =   $_SESSION['elastix_pass2'];
@@ -105,6 +109,9 @@ function _moduleContent(&$smarty, $module_name)
     switch($accion){
         case "view_bodymail":
             $content = view_mail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $inbox);
+            break;
+        case "getImage":
+            $content = getImage($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         default:
             $content = createHome($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $emailnum, $inbox);
@@ -153,11 +160,39 @@ function view_mail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
    return $jsonObject->createJSON();
 }
 
+function getImage($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrCredentiasls){
+    $pACL       = new paloACL($pDB);
+    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/web/apps/$module_name/images/Icon-user.png";
+    $id_user=getParameter("ID");
+    $picture=false;
+   
+    if($arrCredentiasls["userlevel"]=="superadmin"){
+        $picture = $pACL->getUserPicture($id_user);
+    }else{
+        //verificamos que el usario pertenezca a la organizacion
+        if($pACL->userBellowOrganization($id_user,$arrCredentiasls["id_organization"]))
+            $picture = $pACL->getUserPicture($id_user);
+    } 
+    
+    // Creamos la imagen a partir de un fichero existente
+    if($picture!=false && !empty($picture["picture_type"])){
+        Header("Content-type: {$picture["picture_type"]}");
+        print $picture["picture_content"];
+    }else{
+        Header("Content-type: image/png");
+        $im = file_get_contents($imgDefault);
+        echo $im;
+    }
+    return;
+}
+
 function getAction()
 {
-    if(getParameter("action")=="view_bodymail")
+    if(getParameter("action")=="view_bodymail"){
       return "view_bodymail";  
-    else
+    }else if(getParameter("action")=="getImage"){
+      return "getImage";
+    }else
       return "report";
 }
 

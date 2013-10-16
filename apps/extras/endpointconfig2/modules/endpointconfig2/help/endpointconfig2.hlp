@@ -2,6 +2,19 @@
     <header>
         <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
         <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+{literal}
+<style type="text/css">
+
+dt {
+    font-weight: bold;
+}
+pre {
+    margin-left: 20px;
+    background-color: #dddddd;
+}
+
+</style>
+{/literal}
     </header>
     <body>
         <h1>{$node_name}</h1>
@@ -92,7 +105,7 @@ Elastix server. </dd>
 
 <p>The main interface of the module is as follows:</p>
 
-(TODO: insertar imagen)
+<img src="../modules/{$node_id}/images/hlp_mainscreen.png" />
 
 <dl>
 <dt>Main listing</dt>
@@ -180,14 +193,14 @@ detected.</dd>
 
 <p>The configuration dialog contains the following screens:</p>
 
-(TODO: imagen)
+<img src="../modules/{$node_id}/images/hlp_dialog_information.png" />
 
 <p>The Information screen displays details on the selected endpoint. These details
 include the detected manufacturer and model, MAC and IP, and the maximum number
 of configurable accounts for the endpoint, as dictated by the model. Also visible
 are various flags that indicate known capabilities for the model.</p>
 
-(TODO: imagen)
+<img src="../modules/{$node_id}/images/hlp_dialog_accounts.png" />
 
 <p>The Accounts screen enables assignment of the existing accounts on the system to
 the selected endpoint. The screen contains two panels with account entries and
@@ -203,18 +216,18 @@ properties for specific accounts. If so, these properties may be entered by
 selecting the assigned account, and writing the name and value of the property
 in the lower right panel.</p>
 
-(TODO: imagen)
+<img src="../modules/{$node_id}/images/hlp_dialog_network.png" />
 
 <p>The network screen enables configuration of network parameters. The endpoint
 can be switched between DHCP and static network addresses (if supported), and
 if configuring as static address, the basic IP parametrers are entered here.</p>
 
-(TODO: imagen)
+<img src="../modules/{$node_id}/images/hlp_dialog_auth.png" />
 
 <p>The credentials screen enables configuration of authentication credentials
 that may be required to configure a phone with non-default passwords.</p>
 
-(TODO: imagen)
+<img src="../modules/{$node_id}/images/hlp_dialog_custom.png" />
 
 <p>The Custom Parameters screen allows setting of model-specific parameters not
 otherwise supported by the interface. Unlike any parameters entered in the 
@@ -223,10 +236,351 @@ a specific account.</p>
 
 <h3><a id="workflow_manual">Workflow for manual parameter configuration</a></h3>
 
-<p>The following is the recommended procedure for configuring a small number of</p>
+<p>The following is the recommended procedure for configuring a small number of
+endpoints:</p>
+<ol>
+<li>Plug all of your endpoints into the same LAN as the Elastix server.</li>
+<li>On the interface, check the network specification next to the Scan button, and
+fix it if required. Then, click on the Scan button.</li>
+<li>The endpoint listing will grow or update in real time as endpoints are 
+detected. Press the "Cancel" button at any time to stop scanning, or wait until
+the entire network has been scanned.</li>
+<li>For each detected endpoint to be configured, check whether the model has been
+detected correctly. If the model says "(not detected)", the model must be manually
+set before accounts can be assigned.</li>
+<li>Display the configuration dialog for each endpoint to configure, and assign
+accounts as required.</li>
+<li>Select all of the endpoints with the checkbox at the header row in order to
+configure all of the detected endpoints. Otherwise, individually select the 
+endpoints to be configured.</li>
+<li>Click on the Endpoint configuration toolbar button. The configuration process
+will start and the progress bar will be displayed.</li>
+<li>If all endpoints were correctly configured, a message will pop up at the top
+of the module indicating so. Otherwise, it is recommended to review the 
+configuration log by clicking on the Configuration Log toolbar button.</li>
+</ol>
 
 <h3><a id="workflow_file">Workflow for parameter configuration through file upload</a></h3>
+
+<p>For a large number of endpoints, it is recommended to use the file download/upload
+tools. The initial and final steps are similar to the manual configuration:</p>
+
+<ol>
+<li>Plug all of your endpoints into the same LAN as the Elastix server.</li>
+<li>On the interface, check the network specification next to the Scan button, and
+fix it if required. Then, click on the Scan button.</li>
+<li>The endpoint listing will grow or update in real time as endpoints are 
+detected. Press the "Cancel" button at any time to stop scanning, or wait until
+the entire network has been scanned.</li>
+<li>Click on the Download toolbar button. This will display a menu with possible
+file formats for the endpoint list. If you do not need support for multiple
+accounts per endpoint AND you need to maintain compatibility with the old endpoint
+format, choose the "CSV (Legacy)" format. If you have a suitable XML editor, or
+have a program that can handle XML, choose the XML format. Otherwise choose the
+"CSV (Nested)" format.</li>
+<li>Modify the files to reflect the required endpoint policy. Any endpoints for
+which the model appears as empty MUST be either removed or the model filled in.
+Otherwise the file will be rejected on upload.</li>
+<li>Click on the Upload toolbar button. A file upload control will appear on
+which the modified file must be specified.</li>
+<li>Check whether the upload was successful.</li>
+<li>Select all of the endpoints with the checkbox at the header row in order to
+configure all of the detected endpoints. Otherwise, individually select the 
+endpoints to be configured.</li>
+<li>Click on the Endpoint configuration toolbar button. The configuration process
+will start and the progress bar will be displayed.</li>
+<li>If all endpoints were correctly configured, a message will pop up at the top
+of the module indicating so. Otherwise, it is recommended to review the 
+configuration log by clicking on the Configuration Log toolbar button.</li>
+</ol>
+
 <h3><a id="file_formats">Endpoint list file formats</a></h3>
+
+<p>The Download Endpoint List functionality can generate lists in three formats:</p>
+<ul>
+<li><a href="#format_csvlegacy">CSV (Legacy)</a></li>
+<li><a href="#format_xml">XML</a></li>
+<li><a href="#format_csvnested">CSV (Nested)</a></li>
+</ul>
+
+<h4><a id="format_csvlegacy">CSV (Legacy)</a></h4>
+<p>This is the format used by the old implementation of the Endpoint Batch module.
+Unlike the previous implementation, this module supports mixing multiple manufacturers
+without errors. This format can assign only one extension/account per endpoint.
+The fields listed below may appear in any order. However, the very first row of the
+file must contain headers with the listed keywords, in the order they will be
+defined in the rest of the file. Any fields not marked as Required may be omitted
+from the file.</p>
+<dl>
+<dt>Vendor</dt>
+<dd>(Required) The name of the endpoint manufacturer</dd>
+<dt>Model</dt>
+<dd>(Required) The name of the endpoint model for the manufacturer</dd>
+<dt>MAC</dt>
+<dd>(Required) The MAC address of the phone. This field is used to match the information against
+any existing definition in the database.</dd>
+<dt>Ext</dt>
+<dd>(Required) The account to be assigned to this particular endpoint. In single
+tenant systems, this is frequently the same string as the extension.</dd>
+<dt>IP</dt>
+<dd>The IP address that will be configured in the phone. If this field is empty,
+the phone will be configured for DHCP.</dd>
+<dt>Mask</dt>
+<dd>The netmask that will be configured in the phone. This field is required if
+an IP address is specified.</dd>
+<dt>GW</dt>
+<dd>The gateway address that will be configured in the phone. This field is required if
+an IP address is specified.</dd>
+<dt>DNS1</dt>
+<dd>The primary DNS. This field is required if an IP address is specified.</dd>
+<dt>DNS2</dt>
+<dd>The secondary DNS.</dd>
+<dt>Bridge</dt>
+<dd>If you want the phone to act as a bridge then set this field to 1, otherwise
+set it to 0. Not all endpoint manufacturer implementations support the use of this
+field.</dd>
+<dt>Time_Zone</dt>
+<dd>Specify the timezone for the phone. If not present, the phone will use its
+vendor and model specific defaults. Not all endpoint manufacturer implementations
+support the use of this field.</dd>
+</dl>
+<p>The following example defines a single endpoint with headers. Here the phone
+is declared as a Grandstream GXP1405 with MAC address 00:0B:82:3C:47:85, assigned
+to extension 1071.</p>
+<pre>
+Vendor,Model,MAC,Ext,IP,Mask,GW,DNS1,Bridge,Time_Zone,DNS2
+Grandstream,GXP1405,00:0B:82:3C:47:85,1071,,,,,,,
+</pre>
+
+<h4><a id="format_xml">XML</a></h4>
+
+<p>This format is an XML document. The topmost element is the "endpoints" element, 
+which contains one or more "endpoint" elements. The "endpoint" element contains
+the following elements:</p>
+<dl>
+<dt>mac_address</dt>
+<dd>(Required) The MAC address of the phone. This field is used to match the information against
+any existing definition in the database.</dd>
+<dt>name_manufacturer</dt>
+<dd>(Required) The name of the endpoint manufacturer.</dd>
+<dt>name_model</dt>
+<dd>(Required) The name of the endpoint model for the manufacturer</dd>
+<dt>endpoint_properties</dt>
+<dd>Contains the set of properties that apply to the endpoint as a whole.</dd>
+<dt>accounts</dt>
+<dd>Contains the set of accounts to be assigned to the endpoint.</dd>
+</dl>
+
+<p>The "endpoint_properties" element contains zero or more "property" elements.
+Each "property" element has a "key" element for the name of the property, and
+a "value" element for its value. The configuration uses these standard properties:</p>
+
+<dl>
+<dt>dhcp</dt>
+<dd>Set to 1 (default) to use DHCP, or 0 to use the 5 next properties for network 
+configuration.</dd>
+<dt>static_ip</dt>
+<dd>If dhcp is set to 0, specifies the IPv4 address.</dd>
+<dt>static_mask</dt>
+<dd>If dhcp is set to 0, specifies the IPv4 network mask (such as 255.255.255.0)</dd>
+<dt>static_gw</dt>
+<dd>If dhcp is set to 0, specifies an IPv4 gateway</dd>
+<dt>static_dns1</dt>
+<dd>If dhcp is set to 0, specifies first DNS address</dd>
+<dt>static_dns2</dt>
+<dd>If dhcp is set to 0, specifies second DNS address</dd>
+<dt>http_username</dt>
+<dd>For models that require it, specifies the HTTP username to use during 
+configuration, if set to other than the default.</dd>
+<dt>http_password</dt>
+<dd>For models that require it, specifies the HTTP password to use during 
+configuration, if set to other than the default.</dd>
+<dt>telnet_username</dt>
+<dd>For models that require it, specifies the Telnet username to use during 
+configuration, if set to other than the default.</dd>
+<dt>telnet_password</dt>
+<dd>For models that require it, specifies the Telnet password to use during 
+configuration, if set to other than the default.</dd>
+<dt>ssh_username</dt>
+<dd>For models that require it, specifies the SSH username to use during 
+configuration, if set to other than the default.</dd>
+<dt>ssh_password</dt>
+<dd>For models that require it, specifies the SSH username to use during 
+configuration, if set to other than the default.</dd>
+</dl>
+
+<p>The "accounts" element contains zero or more "account" elements. Each "account"
+element contains the following elements:</p>
+<dl>
+<dt>tech</dt>
+<dd>(Required) The VoIP technology used for the account. Currently supported 
+technologies are 'sip' and 'iax2'.</dd>
+<dt>accountname</dt>
+<dd>(Required) Account name to link to this endpoint.</dd>
+<dt>name_model</dt>
+<dd>(Required) The name of the endpoint model for the manufacturer</dd>
+<dt>priority</dt>
+<dd>(Required) Position in which the endpoint will be assigned to an endpoint that
+supports multiple accounts. The account at the first priority will be the one used
+for the on-screen description (if supported).</dd>
+<dt>account_properties</dt>
+<dd>Contains the set of properties that apply to this account.</dd>
+</dl>
+
+<p>The "account_properties" element contains zero or more "property" elements.
+Each "property" element has a "key" element for the name of the property, and
+a "value" element for its value.</p>
+
+<p>The following example is a complete XML document that defines a single endpoint.
+Here the phone is declared as a Grandstream GXP1405 with MAC address 00:0B:82:3C:47:85, assigned
+to extensions 1071 and 1072. The endpoint contains a standard property "dhcp" set
+to "1", and also a custom property "unusedproperty" set to "unusedvalue". Additionally
+the account 1072 contains a custom property "unusedproperty" set to "unusedvalue",
+which is not the same as the endpoint-level property of the same name.</p>
+<pre>
+
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;endpoints&gt;
+    &lt;endpoint&gt;
+        &lt;mac_address&gt;00:0B:82:3C:47:85&lt;/mac_address&gt;
+        &lt;name_manufacturer&gt;Grandstream&lt;/name_manufacturer&gt;
+        &lt;name_model&gt;GXP1405&lt;/name_model&gt;
+        &lt;endpoint_properties&gt;
+            &lt;property&gt;
+                &lt;key&gt;dhcp&lt;/key&gt;
+                &lt;value&gt;1&lt;/value&gt;
+            &lt;/property&gt;
+            &lt;property&gt;
+                &lt;key&gt;unusedproperty&lt;/key&gt;
+                &lt;value&gt;unusedvalue&lt;/value&gt;
+            &lt;/property&gt;
+        &lt;/endpoint_properties&gt;
+        &lt;accounts&gt;
+            &lt;account&gt;
+                &lt;tech&gt;sip&lt;/tech&gt;
+                &lt;accountname&gt;1071&lt;/accountname&gt;
+                &lt;priority&gt;1&lt;/priority&gt;
+                &lt;account_properties/&gt;
+            &lt;/account&gt;
+            &lt;account&gt;
+                &lt;tech&gt;sip&lt;/tech&gt;
+                &lt;accountname&gt;1072&lt;/accountname&gt;
+                &lt;priority&gt;2&lt;/priority&gt;
+                &lt;account_properties&gt;
+                    &lt;property&gt;
+                        &lt;key&gt;unusedproperty&lt;/key&gt;
+                        &lt;value&gt;unusedvalue&lt;/value&gt;
+                    &lt;/property&gt;
+                &lt;/account_properties&gt;
+            &lt;/account&gt;
+        &lt;/accounts&gt;
+    &lt;/endpoint&gt;
+&lt;/endpoints&gt;
+
+</pre>
+
+
+<h4><a id="format_csvnested">CSV (Nested)</a></h4>
+
+<p>This format is based on CSV and can be manually generated in a spreadsheet if
+required. In order to represent multiple accounts per endpoint, this format uses
+indentation with empty fields to define all components of the endpoint definition.
+The use of indentation is as follows:</p>
+<ul>
+<li>No indentation: this row starts a new endpoint definition in the file. All
+definitions in the following lines that have indentation apply to this endpoint,
+up to the next no-indentation row that defines the next endpoint. The fields
+are defined as follows:
+	<ul>
+	<li>Field 1: MAC address for the endpoint</li>
+    <li>Field 2: Name of manufacturer</li>
+    <li>Field 3: Name of assigned/detected model for endpoint</li>
+	</ul>
+</li>
+<li>One-field indentation: this row defines a property for the current endpoint.
+    <ul>
+    <li>Field 1: blank</li>
+    <li>Field 2: Property key. Please refer to the XML definition for the names
+    of standard properties.</li>
+    <li>Field 3: Property value.</li>
+    </ul>
+</li>
+<li>Two-field indentation: this row defines an account for the current endpoint.
+Account properties apply for this account until the next line with two-field or
+lesser indentation. The fields are defined as follows:
+    <ul>
+    <li>Field 1-2: blank</li>
+    <li>Field 3: account technology. Either "sip" or "iax2".</li>
+    <li>Field 4: account name to link to this endpoint.</li>
+    <li>Field 5: priority for this account.</li>
+    </ul>
+</li>
+<li>Three-field indentation: this row defines a property for the current account.
+    <ul>
+    <li>Field 1-3: blank</li>
+    <li>Field 4: Property key.</li>
+    <li>Field 5: Property value.</li>
+    </ul>
+</li>
+</ul>
+
+<p>The following example is a complete nested CSV document that defines the exact same endpoint as the XML example above.
+Here the phone is declared as a Grandstream GXP1405 with MAC address 00:0B:82:3C:47:85, assigned
+to extensions 1071 and 1072. The endpoint contains a standard property "dhcp" set
+to "1", and also a custom property "unusedproperty" set to "unusedvalue". Additionally
+the account 1072 contains a custom property "unusedproperty" set to "unusedvalue",
+which is not the same as the endpoint-level property of the same name.</p>
+<pre>
+00:0B:82:3C:47:85,Grandstream,GXP1405
+,dhcp,1
+,unusedproperty,unusedvalue
+,,sip,1071,1
+,,sip,1072,2
+,,,unusedproperty,unusedvalue
+</pre>
+
 <h3><a id="supported">Supported endpoint manufacturers</a></h3>
+<ul>
+<li>Aastra: 480i,480i CT,51i,53i,55i,57i,57i CT,6730i,6731i,6739i,6755i,6757i,9112i,9133i,9143i,9480i,9480i CT.
+Remote reboot supported. </li>
+<li>Atcom: AT320,AT530,AT610,AT620,AT640,AT800. Part of the Atcom family. Remote reboot
+and static provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
+<li>Atlinks: Temporis IP800. Part of the Yealink family. Remote reboot
+and static provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
+<li>AudioCodes: 310HD,320HD. Remote reboot and static provisioning supported.</li>
+<li>Cisco: 7690,7906,7931,7940,7960,7961,7970,7971. Partially supported - support has been tested with
+7960. Remote reboot is partially supported. Static IP is NOT supported. Can be linked to the
+Elastix internal and external agendas.  
+</li>
+<li>Damall: D-3310. Remote reboot and static provisioning supported. Supports the following extra 
+endpoint properties: bridge, timezone.</li>
+<li>Digium: D40,D50,D70. Remote reboot is supported on newer firmware, partially supported
+on older firmware. Static IP is NOT supported. This manufacturer requires the propietary 
+DPMA module for Asterisk to be installed (not included with this module). Due to the nature
+of DPMA, static provisioning is enabled by default.</li>
+<li>Elastix: LXP100,LXP200. See Grandstream support for details.</li>
+<li>Escene: ES620. Remote reboot and static provisioning supported.</li>
+<li>Fanvil: C56,C58,C60,C62. Part of the Atcom family. Remote reboot and static 
+provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
+<li>Grandstream: BT200,HT386,GXP280,GXP1400,GXP1405,GXP1450,GXP2000,GXP2020,GXP2100,GXP2120,GXP2200,GXV3140,GXV3175.
+ Remote reboot supported. Static provisioning supported for BT200, GXP140x (and Elastix),
+ GXP1450, and GXV series, unsupported in all others. Can be linked to the Elastix internal and
+ external agendas. Supports the following extra endpoint properties: timezone.</li>
+<li>LG-ERICSSON: IP8802. Remote reboot and static provisioning supported. Supports the 
+following extra endpoint properties: timezone.</li>
+<li>Linksys: SPA841,SPA921,SPA922,SPA941,SPA942,SPA962. Untested. Remote reboot supported.</li>
+<li>Polycom: IP 301,IP 330/320,IP 430,IP 501,IP 550,IP 601,IP 650,SoundStation IP 4000,VSX7000A.
+Model detection is NOT supported. Static IP is NOT supported. Remote reboot supported.</li>
+<li>Snom: 300,320,360,821,m9. Remote reboot and static provisioning supported. 
+Supports the following extra endpoint properties: bridge, timezone.</li>
+<li>VOPTech: VI2006,VI2007,VI2008. Part of the Atcom family. Remote reboot and static 
+provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
+<li>Xorcom: XP0100P,XP0120P. Untested. Remote reboot supported.</li>
+<li>Yealink: SIP-T20/T20P,SIP-T22/T22P,SIP-T26/T26P,SIP-T28/T28P,SIP-T38G,VP530.
+Remote reboot and static provisioning supported. Can be linked to the
+Elastix internal and external agendas. Supports the following extra 
+endpoint properties: bridge, timezone.</li>
+<li>Zultys: ZIP2x1,ZIP2x2. Static IP NOT supported. Untested.</li>
+</ul>
     </body>
 </html>

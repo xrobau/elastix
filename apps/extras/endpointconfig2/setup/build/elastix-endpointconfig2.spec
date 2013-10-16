@@ -132,6 +132,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Oct 16 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: New Endpoint Configurator: add help files.
+  SVN Rev[6013]
+
 * Mon Oct 07 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add support for offset-based timezone
   configuration using the pytz library. The phones by the following manufacturers

@@ -2,7 +2,7 @@
 
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
-Version: 0.0.4
+Version: 0.0.5
 Release: 0
 License: GPL
 Group:   Applications/System
@@ -132,6 +132,9 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Oct 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.5-0
+- Bump version for release
+
 * Wed Oct 16 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: New Endpoint Configurator: add help files.
   SVN Rev[6013]

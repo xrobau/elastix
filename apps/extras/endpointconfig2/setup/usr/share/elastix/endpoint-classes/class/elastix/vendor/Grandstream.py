@@ -525,15 +525,23 @@ class Endpoint(BaseEndpoint):
             'P237'  :   stdvars['server_ip'], # Config Server Path
             'P212'  :   '0',            # Firmware Upgrade. 0 - TFTP Upgrade,  1 - HTTP Upgrade.
             'P290'  :   '{ x+ | *x+ | *xx*x+ }', # (GXV3175 specific) Dialplan string
+
+            'P30'   :   stdvars['server_ip'], # NTP server
             'P64'   :   self._timeZone,
+            'P144'  :   '0',    # Allow DHCP 42 to override NTP server?
+            'P143'  :   '1',    # Allow DHCP to override timezone setting.
 
             'P8'    :   '0',            # DHCP=0 o static=1
             'P41': o[0], 'P42': o[1], 'P43': o[2], 'P44': o[3], # TFTP Server
             
             'P330'  :   1,    # 0-Disable phonebook download 1-HTTP 2-TFTP 3-HTTPS
             'P331'  :   stdvars['phonesrv'],
-            'P332'  :   20,   # Minutes between XML phonebook fetches, or 0 to disable
-            'P143'  :   1,    # Allow DHCP to override timezone setting.
+            'P332'  :   20,   # Minutes between XML phonebook fetches, or 0 to disable,
+            
+            'P1376' :   '1',  # Enable automatic attended transfer
+        
+            # TODO: inherit server language
+            'P1362' :   'es', # Phone display language 
         }
         if self._model in ('GXP280',):
             vars.update({'P73' : '1'})  # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO
@@ -563,59 +571,65 @@ class Endpoint(BaseEndpoint):
                 vars.update({'P25': o[0], 'P26': o[1], 'P27': o[2], 'P28': o[3],})
 
         varmap = [
-            {'enable'       :   'P271', # Enable account
-             'accountname'  :   'P270', # Account Name
-             'sipserver'    :   'P47',  # SIP Server
-             'sipid'        :   'P35',  # SIP User ID
-             'authid'       :   'P36',  # Authenticate ID
-             'secret'       :   'P34',  # Authenticate password
-             'displayname'  :   'P3',   # Display Name (John Doe)
-             'outboundproxy':   'P48',  # Outbound Proxy
+            {'enable'               :   'P271', # Enable account
+             'accountname'          :   'P270', # Account Name
+             'sipserver'            :   'P47',  # SIP Server
+             'sipid'                :   'P35',  # SIP User ID
+             'authid'               :   'P36',  # Authenticate ID
+             'secret'               :   'P34',  # Authenticate password
+             'displayname'          :   'P3',   # Display Name (John Doe)
+             'outboundproxy'        :   'P48',  # Outbound Proxy
+             'autoanswercallinfo'   :   'P298', # Enable auto-answer by Call-Info
             },
-            {'enable'       :   'P401', # Enable account
-             'accountname'  :   'P417', # Account Name
-             'sipserver'    :   'P402', # SIP Server
-             'sipid'        :   'P404', # SIP User ID
-             'authid'       :   'P405', # Authenticate ID
-             'secret'       :   'P406', # Authenticate password
-             'displayname'  :   'P407', # Display Name (John Doe)
-             'outboundproxy':   'P403', # Outbound Proxy
+            {'enable'               :   'P401', # Enable account
+             'accountname'          :   'P417', # Account Name
+             'sipserver'            :   'P402', # SIP Server
+             'sipid'                :   'P404', # SIP User ID
+             'authid'               :   'P405', # Authenticate ID
+             'secret'               :   'P406', # Authenticate password
+             'displayname'          :   'P407', # Display Name (John Doe)
+             'outboundproxy'        :   'P403', # Outbound Proxy
+             'autoanswercallinfo'   :   'P438', # Enable auto-answer by Call-Info
             },
-            {'enable'       :   'P501', # Enable account
-             'accountname'  :   'P517', # Account Name
-             'sipserver'    :   'P502', # SIP Server
-             'sipid'        :   'P504', # SIP User ID
-             'authid'       :   'P505', # Authenticate ID
-             'secret'       :   'P506', # Authenticate password
-             'displayname'  :   'P507', # Display Name (John Doe)
-             'outboundproxy':   'P503',  # Outbound Proxy
+            {'enable'               :   'P501', # Enable account
+             'accountname'          :   'P517', # Account Name
+             'sipserver'            :   'P502', # SIP Server
+             'sipid'                :   'P504', # SIP User ID
+             'authid'               :   'P505', # Authenticate ID
+             'secret'               :   'P506', # Authenticate password
+             'displayname'          :   'P507', # Display Name (John Doe)
+             'outboundproxy'        :   'P503',  # Outbound Proxy
+             'autoanswercallinfo'   :   'P538', # Enable auto-answer by Call-Info
             },
-            {'enable'       :   'P601', # Enable account
-             'accountname'  :   'P617', # Account Name
-             'sipserver'    :   'P602', # SIP Server
-             'sipid'        :   'P604', # SIP User ID
-             'authid'       :   'P605', # Authenticate ID
-             'secret'       :   'P606', # Authenticate password
-             'displayname'  :   'P607', # Display Name (John Doe)
-             'outboundproxy':   'P603', # Outbound Proxy
+            {'enable'               :   'P601', # Enable account
+             'accountname'          :   'P617', # Account Name
+             'sipserver'            :   'P602', # SIP Server
+             'sipid'                :   'P604', # SIP User ID
+             'authid'               :   'P605', # Authenticate ID
+             'secret'               :   'P606', # Authenticate password
+             'displayname'          :   'P607', # Display Name (John Doe)
+             'outboundproxy'        :   'P603', # Outbound Proxy
+             'autoanswercallinfo'   :   'P638', # Enable auto-answer by Call-Info
             },
-            {'enable'       :   'P1701',# Enable account
-             'accountname'  :   'P1717',# Account Name
-             'sipserver'    :   'P1702',# SIP Server
-             'sipid'        :   'P1704',# SIP User ID
-             'authid'       :   'P1705',# Authenticate ID
-             'secret'       :   'P1706',# Authenticate password
-             'displayname'  :   'P1707',# Display Name (John Doe)
-             'outboundproxy':   'P1703',# Outbound Proxy
+            {'enable'               :   'P1701',# Enable account
+             'accountname'          :   'P1717',# Account Name
+             'sipserver'            :   'P1702',# SIP Server
+             'sipid'                :   'P1704',# SIP User ID
+             'authid'               :   'P1705',# Authenticate ID
+             'secret'               :   'P1706',# Authenticate password
+             'displayname'          :   'P1707',# Display Name (John Doe)
+             'outboundproxy'        :   'P1703',# Outbound Proxy
+             'autoanswercallinfo'   :   'P1738',# Enable auto-answer by Call-Info
             },
-            {'enable'       :   'P1801',# Enable account
-             'accountname'  :   'P1817',# Account Name
-             'sipserver'    :   'P1802',# SIP Server
-             'sipid'        :   'P1804',# SIP User ID
-             'authid'       :   'P1805',# Authenticate ID
-             'secret'       :   'P1806',# Authenticate password
-             'displayname'  :   'P1807',# Display Name (John Doe)
-             'outboundproxy':   'P1803',# Outbound Proxy
+            {'enable'               :   'P1801',# Enable account
+             'accountname'          :   'P1817',# Account Name
+             'sipserver'            :   'P1802',# SIP Server
+             'sipid'                :   'P1804',# SIP User ID
+             'authid'               :   'P1805',# Authenticate ID
+             'secret'               :   'P1806',# Authenticate password
+             'displayname'          :   'P1807',# Display Name (John Doe)
+             'outboundproxy'        :   'P1803',# Outbound Proxy
+             'autoanswercallinfo'   :   'P1838',# Enable auto-answer by Call-Info
             },
         ]
 
@@ -629,6 +643,7 @@ class Endpoint(BaseEndpoint):
             vars[varmap[i]['sipid']] = ''
             vars[varmap[i]['authid']] = ''
             vars[varmap[i]['secret']] = ''
+            vars[varmap[i]['autoanswercallinfo']] = 1
         
         for i in range(0, min(len(varmap), len(stdvars['sip']))):
             vars[varmap[i]['enable']] = 1

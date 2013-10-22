@@ -132,6 +132,14 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Oct 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: enhance the Grandstream/Elastix 
+  configurator to add the following useful parameters: NTP Server, set to the
+  Elastix server; disable override of NTP server by DHCP option 42; enable 
+  automatic attended transfer; set default display language to Spanish; enable
+  auto-answer on Call-Info.
+  SVN Rev[6026]
+
 * Thu Oct 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.5-0
 - Bump version for release
 

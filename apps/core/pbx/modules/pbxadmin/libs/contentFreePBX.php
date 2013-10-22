@@ -73,18 +73,6 @@ function getContent(&$smarty, $elx_module_name, $withList)
     header('Pragma: no-cache');
     header('Content-Type: text/html; charset=utf-8');
 
-    //Credenciales de acceso a freePBX como admin, durante la instalación
-    //de elastix en el primer inicio del sistema operativo pide la contrasena
-    //para el acceso web admin de elastix, esta es la misma que se define
-    //para el usuario admin de AMI. Entonces del archivo /etc/elastix.conf
-    //vamos a obtener la contrasena que necesitamos.
-    
-    $username = "admin";
-    $password = obtenerClaveAMIAdmin("/var/www/html/");    
-
-    if(isset($_SESSION['AMP_user']))
-        unset($_SESSION);
-
     global $amp_conf;
     global $db;
     global $no_auth;
@@ -110,8 +98,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
     // This needs to be included BEFORE the session_start or we fail so
     // we can't do it in bootstrap and thus we have to depend on the
     // __FILE__ path here.
-    require_once("$base_dir/admin/libraries/ampuser.class.php");
-    //session_cache_limiter('public, no-store');
+
     if (isset($_REQUEST['handler'])) {
             $restrict_mods = true;
             // I think reload is the only handler that requires astman, so skip it 
@@ -127,11 +114,16 @@ function getContent(&$smarty, $elx_module_name, $withList)
                             break;
             }
     }
-      
+    
+    $bootstrap_settings['freepbx_auth'] = false;
+  
     // call bootstrap.php through freepbx.conf
     if (!@include_once(getenv('FREEPBX_CONF') ? getenv('FREEPBX_CONF') : '/etc/freepbx.conf')) {
                     include_once('/etc/asterisk/freepbx.conf');
     }
+
+    $username = "admin";
+    $_SESSION['AMP_user'] = new ampuser($username);
 
     /* If there is an action request then some sort of update is usually being done.
     This may protect from cross site request forgeries unless disabled.

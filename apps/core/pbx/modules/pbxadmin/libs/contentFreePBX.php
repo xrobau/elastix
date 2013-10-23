@@ -11,7 +11,8 @@ function getContent(&$smarty, $elx_module_name, $withList)
         include_once $lang_file;
         $arrLangModule = array_merge($arrLangEn, $arrLangModule);
     }
-
+    global $arrLang;
+    $arrLang = array_merge($arrLang,$arrLangModule);
     $local_templates_dir = "$base_dir/modules/$elx_module_name/themes/default";
     
     //set variables

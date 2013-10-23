@@ -132,6 +132,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Oct 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: updated internal copy of Ember.js to
+  version 1.1.0
+  SVN Rev[6031]
+
 * Tue Oct 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: enhance the Grandstream/Elastix 
   configurator to add the following useful parameters: NTP Server, set to the

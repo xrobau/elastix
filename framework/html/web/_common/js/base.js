@@ -409,34 +409,6 @@ function getElastixKey(){
     );
 }
 
-function setAdminPassword(){
-    var title = $('#lblChangePass').val();
-    var lblCurrentPass = $('#lblCurrentPass').val();
-    var lblNewPass = $('#lblNewPass').val();
-    var lblRetypeNewPass = $('#lblRetypePass').val();
-    var btnChange = $('#btnChagePass').val();
-    var height = 160;
-    var width = 380;
-    var html =
-        "<table class='tabForm' style='font-size: 16px;' width='100%' >" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblCurrentPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass' name='curr_pass' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblNewPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass_new' name='curr_pass_new' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblRetypeNewPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass_renew' name='curr_pass_renew' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='center'  colspan='2'><input type='button' id='sendChanPass' name='sendChanPss' value='"+btnChange+"' onclick='saveNewPasswordElastix()' /></td>" +
-            "</tr>" +
-        "</table>";
-    ShowModalPopUP(title,width,height,html);
-}
 
 function saveNewPasswordElastix(){
 	var arrAction = new Array();
@@ -914,23 +886,22 @@ function JSONRPMtoString(str) {
 
 function changeColorMenu()
 {
-	var color = $('#userMenuColor').val();
-	var arrAction = new Array();
-	if(color == ""){
-		color = "#454545";
-	}
+    var color = $('#userMenuColor').val();
+    var arrAction = new Array();
+    if(color == ""){
+        color = "#454545";
+    }
 
-	arrAction["menu"] = "_elastixutils";
-	arrAction["action"] = "changeColorMenu";
-	arrAction["menuColor"]  = color;
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-		    if(statusResponse == "false")
-				alert(error);
-		}
-	);
-
+    arrAction["menu"] = "_elastixutils";
+    arrAction["action"] = "changeColorMenu";
+    arrAction["menuColor"]  = color;
+    request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            if(statusResponse == "false")
+                alert(error);
+        }
+    );
 }
 //Capturar el valor del parametro dado del url
 function getParameterByName(name) {

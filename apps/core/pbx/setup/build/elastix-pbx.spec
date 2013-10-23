@@ -142,12 +142,6 @@ rmdir setup/etc/xinetd.d
 unzip setup/tftpboot/P0S3-08-8-00.zip  -d     $RPM_BUILD_ROOT/tftpboot/
 mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
 
-# Install new endpoint configurator
-mkdir -p $RPM_BUILD_ROOT/usr/bin/
-mv setup/usr/bin/elastix-endpoint-configure $RPM_BUILD_ROOT/usr/bin/
-chmod 755 $RPM_BUILD_ROOT/usr/bin/elastix-endpoint-configure
-mv setup/usr/share/elastix/endpoint-vendors $RPM_BUILD_ROOT/usr/share/elastix/
-
 rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
 
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -341,15 +335,19 @@ fi
 /usr/share/elastix/module_installer/*
 /tftpboot/*
 /usr/share/elastix/tftp
-/usr/share/elastix/endpoint-vendors
 %defattr(755, root, root)
-/usr/bin/elastix-endpoint-configure
 /etc/init.d/festival
 /bin/asterisk.reload
 /usr/share/elastix/privileged/*
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Oct 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: The code for the experimental PHP-based parallel endpoint configurator
+  has been removed. This functionality is now provided by the New Endpoint
+  Configurator.
+  SVN Rev[6030]
+
 * Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Conference: remove bogus reference to PST/PDT timezone in conference
   start time. Fixes Elastix bug #1650.

@@ -298,6 +298,8 @@ fi
 
 %changelog
 * Wed Oct 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Control Panel: updated internal copy of Ember.js to version 1.1.0.
+  SVN Rev[6033]
 - DELETED: The code for the experimental PHP-based parallel endpoint configurator
   has been removed. This functionality is now provided by the New Endpoint
   Configurator.

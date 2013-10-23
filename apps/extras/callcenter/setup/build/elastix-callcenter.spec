@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Sep 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): allow setting date fields to empty strings. Apparently
+  this was allowed by the old implementation of the agent console.
+  SVN Rev[6029]
+
 * Fri Sep 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Campaign Monitoring: fix swapped labels in display. Fixes Elastix 
   bug #1707.
@@ -107,7 +112,7 @@ fi
   code to be more generic as well as smaller, and to use SQL parameters. It also
   removes dead references to xajax and other unneeded libraries, and brings the
   code up to newer coding standards. The filter template is exported to a
-  separate file.
+  separate file. Fixes Elastix bug #1726.
   SVN Rev[5900] 
 - FIXED: Calls Per Agent: remove pagination code as this report is actually a 
   summary report. Fixes Elastix bug #1710.

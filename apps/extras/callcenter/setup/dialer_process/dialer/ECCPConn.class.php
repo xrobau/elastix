@@ -1301,7 +1301,7 @@ LEER_CAMPANIA;
                     
                     // Validar que el campo de fecha tenga valor correcto
                     } elseif ($infoCampo['type'] == 'DATE' && 
-                        !(preg_match('/^\d{4}-\d{2}-\d{2}$/', $sValor) || preg_match('/^\d{4}-\d{2}-\d{2} d{2}:\d{2}:\d{2}$/', $sValor))) {
+                        $sValor != '' && !(preg_match('/^\d{4}-\d{2}-\d{2}$/', $sValor) || preg_match('/^\d{4}-\d{2}-\d{2} d{2}:\d{2}:\d{2}$/', $sValor))) {
                         $bDatosValidos = FALSE;
                         $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 406, 
                             'Date format not acceptable, must be yyyy-mm-dd or yyyy-mm-dd hh:mm:ss: '.$idForm.' - '.$idField);

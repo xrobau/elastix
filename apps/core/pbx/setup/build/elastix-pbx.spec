@@ -95,11 +95,8 @@ mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
 
 # Install new endpoint configurator
 mkdir -p $RPM_BUILD_ROOT/usr/bin/
-mv setup/usr/bin/elastix-endpoint-configure $RPM_BUILD_ROOT/usr/bin/
-chmod 755 $RPM_BUILD_ROOT/usr/bin/elastix-endpoint-configure
 mv setup/usr/bin/fix-model-duplicates-bug1618 $RPM_BUILD_ROOT/usr/bin/
 chmod 755 $RPM_BUILD_ROOT/usr/bin/fix-model-duplicates-bug1618
-mv setup/usr/share/elastix/endpoint-vendors $RPM_BUILD_ROOT/usr/share/elastix/
 
 rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
 
@@ -291,9 +288,7 @@ fi
 /usr/share/elastix/module_installer/*
 /tftpboot/*
 /usr/share/elastix/tftp
-/usr/share/elastix/endpoint-vendors
 %defattr(755, root, root)
-/usr/bin/elastix-endpoint-configure
 /usr/bin/fix-model-duplicates-bug1618
 /etc/init.d/festival
 /bin/asterisk.reload
@@ -302,6 +297,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Oct 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: The code for the experimental PHP-based parallel endpoint configurator
+  has been removed. This functionality is now provided by the New Endpoint
+  Configurator.
+  SVN Rev[6030]
+
 * Wed Oct 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: handle PeerStatus event with PeerStatus set to Reachable
   which must not be interpreted as "not registered".

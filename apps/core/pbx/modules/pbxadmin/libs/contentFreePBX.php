@@ -131,6 +131,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
 
     $username = "admin";
     $_SESSION['AMP_user'] = new ampuser($username);
+    set_language();
 
     /* If there is an action request then some sort of update is usually being done.
     This may protect from cross site request forgeries unless disabled.
@@ -474,9 +475,6 @@ function getContent(&$smarty, $elx_module_name, $withList)
                 $return_HTML .= framework_include_css_freepbx();
         }
 
-        // set the language so local module languages take
-        set_language(); //TODO: falta revisar si esto funciona
-
         // If processing posback (fw_popover_process) and there are errors then we
         // display again, otherwise we ignore the $content and prepare to process
         //
@@ -511,9 +509,6 @@ function getContent(&$smarty, $elx_module_name, $withList)
         if (isset($module_name)) {
                 $return_HTML .= framework_include_css_freepbx();
         }
-
-        // set the language so local module languages take
-        set_language(); //TODO: falta revisar si esto funciona
 
         // send menu
         $return_HTML .= load_view("$local_templates_dir/menu.php", null);

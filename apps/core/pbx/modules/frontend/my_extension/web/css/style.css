@@ -1,32 +1,20 @@
-.my_settings{
-    padding-top: 30px;
-}
-
 .row{
-    margin-top: 15px;
+    margin-top: 7px;
     margin-left: 0px;
     margin-right: 0px;
 }
 
-.input-group .form-control{
-    width:200px;
-}
-
-.form-control{
+select[name=language_vm]{
 width: 65px;
 }
 
-input[type=text]{
-width: 200px;
+input[type="text"]{
+width: 200px !important;
 }
 
-.col-md-8 p{
+.subtitle p{
 color: #E35332;
 font-size: 17px;
-font-weight: bold;
-}
-
-.col-md-3{
 font-weight: bold;
 }
 
@@ -36,4 +24,12 @@ display:none;
 
 .visible{
 display:block;
+}
+
+.alert{
+margin-bottom: 0px;
+}
+
+.name-label{
+font-weight: bold;
 }

@@ -73,9 +73,8 @@ $( document ).ready(function() {
       });
 
         $(".close").click(function() {
-            $("#message_area").slideUp();
-            //$("#message_area").removeClass("visible").addClass("oculto");
-        });
+            $("#message_area").slideUp();        
+        });        
 
 });
 
@@ -97,7 +96,7 @@ $(function() {
 });
 
 function editExten(){
-
+    showElastixUFStatusBar("Saving...");
     var arrAction = new Array();
     arrAction["menu"]="my_extension";
     arrAction["action"]="editExten";
@@ -125,7 +124,7 @@ function editExten(){
     arrAction["rawmode"]="yes";
     request("index.php", arrAction, false,
         function(arrData,statusResponse,error){
-            //alert(arrData);
+            hideElastixUFStatusBar();
             if(error!=""){
                 //alert(error);
                 $("#message_area").slideDown();
@@ -138,12 +137,4 @@ function editExten(){
                 $("#my_extension_errorloc").html(arrData);  
             }
     });
-}
-
-function getParametersForm(){
-    
-}
-
-function validateForm(){
-    
 }

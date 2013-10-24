@@ -1,0 +1,35 @@
+.row{
+    margin-top: 7px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+select[name=language_vm]{
+width: 65px;
+}
+
+input[type="text"]{
+width: 200px !important;
+}
+
+.subtitle p{
+color: #E35332;
+font-size: 17px;
+font-weight: bold;
+}
+
+.oculto{
+display:none;
+}
+
+.visible{
+display:block;
+}
+
+.alert{
+margin-bottom: 0px;
+}
+
+.name-label{
+font-weight: bold;
+}

@@ -14,9 +14,9 @@ function getContent(&$smarty, $elx_module_name, $withList)
     global $arrLang;
     $arrLang = array_merge($arrLang,$arrLangModule);
 
-    $arrLangFreePBX = array("en" => "en_US", "bg" => "bg_BG", "zh" => "zh_CN", "de" => "de_DE", "es" => "es_ES",
+    $arrLangFreePBX = array("en" => "en_US", "bg" => "bg_BG", "cn" => "zh_CN", "de" => "de_DE", "es" => "es_ES",
                             "fr" => "fr_FR", "he" => "he_IL", "hu" => "hu_HU", "it" => "it_IT",
-                            "pt" => "pt_PT", "ru" => "ru_RU", "sv" => "sv_SE", "pt" => "pt_BR");
+                            "pt" => "pt_PT", "ru" => "ru_RU", "sv" => "sv_SE", "br" => "pt_BR");
     $langFreePBX = isset($arrLangFreePBX[$lang])?$arrLangFreePBX[$lang]:"en_US";
     setcookie("lang",$langFreePBX);
     $local_templates_dir = "$base_dir/modules/$elx_module_name/themes/default";

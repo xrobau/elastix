@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 13
+Release: 14
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -12,11 +12,12 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-9
 Prereq: elastix-my_extension >= 2.0.4-5
-Prereq: freePBX >= 2.11.0-1
+#Prereq: freePBX >= 2.11.0-1
 Prereq: elastix-system >= 2.3.0-10
 Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
 Requires: festival >= 1.95
+Requires: freePBX >= 2.11.0-1
 
 %description
 Elastix Module PBX
@@ -297,6 +298,19 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Oct 25 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-14
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Thu Oct 24 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: branches/2.4.0 module pbxadmin, fixed translate FreePBX modules.
+  SVN Rev[6037]
+
+* Wed Oct 23 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: module pbxadmin - branches/2.4.0. Fixed language translate freepbx
+  modules.
+  SVN Rev[6032]
+
 * Wed Oct 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Control Panel: updated internal copy of Ember.js to version 1.1.0.
   SVN Rev[6033]
@@ -304,6 +318,14 @@ fi
   has been removed. This functionality is now provided by the New Endpoint
   Configurator.
   SVN Rev[6030]
+
+* Wed Oct 23 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: module pbxadmin - branches/2.4.0. Fixed translate menus left language.
+  SVN Rev[6028]
+
+* Tue Oct 22 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: pbx - libs/contentFreePBX.php: The bug 1736 its now corrected.
+  SVN Rev[6027]
 
 * Wed Oct 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: handle PeerStatus event with PeerStatus set to Reachable
@@ -348,6 +370,11 @@ fi
     keeps time accurately without accumulating errors.
   SVN Rev[6001]
 
+* Thu Oct 03 2013 Jose Briones <jbriones@palosanto.com> 
+  Changelog was changed: UPDATED: Module recordings. A mistake in the file
+  recordings.hlp was fixed.
+  SVN Rev[5968]
+
 * Thu Oct 3 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module recordings. A mistake in the file recordings.hlp was fixed.
   SVN Rev[5967]
@@ -366,9 +393,15 @@ fi
 - UPDATED: Module conference, the file es.lang was updated 
   SVN Rev[5927]
 
+* Fri Sep 20 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: Problem about upload a recorded file with a registered extension its
+  now solved.
+  SVN Rev[5919]
+
 * Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-13
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5912]
 
 * Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 
 - FIXED: pbx - index.php,paloSantoMonitoring.class.php,filter.tpl,javascript.js: It was

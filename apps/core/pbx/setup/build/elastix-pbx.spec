@@ -298,6 +298,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sat Oct 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Control Panel: updated internal copy of Ember.js to version 1.1.2.
+  SVN Rev[6040]
+
 * Fri Oct 25 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-14
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

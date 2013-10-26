@@ -132,6 +132,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sat Oct 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: updated internal copy of Ember.js to 
+  version 1.1.2.
+  SVN Rev[6041]
+
 * Wed Oct 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: updated internal copy of Ember.js to
   version 1.1.0

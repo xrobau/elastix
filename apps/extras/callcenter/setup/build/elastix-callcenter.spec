@@ -97,6 +97,15 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Oct 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: refactor the client-side javascript code to 
+  conform to best Ember.js coding practices. Instead of explicitly binding to
+  controllers as variables in App, controllers are now references from the
+  corresponding views and setup through routes. Each campaign detail is now
+  implemented as a route.
+  Update Ember.js to 1.1.2, Handlebars to 1.0.0 .
+  SVN Rev[6043]
+
 * Mon Sep 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): allow setting date fields to empty strings. Apparently
   this was allowed by the old implementation of the agent console.
@@ -113,7 +122,7 @@ fi
   removes dead references to xajax and other unneeded libraries, and brings the
   code up to newer coding standards. The filter template is exported to a
   separate file. Fixes Elastix bug #1726.
-  SVN Rev[5900] 
+  SVN Rev[5901] 
 - FIXED: Calls Per Agent: remove pagination code as this report is actually a 
   summary report. Fixes Elastix bug #1710.
   SVN Rev[5896] 

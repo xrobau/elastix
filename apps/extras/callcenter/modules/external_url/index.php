@@ -90,6 +90,8 @@ function listURL($pDB, $smarty, $module_name, $local_templates_dir)
     $dtypes = descOpenType();
     
     // para el pagineo
+    $url = array('menu' => $module_name);
+    $grid->setURL($url);
     $grid->setLimit(15);
     $grid->setTotal($urls->countURLs());
     $offset = $grid->calculateOffset();

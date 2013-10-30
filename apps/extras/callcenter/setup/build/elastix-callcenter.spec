@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Oct 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: External URLs: fixed broken pagination in arrow links with more than
+  15 items. Fixes Elastix bug #1751.
+  SVN Rev[6044]
+
 * Tue Oct 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Monitoring: refactor the client-side javascript code to 
   conform to best Ember.js coding practices. Instead of explicitly binding to

@@ -75,11 +75,11 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
     }else{
         $my_fax=$pMyFax->getMyFaxExtension();
     }
-    
+
     if($my_fax==false){
         $smarty->assign("ERROR_FIELD",$pMyFax->getErrorMsg());
-    }
-    //var_dump($my_fax);die();
+    }    
+
     $smarty->assign("EXTENSION_LABEL",_tr("Fax Extension:"));
     $smarty->assign("EXTENSION",$my_fax['FAX_EXTEN']);
     $smarty->assign("DEVICE_LABEL",_tr("Device:"));
@@ -87,6 +87,13 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
     $smarty->assign("STATUS_LABEL",_tr("Status:"));
     $smarty->assign("STATUS",$my_fax['STATUS']);
     $smarty->assign("FAX_EMAIL_SETTINGS",_tr("Fax email settings"));
+
+    $my_fax['FAX_SUBJECT']= htmlentities($my_fax['FAX_SUBJECT'],ENT_QUOTES, "UTF-8");
+    $my_fax['FAX_CONTENT']= htmlentities($my_fax['FAX_CONTENT'],ENT_QUOTES, "UTF-8");
+    $my_fax['CID_NAME']= htmlentities($my_fax['CID_NAME'],ENT_QUOTES, "UTF-8");
+    $my_fax['CID_NUMBER']= htmlentities($my_fax['CID_NUMBER'],ENT_QUOTES, "UTF-8");
+    $my_fax['COUNTRY_CODE']= htmlentities($my_fax['COUNTRY_CODE'],ENT_QUOTES, "UTF-8");
+    $my_fax['AREA_CODE']= htmlentities($my_fax['AREA_CODE'],ENT_QUOTES, "UTF-8");
 
     $session = getSession();
     $session['faxlistStatus'] = $my_fax['STATUS'];
@@ -106,25 +113,25 @@ function saveExtensionSettings($smarty, $module_name, $local_templates_dir, $pDB
     
     global $arrCredentials;
 
-    $pMyExten=new paloMyFax($pDB,$arrCredentials['idUser']);
-    $myExten['clid_name']=getParameter('CID_NAME'); 
-    $myExten['clid_number']=getParameter('CID_NUMBER');
-    $myExten['country_code']=getParameter('COUNTRY_CODE');
-    $myExten['area_code']=getParameter('AREA_CODE'); 
-    $myExten['fax_subject']=getParameter('FAX_SUBJECT');
-    $myExten['fax_content']=getParameter('FAX_CONTENT');
+    $pMyFax=new paloMyFax($pDB,$arrCredentials['idUser']);
+    $myFax['clid_name']=getParameter('CID_NAME'); 
+    $myFax['clid_number']=getParameter('CID_NUMBER');
+    $myFax['country_code']=getParameter('COUNTRY_CODE');
+    $myFax['area_code']=getParameter('AREA_CODE'); 
+    $myFax['fax_subject']=getParameter('FAX_SUBJECT');
+    $myFax['fax_content']=getParameter('FAX_CONTENT');
     
     
-    $pMyExten=new paloMyFax($pDB,$arrCredentials['idUser']);
+    $pMyFax=new paloMyFax($pDB,$arrCredentials['idUser']);
     
-    $pMyExten->_DB->beginTransaction();
-    if(!$pMyExten->editFaxExten($myExten)){
-        $pMyExten->_DB->rollBack();
-        $jsonObject->set_error($pMyExten->getErrorMsg());
-        //$jsonObject->set_error($myExten);
+    $pMyFax->_DB->beginTransaction();
+    if(!$pMyFax->editFaxExten($myFax)){
+        $pMyFax->_DB->rollBack();
+        $jsonObject->set_error($pMyFax->getErrorMsg());
+        //$jsonObject->set_error($myFax);
     }else{
-        $pMyExten->_DB->commit();
-        //$jsonObject->set_message($myExten);
+        $pMyFax->_DB->commit();
+        //$jsonObject->set_message($myFax);
         $jsonObject->set_message("Changes were saved succefully");
     }
     return $jsonObject->createJSON();
@@ -215,37 +222,37 @@ function createForm(){
     $arrForm = array("CID_NAME"        => array("LABEL"                  => _tr("CID NAME:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control input-sm", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                               "CID_NUMBER"  => array("LABEL"               => _tr("CID Number:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control input-sm", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                           "COUNTRY_CODE"  => array("LABEL"               => _tr("Country Code:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control input-sm", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                              "AREA_CODE"  => array("LABEL"               => _tr("Area Code:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control input-sm", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                            "FAX_SUBJECT"  => array("LABEL"               => _tr("Fax Subject:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control input-sm", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                            "FAX_CONTENT"  => array("LABEL"               => _tr("Fax content:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXTAREA",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control input-sm", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
 

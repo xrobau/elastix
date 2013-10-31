@@ -28,36 +28,6 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Currency" => "Moneda",
-"Argentinian peso" => "Peso Argentino",
-"Baht tailandés / balboa panameño" => "Baht tailandés / balboa panameño",
-"Bolívar venezolano" => "Bolívar venezolano",
-"Bolívar fuerte venezolana" => "Bolívar fuerte venezolana",
-"Córdoba nicaragüense/dólar canadiense" => "Córdoba nicaragüense/dólar canadiense",
-"Dong vietnamita" => "Dong vietnamita",
-"Dólar del Caribe Oriental" => "Dólar del Caribe Oriental",
-"Corona danesa, corona sueca" => "Corona danesa, corona sueca",
-"Lira" => "Lira",
-"Lempira hondureño" => "Lempira hondureño",
-"Quetzal guatemalteco" => "Quetzal guatemalteco",
-"Euro" => "Euro",
-"Rand sudafricano" => "Rand sudafricano",
-"Rupia indonesia" => "Rupia indonesia",
-"Rupia" => "Rupia",
-"Real brasileño" => "Real brasileño",
-"Dólar australiano" => "Dólar australiano",
-"Dólar/Peso" => "Dólar/Peso",
-"Yen" => "Yen",
-"Sheqel israelí" => "Sheqel israelí",
-"Colón salvadoreño" => "Colón salvadoreño",
-"Yuan chino" => "Yuan chino",
-"Rupia bengalí" => "Rupia bengalí",
-"Dólar de Singapur" => "Dólar de Singapur",
-"Error" => "Error",
-"Successfully saved" => "Guardado exitosamente",
-"Colón costarricense" => "Colón costarricense",
-"GB Sterling" => "Libra Esterlina",
-"Rublo ruso" => "Rublo ruso",
-"Swiss Franc" => "Franco Suizo",
+
 );
 ?>

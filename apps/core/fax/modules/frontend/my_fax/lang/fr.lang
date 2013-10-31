@@ -31,36 +31,6 @@
   $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
 global $arrLangModule;
 $arrLangModule=array(  
-"Currency" => "Monnaie",
-"Argentinian peso" => "Argentinian peso",
-"Baht tailandés / balboa panameño" => "Baht tailandés / balboa panameño",
-"Bolívar venezolano" => "Bolívar venezolano",
-"Bolívar fuerte venezolana" => "Bolívar fuerte venezolana",
-"Córdoba nicaragüense/dólar canadiense" => "Córdoba nicaragüense/dólar canadiense",
-"Dong vietnamita" => "Dong vietnamita",
-"Dólar del Caribe Oriental" => "Dólar del Caribe Oriental",
-"Corona danesa, corona sueca" => "Corona danesa, corona sueca",
-"Lira" => "Lire",
-"Lempira hondureño" => "Lempira hondureño",
-"Quetzal guatemalteco" => "Quetzal guatemalteco",
-"Euro" => "€ Euro",
-"Rand sudafricano" => "Rand sudafricano",
-"Rupia indonesia" => "Rupia indonesia",
-"Rupia" => "Rupia",
-"Real brasileño" => "Real brasileño",
-"Dólar australiano" => "Dólar australiano",
-"Dólar/Peso" => "Dólar/Peso",
-"Yen" => "Yen",
-"Sheqel israelí" => "Sheqel israelí",
-"Colón salvadoreño" => "Colón salvadoreño",
-"Yuan chino" => "Yuan chino",
-"Rupia bengalí" => "Rupia bengalí",
-"Dólar de Singapur" => "Singapore Dollar",
-"Error" => "Error",
-"Successfully saved" => "Successfully saved",
-"Colón costarricense" => "Colon du Costa Rica",
-"GB Sterling" => "Great British Pound",
-"Rublo ruso" => "Rouble russe",
-"Swiss Franc" => "Swiss Franc",
+
 );
 ?>

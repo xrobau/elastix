@@ -1,19 +1,16 @@
-{literal}
-<link rel="stylesheet" href="web/_common/js/jquery/css/smoothness/jquery-ui-1.8.24.custom.css">
-{/literal}
 <div id="contsetting">
     
     <div class="my_settings">
 
        {if $ERROR_FIELD}
-       <div id="message_area" class="alert oculto alert-dismissable" style="text-align:center;">
+       <div id="initial_message_area" class="alert alert-dismissable" style="text-align:center;">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-           <p id="my_extension_errorloc">{$ERROR_FIELD}</p> 
+           <p id="msg-text" class="alert-danger">{$ERROR_FIELD}</p> 
        </div>
        {else}
        <div id="message_area" class="alert oculto alert-dismissable" style="text-align:center;">
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-           <p id="my_extension_errorloc"> </p> 
+           <p id="msg-text"> </p> 
        </div>
        {/if}
 

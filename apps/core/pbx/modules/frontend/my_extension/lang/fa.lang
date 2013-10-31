@@ -28,36 +28,6 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Currency" => "پول رايج",
-"Argentinian peso" => "پسو آرژانتين",
-"Baht tailandés / balboa panameño" => "Baht tailandés / balboa panameño",
-"Bolívar venezolano" => "Bolívar venezolano",
-"Bolívar fuerte venezolana" => "Bolívar fuerte venezolana",
-"Córdoba nicaragüense/dólar canadiense" => "Córdoba nicaragüense/dólar canadiense",
-"Dong vietnamita" => "دنگ ويتنام",
-"Dólar del Caribe Oriental" => "Dólar del Caribe Oriental",
-"Corona danesa, corona sueca" => "Corona danesa, corona sueca",
-"Lira" => "Lira",
-"Lempira hondureño" => "Lempira hondureño",
-"Quetzal guatemalteco" => "Quetzal guatemalteco",
-"Euro" => "يورو",
-"Rand sudafricano" => "Rand sudafricano",
-"Rupia indonesia" => "روپيه اندونزي",
-"Rupia" => "روپيه",
-"Real brasileño" => "ر يال برزيل",
-"Dólar australiano" => "دلار استراليا",
-"Dólar/Peso" => "Dólar/Peso",
-"Yen" => "ين",
-"Sheqel israelí" => "شکل اسرائيل",
-"Colón salvadoreño" => "کولن سالوادر",
-"Yuan chino" => "يوان چين",
-"Rupia bengalí" => "روپيه بنگال",
-"Dólar de Singapur" => "دلار سنگاپور",
-"Error" => "Error",
-"Successfully saved" => "Successfully saved",
-"Colón costarricense" => "Costa Rican Colón",
-"GB Sterling" => "Great British Pound",
-"Rublo ruso" => "Russian Ruble",
-"Swiss Franc" => "Swiss Franc",
+
 );
 ?>

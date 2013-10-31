@@ -72,9 +72,18 @@ $( document ).ready(function() {
         }
       });
 
-        $(".close").click(function() {
-            $("#message_area").slideUp();        
-        });        
+
+/* oculta el mensaje que aprece al cargar la pagina, siempre y cuando haya un error con el efecto slide*/
+    $(".close").click(function() {
+        $("#initial_message_area").slideUp();   
+        $("#message_area").slideUp();      
+    });
+
+    $(".close").click(function() {
+        $("#message_area").slideUp();      
+    });
+
+
 
 });
 
@@ -128,13 +137,13 @@ function editExten(){
             if(error!=""){
                 //alert(error);
                 $("#message_area").slideDown();
-                $("#my_extension_errorloc").removeClass("alert-success").addClass("alert-danger");
-                $("#my_extension_errorloc").html(error);
+                $("#msg-text").removeClass("alert-success").addClass("alert-danger");
+                $("#msg-text").html(error);
             }else{
                 //alert(arrData);
                 $("#message_area").slideDown();
-                $("#my_extension_errorloc").removeClass("alert-danger").addClass("alert-success");
-                $("#my_extension_errorloc").html(arrData);  
+                $("#msg-text").removeClass("alert-danger").addClass("alert-success");
+                $("#msg-text").html(arrData);  
             }
     });
 }

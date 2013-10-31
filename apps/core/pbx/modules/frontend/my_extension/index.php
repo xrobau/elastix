@@ -72,12 +72,11 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
     }else{
         $my_exten=$pMyExten->getMyExtension();
     }
-    
+
     if($my_exten==false){
         $smarty->assign("ERROR_FIELD",$pMyExten->getErrorMsg());
     }
-    
-//var_dump($my_exten);
+
     $smarty->assign("DISPLAY_NAME_LABEL",_tr("Display Name CID:"));
     $smarty->assign("clid_name",$my_exten['clid_name']);
     $smarty->assign("DISPLAY_EXT_LABEL",_tr("Extension number:"));
@@ -221,19 +220,19 @@ function createForm(){
                         "callForwardInp"  => array("LABEL"               => _tr(""),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
              "callForwardUnavailableInp"  => array("LABEL"               => _tr(""),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                    "callForwardBusyInp"  => array("LABEL"               => _tr(""),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control", "placeholder" => "12345"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                         "recordIncoming"  => array("LABEL"               => _tr("Record Incoming:"),
@@ -258,13 +257,13 @@ function createForm(){
                           "email_vm"   => array( "LABEL"                    => _tr("Email:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-						    					"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control", "placeholder" => "Enter email"),
+						    					"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Enter email"),
 												"VALIDATION_TYPE"        => "email",
 												"VALIDATION_EXTRA_PARAM" => ""),
                               "password_vm"  => array("LABEL"               => _tr("Password:"),
 												"REQUIRED"               => "no",
 												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail form-control", "placeholder" => "Password"),
+												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Password"),
 												"VALIDATION_TYPE"        => "text",
 												"VALIDATION_EXTRA_PARAM" => ""),
                            "language_vm"  => array("LABEL"               => _tr("Language:"),

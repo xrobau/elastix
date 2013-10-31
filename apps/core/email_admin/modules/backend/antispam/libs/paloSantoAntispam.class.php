@@ -152,6 +152,57 @@ class paloSantoAntispam {
             default:    return '';
         }
     }
+
+    function existScriptSieve($email, $search)
+    {
+        $SIEVE  = array();
+        $SIEVE['HOST'] = "localhost";
+        $SIEVE['PORT'] = 4190;
+        $SIEVE['USER'] = "";
+        $SIEVE['PASS'] = obtenerClaveCyrusAdmin();
+        $SIEVE['AUTHTYPE'] = "PLAIN";
+        $SIEVE['AUTHUSER'] = "cyrus";
+        $SIEVE['USER'] = $email;
+        $result['status']  = false;
+        $result['actived'] = "";
+
+        $flag = $status = null;
+        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'list'",$flags, $status);
+
+        if($status != 0){
+            return null;
+        }else{
+            for($i=0; $i<count($flags); $i++){
+                $value = trim($flags[$i]);
+                if(preg_match("/$search/", $value)){
+                    $result['status'] = true;
+                }
+                if(preg_match("/active script/", $value)){
+                    $result['actived'] = $value;
+                }
+            }
+        }
+        return $result;
+    }
+    
+    function getContentScript(){
+        $script = <<<SCRIPT
+require "fileinto";
+if exists "X-Spam-Flag" {
+    if header :is "X-Spam-Flag" "YES" {
+        fileinto "Spam";
+        stop;
+    }
+}
+if exists "X-Spam-Status" {
+    if header :contains "X-Spam-Status" "Yes," {
+        fileinto "Spam";
+        stop;
+    }
+}
+SCRIPT;
+        return $script;
+    }
     
 }
 ?>

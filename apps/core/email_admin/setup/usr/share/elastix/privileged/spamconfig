@@ -276,14 +276,14 @@ function _toggleAntispamScripts($bEnable)
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         $sqlEmailInfo = <<<EMAIL_INFO
-SELECT username, subject, end_date, body FROM acl_user u
-LEFT JOIN messages_vacations ON u.username = messages_vacations.account
+SELECT u.username, v.email_subject, v.end_date, v.email_body FROM acl_user u
+LEFT JOIN vacations v ON u.id = v.id_user 
 EMAIL_INFO;
         foreach ($conn->query($sqlEmailInfo) as $row) {
         	$userInfoList[$row['username']] = array(
-                'subject'   =>  $row['subject'],
+                'subject'   =>  $row['email_subject'],
                 'end_date'  =>  $row['end_date'],
-                'body'      =>  $row['body'],
+                'body'      =>  $row['email_body'],
             );
         }
     } catch (PDOException $e) {
@@ -338,8 +338,7 @@ EMAIL_INFO;
             if (isset($sieve->response) && isset($sieve->response['ACTIVE']) && 
                 $sieve->response['ACTIVE'] == $sVacationName && !empty($emailInfo['subject'])) {
                 // Active vacation script
-                $r = $sieve->sieve_sendscript($sVacationName,
-                    ($bEnable 
+                $vacationScript=($bEnable 
                         ? str_replace(
                             'require "fileinto";',
                             'require ["fileinto","vacation"];',
@@ -349,8 +348,8 @@ EMAIL_INFO;
                     "\n".
                     _getContentVacationScript(
                         $emailInfo['subject'],
-                        str_replace('{END_DATE}', $emailInfo['end_date'], $emailInfo['body']))
-                    );
+                        str_replace('{END_DATE}', $emailInfo['end_date'], $emailInfo['body']));
+                $r = $sieve->sieve_sendscript($sVacationName,$vacationScript);             
                 if (!$r) fwrite(STDERR, "WARN: failed to upload patched vacation script for $email\n");
                 $r = $sieve->sieve_setactivescript($sVacationName);
                 if (!$r) fwrite(STDERR, "WARN: failed to activate vacation script for $email\n");
@@ -371,6 +370,7 @@ EMAIL_INFO;
                 $r = $sieve->sieve_deletescript($sAntispamName);
                 if (!$r) fwrite(STDERR, "WARN: failed to delete antispam script for $email\n");
             }
+            
             
             $sieve->sieve_logout();
         }

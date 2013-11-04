@@ -559,9 +559,9 @@ class Endpoint(BaseEndpoint):
                 # Subnet Mask
                 o = stdvars['static_mask'].split('.')
                 vars.update({'P13': o[0], 'P14': o[1], 'P15': o[2], 'P16': o[3],})
-            if stdvars['static_gw'] != None:
+            if stdvars['static_gateway'] != None:
                 # Gateway
-                o = stdvars['static_gw'].split('.')
+                o = stdvars['static_gateway'].split('.')
                 vars.update({'P17': o[0], 'P18': o[1], 'P19': o[2], 'P20': o[3],})
             if stdvars['static_dns1'] != None:
                 # DNS Server 1

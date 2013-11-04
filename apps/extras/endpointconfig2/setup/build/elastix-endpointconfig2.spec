@@ -133,6 +133,10 @@ fi
 
 %changelog
 * Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: fix incorrect variable reference that caused
+  an uncaught exception when configuring a static IP on a Grandstream/Elastix
+  phone.
+  SVN Rev[6053]
 - FIXED: New Endpoint Configurator: do not silently lose uncaught exceptions when
   logging to a progress file. Required for more precise debugging.
   SVN Rev[6050]

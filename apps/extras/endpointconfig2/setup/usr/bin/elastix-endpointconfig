@@ -278,19 +278,27 @@ def spawnEndpoint(endpointInfo):
         (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
          endpointInfo['ip'], endpointInfo['id']))
     iCurrentStep += 1
-    r = endpointInfo['endpoint'].updateLocalConfig()
-    if r:
-        logging.info('(%d/%d) finished configuration for endpoint %s@%s (%s)...' %
-            (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
-             endpointInfo['endpoint'].getIP(), endpointInfo['id']))
-    else:
+    try:
+        r = endpointInfo['endpoint'].updateLocalConfig()
+        if r:
+            logging.info('(%d/%d) finished configuration for endpoint %s@%s (%s)...' %
+                (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
+                 endpointInfo['endpoint'].getIP(), endpointInfo['id']))
+        else:
+            logging.warning('(%d/%d) failed configuration for endpoint %s@%s (%s)...' %
+                (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
+                 endpointInfo['ip'], endpointInfo['id']))
+    except elastix.ConfigException, e:
+        logging.error(e.msg)
+        r = False
+    except Exception, e:
+        logging.error('Uncaught exception: \n%s' % (traceback.format_exc(),))
         logging.warning('(%d/%d) failed configuration for endpoint %s@%s (%s)...' %
             (iCurrentStep, iTotalSteps, endpointInfo['manufacturer'], 
              endpointInfo['ip'], endpointInfo['id']))
-
+        r = False
     iCurrentStep += 1
     return r
-
 
 def getDatabaseCredentials():
     '''Get database credentials to connect to endpointconfig database

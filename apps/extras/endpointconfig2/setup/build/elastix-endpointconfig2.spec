@@ -133,7 +133,10 @@ fi
 
 %changelog
 * Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: New Endpoint Configurator: fix incorrect variable references in
+- FIXED: New Endpoint Configurator: do not silently lose uncaught exceptions when
+  logging to a progress file. Required for more precise debugging.
+  SVN Rev[6050]
+- FIXED: New Endpoint Configurator: fix incorrect variable references in
   configuration status monitoring.
   SVN Rev[6049]
 - CHANGED: New Endpoint Configurator: allow configuration of default language

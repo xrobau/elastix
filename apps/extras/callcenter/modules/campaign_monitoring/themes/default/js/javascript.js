@@ -92,6 +92,13 @@ $(document).ready(function() {
 			});
 		},
 		setupController: function (controller, model) {
+			var parentController = this.controllerFor("campaign");
+			var old_key_campaign = parentController.get('key_campaign');
+			var new_key_campaign = model.get('type') + '-' + model.get('id_campaign');
+			if (old_key_campaign == null || old_key_campaign != new_key_campaign) {
+				parentController.set('key_campaign', new_key_campaign);
+			}
+			
 			controller.clear();
 			controller.set('model', model);
 			controller.manejarRespuestaStatus(model.get('respuesta'));
@@ -483,9 +490,6 @@ $(document).ready(function() {
 	});
 
 	App.RegistroView = Ember.View.extend({
-		init: function () {
-			debug_registroview = this;
-		},
 		didInsertElement: function() {
 			this.scroll();
 		},

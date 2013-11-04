@@ -50,34 +50,37 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         case "save_new":
-            $content = sendNewSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials["userlevel"],$arrCredentials["idUser"] ,$arrCredentials["id_organization"]);
+            $content = sendNewSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
         case 'checkFaxStatus':
             $content = checkFaxStatus();
             break;
         default: // view_form
-            $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials["userlevel"],$arrCredentials["idUser"] ,$arrCredentials["id_organization"]);
+            $content = viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
     }
     return $content;
 }
 
-function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $idUser, $idOrganization)
+function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
+    global $arrCredentials;
     $pSendFax = new paloSantoSendFax($pDB);
     $pFaxList = new paloFax($pDB);
 
-    /*if($userLevel1=="other"){
-        $pACL = new paloACL($pDB);
-        $idUser=$pACL->getIdUser($userAccount);
-    }else{
-        $idUser=null;
-    }*/
-
-    $faxes      = $pFaxList->getFaxList($idOrganization,$idUser);
+    //obtenemos el fax del usuario
+    //para eso necesitamos el numero de extension del usuario
+    $faxexten=$pSendFax->getFaxExtensionUser($arrCredentials['idUser']);
+    if($faxexten===false || $faxexten==''){
+        $smarty->assign("mb_title", _tr('ERROR'));
+        $smarty->assign("mb_message","An error has ocurred to retrieved fax info. ".$faxexten->errMsg);
+        return '';
+    }
+    
+    $faxes      = $pFaxList->getFaxList(array('organization_domain'=>$arrCredentials['domain'],'exten'=>$faxexten));
     $arrFaxList = array("none"=>'-- '._tr("Select a Fax Device").' --');
     foreach($faxes as $values){
-        $smarty->assign("FAX_USER",$values['clid_name']." / ".$values['extension']);
+        $smarty->assign("FAX_USER",$values['clid_name']." / ".$values['exten']);
         $smarty->assign("FAX_DEV","ttyIAX".$values['dev_id']);
     }
     
@@ -128,28 +131,30 @@ function viewFormSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     }
 }
 
-function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $userLevel1, $idUser, $idOrganization)
+function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
+    global $arrCredentials;
     $pSendFax = new paloSantoSendFax($pDB);
     $pFaxList = new paloFax($pDB);
     $ruta_archivo = "";
     
-    /*if($userLevel1=="other"){
-        $pACL = new paloACL($pDB);
-        $idUser=$pACL->getIdUser($userAccount);
-        $_POST["from"]="ttyIAX".$pACL->getUserProp($idUser,"dev_id");
-    }else{
-        $idUser=null;
-    }*/
-
-    $faxes      = $pFaxList->getFaxList($idOrganization,$idUser);
+    //obtenemos el fax del usuario
+    //para eso necesitamos el numero de extension del usuario
+    $faxexten=$pSendFax->getFaxExtensionUser($arrCredentials['idUser']);
+    if($faxexten===false || $faxexten==''){
+        $smarty->assign("mb_title", _tr('ERROR'));
+        $smarty->assign("mb_message","An error has ocurred to retrieved fax info. ".$faxexten->errMsg);
+        return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+    }
+    
+    $faxes      = $pFaxList->getFaxList(array('organization_domain'=>$arrCredentials['domain'],'exten'=>$faxexten));
     if($faxes==false){
         $smarty->assign("mb_title", _tr('ERROR'));
         $smarty->assign("mb_message", _tr("An error has ocurred to retrieved fax info"));
-        return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $idUser, $idOrganization);
+        return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
     }
-    $faxexten="ttyIAX".$faxes[0]['dev_id'];
-    $smarty->assign("FAX_DEV",$faxexten);
+    $faxDev="ttyIAX".$faxes[0]['dev_id'];
+    $smarty->assign("FAX_DEV",$faxDev);
     
     $arrFormSendFax = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormSendFax);
@@ -164,17 +169,17 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
                 $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $idUser, $idOrganization);
+        return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
     }
     else{
         $destine      = getParameter("to");
-        //$faxexten     = getParameter("from");
+        //$faxDev     = getParameter("from");
         $data_content = getParameter("body");
 
-        /*if($faxexten == "none"){
+        /*if($faxDev == "none"){
             $smarty->assign("mb_title", _tr("Validation Error"));
             $smarty->assign("mb_message", _tr("Please, select a valid Fax Device"));
-            return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $idUser, $idOrganization);
+            return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
         }*/
 
         if(getParameter("option_fax")=="by_file"){
@@ -183,7 +188,7 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             } else {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("File to upload is empty"));
-                return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $idUser, $idOrganization);
+                return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             }
         }else{
             if (!empty($data_content)) {
@@ -197,16 +202,16 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
                         'mb_title'      =>  _tr('Validation Error'),
                         'mb_message'    =>  _tr('Failed to convert text'),
                     ));
-                    return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $idUser, $idOrganization);
+                    return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
                 }
             } else {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("Text to send is empty"));
-                return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $idUser, $idOrganization);
+                return viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             }
         }
     
-        $jobid = $pSendFax->sendFax($faxexten, $destine, $ruta_archivo);
+        $jobid = $pSendFax->sendFax($faxDev, $destine, $ruta_archivo);
         if (is_null($jobid)) {
             $smarty->assign("mb_title", _tr('Validation Error'));
             $smarty->assign("mb_message", _tr('Failed to submit job').': '.$pSendFax->errMsg);
@@ -216,7 +221,7 @@ function sendNewSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             $smarty->assign('JOBID', $jobid);
         }
         if (file_exists($ruta_archivo)) unlink($ruta_archivo);
-        return  viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $userLevel1, $idUser, $idOrganization);
+        return  viewFormSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
     }
 }
 

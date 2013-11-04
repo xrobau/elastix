@@ -139,7 +139,6 @@ function action_faxSentEvent($opt)
 function action_faxRecvEvent($opt)
 {
     global $arrDBConn;
-    
     if (count($opt[1]) < 6)
         wlog_exit("ERR: invoke with --recv tifffile modemdevice commid errormessage CIDNumber CIDName\n");
 
@@ -245,7 +244,7 @@ function commonFaxProcessing($conn, $faxinfo, $sDirection, $status)
     
     //user
     //en caso de no encontrarse el usuario dueño del fax se setea este campo con ''
-    $idUser=getModemOwer($conn,$dev_id);
+    $idUser=getModemOwer($conn,$dev_id,$domain);
     // Create required folder for PDF of processed fax
     $sDestDir = createFaxDirectory($domain, $sDirection, 
         $faxinfo['properties']['number'], $faxinfo['properties']['commid']);
@@ -336,10 +335,9 @@ function commonFaxProcessing($conn, $faxinfo, $sDirection, $status)
     
     // Send email with attached fax
     $emailList = array();
-    if ($idUser != '') {
-        $sDestinationEmail = readNotificationEmail($conn, $idUser);
-        if (!is_null($sDestinationEmail)) $emailList[] = $sDestinationEmail;
-    }
+    $sDestinationEmail = readNotificationEmail($conn, $dev_id);
+    if (!is_null($sDestinationEmail)) $emailList[] = $sDestinationEmail;
+    
     if (isset($faxinfo['properties']['mailaddr']) && !empty($faxinfo['properties']['mailaddr'])) {
         $sDestinationEmail = $faxinfo['properties']['mailaddr'];
         foreach (array('/@localhost$/', '/@localhost.localdomain/', '/@127.0.0.1/') as $regexp) {
@@ -349,7 +347,7 @@ function commonFaxProcessing($conn, $faxinfo, $sDirection, $status)
         if (!is_null($sDestinationEmail)) $emailList[] = $sDestinationEmail;
     }    
     foreach ($emailList as $sDestinationEmail) {
-        sendEmailFax($conn, $idUser, $domain, $sRepresentativeName, $sDestinationEmail,
+        sendEmailFax($conn, $dev_id, $domain, $sRepresentativeName, $sDestinationEmail,
             $faxinfo['properties']['sender'], $faxinfo['properties']['number'],
             "$sDestDir/fax.pdf", $status, $faxinfo['properties']['status']);
     }
@@ -359,7 +357,7 @@ function commonFaxProcessing($conn, $faxinfo, $sDirection, $status)
 }
 
 function getDomain($db_object,$dev_id){
-    $sql="select o.domain from organization o join acl_group g on o.id=g.id_organization where g.id=(SELECT au.id_group from acl_user au join user_properties up on up.id_user=au.id where up.property='dev_id' and up.value=?)";
+    $sql="select organization_domain from fax WHERE dev_id=?";
     $sth = $db_object->prepare($sql);
     $sth->execute(array($dev_id));
     $result = $sth->fetch(PDO::FETCH_NUM);
@@ -369,11 +367,12 @@ function getDomain($db_object,$dev_id){
         return false;
 }
 
-function getModemOwer($db_object,$dev_id)
+function getModemOwer($db_object,$dev_id,$domain)
 {
-    $sql= "select id_user from user_properties where property='dev_id' and value=?";
+    //obtenemos el id de la organizacion 
+    $sql= "select u.id from fax f join acl_user u ON f.exten=u.fax_extension JOIN acl_group g ON u.id_group=g.id where f.dev_id=? and f.organization_domain=? and g.id_organization=(SELECT id from organization where domain=?)";
     $sth = $db_object->prepare($sql);
-    $sth->execute(array($dev_id));
+    $sth->execute(array($dev_id,$domain,$domain));
     $result = $sth->fetch(PDO::FETCH_NUM);
     if(count($result)>0){
         return $result[0];
@@ -465,14 +464,14 @@ INSERT_FAX;
  * 
  * @return  string  E-Mail address for notification, or NULL 
  */
-function readNotificationEmail($conn, $idUser)
+function readNotificationEmail($conn, $devId)
 {
     // Read destination email for notification
-    $sth = $conn->prepare('SELECT username FROM acl_user WHERE id = ?');
-    $sth->execute(array($idUser));
+    $sth = $conn->prepare('SELECT notify_email FROM fax WHERE dev_id = ?');
+    $sth->execute(array($devId));
     $tuple = $sth->fetch(PDO::FETCH_ASSOC);
     $sth->closeCursor();
-    return isset($tuple['username']) ? $tuple['username'] : NULL;
+    return isset($tuple['notify_email']) ? $tuple['notify_email'] : NULL;
 }
 
 /**
@@ -487,7 +486,7 @@ function readNotificationEmail($conn, $idUser)
  * 
  * @return void
  */
-function sendEmailFax($conn, $idUser, $domain, $sRepresentativeName, $sDestinationEmail, $sCompanyName,
+function sendEmailFax($conn, $dev_id, $domain, $sRepresentativeName, $sDestinationEmail, $sCompanyName,
     $sCompanyNumber, $sPdfPath, $status, $errmsg)
 {
 	// Read configured values for fax email template
@@ -503,14 +502,12 @@ function sendEmailFax($conn, $idUser, $domain, $sRepresentativeName, $sDestinati
         array('{FAX_CID_NUMBER}',  $sCompanyNumber),
         array('{JOB_STATUS}',           ($status == 'done') ? $status : "$status: $errmsg"),
     );
-    $sql  = "SELECT value,property from user_properties where property IN ('fax_subject','fax_content') and id_user=?";
+    $sql  = "SELECT fax_content,fax_subject from fax where dev_id=?";
     $sth = $conn->prepare($sql);
-    $sth->execute(array($idUser));
+    $sth->execute(array($dev_id));
     while ($tuple = $sth->fetch(PDO::FETCH_ASSOC)) {
-        if($tuple['property']=='fax_content')
-            $emailInfo['content']=$tuple['value'];
-        else
-            $emailInfo['subject']=$tuple['value'];
+        $emailInfo['content']=$tuple['fax_content'];
+        $emailInfo['subject']=$tuple['fax_subject'];
     }
     
     foreach ($replaceStrings as $replace) {

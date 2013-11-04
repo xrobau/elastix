@@ -4,12 +4,9 @@
     margin-right: 0px;
 }
 
-select[name=language_vm]{
-width: 65px;
-}
-
 input[type="text"]{
-width: 200px !important;
+width: 175px !important;
+display:inline;
 }
 
 .subtitle p{
@@ -33,3 +30,14 @@ margin-bottom: 0px;
 .name-label{
 font-weight: bold;
 }
+
+/* css tool tip*/
+.hidden-tooltip{
+display:none;
+}
+
+.visible-tooltip{
+display:inline;
+color: red;
+}
+/*fin css tooltip*/

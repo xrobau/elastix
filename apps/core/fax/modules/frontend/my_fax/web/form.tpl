@@ -40,39 +40,56 @@
 
         <div class="row">
             <div class="col-md-3 name-label"><p>{$CID_NAME.LABEL}</p></div>
-            <div class="col-md-5"><p>{$CID_NAME.INPUT}</p></div>
+            <div class="col-md-5">
+                {$CID_NAME.INPUT}
+                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Can not be empty">
+            </div>
         </div>
 
         <div class="row">
             <div class="col-md-3 name-label"><p>{$CID_NUMBER.LABEL}</p></div>
-            <div class="col-md-5"><p>{$CID_NUMBER.INPUT}</p></div>
+            <div class="col-md-5">
+                {$CID_NUMBER.INPUT}
+                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Can not be empty, just numeric characters are valid">
+            </div>
         </div>
 
         <div class="row">
             <div class="col-md-3 name-label"><p>{$COUNTRY_CODE.LABEL}</p></div>
-            <div class="col-md-5"><p>{$COUNTRY_CODE.INPUT}</p></div>
+            <div class="col-md-5">
+                {$COUNTRY_CODE.INPUT}
+                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Can not be empty, just numeric characters are valid">
+            </div>
         </div>
 
         <div class="row">
             <div class="col-md-3 name-label"><p>{$AREA_CODE.LABEL}</p></div>
-            <div class="col-md-5"><p>{$AREA_CODE.INPUT}</p></div>
+            <div class="col-md-5">
+                {$AREA_CODE.INPUT}
+                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Can not be empty, just numeric characters are valid">
+            </div>
         </div>
 
         <div class="row" >
-            <div class="col-md-6 subtitle"><p>{$FAX_EMAIL_SETTINGS}</p></div>
+            <div class="col-md-6 subtitle">
+                <p>{$FAX_EMAIL_SETTINGS}</p>        
+            </div>
         </div>
 
         <div class="row">
             <div class="col-md-3 name-label"><p>{$FAX_SUBJECT.LABEL}</p></div>
-            <div class="col-md-5"><p>{$FAX_SUBJECT.INPUT}</p></div>
+            <div class="col-md-5">
+                {$FAX_SUBJECT.INPUT}
+                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Can not be empty">
+            </div>
         </div>
 
         <div class="row">
             <div class="col-md-3 name-label"><p>{$FAX_CONTENT.LABEL}</p></div>
-            <div class="col-md-5"><p>{$FAX_CONTENT.INPUT}</p></div>
+            <div class="col-md-5">
+                {$FAX_CONTENT.INPUT}
+            </div>
         </div>
-
-        
 
     </div>
 </div>

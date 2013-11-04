@@ -6,7 +6,6 @@
 				<action name="access|cancel_job">
 					<groups>
 						<group id="1" name="superadmin"    desc="Super Admin"   />
-						<group id="2" name="administrator" desc="Administrator" />
 					</groups>
 				</action>
 			</actions>        

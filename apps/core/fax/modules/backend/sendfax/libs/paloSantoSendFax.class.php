@@ -48,6 +48,19 @@ class paloSantoSendFax {
             }
         }
     }
+    
+    function getFaxExtensionUser($idUser){
+        $query="SELECT fax_extension FROM acl_user WHERE id=?";
+        $result=$this->_DB->getFirstRowQuery($query,false,array($idUser));
+        if($result===false){
+            $this->errMsg=_tr("DATABASE ERROR");
+            return false;
+        }elseif(count($result)==0){
+            $this->errMsg=_tr("User does not exist");
+            return false;
+        }
+        return $result[0];
+    }
 
     function generarArchivoTextoPS(&$data_content)
     {
@@ -84,13 +97,14 @@ class paloSantoSendFax {
     }
 
     /*HERE YOUR FUNCTIONS*/
-    function sendFax($faxexten, $destine, $data)
+    function sendFax($faxdev, $destine, $data)
     {
-        $faxhost = escapeshellarg("$faxexten@127.0.0.1");
+        $faxhost = escapeshellarg("$faxdev@127.0.0.1");
         $destine = escapeshellarg($destine);
         $data = escapeshellarg($data);
         $output = $retval = NULL;
         exec("sendfax -D -h $faxhost -n -d $destine $data 2>&1", $output, $retval);
+        print_r("sendfax -D -h $faxhost -n -d $destine $data 2>&1");
         $regs = NULL;
         if ($retval != 0 || !preg_match('/request id is (\d+)/', implode('', $output), $regs)) {
             $this->errMsg = implode('<br/>', $output);

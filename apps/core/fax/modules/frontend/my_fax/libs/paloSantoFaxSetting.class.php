@@ -147,9 +147,54 @@ class paloMyFax{
 
     function editFaxExten($arrProp){
         require_once("libs/paloSantoPBX.class.php");
+        $errorData=array();
+        $errorBoolean= false;
 
-        $arrProp['idUser']= $this->idUser;
+        if($arrProp['clid_name']==''){
+            $errorData['field'][] = "CID_NAME";
+            $errorBoolean= true;
+        }
 
+        if($arrProp['clid_number']==''){
+            $errorData['field'][] = "CID_NUMBER";
+            $errorBoolean= true;
+        }elseif(!preg_match('/^[0-9]+$/', $arrProp['clid_number'])){
+            $errorData['field'][] = "CID_NUMBER";
+            $errorBoolean= true;
+        }
+
+        if($arrProp['country_code']==''){
+            $errorData['field'][] = "COUNTRY_CODE";
+            $errorBoolean= true;
+        }elseif(!preg_match('/^[0-9]+$/', $arrProp['country_code'])){
+            $errorData['field'][] = "COUNTRY_CODE";
+            $errorBoolean= true;
+        }
+
+        if($arrProp['area_code']==''){
+            $errorData['field'][] = "AREA_CODE";
+            $errorBoolean= true;
+        }elseif(!preg_match('/^[0-9]+$/', $arrProp['area_code'])){
+            $errorData['field'][] = "AREA_CODE";
+            $errorBoolean= true;
+        }
+
+        if($arrProp['fax_subject']==''){
+            $errorData['field'][] = "FAX_SUBJECT";
+            $errorBoolean= true;
+        }
+
+        if($arrProp['fax_content']==''){
+            $errorData['field'][] = "FAX_CONTENT";
+            $errorBoolean= true;
+        }
+
+        if($errorBoolean){
+            $errorData['stringError'] = "Some fields are wrong";
+            $this->errMsg = $errorData;
+            return false;
+        }
+              
         $pMyFax = new paloFax($this->_DB);
         if(!$pMyFax->editFaxToUser($arrProp)){
             return false;

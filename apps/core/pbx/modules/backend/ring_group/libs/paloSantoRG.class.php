@@ -206,8 +206,8 @@ class paloSantoRG extends paloAsteriskDB{
         //el conjunto de extensiones que pertence al grupo de marcado
         $arrExtens=explode("\n",$arrProp["rg_extensions"]);
         foreach($arrExtens as $value){
-            if(preg_match("/([0-9]+)(#){0,1}/",$value,$match)){
-                $extensions .=(isset($match[2]))?$match[1].$match[2]."-":$match[1]."-";
+            if(preg_match("/^([0-9]+)(#){0,1}$/",trim($value),$match)){
+                $extensions .=$value."-";
             }
         }
         
@@ -271,6 +271,11 @@ class paloSantoRG extends paloAsteriskDB{
         if(isset($arrProp["rg_skipbusy"])){
             $query .="rg_skipbusy,";
             $arrOpt[count($arrOpt)]=$arrProp["rg_skipbusy"];
+        }
+        
+        if(isset($arrProp["rg_pickup"])){
+            $query .="rg_pickup,";
+            $arrOpt[count($arrOpt)]=$arrProp["rg_pickup"];
         }
         
         if(isset($arrProp["rg_confirm_call"])){
@@ -341,11 +346,10 @@ class paloSantoRG extends paloAsteriskDB{
         //no se puede actualizar el numero del ringroup
         
         $extensions="";
-        //el conjunto de extensiones que pertence al grupo de marcado
         $arrExtens=explode("\n",$arrProp["rg_extensions"]);
         foreach($arrExtens as $value){
-            if(preg_match("/([0-9]+)(#){0,1}/",$value,$match)){
-                $extensions .=(isset($match[2]))?$match[1].$match[2]."-":$match[1]."-";
+            if(preg_match("/^([0-9]+)(#){0,1}$/",trim($value),$match)){
+                $extensions .=$value."-";
             }
         }
         
@@ -409,6 +413,11 @@ class paloSantoRG extends paloAsteriskDB{
         if(isset($arrProp["rg_skipbusy"])){
             $query .="rg_skipbusy=?,";
             $arrOpt[count($arrOpt)]=$arrProp["rg_skipbusy"];
+        }
+        
+        if(isset($arrProp["rg_pickup"])){
+            $query .="rg_pickup=?,";
+            $arrOpt[count($arrOpt)]=$arrProp["rg_pickup"];
         }
         
         if(isset($arrProp["rg_confirm_call"])){
@@ -514,6 +523,10 @@ class paloSantoRG extends paloAsteriskDB{
                         $arrExt[]=new paloExtensions($exten, new ext_setvar('_FORWARD_CONTEXT', 'block-cf'));
                     }
                     
+                    if($value["rg_pickup"]=="yes"){
+                        $arrExt[]=new paloExtensions($exten, new ext_setvar('__PICKUPMARK', $this->code.'_${EXTEN}'));
+                    }
+                    
                     $arrExt[]=new paloExtensions($exten, new ext_setvar('RingGroupMethod', $value["rg_strategy"]));
                     
                     if(isset($value["rg_recording"])){
@@ -543,7 +556,8 @@ class paloSantoRG extends paloAsteriskDB{
                         $toolate=($toolate==false)?"":$toolate;
                         $len=strlen($exten)+4;
                         
-                        $arrExt2[]=new paloExtensions("_RG-$exten-.", new ext_macro($this->code.'-dial',$value["rg_time"].",M(".$this->code."-confirm^$remote^$toolate^$exten)$dialopts".',${EXTEN:'.$len.'}'),"1");
+                        $arrExt2[]=new paloExtensions("_RG-$exten-.", new ext_nocdr(''), 1);
+                        $arrExt2[]=new paloExtensions("_RG-$exten-.", new ext_macro($this->code.'-dial',$value["rg_time"].",M(".$this->code."-confirm^$remote^$toolate^$exten)$dialopts".',${EXTEN:'.$len.'}'));
                         
                         $arrExt[]=new paloExtensions($exten, new ext_macro($this->code.'-dial-confirm',$value["rg_time"].",".$dialopts.",".$value["rg_extensions"].",".$exten),"n",'DIALGRP');
                     }else{
@@ -560,12 +574,16 @@ class paloSantoRG extends paloAsteriskDB{
                         $arrExt[]=new paloExtensions($exten, new ext_setvar('_FORWARD_CONTEXT', $this->code.'-from-internal'));
                     }
                     
+                    if($value["rg_pickup"]=="yes"){
+                        $arrExt[]=new paloExtensions($exten, new ext_setvar('__PICKUPMARK', ''));
+                    }
+                    
                     $arrExt[]=new paloExtensions($exten, new ext_setvar('__NODEST', ''));
                     $arrExt[]=new paloExtensions($exten, new ext_dbdel('${BLKVM_OVERRIDE}'));
                     
                     if(isset($value["destination"])){
-                    $goto=$this->getGotoDestine($this->domain,$value["destination"]);
-                    if($goto==false)
+                        $goto=$this->getGotoDestine($this->domain,$value["destination"]);
+                        if($goto==false)
                             $goto="h,1";
                     }
                     

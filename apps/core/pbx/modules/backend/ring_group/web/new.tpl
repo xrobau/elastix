@@ -60,6 +60,10 @@
         <td width="20%">{$rg_skipbusy.INPUT}</td>
     </tr>
     <tr class="ringgroup">
+        <td nowrap>{$rg_pickup.LABEL}:</td>
+        <td >{$rg_pickup.INPUT}</td>
+    </tr>
+    <tr class="ringgroup">
         <td nowrap>{$rg_confirm_call.LABEL}:</td>
         <td >{$rg_confirm_call.INPUT}</td>
     </tr>

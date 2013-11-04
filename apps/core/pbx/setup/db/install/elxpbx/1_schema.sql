@@ -1068,7 +1068,6 @@ CREATE TABLE ring_group (
     rg_cid_prefix varchar(100),
     rg_cf_ignore enum ('yes','no') default 'no',
     rg_skipbusy enum ('yes','no') default 'no',
-    rg_pickup enum ('yes','no') default 'no',
     rg_confirm_call enum ('yes','no') default 'no',
     rg_record_remote varchar(128),
     rg_record_toolate varchar(128),

@@ -449,7 +449,7 @@ class paloIvrPBX extends paloAsteriskDB{
                             $context->arrInclude=array(array("name"=>"from-did-direct-ivr"));
                     }
                 }
-                
+                print_r($context->errMsg);
                 $arrConIvr[]=$context;
             }
             return $arrConIvr;

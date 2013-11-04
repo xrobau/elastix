@@ -231,6 +231,8 @@ class paloMyExten{
 
     function editExten($arrProp){
         require_once("libs/paloSantoPBX.class.php");
+        $errorData=array();
+        $errorBoolean= false;
 
         $exten=$this->getExtensionUser();
         if($exten===false){
@@ -260,25 +262,28 @@ class paloMyExten{
 
         //validamos el lenguage
         if(!preg_match('/^[[:alpha:]]+$/', $arrProp['language'])){
-            $this->errMsg=_tr('Invalid language');    
-            return false;        
+            $errorData['field'][] = "language_vm";
+            $errorBoolean= true;       
         }
         
         
         if($arrProp['create_vm']=="yes"){
-            //validar que ingrese un password numerico sergio
+            //validar que ingrese un password numerico
             if($arrProp['vmpassword']!=''){
               if(!preg_match('/^[0-9]+$/', $arrProp['vmpassword'])){
-                $this->errMsg=_tr('Invalid Voicemail Password');    
-                return false;        
+                $errorData['field'][] = "password_vm";
+                $errorBoolean= true;        
               } 
+            }else{
+                $errorData['field'][] = "password_vm";
+                $errorBoolean= true;
             } 
                         
 
             if($arrProp['vmattach']=='yes'){
               if(!filter_var($arrProp['vmemail'], FILTER_VALIDATE_EMAIL)){
-                $this->errMsg=_tr('Invalid mail');    
-                return false;      
+                $errorData['field'][] = "email_vm";
+                $errorBoolean= true;     
               } 
             }      
         }else{
@@ -289,25 +294,31 @@ class paloMyExten{
         if($arrProp['callForwardOpt']=="yes"){
         //validamos que haya ingresado un numero a marcar en el campo callForwardUnavailableInp    
               if(!preg_match('/^[0-9]+$/', $arrProp['callForwardInp'])){
-                $this->errMsg=_tr('Invalid Call Forward Phone Number ');    
-                return false;
+                $errorData['field'][] = "callForwardInp";
+                $errorBoolean= true;
               }           
         }
 
         if($arrProp['callForwardUnavailableOpt']=="yes"){
         //validamos que haya ingresado un numero a marcar en el campo callForwardUnavailableInp    
               if(!preg_match('/^[0-9]+$/', $arrProp['callForwardUnavailableInp'])){
-                $this->errMsg=_tr('Invalid Call Forward Unavailable Phone Number ');    
-                return false;       
+                $errorData['field'][] = "callForwardUnavailableInp";
+                $errorBoolean= true;      
               }           
         }
 
         if($arrProp['callForwardBusyOpt']=="yes"){
         //validamos que haya ingresado un numero a marcar en el campo callForwardUnavailableInp    
               if(!preg_match('/^[0-9]+$/', $arrProp['callForwardBusyInp'])){
-                $this->errMsg=_tr('Invalid call Forward Busy Phone Number ');    
-                return false;         
+                $errorData['field'][] = "callForwardBusyInp";
+                $errorBoolean= true;     
               }           
+        }
+
+        if($errorBoolean){
+            $errorData['stringError'] = "Some Fields are wrong";
+            $this->errMsg = $errorData;
+            return false;
         }
 
         //primero guardamos el voicemail

@@ -135,6 +135,7 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     if($credentials['userlevel']=="superadmin")
         $arrColum[]=_tr("Organization");
     $arrColum[]=_tr("Extension");
+    $arrColum[]=_tr("Caller ID");
     $arrColum[]=_tr("Technology");
     $arrColum[]=_tr("Device");
     $arrColum[]=_tr("Context");
@@ -159,6 +160,7 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
                 $arrTmp[] = $arrOrgz[$exten["organization_domain"]];
             }
             $arrTmp[] = "&nbsp;<a href='?menu=extensions&action=view&id_exten=".$exten['id']."&organization={$exten['organization_domain']}'>".$exten["exten"]."</a>";
+            $arrTmp[] = $exten['clid_name']." <{$exten['clid_number']}>";
             $arrTmp[] = strtoupper($exten['tech']);
             $arrTmp[] = $exten['device'];
             $arrTmp[] = $exten['context'];
@@ -429,24 +431,44 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     }else{
         $secret=getParameter("secret");
         if(!isStrongPassword($secret)){
-            $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
+            $error .=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
             $continuar=false;
         }
 
         $type=getParameter("technology");
         if(!isset($type) || !($type=="sip" || $type=="iax2")){
-            $error=_tr("You must select a technology");
+            $error .=_tr("You must select a technology");
             $continuar=false;
         }
 
+        //no puede contener caracteres esoeciales ni salto de lineas
+        $arrProp["fullname"]=getParameter("clid_name");
+        if($arrProp["fullname"]!=''){
+            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["fullname"])){
+                $error .=_tr("CID Name is invalid");
+                $continuar=false;
+            }
+        }else{
+            $arrProp["fullname"]=$exten;
+        }
+        
+        $arrProp["clid_number"]=getParameter('clid_number');
+        if($arrProp["clid_number"]!=''){
+            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["clid_number"])){
+                $error .=_tr("CID Number is invalid");
+                $continuar=false;
+            }
+        }else{
+           $arrProp["clid_number"]=$exten;
+        }
+            
         if($continuar){
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
             $exten=getParameter("exten");
-            $arrProp["name"]=getParameter("exten");
+            $arrProp["name"]=getParameter("exten"); //nombre del device al que se le agrega como prefijo orgcode_
+            $arrProp["exten"]=getParameter("exten");
             $arrProp['secret']=getParameter("secret");
-            $arrProp["fullname"]=(isset($_POST["clid_name"]) && $_POST["clid_name"]!="")?$_POST["clid_name"]:$exten;
-            $arrProp["clid_number"]=(isset($_POST["clid_number"]) && $_POST["clid_number"]!="")?$_POST["clid_number"]:$exten;
             $arrProp['rt']=getParameter("ring_timer");
             $arrProp['record_in']=getParameter("record_in");
             $arrProp['record_out']=getParameter("record_out");
@@ -547,29 +569,61 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
         $smarty->assign("mb_message",_tr("Extension doesn't exist"));
         return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
+        //comprobamos si la extension le pertenece a algun usuario
+        //si le pertenece a un usuario el secret no puede ser editado
+        $query = "Select username from acl_user where extension=? and id_group in (select g.id from acl_group g join organization o on g.id_organization=o.id where o.domain=?)";
+        $result=$pDB->getFirstRowQuery($query,false,array($arrExten["exten"],$arrExten["domain"]));
+        if($result===false){
+            $error .="An error has ocurred to retrieved Extension data."." "._tr("DATABASE ERROR");
+            $continuar=false;
+        }elseif(count($result)>0){
+            $secret="";
+        }else{
+            $secret=getParameter("secret");
+        }
+    
         $exten=$arrExten["exten"];
-        $secret=getParameter("secret");
         if(isset($secret) && $secret!=""){
             if(!isStrongPassword($secret)){
-                $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
+                $error .=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
                 $continuar=false;
             }
         }
 
         $type=$arrExten["technology"];
         if(!isset($type) || !($type=="sip" || $type=="iax2")){
-            $error=_tr("Invalid technology");
+            $error .=_tr("Invalid technology");
             $continuar=false;
         }
 
+        //no puede contener caracteres esoeciales ni salto de lineas
+        $arrProp["fullname"]=getParameter("clid_name");
+        if($arrProp["fullname"]!=''){
+            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["fullname"])){
+                $error .=_tr("CID Name is invalid");
+                $continuar=false;
+            }
+        }else{
+            $arrProp["fullname"]=$exten;
+        }
+        
+        $arrProp["clid_number"]=getParameter('clid_number');
+        if($arrProp["clid_number"]!=''){
+            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["clid_number"])){
+                $error .=_tr("CID Number is invalid");
+                $continuar=false;
+            }
+        }else{
+           $arrProp["clid_number"]=$exten;
+        }
+        
         if($continuar){
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
-            $arrProp["name"]=$exten;
+            $arrProp["exten"]=$exten;
+            $arrProp["name"]=$arrExten["device"];
             $arrProp["dial"]=$arrExten["dial"];
             $arrProp['secret']=getParameter("secret");
-            $arrProp["fullname"]=(isset($_POST["clid_name"]) && $_POST["clid_name"]!="")?$_POST["clid_name"]:$exten;
-            $arrProp["clid_number"]=(isset($_POST["clid_number"]) && $_POST["clid_number"]!="")?$_POST["clid_number"]:$exten;
             $arrProp['rt']=getParameter("ring_timer");
             $arrProp['record_in']=getParameter("record_in");
             $arrProp['record_out']=getParameter("record_out");
@@ -675,6 +729,7 @@ function propersParamByTech($tech){
         $arrProp['transport']=getParameter("transport");
         $arrProp['callcounter']=getParameter("callcounter");
         $arrProp['busylevel']=getParameter("busylevel");
+        $arrProp['subscribecontext']=getParameter("subscribecontext");
         $arrProp['videosupport']=getParameter("videosupport");
         $arrProp['qualifyfreq']=getParameter("qualifyfreq");
         $arrProp['pickupgroup']=getParameter("pickupgroup");
@@ -1161,6 +1216,12 @@ function createSipForm(){
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNod,
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
+                            "subscribecontext"   => array( "LABEL"           => _tr("subscribecontext"),
+                                                    "REQUIRED"               => "no",
+                                                    "INPUT_TYPE"             => "TEXT",
+                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
                             "videosupport"   => array( "LABEL"              => _tr("videosupport"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",

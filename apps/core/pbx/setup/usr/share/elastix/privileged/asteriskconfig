@@ -611,17 +611,17 @@ EXTENSIONS_CONFIG;
     
     foreach($arrDomain as $value){
         if(!empty($value)){
-            if(!is_file("/etc/asterisk/organizations/$value/extensions_".$value.".conf")){
+            if(!is_file("/etc/asterisk/organizations/$value/extensions.conf")){
                 //comprobamos que exista el directorio de archivos de configuracion de la organizacion
                 if(!isDir("/etc/asterisk/organizations/$value")){
                     return false;
                 }
-                if(file_put_contents("/etc/asterisk/organizations/$value/extensions_".$value.".conf","")!==false){
-                    $content .="#include organizations/$value/extensions_".$value.".conf\n";
-                    changeFilePermission("/etc/asterisk/organizations/$value/extensions_".$value.".conf");
+                if(file_put_contents("/etc/asterisk/organizations/$value/extensions.conf","")!==false){
+                    $content .="#include organizations/$value/extensions.conf\n";
+                    changeFilePermission("/etc/asterisk/organizations/$value/extensions.conf");
                 }
             }else{
-                $content .="#include organizations/$value/extensions_".$value.".conf\n";
+                $content .="#include organizations/$value/extensions.conf\n";
             }
         }
     }
@@ -663,17 +663,17 @@ function createExtensionGlobals($arrDomain){
                 //antes de incluir el archivo validamos que el mismo exista
                 //ya que si no existe y lo incluimos esto provocara que asterisk crash
                 //en caso de no existir el archivo se lo inteta crear
-                if(!is_file("/etc/asterisk/organizations/$value/extensions_globals_".$value.".conf")){
+                if(!is_file("/etc/asterisk/organizations/$value/extensions_globals.conf")){
                     //comprobamos que exista el directorio de archivos de configuracion de la organizacion
                     if(!isDir("/etc/asterisk/organizations/$value")){
                         return false;
                     }
-                    if(file_put_contents("/etc/asterisk/organizations/$value/extensions_globals_".$value.".conf","")!==false){
-                        $content .="#include organizations/$value/extensions_globals_".$value.".conf\n";
-                        changeFilePermission("/etc/asterisk/organizations/$value/extensions_globals_".$value.".conf");
+                    if(file_put_contents("/etc/asterisk/organizations/$value/extensions_globals.conf","")!==false){
+                        $content .="#include organizations/$value/extensions_globals.conf\n";
+                        changeFilePermission("/etc/asterisk/organizations/$value/extensions_globals.conf");
                     }
                 }else
-                    $content .="#include organizations/extensions_globals_".$value.".conf\n";
+                    $content .="#include organizations/extensions_globals.conf\n";
             }
         }
         $content .="; END ELASTIX INCLUDE FILE DO NOT REMOVE THIS LINE\n";  
@@ -694,10 +694,10 @@ function createExtensionGlobals($arrDomain){
 function createExtensionDomainFile($domain,$code){
     $EXITO=false;
     $fsource="/var/www/elastixdir/asteriskconf/generic_extensions.conf";
-    $extFile="/etc/asterisk/organizations/$domain/extensions_$domain.conf";
-    $extAddFile="/etc/asterisk/organizations/$domain/extensions_additionals_$domain.conf";
-    $extCusFile="/etc/asterisk/organizations/$domain/extensions_custom_$domain.conf";
-    $extGlobalFile="/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf";
+    $extFile="/etc/asterisk/organizations/$domain/extensions.conf";
+    $extAddFile="/etc/asterisk/organizations/$domain/extensions_additionals.conf";
+    $extCusFile="/etc/asterisk/organizations/$domain/extensions_custom.conf";
+    $extGlobalFile="/etc/asterisk/organizations/$domain/extensions_globals.conf";
     
     if(is_file($fsource)){
         if($handler=fopen($fsource,'r')){
@@ -738,7 +738,7 @@ function createExtensionDomainFile($domain,$code){
 
 function createExtensionGlobalsDomainFile($domain,$code){
     global $arrConf;
-    $file="/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf";
+    $file="/etc/asterisk/organizations/$domain/extensions_globals.conf";
     $contenido="";
             
     $pDB=new paloDB($arrConf["elastix_dsn"]["elastix"]);
@@ -775,6 +775,7 @@ function generateDialPlan($domain,$reload=false){
     require_once "apps/time_conditions/libs/paloSantoTC.class.php";
     require_once "apps/conference/libs/paloSantoConference.class.php";
     require_once "apps/features_code/libs/paloSantoFeaturesCode.class.php";
+    require_once "libs/paloSantoIM.class.php";
     
     if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
         fprintf(STDERR, "Invalid domain format");
@@ -795,7 +796,7 @@ function generateDialPlan($domain,$reload=false){
     }
     $code=$resultc[0];
 
-    $file="/etc/asterisk/organizations/$domain/extensions_additionals_$domain.conf";
+    $file="/etc/asterisk/organizations/$domain/extensions_additionals.conf";
 
     $arrContext=array();
     $arrFromInt=array();
@@ -814,11 +815,11 @@ function generateDialPlan($domain,$reload=false){
     //al momento de crear una organizacion no se escriben las variables globales de la misma
     //por lo que es necesario una vez que se mande a generar por primera vez el plan de marcado para
     //la misma hacer un reload para que las variables globales sean seteadas correctamente
-    if(is_file("/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf")===false || filesize("/etc/asterisk/organizations/$domain/extensions_globals_$domain.conf")==0){
+    if(is_file("/etc/asterisk/organizations/$domain/extensions_globals.conf")===false || filesize("/etc/asterisk/organizations/$domain/extensions_globals.conf")==0){
         $reload=true;
     }
     
-    //escribimos el archivos extensions_domain.conf
+    //escribimos el archivos extensions.conf
     if(createExtensionDomainFile($domain,$code)==false){
         fprintf(STDERR, "ERR: File extesions_$domain.conf couln't be written.\n");
         return false;
@@ -870,6 +871,14 @@ function generateDialPlan($domain,$reload=false){
         fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pDevice->errMsg);
     else
         $arrContext=array_merge($arrContext,$arrContextExtFax);
+        
+    //genero el plan de marcado para IM elastix
+    $pIM=new paloIM($pDB,$domain);
+    $arrContextIM=$pIM->createDialPlanIM();
+    if($arrContextIM===false || !is_array($arrContextIM))
+        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pIM->errMsg);
+    else
+        $arrContext=array_merge($arrContext,$arrContextIM);
         
     //genero plan de marcado relacionado con las colas
     $pQueue=new paloQueuePBX($pDB,$domain);
@@ -1351,6 +1360,47 @@ function createExtGeneral(){
     $arrExt[]=new paloExtensions("s",new ext_goto("1",'${RETDID}','from-pstn'));
     $contenido .="\n[macro-analog-did]\n";
     $contenido .="include =>macro-analog-did-custom\n";
+    if(is_array($arrExt)){
+        foreach($arrExt as $extension){
+            if(!is_null($extension) && is_object($extension))
+                $contenido .=$extension->data."\n";
+        }
+    }
+        
+    //im-sip
+    //useado para enviar mensajes de chat
+    //ARG1 -> ORG_CODE
+    //ARG2 -> DEVICE a que se le envia el mensaje
+    $arrExt=array();
+    $arrExt[]=new paloExtensions("im",new ext_noop('Start SIP MESSAGE to ${MESSAGE(to)} from ${MESSAGE(from)}'),"1");
+    //si no se envia la lista de dispositivos alos cuales enviar el mensaje no se puede continuar
+    $arrExt[]=new paloExtensions("im",new ext_execif('$["${ARG2}" = ""]','Return'));
+    $arrExt[]=new paloExtensions("im",new ext_set('FROM_PEER','${CUT(MESSAGE(from),:,2)}'));
+    $arrExt[]=new paloExtensions("im",new ext_set('FROM_PEER','${CUT(FROM_PEER,@,1)}'));
+    //obtenemos el alias del del device dentro del sistema, si no llegase a tener entonces usamos solamente el nombre del dispositivo
+    $arrExt[]=new paloExtensions("im",new ext_set('FROM_PEER_ALIAS','${DB(DEVICE/${ARG1}/${FROM_PEER}/alias)}'));
+    $arrExt[]=new paloExtensions("im",new ext_execif('$["${FROM_PEER_ALIAS}" = ""]','SET','FROM_PEER_ALIAS=${FROM_PEER}'));
+    $arrExt[]=new paloExtensions("im",new ext_set('FROM_PEER_NAME','${SIPPEER(${FROM_PEER},callerid_name)}'));
+    $arrExt[]=new paloExtensions("im",new ext_set('TO_PEER_ORG','${CUT(MESSAGE(to),:,2)}'));
+    $arrExt[]=new paloExtensions("im",new ext_set('TO_PEER_ORG','${CUT(TO_PEER_ORG,@,1)}'));
+    
+    $arrExt[]=new paloExtensions("im",new ext_set('GROUP_MSG_STATUS','FAIL'));
+    $arrExt[]=new paloExtensions("im",new ext_while('$["${SET(TO_PEER=${SHIFT(ARG2,&)})}" != ""]'));
+    $arrExt[]=new paloExtensions("im",new ext_set('TO_PEER_NAME','${SIPPEER(${TO_PEER},callerid_name)}'));
+    $arrExt[]=new paloExtensions("im",new ext_set('FROM_REPLACE','${STRREPLACE(MESSAGE(from),${FROM_PEER},${FROM_PEER_ALIAS})}'));
+    $arrExt[]=new paloExtensions("im",new ext_messageSend('sip:${TO_PEER}','${FROM_REPLACE}'));
+    $arrExt[]=new paloExtensions("im",new ext_noop('Send status is ${MESSAGE_SEND_STATUS}'));
+    $arrExt[]=new paloExtensions("im",new ext_execif('$["${MESSAGE_SEND_STATUS}" = "SUCCESS"]','SET','GROUP_MSG_STATUS=SUCCESS'));
+    $arrExt[]=new paloExtensions("im",new extension('EndWhile'));
+    $arrExt[]=new paloExtensions("im",new ext_gotoif('$["${GROUP_MSG_STATUS}"!="SUCCESS"]','sendfailedmsg'));
+    $arrExt[]=new paloExtensions("im",new ext_hangup());
+    $arrExt[]=new paloExtensions("im",new ext_noop('Sending error to user'),"n",'sendfailedmsg');
+    $arrExt[]=new paloExtensions("im",new ext_set('MESSAGE(body)','[${STRFTIME(${EPOCH},,%d%m%Y-%H:%M:%S)}] Your message to ${TO_PEER_NAME} has failed. Sending when available'));
+    $arrExt[]=new paloExtensions("im",new ext_messageSend('sip:${FROM_PEER}','"${TO_PEER_NAME}" <${MESSAGE(to)}>'));
+    $arrExt[]=new paloExtensions("im",new ext_noop('Send status is ${MESSAGE_SEND_STATUS}'));
+    $arrExt[]=new paloExtensions("im",new ext_hangup());
+    $contenido .="\n[im-sip]\n";
+    $contenido .="include =>im-sip-custom\n";
     if(is_array($arrExt)){
         foreach($arrExt as $extension){
             if(!is_null($extension) && is_object($extension))

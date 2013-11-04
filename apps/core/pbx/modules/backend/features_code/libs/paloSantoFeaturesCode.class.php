@@ -436,7 +436,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrCF[]=new paloExtensions($fcode,new ext_wait('1'));
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('DB(CF/'.$this->code.'/${fromext})', '${toext}'));
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('STATE', 'BUSY')); //debe ser astrisk mayor a 1.4
-        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code.'-app-cf-on')); //debe ser astrisk mayor a 1.4
+        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code.'-app-cf-on')); //debe ser astrisk mayor a 1.4
         $arrCF[]=new paloExtensions($fcode,new ext_playback('call-fwd-unconditional&for&extension'),"n","hook_1");
         $arrCF[]=new paloExtensions($fcode,new ext_saydigits('${fromext}'));
         $arrCF[]=new paloExtensions($fcode,new ext_playback('is-set-to'));
@@ -449,13 +449,13 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_setvar('toext','${EXTEN:'.$length.'}'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_setvar('DB(CF/'.$this->code.'/${fromext})', '${toext}'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_setvar('STATE', 'BUSY')); //debe ser astrisk mayor a 1.4
-        $arrCF[]=new paloExtensions("_".$fcode.".",new ext_gosub('1', 'sstate', $this->code.'-app-cf-on')); //debe ser astrisk mayor a 1.4
+        $arrCF[]=new paloExtensions("_".$fcode.".",new ext_gosub('1', 'state', $this->code.'-app-cf-on')); //debe ser astrisk mayor a 1.4
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_playback('call-fwd-unconditional&for&extension'),"n","hook_2");
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_saydigits('${fromext}'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_playback('is-set-to'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_saydigits('${toext}'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_macro($this->code.'-hangupcall'));
-        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF${fromext})', '${STATE}'),"1");
+        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF'.$this->code.'_${fromext})', '${STATE}'),"1");
         $arrCF[]=new paloExtensions("state",new ext_dbget('DEVICES','EXTUSER/'.$this->code.'/${fromext}/device'));
         $arrCF[]=new paloExtensions("state",new ext_gotoif('$["${DEVICES}" = "" ]', 'return'));
         $arrCF[]=new paloExtensions("state",new ext_setvar('LOOPCNT', '${FIELDQTY(DEVICES,&)}'));
@@ -485,7 +485,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('fromext', '${EXTUSER}'));
         $arrCF[]=new paloExtensions($fcode,new ext_dbdel('CF/'.$this->code.'/${fromext}'));
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('STATE', 'NOT_INUSE')); //debe ser astrisk mayor a 1.4
-        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code.'-app-cf-off')); //debe ser astrisk mayor a 1.4
+        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code.'-app-cf-off')); //debe ser astrisk mayor a 1.4
         $arrCF[]=new paloExtensions($fcode,new ext_playback('call-fwd-unconditional&de-activated'),"n","hook_1");
         $arrCF[]=new paloExtensions($fcode,new ext_macro($this->code.'-hangupcall'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_answer(),"1");
@@ -493,12 +493,12 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_setvar('fromext', '${EXTEN:'.$length.'}'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_dbdel('CF/'.$this->code.'/${fromext}'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_setvar('STATE', 'NOT_INUSE')); //debe ser astrisk mayor a 1.4
-        $arrCF[]=new paloExtensions("_".$fcode.".",new ext_gosub('1', 'sstate', $this->code.'-app-cf-off')); //debe ser astrisk mayor a 1.4
+        $arrCF[]=new paloExtensions("_".$fcode.".",new ext_gosub('1', 'state', $this->code.'-app-cf-off')); //debe ser astrisk mayor a 1.4
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_playback('call-fwd-unconditional&for&extension'),"n","hook_2");
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_saydigits('${fromext}'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_playback('cancelled'));
         $arrCF[]=new paloExtensions("_".$fcode.".",new ext_macro($this->code.'-hangupcall'));
-        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF${fromext})', '${STATE}'),"1");
+        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF'.$this->code.'_${fromext})', '${STATE}'),"1");
         $arrCF[]=new paloExtensions("state",new ext_dbget('DEVICES','EXTUSER/'.$this->code.'/${fromext}/device'));
         $arrCF[]=new paloExtensions("state",new ext_gotoif('$["${DEVICES}" = "" ]', 'return'));
         $arrCF[]=new paloExtensions("state",new ext_setvar('LOOPCNT', '${FIELDQTY(DEVICES,&)}'));
@@ -530,12 +530,12 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrCF[]=new paloExtensions($fcode,new ext_wait('1'));
         $arrCF[]=new paloExtensions($fcode,new ext_dbdel('CF/'.$this->code.'/${fromext}'));
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('STATE', 'NOT_INUSE')); //debe ser astrisk mayor a 1.4
-        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code.'-app-cf-off')); //debe ser astrisk mayor a 1.4
+        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code.'-app-cf-off')); //debe ser astrisk mayor a 1.4
         $arrCF[]=new paloExtensions($fcode,new ext_playback('call-fwd-unconditional&for&extension'),"n","hook_1");
         $arrCF[]=new paloExtensions($fcode,new ext_saydigits('${fromext}'));
         $arrCF[]=new paloExtensions($fcode,new ext_playback('cancelled'));
         $arrCF[]=new paloExtensions($fcode,new ext_macro($this->code.'-hangupcall'));
-        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF${fromext})', '${STATE}'),"1");
+        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF'.$this->code.'_${fromext})', '${STATE}'),"1");
         $arrCF[]=new paloExtensions("state",new ext_dbget('DEVICES','EXTUSER/'.$this->code.'/${fromext}/device'));
         $arrCF[]=new paloExtensions("state",new ext_gotoif('$["${DEVICES}" = "" ]', 'return'));
         $arrCF[]=new paloExtensions("state",new ext_setvar('LOOPCNT', '${FIELDQTY(DEVICES,&)}'));
@@ -736,7 +736,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrCF[]=new paloExtensions($fcode,new ext_wait('1'));
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('DB(CF/'.$this->code.'/${fromext})', '${toext}'),"n","toext");
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('STATE', 'BUSY')); //debe ser astrisk mayor a 1.4
-        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code.'-app-cf-toggle')); //debe ser astrisk mayor a 1.4
+        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code.'-app-cf-toggle')); //debe ser astrisk mayor a 1.4
         $arrCF[]=new paloExtensions($fcode,new ext_playback('call-fwd-unconditional&for&extension'),"n","hook_on");
         $arrCF[]=new paloExtensions($fcode,new ext_saydigits('${fromext}'));
         $arrCF[]=new paloExtensions($fcode,new ext_playback('is-set-to'));
@@ -748,10 +748,10 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrCF[]=new paloExtensions($fcode,new ext_goto('toext'));
         $arrCF[]=new paloExtensions($fcode,new ext_dbdel('CF/'.$this->code.'/${fromext}'),"n",'deactivate');
         $arrCF[]=new paloExtensions($fcode,new ext_setvar('STATE', 'NOT_INUSE')); //debe ser astrisk mayor a 1.4
-        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code.'-app-cf-toggle')); //debe ser astrisk mayor a 1.4
+        $arrCF[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code.'-app-cf-toggle')); //debe ser astrisk mayor a 1.4
         $arrCF[]=new paloExtensions($fcode,new ext_playback('call-fwd-unconditional&de-activated'),"n","hook_off");
         $arrCF[]=new paloExtensions($fcode,new ext_macro($this->code.'-hangupcall'));
-        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF${fromext})', '${STATE}'),"1");
+        $arrCF[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:CF'.$this->code.'_${fromext})', '${STATE}'),"1");
         $arrCF[]=new paloExtensions("state",new ext_dbget('DEVICES','EXTUSER/'.$this->code.'/${fromext}/device'));
         $arrCF[]=new paloExtensions("state",new ext_gotoif('$["${DEVICES}" = "" ]', 'return'));
         $arrCF[]=new paloExtensions("state",new ext_setvar('LOOPCNT', '${FIELDQTY(DEVICES,&)}'));
@@ -948,10 +948,10 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrDND[]=new paloExtensions($fcode,new ext_macro($this->code."-user-callerid"));
         $arrDND[]=new paloExtensions($fcode,new ext_setvar('DND/'.$this->code.'/${EXTUSER}', 'YES'));
         $arrDND[]=new paloExtensions($fcode,new ext_setvar('STATE', 'BUSY'));
-        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code."-app-dnd-on"));
+        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code."-app-dnd-on"));
         $arrDND[]=new paloExtensions($fcode,new ext_playback('do-not-disturb&activated'),"n","hook_1");
         $arrDND[]=new paloExtensions($fcode,new ext_macro($this->code.'-hangupcall'));
-        $arrDND[]=new paloExtensions("sstate",new ext_setvar('DEVICE_STATE(Custom:DND${EXTUSER})', '${STATE}'),"1");
+        $arrDND[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:DND'.$this->code.'_${EXTUSER})', '${STATE}'),"1");
         $arrDND[]=new paloExtensions("state",new ext_dbget('DEVICES','EXTUSER/'.$this->code.'/${fromext}/device'));
         $arrDND[]=new paloExtensions("state",new ext_gotoif('$["${DEVICES}" = "" ]', 'return'));
         $arrDND[]=new paloExtensions("state",new ext_setvar('LOOPCNT', '${FIELDQTY(DEVICES,&)}'));
@@ -978,10 +978,10 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrDND[]=new paloExtensions($fcode,new ext_macro($this->code."-user-callerid"));
         $arrDND[]=new paloExtensions($fcode,new ext_dbdel('DND/'.$this->code.'/${EXTUSER}'));
         $arrDND[]=new paloExtensions($fcode,new ext_setvar('STATE', 'NOT_INUSE'));
-        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code."-app-dnd-off"));
+        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code."-app-dnd-off"));
         $arrDND[]=new paloExtensions($fcode,new ext_playback('do-not-disturb&de-activated'),"n","hook_1");
         $arrDND[]=new paloExtensions($fcode,new ext_macro($this->code.'-hangupcall'));
-        $arrDND[]=new paloExtensions("sstate",new ext_setvar('DEVICE_STATE(Custom:DND${EXTUSER})', '${STATE}'),"1");
+        $arrDND[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:DND'.$this->code.'_${EXTUSER})', '${STATE}'),"1");
         $arrDND[]=new paloExtensions("state",new ext_dbget('DEVICES','EXTUSER/'.$this->code.'/${fromext}/device'));
         $arrDND[]=new paloExtensions("state",new ext_gotoif('$["${DEVICES}" = "" ]', 'return'));
         $arrDND[]=new paloExtensions("state",new ext_setvar('LOOPCNT', '${FIELDQTY(DEVICES,&)}'));
@@ -1009,15 +1009,15 @@ class paloFeatureCodePBX extends paloAsteriskDB{
         $arrDND[]=new paloExtensions($fcode, new ext_gotoif('$["${DB(DND/'.$this->code.'/${EXTUSER})}" = ""]', 'activate', 'deactivate'));
         $arrDND[]=new paloExtensions($fcode,new ext_setvar('DND/'.$this->code.'/${EXTUSER}', 'YES'),"n","activate");
         $arrDND[]=new paloExtensions($fcode,new ext_setvar('STATE', 'BUSY'));
-        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code."-app-dnd-toggle"));
+        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code."-app-dnd-toggle"));
         $arrDND[]=new paloExtensions($fcode,new ext_playback('do-not-disturb&activated'),"n","hook_1");
         $arrDND[]=new paloExtensions($fcode,new ext_macro($this->code.'-hangupcall'));
         $arrDND[]=new paloExtensions($fcode,new ext_dbdel('DND/'.$this->code.'/${EXTUSER}'),"n","deactivate");
         $arrDND[]=new paloExtensions($fcode,new ext_setvar('STATE', 'NOT_INUSE'));
-        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'sstate', $this->code."-app-dnd-off"));
+        $arrDND[]=new paloExtensions($fcode,new ext_gosub('1', 'state', $this->code."-app-dnd-off"));
         $arrDND[]=new paloExtensions($fcode,new ext_playback('do-not-disturb&de-activated'),"n","hook_2");
         $arrDND[]=new paloExtensions($fcode,new ext_macro($this->code.'-hangupcall'));
-        $arrDND[]=new paloExtensions("sstate",new ext_setvar('DEVICE_STATE(Custom:DND${EXTUSER})', '${STATE}'),"1");
+        $arrDND[]=new paloExtensions("state",new ext_setvar('DEVICE_STATE(Custom:DND'.$this->code.'_${EXTUSER})', '${STATE}'),"1");
         $arrDND[]=new paloExtensions("state",new ext_dbget('DEVICES','EXTUSER/'.$this->code.'/${fromext}/device'));
         $arrDND[]=new paloExtensions("state",new ext_gotoif('$["${DEVICES}" = "" ]', 'return'));
         $arrDND[]=new paloExtensions("state",new ext_setvar('LOOPCNT', '${FIELDQTY(DEVICES,&)}'));
@@ -1473,37 +1473,29 @@ class paloFeatureCodePBX extends paloAsteriskDB{
     }
 
     private function dialPlanCore_direct_call_pickup($fcode,&$arrFromInt){
+        /**
+         * This application use asterisk dialplan application Pickup()
+         * Permit pickup other extension especified inside the application
+         * This application can pickup a specified ringing channel. The channel to pickup can be specified in the following ways.
+         * 1) If no extension targets are specified, the application will pickup a channel matching the pickup group of the requesting channel.
+         * 2) If the extension is specified with a context of the special string PICKUPMARK (for example 10@PICKUPMARK), the application will pickup a channel which has defined the channel variable PICKUPMARK with the same value as extension (in this example, 10).
+         * 3) If the extension is specified with or without a context, the channel with a matching extension and context will be picked up. If no context is specified, the current context will be used.
+         */
+        
         $arrExt=array();
         $fclen=strlen($fcode);
         $picklist = '${EXTEN:'.$fclen.'}';
-        $picklist .= '&${EXTEN:'.$fclen.'}@'.$this->code.'-ext-local';
-        $picklist .= '&${EXTEN:'.$fclen.'}@'.$this->code.'-from-internal';
-        $picklist .= '&${EXTEN:'.$fclen.'}@'.$this->code.'-from-internal-xfer';
-        $picklist .= '&${EXTEN:'.$fclen.'}@'.$this->code.'-from-did-direct';
-        $picklist .= '&LC-${EXTEN:'.$fclen.'}@'.$this->code.'-from-internal';
-        $picklist .= '&LC-${EXTEN:'.$fclen.'}@'.$this->code.'-from-internal-xfer';
-        $picklist .= '&FMPR-${EXTEN:'.$fclen.'}@'.$this->code.'-from-internal';
-        $picklist .= '&FMPR-${EXTEN:'.$fclen.'}@'.$this->code.'-from-internal-xfer';
-        $picklist .= '&FMPR-${EXTEN:'.$fclen.'}@'.$this->code.'-from-did-direct';
+        $picklist .= '&'.$this->code.'_${EXTEN:'.$fclen.'}@PICKUPMARK';
         
         $arrEXT[]=new paloExtensions("_".$fcode.".",new ext_pickup($picklist),"1");
         $arrEXT[]=new paloExtensions("_".$fcode.".",new ext_hangup(''));
         
         //de aqui se debe obtener una lista de todas las extensions que pertenece a algun grupo de marcado
-        //marcando el codigo de este feture code y para poder alcanzar dichas extensiones 
-        //a traves de su grupo de timbrado
-        $rg_members=array(); //falta crear la funcion que me devuelva este arreglo
+        //esto se hace para poder contestar las llamadas del grupo de timbrado de dicha extensions
+        $rg_members=$this->getAllRingGroups(); //falta crear la funcion que me devuelva este arreglo
         foreach ($rg_members as $exten => $grps) {
             $picklist  = $exten;
-            $picklist .= '&'.$exten.'@'.$this->code.'ext-local'; 
-            $picklist .= '&'.$exten.'@'.$this->code.'from-internal'; 
-            $picklist .= '&'.$exten.'@'.$this->code.'from-internal-xfer'; 
-            $picklist .= '&'.$exten.'@'.$this->code.'from-did-direct'; 
-            $picklist .= '&LC-'.$exten.'@'.$this->code.'from-internal'; 
-            $picklist .= '&LC-'.$exten.'@'.$this->code.'from-internal-xfer'; 
-            $picklist .= '&FMPR-'.$exten.'@'.$this->code.'from-internal'; 
-            $picklist .= '&FMPR-'.$exten.'@'.$this->code.'from-internal-xfer'; 
-            $picklist .= '&FMPR-'.$exten.'@'.$this->code.'from-did-direct'; 
+            $picklist .= '&'.$this->code.'_'.$exten.'@PICKUPMARK'; 
 
             foreach ($grps as $grp) {
                 $picklist .= '&'.$grp.'@'.$this->code.'from-internal'; 
@@ -1522,6 +1514,26 @@ class paloFeatureCodePBX extends paloAsteriskDB{
             $arrFromInt[]["name"]="app-pickup";
         }
         return array($contexto);
+    }
+    
+    private function getAllRingGroups(){
+        $rgMembers=array();
+        $query="SELECT rg_number,rg_extensions FROM ring_group WHERE organization_domain=?";
+        $result=$this->_DB->fetchTable($query,true,array($this->domain));
+        if($result===false){
+            $this->errMsg=_tr("Error to create app-pickup for ring_groups");
+        }else{
+            foreach($result as $ring_group){
+                $arrExtens=explode("-",$ring_group["rg_extensions"]);
+                foreach($arrExtens as $value){
+                    //se debria además comprobar que las extensiones existieran?
+                    if(preg_match("/^([0-9]+)$/",trim($value))){
+                        $rgMembers[$value][]=$ring_group['rg_number'];
+                    }
+                }
+            }
+        }
+        return $rgMembers;
     }
 
     function getAllFeaturesCode($domain){

@@ -50,8 +50,10 @@
                 {else}
                     <td width="31%">{$exten.INPUT}</td>
                 {/if}
-                <td width="21%" nowrap>{$secret.LABEL}: {if $mode eq 'input'}<span class="required">*</span>{/if}</td>
-                <td>{$secret.INPUT}</td>
+                {if $mode eq 'edit' && $USER_EXTEN} 
+                    <td width="21%" nowrap>{$secret.LABEL}: {if $mode eq 'input'}<span class="required">*</span>{/if}</td>
+                    <td>{$secret.INPUT}</td>
+                {/if}
             </tr>
             <tr class="extension">
                 <td width="15%" nowrap>{$technology.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
@@ -260,6 +262,16 @@
                     <td nowrap>{$transport.LABEL}: </td>
                     <td>{$transport.INPUT}</td>
                 </tr>
+                <tr class="sip_settings">
+                    <td nowrap>{$callcounter.LABEL}: </td>
+                    <td>{$callcounter.INPUT}</td>
+                    <td nowrap>{$busylevel.LABEL}: </td>
+                    <td>{$busylevel.INPUT}</td>
+                </tr>
+                <tr class="sip_settings">
+                    <td nowrap>{$subscribecontext.LABEL}: </td>
+                    <td>{$subscribecontext.INPUT}</td>
+                </tr>
                 <tr>
                     <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
                 </tr>
@@ -284,12 +296,6 @@
                 <tr class="sip_settings show_more" {$SHOW_MORE}>
                     <td nowrap>{$g726nonstandard.LABEL}:</td>
                     <td>{$g726nonstandard.INPUT}</td>
-                </tr>
-                <tr class="sip_settings show_more" {$SHOW_MORE}>
-                    <td nowrap>{$callcounter.LABEL}: </td>
-                    <td>{$callcounter.INPUT}</td>
-                    <td nowrap>{$busylevel.LABEL}: </td>
-                    <td>{$busylevel.INPUT}</td>
                 </tr>
                 <tr class="sip_settings show_more" {$SHOW_MORE}>
                     <td nowrap>{$videosupport.LABEL}:</td>

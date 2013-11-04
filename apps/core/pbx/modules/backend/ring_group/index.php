@@ -404,6 +404,7 @@ function saveNewRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
             $arrProp['rg_skipbusy'] = getParameter("rg_skipbusy");
             $arrProp['rg_confirm_call'] = getParameter("rg_confirm_call");
             $arrProp['rg_extensions'] = getParameter("rg_extensions");
+            $arrProp['rg_pickup'] = getParameter("rg_pickup");
             if($arrProp['rg_confirm_call']=="yes"){
                 $arrProp['rg_record_remote']=getParameter("rg_record_remote");
                 $arrProp['rg_record_toolate']=getParameter("rg_record_toolate");
@@ -486,6 +487,7 @@ function saveEditRG($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
             $arrProp['rg_moh']=getParameter("rg_moh");
             $arrProp['rg_cf_ignore'] = getParameter("rg_cf_ignore");
             $arrProp['rg_skipbusy'] = getParameter("rg_skipbusy");
+            $arrProp['rg_pickup'] = getParameter("rg_pickup");
             $arrProp['rg_confirm_call'] = getParameter("rg_confirm_call");
             $arrProp['rg_extensions'] = getParameter("rg_extensions");
             if($arrProp['rg_confirm_call']=="yes"){
@@ -688,6 +690,12 @@ function createFieldForm($goto,$destination,$pDB,$domain)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "rg_skipbusy"     => array("LABEL"             => _tr("Skip Busy Extensions"),
+                                                    "REQUIRED"               => "yes",
+                                                    "INPUT_TYPE"             => "SELECT",
+                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
+                                                    "VALIDATION_TYPE"        => "text",
+                                                    "VALIDATION_EXTRA_PARAM" => ""),
+                            "rg_pickup"     => array("LABEL"             => _tr("Enable Call Pickup"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,

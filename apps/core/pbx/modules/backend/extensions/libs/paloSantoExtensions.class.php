@@ -165,7 +165,7 @@ class paloSantoExtensions{
             }
         }
 
-        $query="SELECT tech,exten,outboundcid,rt,record_in,record_out,organization_domain,voicemail,device from extension where id=? $where";
+        $query="SELECT tech, exten, outboundcid, rt, record_in, record_out, organization_domain, voicemail, device, clid_name, clid_number from extension where id=? $where";
         $result=$this->_DB->getFirstRowQuery($query,true,$param);
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;
@@ -179,15 +179,15 @@ class paloSantoExtensions{
             
             $arrExtension["technology"]=$result["tech"];
             $arrExtension["exten"]=$result["exten"];
-            //$arrExtension["clid_name"]=$result["clid_name"];
-            //$arrExtension["clid_number"]=$result["clid_number"];
+            $arrExtension["clid_name"]=$result["clid_name"];
+            $arrExtension["clid_number"]=$result["clid_number"];
             $arrExtension["ring_timer"]=$result["rt"];
             $arrExtension["record_in"]=$result["record_in"];
             $arrExtension["record_out"]=$result["record_out"];
             $arrExtension["out_clid"]=$result["outboundcid"];
             
             //obtenemos las caracteristicas de voicemail de la extension en caso de que este tenga creada uno
-            if(isset($result["voicemail"]) && $result["voicemail"]!="no"){
+            if(isset($result["voicemail"]) && $result["voicemail"]!="novm"){
                 $query="SELECT * from voicemail where mailbox=? and organization_domain=?";
                 $voicemail=$this->_DB->getFirstRowQuery($query,true,array($result["exten"],$result["organization_domain"]));
                 if($voicemail==false){
@@ -252,7 +252,7 @@ class paloSantoExtensions{
             }elseif($result["tech"]=="sip"){
                 $queryDev="SELECT context,dial,host,type,allow,disallow,port,qualify,accountcode,deny,permit,language,amaflags,";
                 $queryDev .="defaultip,username,mohinterpret,mohsuggest,dtmfmode,nat,allowtransfer,namedcallgroup,namedpickupgroup,";
-                $queryDev .="mailbox,vmexten,defaultuser,useragent,directmedia,sendrpid,trustrpid,transport,callcounter,busylevel,videosupport,maxcallbitrate,";
+                $queryDev .="mailbox,vmexten,defaultuser,useragent,directmedia,sendrpid,trustrpid,transport,callcounter,busylevel,subscribecontext,videosupport,maxcallbitrate,";
                 $queryDev .="qualifyfreq,rtptimeout,rtpholdtimeout,rtpkeepalive,progressinband,g726nonstandard,vmexten from sip where name=?   and organization_domain=?";
             }else{
                 $this->errMsg .=_tr("Invalid Technology");
@@ -266,7 +266,7 @@ class paloSantoExtensions{
                 }else{
                     foreach($device as $key => $value){
                         if(isset($value)){
-                            if($key=="namedcallgroup" || $key=="namedpickupgroup" || $key=="context"){
+                            if($key=="namedcallgroup" || $key=="namedpickupgroup" || $key=="context" || $key=='subscribecontext'){
                                 $arrExtension[$key]=substr_replace($value,'',0,strlen($org_code)+1);
                             }else{
                                 $arrExtension[$key]=$value;
@@ -288,8 +288,6 @@ class paloSantoExtensions{
                     return false;
                 }else{
                     $familia="EXTUSER/".$orgTmp["code"]."/".$result["exten"];
-                    $arrExtension["clid_name"]=$astMang->database_get($familia, "cidname");
-                    $arrExtension["clid_number"]=$astMang->database_get($familia, "cidnum");
                     $arrExtension["call_waiting"]=($astMang->database_get("CW/".$orgTmp["code"], $result["exten"])=="ENABLED")?"yes":"no";
                     $arrExtension["screen"]=$astMang->database_get($familia,"screen");
                     $enDictate=$astMang->database_get($familia."/dictate", "enabled");

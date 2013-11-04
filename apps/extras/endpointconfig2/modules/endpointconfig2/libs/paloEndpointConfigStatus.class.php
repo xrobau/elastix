@@ -118,7 +118,7 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
             $currentClientState['configLog'] = NULL;
             
             // Contar los mensajes de advertencias y errores
-            $iQuitMsg = count($jsonResponse) - 1;
+            $iQuitMsg = count($jsonResponse['endpointchanges']) - 1;
             if ($iQuitMsg >= 0 && $jsonResponse['endpointchanges'][$iQuitMsg][0] == 'quit') {
             	$lineas = explode("\n", $s);
                 $warnings = $errors = 0;
@@ -171,7 +171,7 @@ class paloEndpointConfigStatus extends paloInterfaceSSE
                 $logdate = $regs[1];
                 $curstep = $regs[2];
                 $totalstep = $regs[3];
-                $failed = $regs[4];
+                $failed = isset($regs[4]) ? $regs[4] : NULL;
                 
                 $jsonResponse['totalsteps'] = (int)$totalstep;
                 $jsonResponse['completedsteps'] = (int)$curstep;

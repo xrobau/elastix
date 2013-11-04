@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: fix incorrect variable references in
+  configuration status monitoring.
+  SVN Rev[6049]
 - CHANGED: New Endpoint Configurator: allow configuration of default language
   for Grandstream and Elastix endpoints by setting the custom endpoint property
   'language'. The default if unset is 'es' for Spanish.

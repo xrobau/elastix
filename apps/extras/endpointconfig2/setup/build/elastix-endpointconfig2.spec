@@ -132,6 +132,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: allow configuration of default language
+  for Grandstream and Elastix endpoints by setting the custom endpoint property
+  'language'. The default if unset is 'es' for Spanish.
+  SVN Rev[6048]
+
 * Sat Oct 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: updated internal copy of Ember.js to 
   version 1.1.2.

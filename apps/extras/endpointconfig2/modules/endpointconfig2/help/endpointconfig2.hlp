@@ -565,7 +565,7 @@ provisioning supported. Supports the following extra endpoint properties: bridge
 <li>Grandstream: BT200,HT386,GXP280,GXP1400,GXP1405,GXP1450,GXP2000,GXP2020,GXP2100,GXP2120,GXP2200,GXV3140,GXV3175.
  Remote reboot supported. Static provisioning supported for BT200, GXP140x (and Elastix),
  GXP1450, and GXV series, unsupported in all others. Can be linked to the Elastix internal and
- external agendas. Supports the following extra endpoint properties: timezone.</li>
+ external agendas. Supports the following extra endpoint properties: timezone, language.</li>
 <li>LG-ERICSSON: IP8802. Remote reboot and static provisioning supported. Supports the 
 following extra endpoint properties: timezone.</li>
 <li>Linksys: SPA841,SPA921,SPA922,SPA941,SPA942,SPA962. Untested. Remote reboot supported.</li>

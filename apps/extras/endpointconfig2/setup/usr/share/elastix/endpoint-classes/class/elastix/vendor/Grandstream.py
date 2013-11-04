@@ -45,10 +45,12 @@ class Endpoint(BaseEndpoint):
         # Calculate timezone, 'auto' or GMT offset in minutes +720
         #self._timeZone = BaseEndpoint.getTimezoneOffset() / 60 + 720
         self._timeZone = 'auto'
+        self._language = 'es'
 
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False
         if 'timezone' in param: self._timeZone = param['timezone']
+        if 'language' in param: self._language = param['language']
         return True
 
     def setModel(self, sModel):
@@ -541,7 +543,7 @@ class Endpoint(BaseEndpoint):
             'P1376' :   '1',  # Enable automatic attended transfer
         
             # TODO: inherit server language
-            'P1362' :   'es', # Phone display language 
+            'P1362' :   self._language, # Phone display language
         }
         if self._model in ('GXP280',):
             vars.update({'P73' : '1'})  # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO

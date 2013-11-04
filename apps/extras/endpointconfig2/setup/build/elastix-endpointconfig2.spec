@@ -2,7 +2,7 @@
 
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
-Version: 0.0.5
+Version: 0.0.6
 Release: 0
 License: GPL
 Group:   Applications/System
@@ -132,7 +132,8 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.6-0
+- Bump version for release
 - FIXED: New Endpoint Configurator: fix incorrect variable reference that caused
   an uncaught exception when configuring a static IP on a Grandstream/Elastix
   phone.

@@ -244,7 +244,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
         global $arrConf;
         //comprobamos que exista el index del modulo
         if (!file_exists("{$arrConf['elxPath']}/apps/$module/index.php"))
-            return "Error: The module <b>{$arrConf['elxPath']}/apps/$module/index.php</b> could not be found!<br/>";
+            return array('data'=>"Error: The module <b>{$arrConf['elxPath']}/apps/$module/index.php</b> could not be found!<br/>");
         
         require_once "apps/$module/index.php";
         
@@ -273,22 +273,24 @@ class paloSantoNavigation extends paloSantoNavigationBase
         // Cargar las traducciones para el módulo elegido
         load_language_module($module);
         
-        // Cargar las creadenciales del modulo
+        // Cargar las creadenciales del usuario
         global $arrCredentials;
         $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
         if($arrCredentials==false)
-            return "Error to load User Credentials: {$_SESSION['elastix_user']}";
+            return array('data'=>"Error to load User Credentials: {$_SESSION['elastix_user']}");
         
         //cargar los permisos del modulo
         global $arrPermission;
         $arrPermission=getResourceActionsByUser($arrCredentials['idUser'],$module);
         if($arrPermission==false)
-            return "Error to load Module Permissions: $module";
+            return array('data'=>"Error to load Module Permissions: $module");
         
         if (!function_exists("_moduleContent"))
-            return "Wrong module: apps/$module/index.php";
-        $this->putHEAD_MODULE_HTML($module);
-        return _moduleContent($this->_smarty, $module);
+            return array('data'=>"Wrong module: apps/$module/index.php");
+            
+        $CssJsModule=$this->putHEAD_MODULE_HTML($module);
+        $moduleContent=_moduleContent($this->_smarty, $module);
+        return array("data"=>$moduleContent,"JS_CSS_HEAD"=>$CssJsModule); 
     }
 
     /**
@@ -317,7 +319,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
             if($arr_js!=false && count($arr_js)>0){
                 for($i=0; $i<count($arr_js); $i++){
                     $dir_script = "web/apps/$module/js/".$arr_js[$i];
-                    $HEADER_MODULES[] = "<script type='text/javascript' src='$dir_script'></script>";
+                    $HEADER_MODULES[] = "<script type='text/javascript' class='header-module-elastix' src='$dir_script'></script>";
                 }
             }
         }
@@ -326,12 +328,11 @@ class paloSantoNavigation extends paloSantoNavigationBase
             if($arr_css!=false && count($arr_css)>0){
                 for($i=0; $i<count($arr_css); $i++){
                     $dir_css = "web/apps/$module/css/".$arr_css[$i];
-                    $HEADER_MODULES[] = "<link rel='stylesheet' href='$dir_css' />";
+                    $HEADER_MODULES[] = "<link rel='stylesheet' class='header-module-elastix' href='$dir_css' />";
                 }
             }
         }
-        //$HEADER_MODULES
-        $this->_smarty->assign("HEADER_MODULES", implode("\n", $HEADER_MODULES));
+        return implode("\n", $HEADER_MODULES);
     }
 
     function putHEAD_JQUERY_HTML()

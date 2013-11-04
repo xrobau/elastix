@@ -452,4 +452,203 @@ function saveNeoToggleTabByUser($menu, $action_status)
     }
     return $arrResult;
 }
+function getChatClientConfig($pDB,&$error){
+    $query="SELECT property_name,property_val from elx_chat_config";
+    $result=$pDB->fetchTable($query,true);
+    if($result===false){
+        //error de conexion a la base no podemos determinar los parametros de configuracion del chat
+        //mostramos un error
+        $error='Error to obtain elastix chat configurations';
+        return false;
+    }
+    $chat_conf=array();
+    $type_connection="ws";
+    foreach($result as $value){
+        switch($value['property_name']){
+            case 'type_connection':
+                if($value['property_val']=='ws' || $value['property_val']=='wss')
+                    $type_connection=$value['property_val'];
+                else{
+                    $type_connection='ws';
+                }
+                break;
+            case 'register':
+            //Indicate if JsSIP User Agent should register automatically when starting. Valid values are true and false (Boolean). Default value is true.
+                if($value['property_val']=='no'){
+                    $chat_conf[$value['property_name']]=false;
+                }else{
+                    $chat_conf[$value['property_name']]=true;
+                }
+                break;
+            case 'register_expires':
+            //Registration expiry time (in seconds) (Integer). Default value is 600.
+                if($value['property_val']==''){
+                    if(ctype_digit($value['property_val'])){
+                        $chat_conf[$value['property_name']]=$value['property_val'];
+                    }
+                }
+                break;    
+            case 'no_answer_timeout':
+            //Time (in seconds) (Integer) after which an incoming call is rejected if not answered. Default value is 60.
+                if($value['property_val']==''){
+                    if(ctype_digit($value['property_val'])){
+                        $chat_conf[$value['property_name']]=$value['property_val'];
+                    }
+                }
+                break;  
+            case 'trace_sip':
+            //Indicate whether incoming and outgoing SIP request/responses must be logged in the browser console (Boolean). Default value is false
+                if($value['property_val']=='yes'){
+                    $chat_conf[$value['property_name']]=true;
+                }else{
+                    $chat_conf[$value['property_name']]=false;
+                }
+                $chat_conf[$value['property_name']]=true;
+                break;
+            case 'use_preloaded_route':
+            //If set to true every SIP initial request sent by JsSIP includes a Route header with the SIP URI associated to the WebSocket server as value. Some SIP Outbound Proxies require such a header. Valid values are true and false (Boolean). Default value is false.
+                if($value['property_val']=='yes'){
+                    $chat_conf[$value['property_name']]=true;
+                }else{
+                    $chat_conf[$value['property_name']]=false;
+                }
+                break;    
+            case 'connection_recovery_min_interval':
+            //Minimum interval (Number) in seconds between WebSocket reconnection attempts. Default value is 2
+                if($value['property_val']==''){
+                    if(ctype_digit($value['property_val'])){
+                        $chat_conf[$value['property_name']]=$value['property_val'];
+                    }
+                }
+                break; 
+            case 'connection_recovery_max_interval':
+            //Minimum interval (Number) in seconds between WebSocket reconnection attempts. Default value is 2
+                if($value['property_val']==''){
+                    if(ctype_digit($value['property_val'])){
+                        $chat_conf[$value['property_name']]=$value['property_val'];
+                    }
+                }
+                break; 
+            case 'hack_via_tcp':
+            //Set Via transport parameter in outgoing SIP requests to “TCP”, Valid values are true and false (Boolean). Default value is false.
+                if($value['property_val']=='yes'){
+                    $chat_conf[$value['property_name']]=true;
+                }else{
+                    $chat_conf[$value['property_name']]=false;
+                }
+                break; 
+            case 'hack_ip_in_contact':
+            //Set a random IP address as the host value in the Contact header field and Via sent-by parameter. Valid values are true and false (Boolean). Default value is a false.
+                if($value['property_val']=='yes'){
+                    $chat_conf[$value['property_name']]=true;
+                }else{
+                    $chat_conf[$value['property_name']]=false;
+                }
+                break;
+            default:
+                $chat_conf[$value['property_name']]=$value['property_val'];
+                break;
+        }
+    }
+    
+    //obtenemos las configuraciones de asterisk del module http para web_socket support
+    $http=getAsteriskHttpModuleConfig($pDB,$error);
+    if($http===false){
+        return false;
+    }
+    
+    //se quiere usar wss debe estar habilitado soporte tls
+    //si no está habilitado se debe usar ws en su lugar
+    if(!isset($http['tlsenable'])){
+        $type_connection='ws';
+    }elseif($http['tlsenable']=='no'){
+        $type_connection='ws';
+    }
+    
+    if($type_connection=='ws'){
+        if(!empty($http['bindport'])){
+            $puerto=$http['bindport'];
+        }else{
+            $puerto=8088; //no esta configurado usamos los valores por default de asterisk
+        }
+    }else{
+        if(!empty($http['tlsport'])){
+            $puerto=$http['tlsport'];
+        }else{
+            $puerto=8089; //no esta configurado usamos los valores por default de asterisk
+        }
+    }
+    $prefix='';
+    if(isset($http['prefix'])){
+        if($http['prefix']!='' && $http['prefix']!==false){
+            $prefix="{$http['prefix']}";
+        }
+    }
+    
+    //"ws://192.168.5.110:8088/asterisk/ws"
+    //ws -> transport, puede ser ws o wss
+    //192.168.5.110 -> server
+    //8088 -> puerto usado para la comunicacion definido en /etc/asterisk/http.conf 
+    //asterisk -> prefix usado para la coneccion definido en http.conf
+    //el ultimo ws simpre va, esto es una especificacion de asterisk
+    
+    //TODO: el valor para el parametro server se obtiene de la direccion web a la cual estamoas accediendo
+    //No se si esto este bien, se debe probar haber si debe ser o deberia poder ser configurable y estatico
+    //print($_SERVER['SERVER_ADDR']);
+    //print($_SERVER['SERVER_NAME']);
+    $server=$_SERVER['SERVER_ADDR'];
+    $chat_conf['ws_servers']="$type_connection://$server:$puerto/".( ($prefix!='')?"$prefix/":'')."ws";
+    $chat_conf['elastix_chat_server']=$server;
+    return $chat_conf;
+}
+function getAsteriskHttpModuleConfig($pDB,&$error){
+    $query="SELECT property_name,property_val FROM http_ast";
+    $result=$pDB->fetchTable($query,true);
+    if($result===false){
+        //problemas con la coneccion no podemos determinar los 
+        //valores usados para configurar web_socket con asterisk
+        $error='Error to obtain asterisk web socket configurations';
+        return false;
+    }
+    $http_conf=array();
+    foreach($result as $value){
+        $http_conf[$value['property_name']]=$value['property_val'];
+    }
+    return $http_conf;
+}
+function getStatusContactFromCode($code){
+    /*
+        -1 = Extension not found
+        0 = Idle
+        1 = In Use
+        2 = Busy
+        4 = Unavailable
+        8 = Ringing
+        16 = On Hold
+    */
+    switch($code){
+        case "0":
+            $status=_tr('Idle');
+            break;
+        case "1":
+            $status=_tr('In Use');
+            break;
+        case "2":
+            $status=_tr('Busy');
+            break;
+        case "4":
+            $status=_tr('Unavailable');
+            break;
+        case "8":
+            $status=_tr('Ringing');
+            break;
+        case "16":
+            $status=_tr('On Hold');
+            break;
+        default:
+            $status=_tr('Extension not found');
+            break;
+    }
+    return $status;
+}
 ?>

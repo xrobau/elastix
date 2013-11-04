@@ -51,10 +51,7 @@ function _moduleContent(&$smarty, $module_name)
     $uid = $pACL->getIdUser($user);
     $arrUser = $pACL->getUsers($uid);
       
-     $picture = $pACL->getUserPicture($uid);
-            if($picture!==false){
-                $smarty->assign("ShowImg",1);
-            }
+     
 
     foreach($arrUser as $value){
     $arrFill["username"]=$value[1];
@@ -91,7 +88,7 @@ function _moduleContent(&$smarty, $module_name)
     // close the connection
     $imap_login->close_mail_connection();
 
-    $smarty->assign("USER_NAME", $arrFill["name"]);
+   // $smarty->assign("USER_NAME", $arrFill["name"]);
     $smarty->assign("MODULE_NAME", $module_name);
     $smarty->assign("id_user", $uid);
     $hostname = '{localhost:143/imap/novalidate-cert}INBOX';
@@ -109,9 +106,6 @@ function _moduleContent(&$smarty, $module_name)
     switch($accion){
         case "view_bodymail":
             $content = view_mail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $inbox);
-            break;
-        case "getImage":
-            $content = getImage($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         default:
             $content = createHome($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $emailnum, $inbox);
@@ -144,8 +138,12 @@ function createHome($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $home = new paloHome();
     $smarty->assign("ICON_TYPE", "web/apps/$module_name/images/mail2.png");
    
+    $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m"><span class="lp ml10">&#9993;</span></div>
+    <div class="icn_m"><span class="lp ml10">&#59158;</span></div>  
+    <div class="icn_m"><span class="lp ml10">&#128260;</span></div> 
+    <div class="icn_m" id="filter_but"><span class="lp ml10">&#128269;</span></div>');
     $html = $smarty->fetch("file:$local_templates_dir/form.tpl");
-    $contenidoModulo = "<div>".$html."<div>";
+    $contenidoModulo = "<div>".$html."</div>";
     return $contenidoModulo;
 }
 
@@ -160,38 +158,12 @@ function view_mail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
    return $jsonObject->createJSON();
 }
 
-function getImage($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrCredentiasls){
-    $pACL       = new paloACL($pDB);
-    $imgDefault = $_SERVER['DOCUMENT_ROOT']."/web/apps/$module_name/images/Icon-user.png";
-    $id_user=getParameter("ID");
-    $picture=false;
-   
-    if($arrCredentiasls["userlevel"]=="superadmin"){
-        $picture = $pACL->getUserPicture($id_user);
-    }else{
-        //verificamos que el usario pertenezca a la organizacion
-        if($pACL->userBellowOrganization($id_user,$arrCredentiasls["id_organization"]))
-            $picture = $pACL->getUserPicture($id_user);
-    } 
-    
-    // Creamos la imagen a partir de un fichero existente
-    if($picture!=false && !empty($picture["picture_type"])){
-        Header("Content-type: {$picture["picture_type"]}");
-        print $picture["picture_content"];
-    }else{
-        Header("Content-type: image/png");
-        $im = file_get_contents($imgDefault);
-        echo $im;
-    }
-    return;
-}
+
 
 function getAction()
 {
     if(getParameter("action")=="view_bodymail"){
       return "view_bodymail";  
-    }else if(getParameter("action")=="getImage"){
-      return "getImage";
     }else
       return "report";
 }

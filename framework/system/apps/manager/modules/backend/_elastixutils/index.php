@@ -173,4 +173,122 @@ function handleJSON_showAboutAs($smarty, $module_name)
     $jsonObject->set_message($response);
     return $jsonObject->createJSON();
 }
+
+function handleJSON_getImage($smarty, $module_name){
+    global $arrCredentials;    
+    global $arrConf;
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL       = new paloACL($pDB);
+    $imgDefault = "/var/www/html/web/_common/images/Icon-user.png";
+    $id_user=getParameter("ID");
+    $picture=false;
+   
+    $picture = $pACL->getUserPicture($id_user);
+    
+    // Creamos la imagen a partir de un fichero existente
+    if($picture!=false && !empty($picture["picture_type"])){
+        Header("Content-type: {$picture["picture_type"]}");
+        print $picture["picture_content"];
+    }else{
+        Header("Content-type: image/png");
+        $im = file_get_contents($imgDefault);
+        echo $im;
+    }
+    return;
+}
+
+function handleJSON_getElastixAccounts($smarty, $module_name){
+    global $arrConf;
+    $error='';
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL = new paloACL($pDB);
+    $jsonObject = new PaloSantoJSON();
+    
+    $astMang=AsteriskManagerConnect($errorM);
+    if($astMang==false){
+        $this->errMsg=$errorM;
+        return false;
+    }
+    
+    $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+    
+    
+    //1) obtenemos los parametros generales de configuracion para asterisk websocket y el cliente de chat de elastix
+    $chatConfig=getChatClientConfig($pDB,$error);
+    if($chatConfig==false){
+        $jsonObject->set_error("An error has ocurred to retrieved server configuration params. ".$error);
+        return $jsonObject->createJSON();
+    }
+    
+    //2) obtenemos el dominio sip de la organizacion si no se encuentra configurado utilizamos el valor de ws_server       
+    $dominio=$chatConfig['elastix_chat_server'];
+    
+    //3) obtenemos la informacion de las cuentas de los usuarios
+    $result=$pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"]);
+    if($result===false){
+        //hubo un error de la base de datos ahi que desactivar la columna lateral
+        $jsonObject->set_error("An error has ocurred to retrieved Contacts Info. ".$pACL->errMsg);
+    }else{
+        $arrContacts=array();
+        foreach($result as $key => $value){
+            //TODO: por el momento se obtine la presencia del usuario al
+            // travès de AMI con la función que extension_state
+            // en el futuro esto debe ser manejado con la libreria jssip
+            // actualmente este libreria no tiene esa funcion implementada
+            /*
+            -1 = Extension not found
+            0 = Idle
+            1 = In Use
+            2 = Busy
+            4 = Unavailable
+            8 = Ringing
+            16 = On Hold
+            */
+            if($value['extension']!='' && isset($value['extension'])){
+                if($value['id']!=$arrCredentials['idUser']){
+                    $result=$astMang->send_request('ExtensionState',array('Exten'=>"{$value['extension']}", 'Context'=>"cocacolacomc8nm-ext-local"));
+                    if($result['Response']=='Success'){
+                        $status=getStatusContactFromCode($result['Status']);
+                        $st_code=$result['Status'];
+                        if($result['Status']=='-1'){
+                            $index_st='not_found';
+                        }elseif($result['Status']=='4'){
+                            $index_st='unava';
+                        }else{
+                            $index_st='ava';
+                        }
+                    }else{
+                        //TODO:ahi un error con el manager y nopuede determinar le estado de los
+                        //contactos por lo tanto dejo a todas como disponibles
+                        $index_st='ava';
+                        $st_code=0;
+                        $status=_tr('Idle');
+                    }
+                    $arrContacts[$index_st][$key]['idUser']=$value['id'];
+                    $arrContacts[$index_st][$key]['display_name']=$value['name'];
+                    $arrContacts[$index_st][$key]['username']=$value['username'];
+                    $arrContacts[$index_st][$key]['presence']=$status;
+                    $arrContacts[$index_st][$key]['st_code']=$st_code;
+                    $arrContacts[$index_st][$key]['exten']=$value['extension'];
+                    $arrContacts[$index_st][$key]['faxexten']=$value['fax_extension'];
+                    $arrContacts[$index_st][$key]['device']="{$value['elxweb_device']}";
+                }else{
+                    $arrContacts['my_info']['uri']="{$value['elxweb_device']}@$dominio";
+                    $arrContacts['my_info']['ws_servers']=$chatConfig['ws_servers'];
+                    $arrContacts['my_info']['password']=$_SESSION['elastix_pass2'];
+                    $arrContacts['my_info']['display_name']=$value['name'];
+                    $arrContacts['my_info']['elxuser_username']=$value['username'];
+                    $arrContacts['my_info']['elxuser_exten']=$value['extension'];
+                    $arrContacts['my_info']['elxuser_faxexten']=$value['fax_extension'];
+                    foreach($chatConfig as $key => $value){
+                        $arrContacts['my_info'][$key] = $value;
+                    }
+                }
+            }
+        }
+        $jsonObject->set_message($arrContacts);
+    }
+    $astMang->disconnect();
+    return $jsonObject->createJSON();
+}
 ?>

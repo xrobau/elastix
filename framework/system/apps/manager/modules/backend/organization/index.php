@@ -832,6 +832,8 @@ function reloadAsterisk($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 
     if($credentials['userlevel']=="superadmin"){
         $idOrganization = getParameter("organization_id");
+    }else{
+        $idOrganization = $credentials['id_organization'];
     }
 
     if($idOrganization==1){

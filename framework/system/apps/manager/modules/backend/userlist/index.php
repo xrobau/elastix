@@ -352,6 +352,7 @@ function viewFormUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         }
         foreach($orgTmp as $value){
             $arrOrgz[$value["id"]]=$value["name"];
+            $arrDomains[$value["id"]]=$value["domain"];
         }
         $smarty->assign("ORGANIZATION",htmlentities($orgTmp[0]["name"], ENT_COMPAT, 'UTF-8'));
     }
@@ -407,11 +408,19 @@ function viewFormUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
                 $nGroup=_tr("NONE");
             $smarty->assign("GROUP",$nGroup);
             $_POST["organization"]=$arrFill["organization"];
-            //ahora obtenemos las propiedades del usuario
-            $arrFill["country_code"]=$pACL->getUserProp($idUser,"country_code");
-            $arrFill["area_code"]=$pACL->getUserProp($idUser,"area_code");
-            $arrFill["clid_number"]=$pACL->getUserProp($idUser,"clid_number");
-            $arrFill["clid_name"]=$pACL->getUserProp($idUser,"clid_name");
+            
+            //ahora obtenemos las configuraciones de fax dle usuario
+            $pFax=new paloFax($pACL->_DB);
+            $listFaxs=$pFax->getFaxList(array("exten"=>$extf,"organization_domain"=>$arrDomains[$arrFill["organization"]]));
+            if($listFaxs!=false){
+                $faxUser=$listFaxs[0];
+                $arrFill["country_code"]=$faxUser["country_code"];
+                $arrFill["area_code"]=$faxUser["area_code"];
+                $arrFill["clid_number"]=$faxUser["clid_number"];
+                $arrFill["clid_name"]=$faxUser["clid_name"];
+            }
+            
+            //ahora obtenemos la cuenta del email
             $arrFill["email_quota"]=$pACL->getUserProp($idUser,"email_quota");
             if($idUser=="1")
                 $arrFill["email_contact"]=$pACL->getUserProp($idUser,"email_contact");

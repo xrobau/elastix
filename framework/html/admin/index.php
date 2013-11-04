@@ -102,6 +102,9 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
     if($pACL->authenticateUser($_POST['input_user'], $pass_md5)) {
         $_SESSION['elastix_user'] = trim($_POST['input_user']);
         $_SESSION['elastix_pass'] = $pass_md5;
+        //fue necesario incluir esto aqui porque cuando te logueas en la interfaz
+        //de usario final haces uso de esta variable
+        $_SESSION['elastix_pass2'] = $_POST['input_pass'];
         header("Location: index.php");
         writeLOG("audit.log", "LOGIN $_POST[input_user]: Web Interface login successful. Accepted password for $_POST[input_user] from $_SERVER[REMOTE_ADDR].");
         update_theme();
@@ -204,13 +207,13 @@ if (isset($_SESSION['elastix_user']) &&
     $selectedMenu = $oPn->getSelectedModule();
     // Obtener contenido del módulo, si usuario está autorizado a él
     $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $selectedMenu);
-    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';    
+    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : array('data'=>'');    
     
     // rawmode es un modo de operacion que pasa directamente a la pantalla la salida
     // del modulo. Esto es util en ciertos casos.
     $rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes') {
-        echo $sModuleContent;
+        echo $sModuleContent['data'];
     } else {
         $oPn->renderMenuTemplates();
 
@@ -224,7 +227,14 @@ if (isset($_SESSION['elastix_user']) &&
             // Guardar historial de la navegación
             // TODO: también para rawmode=yes ?
             putMenuAsHistory($pdbACL, $idUser, $selectedMenu);
-            $smarty->assign("CONTENT", $sModuleContent);
+            if(isset($sModuleContent['JS_CSS_HEAD'])){
+                //es necesario cargar los css y js que el modulo pone
+                //$smarty->assign("HEADER_MODULES",$sModuleContent['JS_CSS_HEAD']);
+                $smarty->assign("CONTENT", $sModuleContent['JS_CSS_HEAD'].$sModuleContent['data']);
+            }else{
+                $smarty->assign("CONTENT", $sModuleContent['data']);
+            }
+            
             $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 
                 ? $smarty->fetch("_common/_menu.tpl") 
                 : _tr('No modules'));

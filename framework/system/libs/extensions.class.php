@@ -46,8 +46,9 @@ class ext_gosub extends extension {
 	var $pri;
 	var $ext;
 	var $context;
+	var $params;
 
-	function ext_gosub($pri, $ext = false, $context = false) {
+	function ext_gosub($pri, $ext = false, $context = false, $parameters = false) {
 		if ($context !== false && $ext === false) {
 			$this->error="\$ext is required when passing \$context in ext_gosub::ext_gosub()";
 		}
@@ -55,6 +56,7 @@ class ext_gosub extends extension {
 		$this->pri = $pri;
 		$this->ext = $ext;
 		$this->context = $context;
+		$this->params = $parameters;
 	}
 
 	function incrementContents($value) {
@@ -62,7 +64,7 @@ class ext_gosub extends extension {
 	}
 
 	function output() {
-		return 'Gosub('.($this->context ? $this->context.',' : '').($this->ext ? $this->ext.',' : '').$this->pri.')' ;
+		return 'Gosub('.($this->context ? $this->context.',' : '').($this->ext ? $this->ext.',' : '').$this->pri.($this->params ?'('.$this->params.')':'').')' ;
 	}
 }
 
@@ -319,7 +321,7 @@ class ext_macro {
 
 //      The app_false argument only works with asterisk 1.6
 //
-class ext_execif {
+class ext_execif{
 	var $expr;
 	var $app_true;
 	var $data_true;
@@ -1102,74 +1104,76 @@ class ext_progress extends extension {
 
 //hasta aqui lo implementado por freepbx
 class ext_hint extends extension {
-	public $exten;
-	public $domain;
-	public $code;
+    public $exten;
+    public $domain;
+    public $code;
 
-	function ext_hint($exten,$domino) {
-		global $arrConf;
-		if($this->isEmpty($exten) || $this->isEmpty($domino)){
-			$this->error="Number extension and domain can't be empty";
-		}else{
-			$this->exten=$exten;
-			$this->domain=$domino;
-			$pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-			$query="SELECT code from organization where domain=?";
-			$result = $pDB->getFirstRowQuery($query, false, array($this->domain));
-			$this->code=$result[0];
-		}
-	}
+    function ext_hint($exten,$domino) {
+        global $arrConf;
+        if($this->isEmpty($exten) || $this->isEmpty($domino)){
+            $this->error="Number extension and domain can't be empty";
+        }else{
+            $this->exten=$exten;
+            $this->domain=$domino;
+            $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+            $query="SELECT code from organization where domain=?";
+            $result = $pDB->getFirstRowQuery($query, false, array($this->domain));
+            $this->code=$result[0];
+        }
+    }
 
-	function output() {
-		if($this->error!="")
-			return "";
-		else
-			return $this->get_hint()."&Custom:DND".$this->exten;
-	}
+    function output() {
+        if($this->error!="")
+            return "";
+        else
+            return $this->get_hint()."&Custom:DND".$this->code."_".$this->exten;
+    }
 
-	function get_hint(){
-		// We should always check the EXTUSER in case they logged into a device
-		// but we will fall back to the old methond if $astman not open although
-		// I'm pretty sure everything else will puke anyhow if not running
-		//
-		$error="";
-		$pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
-		$astman=AsteriskManagerConnect($error);
-		if($astman!=false){
-			//se obtine los dispositivos a los cuales la extension esta asociada
-			$device=$astman->database_get("EXTUSER",$this->code."/".$this->exten."/device");
-			$device_arr = explode('&',$device);
-			$query = "SELECT DISTINCT dial from extension where organization_domain=? and device in ('".implode("','",$device_arr)."')";
-			$arrayParam=array($this->domain);
-		} else {
-			$query = "SELECT dial from extension where exten=? and organization_domain=?";
-			$arrayParam=array($this->exten,$this->domain);
-		}
+    function get_hint(){
+        // We should always check the EXTUSER in case they logged into a device
+        // but we will fall back to the old methond if $astman not open although
+        // I'm pretty sure everything else will puke anyhow if not running
+        //
+        $error="";
+        $pDB=new paloDB(generarDSNSistema("asteriskuser", "elxpbx"));
+        $astman=AsteriskManagerConnect($error);
+        if($astman!=false){
+            //se obtine los dispositivos a los cuales la extension esta asociada
+            $deviceDB=$astman->database_get("EXTUSER",$this->code."/".$this->exten."/device");
+            $device_arr = explode('&',$deviceDB);
+            //se obtine como se marca a dichos dispositivos
+            foreach($device_arr as $device){
+                $tmp_dial=$astman->database_get("DEVICE",$this->code."/".$device."/dial");
+                if($tmp_dial!=="ERROR")
+                    $dial[]=$tmp_dial;
+            }
+        } else {
+            $query = "SELECT dial from extension where exten=? and organization_domain=?";
+            $arrayParam=array($this->exten,$this->domain);
+            $results = $pDB->fetchTable($query, false, $arrayParam);
+            //create an array of strings
+            if (is_array($results)){
+                foreach ($results as $result) {
+                    $dial[] = str_replace('ZAP', 'DAHDI', $result[0]);
+                }
+            }
+        }
 
-		$results = $pDB->fetchTable($query, false, $arrayParam);
+        //create a string with & delimiter
+        if (isset($dial) && is_array($dial)){
+            $hint = implode($dial,"&");
+        } else {
+            $query = "SELECT dial from extension where exten=? and organization_domain=?";
+            $results = $pDB->getFirstRowQuery($query, false, array($this->exten,$this->domain));
+            if (isset($results[0])) {
+                $hint = $results[0];
+            } else {
+                $hint = "";
+            }
+        }
 
-		//create an array of strings
-		if (is_array($results)){
-			foreach ($results as $result) {
-				$dial[] = str_replace('ZAP', 'DAHDI', $result[0]);
-			}
-		}
-
-		//create a string with & delimiter
-		if (isset($dial) && is_array($dial)){
-			$hint = implode($dial,"&");
-		} else {
-			$query = "SELECT dial from extension where exten=? and organization_domain=?";
-			$results = $pDB->getFirstRowQuery($query, false, array($this->exten,$this->domain));
-			if (isset($results[0])) {
-				$hint = $results[0];
-			} else {
-				$hint = "";
-			}
-		}
-
-		return $hint;
-	}
+        return $hint;
+    }
 }
 
 class ext_directory extends extension{
@@ -1200,6 +1204,33 @@ class ext_directory extends extension{
 		else
 			return "Directory(".$this->context.",".$this->dial_context.$this->options.")";
 	}
+}
+
+class ext_messageSend extends extension {
+    public $to;
+    public $from;
+    
+    function ext_messageSend($to,$from){
+        $this->to=$to;
+        $this->from=$from;
+    }
+    
+    function output() {
+        return "MessageSend(".$this->to.",".$this->from.")";
+    }
+    
+}
+
+class ext_while extends extension {
+    public $condition;
+    
+    function ext_while($condition){
+        $this->condition=$condition;
+    }
+    
+    function output() {
+        return "While(".$this->condition.")";
+    }
 }
 /* example usage
 $ext = new extensions;

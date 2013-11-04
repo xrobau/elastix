@@ -112,6 +112,43 @@ class paloACL {
         return $arr_result;
     }
     
+    function getUsers2($id_user = NULL, $id_organization = NULL, $limit = NULL, $offset = NULL)
+    {
+        $arr_result = FALSE;
+        $where = "";
+        $paging = "";
+        $arrParams = null;
+        if (!is_null($id_user) && !preg_match('/^[[:digit:]]+$/', "$id_user")) {
+            $this->errMsg = "User ID is not numeric";
+        }elseif (!is_null($id_organization) && !preg_match('/^[[:digit:]]+$/', "$id_organization")) {
+            $this->errMsg = _tr("Organization ID must be numeric");
+        }else {
+            if(!is_null($id_user) && is_null($id_organization)){
+                $where = "where u.id=?";
+                $arrParams = array($id_user);
+            }elseif(is_null($id_user) && !is_null($id_organization)){
+                $where = "where g.id_organization=?";
+                $arrParams = array($id_organization);
+            }elseif(!is_null($id_user) && !is_null($id_organization)){
+                $where = "where g.id_organization=? and u.id=?";
+                $arrParams = array($id_organization,$id_user);
+            }
+
+            if(!is_null($limit) && !is_null($offset)){
+                $paging = "limit $limit offset $offset";
+            }
+            $this->errMsg = "";
+
+            $sPeticionSQL = "SELECT u.id, u.username, u.name, u.md5_password, g.id_organization, u.extension, u.fax_extension, u.id_group FROM acl_user as u JOIN  acl_group as g on u.id_group=g.id $where $paging";
+            $arr_result = $this->_DB->fetchTable($sPeticionSQL,true,$arrParams);
+            if (!is_array($arr_result)) {
+                $arr_result = FALSE;
+                $this->errMsg = $this->_DB->errMsg;
+            }
+        }
+        return $arr_result;
+    }
+    
 	function getUserPicture($id_user){
 		$arr_result = FALSE;
 		if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
@@ -380,8 +417,8 @@ class paloACL {
         $bExito = FALSE;
         if ($username == "") {
             $this->errMsg = _tr("Username can't be empty");
-        } elseif(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/", $username)){
-            $this->errMsg = _tr("Username is not valid");
+        } elseif(!preg_match("/^[a-z0-9]+([_]?[a-z0-9]+[_]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/", $username)){
+            $this->errMsg = _tr("Username is not valid").tr("Permited characters are: letters a-z, numbers (0-9) and underscore");
         }else{
             if ( !$name ) $name = $username;
             // Verificar que el nombre de usuario no existe previamente
@@ -1181,7 +1218,35 @@ INFO_AUTH_MODULO;
             return true;
     }
     
+    /**
+     * Funcion que devuelve una lista 
+     */
+    function getUsersAccountsInfoByDomain($idOrganization,$name=null){
+        $query="SELECT u.id, u.name, u.username, u.extension, u.fax_extension, e.elxweb_device, e.alias
+                FROM acl_user u JOIN acl_group g ON u.id_group=g.id JOIN extension e ON u.extension=e.exten WHERE g.id_organization=? and e.organization_domain=(SELECT domain from organization where id=?)";
+        $param[]=$idOrganization;
+        $param[]=$idOrganization;
+        if($name!='' && isset($name)){
+            $query .=' and name LIKE ?';
+            $param[]="%$name%";
+        }
+        $query .=" order by name ASC";
+        $result=$this->_DB->fetchTable($query,true,$param);
+        if($result===false){
+            $this->errMsg=_tr("DATABASE ERROR");
+        }
+        return $result;
+    }
     
+    function getUserAccountInfo($idUser,$idOrganization){
+       $query="SELECT u.id, u.name, u.username, u.extension, u.fax_extension, e.elxweb_device, e.alias
+                FROM acl_user u JOIN acl_group g ON u.id_group=g.id JOIN extension e ON u.extension=e.exten WHERE u.id=? and g.id_organization=? and e.organization_domain=(SELECT domain from organization where id=?)";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($idUser,$idOrganization,$idOrganization));
+        if($result===false){
+            $this->errMsg=_tr("DATABASE ERROR");
+        }
+        return $result;
+    }
     
     /**
      * Esta funcion devuelve un arreglo que contine las acciones que un usuario puede realizar

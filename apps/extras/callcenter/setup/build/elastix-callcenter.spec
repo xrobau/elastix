@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Monitoring: fix synchronization of current route with drop-down
+  list of campaigns.
+  SVN Rev[6060]
+
 * Wed Oct 30 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: External URLs: fixed broken pagination in arrow links with more than
   15 items. Fixes Elastix bug #1751.

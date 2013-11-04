@@ -34,6 +34,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Elastix', amipool, dbpool, sServerIP, sIP, mac)
         self._timeZone = 'auto'
+        self._language = 'es'
 
     def setModel(self, sModel):
         if sModel in ('LXP100', 'LXP200'):

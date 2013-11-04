@@ -1,3 +1,27 @@
+2.2.0-4 (SVN revision 6061)
+* FIXED: Campaign Monitoring: fix synchronization of current route with drop-down
+  list of campaigns.
+* FIXED: External URLs: fixed broken pagination in arrow links with more than
+  15 items. Fixes Elastix bug #1751.
+* CHANGED: Campaign Monitoring: refactor the client-side javascript code to 
+  conform to best Ember.js coding practices. Instead of explicitly binding to
+  controllers as variables in App, controllers are now references from the
+  corresponding views and setup through routes. Each campaign detail is now
+  implemented as a route.
+  Update Ember.js to 1.1.2, Handlebars to 1.0.0 .
+* FIXED: Dialer (ECCP): allow setting date fields to empty strings. Apparently
+  this was allowed by the old implementation of the agent console.
+* FIXED: Campaign Monitoring: fix swapped labels in display. Fixes Elastix 
+  bug #1707.
+* CHANGED: Hold Time: complete rewrite. This rewrite reimplements the histogram
+  code to be more generic as well as smaller, and to use SQL parameters. It also
+  removes dead references to xajax and other unneeded libraries, and brings the
+  code up to newer coding standards. The filter template is exported to a
+  separate file. Fixes Elastix bug #1726.
+* FIXED: Calls Per Agent: remove pagination code as this report is actually a 
+  summary report. Fixes Elastix bug #1710.
+* CHANGED: Campaign Out: remove last traces of xajax dead code from the module.
+
 2.2.0-3 (SVN revision 5843)
 * FIXED: Dialer: an outgoing route with multiple trunks may produce multiple
   Dial events as each trunk is tried and fails in turn. Must collect actual

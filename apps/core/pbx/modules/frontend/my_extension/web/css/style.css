@@ -45,5 +45,10 @@ display:none;
 display:inline;
 color: red;
 }
+
+.my_settings a:hover{
+color: red;
+text-decoration: none;
+}
 /*fin css tooltip*/
 

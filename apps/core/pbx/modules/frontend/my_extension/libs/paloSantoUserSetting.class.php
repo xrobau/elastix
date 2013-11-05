@@ -316,7 +316,7 @@ class paloMyExten{
         }
 
         if($errorBoolean){
-            $errorData['stringError'] = "Some Fields are wrong";
+            $errorData['stringError'] = "Some fields are wrong";
             $this->errMsg = $errorData;
             return false;
         }

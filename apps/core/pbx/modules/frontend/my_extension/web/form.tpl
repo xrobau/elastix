@@ -67,8 +67,7 @@
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2" id="radio_call_forward">{$callForwardOpt.INPUT}</div>
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2">
                 {$callForwardInp.INPUT}
-                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Just numeric characters are valid">
-                </span>
+                <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Just numeric characters are valid"></a>
             </div>
         </div>
 
@@ -77,8 +76,7 @@
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2" id="radio_call_forward_unavailable">{$callForwardUnavailableOpt.INPUT}</div>
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2">
                 {$callForwardUnavailableInp.INPUT}
-                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Just numeric characters are valid">
-                </span>
+                <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Just numeric characters are valid"></a>
             </div>
         </div>
 
@@ -87,8 +85,7 @@
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2" id="radio_call_forward_busy">{$callForwardBusyOpt.INPUT}</div>
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2">
                 {$callForwardBusyInp.INPUT}
-                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Just numeric characters are valid">
-                </span>
+                <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Just numeric characters are valid"></a>
             </div>
         </div>
       
@@ -120,8 +117,7 @@
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 input-group">
                 <span class="input-group-addon">@</span>
                 {$email_vm.INPUT}
-                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Invalid email">
-                </span>
+                <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Invalid email"></a>
             </div>
         </div>
       
@@ -129,8 +125,7 @@
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 name-label"><p>{$password_vm.LABEL}</p></div>
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
                 {$password_vm.INPUT}
-                <span class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Just numeric characters are valid">
-                </span>
+                <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Just numeric characters are valid"></a>
             </div>
         </div>
       

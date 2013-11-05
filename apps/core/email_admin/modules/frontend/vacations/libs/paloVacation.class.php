@@ -330,6 +330,30 @@ class paloMyVacation extends paloVacation{
     }
 
     function editVacation($arrProp){
+
+        $errorData=array();
+        $errorBoolean= false;
+
+        if($arrProp['init_date']==''){
+            $errorData['field'][] = "FROM";
+            $errorBoolean= true;
+        }
+
+        if($arrProp['end_date']==''){
+            $errorData['field'][] = "TO";
+            $errorBoolean= true;
+        }
+
+        if($arrProp['email_subject']==''){
+            $errorData['field'][] = "EMAIL_SUBJECT";
+            $errorBoolean= true;
+        }
+
+        if($arrProp['email_body']==''){
+            $errorData['field'][] = "EMAIL_CONTENT";
+            $errorBoolean= true;
+        }
+
         $timeInit = strtotime($arrProp['init_date']);     
         $initDate = date('Y-m-d',$timeInit); 
 
@@ -343,8 +367,14 @@ class paloMyVacation extends paloVacation{
         $timeSince = $timestamp0 - $timestamp1;
 
         if($timeSince > 0){
-            $this->errMsg=_tr('Invalid End Date Parameter');    
-            return false;        
+            $errorData['field'][] = "TO";
+            $errorBoolean= true;        
+        }
+
+        if($errorBoolean){
+            $errorData['stringError'] = "Some fields are wrong";
+            $this->errMsg = $errorData;
+            return false;
         }
 
         $idVacation=$this->getVacationByUser();

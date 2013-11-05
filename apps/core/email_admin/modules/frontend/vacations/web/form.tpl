@@ -50,12 +50,17 @@
 
         <div class="row">
             <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 name-label"><p>{$EMAIL_SUBJECT.LABEL}</p></div>
-            <div class="col-xs-12 col-sm-7 col-md-6 col-lg-5"><p>{$EMAIL_SUBJECT.INPUT}</p></div>
+            <div class="col-xs-12 col-sm-7 col-md-6 col-lg-5">
+                {$EMAIL_SUBJECT.INPUT}
+                <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="Can not be empty"></a>
+            </div>
         </div>
 
         <div class="row">
             <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 name-label"><p>{$EMAIL_CONTENT.LABEL}</p></div>
-            <div class="col-xs-10 col-sm-7 col-md-6 col-lg-5"><p>{$EMAIL_CONTENT.INPUT}</p></div>
+            <div class="col-xs-10 col-sm-7 col-md-6 col-lg-5">
+                {$EMAIL_CONTENT.INPUT}
+            </div>
         </div>
 
     </div>

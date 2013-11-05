@@ -88,16 +88,24 @@ function saveVacation(){
     request("index.php", arrAction, false,
         function(arrData,statusResponse,error){
             hideElastixUFStatusBar();
-            if(error!=""){
-                //alert(error);
+            if (error != '' ){
                 $("#message_area").slideDown();
                 $("#msg-text").removeClass("alert-success").addClass("alert-danger");
-                $("#msg-text").html(error);
+                $("#msg-text").html(error['stringError']);
+                // se recorre todos los elementos erroneos y se agrega la clase error (color rojo)
+                $(".flag").removeClass("has-error");
+                $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
+                for(var i=0;i<error['field'].length; i++){     
+                    $("[name='"+error['field'][i]+"']").parents(':first').addClass("has-error flag");
+                    $("[name='"+error['field'][i]+"']").next().tooltip().removeClass("hidden-tooltip").addClass("visible-tooltip");
+                }
             }else{
-                //alert(arrData);
-                $("#message_area").slideDown();
+                //se elimina el borde rojo a los campos que estaban erroneos, y que hayan sido ingresados 
+                $(".flag").removeClass("has-error");
+                $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
                 $("#msg-text").removeClass("alert-danger").addClass("alert-success");
-                $("#msg-text").html(arrData);  
+                $("#msg-text").html(arrData);
+                $("#message_area").slideDown();
             }
     });
 }

@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -124,9 +124,19 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Nov 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Sep 25 2013 Daniel Paez <dpaez@palosanto.com> 
+- CHANGED: palosantoAddons.class.php, Send server architect parameter to
+  elastix addons webservice
+  SVN Rev[5946]
+
 * Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5557]
 
 * Mon Aug 05 2013 Jose Briones <jbriones@palosanto.com> 
 - ADD: Added translation file es.lang

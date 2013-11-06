@@ -82,34 +82,33 @@ fi
 
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
 bdir=%{_builddir}/%{name}/framework/system
-for FOLDER0 in $(ls -A $bdir/)#apps
+for FOLDER0 in $(ls -A $bdir/)
 do
 		if [ "$FOLDER0" == "apps" ]; then
-			for FOLDER1 in $(ls -A $bdir/$FOLDER0/)#manager
+			for FOLDER1 in $(ls -A $bdir/$FOLDER0/)
 			do
-				for FOLDER2 in $(ls -A $bdir/$FOLDER0/$FOLDER1/)#modules
+				for FOLDER2 in $(ls -A $bdir/$FOLDER0/$FOLDER1/)
 				do
-				for FOLDER3 in $(ls -A $bdir/$FOLDER0/$FOLDER1/$FOLDER2/)#BackORFront
+				for FOLDER3 in $(ls -A $bdir/$FOLDER0/$FOLDER1/$FOLDER2/)
 				do
 				for FOLFI in $(ls -A $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/)
 				do
-					#case "$FOLDER1" in 
 					case "$FOLDER3" in
 						frontend)
 							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/$FOLFI/web/ ]; then
 								mkdir -p $RPM_BUILD_ROOT/var/www/html/web/$FOLDER0/$FOLFI/
-								mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/web/$FOLDER0/$FOLFI/
+							mv $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/web/$FOLDER0/$FOLFI/
 							fi
 						;;
 						backend)
 							if [ -d $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/$FOLFI/web/ ]; then
 								mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/$FOLDER0/$FOLFI/
-							mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/$FOLDER0/$FOLFI/
+						mv $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/$FOLFI/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/$FOLDER0/$FOLFI/
 							fi
 						;;
 					esac
 					mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/$FOLFI
-					mv $bdir/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/$FOLFI/
+					mv $bdir/$FOLDER0/$FOLDER1/$FOLDER2/$FOLDER3/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/$FOLDER0/$FOLFI/
 				done
 				done
 				done

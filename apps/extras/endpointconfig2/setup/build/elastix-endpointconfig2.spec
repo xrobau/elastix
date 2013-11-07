@@ -132,6 +132,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Nov 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add support for RCA IP150
+  SVN Rev[6072]
+
 * Mon Nov 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.6-0
 - Bump version for release
 - FIXED: New Endpoint Configurator: fix incorrect variable reference that caused

@@ -571,6 +571,10 @@ following extra endpoint properties: timezone.</li>
 <li>Linksys: SPA841,SPA921,SPA922,SPA941,SPA942,SPA962. Untested. Remote reboot supported.</li>
 <li>Polycom: IP 301,IP 330/320,IP 430,IP 501,IP 550,IP 601,IP 650,SoundStation IP 4000,VSX7000A.
 Model detection is NOT supported. Static IP is NOT supported. Remote reboot supported.</li>
+<li>RCA: IP150. Static provisioning supported. This phone has no remote reboot, but restoring
+its XML configuration applies the changes immediately. Quirk: if the "no autoprovisioning"
+dialog is displayed before configuration, there is no known way to dismiss this dialog
+remotely, even after configuration succeeded.</li>
 <li>Snom: 300,320,360,821,m9. Remote reboot and static provisioning supported. 
 Supports the following extra endpoint properties: bridge, timezone.</li>
 <li>VOPTech: VI2006,VI2007,VI2008. Part of the Atcom family. Remote reboot and static 

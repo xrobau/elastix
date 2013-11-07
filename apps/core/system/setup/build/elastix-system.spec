@@ -143,6 +143,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Nov 07 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: the privileged script tried to build and check a path
+  using an not-always-assigned variable. Fixed. Part of the fix for Elastix
+  bug #1764 item 3.
+  SVN Rev[6070]
+
 * Sat Oct 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: prefer system-installed magpierss to bundled magpierss if
   available. This is preparation for unbundling of magpierss library. Eventually

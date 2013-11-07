@@ -130,6 +130,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Nov 07 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: the privileged script tried to build and check a path
+  using an not-always-assigned variable. Fixed. Part of the fix for Elastix
+  bug #1764 item 3.
+  SVN Rev[6070]
+
 * Sun Oct 13 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: unlock the session as soon as possible when serving the
   applets. This allows more parallelism on applet requests and decreases load

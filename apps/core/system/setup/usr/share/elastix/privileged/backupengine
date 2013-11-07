@@ -833,7 +833,8 @@ function backupComponent_file($sLevelTag, &$backupComponent, $sWorkingDir)
 
 function backupComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
 {
-    if(is_dir($backupComponent['parentdir']."/".$backupComponent['dirname'])===false){
+    if (isset($backupComponent['dirname']) &&
+        is_dir($backupComponent['parentdir']."/".$backupComponent['dirname']) === false) {
         if(isset($backupComponent['mustExist'])){
             if($backupComponent['mustExist']=="no"){
                 return TRUE;

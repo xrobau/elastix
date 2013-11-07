@@ -144,9 +144,14 @@ fi
 
 %changelog
 * Thu Nov 07 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: for Asterisk 11, the astdb database can not be swapped
+  while asterisk is running. It is now required to shutdown and restart asterisk
+  around the database restores.
+  SVN Rev[6071]
 - FIXED: Backup/Restore: the privileged script tried to build and check a path
-  using an not-always-assigned variable. Fixed. Part of the fix for Elastix
-  bug #1764 item 3.
+  using an not-always-assigned variable. Fixed. Additionally check whether the
+  path globs actually exist before backing up. Part of the fix for Elastix
+  bug #1764 item 3. Fixes Elastix bug #1747.
   SVN Rev[6070]
 
 * Sat Oct 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>

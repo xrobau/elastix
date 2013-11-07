@@ -115,6 +115,7 @@ $BACKUP_PLAN = array(
                     'backupfile'    =>  'var.www.html.admin.tgz',
                 ),
             ),
+            'prerestore'    =>  'prerestore_as_db',
             'postrestore'   =>  'postrestore_as_db',
         ),
         'as_config_files'   =>  array(
@@ -835,6 +836,7 @@ function backupComponent_dir($sLevelTag, &$backupComponent, $sWorkingDir)
 {
     if (isset($backupComponent['dirname']) &&
         is_dir($backupComponent['parentdir']."/".$backupComponent['dirname']) === false) {
+        if(isset($backupComponent['mustExist'])){
             if($backupComponent['mustExist']=="no"){
                 return TRUE;
             }
@@ -1288,6 +1290,14 @@ function restoreComponent_bundle($sLevelTag, &$backupComponent, $sWorkingDir)
     return restoreComponent($sLevelTag.'/'.$backupComponent['backupdir'], $backupComponent, $sWorkingSubdir);
 }
 
+// Custom processing before restoring asterisk databases
+function prerestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    // asterisk must be stopped in order to swap out astdb.sqlite3
+    exec('/sbin/service asterisk stop > /dev/null 2>&1');
+    return TRUE;
+}
+
 // Custom processing after restoring asterisk databases
 function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
 {
@@ -1304,6 +1314,9 @@ function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
         system('/usr/sbin/astdb2sqlite3 /var/lib/asterisk/astdb');
     }
 
+    // asterisk must be restarted in order for retrieve_conf to work correctly
+    exec('/sbin/service asterisk start > /dev/null 2>&1');
+    
     // Read information from /etc/amportal.conf
     foreach (file('/etc/amportal.conf') as $s) {
     	$regs = NULL;

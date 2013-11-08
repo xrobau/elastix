@@ -140,7 +140,7 @@ def main():
     global iCurrentStep
     
     exitstatus = 0
-    socket.setdefaulttimeout(5)
+    socket.setdefaulttimeout(10)
     
     # Parse and validate commandline options
     parser = OptionParser()

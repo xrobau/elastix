@@ -132,6 +132,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: increase default socket timeout to 10
+  seconds to cope with several endpoints that take a long time to apply changes.
+  SVN Rev[6073]
+
 * Thu Nov 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add support for RCA IP150
   SVN Rev[6072]

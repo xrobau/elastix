@@ -93,12 +93,31 @@ class Endpoint(BaseEndpoint):
         # If telnet failed to connect, the model might still be exposed through HTTP
         if bTelnetFailed:
             try:
-                response = urllib2.urlopen('http://' + self._ip + '/manager?action=product&time=0')
-                htmlbody = response.read()
-                if response.code == 200:
-                    # Response=Success\r\nProduct=GXP2200\r\n
-                    m = re.search(r'Product=(\w+)', htmlbody)
-                    if m != None: sModel = m.group(1)
+                # Try detecting GXP2200 or similar
+                try:
+                    response = urllib2.urlopen('http://' + self._ip + '/manager?action=product&time=0')
+                    htmlbody = response.read()
+                    if response.code == 200:
+                        # Response=Success\r\nProduct=GXP2200\r\n
+                        m = re.search(r'Product=(\w+)', htmlbody)
+                        if m != None: sModel = m.group(1)
+                except urllib2.HTTPError, e:
+                    # Ignore 404 error
+                    pass
+                
+                # Try detecting Elastix LXP200 with updated firmware
+                try:
+                    response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/api.values.get?request=phone_model:1395')
+                    if response.code == 200:
+                        jsonvars = self._parseBotchedJSONResponse(response)
+                        if jsonvars != None and 'body' in jsonvars:
+                            if '1395' in jsonvars['body'] and jsonvars['body']['1395'] == 'Elastix':
+                                self._saveVendor('Elastix')
+                            if 'phone_model' in jsonvars['body']:
+                                sModel = jsonvars['body']['phone_model']
+                except urllib2.HTTPError, e:
+                    # Ignore 404 error
+                    pass
             except Exception, e:
                 pass
         else:
@@ -272,34 +291,11 @@ class Endpoint(BaseEndpoint):
             vars.update({'sid' : sid})
             response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/api.values.post',
                 urllib.urlencode(vars))
-            body = response.read()
-            if response.info():
-                if response.info()['Content-Type'] <> 'application/json':
-                    logging.error('Endpoint %s@%s GXP140x - api.values.post answered not application/json but %s' %
-                        (self._vendorname, self._ip, response.info()['Content-Type']))
-                    return False
-                jsonvars = cjson.decode(body)
-            else:
-                # The GXP1400 has been discovered to violate the HTTP protocol.
-                # The response for /cgi-bin/api.values.post sticks a shebang
-                # header before the HTTP headers of the response. This causes
-                # the header parsing to end early and the body gets prepended
-                # with the headers. We now have to undo this mess.
-                expectbody = False 
-                for s in body.splitlines():
-                    if not expectbody:
-                        m = re.search(r'Content-Type: (\S+)', s)
-                        if m != None:
-                            if m.group(1) <> 'application/json':
-                                logging.error('Endpoint %s@%s GXP140x - api.values.post answered not application/json but %s' %
-                                    (self._vendorname, self._ip, m.group(1)))
-                                return False
-                        if s == '':
-                            expectbody = True
-                    else:
-                        # This expects the body to be a single JSON string in one line
-                        jsonvars = cjson.decode(s)
-                        break
+
+            jsonvars = self._parseBotchedJSONResponse(response)
+            if jsonvars == None:
+                return False
+            
             if not ('response' in jsonvars and jsonvars['response'] == 'success' \
                     and 'body' in jsonvars and 'status' in jsonvars['body'] and jsonvars['body']['status'] == 'right' ):
                 logging.error('Endpoint %s@%s GXP140x - vars rejected by interface - %s' %
@@ -319,6 +315,38 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s GXP140x failed to connect - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
+
+    def _parseBotchedJSONResponse(self, response):
+        jsonvars = None
+        body = response.read()
+        if response.info():
+            if response.info()['Content-Type'] <> 'application/json':
+                logging.error('Endpoint %s@%s GXP140x - api.values.post answered not application/json but %s' %
+                    (self._vendorname, self._ip, response.info()['Content-Type']))
+                return None
+            jsonvars = cjson.decode(body)
+        else:
+            # The GXP1400 has been discovered to violate the HTTP protocol.
+            # The response for /cgi-bin/api.values.post sticks a shebang
+            # header before the HTTP headers of the response. This causes
+            # the header parsing to end early and the body gets prepended
+            # with the headers. We now have to undo this mess.
+            expectbody = False
+            for s in body.splitlines():
+                if not expectbody:
+                    m = re.search(r'Content-Type: (\S+)', s)
+                    if m != None:
+                        if m.group(1) <> 'application/json':
+                            logging.error('Endpoint %s@%s GXP140x - api.values.post answered not application/json but %s' %
+                                (self._vendorname, self._ip, m.group(1)))
+                            return None
+                    if s == '':
+                        expectbody = True
+                else:
+                    # This expects the body to be a single JSON string in one line
+                    jsonvars = cjson.decode(s)
+                    break
+        return jsonvars
 
     def _enableStaticProvisioning_BT200(self, vars):
         try:

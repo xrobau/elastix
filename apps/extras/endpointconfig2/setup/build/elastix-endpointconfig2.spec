@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Fri Nov 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: tweak detection method for Elastix LXP200
+  with updated firmware.
+  SVN Rev[6074]
 - CHANGED: New Endpoint Configurator: increase default socket timeout to 10
   seconds to cope with several endpoints that take a long time to apply changes.
   SVN Rev[6073]

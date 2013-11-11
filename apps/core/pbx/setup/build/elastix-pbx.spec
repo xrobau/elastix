@@ -145,7 +145,7 @@ mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
 rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
 
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+#mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 
 %pre
@@ -328,7 +328,7 @@ fi
 /var/lib/asterisk/sounds/conf-call-recorded.wav
 /var/lib/asterisk/sounds/conf-has-not-started.wav
 /var/lib/asterisk/sounds/conf-will-end-in.wav
-/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
+#/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
 %{_localstatedir}/www/html/*
 /usr/share/elastix/apps/*
 %defattr(-, root, root)

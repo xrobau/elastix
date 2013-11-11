@@ -93,6 +93,9 @@ mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version
 mkdir -p $RPM_BUILD_ROOT/var/log/iaxmodem
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc
+mkdir -p $RPM_BUILD_ROOT/var/www/faxes/recvd
+mkdir -p $RPM_BUILD_ROOT/var/www/faxes/sent
+
 
 %pre
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/

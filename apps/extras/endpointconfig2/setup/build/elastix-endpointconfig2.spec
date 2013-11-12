@@ -132,6 +132,13 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Nov 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: the AudioCodes 310HD/320HD require a dummy
+  HTTP request from the same IP that will later POST the autoconfiguration data,
+  in order for the phone to accept the changes. Also set default language to 
+  Spanish, and inherit timezone from the Elastix server.
+  SVN Rev[6079]
+
 * Fri Nov 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: tweak detection method for Elastix LXP200
   with updated firmware.

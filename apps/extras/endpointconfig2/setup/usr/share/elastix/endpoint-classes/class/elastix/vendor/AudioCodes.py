@@ -37,6 +37,19 @@ class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'AudioCodes', amipool, dbpool, sServerIP, sIP, mac)
 
+        # Calculate timezone, GMT offset in minutes
+        tzoffset = BaseEndpoint.getTimezoneOffset() / 60
+        self._timeZone = ''
+        if tzoffset < 0: self._timeZone = '-'
+        self._timeZone = self._timeZone + ('%02d:%02d' % (abs(tzoffset) / 60, abs(tzoffset) % 60))
+        self._language = 'SPANISH'
+
+    def setExtraParameters(self, param):
+        if not BaseEndpoint.setExtraParameters(self, param): return False
+        if 'timezone' in param: self._timeZone = param['timezone']
+        if 'language' in param: self._language = param['language']
+        return True
+
     def probeModel(self):
         '''Probe specific model of the AudioCodes phone
         
@@ -105,12 +118,25 @@ class Endpoint(BaseEndpoint):
         sConfigFile = (self._mac.replace(':', '').lower()) + '.cfg'
         sConfigPath = self._tftpdir + '/' + sConfigFile
         vars = self._prepareVarList()
-        vars['config_filename'] = sConfigFile
+        vars.update({
+            'config_filename': sConfigFile,
+            'timezone': self._timeZone,
+            'language': self._language
+        })
         try:
             self._writeTemplate('AudioCodes_local_cfg.tpl', vars, sConfigPath)
         except IOError, e:
             logging.error('Endpoint %s@%s failed to write configuration file - %s' %
                 (self._vendorname, self._ip, str(e)))
+            return False
+
+        # The AudioCodes firmware is stateful, in an annoying way. Just submitting
+        # a POST to the autoprovisioning URL from the factory-default setting will
+        # only get a 301 Found response, and the settings will NOT be applied.
+        # To actually apply the settings, it is required to perform a dummy GET
+        # to /mainform.cgi/info.htm, discard anything returned, and only then
+        # perform the POST.
+        if not self._doAuthGet('/mainform.cgi/info.htm'):
             return False
 
         # Attempt to force provisioning to STATIC into this server. This allows

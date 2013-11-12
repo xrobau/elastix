@@ -369,6 +369,13 @@ class BaseEndpoint(object):
         
         return vars
     
+    def _doAuthGet(self, urlpath):
+        '''Perform an HTTP GET on a particular URL using the HTTP credentials
+        
+        Implemented using _doAuthPost
+        '''
+        return self._doAuthPost(urlpath, None)
+    
     def _doAuthPost(self, urlpath, postvars):
         '''Perform an HTTP POST on a particular URL using the HTTP credentials
         
@@ -381,9 +388,10 @@ class BaseEndpoint(object):
         basic_auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
         digest_auth_handler = urllib2.HTTPDigestAuthHandler(password_manager)
         opener = urllib2.build_opener(basic_auth_handler, digest_auth_handler)
-        opener.addheaders = [('Content-Type', 'application/x-www-form-urlencoded')]
-        if not isinstance(postvars, str):
-            postvars = urllib.urlencode(postvars)
+        if postvars != None:
+            opener.addheaders = [('Content-Type', 'application/x-www-form-urlencoded')]
+            if not isinstance(postvars, str):
+                postvars = urllib.urlencode(postvars)
         try:
             opener.open('http://' + self._ip + urlpath, postvars)
         except urllib2.HTTPError, e:

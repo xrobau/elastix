@@ -1,3 +1,6 @@
+system/ntp/enabled=1
+system/ntp/primary_server_address={{server_ip}}
+system/ntp/gmt_offset={{timezone}}
 provisioning/configuration/url=tftp://{{server_ip}}/{{config_filename}}
 network/lan_type={{if enable_dhcp}}DHCP{{else}}STATIC{{endif}}
 network/lan/fixed_ip/ip_address={{static_ip}}
@@ -19,3 +22,4 @@ voip/line/{{m}}/auth_password=0
 voip/signalling/sip/sip_registrar/enabled=1
 voip/signalling/sip/sip_registrar/addr={{server_ip}}
 voip/signalling/sip/use_proxy=1
+personal_settings/language={{language}}

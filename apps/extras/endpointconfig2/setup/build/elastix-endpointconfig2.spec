@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Tue Nov 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: when removing configuration files, also
+  unregister previously detected accounts.
+  SVN Rev[6080]
 - FIXED: New Endpoint Configurator: the AudioCodes 310HD/320HD require a dummy
   HTTP request from the same IP that will later POST the autoconfiguration data,
   in order for the phone to accept the changes. Also set default language to 

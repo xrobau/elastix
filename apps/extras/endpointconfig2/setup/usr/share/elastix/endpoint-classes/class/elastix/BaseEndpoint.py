@@ -450,6 +450,9 @@ class BaseEndpoint(object):
         for filename in os.listdir(TFTP_DIR):
             if (lcasemac in filename) or (ucasemac in filename):
                 os.unlink(TFTP_DIR + '/' + filename)
+        
+        # Unregister accounts
+        self._unregister()
  
     @staticmethod
     def getTimezoneOffset():

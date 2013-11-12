@@ -225,10 +225,6 @@ class Endpoint(BaseEndpoint):
 
     @staticmethod
     def deleteGlobalContent(serveriplist, amipool, endpoints):
-        # First of all, check if DPMA is available and properly licensed.
-        if not Endpoint._isDPMAAvailable(amipool):
-            return False
-        
         configsections, contexts = Endpoint._readDPMAConfig()
         if configsections == None: return False
 
@@ -242,11 +238,14 @@ class Endpoint(BaseEndpoint):
         if not Endpoint._writeDPMAConfig(configsections):
             return False
 
-        # Reconfigure all the phones
-        ami = amipool.get()
-        ami.Command('module reload res_digium_phone.so');
-        ami.Command('digium_phones reconfigure all');
-        amipool.put(ami)
+        # Reconfigure all the phones, if DPMA is available
+        if Endpoint._isDPMAAvailable(amipool):
+            ami = amipool.get()
+            ami.Command('module reload res_digium_phone.so');
+            ami.Command('digium_phones reconfigure all');
+            amipool.put(ami)
+        else:
+            logging.warning('DPMA not available or loaded, cannot broadcast reconfiguration')
         return True
 
     @staticmethod

@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Tue Nov 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: make DPMA optional when removing phone 
+  configuration for Digium phones.
+  SVN Rev[6081]
 - CHANGED: New Endpoint Configurator: when removing configuration files, also
   unregister previously detected accounts.
   SVN Rev[6080]

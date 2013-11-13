@@ -116,7 +116,8 @@ class Endpoint(BaseEndpoint):
             self._addSetting(dom, xml_system, 'netMask', stdvars['static_mask'])
             self._addSetting(dom, xml_system, 'gateway', stdvars['static_gateway'])
             self._addSetting(dom, xml_system, 'dns1', stdvars['static_dns1'])
-            self._addSetting(dom, xml_system, 'dns2', stdvars['static_dns2'])
+            if stdvars['static_dns2'] <> None:
+                self._addSetting(dom, xml_system, 'dns2', stdvars['static_dns2'])
         self._addSetting(dom, xml_system, 'displayName', stdvars['sip'][0].description)
         self._addSetting(dom, xml_system, 'displayNumber', stdvars['sip'][0].extension)
         self._addSetting(dom, xml_system, 'timeZone', 'America/Bogota')

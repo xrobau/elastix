@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Wed Nov 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: do not crash when configuring the RCA IP150 
+  with static IP and just one DNS instead of two.
+  SVN Rev[6084]
 - FIXED: New Endpoint Configurator: tweak the Atlinks Temporis IP800 template to
   blank out unused accounts on the phone display.
   SVN Rev[6083] 

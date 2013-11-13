@@ -132,6 +132,13 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Nov 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: enhance Atlinks Temporis IP800: add support
+  for setting language (default Spanish), and link to remote phonebooks with the
+  exact same format as Yealink. Reprogram line keys to display assigned accounts
+  correctly. Bind to Elastix as primary NTP server.
+  SVN Rev[6082]
+
 * Tue Nov 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: make DPMA optional when removing phone 
   configuration for Digium phones.

@@ -546,7 +546,8 @@ Remote reboot supported. </li>
 <li>Atcom: AT320,AT530,AT610,AT620,AT640,AT800. Part of the Atcom family. Remote reboot
 and static provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
 <li>Atlinks: Temporis IP800. Part of the Yealink family. Remote reboot
-and static provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
+and static provisioning supported. Can be linked to the Elastix internal and 
+external agendas. Supports the following extra endpoint properties: bridge, timezone, language.</li>
 <li>AudioCodes: 310HD,320HD. Remote reboot and static provisioning supported. Supports the following
 extra endpoint properties: language, timezone.</li>
 <li>Cisco: 7690,7906,7931,7940,7960,7961,7970,7971. Partially supported - support has been tested with

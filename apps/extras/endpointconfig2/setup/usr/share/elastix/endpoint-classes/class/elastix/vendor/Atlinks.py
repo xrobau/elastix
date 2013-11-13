@@ -39,11 +39,13 @@ class Endpoint(BaseEndpoint):
         
         # Time Zone, hour offset from GMT (assumed from similarity with Yealink)
         self._timeZone = '%g' % (BaseEndpoint.getTimezoneOffset() / 3600.0)
+        self._language = 'Spanish'
 
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False
         if 'bridge' in param: self._bridge = param['bridge']
         if 'timezone' in param: self._timeZone = param['timezone']
+        if 'language' in param: self._language = param['language']
         return True
 
     def probeModel(self):
@@ -96,6 +98,7 @@ class Endpoint(BaseEndpoint):
         vars.update({
             'enable_bridge'     :   int(self._bridge),
             'time_zone'         :   self._timeZone,
+            'language'          :   self._language,
         })
         try:
             self._writeTemplate('Atlinks_local_cfg.tpl', vars, sConfigPath)

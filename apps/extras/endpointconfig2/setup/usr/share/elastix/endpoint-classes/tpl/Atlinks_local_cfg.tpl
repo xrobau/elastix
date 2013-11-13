@@ -24,7 +24,7 @@ LANTYPE = {{enable_bridge}}
 [ Time ]
 path = /config/Setting/Setting.cfg
 TimeZone = {{time_zone}}
-TimeServer1 = europe.pool.ntp.org
+TimeServer1 = {{server_ip}}
 TimeServer2 = europe.pool.ntp.org
 Interval = 1000
 SummerTime = 2
@@ -66,3 +66,62 @@ password =
 SIPServerHost = {{server_ip}}
 
 {{endfor}}
+
+{{py:n = 1}}{{for extension in sip}}
+[ memory1{{n}} ]
+path= /config/vpPhone/vpPhone.ini
+DKtype = 15
+Line = {{n}}
+type = 
+Value = 
+KEY_MODE = Asterisk
+HotNumber = 
+HotLineId = 1
+Callpickup = 
+IntercomId = -1
+IntercomNumber = 
+PickupValue = 
+Label = 
+
+{{py:n += 1}}{{endfor}}{{for m in range(n,max_sip_accounts + 1)}}
+[ memory1{{m}} ]
+path= /config/vpPhone/vpPhone.ini
+DKtype = 15
+Line = 0
+type = N/A
+Value = 
+KEY_MODE = Asterisk
+HotNumber = 
+HotLineId = 1
+Callpickup = 
+IntercomId = -1
+IntercomNumber = 
+PickupValue = 
+Label = 
+
+{{endfor}}
+
+[ RemotePhoneBook0 ]
+path = /config/Setting/Setting.cfg
+URL = {{phonesrv}}/internal
+Name = Elastix Phonebook - Internal
+
+[ RemotePhoneBook1 ]
+path = /config/Setting/Setting.cfg
+URL = {{phonesrv}}/external
+Name = Elastix Phonebook - External
+
+[ RemotePhoneBook2 ]
+path = /config/Setting/Setting.cfg
+URL = {{phonesrv}}/internal?name=#SEARCH
+Name = Elastix Search - Internal
+
+[ RemotePhoneBook3 ]
+path = /config/Setting/Setting.cfg
+URL = {{phonesrv}}/external?name=#SEARCH
+Name = Elastix Search - External
+
+[ Lang ]
+path = /config/Setting/Setting.cfg
+ActiveWebLanguage = {{language}}
+WebLanguage = {{language}}

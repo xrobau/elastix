@@ -87,8 +87,8 @@ Label =
 [ memory1{{m}} ]
 path= /config/vpPhone/vpPhone.ini
 DKtype = 15
-Line = 0
-type = N/A
+Line = {{m}}
+type = 
 Value = 
 KEY_MODE = Asterisk
 HotNumber = 

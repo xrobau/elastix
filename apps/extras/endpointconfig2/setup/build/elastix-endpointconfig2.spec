@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Wed Nov 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: tweak the Atlinks Temporis IP800 template to
+  blank out unused accounts on the phone display.
+  SVN Rev[6083] 
 - FIXED: New Endpoint Configurator: enhance Atlinks Temporis IP800: add support
   for setting language (default Spanish), and link to remote phonebooks with the
   exact same format as Yealink. Reprogram line keys to display assigned accounts

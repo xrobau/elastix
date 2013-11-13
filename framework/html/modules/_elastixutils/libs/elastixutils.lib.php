@@ -51,6 +51,7 @@ function obtenerDetallesRPMS()
     foreach ($packageClass as $packageLists) {
     	if (is_array($packageLists)) $sCommand .= ' '.implode(' ', array_map('escapeshellarg', $packageLists));
     }
+    $sCommand .= ' | sort';
     $output = $retval = NULL;
     exec($sCommand, $output, $retval);
     $packageVersions = array();

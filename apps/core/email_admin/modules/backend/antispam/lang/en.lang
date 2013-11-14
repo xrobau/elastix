@@ -64,5 +64,8 @@ $arrLangModule=array(
 "Delete Spam for more than one week" => "Delete spam messages older than one week",
 "Delete Spam for more than two week" => "Delete spam messages older than two weeks",
 "Delete Spam for more than one month" => "Delete spam messages older than one month",
+"mail_status" => "Turn on/Turn off the Antispam",
+"mail_level" => "set the level of spam",
+"mail_politics" => "choose the actions in case of catch spams"
 );
 ?>

@@ -157,6 +157,7 @@ function createFieldForm()
 
     $arrFields = array(
             "status"            => array(   "LABEL"                  => _tr("Status"),
+					                        "DESCRIPTION"            =>_tr("mail_status"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "CHECKBOX",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -171,6 +172,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => "",
                                 ),
             "politica"          => array(   "LABEL"                  => _tr("Politics"),
+					                        "DESCRIPTION"            =>_tr("mail_politics"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "SELECT",
                                             "INPUT_EXTRA_PARAM"      => $arrPolitics,

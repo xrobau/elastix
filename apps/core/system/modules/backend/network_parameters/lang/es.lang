@@ -55,5 +55,9 @@ $arrLangModule=array(
 "Required field" => "Campo requerido",
 "Apply changes" => "Aplicar cambios",
 "Are you sure you want to edit network parameters?" => "¿Está seguro que desea editar los parámetros de red?",
+"Np_host" => "Muestra el dominio",
+"Np_gateway" => "Muestra la puerta de enlace definida",
+"Np_dns1" => "Muestra el DNS primario definido",
+"Np_dns2" => "Muestra el DNS secundario definido"
 );
 ?>

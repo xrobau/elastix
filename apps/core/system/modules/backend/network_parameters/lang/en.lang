@@ -57,5 +57,9 @@ $arrLangModule=array(
 "Required field"=>"Required field",
 "Apply changes"=>"Apply changes",
 "Are you sure you want to edit network parameters?"=>"Are you sure you want to edit network parameters?",
+"Np_host" => "show the host",
+"Np_gateway" => "show the gateway defined",
+"Np_dns1" => "show the first DNS defined",
+"Np_dns2" => "show the second DNS defined"
 );
 ?>

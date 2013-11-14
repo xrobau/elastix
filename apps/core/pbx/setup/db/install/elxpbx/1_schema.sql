@@ -372,8 +372,8 @@ CREATE TABLE voicemail_settings (
 DROP TABLE IF EXISTS sip;
 CREATE TABLE IF NOT EXISTS `sip` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
-      `name` varchar(40) NOT NULL,
-      `context` varchar(40) DEFAULT NULL,
+      `name` varchar(80) NOT NULL,
+      `context` varchar(80) DEFAULT NULL,
       `callingpres` enum('allowed_not_screened','allowed_passed_screen','allowed_failed_screen','allowed','prohib_not_screened','prohib_passed_screen','prohib_failed_screen','prohib') DEFAULT NULL,
       `deny` varchar(40) DEFAULT NULL,
       `permit` varchar(40) DEFAULT NULL,
@@ -396,14 +396,14 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `directmediapermit` varchar(200) DEFAULT NULL,
       `directmediaacl` varchar(200) DEFAULT NULL,
       `description` varchar(200) DEFAULT NULL,
-      `defaultip` varchar(40) DEFAULT NULL,
+      `defaultip` varchar(80) DEFAULT NULL,
       `dtmfmode` enum('rfc2833','info','shortinfo','inband','auto') DEFAULT NULL,
-      `fromuser` varchar(40) DEFAULT NULL,
-      `fromdomain` varchar(40) DEFAULT NULL,
+      `fromuser` varchar(80) DEFAULT NULL,
+      `fromdomain` varchar(80) DEFAULT NULL,
       `insecure` varchar(40) DEFAULT NULL,
       `language` varchar(40) DEFAULT NULL,
       `tonezone` varchar(3) DEFAULT NULL,
-      `mailbox` varchar(40) DEFAULT NULL,
+      `mailbox` varchar(80) DEFAULT NULL,
       `qualify` char(3) DEFAULT 'yes',
       `regexten` varchar(40) DEFAULT NULL,
       `rtptimeout` int(11) DEFAULT NULL,
@@ -411,12 +411,12 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `setvar` varchar(40) DEFAULT NULL,
       `disallow` varchar(40) DEFAULT NULL,
       `allow` varchar(40) DEFAULT NULL,
-      `fullcontact` varchar(35) NOT NULL DEFAULT '',
+      `fullcontact` varchar(100) NOT NULL DEFAULT '',
       `ipaddr` varchar(45) DEFAULT NULL,
       `port` int(5) DEFAULT NULL,
       `username` varchar(80) NOT NULL DEFAULT '',
-      `defaultuser` varchar(10) NOT NULL DEFAULT '',
-      `dial` varchar(50) DEFAULT NULL,
+      `defaultuser` varchar(80) NOT NULL DEFAULT '',
+      `dial` varchar(100) DEFAULT NULL,
       `trustrpid` enum('yes','no') DEFAULT NULL,
       `sendrpid` enum('yes','no','pai','yes,pai') DEFAULT NULL,
       `progressinband` enum('yes','no','never') DEFAULT NULL,
@@ -452,8 +452,8 @@ CREATE TABLE IF NOT EXISTS `sip` (
       `faxdetect` enum('yes','no') DEFAULT NULL,
       `buggymwi` enum('yes','no') DEFAULT NULL,
       `auth` varchar(40) DEFAULT NULL,
-      `fullname` varchar(40) DEFAULT NULL,
-      `trunkname` varchar(40) DEFAULT NULL,
+      `fullname` varchar(80) DEFAULT NULL,
+      `trunkname` varchar(80) DEFAULT NULL,
       `cid_number` varchar(40) DEFAULT NULL,
       `mohinterpret` varchar(40) DEFAULT NULL,
       `mohsuggest` varchar(40) DEFAULT NULL,
@@ -480,12 +480,12 @@ CREATE TABLE IF NOT EXISTS `sip` (
 DROP TABLE IF EXISTS iax;
 CREATE TABLE `iax` (
   `organization_domain` varchar(100) NOT NULL,
-  `name` varchar(40) NOT NULL default '',
+  `name` varchar(80) NOT NULL default '',
   `type` varchar(10) NOT NULL default 'friend', -- friend/user/peer
-  `username` varchar(40) NULL, -- username to send as peer
-  `mailbox` varchar(40) NULL, -- mailbox@context
+  `username` varchar(80) NULL, -- username to send as peer
+  `mailbox` varchar(80) NULL, -- mailbox@context
   `secret` varchar(40) NULL,
-  `dial` varchar(50) DEFAULT NULL,
+  `dial` varchar(100) DEFAULT NULL,
   `dbsecret` varchar(40) NULL, -- In AstDB, location to store/retrieve secret
   `context` varchar(40) NULL,
   `regcontext` varchar(40) NULL,
@@ -497,7 +497,7 @@ CREATE TABLE `iax` (
   `mask` varchar(20) NULL,
   `regexten` varchar(40) NULL,
   `regseconds`  int(11) NOT NULL DEFAULT '0', -- Must be updateable by Asterisk user
-  `accountcode` varchar(20) NULL, 
+  `accountcode` varchar(80) NULL, 
   `mohinterpret` varchar(20) NULL, 
   `mohsuggest` varchar(20) NULL, 
   `inkeys` varchar(40) NULL, 
@@ -506,7 +506,7 @@ CREATE TABLE `iax` (
   `callerid` varchar(100) NULL, -- The whole callerid string, or broken down in the next 3 fields
   `cid_number` varchar(40) NULL, -- The number portion of the callerid
   `sendani` varchar(10) NULL, -- yes/no
-  `fullname` varchar(40) NULL, -- The name portion of the callerid
+  `fullname` varchar(80) NULL, -- The name portion of the callerid
   `trunk` varchar(3) NULL, -- Yes/no
   `trunkfreq` int(5) default 20,
   `trunktimestamps` varchar(3) NULL, -- Yes/no
@@ -628,22 +628,6 @@ CREATE TABLE IF NOT EXISTS `extension` (
       `alias` varchar(50) default NULL,
       `mohclass` varchar(80) default 'default',
       `noanswer` varchar(100) default NULL,
-      PRIMARY KEY (`id`),
-      FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
-      INDEX organization_domain (organization_domain)
-)ENGINE = INNODB;
-
-CREATE TABLE IF NOT EXISTS `fax` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `organization_domain` varchar(100) NOT NULL,
-      `context` varchar(40) NOT NULL,
-      `exten` int(20) NOT NULL,
-      `tech` varchar(20) NOT NULL,
-      `dial` varchar(40) DEFAULT NULL,
-      `device` varchar(40) DEFAULT NULL,
-      `rt` varchar(20) DEFAULT NULL,
-      `callerid_name` varchar(20) DEFAULT NULL,
-      `callerid_number` varchar(40) DEFAULT NULL, 
       PRIMARY KEY (`id`),
       FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
       INDEX organization_domain (organization_domain)

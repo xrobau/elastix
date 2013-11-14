@@ -25,7 +25,7 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: index.php,v 1.3 2013/06/01 00:00:00 wreyes Exp $ */
+  $Id: index.php,v 1.3 2007/07/17 00:03:42 gcarrillo Exp $ */
 
 function spl_elastix_class_autoload($sNombreClase)
 {
@@ -103,7 +103,7 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
         header("Location: index.php");
         writeLOG("audit.log", "LOGIN $_POST[input_user]: Web Interface login successful. Accepted password for $_POST[input_user] from $_SERVER[REMOTE_ADDR].");
         update_theme();
-print("hola");
+
         exit;
     } else {
         $user = urlencode(substr($_POST['input_user'],0,20));
@@ -127,6 +127,15 @@ if (isset($_SESSION['elastix_user']) &&
 
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
     $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
+    
+    $arrUser = $pACL->getUsers($idUser);
+    foreach($arrUser as $value){
+        $arrFill["username"]=$value[1];
+        $arrFill["name"]=$value[2];
+    }
+    $smarty->assign("ID_ELX_USER",$idUser);
+    $smarty->assign("USER_NAME", $arrFill["name"]);
+    
     //obtenemos los menu a los que el usuario tiene acceso
     $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);
     
@@ -156,6 +165,7 @@ if (isset($_SESSION['elastix_user']) &&
     $smarty->assign("LOGOUT", _tr('Logout'));
     $smarty->assign("textMode", _tr('textMode'));
     $smarty->assign("htmlMode", _tr('htmlMode'));
+    $smarty->assign("INT_SESSION", _tr('Starting Session'));
     $smarty->assign("ABOUT_ELASTIX", _tr('About Elastix')." ".$arrConf['elastix_version']);
     $selectedMenu = getParameter('menu');
     /* El módulo _elastixutils sirve para contener las utilidades json que
@@ -185,17 +195,29 @@ if (isset($_SESSION['elastix_user']) &&
 
     // Inicializa el objeto palosanto navigation
     $oPn = new paloSantoNavigation($arrMenuFiltered, $smarty, $selectedMenu);
-
     $selectedMenu = $oPn->getSelectedModule();
     // Obtener contenido del módulo, si usuario está autorizado a él
     $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $selectedMenu);
-    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';    
-   
+    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : array('data'=>'');    
     // rawmode es un modo de operacion que pasa directamente a la pantalla la salida
     // del modulo. Esto es util en ciertos casos.
     $rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes') {
-        echo $sModuleContent;
+        $changeModule = getParameter("changeModule");
+        if(isset($changeModule) && $changeModule=='yes'){
+            require_once "libs/paloSantoJSON.class.php";
+            $jsonObject = new PaloSantoJSON();
+            if ($bModuleAuthorized) {
+                $jsonObject->set_message($sModuleContent);
+            }else{
+                $jsonObject->set_error("Module is invalid");
+            }
+            echo $jsonObject->createJSON();
+            return;
+        }else{
+            echo $sModuleContent['data'];
+            return;
+        }
     } else {
         $oPn->renderMenuTemplates();
 
@@ -206,10 +228,14 @@ if (isset($_SESSION['elastix_user']) &&
 
         // Autorizacion
         if ($bModuleAuthorized) {
-            // Guardar historial de la navegación
-            // TODO: también para rawmode=yes ?
-            putMenuAsHistory($pdbACL, $idUser, $selectedMenu);
-            $smarty->assign("CONTENT", $sModuleContent);
+            if(isset($sModuleContent['JS_CSS_HEAD'])){
+                //es necesario cargar los css y js que el modulo pone
+                //$smarty->assign("HEADER_MODULES",$sModuleContent['JS_CSS_HEAD']);
+                $smarty->assign("CONTENT", $sModuleContent['JS_CSS_HEAD'].$sModuleContent['data']);
+            }else{
+                $smarty->assign("CONTENT", $sModuleContent['data']);
+            }
+            
             $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 
                 ? $smarty->fetch("_common/_menu_uf.tpl") 
                 : _tr('No modules'));

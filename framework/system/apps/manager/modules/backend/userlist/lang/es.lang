@@ -90,6 +90,7 @@ $arrLangModule=array(
 "Us_faxcidnumber" => "Define el numero para el CID fax. ",
 "Us_countrycode" => "Especifica el codigo telefonico de pais del usuario. ",
 "Us_areacode" => "Especifica el codigo de area del usuario. ",
-"Us_emailquota" => "Especifica la cantidad en Mb que tendra de capacidad el mail del usuario. "
+"Us_emailquota" => "Especifica la cantidad en Mb que tendra de capacidad el mail del usuario. ",
+"Us_picture" => "adjunta una imagen/foto para su identificacion. "
 );
 ?>

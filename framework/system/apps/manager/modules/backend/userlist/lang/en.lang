@@ -89,9 +89,10 @@ $arrLangModule=array(
 "Us_extension" => "Defines the extension number. ",
 "Us_faxext" => "Defines the extension fax number. ",
 "Us_faxcidname" => "Defines a Fax CID name. ",
-"Us_faxcidnumber" => "Define el numero para el CID fax. ",
-"Us_countrycode" => "Especifica el codigo telefonico de pais del usuario. ",
-"Us_areacode" => "Especifica el codigo de area del usuario. ",
-"Us_emailquota" => "Especifica la cantidad en Mb que tendra de capacidad el mail del usuario. "
+"Us_faxcidnumber" => "Defines the Fax CID number. ",
+"Us_countrycode" => "Defines the country code. ",
+"Us_areacode" => "Defines the area code. ",
+"Us_emailquota" => "Defines the quantity of email (Mb). ",
+"Us_picture" => "attach a photo/image for your identification. "
 );
 ?>

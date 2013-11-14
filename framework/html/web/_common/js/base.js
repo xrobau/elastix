@@ -408,339 +408,362 @@ function getElastixKey(){
 	}
     );
 }
-
-
-function saveNewPasswordElastix(){
-	var arrAction = new Array();
-	var oldPass   = $('#curr_pass').val();
-	var newPass   = $('#curr_pass_new').val();
-	var newPassRe = $('#curr_pass_renew').val();
-
-	if(oldPass == ""){
-	  var lable_err = $('#lblCurrentPassAlert').val();
-	  alert(lable_err)
-	  return
-	}
-	if(newPass == "" || newPassRe == ""){
-	  var lable_err = $('#lblNewRetypePassAlert').val();
-	  alert(lable_err);
-	  return;
-	}
-	if(newPass != newPassRe){
-	  var lable_err = $('#lblPassNoTMatchAlert').val();
-	  alert(lable_err);
-	  return;
-	}
-
-	arrAction["menu"]          = '_elastixutils';
-	arrAction["action"]        = "changePasswordElastix";
-	arrAction["oldPassword"]   = oldPass;
-	arrAction["newPassword"]   = newPass;
-	arrAction["newRePassword"] = newPassRe;
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-		    if(statusResponse == "false")
-				alert(error);
-			else{
-				alert(error);
-				hideModalPopUP();
-			}
-		}
-	);
-}
-
-function addBookmark(){
-	var arrAction = new Array();
-	arrAction["menu"] = "_elastixutils";
-	arrAction["id_menu"] = getCurrentElastixModule();
-	arrAction["action"]  = "addBookmark";
-	arrAction["rawmode"] = "yes";
+function setAdminPassword(){
+    var title = $('#lblChangePass').val();
+    var lblCurrentPass = $('#lblCurrentPass').val();
+    var lblNewPass = $('#lblNewPass').val();
+    var lblRetypeNewPass = $('#lblRetypePass').val();
+    var btnChange = $('#btnChagePass').val();
+    var height = 160;
+    var width = 380;
     var webCommon=getWebCommon();
-    
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_addingBookmark').val()+"</span></div></div>";
-	var imgBookmark = $("#togglebookmark").attr('src');
-	if(/bookmarkon.png/.test(imgBookmark))
-		urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
-	$.blockUI({ message: urlImaLoading });
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-			$.unblockUI();
-		    if(statusResponse == "false"){
-				var imgBookmark = $("#togglebookmark").attr('src');
-				if(/bookmarkon.png/.test(imgBookmark)) {
-				  var labeli = $("#toolTip_addBookmark").val();
-				  $("#togglebookmark").attr('title', labeli);
-				  $("#togglebookmark").attr('src',"web/themes/elastixneo/images/bookmark.png");
-				} else {
-				  var labeli = $("#toolTip_removeBookmark").val();
-				  $("#togglebookmark").attr('title', labeli);
-				  $("#togglebookmark").attr('src',"web/themes/elastixneo/images/bookmarkon.png");
-				}
-				alert(error);
-			}else{
-				var action = arrData['action'];
-				var menu   = arrData['menu'];
-				var idmenu = arrData['idmenu'];
-				var namemenu = arrData['menu_session'];
-				if(action == "add"){
-					var labeli = $("#toolTip_removeBookmark").val();
-					$("#togglebookmark").attr('title', labeli);
-					var link = "<div class='neo-historybox-tab' id='menu"+idmenu+"' onMouseOut='removeNeoDisplayOnMouseOut(this);' onMouseOver='removeNeoDisplayOnMouseOver(this);'><a href='index.php?menu="+namemenu+"' >"+menu+"</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-					if($('div[id^=menu]').length == 0){
-						$('#neo-bookmarkID').attr("style","");
-						link = "<div class='neo-historybox-tabmid' id='menu"+idmenu+"' onMouseOut='removeNeoDisplayOnMouseOut(this);' onMouseOver='removeNeoDisplayOnMouseOver(this);'><a href='index.php?menu="+namemenu+"' >"+menu+"</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
-						//$('#neo-historybox').find("br").remove();
-					}
-					$('#neo-bookmarkID').after(link);
-				}
-				if(action == "delete"){
-					var labeli = $("#toolTip_addBookmark").val();
-					$("#togglebookmark").attr('title', labeli);
-					// el anterior debe tener la clase neo-historybox-tabmid
-					$('#menu'+idmenu).remove();
-					if($('div[id^=menu]').length == 0){
-						//$('#neo-bookmarkID').after("<br />");
-						$('#neo-bookmarkID').attr("style","display:none;");
-					}else{
-						$('div[id^=menu]').each(function(indice,valor){
-							var tam = $('div[id^=menu]').length;
-							if(indice == (tam - 1)){
-								$(this).removeClass('neo-historybox-tab');
-								$(this).addClass('neo-historybox-tabmid');
-
-							}
-						});
-
-					}
-				}
-			}
-		}
-	);
+    var html =
+        "<table class='tabForm' style='font-size: 16px;' width='100%' >" +
+            "<tr class='letra12'>" +
+                "<td align='left'><b>"+lblCurrentPass+"</b></td>" +
+                "<td align='left'><input type='password' id='curr_pass' name='curr_pass' value='' /></td>" +
+            "</tr>" +
+            "<tr class='letra12'>" +
+                "<td align='left'><b>"+lblNewPass+"</b></td>" +
+                "<td align='left'><input type='password' id='curr_pass_new' name='curr_pass_new' value='' /></td>" +
+            "</tr>" +
+            "<tr class='letra12'>" +
+                "<td align='left'><b>"+lblRetypeNewPass+"</b></td>" +
+                "<td align='left'><input type='password' id='curr_pass_renew' name='curr_pass_renew' value='' /></td>" +
+            "</tr>" +
+            "<tr class='letra12' >" +
+                "<td align='center'  colspan='2'><input type='button' id='elxSendChanPass' name='sendChanPss' value='"+btnChange+"' onclick='saveNewPasswordElastix()' /><img id='elxImgSavingPass' style='display:none' src='"+webCommon+"images/loading.gif' /></td>" +
+            "</tr>" +
+        "</table>";
+    ShowModalPopUP(title,width,height,html);
 }
+function saveNewPasswordElastix(){
+    var arrAction = new Array();
+    var oldPass   = $('#curr_pass').val();
+    var newPass   = $('#curr_pass_new').val();
+    var newPassRe = $('#curr_pass_renew').val();
 
+    if(oldPass == ""){
+        var lable_err = $('#lblCurrentPassAlert').val();
+        alert(lable_err)
+        return
+    }
+    if(newPass == "" || newPassRe == ""){
+        var lable_err = $('#lblNewRetypePassAlert').val();
+        alert(lable_err);
+        return;
+    }
+    if(newPass != newPassRe){
+        var lable_err = $('#lblPassNoTMatchAlert').val();
+        alert(lable_err);
+        return;
+    }
+    //ocultamos el boton de guardar
+    $("#elxSendChanPass").hide(10,function(){
+        $("#elxImgSavingPass").css("display","inline");
+    });
+    //mostramos la imagend e loading
+    arrAction["menu"]          = '_elastixutils';
+    arrAction["action"]        = "changePasswordElastix";
+    arrAction["oldPassword"]   = oldPass;
+    arrAction["newPassword"]   = newPass;
+    arrAction["newRePassword"] = newPassRe;
+    request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            if(statusResponse == "false"){
+                alert(error);
+                $("#elxImgSavingPass").hide(10,function(){
+                    $("#elxSendChanPass").css("display","inline");
+                });
+            }else{
+                alert(arrData);
+                hideModalPopUP();
+            }
+        }
+    );
+}
+function addBookmark(){
+    var arrAction = new Array();
+    arrAction["menu"] = "_elastixutils";
+    arrAction["id_menu"] = getCurrentElastixModule();
+    arrAction["action"]  = "addBookmark";
+    arrAction["rawmode"] = "yes";
+    var webCommon=getWebCommon();
+
+    var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_addingBookmark').val()+"</span></div></div>";
+    var imgBookmark = $("#togglebookmark").attr('src');
+    if(/bookmarkon.png/.test(imgBookmark))
+        urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
+    $.blockUI({ message: urlImaLoading });
+    request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            $.unblockUI();
+            if(statusResponse == "false"){
+                var imgBookmark = $("#togglebookmark").attr('src');
+                if(/bookmarkon.png/.test(imgBookmark)) {
+                    var labeli = $("#toolTip_addBookmark").val();
+                    $("#togglebookmark").attr('title', labeli);
+                    $("#togglebookmark").attr('src',"web/themes/elastixneo/images/bookmark.png");
+                } else {
+                    var labeli = $("#toolTip_removeBookmark").val();
+                    $("#togglebookmark").attr('title', labeli);
+                    $("#togglebookmark").attr('src',"web/themes/elastixneo/images/bookmarkon.png");
+                }
+                alert(error);
+            }else{
+                var action = arrData['action'];
+                var menu   = arrData['menu'];
+                var idmenu = arrData['idmenu'];
+                var namemenu = arrData['menu_session'];
+                if(action == "add"){
+                    var labeli = $("#toolTip_removeBookmark").val();
+                    $("#togglebookmark").attr('title', labeli);
+                    var link = "<div class='neo-historybox-tab' id='menu"+idmenu+"' onMouseOut='removeNeoDisplayOnMouseOut(this);' onMouseOver='removeNeoDisplayOnMouseOver(this);'><a href='index.php?menu="+namemenu+"' >"+menu+"</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
+                    if($('div[id^=menu]').length == 0){
+                        $('#neo-bookmarkID').attr("style","");
+                        link = "<div class='neo-historybox-tabmid' id='menu"+idmenu+"' onMouseOut='removeNeoDisplayOnMouseOut(this);' onMouseOver='removeNeoDisplayOnMouseOver(this);'><a href='index.php?menu="+namemenu+"' >"+menu+"</a><div class='neo-bookmarks-equis neo-display-none' onclick='deleteBookmarkByEquis(this);'></div></div>";
+                        //$('#neo-historybox').find("br").remove();
+                    }
+                    $('#neo-bookmarkID').after(link);
+                }
+                if(action == "delete"){
+                    var labeli = $("#toolTip_addBookmark").val();
+                    $("#togglebookmark").attr('title', labeli);
+                    // el anterior debe tener la clase neo-historybox-tabmid
+                    $('#menu'+idmenu).remove();
+                    if($('div[id^=menu]').length == 0){
+                        //$('#neo-bookmarkID').after("<br />");
+                        $('#neo-bookmarkID').attr("style","display:none;");
+                    }else{
+                        $('div[id^=menu]').each(function(indice,valor){
+                            var tam = $('div[id^=menu]').length;
+                            if(indice == (tam - 1)){
+                                $(this).removeClass('neo-historybox-tab');
+                                $(this).addClass('neo-historybox-tabmid');
+
+                            }
+                        });
+
+                    }
+                }
+            }
+        }
+    );
+}
 function deleteBookmarkByEquis(ref){
     // obteniendo el id del menu.
     var linkMenu = $(ref).parent().children(':first-child').attr('href');
-	var arrLinkMenu = linkMenu.split("menu=",2);
-	var id_menu = arrLinkMenu[1];
-	var arrAction = new Array();
-	arrAction["menu"] = "_elastixutils";
-	arrAction["action"]  = "deleteBookmark";
-	arrAction["rawmode"] = "yes";
-	arrAction["id_menu"] = id_menu;
-	var webCommon=getWebCommon();
-    
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
-	$.blockUI({ message: urlImaLoading });
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-			$.unblockUI();
-			var source_img = $('#neo-logobox').find('img:first').attr("src");
-			var menu_actual = arrData['menu_url'];
-		    if(statusResponse == "false"){
-				var menuchanged = arrData['menu_session'];
-				var source_img = $('#neo-logobox').find('img:first').attr("src");
-				alert(error);
-			}else{
-				var action = arrData['action'];
-				var menu   = arrData['menu'];
-				var idmenu = arrData['idmenu'];
-				var namemenu = arrData['menu_session'];
+    var arrLinkMenu = linkMenu.split("menu=",2);
+    var id_menu = arrLinkMenu[1];
+    var arrAction = new Array();
+    arrAction["menu"] = "_elastixutils";
+    arrAction["action"]  = "deleteBookmark";
+    arrAction["rawmode"] = "yes";
+    arrAction["id_menu"] = id_menu;
+    var webCommon=getWebCommon();
 
-				if(action == "delete"){
-					var imgBookmark = $("#togglebookmark").attr('src');
-					// solo hacer esto si el menu actual es el que se esta eliminando
-					if(namemenu == menu_actual){
-						var labeli = $("#toolTip_addBookmark").val();
-						$("#togglebookmark").attr('title', labeli);
-						$("#togglebookmark").attr('src',"web/themes/elastixneo/images/bookmark.png");
-					}
+    var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='"+webCommon+"images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
+    $.blockUI({ message: urlImaLoading });
+    request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            $.unblockUI();
+            var source_img = $('#neo-logobox').find('img:first').attr("src");
+            var menu_actual = arrData['menu_url'];
+            if(statusResponse == "false"){
+                var menuchanged = arrData['menu_session'];
+                var source_img = $('#neo-logobox').find('img:first').attr("src");
+                alert(error);
+            }else{
+                var action = arrData['action'];
+                var menu   = arrData['menu'];
+                var idmenu = arrData['idmenu'];
+                var namemenu = arrData['menu_session'];
 
-					var labeli = $("#toolTip_addBookmark").val();
-					$("#togglebookmark").attr('title', labeli);
-					// el anterior debe tener la clase neo-historybox-tabmid
-					$('#menu'+idmenu).remove();
-					if($('div[id^=menu]').length == 0){
-						//$('#neo-bookmarkID').after("<br />");
-						$('#neo-bookmarkID').attr("style","display:none;");
-					}else{
-						$('div[id^=menu]').each(function(indice,valor){
-							var tam = $('div[id^=menu]').length;
-							if(indice == (tam - 1)){
-								$(this).removeClass('neo-historybox-tab');
-								$(this).addClass('neo-historybox-tabmid');
-							}
-						});
-
-					}
-				}
-			}
-		}
-	);
-}
-
-function saveToggleTab(){
-	var arrAction = new Array();
-	arrAction["menu"] = "_elastixutils";
-	arrAction["id_menu"] = getCurrentElastixModule();
-	arrAction["action"]  = "saveNeoToggleTab";
-	if($('#neo-lengueta-minimized').hasClass('neo-display-none'))
-		arrAction["statusTab"]  = "true";
-	else
-		arrAction["statusTab"]  = "false";
-	arrAction["rawmode"] = "yes";
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-            var webCommon=getWebCommon();
-			/*$.unblockUI();*/
-			if(statusResponse == "false"){
-				if(!$('#neo-lengueta-minimized').hasClass('neo-display-none')){
-					  $("#neo-contentbox-leftcolumn").removeClass("neo-contentbox-leftcolumn-minimized");
-					  $("#neo-contentbox-maincolumn").css("width", "1025px");
-					  $("#neo-contentbox-leftcolumn").data("neo-contentbox-leftcolum-status", "visible");
-					  $("#neo-lengueta-minimized").addClass("neo-display-none");
-					  if($('#toggleleftcolumn')){
-						  var labeli = $('#toolTip_hideTab').val();
-						  $('#toggleleftcolumn').attr('title',labeli);
-						  $('#toggleleftcolumn').attr('src',""+webCommon+"images/expand.png");
-
-					  }
-					}else{
-					  $("#neo-contentbox-leftcolumn").addClass("neo-contentbox-leftcolumn-minimized");
-					  $("#neo-contentbox-maincolumn").css("width", "1245px");
-					  $("#neo-contentbox-leftcolumn").data("neo-contentbox-leftcolum-status", "hidden");
-					  $("#neo-lengueta-minimized").removeClass("neo-display-none");
-					  if($('#toggleleftcolumn')){
-						  var labeli = $('#toolTip_showTab').val();
-						  $('#toggleleftcolumn').attr('title',labeli);
-						  $('#toggleleftcolumn').attr('src',""+webCommon+"images/expandOut.png");
-					  }
-					}
-				alert(error);
-			}
-		}
-	);
-}
-
-
-//***Genera la Tabla de los Detalles de la Versión
-function loadDetails(){
-        var order = "menu=_elastixutils&action=versionRPM&rawmode=yes";
-        $.post("index.php", order, function(theResponse){
-            $("#loadingRPM").hide();
-            $("#changeMode").show();
-            var message = JSONRPMtoString(theResponse);
-            var html = "";
-            var html2 = "";
-            var key = "";
-            var key2 = "";
-            var message2 = "";
-            var i = 0;
-            var cont = 0;
-            for(key in message){
-                html += "<table  width='96%' border='0' cellspacing='0' cellpadding='0' style='border:1px solid #999'>"+
-                           "<tr class='letra12'>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Name</b></td>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Package Name</b></td>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Version</b></td>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Release</b></td>" +
-                        "</tr>" +
-                        "<tr class='letra12'>" +
-                            "<td class='letra12 tdRPMDetail' colspan='4' align='left'>&nbsp;&nbsp;" + key + "</td>" +
-                        "</tr>";
-                /*html2 += "Name|Package Name|Version|Release\n";*/
-                cont = cont + 2;
-                html2 += "\n " + key+"\n";
-                message2 = message[key];
-                if(key == "Kernel"){
-                    for(i = 0; i<message2.length; i++){
-                        var arryVersions = (message2[i][1]).split("-",2);
-                        html += "<tr class='letra12'>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][0] + "(" + message2[i][2] + ")</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + arryVersions[0] + "</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + arryVersions[1] + "</td>" +
-                                "</tr>";
-                        html2+= "   " + message2[i][0] + "(" + message2[i][2] + ")-"+arryVersions[0] + "-"+arryVersions[1] + "\n";
-                        cont++;
+                if(action == "delete"){
+                    var imgBookmark = $("#togglebookmark").attr('src');
+                    // solo hacer esto si el menu actual es el que se esta eliminando
+                    if(namemenu == menu_actual){
+                        var labeli = $("#toolTip_addBookmark").val();
+                        $("#togglebookmark").attr('title', labeli);
+                        $("#togglebookmark").attr('src',"web/themes/elastixneo/images/bookmark.png");
                     }
-                }else{
-                    for(i = 0; i<message2.length; i++){
-                        html += "<tr class='letra12'>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][0] + "</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][1] + "</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][2] + "</td>" +
-                                "</tr>";
-                        html2+= "   " + message2[i][0] + "-" + message2[i][1] + "-" + message2[i][2] + "\n";
-                        cont++;
+
+                    var labeli = $("#toolTip_addBookmark").val();
+                    $("#togglebookmark").attr('title', labeli);
+                    // el anterior debe tener la clase neo-historybox-tabmid
+                    $('#menu'+idmenu).remove();
+                    if($('div[id^=menu]').length == 0){
+                        //$('#neo-bookmarkID').after("<br />");
+                        $('#neo-bookmarkID').attr("style","display:none;");
+                    }else{
+                        $('div[id^=menu]').each(function(indice,valor){
+                            var tam = $('div[id^=menu]').length;
+                            if(indice == (tam - 1)){
+                                $(this).removeClass('neo-historybox-tab');
+                                $(this).addClass('neo-historybox-tabmid');
+                            }
+                        });
+
                     }
                 }
-
             }
-            cont = cont + 2;
-            html +="</table>";
-	    
-            $("#txtMode").attr("rows", cont);
-            $("#tableRMP").html(html);
-	    $("#changeMode").show();
-            $("#txtMode").val(html2);
-            $("#tableRMP").css("border-style", "none");	
-            
-        });
+        }
+    );
 }
+function saveToggleTab(){
+    var arrAction = new Array();
+    arrAction["menu"] = "_elastixutils";
+    arrAction["id_menu"] = getCurrentElastixModule();
+    arrAction["action"]  = "saveNeoToggleTab";
+    if($('#neo-lengueta-minimized').hasClass('neo-display-none'))
+        arrAction["statusTab"]  = "true";
+    else
+        arrAction["statusTab"]  = "false";
+    arrAction["rawmode"] = "yes";
+    request("index.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            var webCommon=getWebCommon();
+            /*$.unblockUI();*/
+            if(statusResponse == "false"){
+                if(!$('#neo-lengueta-minimized').hasClass('neo-display-none')){
+                        $("#neo-contentbox-leftcolumn").removeClass("neo-contentbox-leftcolumn-minimized");
+                        $("#neo-contentbox-maincolumn").css("width", "1025px");
+                        $("#neo-contentbox-leftcolumn").data("neo-contentbox-leftcolum-status", "visible");
+                        $("#neo-lengueta-minimized").addClass("neo-display-none");
+                        if($('#toggleleftcolumn')){
+                            var labeli = $('#toolTip_hideTab').val();
+                            $('#toggleleftcolumn').attr('title',labeli);
+                            $('#toggleleftcolumn').attr('src',""+webCommon+"images/expand.png");
 
+                        }
+                    }else{
+                        $("#neo-contentbox-leftcolumn").addClass("neo-contentbox-leftcolumn-minimized");
+                        $("#neo-contentbox-maincolumn").css("width", "1245px");
+                        $("#neo-contentbox-leftcolumn").data("neo-contentbox-leftcolum-status", "hidden");
+                        $("#neo-lengueta-minimized").removeClass("neo-display-none");
+                        if($('#toggleleftcolumn')){
+                            var labeli = $('#toolTip_showTab').val();
+                            $('#toggleleftcolumn').attr('title',labeli);
+                            $('#toggleleftcolumn').attr('src',""+webCommon+"images/expandOut.png");
+                        }
+                    }
+                alert(error);
+            }
+        }
+    );
+}
+//***Genera la Tabla de los Detalles de la Versión
+function loadDetails(){
+    var order = "menu=_elastixutils&action=versionRPM&rawmode=yes";
+    $.post("index.php", order, function(theResponse){
+        $("#loadingRPM").hide();
+        $("#changeMode").show();
+        var message = JSONRPMtoString(theResponse);
+        var html = "";
+        var html2 = "";
+        var key = "";
+        var key2 = "";
+        var message2 = "";
+        var i = 0;
+        var cont = 0;
+        for(key in message){
+            html += "<table  width='96%' border='0' cellspacing='0' cellpadding='0' style='border:1px solid #999'>"+
+                        "<tr class='letra12'>" +
+                        "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Name</b></td>" +
+                        "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Package Name</b></td>" +
+                        "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Version</b></td>" +
+                        "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Release</b></td>" +
+                    "</tr>" +
+                    "<tr class='letra12'>" +
+                        "<td class='letra12 tdRPMDetail' colspan='4' align='left'>&nbsp;&nbsp;" + key + "</td>" +
+                    "</tr>";
+            /*html2 += "Name|Package Name|Version|Release\n";*/
+            cont = cont + 2;
+            html2 += "\n " + key+"\n";
+            message2 = message[key];
+            if(key == "Kernel"){
+                for(i = 0; i<message2.length; i++){
+                    var arryVersions = (message2[i][1]).split("-",2);
+                    html += "<tr class='letra12'>" +
+                                "<td class='letra12'>&nbsp;&nbsp;</td>" +
+                                "<td class='letra12'>&nbsp;&nbsp;" + message2[i][0] + "(" + message2[i][2] + ")</td>" +
+                                "<td class='letra12'>&nbsp;&nbsp;" + arryVersions[0] + "</td>" +
+                                "<td class='letra12'>&nbsp;&nbsp;" + arryVersions[1] + "</td>" +
+                            "</tr>";
+                    html2+= "   " + message2[i][0] + "(" + message2[i][2] + ")-"+arryVersions[0] + "-"+arryVersions[1] + "\n";
+                    cont++;
+                }
+            }else{
+                for(i = 0; i<message2.length; i++){
+                    html += "<tr class='letra12'>" +
+                                "<td class='letra12'>&nbsp;&nbsp;</td>" +
+                                "<td class='letra12'>&nbsp;&nbsp;" + message2[i][0] + "</td>" +
+                                "<td class='letra12'>&nbsp;&nbsp;" + message2[i][1] + "</td>" +
+                                "<td class='letra12'>&nbsp;&nbsp;" + message2[i][2] + "</td>" +
+                            "</tr>";
+                    html2+= "   " + message2[i][0] + "-" + message2[i][1] + "-" + message2[i][2] + "\n";
+                    cont++;
+                }
+            }
 
+        }
+        cont = cont + 2;
+        html +="</table>";
+    
+        $("#txtMode").attr("rows", cont);
+        $("#tableRMP").html(html);
+    $("#changeMode").show();
+        $("#txtMode").val(html2);
+        $("#tableRMP").css("border-style", "none");	
+    });
+}
 //***Cambia de (Texto->Html)(Html->Texto)
 function changeMode(){	
-        var viewTbRpm = $(".tdRpm").attr("style");
-        if(viewTbRpm == "display: block;"){
-            //change lbltextMode
-            var lblhtmlMode = $("#lblHtmlMode").val();
-            $("#changeMode").text("("+lblhtmlMode+")");
+    var viewTbRpm = $(".tdRpm").attr("style");
+    if(viewTbRpm == "display: block;"){
+        //change lbltextMode
+        var lblhtmlMode = $("#lblHtmlMode").val();
+        $("#changeMode").text("("+lblhtmlMode+")");
 
-            $(".tdRpm").attr("style","display: none;");
-            $("#tdTa").attr("style","display: block;");
-		
-        }else{
-            //change lblHtmlMode
-            var lbltextMode = $("#lblTextMode").val();
-            $("#changeMode").text("("+lbltextMode+")");
-            $(".tdRpm").attr("style","display: block;");
-            $("#tdTa").attr("style","display: none;");
-            $("#txtMode").css("height","auto");
-        }
+        $(".tdRpm").attr("style","display: none;");
+        $("#tdTa").attr("style","display: block;");
+    
+    }else{
+        //change lblHtmlMode
+        var lbltextMode = $("#lblTextMode").val();
+        $("#changeMode").text("("+lbltextMode+")");
+        $(".tdRpm").attr("style","display: block;");
+        $("#tdTa").attr("style","display: none;");
+        $("#txtMode").css("height","auto");
+    }
 }
 
 //***POPUP VERSION
 function showVersion(){
-	var arrAction = new Array();
+    var arrAction = new Array();
         arrAction["action"]  = "showRPMS_Version";
         arrAction["rawmode"] = "yes";
 
         request("register.php",arrAction,false,
             function(arrData,statusResponse,error)
             {
-	        ShowModalPopUP(arrData['title'],380,800,arrData['html']);  
-		loadDetails();
+            ShowModalPopUP(arrData['title'],380,800,arrData['html']);  
+        loadDetails();
             }
         );
-       
-	$("#loadingRPM").show();
+        
+    $("#loadingRPM").show();
         $("#tdTa").hide();
         $(".tdRpm").show();
         $("#tdTa").val("");
         var lbltextMode = $("#lblTextMode").val();
         $("#changeMode").text("("+lbltextMode+")");
         $("#txtMode").val("");
-        
 }
-
-
 $(document).ready(function(){
     //***Para los módulos con filtro se llama a la función pressKey
     if (document.getElementById("filter_value") || 
@@ -755,7 +778,7 @@ $(document).ready(function(){
             $("#boxRPM").attr("style","display: none;");
             $("#fade_overlay").attr("style","display: none;");
         });
-  
+
     $("#viewDetailsRPMs").click(function(){ showVersion(); });
 
     $("#fade_overlay").click(function(){
@@ -763,106 +786,102 @@ $(document).ready(function(){
         $("#fade_overlay").attr("style","display: none;");
     });
 
-	$( "#search_module_elastix" )
-		// don't navigate away from the field on tab when selecting an item
-		.bind( "keydown", function( event ) {
-			if ( event.keyCode === $.ui.keyCode.TAB && $( this ).data( "autocomplete" ).menu.active ) {
-				event.preventDefault();
-			}
-		})
-		.autocomplete({
-			autoFocus: true,
-		    delay: 0,
-			minLength: 0,
-			source: function(request, response){
-				//$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-				$("#neo-cmenu-showbox-search").hover(
-				  function() {
-					$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-				  },
-				  function() {
-					$("#neo-cmenu-showbox-search").removeClass("neo-display-none");}
-				);
-				$.ajax({
-					url: 'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
-					dataType: "json",
-					data: {
-						name_module_search: ((request.term).split( /,\s*/ ) ).pop()
-					},
-					success: function( data ) {
-						response( $.map( data, function( item ) {
-							return {
-								label: item.caption,
-								value: item.value
-							}
-						}));
-					}
-				});
-			},
-			focus: function() {
-				// prevent value inserted on focus
-				return false;
-			},
-			open: function() { // parche que resuelve el bug del panel de busqueda de modulo en PBX
-				var top_var  = $('.ui-autocomplete').css("top");
-				var left_var = $('.ui-autocomplete').css("left");
-				if(top_var == "0px" & left_var == "0px"){
-					var searchPosition = $('#search_module_elastix').position();
-					var top = searchPosition.top + 53;
-					if (/Chrome[\/\s](\d+\.\d+)/.test(navigator.userAgent))
-						top = searchPosition.top + 50;
-					$('.ui-autocomplete').css("top",top+"px");
-					$('.ui-autocomplete').css("left","1054px");
-					$('.ui-autocomplete').css("width","174px");
-				}
-			},
-			close: function() {
-				$('#neo-cmenu-showbox-search').one('click', function(e) {
-					//$( "#search_module_elastix" ).autocomplete( "close" );
-					$( "#search_module_elastix" ).val("");
-					e.stopPropagation();
-				});
-				$('body').one('click', function(e) {
-					$("#neo-cmenu-showbox-search").hover(
-					  function() {
-						$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-					  },
-					  function() {
-						$("#neo-cmenu-showbox-search").addClass("neo-display-none");
-					  }
-					);
-					$("#neo-cmenu-showbox-search").addClass("neo-display-none");
-					e.stopPropagation();
-				});
-				//$("#neo-cmenu-showbox-search").addClass("neo-display-none");
-			},
-			/*change: function( event, ui ) {
+    $( "#search_module_elastix" )
+        // don't navigate away from the field on tab when selecting an item
+        .bind( "keydown", function( event ) {
+            if ( event.keyCode === $.ui.keyCode.TAB && $( this ).data( "autocomplete" ).menu.active ) {
+                event.preventDefault();
+            }
+        })
+        .autocomplete({
+            autoFocus: true,
+            delay: 0,
+            minLength: 0,
+            source: function(request, response){
+                //$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
+                $("#neo-cmenu-showbox-search").hover(
+                    function() {
+                    $("#neo-cmenu-showbox-search").removeClass("neo-display-none");
+                    },
+                    function() {
+                    $("#neo-cmenu-showbox-search").removeClass("neo-display-none");}
+                );
+                $.ajax({
+                    url: 'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
+                    dataType: "json",
+                    data: {
+                        name_module_search: ((request.term).split( /,\s*/ ) ).pop()
+                    },
+                    success: function( data ) {
+                        response( $.map( data, function( item ) {
+                            return {
+                                label: item.caption,
+                                value: item.value
+                            }
+                        }));
+                    }
+                });
+            },
+            focus: function() {
+                // prevent value inserted on focus
+                return false;
+            },
+            open: function() { // parche que resuelve el bug del panel de busqueda de modulo en PBX
+                var top_var  = $('.ui-autocomplete').css("top");
+                var left_var = $('.ui-autocomplete').css("left");
+                if(top_var == "0px" & left_var == "0px"){
+                    var searchPosition = $('#search_module_elastix').position();
+                    var top = searchPosition.top + 53;
+                    if (/Chrome[\/\s](\d+\.\d+)/.test(navigator.userAgent))
+                        top = searchPosition.top + 50;
+                    $('.ui-autocomplete').css("top",top+"px");
+                    $('.ui-autocomplete').css("left","1054px");
+                    $('.ui-autocomplete').css("width","174px");
+                }
+            },
+            close: function() {
+                $('#neo-cmenu-showbox-search').one('click', function(e) {
+                    //$( "#search_module_elastix" ).autocomplete( "close" );
+                    $( "#search_module_elastix" ).val("");
+                    e.stopPropagation();
+                });
+                $('body').one('click', function(e) {
+                    $("#neo-cmenu-showbox-search").hover(
+                        function() {
+                        $("#neo-cmenu-showbox-search").removeClass("neo-display-none");
+                        },
+                        function() {
+                        $("#neo-cmenu-showbox-search").addClass("neo-display-none");
+                        }
+                    );
+                    $("#neo-cmenu-showbox-search").addClass("neo-display-none");
+                    e.stopPropagation();
+                });
+                //$("#neo-cmenu-showbox-search").addClass("neo-display-none");
+            },
+            /*change: function( event, ui ) {
 
-			},*/
-			select: function( event, ui ) {
-				//$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-				this.value = ui.item.label;
-				document.location.href = "?menu="+ui.item.value;
-				// enviando la redireccion al index.php
-				return false;
-			}
-	});
+            },*/
+            select: function( event, ui ) {
+                //$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
+                this.value = ui.item.label;
+                document.location.href = "?menu="+ui.item.value;
+                // enviando la redireccion al index.php
+                return false;
+            }
+    });
       
-      var menu = getParameterByName("menu");
-       if(typeof  menu!== "undefined" && menu){
+    var menu = getParameterByName("menu");
+    if(typeof  menu!== "undefined" && menu){
         var lblmenu = menu.split("_");
 
         if(lblmenu["0"]=="a2b"){
-          $('#myframe').load(function() {
-              $(".topmenu-right-button a",myframe.document).attr("target","_self");
-          });
+            $('#myframe').load(function() {
+                $(".topmenu-right-button a",myframe.document).attr("target","_self");
+            });
         }
-      }
-
-          
-
+    }
 });
-
 //Si se presiona enter se hace un submit al formulario para que se aplica el filtro
 function keyPressed(e)
 {
@@ -876,14 +895,12 @@ function keyPressed(e)
         return false;
     }
 }
-
 // implement JSON.parse de-serialization
 function JSONRPMtoString(str) {
-	if (str === "") str = '""';
-	eval("var p=" + str + ";");
-	return p;
+    if (str === "") str = '""';
+    eval("var p=" + str + ";");
+    return p;
 }
-
 function changeColorMenu()
 {
     var color = $('#userMenuColor').val();
@@ -910,7 +927,6 @@ function getParameterByName(name) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 
 }
-
 //Recoger el valor del módulo activo a partir de elastix_framework_module_id
 function getCurrentElastixModule()
 {

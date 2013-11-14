@@ -3,11 +3,14 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, target-densitydpi=device-dpi"/>
         <title>Elastix</title>
-        <link rel="stylesheet" href="{$WEBCOMMON}css/bootstrap.css" />
+        <link rel="stylesheet" href="{$WEBCOMMON}css/bootstrap.min.css" />
         <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" />
         {$HEADER_LIBS_JQUERY}
-        <script type='text/javascript' src="{$WEBCOMMON}js/jssip-0.3.0.min.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/jssip-0.3.0.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/bootstrap.min.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/jquery-title-alert.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/base.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/uf.js"></script>
         {$HEADER}
@@ -31,12 +34,14 @@
         </div>
         <div id="rightdiv"> <!--Este es el Div que se usa para el chat-->
             <div id="b3_1" style='display:none'>
-                <div id='elx_im_personal_info'>
-                    
-                </div>
-                <div id='elx_im_contact_search'>
-                    <input type='text' maxlength='50' id='im_search_filter' name='im_search_filter' class='im_search_filter' >
-                    <div class='contactSearchResult' class='contactSearchResult'>
+                <div id='head_rightdiv'>
+                    <div id='elx_im_personal_info'>
+                        
+                    </div>
+                    <div id='elx_im_contact_search'>
+                        <input type='text' maxlength='50' id='im_search_filter' name='im_search_filter' class='im_search_filter' >
+                        <div class='contactSearchResult' class='contactSearchResult'>
+                        </div>
                     </div>
                 </div>
                 <div id='elx_im_list_contacts'>
@@ -49,7 +54,21 @@
             </div>
         </div>
         <div id='elx_chat_space'>
-            
+            <div id='elx_notify_min_chat'  class='elx_nodisplay'>
+                <div id='elx_list_min_chat' style='visibility:hidden'> 
+                    <div>
+                        <ul class='elx_list_min_chat_ul'>
+                        </ul>
+                    </div>
+                </div>
+                <input type='hidden' id='elx_hide_min_list' value='no'>
+                <a id='elx_notify_min_chat_box' href="#" rel="toggle" role="button">
+                    <span class="icn_d elx_icn_notify_chat">h</span>
+                    <span id='elx_num_mim_chat'>0</span>
+                </a>
+            </div>
+            <div id='elx_chat_space_tabs'>
+            </div>
         </div>
     </body>
 </html>

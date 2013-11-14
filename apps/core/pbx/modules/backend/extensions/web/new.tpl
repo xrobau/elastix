@@ -50,7 +50,7 @@
                 {else}
                     <td width="31%">{$exten.INPUT}</td>
                 {/if}
-                {if $mode eq 'edit' && $USER_EXTEN} 
+                {if $USER_EXTEN} 
                     <td width="21%" nowrap>{$secret.LABEL}: {if $mode eq 'input'}<span class="required">*</span>{/if}</td>
                     <td>{$secret.INPUT}</td>
                 {/if}

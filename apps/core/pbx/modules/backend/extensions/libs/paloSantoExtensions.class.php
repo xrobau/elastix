@@ -165,7 +165,7 @@ class paloSantoExtensions{
             }
         }
 
-        $query="SELECT tech, exten, outboundcid, rt, record_in, record_out, organization_domain, voicemail, device, clid_name, clid_number from extension where id=? $where";
+        $query="SELECT tech, exten, outboundcid, rt, record_in, record_out, organization_domain, voicemail, device, clid_name, clid_number,alias,elxweb_device,enable_chat from extension where id=? $where";
         $result=$this->_DB->getFirstRowQuery($query,true,$param);
         if($result===false){
             $this->errMsg=$this->_DB->errMsg;
@@ -185,6 +185,9 @@ class paloSantoExtensions{
             $arrExtension["record_in"]=$result["record_in"];
             $arrExtension["record_out"]=$result["record_out"];
             $arrExtension["out_clid"]=$result["outboundcid"];
+            $arrExtension["alias"]=$result["alias"];
+            $arrExtension["elxweb_device"]=$result["elxweb_device"];
+            $arrExtension["enable_chat"]=$result["enable_chat"];
             
             //obtenemos las caracteristicas de voicemail de la extension en caso de que este tenga creada uno
             if(isset($result["voicemail"]) && $result["voicemail"]!="novm"){

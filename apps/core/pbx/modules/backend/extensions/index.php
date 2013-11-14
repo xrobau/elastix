@@ -248,7 +248,6 @@ function showMessageReload($module_name, &$pDB, $credentials){
     }
     return $msgs;
 }
-
 function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials){
     global $arrPermission;
     $pExten = new paloSantoExtensions($pDB);
@@ -293,10 +292,18 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
             }else
                 $tech=null;
 
+            //comprabar si la extension pertence a un usuario, 
+            //si pertenece a un usuario el secret no puede ser modificado
+            $belonguser=extenBelongToUser($pDB,$arrExten["exten"],$arrExten["domain"]);
+            if($belonguser){
+                $smarty->assign("USER_EXTEN",false);
+            }else{
+                $smarty->assign("USER_EXTEN",true);
+            }
+            
             if(getParameter("save_edit"))
                 $arrExten=$_POST;
             
-
             $smarty->assign("DISPLAY_VM","style='display: none;'");
             if(isset($arrExten["create_vm"])){
                 if($arrExten["create_vm"]=="yes"){
@@ -324,6 +331,7 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         }
     }else{
         $tech=null;
+        $smarty->assign("USER_EXTEN",true);
         if($credentials['userlevel']=='superadmin'){
             if(getParameter("create_exten")){
                 $domain=getParameter('organization_add'); //este parametro solo es selecionable cuando es el superadmin quien crea la ruta
@@ -402,7 +410,17 @@ function viewFormExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 
     return $content;
 }
-
+function extenBelongToUser($pDB,$exten,$domain){
+    $belonguser=false;
+    //comprobamos si la extension le pertenece a algun usuario
+    //si le pertenece a un usuario el secret no puede ser editado
+    $query = "Select username from acl_user where extension=? and id_group in (select g.id from acl_group g join organization o on g.id_organization=o.id where o.domain=?)";
+    $result=$pDB->getFirstRowQuery($query,false,array($exten,$domain));
+    if(is_array($result) && count($result)>0){
+        $belonguser=true;
+    }
+    return $belonguser;
+}
 function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials){
     $pExten = new paloSantoExtensions($pDB);
     $error = "";
@@ -444,7 +462,7 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         //no puede contener caracteres esoeciales ni salto de lineas
         $arrProp["fullname"]=getParameter("clid_name");
         if($arrProp["fullname"]!=''){
-            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["fullname"])){
+            if(!preg_match("/^[[:alnum:]_[:space:]-]+$/",$arrProp["fullname"])){
                 $error .=_tr("CID Name is invalid");
                 $continuar=false;
             }
@@ -454,7 +472,7 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         
         $arrProp["clid_number"]=getParameter('clid_number');
         if($arrProp["clid_number"]!=''){
-            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["clid_number"])){
+            if(!preg_match("/^[[:alnum:]_[:space:]-]+$/",$arrProp["clid_number"])){
                 $error .=_tr("CID Number is invalid");
                 $continuar=false;
             }
@@ -464,7 +482,6 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
             
         if($continuar){
             //seteamos un arreglo con los parametros configurados
-            $arrProp=array();
             $exten=getParameter("exten");
             $arrProp["name"]=getParameter("exten"); //nombre del device al que se le agrega como prefijo orgcode_
             $arrProp["exten"]=getParameter("exten");
@@ -544,6 +561,7 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
     $error = "";
     $continuar=true;
     $exito=false;
+    $belonguser=false;
     
     $idExten=getParameter("id_exten");
 
@@ -569,20 +587,15 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
         $smarty->assign("mb_message",_tr("Extension doesn't exist"));
         return reportExten($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
+        $exten=$arrExten["exten"];
         //comprobamos si la extension le pertenece a algun usuario
         //si le pertenece a un usuario el secret no puede ser editado
-        $query = "Select username from acl_user where extension=? and id_group in (select g.id from acl_group g join organization o on g.id_organization=o.id where o.domain=?)";
-        $result=$pDB->getFirstRowQuery($query,false,array($arrExten["exten"],$arrExten["domain"]));
-        if($result===false){
-            $error .="An error has ocurred to retrieved Extension data."." "._tr("DATABASE ERROR");
-            $continuar=false;
-        }elseif(count($result)>0){
+        $belonguser=extenBelongToUser($pDB,$arrExten["exten"],$arrExten["domain"]);
+        
+        $secret=getParameter("secret");
+        if($belonguser){
             $secret="";
-        }else{
-            $secret=getParameter("secret");
         }
-    
-        $exten=$arrExten["exten"];
         if(isset($secret) && $secret!=""){
             if(!isStrongPassword($secret)){
                 $error .=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
@@ -599,7 +612,7 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
         //no puede contener caracteres esoeciales ni salto de lineas
         $arrProp["fullname"]=getParameter("clid_name");
         if($arrProp["fullname"]!=''){
-            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["fullname"])){
+            if(!preg_match("/^[[:alnum:]_[:space:]-]+$/",$arrProp["fullname"])){
                 $error .=_tr("CID Name is invalid");
                 $continuar=false;
             }
@@ -609,7 +622,7 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
         
         $arrProp["clid_number"]=getParameter('clid_number');
         if($arrProp["clid_number"]!=''){
-            if(!preg_match("/^[[:alnum:]_[[:space:]]]+$/",$arrProp["clid_number"])){
+            if(!preg_match("/^[[:alnum:]_[:space:]-]+$/",$arrProp["clid_number"])){
                 $error .=_tr("CID Number is invalid");
                 $continuar=false;
             }
@@ -619,10 +632,14 @@ function saveEditExten($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
         
         if($continuar){
             //seteamos un arreglo con los parametros configurados
-            $arrProp=array();
             $arrProp["exten"]=$exten;
             $arrProp["name"]=$arrExten["device"];
             $arrProp["dial"]=$arrExten["dial"];
+            if($belonguser){
+                $arrProp["alias"]=$arrExten["alias"];
+                $arrProp["elxweb_device"]=$arrExten["elxweb_device"];
+                $arrProp["enable_chat"]=$arrExten["enable_chat"];
+            }
             $arrProp['secret']=getParameter("secret");
             $arrProp['rt']=getParameter("ring_timer");
             $arrProp['record_in']=getParameter("record_in");

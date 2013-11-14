@@ -356,9 +356,9 @@ class paloMyExten{
         if($arrProp['create_vm']=="yes"){
             if($extenDB['voicemail']=='novm'){
                 $arrProp['mailbox']=$arrProp["exten"]."@{$orgInfo['code']}-default";
-                $arrProp["voicemail_context"]=$arrProp["exten"]."@{$orgInfo['code']}-default";
+                $arrProp["voicemail_context"]="{$orgInfo['code']}-default";
             }else{
-			    $arrProp['mailbox']=$extenDB['voicemail'];
+			    $arrProp['mailbox']=$arrProp["exten"]."@".$extenDB['voicemail'];
 			    $arrProp["voicemail_context"]=$extenDB['voicemail'];
             }
 		}else{

@@ -1395,7 +1395,7 @@ function createExtGeneral(){
     $arrExt[]=new paloExtensions("im",new ext_gotoif('$["${GROUP_MSG_STATUS}"!="SUCCESS"]','sendfailedmsg'));
     $arrExt[]=new paloExtensions("im",new ext_hangup());
     $arrExt[]=new paloExtensions("im",new ext_noop('Sending error to user'),"n",'sendfailedmsg');
-    $arrExt[]=new paloExtensions("im",new ext_set('MESSAGE(body)','[${STRFTIME(${EPOCH},,%d%m%Y-%H:%M:%S)}] Your message to ${TO_PEER_NAME} has failed. Sending when available'));
+    $arrExt[]=new paloExtensions("im",new ext_set('MESSAGE(body)','[${STRFTIME(${EPOCH},,%d/%m/%Y-%H:%M:%S)}] Your message to ${TO_PEER_NAME} has failed. Sending when available'));
     $arrExt[]=new paloExtensions("im",new ext_messageSend('sip:${FROM_PEER}','"${TO_PEER_NAME}" <${MESSAGE(to)}>'));
     $arrExt[]=new paloExtensions("im",new ext_noop('Send status is ${MESSAGE_SEND_STATUS}'));
     $arrExt[]=new paloExtensions("im",new ext_hangup());

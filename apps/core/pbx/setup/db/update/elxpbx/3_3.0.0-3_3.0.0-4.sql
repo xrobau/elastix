@@ -13,6 +13,9 @@ ALTER TABLE sip_settings MODIFY COLUMN `mohinterpret` varchar(100) DEFAULT NULL;
 ALTER TABLE sip_settings MODIFY COLUMN `mohsuggest` varchar(100) DEFAULT NULL;
 ALTER TABLE sip_settings MODIFY COLUMN `host` varchar(100) DEFAULT NULL;
 
+insert into sip_general (property_name,property_val,cathegory) values ('accept_outofcall_message','yes','general');
+insert into sip_general (property_name,property_val,cathegory) values ('auth_message_requests','yes','general');
+
 ALTER TABLE iax MODIFY COLUMN `mohinterpret` varchar(100) DEFAULT NULL;
 ALTER TABLE iax MODIFY COLUMN `mohsuggest` varchar(100) DEFAULT NULL;
 ALTER TABLE iax MODIFY COLUMN `host` varchar(100) DEFAULT NULL;
@@ -65,7 +68,7 @@ CREATE TABLE IF NOT EXISTS elx_chat_config (
     PRIMARY KEY (id),
     UNIQUE KEY property_name (property_name)
 ) ENGINE = INNODB;
-insert into elx_chat_config (property_name,property_val) values ('type_connection','wss');
+insert into elx_chat_config (property_name,property_val) values ('type_connection','ws');
 insert into elx_chat_config (property_name,property_val) values ('register','yes');
 insert into elx_chat_config (property_name,property_val) values ('no_answer_timeout','60');
 insert into elx_chat_config (property_name,property_val) values ('register_expires','600');

@@ -2418,7 +2418,6 @@ class paloDevice{
             }
 
             //si la cuenta sip tiene dispositivo elxweb_device entonces se lo agrega
-            $arrExten['enable_chat']=isset($arrProp['enable_chat'])?$arrProp['enable_chat']:'no';
             if($tech=='sip'){
                 //si la cuenta sip tiene dispositivo elxweb_device entonces debe ser actualizado
                 if(isset($arrProp["elxweb_device"])){
@@ -2437,12 +2436,17 @@ class paloDevice{
                             $this->errMsg=_tr("An error as ocurred to set IM account. ").$pIM->errMsg;
                             return false;
                         }
+                        $arrProp["enable_chat"]='yes';
+                    }else{
+                        $arrProp["enable_chat"]='no';
                     }
                 }else{
                     $arrProp["elxweb_device"] = NULL;
+                    $arrProp["enable_chat"]='no';
                 }
             }else{
                 $arrProp["elxweb_device"] = NULL;
+                $arrProp["enable_chat"]='no';
             }
             
             $arrExten['tech']=$tech;
@@ -2461,6 +2465,7 @@ class paloDevice{
             $arrExten['mohclass']='';
             $arrExten['noanswer']='';
             $arrExten['elxweb_device']=isset($arrProp["elxweb_device"])?$arrProp["elxweb_device"]:NULL;
+            $arrExten['enable_chat']=isset($arrProp["enable_chat"])?$arrProp["enable_chat"]:'no';
             $exito=$this->editExtensionDB($arrExten);
             if($exito){
                 if($this->insertDeviceASTDB($arrProp)){

@@ -129,6 +129,7 @@ function setUserPassword()
                 $arrResult['status'] = TRUE;
                 $arrResult['msg'] = _tr("Elastix password has been changed.");
                 $_SESSION['elastix_pass'] = md5($new_pass);
+                $_SESSION['elastix_pass2'] = $new_pass;
             }else{
                 $arrResult['msg'] = _tr("Impossible to change your Elastix password.")." ".$pORG->errMsg;
             }
@@ -573,8 +574,8 @@ function getChatClientConfig($pDB,&$error){
             $puerto=8088; //no esta configurado usamos los valores por default de asterisk
         }
     }else{
-        if(!empty($http['tlsport'])){
-            $puerto=$http['tlsport'];
+        if(!empty($http['tlsbindport'])){
+            $puerto=$http['tlsbindport'];
         }else{
             $puerto=8089; //no esta configurado usamos los valores por default de asterisk
         }

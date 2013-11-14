@@ -1925,7 +1925,7 @@ class paloDevice{
 
         //creamos la cuenat sip que se usa para acceder a la extension del usuario desde la interfaz eb
         //es necesario crear esta cuenta porque asterisk no  soporta multipresencia
-        $arrProp['enable_chat']=isset($arrExten['enable_chat'])?$arrExten['enable_chat']:'no';
+        $arrProp['enable_chat']=isset($arrProp['enable_chat'])?$arrProp['enable_chat']:'no';
         $arrProp["elxweb_device"]=NULL;
         if($type=='sip'){ 
             $arrProp["elxweb_device"]=NULL;
@@ -2119,7 +2119,7 @@ class paloDevice{
             $family="DEVICE/$code/".$arrSetting["elxweb_device"];
             $arrKey=array("default_exten"=>$arrProp['exten'],"dial"=>"SIP/{$arrSetting["elxweb_device"]}","type"=>"fixed","exten"=>$arrProp['exten']);
             if(isset($arrProp['alias'])){
-                if($arrProp['alias']!='' && $arrProp['alias']===false){
+                if($arrProp['alias']!='' && $arrProp['alias']!==false){
                     $arrKey['alias']=$arrProp['alias'];
                 }
             }
@@ -2378,7 +2378,7 @@ class paloDevice{
             //actualizamos el dispositivo
             $arrProp['name']=$arrProp['device'];
             if($this->tecnologia->updateParameters($arrProp)==false){
-                $this->errMsg="Error setting parameter $type device ".$this->tecnologia->errMsg;
+                $this->errMsg="Error setting parameter $tech device ".$this->tecnologia->errMsg;
                 return false;
             }
 
@@ -2418,29 +2418,34 @@ class paloDevice{
             }
 
             //si la cuenta sip tiene dispositivo elxweb_device entonces se lo agrega
-            $arrExten['enable_chat']=isset($arrExten['enable_chat'])?$arrExten['enable_chat']:'no';
-            $arrProp["elxweb_device"]=NULL;
-            if($type=='sip'){
+            $arrExten['enable_chat']=isset($arrProp['enable_chat'])?$arrProp['enable_chat']:'no';
+            if($tech=='sip'){
                 //si la cuenta sip tiene dispositivo elxweb_device entonces debe ser actualizado
-                if(isset($arrProp["elxweb_device"])){ 
-                    $IM=$arrProp;
-                    $IM['name'] = $elxweb_device;
-                    $IM['secret'] = $secret;
-                    $IM["outofcall_message_context"] = 'im-sip';
-                    $IM["subscribecontext"] = 'im-sip';
-                    $IM['id_exten']=$idExten;    //este campo es para indicar que la cuenta sip usada 
-                                                 //para IM esta relacionada con la extension
-                    $IM['display_name'] = $arrProp['fullname'];
-                    $IM['update_device']=true;
-                    $pIM=new paloIM($this->tecnologia->_DB,$this->domain);
-                    if(!$pIM->updateIMAccount($IM)){
-                        $this->errMsg=_tr("An error as ocurred to set IM account. ").$pIM->errMsg;
-                        return false;
+                if(isset($arrProp["elxweb_device"])){
+                    if(!empty($arrProp["elxweb_device"])){
+                        $IM=$arrProp;
+                        $IM['name'] = $arrProp["elxweb_device"];
+                        $IM['secret'] = $secret;
+                        $IM["outofcall_message_context"] = 'im-sip';
+                        $IM["subscribecontext"] = 'im-sip';
+                        $IM['id_exten']=$idExten;    //este campo es para indicar que la cuenta sip usada 
+                                                    //para IM esta relacionada con la extension
+                        $IM['display_name'] = $arrProp['fullname'];
+                        $IM['update_device']=true;
+                        $pIM=new paloIM($this->tecnologia->_DB,$this->domain);
+                        if(!$pIM->updateIMAccount($IM)){
+                            $this->errMsg=_tr("An error as ocurred to set IM account. ").$pIM->errMsg;
+                            return false;
+                        }
                     }
+                }else{
+                    $arrProp["elxweb_device"] = NULL;
                 }
+            }else{
+                $arrProp["elxweb_device"] = NULL;
             }
             
-            $arrExten['tech']=$type;
+            $arrExten['tech']=$tech;
             $arrExten['dial']=$arrProp['dial'];
             $arrExten['exten']=$arrProp['exten'];
             $arrExten['clid_number']=$arrProp['clid_number'];
@@ -2449,14 +2454,13 @@ class paloDevice{
             $arrExten['rt']=$arrProp['rt'];
             $arrExten['record_in']=$arrProp['record_in'];
             $arrExten['record_out']=$arrProp['record_out'];
-            $arrExten['context']=$this->tecnologia->context;
+            $arrExten['context']=$arrProp['context'];
             $arrExten['voicemail']=$arrProp["voicemail_context"];
             $arrExten['outboundcid']=isset($arrProp['out_clid'])?$arrProp['out_clid']:"";
             $arrExten['alias']=isset($arrProp['alias'])?$arrProp['alias']:"";
             $arrExten['mohclass']='';
             $arrExten['noanswer']='';
-            $arrExten['enable_chat']=$arrProp["enable_chat"];
-            $arrExten['elxweb_device']=$arrProp["elxweb_device"];
+            $arrExten['elxweb_device']=isset($arrProp["elxweb_device"])?$arrProp["elxweb_device"]:NULL;
             $exito=$this->editExtensionDB($arrExten);
             if($exito){
                 if($this->insertDeviceASTDB($arrProp)){
@@ -2478,7 +2482,7 @@ class paloDevice{
 
     function editExtensionDB($arrProp){
         $query="UPDATE extension SET rt=?, record_in=?, record_out=?, context=?, voicemail=?, outboundcid=?, alias=?, mohclass=?, noanswer=?, enable_chat=?, elxweb_device=?, clid_name=?, clid_number=? where exten=? and organization_domain=?";
-        $result=$this->tecnologia->executeQuery($query,array($arrProp["rt"],$arrProp["record_in"],$arrProp["record_out"],$arrProp["context"],$arrProp["voicemail"],$arrProp["outboundcid"],$arrProp["alias"],$arrProp["mohclass"],$arrProp["noanswer"],$arrProp["enable_chat"],$arrProp["elxweb_device"],$arrProp["clid_name"],$arrProp["clid_number"],$exten,$domain));
+        $result=$this->tecnologia->executeQuery($query,array($arrProp["rt"],$arrProp["record_in"],$arrProp["record_out"],$arrProp["context"],$arrProp["voicemail"],$arrProp["outboundcid"],$arrProp["alias"],$arrProp["mohclass"],$arrProp["noanswer"],$arrProp["enable_chat"],$arrProp["elxweb_device"],$arrProp["clid_name"],$arrProp["clid_number"],$arrProp['exten'],$this->domain));
         if($result==false)
             $this->errMsg=$this->tecnologia->errMsg;
         return $result; 
@@ -2762,10 +2766,18 @@ class paloDevice{
         }else{
             if(is_array($result)){
                 foreach($result as $value){
+                    //anteriormente caundo una extension no tenia configurada una cuenta de voicemail
+                    //lo que se hacia era no crear cierto plan de marcado y pasar novm como extension de vociemail
+                    //a la macro exten-vm. 
+                    //Se decidio que para poder permitir activar y desactivar el voicemail, sin nesecidad de manadar
+                    //a recargar el plan de marcado, se procede a siempre crear el plan de marcado como si el usario
+                    //tuviese voicemail. 
+                    //Dentro de las macro exten-vm y vm, se hace la validacion de que si la extension cuenta o no 
+                    //con un voicemail activo
                     $exten=$value["exten"];
-                    if(!isset($value["voicemail"]) || $value["voicemail"]=="" || $value["voicemail"]=="novm")
+                    /*if(!isset($value["voicemail"]) || $value["voicemail"]=="" || $value["voicemail"]=="novm")
                         $voicemail="novm";
-                    else
+                    else*/
                         $voicemail=$exten;
 
                     if($value["rt"]!=0 && isset($value["rt"])){
@@ -2776,7 +2788,7 @@ class paloDevice{
                         
                     $arrExtensionLocal[] = new paloExtensions($exten, new ext_set('__PICKUPMARK',''),"n",'dest');
 
-                    if($voicemail != "novm") {
+                    //if($voicemail != "novm") {
                         $arrExtensionLocal[] = new paloExtensions($exten,new ext_goto('1','vmret'));
                         $arrExtensionLocal[] = new paloExtensions($exten,new ext_hint($exten,$this->domain),"hint");
                         $arrExtensionLocal[] = new paloExtensions('${'.$this->code.'_VM_PREFIX}'.$exten,new ext_macro($this->code.'-vm',$voicemail.',DIRECTDIAL,${IVR_RETVM}'),1);
@@ -2787,10 +2799,10 @@ class paloDevice{
                         $arrExtensionLocal[] = new paloExtensions('vmu'.$exten,new ext_goto('1','vmret'));
                         $arrExtensionLocal[] = new paloExtensions('vms'.$exten,new ext_macro($this->code.'-vm',$voicemail.',NOMESSAGE,${IVR_RETVM}'),1);
                         $arrExtensionLocal[] = new paloExtensions('vms'.$exten,new ext_goto('1','vmret'));
-                    } else {
+                    /*} else {
                         $arrExtensionLocal[] = new paloExtensions($exten,new ext_goto('1','return','${IVR_CONTEXT}'));
                         $arrExtensionLocal[]= new paloExtensions($exten,new ext_hint($exten,$this->domain),"hint");
-                    }
+                    }*/
 
                     if(isset($value["alias"]) && $value["alias"]!="")
                         $arrExtensionLocal[] = new paloExtensions($value["alias"],new ext_goto('1',$exten),1);

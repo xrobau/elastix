@@ -79,6 +79,19 @@ $arrLangModule=array(
 "Fax cannot be deleted" => "Fax couldn't be deleted. ",
 "User Extension can't be deleted" => "User Extension couldn't be deleted. ",
 "Don't exist user in elastix system" => "Don't exist user in elastix system. ",
-"Need assign password" => "It is necessary you set a password if you wish assign to the user a new extension or fax extension. "
+"Need assign password" => "It is necessary you set a password if you wish assign to the user a new extension or fax extension . ",
+"Us_username" => "Defines a username that use for login to Elastix. ",
+"Us_name" => "Write your name.",
+"Us_pass" => "Write a password for login Min. 10 (use capital letter, small letter and numbers). ",
+"Us_confpass" => "Write the password again.",
+"Us_organization" => "If you're superadmin select the organization, else show your organization. ",
+"Us_group" => "Select the group that will  have this user. ",
+"Us_extension" => "Defines the extension number. ",
+"Us_faxext" => "Defines the extension fax number. ",
+"Us_faxcidname" => "Defines a Fax CID name. ",
+"Us_faxcidnumber" => "Define el numero para el CID fax. ",
+"Us_countrycode" => "Especifica el codigo telefonico de pais del usuario. ",
+"Us_areacode" => "Especifica el codigo de area del usuario. ",
+"Us_emailquota" => "Especifica la cantidad en Mb que tendra de capacidad el mail del usuario. "
 );
 ?>

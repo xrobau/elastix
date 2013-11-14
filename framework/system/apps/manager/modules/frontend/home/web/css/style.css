@@ -1,5 +1,5 @@
 /* Basic Styles */
-.icn_m{
+ .icn_m{
  display:inline-block;
  font-family:entypo;
  font-size:38pt;
@@ -15,6 +15,7 @@
 .lp{
  position:relative;
  bottom:5px;
+
 }
 
 #filterdiv{
@@ -45,9 +46,8 @@
  left:0;
  z-index:1;
  display:none;
- overflow:auto;
- overflow-y:auto;
- overflow-x:hidden;
+ 
+ 
 }
 
 #centerdiv{
@@ -241,7 +241,7 @@ margin-left:10%;
  width:100%;
  height: 510px;
  border-bottom: 1px solid rgb(204, 204, 204);
- overflow:auto;
+ //overflow:auto;
 }
 .row{
  float:left;

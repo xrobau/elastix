@@ -1678,6 +1678,11 @@ class paloSantoOrganization{
                                 $editFax=true;
                             }
                         }
+                        //debemos actualizar el password en las variable de session
+                        if($continuar){
+                            $_SESSION['elastix_pass'] = $md5password;
+                            $_SESSION['elastix_pass2'] = $password1;
+                        }
                     }else{
                         $error=_tr("Password couldn't be updated")." ".$pACL->errMsg;
                         $continuar=false;
@@ -1827,7 +1832,7 @@ class paloSantoOrganization{
             }
             
             //cambiamos la clave para el fax (peer, archivos de configuracion)
-            if(!$pFax->editFaxToUser(array("idUser"=>$idUser, "country_code"=>$faxUser['countryCode'], "area_code"=>$faxUser['areaCode'],"clid_name"=>$faxUser['cldiName'], "clid_number"=>$faxUser['clidNumber']))){
+            if(!$pFax->editFaxToUser(array("idUser"=>$idUser, "country_code"=>$faxUser['country_code'], "area_code"=>$faxUser['area_code'],"clid_name"=>$faxUser['clid_name'], "clid_number"=>$faxUser['clid_number']))){
                 $this->_DB->rollBack();
                 $this->errMsg=_tr("Fax Extension password couldn't be updated").$pFax->errMsg;
                 return false;
@@ -1845,6 +1850,10 @@ class paloSantoOrganization{
                 //recargamos la configuracion en realtime de los dispositivos para que tomen efectos los cambios
                 $pDevice->tecnologia->prunePeer($arrExtUser["device"],$arrExtUser["tech"]);
                 $pDevice->tecnologia->loadPeer($arrExtUser["device"],$arrExtUser["tech"]);
+                if(!empty($arrExtUser["elxweb_device"])){
+                    $pDevice->tecnologia->prunePeer($arrExtUser["elxweb_device"],$arrExtUser["tech"]);
+                    $pDevice->tecnologia->loadPeer($arrExtUser["elxweb_device"],$arrExtUser["tech"]);
+                }
                 
                 //se recarga la faxextension del usuario por los cambios que pudo haber
                 $pDevice->tecnologia->prunePeer($faxUser["device"],$faxUser["tech"]);

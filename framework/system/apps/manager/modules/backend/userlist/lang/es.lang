@@ -77,6 +77,19 @@ $arrLangModule=array(
 "Email Account cannot be deleted" => "Cuenta de Email no pudo ser borrada. ",
 "Fax cannot be deleted" => "Fax no pudo ser borrado. ",
 "User Extension can't be deleted" => "Extension de usuario no pudo ser borrada. ",
-"Need assign password" => "Es necesario establecer una contraseña si desea asignar al usuario una nueva extension o extensión de fax. "
+"Need assign password" => "Es necesario establecer una contraseña si desea asignar al usuario una nueva extension o extensión de fax. ",
+"Us_username" => "Define un nombre de nombre como usuario. ",
+"Us_name" => "Escribe tu nombre Ejemplo: Homero Simpson. ",
+"Us_pass" => "Define una contraseña minimo de 10 caracteres (Mayusculas, minusculas y numeros). ",
+"Us_confpass" => "Confirma tu contraseña escribiendola nuevamente. ",
+"Us_organization" => "Si eres superadmin selecciona tu organizacion, caso contrario te muestra la organizacion a la que perteneces. ",
+"Us_group" => "Selecciona el grupo al que pertenecera el usuario. ",
+"Us_extension" => "Ingresa el numero de la extension. ",
+"Us_faxext" => "Ingresa el numero de extension de fax . ",
+"Us_faxcidname" => "Define el nombre para el CID fax. ",
+"Us_faxcidnumber" => "Define el numero para el CID fax. ",
+"Us_countrycode" => "Especifica el codigo telefonico de pais del usuario. ",
+"Us_areacode" => "Especifica el codigo de area del usuario. ",
+"Us_emailquota" => "Especifica la cantidad en Mb que tendra de capacidad el mail del usuario. "
 );
 ?>

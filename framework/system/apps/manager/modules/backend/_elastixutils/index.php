@@ -53,7 +53,11 @@ function handleJSON_changePasswordElastix($smarty, $module_name)
     $jsonObject = new PaloSantoJSON();
     $output = setUserPassword();
     $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
-    $jsonObject->set_error($output['msg']);
+    if($output['status'])
+        $jsonObject->set_message($output['msg']);
+    else{
+        $jsonObject->set_error($output['msg']);
+    }
     return $jsonObject->createJSON();
 }
 
@@ -269,9 +273,8 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
                     $arrContacts[$index_st][$key]['username']=$value['username'];
                     $arrContacts[$index_st][$key]['presence']=$status;
                     $arrContacts[$index_st][$key]['st_code']=$st_code;
-                    $arrContacts[$index_st][$key]['exten']=$value['extension'];
-                    $arrContacts[$index_st][$key]['faxexten']=$value['fax_extension'];
-                    $arrContacts[$index_st][$key]['device']="{$value['elxweb_device']}";
+                    $arrContacts[$index_st][$key]['uri']="{$value['elxweb_device']}@$dominio";
+                    $arrContacts[$index_st][$key]['alias']="{$value['alias']}@$dominio";
                 }else{
                     $arrContacts['my_info']['uri']="{$value['elxweb_device']}@$dominio";
                     $arrContacts['my_info']['ws_servers']=$chatConfig['ws_servers'];

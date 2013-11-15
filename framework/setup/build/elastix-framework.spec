@@ -64,6 +64,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/php.d
 mkdir -p $RPM_BUILD_ROOT/etc/yum.repos.d
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 
 
 ## ** Step 2: Installation of files and folders ** ##
@@ -249,7 +250,15 @@ sed --in-place "s,Group\sapache,#Group apache,g" /etc/httpd/conf/httpd.conf
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 preversion=`cat $pathModule/preversion_elastix-framework.info`
 rm -f $pathModule/preversion_elastix-framework.info
-elastix-menumerge $pathModule/setup/infomodules
+#elastix-menumerge $pathModule/setup/infomodules
+service mysqld status &>/dev/null
+res=$?
+if($res -eq 0) #service is up
+	elastix-menumerge $pathModule/setup/infomodules	
+else{
+	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
+	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+fi
 
 if [ $1 -eq 1 ]; then #install
     # The installer database

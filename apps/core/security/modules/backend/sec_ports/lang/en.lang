@@ -64,6 +64,10 @@ $arrLangModule=array(
 "Validation Error" => "Validation Error",
 "Port used in a firewall rule" => "Port used in a firewall rule",
 "You have to delete the rule related in order to delete this port" => "You have to delete the rule related in order to delete this port",
-"Some rules could be deactivated due to these changes, please check the firewall rules" => "Some rules could be deactivated due to these changes, please check the firewall rules"
+"Some rules could be deactivated due to these changes, please check the firewall rules" => "Some rules could be deactivated due to these changes, please check the firewall rules",
+"SDP_name" => "Defines a port name",
+"SDP_protocol" => "select the type of protocol that you use",
+"SDP_port" => "Defines a port number",
+"SDP_comment" => "Write a short information about this port"
 );
 ?>

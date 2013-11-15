@@ -27,6 +27,7 @@ Elastix Module Fax
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/faxdocs
+mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 
 # Files provided by all Elastix modules
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
@@ -137,7 +138,15 @@ done
 
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge $pathModule/setup/infomodules
+#elastix-menumerge $pathModule/setup/infomodules
+service mysqld status &>/dev/null
+res=$?
+if($res -eq 0) #service is up
+	elastix-menumerge $pathModule/setup/infomodules	
+else{
+	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
+	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+fi
 
 preversion=`cat $pathModule/preversion_%{modname}.info`
 rm -f $pathModule/preversion_%{modname}.info

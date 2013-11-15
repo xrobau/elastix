@@ -35,6 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/agi-bin
 mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/mohmp3
 
+mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+
 mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
 
 # ** /bin path ** #
@@ -142,6 +144,8 @@ rmdir setup/etc/xinetd.d
 unzip setup/tftpboot/P0S3-08-8-00.zip  -d     $RPM_BUILD_ROOT/tftpboot/
 mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
 
+mkdir -p                             $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mv setup/paloSantoIM.class.php      $RPM_BUILD_ROOT/usr/share/elastix/libs/
 rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
 
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -213,7 +217,15 @@ fi
 
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge $pathModule/setup/infomodules
+#elastix-menumerge $pathModule/setup/infomodules
+service mysqld status &>/dev/null
+res=$?
+if($res -eq 0) #service is up
+	elastix-menumerge $pathModule/setup/infomodules	
+else{
+	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
+	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+fi
 
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB

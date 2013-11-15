@@ -26,6 +26,8 @@ Elastix Module System
 %install
 rm -rf $RPM_BUILD_ROOT
 
+mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+
 # Files provided by all Elastix modules
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/libs/
 mkdir -p    $RPM_BUILD_ROOT/var/www/backup
@@ -91,7 +93,16 @@ fi
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 
 # Run installer script to fix up ACLs and add module to Elastix menus.
-elastix-menumerge $pathModule/setup/infomodules
+
+service mysqld status &>/dev/null
+res=$?
+if($res -eq 0) #service is up
+	elastix-menumerge $pathModule/setup/infomodules	
+else{
+	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
+	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+fi
+
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`

@@ -143,6 +143,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Nov 15 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Server: comment out the Polycom-specific options from the DHCP
+  configuration template.
+  SVN Rev[6098]
+
 * Thu Nov 07 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: for Asterisk 11, the astdb database can not be swapped
   while asterisk is running. It is now required to shutdown and restart asterisk

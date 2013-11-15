@@ -36,6 +36,11 @@ $arrLangModule=array(
 "New Extension"=>"New Extension",
 "Edit Extension"=>"Edit Extension",
 "Error to obtain extensions"=>"Error trying get extensions. ",
-"on_demand"=>"On demand"
+"on_demand"=>"On demand",
+"OU_routename" => "Defines a route name",
+"OU_outcid" => "Defines the route CID",
+"OU_routepass" => "Defines the password for the route",
+"OU_musiconhold" => "Defines the type of sound",
+"OU_timegroup" => "Defines the time for groups",
 );
 ?>

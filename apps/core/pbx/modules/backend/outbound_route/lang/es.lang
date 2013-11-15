@@ -77,6 +77,11 @@ $arrLangModule=array(
 "Email Account cannot be deleted" => "Cuenta de Email no pudo ser borrada. ",
 "Fax cannot be deleted" => "Fax no pudo ser borrado. ",
 "User Extension can't be deleted" => "Extension de usuario no pudo ser borrada. ",
-"Need assign password" => "Es necesario establecer una contraseña si desea asignar al usuario una nueva extension o extensión de fax. "
+"Need assign password" => "Es necesario establecer una contraseña si desea asignar al usuario una nueva extension o extensión de fax. ",
+"OU_routename" => "Define el nombre de la ruta",
+"OU_outcid" => "Especifica el CID de la ruta",
+"OU_routepass" => "Define la contraseña para la ruta",
+"OU_musiconhold" => "Especifica el tipo de sonido",
+"OU_timegroup" => "Define el tiempo para los grupos",
 );
 ?>

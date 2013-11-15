@@ -77,6 +77,18 @@ $arrLangModule=array(
 "Email Account cannot be deleted" => "Cuenta de Email no pudo ser borrada. ",
 "Fax cannot be deleted" => "Fax no pudo ser borrado. ",
 "User Extension can't be deleted" => "Extension de usuario no pudo ser borrada. ",
-"Need assign password" => "Es necesario establecer una contraseña si desea asignar al usuario una nueva extension o extensión de fax. "
+"Need assign password" => "Es necesario establecer una contraseña si desea asignar al usuario una nueva extension o extensión de fax. ",
+"IN_description" => "Escribe una pequeña descripcion acerca de la ruta entrante",
+"IN_didnumber" => "Define el numero para el DID",
+"IN_calleridnumber" => "Define el numero de identificacion de llamada",
+"IN_alertinfo" => "Describe la informacion que servira como alerta",
+"IN_cidnameprefix" => "Describe el prefijo para el nombre del CID",
+"IN_moh" => "Selecciona el sonido",
+"IN_signalring" => "Activa/Desactiva señales de ring/ring",
+"IN_pausebeforeanswer" => "Escribe un mensaje para el pausado antes de la respuesta",
+"IN_privacymanager" => "Habilita/Deshabilita las opciones de administrador de privacidad",
+"IN_activatefaxdetection" => "Habilita/Deshabilita las detecciones de fax",
+"IN_language" => "Selecciona el tipo de lenguaje",
+"IN_destiny" => "Selecciona el tipo de destino que tendrala ruta entrante",
 );
 ?>

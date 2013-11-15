@@ -36,6 +36,18 @@ $arrLangModule=array(
 "New Extension"=>"New Extension",
 "Edit Extension"=>"Edit Extension",
 "Error to obtain extensions"=>"Error trying get extensions. ",
-"on_demand"=>"On demand"
+"on_demand"=>"On demand",
+"IN_description" => "Write a short information about the inbound route",
+"IN_didnumber" => "Defines the DID number",
+"IN_calleridnumber" => "Defines an identification number for calls",
+"IN_alertinfo" => "Defines an information of alert",
+"IN_cidnameprefix" => "Defines the prefix for the CID name",
+"IN_moh" => "Select the sound",
+"IN_signalring" => "Enable/Disable ring/ring signals",
+"IN_pausebeforeanswer" => "Write a message pause before answer",
+"IN_privacymanager" => "Enable/Disable the privacy manager",
+"IN_activatefaxdetection" => "Enable/Disable the fax detection",
+"IN_language" => "Select the language",
+"IN_destiny" => "Select the type of destiny that will have the inbound route",
 );
 ?>

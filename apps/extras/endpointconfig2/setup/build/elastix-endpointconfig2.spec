@@ -132,6 +132,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add support for Polycom remote phonebook
+  via the microbrowser.
+  SVN Rev[6109]
+
 * Wed Nov 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: do not crash when configuring the RCA IP150 
   with static IP and just one DNS instead of two.

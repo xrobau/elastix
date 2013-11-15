@@ -694,7 +694,7 @@
     <render log.render.level="1" log.render.type="2" log.render.realtime="1" log.render.stdout="1" log.render.file="1" log.render.file.size="16" log.render.file.upload.period="172800" log.render.file.upload.append="1" log.render.file.upload.append.sizeLimit="512" log.render.file.upload.append.limitMode="delete" />
     <scheduled log.sched.1.name="showCpuLoad" log.sched.1.level="3" log.sched.1.period="15" log.sched.1.startMode="rel" log.sched.1.startTime="0" log.sched.1.startDay="0" log.sched.2.name="" log.sched.2.level="" log.sched.2.period="" log.sched.2.startMode="" log.sched.2.startTime="" log.sched.2.startDay="" />
   </logging>
-  <security sec.tagSerialNo="0">
+  <security sec.tagSerialNo="1">
     <pwd>
       <length sec.pwd.length.admin="1" sec.pwd.length.user="2" />
     </pwd>
@@ -716,8 +716,8 @@
     <quotas res.quotas.1.name="tone" res.quotas.1.value="300" res.quotas.2.name="bitmap" res.quotas.2.value="10" res.quotas.3.name="font" res.quotas.3.value="10" res.quotas.4.name="xmlui" res.quotas.4.value="10" res.quotas.5.name="background" res.quotas.5.value="600" />
   </resource>
   <microbrowser mb.proxy="" mb.ssawc.call.mode="" mb.ssawc.enabled="">
-    <main mb.main.home="http://{{server_ip}}/xmlservices/index.php" mb.main.idleTimeout="" mb.main.statusbar="" mb.main.autoBackKey="1" />
-    <idleDisplay mb.idleDisplay.home="" mb.idleDisplay.refresh="0" />
+    <main mb.main.home="{{phonesrv}}/" mb.main.idleTimeout="" mb.main.statusbar="" mb.main.autoBackKey="1" />
+    <idleDisplay mb.idleDisplay.home="{{phonesrv}}/idle" mb.idleDisplay.refresh="60" />
     <limits mb.limits.nodes="" mb.limits.cache="" />
   </microbrowser>
   <applications>

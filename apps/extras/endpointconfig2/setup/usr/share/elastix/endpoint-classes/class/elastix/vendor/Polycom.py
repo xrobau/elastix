@@ -62,7 +62,10 @@ class Endpoint(BaseEndpoint):
                 if e.errno != errno.EEXIST: 
                     logging.error('Failed to create directory for Polycom - %s' % (str(e),))
                     return False
-        vars = {'server_ip' : Endpoint._global_serverip}
+        vars = {
+            'server_ip' : Endpoint._global_serverip,
+            'phonesrv'  : BaseEndpoint._buildPhoneProv(Endpoint._global_serverip, 'Polycom', 'GLOBAL'),
+        }
         
         for sConfigFile, sTemplate in (
             ('server.cfg', 'Polycom_global_server.tpl'),
@@ -100,7 +103,10 @@ class Endpoint(BaseEndpoint):
         # Write out configuration files
         sConfigFile = mac + '.cfg'
         sConfigPath = self._tftpdir + '/' + sConfigFile
-        vars = {'config_filename' : mac + 'reg.cfg'}
+        vars = {
+            'config_filename'   :   mac + 'reg.cfg',
+            'microbrowser_cfg'  :   mac + 'microbrowser.cfg',
+        }
         if self._model in ('IP 301', 'IP 501', 'IP 601'):
             vars['sip_cfg'] = 'sip_1.cfg'
         else:
@@ -117,6 +123,14 @@ class Endpoint(BaseEndpoint):
         sConfigPath = self._tftpdir + '/' + sConfigFile
         try:
             self._writeTemplate('Polycom_local_reg.tpl', vars, sConfigPath)
+        except IOError, e:
+            logging.error('Endpoint %s@%s failed to write configuration file - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        sConfigFile = mac + 'microbrowser.cfg'
+        sConfigPath = self._tftpdir + '/' + sConfigFile
+        try:
+            self._writeTemplate('Polycom_local_microbrowser.tpl', vars, sConfigPath)
         except IOError, e:
             logging.error('Endpoint %s@%s failed to write configuration file - %s' %
                 (self._vendorname, self._ip, str(e)))

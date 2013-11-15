@@ -183,6 +183,7 @@ function createFieldForm()
 
     $arrFields = array(
             "status"   => array(      "LABEL"                  => _tr("Status"),
+                                            "DESCRIPTION"            => _tr("Rstp_status"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "CHECKBOX",
                                             "INPUT_EXTRA_PARAM"      => array("id"=>"status"),
@@ -190,6 +191,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "SMTP_Server"    => array(      "LABEL"                  => _tr("SMTP Server"),
+                                            "DESCRIPTION"            => _tr("Rstp_smtpserver"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "SELECT",
                                             "INPUT_EXTRA_PARAM"      => $arrServers,
@@ -197,6 +199,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "relayhost"    => array(        "LABEL"                  => _tr("Domain"),
+                                            "DESCRIPTION"            => _tr("Rstp_domain"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -204,6 +207,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "port"         => array(        "LABEL"                  => _tr("Port"),
+                                            "DESCRIPTION"            => _tr("Rstp_port"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -211,6 +215,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "user"         => array(        "LABEL"                  => _tr("Username"),
+                                            "DESCRIPTION"            => _tr("Rstp_username"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -218,6 +223,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "password"     => array(        "LABEL"                  => _tr("Password"),
+                                            "DESCRIPTION"            => _tr("Rstp_password"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "PASSWORD",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -225,6 +231,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "autentification"   => array(   "LABEL"                  => _tr("TLS Enable"),
+                                            "DESCRIPTION"            => _tr("Rstp_tlsenable"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "CHECKBOX",
                                             "INPUT_EXTRA_PARAM"      => "",

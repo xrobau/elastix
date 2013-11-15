@@ -60,5 +60,12 @@ $arrLangModule=array(
 "Failed to start TLS" => "Failed to start TLS",
 "Authenticate not accepted from server" => "Authenticate not accepted from server",
 "Authenticate Error, TLS must be activated" => "Authenticate Error, TLS must be activated",
+"Rstp_status" => "Turn on/Turn off the remote SMTP status",
+"Rstp_smtpserver" => "Choose the type of server",
+"Rstp_domain" => " Defines the domain name that you'll use (Example: smtp.live.com)",
+"Rstp_port" => "Defines the port number",
+"Rstp_username" => "Defines a username (similar to the example)",
+"Rstp_password" => "Defines a password",
+"Rstp_tlsenable" => "if activate this option allow authentications with certified" 
 );
 ?>

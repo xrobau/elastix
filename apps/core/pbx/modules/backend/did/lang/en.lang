@@ -33,5 +33,12 @@ $arrLangModule=array(
 "message did" => "Here you can create a DID, which can later be assigned to organizations in this server. The assignment of DID is made from the 'organization' module.<br />If you do not assign a DID to an organization, it will not be able to receive external calls.<br />
 If you pick 'analog' in the 'type' parameter, it will be assumed that you have an analog card in your server, so you must assign the ports related to this DID.",
 "DID was created successfully" => "DID was created successfully.</br>You can assign this DID to a organization from System >> User >> Organization",
+"DID_number" => "Defines the DID number",
+"DID_type" => "Defines the type of DID (Analogic, Digital, Voip)",
+"DID_channels" => "Select the type of device (only in case: analogic)",
+"DID_country" => "Defines the country",
+"DID_city" => "Defines the city",
+"DID_countrycode" => "Defines the country code",
+"DID_areacode" => "Defines the area code",
 );
 ?>

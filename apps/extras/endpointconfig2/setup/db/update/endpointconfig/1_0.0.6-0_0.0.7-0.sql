@@ -13,3 +13,6 @@ INSERT INTO `model_properties` (`property_key`, `property_value`, `id_model`) VA
 ("ssh_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "RCA" AND model.name = "IP150")),
 ("http_username", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "RCA" AND model.name = "IP150")),
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "RCA" AND model.name = "IP150"));
+
+
+UPDATE model SET static_prov_supported = 1 WHERE id_manufacturer IN (SELECT `id` FROM manufacturer WHERE `name` = "Aastra");

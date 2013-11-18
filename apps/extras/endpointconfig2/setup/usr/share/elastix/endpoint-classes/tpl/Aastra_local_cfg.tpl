@@ -25,6 +25,8 @@ download protocol: TFTP
 tftp server: {{server_ip}}
 
 xml application post list: {{server_ip}}
+xml application uri: {{phonesrv}}/services
+xml application title: "Elastix Services for Aastra"
 
 softkey1 type: speeddial
 softkey1 label: "Voice Mail"
@@ -38,6 +40,15 @@ softkey3 type: speeddial
 softkey3 label: "DND Off"
 softkey3 value: *79
 
+{{py:n = 1}}
+{{for extension in sip}}
+{{if n > 3 }}
+softkey{{n}} type: line
+softkey{{n}} label: "{{extension.description}}"
+softkey{{n}} line: {{n}}
+{{endif}}
+{{py:n += 1}}
+{{endfor}}
 {{py:n = 1}}
 {{for extension in sip}}
 sip line{{n}} screen name: {{extension.description}}

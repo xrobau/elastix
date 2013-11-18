@@ -132,6 +132,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Nov 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add static provisioning support for Aastra
+  phones. Define softkeys to access configured accounts past the third line.
+  Define URL for (not yet implemented) XML services for Aastra.
+  SVN Rev[6114]
+
 * Sun Nov 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add support for highlighting accounts that
   are being registered by hosts not in the current set of scanned hosts, to help

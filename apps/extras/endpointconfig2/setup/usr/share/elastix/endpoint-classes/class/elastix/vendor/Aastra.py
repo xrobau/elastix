@@ -137,6 +137,25 @@ class Endpoint(BaseEndpoint):
                 (self._vendorname, self._ip, str(e)))
             return False
 
+        # The Aastra firmware is stateful, in an annoying way. Just submitting
+        # a POST to the autoprovisioning URL from the factory-default setting will
+        # only get a 200 OK with a message to visit sysinfo.html, and the settings
+        # will NOT be applied.
+        # To actually apply the settings, it is required to perform a dummy GET
+        # to /sysinfo.html, discard anything returned, and only then
+        # perform the POST.
+        if not self._doAuthGet('/sysinfo.html'):
+            return False
+
+        # Set the Elastix server as the provisioning server
+        postvars = {
+            'protocol'  :   'TFTP',
+            'tftp'      :   self._serverip,
+            'tftppath'  :   '',            
+        }
+        if not self._doAuthPost('/configurationServer.html', postvars):
+            return False
+
         # Reboot the phone.
         self._amireboot('aastra-check-cfg')
         self._unregister()

@@ -145,5 +145,26 @@ class BaseVendorResource
         
         return $result;
     }
+    
+    /**
+     * Procedimiento para listar y devolver los códigos de funcionalidades. Esta
+     * implementación lee de la base de datos de FreePBX.
+     * 
+     * @return  NULL en error, o lista en caso de éxito
+     */
+    protected function listarCodigosFuncionalidades()
+    {
+    	$recordset = $this->_db->fetchTable(
+            'SELECT IFNULL(customcode, defaultcode) AS code, description '.
+            'FROM asterisk.featurecodes WHERE enabled = 1 ORDER BY code', TRUE);
+        if (!is_array($recordset)) {
+        	return NULL;
+        }
+        $r = array();
+        foreach ($recordset as $tupla) {
+        	if (preg_match('/\d/', $tupla['code'])) $r[] = $tupla;
+        }
+        return $r;
+    }
 }
 ?>

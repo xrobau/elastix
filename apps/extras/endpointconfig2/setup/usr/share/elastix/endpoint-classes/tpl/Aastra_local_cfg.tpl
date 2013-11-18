@@ -25,7 +25,7 @@ download protocol: TFTP
 tftp server: {{server_ip}}
 
 xml application post list: {{server_ip}}
-xml application uri: {{phonesrv}}/services
+xml application uri: {{phonesrv}}/
 xml application title: "Elastix Services for Aastra"
 
 softkey1 type: speeddial

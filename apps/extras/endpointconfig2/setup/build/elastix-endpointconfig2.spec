@@ -133,6 +133,10 @@ fi
 
 %changelog
 * Mon Nov 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: implement basic XML phonebook and RSS 
+  support for Aastra phones. Tested with Aastra 6739i. In the process, implement
+  reading of current feature codes from FreePBX, instead of hardcoding them.
+  SVN Rev[6117]  
 - CHANGED: New Endpoint Configurator: add static provisioning support for Aastra
   phones. Define softkeys to access configured accounts past the third line.
   Define URL for (not yet implemented) XML services for Aastra.

@@ -45,5 +45,18 @@ $arrLangModule=array(
 "You must select a destination for this ring_group." => "You must select a destination for this ring group. ",
 "The Ring Group was deleted successfully" => "The Ring Group was deleted successfully. ",
 "Ring Group has been edited successfully" => "Ring Group was edited successfully. ",
+"RG_dialstrategy" => "Defines el type of dial",
+"RG_ringtime" => "Defines el time of sound",
+"RG_alertinfo" => "Defines some information in case of alert",
+"RG_cidnameprefix" => "Defines the prefix for the CID name",
+"RG_recording" => "recording",
+"RG_musiconhold" => "music on hold",
+"RG_ignorecallforward" => "Enable/Disable this option",
+"RG_skipbusyextension" => "Enable/Disable this option",
+"RG_enablecallpickup" => "Enable/Disable this option",
+"RG_skipbusyextension" => "Enable/Disable this option",
+"RG_confirmcall" => "Enable/Disable the confirm call",
+"RG_extensionlist" => "Enable/Disable this option",
+"RG_destine" => "Select the destine",
 );
 ?>

@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Number" => "Numero RG",
 "Name"   => "Nombre RG",
-"RG List" => "Ring Group",
+"RG List" => "Ring Grupo",
 "Strategy" => "Estrategia de Marcado",
 "Ring Time" => "Tiempo de Timbrado",
 "Ignore CF" => "Ignorar Reenvio de Llamadas",
@@ -45,5 +45,18 @@ $arrLangModule=array(
 "You must select a destination for this ring_group." => "Usted debe seleccionar un destination para el ring group. ",
 "The Ring Group was deleted successfully" => "El Ring Group fue borrado exitosamente. ",
 "Ring Group has been edited successfully" => "Ring Group fue editado exitosamente. ",
+"RG_dialstrategy" => "Define el tipo de marcado",
+"RG_ringtime" => "Define el tiempo de timbrado (sonido)",
+"RG_alertinfo" => "Define informacion para alerta",
+"RG_cidnameprefix" => "Define el prefijo para el nombre del CID",
+"RG_recording" => "grabacion",
+"RG_musiconhold" => "music on hold",
+"RG_ignorecallforward" => "Habilita/Deshabilita esta opcion",
+"RG_skipbusyextension" => "Habilita/Deshabilita esta opcion",
+"RG_enablecallpickup" => "Habilita/Deshabilita esta opcion",
+"RG_skipbusyextension" => "Habilita/Deshabilita esta opcion",
+"RG_confirmcall" => "Habilita/Deshabilita la confirmacion de llamada",
+"RG_extensionlist" => "Habilita/Deshabilita esta opcion",
+"RG_destine" => "Selecciona el destino",
 );
 ?>

@@ -154,6 +154,13 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Nov 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Hardware Detector: with recent DAHDI versions, the configuration parser
+  misparses "EC: OSLEC - INACTIVE" as having an echo canceller called
+  "OSLEC - INACTIVE", which then shows up as "none" in the GUI. Fixed. Fixes 
+  Elastix bug #1777.
+  SVN Rev[6112]
+
 * Fri Nov 15 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server: comment out the Polycom-specific options from the DHCP
   configuration template.

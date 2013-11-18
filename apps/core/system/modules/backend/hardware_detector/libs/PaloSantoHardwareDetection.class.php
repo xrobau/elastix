@@ -158,7 +158,7 @@ class PaloSantoHardwareDetection
                                         
                     $dataType=preg_split('/[:]/',$regs1[4],2);
                     if(count($dataType)>1){
-                        $arrEcho=preg_split('/[)]/',$dataType[1],2);
+                        $arrEcho=preg_split('/[^\w]/',trim($dataType[1]),2);
                         $data['num_port']       = $pDB->DBCAMPO($regs1[1]);
                         $data['name_port']       = $pDB->DBCAMPO($regs1[2]);
                         $data['echocanceller']   = $pDB->DBCAMPO(trim($arrEcho[0]));

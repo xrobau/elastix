@@ -44,5 +44,8 @@ $arrLangModule=array(
 "You must select a destination for this ring_group." => "You must select a destination for this ring group. ",
 "The Ring Group was deleted successfully" => "The Ring Group was deleted successfully. ",
 "Ring Group has been edited successfully" => "Ring Group was edited successfully. ",
+"TC_timegroup" => "Select one of the groups",
+"TC_destinem" => "Select the destine in case of match",
+"TC_destinef" => "Select the destine in case of fail",
 );
 ?>

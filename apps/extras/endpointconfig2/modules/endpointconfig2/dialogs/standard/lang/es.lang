@@ -101,5 +101,7 @@ $arrLangModule = array(
     "Property" => "Propiedad",
     "Value" => "Valor",
     "Invalid endpoint ID" => "ID de endpoint inválido",
+    'Registered at' => 'Registrado en',
+    'This account is in use by an unsupported/unscanned host' => 'Esta cuenta está en uso por un host no soportado/escaneado',
 );
 ?>

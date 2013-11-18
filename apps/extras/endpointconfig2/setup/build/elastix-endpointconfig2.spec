@@ -132,6 +132,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sun Nov 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add support for highlighting accounts that
+  are being registered by hosts not in the current set of scanned hosts, to help
+  prevent assignment of an already-used account to an endpoint.
+  SVN Rev[6111]
+
 * Fri Nov 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: add support for Polycom remote phonebook
   via the microbrowser.

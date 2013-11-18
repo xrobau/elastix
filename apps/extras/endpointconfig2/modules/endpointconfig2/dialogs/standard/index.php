@@ -77,6 +77,8 @@ class Dialog_Standard
             'DIALOG_STANDARD_PROPERTIES_MESSAGE'    =>  _tr('DIALOG_STANDARD_PROPERTIES_MESSAGE'),
             'DIALOG_STANDARD_LBL_PROPERTY'          =>  _tr('Property'),
             'DIALOG_STANDARD_LBL_VALUE'             =>  _tr('Value'),
+            'DIALOG_STANDARD_LBL_REGISTERED_AT'     =>  _tr('Registered at'),
+            'DIALOG_STANDARD_TOOLTIP_REGISTERED'    =>  _tr('This account is in use by an unsupported/unscanned host'),
         ));
     	return $smarty->fetch("$local_templates_dir/../../dialogs/standard/tpl/dialog.tpl");
     }

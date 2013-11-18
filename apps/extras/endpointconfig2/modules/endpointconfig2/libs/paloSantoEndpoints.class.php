@@ -374,7 +374,7 @@ SQL_FILTRO_ENDPOINT;
     {
         if (is_null($db = $this->_getDB())) return NULL;
     	$sql = <<<SQL_CUENTAS_NO_ASIGNADAS
-SELECT ad.id AS extension, ad.id AS account, ad.tech, ad.description
+SELECT ad.id AS extension, ad.id AS account, ad.tech, ad.description, NULL as registerip
 FROM asterisk.devices ad
 LEFT JOIN (endpoint_account ea) ON ea.account = ad.id
 WHERE ea.account IS NULL ORDER BY extension
@@ -384,6 +384,16 @@ SQL_CUENTAS_NO_ASIGNADAS;
             $this->_errMsg = '(internal) Failed to read accounts: '.$db->errMsg;
             return NULL;
         }
+        
+        $cuentasRegistradas = $this->_recogerCuentasRegistradas();
+        if (!is_null($cuentasRegistradas)) {
+        	for ($i = 0; $i < count($recordset); $i++) {
+        		if (isset($cuentasRegistradas[$recordset[$i]['tech']][$recordset[$i]['account']])) {
+        			$recordset[$i]['registerip'] = $cuentasRegistradas[$recordset[$i]['tech']][$recordset[$i]['account']];
+        		}
+        	}
+        }
+        
         return $recordset;
     }
     
@@ -409,6 +419,51 @@ SQL_CUENTAS_NO_ASIGNADAS;
         }
         return TRUE;
     }
+
+    // TODO: combinar esta implementación con paloEndpointScanStatus::_recogerCuentasRegistradas()
+    private function _recogerCuentasRegistradas()
+    {
+        if (!file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php"))
+            return NULL; 
+        require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
+        $astman = new AGI_AsteriskManager();
+        if (!$astman->connect('localhost', 'admin', obtenerClaveAMIAdmin()))
+            return NULL;
+        $cuentasRegistradas = array();
+        
+        $r = $astman->Command('sip show peers');
+        if ($r['Response'] != 'Error') {
+            foreach (explode("\n", $r['data']) as $s) {
+                // 1064/1064    192.168.3.1  D   N  A  5060  OK (13 ms)
+                $l = preg_split('/\s+/', $s);
+                if (count($l) > 6 && preg_match('/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/', $l[1])) {
+                    $ip = $l[1];
+                    $extArray = explode('/', $l[0]);
+                    if (!isset($cuentasRegistradas[$ip]))
+                        $cuentasRegistradas[$ip] = array('sip' => array(), 'iax2' => array());
+                    $cuentasRegistradas['sip'][$extArray[0]] = $ip;
+                }
+            }
+        }
+        
+        $r = $astman->Command('iax2 show peers');
+        if ($r['Response'] != 'Error') {
+            foreach (explode("\n", $r['data']) as $s) {
+                // 2002   127.0.0.1  (D)  255.255.255.255  40001    OK (1 ms)
+                $l = preg_split('/\s+/', $s);
+                if (count($l) > 5 && preg_match('/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/', $l[1]) && $l[5] == 'OK') {
+                    $ip = $l[1];
+                    if (!isset($cuentasRegistradas[$ip]))
+                        $cuentasRegistradas[$ip] = array('sip' => array(), 'iax2' => array());
+                    $cuentasRegistradas['iax2'][$l[0]] = $ip;
+                }
+            }
+        }
+        
+        $astman->disconnect();
+        return $cuentasRegistradas;
+    }
+
     
     function olvidarSeleccionEndpoints($selection)
     {

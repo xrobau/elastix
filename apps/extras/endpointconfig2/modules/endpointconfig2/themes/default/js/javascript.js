@@ -194,6 +194,7 @@ $(document).ready(function() {
 		extension:		null,
 		priority:		null,
 		description:	null,
+		registerip:		null,
 		properties:		null,
 		
 		propertiesController: null,

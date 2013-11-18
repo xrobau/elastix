@@ -35,7 +35,10 @@
         <td valign="top" width="50%">
             {{#view App.StandardUnboundAccountsView controllerBinding="App.accountsController"}}
             {{#each controller}}
-                <li {{bindAttr id="idattr"}} {{action "selectAccount" this }} >{{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}</li>
+                <li {{bindAttr id="idattr"}} {{action "selectAccount" this }} >
+                    {{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}
+                    {{#if registerip}}<br/><span title="{/literal}{$DIALOG_STANDARD_TOOLTIP_REGISTERED}{literal}" style="color: red">{/literal}{$DIALOG_STANDARD_LBL_REGISTERED_AT}{literal}: {{registerip}}</span>{{/if}}
+                </li>
             {{/each}}
             {{/view}}
         </td>
@@ -43,7 +46,10 @@
             <table border="0" width="100%"><tbody><tr><td>
             {{#view App.StandardBoundAccountsView controllerBinding="details.accountsController"}}
             {{#each controller}}
-                <li {{bindAttr id="idattr"}} {{action "selectAccount" this }} >{{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}</li>
+                <li {{bindAttr id="idattr"}} {{action "selectAccount" this }} >
+                    {{#if priority}}{{priority}}: {{/if}}{{tech}}/{{account}} ({{extension}}) - {{description}}
+                    {{#if registerip}}<br/><span title="{/literal}{$DIALOG_STANDARD_TOOLTIP_REGISTERED}{literal}" style="color: red">{/literal}{$DIALOG_STANDARD_LBL_REGISTERED_AT}{literal}: {{registerip}}</span>{{/if}}
+                </li>
             {{/each}}
             {{/view}}
             </td></tr>

@@ -31,6 +31,7 @@ import re
 import elastix.BaseEndpoint
 from elastix.BaseEndpoint import BaseEndpoint
 from eventlet.green import urllib2
+import errno
 
 class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):

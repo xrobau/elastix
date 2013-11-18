@@ -133,6 +133,8 @@ fi
 
 %changelog
 * Mon Nov 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: add missing import errno to Digium.py
+  SVN Rev[6119]
 - CHANGED: New Endpoint Configurator: centralize RSS channel list inside the
   parent class BaseVendorResource.
   SVN Rev[6118]

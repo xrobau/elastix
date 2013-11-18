@@ -222,7 +222,7 @@ service mysqld status &>/dev/null
 res=$?
 if($res -eq 0) #service is up
 	elastix-menumerge $pathModule/setup/infomodules	
-else{
+else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
 	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 fi
@@ -343,6 +343,8 @@ fi
 #/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
 %{_localstatedir}/www/html/*
 /usr/share/elastix/apps/*
+%defattr(644, asterisk, asterisk)
+/usr/share/elastix/libs/*
 %defattr(-, root, root)
 /usr/share/elastix/module_installer/*
 /tftpboot/*

@@ -101,7 +101,7 @@ service mysqld status &>/dev/null
 res=$?
 if($res -eq 0) #service is up
 	elastix-menumerge $pathModule/setup/infomodules	
-else{
+else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
 	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 fi

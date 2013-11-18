@@ -33,5 +33,10 @@ $arrLangModule=array(
 "Timeout"=>"Timeout",
 "Enable Call Extensions" => "Llamar Extens Directamente",
 "# Loops"=> "# Repeticiones",
+"IVR_announcement" => "Announcement",
+"IVR_returnVM" => "Habilita/Deshabilita el VM return", 
+"IVR_enabledirectdial" => "Habilita/Deshabilita el marcado directo",
+"IVR_timeoutmessage" => "Muestra un mensaje cuando finaliza el tiempo de espera",
+"IVR_invalidmessage" => "Mensaje invalido",
 );
 ?>

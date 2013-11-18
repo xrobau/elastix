@@ -742,12 +742,14 @@ function createFieldFilter($arrOrgz)
 {
     $arrFields = array(
         "organization"  => array("LABEL"         => _tr("Organization"),
+                        "DESCRIPTION"            => _tr("RE_organization"),
                         "REQUIRED"               => "no",
                         "INPUT_TYPE"             => "SELECT",
                         "INPUT_EXTRA_PARAM"      => $arrOrgz,
                         "VALIDATION_TYPE"        => "domain",
                         "VALIDATION_EXTRA_PARAM" => ""),
         "name"  => array("LABEL"                 => _tr("Name"),
+                        "DESCRIPTION"            => _tr("RE_attachfile"),
                         "REQUIRED"               => "no",
                         "INPUT_TYPE"             => "TEXT",
                         "INPUT_EXTRA_PARAM"      => '',
@@ -761,6 +763,7 @@ function createFieldForm($arrOrgz)
 {
     $arrFields = array(
         "organization"  => array("LABEL"         => _tr("Organization"),
+                        "DESCRIPTION"            => _tr("RE_organization"),
                         "REQUIRED"               => "yes",
                         "INPUT_TYPE"             => "SELECT",
                         "INPUT_EXTRA_PARAM"      => $arrOrgz,

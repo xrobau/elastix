@@ -69,6 +69,8 @@ $arrLangModule=array(
 "Record was saved succesfully." => "Record was saved succesfully.",
 "Record was canceled." => "Record was canceled.",
 "Hang up." => "Hang up.",
-"File size exceeds the limit. "=>"File size exceeds the limit. "
+"File size exceeds the limit. "=>"File size exceeds the limit. ",
+"RE_organization" => "Select the organization",
+"RE_attachfile" => "Allow upload recordings files",
 );
 ?>

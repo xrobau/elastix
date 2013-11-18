@@ -66,7 +66,8 @@ $arrLangModule=array(
 "Record was saved succesfully." => "Grabación guardada correctamente.",
 "Record was canceled." => "Grabación cancelada",
 "Hang up." => "Hang up.",
-"File size exceeds the limit. "=>"El tamaño de archivo excede el límite "
-
+"File size exceeds the limit. "=>"El tamaño de archivo excede el límite ",
+"RE_organization" => "Escoge la organizacion",
+"RE_attachfile" => "Permite subir archivo de grabacion",
 );
 ?>

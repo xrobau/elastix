@@ -185,25 +185,7 @@ class Aastra extends BaseVendorResource
 
     private function _handle_rssfeeds($id_endpoint, $pathList)
     {
-        // TODO: leer esta lista de una base de datos
-        $rssfeeds = array(
-            'elastixnews'       =>  array(
-                'Elastix News',
-                'http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw'
-            ),
-            'elastixtraining'   =>  array(
-                'Elastix Training',
-                'http://elastix.org/index.php/es/?option=com_mediarss&feed_id=3&format=raw'
-            ),
-            'wsjonline'         =>  array(
-                "What's News - US",
-                'http://online.wsj.com/xml/rss/0,,3_7011,00.xml'
-            ),
-            'eluniverso'        =>  array(
-                'El Universo - Noticias de Ecuador y el Mundo',
-                'http://www.eluniverso.com/rss/all.xml'
-            ),
-        );
+        $rssfeeds = $this->listarCanalesRSS();
         if (count($pathList) <= 0) {
             // Listar los RSS disponibles
             $xml = new SimpleXMLElement('<?xml version="1.0" ?><AastraIPPhoneTextMenu/>');

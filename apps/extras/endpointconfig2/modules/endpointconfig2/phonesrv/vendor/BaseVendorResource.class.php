@@ -166,5 +166,36 @@ class BaseVendorResource
         }
         return $r;
     }
+    
+    /**
+     * Procedimiento para listar y devolver los canales RSS que pueden verse a
+     * través de la interfaz soportada del teléfono.
+     * 
+     * @return  NULL en error, o lista en caso de éxito
+     */
+    protected function listarCanalesRSS()
+    {
+        // TODO: leer esta lista de una base de datos
+        $rssfeeds = array(
+            'elastixnews'       =>  array(
+                'Elastix News',
+                'http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw'
+            ),
+            'elastixtraining'   =>  array(
+                'Elastix Training',
+                'http://elastix.org/index.php/es/?option=com_mediarss&feed_id=3&format=raw'
+            ),
+            'wsjonline'         =>  array(
+                "What's News - US",
+                'http://online.wsj.com/xml/rss/0,,3_7011,00.xml'
+            ),
+            'eluniverso'        =>  array(
+                'El Universo - Noticias de Ecuador y el Mundo',
+                'http://www.eluniverso.com/rss/all.xml'
+            ),
+        );
+        
+        return $rssfeeds;
+    }
 }
 ?>

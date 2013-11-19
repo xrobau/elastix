@@ -141,7 +141,8 @@ pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 #elastix-menumerge $pathModule/setup/infomodules
 service mysqld status &>/dev/null
 res=$?
-if($res -eq 0) #service is up
+if($res -eq 0); then
+	#service is up
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		

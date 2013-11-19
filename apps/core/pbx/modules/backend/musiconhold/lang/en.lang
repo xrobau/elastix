@@ -43,5 +43,9 @@ $arrLangModule=array(
 "Field 'Name' can't be empty." => "Field 'name' can't be empty.",
 "MoH Class has been edited successfully" => "MoH Class has been edited successfully. ",
 "MoH class was deleted successfully" => "MoH class was deleted successfully. ",
+"MOH_classname" => "Defines a name for this class music on hold",
+"MOH_type" => "Defines a type: files, custom",
+"MOH_sortmusic" => "Defines the sort music",
+"MOH_filename" => "Allow attach files "
 );
 ?>

@@ -42,5 +42,9 @@ $arrLangModule=array(
 "Invalid MoH Class" => "MoH Class no es valida. ",
 "MoH Class has been edited successfully" => "MoH Class ha sido editada exitosamente. ",
 "MoH class was deleted successfully" => "MoH class fue borrada exitosamente. ",
+"MOH_classname" => "Define un nombre para esta clase",
+"MOH_type" => "Define el tipo de archivo",
+"MOH_sortmusic" => "permite definir el tipo de ordenamiento ",
+"MOH_filename" => "permite subir archivo "
 );
 ?>

@@ -462,12 +462,14 @@ function createFieldForm($arrFormats)
         $arrFormats=array("WAV"=>"WAV","wav"=>"wav","ulaw"=>"ulaw","alaw"=>"alaw","sln"=>"sln","gsm"=>"gsm","g729"=>"g729");
     }
     $arrFormElements = array("name"     => array("LABEL"             => _tr('Class Name'),
+                                                    "DESCRIPTION"            => _tr("MOH_classname"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:300px"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                              "mode_moh"     => array("LABEL"             => _tr("Type"),
+                                                    "DESCRIPTION"            => _tr("MOH_type"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => array("files"=>"files", "custom"=>"custom"),
@@ -480,6 +482,7 @@ function createFieldForm($arrFormats)
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "sort"     => array("LABEL"             => _tr("Sort Music"),
+                                                    "DESCRIPTION"            => _tr("MOH_sortmusic"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => array("alpha"=>"alpha", "random"=>"random"),

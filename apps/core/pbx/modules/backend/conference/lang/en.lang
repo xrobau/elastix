@@ -89,5 +89,16 @@ $arrLangModule=array(
 'Update'=>'Update',
 'No Extensions'=>'No Extensions',
 'Unselected' => 'Unselected',
+"CONF_name" => "Defines a conference name",
+"CONF_numconference" => "Defines a conference number",
+"CONF_pinmoderator" => "Defines the pin moderator",
+"CONF_pinuser" => "Defines the pin user",
+"CONF_maxparticipates" => "Defines the max people for this conference",
+"CONF_scheduleconference" => "Enable this option if you want enable schedule of conference",
+"CONF_musiconhold" => "select the music on hold",
+"CONF_joinconferencemessage" => "Defines the join conference message",
+"CONF_recordcall" => "record call",
+"CONF_moderatoroptions" => "Defines moderator options",
+"CONF_useroptions" => "Defines user options",
 );
 ?>

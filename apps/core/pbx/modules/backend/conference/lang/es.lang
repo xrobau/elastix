@@ -86,5 +86,16 @@ $arrLangModule=array(
 'Update'=>'Actualizar',
 'No Extensions'=>'No hay extensiones',
 'Unselected' => 'No seleccion',
+"CONF_name" => "Define un nombre para la conferencia",
+"CONF_numconference" => "Especifica el numero de conferencia",
+"CONF_pinmoderator" => "Especifica el pin moderador",
+"CONF_pinuser" => "Especifica pin de usuario",
+"CONF_maxparticipates" => "Especifica el numero maximo de participantes",
+"CONF_scheduleconference" => "Habilita esta opcion si desea especificar fechas para conferencia",
+"CONF_musiconhold" => "Define el tipo de musica",
+"CONF_joinconferencemessage" => "Define mensaje de conferencia",
+"CONF_recordcall" => "grabacion de llamada",
+"CONF_moderatoroptions" => "Define opciones de moderador",
+"CONF_useroptions" => "Define opciones de usuario",
 );
 ?>

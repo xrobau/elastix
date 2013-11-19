@@ -132,6 +132,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Nov 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: convert Cisco feature code directory to
+  dynamic table read from FreePBX.
+  SVN Rev[6124]
+
 * Mon Nov 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: add missing import errno to Digium.py
   SVN Rev[6119]

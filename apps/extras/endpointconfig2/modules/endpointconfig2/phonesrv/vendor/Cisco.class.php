@@ -31,6 +31,8 @@
 require_once 'vendor/BaseVendorResource.class.php';
 require_once 'magpierss/rss_fetch.inc';
 
+define ('CISCO_MAX_ENTRADAS_DIR', 32);
+
 class Cisco extends BaseVendorResource
 {
     function handle($id_endpoint, $pathList)
@@ -98,45 +100,47 @@ class Cisco extends BaseVendorResource
     
     private function _handle_help($id_endpoint, $pathList)
     {
-    	$helptext = <<<HELPTEXT
-
-Feature Codes - List
-
-*411 Directory
-*43 Echo Test
-*60 Time
-*61 Weather
-*62 Schedule wakeup call
-*65 festival test (your extension is XXX)
-*70 Activate Call Waiting (deactivated by default)
-*71 Deactivate Call Waiting
-*72 Call Forwarding System
-*73 Disable Call Forwarding
-*77 IVR Recording
-*78 Enable Do-Not-Disturb
-*79 Disable Do-Not-Disturb
-*90 Call Forward on Busy
-*91 Disable Call Forward on Busy
-*97 Message Center (does no ask for extension)
-*98 Enter Message Center
-*99 Playback IVR Recording
-666 Test Fax
-7777 Simulate incoming call
-
-HELPTEXT;
-
-        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneText/>');
-        $xml->addChild('Title', str_replace('&', '&amp;', _tr('Help')));
-        $xml->addChild('Text', str_replace('&', '&amp;', $helptext));
-        //$xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
+        $r = $this->listarCodigosFuncionalidades();
+        if (!is_array($r)) {
+            Header('HTTP/1.1 501 Internal Server Error');
+            print "Unable to read feature codes!";
+            return;
+        }
         
+        $numpaginas = (int)((count($r) + CISCO_MAX_ENTRADAS_DIR - 1) / CISCO_MAX_ENTRADAS_DIR);
+        if (isset($_GET['page'])) {
+        	if (!ctype_digit($_GET['page']) || $_GET['page'] >= $numpaginas)
+                unset($_GET['page']);
+        }
+        
+        if (!isset($_GET['page'])) {
+            // Se elaboran tantos menús como sea requerido para cubrir todas las páginas
+            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneMenu/>');
+
+            for ($i = 0; $i < $numpaginas; $i++) {
+            	$url = $this->_baseurl.'/help?name='.$_GET['name'].'&page='.$i;
+                $this->_ciscoMenuItem($xml,
+                    _tr('Help').' - '._tr('Page').' '.($i + 1),
+                    $url);
+            }
+        } else {
+            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneDirectory/>');
+            $xml->addChild('Title', str_replace('&', '&amp;', _tr('Help')));
+            $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
+            $r = array_slice($r, $_GET['page'] * CISCO_MAX_ENTRADAS_DIR, CISCO_MAX_ENTRADAS_DIR);
+            foreach ($r as $tupla) {
+                $xml_direntry = $xml->addChild('DirectoryEntry');
+                $xml_direntry->addChild('Name', str_replace('&', '&amp;', $tupla['description']));
+                $xml_direntry->addChild('Telephone', str_replace('&', '&amp;', $tupla['code']));
+            }
+        }
+
         header('Content-Type: text/xml');
         print $xml->asXML();
     }
 
     private function _handle_directory($id_endpoint, $pathList)
     {
-        $limit = 32;    // Máximo número de entradas por directorio
         $typemap = array(
             'internal' => _tr('Internal'),
             'external' => _tr('External'));
@@ -172,7 +176,7 @@ HELPTEXT;
                 }
                 $total = count($result['contacts']);
                 
-                for ($offset = 0, $page = 1; $offset < $total; $offset += $limit, $page++) {
+                for ($offset = 0, $page = 1; $offset < $total; $offset += CISCO_MAX_ENTRADAS_DIR, $page++) {
                     $url = $this->_baseurl.'/directory/'.$addressBookType.'?name='.$_GET['name'].'&offset='.$offset;
                     if (isset($_GET['search'])) $url .= '&search='.urlencode($_GET['search']);
                     $this->_ciscoMenuItem($xml, "$v - "._tr('Page')." $page", $url);
@@ -181,7 +185,7 @@ HELPTEXT;
     	} else {
     		$addressBookType = array_shift($pathList);
             $offset = (isset($_GET['offset']) && ctype_digit($_GET['offset'])) ? (int)$_GET['offset'] : 0;
-            $page = (int)($offset / $limit) + 1;
+            $page = (int)($offset / CISCO_MAX_ENTRADAS_DIR) + 1;
             
             if (!isset($typemap[$addressBookType])) {
                 header('Location: '.$this->_baseurl.'/directory?name='.$_GET['name']);
@@ -282,7 +286,7 @@ HELPTEXT;
                 $rsstext = $infoRSS->channel['title'].' - '.$infoRSS->channel['link']."\n-----------------------------\n";
                 for ($i = 0; $i < count($infoRSS->items); $i++) {
                     $newitem = date('Y.m.d', $infoRSS->items[$i]['date_timestamp']).' - '.$infoRSS->items[$i]['title']."\n\n";
-                    $newitem .= $infoRSS->items[$i]['summary'];
+                    $newitem .= strip_tags($infoRSS->items[$i]['summary']);
                     $newitem .= "\n-----------------------------\n";
                     
                     // El Cisco 7960 se ahoga con un texto muy largo

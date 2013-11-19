@@ -179,11 +179,11 @@ class BaseVendorResource
         $rssfeeds = array(
             'elastixnews'       =>  array(
                 'Elastix News',
-                'http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw'
+                'http://elastix.org/index.php/en/news.feed?type=rss'
             ),
             'elastixtraining'   =>  array(
                 'Elastix Training',
-                'http://elastix.org/index.php/es/?option=com_mediarss&feed_id=3&format=raw'
+                'http://elastix.org/index.php/en/events.feed?type=rss'
             ),
             'wsjonline'         =>  array(
                 "What's News - US",

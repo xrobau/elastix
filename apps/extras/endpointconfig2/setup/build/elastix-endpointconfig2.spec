@@ -133,6 +133,8 @@ fi
 
 %changelog
 * Tue Nov 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: update RSS URLs with working versions
+  SVN Rev[6127] 
 - CHANGED: New Endpoint Configurator: abstract Cisco XML objects into classes
   for readability.
   SVN Rev[6126]

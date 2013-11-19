@@ -82,20 +82,17 @@ class Cisco extends BaseVendorResource
     
     private function _handle_services($id_endpoint, $pathList)
     {
-        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneMenu/>');
-        $xml->addChild('Title',  str_replace('&', '&amp;', _tr('Elastix services for Cisco')));
-        $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
-
+        $xml = new CiscoIPPhoneMenu;
+        $xml->setTitle(_tr('Elastix services for Cisco'))
+            ->setPrompt(_tr('Please select one'));
         foreach (array(
             'directory' => _tr('Phone directory'),
             'rssfeeds'  => _tr('RSS Feeds'),
             'help'      => _tr('Help'))
             as $k => $v) {
-            $this->_ciscoMenuItem($xml, $v, $this->_baseurl.'/'.$k.'?name='.$_GET['name']);
+            $xml->addMenuItem($v, $this->_baseurl.'/'.$k.'?name='.$_GET['name']);
         }
-        
-        header('Content-Type: text/xml');
-        print $xml->asXML();
+        $xml->output();
     }
     
     private function _handle_help($id_endpoint, $pathList)
@@ -115,28 +112,22 @@ class Cisco extends BaseVendorResource
         
         if (!isset($_GET['page'])) {
             // Se elaboran tantos menús como sea requerido para cubrir todas las páginas
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneMenu/>');
-
+            $xml = new CiscoIPPhoneMenu;
             for ($i = 0; $i < $numpaginas; $i++) {
-            	$url = $this->_baseurl.'/help?name='.$_GET['name'].'&page='.$i;
-                $this->_ciscoMenuItem($xml,
-                    _tr('Help').' - '._tr('Page').' '.($i + 1),
-                    $url);
+                $url = $this->_baseurl.'/help?name='.$_GET['name'].'&page='.$i;
+                $xml->addMenuItem(_tr('Help').' - '._tr('Page').' '.($i + 1), $url);
             }
         } else {
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneDirectory/>');
-            $xml->addChild('Title', str_replace('&', '&amp;', _tr('Help')));
-            $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
+            $xml = new CiscoIPPhoneDirectory;
+            $xml->setTitle(_tr('Help'))
+                ->setPrompt(_tr('Please select one'));
             $r = array_slice($r, $_GET['page'] * CISCO_MAX_ENTRADAS_DIR, CISCO_MAX_ENTRADAS_DIR);
             foreach ($r as $tupla) {
-                $xml_direntry = $xml->addChild('DirectoryEntry');
-                $xml_direntry->addChild('Name', str_replace('&', '&amp;', $tupla['description']));
-                $xml_direntry->addChild('Telephone', str_replace('&', '&amp;', $tupla['code']));
+                $xml->addDirectoryEntry($tupla['description'], $tupla['code']);
             }
         }
 
-        header('Content-Type: text/xml');
-        print $xml->asXML();
+        $xml->output();
     }
 
     private function _handle_directory($id_endpoint, $pathList)
@@ -151,16 +142,15 @@ class Cisco extends BaseVendorResource
         
         if (count($pathList) <= 0) {
     		// Se elaboran tantos menús como sea requerido para cubrir todas las páginas
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneMenu/>');
-            
+            $xml = new CiscoIPPhoneMenu;
+
             if (!isset($_GET['search'])) {
-                $xml->addChild('Title', str_replace('&', '&amp;', _tr('Phone Directory')));
-                $this->_ciscoMenuItem($xml, _tr('Search'), 
-                    $this->_baseurl.'/directorysearch/?name='.$_GET['name']);
+                $xml->setTitle(_tr('Phone Directory'))
+                    ->addMenuItem(_tr('Search'), $this->_baseurl.'/directorysearch/?name='.$_GET['name']);
             } else {
-                $xml->addChild('Title', str_replace('&', '&amp;', _tr('Search Results')));
+                $xml->setTitle(_tr('Search Results'));
             }
-            $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
+            $xml->setPrompt(_tr('Please select one'));
             
             foreach ($typemap as $addressBookType => $v) {
                 $result = $this->listarAgendaElastix(
@@ -179,7 +169,7 @@ class Cisco extends BaseVendorResource
                 for ($offset = 0, $page = 1; $offset < $total; $offset += CISCO_MAX_ENTRADAS_DIR, $page++) {
                     $url = $this->_baseurl.'/directory/'.$addressBookType.'?name='.$_GET['name'].'&offset='.$offset;
                     if (isset($_GET['search'])) $url .= '&search='.urlencode($_GET['search']);
-                    $this->_ciscoMenuItem($xml, "$v - "._tr('Page')." $page", $url);
+                    $xml->addMenuItem("$v - "._tr('Page')." $page", $url);
                 }
             }
     	} else {
@@ -204,20 +194,18 @@ class Cisco extends BaseVendorResource
             }
 
             // Listar resumen de contactos
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneDirectory/>');
-            $xml->addChild('Title', str_replace('&', '&amp;', _tr('Phone Directory').' - '.$typemap[$addressBookType].' - '._tr('Page')." $page"));
-            $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select one')));
+            $xml = new CiscoIPPhoneDirectory;
+            $xml->setTitle(_tr('Phone Directory').' - '.$typemap[$addressBookType].' - '._tr('Page')." $page")
+                ->setPrompt(_tr('Please select one'));
             foreach ($result['contacts'] as $contact) {
-                $nombre = $contact['name'];
-                if (isset($contact['last_name'])) $nombre .= ' '.$contact['last_name'];
-                $xml_direntry = $xml->addChild('DirectoryEntry');
-                $xml_direntry->addChild('Name', str_replace('&', '&amp;', $nombre));
-                $xml_direntry->addChild('Telephone', str_replace('&', '&amp;', $contact['work_phone']));
+                $xml->addDirectoryEntry(
+                    $contact['name'].(isset($contact['last_name']) ? ' '.$contact['last_name'] : ''),
+                    $contact['work_phone']);
             }
+                
     	}
-    
-        header('Content-Type: text/xml');
-        print $xml->asXML();
+
+        $xml->output();
     }
 
     private function _filter_direntry_name(&$contact, $name)
@@ -233,18 +221,12 @@ class Cisco extends BaseVendorResource
 
     private function _handle_directorysearch($id_endpoint, $pathList)
     {
-    	$xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneInput/>');
-        $xml->addChild('Title', str_replace('&', '&amp;', _tr('Search Phone Directory')));
-        $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Enter text to search')));
-        $xml->addChild('URL', $this->_baseurl.'/directory?name='.$_GET['name']);
-        $xml_inputitem = $xml->addChild('InputItem');
-        $xml_inputitem->addChild('DisplayName', str_replace('&', '&amp;', _tr('Text')));
-        $xml_inputitem->addChild('QueryStringParam', 'search');
-        $xml_inputitem->addChild('InputFlags');
-        $xml_inputitem->addChild('DefaultValue');
-    
-        header('Content-Type: text/xml');
-        print $xml->asXML();
+        $xml = new CiscoIPPhoneInput;
+        $xml->setTitle(_tr('Search Phone Directory'))
+            ->setPrompt(_tr('Enter text to search'))
+            ->setURL($this->_baseurl.'/directory?name='.$_GET['name'])
+            ->addInputItem(_tr('Text'), 'search')
+            ->output();
     }
     
     private function _ciscoMenuItem($xml, $name, $url)
@@ -259,12 +241,11 @@ class Cisco extends BaseVendorResource
         $rssfeeds = $this->listarCanalesRSS();
     	if (count($pathList) <= 0) {
     		// Listar los RSS disponibles
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneMenu/>');
-            $xml->addChild('Title',  str_replace('&', '&amp;', _tr('RSS Feeds')));
-            $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('Please select an RSS Feed')));
-    
+            $xml = new CiscoIPPhoneMenu;
+            $xml->setTitle(_tr('RSS Feeds'))
+                ->setPrompt(_tr('Please select an RSS Feed'));
             foreach ($rssfeeds as $k => $rssfeed) {
-                $this->_ciscoMenuItem($xml, $rssfeed[0], $this->_baseurl.'/rssfeeds/'.$k.'?name='.$_GET['name']);
+                $xml->addMenuItem($rssfeed[0], $this->_baseurl.'/rssfeeds/'.$k.'?name='.$_GET['name']);
             }
     	} else {
     		// Mostrar el contenido del RSS elegido
@@ -282,6 +263,10 @@ class Cisco extends BaseVendorResource
                 header("HTTP/1.1 500 Internal Server Error");
                 print _tr('Could not get web server information. You may not have internet access or the web server is down');
                 return;
+            } elseif (strpos($sMensaje, '404 Not Found') !== FALSE) {
+                header('HTTP/1.1 404 Not Found');
+                print $sMensaje;
+                return;
             } else {
                 $rsstext = $infoRSS->channel['title'].' - '.$infoRSS->channel['link']."\n-----------------------------\n";
                 for ($i = 0; $i < count($infoRSS->items); $i++) {
@@ -296,18 +281,122 @@ class Cisco extends BaseVendorResource
                 $rsstext = str_replace('&amp;', '&', $rsstext);
                 $rsstext = str_replace("\r", '', $rsstext);
 
-                $rsstext = iconv('ISO-8859-1', 'UTF-8', 
-                    iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $rsstext));
-
-                $xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><CiscoIPPhoneText/>');
-                $xml->addChild('Title', str_replace('&', '&amp;', $rssfeeds[$chosenfeed][0]));
-                $xml->addChild('Prompt', str_replace('&', '&amp;', _tr('RSS Feed')));
-                $xml->addChild('Text', str_replace('&', '&amp;', $rsstext));
+                $xml = new CiscoIPPhoneText;
+                $xml->setTitle($rssfeeds[$chosenfeed][0])
+                    ->setPrompt(_tr('RSS Feed'))
+                    ->setText($rsstext);
             }
     	}
 
+        $xml->output();
+    }
+}
+
+class CiscoIPPhoneObject
+{
+	protected $_xml;
+
+    function __construct($basetag)
+    {
+    	$this->_xml = new SimpleXMLElement('<?xml version="1.0" encoding="iso-8859-1" ?><'.$basetag.'/>');
+    }
+    
+    protected function _addTextChild($xml, $t, $s)
+    {
+    	return $xml->addChild($t, str_replace('&', '&amp;',
+            iconv('ISO-8859-1', 'UTF-8', iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $s))));
+    }
+    
+    function setTitle($s)
+    {
+        $this->_addTextChild($this->_xml, 'Title', $s);
+        return $this;
+    }
+    
+    function setPrompt($s)
+    {
+        $this->_addTextChild($this->_xml, 'Prompt', $s);
+        return $this;
+    }
+    
+    function output()
+    {
         header('Content-Type: text/xml');
-        print $xml->asXML();
+        print $this->_xml->asXML();
+    }
+}
+
+class CiscoIPPhoneText extends CiscoIPPhoneObject
+{
+	function __construct()
+    {
+    	parent::__construct('CiscoIPPhoneText');
+    }
+    
+    function setText($s)
+    {
+        $this->_addTextChild($this->_xml, 'Text', $s);
+        return $this;
+    }
+}
+
+class CiscoIPPhoneMenu extends CiscoIPPhoneObject
+{
+    function __construct()
+    {
+        parent::__construct('CiscoIPPhoneMenu');
+    }
+    
+	function addMenuItem($name, $url)
+    {
+        $xml_menuitem = $this->_xml->addChild('MenuItem');
+        $this->_addTextChild($xml_menuitem, 'Name', $name);
+        $this->_addTextChild($xml_menuitem, 'URL', $url);
+        return $this;
+    }
+}
+
+class CiscoIPPhoneInput extends CiscoIPPhoneObject
+{
+    function __construct()
+    {
+        parent::__construct('CiscoIPPhoneInput');
+    }
+
+    function setURL($s)
+    {
+        $this->_addTextChild($this->_xml, 'URL', $s);
+        return $this;
+    }
+    
+    function addInputItem($displayname, $queryparam, $inputflags = NULL, $defaultvalue = NULL)
+    {
+        $xml_inputitem = $this->_xml->addChild('InputItem');
+        $this->_addTextChild($xml_inputitem, 'DisplayName', $displayname);
+        $this->_addTextChild($xml_inputitem, 'QueryStringParam', $queryparam);
+        if (!is_null($inputflags))
+            $this->_addTextChild($xml_inputitem, 'InputFlags', $inputflags);
+        else $xml_inputitem->addChild('InputFlags');
+        if (!is_null($defaultvalue))
+            $this->_addTextChild($xml_inputitem, 'DefaultValue', $defaultvalue);
+        else $xml_inputitem->addChild('DefaultValue');
+        return $this;
+    }
+}
+
+class CiscoIPPhoneDirectory extends CiscoIPPhoneObject
+{
+    function __construct()
+    {
+        parent::__construct('CiscoIPPhoneDirectory');
+    }
+
+    function addDirectoryEntry($name, $telephone)
+    {
+        $xml_direntry = $this->_xml->addChild('DirectoryEntry');
+        $this->_addTextChild($xml_direntry, 'Name', $name);
+        $this->_addTextChild($xml_direntry, 'Telephone', $telephone);
+        return $this;
     }
 }
 ?>

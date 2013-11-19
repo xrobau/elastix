@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Tue Nov 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: abstract Cisco XML objects into classes
+  for readability.
+  SVN Rev[6126]
 - CHANGED: New Endpoint Configurator: convert Cisco feature code directory to
   dynamic table read from FreePBX.
   SVN Rev[6124]

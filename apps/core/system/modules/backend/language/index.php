@@ -133,6 +133,7 @@ function saveLanguage($smarty, $module_name, $local_templates_dir, $arrConf, $pA
 
 function createFieldForm($langElastix){
         $arrForm  = array("language"  => array("LABEL"                  => _tr("Select language"),
+                                               "DESCRIPTION"            => _tr("LG_selectlang"),
                                                "REQUIRED"               => "yes",
                                                "INPUT_TYPE"             => "SELECT",
                                                "INPUT_EXTRA_PARAM"      => $langElastix,

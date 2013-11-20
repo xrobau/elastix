@@ -32,6 +32,7 @@ $arrLangModule=array(
 "Select language"=>"Select language",
 "Continue"=>"Continue",
 "You can't change language"=>"You can't change language",
+"LG_selectlang" => "select your language"
 /*End Language*/
 );
 ?>

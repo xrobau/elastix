@@ -97,6 +97,7 @@ function createFieldForm($arr_themes){
     $formCampos = array(
         'themes'                 => array(
             "LABEL"                  => _tr("Themes"),
+            "DESCRIPTION"            => _tr("TH_tem"),
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "SELECT",
             "INPUT_EXTRA_PARAM"      => $arr_themes,

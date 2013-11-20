@@ -108,6 +108,7 @@ function createFieldForm()
 
     $arrFields = array(
             "currency"   => array(  "LABEL"                  => _tr("Currency"),
+                                    "DESCRIPTION"            => _tr("CU_currency"),
                                     "REQUIRED"               => "no",
                                     "INPUT_TYPE"             => "SELECT",
                                     "INPUT_EXTRA_PARAM"      => getCurrencys(),

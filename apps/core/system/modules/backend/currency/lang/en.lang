@@ -59,5 +59,6 @@ $arrLangModule=array(
 "GB Sterling" => "Great British Pound",
 "Rublo ruso" => "Russian Ruble",
 "Swiss Franc" => "Swiss Franc",
+"CU_currency" => "Defines the currency",
 );
 ?>

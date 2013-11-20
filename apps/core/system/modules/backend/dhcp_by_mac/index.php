@@ -311,6 +311,7 @@ function createFieldForm()
 {
     $arrFields = array(
             "hostname"   => array(      "LABEL"                  => _tr('Host Name'),
+                                            "DESCRIPTION"            => _tr("DCHBYMAC_hostname"),  
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),
@@ -318,6 +319,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "ipaddress"   => array(      "LABEL"                  => _tr('IP Address'),
+                                            "DESCRIPTION"            => _tr("DCHBYMAC_ipaddress"),  
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),
@@ -326,6 +328,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
             "macaddress"   => array(      "LABEL"                  => _tr('MAC Address'),
+                                            "DESCRIPTION"            => _tr("DCHBYMAC_macaddress"),  
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),

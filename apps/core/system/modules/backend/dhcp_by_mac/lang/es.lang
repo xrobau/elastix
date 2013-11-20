@@ -47,5 +47,8 @@ $arrLangModule=array(
 'Invalid IP address' => 'Dirección IP no es válida',
 'Invalid MAC address' => 'Dirección MAC no es válida',
 'Duplicate IP or MAC' => 'IP o MAC están ya duplicados',
+"DCHBYMAC_macaddress" => "Define una dirección mac", 
+"DCHBYMAC_hostname" => "Define el nombre para el host",
+"DCHBYMAC_ipaddress" => "Define una dirección IP",
 );
 ?>

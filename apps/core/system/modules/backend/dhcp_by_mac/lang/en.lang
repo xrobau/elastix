@@ -47,5 +47,9 @@ $arrLangModule=array(
 'Invalid IP address' => 'Invalid IP address',
 'Invalid MAC address' => 'Invalid MAC address',
 'Duplicate IP or MAC' => 'Duplicate IP or MAC',
+"DCHBYMAC_macaddress" => "Defines the mac address", 
+"DCHBYMAC_hostname" => "Defines a host name",
+"DCHBYMAC_ipaddress" => "Defines the IP address",
+
 );
 ?>

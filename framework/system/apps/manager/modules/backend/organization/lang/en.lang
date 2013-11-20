@@ -72,6 +72,18 @@ $arrLangModule=array(
 "Couldn't be written file" => "Couldn't be created file",
 "active" => "Active",
 "terminate" => "Ready to Delete",
-"suspend" => "Suspended"
+"suspend" => "Suspended",
+"ORG_name" => "Defines the organization name",
+"ORG_domainname" => "Defines the Organization domain (not www Example: organization.com).",
+"ORG_country" => "Defines the organization country",
+"ORG_city" => "Definimos the organization city",
+"ORG_address" => "Defines the address for this organization",
+"ORG_countrycode" => "Defines the country code",
+"ORG_areacode" => "Defines the area code",
+"ORG_emailcontact" => "Defines a mail for receive information (this mail will be the administrator and username of this organization)",
+"ORG_maxnumaccounts" => "Defines the users numbers for the organization (default: unlimited)",
+"ORG_maxnumextensions" => "Defines the extensions number for the organization (default: unlimited)",
+"ORG_masxnumqueues" => "Defines the queues for the organization (default: unlimited)",
+"ORG_emailquota" => "Defines the email quota by user [Mb] (default: 30 mb)",
 );
 ?>

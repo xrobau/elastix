@@ -71,6 +71,18 @@ $arrLangModule=array(
 "Couldn't be written file" => "No pudo ser creado archivo",
 "active" => "Activa",
 "terminate" => "Lista para Eliminar",
-"suspend" => "Suspendida"
+"suspend" => "Suspendida",
+"ORG_name" => "Definimos el nombre de la organización",
+"ORG_domainname" => "Definimos el dominio para la organización (sin www Ejemplo: organizacion.com)",
+"ORG_country" => "Definimos el nombre del pais",
+"ORG_city" => "Definimos el nombre la ciudad",
+"ORG_address" => "Definimos la dirección fisica donde estará ubicada la organización",
+"ORG_countrycode" => "Definimos el código de pais",
+"ORG_areacode" => "Definimos el código de area",
+"ORG_emailcontact" => "Definimos un mail de contacto (este sera el administrador y username de acceso a esta organización)",
+"ORG_maxnumaccounts" => "Definimos el número de cuentas para la organización (defecto: ilimitado)",
+"ORG_maxnumextensions" => "Definimos el número de extensiones para la organización (defecto: ilimitado)",
+"ORG_masxnumqueues" => "Definimos el número máximo de colas para esta organización (defecto: ilimitado)",
+"ORG_emailquota" => "Definimos la cuota de email por usuario. [Mb] (defecto: 30 Mb)",
 );
 ?>

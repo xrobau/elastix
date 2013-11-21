@@ -62,10 +62,18 @@
                 <button class="neo-table-action" ><img align="absmiddle" src="images/list.png"/></button>
             </div>
             {{/linkTo}}
-            <div class="neo-table-header-row-filter" title="{/literal}{$LBL_FORGET}{literal}" {{action "forgetSelected"}} >
-                <button class="neo-table-action"><img align="absmiddle" src="images/delete5.png"/></button>
-            </div>
         {{/unless}}
+        {{#if unsetInProgress }}
+            <div class="neo-table-header-row-filter">
+                <img src="images/loading.gif" style="height: 21px; vertical-align: middle;" />
+            </div>
+        {{else}}
+	        {{#unless uiblock }}
+	            <div class="neo-table-header-row-filter" title="{/literal}{$LBL_FORGET}{literal}" {{action "forgetSelected"}} >
+	                <button class="neo-table-action"><img align="absmiddle" src="images/delete5.png"/></button>
+	            </div>
+	        {{/unless}}
+        {{/if}}
         {{#unless uiblock }}
             {{#view App.SubMenuView}}
                 <div class="neo-table-header-row-filter" title="{/literal}{$LBL_DOWNLOAD}{literal}" {{action "toggleMenu" target="view"}}>

@@ -132,6 +132,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Nov 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: display spinner when removing accounts
+  information.
+  SVN Rev[6143]
+
 * Tue Nov 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: update RSS URLs with working versions
   SVN Rev[6127] 

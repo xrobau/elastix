@@ -43,6 +43,6 @@ $arrLangModule=array(
 "Message" => "Text to Convert",
 "Back" => "Regresar",
 "TTW_texttoconvert" => "Escribe el texto que deseas convertir",
-"TTW_format" => "Escoge el tipo de formato",
+"TTW_format" => "Escoge el tipo de formato.",
 );
 ?>

@@ -51,19 +51,17 @@ function _moduleContent(&$smarty, $module_name)
     $uid = $pACL->getIdUser($user);
     $arrUser = $pACL->getUsers($uid);
       
-     
-
     foreach($arrUser as $value){
-    $arrFill["username"]=$value[1];
-    $arrFill["name"]=$value[2];
-    $arrFill["password"]=$value[3];
-    $arrFill["organization"]=$value[4];
-    $arrFill["group"]=$value[7];
-    $extu=isset($value[5])?$value[5]:_tr("Not assigned yet");
-    $extf=isset($value[6])?$value[6]:_tr("Not assigned yet");
-    $arrFill["extension"]=$extu;
-    $arrFill["fax_extension"]=$extf;
-   }
+        $arrFill["username"]=$value[1];
+        $arrFill["name"]=$value[2];
+        $arrFill["password"]=$value[3];
+        $arrFill["organization"]=$value[4];
+        $arrFill["group"]=$value[7];
+        $extu=isset($value[5])?$value[5]:_tr("Not assigned yet");
+        $extf=isset($value[6])?$value[6]:_tr("Not assigned yet");
+        $arrFill["extension"]=$extu;
+        $arrFill["fax_extension"]=$extf;
+    }
 
     $hostname = '{localhost:143/imap/novalidate-cert}';
     $username =  $arrFill["username"];
@@ -98,7 +96,6 @@ function _moduleContent(&$smarty, $module_name)
     $emailnum = imap_search($inbox,'ALL');
     
     $list=imap_getmailboxes($inbox,'{localhost:143/imap/novalidate-cert}',"*");
-    //print_r($list);
     
     //actions
     $accion = getAction();
@@ -117,37 +114,33 @@ function _moduleContent(&$smarty, $module_name)
 function createHome($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $emailnum, $inbox)
 {
  //imap_clearflag_full($inbox,"1,2,3,4","\\Seen");
-  if($emailnum) {
-  foreach($emailnum as $email_number) {    
-    $overview= imap_fetch_overview($inbox,$email_number,0);
-    $tmp_str= substr($overview[0]->date,0,17);
-    $mails[]= array("from" => $overview[0]->from,
-                    "subject" => $overview[0]->subject,
-                    "date"=> $tmp_str,
-                    "UID"=>$email_number,
-                    "status"=>$overview[0]->seen);
-   }
-
-    $mails_final = array_reverse($mails);
-  
-    //print_r($mails_final);
-    $smarty->assign("MAILS",$mails_final);
-  }
+    if($emailnum) {
+        foreach($emailnum as $email_number) {    
+            $overview= imap_fetch_overview($inbox,$email_number,0);
+            $tmp_str= substr($overview[0]->date,0,17);
+            $mails[]= array("from" => $overview[0]->from,
+                            "subject" => $overview[0]->subject,
+                            "date"=> $tmp_str,
+                            "UID"=>$email_number,
+                            "status"=>$overview[0]->seen);
+        }
+        $mails_final = array_reverse($mails);
+        //print_r($mails_final);
+        $smarty->assign("MAILS",$mails_final);
+    }
 
     imap_close($inbox);
     $home = new paloHome();
     $smarty->assign("ICON_TYPE", "web/apps/$module_name/images/mail2.png");
    
-    $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m"><span class="lp ml10">&#9993;</span></div>
-    <div class="icn_m"><span class="lp ml10">&#59158;</span></div>  
-    <div class="icn_m"><span class="lp ml10">&#128260;</span></div> 
-    <div class="icn_m" id="filter_but"><span class="lp ml10">&#128269;</span></div>');
+    $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m"><span class="lp ml10 glyphicon glyphicon-envelope"></span></div>
+    <div class="icn_m"><span class="lp ml10 glyphicon glyphicon-refresh"></span></div>  
+    <div class="icn_m"><span class="lp ml10 glyphicon glyphicon-trash"></span></div> 
+    <div class="icn_m" id="filter_but"><span class="lp ml10 glyphicon glyphicon-search"></span></div>');
     $html = $smarty->fetch("file:$local_templates_dir/form.tpl");
     $contenidoModulo = "<div>".$html."</div>";
     return $contenidoModulo;
 }
-
-
 function view_mail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,$inbox)
 {
    $jsonObject = new PaloSantoJSON();
@@ -157,9 +150,6 @@ function view_mail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
    
    return $jsonObject->createJSON();
 }
-
-
-
 function getAction()
 {
     if(getParameter("action")=="view_bodymail"){
@@ -167,12 +157,4 @@ function getAction()
     }else
       return "report";
 }
-
-
-
-
-
-
-
-
 ?>

@@ -388,6 +388,7 @@ img {
  position: relative;
  float:left;
  vertical-align: middle;
+ margin-top: 5px;
 }
 
 .logout{
@@ -505,6 +506,7 @@ img {
     padding: 0px;
     text-align:right;
     overflow:visible!important;
+    z-index:3;
 }
 .elx_tab_chat{
     width:225px;

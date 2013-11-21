@@ -44,9 +44,9 @@
                 <div id="table">
                     {section name=mail loop=$MAILS }
                     {if $MAILS[mail].status}
-                        <div class="row" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:#ffff;">
+                        <div class="elx_row" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:#ffff;">
                     {else}
-                        <div class="row" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:rgb(229,229,229);">
+                        <div class="elx_row" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:rgb(229,229,229);">
                     {/if}
                             <div class="sel"><input type="checkbox" value={$MAILS[mail].UID} class="inp1" name="checkmail"/></div>	
                             <div class="ic">

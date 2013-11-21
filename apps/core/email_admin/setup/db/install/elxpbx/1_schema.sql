@@ -23,18 +23,19 @@ CREATE TABLE IF NOT EXISTS member_list
     FOREIGN KEY(id_emaillist) REFERENCES email_list(id) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXISTS messages_vacations
-(
-    id          INTEGER NOT NULL AUTO_INCREMENT,
-    account     varchar(150) NOT NULL,
-    subject     varchar(150) NOT NULL,
-    body        text,
-    vacation varchar(5) default 'no',
-    ini_date date NOT NULL,
-    end_date date NOT NULL,
+CREATE TABLE IF NOT EXIST vacations (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    id_user int(11) NOT NULL,
+    id_recording int(10) unsigned NULL,
+    email_subject varchar(150) NOT NULL,
+    email_body text,
+    init_date DATE,
+    end_date DATE,
+    vacation varchar(5) DEFAULT 'no',
     PRIMARY KEY (id),
-    FOREIGN KEY (account) REFERENCES acl_user(username) ON DELETE CASCADE
-) ENGINE = INNODB;
+    FOREIGN KEY (id_user) REFERENCES acl_user (id),
+    FOREIGN KEY (id_recording) REFERENCES recordings (uniqueid)
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS email_statistics(
     id                       integer not null AUTO_INCREMENT,

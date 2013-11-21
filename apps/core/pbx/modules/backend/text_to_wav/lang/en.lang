@@ -42,5 +42,7 @@ $arrLangModule=array(
 "Not exists file" => "Not exists file",
 "Message" => "Text to Convert",
 "Back" => "Back",
+"TTW_texttoconvert" => "Write the text that you will want convert",
+"TTW_format" => "Choose the format",
 );
 ?>

@@ -123,6 +123,7 @@ function createFieldForm()
 
     $arrFields = array(
             "message"          => array(   "LABEL"                  => _tr("Message"),
+                                            "DESCRIPTION"            => _tr("TTW_texttoconvert"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXTAREA",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -133,6 +134,7 @@ function createFieldForm()
                                             "VALIDATION_EXTRA_PARAM" => ""
                                 ),
             "format"             => array(   "LABEL"                  => _tr("Format"),
+                                            "DESCRIPTION"            => _tr("TTW_format"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "RADIO",
                                             "INPUT_EXTRA_PARAM"      => $arrOptions,

@@ -28,6 +28,9 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-
+"SV_periodo" => "Define the range (from, to)",
+"SV_emailaddress" => "Show your email address (not edit)",
+"SV_emailsubject" => "Defines the subject that will have the message",
+"SV_emailcontent" => "Defines the content",
 );
 ?>

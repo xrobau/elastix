@@ -28,6 +28,9 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-
+"SV_periodo" => "Define el periodo de tiempo",
+"SV_emailaddress" => "Muestra tu correo electronico (no editable)",
+"SV_emailsubject" => "Define el titulo que tendra el mensaje",
+"SV_emailcontent" => "Defines el contenido del mensaje",
 );
 ?>

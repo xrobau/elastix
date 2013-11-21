@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS member_list
     FOREIGN KEY(id_emaillist) REFERENCES email_list(id) ON DELETE CASCADE
 ) ENGINE = INNODB;
 
-CREATE TABLE IF NOT EXIST vacations (
+CREATE TABLE IF NOT EXISTS vacations (
     id int(11) NOT NULL AUTO_INCREMENT,
     id_user int(11) NOT NULL,
     id_recording int(10) unsigned NULL,

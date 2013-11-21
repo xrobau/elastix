@@ -119,6 +119,7 @@ function createFieldForm()
 {
     $arrFields = array(
             "status"   => array(            "LABEL"                  => _tr("Status"),
+                                            "DESCRIPTION"            => _tr("FT_status"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "CHECKBOX",
                                             "INPUT_EXTRA_PARAM"      => "",

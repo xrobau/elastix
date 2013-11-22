@@ -23,6 +23,8 @@ sip digit timeout: 6
 
 download protocol: TFTP
 tftp server: {{server_ip}}
+alternate tftp server: {{server_ip}}
+use alternate tftp: 1
 
 xml application post list: {{server_ip}}
 xml application uri: {{phonesrv}}/

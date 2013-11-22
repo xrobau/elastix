@@ -30,7 +30,8 @@ import logging
 import re
 import elastix.BaseEndpoint
 from elastix.BaseEndpoint import BaseEndpoint
-from eventlet.green import urllib2
+from eventlet.green import httplib, urllib, socket
+import base64
 
 class Endpoint(BaseEndpoint):
     _global_serverip = None
@@ -137,6 +138,16 @@ class Endpoint(BaseEndpoint):
                 (self._vendorname, self._ip, str(e)))
             return False
 
+        if not self._enableStaticProvisioning():
+            return False
+        
+        # Reboot the phone.
+        self._amireboot('aastra-check-cfg')
+        self._unregister()
+        self._setConfigured()
+        return True
+
+    def _enableStaticProvisioning(self):
         # The Aastra firmware is stateful, in an annoying way. Just submitting
         # a POST to the autoprovisioning URL from the factory-default setting will
         # only get a 200 OK with a message to visit sysinfo.html, and the settings
@@ -144,21 +155,73 @@ class Endpoint(BaseEndpoint):
         # To actually apply the settings, it is required to perform a dummy GET
         # to /sysinfo.html, discard anything returned, and only then
         # perform the POST.
+        # Additionally, the TCP/IP and HTTP stack of the Aastra 6739i is buggy.
+        # When performing a POST, the firmware wants the end of the headers and
+        # the start of the body in the same TCP/IP packet. If they are on 
+        # different packets, the request hangs. Due to the way urllib2 works, 
+        # it introduces a flush between the two, which triggers said hang. 
+        # Therefore, the full POST request must be assembled and sent manually
+        # as a single write.
         if not self._doAuthGet('/sysinfo.html'):
             return False
 
         # Set the Elastix server as the provisioning server
         postvars = {
-            'protocol'  :   'TFTP',
-            'tftp'      :   self._serverip,
-            'tftppath'  :   '',            
+            'protocol'      :   'TFTP',
+            'tftp'          :   self._serverip,
+            'tftppath'      :   '',            
+            'alttftp'       :   self._serverip,
+            'alttftppath'   :   '',
+            'usealttftp'    :   '1',
+            'ftpserv'       :   '',
+            'ftppath'       :   '',
+            'ftpuser'       :   '',
+            'ftppass'       :   '',
+            'httpserv'      :   '',
+            'httppath'      :   '',
+            'httpport'      :   80,
+            'httpsserv'     :   '',
+            'httpspath'     :   '',
+            'httpsport'     :   80,
+            'autoResyncMode':   0,
+            'autoResyncTime':   '00:00',
+            'maxDelay'      :   15,
+            'days'          :   0,
+            'postList'      :   self._serverip,
         }
-        if not self._doAuthPost('/configurationServer.html', postvars):
+        postbody = urllib.urlencode(postvars)
+        urlpath = '/configurationServer.html'
+        postrequest = (\
+            'POST %s HTTP/1.1\r\n' +\
+            'Host: %s\r\n' +\
+            'Connection: close\r\n' +\
+            'Accept-Encoding: identity\r\n' +\
+            'Authorization: Basic %s\r\n' +\
+            'Content-length: %d\r\n' +\
+            'Content-type: application/x-www-form-urlencoded\r\n' +\
+            '\r\n%s') % (urlpath, self._ip, base64.encodestring('%s:%s' % (self._http_username, self._http_password)).strip(), len(postbody), postbody)
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((self._ip, 80))
+            sock.sendall(postrequest)
+            
+            # Rather than parse the response myself, I create an instance of
+            # HTTPResponse. However, begin() is an internal method, and not
+            # guaranteed to exist in future versions of the library.
+            resp = httplib.HTTPResponse(sock, strict=1, method='POST')
+            resp.begin()
+            htmlbody = resp.read()
+            
+            if resp.status <> 200:
+                logging.error('Endpoint %s@%s failed to post configuration - %s' %
+                    (self._vendorname, self._ip, r))
+                return False
+            if not 'Provisioning complete' in htmlbody:
+                logging.error('Endpoint %s@%s failed to set configuration server - not provisioned' %
+                    (self._vendorname, self._ip))
+                return False            
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
             return False
-
-        # Reboot the phone.
-        self._amireboot('aastra-check-cfg')
-        self._unregister()
-        self._setConfigured()
         return True
-        

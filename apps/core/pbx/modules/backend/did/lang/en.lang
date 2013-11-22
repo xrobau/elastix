@@ -36,9 +36,11 @@ If you pick 'analog' in the 'type' parameter, it will be assumed that you have a
 "DID_number" => "Defines the DID number",
 "DID_type" => "Defines the type of DID (Analogic, Digital, Voip)",
 "DID_channels" => "Select the type of device (only in case: analogic)",
-"DID_country" => "Defines the country",
-"DID_city" => "Defines the city",
+"DID_country" => "Defines your country",
 "DID_countrycode" => "Defines the country code",
 "DID_areacode" => "Defines the area code",
+"DID_org" => "Select the organization(s)",
+"DID_status" => "Defines the status",
+"DID_city" => "Defines the city",
 );
 ?>

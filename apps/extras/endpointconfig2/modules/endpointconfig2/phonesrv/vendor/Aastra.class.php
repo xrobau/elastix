@@ -209,6 +209,9 @@ class Aastra extends BaseVendorResource
                 header("HTTP/1.1 500 Internal Server Error");
                 print _tr('Could not get web server information. You may not have internet access or the web server is down');
                 return;
+            } elseif (strpos($sMensaje, '404 Not Found') !== FALSE) {
+                header('HTTP/1.1 404 Not Found');
+                print $sMensaje;
             } else {
                 $xml = new SimpleXMLElement('<?xml version="1.0" ?><AastraIPPhoneFormattedTextScreen/>');
                 $xml_header = $xml->addChild('Line', str_replace('&', '&amp;', $rssfeeds[$chosenfeed][0]));

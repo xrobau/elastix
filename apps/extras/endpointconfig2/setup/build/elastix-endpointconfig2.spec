@@ -132,6 +132,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: make Aastra XML services handle missing RSS
+  links and forward the 404 to the phone.
+  SVN Rev[6144]
+
 * Thu Nov 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: display spinner when removing accounts
   information.

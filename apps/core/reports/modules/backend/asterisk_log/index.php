@@ -58,6 +58,7 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir)
 {
     $arrFormElements = array(
             "filter"            => array(   "LABEL"                  => _tr("Date"),
+                                            "DESCRIPTION"            => _tr("Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "SELECT",
                                             "INPUT_EXTRA_PARAM"      => NULL,
@@ -66,6 +67,7 @@ function report_AsteriskLogs($smarty, $module_name, $local_templates_dir)
 
             "busqueda"          => array(
                                             "LABEL"                  => _tr('Search string'),
+                                            "DESCRIPTION"            => _tr("Search string"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             'VALIDATION_TYPE'           =>  'text',

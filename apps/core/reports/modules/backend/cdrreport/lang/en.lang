@@ -59,6 +59,16 @@ $arrLangModule=array(
 "Your username does not have any extension assigned." => "Your username does not have any extension assigned.",
 "contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
 "no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"Only administrators can delete CDRs" => "Only administrators can delete CDRs"
+"Only administrators can delete CDRs" => "Only administrators can delete CDRs",
+"CDR_datestart" => "Defines the start date",
+"CDR_dateend" => "Defines the end date",
+"CDR_organization" => "Select the organization",
+"CDR_origin" => "Defines the origin",
+"CDR_destine" => "Defines the destine",
+"CDR_calltype" => "Select the call type",
+"CDR_status" => "Select the status",
+"CDR_sourcechannel" => "Defines the source channel",
+"CDR_destinationchannel" => "Defines the destination channel",
+"CDR_accountcode" => "Search the account code",
 );
 ?>

@@ -133,6 +133,10 @@ fi
 
 %changelog
 * Fri Nov 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: fix support for static provisioning for
+  Aastra phones by working around a firmware bug that hangs an HTTP POST if
+  headers and body end up in different IP packets.
+  SVN Rev[6145]
 - FIXED: New Endpoint Configurator: make Aastra XML services handle missing RSS
   links and forward the 404 to the phone.
   SVN Rev[6144]

@@ -454,7 +454,7 @@ function createFieldForm()
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:50px","class"=>"feature_val"),
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^[0-9\#\*]+$"),     
-                              "dnd_desact" => array("LABEL"                  => _tr('DND Deactivate'),
+                              "dnd_desact" => array("LABEL"                  => _tr('DND Desactivate'),
                                                     "DESCRIPTION"            => _tr("FC_dnddesactivate"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",

@@ -29,9 +29,9 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Organization Domain" => "Dominio de la Organizacion",
-"Type" => "Type",
-"message did" => "Here you can create a DID, which can later be assigned to organizations in this server. The assignment of DID is made from the 'organization' module.<br />If you do not assign a DID to an organization, it will not be able to receive external calls.<br />
-If you pick 'analog' in the 'type' parameter, it will be assumed that you have an analog card in your server, so you must assign the ports related to this DID.",
+"Type" => "Tipo",
+"message did" => "Tu puedes crear una DID, que pueden ser asignadas a organizaciones en este servidor. La asignacion de DID es hecha desde el modulo 'Organizacion'.<br />Si tu  no asignas un DID a la organizacion, Esta no podria habilitar la recpeción de llamadas externas.<br />
+Si tu seleccionas 'analogic' en el tipo de parametro, Elastix asume que tu tienes una tarjeta analogica en su servidor, tu debes asignar los puertos relativos a este DID.",
 "DID was created successfully" => "DID fue creado exitosamente..</br>Usted puede aisganar el DID a una organizacion desde System >> User >> Organization",
 "DID_number" => "Define un numero para el DID",
 "DID_type" => "Define el tipo de DID (analogico, voip, digital)",
@@ -42,5 +42,16 @@ If you pick 'analog' in the 'type' parameter, it will be assumed that you have a
 "DID_org" => "Selecciona la(s) organizacion(es)",
 "DID_status" => "Selecciona el estado actual",
 "DID_city" => "Define el nombre la ciudad",
+"DID Number"=> "Número del DID",
+"Channels" => "Canales",
+"Country" => "País",
+"City" => "Ciudad",
+"Country Code" => "Codigo de País",
+"Area Code" => "Codigo de Area",
+"Save" => "Guardar",
+"Cancel" => "Cancelar",
+"New DID" => "Crear Nuevo DID",
+"DID Parameters" => "Parametros DID",
+"Country Code / Area Code" => "Código Pais/Código Area"
 );
 ?>

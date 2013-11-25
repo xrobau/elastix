@@ -38,5 +38,18 @@ $arrLangModule=array(
 "IVR_enabledirectdial" => "Habilita/Deshabilita el marcado directo",
 "IVR_timeoutmessage" => "Muestra un mensaje cuando finaliza el tiempo de espera",
 "IVR_invalidmessage" => "Mensaje invalido",
+"Organization Domain" => "Dominio de la Organización",
+"Display Name" => "Nombre a visualizar",
+"Timeout" => "Tiempo de Espera",
+"Timeout Message" => "Mensaje de Tiempo de Espera",
+"Announcement" => "Anuncio",
+"Enable Direct Dial" => "Habilitar Marcado Directo",
+"Repeat Loops" => "Repetición Lazos",
+"Invalid Message" => "Mensaje Invalido",
+"Destine" => "Destino",
+"Exten" => "Extensión",
+"Option" => "Opción",
+"Return to IVR" => "Retornar a IVR",
+
 );
 ?>

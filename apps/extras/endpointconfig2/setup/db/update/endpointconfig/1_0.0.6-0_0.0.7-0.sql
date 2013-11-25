@@ -1,3 +1,4 @@
+/* Creación del fabricante y modelo RCA IP150 */
 INSERT INTO `manufacturer` (`name`, `description`) VALUES ("RCA", "RCA IP Phones");
 
 INSERT INTO `mac_prefix` (`mac_prefix`, `description`, `id_manufacturer`) VALUES
@@ -14,5 +15,30 @@ INSERT INTO `model_properties` (`property_key`, `property_value`, `id_model`) VA
 ("http_username", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "RCA" AND model.name = "IP150")),
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "RCA" AND model.name = "IP150"));
 
+/* Ya se soporta provisionamiento estático para Aastra */
+UPDATE model SET static_prov_supported = 1 WHERE id_manufacturer IN
+    (SELECT `id` FROM manufacturer WHERE `name` = "Aastra");
 
-UPDATE model SET static_prov_supported = 1 WHERE id_manufacturer IN (SELECT `id` FROM manufacturer WHERE `name` = "Aastra");
+
+/* Separar Polycom IP 320 y Polycom IP 330 entre sí */
+INSERT INTO model
+    SELECT NULL AS id, id_manufacturer, 'IP 330' AS name, 'IP 330' AS description, max_accounts, static_ip_supported, dynamic_ip_supported, static_prov_supported
+    FROM model WHERE id_manufacturer IN
+        (SELECT `id` FROM manufacturer WHERE `name` = "Polycom") AND name = 'IP 330/320';
+UPDATE model SET name = "IP 320", description = "IP 320" WHERE id_manufacturer IN 
+    (SELECT `id` FROM manufacturer WHERE `name` = "Polycom") AND name = 'IP 330/320';
+INSERT INTO model_properties (id_model, property_key, property_value)
+    SELECT 
+        (   SELECT model.id FROM model, manufacturer 
+            WHERE model.id_manufacturer = manufacturer.id 
+            AND manufacturer.name = "Polycom" AND model.name = "IP 330")
+        AS id_model,
+        model_properties.property_key,
+        model_properties.property_value
+    FROM model_properties, model, manufacturer 
+    WHERE model_properties.id_model = model.id AND model.id_manufacturer = manufacturer.id 
+        AND manufacturer.name = "Polycom" AND model.name = "IP 320";
+    
+/* Renombrar modelos de Polycom para que coincidan con valores emitidos por Cisco Discovery Protocol */
+UPDATE model SET name = CONCAT("SoundPoint ", name), description = CONCAT("SoundPoint ", description)
+WHERE id_manufacturer IN (SELECT `id` FROM manufacturer WHERE `name` = "Polycom") AND name LIKE "IP %";

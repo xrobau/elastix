@@ -132,6 +132,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Nov 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: rename Polycom phone models to better fit
+  the values found via Cisco Discovery Protocol. Add some comments to the SQL
+  updates.
+  SVN Rev[6154]
+
 * Fri Nov 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: fix support for static provisioning for
   Aastra phones by working around a firmware bug that hangs an HTTP POST if

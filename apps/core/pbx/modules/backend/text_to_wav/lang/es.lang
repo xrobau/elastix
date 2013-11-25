@@ -31,7 +31,7 @@
   $Id: en.lang,v 1.7 2008/02/18 09:49:00 jvega Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Generate" => "Generar Audio File",
+"Generate" => "Generar Archivo de Audio",
 "Format" => "Formato",
 "Download File" => "Descargar Archivo",
 "Text to Wav" => "Texto a Wav",
@@ -40,9 +40,10 @@ $arrLangModule=array(
 "Unabled create file wav" => "No es posible crear el archivo wav",
 "Unabled create file gsm" => "No es posible crear el archivo gsm",
 "Not exists file" => "No existe el archivo",
-"Message" => "Text to Convert",
+"Message" => "Texto a convertir",
 "Back" => "Regresar",
 "TTW_texttoconvert" => "Escribe el texto que deseas convertir",
 "TTW_format" => "Escoge el tipo de formato.",
+"Text to Convert" => "Texto a Convertir",
 );
 ?>

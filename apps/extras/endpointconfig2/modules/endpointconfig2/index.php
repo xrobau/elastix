@@ -509,7 +509,6 @@ function handleJSON_download($smarty, $module_name, $local_templates_dir, $dlgli
 
 function handleJSON_upload($smarty, $module_name, $local_templates_dir, $dlglist)
 {
-file_put_contents('/tmp/debug-endpointconfig2.txt', print_r($_REQUEST, 1).print_r($_FILES, 1));
 	$sMensajeError = NULL;
     
     // ¿Cuál es el formato del archivo que se ha subido?

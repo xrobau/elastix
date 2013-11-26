@@ -241,6 +241,8 @@ class EndpointFile_Legacy
                     	$endpoint['properties'][$k2] = $t[$cp[$k1]];
                     }
                 }
+                if (isset($endpoint['properties']['static_ip']))
+                    $endpoint['properties']['dhcp'] = '0';
                 
                 $endpoints[] = $endpoint;
             }

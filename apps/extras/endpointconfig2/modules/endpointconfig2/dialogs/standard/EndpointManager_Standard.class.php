@@ -205,7 +205,7 @@ SQL_ENDPOINT_ACCOUNTS;
         $detallesGuardar = array();
         foreach ($this->_rw_properties as $k) {
             $detallesGuardar[$k] = NULL;
-            if (isset($detalles[$k]) && !empty($detalles[$k])) {
+            if (isset($detalles[$k]) && (!empty($detalles[$k]) || $detalles[$k] === '0')) {
                 $detallesGuardar[$k] = $detalles[$k];
             }
         }
@@ -213,7 +213,7 @@ SQL_ENDPOINT_ACCOUNTS;
         // Verificaciones que no requieren acceso a DB
         $validador = new PaloValidar();
         if (!isset($detallesGuardar['dhcp'])) $detallesGuardar['dhcp'] = 'true';
-        $detallesGuardar['dhcp'] = ($detallesGuardar['dhcp'] != 'false') ? 1 : 0;
+        $detallesGuardar['dhcp'] = in_array($detallesGuardar['dhcp'], array('false', '0')) ? 0 : 1;
         if ($detallesGuardar['dhcp']) {
             foreach (array('static_ip', 'static_gw', 'static_mask', 'static_dns1', 'static_dns2') as $k)
                 $detallesGuardar[$k] = NULL;

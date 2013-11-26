@@ -132,6 +132,13 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Nov 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: legacy CSV file upload must synthetize the
+  dhcp parameter and set it to 0 when the file specifies a static IP 
+  configuration. Additionally, parameter validation was relaxed to avoid 
+  dropping the string '0' as an unset value.
+  SVN Rev[6158]
+
 * Mon Nov 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: rename Polycom phone models to better fit
   the values found via Cisco Discovery Protocol. Add some comments to the SQL

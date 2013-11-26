@@ -30,7 +30,7 @@ import logging
 import re
 import elastix.BaseEndpoint
 from elastix.BaseEndpoint import BaseEndpoint
-from eventlet.green import httplib, urllib, socket
+from eventlet.green import httplib, urllib, urllib2, socket
 import base64
 
 class Endpoint(BaseEndpoint):

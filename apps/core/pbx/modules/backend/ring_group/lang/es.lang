@@ -58,5 +58,11 @@ $arrLangModule=array(
 "RG_confirmcall" => "Habilita/Deshabilita la confirmacion de llamada",
 "RG_extensionlist" => "Habilita/Deshabilita esta opcion",
 "RG_destine" => "Selecciona el destino",
+"Organization Domain" => "Dominio de la Organización",
+"Final Destination"  => "Ruta final de destino",
+"Destine" => "Destino",
+"RG Route" => "Ruta Ring Group",
+"CID Name Prefix" => "Nombre del Prefijo CID",
+"ADD Ring Group" => "Agregar Ring Group",
 );
 ?>

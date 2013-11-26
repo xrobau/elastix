@@ -47,5 +47,10 @@ $arrLangModule=array(
 "TC_timegroup" => "Selecciona uno de los grupos",
 "TC_destinem" => "Escoge el destino en caso de exito",
 "TC_destinef" => "Escoge el destino en caso de fallo",
+"Organization Domain" => "Dominio de la Organización",
+"Destination If Match" => "Destino si fue exitosa",
+"Destination If Fail" => "Destino si fue erronea",
+"Destine" => "Destino",
+"TC Route" => "Ruta TC"
 );
 ?>

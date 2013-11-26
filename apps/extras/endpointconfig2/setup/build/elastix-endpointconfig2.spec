@@ -133,6 +133,9 @@ fi
 
 %changelog
 * Tue Nov 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: allow removal of the configuration for
+  endpoint records that have no model assigned.
+  SVN Rev[6159]
 - FIXED: New Endpoint Configurator: legacy CSV file upload must synthetize the
   dhcp parameter and set it to 0 when the file specifies a static IP 
   configuration. Additionally, parameter validation was relaxed to avoid 

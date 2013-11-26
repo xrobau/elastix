@@ -212,13 +212,14 @@ def main():
             
             # Create the manufacturer-specific Endpoint object
             endpoint = eclass(amipool, dbpool, chooseServerIP(serveriplist, ip),
-                ip, endpointList[ip]['mac'])        
-            if not endpoint.setModel(endpointList[ip]['model']):
-                raise elastix.ConfigException('manufacturer %s does not implement model: %s' % 
-                    (endpointList[ip]['manufacturer'], endpointList[ip]['model']))
-            endpoint.max_accounts = endpointList[ip]['max_accounts']
-            endpoint.static_ip_supported = bool(endpointList[ip]['static_ip_supported'])
-            endpoint.dynamic_ip_supported = bool(endpointList[ip]['dynamic_ip_supported'])
+                ip, endpointList[ip]['mac'])
+            if endpointList[ip]['model'] != None:
+                if not endpoint.setModel(endpointList[ip]['model']):
+                    raise elastix.ConfigException('manufacturer %s does not implement model: %s' % 
+                        (endpointList[ip]['manufacturer'], endpointList[ip]['model']))
+                endpoint.max_accounts = endpointList[ip]['max_accounts']
+                endpoint.static_ip_supported = bool(endpointList[ip]['static_ip_supported'])
+                endpoint.dynamic_ip_supported = bool(endpointList[ip]['dynamic_ip_supported'])
             if not endpoint.setExtraParameters(endpointList[ip]['properties']):
                 raise elastix.ConfigException('manufacturer %s model %s rejected parameters: %s' %
                     (endpointList[ip]['manufacturer'], endpointList[ip]['model'],
@@ -351,9 +352,9 @@ def loadEndpointIP(dbpool):
             'model.max_accounts, model.static_ip_supported, '\
             'model.dynamic_ip_supported, endpoint.mac_address, '\
             ' endpoint.last_known_ipv4 AS ip '\
-        'FROM endpoint, model, manufacturer '\
-        'WHERE endpoint.id_model = model.id '\
-            'AND model.id_manufacturer = manufacturer.id '\
+        'FROM (endpoint, manufacturer) '\
+        'LEFT JOIN model ON endpoint.id_model = model.id '\
+        'WHERE endpoint.id_manufacturer = manufacturer.id '\
             'AND endpoint.selected = 1')
     endpointList = {}
     for row in sth.fetchall():
@@ -385,7 +386,7 @@ def loadEndpointIP(dbpool):
             if extension.tech != None:
                 endpointList[ip]['accounts'].append(extension)
                 totalAccounts += 1
-        if totalAccounts > endpointList[ip]['max_accounts']:
+        if endpointList[ip]['max_accounts'] != None and totalAccounts > endpointList[ip]['max_accounts']:
             dbpool.put(dbconn)
             raise elastix.ConfigException('Endpoint %s@%s cannot configure more than %d accounts, got %d' %
                 (endpointList[ip]['manufacturer'], ip, endpointList[ip]['max_accounts'], totalAccounts))

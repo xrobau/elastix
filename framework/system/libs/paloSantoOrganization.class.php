@@ -1315,6 +1315,8 @@ class paloSantoOrganization{
         $arrOpt=array_merge($result,$arrProp);
         if(empty($arrOpt["context"]))
             $arrOpt["context"]="from-internal";
+        if(empty($arrOpt["host"]))
+            $arrOpt["host"]="dynamic";
             
         $arrOpt["create_elxweb_device"]="yes"; //a esto se le agrega el codigo de la organizacion
         $arrOpt["alias"]=strstr($email, '@', true);

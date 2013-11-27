@@ -36,6 +36,8 @@ $arrLangModule=array(
 "Type" => "Tipo",
 "Main" => "Principales",
 "Others" => "Otros",
-"All" => "Todos"
+"All" => "Todos",
+"Save/Update" => "Guardar/Actualizar",
+"Active" => "Activo",
 );
 ?>

@@ -6,22 +6,22 @@ ALTER TABLE sip MODIFY COLUMN `fullcontact` varchar(100) DEFAULT NULL;
 ALTER TABLE sip MODIFY COLUMN `defaultuser` varchar(100) DEFAULT NULL;
 ALTER TABLE sip MODIFY COLUMN `mohinterpret` varchar(100) DEFAULT NULL;
 ALTER TABLE sip MODIFY COLUMN `mohsuggest` varchar(100) DEFAULT NULL;
-ALTER TABLE sip MODIFY COLUMN `host` varchar(100) DEFAULT NULL;
+ALTER TABLE sip MODIFY COLUMN `host` varchar(100) DEFAULT 'dynamic';
 ALTER TABLE sip_settings add column `outofcall_message_context` varchar(100) DEFAULT 'im-sip';
 ALTER TABLE sip_settings MODIFY COLUMN `defaultuser` varchar(100) DEFAULT NULL;
 ALTER TABLE sip_settings MODIFY COLUMN `mohinterpret` varchar(100) DEFAULT NULL;
 ALTER TABLE sip_settings MODIFY COLUMN `mohsuggest` varchar(100) DEFAULT NULL;
-ALTER TABLE sip_settings MODIFY COLUMN `host` varchar(100) DEFAULT NULL;
+ALTER TABLE sip_settings MODIFY COLUMN `host` varchar(100) DEFAULT 'dynamic';
 
 insert into sip_general (property_name,property_val,cathegory) values ('accept_outofcall_message','yes','general');
 insert into sip_general (property_name,property_val,cathegory) values ('auth_message_requests','yes','general');
 
 ALTER TABLE iax MODIFY COLUMN `mohinterpret` varchar(100) DEFAULT NULL;
 ALTER TABLE iax MODIFY COLUMN `mohsuggest` varchar(100) DEFAULT NULL;
-ALTER TABLE iax MODIFY COLUMN `host` varchar(100) DEFAULT NULL;
+ALTER TABLE iax MODIFY COLUMN `host` varchar(100) DEFAULT 'dynamic';
 ALTER TABLE iax_settings MODIFY COLUMN `mohinterpret` varchar(100) DEFAULT NULL;
 ALTER TABLE iax_settings MODIFY COLUMN `mohsuggest` varchar(100) DEFAULT NULL;
-ALTER TABLE iax_settings MODIFY COLUMN `host` varchar(100) DEFAULT NULL;
+ALTER TABLE iax_settings MODIFY COLUMN `host` varchar(100) DEFAULT 'dynamic';
 
 ALTER TABLE extension MODIFY COLUMN `device` varchar(100) NOT NULL;
 ALTER TABLE extension MODIFY COLUMN `context` varchar(100) DEFAULT NULL;

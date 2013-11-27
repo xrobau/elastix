@@ -88,6 +88,7 @@ $arrLangModule=array(
 "Member email" => "Correo del miembro",
 "Name" => "Nombre",
 "Email" => "Correo",
-"Export Members" => "Exportar Miembros"
+"Export Members" => "Exportar Miembros",
+"New Email List" => "Nueva Lista de Correo"
 );
 ?>

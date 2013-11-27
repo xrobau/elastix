@@ -171,7 +171,7 @@ function viewGeneralSetting($smarty, $module_name, $local_templates_dir, &$pDB, 
     $smarty->assign("VIDEO_OPTS",_tr("Video Support"));
     $smarty->assign("JITTER",_tr("Jitter Buffer Settings"));
     $smarty->assign("EMAIL_VM",_tr("Send Email Settings"));
-    $smarty->assign("ADVANCED",_tr("Advande Settings"));
+    $smarty->assign("ADVANCED",_tr("Advance Settings"));
     $smarty->assign("MODULE_NAME",$module_name);
     $smarty->assign("sipCustom",$arrCustom["sip"]);
     $smarty->assign("iaxCustom",$arrCustom["iax"]);

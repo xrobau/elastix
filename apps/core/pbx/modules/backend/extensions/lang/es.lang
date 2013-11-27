@@ -145,5 +145,13 @@ $arrLangModule=array(
 "Use When" => "Usar cuando",
 "Go to Operator" => "Ir al Operador",
 "Extensions" => "Extensiones",
+"Caller ID" => "Identificador de llamada",
+"Device" => "Dispositivo",
+"User" => "Usuario",
+"Voicemail" => "Mensaje de Voz",
+"Context" => "Contexto",
+"Recording In" => "Grabación entrante",
+"Recording Out" => "Grabación saliente",
+
 );
 ?>

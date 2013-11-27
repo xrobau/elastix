@@ -82,8 +82,14 @@ class paloSantoAppletAdmin {
         if($result==FALSE){
             $this->errMsg = $pDB->errMsg;
             return array();
+        }else{
+            $applets=array();
+            foreach($result as $value){
+                $value['name']=_tr($value['name']);
+                $applets[]=$value;
+            }
+            return $applets;
         } 
-        return $result;
     }
 
     function setApplets_User($arrIDs_DAU, $user)

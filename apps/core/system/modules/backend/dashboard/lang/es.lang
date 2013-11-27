@@ -44,5 +44,6 @@ $arrLangModule = array(
     "Invalid request" => "Petición inválida",
     "Emails" => "Correos",
     "Voicemails" => "Mensajes de voz",
+    "Dashboard" => "Tablero",
 );
 ?>

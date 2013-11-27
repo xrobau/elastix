@@ -46,5 +46,7 @@ $arrLangModule=array(
 "ERROR" => "ERROR",
 "Type" => "Tipo",
 "Status"=>"Estado",
+"Fax Cid Name" => "Nombre del Fax CID",
+"Fax Cid Number" => "Número del Fax CID",
 );
 ?>

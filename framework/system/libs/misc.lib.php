@@ -324,8 +324,8 @@ function update_theme()
     //actualizo el tema personalizado del usuario
     global $arrConf;
     $arrConf['mainTheme'] = load_theme();
-    $documentRoot = $arrConf['documentRoot'];
-    exec("rm -rf $documentRoot/tmp/smarty/templates_c/*",$arrConsole,$flagStatus);
+    /*$documentRoot = $arrConf['documentRoot'];
+    exec("rm -rf $documentRoot/tmp/smarty/templates_c/*",$arrConsole,$flagStatus);*/
     //STEP 2: Update menus elastix permission.
     if(isset($_SESSION['elastix_user_permission']))
         unset($_SESSION['elastix_user_permission']);
@@ -1503,10 +1503,19 @@ function getSmarty($mainTheme)
     else require_once("$elxPath/libs/smarty/libs/Smarty.class.php");     
     $smarty = new Smarty();     
     
+    $mainTheme=basename($mainTheme);
+    
     $smarty->template_dir = "{$arrConf['basePath']}/web/themes/$mainTheme";   
-    $smarty->config_dir =   "$elxPath/configs/";    
-    $smarty->compile_dir =  "{$arrConf['documentRoot']}/tmp/smarty/templates_c/";    
-    $smarty->cache_dir =    "{$arrConf['documentRoot']}/tmp/smarty/cache/";  
+    $smarty->config_dir =   "$elxPath/configs/";  
+    
+    if(!is_dir("{$arrConf['documentRoot']}/tmp/smarty/templates_c/$mainTheme")){
+        mkdir("{$arrConf['documentRoot']}/tmp/smarty/templates_c/$mainTheme");
+    }
+    if(!is_dir("{$arrConf['documentRoot']}/tmp/smarty/cache/$mainTheme")){
+        mkdir("{$arrConf['documentRoot']}/tmp/smarty/cache/$mainTheme");
+    }
+    $smarty->compile_dir =  "{$arrConf['documentRoot']}/tmp/smarty/templates_c/$mainTheme";    
+    $smarty->cache_dir =    "{$arrConf['documentRoot']}/tmp/smarty/cache/$mainTheme";  
     
     return $smarty;     
 }

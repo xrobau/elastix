@@ -144,6 +144,25 @@ class paloForm
                 return implode(' ', $listaAttr);
             }
         }
+        
+        if (!function_exists('_inputExtraParam_options')) {
+            function _inputExtraParam_options(&$arrVars)
+            {
+                if (!isset($arrVars['INPUT_EXTRA_PARAM_OPTIONS']) || 
+                    !is_array($arrVars['INPUT_EXTRA_PARAM_OPTIONS']) || 
+                    count($arrVars['INPUT_EXTRA_PARAM_OPTIONS']) <= 0)
+                    return '';
+                $listaAttr = array();
+                foreach($arrVars['INPUT_EXTRA_PARAM_OPTIONS'] as $key => $value) {
+                    $listaAttr[] = sprintf(
+                        '%s="%s"', 
+                        htmlentities($key, ENT_COMPAT, 'UTF-8'),
+                        htmlentities($value, ENT_COMPAT, 'UTF-8'));
+                }
+                
+                return implode(' ', $listaAttr);
+            }
+        }
 
         // Función para usar con array_map
         if (!function_exists('_map_htmlentities')) {
@@ -255,10 +274,11 @@ class paloForm
                             $listaRadio = array();
                             foreach($arrVars['INPUT_EXTRA_PARAM'] as $radioValue => $radioLabel) {
                                 $listaRadio[] = sprintf(
-                                    '<input type="radio" name="%s" value="%s" %s />&nbsp;%s&nbsp;',
+                                    '<input type="radio" name="%s" value="%s" %s %s/>&nbsp;%s&nbsp;',
                                     $varName_escaped,
                                     htmlentities($radioValue, ENT_COMPAT, 'UTF-8'),
                                     ($radioValue == $arrPreFilledValues[$varName]) ? 'checked="checked"' : '',
+                                    _inputExtraParam_options($arrVars),
                                     htmlentities($radioLabel, ENT_COMPAT, 'UTF-8'));
                             }
                             $strInput = implode("\n", $listaRadio);                            
@@ -274,11 +294,12 @@ class paloForm
                             $listaRadio = array();
                             foreach($arrVars['INPUT_EXTRA_PARAM'] as $radioItem) {
                                 $listaRadio[] = sprintf(
-                                    '<input type="radio" id="%s" name="%s" value="%s" %s /><label for="%s">%s</label>',
+                                    '<input type="radio" id="%s" name="%s" value="%s" %s %s/><label for="%s">%s</label>',
                                     htmlentities($radioItem['id'], ENT_COMPAT, 'UTF-8'),
                                     $varName_escaped,
                                     htmlentities($radioItem['value'], ENT_COMPAT, 'UTF-8'),
                                     ($radioItem['value'] == $arrPreFilledValues[$varName]) ? 'checked="checked"' : '',
+                                    _inputExtraParam_options($arrVars),
                                     htmlentities($radioItem['id'], ENT_COMPAT, 'UTF-8'),
                                     htmlentities($radioItem['label'], ENT_COMPAT, 'UTF-8'));
                             }
@@ -310,7 +331,7 @@ class paloForm
                             $sNombreSelect .= '[]';
                         }
                         $strInput = sprintf(
-                            '<select name="%s" id="%s" %s %s %s>%s</select>',
+                            '<select name="%s" id="%s" %s %s %s %s>%s</select>',
                             $sNombreSelect,
                             $sNombreSelect,
                             $sAttrMultiple,
@@ -320,6 +341,7 @@ class paloForm
                             (isset($arrVars['ONCHANGE']) && $arrVars['ONCHANGE'] != '') 
                                 ? "onchange='{$arrVars['ONCHANGE']}'" 
                                 : '',
+                            _inputExtraParam_options($arrVars),
                             implode("\n", $listaOpts));
                     } else {
                         $strInput = is_array($arrPreFilledValues[$varName])

@@ -187,6 +187,15 @@ class paloSantoGrid {
 
         $this->arrActions[] = $newAction;
     }
+    
+    public function addButtonGroup($name="dropdown", $label="New Row", $data=array())
+    {
+        $newAction['type'] = "dropdown";
+        $newAction['name'] = $name;
+        $newAction['label']  = $label;
+        $newAction['arrOptions'] = empty($data)?array():$data;
+        $this->arrActions[] = $newAction;
+    }
 
     public function addHTMLAction($html)
     {
@@ -271,6 +280,11 @@ class paloSantoGrid {
             $this->url = construirURL($arrURL, array('nav', 'start', 'logout','name_delete_filters'));
         else
             $this->url = $arrURL;
+    }
+    
+    function getURL()
+    {
+        return $this->url;
     }
 
     function getColumns()

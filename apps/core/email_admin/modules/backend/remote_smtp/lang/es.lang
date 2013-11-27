@@ -66,6 +66,7 @@ $arrLangModule=array(
 "Rstp_port" => "Define el numero que tendra el puerto",
 "Rstp_username" => "Define un nombre de usuario (similar al del ejemplo)",
 "Rstp_password" => "Define una contraseña",
-"Rstp_tlsenable" => "Si activas esta opcion permitira autenticaciones con certificados" 
+"Rstp_tlsenable" => "Si activas esta opcion permitira autenticaciones con certificados",
+"Remote SMTP Delivery" => "Entrega remota SMTP",
 );
 ?>

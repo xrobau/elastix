@@ -50,6 +50,7 @@ $arrLangModule=array(
 "Exten" => "Extensión",
 "Option" => "Opción",
 "Return to IVR" => "Retornar a IVR",
-
+"Name" => "Nombre",
+"VM Return to IVR" => "VM retornar a IVR",
 );
 ?>

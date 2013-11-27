@@ -324,9 +324,8 @@ function update_theme()
     //actualizo el tema personalizado del usuario
     global $arrConf;
     $arrConf['mainTheme'] = load_theme();
-    /*$documentRoot = $arrConf['documentRoot'];
-    exec("rm -rf $documentRoot/tmp/smarty/templates_c/*",$arrConsole,$flagStatus);*/
-    //STEP 2: Update menus elastix permission.
+    
+    //Update menus elastix permission.
     if(isset($_SESSION['elastix_user_permission']))
         unset($_SESSION['elastix_user_permission']);
 }

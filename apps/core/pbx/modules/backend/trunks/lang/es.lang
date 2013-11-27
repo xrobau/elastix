@@ -179,5 +179,8 @@ $arrLangModule=array(
 "Prefix" => "Prefijo",
 "Match Pattern" => "Patrón de comparación",
 "Prepend" => "Anteposición",
+"Trunks List" => "Lista de Troncales",
+"Type" => "Tipo",
+"Organization Allow" => "Permitir Organizaciones",
 );
 ?>

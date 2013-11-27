@@ -28,11 +28,11 @@
   $Id: en.lang,v 1.1 2012-02-07 11:02:13 Rocio Mera rmera@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Organization" => "Organizacion",
+"Organization" => "Organización",
 "Domain" => "Dominio",
 "Country" => "Pais",
 "City" => "Ciudad",
-"Direction" => "Direccion",
+"Direction" => "Dirección",
 "HERE YOU CAN CREATE NEW ORGANIZATION. " => "AQUI USTED PUEDE CREAR NUEVAS ORGANIZACIONES. ",
 "Create Organization" => "Crear Nueva Organizacion",
 "Invalid ID Organization" => "ID de la Organizacion no es valido. ",
@@ -84,5 +84,16 @@ $arrLangModule=array(
 "ORG_maxnumextensions" => "Definimos el número de extensiones para la organización (defecto: ilimitado)",
 "ORG_masxnumqueues" => "Definimos el número máximo de colas para esta organización (defecto: ilimitado)",
 "ORG_emailquota" => "Definimos la cuota de email por usuario. [Mb] (defecto: 30 Mb)",
+"Address" => "Dirección",
+"Country Code" => "Código de País",
+"Email Contact"=> "Email de Contacto",
+"Domain Name" => "Nombre del Dominio",
+"Area Code" => "Código de Area",
+"Organization Limits" => "Límites de la Organización", 
+"Max. # of User Accounts" => "Num. Máximo Cuentas Usuario",
+"Max. # of extensions" => "Num. Max de Extensiones",
+"Max. # of queues" => "Num. Max de colas",
+"Email Quota By User(MB)" => "Cuota de Correo por Usuario (Mb)",
+"unlimited" => "Ilimitado",
 );
 ?>

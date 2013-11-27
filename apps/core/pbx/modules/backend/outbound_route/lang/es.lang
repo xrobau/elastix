@@ -83,5 +83,21 @@ $arrLangModule=array(
 "OU_routepass" => "Define la contraseña para la ruta",
 "OU_musiconhold" => "Especifica el tipo de sonido",
 "OU_timegroup" => "Define el tiempo para los grupos",
+"ADD Outbound Route" => "Agregar Nueva Ruta saliente",
+"Settings" => "Configuraciones",
+"Dial Patterns" => "Patrones de marcado",
+"Trunk Sequence for Matched Routes" => "Secuencia de troncales para rutas coincidentes",
+"Organization Domain" => "Dominio de la Organización",
+"Route Name" => "Nombre de la ruta",
+"Route Password" => "Contraseña de la ruta",
+"Time Group" => "Tiempo de Grupo",
+"Route CID" => "Ruta de CID",
+"Music On Hold" => "Música en Espera",
+"Caller Id" => "Identificador de llamada",
+"Prefix" => "Prefijo",
+"Match Pattern" => "Patron coincidente",
+"TRUNKS" => "TRONCALES",
+"TRUNKS SEQUENCE" => "TRONCALES DE SECUENCIA",
+"Drag and Drop Trunk into Sequence Trunk Area" => "Arrastrar y Soltar Troncales en el area de Troncales de Secuencia"
 );
 ?>

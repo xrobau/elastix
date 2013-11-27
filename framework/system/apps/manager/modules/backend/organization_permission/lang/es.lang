@@ -30,11 +30,12 @@ global $arrLangModule;
 $arrLangModule=array(
 "Permit Access" => "Permitir Acceso",
 "Resource" => "Recurso",
-"Invalid Organization" => "Organizacion no es valida",
+"Invalid Organization" => "Organización no es valida",
 "Error saving groups permissions changes" => "Un error ha ocurrido al configurar los permisos de los grupos",
 "Error saving changes" => "Error guardando los cambios",
 "Changes were applied successfully" => "Cambios fueron aplicados exitosamente",
 "You haven't created any organization" => "No existe ninguna organizacion creada",
-"Error getting resource" => "Un error ha ocurrido al obtener los recursos del sistema"
+"Error getting resource" => "Un error ha ocurrido al obtener los recursos del sistema",
+"Organization Permission" => "Permisos de Organización",
 );
 ?>

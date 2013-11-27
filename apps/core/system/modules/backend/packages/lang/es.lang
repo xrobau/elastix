@@ -71,5 +71,8 @@ $arrLangModule=array(
 "Packages uninstalled"=>"Paquetes desinstalados",
 "Completed!"=>"Terminado",
 "Are you sure want to Install this package?"=>"¿Está seguro que desea instalar este paquete?",
+"Architecture" => "Arquitectura",
+"Current Version" => "Versión Actual",
+"Available Version" => "Versión Disponible",
 );
 ?>

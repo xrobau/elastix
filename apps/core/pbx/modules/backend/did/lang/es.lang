@@ -52,6 +52,8 @@ Si tu seleccionas 'analogic' en el tipo de parametro, Elastix asume que tu tiene
 "Cancel" => "Cancelar",
 "New DID" => "Crear Nuevo DID",
 "DID Parameters" => "Parametros DID",
-"Country Code / Area Code" => "Código Pais/Código Area"
+"Country Code / Area Code" => "Código Pais/Código Area",
+"Did Number" => "Número de DID",
+"Status" => "Estado",
 );
 ?>

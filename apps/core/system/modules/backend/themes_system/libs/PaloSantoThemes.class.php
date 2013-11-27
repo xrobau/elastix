@@ -134,10 +134,8 @@ class PaloSantoThemes
             $documentRoot = $arrConf['basePath'];
         }
 
-        $paloInstaller = new Installer();
-        if($paloInstaller->refresh($documentRoot)==1){ //hubo un error, se valida si es igual a 1. 
-            return false;
-        }
+        update_theme();
+        
         return true;
     } 
 }

@@ -52,24 +52,8 @@ class paloSantoMyExtension {
         }
     }
 
-
-    function getInsecurePortsById($id)
-    {
-        $query = "SELECT * FROM table WHERE id=$id";
-
-        $result=$this->_DB->getFirstRowQuery($query,true);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
- 
-
-
     /*HERE YOUR FUNCTIONS*/
-    function updateDatabaseAsterisk($technology,$extension,$recordSettingsType)//$recordSettingsType is an array i.e: $recordSettingsIn["record_in"]  = $state_in;
+    private function updateDatabaseAsterisk($technology,$extension,$recordSettingsType)//$recordSettingsType is an array i.e: $recordSettingsIn["record_in"]  = $state_in;
     {
         if($technology != null){
             if(isset($recordSettingsType["record_in"])){
@@ -136,7 +120,7 @@ class paloSantoMyExtension {
         return false;
     }
 
-    function AMI_Command($command)
+    private function AMI_Command($command)
     {
         $astman = new AGI_AsteriskManager();
         $return = false;
@@ -314,7 +298,7 @@ class paloSantoMyExtension {
 
     }
 
-    function getTechnology($extension)
+    private function getTechnology($extension)
     {    $technology = null;
          $r = $this->AMI_Command("database get DEVICE/$extension dial\r\n\r\n");
          if($r != false && strpos($r,"Value: ") !== false){

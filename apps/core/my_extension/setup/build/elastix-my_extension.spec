@@ -84,6 +84,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Nov 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: My Extension: remove some dead code, and mark some methods as private
+  in paloSantoMyExtension.
+  SVN Rev[6193]
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.

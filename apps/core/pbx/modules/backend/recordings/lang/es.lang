@@ -69,5 +69,8 @@ $arrLangModule=array(
 "File size exceeds the limit. "=>"El tamaño de archivo excede el límite ",
 "RE_organization" => "Escoge la organizacion",
 "RE_attachfile" => "Permite subir archivo de grabacion",
+"Add Recording" => "Agregar Grabación",
+"Recording List" => "Lista de Grabaciones",
+"Recordings" => "Grabaciones",
 );
 ?>

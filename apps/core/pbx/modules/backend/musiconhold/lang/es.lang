@@ -45,6 +45,11 @@ $arrLangModule=array(
 "MOH_classname" => "Define un nombre para esta clase",
 "MOH_type" => "Define el tipo de archivo",
 "MOH_sortmusic" => "permite definir el tipo de ordenamiento ",
-"MOH_filename" => "permite subir archivo "
+"MOH_filename" => "permite subir archivo ",
+"MoH Route" => "Ruta MOH", 
+"Class Name" => "Nombre de la Clase",
+"Sort Music" => "Ordenamiento de la Música",
+"Filename" => "Nombre del Archivo",
+"Add New file" => "Agregar Nuevo archivo",
 );
 ?>

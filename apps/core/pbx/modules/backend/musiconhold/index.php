@@ -496,6 +496,7 @@ function createFieldForm($arrFormats)
                                                     "VALIDATION_EXTRA_PARAM" => ""),
     );
 	
+
 	return $arrFormElements;
 }
 

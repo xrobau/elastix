@@ -113,7 +113,7 @@ class paloSantoMoH extends paloAsteriskDB{
     function getMoHByClass($class){
         $where="";
         $arrParam=array($class);
-        
+       
         if (!preg_match('/^([[:alnum:]]|-|_)+$/', "$class")) {
             $this->errMsg = _tr("Invalid MoH Class");
             return false;
@@ -126,6 +126,7 @@ class paloSantoMoH extends paloAsteriskDB{
         }else{
             $this->domain="";
             $directory="/var/lib/asterisk/mohmp3/";
+        
         }
 
         $query="SELECT name as class, description as name, mode as mode_moh,directory, application, sort, format from musiconhold where name=? $where";
@@ -288,6 +289,7 @@ class paloSantoMoH extends paloAsteriskDB{
                             $filename = basename("$directory/$filenameTmp");
                             $date=date("YMd_His");
                             $tmpFile=$date."_".$filename;
+                     
                             if (move_uploaded_file($tmp_name, "$directory/$tmpFile"))
                             {
                                 $info=pathinfo($filename);

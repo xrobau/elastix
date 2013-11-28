@@ -116,6 +116,7 @@ class paloIM extends paloAsteriskDB{
         $arrProp["outofcall_message_context"] = empty($arrProp["outofcall_message_context"])?'im-sip':$arrProp["outofcall_message_context"];
         $arrProp["context"] = empty($arrProp["context"])?'default':$arrProp["context"]; 
         $arrProp["transport"] = "ws,wss,udp";
+        $arrProp["dial"] = "SIP/$device";
         //para poder monitorear la presencia del dispositivo
         $arrProp["subscribecontext"] = empty($arrProp["subscribecontext"])?'im-sip':$arrProp["subscribecontext"];
         

@@ -95,5 +95,12 @@ $arrLangModule=array(
 "Max. # of queues" => "Num. Max de colas",
 "Email Quota By User(MB)" => "Cuota de Correo por Usuario (Mb)",
 "unlimited" => "Ilimitado",
+"Change State" => "Cambiar Estado",
+"Click here to reload dialplan" => "Clic aquí para recargar el plan de marcado de ",
+"Name" => "Nombre",
+"State" => "Estado",
+"Number of Users" => "Número de Usuarios",
+"Email Qouta" => "Cuota de email",
+"Organization List" => "Lista de Organizaciones",
 );
 ?>

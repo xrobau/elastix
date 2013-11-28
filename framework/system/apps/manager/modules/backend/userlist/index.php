@@ -1132,12 +1132,12 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         if($pAstConf->generateDialplan($domain)===false){
             $pAstConf->setReloadDialplan($domain,true);
             $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message",_tr("Asterisk can't be reloaded. ").$pAstConf->errMsg);
+            $smarty->assign("mb_message",_tr("Asterisk can't be reloaded.").$pAstConf->errMsg);
             $showMsg=true;
         }else{
             $pAstConf->setReloadDialplan($domain);
             $smarty->assign("mb_title", _tr("MESSAGE"));
-            $smarty->assign("mb_message",_tr("Asterisk was reloaded correctly. "));
+            $smarty->assign("mb_message",_tr("Asterisk was reloaded correctly."));
         }
     }
 

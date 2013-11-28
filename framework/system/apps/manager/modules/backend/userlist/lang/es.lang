@@ -99,5 +99,9 @@ $arrLangModule=array(
 "Fax Cid Name" => "Nombre Fax CID",
 "Picture" => "Imagen/Foto",
 "User" => "Datos de Usuario",
+"Click here to reload dialplan" => "Clic aquí para recargar el plan de marcado de ",
+"MESSAGE" => "MENSAJE",
+"Asterisk was reloaded correctly." => "Asterisk fue recargado Correctamente",
+"Asterisk can't be reloaded." => "Asterisk No pudo ser recargado",
 );
 ?>

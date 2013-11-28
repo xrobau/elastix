@@ -97,5 +97,15 @@ $arrLangModule=array(
 "CONF_recordcall" => "grabacion de llamada",
 "CONF_moderatoroptions" => "Define opciones de moderador",
 "CONF_useroptions" => "Define opciones de usuario",
+"ADD Conference" => "Agregar Conferencia",
+"Type" => "Tipo",
+"Name" => "Nombre",
+"Organization Domain" => "Dominio de la Organización",
+"Max Participates" => "Máximo de Participantes",
+"Record Call" => "Grabación de llamada",
+"Join Conference Message" => "Mensaje de Inicio de Conferencia",
+"Announce Join/Leave" => "Anuncio de Ingreso/Salida",
+"Schedule Conference" => "Calendario de Conferencia",
+"schedule" => "calendario",
 );
 ?>

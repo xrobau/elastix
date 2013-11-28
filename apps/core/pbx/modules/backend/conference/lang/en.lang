@@ -100,5 +100,6 @@ $arrLangModule=array(
 "CONF_recordcall" => "record call",
 "CONF_moderatoroptions" => "Defines moderator options",
 "CONF_useroptions" => "Defines user options",
+"Schedule Conference" => "Schedule Conference",
 );
 ?>

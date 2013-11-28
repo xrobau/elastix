@@ -28,6 +28,23 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-
+"ME_displaynameCID" => "Muestra el nombre y extension asignada para este usuario",
+"ME_extensionnumber" => "Muestra el numero de extension",
+"ME_device" => "Muestra el codigo del dispositivo",
+"ME_language" => "Selecciona el lenguaje de tu preferencia ",
+"ME_donotdisturb" => "Habilita/Deshabilita la opción de no interrupcion",
+"ME_callwaiting" => "Habilita/Deshbilita la opcion de llamada en espera",
+"ME_callforward" => "Habilita/Deshabilita la opcion de desvio de llamada",
+"ME_callforwardonunavailable" => "Habilita/Deshabilita la opcion de desvio de llamada en modo: no disponible",
+"ME_callforwardonbusy" => "Habilita/Deshabilita la opcion de desvio de llamada en modo: ocupado",
+"ME_recordincoming" => "Selecciona el modo de grabaciones entrantes",
+"ME_recordoutgoing" => "Selecciona el modo de grabaciones salientes",
+"ME_status" => "Habilita/Deshabilita el estado actual del mensaje de voz",
+"ME_email" => "Define tu correo electronico ",
+"ME_password" => "Define una contraseña",
+"ME_emailattachment" => "Habilita/Deshabilita la opción de poder adjuntar archivos",
+"ME_playcid" => "Habilita/Deshabilita la opción de Play CID",
+"ME_palyenvelope" => "Habilita/Deshabilita la opción de Play envelope",
+"ME_deletevmail" => "Habilita/Deshabilita la opción de borrado de Vmail",
 );
 ?>

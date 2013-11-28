@@ -28,6 +28,24 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
+"ME_displaynameCID" => "Show the name and extension for this user",
+"ME_extensionnumber" => "show the extension number",
+"ME_device" => "show the device code",
+"ME_language" => "select the language",
+"ME_donotdisturb" => "Enable/Disable the do no to disturb",
+"ME_callwaiting" => "Enable/Disable the call waiting",
+"ME_callforward" => "Enable/Diable the call forward",
+"ME_callforwardonunavailable" => "Enable/Disable the call forward (mode: unavailable)",
+"ME_callforwardonbusy" => "Enable/Disable the call forward (mode: busy)",
+"ME_recordincoming" => "Select the mode of recording incoming",
+"ME_recordoutgoing" => "Select the mode of recording outgoing",
+"ME_status" => "Enable/Disable the voicemail status",
+"ME_email" => "Defines the email address",
+"ME_password" => "Defines a password",
+"ME_emailattachment" => "Enable/Disable the email attachment",
+"ME_playcid" => "Enable/Disable the play CID",
+"ME_palyenvelope" => "Enable/Disable the play envelope",
+"ME_deletevmail" => "Enable/Disable the delete vmail",
 
 );
 ?>

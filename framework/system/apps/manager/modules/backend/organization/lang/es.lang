@@ -102,5 +102,8 @@ $arrLangModule=array(
 "Number of Users" => "Número de Usuarios",
 "Email Qouta" => "Cuota de email",
 "Organization List" => "Lista de Organizaciones",
+"MESSAGE" => "MENSAJE",
+"Asterisk was reloaded correctly. " => "Asterisk fue recargado Correctamente",
+"Asterisk can't be reloaded. " => "Asterisk No pudo ser recargado",
 );
 ?>

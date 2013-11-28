@@ -20,12 +20,9 @@
 <div id="paneldiv">  
     <div id="leftdiv">
         <div id="b1_1">
-            <div class="folder" onclick="create_showInbox();">Inbox</div>
-            <div class="folder">Sent Mail</div>
-            <div class="folder">Spam</div>
-            <div class="folder">Trash</div>
-            <div class="folder">Drafts</div>
-            <div class="folder">Personal</div>
+            {foreach from=$MAILBOX_FOLDER_LIST key=k item=M_FOLDER}
+                <div class="folder" onclick="show_messages_folder('{$M_FOLDER}');">{$M_FOLDER}</div>
+            {/foreach}
         </div>
     </div>
     <div id="centerdiv">
@@ -39,12 +36,12 @@
             </div>
                                 
             <div id="contentdiv">
-                <div id="bodymail"></div>
-                <div id="createmail"></div>
-                <div id="table">
+                <div id="elx_bodymail">
+                </div>
+                <div id="elx_mail_messages">
                     {section name=mail loop=$MAILS }
                     {if $MAILS[mail].status}
-                        <div class="elx_row" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:#ffff;">
+                        <div class="elx_row" onclick="view_body({$MAILS[mail].UID});" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:#ffff;">
                     {else}
                         <div class="elx_row" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:rgb(229,229,229);">
                     {/if}
@@ -54,7 +51,7 @@
                                 <div class="star"><span class="st">e</span></div>	
                                 <div class="trash"><span class="st">ç</span></div>	
                             </div>
-                            <div class="from" onclick="view_body({$MAILS[mail].UID});"><span>{$MAILS[mail].from}</span></div> 
+                            <div class="from" ><span>{$MAILS[mail].from}</span></div> 
                             <div class="subject"><span>{$MAILS[mail].subject}</span></div> 
                             <div class="date"><span>{$MAILS[mail].date}</span></div> 
                         </div>

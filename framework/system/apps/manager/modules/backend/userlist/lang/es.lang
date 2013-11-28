@@ -98,6 +98,6 @@ $arrLangModule=array(
 "Country Code" => "Código de País",
 "Fax Cid Name" => "Nombre Fax CID",
 "Picture" => "Imagen/Foto",
-"User" => "Datos de Usuario"
+"User" => "Datos de Usuario",
 );
 ?>

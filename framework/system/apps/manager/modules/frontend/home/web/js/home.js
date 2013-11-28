@@ -1,15 +1,12 @@
 $(document).ready(function(){
-    table = $('#table');
-    bodymail= $('#bodymail');
-    newmail= $('#createmail');
+    elx_mail_messages = $('#elx_mail_messages');
+    elx_bodymail= $('#elx_bodymail');
     checkmail= $("input[name=checkmail]"); 
     row=$('.row'); 
     filter_pull =$('#filter_but');
     pull2 = $('#icn_disp1');
     prueba_filter= $('#filterdiv');
     pull = $('#pull');
-    menu = $('nav > ul');
-    menuHeight = menu.height();
     leftdiv = $('#leftdiv');
     centerdiv = $('#centerdiv');
     rightdiv = $('#rightdiv');
@@ -84,94 +81,9 @@ $(document).ready(function(){
             //centerdiv.css('width',content_w+'px');
         }
     });
-    
-    /* evento que modifica el estilo de todos los paneles, al pulsar el icono para desplegar u ocultar 
-    el panel lateral izquierdo (leftpanel)*/      
-    /*$(pull2).on('click', function(e) {    
-        var w = $(window).width();
-        //panel dereche abierto y panel izquierdo estaba cerrado y lo vamos a 
-        if(rightdiv.is(':hidden') == false && leftdiv.is(':hidden')) {                                        
-            leftdiv.show(10);   
-            set_size (w,"left",320,140);
-        } else{ 
-            if(rightdiv.is(':hidden')==false && leftdiv.is(':hidden')==false){
-                leftdiv.hide(10);
-                set_size (w,"left",180,0);
-            } else{ 
-                if(rightdiv.is(':hidden') && leftdiv.is(':hidden')){
-                    leftdiv.show(10);
-                    set_size (w,"left",140,140);         
-                } else{
-                    leftdiv.hide(10);
-                    set_size (w,"left",0,0);
-                }
-            }
-        } 
-    });
-    function set_size (w,position,size_tpanels,size_margin){
-        var t=w-size_tpanels;
-        paginationdiv.css("margin-"+position,size_margin+"px");
-        if(w>=700){
-            contentdiv.css("margin-"+position,size_margin+"px");
-            contentdiv.css("width",t+"px");
-        }else if(w<700) {
-            set_size_contentdiv(w);
-            if(w<400){
-                if(leftdiv.is(':hidden')==false && rightdiv.is(':hidden')==false){ 
-                    if(position=="left"){
-                        rightdiv.hide(10);
-                        paginationdiv.css("margin-right","0px");
-                    }
-                    if(position=="right"){
-                        leftdiv.hide(10);
-                        paginationdiv.css("margin-left","0px");
-                    }
-                    
-                }
-            }
-        }
-    }*/
-    /*
-    $(window).resize(function(){
-        w = $(window).width();
-        var tmpSize=0;
-        
-        //setea el ancho del panel central al minimizar o maximar la pantalla dependiendo
-        //del estado de los paneles laterales 
-        if(w>=700){
-            if(rightdiv.is(':hidden') == false){
-                tmpSize= tmpSize + 180;
-                contentdiv.css("margin-right","180px");
-            }
-            if(leftdiv.is(':hidden') == false){
-                tmpSize= tmpSize + 140;
-                contentdiv.css("margin-left","140px");
-            }
-        }  
-        tmpSize = w - tmpSize;
-        contentdiv.css("width",tmpSize+"px");
-        
-        //setea margenes y ancho del panel central para que los paneles laterales se superpongan
-        if (w<700 && (rightdiv.is(':hidden') == false || leftdiv.is(':hidden') == false ) )
-            set_size_contentdiv(w); 
-        
-        //cierra el panel de chat en caso de minimizar pantalla con los 2 paneles abiertos 
-        if (w<400 && rightdiv.is(':hidden') == false && leftdiv.is(':hidden') == false  ){
-            rightdiv.hide(10);
-            paginationdiv.css("margin-right","0px");
-        }
-    });
-    /*funcion que setea los margenes a 0px y el ancho enviado por parametro 
-    del panel central (contentdiv)*/                
-    /*function set_size_contentdiv(w){
-        contentdiv.css("margin-left","0px");
-        contentdiv.css("width",w+"px");
-        contentdiv.css("margin-right","0px");
-    }*/
 });
 
 function view_body(UID){
-    table.hide(10);
     var arrAction = new Array();
     arrAction["menu"]="user_home";
     arrAction["action"]="view_bodymail";
@@ -182,19 +94,57 @@ function view_body(UID){
                 if(error!=""){
                     alert(error);
                 }else{
-                bodymail.append("<p>"+arrData+"</p>")
-                    }     
+                    bodymail.append("<p>"+arrData+"</p>");
+                    elx_mail_messages.hide(10);
+                    bodymail.show(10);
+                    $('#'+UID).removeClass('elx_msg_unseen').addClass('elx_msg_seen');
+                }     
         });
-    bodymail.show(10);
-    $('#0'+UID).attr('id','1'+UID);
-    $('#1'+UID).css("background-color","rgb(255, 255, 255)");
 }
 
-function create_showInbox(){
-    table.show(10);
-    bodymail.hide(10);
-    newmail.hide(10);
+function show_messages_folder(folder){
+    var arrAction = new Array();
+    arrAction["menu"]="user_home";
+    arrAction["action"]="show_messages_folder";
+    arrAction["folder"]=folder;
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error!=""){
+                alert(error);
+            }else{
+                if(arrData.lenght>0){
+                    var messaje_list='';
+                    for( var i=0; i<arrData.length; i++){
+                        var message='';
+                        if(arrData[i]['status']==1){
+                            var seen_class='elx_msg_seen';
+                        }else{
+                            var seen_class='elx_msg_unseen';
+                        }
+                        message='<div class="elx_row '+seen_class+'" onclick="view_body(\"'+arrData[i]['UID']+'\"); id="'+arrData[i]['UID']+'" ';
+                        message +='<div class="sel"><input type="checkbox" value="'+arrData[i]['UID']+'" class="inp1" name="checkmail"/></div>';
+                        message +='<div class="ic">';
+                        message +='<div class="icon"><img border="0" src="web/apps/home/images/mail2.png" class="icn_buz"></td></div>';
+                        message +='<div class="star"><span class="st">e</span></div>';
+                        message +='<div class="trash"><span class="st">ç</span></div>';
+                        message +='</div>';
+                        message +='<div class="from" ><span>"'+arrData[i]['from']+'"</span></div>';
+                        message +='<div class="subject" ><span>"'+arrData[i]['subject']+'"</span></div>';
+                        message +='<div class="date" ><span>"'+arrData[i]['date']+'"</span></div>';
+                        messaje_list +=message;
+                    }
+                    elx_mail_messages.html(messaje_list);
+                    elx_bodymail.hide(10);
+                    elx_mail_messages.show(10);
+                }else{
+                    //no ahi mensaje para mostrar mostramos un mensaje
+                    '<div class="elx_row" style="style="background-color:rgb(229,229,229);">There is not message</div>'
+                }
+            }     
+    });
 }
+
 
  
 

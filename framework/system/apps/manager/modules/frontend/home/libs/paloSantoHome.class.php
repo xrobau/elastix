@@ -25,76 +25,203 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: paloSantoForm.class.php,v 1.4 2007/05/09 01:07:03 gcarrillo Exp $ */
+*/
+  
 global $arrConf;
-require_once("{$arrConf['elxPath']}/libs/misc.lib.php");
- 
+require_once("libs/misc.lib.php");
+require_once("configs/email.conf.php");
+
 class paloHome
 {
     
 }
-
-class Imap {
-    public $folders;
-    public $connection;
-
-    public function login($hostname,$user, $pass) {
-        $mbox = @imap_open($hostname, $user, $pass);
-        if(!$mbox)
-            return ('Your login failed for user <strong>'.$user.'</strong>. Please try to enter your username and password again.<br />');
-
-        // Login worked, let us begin!!!!....
-
-        // gather folder lost...
-        $fldrs_made = 0;
-        $folders = imap_listmailbox($mbox, $hostname, "*");
-        // create the default folders....
-        if(1 === $this->create_default_folders($mbox,$folders)) {
-            $folders = imap_listmailbox($mbox, $hostname, "*");
-            $fldrs_made = 1;
-        }
-
-        sort($folders);
-
-        $this->folders = $folders;
-        $this->connection = $mbox;
-
-        if(1 === $fldrs_made)
-            return ('User logged in successfully as '.$user.'. This is your first time logging in, welcome to our webmail!!!<br />');
-        else
-            return ('User logged in successfully as '.$user.'.<br />');
+/*
+  @author: paloImap,v 1 2013/05/09 01:07:03 Washington Reyes wreyes@palosanto.com Exp $
+  @author: paloImap,v 2 2013/11/21 01:07:03 Rocio Mera rmera@palosanto.com Exp $ */
+class paloImap {
+    private $user;
+    private $port;
+    private $host;
+    private $imap_ref;
+    private $mailbox='INBOX';
+    private $folders;
+    private $default_folders = array('Sent','Drafts','Trash','Spam');
+    private $sort_field = 'date';
+    private $sort_order = 'DESC';
+    private $default_charset = 'ISO-8859-1';
+    private $struct_charset = NULL;
+    private $list_page = 1;
+    private $page_size = 10;
+    public $errMsg = '';
+    private $connection; //contiene la la coneccion a un IMAP a un buzon
+    
+    public function paloImap($mailbox='INBOX',$host='',$port='', $default_folders=''){
+        global $CYRUS;
+        
+        $this->host=empty($host)?$host:$CYRUS['HOST'];
+        $this->port=empty($port)?$port:$CYRUS['PORT'];
+        $this->mailbox=empty($mailbox)?'INBOX':$mailbox;
+        if(is_array($default_folders) && count($default_folders)>0);
+            $this->default_folders==$default_folders;
     }
-    private function create_default_folders($imap_stream, $folders) {
-        $change=0;
-        if(!in_array('{imap.example.org}TRASH',$folders)) {
-            @imap_createmailbox($imap_stream, imap_utf7_encode($hostname."TRASH"));
-            $change=1;
-        }
-        if(!in_array('{imap.example.org}SENT',$folders)) {
-            @imap_createmailbox($imap_stream, imap_utf7_encode($hostname."SENT"));
-            $change=1;
-        }
-        if(!in_array('{imap.example.org}SPAM',$folders)) {
-            @imap_createmailbox($imap_stream, imap_utf7_encode($hostname."SPAM"));
-            $change=1;
-        }
-        if(!in_array('{imap.example.org}SENT',$folders)) {
-            @imap_createmailbox($imap_stream, imap_utf7_encode($hostname."SENT"));
-            $change=1;
-        }
-        if(!in_array('{imap.example.org}SENT',$folders)) {
-            @imap_createmailbox($imap_stream, imap_utf7_encode($hostname."DRAFTS"));
-            $change=1;
-        }
-        if(!in_array('{imap.example.org}MY_FOLDERS',$folders)) {
-            @imap_createmailbox($imap_stream, imap_utf7_encode($hostname."PERSONAL EMAIL"));
-            $change=1;
-        }
-        return $change;
+    
+    public function setMailbox($mailbox){
+        $this->mailbox=$mailbox;
     }
+    
+    public function setDefaultFolders($arrFolders){
+        $this->$default_folders=$arrFolders;
+    }
+    
+    public function getConnection(){
+        return $this->connection;
+    }
+    
+    public function login($user, $pass, $use_ssl=null, $validate_cert=false){
+        //validamos la cuenta del usuario
+        if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/",$user)){
+            $this->errMsg=_tr('Invalid Username');
+            return false;
+        }
+        
+        //validamos el password
+        if($pass=='' || $pass===false){
+            $this->errMsg=_tr('Password can not be empty');
+            return false;
+        }
+        
+        //TODO: revisar conecction usando ssl
+        
+        if($validate_cert){
+            $cert_opt="validate-cert";
+        }else{
+            $cert_opt="novalidate-cert";
+        }
+        
+        //validamos host, si no esta configurado usamos localhost
+        $this->host=empty($this->host)?'localhost':$this->host;
+        //validamos port, si no esta configurado usamos 143
+        $this->port=empty($this->port)?'143':$this->port;
+        
+        $this->imap_ref = "{".$this->host.":".$this->port."/imap/novalidate-cert}";
+        
+        //el nombre dle buzon que se vaya a leer debe tener 
+        $this->mailbox=empty($this->mailbox)?'INBOX':$this->mailbox;
+        
+        $str_connection=$this->imap_ref.imap_utf7_encode($this->mailbox);
+        
+        $this->connection = @imap_open($str_connection, $user, $pass);
+        
+        if(!$this->connection){
+            $this->errMsg=_tr("Your login failed for user <strong>'.$user.'</strong>. Please try to enter your username and password again.<br/>");
+            return false;
+        }else
+            return true;
+    }
+
+    /**
+     * This function create the default mailbox
+     */
+    public function create_mailbox($folder) {
+        $exist=false;
+        //chequeamos que la carpeta no exista
+        $list_mailbox=imap_list($this->connection ,$this->imap_ref, "*");
+        if (is_array($list_mailbox)) {
+            foreach ($list_mailbox as $mailbox) {
+                if(imap_utf7_decode($mailbox)==$this->imap_ref.$folder){
+                    $exist=true;
+                }
+            }
+        } else {
+            $this->errMsg="Imap_list failed: " . imap_last_error();
+            return false;
+        }
+        
+        if(!$exist){
+            $result=imap_createmailbox($imap_stream, imap_utf7_encode($this->imap_ref.$folder));
+            if(!$result){
+                $this->errMsg="Imap_createmailbox failed: " . imap_last_error();
+            }
+            return $result;
+        }else{
+            $this->errMsg=_tr("Already exist a folder with teh same name");
+            return false;
+        }
+    }
+    
+    /**
+     * This function return the list of mailbox
+     * whit extra info has the number of message has been read.
+     * Also this function check if exist the default folders. If any of default_folders
+     * does not exist this function try to create this one
+     */
+    public function getMailboxList($searh_pattern=''){
+        $mailboxs=array();
+        $mailbox_list=imap_list($this->connection,$this->imap_ref,"*");
+        if (is_array($mailbox_list)) {
+            //loop through rach array index
+            foreach ($mailbox_list as $folder) {
+                //remove any slashes
+                $folder = trim(stripslashes($folder));
+        
+                //remove $this->imap_ref from the folderName
+                $folderName = str_replace($this->imap_ref, '', $folder);
+  
+                $mailboxs[]=imap_utf7_decode($folderName);
+            }
+                        
+            //chequemos que existan las carpetas por default
+            //en caso de no existir las borramos
+            $list_create=array_diff($this->default_folders,$mailboxs);
+            foreach($list_create as $folder){
+                $result=imap_createmailbox($this->connection, imap_utf7_encode($this->imap_ref.$folder));
+                if(!$result){
+                    $this->errMsg="Imap_createmailbox failed: " . imap_last_error();
+                    return false;
+                }else{
+                    $mailboxs[]=$folder;
+                }
+            }
+            
+            return $mailboxs;
+        } else {
+            $this->errMsg="Imap_list failed: " . imap_last_error();
+            return false;
+        }
+    }
+    
     public function close_mail_connection() {
         @imap_close($this->connection);
     }
+    
+    public function readMailbox(){
+        $emailnum = imap_search($this->connection,'ALL');
+        return $emailnum; 
+    }
+}
+
+class paloImapHeader{
+    
+}
+
+class paloImalMessage{
+    private $app;
+    private $imap;
+    private $opt = array();
+    private $inline_parts = array();
+    private $parse_alternative = false;
+  
+    public $uid = null;
+    public $headers;
+    public $structure;
+    public $parts = array();
+    public $mime_parts = array();
+    public $attachments = array();
+    public $subject = '';
+    public $sender = null;
+    public $is_safe = false;
+    
+    
 }
 
 

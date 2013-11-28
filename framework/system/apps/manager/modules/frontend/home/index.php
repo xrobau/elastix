@@ -29,8 +29,8 @@
 //include elastix framework
 
 include_once "libs/paloSantoForm.class.php";
-include_once "libs/paloSantoDB.class.php";
 include_once "libs/paloSantoJSON.class.php";
+
 function _moduleContent(&$smarty, $module_name)
 {
     //global variables
@@ -46,31 +46,8 @@ function _moduleContent(&$smarty, $module_name)
     $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
    	$pACL = new paloACL($pDB);
 
-     //get actual User Id
-    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $uid = $pACL->getIdUser($user);
-    $arrUser = $pACL->getUsers($uid);
-      
-    foreach($arrUser as $value){
-        $arrFill["username"]=$value[1];
-        $arrFill["name"]=$value[2];
-        $arrFill["password"]=$value[3];
-        $arrFill["organization"]=$value[4];
-        $arrFill["group"]=$value[7];
-        $extu=isset($value[5])?$value[5]:_tr("Not assigned yet");
-        $extf=isset($value[6])?$value[6]:_tr("Not assigned yet");
-        $arrFill["extension"]=$extu;
-        $arrFill["fax_extension"]=$extf;
-    }
-
-    $hostname = '{localhost:143/imap/novalidate-cert}';
-    $username =  $arrFill["username"];
-    $password =   $_SESSION['elastix_pass2'];
-
-    // usage, create a form, post it....
-
-    $imap_login = new Imap();
-    $imap_login->login($hostname, $username ,$password);
+    $pImap = new paloImap();
+    /*$imap_login->login($hostname, $username ,$password);
    
     // Do some mail stuff here, like get headers...., use obj connection
     $message_headers = imap_mailboxmsginfo($imap_login->connection);
@@ -95,28 +72,56 @@ function _moduleContent(&$smarty, $module_name)
     $inbox = imap_open($hostname,$username,$password) or die('Ha fallado la conexión: ' . imap_last_error());
     $emailnum = imap_search($inbox,'ALL');
     
-    $list=imap_getmailboxes($inbox,'{localhost:143/imap/novalidate-cert}',"*");
+    $list=imap_getmailboxes($inbox,'{localhost:143/imap/novalidate-cert}',"*");*/
     
     //actions
     $accion = getAction();
     
     switch($accion){
-        case "view_bodymail":
-            $content = view_mail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $inbox);
+        case "view_mail":
+            $content = view_mail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
+        case "delete_mail":
+            $content = delete_mail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
+        case "download_attach":
+            $content = download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
         default:
-            $content = createHome($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $emailnum, $inbox);
+            $content = reportMail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
     }
     return $content;
 }
 
-function createHome($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $emailnum, $inbox)
+function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
 {
- //imap_clearflag_full($inbox,"1,2,3,4","\\Seen");
+    //obtenemos el mailbox que deseamos leer
+    $mailbox=getParameter('mailbox');
+    $action=getParameter('action');
+    
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+    
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        print($pImap->errMsg);
+    }
+    
+    $listMailbox=$pImap->getMailboxList($searh_pattern='');
+    if($result===false){
+        print($pImap->errMsg);
+    }else{
+        $smarty->assign('MAILBOX_FOLDER_LIST',$listMailbox);
+    }
+    
+    //obtenemos el numero de 
+    $emailnum = $pImap->readMailbox();
+    
+    //imap_clearflag_full($inbox,"1,2,3,4","\\Seen");
     if($emailnum) {
         foreach($emailnum as $email_number) {    
-            $overview= imap_fetch_overview($inbox,$email_number,0);
+            $overview= imap_fetch_overview($pImap->getConnection(),$email_number,0);
             $tmp_str= substr($overview[0]->date,0,17);
             $mails[]= array("from" => $overview[0]->from,
                             "subject" => $overview[0]->subject,
@@ -125,12 +130,10 @@ function createHome($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
                             "status"=>$overview[0]->seen);
         }
         $mails_final = array_reverse($mails);
-        //print_r($mails_final);
         $smarty->assign("MAILS",$mails_final);
     }
 
-    imap_close($inbox);
-    $home = new paloHome();
+    $pImap->close_mail_connection();
     $smarty->assign("ICON_TYPE", "web/apps/$module_name/images/mail2.png");
    
     $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m"><span class="lp ml10 glyphicon glyphicon-envelope"></span></div>

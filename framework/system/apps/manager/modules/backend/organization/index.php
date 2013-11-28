@@ -216,11 +216,11 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
 	if($credentials['userlevel']=="superadmin"){
         $oGrid->addNew("new_organization",_tr("Create Organization"));
         $stateButton='<select name="state_orgs" id="state_orgs">';
-        $stateButton .='<option label="'._tr("Suspend").'" value="suspend">Suspend</option>';
-        $stateButton .='<option label="'._tr("Unsuspend").'" value="unsuspend">unsuspend</option>';
-        $stateButton .='<option label="'._tr("Terminate").'" value="terminate">Terminate</option>';
+        $stateButton .='<option label="'._tr("Suspend").'" value="suspend">'._tr("Suspend").'</option>';
+        $stateButton .='<option label="'._tr("Unsuspend").'" value="unsuspend">'._tr("Unsuspend").'</option>';
+        $stateButton .='<option label="'._tr("Terminate").'" value="terminate">'_tr("Terminate")'</option>';
         $stateButton .="</select>";
-        $stateButton .='<input type="button" name="button_state" value="'._tr("Change Sate").'" onclick="change_state();" class="neo-table-action">';
+        $stateButton .='<input type="button" name="button_state" value="'._tr("Change State").'" onclick="change_state();" class="neo-table-action">';
         $stateButton .='<input type="hidden" name="msg_ch_alert" id="msg_ch_alert" value="'._tr("Are you sure you wish change the states of checked organizations to: ")."STATE_NAME\n"._tr("This process can take several minutes").'">';
         $oGrid->addHTMLAction($stateButton);
         $oGrid->addButtonAction("del_orgs",_tr("Delete"),"{$arrConf['webCommon']}/images/delete5.png", "delete_orgs();");

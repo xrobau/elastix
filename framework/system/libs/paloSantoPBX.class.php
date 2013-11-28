@@ -816,19 +816,27 @@ class paloSip extends paloAsteriskDB {
                             break;
                         case "namedpickupgroup":
                             $Prop .=$key.",";
-                            $value = $code."_".$value;
+                            if($value!=''){
+                                $value = $code."_".$value;
+                            }
                             break;
                         case "namedcallgroup":
                             $Prop .=$key.",";
-                            $value = $code."_".$value;
+                            if($value!=''){
+                                $value = $code."_".$value;
+                            }
                             break;
                         case "subscribecontext":
                             $Prop .=$key.",";
-                            $value = $code."_".$value;
+                            if($value!=''){
+                                $value = $code."-".$value;
+                            }
                             break;
                         case "outofcall_message_context":
                             $Prop .=$key.",";
-                            $value = $code."-".$value;
+                            if($value!=''){
+                                $value = $code."-".$value;
+                            }
                             break;
                         default:
                             $Prop .=$key.",";
@@ -906,19 +914,27 @@ class paloSip extends paloAsteriskDB {
                                     break;
                                 case "namedpickupgroup":
                                     $arrQuery[]="namedpickupgroup=?";
-                                    $value = $code."_".$value;
+                                    if($value!=NULL){
+                                        $value = $code."_".$value;
+                                    }
                                     break;
                                 case "namedcallgroup":
                                     $arrQuery[]="namedcallgroup=?";
-                                    $value = $code."_".$value;
+                                    if($value!=NULL){
+                                        $value = $code."_".$value;
+                                    }
                                     break;
                                 case "subscribecontext":
                                     $arrQuery[]="subscribecontext=?";
-                                    $value = $code."_".$value;
+                                    if($value!=NULL){
+                                        $value = $code."-".$value;
+                                    }
                                     break;
                                 case "outofcall_message_context":
                                     $arrQuery[]="outofcall_message_context=?";
-                                    $value = $code."-".$value;
+                                    if($value!=NULL){
+                                        $value = $code."-".$value;
+                                    }
                                     break;
                                 default:
                                     $arrQuery[]="$name=?";
@@ -2103,8 +2119,16 @@ class paloDevice{
         //se guardan los datos del dispositivo, esto realmente sirvecuando a un dispositivo se le ha asociado
         //varias extensiones, por el momento esto no esta soportado
         $family="DEVICE/$code/{$arrProp['device']}";
-        $arrKey=array("default_exten"=>$arrProp['exten'],"dial"=>$arrProp['dial'],"type"=>"fixed","exten"=>$arrProp['exten']);
-        foreach($arrKey as $key => $value){
+        $arrKeyDevice["default_exten"]=$arrProp['exten'];
+        $arrKeyDevice["dial"]=$arrProp['dial'];
+        $arrKeyDevice["type"]="fixed";
+        $arrKeyDevice["exten"]=$arrProp['exten'];
+        if(isset($arrProp['alias'])){
+            if($arrProp['alias']!='' && $arrProp['alias']!==false){
+                $arrKeyDevice['alias']=$arrProp['alias'];
+            }
+        }
+        foreach($arrKeyDevice as $key => $value){
             $result=$astMang->database_put($family,$key,$value);
             if(strtoupper($result["Response"]) == "ERROR"){
                 $error=true;
@@ -2117,13 +2141,8 @@ class paloDevice{
             //de la multipresencia en sip con asterisk
             //esta es la cuenta con el que el usuario se registra en la interfaz web
             $family="DEVICE/$code/".$arrSetting["elxweb_device"];
-            $arrKey=array("default_exten"=>$arrProp['exten'],"dial"=>"SIP/{$arrSetting["elxweb_device"]}","type"=>"fixed","exten"=>$arrProp['exten']);
-            if(isset($arrProp['alias'])){
-                if($arrProp['alias']!='' && $arrProp['alias']!==false){
-                    $arrKey['alias']=$arrProp['alias'];
-                }
-            }
-            foreach($arrKey as $key => $value){
+            $arrKeyDevice["dial"]="SIP/{$arrSetting["elxweb_device"]}";
+            foreach($arrKeyDevice as $key => $value){
                 $result=$astMang->database_put($family,$key,$value);
                 if(strtoupper($result["Response"]) == "ERROR"){
                     $error=true;

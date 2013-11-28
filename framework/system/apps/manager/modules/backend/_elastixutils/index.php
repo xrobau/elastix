@@ -216,6 +216,14 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
     
     $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
     
+    //obtenemos el codigo pbx de la organizacion
+    $query="SELECT code from organization where id=?";
+    $result=$pDB->getFirstRowQuery($query,false,array($arrCredentials["id_organization"]));
+    if($result==false){
+        $jsonObject->set_error("An error has ocurred to retrieved organization data. ");
+        return $jsonObject->createJSON();
+    }else
+        $pbxCode=$result[0];
     
     //1) obtenemos los parametros generales de configuracion para asterisk websocket y el cliente de chat de elastix
     $chatConfig=getChatClientConfig($pDB,$error);
@@ -224,7 +232,8 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
         return $jsonObject->createJSON();
     }
     
-    //2) obtenemos el dominio sip de la organizacion si no se encuentra configurado utilizamos el valor de ws_server       
+    //2) TODO:obtener el dominio sip de la organizacion si no se encuentra configurado utilizar
+    //   el ws_server
     $dominio=$chatConfig['elastix_chat_server'];
     
     //3) obtenemos la informacion de las cuentas de los usuarios
@@ -250,7 +259,7 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
             */
             if($value['extension']!='' && isset($value['extension'])){
                 if($value['id']!=$arrCredentials['idUser']){
-                    $result=$astMang->send_request('ExtensionState',array('Exten'=>"{$value['extension']}", 'Context'=>"cocacolacomc8nm-ext-local"));
+                    $result=$astMang->send_request('ExtensionState',array('Exten'=>"{$value['extension']}", 'Context'=>"$pbxCode-ext-local"));
                     if($result['Response']=='Success'){
                         $status=getStatusContactFromCode($result['Status']);
                         $st_code=$result['Status'];

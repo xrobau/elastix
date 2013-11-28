@@ -152,6 +152,6 @@ $arrLangModule=array(
 "Context" => "Contexto",
 "Recording In" => "Grabación entrante",
 "Recording Out" => "Grabación saliente",
-
+"Extensions List" => "Lista de Extensiones",
 );
 ?>

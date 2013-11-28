@@ -154,10 +154,7 @@ $arrLangModule=array(
 "SPEEDDIAL" => "VELOCIDAD DE MARCADO",
 "VOICEMAIL" => "MENSAJE DE VOZ",
 "FOLLOWME" => "SIGANME(follow me)", 
-
-
-
-
+"Features Code" => "Características de Prefijo",
 
 );
 ?>

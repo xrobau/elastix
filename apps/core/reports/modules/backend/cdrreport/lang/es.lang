@@ -64,8 +64,13 @@ $arrLangModule=array(
 "CDR_destine" => "Define el ruta destino",
 "CDR_calltype" => "Selecciona el tipo de llamada",
 "CDR_status" => "Selecciona el estado",
-"CDR_sourcechannel" => "Define el source channel",
+"CDR_sourcechannel" => "Define el canal de origen",
 "CDR_destinationchannel" => "Define el destino del source channel",
 "CDR_accountcode" => "Codigo de cuenta",
+"Source Channel" => "Canal de Origen",
+"Destination Channel" => "Canal de Destino",
+"Account Code" => "Código de Cuenta",
+"Call Type" => "Tipo de Cuenta", 
+"Call Direction" => "Dirección de Llamada",
 );
 ?>

@@ -422,7 +422,7 @@ function createSipForm($arrLang){
                                                 "VALIDATION_TYPE"        => "numeric", //20
                                                 "VALIDATION_EXTRA_PARAM" => ""), 
                             "sip_registerattempts"    =>  array("LABEL"        => _tr("registerattempts"),
-                                                "DESCRIPTION"            => _tr(" Number of registration attempts before we give up 0 = continue forever."),
+                                                "DESCRIPTION"            => _tr("Number of registration attempts before we give up 0 = continue forever."),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "TEXT",
                                                 "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),

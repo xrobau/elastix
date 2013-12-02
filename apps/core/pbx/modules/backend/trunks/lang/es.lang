@@ -182,5 +182,7 @@ $arrLangModule=array(
 "Trunks List" => "Lista de Troncales",
 "Type" => "Tipo",
 "Organization Allow" => "Permitir Organizaciones",
+"Enabled" => "Habilitado",
+"Disabled" => "Deshabilitado",
 );
 ?>

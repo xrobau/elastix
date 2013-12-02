@@ -118,5 +118,8 @@ $arrLangModule=array(
 "Announce Position" => "Anuncio de Posición",
 "Periodic Announce Frecuency" => "Anuncio Periodico de Frecuencia",
 "Periodic Announce" => "Anuncio Periodico",
+"Timeout Queue" => "Tiempo de Espera de la cola ",
+"Timeout Agent" => "Tiempo de Espera del agente",
+"Queues List" => "Lista de colas",
 );
 ?>

@@ -564,7 +564,7 @@ function createFieldFilter($arrOrgz)
                         "INPUT_EXTRA_PARAM"      => $arrOrgz,
                         "VALIDATION_TYPE"        => "domain",
                         "VALIDATION_EXTRA_PARAM" => ""),
-        "name"  => array("LABEL"            => _tr("Tiem Condition Name"),
+        "name"  => array("LABEL"            => _tr("Time Condition Name"),
                         "REQUIRED"               => "no",
                         "INPUT_TYPE"             => "TEXT",
                         "INPUT_EXTRA_PARAM"      => "",

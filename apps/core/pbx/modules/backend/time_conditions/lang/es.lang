@@ -51,6 +51,13 @@ $arrLangModule=array(
 "Destination If Match" => "Destino si fue exitosa",
 "Destination If Fail" => "Destino si fue erronea",
 "Destine" => "Destino",
-"TC Route" => "Ruta TC"
+"TC Route" => "Ruta TC",
+"Destination Match" => "Destino Exito",
+"Destination Fail" => "Destino Fallo",
+"ADD Time Conditions" => "Agregar Condición de Tiempo",
+"Time Conditions List" => "Lista de Condiciones de Tiempo",
+"Time Condition Name" => "Nombre Condición de Tiempo",
+"--Select one--" => "Selecciona Uno",
+"- choose one -" => "Escoge Uno",
 );
 ?>

@@ -28,7 +28,7 @@
   $Id: en.lang,v 1.1 2012-02-07 11:02:13 Rocio Mera rmera@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Organization Domain" => "Dominio de la Organizacion",
+"Organization Domain" => "Dominio de la Organización",
 "Type" => "Tipo",
 "message did" => "Tu puedes crear una DID, que pueden ser asignadas a organizaciones en este servidor. La asignacion de DID es hecha desde el modulo 'Organizacion'.<br />Si tu  no asignas un DID a la organizacion, Esta no podria habilitar la recpeción de llamadas externas.<br />
 Si tu seleccionas 'analogic' en el tipo de parametro, Elastix asume que tu tienes una tarjeta analogica en su servidor, tu debes asignar los puertos relativos a este DID.",
@@ -55,5 +55,6 @@ Si tu seleccionas 'analogic' en el tipo de parametro, Elastix asume que tu tiene
 "Country Code / Area Code" => "Código Pais/Código Area",
 "Did Number" => "Número de DID",
 "Status" => "Estado",
+"All" => "Mostrar Todas",
 );
 ?>

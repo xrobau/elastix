@@ -100,5 +100,7 @@ $arrLangModule=array(
 "TRUNKS SEQUENCE" => "TRONCALES DE SECUENCIA",
 "Drag and Drop Trunk into Sequence Trunk Area" => "Arrastrar y Soltar Troncales en el area de Troncales de Secuencia",
 "Outbound Routes List" => "Lista de Rutas Salientes",
+"Order" => "Orden",
+"Override Extension" => "Sobreescribir Extensión",
 );
 ?>

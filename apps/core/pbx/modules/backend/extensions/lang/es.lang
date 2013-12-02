@@ -153,5 +153,18 @@ $arrLangModule=array(
 "Recording In" => "Grabación entrante",
 "Recording Out" => "Grabación saliente",
 "Extensions List" => "Lista de Extensiones",
+"Yes" => "Si",
+"Unavailable & Busy" => "No disponible y ocupado",
+"Disabled" => "Deshabilitado",
+"disabled" => "Deshabilitado",
+"On Demand" => "En demanda",
+"Unavailable & busy" => "No disponible y ocupado",
+"Always" => "Siempre",
+"Never" => "Nunca",
+"Enabled" => "Habilitado",
+"enabled" => "Habilitado",
+"Busy" => "Ocupado",
+"Unavailable" => "No Disponible",
+"On demand" => "En demanda",
 );
 ?>

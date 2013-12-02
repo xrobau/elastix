@@ -863,8 +863,8 @@ function createFieldForm($tech=null)
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrWait=array("no"=>_tr("Disabled"),"yes"=>_tr("Enabled"));
     $arrRecord=array("on_demand"=>_tr("On demand"),"always"=>_tr("Always"),"never"=>_tr("Never"));
-    $arrScreen=array("no"=>"disabled","memory"=>"memory","nomemory"=>"nomemory");
-    $arrDictate=array("no"=>"disabled","yes"=>"enabled");
+    $arrScreen=array("no"=>_tr("disabled"),"memory"=>"memory","nomemory"=>"nomemory");
+    $arrDictate=array("no"=>_tr("disabled"),"yes"=>_tr("enabled"));
     $arrDictFor=array("ogg"=>"ogg","gsm"=>"gsm","wav"=>"wav");
     $arrLang=getLanguagePBX();
     $arrFormElements = array("exten" => array("LABEL"                  => _tr('Extension'),

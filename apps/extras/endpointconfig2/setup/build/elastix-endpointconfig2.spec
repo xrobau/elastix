@@ -21,6 +21,8 @@ Requires: MySQL-python
 Requires: python-cjson
 Requires: pytz
 Requires: php-magpierss
+Requires: python-paramiko
+Requires: python-paramiko-eventlet-compat
 
 %description
 The Elastix Endpoint Configurator is a complete rewrite and reimplementation of
@@ -132,6 +134,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Dec 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: fix static IP assignment of RCA IP150 by 
+  starting a SSH session into the phone and running a network command directly.
+  The package now requires python-paramiko.
+  SVN Rev[6129]
+
 * Tue Nov 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: allow removal of the configuration for
   endpoint records that have no model assigned.

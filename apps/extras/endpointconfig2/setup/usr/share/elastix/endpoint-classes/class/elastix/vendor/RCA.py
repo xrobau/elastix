@@ -33,6 +33,7 @@ from eventlet.green import socket, urllib2, urllib, os
 import errno
 import re
 import xml.dom.minidom
+paramiko = eventlet.import_patched('paramiko')
 
 class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
@@ -202,10 +203,32 @@ class Endpoint(BaseEndpoint):
                     '@dhcp_option_protocol' : 'TFTP'
                 }))
             body = response.read()
-            #if not '/console/start' in body:
-            #    logging.error('Endpoint %s@%s - j_security_check failed login' %
-            #        (self._vendorname, self._ip))
-            #    return False            
+            
+            # Since the web interface will NOT immediately apply the network
+            # changes, we need to go raw and ssh into the phone. Additionally,
+            # if we are changing the network setting from DHCP to static or 
+            # viceversa, we expect the SSH connection to be disconnected in the
+            # middle of the update. A timeout of 5 seconds should do it.
+            if self._dhcp:
+                command = '/root/dhcp-configure.sh'
+            else:
+                dns2 ='none'
+                if self._static_dns2 != None:
+                    dns2 = self._static_dns2
+                command = '/root/staticip-configure.sh %s %s %s %s %s' %\
+                    (self._static_ip, self._static_mask, self._static_gw, self._static_dns1, dns2)
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.WarningPolicy())
+            ssh.connect(self._ip, username=self._ssh_username, password=self._ssh_password, timeout=5)
+            stdin, stdout, stderr = ssh.exec_command(command)            
+            logging.info('Endpoint %s@%s - about to set timeout of %d on stdout' % (self._vendorname, self._ip, oldtimeout,))            
+            stdout.channel.settimeout(5)
+            try:
+                s = stdout.read()
+                logging.info('Endpoint %s@%s - answer follows:\n%s' % (self._vendorname, self._ip, s,))
+            except socket.error, e:
+                pass
+            ssh.close()
             return True
         except paramiko.AuthenticationException, e:
             logging.error('Endpoint %s@%s failed to authenticate ssh - %s' %

@@ -594,12 +594,12 @@ function createFieldForm($goto,$destination,$pDB,$domain)
     $pRG=new paloSantoRG($pDB,$domain);
     $strategy = array('ringall'=>'ringall','ringall-prim'=>'ringall-prim','hunt'=>'hunt','hunt-prim'=>'hunt-prim','memoryhunt'=>'memoryhunt','memoryhunt-prim'=>'memoryhunt-prim', 'firstavailable'=>'firstavailable', 'firstnotonphone'=>'firstnotonphone');
     $time = generateOptionNum(1, 60);
-    $arrYesNo = array("yes" => _tr("Yes"), "no" => "No");
+    $arrYesNo = array(_tr("yes") => _tr("Yes"), "no" => "No");
     
     $arrRecording=$pRG->getRecordingsSystem($domain);
     $arrMoH=$pRG->getMoHClass($domain);
     
-    $recording = array("none"=>"None");
+    $recording = array(_tr("none")=>_tr("None"));
     $recording2 = array("default"=>"Default");
     if(is_array($arrRecording)){
         foreach($arrRecording as $key => $value){
@@ -616,7 +616,7 @@ function createFieldForm($goto,$destination,$pDB,$domain)
     }
     
     $extens=$pRG->getAllDevice($domain);
-    $arrExten=array(""=>"--unselected--");
+    $arrExten=array(""=>_tr("--unselected--"));
     if($extens!=false){
         $astMang=AsteriskManagerConnect($errorM);
         $result=$pRG->getCodeByDomain($domain);

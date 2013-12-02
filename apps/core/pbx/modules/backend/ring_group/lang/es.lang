@@ -64,5 +64,10 @@ $arrLangModule=array(
 "RG Route" => "Ruta Ring Group",
 "CID Name Prefix" => "Nombre del Prefijo CID",
 "ADD Ring Group" => "Agregar Ring Group",
+"Only Ring" => "Solo timbrado",
+"None" => "Ninguno",
+"Yes" => "Si",
+"--unselected--" => "Sin seleccionar",
+"- choose one -" => "Escoge uno",
 );
 ?>

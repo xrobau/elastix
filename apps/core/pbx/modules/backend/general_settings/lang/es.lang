@@ -242,5 +242,12 @@ $arrLangModule=array(
 "Address NAT-related issues in incoming SIP or media sessions.\nnat = no; Use rport if the remote side says to use it.\nnat = force_rport ; Pretend there was an rport parameter even if there wasn't.\nnat = comedia; Use rport if the remote side says to use it and perform comedia RTP handling.\nnat = auto_force_rport  ; Set the force_rport option if Asterisk detects NAT (default)\nnat = auto_comedia      ; Set the comedia option if Asterisk detects NAT\nNAT settings are a combinable list of options.\n The equivalent of the deprecated nat=yes is nat=force_rport,comedia." => "Dirección NAT-related cuestiones en las sesiones SIP o los medios de comunicación entrantes.\nnat = no; Use rport si el lado remoto dice utilizarlo.\nnat = force_rport ; Finge había un parámetro de informe, incluso si no había.\nnat = comedia; Utilice reporte si el lado remoto dice utilizarlo y realizar el manejo RTP commedia.\nnat = auto_force_rport  ; Setea el force_rport opción si Asterisk detecta NAT (default)\nnat = auto_comedia      ; Setea la opción comedia si Asterisk detecta NAT\nNAT configuraciones son una combinable lista de opciones.\n El equivalente del desaprobado nat=yes is nat=force_rport,comedia.",
 "transfer" => "Transferencia",
 "requierecalltoken" => "Requiere señales de llamada",
+"Enabled" => "Habilitado",
+"Disabled" => "Deshabilitado",
+"surname" => "apellido",
+"first name" => "nombre",
+"both" => "ambos",
+"YES" => "SI",
+"Yes" => "si",
 );
 ?>

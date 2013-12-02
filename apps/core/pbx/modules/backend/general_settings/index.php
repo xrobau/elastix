@@ -365,7 +365,7 @@ function createFieldForm($arrTone,$arrMOH,$arrZoneMessage)
     //se los puede hacer con el comando en consola de asterisk "module show like format" or "core show codecs audio"
     //por ahora se pone los que vienes con la instalacion de asterisk
     $arrRCFormat=array("WAV"=>"WAV","wav"=>"wav","ulaw"=>"ulaw","alaw"=>"alaw","sln"=>"sln","gsm"=>"gsm","g729"=>"g729");
-    $arrYesNO=array("yes"=>"YES","no"=>"NO");
+    $arrYesNO=array(_tr("yes")=>_tr("YES"),"no"=>"NO");
     $arrLng=getLanguagePBX();
     
     $arrFormElements = array("DIAL_OPTIONS" => array("LABEL"                  => _tr('Asterisk Dial Options'),
@@ -421,14 +421,14 @@ function createFieldForm($arrTone,$arrMOH,$arrZoneMessage)
                         						    "DESCRIPTION"            => _tr("GS_searchdirectoryby"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("first"=>"surname","last"=>"first name","both"=>"both"),
+                                                    "INPUT_EXTRA_PARAM"      => array(_tr("first")=>_tr("surname"),_tr("last")=>_tr("first name"),_tr("both")=>_tr("both")),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "DIRECTORY_OPT_EXT" => array("LABEL"            => _tr('Say Extension with name'),
                         						    "DESCRIPTION"            => _tr("GS_sayextensionwithname"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("e" => "Yes", "" => "No"),
+                                                    "INPUT_EXTRA_PARAM"      => array("e" => _tr("Yes"), "" => "No"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "CREATE_VM" => array("LABEL"            => _tr('Create Voicemail with extension'),
@@ -448,10 +448,10 @@ function createFieldForm($arrTone,$arrMOH,$arrZoneMessage)
 function createSipForm($arrMOH){
     $arrCallingpres=array(""=>"",'allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
     $arrYesNo=array("yes"=>"yes","no"=>"no");
-    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrYesNod=array("noset"=>"",_tr("yes")=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
-    $arrMedia=array("noset"=>"",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
+    $arrMedia=array("noset"=>"",_tr('yes')=>_tr('yes'),'no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
     
     $arrMusic=array(""=>"");
     foreach($arrMOH as $key => $value){
@@ -643,7 +643,7 @@ function createSipForm($arrMOH){
                                                 "DESCRIPTION"            => _tr("If Remote-Party-ID should be sent"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no","yes"=>"yes", "pai"=>"pai","yes,pai"=>"yes,pai"),
+                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no",_tr("yes")=>_tr("yes"), "pai"=>"pai","yes,pai"=>"yes,pai"),
                                                 "VALIDATION_TYPE"        => "text", //no
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_transport"    =>  array("LABEL"        => _tr("transport"),
@@ -658,13 +658,13 @@ function createSipForm($arrMOH){
 }
 
 function createIaxForm(){
-    $arrTrans=array("yes"=>"yes","no"=>"no","mediaonly"=>"mediaonly");
-    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrTrans=array(_tr("yes")=>_tr("yes"),"no"=>"no","mediaonly"=>"mediaonly");
+    $arrYesNo=array(_tr("yes")=>_tr("Yes"),"no"=>_tr("No"));
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
-    $arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
+    $arrCallTok=array(_tr("yes")=>_tr("yes"),"no"=>"no","auto"=>"auto");
     $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
-    $encryption=array("noset"=>"","aes128"=>"aes128","yes"=>"yes","no"=>"no");
+    $encryption=array("noset"=>"","aes128"=>"aes128",_tr("yes")=>_tr("yes"),"no"=>"no");
     $arrFormElements = array("iax_transfer"  => array("LABEL"                  => _tr("transfer"),
                             				    "DESCRIPTION"            => _tr("GS_transferIax"),
                                                 "REQUIRED"               => "no",
@@ -826,7 +826,7 @@ function createIaxForm(){
 function createVMForm($arrZoneMessage)
 {
     $arrVMesg=array(""=>_tr("Default"),"u"=>_tr("Unavailable"),"b"=>_tr("Busy"),"s"=>("No Message"));
-    $arrYesNo=array("yes"=>"Yes","no"=>"No");
+    $arrYesNo=array(_tr("yes")=>_tr("Yes"),"no"=>"No");
     $arrOptions=array(""=>_tr("Standard Message"),"s"=>_tr("Beep only"));
     $arrTries=array("1","2","3","4");
     $arrTime=array("1","2","3","4","5","6","7","8","9","10");

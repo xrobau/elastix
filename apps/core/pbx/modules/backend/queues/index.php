@@ -110,7 +110,7 @@ function reportQueue($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     $total=$pQueue->getTotalQueues($domain,$queue_number,$queue_name);
     $arrOrgz=array();
     if($credentials['userlevel']=="superadmin"){
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array(_tr("all")=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -592,7 +592,7 @@ function deleteQueue($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
 function getArrayExtens($pDB,$domain){
     $pQueue=new paloQueuePBX($pDB,$domain);
     $arrExten=$pQueue->getAllDevice($domain);
-    $extens=array("none"=>"select one");
+    $extens=array(_tr("none")=>_tr("select one"));
     if($arrExten!=false){
         foreach($arrExten as $value){
             $extens[$value["exten"]]=$value["exten"]."(".$value["dial"].")";
@@ -662,7 +662,7 @@ function get_destination_category($smarty, $module_name, $pDB, $arrConf, $creden
 
 function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
 {   
-    $arrRecordings=array("none"=>"None");
+    $arrRecordings=array("none"=>_tr("None"));
     if(is_array($Recordings)){
         foreach($Recordings as $key => $value){
             $arrRecordings[$key] = $value;
@@ -677,12 +677,15 @@ function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
     $arrTime=range(0,120);
     $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrMonitor=array("no"=>_tr("No"),"gsm"=>"gsm","wav"=>"wav","wav49"=>"wav49");
-    $arrLen=array("0"=>"unlimited",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60);
-	$arrPosition=array(""=>"none","1"=>1,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"15"=>15,"20"=>20);	$arrTimeF=array("0"=>"desactivate",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120);
-    $arrBusy=array("No","Yes","Yes + (ringuse=no)","Queues Calls only + (ringuse=no)");    
+    $arrLen=array("0"=>_tr("unlimited"),1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60);
+	$arrPosition=array(""=>_tr("none"),"1"=>1,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"15"=>15,"20"=>20);	$arrTimeF=array("0"=>_tr("desactivate"),1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120);
+    $arrBusy=array("No",_tr("Yes"),_tr("Yes + (ringuse=no)"),_tr("Queues Calls only + (ringuse=no)"));    
     $strategy=array('ringall'=>'ringall','leastrecent'=>'leastrecent','fewestcalls'=>'fewestcalls','random'=>'random','rrmemory'=>'rrmemory','rrordered'=>'rrordered','linear'=>'linear','leastrecent'=>'leastrecent');
-	$arrMaxTimeOut=array("0"=>"unlimited","10"=>"10 seconds","20"=>"20 seconds","30"=>"30 seconds","40"=>"40 seconds","50"=>"50 seconds","60"=>"1 minute","90"=>"1 min 30\"","120"=>"2 mins","150"=>"2 mins 30\"","180"=>"3 mins","210"=>"3 mins 30\"","240"=>"4 mins","270"=>"4 mins 30\"","300"=>"5 mins","600"=>"10 mins","900"=>"15 mins","1200"=>"20 mins","1500"=>"25 mins","1800"=>"30 mins","2100"=>"35 mins","2400"=>"40 mins","2700"=>"45 mins","3000"=>"50 mins","3300"=>"55 mins","3600"=>"1 hour");
+	$arrMaxTimeOut=array("0"=>_tr("unlimited"),"10"=>"10 seconds","20"=>"20 seconds","30"=>"30 seconds","40"=>"40 seconds","50"=>"50 seconds","60"=>"1 minute","90"=>"1 min 30\"","120"=>"2 mins","150"=>"2 mins 30\"","180"=>"3 mins","210"=>"3 mins 30\"","240"=>"4 mins","270"=>"4 mins 30\"","300"=>"5 mins","600"=>"10 mins","900"=>"15 mins","1200"=>"20 mins","1500"=>"25 mins","1800"=>"30 mins","2100"=>"35 mins","2400"=>"40 mins","2700"=>"45 mins","3000"=>"50 mins","3300"=>"55 mins","3600"=>"1 hour");
     $retry=array("no_retry"=>"no retry",0=>"0 seconds","1"=>"1 seconds","2"=>"2 seconds","3"=>"3 seconds","4"=>"4 seconds","5"=>"5 seconds","6"=>"6 seconds","7"=>"7 seconds","8"=>"8 seconds","9"=>"9 seconds","10"=>"10 seconds","11"=>"11 seconds","12"=>"12 seconds","13"=>"13 seconds","14"=>"14 seconds","15"=>"15 seconds","16"=>"16 seconds","17"=>"17 seconds","18"=>"18 seconds","19"=>"19 seconds","20"=>"20 seconds");
+
+
+
     $arrFormElements = array("description" => array("LABEL"                  => _tr('Description'),
                                                     "DESCRIPTION"            => _tr("QUO_description"),
                                                     "REQUIRED"               => "yes",
@@ -710,7 +713,7 @@ function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
                                                     "INPUT_TYPE"             => "SELECT",
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,
                                                     "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
+                                                    "VALIDATION_EXTRA_PARAM" => _tr("^(yes|no){1}$")),
                              "alert_info"   => array("LABEL"                  => _tr("Alert Info"),
                                                     "DESCRIPTION"            => _tr("QUO_alertinfo"),
                                                     "REQUIRED"               => "no",
@@ -746,7 +749,7 @@ function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
                                                     "INPUT_EXTRA_PARAM"      => $arrYesNo,
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
-                             "strategy"       => array("LABEL"              => _tr("Strategy "),
+                             "strategy"       => array("LABEL"              => _tr("Strategy"),
                                                     "DESCRIPTION"            => _tr("QUO_strategy"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
@@ -799,7 +802,7 @@ function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
                                                     "DESCRIPTION"            => _tr("QUO_joinempty"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"yes","no"=>"no","strict"=>"strict","loose"=>"loose"),
+                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>_tr("yes"),"no"=>"no","strict"=>_tr("strict"),"loose"=>_tr("loose")),
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no|strict|loose){1}$"),
                              "leavewhenempty"   => array("LABEL"              => _tr("Leavewhenempty"),
@@ -869,7 +872,7 @@ function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
                                                     "DESCRIPTION"            => _tr("QUO_autopause"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("no"=>"No","yes"=>"Yes","all"=>"All"),
+                                                    "INPUT_EXTRA_PARAM"      => array("no"=>"No",_tr("yes")=>"Yes",_tr("all")=>_tr("All")),
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no|all){1}$"),
                              "announce_frequency" => array("LABEL"            => _tr("Announce Frecuency"),
@@ -890,14 +893,14 @@ function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
                                                     "DESCRIPTION"            => _tr("QUO_announceholdtime"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"yes","no"=>"no","once"=>"once"),
+                                                    "INPUT_EXTRA_PARAM"      => array(_tr("yes")=>"yes","no"=>"no",_tr("once")=>_tr("once")),
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no|once){1}$"),
                             "announce_position"       => array("LABEL"       => _tr("Announce Position"),
                                                     "DESCRIPTION"            => _tr("QUO_announceposition"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"yes","no"=>"no","more"=>"more","limit"=>"limit"),
+                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>_tr("yes"),"no"=>"no","more"=>_tr("more"),"limit"=>_tr("limit")),
                                                     "VALIDATION_TYPE"        => "ereg",
                                                     "VALIDATION_EXTRA_PARAM" => "^(yes|no|more|limit){1}$"),
                             "announce_position_limit" => array("LABEL"            => _tr("Announce Position Limit"),
@@ -962,7 +965,7 @@ function createFieldForm($Recordings,$extens,$category,$destiny,$arrMusic)
                                                     "DESCRIPTION"            => _tr("QUO_agentrestriction"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("as called","no followme","only extension"),
+                                                    "INPUT_EXTRA_PARAM"      => array(_tr("as called"),_tr("no followme"),_tr("only extension")),
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "category"     => array("LABEL"          => _tr("Default Destination"),

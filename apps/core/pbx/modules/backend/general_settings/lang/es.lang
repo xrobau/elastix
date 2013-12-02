@@ -249,5 +249,8 @@ $arrLangModule=array(
 "both" => "ambos",
 "YES" => "SI",
 "Yes" => "si",
+"friend" => "amigo",
+"user" => "usuario",
+"yes" => "si",
 );
 ?>

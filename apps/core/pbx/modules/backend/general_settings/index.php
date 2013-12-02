@@ -449,7 +449,7 @@ function createSipForm($arrMOH){
     $arrCallingpres=array(""=>"",'allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
     $arrYesNo=array("yes"=>"yes","no"=>"no");
     $arrYesNod=array("noset"=>"",_tr("yes")=>_tr("Yes"),"no"=>_tr("No"));
-    $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
+    $arrType=array(_tr("friend")=>_tr("friend"),_tr("user")=>_tr("user"),"peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
     $arrMedia=array("noset"=>"",_tr('yes')=>_tr('yes'),'no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
     
@@ -663,7 +663,7 @@ function createIaxForm(){
     $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
     $arrCallTok=array(_tr("yes")=>_tr("yes"),"no"=>"no","auto"=>"auto");
-    $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
+    $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller",_tr("disabled")=>_tr("disabled"),"reqonly"=>"reqonly");
     $encryption=array("noset"=>"","aes128"=>"aes128",_tr("yes")=>_tr("yes"),"no"=>"no");
     $arrFormElements = array("iax_transfer"  => array("LABEL"                  => _tr("transfer"),
                             				    "DESCRIPTION"            => _tr("GS_transferIax"),

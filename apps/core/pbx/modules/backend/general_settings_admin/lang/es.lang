@@ -79,7 +79,7 @@ $arrLangModule=array(
 "User Extension can't be deleted" => "Extension de usuario no pudo ser borrada. ",
 "Need assign password" => "Es necesario establecer una contraseña si desea asignar al usuario una nueva extension o extensión de fax. ",
 "General Settings" => "Configuraciones Generales",
-"SIP Settings" => "Coinfiguraciones de SIP",
+"SIP Settings" => "Configuraciones de SIP",
 "IAX Settings" => "Configuraciones de IAX",
 "Voicemail Settings" => "Configuraciones de Mensaje de Voz",
 "language" => "Selecciona Lenguaje",
@@ -237,10 +237,14 @@ $arrLangModule=array(
 "If mailboxes are changed anywhere outside of app_voicemail, then this option must be enabled for MWI to work." => "Si los mensajes de box son cambiados cuando salen de app_voicemail, entonces esta opción deberia ser habilitada para MVI to wok",
 "If the 'pollmailboxes' option is enabled, this option  sets the polling frequency.  The default is once every 30 seconds." => "Si la opción de los buzones de encuesta es habilitada, esta opcion define la frecuencia de encuesta. Por defecto es una cada 30 segundos",
 "You can override the default program to send e-mail if you wish, too." => "Tu puedes sobrtescribir por defectop el programa a enviar el mail si tu deseas , tambien",
-
-
-
-
+"yes" => "si",
+"public" => "público",
+"default" => "Predeterminado",
+"dynamic" => "dinamico",
+"static" => "estatico",
+"yes,pai" => "si, pai",
+"yes,redundancy" => "si,redundancia",
+"yes,none" => "si,ninguna",
 
 );
 ?>

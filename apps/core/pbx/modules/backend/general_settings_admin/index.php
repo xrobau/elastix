@@ -310,9 +310,9 @@ function createFieldForm($arrTZ){
 }
 
 function createSipForm($arrLang){
-    $arrYesNo=array("yes"=>"yes","no"=>"no");
+    $arrYesNo=array(_tr("yes")=>_tr("yes"),"no"=>"no");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
-    $arrMedia=array('yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
+    $arrMedia=array(_tr('yes')=>_tr('yes'),'no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
     
     $arrFormElements = array("sip_default_context"  => array("LABEL"                  => _tr("Default Context"),
                                                 "DESCRIPTION"            => _tr("Default context for incoming calls. We  recomend don't edit this at least you know what you are doing"),
@@ -332,7 +332,7 @@ function createSipForm($arrLang){
                                                 "DESCRIPTION"            => _tr("Disable overlap dialing support. (Default is yes)"),
                                                 "REQUIRED"               => "yes",
                                                 "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => array("yes"=>"yes","no"=>"no", "dtmf"=>"dtmf","yes,dtmf"=>"yes,dtmf"), //no
+                                                "INPUT_EXTRA_PARAM"      => array(_tr("yes")=>_tr("yes"),"no"=>"no", "dtmf"=>"dtmf","yes,dtmf"=>"yes,dtmf"), //no
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_allowtransfer" => array("LABEL"         => _tr("allowtransfer"),
@@ -433,7 +433,7 @@ function createSipForm($arrLang){
                                                 "DESCRIPTION"            => _tr("Turn on support for SIP video. You need to turn this on in this section to get any video support at all."),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "TEXT",
-                                                "INPUT_EXTRA_PARAM"      => array("yes"=>"yes","no"=>"no", "always"=>"always"),
+                                                "INPUT_EXTRA_PARAM"      => array(_tr("yes")=>_tr("yes"),"no"=>"no", "always"=>"always"),
                                                 "VALIDATION_TYPE"        => "text", //no
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_maxcallbitrate"    =>  array("LABEL"        => _tr("maxcallbitrate"),
@@ -470,14 +470,14 @@ function createSipForm($arrLang){
                                                 "DESCRIPTION"            => _tr("FAX detection will cause the SIP channel to jump to the 'fax' extension (if it exists) based one or more events being detected"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => array("yes"=>"yes","no"=>"no", "cng"=>"cng","t38"=>"t38"),
+                                                "INPUT_EXTRA_PARAM"      => array(_tr("yes")=>_tr("yes"),"no"=>"no", "cng"=>"cng","t38"=>"t38"),
                                                 "VALIDATION_TYPE"        => "text", //yes
                                                 "VALIDATION_EXTRA_PARAM" => ""), 
                             "sip_t38pt_udptl"    =>  array("LABEL"        => _tr("t38pt_udptl"),
                                                 "DESCRIPTION"            => _tr("Setting this to yes enables T.38 FAX (UDPTL) on SIP calls; it defaults to off"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => array("yes"=>"yes", "yes,redundancy"=>"yes,redundancy", "yes,none"=>"yes,none"),
+                                                "INPUT_EXTRA_PARAM"      => array(_tr("yes")=>_tr("yes"), "yes,redundancy"=>_tr("yes,redundancy"), "yes,none"=>_tr("yes,none")),
                                                 "VALIDATION_TYPE"        => "text", //yes
                                                 "VALIDATION_EXTRA_PARAM" => ""), 
                              //NAT SUPPORT
@@ -492,7 +492,7 @@ function createSipForm($arrLang){
                                                 "DESCRIPTION"            => _tr("Indicate the type of Configuration if you are using NAT."),
                                                 "REQUIRED"               => "yes",
                                                 "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => array("public"=>"public","static"=>"static","dynamic"=>"dynamic"),
+                                                "INPUT_EXTRA_PARAM"      => array(_tr("public")=>_tr("public"),_tr("static")=>_tr("static"),_tr("dynamic")=>_tr("dynamic")),
                                                 "VALIDATION_TYPE"        => "text", //yes
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                              "sip_localnetip"  =>   array("LABEL"        => _tr("Local Network"),
@@ -555,7 +555,7 @@ function createSipForm($arrLang){
                                                 "DESCRIPTION"            => _tr("If Remote-Party-ID should be sent"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no","yes"=>"yes", "pai"=>"pai","yes,pai"=>"yes,pai"),
+                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no",_tr("yes")=>_tr("yes"), "pai"=>"pai",_tr("yes,pai")=>_tr("yes,pai")),
                                                 "VALIDATION_TYPE"        => "text", //no
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_useragent"    =>  array("LABEL"        => _tr("useragent"),
@@ -607,13 +607,13 @@ function createSipForm($arrLang){
 }
 
 function createIaxForm($arrLang){
-    $arrTrans=array("yes"=>"yes","no"=>"no","mediaonly"=>"mediaonly");
-    $arrYesNo=array("yes"=>"yes","no"=>"no");
-    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrTrans=array(_tr("yes")=>_tr("yes"),"no"=>"no","mediaonly"=>"mediaonly");
+    $arrYesNo=array(_tr("yes")=>_tr("yes"),"no"=>"no");
+    $arrYesNod=array("noset"=>"",_tr("yes")=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array("friend"=>"friend","user"=>"user","peer"=>"peer");
-    $arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
-    $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
-    $encryption=array("noset"=>"","aes128"=>"aes128","yes"=>"yes","no"=>"no");
+    $arrCallTok=array(_tr("yes")=>_tr("yes"),"no"=>"no","auto"=>"auto");
+    $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller",_tr("disabled")=>_tr("disabled"),"reqonly"=>"reqonly");
+    $encryption=array("noset"=>"","aes128"=>"aes128",_tr("yes")=>_tr("yes"),"no"=>"no");
     $arrFormElements = array("iax_delayreject"     => array("LABEL"                  => _tr("delayreject"),
                                                 "DESCRIPTION"            => _tr("For increased security against brute force password attacks enable (delayreject) which will delay the sending of authentication reject for REGREQ or AUTHREP if there is a password"),
                                                 "REQUIRED"               => "no",
@@ -720,7 +720,7 @@ function createIaxForm($arrLang){
 
 function createVMForm($arrLang,$arrTz)
 {
-    $arrYesNoU=array("noset"=>"","yes"=>"YES","no"=>"NO");
+    $arrYesNoU=array("noset"=>"",_tr("yes")=>_tr("YES"),"no"=>"NO");
     if($arrTz===false)
         $arrZoneMessage=array();
     else

@@ -36,6 +36,7 @@ $arrLangModule=array(
 "New Extension"=>"New Extension",
 "Edit Extension"=>"Edit Extension",
 "Error to obtain extensions"=>"Error trying get extensions. ",
-"on_demand"=>"On demand"
+"on_demand"=>"On demand",
+
 );
 ?>

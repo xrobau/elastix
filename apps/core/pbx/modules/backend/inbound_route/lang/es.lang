@@ -107,5 +107,10 @@ $arrLangModule=array(
 "Caller ID Number" => "ID Número de llamada",
 "CID Name Prefix" => "Nombre de Prefijo CID",
 "Signal RINGING" => "Señal RingRing",
+"ADD Incoming Route" => "Agregar Ruta de Entrada",
+"CID Prefix" => "Prefijo CID",
+"Destination" => "Destino",
+"CID Number" => "Número de CID",
 );
+
 ?>

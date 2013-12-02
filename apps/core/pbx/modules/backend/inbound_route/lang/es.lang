@@ -111,6 +111,7 @@ $arrLangModule=array(
 "CID Prefix" => "Prefijo CID",
 "Destination" => "Destino",
 "CID Number" => "Número de CID",
+"Inbound Routes List" => "Rutas de Lista de Entrada"
 );
 
 ?>

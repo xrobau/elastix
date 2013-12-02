@@ -49,5 +49,6 @@ $arrLangModule=array(
 "IN_activatefaxdetection" => "Enable/Disable the fax detection",
 "IN_language" => "Select the language",
 "IN_destiny" => "Select the type of destiny that will have the inbound route",
+"Inbound Routes List" => "Inbound Routes List."
 );
 ?>

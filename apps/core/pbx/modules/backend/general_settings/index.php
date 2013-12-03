@@ -447,7 +447,7 @@ function createFieldForm($arrTone,$arrMOH,$arrZoneMessage)
 
 function createSipForm($arrMOH){
     $arrCallingpres=array(""=>"",'allowed_not_screened'=>'allowed_not_screened','allowed_passed_screen'=>'allowed_passed_screen','allowed_failed_screen'=>'allowed_failed_screen','allowed'=>'allowed','prohib_not_screened'=>'prohib_not_screened','prohib_passed_screen'=>'prohib_passed_screen','prohib_failed_screen'=>'prohib_failed_screen','prohib'=>'prohib');
-    $arrYesNo=array("yes"=>"yes","no"=>"no");
+    $arrYesNo=array("yes"=>_tr("yes"),"no"=>"no");
     $arrYesNod=array("noset"=>"",_tr("yes")=>_tr("Yes"),"no"=>_tr("No"));
     $arrType=array(_tr("friend")=>_tr("friend"),_tr("user")=>_tr("user"),"peer"=>"peer");
     $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband','auto'=>'auto');
@@ -643,7 +643,7 @@ function createSipForm($arrMOH){
                                                 "DESCRIPTION"            => _tr("If Remote-Party-ID should be sent"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
-                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no",_tr("yes")=>_tr("yes"), "pai"=>"pai","yes,pai"=>"yes,pai"),
+                                                "INPUT_EXTRA_PARAM"      => array("no"=>"no","yes"=>_tr("yes"), "pai"=>"pai","yes,pai"=>"yes,pai"),
                                                 "VALIDATION_TYPE"        => "text", //no
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "sip_transport"    =>  array("LABEL"        => _tr("transport"),
@@ -825,7 +825,7 @@ function createIaxForm(){
 
 function createVMForm($arrZoneMessage)
 {
-    $arrVMesg=array(""=>_tr("Default"),"u"=>_tr("Unavailable"),"b"=>_tr("Busy"),"s"=>("No Message"));
+    $arrVMesg=array(""=>_tr("Default"),"u"=>_tr("Unavailable"),"b"=>_tr("Busy"),"s"=>_tr("No Message"));
     $arrYesNo=array(_tr("yes")=>_tr("Yes"),"no"=>"No");
     $arrOptions=array(""=>_tr("Standard Message"),"s"=>_tr("Beep only"));
     $arrTries=array("1","2","3","4");
@@ -857,7 +857,7 @@ function createVMForm($arrZoneMessage)
                                 				    "DESCRIPTION"            => _tr("GS_playpleaseleave"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("s"=>"Yes",""=>"No"),
+                                                    "INPUT_EXTRA_PARAM"      => array("s"=>_tr("Yes"),""=>"No"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                               "OPERATOR_XTN" => array("LABEL"                  => _tr('Operator Extension'),

@@ -252,5 +252,11 @@ $arrLangModule=array(
 "friend" => "amigo",
 "user" => "usuario",
 "yes" => "si",
+"Standard Message" => "Mensaje Estandar",
+"Beep only" => "Beep unicamente",
+"Unavailable" => "No Disponible",
+"Default" => "Predeterminado",
+"Busy" => "Ocupado",
+"No Message" => "No mensaje",
 );
 ?>

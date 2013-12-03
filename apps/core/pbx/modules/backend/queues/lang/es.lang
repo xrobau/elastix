@@ -141,5 +141,6 @@ $arrLangModule=array(
 "limit" => "limite",
 "once" => "una vez",
 "All" => "Todos",
+"all" => "Todos",
 );
 ?>

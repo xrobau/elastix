@@ -110,7 +110,7 @@ function reportQueue($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     $total=$pQueue->getTotalQueues($domain,$queue_number,$queue_name);
     $arrOrgz=array();
     if($credentials['userlevel']=="superadmin"){
-        $arrOrgz=array(_tr("all")=>_tr("all"));
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }

@@ -83,7 +83,7 @@ $arrLangModule=array(
 "QUO_periodicannouncefrecuency" => "Defines the periodic announce frecuency",
 "yes" => "yes",
 "Strategy" => "Strategy",
-"All" => "All.",
+"All" => "All",
 
 
 );

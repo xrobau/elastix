@@ -245,6 +245,7 @@ $arrLangModule=array(
 "yes,pai" => "si, pai",
 "yes,redundancy" => "si,redundancia",
 "yes,none" => "si,ninguna",
+"YES" => "SI",
 
 );
 ?>

@@ -82,7 +82,7 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $a
         $domain=getParameter('organization');
         $domain=(empty($domain))?'all':$domain;
         
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -288,7 +288,7 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $a
     
     if($credentials['userlevel']=='superadmin'){
         $_POST["organization"]=$domain;
-        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$domain], $_POST, array("organization" => "all"),true);
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization")." = ".$arrOrgz[$domain], $_POST, array("organization" => _tr("all")),true);
     }
     
     $_POST['date_start']=$arrProp['date_start'];

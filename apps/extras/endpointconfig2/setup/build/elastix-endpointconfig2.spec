@@ -21,8 +21,7 @@ Requires: MySQL-python
 Requires: python-cjson
 Requires: pytz
 Requires: php-magpierss
-Requires: python-paramiko
-Requires: python-paramiko-eventlet-compat
+Requires: python-paramiko >= 1.7.6-2
 
 %description
 The Elastix Endpoint Configurator is a complete rewrite and reimplementation of
@@ -134,6 +133,15 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Dec 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: add support for new Snom models 710, 720, 
+  760, 870.
+- FIXED: New Endpoint Configurator: fix network configuration sequence for new
+  Snom models.
+- CHANGED: New Endpoint Configurator: add language support for several Snom 
+  models.
+  SVN Rev[6235]
+
 * Mon Dec 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: fix static IP assignment of RCA IP150 by 
   starting a SSH session into the phone and running a network command directly.

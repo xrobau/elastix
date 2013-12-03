@@ -49,6 +49,7 @@ class Endpoint(BaseEndpoint):
         self._bridge = True
         self._timeZone = None
         self._cookie_v2 = None
+        self._language = 'Español'
         
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False
@@ -58,6 +59,7 @@ class Endpoint(BaseEndpoint):
             self._timeZone = 'USA-5'
         if 'bridge' in param: self._bridge = param['bridge']
         if 'timezone' in param: self._timeZone = param['timezone']
+        if 'language' in param: self._language = param['language']
         return True
 
     def probeModel(self):
@@ -91,9 +93,11 @@ class Endpoint(BaseEndpoint):
         '''
         vars = {'server_ip' : Endpoint._global_serverip}
         
-        for sConfigFile in ('snom300.htm', 'snom320.htm', 'snom360.htm', 'snom821.htm'):
+        #for sConfigFile in ('snom300.htm', 'snom320.htm', 'snom360.htm', 'snom821.htm'):
+        for sModel in ('300', '320', '360', '710', '720', '760', '821', '870'):
             try:
-                sConfigPath = elastix.BaseEndpoint.TFTP_DIR + '/' + sConfigFile
+                #sConfigPath = elastix.BaseEndpoint.TFTP_DIR + '/' + sConfigFile
+                sConfigPath = '%s/snom%s.htm' % (elastix.BaseEndpoint.TFTP_DIR, sModel)
                 BaseEndpoint._writeTemplate('Snom_global_3xx.tpl', vars, sConfigPath)
             except IOError, e:
                 logging.error('Failed to write %s for Snom - %s' % (sConfigFile, str(e),))
@@ -140,8 +144,11 @@ class Endpoint(BaseEndpoint):
         sConfigFile = 'snom' + self._model + '-' + (self._mac.replace(':', '').upper()) + '.htm'
         sConfigPath = self._tftpdir + '/' + sConfigFile
         vars = self._prepareVarList()
-        vars['time_zone'] = self._timeZone
-        vars['enable_bridge'] = int(self._bridge)
+        vars.update({
+            'time_zone'         :   self._timeZone,
+            'enable_bridge'     :   int(self._bridge),
+            'language'          :   self._language
+        })
         try:
             self._writeTemplate('Snom_local_3xx.tpl', vars, sConfigPath)
         except IOError, e:
@@ -178,10 +185,13 @@ class Endpoint(BaseEndpoint):
         sConfigFile = 'snom-' + self._model + '-' + (self._mac.replace(':', '').upper()) + '.xml'
         sConfigPath = self._tftpdir + '/' + sConfigFile
         vars = self._prepareVarList()
-        vars['time_zone'] = self._timeZone
-        vars['enable_bridge'] = int(self._bridge)
-        vars['current_ip'] = self._ip
-        vars['config_filename'] = sConfigFile
+        vars.update({
+            'config_filename'   :   sConfigFile,
+            'time_zone'         :   self._timeZone,
+            'enable_bridge'     :   int(self._bridge),
+            'current_ip'        :   self._ip,
+            'language'          :   self._language
+        })
         try:
             self._writeTemplate('Snom_local_m9.tpl', vars, sConfigPath)
         except IOError, e:
@@ -258,7 +268,7 @@ class Endpoint(BaseEndpoint):
                     (self._vendorname, self._ip, str(e)))
             return False
         except socket.error, e:
-            logging.error('Endpoint %s@%s failed to reboot phone - %s' %
+            logging.error('Endpoint %s@%s failed to set provisioning server - %s' %
                 (self._vendorname, self._ip, str(e)))
         return False
 
@@ -373,8 +383,12 @@ class Endpoint(BaseEndpoint):
                 htmlbody = response.read()
                 response = urllib2.urlopen('http://' + self._ip + '/confirm.htm', 'REBOOT=Yes')
                 htmlbody = response.read()
-                return (False, False)
+                logging.info('Endpoint %s@%s set network config - rebooting' %
+                    (self._vendorname, self._ip))
+                return (True, True)
             else:
+                logging.info('Endpoint %s@%s set network config - not yet rebooting' %
+                    (self._vendorname, self._ip))
                 return (True, False)
         except urllib2.URLError, e:
             logging.error('Endpoint %s@%s failed to connect - %s' %

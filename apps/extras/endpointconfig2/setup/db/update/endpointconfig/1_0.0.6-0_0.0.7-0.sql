@@ -42,3 +42,21 @@ INSERT INTO model_properties (id_model, property_key, property_value)
 /* Renombrar modelos de Polycom para que coincidan con valores emitidos por Cisco Discovery Protocol */
 UPDATE model SET name = CONCAT("SoundPoint ", name), description = CONCAT("SoundPoint ", description)
 WHERE id_manufacturer IN (SELECT `id` FROM manufacturer WHERE `name` = "Polycom") AND name LIKE "IP %";
+
+
+/* Nuevos modelos de Snom */
+INSERT INTO `model` (`max_accounts`, `static_ip_supported`, `dynamic_ip_supported`, `static_prov_supported`, `name`, `description`, `id_manufacturer`) VALUES
+(4, 1, 1, 1, "710", "snom710-SIP", (SELECT `id` FROM manufacturer WHERE `name` = "Snom")),
+(12, 1, 1, 1, "720", "snom720-SIP", (SELECT `id` FROM manufacturer WHERE `name` = "Snom")),
+(12, 1, 1, 1, "760", "snom760-SIP", (SELECT `id` FROM manufacturer WHERE `name` = "Snom")),
+(12, 1, 1, 1, "870", "snom870-SIP", (SELECT `id` FROM manufacturer WHERE `name` = "Snom"));
+
+INSERT INTO `model_properties` (`property_key`, `property_value`, `id_model`) VALUES
+("max_sip_accounts", "4", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "710")),
+("max_iax2_accounts", "0", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "710")),
+("max_sip_accounts", "12", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "720")),
+("max_iax2_accounts", "0", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "720")),
+("max_sip_accounts", "12", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "760")),
+("max_iax2_accounts", "0", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "760")),
+("max_sip_accounts", "12", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "870")),
+("max_iax2_accounts", "0", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Snom" AND model.name = "870"));

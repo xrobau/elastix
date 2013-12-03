@@ -8,7 +8,7 @@
         user_name{{n}}: {{extension.account}}
         user_pass{{n}}: {{extension.secret}}
         user_pname{{n}}: {{extension.account}}
-        user_mailbox{{n}}: {{extension.account}}
+        user_mailbox{{n}}: *97
         user_host{{n}}: {{server_ip}}
         user_srtp{{n}}: off{{py:n += 1}}{{endfor}}{{for m in range(n,max_sip_accounts+1)}}
         user_active{{m}}: off
@@ -19,5 +19,6 @@
         user_mailbox{{m}}:
         user_host{{m}}: {{server_ip}}
         user_srtp{{m}}: off{{endfor}}
+        language: {{language}}
     </pre>
 </html>

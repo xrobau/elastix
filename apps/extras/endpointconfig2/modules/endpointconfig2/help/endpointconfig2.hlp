@@ -578,8 +578,8 @@ Can be linked to the Elastix internal and external agendas.</li>
 its XML configuration applies the changes immediately. Quirk: if the "no autoprovisioning"
 dialog is displayed before configuration, there is no known way to dismiss this dialog
 remotely, even after configuration succeeded.</li>
-<li>Snom: 300,320,360,821,m9. Remote reboot and static provisioning supported. 
-Supports the following extra endpoint properties: bridge, timezone.</li>
+<li>Snom: 300,320,360,710,720,760,821,870,m9. Remote reboot and static provisioning supported. 
+Supports the following extra endpoint properties: bridge, timezone, language.</li>
 <li>VOPTech: VI2006,VI2007,VI2008. Part of the Atcom family. Remote reboot and static 
 provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
 <li>Xorcom: XP0100P,XP0120P. Untested. Remote reboot supported.</li>

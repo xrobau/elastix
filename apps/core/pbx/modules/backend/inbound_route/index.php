@@ -103,7 +103,7 @@ function reportInbound($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         }
         $total=$pInbound->getNumInbound($domain,$name);
         
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -708,7 +708,7 @@ function createFieldForm($goto,$destination,$faxes,$arrDetect,$music)
                                                     "DESCRIPTION"            => _tr("IN_privacymanager"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
+                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>_tr("Yes"),"no"=>"No"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "ringing"  => array("LABEL"             => _tr("Signal RINGING"),
@@ -734,7 +734,7 @@ function createFieldForm($goto,$destination,$faxes,$arrDetect,$music)
                                                     "DESCRIPTION"            => _tr("IN_activatefaxdetection"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
+                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>_tr("Yes"),"no"=>"No"),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "fax_destiny" => array("LABEL"             => _tr("Fax Extension"),

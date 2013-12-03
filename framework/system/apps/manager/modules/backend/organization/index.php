@@ -229,7 +229,7 @@ function reportOrganization($smarty, $module_name, $local_templates_dir, &$pDB, 
         //filter
         $smarty->assign('USERLEVEL',$credentials['userlevel']);
         $smarty->assign('SEARCH',"<input name='search_org' type='submit' class='button' value='"._tr('Search')."'>");
-        $arrState=array("all"=>"All","active"=>"Active","suspend"=>"Suspend","terminate"=>"terminate");
+        $arrState=array("all"=>_tr("All"),"active"=>_tr("Active"),"suspend"=>_tr("Suspend"),"terminate"=>_tr("terminate"));
         
         $_POST['fname']=$arrProp['name'];
         $oGrid->addFilterControl(_tr("Filter applied ")._tr("fname")." = {$arrProp['name']}", $_POST, array("fname" =>''));

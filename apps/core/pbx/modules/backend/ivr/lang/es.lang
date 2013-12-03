@@ -52,5 +52,10 @@ $arrLangModule=array(
 "Return to IVR" => "Retornar a IVR",
 "Name" => "Nombre",
 "VM Return to IVR" => "VM retornar a IVR",
+"Ivrs List" => "Lista de IVR",
+"all" => "Todas",
+"None" => "Ninguna",
+"Yes" => "Si",
+"yes" => "si",
 );
 ?>

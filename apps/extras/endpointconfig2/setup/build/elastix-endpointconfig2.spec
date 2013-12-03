@@ -135,6 +135,8 @@ fi
 %changelog
 * Tue Dec 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.7-0
 - Bump version for release
+- FIXED: New Endpoint Configurator: move SQL update file to correct directory.
+  SVN Rev[6240]
 - CHANGED: New Endpoint Configurator: add support for new Snom models 710, 720, 
   760, 870.
 - FIXED: New Endpoint Configurator: fix network configuration sequence for new

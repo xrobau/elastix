@@ -75,7 +75,7 @@ function reportCDR($smarty, $module_name, $local_templates_dir, $pDB,$arrConf, $
         $domain=getParameter('organization');
         $domain=(empty($domain))?'all':$domain;
         
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }

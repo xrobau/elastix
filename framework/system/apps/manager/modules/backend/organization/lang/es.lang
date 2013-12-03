@@ -112,5 +112,6 @@ $arrLangModule=array(
 "Active" => "Activo",
 "Suspend" => "Suspendido",
 "terminate" => "Terminado",
+"Select a country" => "Selecciona un país",
 );
 ?>

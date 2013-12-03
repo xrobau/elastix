@@ -184,5 +184,10 @@ $arrLangModule=array(
 "Organization Allow" => "Permitir Organizaciones",
 "Enabled" => "Habilitado",
 "Disabled" => "Deshabilitado",
+"friend" => "amigo",
+"Yes" => "Si",
+"No" => "No",
+"--pickup organizations--" => "Selecciona la(s) Organizacion(es)",
+
 );
 ?>

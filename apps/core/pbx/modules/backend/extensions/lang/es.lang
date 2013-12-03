@@ -166,5 +166,6 @@ $arrLangModule=array(
 "Busy" => "Ocupado",
 "Unavailable" => "No Disponible",
 "On demand" => "En demanda",
+"all" => "Todas",
 );
 ?>

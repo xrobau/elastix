@@ -106,7 +106,7 @@ function reportExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     
     $arrOrgz=array();
     if($credentials['userlevel']=="superadmin"){
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }

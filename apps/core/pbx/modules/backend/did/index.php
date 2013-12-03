@@ -122,7 +122,7 @@ function reportDID($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     $offset = $oGrid->calculateOffset();
     $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
     $url = "?menu=$module_name";
-    $arrGrid = array("title"    => _tr('Organization List'),
+    $arrGrid = array("title"    => _tr('DID List'),
                 "url"      => $url,
                 "width"    => "99%",
                 "start"    => ($total==0) ? 0 : $offset + 1,
@@ -167,12 +167,12 @@ function reportDID($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     
     $arrStatus=array("all"=>_tr('All'),"free"=>_tr("No Assigned"),"busy"=>_tr('Assigned'));
     $_POST["status"]=$status;
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$arrStatus[$status], $_POST, array("status" => "all"),true);
+    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$arrStatus[$status], $_POST, array("status" => _tr("all")),true);
     
     $_POST["country"]=$country;
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Country")." = ".$country, $_POST, array("country" => ""));
     
-    $arrOrgz=array("all"=>"all");
+    $arrOrgz=array("all"=>_tr("all"));
     foreach(($pORGZ->getOrganization(array())) as $value){
         $arrOrgz[$value["domain"]]=$value["name"];
     }
@@ -519,7 +519,7 @@ function validate_delete($pDB,$credentials){
 function createFieldForm($arrChannel){
     $arrCountry = array(_tr("Select a country").' --');
     $arrCountry = array_merge($arrCountry,getCountry());
-    $arrType=array("analog"=>"analog","digital"=>"digital","voip"=>"VoIP");
+    $arrType=array(_tr("analog")=>_tr("analog"),"digital"=>"digital","voip"=>"VoIP");
     $arrFormElements = array("did" => array("LABEL"                  => _tr('DID Number'),
                                                     "DESCRIPTION"            => _tr("DID_number"),
                                                     "REQUIRED"               => "yes",

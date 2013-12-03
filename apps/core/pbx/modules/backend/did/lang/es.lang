@@ -56,5 +56,12 @@ Si tu seleccionas 'analogic' en el tipo de parametro, Elastix asume que tu tiene
 "Did Number" => "Número de DID",
 "Status" => "Estado",
 "All" => "Mostrar Todas",
+"all" => "Todas",
+"analog" => "analogico",
+"--Select one--" => "Selecciona alguno",
+"Select a country" => "Selecciona un país",
+"Assigned" => "Asignado",
+"No Assigned" => "No Asignado",
+"DID List" => "Lista de DID",
 );
 ?>

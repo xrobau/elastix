@@ -113,7 +113,7 @@ function reportOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $arr
         }
         $total=$pOutbound->getNumOutbound($domain,$name);
         
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -709,7 +709,7 @@ function createFieldForm($pDB,$domain)
     //time_group
     $query="SELECT name,id from time_group where organization_domain=?";
     $result=$pDB->fetchTable($query,true,array($domain));
-    $arrtg=array(""=>"-- Permanent Route --");
+    $arrtg=array(""=>_tr("-- Permanent Route --"));
     if($result!=false){
         foreach($result as $value){
             $arrtg[$value["id"]]=$value["name"];

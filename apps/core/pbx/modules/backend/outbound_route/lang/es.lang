@@ -102,5 +102,9 @@ $arrLangModule=array(
 "Outbound Routes List" => "Lista de Rutas Salientes",
 "Order" => "Orden",
 "Override Extension" => "Sobreescribir Extensión",
+"Inbound Routes List" => "Lista de rutas de entrada ",
+"all" => "Todas",
+"-- Permanent Route --" => "Ruta Permanente",
+"Outbound Route" => "Ruta Saliente",
 );
 ?>

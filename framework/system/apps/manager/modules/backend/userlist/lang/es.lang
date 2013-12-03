@@ -103,5 +103,9 @@ $arrLangModule=array(
 "MESSAGE" => "MENSAJE",
 "Asterisk was reloaded correctly." => "Asterisk fue recargado Correctamente",
 "Asterisk can't be reloaded." => "Asterisk No pudo ser recargado",
+"all" => "Todos",
+"Used Space" => "Espacio Utilizado",
+"Email Quota" => "Cuota de Mail",
+
 );
 ?>

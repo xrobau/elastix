@@ -139,7 +139,7 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $arrColumns[]=_tr("Name");
     $arrColumns[]=_tr("Group");
     $arrColumns[]=_tr("Extension")." / "._tr("Fax Extension");
-    $arrColumns[]=_tr("Used Space")." / "._tr("Email Qouta");
+    $arrColumns[]=_tr("Used Space")." / "._tr("Email Quota");
     if(in_array('reconstruct_mailbox',$arrPermission))
         $arrColumns[]=""; //reconstruct mailbox
     $oGrid->setColumns($arrColumns);
@@ -198,7 +198,7 @@ function reportUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $smarty->assign("USERLEVEL",$credentials['userlevel']);
     $smarty->assign("SEARCH","<input name='search_org' type='submit' class='button' value='"._tr('Search')."'>");
     if($pORGZ->getNumOrganization(array()) > 0){
-        $arrOrgz=array(0=>"all");
+        $arrOrgz=array(0=>_tr("all"));
         if(in_array('create_user',$arrPermission))
                 $oGrid->addNew("create_user",_tr("Create New User"));
         if($credentials['userlevel']=="superadmin"){
@@ -715,7 +715,7 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
                 }elseif(!isset($areaCode) || $areaCode==""){
                     $error=_tr("Area Code must not be empty");
                 }elseif(!isset($clidNumber) || $clidNumber==""){
-                    $error=_tr("Caller Id Number must not be empty");
+                    $error=_tr("C er Id Number must not be empty");
                 }elseif(!isset($cldiName) || $cldiName==""){
                     $error=_tr("Caller Id Name must not be empty");
                 }else{

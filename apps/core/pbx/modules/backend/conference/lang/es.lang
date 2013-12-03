@@ -106,6 +106,17 @@ $arrLangModule=array(
 "Join Conference Message" => "Mensaje de Inicio de Conferencia",
 "Announce Join/Leave" => "Anuncio de Ingreso/Salida",
 "Schedule Conference" => "Calendario de Conferencia",
-"schedule" => "calendario",
+"schedule" => "horario",
+"all" => "Todos",
+"Room Number" => "Número Sala",
+"Period" => "Periodo",
+"Participants / MaxUsers" => "Participantes/Max Usuarios",
+"Status" => "Estado",
+"Both" => "Ambos",
+"Schedule" => "Horario",
+"No Schedule" => "Sin Horario",
+"--no music--" => "--no música--",
+"--no announcement--" => "--No anuncio--",
+
 );
 ?>

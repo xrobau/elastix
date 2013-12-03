@@ -124,7 +124,7 @@ function reportConference($smarty, $module_name, $local_templates_dir, &$pDB, $a
         $domain=getParameter("organization");
         $domain=empty($domain)?'all':$domain;
         
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -1229,13 +1229,13 @@ function reloadAasterisk($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 }
 
 function createFieldForm($recordings,$music){
-    $arrMusic=array(""=>"--no music--");
+    $arrMusic=array(""=>_tr("--no music--"));
     if(is_array($music)){
         foreach($music as $key => $value){
             $arrMusic[$key]=$value;
         }
     }
-    $arrRecording=array(""=>"--no announcement--");
+    $arrRecording=array(""=>_tr("--no announcement--"));
     if(is_array($recordings)){
         foreach($recordings as $key => $value){
             $arrRecording[$key]=$value;

@@ -104,7 +104,7 @@ function reportRecording($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         $domain=getParameter('organization');
         $domain=empty($domain)?'all':$domain;
         
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -685,7 +685,7 @@ function form_Recordings($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         $extension = $pRecording->Obtain_Extension_Current_User();
     }else{
         $domain=getParameter('organization');
-        $arrOrgz=array(""=>"-- Any (To the system) --");
+        $arrOrgz=array(""=>_tr("-- Any (To the system) --"));
         $pORGZ=new paloSantoOrganization($pDB);
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];

@@ -67,10 +67,16 @@ $arrLangModule=array(
 "Record was canceled." => "Grabación cancelada",
 "Hang up." => "Hang up.",
 "File size exceeds the limit. "=>"El tamaño de archivo excede el límite ",
-"RE_organization" => "Escoge la organizacion",
+"RE_organization" => "Escoge la organización",
 "RE_attachfile" => "Permite subir archivo de grabacion",
 "Add Recording" => "Agregar Grabación",
 "Recording List" => "Lista de Grabaciones",
 "Recordings" => "Grabaciones",
+"Recording List" => "Lista de Grabación",
+"Name" => "Nombre",
+"Organization" => "Organización",
+"all" => "Todas",
+"Recordings List" => "Lista de Grabación",
+"-- Any (To the system) --" => "Cualquiera (para el sistema)",
 );
 ?>

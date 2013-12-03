@@ -87,7 +87,7 @@ function reportMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
         $domain=getParameter("organization");
         $domain=empty($domain)?'all':$domain;
         
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }
@@ -472,7 +472,7 @@ function createFieldForm($arrFormats)
                                                     "DESCRIPTION"            => _tr("MOH_type"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("files"=>"files", "custom"=>"custom"),
+                                                    "INPUT_EXTRA_PARAM"      => array("files"=>_tr("files"), "custom"=>_tr("custom")),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                              "application" 	=> array("LABEL"             => _tr("Application"),
@@ -485,7 +485,7 @@ function createFieldForm($arrFormats)
                                                     "DESCRIPTION"            => _tr("MOH_sortmusic"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("alpha"=>"alpha", "random"=>"random"),
+                                                    "INPUT_EXTRA_PARAM"      => array("alpha"=>_tr("alpha"), "random"=>_tr("random")),
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "format"     => array("LABEL"             => _tr("Format"),

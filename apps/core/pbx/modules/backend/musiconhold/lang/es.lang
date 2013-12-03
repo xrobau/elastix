@@ -51,5 +51,9 @@ $arrLangModule=array(
 "Sort Music" => "Ordenamiento de la Música",
 "Filename" => "Nombre del Archivo",
 "Add New file" => "Agregar Nuevo archivo",
+"all" => "Todos",
+"files" => "archivos",
+"custom" => "tradicional",
+"random" => "aleatorio", 
 );
 ?>

@@ -69,5 +69,8 @@ $arrLangModule=array(
 "Yes" => "Si",
 "--unselected--" => "Sin seleccionar",
 "- choose one -" => "Escoge uno",
+"all" => "Todos",
+"Default Destination" => "Destino Predeterminado",
+"Extensions List" => "Lista de Extensiones",
 );
 ?>

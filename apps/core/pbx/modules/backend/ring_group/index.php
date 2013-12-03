@@ -107,7 +107,7 @@ function reportRG($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
     $total=$pRG->getNumRG($domain,$rg_number,$rg_name);
     $arrOrgz=array();
     if($credentials['userlevel']=="superadmin"){
-        $arrOrgz=array("all"=>"all");
+        $arrOrgz=array("all"=>_tr("all"));
         foreach(($pORGZ->getOrganization(array())) as $value){
             $arrOrgz[$value["domain"]]=$value["name"];
         }

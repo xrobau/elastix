@@ -72,6 +72,8 @@ $arrLangModule=array(
 "Account Code" => "Código de Cuenta",
 "Call Type" => "Tipo de Cuenta", 
 "Call Direction" => "Dirección de Llamada",
-"all" => "Todos",
+"all" => "TODOS",
+"Incoming" => "Entrante",
+"Outgoing" => "Saliente",
 );
 ?>

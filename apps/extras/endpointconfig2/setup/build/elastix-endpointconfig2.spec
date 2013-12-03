@@ -2,7 +2,7 @@
 
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
-Version: 0.0.6
+Version: 0.0.7
 Release: 0
 License: GPL
 Group:   Applications/System
@@ -133,7 +133,8 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Tue Dec 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Tue Dec 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.7-0
+- Bump version for release
 - CHANGED: New Endpoint Configurator: add support for new Snom models 710, 720, 
   760, 870.
 - FIXED: New Endpoint Configurator: fix network configuration sequence for new

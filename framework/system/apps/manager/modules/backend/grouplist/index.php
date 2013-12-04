@@ -131,10 +131,10 @@ function reportGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     $oGrid->setEnd($end);
 
     if($userLevel1=="superadmin"){
-        $arrColumns[]="Organization";
+        $arrColumns[]=_tr("Organization");
     }
-    $arrColumns[]="Group Name";
-    $arrColumns[]="Group Description";
+    $arrColumns[]=_tr("Group Name");
+    $arrColumns[]=_tr("Group Description");
     $oGrid->setColumns($arrColumns);
     
     if($idOrgFil!=0)
@@ -163,7 +163,7 @@ function reportGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
             $oGrid->addNew("create_group",_tr("Create New Group"));
         
         if($userLevel1 == "superadmin"){
-            $arrOrgz=array(0=>"all");
+            $arrOrgz=array(0=>_tr("all"));
             foreach(($pORGZ->getOrganization(array())) as $value){
                 if($value["id"]!=1)
                     $arrOrgz[$value["id"]]=$value["name"];

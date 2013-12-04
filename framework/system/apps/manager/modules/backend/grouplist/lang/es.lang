@@ -42,6 +42,10 @@ $arrLangModule=array(
 "You can not delete this group. You must delete all users belong this group before to delete the group" => "No se puede eliminar el grupo porque tiene usuarios asociados a el. ",
 "Gp_organization" => "Si eres superadmin, escoge el nombre de tu organizacion caso contrario te mostrara tu organizacion. ",
 "Gp_group" => "Escribe el nombre para este grupo. ",
-"Gp_description" => "Escribe un resumen corto acerca de este grupo. "
+"Gp_description" => "Escribe un resumen corto acerca de este grupo. ",
+"all" => "Todos",
+"Organization" => "Organización",
+"Group Name" => "Nombre Grupo",
+"Group Description" => "Descripción de Grupo",
 );
 ?>

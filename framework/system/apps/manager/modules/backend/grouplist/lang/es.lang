@@ -47,5 +47,6 @@ $arrLangModule=array(
 "Organization" => "Organización",
 "Group Name" => "Nombre Grupo",
 "Group Description" => "Descripción de Grupo",
+"Select one Organization" => "Selecciona una Organización",
 );
 ?>

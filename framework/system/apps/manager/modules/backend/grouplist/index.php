@@ -191,7 +191,7 @@ function viewFormGroup($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $arrFill = array();
     $action = getParameter("action");
 
-    $arrOrgz=array(0=>"Select one Organization");
+    $arrOrgz=array(0=>_tr("Select one Organization"));
     if($userLevel1=="superadmin")
         $orgTmp=$pORGZ->getOrganization(array());
     else

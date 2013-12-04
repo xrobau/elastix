@@ -165,14 +165,14 @@ function reportTrunks($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $arrTech = array("sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"), "custom"=>_tr("CUSTOM"));
         $oGrid->addComboAction($name_select="tech_trunk",_tr("Create New Trunk"), $arrTech, $selected=null, $task="create_trunk", $onchange_select=null);
     }
-    $arrOrgz=array(""=>"all");
+    $arrOrgz=array(""=>_tr("all"));
     foreach(($pORGZ->getOrganization(array())) as $value){
         $arrOrgz[$value["domain"]]=$value["name"];
     }
     $_POST["organization"]=$domain;
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Organization Allow")." = ".$arrOrgz[$domain], $_POST, array("organization" => ""),true); //organization allow
     
-    $techFilter=array(''=>'All',"sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"), "custom"=>_tr("CUSTOM"));
+    $techFilter=array(''=>_tr('All'),"sip"=>_tr("SIP"),"dahdi"=>_tr("DAHDI"), "iax2"=>_tr("IAX2"), "custom"=>_tr("CUSTOM"));
     $_POST["technology"]=$technology;
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Type")." = ".$techFilter[$technology], $_POST, array("technology" => ""),true); //technology
     

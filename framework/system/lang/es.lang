@@ -273,6 +273,80 @@ $arrLang=array(
 "Organization doesn't have priviled to access resource " => "Organizacion no tiene privilegios para acceder al recurso ",
 "Error has ocurred to delete permission" => "Error ha ocurrido al borrar el permiso. ",
 "Problem setting globals variables" => "Un error ha ocurrido al configurar las variables globales en asterisk. ",
-"Coulnd't be created new dialplan" => "El nuevo plan de marcado no pudo ser creado. "
+"Coulnd't be created new dialplan" => "El nuevo plan de marcado no pudo ser creado. ",
+
+"Network" => "Red",
+"Network Parameters" => "Parametros de Red",
+"DHCP Server" => "Servidor DHCP",
+"DHCP Client List" => "Lista de Clientes DHCP",
+"Assign IP Address to Host" => "Asignación de Dirección IP a Host",
+"Shutdown" => "Reinicio",
+"Hardware Configuration" => "Configuración de Hardware",
+"Hardware Detector" => "Detector de Hardware",
+"Updates" => "Actualizaciones",
+"Repositories" => "Repositorios",
+"Packages" => "Paquetes",
+"Currency" => "Moneda",
+
+"Manager" => "Administrador",
+"Dashboard Manager" => "Tablero de Administrador ",
+"Dashboard" => "Tablero",
+"Dashboard Applet Admin" => "Tablero Componentes Adm. ",
+
+"Organization Manager" => "Organización",
+"Organization Resource" => "Recursos de Organización",
+
+"User/Group Manager" => "Usuario/Grupo",
+"Group Resource" => "Recursos de Grupo",
+
+"Relay" => "Retraso",
+"Remote SMTP" => "SMTP Remoto",
+"Email list" => "Lista de Email",
+"Email stats" => "Estado de Email",
+
+"Fax Viewer" => "Visor de Fax",
+"Fax Queue" => "Cola de Fax",
+"Fax Master" => "Fax Maestro",
+"Fax Clients" => "Clientes de Fax",
+
+"Trunks" => "Troncales",
+"Outbound Routes" => "Rutas Salientes",
+"Inbound Routes" => "Rutas Entrantes",
+
+"PBX Applications" => "Aplicaciones de PBX",
+"Extensions" => "Extensiones",
+"Queues" => "Colas",
+"Time Group" => "Tiempo de Grupo",
+"Time Conditions" => "Condiciones de Tiempo",
+"Ring Group" => "Grupo de llamada",
+
+"PBX Admin Settings" => "Configuraciones Administrador PBX",
+"Conference" => "Conferencia",
+"General Settings Admin" => "Configuraciones Generales de Adm",
+"Features Codes" => "Características de Prefijo",
+"General Settings" => "Configuraciones Generales",
+"MUsic On Hold" => "Música en Espera",
+"Recording" => "Grabación",
+"Monitoring" => "Monitoreo",
+"Tools" => "Herramientas",
+
+"Asterisk File Editor" => "Editor de Archivos Asterisk",
+"Text to Wav" => "Texto a Wav",
+
+"Reports" => "Reportes",
+"CDR Report" => "Reporte CDR",
+"Channels Usage" => "Reporte de Canales ",
+"Graphic Report" => "Reporte Gráfico",
+"Summary" => "Resumen",
+"Missed Calls" => "Llamadas Perdidas",
+
+"Security" => "Seguridad",
+"Audit" => "Auditoria",
+"Weak Keys" => "Claves Débiles",
+"Firewall" => "Cortafuego",
+"Firewall Rules" => "Reglas de Cortafuego",
+"Define Ports" => "Definir Puertos",
+"Port Knocking Interfaces" => "Interfaces protegidas por Knocking",
+"Port Knocking Users" => "Usuarios protegidas por Knocking",
 );
 ?>

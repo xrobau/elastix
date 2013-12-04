@@ -72,5 +72,7 @@ $arrLangModule=array(
 "all" => "Todos",
 "Default Destination" => "Destino Predeterminado",
 "Extensions List" => "Lista de Extensiones",
+"Ring Group Name" => "Nombre Grupo Timbrado",
+"Ring Group Number" => "Número Grupo Timbrado",
 );
 ?>

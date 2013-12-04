@@ -37,5 +37,12 @@ $arrLangModule=array(
 "Delete" => "Eliminar",
 "Update" => "Actualizar",
 "Group Permission" => "Permisos de Grupo",
+"administrator" => "administrador",
+"end_user" => "usuario final",
+"administrator" => "administrador",
+"Action" => "Acción",
+"export" => "exportar",
+"access" => "accesar",
+
 );
 ?>

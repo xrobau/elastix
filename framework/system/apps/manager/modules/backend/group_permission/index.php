@@ -149,7 +149,7 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
     }
     
     //el grupo administrator de cada organizacion tiene ciertos recursos siempre activos
-    $isAdministrator = ($pACL->getGroupNameByid($idGroup) == "administrator") ? true :false;
+    $isAdministrator = ($pACL->getGroupNameByid($idGroup) == _tr("administrator")) ? true :false;
     if( $isAdministrator ){
         $listResource[] = "grouplist";
         $listResource[] = "userlist";
@@ -172,7 +172,7 @@ function applyGroupPermission($smarty, $module_name, $local_templates_dir, &$pDB
         $arrResourceActions['dashboard']=array('access');
     }
     if(isset($arrResourceActions['cdrreport'])){
-        $arrResourceActions['cdrreport']=array('access','export');
+        $arrResourceActions['cdrreport']=array('access',_tr('export'));
     }
     
     //los premisos que tiene el grupo
@@ -403,7 +403,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
     }
 
     $max_actions = 0;
-    $isAdministrator = ($pACL->getGroupNameByid($idGroup) == "administrator") ? true :false;
+    $isAdministrator = ($pACL->getGroupNameByid($idGroup) == _tr("administrator")) ? true :false;
     if($totalGroupPermission>0 && !$error){
         foreach($arrResourceActions as $resource => $actions){
             $arrTmp=array();
@@ -465,7 +465,8 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir, &$pD
     $oGrid->setTotal($total);
     $arrColumn[]=_tr("Resource");
     for($i=1;$i<=$max_actions;$i++){
-        $arrColumn[]="Action $i";
+        $act= _tr("Action");
+        $arrColumn[]="$act"." $i";
     }
     $oGrid->setColumns($arrColumn);
     

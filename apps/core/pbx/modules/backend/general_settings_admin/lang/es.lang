@@ -140,7 +140,7 @@ $arrLangModule=array(
 "Move Messages to old" => "Mover Mensajes hacia Antiguos",
 "Operator" => "Operador",
 "Review Message" => "Revisión de Mensaje",
-"Say Duration" => "Decir Duración",
+"Say Duration" => "Mostrar Duración",
 "tempgreetwarn" => "Saludo temporal de advertencia",
 "Send Email Settings" => "Configuraciones de envio de mensajes",
 "serveremail" => "Servidor de Mail",
@@ -246,6 +246,13 @@ $arrLangModule=array(
 "yes,redundancy" => "si,redundancia",
 "yes,none" => "si,ninguna",
 "YES" => "SI",
-
+"disabled" => "Deshabilitado",
+"Extern Pass check" => "Revisión Externa Contraseña",
+"odbcstorage" => "Almacenamiento odbc",
+"odbctable" => "Tabla odbc",
+"mailcmd" => "Mail cmd",
+"Max length greetings in sec" => "Máxima Longitud de Saludo en segundos",
+"Move Messages to Old" => "Mover mensajes a viejo",
+"Max # of Login Attempts" => "Máximo número de intentos de autenticación",
 );
 ?>

@@ -158,10 +158,12 @@ $arrLang=array(
 
 /* Start About Elastix */
 "About Elastix"=>"Acerca de Elastix",
-"About Elastix2"=>"About us",
+"About Elastix2"=>"Sobre Nosotros",
+"Elastix Website" => "Sitio Web Elastix",
 "HELP"=>"Help",
 "About Elastix Content"=>"Elastix es una Solución de Comunicaciones Unificadas confiable y fácil de utilizar. Este software de código abierto basado en web se ha convertido en la solución predilecta para las implementaciones de Comunicaciones sobre IP en todo el mundo.",
 "About Elastix Closed"=>"Cerrar",
+
 /* End About Elastix */
 
 //Elastix 0.9.1
@@ -348,5 +350,6 @@ $arrLang=array(
 "Define Ports" => "Definir Puertos",
 "Port Knocking Interfaces" => "Interfaces protegidas por Knocking",
 "Port Knocking Users" => "Usuarios protegidas por Knocking",
+
 );
 ?>

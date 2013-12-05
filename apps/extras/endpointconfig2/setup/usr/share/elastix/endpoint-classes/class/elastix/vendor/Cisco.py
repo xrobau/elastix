@@ -59,7 +59,7 @@ class Endpoint(BaseEndpoint):
         try:
             telnet = telnetlib.Telnet()
             telnet.open(self._ip)
-            telnet.get_socket().settimeout(5)
+            telnet.get_socket().settimeout(10)
         except socket.timeout, e:
             logging.error('Endpoint %s@%s failed to telnet - timeout (%s)' %
                 (self._vendorname, self._ip, str(e)))
@@ -73,16 +73,16 @@ class Endpoint(BaseEndpoint):
 
         try:
             # Attempt login with default credentials
-            telnet.read_until('Password :')
+            telnet.read_until('Password :', 10)
             telnet.write('cisco\r\n') # Password            
             
-            idx, m, text = telnet.expect([r'Password :', r'> '])
+            idx, m, text = telnet.expect([r'Password :', r'> '], 10)
             if idx == 0:
                 # Login failed
                 telnet.close()
                 return
             telnet.write('show config\r\n')
-            text = telnet.read_until('> ')
+            text = telnet.read_until('> ', 10)
             telnet.write('exit\r\n')
             telnet.close()
             
@@ -179,10 +179,10 @@ class Endpoint(BaseEndpoint):
 
         try:
             # Attempt login with default credentials
-            telnet.read_until('Password :')
+            telnet.read_until('Password :', 10)
             if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')            
             
-            idx, m, text = telnet.expect([r'Password :', r'> '])
+            idx, m, text = telnet.expect([r'Password :', r'> '], 10)
             if idx == 0:
                 # Login failed
                 telnet.close()

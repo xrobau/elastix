@@ -65,7 +65,7 @@ class Endpoint(BaseEndpoint):
         sModel = None
 
         try:
-            idx, m, text = telnet.expect([r'Login:'])
+            idx, m, text = telnet.expect([r'Login:'], 10)
             telnet.close()
             
             m = re.search(r'Welcome to LG-Ericsson (\w+)', text)
@@ -138,13 +138,13 @@ class Endpoint(BaseEndpoint):
 
         # Attempt to login into admin telnet
         try:
-            telnet.read_until('Login:')
+            telnet.read_until('Login:', 10)
             if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
-            telnet.read_until('Password:')
+            telnet.read_until('Password:', 10)
             if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
 
             # Wait for either prompt or login prompt
-            idx, m, text = telnet.expect([r'Login:', r':>\s'])
+            idx, m, text = telnet.expect([r'Login:', r':>\s'], 10)
             if idx == 0:
                 telnet.close()
                 logging.error('Endpoint %s@%s detected ACCESS DENIED on telnet connect')
@@ -161,7 +161,7 @@ class Endpoint(BaseEndpoint):
                     telnet.write('Config/Lan/Change dns2 ' + self._static_dns2.encode() + '\r\n')
                 telnet.write('Config/Update/Change tftp ' + self._serverip.encode() + '\r\n')
                 telnet.write('System/Reboot\r\ny\r\n')
-                idx, m, text = telnet.expect([r'Reboot msg'])
+                idx, m, text = telnet.expect([r'Reboot msg'], 10)
                 telnet.close()
         except socket.error, e:
             logging.error('Endpoint %s@%s connection failure - %s' %

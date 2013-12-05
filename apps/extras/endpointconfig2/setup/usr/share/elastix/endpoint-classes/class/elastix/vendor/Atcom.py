@@ -78,7 +78,7 @@ class Endpoint(BaseEndpoint):
         sModel = None
         if telnet != None:
             try:
-                idx, m, text = telnet.expect([r'Password:', r'Login:'])
+                idx, m, text = telnet.expect([r'Password:', r'Login:'], 10)
                 if idx == 0:
                     # This is an AT320 - no need to go further
                     sModel = 'AT320'
@@ -87,7 +87,7 @@ class Endpoint(BaseEndpoint):
                     # Attempt login with default credentials
                     telnet.write('admin\r\n') # Username
                     telnet.write('admin\r\n') # Password
-                    idx, m, text = telnet.expect([r'Login:', r'# '])
+                    idx, m, text = telnet.expect([r'Login:', r'# '], 10)
                     telnet.close()
                     if idx == 0:
                         # Failed to login - credentials changed from default
@@ -170,12 +170,12 @@ class Endpoint(BaseEndpoint):
         
         try:
             # Attempt to login into admin telnet
-            telnet.read_until('Password:')
+            telnet.read_until('Password:', 10)
             if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
             if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
             
             # Wait for either prompt or password prompt
-            idx, m, text = telnet.expect([r'Password:', r'P:\\>'])
+            idx, m, text = telnet.expect([r'Password:', r'P:\\>'], 10)
             if idx == 0:
                 telnet.close()
                 logging.error('Endpoint %s@%s detected ACCESS DENIED on telnet connect')
@@ -243,7 +243,7 @@ class Endpoint(BaseEndpoint):
                 # Write all of the commands
                 for cmd in telnetQueue:
                     telnet.write(cmd + '\r\n')
-                    idx, m, text = telnet.expect([r'P:\\>', r'rebooting...'])
+                    idx, m, text = telnet.expect([r'P:\\>', r'rebooting...'], 10)
                 telnet.close()
                 if idx == 1:
                     # Successfully issued the last command
@@ -317,20 +317,20 @@ class Endpoint(BaseEndpoint):
 
         # Attempt to login into admin telnet
         try:
-            telnet.read_until('Login:')
+            telnet.read_until('Login:', 10)
             if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
             #telnet.read_until('Password:')
             if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
 
             # Wait for either prompt or login prompt
-            idx, m, text = telnet.expect([r'Login:', r'# '])
+            idx, m, text = telnet.expect([r'Login:', r'# '], 10)
             if idx == 0:
                 telnet.close()
                 logging.error('Endpoint %s@%s detected ACCESS DENIED on telnet connect')
                 return False
             else:
                 telnet.write('download tftp -ip ' + self._serverip.encode() + ' -file ' + sConfigFile.encode() + '\r\n')
-                idx, m, text = telnet.expect([r'# '])
+                idx, m, text = telnet.expect([r'# '], 10)
                 if 'failed' in text:
                     logging.error('Endpoint %s@%s failed to retrieve new config' % (self._vendorname, self._ip))
                     return False
@@ -342,7 +342,7 @@ class Endpoint(BaseEndpoint):
                 ]
                 for cmd in telnetQueue:
                     telnet.write(cmd + '\r\n')
-                    idx, m, text = telnet.expect([r'# ', r'reload'])
+                    idx, m, text = telnet.expect([r'# ', r'reload'], 10)
                 telnet.close()
                 if 'reload' in text:
                     # Successfully issued the last command

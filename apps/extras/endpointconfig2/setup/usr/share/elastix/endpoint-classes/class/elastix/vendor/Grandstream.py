@@ -122,7 +122,7 @@ class Endpoint(BaseEndpoint):
                 pass
         else:
             try:
-                idx, m, text = telnet.expect([r'Password:'])
+                idx, m, text = telnet.expect([r'Password:'], 10)
                 telnet.close()
                 
                 # This is known to detect GXV3140, GXP2120
@@ -499,11 +499,11 @@ class Endpoint(BaseEndpoint):
         try:
             #telnet.read_until('Login:')
             if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
-            telnet.read_until('Password:')
+            telnet.read_until('Password:', 10)
             if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
 
             # Wait for either prompt or login prompt
-            idx, m, text = telnet.expect([r'Password:', r'>\s?'])
+            idx, m, text = telnet.expect([r'Password:', r'>\s?'], 10)
             if idx == 0:
                 telnet.close()
                 logging.error('Endpoint %s@%s detected ACCESS DENIED on telnet connect' %
@@ -516,7 +516,7 @@ class Endpoint(BaseEndpoint):
                     # GXP280 accepts just a 'r'
                     rebootcommand = 'reboot'
                 telnet.write(rebootcommand + '\r\n')
-                idx, m, text = telnet.expect([r'Rebooting', r'reboot'])
+                idx, m, text = telnet.expect([r'Rebooting', r'reboot'], 10)
                 if self._model in telnetwaitmodels:
                     telnet.get_socket().settimeout(1)
                     deliberatetimeout = True

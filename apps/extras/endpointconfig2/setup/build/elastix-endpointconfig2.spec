@@ -133,6 +133,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Dec 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: add timeouts to telnet read interactions.
+  SVN Rev[6258]
+
 * Tue Dec 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 0.0.7-0
 - Bump version for release
 - FIXED: New Endpoint Configurator: move SQL update file to correct directory.

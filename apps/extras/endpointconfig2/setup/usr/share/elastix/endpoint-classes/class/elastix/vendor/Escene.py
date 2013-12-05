@@ -57,7 +57,7 @@ class Endpoint(BaseEndpoint):
         try:
             telnet = telnetlib.Telnet()
             telnet.open(self._ip)
-            telnet.get_socket().settimeout(5)
+            telnet.get_socket().settimeout(10)
         except socket.timeout, e:
             logging.error('Endpoint %s@%s failed to telnet - timeout (%s)' %
                 (self._vendorname, self._ip, str(e)))
@@ -71,18 +71,18 @@ class Endpoint(BaseEndpoint):
 
         try:
             # Attempt login with default credentials
-            telnet.read_until('login: ')
+            telnet.read_until('login: ', 10)
             telnet.write('root\r\n') # Username
-            telnet.read_until('Password: ')
+            telnet.read_until('Password: ', 10)
             telnet.write('root\r\n') # Password            
             
-            idx, m, text = telnet.expect([r'login: ', r'\# '])
+            idx, m, text = telnet.expect([r'login: ', r'\# '], 10)
             if idx == 0:
                 # Login failed
                 telnet.close()
                 return
             telnet.write('cat /mnt/system/PhoneType\r\n')
-            text = telnet.read_until('# ')
+            text = telnet.read_until('# ', 10)
             telnet.write('exit\r\n')
             telnet.close()
             
@@ -182,13 +182,13 @@ class Endpoint(BaseEndpoint):
 
         # Attempt to login into admin telnet
         try:
-            telnet.read_until('login:')
+            telnet.read_until('login:', 10)
             if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
-            telnet.read_until('Password:')
+            telnet.read_until('Password:', 10)
             if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
 
             # Wait for either prompt or login prompt
-            idx, m, text = telnet.expect([r'login:', r'# '])
+            idx, m, text = telnet.expect([r'login:', r'# '], 10)
             if idx == 0:
                 telnet.close()
                 logging.error('Endpoint %s@%s detected ACCESS DENIED on telnet connect')
@@ -202,7 +202,7 @@ class Endpoint(BaseEndpoint):
                 ]
                 for cmd in telnetQueue:
                     telnet.write(cmd.encode() + '\r\n')
-                    idx, m, text = telnet.expect([r'# '])
+                    idx, m, text = telnet.expect([r'# '], 10)
                 telnet.close()
         except socket.error, e:
             logging.error('Endpoint %s@%s connection failure - %s' %

@@ -161,39 +161,44 @@ class PaloSantoPackages
         }
         
         // Filtrar los repos activos según /etc/yum.repos.d/*.repo
+        $reposValidos = array();
         $reposInactivos = array();
         foreach (glob('/etc/yum.repos.d/*.repo') as $repospec) {
-        	$cur_repo = NULL;
+            $cur_repo = NULL;
             foreach (file($repospec) as $linea) {
-            	$regs = NULL;
-                if (preg_match('/^\[(\S+)\]/', $linea, $regs))
+                $regs = NULL;
+                if (preg_match('/^\[(\S+)\]/', $linea, $regs)) {
                     $cur_repo = $regs[1];
+                    if (!in_array($cur_repo, $reposValidos))
+                        $reposValidos[] = $cur_repo;
+                }
                 if (preg_match('/\s*enabled\s*=\s*0/', $linea, $regs)) {
-                	$reposInactivos[] = $cur_repo;
+                        $reposInactivos[] = $cur_repo;
                 }
             }
         }
-        
+
         foreach ($repos as $rutarepo) if (is_dir($rutarepo)) {
-        	$repo = basename($rutarepo);
+            $repo = basename($rutarepo);
+            if (!in_array($repo, $reposValidos)) continue;
             if (in_array($repo, $reposInactivos)) continue;
             $rutas = glob("$rutarepo/*primary*sqlite");
             if (count($rutas) > 0) {
-            	// Pedir actualización si los repos tienen más de 1 semana
+                // Pedir actualización si los repos tienen más de 1 semana
                 $st = stat($rutas[0]);
                 if (time() - $st['mtime'] > 3600 * 24 * 7) {
                     //print "Repo $repo es viejo<br/>\n";
                     $this->bActualizar = TRUE;
                 }
-                
+
                 $dsn = $cadena_dsn = "sqlite3:///".$rutas[0];
                 $dbconn = new paloDB($dsn);
-                if (empty($dbconn->errMsg)) $this->_repodb[$repo] = $dbconn; 
+                if (empty($dbconn->errMsg)) $this->_repodb[$repo] = $dbconn;
             } else {
-            	// Alguien hizo yum clean all
+                // Alguien hizo yum clean all
                 //print "No hay sqlite para repo $repo<br/>\n";
                 $this->bActualizar = TRUE;
-            } 
+            }
         }
     }
     

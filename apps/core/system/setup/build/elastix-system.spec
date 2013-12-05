@@ -130,6 +130,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Dec 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Packages: filter out inactive repostories before checking for package
+  availability and freshness.
+  SVN Rev[6257]
+
 * Mon Nov 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Hardware Detector: with recent DAHDI versions, the configuration parser
   misparses "EC: OSLEC - INACTIVE" as having an echo canceller called

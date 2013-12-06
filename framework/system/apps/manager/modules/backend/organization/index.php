@@ -1018,8 +1018,8 @@ function didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, 
             return reportDIDorganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
         }
         
-        $country=array("0"=>"--Select a Country--");
-        $city=array("0"=>"--Select a City--");
+        $country=array("0"=>_tr("--Select a Country--"));
+        $city=array("0"=>_tr("--Select a City--"));
         $arrDID=$listDIDOrg=array();
         foreach($listDID as $value){
             $arrDID[]=array('id'=>$value['id'],'did'=>$value['did'],'country_code'=>$value['country_code'],'area_code'=>$value['area_code']);
@@ -1046,7 +1046,7 @@ function didAssign($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, 
     $arrForm = createDidForn($country,$city);
     $oForm = new paloForm($smarty,$arrForm);
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/organization_did.tpl","Organization DID", $prop);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/organization_did.tpl",_tr("Organization DID"), $prop);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
     return $content;
 }

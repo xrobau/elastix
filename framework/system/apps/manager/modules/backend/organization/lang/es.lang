@@ -118,5 +118,13 @@ $arrLangModule=array(
 "Remove DID" => "Remover DID",
 "Type" => "Tipo",
 "Country Code / Area Code"  => "Código País / Código Area",
+"--Select a Country--" => "Selecciona un país",
+"Available DID" => "DID Disponible",
+"DID to assign to" => "DID Asignado a ",
+"Drag and Drop DIDs into 'DID to assign' Area" => "Arrastra y Suelta DIDs dentro del area 'Asignar DID'",
+"Organization DID" => "DID Organizacion",
+"--Select a Country--" => "Selecciona un pais",
+"--Select a City--" => "Selecciona una ciudad",
+
 );
 ?>

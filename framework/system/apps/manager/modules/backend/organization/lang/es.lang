@@ -113,5 +113,10 @@ $arrLangModule=array(
 "Suspend" => "Suspendido",
 "terminate" => "Terminado",
 "Select a country" => "Selecciona un país",
+"DID Organization List" => "Lista de DID de Organizaciones",
+"Add DID" => "Agregar Nueva DID",
+"Remove DID" => "Remover DID",
+"Type" => "Tipo",
+"Country Code / Area Code"  => "Código País / Código Area",
 );
 ?>

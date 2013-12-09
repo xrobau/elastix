@@ -30,6 +30,8 @@ require_once "libs/paloSantoForm.class.php";
 require_once "libs/paloSantoTrunk.class.php";
 require_once "libs/paloSantoConfig.class.php";
 
+define ('AGENT_CONSOLE_DEBUG_LOG', FALSE);
+
 function _moduleContent(&$smarty, $module_name)
 {
     global $arrConf;
@@ -75,6 +77,18 @@ function _moduleContent(&$smarty, $module_name)
         // Manejo del inicio de la sesión del agente
         return manejarLogin($module_name, $smarty, $sDirLocalPlantillas);
     }
+}
+
+function _debug($s)
+{
+    if (! AGENT_CONSOLE_DEBUG_LOG) return;
+    
+	$sAgent = '(unset)';
+    if (isset($_SESSION['callcenter']) && isset($_SESSION['callcenter']['agente']))
+        $sAgent = $_SESSION['callcenter']['agente'];
+    file_put_contents('/tmp/debug-callcenter-agentconsole.txt',
+        sprintf("%s agent=%s %s\n", date('Y-m-d H:i:s'), $sAgent, $s),
+        FILE_APPEND);
 }
 
 /* Procedimiento para generar el estado inicial de la información del agente en
@@ -1031,6 +1045,8 @@ function manejarSesionActiva_saveForms($oPaloConsola, $estado)
 function manejarSesionActiva_checkStatus($module_name, $smarty, 
     $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
+    _debug(__FUNCTION__.' start');
+    
     $respuesta = array();
 
     ignore_user_abort(true);
@@ -1041,6 +1057,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
     $iDuracionPausa = $iDuracionPausaActual = NULL;
     
     $estadoCliente = getParameter('clientstate');
+    _debug(__FUNCTION__.' before sanitizing clientstate='.print_r($estadoCliente, TRUE));
 
     // Validación del estado del cliente:
     // onhold break_id calltype campaign_id callid
@@ -1059,6 +1076,8 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
         $estadoCliente['calltype'] = $estadoCliente['callid'] = NULL;
     }
 
+    _debug(__FUNCTION__.' after sanitizing clientstate='.print_r($estadoCliente, TRUE));
+
     // Modo a funcionar: Long-Polling, o Server-sent Events
     $sModoEventos = getParameter('serverevents');
     $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
@@ -1069,12 +1088,16 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
     	Header('Content-Type: application/json');
     }
 
+    _debug(__FUNCTION__.' using Server-sent Events: '.($bSSE ? 'YES' : 'NO'));
+    _debug(__FUNCTION__.' server state for agent='.print_r($estado, TRUE));
+
     // Respuesta inmediata si el agente ya no está logoneado
     if ($estado['estadofinal'] != 'logged-in') {
         // Respuesta inmediata si el agente ya no está logoneado
         jsonflush($bSSE, array(
             'event' =>  'logged-out',
         ));
+        _debug(__FUNCTION__.' agent not logged-in, aborting.');
         return;
     }
 	
@@ -1099,18 +1122,22 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
         (is_null($estadoCliente['break_id']) || $estadoCliente['break_id'] != $estado['pauseinfo']['pauseid'])) {
         // La consola debe de entrar en break
         $respuesta[] = construirRespuesta_breakenter($estado['pauseinfo']['pauseid']);
+        _debug(__FUNCTION__.' initial: agent has entered break');
     } elseif (!is_null($estadoCliente['break_id']) && is_null($estado['pauseinfo'])) {
         // La consola debe de salir del break
         $respuesta[] = construirRespuesta_breakexit();
+        _debug(__FUNCTION__.' initial: agent has exited break');
     }
 
     // Verificación de la consistencia del estado de hold
     if (!$estadoCliente['onhold'] && $estado['onhold']) {
         // La consola debe de entrar en hold
         $respuesta[] = construirRespuesta_holdenter();
+        _debug(__FUNCTION__.' initial: agent has entered hold');
     } elseif ($estadoCliente['onhold'] && !$estado['onhold']) {
         // La consola debe de salir de hold
         $respuesta[] = construirRespuesta_holdexit();
+        _debug(__FUNCTION__.' initial: agent has exited break');
     }
     
     if (!is_null($estado['callinfo'])) {
@@ -1147,10 +1174,14 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
 
         $respuesta[] = construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas, 
             $oPaloConsola, $estado['callinfo'], $infoLlamada, $infoCampania);
+        _debug(__FUNCTION__.' initial: agent has received call');
     } elseif (!is_null($estadoCliente['calltype']) && is_null($estado['callinfo'])) {
         // La consola dejó de atender una llamada
         $respuesta[] = construirRespuesta_agentunlinked();
+        _debug(__FUNCTION__.' initial: agent has ended call');
     }
+
+    _debug(__FUNCTION__.' initial list of changes: '.print_r($respuesta, TRUE));
 
     // Ciclo de verificación para Server-sent Events
     $sAgente = $_SESSION['callcenter']['agente'];
@@ -1366,6 +1397,7 @@ function printflush($s)
     print $s;
     ob_flush();
     flush();
+    _debug('json: '.$s);
 }
 
 /*  

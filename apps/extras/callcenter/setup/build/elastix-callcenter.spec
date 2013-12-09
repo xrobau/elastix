@@ -97,6 +97,13 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Dec 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: during an Asterisk restart, the startup time reported by
+  CoreStatus may get stuck at year 1969 for a few seconds, and break the 
+  detection of a restarted Asterisk instance. Fix by rejecting and retrying the
+  call until a valid date is returned.
+  SVN Rev[6262]
+
 * Tue Nov 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-5
 - Fix incorrect packaging of Ember.js
 

@@ -189,15 +189,29 @@ class AMIEventProcess extends TuberiaProcess
 
             /* Ejecutar el comando CoreStatus para obtener la fecha de arranque de 
              * Asterisk. Si se tiene una fecha previa distinta a la obtenida aquí,
-             * se concluye que Asterisk ha sido reiniciado */
-            $sFechaInicio = '';
-            $r = $astman->CoreStatus();
-            if (isset($r['Response']) && $r['Response'] == 'Success') {
-                $sFechaInicio = $r['CoreStartupDate'].' '.$r['CoreStartupTime'];
-                $this->_log->output('INFO: esta instancia de Asterisk arrancó en: '.$sFechaInicio);
-            } else {
-                $this->_log->output('INFO: esta versión de Asterisk no soporta CoreStatus');
-            }
+             * se concluye que Asterisk ha sido reiniciado. Durante el inicio
+             * temprano de Asterisk, la fecha de inicio todavía no está lista y
+             * se reportará como 1969-12-31 o similar. Se debe de repetir la llamada
+             * hasta que reporte una fecha válida. */
+            $sFechaInicio = ''; $bFechaValida = FALSE;
+            do {
+                $r = $astman->CoreStatus();
+                if (isset($r['Response']) && $r['Response'] == 'Success') {
+                    $sFechaInicio = $r['CoreStartupDate'].' '.$r['CoreStartupTime'];
+                    $this->_log->output('INFO: esta instancia de Asterisk arrancó en: '.$sFechaInicio);
+                } else {
+                    $this->_log->output('INFO: esta versión de Asterisk no soporta CoreStatus');
+                    break;
+                }
+                $regs = NULL;
+                if (preg_match('/^(\d+)/', $sFechaInicio, $regs) && (int)$regs[1] <= 1970) {
+                    $this->_log->output('INFO: fecha de inicio de Asterisk no está lista, se espera');
+                	usleep(1 * 1000000);
+                } else {
+                	$bFechaValida = TRUE;
+                }
+            } while (!$bFechaValida);
+            
             if (is_null($this->_asteriskStartTime)) {
                 $this->_asteriskStartTime = $sFechaInicio;
             } elseif ($this->_asteriskStartTime != $sFechaInicio) {

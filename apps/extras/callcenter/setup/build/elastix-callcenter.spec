@@ -98,6 +98,9 @@ fi
 
 %changelog
 * Mon Dec 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Preview: complete rewrite. Try to take advantage of the field
+  generation of PaloSantoForm as much as possible. Remove dead xajax references.
+  SVN Rev[6263]
 - FIXED: Dialer: during an Asterisk restart, the startup time reported by
   CoreStatus may get stuck at year 1969 for a few seconds, and break the 
   detection of a restarted Asterisk instance. Fix by rejecting and retrying the

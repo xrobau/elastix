@@ -99,7 +99,7 @@ function viewFeatures($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
     $pORGZ = new paloSantoOrganization($pDB);
     
     if($credentials['userlevel']=='superadmin'){
-        $domain=getParameter('organization');
+        $domain=getParameter(_tr('organization'));
         $tmpORG=$pORGZ->getOrganization(array());
         $arrOrgz=array();
         foreach($tmpORG as $value){
@@ -308,6 +308,7 @@ function crearSelect($name,$option,$disabled){
     $select .="<option $opt2 value='ena_custom'>Enabled Custom</option>";
     $select .="<option $opt3 value='disabled'>Disabled</option>";
     $select .="</select>";
+    
     return $select; 
 }
 

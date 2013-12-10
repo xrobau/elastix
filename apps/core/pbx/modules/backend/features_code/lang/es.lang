@@ -155,6 +155,6 @@ $arrLangModule=array(
 "VOICEMAIL" => "MENSAJE DE VOZ",
 "FOLLOWME" => "SIGANME(follow me)", 
 "Features Code" => "Características de Prefijo",
-
+"Click here to reload dialplan" => "Clic aqui para recargar el plan de marcado",
 );
 ?>

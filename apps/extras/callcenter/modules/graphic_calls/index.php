@@ -69,13 +69,14 @@ function _moduleContent(&$smarty, $module_name)
     
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-
     global $arrConf;
-    global $arrConfig;
+
+    // Se fusiona la configuración del módulo con la configuración global
+    $arrConf = array_merge($arrConf, $arrConfModule);
 
     //folder path for custom templates
     $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($arrConfig['templates_dir']))?$arrConfig['templates_dir']:'themes';
+    $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
     // Conexión a la base de datos CallCenter

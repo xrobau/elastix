@@ -27,9 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
-$arrConfig['module_name'] = 'outgoing_monitoring';
-$arrConfig['templates_dir'] = 'themes';
-//$cadena_dsn2 = "mysql://asterisk:asterisk@localhost/call_center";
-
-
+$arrConfModule['module_name'] = 'campaign_monitoring';
+$arrConfModule['templates_dir'] = 'themes';
+$arrConfModule['cadena_dsn'] = "mysql://asterisk:asterisk@localhost/call_center";
 ?>

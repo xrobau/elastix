@@ -26,13 +26,9 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
-    global $arrConf;
-    global $arrConfModule;
+global $arrConfModule;
 
-    $arrConfModule['module_name']       = 'agents_monitoring';
-    $arrConfModule['templates_dir']     = 'themes';
-    //ex1: $arrConfModule['dsn_conn_database'] = "sqlite3:///$arrConf[elastix_dbdir]/base_name.db";
-    //ex2: $arrConfModule['dsn_conn_database'] = "mysql://user:password@ip_host_sever_mysql/base_name";
-    $arrConf['dsn_conn_database'] = 'mysql://asterisk:asterisk@localhost/call_center';
-    $arrConfModule['dsn_conn_database'] = 'mysql://asterisk:asterisk@localhost/call_center';
+$arrConfModule['module_name']       = 'rep_agents_monitoring';
+$arrConfModule['templates_dir']     = 'themes';
+$arrConfModule['cadena_dsn'] = 'mysql://asterisk:asterisk@localhost/call_center';
 ?>

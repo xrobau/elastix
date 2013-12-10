@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Dec 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: CallCenter: Fix multiple modules to define their own DSN instead of
+  relying on the definition in Elastix core. Fix Elastix bug #1795.
+  SVN Rev[6264]
+
 * Mon Dec 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Form Preview: complete rewrite. Try to take advantage of the field
   generation of PaloSantoForm as much as possible. Remove dead xajax references.

@@ -51,6 +51,9 @@ function _moduleContent(&$smarty, $module_name)
     require_once "modules/$module_name/configs/default.conf.php";
     global $arrConf;
 
+    // Se fusiona la configuración del módulo con la configuración global
+    $arrConf = array_merge($arrConf, $arrConfModule);
+
     load_language_module($module_name);
 
     //folder path for custom templates

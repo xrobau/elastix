@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
-$arrConfig['module_name'] = 'break_administrator';
-$arrConfig['templates_dir'] = 'themes';
-
+$arrConfModule['module_name'] = 'break_administrator';
+$arrConfModule['templates_dir'] = 'themes';
+$arrConfModule['cadena_dsn'] = "mysql://asterisk:asterisk@localhost/call_center";
 ?>

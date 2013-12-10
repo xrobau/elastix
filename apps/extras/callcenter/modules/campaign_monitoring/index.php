@@ -44,7 +44,10 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloMonitorCampania.class.php";
 
-    load_language_module($module_name);    
+    // Se fusiona la configuración del módulo con la configuración global
+    $arrConf = array_merge($arrConf, $arrConfModule);
+
+    load_language_module($module_name);
 
     //folder path for custom templates
     $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);

@@ -30,6 +30,7 @@
 global $arrConfModule;
 $arrConfModule = array(
     'hardware'  =>  'SIP|IAX2|ZAP|H323|OH323',
+    'cadena_dsn' => "mysql://asterisk:asterisk@localhost/call_center",
 );
 
 ?>

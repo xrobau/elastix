@@ -27,18 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
-$arrConfig['module_name'] = 'form_designer';
-$arrConfig['templates_dir'] = 'themes';
-// $arrConfig['arrValidation'] = array(
-//         "VALUE" => array (
-//                     "LETTER",
-//                     "NUMBER",
-//                     "ALPAHANUMERIC",
-//                     "E-MAIL"),
-//         "NAME"  => array (
-//                     $arrLang["Validation Only Letter"],
-//                     $arrLang["Validation Only Number"],
-//                     $arrLang["Validation Alphanumeric"],
-//                     $arrLang["Validation E-mail"]), 
-//         );
+$arrConfModule['module_name'] = 'form_designer';
+$arrConfModule['templates_dir'] = 'themes';
+$arrConfModule['cadena_dsn'] = "mysql://asterisk:asterisk@localhost/call_center";
 ?>

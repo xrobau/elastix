@@ -1,64 +1,83 @@
 <div id="filterdiv">
     <form id="filterform">
         <input type="search" id="search" placeholder="Search">
-            <select class="filter filter1">
-                <option>MAIL</option>
-                <option>FAX</option>
-                <option>VOICE MAIL</option>
-            </select>
-            <select class="filter filter2">
-                <option>ALL</option>
-                <option>READ</option>
-                <option>UNREAD</option>
-                <option>STARRED</option>
-                <option>UNSTARRED</option>
-                <option>CONTACTS</option>
-            </select>	
     </form>
 </div>   
-
 <div id="paneldiv">  
-    <div id="leftdiv">
-        <div id="b1_1">
-            {foreach from=$MAILBOX_FOLDER_LIST key=k item=M_FOLDER}
-                <div class="folder" onclick="show_messages_folder('{$M_FOLDER}');">{$M_FOLDER}</div>
-            {/foreach}
+    <div id='list_folders'>
+        <div id="leftdiv">
+            <div id="b1_1">
+                {foreach from=$MAILBOX_FOLDER_LIST key=k item=M_FOLDER}
+                    <div class="folder" onclick="show_messages_folder('{$M_FOLDER}');">{$M_FOLDER}</div>
+                {/foreach}
+            </div>
+        </div>
+        <div id="display1" class="color1 ra_disp1_10">
+            <div id="icn_disp1" class="cont_pic_tag ra_disp1_10" >
+                <span class="icn_d">ë</span>
+            </div>  
         </div>
     </div>
     <div id="centerdiv">
         <div id="b2_1">	
             <div id="paginationdiv">
-                <div id="display1" class="color1 ra_disp1_10">
-                    <div id="icn_disp1" class="cont_pic_tag ra_disp1_10" >
-                        <span class="icn_d">ë</span>
-                    </div>	
+                <div id='elx_email_fil_view' style='padding:10px' class='elx_email_pag_bar'>
+                    <div class="btn-group elx_email_pag_btn">
+                        <button type="button" class="btn btn-default btn-sm">{$VIEW} : <span id='elx_sel_view_filter'>{$ELX_MAIL_FILTER_OPT[$SELECTED_VIEW_FILTER]}</span></button>
+                        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                        {foreach from=$ELX_MAIL_FILTER_OPT key=k item=view_filter}
+                            <li><a href="#" id='elx_email_vsel_{$k}' onclick='search_email_message_view("{$k}")'>{$view_filter}</a></li>
+                        {/foreach}
+                        </ul>
+                    </div>
+                    <input type='hidden' name='elx_sel_view_filter_h' value='{$SELECTED_VIEW_FILTER}' data-value='{$ELX_MAIL_FILTER_OPT[$SELECTED_VIEW_FILTER]}'>
+                </div>
+                <div id='elx_email_mv' class='elx_email_pag_bar'>
+                    <div class="btn-group elx_email_pag_btn" >
+                        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <span id='elx_email_mv_wtag'>{$MOVE_TO}:</span><span id='elx_email_mv_itag' class='glyphicon glyphicon-folder-open'></span><span class="caret"></span>
+                        </button>
+                        <ul id='elx_email_mv_ul' class="dropdown-menu" role="menu">
+                        {foreach from=$MOVE_FOLDERS key=k item=mv_folder}
+                            <li><a href="#" onclick='mv_msg_to_folder("{$k}")'>{$mv_folder}</a></li>
+                        {/foreach}
+                        </ul>
+                    </div>
+                </div>
+                <div id='elx_email_mark_as' class='elx_email_pag_bar'> 
+                    <div class="btn-group elx_email_pag_btn">
+                        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <span id='elx_email_mark_wtag'>{$MARK_AS}:</span><span id='elx_email_mark_itag' class='glyphicon glyphicon-tag'></span> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                        {foreach from=$ELX_MAIL_MARK_OPT key=k item=opt}
+                            <li><a href="#" onclick='mark_email_msg_as("{$k}")'>{$opt}</a></li>
+                        {/foreach}
+                        </ul>
+                    </div>
                 </div>
             </div>
-                                
-            <div id="contentdiv">
+            <div id="email_contentdiv">
                 <div id="elx_bodymail">
                 </div>
                 <div id="elx_mail_messages">
-                    {section name=mail loop=$MAILS }
-                    {if $MAILS[mail].status}
-                        <div class="elx_row" onclick="view_body({$MAILS[mail].UID});" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:#ffff;">
+                    {if empty($MAILS)}
+                        <div class="elx_row elx_unseen_email" style="text-align:center">{$NO_EMAIL_MSG}</div>
                     {else}
-                        <div class="elx_row" id={$MAILS[mail].status}{$MAILS[mail].UID} style="background-color:rgb(229,229,229);">
+                        {foreach from=$MAILS key=k item=MAIL}
+                            {foreach from=$MAIL key=j item=col_mail}
+                                {$col_mail}
+                            {/foreach}
+                        {/foreach}
                     {/if}
-                            <div class="sel"><input type="checkbox" value={$MAILS[mail].UID} class="inp1" name="checkmail"/></div>	
-                            <div class="ic">
-                                <div class="icon"><img border="0" src="web/apps/home/images/mail2.png" class="icn_buz"></td></div>
-                                <div class="star"><span class="st">e</span></div>	
-                                <div class="trash"><span class="st">ç</span></div>	
-                            </div>
-                            <div class="from" ><span>{$MAILS[mail].from}</span></div> 
-                            <div class="subject"><span>{$MAILS[mail].subject}</span></div> 
-                            <div class="date"><span>{$MAILS[mail].date}</span></div> 
-                        </div>
-                    {/section}
                 </div>
             </div>
         </div>
     </div>
 </div>
+<input type='hidden' name='current_mailbox' val='{$CURRENT_MAILBOX}'>
 

@@ -30,6 +30,7 @@
 
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
+include_once "libs/paloSantoGrid.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -47,45 +48,25 @@ function _moduleContent(&$smarty, $module_name)
    	$pACL = new paloACL($pDB);
 
     $pImap = new paloImap();
-    /*$imap_login->login($hostname, $username ,$password);
-   
-    // Do some mail stuff here, like get headers...., use obj connection
-    $message_headers = imap_mailboxmsginfo($imap_login->connection);
-   
-    // show the folders....
-    //print_r($imap_login->folders, true);
-   
-    //print '<br /><hr size="1" noshade />';
-   
-    //print_r($message_headers, true);
-   
-
-    // close the connection
-    $imap_login->close_mail_connection();
-
-   // $smarty->assign("USER_NAME", $arrFill["name"]);
-    $smarty->assign("MODULE_NAME", $module_name);
-    $smarty->assign("id_user", $uid);
-    $hostname = '{localhost:143/imap/novalidate-cert}INBOX';
-    $username =  $arrFill["username"];
-    $password =   $_SESSION['elastix_pass2'];
-    $inbox = imap_open($hostname,$username,$password) or die('Ha fallado la conexión: ' . imap_last_error());
-    $emailnum = imap_search($inbox,'ALL');
-    
-    $list=imap_getmailboxes($inbox,'{localhost:143/imap/novalidate-cert}',"*");*/
     
     //actions
     $accion = getAction();
     
     switch($accion){
-        case "view_mail":
-            $content = view_mail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
-            break;
-        case "delete_mail":
-            $content = delete_mail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+        case "view_bodymail":
+            $content = viewMail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
         case "download_attach":
             $content = download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
+        case "mv_msg_to_folder":
+            $content = moveMsgsToFolder($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
+        case "mark_msg_as":
+            $content = markMsgAs($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
+        case "delete_msg_trash":
+            $content = deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
         default:
             $content = reportMail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
@@ -96,8 +77,11 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
 {
+    $jsonObject = new PaloSantoJSON();
+    $arrFilter=array();
+    
     //obtenemos el mailbox que deseamos leer
-    $mailbox=getParameter('mailbox');
+    $mailbox=getParameter('folder');
     $action=getParameter('action');
     
     //creamos la connección al mailbox
@@ -105,58 +89,279 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     
     $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
     if($result===false){
-        print($pImap->errMsg);
+        $jsonObject->set_error($pImap->errMsg);
+        $smarty->assign("ERROR_FIELD",$pImap->errMsg);
     }
     
-    $listMailbox=$pImap->getMailboxList($searh_pattern='');
+    $listMailbox=$pImap->getMailboxList();
     if($result===false){
-        print($pImap->errMsg);
+        $jsonObject->set_error($pImap->errMsg);
+        $smarty->assign("ERROR_FIELD",$pImap->errMsg);
     }else{
         $smarty->assign('MAILBOX_FOLDER_LIST',$listMailbox);
     }
     
-    //obtenemos el numero de 
-    $emailnum = $pImap->readMailbox();
+    $view_filter_opt['all']=_tr("All");
+    $view_filter_opt['seen']=_tr("Seen");
+    $view_filter_opt['unseen']=_tr("Unseen");
+    $view_filter_opt['flagged']=_tr("Important");
+    $view_filter_opt['unflagged']=_tr("No Important");
+    $smarty->assign("ELX_MAIL_FILTER_OPT",$view_filter_opt);
     
-    //imap_clearflag_full($inbox,"1,2,3,4","\\Seen");
-    if($emailnum) {
-        foreach($emailnum as $email_number) {    
-            $overview= imap_fetch_overview($pImap->getConnection(),$email_number,0);
-            $tmp_str= substr($overview[0]->date,0,17);
-            $mails[]= array("from" => $overview[0]->from,
-                            "subject" => $overview[0]->subject,
-                            "date"=> $tmp_str,
-                            "UID"=>$email_number,
-                            "status"=>$overview[0]->seen);
+    $filter_view='all';
+    $tmp_filter_view=getParameter('email_filter1');
+    if(array_key_exists($tmp_filter_view,$view_filter_opt)){
+        $filter_view=$tmp_filter_view;
+    }
+    $arrFilter=array("filter_view"=>$filter_view);
+    
+    //obtenemos el numero de correos que ahi en el buzon
+    //filtrando por los parámetros dados
+    $listUID=array();
+    $total = $pImap->getNumMails($arrFilter,$listUID);
+    if($total===false){
+        $total=0;
+        $jsonObject->set_error($pImap->errMsg);
+        $smarty->assign("ERROR_FIELD",$pImap->errMsg);
+    }
+    
+    $limit=50;
+    //sacamos calculamos el offset
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+    $url['menu']=$module_name;
+    $url['email_filter1']=$filter_view;
+    
+    $oGrid->setTitle(_tr('Contacts List'));
+    $oGrid->setURL($url);
+    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
+    $oGrid->setEnd($end);
+    $oGrid->setTotal($total);
+    
+    $arrData=array();
+    if($total!=0){
+        $pImap->setMessageByPage($limit);
+        $pImap->setOffset($offset);
+        $emails = $pImap->readMails($listUID);
+        if($emails!==false){
+            foreach($emails as $email){
+                $tmp=array();
+                $class='elx_unseen_email';
+                if($email['SEEN']==1){
+                    $class='elx_seen_email';
+                }
+                $tmp[]="<div class='elx_row $class' id={$email['UID']}>";
+                $tmp[]="<div class='sel'><input type='checkbox' value='{$email['UID']}' class='inp1 checkmail'/></div>";
+                $tmp[]="<div class='ic'>";
+                $tmp[]="<div class='icon'><img border='0' src='web/apps/home/images/mail2.png' class='icn_buz'></div>";
+                $class='elx_unflagged_email';
+                if($email['FLAGGED']==1){
+                    $class='elx_flagged_email';
+                }
+                $tmp[]="<div class='star'><span class='st $class'>e</span></div>";
+                $tmp[]="</div>";
+                $tmp[]="<div class='from  elx_row_email_msg' <span>".htmlentities($email['from'],ENT_COMPAT,'UTF-8')."</span></div>";
+                $tmp[]="<div class='subject elx_row_email_msg'> <span>".htmlentities($email['subject'],ENT_COMPAT,'UTF-8')."</span></div>";
+                $tmp[]="<div class='date elx_row_email_msg'><span>".$email['date']."</span></div>";
+                $tmp[]="</div>";
+                $arrData[]=$tmp;
+            }
+            $smarty->assign("MAILS",$arrData);
+        }else{
+            $jsonObject->set_error($pImap->errMsg);
+            $smarty->assign("ERROR_FIELD",$pImap->errMsg);
         }
-        $mails_final = array_reverse($mails);
-        $smarty->assign("MAILS",$mails_final);
     }
 
     $pImap->close_mail_connection();
+    $listMailbox=array_diff($listMailbox,array($pImap->getMailBox()));
+    $move_folder=array();
+    foreach($listMailbox as $value){
+        $move_folder[$value]=$value;
+    }
+    $smarty->assign("MOVE_FOLDERS",$move_folder);
+    
+    if($action=='show_messages_folder'){
+        $message['email_content']=$arrData;
+        $message['email_filter1']=$filter_view;
+        $message['move_folders']=$move_folder;
+        $jsonObject->set_message($message);
+        return $jsonObject->createJSON();
+    }
+    
+    
     $smarty->assign("ICON_TYPE", "web/apps/$module_name/images/mail2.png");
    
-    $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m"><span class="lp ml10 glyphicon glyphicon-envelope"></span></div>
-    <div class="icn_m"><span class="lp ml10 glyphicon glyphicon-refresh"></span></div>  
-    <div class="icn_m"><span class="lp ml10 glyphicon glyphicon-trash"></span></div> 
+    $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m" id="email_new"><span class="lp ml10 glyphicon glyphicon-envelope"></span></div>
+    <div class="icn_m" id="email_refresh"><span class="lp ml10 glyphicon glyphicon-refresh"></span></div>  
+    <div class="icn_m" id="email_trash"><span class="lp ml10 glyphicon glyphicon-trash"></span></div> 
     <div class="icn_m" id="filter_but"><span class="lp ml10 glyphicon glyphicon-search"></span></div>');
+    
+    $mark_opt['seen']=_tr("Seen");
+    $mark_opt['unseen']=_tr("Unseen");
+    $mark_opt['flagged']=_tr("Important");
+    $mark_opt['unflagged']=_tr("No Important");
+    $smarty->assign("ELX_MAIL_MARK_OPT",$mark_opt);
+    $smarty->assign("MOVE_TO",_tr("Move to"));
+    $smarty->assign("MARK_AS","Mark message as");
+    
+    $smarty->assign("NO_EMAIL_MSG",_tr("There is not message"));
+    $smarty->assign("VIEW",_tr("View"));
+    $smarty->assign("SELECTED_VIEW_FILTER",$filter_view);
+    
     $html = $smarty->fetch("file:$local_templates_dir/form.tpl");
     $contenidoModulo = "<div>".$html."</div>";
     return $contenidoModulo;
 }
-function view_mail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,$inbox)
+function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
 {
-   $jsonObject = new PaloSantoJSON();
-   $idMail=getParameter("idMail");
-   $body=imap_qprint(imap_body($inbox,$idMail));
-   $jsonObject->set_message($body);
+    $jsonObject = new PaloSantoJSON();
    
-   return $jsonObject->createJSON();
+    $mailbox=getParameter('folder');
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    $uid=getParameter("uid");
+    if(is_null($uid) || $uid=='' || $uid===false){
+        $jsonObject->set_error('Invalid Email Message');
+        return $jsonObject->createJSON();
+    }
+    
+    $body=$pImap->readEmailMsg($uid);
+    $jsonObject->set_message($body);
+    
+    return $jsonObject->createJSON();
+}
+function moveMsgsToFolder($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap){
+    $jsonObject = new PaloSantoJSON();
+   
+    //current mailbox
+    $mailbox=getParameter('current_folder');
+    
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    //lista de UIDs de mensajes a mover
+    $lisUIDs=getParameter('UIDs');
+    if(empty($lisUIDs)){
+        $jsonObject->set_error(_tr("At_least_one"));
+        return $jsonObject->createJSON();
+    }
+    
+    $arrUID=array_diff(explode(",",$lisUIDs),array(''));
+    if(!is_array($arrUID) || count($arrUID)==0){
+        $jsonObject->set_error(_tr("At_least_one"));
+        return $jsonObject->createJSON();
+    }
+    
+    //carpetas a la que queremos mover los mensajes seleccionados
+    $new_folder=getParameter('new_folder');
+    
+    if(!$pImap->moveMsgToFolder($mailbox,$new_folder,$arrUID)){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }else{
+        $jsonObject->set_message(_tr("Success_mv"));
+        return $jsonObject->createJSON();
+    }
+}
+function markMsgAs($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap){
+    $jsonObject = new PaloSantoJSON();
+   
+    //current mailbox
+    $mailbox=getParameter('current_folder');
+    
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    //lista de UIDs de mensajes a mover
+    $lisUIDs=getParameter('UIDs');
+    if(empty($lisUIDs)){
+        $jsonObject->set_error(_tr("At_least_one"));
+        return $jsonObject->createJSON();
+    }
+    
+    $arrUID=array_diff(explode(",",$lisUIDs),array(''));
+    if(!is_array($arrUID) || count($arrUID)==0){
+        $jsonObject->set_error(_tr("At_least_one"));
+        return $jsonObject->createJSON();
+    }
+    
+    //carpetas a la que queremos mover los mensajes seleccionados
+    $tag=getParameter('tag');
+    
+    if(!$pImap->markMsgFolder($tag,$arrUID)){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }else{
+        $jsonObject->set_message(_tr("Success_tag"));
+        return $jsonObject->createJSON();
+    }
+}
+function deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $pImap){
+    $jsonObject = new PaloSantoJSON();
+       
+    //creamos la connección al mailbox
+    $pImap->setMailbox("Trash");
+
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    //lista de UIDs de mensajes a mover
+    $lisUIDs=getParameter('UIDs');
+    if(empty($lisUIDs)){
+        $jsonObject->set_error(_tr("At_least_one"));
+        return $jsonObject->createJSON();
+    }
+    
+    $arrUID=array_diff(explode(",",$lisUIDs),array(''));
+    if(!is_array($arrUID) || count($arrUID)==0){
+        $jsonObject->set_error(_tr("At_least_one"));
+        return $jsonObject->createJSON();
+    }
+    
+    if(!$pImap->deleteMsgTrash($arrUID)){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }else{
+        $jsonObject->set_message(_tr("Success_del"));
+        return $jsonObject->createJSON();
+    }
 }
 function getAction()
 {
     if(getParameter("action")=="view_bodymail"){
       return "view_bodymail";  
+    }elseif(getParameter("action")=="mv_msg_to_folder"){
+      return "mv_msg_to_folder";  
+    }elseif(getParameter("action")=="mark_msg_as"){
+      return "mark_msg_as";  
+    }elseif(getParameter("action")=="delete_msg_trash"){
+      return "delete_msg_trash";  
     }else
       return "report";
 }

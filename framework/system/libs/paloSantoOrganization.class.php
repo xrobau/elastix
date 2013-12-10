@@ -1462,7 +1462,7 @@ class paloSantoOrganization{
                             $devId=$pACL->getUserProp($idUser,"dev_id");
                             if($transaction) $this->_DB->rollBack();
                             $pDevice->deleteAstDBExt($extension,"sip");
-                            $pFax->deleteFax($devId);
+                            $pFax->deleteFaxConfiguration($devId);
                         }
                     }else{
                         $error=_tr("Error trying create new fax").$pFax->errMsg;
@@ -1943,9 +1943,9 @@ class paloSantoOrganization{
         //tomamos un backup de las extensiones que se van a eliminar de la base astDB por si algo sale mal
         //y ahi que restaurar la extension
         $arrExt=$pDevice->backupAstDBEXT($arrUser[0][5]);
-        if($pACL->deleteUser($idUser)){
-            if($pDevice->deleteExtension($arrUser[0][5])){
-                if($pFax->deleteFaxByUser($idUser)){
+        if($pDevice->deleteExtension($arrUser[0][5])){
+            if($pFax->deleteFaxByUser($idUser)){
+                if($pACL->deleteUser($idUser)){
                     if($pEmail->deleteAccount($arrUser[0][1])){
                         $Exito=true;
                         $this->_DB->commit();
@@ -1953,24 +1953,26 @@ class paloSantoOrganization{
                         $pDevice->tecnologia->prunePeer($arrFaxExten["device"],$arrFaxExten["tech"]);
                         $pFax->restartService();
                     }else{
-                        $pDevice->restoreBackupAstDBEXT($arrExt);
-                        $this->_DB->rollBack();
-                        $pFax->createFaxFileConfig($arrFaxExten['dev_id'],$getDomain[0]);
                         $this->errMsg=_tr("Email Account cannot be deleted").$pEmail->errMsg;
+                        $this->_DB->rollBack();
+                        $pDevice->restoreBackupAstDBEXT($arrExt);
+                        $pFax->createFaxFileConfig($arrFaxExten['dev_id'],$getDomain[0]);
                     }
                 }else{
-                    $this->errMsg=_tr("Fax cannot be deleted").$pFax->errMsg;
-                    $pDevice->restoreBackupAstDBEXT($arrExt);
+                    $this->errMsg=$pACL->errMsg;
                     $this->_DB->rollBack();
+                    $pDevice->restoreBackupAstDBEXT($arrExt);
+                    $pFax->createFaxFileConfig($arrFaxExten['dev_id'],$getDomain[0]);
                 }
             }else{
-                $this->errMsg=_tr("User Extension can't be deleted").$pDevice->errMsg;
-                $pDevice->restoreBackupAstDBEXT($arrExt);
+                $this->errMsg=_tr("Fax cannot be deleted").$pFax->errMsg;
                 $this->_DB->rollBack();
+                $pDevice->restoreBackupAstDBEXT($arrExt);
             }
         }else{
-            $this->errMsg=$pACL->errMsg;
+            $this->errMsg=_tr("User Extension can't be deleted").$pDevice->errMsg;
             $this->_DB->rollBack();
+            $pDevice->restoreBackupAstDBEXT($arrExt);
         }
         return $Exito;
     }

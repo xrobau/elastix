@@ -1,4 +1,7 @@
 /* Basic Styles */
+.oculto{
+    display:none;
+}
 .icn_m{
     display:inline-block;
     font-size:18pt;
@@ -14,41 +17,58 @@
     position:relative;
 }
 #filterdiv{
-    background-color: rgb(229, 229, 229);
     display:none;
-    float:left;
-    width:100%;
     height:50px;
-    border-bottom: 2px solid rgba(110,0,0,1);
+    border-bottom: #dd271d;
 }
 #paneldiv{
-    position: absolute;
+    position:relative;
+    height: auto;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 1;
-    overflow: hidden;
+}
+#list_folders{
+    position:absolute;
+    z-index:100;
+}
+#display1{
+    position:absolute;
+    height:40px;
+    margin-left:0;
+    margin-top:0;
+    width:30px;
+    top: 0;
+}
+#icn_disp1{
+    background-color: #E8E8E8;
+    border-left:none;
+    height:40px;
+    float:left;
+    cursor:pointer;
+    width:30px;    
 }
 #leftdiv{
     background-color: #F3F3F3;
-    position: absolute;
     top: 0px;
     left: 0px;
     bottom: 0px;
-    z-index: 80;
     width: 140px;
     display: none;
     overflow-x:hidden!important;
     overflow-y:auto!important;
 }
 #centerdiv{
-    position:absolute;
+    position:relative;
     top:0;
     left:0;
     bottom:0;
     display:block;
-    overflow:hidden;
+}
+#paginationdiv{
+    margin-left:50px;
 }
 #b1_1{
     border-right: 1px solid rgb(204, 204, 204);			
@@ -93,35 +113,6 @@
     -o-border-bottom-left-radius:      10px;
     -webkit-border-bottom-left-radius: 10px;
 }
-#paginationdiv{
-    margin-left:0px;
-    height:50px;
-    margin-top:0px;
-    margin-right:0px;
-}
-#display1{
-    height:40px;
-    margin-left:0;
-    margin-top:5px;
-    width:30px;
-    float:left;			
-}
-#icn_disp1{
-    border: 1px solid rgb(204, 204, 204);
-    background-color: rgb(229, 229, 229);
-    border-left:none;
-    height:40px;
-    float:left;
-    cursor:pointer;
-    width:30px;			
-}
-#display2{
-    height:40px;
-    margin-left:0;
-    margin-top:5px;
-    width:30px;
-    float:right;
-}
 #filterform {  
     height: 38px;
     width:100%;
@@ -145,10 +136,10 @@
 #filterform input[type="search"]:focus {
     width:200px;
     background-color:#fff;
-    border-color:rgba(110,0,0,1);
-    -webkit-box-shadow:0 0 5px rgba(110,0,0,1);
-    -moz-box-shadow:0 0 5px rgba(110,0,0,1);
-    box-shadow:0 0 5px rgba(110,0,0,1);
+    border-color:#dd271d;
+    -webkit-box-shadow:0 0 5px #dd271d;
+    -moz-box-shadow:0 0 5px #dd271d;
+    box-shadow:0 0 5px #dd271d;
 }
 #filterform input[type="search"] {
     font-family: inherit;
@@ -159,17 +150,17 @@
 }
 .filter{
     border-style:solid;
-    border: 1px solid rgba(110,0,0,1);
+    border: 1px solid #dd271d;
     color:black;
     display: inline-block;
     margin-top:9px;
     float:left;
 }
 .filter:focus{
-    border-color:rgba(110,0,0,1);
-    -webkit-box-shadow:0 0 5px rgba(110,0,0,1);
-    -moz-box-shadow:0 0 5px rgba(110,0,0,1);
-    box-shadow:0 0 5px rgba(110,0,0,1);
+    border-color:#dd271d;
+    -webkit-box-shadow:0 0 5px #dd271d;
+    -moz-box-shadow:0 0 5px #dd271d;
+    box-shadow:0 0 5px #dd271d;
 }
 .filter1{
     margin-left:20%;
@@ -194,19 +185,25 @@
     width:100%;
     display:none;
 }
-#contentdiv{
+#email_contentdiv{
     margin-top:3px;
     float:left;
     width:100%;
     overflow-y: auto!important;
     border-top: 1px solid rgb(204, 204, 204);
-    /*height:505px;*/
 }
 #elx_mail_messages{
     float:left;
     width:100%;
     /*height: 510px;*/
     /*border-bottom: 1px solid rgb(204, 204, 204);*/
+}
+.elx_unseen_email{
+    font-weight:bold;
+    background-color:white;
+}
+.elx_seen_email{
+    background-color:#E8E8E8;
 }
 .elx_row{
     float:left;
@@ -218,39 +215,37 @@
     border-right:none;
     padding-left: 5px
 }
-.ic{
-    float:left;
-    width:15%;
-    height:27px;
-    border-right: 1px solid rgb(204, 204, 204);
-}
 .sel{
     float:left;
     width:30px;
     height:27px;
 }
+.ic{
+    float:left;
+    width:auto;
+    height:27px;
+    border-right: 1px solid rgb(204, 204, 204);
+}
 .icon{
     float:left;
     width:30px;
-    height:27px;
 }
 .star{
     float:left;
     width:30px;
-    height:27px;
     cursor:pointer;
 }
-.trash{
-    float:left;
-    width:30px;
-    height:27px;
-    cursor:pointer;
+.elx_flagged_email{
+    color:#ffe800!important;
+}
+.elx_unflagged_email{
+    color:grey!important;
 }
 .from{
     font-size:10pt;
     float:left;
     width:30%;
-    height:18px;
+    height:27px;
     padding: 5px 4px;
     text-align:left;
     cursor:pointer;
@@ -261,7 +256,7 @@
     border-left: 1px solid rgb(204, 204, 204);
     float:left;
     width:30%;
-    height:18px;
+    height:27px;
     padding: 5px 4px;
     text-align:left;
     cursor:pointer;
@@ -270,7 +265,7 @@
     font-size:10pt;
     float:left;
     width:15%;
-    height:18px;
+    height:27px;
     text-align:left;
     padding: 5px 4px;
     cursor:pointer;
@@ -296,6 +291,21 @@
 .st:hover{
     olor:rgba(110,0,0,1);	
 }
+.elx_email_pag_bar{
+    display:inline-block;
+}
+#elx_email_mv_wtag{
+    display:inline;
+}
+#elx_email_mv_itag{
+    display:none;
+}
+#elx_email_mark_wtag{
+    display:inline;
+}
+#elx_email_mark_itag{
+    display:none;
+}
 /*****************************************************/
 /*    Styles for screen 960px and lower             */
 /*****************************************************/
@@ -315,10 +325,6 @@
 }
 .star{
     float:left;
-}
-.trash{
-    float:right;
-    margin-right:25px;
 }
 .sel{
     position:relative;
@@ -389,7 +395,23 @@
 /*    Styles for screen 500px and lower             */
 /*****************************************************/
 @media only screen and (max-width : 500px) {
-
+    .elx_email_pag_btn > .btn > .glyphicon{
+        display: inline-block!important;
+        height: 18px!important;
+        width: 18px!important;
+    }
+    #elx_email_mv_wtag{
+        display:none;
+    }
+    #elx_email_mv_itag{
+        display:inline;
+    }
+    #elx_email_mark_wtag{
+        display:none;
+    }
+    #elx_email_mark_itag{
+        display:inline;
+    }
 }
 /*****************************************************/
 /*    Styles for screen 450px and lower             */
@@ -405,10 +427,6 @@
 }
 .elx_row{
     height:90px;
-}
-.trash{
-    float:left;
-    margin-right:0px;
 }
 .date{
     position:relative;

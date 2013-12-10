@@ -33,5 +33,16 @@ $arrLangModule=array(
 'Drafts'=>"Drafts",
 'Trash'=>'Trash',
 'Spam'=>'Spam',
+'View'=>'View',
+'Seen'=>'Seen',
+"Unseen"=>"Unseen",
+"Important"=>"Important",
+"No Important"=>"No Important",
+"There is not message"=>"There is not message",
+"All"=>"All",
+"At_least_one"=>"You must select at least one valid Message",
+"Success_mv"=>"Messages were moved successfully",
+"Dest_mail_inv"=>"Destination mailbox is invalid",
+"Success_tag"=>"Messages were tagged successfully",
 );
 ?>

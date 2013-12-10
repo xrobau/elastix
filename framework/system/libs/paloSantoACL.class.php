@@ -417,8 +417,8 @@ class paloACL {
         $bExito = FALSE;
         if ($username == "") {
             $this->errMsg = _tr("Username can't be empty");
-        } elseif(!preg_match("/^[a-z0-9]+([_]?[a-z0-9]+[_]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/", $username)){
-            $this->errMsg = _tr("Username is not valid").tr("Permited characters are: letters a-z, numbers (0-9) and underscore");
+        } elseif(!preg_match("/^[[:alnum:]]+([_]?[[:alnum:]]+[_]?)*@[[:alnum:]]+([\._\-]?[[:alnum:]]+)*(\.[[:alnum:]]{2,4})+$/", $username)){
+            $this->errMsg = _tr("Username is not valid")._tr("Permited characters are: letters a-z, numbers (0-9) and underscore");
         }else{
             if ( !$name ) $name = $username;
             // Verificar que el nombre de usuario no existe previamente

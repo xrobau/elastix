@@ -33,5 +33,16 @@ $arrLangModule=array(
 'Drafts'=>"Borradores",
 'Trash'=>'Eliminados',
 'Spam'=>'Spam',
+'View'=>'Ver',
+'Seen'=>'Vistos',
+"Unseen"=>"No vistos",
+"Important"=>"Destacados",
+"No Important"=>"No Destacados",
+"There is not message"=>"No hay mensajes",
+"All"=>"Todos",
+"At_least_one"=>"Usted debe seleccionar al menos un mensaje válido",
+"Success_mv"=>"Los mensajes fueron movidos exitosamente",
+"Dest_mail_inv"=>"La casilla de destino es inválida",
+"Success_tag"=>"Los mensajes fueron marcados exitosamente",
 );
 ?>

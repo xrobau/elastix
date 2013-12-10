@@ -436,13 +436,14 @@ class paloFax {
     
     function deleteFaxByUser($idUser)
     {
+        $pACL=new paloACL($this->_DB);
         // 1) obtenemos los datos dle usuario para el cual se esta creando el fax
         //    comprobando de que este realmente exista
-        if(empty($arrProp['idUser'])){
+        if(empty($idUser)){
             $this->errMsg=_tr("Invalid User");
             return false;
         }
-        $arrUser=$pACL->getUsers2($arrProp['idUser']);
+        $arrUser=$pACL->getUsers2($idUser);
         if($arrUser===false){
             $this->errMsg=_tr("An error has occured when retrieved user data.");
             return false;
@@ -454,7 +455,7 @@ class paloFax {
         
         $domain=$this->getDomainOrganization($user["id_organization"]);
         //obtenemos el fax del usuario
-        $arrFax=$this->getFaxList(array('exten'=>$arrUser['fax_extension'],'organization_domain'=>$domain));
+        $arrFax=$this->getFaxList(array('exten'=>$user['fax_extension'],'organization_domain'=>$domain));
         if($arrFax==false){
             $this->errMsg=($arrFax===false)?'Error to retrieved fax from given user':'User does not have a fax';
             return false;
@@ -895,7 +896,7 @@ class paloFax {
     *
     * @return bool VERDADERO en caso de éxito, FALSO en error
     */
-    private function deleteFaxConfiguration($dev_id)
+    function deleteFaxConfiguration($dev_id)
     {
         $this->errMsg = '';
         $sComando = '/usr/bin/elastix-helper faxconfig delete '.escapeshellarg($dev_id).'  2>&1';

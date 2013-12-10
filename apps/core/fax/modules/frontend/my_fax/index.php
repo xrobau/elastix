@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
 //include elastix framework
-
+//include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoDB.class.php";
 include_once "libs/paloSantoJSON.class.php";

@@ -28,6 +28,14 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-
+"MF_faxextension" => "show your extension number",
+"MF_device" => "show your device code",
+"MF_status" => "show the currency status",
+"MF_cidname" => "show the CID name",
+"MF_cidnumber" => "show your CID number",
+"MF_countrycode" => "show the country code",
+"MF_areacode" => "show the area code",
+"MF_faxsubject" => "Defines the fax subject",
+"MF_faxcontent" => "Defines the fax content",
 );
 ?>

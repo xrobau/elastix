@@ -117,6 +117,6 @@ $arrLangModule=array(
 "No Schedule" => "Sin Horario",
 "--no music--" => "--no música--",
 "--no announcement--" => "--No anuncio--",
-
+"Click here to reload dialplan" => "Click aqui para recargar el plan de marcado",
 );
 ?>

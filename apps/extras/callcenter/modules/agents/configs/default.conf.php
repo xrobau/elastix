@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
-$arrConfig['module_name'] = 'userlist';
-$arrConfig['templates_dir'] = 'themes';
-$cadena_dsn = "mysql://asterisk:asterisk@localhost/call_center";
+$arrConfModule['module_name'] = 'userlist';
+$arrConfModule['templates_dir'] = 'themes';
+$arrConfModule['cadena_dsn'] = "mysql://asterisk:asterisk@localhost/call_center";
 ?>

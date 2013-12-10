@@ -38,12 +38,15 @@ function _moduleContent(&$smarty,$module_name)
 
     global $arrConf;
     
+    // Se fusiona la configuración del módulo con la configuración global
+    $arrConf = array_merge($arrConf, $arrConfModule);
+
     load_language_module($module_name);
 
     $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir = (isset($config['templates_dir']))?$config['templates_dir']:'themes';
-    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$config['theme'];
-    $relative_dir_rich_text = "modules/$module_name/".$templates_dir.'/'.$config['theme'];
+    $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
+    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $relative_dir_rich_text = "modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
     $smarty->assign("relative_dir_rich_text", $relative_dir_rich_text);
 
     // Conexión a la base de datos CallCenter

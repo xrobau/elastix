@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
-$arrConfig['module_name'] = 'login_logout';
-$arrConfig['templates_dir'] = 'themes';
-
+$arrConfModule['module_name'] = 'login_logout';
+$arrConfModule['templates_dir'] = 'themes';
+$arrConfModule['cadena_dsn'] = "mysql://asterisk:asterisk@localhost/call_center";
 ?>

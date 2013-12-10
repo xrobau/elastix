@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: default.conf.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
-$arrConfig['module_name'] = 'calls_per_hour';
-$arrConfig['templates_dir'] = 'themes';
-
+$arrConfModule['module_name'] = 'hold_time';
+$arrConfModule['templates_dir'] = 'themes';
+$arrConfModule['cadena_dsn'] = "mysql://asterisk:asterisk@localhost/call_center";
 ?>

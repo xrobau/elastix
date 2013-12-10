@@ -258,5 +258,6 @@ $arrLangModule=array(
 "Default" => "Predeterminado",
 "Busy" => "Ocupado",
 "No Message" => "No mensaje",
+"Click here to reload dialplan" => "Click aqui para recargar el plan de marcado",
 );
 ?>

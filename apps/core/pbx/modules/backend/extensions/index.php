@@ -1314,6 +1314,7 @@ function createSipForm(){
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "rtpholdtimeout" => array("LABEL"             => _tr("rtpholdtimeout"),
+                                                    "DESCRIPTION"            => _tr("RTP hold timeout"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
@@ -1450,7 +1451,7 @@ function createIaxForm(){
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                             "mohsuggest" => array("LABEL"             => _tr("mohsuggest"),
-                               
+                                                    "DESCRIPTION"            => _tr("suggest of music on hold"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),

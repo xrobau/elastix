@@ -249,7 +249,8 @@ function deleteAccountByDomain($opt)
         $accountList = $sthListAccounts->fetchAll(PDO::FETCH_ASSOC);
         $preparedSth = array();
         foreach ($accountList as $account) {
-            _internal_delete_account($cyr_conn, $account);
+            $cyr_conn->deletemb('user/'.$account['username']);
+            system('/usr/sbin/saslpasswd2 -d '.escapeshellarg($account['username']), $retval);
         }
     } catch (PDOException $e) {
         error_exit("ERR: failed to remove old domains - ".$e->getMessage()."\n");
@@ -359,7 +360,7 @@ function create_account($opt)
     if (is_null($sQuota)) {
         error_exit("ERR: --createaccount: no quota specified.\n");
     }
-    if (!preg_match('/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*$/', $sUsername)) {
+    if (!preg_match('/^[[:alnum:]]+([\._\-]?[[:alnum:]]+[_\-]?)*$/', $sUsername)) {
         error_exit("ERR: --createaccount: Wrong format for username $sUsername.\n");
     }
     if (!ctype_digit($sQuota)) {

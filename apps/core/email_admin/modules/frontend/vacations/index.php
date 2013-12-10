@@ -85,7 +85,7 @@ function showVacationSettings($smarty, $module_name, $local_templates_dir, &$pDB
     }
 
     if($my_vacation==false){
-        $smarty->assign("ERROR_FIELD",$pMyFax->getErrorMsg());
+        $smarty->assign("ERROR_FIELD",$pVacations->getErrorMsg());
     }elseif($my_vacation == "default-vacation") {
         $my_vacation=array();
         $my_vacation['FROM']= date('Y-m-d');

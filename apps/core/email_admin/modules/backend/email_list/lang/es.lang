@@ -93,5 +93,6 @@ $arrLangModule=array(
 "List Name" => "Nombre de la Lista",
 "Number of Members" => "Número de Miembros",
 "Actions" => "Acciones",
+
 );
 ?>

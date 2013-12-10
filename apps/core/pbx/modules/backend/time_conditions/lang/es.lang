@@ -59,5 +59,6 @@ $arrLangModule=array(
 "Time Condition Name" => "Nombre Condición de Tiempo",
 "--Select one--" => "Selecciona Uno",
 "- choose one -" => "Escoge Uno",
+"Selected Time Group doesn't exist" => "El grupo seleccionado no existe",
 );
 ?>

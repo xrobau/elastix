@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 11
+Release: 12
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -36,6 +36,8 @@ mv modules/ $RPM_BUILD_ROOT/var/www/html/
 mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
 mv setup/automatic_backup.php            $RPM_BUILD_ROOT/var/www/backup/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
+mv setup/rpms_availables		 $RPM_BUILD_ROOT/var/www/db/
+mv setup/verify_rpm			 $RPM_BUILD_ROOT/usr/bin/
 
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
 
@@ -124,12 +126,24 @@ fi
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /var/www/backup/automatic_backup.php
+/var/www/db/rpms_availables
 %defattr(755, root, root)
 /usr/sbin/switch_wanpipe_media
+/usr/bin/verify_rpm
 /usr/share/elastix/privileged/*
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Dec 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-12
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Dec 11 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: package -verify_rpm,rpms_availables,QueryRPMs.class.php,rpm.class.php: 
+  It was implemented a REST service that query the rpms of Elastix Family (addons
+  included) that are currently installed in the system.
+  SVN Rev[6274]
+
 * Thu Dec 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: filter out inactive repostories before checking for package
   availability and freshness.
@@ -171,9 +185,14 @@ fi
   additional Requires: php-magpierss.
   SVN Rev[5990]
 
+* Wed Aug 21 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Updated the transalation file es.lang of SystemResources
+  SVN Rev[5793]
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5791]
 
 * Wed Aug 21 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATED: Added support for transalating some words.

@@ -1014,13 +1014,13 @@ LISTA_EXTENSIONES;
     	}
     }
     
-    function leerEstadoCampania($sCallType, $iCampaignId)
+    function leerEstadoCampania($sCallType, $iCampaignId, $datetime_start = NULL)
     {
     	try {
     		$oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = ($sCallType == 'incomingqueue') 
-                ? $oECCP->getincomingqueuestatus($iCampaignId)
-                : $oECCP->getcampaignstatus($sCallType, $iCampaignId);
+                ? $oECCP->getincomingqueuestatus($iCampaignId, $datetime_start)
+                : $oECCP->getcampaignstatus($sCallType, $iCampaignId, $datetime_start);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to read campaign information').' - '.$this->_formatoErrorECCP($respuesta);
                 return NULL;

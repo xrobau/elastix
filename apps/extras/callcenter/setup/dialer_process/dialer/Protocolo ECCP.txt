@@ -1511,7 +1511,10 @@ llamadas activas que todavía no han sido asignadas a agentes.
 
 Atributos o argumentos:
 * campaign_type: Estilo de la campaña. Uno de los valores 'incoming','outgoing'
-* campaign_id: ID de la campaña. 
+* campaign_id: ID de la campaña.
+* datetime_start: Opcional. Si se especifica, las estadísticas que involucren
+  llamadas se calcularán sólo con las llamadas realizadas a partir de la fecha
+  indicada (yyyy-mm-dd)  
 
 Respuesta:
 * statuscount: elemento que contiene los siguientes atributos:
@@ -3143,6 +3146,9 @@ a la cola pero no fueron asignadas como pertenecientes a una campaña entrante.
 
 Atributos o argumentos:
 * queue: Número de la cola entrante
+* datetime_start: Opcional. Si se especifica, las estadísticas que involucren
+  llamadas se calcularán sólo con las llamadas realizadas a partir de la fecha
+  indicada (yyyy-mm-dd)  
 
 Respuesta:
 * statuscount: elemento que contiene los siguientes atributos:

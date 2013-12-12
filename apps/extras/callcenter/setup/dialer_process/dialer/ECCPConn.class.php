@@ -2092,13 +2092,22 @@ LISTA_EXTENSIONES;
             $sTipoCampania = (string)$comando->campaign_type;
         }
 
+        // Si hay fecha de inicio, verificar que sea correcta
+        $sFechaInicio = NULL;
+        if (isset($comando->datetime_start)) {
+            $sFechaInicio = (string)$comando->datetime_start;
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaInicio))
+                return $this->_generarRespuestaFallo(400, 'Bad request - invalid start date');
+        }
+        $sFechaInicio .= ' 00:00:00';
+
         // Leer resumen de llamadas completadas desde la base de datos
         switch ($sTipoCampania) {
         case 'outgoing':
-            $statusCampania_DB = $this->_leerResumenCampaniaSaliente($idCampania);
+            $statusCampania_DB = $this->_leerResumenCampaniaSaliente($idCampania, $sFechaInicio);
             break;
         case 'incoming':
-            $statusCampania_DB = $this->_leerResumenCampaniaEntrante($idCampania);
+            $statusCampania_DB = $this->_leerResumenCampaniaEntrante($idCampania, $sFechaInicio);
             break;
         default:
             return $this->_generarRespuestaFallo(400, 'Bad request');
@@ -2127,9 +2136,18 @@ LISTA_EXTENSIONES;
         if (!isset($comando->queue)) 
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sCola = (string)$comando->queue;
+
+        // Si hay fecha de inicio, verificar que sea correcta
+        $sFechaInicio = NULL;
+        if (isset($comando->datetime_start)) {
+            $sFechaInicio = (string)$comando->datetime_start;
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaInicio))
+                return $this->_generarRespuestaFallo(400, 'Bad request - invalid start date');
+        }
+        $sFechaInicio .= ' 00:00:00';
         
         // Leer resumen de llamadas completadas sin campaña desde la base de datos
-        $statusCampania_DB = $this->_leerResumenColaEntrante($sCola);
+        $statusCampania_DB = $this->_leerResumenColaEntrante($sCola, $sFechaInicio);
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_statusresponse = $xml_response->addChild('getincomingqueuestatus_response');
@@ -2248,10 +2266,12 @@ LISTA_EXTENSIONES;
      * para ser mostrada en la interfaz de monitoreo.
      *
      * @param   int     $idCampania     ID de la campaña a interrogar
+     * @param   string  $sFechaInicio   Si no es NULL, fecha inicial para llamadas
+     *                                  de campaña a considerar.
      *
      * @return  mixed   NULL en error, o información de la campaña
      */
-    private function _leerResumenCampaniaSaliente($idCampania)
+    private function _leerResumenCampaniaSaliente($idCampania, $sFechaInicio = NULL)
     {
         // Leer la información en el propio registro de la campaña
         $sPeticionSQL = <<<LEER_RESUMEN_CAMPANIA
@@ -2292,10 +2312,10 @@ LEER_RESUMEN_CAMPANIA;
         // Leer estadísticas de la campaña
         $sPeticionSQL = <<<LEER_STATS_CAMPANIA
 SELECT SUM(duration) AS total_sec, MAX(duration) AS max_duration FROM calls
-WHERE id_campaign = ? AND status = 'Success' AND end_time IS NOT NULL
+WHERE id_campaign = ? AND status = 'Success' AND ((? IS NULL) OR (start_time >= ?)) AND end_time IS NOT NULL
 LEER_STATS_CAMPANIA;
         $recordset = $this->_db->prepare($sPeticionSQL);
-        $recordset->execute(array($idCampania));
+        $recordset->execute(array($idCampania, $sFechaInicio, $sFechaInicio));
         $recordset->setFetchMode(PDO::FETCH_ASSOC);
         $tupla['stat'] = array();
         foreach ($recordset as $tuplaStat) {
@@ -2305,7 +2325,7 @@ LEER_STATS_CAMPANIA;
         return $tupla;
     }
 
-    private function _leerResumenCampaniaEntrante($idCampania)
+    private function _leerResumenCampaniaEntrante($idCampania, $sFechaInicio = NULL)
     {
         // Leer la información en el propio registro de la campaña
         $sPeticionSQL = <<<LEER_RESUMEN_CAMPANIA
@@ -2355,10 +2375,11 @@ LEER_RESUMEN_CAMPANIA;
         // Leer estadísticas de la campaña
         $sPeticionSQL = <<<LEER_STATS_CAMPANIA
 SELECT SUM(duration) AS total_sec, MAX(duration) AS max_duration FROM call_entry
-WHERE id_campaign = ? AND status = 'terminada' and datetime_end IS NOT NULL
+WHERE id_campaign = ? AND status = 'terminada'
+    AND ((? IS NULL) OR (datetime_init >= ?)) AND datetime_end IS NOT NULL
 LEER_STATS_CAMPANIA;
         $recordset = $this->_db->prepare($sPeticionSQL);
-        $recordset->execute(array($idCampania));
+        $recordset->execute(array($idCampania, $sFechaInicio, $sFechaInicio));
         $recordset->setFetchMode(PDO::FETCH_ASSOC);
         $tupla['stat'] = array();
         foreach ($recordset as $tuplaStat) {
@@ -2368,7 +2389,7 @@ LEER_STATS_CAMPANIA;
         return $tupla;
     }
 
-    private function _leerResumenColaEntrante($sCola)
+    private function _leerResumenColaEntrante($sCola, $sFechaInicio = NULL)
     {
         $tupla['queue'] = $sCola;
 
@@ -2378,9 +2399,10 @@ LEER_STATS_CAMPANIA;
             'WHERE call_entry.id_campaign IS NULL '.
                 'AND call_entry.id_queue_call_entry = queue_call_entry.id '.
                 'AND queue_call_entry.queue = ? '.
+                'AND ((? IS NULL) OR (call_entry.datetime_init >= ?)) '.
             'GROUP BY status';
         $recordset = $this->_db->prepare($sPeticionSQL);
-        $recordset->execute(array($sCola));
+        $recordset->execute(array($sCola, $sFechaInicio, $sFechaInicio));
         $recordset->setFetchMode(PDO::FETCH_ASSOC);
         $tupla['status'] = array(
             //'Pending'   =>  0,  // Llamada no ha sido realizada todavía
@@ -2416,9 +2438,10 @@ FROM call_entry, queue_call_entry
 WHERE id_campaign IS NULL AND id_queue_call_entry = queue_call_entry.id
     AND queue_call_entry.queue = ? AND status = 'terminada'
     AND datetime_end IS NOT NULL
+    AND ((? IS NULL) OR (datetime_init >= ?))
 LEER_STATS_CAMPANIA;
         $recordset = $this->_db->prepare($sPeticionSQL);
-        $recordset->execute(array($sCola));
+        $recordset->execute(array($sCola, $sFechaInicio, $sFechaInicio));
         $recordset->setFetchMode(PDO::FETCH_ASSOC);
         $tupla['stat'] = array();
         foreach ($recordset as $tuplaStat) {

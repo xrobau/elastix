@@ -438,12 +438,14 @@ class ECCP
         return $xml_response->atxfercall_response;
     }
 
-    public function getcampaignstatus($campaign_type, $campaign_id)
+    public function getcampaignstatus($campaign_type, $campaign_id, $datetime_start = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
         $xml_cmdRequest = $xml_request->addChild('getcampaignstatus');
         $xml_cmdRequest->addChild('campaign_type', str_replace('&', '&amp;', $campaign_type));
         $xml_cmdRequest->addChild('campaign_id', str_replace('&', '&amp;', $campaign_id));
+        if (!is_null($datetime_start))
+            $xml_cmdRequest->addChild('datetime_start', str_replace('&', '&amp;', $datetime_start));
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getcampaignstatus_response;
     }
@@ -602,11 +604,13 @@ class ECCP
         return $xml_response->callprogress_response;
     } 
 
-    public function getincomingqueuestatus($queue)
+    public function getincomingqueuestatus($queue, $datetime_start = NULL)
     {
         $xml_request = new SimpleXMLElement('<request />');
         $xml_cmdRequest = $xml_request->addChild('getincomingqueuestatus');
         $xml_cmdRequest->addChild('queue', str_replace('&', '&amp;', $queue));
+        if (!is_null($datetime_start))
+            $xml_cmdRequest->addChild('datetime_start', str_replace('&', '&amp;', $datetime_start));
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getincomingqueuestatus_response;
     }

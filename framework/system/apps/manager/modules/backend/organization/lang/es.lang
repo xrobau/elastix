@@ -125,6 +125,7 @@ $arrLangModule=array(
 "Organization DID" => "DID Organizacion",
 "--Select a Country--" => "Selecciona un pais",
 "--Select a City--" => "Selecciona una ciudad",
+"To admin the new organization login to elastix as admin@" => "Para poder administrar la nueva organizacion debes autenticarte en elastix como admin@",
 
 );
 ?>

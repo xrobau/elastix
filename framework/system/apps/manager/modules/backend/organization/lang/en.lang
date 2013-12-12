@@ -40,6 +40,7 @@ $arrLangModule=array(
 "You must select a country" => "You must select a country. ",
 "The organization was created successfully" => "The organization was created successfully. ",
 "The organization was edit successfully" => "The organization was edit successfully. ",
+"To admin the new organization login to elastix as admin@" => "To admin the new organization login to elastix as admin@",
 "Don't extension associated" => "Don't extension associated",
 "Don't fax extension associated" => "Don't fax extension associated",
 "Extension / fax extension" => "Extension / fax extension",

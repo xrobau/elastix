@@ -518,7 +518,7 @@ function saveNewOrganization($smarty, $module_name, $local_templates_dir, &$pDB,
         $exito=$pOrganization->createOrganization($name,$domain,$country,$state,$address,$country_code,$area_code,$quota,$email_contact,$num_user,$num_exten,$num_queues,$admin_password);
         if($exito!==false){
             $smarty->assign("mb_title", _tr("Message"));
-            $smarty->assign("mb_message", _tr("The organization was created successfully")."<br />"._tr("To admin the new organization login to elastix as admin@$domain").$pOrganization->errMsg);
+            $smarty->assign("mb_message", _tr("The organization was created successfully")."<br />"._tr("To admin the new organization login to elastix as admin@").$domain.$pOrganization->errMsg);
             return reportOrganization($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
         }else{
             $smarty->assign("mb_title", _tr("Error"));

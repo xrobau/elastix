@@ -66,7 +66,7 @@ class paloImap {
     }
     
     public function setMailbox($mailbox){
-        $this->mailbox=$mailbox;
+        $this->mailbox=(!isset($mailbox) || $mailbox=='' || $mailbox===false)?'INBOX':$mailbox;
     }
     
     public function getMailbox(){
@@ -130,7 +130,7 @@ class paloImap {
         $this->imap_ref = "{".$this->host.":".$this->port."/imap/novalidate-cert}";
         
         //el nombre dle buzon que se vaya a leer debe tener 
-        $this->mailbox=empty($this->mailbox)?'INBOX':$this->mailbox;
+        $this->mailbox=(!isset($this->mailbox) || $this->mailbox=='' || $this->mailbox===false)?'INBOX':$this->mailbox;
         
         $str_connection=$this->imap_ref.imap_utf7_encode($this->mailbox);
         
@@ -375,20 +375,34 @@ class paloImap {
     }
     
     function deleteMsgTrash($listUID){
-        
+        if(is_array($listUID) && count($listUID)>0){
+            //marcamos los mensajes para borrar
+            if(!$this->flagMsg('deleted',$listUID)){
+                return false;
+            }
+            
+            //eliminamos los mensajes definitivamente del buzon
+            imap_expunge($this->getConnection()); 
+            return true;
+        }else{
+            $this->errMsg=_tr("At_least_one");
+            return false;
+        }
     }
     
     function readEmailMsg($uid){
-        $body=imap_qprint(imap_body($this->getConnection(),$uid));
-        return $body;
-    }
-    
-    private function parseHeaderEmail(){
+        $message=array();
+        //primero leemos la cabecera del mensaje
         
-    }
-    
-    private function parseBodyEmail(){
-    
+        
+        //leemos el mensaje en si
+        $pMessage=new paloImapMessage($this->connection,$uid);
+        $pMessage->imapReadMesg();
+        
+        $message['attachment']=$pMessage->getAttachments();
+        $message['body']=$pMessage->getInline_Parts();
+        
+        return $message;
     }
 }
 
@@ -396,74 +410,279 @@ class paloImapHeader{
     
 }
 
-class paloImalMessage{
+/**
+    stdClass Object
+    (
+    [type] => 1
+    [encoding] => 0
+    [ifsubtype] => 1
+    [subtype] => MIXED
+    [ifdescription] => 0
+    [ifid] => 0
+    [ifdisposition] => 0
+    [ifdparameters] => 0
+    [ifparameters] => 1
+    [parameters] => Array
+        (
+        [0] => stdClass Object
+            (
+                [attribute] => BOUNDARY
+                [value] => bcaec54b516462cef304c7e9d5c3
+            )
+        )
+    [parts] => Array
+        (
+        [0] => stdClass Object
+            (
+            [type] => 1
+            [encoding] => 0
+            [ifsubtype] => 1
+            [subtype] => ALTERNATIVE
+            [ifdescription] => 0
+            [ifid] => 0
+            [ifdisposition] => 0
+            [ifdparameters] => 0
+            [ifparameters] => 1
+            [parameters] => Array
+                (
+                [0] => stdClass Object
+                    (
+                    [attribute] => BOUNDARY
+                    [value] => bcaec54b516462ceeb04c7e9d5c1
+                    )
+                )
+            [parts] => Array
+                (
+                [0] => stdClass Object
+                    (
+                    [type] => 0
+                    [encoding] => 0
+                    [ifsubtype] => 1
+                    [subtype] => PLAIN
+                    [ifdescription] => 0
+                    [ifid] => 0
+                    [lines] => 1
+                    [bytes] => 2
+                    [ifdisposition] => 0
+                    [ifdparameters] => 0
+                    [ifparameters] => 1
+                    [parameters] => Array
+                        (
+                        [0] => stdClass Object
+                            (
+                            [attribute] => CHARSET
+                            [value] => ISO-8859-1
+                            )
+                        )
+                    )
+                [1] => stdClass Object
+                    (
+                    [type] => 0
+                    [encoding] => 0
+                    [ifsubtype] => 1
+                    [subtype] => HTML
+                    [ifdescription] => 0
+                    [ifid] => 0
+                    [lines] => 1
+                    [bytes] => 6
+                    [ifdisposition] => 0
+                    [ifdparameters] => 0
+                    [ifparameters] => 1
+                    [parameters] => Array
+                        (
+                        [0] => stdClass Object
+                            (
+                            [attribute] => CHARSET
+                            [value] => ISO-8859-1
+                            )
+                        )
+                    )
+                )
+            )
+        [1] => stdClass Object
+            (
+            [type] => 3
+            [encoding] => 3
+            [ifsubtype] => 1
+            [subtype] => ZIP
+            [ifdescription] => 0
+            [ifid] => 0
+            [bytes] => 115464
+            [ifdisposition] => 1
+            [disposition] => ATTACHMENT
+            [ifdparameters] => 1
+            [dparameters] => Array
+                (
+                [0] => stdClass Object
+                    (
+                    [attribute] => FILENAME
+                    [value] => weekly-reports.zip
+                    )
+                )
+            [ifparameters] => 1
+            [parameters] => Array
+                (
+                [0] => stdClass Object
+                    (
+                    [attribute] => NAME
+                    [value] => weekly-reports.zip
+                    )
+                )
+            )
+        )
+    )
+*/
+class paloImapMessage{
     private $app;
-    private $imap;
+    private $paloImap;
+    private $uid = null;
+    //private $headers;
+    private $structure;
+    private $attachments = array();
+    private $inline_parts = array();
+    private $mime_parts = array();
+    
+    /*
     private $opt = array();
     private $inline_parts = array();
     private $parse_alternative = false;
   
-    public $uid = null;
-    public $headers;
-    public $structure;
     public $parts = array();
     public $mime_parts = array();
-    public $attachments = array();
-    public $subject = '';
-    public $sender = null;
-    public $is_safe = false;
+    public $is_safe = false;*/
     
-    function getBody($uid, $imap) {
-        $body = get_part($imap, $uid, "TEXT/HTML");
-        // if HTML body is empty, try getting text body
-        if ($body == "") {
-            $body = get_part($imap, $uid, "TEXT/PLAIN");
-        }
-        return $body;
+    function paloImapMessage($imap,$uid){
+        $this->paloImap=$imap;
+        $this->uid=$uid;
     }
- 
-    function get_part($imap, $uid, $mimetype, $structure = false, $partNumber = false) {
-        if (!$structure) {
-            $structure = imap_fetchstructure($imap, $uid, FT_UID);
+    
+    function getAttachments(){
+        return $this->attachments;
+    }
+    
+    function getInline_Parts(){
+        return $this->inline_parts;
+    }
+    
+    function imapReadMesg(){
+        //get msg structure
+        $this->structure = imap_fetchstructure($this->paloImap, $this->uid, FT_UID);
+        
+        print_r($this->structure);
+        
+        if (!isset($this->structure->parts))  // simple
+            $this->getpart($this->structure,0);  // pass 0 as part-number
+        else {  // multipart: cycle through each part
+            foreach ($this->structure->parts as $partno0 => $p)
+                $this->getpart($p,$partno0+1);
         }
-        if ($structure) {
-            if ($mimetype == get_mime_type($structure)) {
-                if (!$partNumber) {
-                    $partNumber = 1;
-                }
-                $text = imap_fetchbody($imap, $uid, $partNumber, FT_UID);
-                switch ($structure->encoding) {
-                    case 3: return imap_base64($text);
-                    case 4: return imap_qprint($text);
-                    default: return $text;
+    }
+    
+    private function getpart($p,$partno) {
+        // $partno = '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
+        
+        // PARAMETERS
+        // get all parameters, like charset, filenames of attachments, etc.
+        $params = array();
+        if ($p->ifparameters)
+            foreach ($p->parameters as $x)
+                $params[strtolower($x->attribute)] = $x->value;
+        if ($p->ifdparameters)
+            foreach ($p->dparameters as $x)
+                $params[strtolower($x->attribute)] = $x->value;
+                
+        // ATTACHMENT
+        if ($p->ifdisposition){
+            if ($p->disposition == "ATTACHMENT") {
+                $attachmentDetails = array(
+                    "name"    => ($params['filename'])? $params['filename'] : $params['name'],
+                    "partNum" => $partno,
+                    "enc"     => $p->encoding
+                );
+                array_push($this->attachments,$attachmentDetails);
             }
         }
-    
-            // multipart 
-            if ($structure->type == 1) {
-                foreach ($structure->parts as $index => $subStruct) {
-                    $prefix = "";
-                    if ($partNumber) {
-                        $prefix = $partNumber . ".";
-                    }
-                    $data = get_part($imap, $uid, $mimetype, $subStruct, $prefix . ($index + 1));
-                    if ($data) {
-                        return $data;
-                    }
-                }
+        
+
+        // TEXT
+        if ($p->type==0) {
+            $data = $this->decodeData($p,$partno);
+            if($data){
+                // Messages may be split in different parts because of inline attachments,
+                // so append parts together with blank row.
+                if (strtolower($p->subtype)=='plain')
+                    $this->inline_parts[$partno]['plaintext'][]= trim($data);
+                else
+                    $this->inline_parts[$partno]['html'][]= array('data'=>$data,'charset'=>$params['charset']);
             }
         }
-        return false;
-    }
-    
-    function get_mime_type($structure) {
-        $primaryMimetype = array("TEXT", "MULTIPART", "MESSAGE", "APPLICATION", "AUDIO", "IMAGE", "VIDEO", "OTHER");
-    
-        if ($structure->subtype) {
-        return $primaryMimetype[(int)$structure->type] . "/" . $structure->subtype;
+
+        // EMBEDDED MESSAGE
+        // Many bounce notifications embed the original message as type 2,
+        // but AOL uses type 1 (multipart), which is not handled here.
+        // There are no PHP functions to parse embedded messages,
+        // so this just appends the raw source to the main message.
+        elseif ($p->type==2) {
+            $data = $this->decodeData($p,$partno);
+            if($data){
+                $this->inline_parts[$partno]['plaintext'][]= trim($data);
+            }
         }
-        return "TEXT/PLAIN";
+
+        // SUBPART RECURSION
+        if (isset($p->parts)) {
+            foreach ($p->parts as $partno0=>$p2)
+                $this->getpart($p2,$partno.'.'.($partno0+1));  // 1.2, 1.2.1, etc.
+        }
     }
+    
+    private function decodeData($p,$partno){
+        // DECODE DATA
+        $data = ($partno)?
+            imap_fetchbody($this->paloImap, $this->uid,$partno,FT_UID):  // multipart
+            imap_body($this->paloImap, $this->uid,FT_UID);  // simple
+        
+        // Any part may be encoded, even plain text messages, so check everything.
+        if ($p->encoding==4)
+            $data = quoted_printable_decode($data);
+        elseif ($p->encoding==3)
+            $data = base64_decode($data);
+            
+        return $data;
+    }
+    
+    /*
+    function downloadAttachment($imap, $uid, $partNum, $encoding, $path) {
+        $partStruct = imap_bodystruct($imap, imap_msgno($imap, $uid), $partNum);
+    
+        $filename = $partStruct->dparameters[0]->value;
+        $message = imap_fetchbody($imap, $uid, $partNum, FT_UID);
+    
+        switch ($encoding) {
+            case 0:
+            case 1:
+                $message = imap_8bit($message);
+                break;
+            case 2:
+                $message = imap_binary($message);
+                break;
+            case 3:
+                $message = imap_base64($message);
+                break;
+            case 4:
+                $message = quoted_printable_decode($message);
+                break;
+        }
+    
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=" . $filename);
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate");
+        header("Pragma: public");
+        echo $message;
+    }*/
 }
 
 

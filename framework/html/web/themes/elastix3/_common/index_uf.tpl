@@ -27,6 +27,10 @@
                         </div>
                     </div>
                 </div>
+                <div id="elx_msg_area" class="alert {if $MSG_ERROR_FIELD || $MSG_FIELD}elx_msg_visible {else} elx_msg_oculto{/if} alert-dismissable" style="text-align:center;margin:0;">
+                    <button type="button" class="elx-msg-area-close close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <p id="elx_msg_area_text" class='{if $MSG_ERROR_FIELD}alert-danger{else}alert-success{/if}'></p> 
+                </div>
                 <div id='module_content_framework'>
                     {$CONTENT}
                 </div>

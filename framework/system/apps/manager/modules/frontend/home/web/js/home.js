@@ -93,26 +93,17 @@ $(document).ready(function(){
         var UID=$(this).parent('.elx_row').attr('id');
         view_body(UID)
     });
+    //mark msg as important
+    $(this).on("click",".elx_unflagged_email",function(e){
+        var UID=$(this).parents('.elx_row').attr('id');
+        toggle_important('flagged',UID);
+    });
+    //mark msg as unimportant
+    $(this).on("click",".elx_flagged_email",function(e){
+        var UID=$(this).parents('.elx_row').attr('id');
+        toggle_important('unflagged',UID);
+    });
 });
-
-function view_body(UID){
-    var arrAction = new Array();
-    arrAction["menu"]="home";
-    arrAction["action"]="view_bodymail";
-    arrAction["uid"]=UID;
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-            function(arrData,statusResponse,error){
-                if(error!=""){
-                    alert(error);
-                }else{
-                    $("#elx_bodymail").html("<p>"+arrData+"</p>");
-                    elx_mail_messages.hide(10);
-                    $("#elx_bodymail").show(10);
-                    $('#'+UID).removeClass('elx_unseen_email').addClass('elx_seen_email');
-                }     
-        });
-}
 function show_email_msg(){
     showElastixUFStatusBar("Searching...");
     var arrAction = new Array();
@@ -256,6 +247,28 @@ function mark_email_msg_as(tag){
         });
     }
 }
+function toggle_important(tag,uid){
+    var arrAction = new Array();
+    arrAction["menu"]="home";
+    arrAction["action"]="toggle_important";
+    arrAction["folder"]=$("input[name='current_mailbox']").val();
+    arrAction["tag"]=tag;
+    arrAction["uid"]=uid;
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error!=""){
+                alert(error);
+            }else{
+                if(tag=='flagged'){
+                    $("#"+uid+" > div.ic > div.star > span").removeClass('elx_unflagged_email').addClass('elx_flagged_email');
+                }else{
+                    $("#"+uid+" > div.ic > div.star > span").removeClass('elx_flagged_email').addClass('elx_unflagged_email');
+                }
+                    
+            }     
+    });
+}
 function delete_msg_trash(){
     var listUIDs='';
     $('.checkmail:checked').each(function (e){
@@ -282,6 +295,24 @@ function delete_msg_trash(){
                 }     
         });
     }
+}
+function view_body(UID){
+    var arrAction = new Array();
+    arrAction["menu"]="home";
+    arrAction["action"]="view_bodymail";
+    arrAction["uid"]=UID;
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+            function(arrData,statusResponse,error){
+                if(error!=""){
+                    alert(error);
+                }else{
+                    //$("#elx_bodymail").html("<p>"+arrData['body']+"</p>");
+                    elx_mail_messages.hide(10);
+                    $("#elx_bodymail").show(10);
+                    $('#'+UID).removeClass('elx_unseen_email').addClass('elx_seen_email');
+                }     
+        });
 }
 
 

@@ -769,7 +769,12 @@ a.boxclose{
 #notify_change_elastix{
     display:none;
 }
-
+.elx_msg_visible{
+    display:inline;
+}
+.elx_msg_oculto{
+    display:none;
+}
 /*****************************************************/
 /*    Styles for screen 960px and lower             */
 /*****************************************************/

@@ -68,6 +68,9 @@ function _moduleContent(&$smarty, $module_name)
         case "delete_msg_trash":
             $content = deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
+        case "toggle_important":
+            $content = toogle_important_msg($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
         default:
             $content = reportMail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
@@ -86,11 +89,17 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     
     //creamos la connección al mailbox
     $pImap->setMailbox($mailbox);
+    $smarty->assign("CURRENT_MAILBOX",$pImap->getMailbox());
     
     $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
     if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-        $smarty->assign("ERROR_FIELD",$pImap->errMsg);
+        if($action=='show_messages_folder'){
+            $jsonObject->set_error($pImap->errMsg);
+            return $jsonObject->createJSON();
+        }else{
+            $smarty->assign("ERROR_FIELD",$pImap->errMsg);
+            return '';
+        }
     }
     
     $listMailbox=$pImap->getMailboxList();
@@ -192,7 +201,6 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         return $jsonObject->createJSON();
     }
     
-    
     $smarty->assign("ICON_TYPE", "web/apps/$module_name/images/mail2.png");
    
     $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m" id="email_new"><span class="lp ml10 glyphicon glyphicon-envelope"></span></div>
@@ -215,31 +223,6 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $html = $smarty->fetch("file:$local_templates_dir/form.tpl");
     $contenidoModulo = "<div>".$html."</div>";
     return $contenidoModulo;
-}
-function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
-{
-    $jsonObject = new PaloSantoJSON();
-   
-    $mailbox=getParameter('folder');
-    //creamos la connección al mailbox
-    $pImap->setMailbox($mailbox);
-
-    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
-    if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
-    }
-    
-    $uid=getParameter("uid");
-    if(is_null($uid) || $uid=='' || $uid===false){
-        $jsonObject->set_error('Invalid Email Message');
-        return $jsonObject->createJSON();
-    }
-    
-    $body=$pImap->readEmailMsg($uid);
-    $jsonObject->set_message($body);
-    
-    return $jsonObject->createJSON();
 }
 function moveMsgsToFolder($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
@@ -319,6 +302,45 @@ function markMsgAs($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
         return $jsonObject->createJSON();
     }
 }
+function toogle_important_msg($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $pImap){
+    $jsonObject = new PaloSantoJSON();
+   
+    //current mailbox
+    $mailbox=getParameter('current_folder');
+    
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    //uid del mensaje que vamos a marcar
+    $uid=getParameter("uid");
+    if(is_null($uid) || $uid=='' || $uid===false){
+        $jsonObject->set_error('Invalid Email Message');
+        return $jsonObject->createJSON();
+    }
+        
+    //como vamos a marcar el mensaje
+    $tag=getParameter('tag');
+    if($tag!='flagged' && $tag!='unflagged'){
+        $jsonObject->set_error('Invalid Action');
+        return $jsonObject->createJSON();
+    }
+    
+    $arrUID[]=$uid;
+    
+    if(!$pImap->markMsgFolder($tag,$arrUID)){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }else{
+        $jsonObject->set_message(_tr("Success_tag"));
+        return $jsonObject->createJSON();
+    }
+}
 function deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $pImap){
     $jsonObject = new PaloSantoJSON();
        
@@ -352,6 +374,34 @@ function deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrC
         return $jsonObject->createJSON();
     }
 }
+function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
+{
+    $jsonObject = new PaloSantoJSON();
+   
+    $mailbox=getParameter('folder');
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    $uid=getParameter("uid");
+    if(is_null($uid) || $uid=='' || $uid===false){
+        $jsonObject->set_error('Invalid Email Message');
+        return $jsonObject->createJSON();
+    }
+    
+    $result=$pImap->readEmailMsg($uid);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+    }else{
+        $jsonObject->set_message($result);
+    }
+    return $jsonObject->createJSON();
+}
 function getAction()
 {
     if(getParameter("action")=="view_bodymail"){
@@ -362,6 +412,8 @@ function getAction()
       return "mark_msg_as";  
     }elseif(getParameter("action")=="delete_msg_trash"){
       return "delete_msg_trash";  
+    }elseif(getParameter("action")=="toggle_important"){
+      return "toggle_important";  
     }else
       return "report";
 }

@@ -14,6 +14,10 @@ $(document).ready(function(){
         e.preventDefault();
         menu.slideToggle();
     });
+    
+    $(this).on('click','.elx-msg-area-close',function(e){
+        $("#elx_msg_area").slideUp();  
+    });
                             
     $(window).resize(function(){
         w = $(window).width();
@@ -28,13 +32,12 @@ $(document).ready(function(){
             $("#elx_chat_space").show(1);
         }else{
             if(rightdiv.is(':hidden') == false){ //esta abierto
-                tmpSize = w + 180;
-                main_content_div.css("width",tmpSize+"px"); 
                 $("#elx_chat_space").hide(1,function(){
                     $("#elx_chat_space").css("right","15px");
                 });
             }else
                 $("#elx_chat_space").css("right","15px");
+            main_content_div.css("width",w+"px"); 
         }
         
         adjustTabChatToWindow(w);
@@ -269,6 +272,15 @@ function showElastixUFStatusBar(msgbar){
 }
 function hideElastixUFStatusBar(){
     $("#notify_change_elastix").css('display','none');
+}
+function showElxUFMsgBar(status,msgbar){
+    if(status=='error'){
+        $("#elx_msg_area_text").removeClass("alert-success").addClass("alert-danger");
+    }else{
+        $("#elx_msg_area_text").removeClass("alert-danger").addClass("alert-success");
+    }
+    $("#elx_msg_area_text").html(msgbar);
+    $("#elx_msg_area").slideDown(); 
 }
 function getElastixContacts(){
     var hDiv=$('#rightdiv').height();
@@ -738,4 +750,79 @@ function adjustTabChatToWindow(elxw){
             }
         }
     }
+}
+
+
+function elxGridData(moduleName, action, arrFilter, page){
+    var currentNumPage=$("#elxGridNumPage").val();
+    
+    //validar si page es un numero
+    if(isNaN(page)){
+        page=1;
+    }else{
+        if (page % 1 != 0) {
+            page=1;
+        } 
+    }
+
+    
+    if(page>currentNumPage){
+        page=currentNumPage;
+    }
+    
+    var arrAction = new Array();
+    arrAction["menu"]=moduleName;
+    arrAction["action"]=action;
+    arrAction["page"]=page;
+    arrAction["nav"]='bypage';
+    
+    for( var x in arrFilter){   
+        arrAction[x]=arrFilter[x];
+    }
+    
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if (error != '' ){
+                $("#message_area").slideDown();
+                $("#msg-text").removeClass("alert-success").addClass("alert-danger");
+                $("#msg-text").html(error['stringError']);
+                // se recorre todos los elementos erroneos y se agrega la clase error (color rojo)
+            }else{
+                var content='';
+                var grid=arrData['content'];
+                for(var i=0;i<grid.length;i++){
+                    content+='<tr>';
+                    for(var j=0;j<grid[i].length;j++){
+                        content +="<td>"+grid[i][j]+"</td>";
+                    }
+                    content+='</tr>';
+                }
+                $("#elx_data_grid > table > tbody").html(content);
+                
+                var url=arrData['url'];
+                
+                var newUrl=url+"&exportcsv=yes&rawmode=yes"; 
+                
+                $("#exportcsv > a").attr('href', newUrl);
+                $("#exportspreadsheet > a").attr('href', newUrl);
+                $("#exportpdf > a").attr('href', newUrl);
+                
+                if(arrData['numPage']==0){
+                    arrData['numPage']=1;
+                    page=1;
+                }
+                
+                $("#elxGridNumPage").val(arrData['numPage']);
+                $("#elxGridCurrent").val(page);
+                
+                var options = {
+                    currentPage: page,
+                    totalPages: $("#elxGridNumPage").val(),
+                    }
+                
+                $('#elx_pager').bootstrapPaginator(options); 
+
+            }
+    });
 }

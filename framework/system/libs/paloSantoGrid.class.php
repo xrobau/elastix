@@ -36,6 +36,8 @@ class paloSantoGrid {
     private $limit;
     private $total;
     private $offset;
+    private $currentPage;
+    private $numPage;
     private $start;
     private $end;
     private $tplFile;
@@ -516,7 +518,19 @@ class paloSantoGrid {
         $this->calculatePagination();
         return $this->getOffsetValue();
     }
+    
+    function calculateCurrentPage()
+    {
+        $this->currentPage = ($this->limit==0 || $this->start==0)?0:(floor($this->start / $this->limit) + 1);
+        return $this->currentPage;
+    }
 
+    function calculateNumPage()
+    {
+        $this->numPage = ($this->limit==0)?0:ceil($this->total / $this->limit);
+        return $this->numPage;
+    }
+    
     function getOffSet($limit,$total,$accion,$start)
     {
         // Si se quiere avanzar a la sgte. pagina

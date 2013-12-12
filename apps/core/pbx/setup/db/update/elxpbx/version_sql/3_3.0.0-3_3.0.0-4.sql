@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `im` (
       `id_exten` int(20) DEFAULT NULL, 
       `organization_domain` varchar(100) NOT NULL,
       PRIMARY KEY (`id`),
-      FOREIGN KEY (device) REFERENCES sip(name),
+      FOREIGN KEY (device) REFERENCES sip(name) ON DELETE CASCADE,
       FOREIGN KEY (id_exten) REFERENCES extension(id) ON DELETE CASCADE,
       FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
       INDEX organization_domain (organization_domain)

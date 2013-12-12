@@ -97,6 +97,13 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Dec 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): add new optional parameter datetime_start to requests
+  getcampaignstatus and getincomingqueuestatus to allow specifying the start
+  date of calls belonging to the object. This is groundwork for rewriting the
+  Incoming Calls Monitoring report using ECCP.
+  SVN Rev[6278]
+
 * Tue Dec 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: CallCenter: Fix multiple modules to define their own DSN instead of
   relying on the definition in Elastix core. Fix Elastix bug #1795.

@@ -230,7 +230,7 @@ SCRIPT;
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	    return $result;
+	    return _tr($result);
     }
 
 

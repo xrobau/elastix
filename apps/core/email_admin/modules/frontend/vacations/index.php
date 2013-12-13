@@ -1,31 +1,31 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
-  +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                                |
-  | http://www.elastix.org                                               |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
-  +----------------------------------------------------------------------+
-  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
-  | Telfs. 2283-268, 2294-440, 2284-356                                  |
-  | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com                                             |
-  +----------------------------------------------------------------------+
-  | The contents of this file are subject to the General Public License  |
-  | (GPL) Version 2 (the "License"); you may not use this file except in |
-  | compliance with the License. You may obtain a copy of the License at |
-  | http://www.opensource.org/licenses/gpl-license.php                   |
-  |                                                                      |
-  | Software distributed under the License is distributed on an "AS IS"  |
-  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
-  | the License for the specific language governing rights and           |
-  | limitations under the License.                                       |
-  +----------------------------------------------------------------------+
-  | The Original Code is: Elastix Open Source.                           |
-  | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+Codificación: UTF-8
++----------------------------------------------------------------------+
+| Elastix version 1.4-1                                                |
+| http://www.elastix.org                                               |
++----------------------------------------------------------------------+
+| Copyright (c) 2006 Palosanto Solutions S. A.                         |
++----------------------------------------------------------------------+
+| Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+| Telfs. 2283-268, 2294-440, 2284-356                                  |
+| Guayaquil - Ecuador                                                  |
+| http://www.palosanto.com                                             |
++----------------------------------------------------------------------+
+| The contents of this file are subject to the General Public License  |
+| (GPL) Version 2 (the "License"); you may not use this file except in |
+| compliance with the License. You may obtain a copy of the License at |
+| http://www.opensource.org/licenses/gpl-license.php                   |
+|                                                                      |
+| Software distributed under the License is distributed on an "AS IS"  |
+| basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+| the License for the specific language governing rights and           |
+| limitations under the License.                                       |
++----------------------------------------------------------------------+
+| The Original Code is: Elastix Open Source.                           |
+| The Initial Developer of the Original Code is PaloSanto Solutions    |
++----------------------------------------------------------------------+
+$Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
 //include elastix framework
 
 include_once "libs/paloSantoForm.class.php";
@@ -38,7 +38,7 @@ function _moduleContent(&$smarty, $module_name)
 {
     //global variables
     global $arrConf;
-   
+
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
 
@@ -47,7 +47,7 @@ function _moduleContent(&$smarty, $module_name)
 
     //return array("idUser"=>$idUser,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
     global $arrCredentials;
-      
+    
     //actions
     $accion = getAction();
     
@@ -74,7 +74,7 @@ function showVacationSettings($smarty, $module_name, $local_templates_dir, &$pDB
     $statusSieve = $pVacations->verifySieveStatus();
     
     if(!$statusSieve['response']){
-        $smarty->assign("ERROR_FIELD",$statusSieve['message']);
+        $smarty->assign("MSG_ERROR_FIELD",$statusSieve['message']);
     }
 
 
@@ -85,7 +85,7 @@ function showVacationSettings($smarty, $module_name, $local_templates_dir, &$pDB
     }
 
     if($my_vacation==false){
-        $smarty->assign("ERROR_FIELD",$pVacations->getErrorMsg());
+        $smarty->assign("MSG_ERROR_FIELD",$pVacations->getErrorMsg());
     }elseif($my_vacation == "default-vacation") {
         $my_vacation=array();
         $my_vacation['FROM']= date('Y-m-d');
@@ -102,7 +102,7 @@ function showVacationSettings($smarty, $module_name, $local_templates_dir, &$pDB
     }
 
         
-    $smarty->assign("PERIOD_LABEL",_tr("Periodo:"));
+    $smarty->assign("PERIOD_LABEL",_tr("Period:"));
     $smarty->assign("STATUS_LABEL",_tr("Status:"));
     $smarty->assign("FAX_EMAIL_SETTINGS",_tr("Fax email settings"));
 
@@ -150,8 +150,8 @@ function saveVacationSettings($smarty, $module_name, $local_templates_dir, $pDB,
     $scripts = $objAntispam->existScriptSieve($email, "scriptTest.sieve");
     $spamCapture = false;// si CapturaSpam=OFF y Vacations=OFF
     if($scripts['actived'] != ""){// hay un script activo
-	    if(preg_match("/scriptTest.sieve/",$scripts['actived'])) // si CapturaSpam=ON y Vacations=OFF
-	        $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
+        if(preg_match("/scriptTest.sieve/",$scripts['actived'])) // si CapturaSpam=ON y Vacations=OFF
+            $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
     } 
 
     $pVacations->_DB->beginTransaction();
@@ -162,9 +162,9 @@ function saveVacationSettings($smarty, $module_name, $local_templates_dir, $pDB,
     }else{
         //mandamos a actualizar el script del sieve
         if($timeSince >= 0){
-	        $body = str_replace("{END_DATE}", $end_date, $body);
-	        $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture);
-	    }else    
+            $body = str_replace("{END_DATE}", $end_date, $body);
+            $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture);
+        }else    
             $result = true;
         if($result){
             $pVacations->_DB->commit();
@@ -179,42 +179,42 @@ function saveVacationSettings($smarty, $module_name, $local_templates_dir, $pDB,
 
 function createForm(){
     $arrForm = array("CID_NAME"        => array("LABEL"                  => _tr("CID NAME:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                                  "FROM"  => array("LABEL"               => _tr("From:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("id"=>"inputFrom", "class" => "form-control input-sm", "placeholder" => "yyyy-mm-dd"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                                "FROM"  => array("LABEL"               => _tr("From:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("id"=>"inputFrom", "class" => "form-control input-sm", "placeholder" => "yyyy-mm-dd"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
                                     "TO"  => array("LABEL"               => _tr("To:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("id"=>"inputTo", "class" => "form-control input-sm", "placeholder" => "yyyy-mm-dd"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                  "EMAIL_ADDRESS"   => array( "LABEL"                    => _tr("Email Addres:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-						    					"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Enter email"),
-												"VALIDATION_TYPE"        => "email",
-												"VALIDATION_EXTRA_PARAM" => ""),  
-                           "EMAIL_SUBJECT"  => array("LABEL"               => _tr("Email Subject:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Email Subject"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                           "EMAIL_CONTENT"  => array("LABEL"               => _tr("Email content:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXTAREA",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Email content"),
-												"VALIDATION_TYPE"        => "text",
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("id"=>"inputTo", "class" => "form-control input-sm", "placeholder" => "yyyy-mm-dd"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                "EMAIL_ADDRESS"   => array( "LABEL"                    => _tr("Email Addres:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Enter email"),
+                                                "VALIDATION_TYPE"        => "email",
+                                                "VALIDATION_EXTRA_PARAM" => ""),  
+                        "EMAIL_SUBJECT"  => array("LABEL"               => _tr("Email Subject:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Email Subject"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        "EMAIL_CONTENT"  => array("LABEL"               => _tr("Email content:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXTAREA",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Email content"),
+                                                "VALIDATION_TYPE"        => "text",
                                                 "ROWS"                   => "4",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "VALIDATION_EXTRA_PARAM" => ""),
 
     );
     return $arrForm;

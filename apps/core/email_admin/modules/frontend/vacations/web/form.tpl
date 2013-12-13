@@ -5,18 +5,6 @@
     
     <div class="my_settings">
 
-       {if $ERROR_FIELD}
-       <div id="initial_message_area" class="alert alert-dismissable" style="text-align:center;">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-           <p id="msg-text" class="alert-danger">{$ERROR_FIELD}</p> 
-       </div>
-       {else}
-       <div id="message_area" class="alert oculto alert-dismissable" style="text-align:center;">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-           <p id="msg-text"> </p> 
-       </div>
-       {/if}
-
        <div class="row">
             <div class="col-md-3"><button class="button btn btn-default btn-sm" type="button" name="save_new" onclick='saveVacation()'> <span class="glyphicon glyphicon-ok"></span> Enable vacation Message</div>
         </div>        

@@ -1,16 +1,6 @@
 var frmvalidator = null;
 $( document ).ready(function() {
 
-/* oculta el mensaje que aprece al cargar la pagina, siempre y cuando haya un error con el efecto slide*/
-    $(".close").click(function() {
-        $("#initial_message_area").slideUp();   
-        $("#message_area").slideUp();      
-    });
-
-    $(".close").click(function() {
-        $("#message_area").slideUp();      
-    });
-
 /* desabilitar el boton guardar si existe el error inicial*/   
     if( $('#initial_message_area').length )
     {
@@ -24,49 +14,49 @@ $( document ).ready(function() {
 /* js que funciona para los renge date */
 $(function() {
     $( "#inputFrom" ).datepicker({
-      dateFormat: 'yy-mm-dd',
-      minDate: 0,
-      onClose: function( selectedDate ) {
+    dateFormat: 'yy-mm-dd',
+    minDate: 0,
+    onClose: function( selectedDate ) {
         $( "#inputTo" ).datepicker( "option", "minDate", selectedDate );
-      }
+    }
     });
     $( "#inputTo" ).datepicker({
-      dateFormat: 'yy-mm-dd',
-      minDate: 0,
-      onClose: function( selectedDate ) {
+    dateFormat: 'yy-mm-dd',
+    minDate: 0,
+    onClose: function( selectedDate ) {
         $( "#inputFrom" ).datepicker( "option", "maxDate", selectedDate );
-      }
+    }
     });
 });
 
 
 /*calcular numero de dias de vacaciones cada vez que cambie los campos de fecha*/
     $(document).ready(function(){	    
-	        var cadenaFecha1 = $("#inputFrom").val();
-	        var cadenaFecha2 = $("#inputTo").val();
-	        var strDate1 = new Date(cadenaFecha1);
-	        var strDate2 = new Date(cadenaFecha2);
+            var cadenaFecha1 = $("#inputFrom").val();
+            var cadenaFecha2 = $("#inputTo").val();
+            var strDate1 = new Date(cadenaFecha1);
+            var strDate2 = new Date(cadenaFecha2);
 
-	        //Resta fechas y redondea
-	        var diferencia = strDate2.getTime() - strDate1.getTime();
-	        var dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-	        var segundos = Math.floor(diferencia / 1000);
-	        $('#num_days').text(" "+ dias + "  Days");
+            //Resta fechas y redondea
+            var diferencia = strDate2.getTime() - strDate1.getTime();
+            var dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            var segundos = Math.floor(diferencia / 1000);
+            $('#num_days').text(" "+ dias + "  Days");
     });
 
     $(document).ready(function(){
-	    $("input[id^='input']").change(function(){
-	        var cadenaFecha1 = $("#inputFrom").val();
-	        var cadenaFecha2 = $("#inputTo").val();
-	        var strDate1 = new Date(cadenaFecha1);
-	        var strDate2 = new Date(cadenaFecha2);
+        $("input[id^='input']").change(function(){
+            var cadenaFecha1 = $("#inputFrom").val();
+            var cadenaFecha2 = $("#inputTo").val();
+            var strDate1 = new Date(cadenaFecha1);
+            var strDate2 = new Date(cadenaFecha2);
 
-	        //Resta fechas y redondea
-	        var diferencia = strDate2.getTime() - strDate1.getTime();
-	        var dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-	        var segundos = Math.floor(diferencia / 1000);
-	        $('#num_days').text(" "+ dias + "  Days");
-	    });
+            //Resta fechas y redondea
+            var diferencia = strDate2.getTime() - strDate1.getTime();
+            var dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            var segundos = Math.floor(diferencia / 1000);
+            $('#num_days').text(" "+ dias + "  Days");
+        });
 
     });
 /*********************************************************************************/
@@ -89,9 +79,7 @@ function saveVacation(){
         function(arrData,statusResponse,error){
             hideElastixUFStatusBar();
             if (error != '' ){
-                $("#message_area").slideDown();
-                $("#msg-text").removeClass("alert-success").addClass("alert-danger");
-                $("#msg-text").html(error['stringError']);
+                showElxUFMsgBar('error',error['stringError']);
                 // se recorre todos los elementos erroneos y se agrega la clase error (color rojo)
                 $(".flag").removeClass("has-error");
                 $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
@@ -103,9 +91,7 @@ function saveVacation(){
                 //se elimina el borde rojo a los campos que estaban erroneos, y que hayan sido ingresados 
                 $(".flag").removeClass("has-error");
                 $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
-                $("#msg-text").removeClass("alert-danger").addClass("alert-success");
-                $("#msg-text").html(arrData);
-                $("#message_area").slideDown();
+                showElxUFMsgBar('success',arrData);
             }
     });
 }

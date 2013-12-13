@@ -1,17 +1,5 @@
 var frmvalidator = null;
-$( document ).ready(function() {
 
-/* oculta el mensaje que aprece al cargar la pagina, siempre y cuando haya un error con el efecto slide*/
-    $(".close").click(function() {
-        $("#initial_message_area").slideUp();   
-        $("#message_area").slideUp();      
-    });
-
-    $(".close").click(function() {
-        $("#message_area").slideUp();      
-    });
-    
-});
 
 function editFaxExten(){
     showElastixUFStatusBar("Saving...");
@@ -30,9 +18,7 @@ function editFaxExten(){
         function(arrData,statusResponse,error){
             hideElastixUFStatusBar();
             if (error != '' ){
-                $("#message_area").slideDown();
-                $("#msg-text").removeClass("alert-success").addClass("alert-danger");
-                $("#msg-text").html(error['stringError']);
+                showElxUFMsgBar('error',error['stringError']);
                 // se recorre todos los elementos erroneos y se agrega la clase error (color rojo)
                 $(".flag").removeClass("has-error");
                 $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
@@ -44,15 +30,15 @@ function editFaxExten(){
                 //se elimina el borde rojo a los campos que estaban erroneos, y que hayan sido ingresados 
                 $(".flag").removeClass("has-error");
                 $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
-                $("#msg-text").removeClass("alert-danger").addClass("alert-success");
-                $("#msg-text").html(arrData);
-                $("#message_area").slideDown();
+                showElxUFMsgBar('success',arrData);
             }
     });
 }
-
+$( document ).ready(function() {
 /*funcion que chequea constantemente el estado del fax*/
 checkFaxStatus();
+});
+
 function checkFaxStatus()
 {
     var arrAction        = new Array();
@@ -61,13 +47,13 @@ function checkFaxStatus()
     arrAction["rawmode"] = "yes";
 
     request("index.php",arrAction,true,
-            function(arrData,statusResponse,error)
-            {
-                if(statusResponse=="CHANGED"){
-                    $(".fax-status").html(arrData);
-                }
-                
-            });
+    function(arrData,statusResponse,error)
+    {
+        if(statusResponse=="CHANGED"){
+            $(".fax-status").html(arrData);
+        }
+        
+    });
 }
 
 

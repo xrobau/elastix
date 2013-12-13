@@ -37,5 +37,6 @@ $arrLangModule=array(
 "MF_areacode" => "Muestra el codigo de area",
 "MF_faxsubject" => "Define el tema del fax",
 "MF_faxcontent" => "Define el contenido del fax",
+"Fax Extension" => "Extension de Fax",
 );
 ?>

@@ -1,31 +1,31 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
-  +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                                |
-  | http://www.elastix.org                                               |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
-  +----------------------------------------------------------------------+
-  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
-  | Telfs. 2283-268, 2294-440, 2284-356                                  |
-  | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com                                             |
-  +----------------------------------------------------------------------+
-  | The contents of this file are subject to the General Public License  |
-  | (GPL) Version 2 (the "License"); you may not use this file except in |
-  | compliance with the License. You may obtain a copy of the License at |
-  | http://www.opensource.org/licenses/gpl-license.php                   |
-  |                                                                      |
-  | Software distributed under the License is distributed on an "AS IS"  |
-  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
-  | the License for the specific language governing rights and           |
-  | limitations under the License.                                       |
-  +----------------------------------------------------------------------+
-  | The Original Code is: Elastix Open Source.                           |
-  | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+Codificación: UTF-8
++----------------------------------------------------------------------+
+| Elastix version 1.4-1                                                |
+| http://www.elastix.org                                               |
++----------------------------------------------------------------------+
+| Copyright (c) 2006 Palosanto Solutions S. A.                         |
++----------------------------------------------------------------------+
+| Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+| Telfs. 2283-268, 2294-440, 2284-356                                  |
+| Guayaquil - Ecuador                                                  |
+| http://www.palosanto.com                                             |
++----------------------------------------------------------------------+
+| The contents of this file are subject to the General Public License  |
+| (GPL) Version 2 (the "License"); you may not use this file except in |
+| compliance with the License. You may obtain a copy of the License at |
+| http://www.opensource.org/licenses/gpl-license.php                   |
+|                                                                      |
+| Software distributed under the License is distributed on an "AS IS"  |
+| basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+| the License for the specific language governing rights and           |
+| limitations under the License.                                       |
++----------------------------------------------------------------------+
+| The Original Code is: Elastix Open Source.                           |
+| The Initial Developer of the Original Code is PaloSanto Solutions    |
++----------------------------------------------------------------------+
+$Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
 //include elastix framework
 //include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
@@ -36,7 +36,7 @@ function _moduleContent(&$smarty, $module_name)
 {
     //global variables
     global $arrConf;
-   
+
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
 
@@ -45,7 +45,7 @@ function _moduleContent(&$smarty, $module_name)
 
     //return array("idUser"=>$idUser,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
     global $arrCredentials;
-      
+    
     //actions
     $accion = getAction();
     
@@ -77,7 +77,7 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
     }
 
     if($my_fax==false){
-        $smarty->assign("ERROR_FIELD",$pMyFax->getErrorMsg());
+        $smarty->assign("MSG_ERROR_FIELD",$pMyFax->getErrorMsg());
     }    
 
     $smarty->assign("EXTENSION_LABEL",_tr("Fax Extension:"));
@@ -154,7 +154,7 @@ function checkFaxStatus($function, $module_name, $local_templates_dir, $pDB, $ar
         $i++;
         sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
     }
-   return $data;
+return $data;
 }
 
 function getFaxStatus($module_name, $local_templates_dir, &$pDB, $arrConf)
@@ -194,7 +194,7 @@ function getFaxStatus($module_name, $local_templates_dir, &$pDB, $arrConf)
     putSession($session);
     
     return array("there_was_change" => $status,
-                 "data" => $jsonObject->createJSON());
+                "data" => $jsonObject->createJSON());
 }
 
 function getSession()
@@ -220,41 +220,41 @@ function putSession($data)//data es un arreglo
 
 function createForm(){
     $arrForm = array("CID_NAME"        => array("LABEL"                  => _tr("CID NAME:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "CID NAME"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                              "CID_NUMBER"  => array("LABEL"               => _tr("CID Number:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                          "COUNTRY_CODE"  => array("LABEL"               => _tr("Country Code:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "593"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                             "AREA_CODE"  => array("LABEL"               => _tr("Area Code:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "04"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                           "FAX_SUBJECT"  => array("LABEL"               => _tr("Fax Subject:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Fax Subject"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                           "FAX_CONTENT"  => array("LABEL"               => _tr("Fax content:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXTAREA",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Fax content"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "CID NAME"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "CID_NUMBER"  => array("LABEL"               => _tr("CID Number:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "12345"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        "COUNTRY_CODE"  => array("LABEL"               => _tr("Country Code:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "593"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "AREA_CODE"  => array("LABEL"               => _tr("Area Code:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "04"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        "FAX_SUBJECT"  => array("LABEL"               => _tr("Fax Subject:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Fax Subject"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        "FAX_CONTENT"  => array("LABEL"               => _tr("Fax content:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXTAREA",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Fax content"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
 
     );
     return $arrForm;

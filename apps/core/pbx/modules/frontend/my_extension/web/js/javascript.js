@@ -71,20 +71,7 @@ $( document ).ready(function() {
             $('input[name=deleteVmail]').button({disabled:true});                   
         }
       });
-
-
-/* oculta el mensaje que aprece al cargar la pagina, siempre y cuando haya un error con el efecto slide*/
-    $(".close").click(function() {
-        $("#initial_message_area").slideUp();     
-    });
-
-    $(".close").click(function() {
-        $("#message_area").slideUp();      
-    });
-
 });
-
-
 
 $(function() {
   $( "#radio_do_not_disturb" ).buttonset();
@@ -126,15 +113,12 @@ function editExten(){
     arrAction["playEnvelope_vm"]=$("input[name='playEnvelope_vm']:checked").val();
     arrAction["deleteVmail"]=$("input[name='deleteVmail']:checked").val();
     
-
     arrAction["rawmode"]="yes";
     request("index.php", arrAction, false,
         function(arrData,statusResponse,error){
             hideElastixUFStatusBar();
             if (error != '' ){
-                $("#message_area").slideDown();
-                $("#msg-text").removeClass("alert-success").addClass("alert-danger");
-                $("#msg-text").html(error['stringError']);
+                showElxUFMsgBar('error',error['stringError']);
                 // se recorre todos los elementos erroneos y se agrega la clase error (color rojo)
                 $(".flag").removeClass("has-error");
                 $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
@@ -146,9 +130,7 @@ function editExten(){
                 //se elimina el borde rojo a los campos que estaban erroneos, y que hayan sido ingresados 
                 $(".flag").removeClass("has-error");
                 $(".visible-tooltip").removeClass("visible-tooltip").addClass("hidden-tooltip");
-                $("#msg-text").removeClass("alert-danger").addClass("alert-success");
-                $("#msg-text").html(arrData);
-                $("#message_area").slideDown();
+                showElxUFMsgBar('success',arrData);
             }
     });
 }

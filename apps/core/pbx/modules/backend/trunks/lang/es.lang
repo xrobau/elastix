@@ -190,5 +190,6 @@ $arrLangModule=array(
 "--pickup organizations--" => "Selecciona la(s) Organizacion(es)",
 "all" => "todas",
 "All" => "Todas",
+
 );
 ?>

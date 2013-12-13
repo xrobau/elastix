@@ -85,5 +85,6 @@ $arrLangModule=array(
 "PBXT_contactacl" => "Defines the contacts of acl",
 "PBXT_videosupport" => "Enable/Disable the video support",
 "PBXT_maxcallbitrate" => "Defines the max. call bit rate",
+
 );
 ?>

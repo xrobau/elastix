@@ -1,31 +1,31 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
-  +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                                |
-  | http://www.elastix.org                                               |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
-  +----------------------------------------------------------------------+
-  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
-  | Telfs. 2283-268, 2294-440, 2284-356                                  |
-  | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com                                             |
-  +----------------------------------------------------------------------+
-  | The contents of this file are subject to the General Public License  |
-  | (GPL) Version 2 (the "License"); you may not use this file except in |
-  | compliance with the License. You may obtain a copy of the License at |
-  | http://www.opensource.org/licenses/gpl-license.php                   |
-  |                                                                      |
-  | Software distributed under the License is distributed on an "AS IS"  |
-  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
-  | the License for the specific language governing rights and           |
-  | limitations under the License.                                       |
-  +----------------------------------------------------------------------+
-  | The Original Code is: Elastix Open Source.                           |
-  | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+Codificación: UTF-8
++----------------------------------------------------------------------+
+| Elastix version 1.4-1                                                |
+| http://www.elastix.org                                               |
++----------------------------------------------------------------------+
+| Copyright (c) 2006 Palosanto Solutions S. A.                         |
++----------------------------------------------------------------------+
+| Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+| Telfs. 2283-268, 2294-440, 2284-356                                  |
+| Guayaquil - Ecuador                                                  |
+| http://www.palosanto.com                                             |
++----------------------------------------------------------------------+
+| The contents of this file are subject to the General Public License  |
+| (GPL) Version 2 (the "License"); you may not use this file except in |
+| compliance with the License. You may obtain a copy of the License at |
+| http://www.opensource.org/licenses/gpl-license.php                   |
+|                                                                      |
+| Software distributed under the License is distributed on an "AS IS"  |
+| basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+| the License for the specific language governing rights and           |
+| limitations under the License.                                       |
++----------------------------------------------------------------------+
+| The Original Code is: Elastix Open Source.                           |
+| The Initial Developer of the Original Code is PaloSanto Solutions    |
++----------------------------------------------------------------------+
+$Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
 //include elastix framework
 
 include_once "libs/paloSantoForm.class.php";
@@ -36,7 +36,7 @@ function _moduleContent(&$smarty, $module_name)
 {
     //global variables
     global $arrConf;
-   
+
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
 
@@ -45,7 +45,7 @@ function _moduleContent(&$smarty, $module_name)
 
     //return array("idUser"=>$idUser,"id_organization"=>$idOrganization,"userlevel"=>$userLevel1,"domain"=>$domain);
     global $arrCredentials;
-      
+    
     //actions
     $accion = getAction();
     
@@ -74,7 +74,7 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
     }
 
     if($my_exten==false){
-        $smarty->assign("ERROR_FIELD",$pMyExten->getErrorMsg());
+        $smarty->assign("MSG_ERROR_FIELD",$pMyExten->getErrorMsg());
     }
 
     $smarty->assign("DISPLAY_NAME_LABEL",_tr("Display Name CID:"));
@@ -133,7 +133,7 @@ function saveExtensionSettings($smarty, $module_name, $local_templates_dir, $pDB
     }else{
         $pMyExten->_DB->commit();
         //$jsonObject->set_message($myExten);
-       $jsonObject->set_message("Changes were saved succefully");
+    $jsonObject->set_message("Changes were saved succefully");
     }
     return $jsonObject->createJSON();
 }
@@ -182,103 +182,103 @@ function createForm(){
 
 
     $arrForm = array("secretExtension"   => array("LABEL"                  => _tr("Secret extension:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "mail"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                         "doNotDisturb"  => array("LABEL"               => _tr("Do Not Disturb:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "OPTION",
-												"INPUT_EXTRA_PARAM"      => $DND,
-												"VALIDATION_TYPE"        => "",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                          "callWaiting"  => array("LABEL"               => _tr("Call Waiting:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "OPTION",
-												"INPUT_EXTRA_PARAM"      => $CW,
-												"VALIDATION_TYPE"        => "",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "mail"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        "doNotDisturb"  => array("LABEL"               => _tr("Do Not Disturb:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "OPTION",
+                                                "INPUT_EXTRA_PARAM"      => $DND,
+                                                "VALIDATION_TYPE"        => "",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        "callWaiting"  => array("LABEL"               => _tr("Call Waiting:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "OPTION",
+                                                "INPUT_EXTRA_PARAM"      => $CW,
+                                                "VALIDATION_TYPE"        => "",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
                         "callForwardOpt"  => array("LABEL"               => _tr("Call Forward:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "OPTION",
-												"INPUT_EXTRA_PARAM"      => $CF,
-												"VALIDATION_TYPE"        => "",
-												"VALIDATION_EXTRA_PARAM" => ""),
-             "callForwardUnavailableOpt"  => array("LABEL"               => _tr("Call Forward on Unavailable:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "OPTION",
-												"INPUT_EXTRA_PARAM"      => $CFU,
-												"VALIDATION_TYPE"        => "",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "OPTION",
+                                                "INPUT_EXTRA_PARAM"      => $CF,
+                                                "VALIDATION_TYPE"        => "",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+            "callForwardUnavailableOpt"  => array("LABEL"               => _tr("Call Forward on Unavailable:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "OPTION",
+                                                "INPUT_EXTRA_PARAM"      => $CFU,
+                                                "VALIDATION_TYPE"        => "",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
                     "callForwardBusyOpt"  => array("LABEL"               => _tr("Call Forward on Busy:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "OPTION",
-												"INPUT_EXTRA_PARAM"      => $CFB,
-												"VALIDATION_TYPE"        => "",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "OPTION",
+                                                "INPUT_EXTRA_PARAM"      => $CFB,
+                                                "VALIDATION_TYPE"        => "",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
                         "callForwardInp"  => array("LABEL"               => _tr(""),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-             "callForwardUnavailableInp"  => array("LABEL"               => _tr(""),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                   "callForwardBusyInp"  => array("LABEL"               => _tr(""),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+            "callForwardUnavailableInp"  => array("LABEL"               => _tr(""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                "callForwardBusyInp"  => array("LABEL"               => _tr(""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "12345"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
                         "recordIncoming"  => array("LABEL"               => _tr("Record Incoming:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "OPTION",
-												"INPUT_EXTRA_PARAM"      => $record_incoming,
-												"VALIDATION_TYPE"        => "",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "OPTION",
+                                                "INPUT_EXTRA_PARAM"      => $record_incoming,
+                                                "VALIDATION_TYPE"        => "",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
 
                         "recordOutgoing"  => array("LABEL"               => _tr("Record Outgoing:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "OPTION",
-												"INPUT_EXTRA_PARAM"      => $record_outgoing,
-												"VALIDATION_TYPE"        => "",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                               "status_vm"   => array("LABEL"               => _tr("Status:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "OPTION",
+                                                "INPUT_EXTRA_PARAM"      => $record_outgoing,
+                                                "VALIDATION_TYPE"        => "",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "status_vm"   => array("LABEL"               => _tr("Status:"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $status,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
-                          "email_vm"   => array( "LABEL"                    => _tr("Email:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-						    					"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Enter email"),
-												"VALIDATION_TYPE"        => "email",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                              "password_vm"  => array("LABEL"               => _tr("Password:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "TEXT",
-												"INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Password"),
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
-                           "language_vm"  => array("LABEL"               => _tr("Language:"),
-												"REQUIRED"               => "no",
-												"INPUT_TYPE"             => "SELECT",
-												"INPUT_EXTRA_PARAM"      => $arrLang,
-												"VALIDATION_TYPE"        => "text",
-												"VALIDATION_EXTRA_PARAM" => ""),
+                        "email_vm"   => array( "LABEL"                    => _tr("Email:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Enter email"),
+                                                "VALIDATION_TYPE"        => "email",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                            "password_vm"  => array("LABEL"               => _tr("Password:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "TEXT",
+                                                "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Password"),
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
+                        "language_vm"  => array("LABEL"               => _tr("Language:"),
+                                                "REQUIRED"               => "no",
+                                                "INPUT_TYPE"             => "SELECT",
+                                                "INPUT_EXTRA_PARAM"      => $arrLang,
+                                                "VALIDATION_TYPE"        => "text",
+                                                "VALIDATION_EXTRA_PARAM" => ""),
                         "emailAttachment_vm"   => array("LABEL"               => _tr("Email Attachment:"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $email_attachment,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
-                              "playCid_vm"   => array("LABEL"               => _tr("Play CID:"),
+                            "playCid_vm"   => array("LABEL"               => _tr("Play CID:"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $PCID,

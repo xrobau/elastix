@@ -19,12 +19,12 @@
     </p>
 </div>
 <div id="endpointConfigApplication" style="background-color: #f0f0f0;">
-<script type="text/x-handlebars" data-template-name="endpoints">
-{literal}
-{{#if loading }}
+
+<script type="text/x-handlebars" data-template-name="loading">
 <div style="text-align: center; padding: 40px;"><img src="images/loading.gif" /></div>
-{{else}}
-{/literal}
+</script>
+
+<script type="text/x-handlebars" data-template-name="endpoints">
   <div class="neo-endpointconfig-header-row">
     {literal}
     {{#view
@@ -165,7 +165,6 @@
 </div>
 
 {literal}{{outlet}}{/literal}
-{literal}{{/if}}{/literal}
 </script>
 
 <script type="text/x-handlebars" data-template-name="endpoints/endpointconfig">

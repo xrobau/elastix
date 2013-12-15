@@ -134,6 +134,9 @@ fi
 
 %changelog
 * Sat Dec 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: provide a "loading" template for the main
+  endpoint listing using the loading view support of Ember.js 1.2.0.
+  SVN Rev[6291]
 - CHANGED: New Endpoint Configurator: update Ember.js to 1.2.0, Handlebars to
   1.1.2.
   SVN Rev[6290]

@@ -133,6 +133,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sat Dec 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: reimplement loading of configuration log
+  using an Ember promise.
+  SVN Rev[6286]
+
 * Thu Dec 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: add timeouts to telnet read interactions.
   SVN Rev[6258]

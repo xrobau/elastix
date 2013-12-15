@@ -45,7 +45,7 @@ $(document).ready(function() {
 		rootElement:	'#endpointConfigApplication'
 	});
 	initializeJQueryUIViews();
-	//App.deferReadiness(); // App está lista luego de do_loadEndpoints()
+
 	App.Endpoint = Ember.Object.extend({
 		// Los siguientes parámetros son campos de la base de datos
 		id_endpoint: null,
@@ -208,24 +208,6 @@ $(document).ready(function() {
 			return ((this.get('id_account') != null) ? 'bound' : 'unbound') +
 				'-' + this.get('tech') + '-' + this.get('account');
 		}.property('tech', 'account', 'id_account')
-	});
-	
-	App.ConfigLog = Ember.Object.extend({
-		log: null,
-		init: function() {
-			$.get('index.php', {
-				menu:		module_name, 
-				rawmode:	'yes',
-				action:		'getConfigLog'
-			},
-			function(respuesta) {
-				if (respuesta.status == 'error') {
-					mostrar_mensaje_error(respuesta.message);
-					return;
-				}
-				this.set('log', respuesta.log);
-			}.bind(this));
-		}
 	});
 	
 	// Arreglo de objetos de clases para los detalles del endpoint
@@ -711,9 +693,18 @@ $(document).ready(function() {
 
 	App.EndpointsGetconfiglogRoute = Ember.Route.extend({
 		model: function (params) {
-			return App.ConfigLog.create({});
-		}
-		 ,
+			return Ember.$.get('index.php', {
+				menu:		module_name, 
+				rawmode:	'yes',
+				action:		'getConfigLog'
+			}).then(function(respuesta) {
+				if (respuesta.status == 'error') {
+					mostrar_mensaje_error(respuesta.message);
+					return null;
+				}
+				return respuesta;
+			});
+		},
 		renderTemplate: function(controller, model) {
 			this.render({ into: 'endpoints'});
 		}

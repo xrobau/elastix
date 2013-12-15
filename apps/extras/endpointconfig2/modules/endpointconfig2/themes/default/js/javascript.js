@@ -305,61 +305,35 @@ $(document).ready(function() {
 				this.set('unsetInProgress', false);
 			}.bind(this));
 		},
-		loadEndpoints: function() {
-			this.set('loading', true);
-			$.get('index.php', {
-				menu:		module_name, 
-				rawmode:	'yes',
-				action:		'loadEndpoints'
-			},
-			function(respuesta) {
-				this.completeList.clear();
-				if (respuesta.status == 'error') {
-					mostrar_mensaje_error(respuesta.message);
-				} else {
-					var temp = [];
-					for (i = 0; i < respuesta.endpoints.length; i++) {
-						respuesta.endpoints[i].modelos = this.modelos;
-						temp.addObject(App.Endpoint.create(respuesta.endpoints[i]));
-					}
-					this.set('completeList', temp);
-					this.set('offset', null);
-					this.displayStart();
-					
-					this.loadStatus();
+		setEndpoints: function(respuesta) {
+			this.completeList.clear();
+			if (respuesta.status == 'error') {
+				mostrar_mensaje_error(respuesta.message);
+			} else {
+				var temp = [];
+				for (i = 0; i < respuesta.endpoints.length; i++) {
+					respuesta.endpoints[i].modelos = this.modelos;
+					temp.addObject(App.Endpoint.create(respuesta.endpoints[i]));
 				}
-				//App.advanceReadiness();
-				this.set('loading', false);
-				
-				$('#loadAnimation').hide();
-			}.bind(this));
+				this.set('completeList', temp);
+				this.set('offset', null);
+				this.displayStart();
+			}
+			this.set('loading', false);
+			
+			$('#loadAnimation').hide();
 		},
 
-
-
-		loadModels: function() {
-			if (this.modelos == null) {
-				this.set('loading', true);
-				$.get('index.php', {
-					menu:		module_name, 
-					rawmode:	'yes',
-					action:		'loadModels'
-				},
-				function(respuesta) {
-					this.modelos = {};
-					for (var id_manufacturer in respuesta.models) {
-						var modelContent = [];
-						for (id_model in respuesta.models[id_manufacturer]) {
-							modelContent.addObject(Ember.Object.create(respuesta.models[id_manufacturer][id_model]));
-						}
-						this.modelos[id_manufacturer] = Ember.ArrayController.create({content: modelContent});
-					}
-	
-					this.loadEndpoints();
-				}.bind(this));
+		setModels: function(respuesta) {
+			this.modelos = {};
+			for (var id_manufacturer in respuesta.models) {
+				var modelContent = [];
+				for (id_model in respuesta.models[id_manufacturer]) {
+					modelContent.addObject(Ember.Object.create(respuesta.models[id_manufacturer][id_model]));
+				}
+				this.modelos[id_manufacturer] = Ember.ArrayController.create({content: modelContent});
 			}
 		},
-		
 		
 		
 		longPoll:	null,		// Objeto de POST largo
@@ -658,8 +632,25 @@ $(document).ready(function() {
 	});
 	
 	App.EndpointsRoute = Ember.Route.extend({
+		model: function () {
+			return Ember.RSVP.hash({
+				'models'	:	Ember.$.get('index.php', {
+					menu:		module_name, 
+					rawmode:	'yes',
+					action:		'loadModels'
+				}),
+				'endpoints'	:	Ember.$.get('index.php', {
+					menu:		module_name, 
+					rawmode:	'yes',
+					action:		'loadEndpoints'
+				})
+			});
+		},
+		
 		setupController: function(controller, model) {
-			controller.loadModels();
+			controller.setModels(model.models);
+			controller.setEndpoints(model.endpoints);
+			controller.loadStatus();
 		}
 	});
 	

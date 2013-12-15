@@ -134,6 +134,9 @@ fi
 
 %changelog
 * Sat Dec 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: reimplement loading of model details and
+  unassigned accounts using an Ember promise.
+  SVN Rev[6289]
 - CHANGED: New Endpoint Configurator: reimplement loading of known models and 
   current endpoints using an Ember promise.
   SVN Rev[6288]

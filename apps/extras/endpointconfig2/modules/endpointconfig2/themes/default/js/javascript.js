@@ -143,24 +143,12 @@ $(document).ready(function() {
 		},
 		
 		// Iniciar la carga de los detalles del endpoint
-		loadDetails: function() {
-			// Carga de los detalles del endpoint elegido
-			$.get('index.php', {
-				menu:		module_name, 
-				rawmode:	'yes',
-				action:		this.get('detail_dialog') + '_loadDetails',
-				id_endpoint:this.get('id_endpoint')
-			},
-			function(respuesta) {
-				if (respuesta.status == 'error') {
-					mostrar_mensaje_error_dialog(respuesta.message);
-					return;
-				}
-				//console.debug(respuesta);
-				this.set('details', App.detailClass[this.get('detail_dialog')].create(respuesta.details));
-			}.bind(this));
-			
-			App.accountsController.loadUnassignedAccounts();
+		setDetails: function(respuesta) {
+			if (respuesta.status == 'error') {
+				mostrar_mensaje_error_dialog(respuesta.message);
+				return;
+			}
+			this.set('details', App.detailClass[this.get('detail_dialog')].create(respuesta.details));
 		},
 		saveDetails: function()
 		{
@@ -587,23 +575,15 @@ $(document).ready(function() {
 
 	App.AccountsController = Ember.ArrayController.extend({
 		content: null,
-		loadUnassignedAccounts: function() {
-			// Carga de las cuentas SIP e IAX disponibles para asignar al endpoint
-			$.get('index.php', {
-				menu:		module_name, 
-				rawmode:	'yes',
-				action:		'loadUnassignedAccounts'
-			},
-			function(respuesta) {
-				if (respuesta.status == 'error') {
-					mostrar_mensaje_error_dialog(respuesta.message);
-					return;
-				}
-				//console.debug(respuesta);
-				for (var i = 0; i < respuesta.accounts.length; i++)
-					respuesta.accounts[i] = App.Account.create(respuesta.accounts[i]);
-				this.set('content', respuesta.accounts);
-			}.bind(this));
+		setUnassignedAccounts: function(respuesta) {
+			if (respuesta.status == 'error') {
+				mostrar_mensaje_error_dialog(respuesta.message);
+				return;
+			}
+			//console.debug(respuesta);
+			for (var i = 0; i < respuesta.accounts.length; i++)
+				respuesta.accounts[i] = App.Account.create(respuesta.accounts[i]);
+			this.set('content', respuesta.accounts);
 		}
 	});
 	App.accountsController = App.AccountsController.create({
@@ -665,16 +645,34 @@ $(document).ready(function() {
 
 			for (var j = 0; j < controller.completeList.length; j++) {
 				if (params.id_endpoint == controller.completeList[j].get('id_endpoint')) {
-					return controller.completeList[j]; 
+					return controller.completeList[j];
 				}
 			}
 			return null;
 		},
 		setupController: function(controller, model) {
-			model.loadDetails();
 			controller.set('content', model);
 			var childController = this.controllerFor('endpointconfig-' + model.get('detail_dialog'));
 			childController.set('content', model);
+		},
+		afterModel: function(model, transition, queryparams) {
+			return model ? Ember.RSVP.hash({
+				'unassigned':	Ember.$.get('index.php', {
+					menu:		module_name, 
+					rawmode:	'yes',
+					action:		'loadUnassignedAccounts'
+				}).then(function (respuesta) {
+					App.accountsController.setUnassignedAccounts(respuesta);
+				}),
+				'details'	:	Ember.$.get('index.php', {
+					menu:		module_name, 
+					rawmode:	'yes',
+					action:		model.get('detail_dialog') + '_loadDetails',
+					id_endpoint:model.get('id_endpoint')
+				}).then (function(respuesta) {
+					model.setDetails(respuesta);
+				})
+			}) : null;
 		},
 		serialize: function(model, parameters) {
 			return { id_endpoint: model.get('id_endpoint') };
@@ -804,7 +802,6 @@ $(document).ready(function() {
 				mostrar_mensaje_error(respuesta.message);
 				return;
 			}
-			//console.debug(respuesta);
 			controller.manejarRespuestaStatus(respuesta);
 		},
 		fail: function(jqXHR) {

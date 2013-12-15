@@ -367,6 +367,8 @@ function handleJSON_setEndpointModel($smarty, $module_name, $local_templates_dir
 
 function handleJSON_loadUnassignedAccounts($smarty, $module_name, $local_templates_dir, $dlglist)
 {
+    session_commit();
+    
     $respuesta = array(
         'status'    =>  'success',
         'message'   =>  '(no message)',

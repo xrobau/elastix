@@ -134,6 +134,9 @@ fi
 
 %changelog
 * Sat Dec 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: New Endpoint Configurator: update Ember.js to 1.2.0, Handlebars to
+  1.1.2.
+  SVN Rev[6290]
 - CHANGED: New Endpoint Configurator: reimplement loading of model details and
   unassigned accounts using an Ember promise.
   SVN Rev[6289]

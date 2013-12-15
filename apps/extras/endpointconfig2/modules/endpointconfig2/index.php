@@ -100,9 +100,6 @@ function _moduleContent(&$smarty, $module_name)
 
 function handleHTML_mainReport($smarty, $module_name, $local_templates_dir, $dlglist)
 {
-    // Ember.js requiere jQuery 1.7.2 o superior.
-    modificarReferenciasLibreriasJS($smarty, $module_name, $dlglist);
-
     $json = new Services_JSON();
     $smarty->assign(array(
         'title'                     =>  _tr('New Endpoint Configurator'),
@@ -617,61 +614,6 @@ function subMask($ip)
         }
     }
     return 32;  // No se pudo encontrar máscara de la red
-}
-
-function modificarReferenciasLibreriasJS($smarty, $module_name, $dlglist)
-{
-    $listaLibsJS_framework = explode("\n", $smarty->get_template_vars('HEADER_LIBS_JQUERY'));
-    $listaLibsJS_modulo = explode("\n", $smarty->get_template_vars('HEADER_MODULES'));
-
-    /* Se busca la referencia a jQuery (se asume que sólo hay una biblioteca que
-     * empieza con "jquery-") y se la quita. Las referencias a Ember.js y 
-     * Handlebars se reordenan para que Handlebars aparezca antes que Ember.js 
-     */ 
-    $sEmberRef = $sHandleBarsRef = $sjQueryRef = NULL;
-    foreach (array_keys($listaLibsJS_modulo) as $k) {
-        if (strpos($listaLibsJS_modulo[$k], 'themes/default/js/jquery-') !== FALSE) {
-            $sjQueryRef = $listaLibsJS_modulo[$k];
-            unset($listaLibsJS_modulo[$k]);
-        } elseif (strpos($listaLibsJS_modulo[$k], 'themes/default/js/handlebars-') !== FALSE) {
-            $sHandleBarsRef = $listaLibsJS_modulo[$k];
-            unset($listaLibsJS_modulo[$k]);
-        } elseif (strpos($listaLibsJS_modulo[$k], 'themes/default/js/ember-') !== FALSE) {
-            $sEmberRef = $listaLibsJS_modulo[$k];
-            unset($listaLibsJS_modulo[$k]);
-        }
-    }
-    array_unshift($listaLibsJS_modulo, $sEmberRef);
-    array_unshift($listaLibsJS_modulo, $sHandleBarsRef);
-    
-    // Se incluyen las funciones javascript de cada diálogo
-    foreach ($dlglist as $dlgname) {
-    	foreach (scandir("modules/$module_name/dialogs/$dlgname/js") as $jslib) 
-        if ($jslib != '.' && $jslib != '..') {
-    		array_push($listaLibsJS_modulo, "<script type='text/javascript' src='modules/$module_name/dialogs/$dlgname/js/$jslib'></script>");
-    	}
-    }    
-    $smarty->assign('HEADER_MODULES', implode("\n", $listaLibsJS_modulo));
-
-    /* Se busca la referencia original al jQuery del framework, y se reemplaza
-     * si es más vieja que el jQuery del módulo */
-    $sRegexp = '/jquery-(\d.+?)(\.min)?\.js/'; $regs = NULL;
-    preg_match($sRegexp, $sjQueryRef, $regs);
-    $sVersionModulo = $regs[1];
-    $sVersionFramework = NULL;
-    foreach (array_keys($listaLibsJS_framework) as $k) {
-        if (preg_match($sRegexp, $listaLibsJS_framework[$k], $regs)) {
-            $sVersionFramework = $regs[1];
-            
-            // Se asume que la versión sólo consiste de números y puntos
-            $verFramework = explode('.', $sVersionFramework);
-            $verModulo = explode('.', $sVersionModulo);
-            while (count($verFramework) < count($verModulo)) $verFramework[] = "0";
-            while (count($verFramework) > count($verModulo)) $verModulo[] = "0";
-            if ($verModulo > $verFramework) $listaLibsJS_framework[$k] = $sjQueryRef;
-        }
-    }
-    $smarty->assign('HEADER_LIBS_JQUERY', implode("\n", $listaLibsJS_framework));
 }
 
 ?>

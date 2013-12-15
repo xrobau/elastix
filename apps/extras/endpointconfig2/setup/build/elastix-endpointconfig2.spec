@@ -133,11 +133,6 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Sun Dec 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: New Endpoint Configurator: rename modules scripts to provide a 
-  natural loading order and remove the need to hack the framework loading order.
-  SVN Rev[6292]
-
 * Sat Dec 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: provide a "loading" template for the main
   endpoint listing using the loading view support of Ember.js 1.2.0.

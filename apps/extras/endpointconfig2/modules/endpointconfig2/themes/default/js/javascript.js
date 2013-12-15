@@ -72,6 +72,8 @@ $(document).ready(function() {
 		modelObj: null,		// Objeto del modelo seleccionado
 		details: null, 		// Detalles del endpoint
 		
+		modelos: null,		// Referencia a App.EndpointsController.modelos
+		
 		init: function() {
 			this.vendorChanged();
 			this.refreshModelObj();
@@ -128,7 +130,7 @@ $(document).ready(function() {
 		
 		// Observador que actualiza el modelo si se elige otro vendedor.
 		vendorChanged: function() {
-			this.set('modelSelect', App.modelos[this.get('id_manufacturer')]);
+			this.set('modelSelect', this.modelos[this.get('id_manufacturer')]);
 		}.observes('id_manufacturer'),
 		
 		// Seleccionar el nuevo objeto de modelo
@@ -213,9 +215,9 @@ $(document).ready(function() {
 	// Arreglo de objetos de clases para los detalles del endpoint
 	App.detailClass = {}
 	
-	App.modelos = null;
-
 	App.EndpointsController = Ember.ArrayController.extend({
+		modelos: null,
+		
 		loading: true,
 		completeList:[
 		     /*
@@ -317,6 +319,7 @@ $(document).ready(function() {
 				} else {
 					var temp = [];
 					for (i = 0; i < respuesta.endpoints.length; i++) {
+						respuesta.endpoints[i].modelos = this.modelos;
 						temp.addObject(App.Endpoint.create(respuesta.endpoints[i]));
 					}
 					this.set('completeList', temp);
@@ -335,7 +338,7 @@ $(document).ready(function() {
 
 
 		loadModels: function() {
-			if (App.modelos == null) {
+			if (this.modelos == null) {
 				this.set('loading', true);
 				$.get('index.php', {
 					menu:		module_name, 
@@ -343,13 +346,13 @@ $(document).ready(function() {
 					action:		'loadModels'
 				},
 				function(respuesta) {
-					App.modelos = {};
+					this.modelos = {};
 					for (var id_manufacturer in respuesta.models) {
 						var modelContent = [];
 						for (id_model in respuesta.models[id_manufacturer]) {
 							modelContent.addObject(Ember.Object.create(respuesta.models[id_manufacturer][id_model]));
 						}
-						App.modelos[id_manufacturer] = Ember.ArrayController.create({content: modelContent});
+						this.modelos[id_manufacturer] = Ember.ArrayController.create({content: modelContent});
 					}
 	
 					this.loadEndpoints();
@@ -662,11 +665,13 @@ $(document).ready(function() {
 	
 	App.EndpointsEndpointconfigRoute = Ember.Route.extend({
 		model: function(params) {
-			if (App.modelos == null) {
+			controller = this.controllerFor('endpoints');
+			
+			if (controller.get('modelos') == null) {
 	        	this.transitionTo('endpoints.index');
 	        	return null;
 			}
-			controller = this.controllerFor('endpoints');
+
 			for (var j = 0; j < controller.completeList.length; j++) {
 				if (params.id_endpoint == controller.completeList[j].get('id_endpoint')) {
 					return controller.completeList[j]; 

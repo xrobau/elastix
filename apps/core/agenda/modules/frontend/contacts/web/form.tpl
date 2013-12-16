@@ -91,6 +91,7 @@
                     <div class="col-lg-6 input-group">
                         <span class="input-group-addon">@</span>
                         {$email.INPUT}
+                        <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_EMAIL}"></a>
                     </div>
                 </div>
 

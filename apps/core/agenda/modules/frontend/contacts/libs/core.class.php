@@ -38,7 +38,8 @@ class coreContact{
     public function coreContact(&$pDB){ 
         global $arrCredentials;      
         $this->idUser=$arrCredentials['idUser'];
-        $this->pathImageContact="/var/www/elastixdir/contacts_images/{$arrCredentials['domain']}/{$arrCredentials['idUser']}";        
+        $this->pathImageContact="/var/www/elastixdir/contacts_images/{$arrCredentials['domain']}/{$arrCredentials['idUser']}";    
+        $this->pathImageOrganization="/var/www/elastixdir/contacts_images/{$arrCredentials['domain']}";
         $this->sqlContact = new paloContact($pDB,$this->idUser);
     }
 
@@ -57,7 +58,7 @@ class coreContact{
 
         foreach($arrayData as $key => $value){  
             if($key == "contact_type"){  
-                if($value==""){
+                if($value==""  || !isset($value)){
                     $errorBoolean = true;
                     $errorData['field'][] = "contact_type";
                 }
@@ -72,6 +73,14 @@ class coreContact{
                 if($value== ""){
                     $errorBoolean = true;
                     $errorData['field'][] = "last_name";
+                }
+            }
+            if($key == "email"){  
+                if($value!= ""){
+                    if(!filter_var($value, FILTER_VALIDATE_EMAIL)){
+                        $errorBoolean = true;
+                        $errorData['field'][] = "email";
+                    }
                 }
             }
             if($key == "work_phone_number"){  
@@ -97,8 +106,13 @@ class coreContact{
     function checkRequirementsForUpload($domain, $pictureUpload, &$nameTmp)
     {        
         if(!empty($pictureUpload)){
+            $generalPath= "/var/www/elastixdir/contacts_images/";
             $this->pathImageContact = "/var/www/elastixdir/contacts_images/$domain/$this->idUser";
 
+            if (!file_exists($generalPath)) {
+                return false;  
+            }
+            
             //verificamos que existe el directorio
             if (!file_exists($this->pathImageContact)) {
                 mkdir($this->pathImageContact, 0755, true);   
@@ -112,7 +126,7 @@ class coreContact{
             if(empty($_SESSION['tmp_contact_img'])){
                 $nameFile=date("Ymdhis");
                 $ext = pathinfo($pictureUpload, PATHINFO_EXTENSION);
-                $nameTmp = "$nameFile.$ext";
+                $nameTmp = "tmp_contact_$nameFile.$ext";
                 $_SESSION['tmp_contact_img']=$nameTmp;
             }else{
                 if(!empty($_SESSION['tmp_contact_img'])){
@@ -121,11 +135,11 @@ class coreContact{
                         unlink("{$this->pathImageContact}/{$_SESSION['tmp_contact_img']}");
                     $nameFile=date("Ymdhis");
                     $ext = pathinfo($pictureUpload, PATHINFO_EXTENSION);
-                    $nameTmp = "$nameFile.$ext";
+                    $nameTmp = "tmp_contact_$nameFile.$ext";
                     $_SESSION['tmp_contact_img']=$nameTmp;
                 }            
             }
-            $uploadedUrl= "{$this->pathImageContact}/$nameFile.$ext";
+            $uploadedUrl= "{$this->pathImageContact}/$nameTmp";
             return $uploadedUrl;
         }
 
@@ -188,9 +202,17 @@ class coreContact{
     
     function getImageContactExternal($picture){
         $imgPath='';
+        
         if(!empty($picture)){
             $picture=basename($picture);
-            $imgPath="{$this->pathImageContact}/$picture";
+            $idContact= explode(".", $picture);
+            
+            $parentId = $this->sqlContact->getIdParent($idContact[0]);
+            if($parentId===false){
+                $this->errMsg = $this->sqlContact->getErrorMsg();
+                $imgPath='';
+            }else
+                $imgPath="{$this->pathImageOrganization}/$parentId/$picture";
         }
         
         $imgDefault = "/var/www/html/web/_common/images/Icon-user.png";
@@ -201,10 +223,12 @@ class coreContact{
             Header("Content-type: image/$ext");
             $im = file_get_contents($imgPath);
             echo $im;
+            //print($imgPath);
         }else{
             Header("Content-type: image/png");
             $im = file_get_contents($imgDefault);
             echo $im;
+            //print($imgDefault);
         }
         return;
     }
@@ -397,6 +421,34 @@ class coreContact{
         }else return _tr("The file is incorrect or empty") .": $sFilePath";
     }
     
+    
+    /* obtenemos la imagen guardada con el nombre temporal, para mostrarla en el preview
+    */
+    function getImagePreview($picture){
+        $imgPath='';
+
+        if(!empty($picture)){
+            $picture=basename($picture);
+            $imgPath="{$this->pathImageContact}/$picture";
+        }
+        
+        $imgDefault = "/var/www/html/web/_common/images/Icon-user.png";
+        
+        // Creamos la imagen a partir de un fichero existente
+        if(file_exists($imgPath) && $imgPath!=''){
+            $ext = pathinfo($imgPath, PATHINFO_EXTENSION);
+            Header("Content-type: image/$ext");
+            $im = file_get_contents($imgPath);
+            echo $im;
+            //print($imgPath);
+        }else{
+            Header("Content-type: image/png");
+            $im = file_get_contents($imgDefault);
+            echo $im;
+            //print($imgDefault);
+        }
+        return;
+    }
     
 }
 ?>

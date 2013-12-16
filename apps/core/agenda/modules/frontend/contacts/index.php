@@ -72,6 +72,9 @@ function _moduleContent(&$smarty, $module_name)
         case "getImageExtContact":
             $content = getImageExtContact($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
+        case "getImageTmp":
+            $content = getImageTmp($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            break;
         default:
             $content = reportContact($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
@@ -211,7 +214,7 @@ function reportContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                     $tmp[]= htmlentities($value['name'],ENT_QUOTES, "UTF-8");
                 }else{
                     if($arrCredentials['idUser']==$value['iduser']){
-                        $tmp[]="<a href='#' onclick='editContact({$value['id']})'>".$value['name']."</a>";
+                        $tmp[]="<a href='#' onclick='editContact({$value['id']})'>".htmlentities($value['name'],ENT_QUOTES, "UTF-8")."</a>";
                     }else{
                         $tmp[]= htmlentities($value['name'],ENT_QUOTES, "UTF-8");
                     }
@@ -300,11 +303,13 @@ function templateContact($smarty, $module_name, $local_templates_dir, &$pDB, $ar
     $smarty->assign("TOOLTIP_FIRS_NAME",_tr("Invalid first name"));
     $smarty->assign("TOOLTIP_LAST_NAME",_tr("Invalid last name"));
     $smarty->assign("TOOLTIP_POHNE",_tr("Just numeric characters are valid"));
+    $smarty->assign("TOOLTIP_EMAIL",_tr("Invalid email"));
 
     if(getParameter('action')=='newContact'){
         //formulario vario con los valores por default   
         $smarty->assign('ELX_ACTION','new');
         $arrayContact=array();
+        $arrayContact['contact_type']='isPrivate';
     }else{
         //consulto la informacion del usuario que me piden
         $idContact=getParameter('idContact');
@@ -393,6 +398,7 @@ function saveContact($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
     if($last_id === false){
         $sqlContact->_DB->rollBack();
         $jsonObject->set_error($sqlContact->getErrorMsg());
+        return $jsonObject->createJSON();
         //debo borrar la imagen en caso de uqe se haya subido
         if(!empty($_SESSION['tmp_contact_img']))
             unlink("{$coreContact->pathImageContact}/{$_SESSION['tmp_contact_img']}");
@@ -401,6 +407,7 @@ function saveContact($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
         $uploadImage = $coreContact->uploadImage($last_id);
         if($uploadImage===false){
             $jsonObject->set_error($coreContact->getErrorMsg());
+            return $jsonObject->createJSON();
         }        
         $contenidoModulo =reportContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf);
         $jsonObject->set_message($contenidoModulo);
@@ -448,8 +455,8 @@ function editContact($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
     $contact['contact_person']=getParameter('contact_person');
     $contact['contact_person_position']=getParameter('contact_person_position');
     $contact['notes']=getParameter('notes');
-    $contact['picture']=getParameter('picture');
-
+    $contact['picture']=getParameter('picturidusere');
+    
     $validateForm = $coreContact->validateForm($contact);
 
     if($validateForm===false){
@@ -464,23 +471,22 @@ function editContact($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
     if($result === false){
         $sqlContact->_DB->rollBack();
         $jsonObject->set_error($sqlContact->getErrorMsg());
+        return $jsonObject->createJSON();
         //debo borrar la imagen en caso de uqe se haya subido
         if(!empty($_SESSION['tmp_contact_img']))
             unlink("{$coreContact->pathImageContact}/{$_SESSION['tmp_contact_img']}");
     }else{
         $sqlContact->_DB->commit();
-        if(!empty($contact['picture'])){
-            $uploadImage = $coreContact->uploadImage($contact['id']);
-            if($uploadImage===false){
-                $jsonObject->set_error($coreContact->getErrorMsg());
-            }
+        $uploadImage = $coreContact->uploadImage($contact['id']);
+        if($uploadImage===false){
+            $jsonObject->set_error($coreContact->getErrorMsg());
+            return $jsonObject->createJSON();
         }
         $contenidoModulo =reportContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf);
         $jsonObject->set_message($contenidoModulo);
     }
     return $jsonObject->createJSON();
-    unset($_SESSION['idContact']);
-           
+    unset($_SESSION['idContact']);   
 }
 
 
@@ -501,17 +507,25 @@ function uploadImageContact($smarty, $module_name, $local_templates_dir, $pDB, $
             $uploadedUrl = $coreContact->checkRequirementsForUpload($domain, $pictureUpload, $nameTmp);
             
             if($uploadedUrl===false){
-                $jsonObject->set_error('Error uploading your file');
+                $jsonObject->set_error(_tr("Error uploading your file"));
+                return $jsonObject->createJSON();
             }
             
             if(move_uploaded_file( $_FILES['picture']['tmp_name'][$key], $uploadedUrl)===false){
-                $jsonObject->set_error('algo paso');    
+                $jsonObject->set_error(_tr("Failed to move file"));
+                return $jsonObject->createJSON();
             }else{
+                /*
                 $urls[] = $uploadedUrl;
-                $jsonObject->set_message($nameTmp);
+                $jsonObject->set_message($nameTmp);*/
+                $src="index.php?menu=$module_name&action=getImageTmp&image=$nameTmp&rawmode=yes";
+                $imgData = array();
+                $imgData['name']= $nameTmp;
+                $imgData['url']= $src;
+                $jsonObject->set_message($imgData);
             }
         }else{
-            $jsonObject->set_error('algo paso');
+            $jsonObject->set_error(_tr("Error uploading your file"));
         }
     }
     return $jsonObject->createJSON();
@@ -523,6 +537,14 @@ function getImageExtContact($smarty, $module_name, $local_templates_dir, $pDB, $
     $coreContact=new coreContact($pDB);
     $picture=getParameter('image');
     $coreContact->getImageContactExternal($picture);
+    return;
+}
+
+function getImageTmp($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
+{
+    $coreContact=new coreContact($pDB);
+    $picture=getParameter('image');
+    $coreContact->getImagePreview($picture);
     return;
 }
 
@@ -753,6 +775,9 @@ function getAction()
         return 'uploadCSV';
     }elseif(getParameter('action')=='newContact' || getParameter('action')=='editContact'){
         return "templateContact";
+    }elseif(getParameter('action')=='getImageTmp'){
+        //obtener imagen contactos externos
+        return 'getImageTmp';
     }elseif(getParameter('action')=='getImageExtContact'){
         //obtener imagen contactos externos
         return 'getImageExtContact';

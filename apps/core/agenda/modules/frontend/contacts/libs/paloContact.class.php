@@ -464,5 +464,27 @@ class paloContact{
             }
     }
     
+    
+    /* funcion para obtener el parent id del contacto seleccionado
+    */
+    
+    function getIdParent($idContact){
+        $data = array($idContact);
+        
+        $query = "select iduser from contacts where id=?";
+
+        $result=$this->_DB->getFirstRowQuery($query,false,$data);
+        
+        if($result===FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else{
+                return $result[0];
+            }
+        
+    }
+    
+    
+    
 }
 ?>

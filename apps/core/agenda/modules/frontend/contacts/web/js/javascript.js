@@ -39,7 +39,7 @@ function formContact(){
         },
         before: function (files)
         {
-           // $('#details, #previews').empty();
+            $('#details, #previews').empty();
             $('#msg-text').html('Uploading ' + files.length + ' file(s)...');
         },
         each: function (file, errors)
@@ -48,9 +48,7 @@ function formContact(){
 
             if (errors.length > 0)
             {
-                $("#message_area").slideDown();
-                $("#msg-text").removeClass("alert-success").addClass("alert-danger");
-                $('#msg-text').html('Error uploading your file');
+                showElxUFMsgBar('error','Error uploading your file');
 
                 $.each(errors, function(i, error)
                 {
@@ -58,26 +56,19 @@ function formContact(){
                 });
             }
 
-            //$('#details').append('<p>name: ' + file.name + ', type: ' + file.type + ', size:' + file.size + errorsDisp + '</p>');
         },
         success: function (response)
         {
             var response = $.parseJSON(response);
             if(response.error !== ''){
-                alert(response.error);
+                showElxUFMsgBar('error',response.error);
             }else{
                 //alert(response.message);
+                //console.debug(response);
                 //guardo en un hidden
-                $('input[name=image]').val(response.message);
+                $('input[name=image]').val(response.message['name']);
+                $('#previews').append($('<img>', {'src': response.message['url'], 'width': 200}));
             }
-           //console.debug(response);
-           /* alert(response.error)
-            $.each(response.urls, function(i, url)
-            {
-                $('#previews').append($('<img>', {'src': url, 'width': 200}));
-            });
-
-            $('#msg-text').html(response.message);*/
         }
     });
 }
@@ -235,24 +226,6 @@ function cancelContact(){
     );       
 }
 
-function downloadCSV(){
-    showElastixUFStatusBar("Loading...");
-    var arrAction = new Array();
-    arrAction["menu"]="contacts";
-    arrAction["action"]="downloadCSV";
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-        function(arrData,statusResponse,error){
-            hideElastixUFStatusBar();
-            if(error != ''){
-                alert(error);
-            }else{
-                
-            }
-        }
-    );       
-}
-
 function deleteContacts(msg){
     if(!confirmSubmit(msg))
         return false;
@@ -293,7 +266,7 @@ function uploadFile(){
         },
         success: function (response)
         {
-            //var response = $.parseJSON(response);
+            var response = $.parseJSON(response);
             if(response.error !== ''){
                 showElxUFMsgBar('error',response.error);
             }else{

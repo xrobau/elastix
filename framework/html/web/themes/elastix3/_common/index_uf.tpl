@@ -10,6 +10,7 @@
         {$HEADER_LIBS_JQUERY}
         <script type='text/javascript' src="{$WEBCOMMON}js/jssip-0.3.0.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/bootstrap.min.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/bootstrap-paginator.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/jquery-title-alert.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/base.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/uf.js"></script>

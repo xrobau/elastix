@@ -1,7 +1,4 @@
 /* Basic Styles */
-.oculto{
-    display:none;
-}
 .icn_m{
     display:inline-block;
     font-size:18pt;
@@ -69,6 +66,7 @@
 }
 #paginationdiv{
     margin-left:50px;
+    min-height:50px;
 }
 #b1_1{
     border-right: 1px solid rgb(204, 204, 204);			
@@ -184,6 +182,7 @@
     float:left;
     width:100%;
     display:none;
+    padding:10px
 }
 #email_contentdiv{
     margin-top:3px;
@@ -289,10 +288,14 @@
     font-weight: bold;	
 }
 .st:hover{
-    olor:rgba(110,0,0,1);	
+    color:rgba(110,0,0,1);	
 }
 .elx_email_pag_bar{
     display:inline-block;
+}
+.elx_email_pag_btn > .btn > .glyphicon{
+    height: 18px!important;
+    width: 18px!important;
 }
 #elx_email_mv_wtag{
     display:inline;
@@ -305,6 +308,56 @@
 }
 #elx_email_mark_itag{
     display:none;
+}
+#elx_email_msg_arrows{
+    float:right;
+}
+#elx_bodymsg_subject{
+    font-weight: normal;
+}
+#elx_bodymsg_subject > h1{
+    font-size:25px;
+    padding: 0px;
+    margin: 0px;
+}
+#elx_bodymsg_header{
+    margin-top:10px;
+    padding-top:10px;
+    border-top: 1px solid rgb(204, 204, 204);
+}
+#elx_bodymsg_theader{
+    border:0;
+}
+.elx_bodymsg_trheader{
+    font-size:11px;
+}
+.elx_bodymsg_trheader > td{
+    width:auto;
+    padding-right: 4px;
+    padding-bottom: 2px;
+    vertical-align: top;
+}
+td.elx_bodymsg_tdheader:first-child{
+    font-weight:bold;
+}
+#elx_bodymsg_attachment{
+    min-height:22px;
+    margin-top:10px;
+    padding-left:10px;
+    border-top: 1px solid rgb(204, 204, 204);
+}
+.elx_bodymsg_file_att{
+    padding: 2px;
+    vertical-align: top;
+    font-size:13px;
+    margin:2px;
+    background-color:#DFDFDF;
+    display: inline-block;
+    height: 20px;
+}
+#elx_bodymsg_body{
+    padding-top:10px;
+    border-top: 1px solid rgb(204, 204, 204);
 }
 /*****************************************************/
 /*    Styles for screen 960px and lower             */
@@ -397,8 +450,6 @@
 @media only screen and (max-width : 500px) {
     .elx_email_pag_btn > .btn > .glyphicon{
         display: inline-block!important;
-        height: 18px!important;
-        width: 18px!important;
     }
     #elx_email_mv_wtag{
         display:none;

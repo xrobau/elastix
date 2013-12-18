@@ -263,7 +263,7 @@ class paloImap {
                 $end=-1;
             }
             for($i=$start; $i > $end ; $i--){
-                $overview = imap_fetch_overview($this->getConnection(),$listUID[$i],FT_UID);
+                $overview = imap_fetch_overview($this->connection,$listUID[$i],FT_UID);
                 if($overview!==false && count($overview)>0){
                     
                     $emails[]= array("from" => isset($overview[0]->from)?$overview[0]->from:'',
@@ -296,7 +296,7 @@ class paloImap {
             
             //procedemos a mover los mensaje a la nueva carpeta. Usamos la bandera 'CP_UID', porque
             //pasamos como parametros los UIDs de los mensajes en lugar de la secuencia
-            $result=imap_mail_move($this->getConnection(), implode(",",$listUID), imap_utf7_encode($new_folder) ,CP_UID);
+            $result=imap_mail_move($this->connection, implode(",",$listUID), imap_utf7_encode($new_folder) ,CP_UID);
             if($result==false){
                 //algo paso devolvemos el error
                 $this->errMsg="Imap_move failed: " . imap_last_error();
@@ -304,7 +304,7 @@ class paloImap {
             }else{
                 //despues d eusar las funciones imap_mail_move or imap_mail_copy or imap_delete es necesary usar la 
                 //funcion imap_expunge
-                imap_expunge($this->getConnection()); 
+                imap_expunge($this->connection); 
                 return true;
             }
         }else{
@@ -382,7 +382,7 @@ class paloImap {
             }
             
             //eliminamos los mensajes definitivamente del buzon
-            imap_expunge($this->getConnection()); 
+            imap_expunge($this->connection); 
             return true;
         }else{
             $this->errMsg=_tr("At_least_one");
@@ -393,7 +393,49 @@ class paloImap {
     function readEmailMsg($uid){
         $message=array();
         //primero leemos la cabecera del mensaje
+        // usamos la funcion imap_rfc822_parse_headers en lugar de imap_headerinfo porque
+        // la funcion imap_header_info solo acepta message number en ludar de uid
+        // como la function imap_rfc822_parse_headers recive un header a parsear
+        // primero leemos el header con la funcion imap_fetchheader y luego
+        // parseamos el mismo
         
+        $overview=imap_fetchheader($this->connection,$uid,FT_UID);
+        if($overview!==false && $overview!=''){
+            $header=imap_rfc822_parse_headers ($overview);
+            //devuelvo solo la parte del header que me interesa
+            $message['header']['to']=$header->to;
+            $message['header']['toaddress']['tag']=_tr('To');
+            $message['header']['toaddress']['content']=$header->toaddress;
+            $message['header']['from']=$header->from;
+            $message['header']['fromaddress']['tag']=_tr('From');
+            $message['header']['fromaddress']['content']=$header->fromaddress;
+            
+            if(isset($header->cc)){
+                $message['header']['cc']=$header->cc;
+                $message['header']['ccaddress']['tag']=_tr('CC');
+                $message['header']['ccaddress']['content']=$header->ccaddress;
+            }
+            if(isset($header->bcc)){
+                $message['header']['bcc']=$header->bcc;
+                $message['header']['bccaddress']['tag']=_tr('BCC');
+                $message['header']['bccaddress']['content']=$header->bccaddress;
+            }
+            if(isset($header->date)){
+                $message['header']['date']['tag']=_tr('Date');
+                $message['header']['date']['content']=$header->date;
+            }
+            //$message['header']['reply_to']=isset($header->reply_to)?$header->reply_to:'';
+            //$message['header']['sender']=isset($header->sender)?$header->sender:'';
+            //$message['header']['return_path']=isset($header->return_path)?$header->return_path:'';
+            $message['header']['subject']=isset($header->subject)?$header->subject:_tr('No Subject');
+            if($message['header']['subject']===''){
+                $message['header']['subject']=_tr('No Subject');
+            }
+        }else{
+            //no exist un mensaje con dicho uid
+            $this->errMsg=_tr('Messages does not exist');
+            return false;
+        }
         
         //leemos el mensaje en si
         $pMessage=new paloImapMessage($this->connection,$uid);
@@ -404,10 +446,6 @@ class paloImap {
         
         return $message;
     }
-}
-
-class paloImapHeader{
-    
 }
 
 /**
@@ -568,8 +606,6 @@ class paloImapMessage{
         //get msg structure
         $this->structure = imap_fetchstructure($this->paloImap, $this->uid, FT_UID);
         
-        print_r($this->structure);
-        
         if (!isset($this->structure->parts))  // simple
             $this->getpart($this->structure,0);  // pass 0 as part-number
         else {  // multipart: cycle through each part
@@ -611,9 +647,9 @@ class paloImapMessage{
                 // Messages may be split in different parts because of inline attachments,
                 // so append parts together with blank row.
                 if (strtolower($p->subtype)=='plain')
-                    $this->inline_parts[$partno]['plaintext'][]= trim($data);
+                    $this->inline_parts['plaintext'][]= trim($data)."\n\n";
                 else
-                    $this->inline_parts[$partno]['html'][]= array('data'=>$data,'charset'=>$params['charset']);
+                    $this->inline_parts['html'][]= array('data'=>$data,'charset'=>$params['charset'])."<br><br>";
             }
         }
 
@@ -625,7 +661,7 @@ class paloImapMessage{
         elseif ($p->type==2) {
             $data = $this->decodeData($p,$partno);
             if($data){
-                $this->inline_parts[$partno]['plaintext'][]= trim($data);
+                $this->inline_parts['plaintext'][]= trim($data)."\n\n";
             }
         }
 
@@ -651,12 +687,12 @@ class paloImapMessage{
         return $data;
     }
     
-    /*
-    function downloadAttachment($imap, $uid, $partNum, $encoding, $path) {
-        $partStruct = imap_bodystruct($imap, imap_msgno($imap, $uid), $partNum);
     
-        $filename = $partStruct->dparameters[0]->value;
-        $message = imap_fetchbody($imap, $uid, $partNum, FT_UID);
+    function downloadAttachment($partNum, $encoding) {
+        $this->structure = imap_bodystruct($this->connection, imap_msgno($this->connection, $this->uid), $partNum);
+    
+        $filename = $this->structure->dparameters[0]->value;
+        $message = imap_fetchbody($this->connection, $this->uid, $partNum, FT_UID);
     
         switch ($encoding) {
             case 0:
@@ -682,7 +718,7 @@ class paloImapMessage{
         header("Cache-Control: must-revalidate");
         header("Pragma: public");
         echo $message;
-    }*/
+    }
 }
 
 

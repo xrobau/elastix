@@ -138,6 +138,8 @@ function show_email_msg(){
                 
                 elx_mail_messages.html(messaje_list);
                 elx_bodymail.hide(10);
+                $("#elx-bodymsg-tools").hide(10);
+                $("#tools-paginationdiv").show(10);
                 elx_mail_messages.show(10);
             }     
     });
@@ -179,6 +181,8 @@ function show_messages_folder(folder){
                 
                 elx_mail_messages.html(messaje_list);
                 elx_bodymail.hide(10);
+                $("#elx-bodymsg-tools").hide(10);
+                $("#tools-paginationdiv").show(10);
                 elx_mail_messages.show(10);
             }     
     });
@@ -297,6 +301,7 @@ function delete_msg_trash(){
     }
 }
 function view_body(UID){
+    showElastixUFStatusBar("Loading...");
     var arrAction = new Array();
     arrAction["menu"]="home";
     arrAction["action"]="view_bodymail";
@@ -304,15 +309,69 @@ function view_body(UID){
     arrAction["rawmode"]="yes";
     request("index.php", arrAction, false,
             function(arrData,statusResponse,error){
+                hideElastixUFStatusBar();
                 if(error!=""){
                     alert(error);
                 }else{
-                    //$("#elx_bodymail").html("<p>"+arrData['body']+"</p>");
+                    createBodyMsg(arrData);
                     elx_mail_messages.hide(10);
-                    $("#elx_bodymail").show(10);
+                    $("#tools-paginationdiv").hide(10);
+                    elx_bodymail.show(10);
+                    $("#elx-bodymsg-tools").show(10);
                     $('#'+UID).removeClass('elx_unseen_email').addClass('elx_seen_email');
                 }     
         });
+}
+function createBodyMsg(arrData){
+    
+    var subject="<div id='elx_bodymsg_subject'>";
+    subject +="<h1>"+arrData['header']['subject']+"</h1>";
+    subject +="</div>";
+    
+    var hTable=new Array('fromaddress','toaddress','date','ccaddress','bccaddress');
+    var header="<div id='elx_bodymsg_header'>";
+    header +="<table id='elx_bodymsg_theader'>";
+    for( var x in hTable){
+        if(typeof arrData['header'][hTable[x]] !== 'undefined'){
+            if(arrData['header'][hTable[x]]['content'] != ''){
+                header +="<tr class='elx_bodymsg_trheader'>";
+                header +="<td class='elx_bodymsg_tdheader'>"+arrData['header'][hTable[x]]["tag"]+":</td>";
+                header +="<td class='elx_bodymsg_tdheader'>"+arrData['header'][hTable[x]]["content"]+"</td>";
+                header +='</tr>';
+            }
+        }
+    }
+    header +="</table>";
+    header +="</div>";
+    
+    var divattachment='';
+    if(typeof arrData['attachment'] !== 'undefined'){
+        var attachment=arrData['attachment'];
+        if(attachment.length > 0){
+            divattachment="<div id='elx_bodymsg_attachment'>";
+            divattachment +="<img src='web/apps/home/images/Paper-Clip.png' style='background-color: white;'  class='elx_bodymsg_file_att' />";
+            for( var i=0; i<attachment.length ; i++){
+                divattachment +="<div class='elx_bodymsg_file_att'><a href='index.php?menu=home&action=download_attach&rawmode=yes&enc="+arrData['attachment'][i]['enc']+"&partnum="+arrData['attachment'][i]['partNum']+"'>"+arrData['attachment'][i]['name']+"</a></div>";
+            }
+            divattachment +="</div>";
+        }
+    }
+    
+    
+    var content="<div id='elx_bodymsg_body'>";
+    if(typeof arrData['body']['html']!=='undefined'){
+        for(var x in arrData['body']['html']){
+            content +=arrData['body']['html'][x]+'</br></br>';
+        }
+    }else if(typeof arrData['body']['plaintext']!=='undefined'){
+        for(var x in arrData['body']['plaintext']){
+            content +=arrData['body']['plaintext'][x]+'</br></br>';
+        }
+    }
+    content +="</div>";
+
+    var bodymail=subject+header+divattachment+content;
+    elx_bodymail.html(bodymail);
 }
 
 

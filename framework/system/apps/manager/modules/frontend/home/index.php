@@ -201,12 +201,12 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         return $jsonObject->createJSON();
     }
     
-    $smarty->assign("ICON_TYPE", "web/apps/$module_name/images/mail2.png");
-   
-    $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m" id="email_new"><span class="lp ml10 glyphicon glyphicon-envelope"></span></div>
-    <div class="icn_m" id="email_refresh"><span class="lp ml10 glyphicon glyphicon-refresh"></span></div>  
-    <div class="icn_m" id="email_trash"><span class="lp ml10 glyphicon glyphicon-trash"></span></div> 
-    <div class="icn_m" id="filter_but"><span class="lp ml10 glyphicon glyphicon-search"></span></div>');
+    $smarty->assign("ICON_TYPE","web/apps/$module_name/images/mail2.png");
+ /*the red menu with images*/   
+    $smarty->assign("CONTENT_OPT_MENU",'<div class="icn_m" id="email_new"><span class="lp ml10 glyphicon glyphicon-envelope" title='._tr("New").' '._tr("Mail").'></span></div>
+    <div class="icn_m" id="email_refresh"><span class="lp ml10 glyphicon glyphicon-refresh" title='._tr("Refresh").'></span></div>  
+    <div class="icn_m" id="email_trash"><span class="lp ml10 glyphicon glyphicon-trash" title='._tr("Trash").'></span></div> 
+    <div class="icn_m" id="filter_but"><span class="lp ml10 glyphicon glyphicon-search" title='._tr("Search").'></span></div>');
     
     $mark_opt['seen']=_tr("Seen");
     $mark_opt['unseen']=_tr("Unseen");
@@ -214,11 +214,20 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $mark_opt['unflagged']=_tr("No Important");
     $smarty->assign("ELX_MAIL_MARK_OPT",$mark_opt);
     $smarty->assign("MOVE_TO",_tr("Move to"));
-    $smarty->assign("MARK_AS","Mark message as");
+    $smarty->assign("MARK_AS",_tr("Mark message as"));
     
-    $smarty->assign("NO_EMAIL_MSG",_tr("There is not message"));
+    $smarty->assign("NO_EMAIL_MSG",_tr("There are no messages in this mailbox"));
     $smarty->assign("VIEW",_tr("View"));
     $smarty->assign("SELECTED_VIEW_FILTER",$filter_view);
+    
+    $smarty->assign("ACTION_MSG", _tr('Actions'));
+    $arrActionsMsg['replay']=_tr('Replay');
+    $arrActionsMsg['replay_all']=_tr('Replay All');
+    $arrActionsMsg['forward']=_tr('Forward');
+    $arrActionsMsg['delete']=_tr('Delete');
+    $arrActionsMsg['flag_important']=_tr('Flag as Important');
+    $arrActionsMsg['flag_unimportant']=_tr('Flag as Unimportant');
+    $smarty->assign("ELX_EMAIL_MSG_ACT", $arrActionsMsg);
     
     $html = $smarty->fetch("file:$local_templates_dir/form.tpl");
     $contenidoModulo = "<div>".$html."</div>";
@@ -405,11 +414,11 @@ function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
 function getAction()
 {
     if(getParameter("action")=="view_bodymail"){
-      return "view_bodymail";  
+      return _tr("view_bodymail");  
     }elseif(getParameter("action")=="mv_msg_to_folder"){
       return "mv_msg_to_folder";  
     }elseif(getParameter("action")=="mark_msg_as"){
-      return "mark_msg_as";  
+      return _tr("mark_msg_as");  
     }elseif(getParameter("action")=="delete_msg_trash"){
       return "delete_msg_trash";  
     }elseif(getParameter("action")=="toggle_important"){

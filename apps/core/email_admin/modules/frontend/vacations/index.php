@@ -91,7 +91,7 @@ function showVacationSettings($smarty, $module_name, $local_templates_dir, &$pDB
         $my_vacation[_tr('FROM')]= date('Y-m-d');
         $my_vacation[_tr('TO')]= date('Y-m-d');
         $my_vacation['EMAIL_ADDRESS']= $_SESSION['elastix_user'];
-        $my_vacation['EMAIL_SUBJECT']= _tr("Auto-Reply: Out of the office");
+        $my_vacation['EMAIL_SUBJECT']= "Auto-Reply: Out of the office";
         $my_vacation['EMAIL_CONTENT']= "I will be out of the office until {END_DATE}. \n\n----\nBest Regards.";
     }else{
         $my_vacation[_tr('FROM')]= $my_vacation['init_date'];

@@ -632,7 +632,7 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
 {
     global $arrCredentials;
     $jsonObject = new PaloSantoJSON();
-    $padress_book = new coreContact($pDB);
+    $coreContact = new coreContact($pDB);
     $pACL         = new paloACL($pDB_2);
     $id_user      = $arrCredentials['idUser'];
     
@@ -640,33 +640,33 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
     
     //obtener los parametros del filtro
     $filters['ftype_contacto']=getParameter('ftype_contacto'); 
-    $validatedfilters= $padress_book->validatedFilters($filters);
+    $validatedfilters= $coreContact->validatedFilters($filters);
 
     if(!empty($id_user))
     {
         if($validatedfilters['table']=="internal"){
-            $extension = $padress_book->sqlContact->getExtension($idContact);
+            $extension = $coreContact->sqlContact->getExtension($idContact);
         }else{
-            $extension = $padress_book->sqlContact->getPhone($idContact);
+            $extension = $coreContact->sqlContact->getPhone($idContact);
         }
             
         if($extension === false)
         {
-            $smarty->assign("MSG_ERROR_FIELD",$padress_book->sqlContact->getErrorMsg());
-            $jsonObject->set_error($padress_book->sqlContact->getErrorMsg());
+            $smarty->assign("MSG_ERROR_FIELD",$coreContact->sqlContact->getErrorMsg());
+            $jsonObject->set_error($coreContact->sqlContact->getErrorMsg());
             return $jsonObject->createJSON();
         }
 
-        $dataExt = $padress_book->sqlContact->Obtain_Protocol_from_Ext($id_user);
+        $dataExt = $coreContact->sqlContact->Obtain_Protocol_from_Ext($id_user);
     
         if($dataExt === FALSE)
         {
-            $smarty->assign("MSG_ERROR_FIELD",$padress_book->sqlContact->getErrorMsg());
-            $jsonObject->set_error($padress_book->getErrorMsg());
+            $smarty->assign("MSG_ERROR_FIELD",$coreContact->sqlContact->getErrorMsg());
+            $jsonObject->set_error($coreContact->getErrorMsg());
             return $jsonObject->createJSON();
         }
         
-        $result = $padress_book->Call2Phone($extension,$dataExt['dial'],$dataExt['exten'],$dataExt['context'],$dataExt['clid_name'],$dataExt['code']);
+        $result = $coreContact->Call2Phone($extension,$dataExt['dial'],$dataExt['exten'],$dataExt['context'],$dataExt['clid_name'],$dataExt['code']);
         if(!$result)
         {
             $smarty->assign("MSG_ERROR_FIELD",_tr("The call couldn't be realized"));
@@ -676,8 +676,8 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
         
     }
     else{
-        $smarty->assign("MSG_ERROR_FIELD",$padress_book->getErrorMsg());
-        $jsonObject->set_error($padress_book->getErrorMsg());
+        $smarty->assign("MSG_ERROR_FIELD",$coreContact->getErrorMsg());
+        $jsonObject->set_error($coreContact->getErrorMsg());
         return $jsonObject->createJSON();
     }
 

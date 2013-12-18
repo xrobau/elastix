@@ -8,5 +8,5 @@
      {$filter_value.LABEL}
      {$filter_value.INPUT}
      
-     <button class="btn btn-default btn-sm" type="button" name="searchContacts" onclick='elxGridSearch(1);'> <span class="glyphicon glyphicon-search"></span> Search</button>
+     <button class="btn btn-default btn-sm" type="button" name="searchContacts" onclick='elxGridSearch(1);'> <span class="glyphicon glyphicon-search" alt="click here for searching"></span> Search</button>
 </div>

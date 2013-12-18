@@ -451,26 +451,17 @@ class coreContact{
     }
     
     
-/************************ funciones para la llamar al contacto y la transferencia de una llamada **************************************************************************************************************/
+/************************ funcion para la llamar al contacto **************************************************************************************************************/
 
     function Call2Phone($extension_to_call,$channel, $exten, $context, $callerid, $code)
     {
         //validamos $extension_to_call, $context, $callerid
         
-        if(!preg_match("/^[[:digit:]]+$/", $extension_to_call)){
+        if(!preg_match("/^[0-9]+$/", $extension_to_call)){
             $this->errMsg=_tr("Invalid parameter");
             return false;
         }
-        /*
-        if(!preg_match("/^[[:digit:]]+$/", $context)){
-            $this->errMsg=_tr("Invalid parameter");
-            return false;
-        }
-
-        if(!preg_match("/^[[:digit:]]+$/", $callerid)){
-           $callerid="$exten";
-        }
-        */
+        
         $context="$code-$context";
         $callerid="$callerid <$exten>";
         
@@ -492,5 +483,10 @@ class coreContact{
         }
         return false;
     }  
+    
+/******************* funcion para transferir la llamada *******************************************************************/
+    
+    
+    
 }
 ?>

@@ -51,5 +51,12 @@ $arrLangModule=array(
 "Contact person's current position:" => "Contacto de Persona en posición similar:",
 "Notes:" => "Notas:",
 "Picture:" => "Imagen",
+"Private" => "Privado",
+"Public" => "Público",
+"Internal" => "Internos",
+"External" => "Externos",
+"Phone Directory" => "Directorio Telefónico",
+"Filter" => "Filtro",
+"search" => "buscar",
 );
 ?>

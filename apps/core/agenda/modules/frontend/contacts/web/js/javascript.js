@@ -275,3 +275,24 @@ function uploadFile(){
         }
     });
 }
+
+function callContact(idContact){
+    showElastixUFStatusBar("calling...");
+    var arrAction = new Array();
+    arrAction["menu"]="contacts";
+    arrAction["action"]="call2phone";
+    arrAction["rawmode"]="yes";
+    arrAction["idContact"]=idContact;
+    arrAction["ftype_contacto"]=$("select[name='ftype_contacto'] option:selected").val();
+
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            hideElastixUFStatusBar();
+            if(error != ''){
+                showElxUFMsgBar('error',error);
+            }else{
+                //
+            }
+        }
+    );       
+}

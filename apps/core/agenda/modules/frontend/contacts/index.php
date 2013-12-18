@@ -75,6 +75,12 @@ function _moduleContent(&$smarty, $module_name)
         case "getImageTmp":
             $content = getImageTmp($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
+        case "call2phone":
+            $content = call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            break;
+        case "transfer_call":
+            $content = transferCALL($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            break;
         default:
             $content = reportContact($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
@@ -236,9 +242,12 @@ function reportContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                     $tmp[]="N/A";
                 }
                 
-                $tmp[]="<span class='glyphicon glyphicon-earphone'></span>";
+                //$tmp[]="<span class='glyphicon glyphicon-earphone'></span>";
+                $tmp[]="<a href='#' onclick='callContact({$value['id']})'><span class='glyphicon glyphicon-earphone'></span></a>";
+                
                 if($validatedfilters['table']=="internal"){
-                    $tmp[]=_tr('Transfer');
+                    //$tmp[]=_tr('Transfer');
+                    $tmp[]="<a href='#' onclick='transferCall({$value['id']})'>"._tr('Transfer')."</a>";
                 }else{
                     $tmp[]="N/A";
                 }
@@ -575,7 +584,7 @@ function deleteContacts($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     }else{
        // $coreContact->deleteImages($newArrayIds);
         $jsonObject->set_message(_tr("Deleted users correctly"));
-        $contenidoModulo =reportContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf);
+        $contenidoModulo = reportContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf);
         $jsonObject->set_message($contenidoModulo);
     }
     
@@ -617,6 +626,62 @@ function uploadCSV($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
     }
     return $jsonObject->createJSON();
 
+}
+
+function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
+{
+    global $arrCredentials;
+    $jsonObject = new PaloSantoJSON();
+    $padress_book = new coreContact($pDB);
+    $pACL         = new paloACL($pDB_2);
+    $id_user      = $arrCredentials['idUser'];
+    
+    $idContact=getParameter('idContact');
+    
+    //obtener los parametros del filtro
+    $filters['ftype_contacto']=getParameter('ftype_contacto'); 
+    $validatedfilters= $padress_book->validatedFilters($filters);
+
+    if(!empty($id_user))
+    {
+        if($validatedfilters['table']=="internal"){
+            $extension = $padress_book->sqlContact->getExtension($idContact);
+        }else{
+            $extension = $padress_book->sqlContact->getPhone($idContact);
+        }
+            
+        if($extension === false)
+        {
+            $smarty->assign("MSG_ERROR_FIELD",$padress_book->sqlContact->getErrorMsg());
+            $jsonObject->set_error($padress_book->sqlContact->getErrorMsg());
+            return $jsonObject->createJSON();
+        }
+
+        $dataExt = $padress_book->sqlContact->Obtain_Protocol_from_Ext($id_user);
+    
+        if($dataExt === FALSE)
+        {
+            $smarty->assign("MSG_ERROR_FIELD",$padress_book->sqlContact->getErrorMsg());
+            $jsonObject->set_error($padress_book->getErrorMsg());
+            return $jsonObject->createJSON();
+        }
+        
+        $result = $padress_book->Call2Phone($extension,$dataExt['dial'],$dataExt['exten'],$dataExt['context'],$dataExt['clid_name'],$dataExt['code']);
+        if(!$result)
+        {
+            $smarty->assign("MSG_ERROR_FIELD",_tr("The call couldn't be realized"));
+            $jsonObject->set_error(_tr("The call couldn't be realized"));
+            return $jsonObject->createJSON();
+        }
+        
+    }
+    else{
+        $smarty->assign("MSG_ERROR_FIELD",$padress_book->getErrorMsg());
+        $jsonObject->set_error($padress_book->getErrorMsg());
+        return $jsonObject->createJSON();
+    }
+
+    return $jsonObject->createJSON();
 }
 
 function createForm(){
@@ -781,6 +846,10 @@ function getAction()
     }elseif(getParameter('action')=='getImageExtContact'){
         //obtener imagen contactos externos
         return 'getImageExtContact';
+    }elseif(getParameter('action')=='call2phone'){
+        return 'call2phone';
+    }elseif(getParameter('action')=='transfer_call'){
+        return 'transfer_call';
     }else{
         return "report";
     }

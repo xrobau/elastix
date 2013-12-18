@@ -450,5 +450,47 @@ class coreContact{
         return;
     }
     
+    
+/************************ funciones para la llamar al contacto y la transferencia de una llamada **************************************************************************************************************/
+
+    function Call2Phone($extension_to_call,$channel, $exten, $context, $callerid, $code)
+    {
+        //validamos $extension_to_call, $context, $callerid
+        
+        if(!preg_match("/^[[:digit:]]+$/", $extension_to_call)){
+            $this->errMsg=_tr("Invalid parameter");
+            return false;
+        }
+        /*
+        if(!preg_match("/^[[:digit:]]+$/", $context)){
+            $this->errMsg=_tr("Invalid parameter");
+            return false;
+        }
+
+        if(!preg_match("/^[[:digit:]]+$/", $callerid)){
+           $callerid="$exten";
+        }
+        */
+        $context="$code-$context";
+        $callerid="$callerid <$exten>";
+        
+        $astMang=AsteriskManagerConnect($errorM);
+        if($astMang==false){
+            $this->errMsg=$errorM;
+            return false;
+        } else{
+            $salida = $astMang->Originate($channel,
+                       $extension_to_call, $context, $priority=1,
+                       $application=NULL, $data=NULL,
+                       $timeout=NULL, $callerid);
+            
+            $astMang->disconnect();
+            if (strtoupper($salida["Response"]) != "ERROR") {
+                return true;
+            }else
+                return false;
+        }
+        return false;
+    }  
 }
 ?>

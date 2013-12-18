@@ -484,7 +484,80 @@ class paloContact{
         
     }
     
+/****************************** funcion para llamar y transferencia*************************************************************************************************************/    
     
+    /* funcion que obtiene le extension del contacto interno
+       tabla ("acl_user")
+    */
     
+    function getExtension($idContact){
+        global $arrCredentials;
+        
+        $data = array($arrCredentials['id_organization'], $idContact);
+        $query="select acu.extension from acl_user acu ".
+                    "join acl_group acg on acu.id_group = acg.id ".
+                    "join organization org on acg.id_organization = org.id ".
+                        "where org.id=? AND acu.id=?";
+
+        $result=$this->_DB->getFirstRowQuery($query,false,$data);
+       
+        if($result===FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else{
+                return $result[0];
+            }
+    }
+    
+    /* funcion que obtiene lel numero de telefono a cual se va a realizar la 
+    llamada
+    */
+    
+    function getPhone($idContact){
+        global $arrCredentials;
+        
+        $data = array($idContact);
+
+        $query="select work_phone from contacts where id=?";
+       
+        $result=$this->_DB->getFirstRowQuery($query,false,$data);
+        if($result===FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else{
+                return $result[0];
+            }
+    }        
+
+    function Obtain_Protocol_from_Ext($id_user)
+    {
+        global $arrCredentials;
+
+        $data = array($id_user,$arrCredentials['domain']);
+        $query="select e.context, e.exten, e.dial, e.clid_name ".
+                    "FROM extension e JOIN acl_user u ON e.exten=u.extension ".
+                       "WHERE u.id=? AND e.organization_domain=?";
+
+        $dataExt=$this->_DB->getFirstRowQuery($query,true,$data);
+       
+        if($dataExt===FALSE){
+            $this->errMsg = $this->_DB->errMsg;
+            return false;
+        }else{
+                $data = array($arrCredentials['id_organization']);
+                $query="select code from organization where id=?";
+                $code=$this->_DB->getFirstRowQuery($query,true,$data);
+                if($code===FALSE){
+                    $this->errMsg = $this->_DB->errMsg;
+                    return false;
+                }else{
+                    $dataExt['code']=$code["code"];
+                    return $dataExt;
+                }
+            }
+    }
+    
+
+   
 }
 ?>

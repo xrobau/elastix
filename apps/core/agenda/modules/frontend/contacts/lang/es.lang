@@ -25,9 +25,31 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
+  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $
+  $Id: en.lang,v 1.1 2013-12-18 12:48:01 achuto armando@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-
+"Picture" => "Figura",
+"Ext / Phone" => "Extensión / Teléfono",
+"Name" => "Nombre",
+"Call" => "Llamar",
+"Transfer" => "Transferencia:",
+"Type Contact" => "Tipo de Contacto:",
+"Contact Type:" => "Tipo de Contacto",
+"First Name: " => "Primer Nombre:",
+"Last Name:" => "Apellido:",
+"Work's Phone Number:" => "Número Telefonico de Trabajo:",
+"Cell Phone Number (SMS):" => "Número Telefónico Celular:",
+"Home Phone Number:" => "Número Telefónico de Casa:",
+"FAX Number 1:" => "Número Fax 1:",
+"FAX Number 2:" => "Número Fax 2:",
+"Province:" => "Provincia:",
+"City:" => "Ciudad:",
+"Address:" => "Dirección:",
+"Company:" => "Compañia:",
+"Contact person in your Company:" => "Contacto de Persona en tu compañia:",
+"Contact person's current position:" => "Contacto de Persona en posición similar:",
+"Notes:" => "Notas:",
+"Picture:" => "Imagen",
 );
 ?>

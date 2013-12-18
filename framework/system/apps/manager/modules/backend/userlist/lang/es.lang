@@ -113,5 +113,6 @@ $arrLangModule=array(
 "Error Extension Number. Already exits a extension with same pattern" => "Ya existe una extension con el mismo número",
 "Already exits a extension with same pattern" => "Existe una extension con el mismo número",
 "Error Extension Number. " => "Error ",
+"Already exits a fax extension with same pattern" => "Existe una extension de fax con el mismo número",
 );
 ?>

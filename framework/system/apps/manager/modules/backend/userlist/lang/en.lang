@@ -93,6 +93,7 @@ $arrLangModule=array(
 "Us_countrycode" => "Defines the country code. ",
 "Us_areacode" => "Defines the area code. ",
 "Us_emailquota" => "Defines the quantity of email (Mb). ",
-"Us_picture" => "attach a photo/image for your identification. "
+"Us_picture" => "attach a photo/image for your identification. ",
+"Already exits a extension with same pattern" => "Already exits a extension with same pattern",
 );
 ?>

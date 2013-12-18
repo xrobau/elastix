@@ -106,6 +106,12 @@ $arrLangModule=array(
 "all" => "Todos",
 "Used Space" => "Espacio Utilizado",
 "Email Quota" => "Cuota de Mail",
-
+"Passwords don't match" => "Contraseñas no coinciden",
+"Password can not be empty"=> "Contraseña no puede quedar vacia",
+"Extension number and Fax number can not be equal" => "Número extension y número de fax no pueden ser iguales",
+"You must select a organization" => "Tu debes seleccionar una organización",
+"Error Extension Number. Already exits a extension with same pattern" => "Ya existe una extension con el mismo número",
+"Already exits a extension with same pattern" => "Existe una extension con el mismo número",
+"Error Extension Number. " => "Error ",
 );
 ?>

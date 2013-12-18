@@ -133,6 +133,7 @@ class paloMyExten{
             }
                       
         }
+
         return $myexten;
     }
 
@@ -214,6 +215,7 @@ class paloMyExten{
 		    $this->errMsg=_tr("DATABASE ERROR");
 		  }else{		
             $familia="EXTUSER/".$org_code."/".$exten;
+
 			$arrExtension["clid_name"]=$astMang->database_get($familia, "cidname");
 			$arrExtension["clid_number"]=$astMang->database_get($familia, "cidnum");
             $arrExtension["language"]=$astMang->database_get($familia, "language");
@@ -225,6 +227,7 @@ class paloMyExten{
             $arrExtension["number_unavailable"]=$astMang->database_get("CFU/".$org_code, $exten);
 			$arrExtension["call_f_busy"]=($astMang->database_get("CFB/".$org_code, $exten)!="")?"yes":"no";
             $arrExtension["number_busy"]=$astMang->database_get("CFB/".$org_code, $exten);
+            
             return $arrExtension;
           }
     }
@@ -263,6 +266,7 @@ class paloMyExten{
         //validamos el lenguage
         if(!preg_match('/^[[:alpha:]]+$/', $arrProp['language'])){
             $errorData['field'][] = "language_vm";
+              
             $errorBoolean= true;       
         }
         

@@ -27,6 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
+
 $arrLangModule=array(
 "ME_displaynameCID" => "Show the name and extension for this user",
 "ME_extensionnumber" => "show the extension number",
@@ -46,6 +47,21 @@ $arrLangModule=array(
 "ME_playcid" => "Enable/Disable the play CID",
 "ME_palyenvelope" => "Enable/Disable the play envelope",
 "ME_deletevmail" => "Enable/Disable the delete vmail",
+"Call Monitor Settings" => "Call Monitor Settings",
+"Enable/Disable the call waiting" => "Enable/Disable the call waitings",
+"Display Name CID" => "Display Name CID",
+"Call Forward" => "Call Forward",
+"Enable/Disable the status" =>"Enable/Disable the status", 
+"Enable/Disable the call fordward on busy" => "Enable/Disable the call fordward on busy",
+"Enable/Disable the Voicemail Configuration" => "Enable/Disable the voicemail configuration",
+"Status:" => "Status",
+"Defines the email" => "Define el correo electronico",
+"Extension number" => "Extension number",
+"Enable/Disable the delete Vmail" => "Enable/Disable the delete Vmail",
+"Delete Vmail" => "Delete Vmail",
+"Enable/Disable the play CID Option" => "Enable/Disable the play CID Option",
+"Save Configuration" => "Save Configuration",
 
 );
+
 ?>

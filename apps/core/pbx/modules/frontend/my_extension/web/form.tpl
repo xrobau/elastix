@@ -5,8 +5,8 @@
     
     <div class="my_settings">
        <div class="row">
-            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"><button class="button btn btn-default btn-sm" type="button" name="save_new" onclick='editExten()'> <span class="glyphicon glyphicon-ok"></span> Save Configuration</div>
-            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"><input class="button btn btn-default btn-sm" type="submit" name="cancel" value="Cancel"></div>
+            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"><button class="button btn btn-default btn-sm" type="button" name="save_new" onclick='editExten()' title = "Save the Changes"> <span class="glyphicon glyphicon-ok"></span> Save Configuration</div>
+            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"><input class="button btn btn-default btn-sm" type="submit" name="cancel" value="Cancel" title = "Cancel the changes"></div>
         </div>
 
         <div class="row" >
@@ -31,7 +31,7 @@
         <div class="row">
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 name-label"><p>{$language_vm.LABEL}</p></div>
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
-                {$language_vm.INPUT}
+                <p>{$language_vm.INPUT}</p>
             </div>
         </div>
 

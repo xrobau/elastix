@@ -32,6 +32,7 @@ include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoDB.class.php";
 include_once "libs/paloSantoJSON.class.php";
 
+
 function _moduleContent(&$smarty, $module_name)
 {
     //global variables
@@ -48,6 +49,7 @@ function _moduleContent(&$smarty, $module_name)
     
     //actions
     $accion = getAction();
+    $content = "";
     
     switch($accion){
         case 'save':
@@ -93,6 +95,7 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
     
     $html = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr('extension'),$my_exten);
     $contenidoModulo = "<div><form  method='POST' style='margin-bottom:0;' name='$module_name' id='$module_name' action='?menu=$module_name'>".$html."</form></div>";
+   
     return $contenidoModulo;
 }
 
@@ -135,46 +138,48 @@ function saveExtensionSettings($smarty, $module_name, $local_templates_dir, $pDB
         //$jsonObject->set_message($myExten);
     $jsonObject->set_message("Changes were saved succefully");
     }
+
     return $jsonObject->createJSON();
 }
 
 function createForm(){
-    $DND[]=array("id"=>'radio1',"label"=>'Enable',"value"=>"yes");
-    $DND[]=array("id"=>'radio2',"label"=>'Disable',"value"=>"no");
+    $DND[]=array("id"=>'radio1',"label"=>_tr('Enable'),"value"=>"yes");
+    $DND[]=array("id"=>'radio2',"label"=>_tr('Disable'),"value"=>"no");
 
-    $CW[]=array("id"=>'radio3',"label"=>'Enable',"value"=>"yes");
-    $CW[]=array("id"=>'radio4',"label"=>'Disable',"value"=>"no");
+    $CW[]=array("id"=>'radio3',"label"=>_tr('Enable'),"value"=>"yes");
+    $CW[]=array("id"=>'radio4',"label"=>_tr('Disable'),"value"=>"no");
 
-    $CF[]=array("id"=>'radio5',"label"=>'Enable',"value"=>"yes");
-    $CF[]=array("id"=>'radio6',"label"=>'Disable',"value"=>"no");
+    $CF[]=array("id"=>'radio5',"label"=>_tr('Enable'),"value"=>"yes");
+    $CF[]=array("id"=>'radio6',"label"=>_tr('Disable'),"value"=>"no");
 
-    $CFU[]=array("id"=>'radio7',"label"=>'Enable',"value"=>"yes");
-    $CFU[]=array("id"=>'radio8',"label"=>'Disable',"value"=>"no");
+    $CFU[]=array("id"=>'radio7',"label"=>_tr('Enable'),"value"=>"yes");
+    $CFU[]=array("id"=>'radio8',"label"=>_tr('Disable'),"value"=>"no");
 
-    $CFB[]=array("id"=>'radio9',"label"=>'Enable',"value"=>"yes");
-    $CFB[]=array("id"=>'radio10',"label"=>'Disable',"value"=>"no");
+    $CFB[]=array("id"=>'radio9',"label"=>_tr('Enable'),"value"=>"yes");
+    $CFB[]=array("id"=>'radio10',"label"=>_tr('Disable'),"value"=>"no");
 
-    $record_incoming[]=array("id"=>'radio11',"label"=>'Always',"value"=>"always");
-    $record_incoming[]=array("id"=>'radio12',"label"=>'Never',"value"=>"never");
-    $record_incoming[]=array("id"=>'radio13',"label"=>'On-Demand',"value"=>"on_demand");
+    $record_incoming[]=array("id"=>'radio11',"label"=>_tr('Always'),"value"=>"always");
+    $record_incoming[]=array("id"=>'radio12',"label"=>_tr('Never'),"value"=>"never");
+    $record_incoming[]=array("id"=>'radio13',"label"=>_tr('On-Demand'),"value"=>"on_demand");
 
-    $record_outgoing[]=array("id"=>'radio14',"label"=>'Always',"value"=>"always");
-    $record_outgoing[]=array("id"=>'radio15',"label"=>'Never',"value"=>"never");
-    $record_outgoing[]=array("id"=>'radio16',"label"=>'On-Demand',"value"=>"on_demand");
+    $record_outgoing[]=array("id"=>'radio14',"label"=>_tr('Always'),"value"=>"always");
+    $record_outgoing[]=array("id"=>'radio15',"label"=>_tr('Never'),"value"=>"never");
+    $record_outgoing[]=array("id"=>'radio16',"label"=>_tr('On-Demand'),"value"=>"on_demand");
 
-    $status[]=array("id"=>'radio17',"label"=>'Enable',"value"=>"yes");
-    $status[]=array("id"=>'radio18',"label"=>'Disable',"value"=>"no");
+    $status[]=array("id"=>'radio17',"label"=>_tr('Enable'),"value"=>"yes");
+    $status[]=array("id"=>'radio18',"label"=>_tr('Disable'),"value"=>"no");
+    
 
-    $email_attachment[]=array("id"=>'radio19',"label"=>'Yes',"value"=>"yes");
+    $email_attachment[]=array("id"=>'radio19',"label"=>_tr('Yes'),"value"=>"yes");
     $email_attachment[]=array("id"=>'radio20',"label"=>'NO',"value"=>"no");
 
-    $PCID[]=array("id"=>'radio21',"label"=>'Yes',"value"=>"yes");
+    $PCID[]=array("id"=>'radio21',"label"=>_tr('Yes'),"value"=>"yes");
     $PCID[]=array("id"=>'radio22',"label"=>'NO',"value"=>"no");
 
-    $play_envelope[]=array("id"=>'radio23',"label"=>'Yes',"value"=>"yes");
+    $play_envelope[]=array("id"=>'radio23',"label"=>_tr('Yes'),"value"=>"yes");
     $play_envelope[]=array("id"=>'radio24',"label"=>'NO',"value"=>"no");
 
-    $delete_vmail[]=array("id"=>'radio25',"label"=>'Yes',"value"=>"yes");
+    $delete_vmail[]=array("id"=>'radio25',"label"=>_tr('Yes'),"value"=>"yes");
     $delete_vmail[]=array("id"=>'radio26',"label"=>'NO',"value"=>"no");
 
     $arrLang=getLanguagePBX();
@@ -188,18 +193,21 @@ function createForm(){
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         "doNotDisturb"  => array("LABEL"               => _tr("Do Not Disturb:"),
+                                                "DESCRIPTION"            => _tr("Enable/Disable the Don't Disturb"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $DND,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
-                        "callWaiting"  => array("LABEL"               => _tr("Call Waiting:"),
+                        "callWaiting"  => array("LABEL"               => _tr("Call Waiting :"),
+                                                "DESCRIPTION"            => _tr("Enable/Disable the call waiting"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $CW,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         "callForwardOpt"  => array("LABEL"               => _tr("Call Forward:"),
+                                                "DESCRIRPTION"           => _tr("Enable/Disable the call waiting"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $CF,
@@ -212,6 +220,7 @@ function createForm(){
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                     "callForwardBusyOpt"  => array("LABEL"               => _tr("Call Forward on Busy:"),
+                                                "DESCRIPTION"            => _tr("Enable/Disable the call fordward on busy"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $CFB,
@@ -236,6 +245,7 @@ function createForm(){
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         "recordIncoming"  => array("LABEL"               => _tr("Record Incoming:"),
+                                                "DESCRIRPTION"           => _tr("Selects the frequency with that uses this option"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $record_incoming,
@@ -243,42 +253,49 @@ function createForm(){
                                                 "VALIDATION_EXTRA_PARAM" => ""),
 
                         "recordOutgoing"  => array("LABEL"               => _tr("Record Outgoing:"),
+                                                "DESCRIRPTION"           => _tr("Selects the frequency with that uses this option"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $record_outgoing,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "status_vm"   => array("LABEL"               => _tr("Status:"),
+                                                "DESCRIRPTION"           => _tr("Enable/Disable the Voicemail Configuration"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $status,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         "email_vm"   => array( "LABEL"                    => _tr("Email:"),
+                                                "DESCRIRPTION"           => _tr("Defines the email"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "TEXT",
                                                 "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Enter email"),
                                                 "VALIDATION_TYPE"        => "email",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "password_vm"  => array("LABEL"               => _tr("Password:"),
+                                                "DESCRIPTION"            => _tr("Defines your password"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "TEXT",
                                                 "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Password"),
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         "language_vm"  => array("LABEL"               => _tr("Language:"),
+                                                "DESCRIPTION"            => _tr("Select the language for voice recording"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
                                                 "INPUT_EXTRA_PARAM"      => $arrLang,
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         "emailAttachment_vm"   => array("LABEL"               => _tr("Email Attachment:"),
+                                                "DESCRIPTION"            => _tr("Allow attachment files to mail"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $email_attachment,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "playCid_vm"   => array("LABEL"               => _tr("Play CID:"),
+                                                "DESCRIPTION"            => _tr("Enable/Disable the play CID Option"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $PCID,
@@ -291,14 +308,15 @@ function createForm(){
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                             "deleteVmail"   => array("LABEL"               => _tr("Delete Vmail:"),
+                                                "DESCRIPTION"            => _tr("Enable/Disable the delete Vmail"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "OPTION",
                                                 "INPUT_EXTRA_PARAM"      => $delete_vmail,
                                                 "VALIDATION_TYPE"        => "",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
-
-                        
+                     
     );
+     
     return $arrForm;
 }
 function getAction()
@@ -308,6 +326,5 @@ function getAction()
     }else
         return "show";
 }
-
 
 ?>

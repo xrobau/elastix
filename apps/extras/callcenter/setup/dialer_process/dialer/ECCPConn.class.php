@@ -2286,9 +2286,13 @@ LEER_RESUMEN_CAMPANIA;
         if (!$tupla) return array();
 
         // Leer la clasificación por estado de las llamadas de la campaña
-        $sPeticionSQL = 'SELECT COUNT(*) AS n, status FROM calls WHERE id_campaign = ? GROUP BY status';
+        $sPeticionSQL = <<<CLASIFICAR_LLAMADAS
+SELECT COUNT(*) AS n, status FROM calls
+WHERE id_campaign = ? AND ((? IS NULL) OR (datetime_originate >= ?))
+GROUP BY status
+CLASIFICAR_LLAMADAS;
         $recordset = $this->_db->prepare($sPeticionSQL);
-        $recordset->execute(array($idCampania));
+        $recordset->execute(array($idCampania, $sFechaInicio, $sFechaInicio));
         $recordset->setFetchMode(PDO::FETCH_ASSOC);
         $tupla['status'] = array(
             'Pending'   =>  0,  // Llamada no ha sido realizada todavía
@@ -2341,9 +2345,13 @@ LEER_RESUMEN_CAMPANIA;
         if (!$tupla) return array();
 
         // Leer la clasificación por estado de las llamadas de la campaña
-        $sPeticionSQL = 'SELECT COUNT(*) AS n, status FROM call_entry WHERE id_campaign = ? GROUP BY status';
+        $sPeticionSQL = <<<CLASIFICAR_LLAMADAS
+SELECT COUNT(*) AS n, status FROM call_entry
+WHERE id_campaign = ? AND ((? IS NULL) OR (datetime_entry_queue >= ?))
+GROUP BY status
+CLASIFICAR_LLAMADAS;
         $recordset = $this->_db->prepare($sPeticionSQL);
-        $recordset->execute(array($idCampania));
+        $recordset->execute(array($idCampania, $sFechaInicio, $sFechaInicio));
         $recordset->setFetchMode(PDO::FETCH_ASSOC);
         $tupla['status'] = array(
             //'Pending'   =>  0,  // Llamada no ha sido realizada todavía
@@ -2399,7 +2407,7 @@ LEER_STATS_CAMPANIA;
             'WHERE call_entry.id_campaign IS NULL '.
                 'AND call_entry.id_queue_call_entry = queue_call_entry.id '.
                 'AND queue_call_entry.queue = ? '.
-                'AND ((? IS NULL) OR (call_entry.datetime_init >= ?)) '.
+                'AND ((? IS NULL) OR (call_entry.datetime_entry_queue >= ?)) '.
             'GROUP BY status';
         $recordset = $this->_db->prepare($sPeticionSQL);
         $recordset->execute(array($sCola, $sFechaInicio, $sFechaInicio));

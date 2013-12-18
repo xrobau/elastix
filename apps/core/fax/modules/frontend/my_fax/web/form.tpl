@@ -3,8 +3,8 @@
     <div class="my_settings">
 
        <div class="row">
-            <div class="col-md-3"><button class="button btn btn-default btn-sm" type="button" name="save_new" onclick='editFaxExten()'> <span class="glyphicon glyphicon-ok"></span> Save Configuration</div>
-            <div class="col-md-5"><input class="button btn btn-default btn-sm" type="submit" name="cancel" value="Cancel"></div>
+            <div class="col-md-3"><button class="button btn btn-default btn-sm" type="button" name="save_new" onclick='editFaxExten()' Title= "Save your configuration"> <span class="glyphicon glyphicon-ok"></span> Save Configuration</div>
+            <div class="col-md-5"><input class="button btn btn-default btn-sm" Title= "Cancel your configuration" type="submit" name="cancel" value="Cancel"></div>
         </div>        
         
         <div class="row" >

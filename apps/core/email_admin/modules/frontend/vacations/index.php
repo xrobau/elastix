@@ -88,14 +88,14 @@ function showVacationSettings($smarty, $module_name, $local_templates_dir, &$pDB
         $smarty->assign("MSG_ERROR_FIELD",$pVacations->getErrorMsg());
     }elseif($my_vacation == "default-vacation") {
         $my_vacation=array();
-        $my_vacation['FROM']= date('Y-m-d');
-        $my_vacation['TO']= date('Y-m-d');
+        $my_vacation[_tr('FROM')]= date('Y-m-d');
+        $my_vacation[_tr('TO')]= date('Y-m-d');
         $my_vacation['EMAIL_ADDRESS']= $_SESSION['elastix_user'];
-        $my_vacation['EMAIL_SUBJECT']= "Auto-Reply: Out of the office";
+        $my_vacation['EMAIL_SUBJECT']= _tr("Auto-Reply: Out of the office");
         $my_vacation['EMAIL_CONTENT']= "I will be out of the office until {END_DATE}. \n\n----\nBest Regards.";
     }else{
-        $my_vacation['FROM']= $my_vacation['init_date'];
-        $my_vacation['TO']= $my_vacation['end_date'];
+        $my_vacation[_tr('FROM')]= $my_vacation['init_date'];
+        $my_vacation[_tr('TO')]= $my_vacation['end_date'];
         $my_vacation['EMAIL_ADDRESS']= $_SESSION['elastix_user'];
         $my_vacation['EMAIL_SUBJECT']= htmlentities($my_vacation['email_subject'],ENT_QUOTES, "UTF-8");
         $my_vacation['EMAIL_CONTENT']= htmlentities($my_vacation['email_body'],ENT_QUOTES, "UTF-8");
@@ -196,7 +196,7 @@ function createForm(){
                                                 "INPUT_EXTRA_PARAM"      => array("id"=>"inputTo", "class" => "form-control input-sm", "placeholder" => "yyyy-mm-dd"),
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
-                "EMAIL_ADDRESS"   => array( "LABEL"                    => _tr("Email Addres:"),
+                "EMAIL_ADDRESS"   => array( "LABEL"                    => _tr("Email Address:"),
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "TEXT",
                                                 "INPUT_EXTRA_PARAM"      => array("class" => "form-control", "placeholder" => "Enter email"),

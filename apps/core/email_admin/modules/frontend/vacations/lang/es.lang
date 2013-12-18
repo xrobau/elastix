@@ -33,5 +33,11 @@ $arrLangModule=array(
 "SV_emailsubject" => "Define el titulo que tendra el mensaje",
 "SV_emailcontent" => "Defines el contenido del mensaje",
 "Period:" => "Periodo:",
+"Email Address:" => "Dirección de Correo:",
+"Email Subject:" => "Tema de correo:",
+"Email Content:" => "Contenido de mail:",
+"From:" => "Desde:",
+"To:" => "Hasta:",
+"Days" => "Días",
 );
 ?>

@@ -1098,9 +1098,10 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
     // Respuesta inmediata si el agente ya no está logoneado
     if ($estado['estadofinal'] != 'logged-in') {
         // Respuesta inmediata si el agente ya no está logoneado
-        jsonflush($bSSE, array(
+        $respuesta[] = array(
             'event' =>  'logged-out',
-        ));
+        );
+        jsonflush($bSSE, $respuesta);
         _debug(__FUNCTION__.' agent not logged-in, aborting.');
         return;
     }

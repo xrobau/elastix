@@ -98,6 +98,12 @@ fi
 
 %changelog
 * Thu Dec 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix corner case in which an incorrect JSON encoding in
+  non-SSE mode of the logged-out event right at the start of status checking
+  would lead to an endless loop of browser requests. Fixes Elastix bug #1759.
+  SVN Rev[6312]
+
+* Thu Dec 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): add new optional parameter datetime_start to requests
   getcampaignstatus and getincomingqueuestatus to allow specifying the start
   date of calls belonging to the object. This is groundwork for rewriting the

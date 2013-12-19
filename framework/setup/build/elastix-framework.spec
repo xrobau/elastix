@@ -395,6 +395,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Dec 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: regenerate session ID on successful login. Fixes Elastix
+  bug #1805.
+  SVN Rev[6311]
+
 * Wed Nov 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: fetch Elastix package list in alphabetical order.
   SVN Rev[6084]

@@ -97,6 +97,8 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
     $pass_md5 = md5(trim($_POST['input_pass']));
     
     if($pACL->authenticateUser($_POST['input_user'], $pass_md5)) {
+        session_regenerate_id(TRUE);
+
         $_SESSION['elastix_user'] = trim($_POST['input_user']);
         $_SESSION['elastix_pass'] = $pass_md5;      
         $_SESSION['elastix_pass2'] = $_POST['input_pass'];

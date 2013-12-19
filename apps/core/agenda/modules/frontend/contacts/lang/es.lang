@@ -29,7 +29,7 @@
   $Id: en.lang,v 1.1 2013-12-18 12:48:01 achuto armando@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Picture" => "Figura",
+"Picture" => "Imagen",
 "Ext / Phone" => "Extensión / Teléfono",
 "Name" => "Nombre",
 "Call" => "Llamar",
@@ -57,6 +57,5 @@ $arrLangModule=array(
 "External" => "Externos",
 "Phone Directory" => "Directorio Telefónico",
 "Filter" => "Filtro",
-"search" => "buscar",
 );
 ?>

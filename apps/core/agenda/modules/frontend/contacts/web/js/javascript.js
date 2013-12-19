@@ -296,3 +296,25 @@ function callContact(idContact){
         }
     );       
 }
+
+
+function transferCall(idContact){
+    showElastixUFStatusBar("Transfreing...");
+    var arrAction = new Array();
+    arrAction["menu"]="contacts";
+    arrAction["action"]="transfer_call";
+    arrAction["rawmode"]="yes";
+    arrAction["idContact"]=idContact;
+    arrAction["ftype_contacto"]=$("select[name='ftype_contacto'] option:selected").val();
+
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            hideElastixUFStatusBar();
+            if(error != ''){
+                showElxUFMsgBar('error',error);
+            }else{
+                //
+            }
+        }
+    );       
+}

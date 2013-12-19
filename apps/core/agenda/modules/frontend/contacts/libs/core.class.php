@@ -457,7 +457,17 @@ class coreContact{
     {
         //validamos $extension_to_call, $context, $callerid
         
-        if(!preg_match("/^[0-9]+$/", $extension_to_call)){
+        if (count(preg_split("/[\r\n]+/", $extension_to_call)) > 1){
+            $this->errMsg=_tr("Invalid parameter");
+            return false;
+        }
+        
+        if (count(preg_split("/[\r\n]+/", $context)) > 1){
+            $this->errMsg=_tr("Invalid parameter");
+            return false;
+        }
+        
+        if (count(preg_split("/[\r\n]+/", $callerid)) > 1){
             $this->errMsg=_tr("Invalid parameter");
             return false;
         }
@@ -474,7 +484,6 @@ class coreContact{
                        $extension_to_call, $context, $priority=1,
                        $application=NULL, $data=NULL,
                        $timeout=NULL, $callerid);
-            
             $astMang->disconnect();
             if (strtoupper($salida["Response"]) != "ERROR") {
                 return true;
@@ -485,8 +494,54 @@ class coreContact{
     }  
     
 /******************* funcion para transferir la llamada *******************************************************************/
-    
-    
+    function TranferCall($extension_to_transfer,$dial, $context, $code)
+    {
+        //validamos $extension_to_transfer, $context, $callerid
+        
+        if (count(preg_split("/[\r\n]+/", $extension_to_transfer)) > 1){
+            $this->errMsg=_tr("Invalid parameter");
+            return false;
+        }
+        
+        if (count(preg_split("/[\r\n]+/", $context)) > 1){
+            $this->errMsg=_tr("Invalid parameter");
+            return false;
+        }
+        
+        if (count(preg_split("/[\r\n]+/", $dial)) > 1){
+            $this->errMsg=_tr("Invalid parameter");
+            return false;
+        }
+        
+        $context="$code-$context";
+        exec("/usr/sbin/asterisk -rx 'core show channels concise' | grep ^".escapeshellarg($dial),$arrConsole,$flagStatus);
+        if($flagStatus == 0){
+            foreach($arrConsole as $data){
+                $arrData = explode("!",$data);
+                $channel= explode("-",$arrData[0]);
+                
+                if($channel[0]==$dial){
+                    $channel_to_transfer=$arrData[12];
+                    $astMang=AsteriskManagerConnect($errorM);
+                    if($astMang==false){
+                        $this->errMsg=$errorM;
+                        return false;
+                    }else{
+                        $salida = $astMang->Redirect($channel_to_transfer, "", $extension_to_transfer, $context, $priority=1);
+                        $astMang->disconnect();
+                        if (strtoupper($salida["Response"]) != "ERROR") {
+                            return true;
+                        }else
+                            return false;
+                    }    
+                }
+            }
+            $this->errMsg="Can't find the channel";
+            return false;
+        }
+        $this->errMsg="Can't find the channel";
+        return false;
+    }  
     
 }
 ?>

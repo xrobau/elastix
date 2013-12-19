@@ -633,7 +633,6 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
     global $arrCredentials;
     $jsonObject = new PaloSantoJSON();
     $coreContact = new coreContact($pDB);
-    $pACL         = new paloACL($pDB_2);
     $id_user      = $arrCredentials['idUser'];
     
     $idContact=getParameter('idContact');
@@ -658,7 +657,7 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
         }
 
         $dataExt = $coreContact->sqlContact->Obtain_Protocol_from_Ext($id_user);
-    
+        
         if($dataExt === FALSE)
         {
             $smarty->assign("MSG_ERROR_FIELD",$coreContact->sqlContact->getErrorMsg());
@@ -666,7 +665,7 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
             return $jsonObject->createJSON();
         }
         
-        $result = $coreContact->Call2Phone($extension,$dataExt['dial'],$dataExt['exten'],$dataExt['context'],$dataExt['clid_name'],$dataExt['code']);
+        $result = $coreContact->Call2Phone($extension, $dataExt['dial'],$dataExt['exten'],$dataExt['context'],$dataExt['clid_name'],$dataExt['code']);
         if(!$result)
         {
             $smarty->assign("MSG_ERROR_FIELD",_tr("The call couldn't be realized"));
@@ -683,6 +682,64 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
 
     return $jsonObject->createJSON();
 }
+
+
+function transferCALL($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
+{
+    global $arrCredentials;
+    $jsonObject = new PaloSantoJSON();
+    $coreContact = new coreContact($pDB);
+    $id_user      = $arrCredentials['idUser'];
+    
+    $idContact=getParameter('idContact');
+    
+    //obtener los parametros del filtro
+    $filters['ftype_contacto']=getParameter('ftype_contacto'); 
+    $validatedfilters= $coreContact->validatedFilters($filters);
+
+    if(!empty($id_user))
+    {
+        if($validatedfilters['table']=="internal"){
+            $extension = $coreContact->sqlContact->getExtension($idContact);
+        }else{
+            $extension = $coreContact->sqlContact->getPhone($idContact);
+        }
+            
+        if($extension === false)
+        {
+            $smarty->assign("MSG_ERROR_FIELD",$coreContact->sqlContact->getErrorMsg());
+            $jsonObject->set_error($coreContact->sqlContact->getErrorMsg());
+            return $jsonObject->createJSON();
+        }
+
+        $dataExt = $coreContact->sqlContact->Obtain_Protocol_from_Ext($id_user);
+        
+        if($dataExt === FALSE)
+        {
+            $smarty->assign("MSG_ERROR_FIELD",$coreContact->sqlContact->getErrorMsg());
+            $jsonObject->set_error($coreContact->getErrorMsg());
+            return $jsonObject->createJSON();
+        }
+        
+        $result = $coreContact->TranferCall($extension, $dataExt['dial'],$dataExt['context'],$dataExt['code']);
+        if(!$result)
+        {
+            $smarty->assign("MSG_ERROR_FIELD",_tr("The transfer couldn't be realized, maybe you don't have any conversation now."));
+            $jsonObject->set_error($coreContact->getErrorMsg());
+            return $jsonObject->createJSON();
+        }
+        
+    }
+    else{
+        $smarty->assign("MSG_ERROR_FIELD",$coreContact->getErrorMsg());
+        $jsonObject->set_error($coreContact->getErrorMsg());
+        return $jsonObject->createJSON();
+    }
+
+    return $jsonObject->createJSON();
+}
+
+
 
 function createForm(){
     $contactType[]=array("id"=>'radio1',"label"=>'Private',"value"=>"isPrivate");

@@ -41,6 +41,10 @@ function _moduleContent(&$smarty, $module_name)
     require_once "modules/$module_name/libs/paloSantoConsola.class.php";
     require_once "modules/$module_name/configs/default.conf.php";
     require_once "modules/$module_name/libs/JSON.php";
+
+    _debug("module entry: ".
+        "\$_GET = ".print_r($_GET, TRUE)."\n".
+        "\$_POST = ".print_r($_POST, TRUE));
     
     // Directorio de este módulo
     $sDirScript = dirname($_SERVER['SCRIPT_FILENAME']);
@@ -87,7 +91,7 @@ function _debug($s)
     if (isset($_SESSION['callcenter']) && isset($_SESSION['callcenter']['agente']))
         $sAgent = $_SESSION['callcenter']['agente'];
     file_put_contents('/tmp/debug-callcenter-agentconsole.txt',
-        sprintf("%s agent=%s %s\n", date('Y-m-d H:i:s'), $sAgent, $s),
+        sprintf("%s %s agent=%s %s\n", $_SERVER['REMOTE_ADDR'], date('Y-m-d H:i:s'), $sAgent, $s),
         FILE_APPEND);
 }
 
@@ -1094,9 +1098,10 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
     // Respuesta inmediata si el agente ya no está logoneado
     if ($estado['estadofinal'] != 'logged-in') {
         // Respuesta inmediata si el agente ya no está logoneado
-        jsonflush($bSSE, array(
+        $respuesta[] = array(
             'event' =>  'logged-out',
-        ));
+        );
+        jsonflush($bSSE, $respuesta);
         _debug(__FUNCTION__.' agent not logged-in, aborting.');
         return;
     }

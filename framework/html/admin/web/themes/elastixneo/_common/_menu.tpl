@@ -537,8 +537,12 @@ function oneClickEvent()
 		  {else}
 		  <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
 		  {/if}
-	      <a href="javascript:popUp('help/index.php?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
-	      <img src="{$WEBCOMMON}images/icon-help.png" width="24" height="24" alt="help" border="0"/></a></span><div class="neo-module-title-buttonstab-left"></div></div>
+
+</span>
+
+<div class="neo-module-title-buttonstab-left">
+
+</div></div>
           <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenuSelected}" />
           <input type="hidden" id="elastix_framework_webCommon" value="{$WEBCOMMON}" />
 	 <div class="neo-module-content">

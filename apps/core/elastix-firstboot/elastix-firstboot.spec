@@ -103,10 +103,14 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Dec 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-admin-passwords: fix CallCenter SQL addition so that it is
+  appended, rather than replacing, the list of SQL updates to run for updating
+  the AMI password.
+  SVN Rev[6317]
 - FIXED: elastix-admin-passwords: add check to verify whether a MySQL table
   exists, and use it to skip MySQL updates that only work on freePBX 2.11. Fixes
   part of Elastix bug #1808.
-  SVN Rev[6315]
+  SVN Rev[6316]
 
 * Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest

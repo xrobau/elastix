@@ -1,7 +1,7 @@
 var elx_phone = null;
 $(document).ready(function(){
     pull = $('#pull');
-    menu = $('nav > ul');
+    menu = $('nav.elx_nav_main_menu > ul');
     menuHeight = menu.height();
     //leftdiv = $('#leftdiv');
     //centerdiv = $('#centerdiv');
@@ -10,10 +10,15 @@ $(document).ready(function(){
     pull3 = $('#icn_disp2'); //icono que despliega y oculta el chat
     
     /*despliegue del menu en pantallas pequeñas*/           
-    $(this).on('click','#pull',function(e){
+    /*$(this).on('click','#pull',function(e){
         e.preventDefault();
         menu.slideToggle();
-    });
+    });*/
+    
+   /* $(this).on('click','nav.elx_nav_main_menu > ul li',function(e){
+        var ul=$(this).children('ul')
+        ul.css('display:block','opacity: 1','visibility: visible');
+    });*/
     
     $(this).on('click','.elx-msg-area-close',function(e){
         $("#elx_msg_area").slideUp();  
@@ -43,8 +48,8 @@ $(document).ready(function(){
         adjustTabChatToWindow(w);
         
         /*setea el estilo del menu una vez que se maximiza la pantalla*/   
-        if(menu.is(':hidden')) 
-            menu.removeAttr('style');
+        /*if(menu.is(':hidden')) 
+            menu.removeAttr('style');*/
         
         //calulamos la altura maxima del div del chat donde estan los contactos
         if(rightdiv.is(':hidden') == false){
@@ -86,13 +91,8 @@ $(document).ready(function(){
             adjustTabChatToWindow(w);
         }
     });
-    /* funciones para Popup*/
-    $(this).on('click','#activator',function(){
-    //$('#activator').click(function(){
-        $('#overlay').fadeIn('fast',function(){
-            $('#box').animate({'top':'160px'},500);
-        });
-    });
+    
+   
 
     $(this).on('click','#boxclose',function(){
     //$('#boxclose').click(function(){
@@ -213,6 +213,11 @@ $(document).ready(function(){
         tabChat.removeClass('elx_chat_min').addClass('elx_chat_close');
         //disminuir la cuenta de las conversaciones minimizadas y en caso de no quedar niguna ocultar tab notificaciones
         removeElxUserNotifyChatMini(tabChat);
+    });
+    
+    $(this).on('change','#languageProfile',function(){
+        var language = $("select[name='languageProfile'] option:selected").val();
+        changeLanguageProfile(language);
     });
 });
 function elxTitleAlert(message){
@@ -825,4 +830,66 @@ function elxGridData(moduleName, action, arrFilter, page){
 
             }
     });
+}
+
+/*funcion que muestra la ventana del popup para editar datos del perfil de usuaurio en sesion*/
+function showProfile(){
+    var arrAction = new Array();
+    arrAction["menu"]="_elastixutils";
+    arrAction["action"]="getUserProfile";
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert(error);
+            }else{
+                $("#elx_profile_content").html(arrData);
+                var options = {
+                    show: true
+                    }
+                $('#elx_popup_profile').modal(options);
+            }
+        }
+    );       
+}
+
+/*funcion que permte cambiar la contraseña al usuario*/
+function saveNewPasswordProfile(){
+    var oldPass   = $("input[name='currentPasswordProfile']").val();
+    var newPass   = $("input[name='newPasswordProfile']").val();
+    var newPassRe = $("input[name='newPasswordProfile']").val();
+    var arrAction = new Array();
+    arrAction["menu"]="_elastixutils";
+    arrAction["action"]="changePasswordElastix";
+    arrAction["oldPassword"]   = oldPass;
+    arrAction["newPassword"]   = newPass;
+    arrAction["newRePassword"] = newPassRe;
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert("Error");
+            }else{
+                //alert("Changed");
+            }
+        }
+    );       
+}
+
+/*funcion para fuardar el leguaje escogido por el usuario*/
+function changeLanguageProfile(language){
+    var arrAction = new Array();
+    arrAction["menu"]="_elastixutils";
+    arrAction["action"]="changeLanguageProfile";
+    arrAction["newLanguage"]   = language;
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert(error);
+            }else{
+                //alert(arrData);
+            }
+        }
+    );       
 }

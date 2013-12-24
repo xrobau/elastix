@@ -303,4 +303,198 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
     $astMang->disconnect();
     return $jsonObject->createJSON();
 }
+
+//action = getUserProfile
+function handleJSON_getUserProfile($smarty, $module_name){
+    include_once "libs/paloSantoForm.class.php";
+    include "configs/languages.conf.php"; //este archivo crea el arreglo language que contine los idiomas soportados
+                                          //por elastix
+                                     
+    $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+   
+    $lang=get_language();
+    $error_msg='';
+    $archivos=array();
+    $langElastix=array();
+    
+    global $arrConf;
+    $ERROR='';
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL = new paloACL($pDB);
+    
+    $jsonObject = new PaloSantoJSON();
+    
+    $dataProfile=getDataProfile($pDB, $ERROR);
+    if($dataProfile === FALSE)
+    {
+        $smarty->assign("MSG_ERROR_FIELD",getErrorMsg());
+        $jsonObject->set_error(getErrorMsg());
+        return $jsonObject->createJSON();
+    }
+    $extension="{$dataProfile['exten']}/{$dataProfile['device']}";
+
+    
+    leer_directorio("/usr/share/elastix/lang",$error_msg,$archivos);
+    if (count($archivos)>0){
+        foreach ($languages as $lang=>$lang_name){
+            if (in_array("$lang.lang",$archivos))
+               $langElastix[$lang]=$lang_name;
+        }
+    }
+    
+    $selectedLanguage = $pACL->getUserProp($arrCredentials['idUser'],"language");
+    
+    if($selectedLanguage === FALSE)
+    {
+        $jsonObject->set_error(_tr("Invalid Language"));
+        return $jsonObject->createJSON();
+    }
+    
+    //verificar que no sea false
+    $smarty->assign("TITLE_POPUP",_tr("My Profile "));
+    $smarty->assign("CLOSE_POPUP",_tr("Close"));
+    $smarty->assign("SAVE_POPUP",_tr("Save changes"));
+    $smarty->assign("CHANGE_PASSWD_POPUP",_tr("Change Password"));
+    $smarty->assign("userProfile_label",_tr("User"));
+    $smarty->assign("userProfile",$dataProfile['username']);
+    $smarty->assign("extenProfile_label",_tr("Extension"));
+    $smarty->assign("extenProfile",$extension);
+    $smarty->assign("faxProfile_label",_tr("Fax"));
+    $smarty->assign("faxProfile",$dataProfile['fax_extension']);
+    $smarty->assign("nameProfile",$dataProfile['name']);
+    $smarty->assign('ID_PICTURE',$arrCredentials['idUser']);
+    
+    $dataProfile['languageProfile']=$selectedLanguage;
+    
+    $arrFormFilter = createProfileForm($langElastix);
+    $oFilterForm = new paloForm($smarty, $arrFormFilter);
+    $htmlFilter = $oFilterForm->fetchForm("/var/www/html/web/themes/elastix3/_common/profile_uf.tpl",_tr('My Profile'), $dataProfile);
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_message($htmlFilter);
+    return $jsonObject->createJSON();
+    
+}
+
+function handleJSON_changeLanguageProfile($smarty, $module_name){
+    global $arrConf;
+    
+    $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+    
+    $ERROR='';
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL = new paloACL($pDB);
+    
+    $jsonObject = new PaloSantoJSON();
+    
+    $newLanguage = getParameter('newLanguage'); 
+    
+    $selectedLanguage=$pACL->setUserProp($arrCredentials['idUser'],"language",$newLanguage);
+    //verificar que la respuesta no sea false
+    if($selectedLanguage === FALSE)
+    {
+        $jsonObject->set_error(_tr("Invalid Language"));
+        return $jsonObject->createJSON();
+    }
+    $jsonObject->set_message(_tr("Changes were saved succefully"));
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_uploadImageProfile($smarty, $module_name){
+    global $arrConf;
+    
+    $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+    
+    $ERROR='';
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL = new paloACL($pDB);
+    
+    $jsonObject = new PaloSantoJSON();
+    
+    
+    
+    global $arrCredentials;
+
+    $domain = $arrCredentials['domain'];
+
+    foreach ($_FILES['picture']['error'] as $key => $error)
+    {
+        if ($error == UPLOAD_ERR_OK)
+        {  
+            $pictureUpload = $_FILES['picture']['name'][$key];
+            $uploadedUrl = $coreContact->checkRequirementsForUpload($domain, $pictureUpload, $nameTmp);
+            
+            if($uploadedUrl===false){
+                $jsonObject->set_error(_tr("Error uploading your file"));
+                return $jsonObject->createJSON();
+            }
+            
+            if(move_uploaded_file( $_FILES['picture']['tmp_name'][$key], $uploadedUrl)===false){
+                $jsonObject->set_error(_tr("Failed to move file"));
+                return $jsonObject->createJSON();
+            }else{
+                /*
+                $urls[] = $uploadedUrl;
+                $jsonObject->set_message($nameTmp);*/
+                $src="index.php?menu=$module_name&action=getImageTmp&image=$nameTmp&rawmode=yes";
+                $imgData = array();
+                $imgData['name']= $nameTmp;
+                $imgData['url']= $src;
+                $jsonObject->set_message($imgData);
+            }
+        }else{
+            $jsonObject->set_error(_tr("Error uploading your file"));
+        }
+    }
+    return $jsonObject->createJSON();
+}
+
+
+
+
+function createProfileForm($langElastix)
+{   
+    $arrFields = array(
+            "languageProfile"  => array("LABEL"                      => _tr("Language"),
+                                            "REQUIRED"               => "yes",
+                                            "INPUT_TYPE"             => "SELECT",
+                                            "INPUT_EXTRA_PARAM"      => $langElastix,
+                                            "INPUT_EXTRA_PARAM_OPTIONS" => array("class" => "form-control input-sm"),
+                                            "VALIDATION_TYPE"        => "text",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+            "currentPasswordProfile"   => array("LABEL"              => _tr("Current Password"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "PASSWORD",
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "VALIDATION_TYPE"        => "text",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+            "newPasswordProfile"   => array("LABEL"                  => _tr("Password"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "PASSWORD",
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "VALIDATION_TYPE"        => "text",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+            "repeatPasswordProfile"   => array("LABEL"               => _tr("Repeat Password"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "PASSWORD",
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "VALIDATION_TYPE"        => "text",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+            "deleteImageProfile"   => array("LABEL"                  => _tr("Delete image"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "CHECKBOX",
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "VALIDATION_TYPE"        => "text",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+            "picture"   => array("LABEL"               => _tr("Picture:"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "FILE",
+                                            "INPUT_EXTRA_PARAM"      => array("id" => "picture", "class"=>"fileUpload"),
+                                            "VALIDATION_TYPE"        => "",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+                                                
+                            );
+    return $arrFields;
+}
+
+
 ?>

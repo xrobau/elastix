@@ -653,4 +653,45 @@ function getStatusContactFromCode($code){
     }
     return $status;
 }
+
+
+function getDataProfile($pDB, &$ERROR){
+    $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+   
+    $data = array($arrCredentials['idUser'],$arrCredentials['domain']);
+    $query="select u.username, u.name, e.exten, u.fax_extension, e.device ".
+                    "FROM extension e JOIN acl_user u ON e.exten=u.extension ".
+                       "WHERE u.id=? AND e.organization_domain=?";
+    
+    $dataProfile=$pDB->getFirstRowQuery($query,true,$data);
+   
+    if($dataProfile===FALSE){
+        $ERROR = $pDB->errMsg;
+        return false;
+    }else{
+        return $dataProfile;
+    }
+    
+}
+
+function leer_directorio($directorio,$error_msg,&$archivos){
+    $bExito=FALSE;
+    $archivos=array();
+    if (file_exists($directorio)) {
+        if ($handle = opendir($directorio)) {
+            $bExito=true;
+            while (false !== ($file = readdir($handle))) {
+               //no tomar en cuenta . y ..
+                if ($file!="." && $file!=".." )
+                    $archivos[]=$file;
+            }
+            closedir($handle);
+        }
+
+     }else
+        $error_msg ="No existe directorio";
+
+     return $bExito;
+}
+
 ?>

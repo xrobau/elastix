@@ -59,6 +59,9 @@ function _moduleContent(&$smarty, $module_name)
         case "download_attach":
             $content = download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
+        case "get_inline_attach":
+            $content = download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
         case "mv_msg_to_folder":
             $content = moveMsgsToFolder($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
@@ -70,6 +73,9 @@ function _moduleContent(&$smarty, $module_name)
             break;
         case "toggle_important":
             $content = toogle_important_msg($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            break;
+        case "create_mailbox":
+            $content = create_mailbox($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
             break;
         default:
             $content = reportMail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
@@ -108,7 +114,9 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         $smarty->assign("ERROR_FIELD",$pImap->errMsg);
     }else{
         $smarty->assign('MAILBOX_FOLDER_LIST',$listMailbox);
+        $smarty->assign('NEW_FOLDER',_tr('New Folder'));
     }
+    
     
     $view_filter_opt['all']=_tr("All");
     $view_filter_opt['seen']=_tr("Seen");
@@ -216,13 +224,13 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $smarty->assign("MOVE_TO",_tr("Move to"));
     $smarty->assign("MARK_AS",_tr("Mark message as"));
     
-    $smarty->assign("NO_EMAIL_MSG",_tr("There are no messages in this mailbox"));
+    $smarty->assign("NO_EMAIL_MSG",_tr("Not messages"));
     $smarty->assign("VIEW",_tr("View"));
     $smarty->assign("SELECTED_VIEW_FILTER",$filter_view);
     
     $smarty->assign("ACTION_MSG", _tr('Actions'));
-    $arrActionsMsg['replay']=_tr('Replay');
-    $arrActionsMsg['replay_all']=_tr('Replay All');
+    $arrActionsMsg['reply']=_tr('Reply');
+    $arrActionsMsg['reply_all']=_tr('Reply All');
     $arrActionsMsg['forward']=_tr('Forward');
     $arrActionsMsg['delete']=_tr('Delete');
     $arrActionsMsg['flag_important']=_tr('Flag as Important');
@@ -386,11 +394,10 @@ function deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrC
 function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
 {
     $jsonObject = new PaloSantoJSON();
-   
-    $mailbox=getParameter('folder');
-    //creamos la connección al mailbox
-    $pImap->setMailbox($mailbox);
 
+    $mailbox=getParameter('current_folder');
+    $pImap->setMailbox($mailbox);
+    
     $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
     if($result===false){
         $jsonObject->set_error($pImap->errMsg);
@@ -411,18 +418,105 @@ function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
     }
     return $jsonObject->createJSON();
 }
+function create_mailbox($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+    $jsonObject = new PaloSantoJSON();
+
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    $new_mailbox=getParameter("new_folder");
+    if(is_null($new_mailbox) || $new_mailbox=='' || $new_mailbox===false){
+        $jsonObject->set_error('Invalid Mailbox');
+        return $jsonObject->createJSON();
+    }
+    
+    $result=$pImap->createMailbox($new_mailbox);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+    }
+    return $jsonObject->createJSON();
+}
+function download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+    $jsonObject = new PaloSantoJSON();
+
+    $mailbox=getParameter('current_folder');
+    $pImap->setMailbox($mailbox);
+    
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+        return $jsonObject->createJSON();
+    }
+    
+    $uid=getParameter("uid");
+    if(is_null($uid) || $uid=='' || $uid===false){
+        $jsonObject->set_error('Invalid Email Message');
+        return $jsonObject->createJSON();
+    }
+    
+    $partNum=getParameter('partnum');
+    $encoding=getParameter('enc');
+    
+    $pMessage=new paloImapMessage($pImap->getConnection(),$uid);
+    $result=$pMessage->downloadAttachment($partNum, $encoding);
+    
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+    }else{
+        $jsonObject->set_message($result);
+    }
+    return $jsonObject->createJSON();
+}
+function inline_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+    //$jsonObject = new PaloSantoJSON();
+
+    $mailbox=getParameter('current_folder');
+    $pImap->setMailbox($mailbox);
+    
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        return '';
+    }
+    
+    $uid=getParameter("uid");
+    if(is_null($uid) || $uid=='' || $uid===false){
+        return '';
+    }
+    
+    $partNum=getParameter('partnum');
+    $encoding=getParameter('enc');
+    
+    $pMessage=new paloImapMessage($pImap->getConnection(),$uid);
+    $result=$pMessage->getInlineAttach($partNum, $encoding);
+    /*
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+    }else{
+        $jsonObject->set_message($result);
+    }
+    return $jsonObject->createJSON();*/
+}
 function getAction()
 {
     if(getParameter("action")=="view_bodymail"){
-      return _tr("view_bodymail");  
+      return "view_bodymail";  
     }elseif(getParameter("action")=="mv_msg_to_folder"){
       return "mv_msg_to_folder";  
     }elseif(getParameter("action")=="mark_msg_as"){
-      return _tr("mark_msg_as");  
+      return "mark_msg_as";  
     }elseif(getParameter("action")=="delete_msg_trash"){
       return "delete_msg_trash";  
     }elseif(getParameter("action")=="toggle_important"){
       return "toggle_important";  
+    }elseif(getParameter("action")=="create_mailbox"){
+      return "create_mailbox";
+    }elseif(getParameter("action")=="download_attach"){
+      return "download_attach";  
+    }elseif(getParameter("action")=="get_inline_attach"){
+      return "get_inline_attach";
     }else
       return "report";
 }

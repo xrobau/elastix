@@ -55,17 +55,17 @@ $(document).ready(function(){
         }
         h_main_content_div=main_content_div.height();
         leftdiv.css('height',main_content_div.height()+'px');
-        $('#email_contentdiv').css('max-height',(h_main_content_div-55)+'px');
+        $('#email_contentdiv').css('max-height',(h_main_content_div-80)+'px');
         
     });
     
     h_main_content_div=main_content_div.height();
     leftdiv.css('height',h_main_content_div+'px');
-    $('#email_contentdiv').css('max-height',(h_main_content_div-55)+'px');
+    $('#email_contentdiv').css('max-height',(h_main_content_div-80)+'px');
     
     //fix email filter1_email
     var btnh=$("#elx_email_fil_view > .btn-group > .btn:first").height();
-    $("#elx_email_fil_view > .btn-group > .dropdown-toggle").height(btnh+"px");
+    $(".elx_email_pag_bar > .btn-group > .dropdown-toggle").height(btnh+"px");
     
     $(".elx_close_email_msg").click(function() {
         $("#initial_message_area").slideUp();
@@ -103,6 +103,25 @@ $(document).ready(function(){
         var UID=$(this).parents('.elx_row').attr('id');
         toggle_important('unflagged',UID);
     });
+    //accion que controla cuando damos enter el cuadro de texto para crear un nuevo mailbox
+    $(this).on("keydown","input[name='new_mailbox_name']", function( event ) {
+            // Ignore TAB and ESC.
+            if (event.which == 9 || event.which == 27) {
+                return false;
+                // Enter pressed? so send chat.
+            }else if ( event.which == 13 && $(this).val()!='') {
+                event.preventDefault();
+                //debemos mandar el mensaje y 
+                //hacer que el texto del text area desaparezca y sea enviado la divdel chat al que corresponde
+                var new_folder=$(this).val();
+                create_new_mailbox(new_folder);
+                // Ignore Enter when empty input.
+            }else if (event.which == 13 && $(this).val() == "") {
+                event.preventDefault();
+                return false;
+            }
+        }
+    );
 });
 function show_email_msg(){
     showElastixUFStatusBar("Searching...");
@@ -128,7 +147,7 @@ function show_email_msg(){
                     }
                 }else{
                     //no ahi mensaje para mostrar mostramos un mensaje
-                    messaje_list='<div class="elx_row elx_unseen_email" style="text-align:center">There is not message</div>';
+                    messaje_list='<div class="elx_row elx_unseen_email" style="text-align:center">Not message</div>';
                 }
                 
                 //este es para marcar por el valor correcto en el filtro1 (seen,unseen, ...)
@@ -306,6 +325,7 @@ function view_body(UID){
     arrAction["menu"]="home";
     arrAction["action"]="view_bodymail";
     arrAction["uid"]=UID;
+    arrAction["current_folder"]=$("input[name='current_mailbox']").val();
     arrAction["rawmode"]="yes";
     request("index.php", arrAction, false,
             function(arrData,statusResponse,error){
@@ -313,7 +333,7 @@ function view_body(UID){
                 if(error!=""){
                     alert(error);
                 }else{
-                    createBodyMsg(arrData);
+                    createBodyMsg(arrData,UID);
                     elx_mail_messages.hide(10);
                     $("#tools-paginationdiv").hide(10);
                     elx_bodymail.show(10);
@@ -322,7 +342,8 @@ function view_body(UID){
                 }     
         });
 }
-function createBodyMsg(arrData){
+function createBodyMsg(arrData,UID){
+    var current_folder=$("input[name='current_mailbox']").val();
     
     var subject="<div id='elx_bodymsg_subject'>";
     subject +="<h1>"+arrData['header']['subject']+"</h1>";
@@ -351,7 +372,7 @@ function createBodyMsg(arrData){
             divattachment="<div id='elx_bodymsg_attachment'>";
             divattachment +="<img src='web/apps/home/images/Paper-Clip.png' style='background-color: white;'  class='elx_bodymsg_file_att' />";
             for( var i=0; i<attachment.length ; i++){
-                divattachment +="<div class='elx_bodymsg_file_att'><a href='index.php?menu=home&action=download_attach&rawmode=yes&enc="+arrData['attachment'][i]['enc']+"&partnum="+arrData['attachment'][i]['partNum']+"'>"+arrData['attachment'][i]['name']+"</a></div>";
+                divattachment +="<div class='elx_bodymsg_file_att'><a href='index.php?menu=home&action=download_attach&rawmode=yes&uid="+UID+"&enc="+arrData['attachment'][i]['enc']+"&partnum="+arrData['attachment'][i]['partNum']+"&current_folder="+current_folder+"'>" +arrData['attachment'][i]['name']+"</a></div>";
             }
             divattachment +="</div>";
         }
@@ -359,19 +380,40 @@ function createBodyMsg(arrData){
     
     
     var content="<div id='elx_bodymsg_body'>";
-    if(typeof arrData['body']['html']!=='undefined'){
-        for(var x in arrData['body']['html']){
-            content +=arrData['body']['html'][x]+'</br></br>';
-        }
-    }else if(typeof arrData['body']['plaintext']!=='undefined'){
-        for(var x in arrData['body']['plaintext']){
-            content +=arrData['body']['plaintext'][x]+'</br></br>';
-        }
+    if(typeof arrData['body']!=='undefined'){
+         content +=arrData['body'];
     }
     content +="</div>";
 
-    var bodymail=subject+header+divattachment+content;
+    hidden="<hidden name='uid' value='"+UID+"'>";
+    
+    var bodymail=subject+header+divattachment+content+hidden;
     elx_bodymail.html(bodymail);
+}
+function new_folder(){
+    alert(1);
+    $("input[name='new_mailbox_name']").parent().css('display','block');
+    $("input[name='new_mailbox_name']").focus();
+}
+function create_new_mailbox(new_folder){
+    showElastixUFStatusBar("Loading...");
+    var arrAction = new Array();
+    arrAction["menu"]="home";
+    arrAction["action"]="create_mailbox";
+    arrAction["new_folder"]=new_folder;
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+            function(arrData,statusResponse,error){
+                hideElastixUFStatusBar();
+                $("input[name='new_mailbox_name']").parent().css('display','none');
+                if(error!=""){
+                    alert(error);
+                }else{
+                    //agregamos la carpeta recien creada a la lista
+                    $("input[name=new_mailbox_name]").parent().before(
+                    "<div class='folder' onclick='show_messages_folder("+"'"+new_folder+"');>"+new_folder+"</div>");
+                }   
+        });
 }
 
 

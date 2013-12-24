@@ -442,9 +442,26 @@ class paloImap {
         $pMessage->imapReadMesg();
         
         $message['attachment']=$pMessage->getAttachments();
-        $message['body']=$pMessage->getInline_Parts();
+        $message['body']=$pMessage->getBody();
         
         return $message;
+    }
+    
+    public function createMailbox($mailbox){
+        $mailbox=trim($mailbox);
+        if(!preg_match("/^[[:alnum:]-_[:blank:]]+$/",$mailbox)){
+            $this->errMsg=_tr("Folder Name is Invalid");
+            return false;
+        }
+        $result=imap_createmailbox($this->connection, imap_utf7_encode($this->imap_ref.$mailbox));
+        if(!$result){
+            $this->errMsg="Imap_createmailbox failed: " . imap_last_error();
+            return false;
+        }
+        
+        //procedemos a subscribir los mailboxs
+        imap_subscribe($this->connection ,imap_utf7_encode($this->imap_ref.$mailbox));
+        return true;
     }
 }
 
@@ -578,7 +595,9 @@ class paloImapMessage{
     private $structure;
     private $attachments = array();
     private $inline_parts = array();
+    private $inline_attachs = array();
     private $mime_parts = array();
+    private $body = '';
     
     /*
     private $opt = array();
@@ -602,6 +621,10 @@ class paloImapMessage{
         return $this->inline_parts;
     }
     
+    function getBody(){
+        return $this->body;
+    }
+    
     function imapReadMesg(){
         //get msg structure
         $this->structure = imap_fetchstructure($this->paloImap, $this->uid, FT_UID);
@@ -612,9 +635,42 @@ class paloImapMessage{
             foreach ($this->structure->parts as $partno0 => $p)
                 $this->getpart($p,$partno0+1);
         }
+        
+        //una vez leidas todas la partes del mensaje es necesario procesar el body del texto
+        //si el contenido es html, es necesario parsear el texto en busca de imagenes embebidas para
+        //hacer el cambio de url correspondiente
+        if(isset($this->inline_parts['html'])){
+            if(count($this->inline_parts['html'])>0){
+                foreach($this->inline_parts['html'] as $data){
+                    $body=$data;
+                    $result=preg_match_all("/src=[\"|']cid:(.*)[\"|']/Uims", $data, $matches);
+                    if(count($matches)){
+                        foreach($matches[1] as $match) {
+                            $search1 = "src=\"cid:$match\"";
+                            $search2 = "src='cid:$match'";
+                            if(isset($this->inline_attachs[$match])){
+                                //TODO:current_mailbox
+                                $replace = "src=index.php?menu=home&action=get_inline_attach&rawmode=yes&uid=".$this->uid."&enc=".$this->inline_attachs[$match]['enc']."&partnum=".$this->inline_attachs[$match]['partNum']."&current_folder=INBOX";
+                                //$body = preg_replace ( "/$search/" , $replace ,$data );
+                                $body = str_replace($search1, $replace, $data);
+                                $body = str_replace($search2, $replace, $body);
+                            }
+                        }
+                    }
+                    $this->body .=$body;
+                }
+            }
+        }elseif(isset($this->inline_parts['plaintext'])){
+            //TODO:si el contenido es texto plano, entonces debemos hacer la conversion de cierto caracteres como
+            //salto de linea, regreso de carro entre otros
+            foreach($this->inline_parts['plaintext'] as $data){
+                $this->body .=$data;
+            }
+        }
     }
     
     private function getpart($p,$partno) {
+        //print_r($p);
         // $partno = '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
         
         // PARAMETERS
@@ -636,6 +692,21 @@ class paloImapMessage{
                     "enc"     => $p->encoding
                 );
                 array_push($this->attachments,$attachmentDetails);
+            }elseif ($p->disposition == "INLINE") {
+                //TODO:imagenes embebidas u otra clase de contenido embebido
+                //no se como interpretar esto. hacer funciones que llamen a este contenido
+                $inline_attachs = array(
+                    "name"    => ($params['filename'])? $params['filename'] : $params['name'],
+                    "partNum" => $partno,
+                    "enc"     => $p->encoding
+                );
+                //TODO:note que a veces el id del elemento esta entr <>, lo cual hace que este no 
+                //coincida con el identificador de la imagen, para reparar esto debemos eliminar esos simbolos
+                //del nombre. Esto esta en prueba, ahi que probar con distintos servidores 
+                if(preg_match("/^<(.*)>$/",$p->id,$match)){
+                    $p->id=$match[1];
+                }
+                $this->inline_attachs[$p->id]=$inline_attachs;
             }
         }
         
@@ -644,12 +715,13 @@ class paloImapMessage{
         if ($p->type==0) {
             $data = $this->decodeData($p,$partno);
             if($data){
+                $data=$this->changeCharset($params['charset'],$data);
                 // Messages may be split in different parts because of inline attachments,
                 // so append parts together with blank row.
                 if (strtolower($p->subtype)=='plain')
                     $this->inline_parts['plaintext'][]= trim($data)."\n\n";
                 else
-                    $this->inline_parts['html'][]= array('data'=>$data,'charset'=>$params['charset'])."<br><br>";
+                    $this->inline_parts['html'][]= trim($data)."<br><br>";
             }
         }
 
@@ -662,6 +734,7 @@ class paloImapMessage{
             $data = $this->decodeData($p,$partno);
             if($data){
                 $this->inline_parts['plaintext'][]= trim($data)."\n\n";
+                $this->inline_parts['html'][]= trim($data)."\n\n";
             }
         }
 
@@ -687,12 +760,56 @@ class paloImapMessage{
         return $data;
     }
     
+    private function changeCharset($charset,$text){
+        $outputCharset = 'UTF-8';
+        if (!empty($charset)) {
+            if ($outputCharset != $charset) {
+                if ($utf8Text = iconv($charset, $outputCharset, $text)) {
+                    $text = $utf8Text;
+                }
+            }
+        }
+        return $text;
+    }
+    
     
     function downloadAttachment($partNum, $encoding) {
-        $this->structure = imap_bodystruct($this->connection, imap_msgno($this->connection, $this->uid), $partNum);
+        $this->structure = imap_bodystruct($this->paloImap, imap_msgno($this->paloImap, $this->uid), $partNum);
     
         $filename = $this->structure->dparameters[0]->value;
-        $message = imap_fetchbody($this->connection, $this->uid, $partNum, FT_UID);
+        $message = imap_fetchbody($this->paloImap, $this->uid, $partNum, FT_UID);
+    
+        switch ($encoding) {
+            case 0:
+            case 1:
+                $message = imap_8bit($message);
+                break;
+            case 2:
+                $message = imap_binary($message);
+                break;
+            case 3:
+                $message = imap_base64($message);
+                break;
+            case 4:
+                $message = quoted_printable_decode($message);
+                break;
+        }
+    
+        header("Content-Description: File Transfer");
+        header("Content-Type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=" . $filename);
+        header("Content-Transfer-Encoding: binary");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate");
+        header("Pragma: public");
+        echo $message;
+    }
+    
+    function getInlineAttach($partNum, $encoding) {
+        $this->structure = imap_bodystruct($this->paloImap, imap_msgno($this->paloImap, $this->uid), $partNum);
+    
+        $filename = $this->structure->dparameters[0]->value;
+        $message = imap_fetchbody($this->paloImap, $this->uid, $partNum, FT_UID);
     
         switch ($encoding) {
             case 0:

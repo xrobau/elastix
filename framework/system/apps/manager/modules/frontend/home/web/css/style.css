@@ -79,13 +79,13 @@
     color: black;
     cursor:pointer; 
     cursor: hand;
-    text-align: center;
-    text-decoration: none;
-    padding-top:6px;
+    padding:6px;
     color: rgb(68, 68, 68);
     font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
-.folder:hover{
+.folder-item:hover{
     color:white;
     background: #8c99a4;
 }
@@ -292,6 +292,7 @@
 }
 .elx_email_pag_bar{
     display:inline-block;
+    padding:10px 5px 10px 0px;
 }
 .elx_email_pag_btn > .btn > .glyphicon{
     height: 18px!important;
@@ -358,6 +359,9 @@ td.elx_bodymsg_tdheader:first-child{
 #elx_bodymsg_body{
     padding-top:10px;
     border-top: 1px solid rgb(204, 204, 204);
+}
+#elx_mail_pager > ul{
+    margin:0;
 }
 /*****************************************************/
 /*    Styles for screen 960px and lower             */
@@ -443,26 +447,27 @@ td.elx_bodymsg_tdheader:first-child{
 .filter2{
     margin-left:14%;
 }
+.elx_email_pag_btn > .btn > .glyphicon{
+    display: inline-block!important;
+}
+#elx_email_mv_wtag{
+    display:none;
+}
+#elx_email_mv_itag{
+    display:inline;
+}
+#elx_email_mark_wtag{
+    display:none;
+}
+#elx_email_mark_itag{
+    display:inline;
+}
 }
 /*****************************************************/
 /*    Styles for screen 500px and lower             */
 /*****************************************************/
 @media only screen and (max-width : 500px) {
-    .elx_email_pag_btn > .btn > .glyphicon{
-        display: inline-block!important;
-    }
-    #elx_email_mv_wtag{
-        display:none;
-    }
-    #elx_email_mv_itag{
-        display:inline;
-    }
-    #elx_email_mark_wtag{
-        display:none;
-    }
-    #elx_email_mark_itag{
-        display:inline;
-    }
+    
 }
 /*****************************************************/
 /*    Styles for screen 450px and lower             */

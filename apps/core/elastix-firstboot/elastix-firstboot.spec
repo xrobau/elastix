@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -102,6 +102,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Dec 26 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
+  SVN history. Bumped Release in specfile.
+
 * Tue Dec 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: elastix-admin-passwords: fix CallCenter SQL addition so that it is
   appended, rather than replacing, the list of SQL updates to run for updating
@@ -115,6 +119,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
   SVN history. Bumped Release in specfile.
+  SVN Rev[5914]
 
 * Mon Sep 09 2013 Luis Abarca <labarca@palosanto.com> 
 - FIXED: Now the update of the passwords made in the asterisk database for ami,

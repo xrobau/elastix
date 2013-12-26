@@ -134,6 +134,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Dec 26 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: replace deprecated .live and .die with .on and .off
+  SVN Rev[6327]
+
 * Wed Dec 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-12
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

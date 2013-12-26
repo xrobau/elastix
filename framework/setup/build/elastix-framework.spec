@@ -330,6 +330,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Dec 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: patch colResizable to stop using deprecated $.browser .
+  SVN Rev[6326]
 - CHANGED: Framework: update jquery.blockUI.js to latest version 2.66
   SVN Rev[6325]
 - CHANGED: Framework: replace deprecated jquery .live with .click. in elastixneo

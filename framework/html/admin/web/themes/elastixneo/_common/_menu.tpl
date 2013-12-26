@@ -164,14 +164,13 @@ $(document).ready(function(){
 	);
 
 	$('.neo-tabh-rend').click(function() {
-		if($("#neo-second-showbox-menu").hasClass("neo-display-none"))
-			$("#neo-second-showbox-menu").removeClass("neo-display-none");
-		else
-			$("#neo-second-showbox-menu").addClass("neo-display-none");
-		$('body').one('click', function(e) {
-			$("#neo-second-showbox-menu").addClass("neo-display-none");
-			e.stopPropagation();
-		});
+        if ($("#neo-second-showbox-menu").hasClass("neo-display-none")) {
+            $("#neo-second-showbox-menu").removeClass("neo-display-none");
+            $('body').one('click', function(e) {
+                $("#neo-second-showbox-menu").addClass("neo-display-none");
+            });
+            e.stopPropagation();
+        }
 	});
 
     $('#neo-cmenu-cpallet').click(function(e){

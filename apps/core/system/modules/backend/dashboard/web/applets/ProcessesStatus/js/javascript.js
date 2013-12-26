@@ -1,7 +1,6 @@
 $(document).ready(function() {
-	$('.neo-applet-processes-row-menu')
-		.die('click')
-		.live('click', neoAppletProcesses_manejarMenu);
+	$(document).off('click', '.neo-applet-processes-row-menu');
+	$(document).on('click', '.neo-applet-processes-row-menu', neoAppletProcesses_manejarMenu);
 });
 
 function neoAppletProcesses_esconderMenu()

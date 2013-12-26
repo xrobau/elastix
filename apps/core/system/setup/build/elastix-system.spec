@@ -155,6 +155,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Dec 26 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: replace deprecated .live and .die with .on and .off
+  SVN Rev[6327]
+
 * Thu Dec 05 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: filter out inactive repostories before checking for package
   availability and freshness.

@@ -163,7 +163,7 @@ $(document).ready(function(){
 	  }
 	);
 
-	$('.neo-tabh-rend').live('click', function() {
+	$('.neo-tabh-rend').click(function() {
 		if($("#neo-second-showbox-menu").hasClass("neo-display-none"))
 			$("#neo-second-showbox-menu").removeClass("neo-display-none");
 		else

@@ -395,6 +395,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Dec 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: replace deprecated jquery .live with .click. in elastixneo
+  theme.
+  SVN Rev[6323]
+
 * Thu Dec 19 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: regenerate session ID on successful login. Fixes Elastix
   bug #1805.

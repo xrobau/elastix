@@ -44,10 +44,6 @@ margin-bottom: 0px;
 font-weight: bold !important;
 }
 
-label{
-font-weight: normal !important;
-}
-
 /* css tool tip*/
 .hidden-tooltip{
 display:none;

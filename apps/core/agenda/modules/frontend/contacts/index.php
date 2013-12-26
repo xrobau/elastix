@@ -144,13 +144,13 @@ function reportContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     }else{
         //arreglo de columnas para mostrar en la grilla
         $arrColumn[]="<span class='glyphicon glyphicon-check'></span>";
-        $arrColumn[]='Picture';
-        $arrColumn[]='Name';//if($validatedfilters['table']=="internal"){
-        $arrColumn[]='Ext / Phone';
-        $arrColumn[]='Email';
-        $arrColumn[]='Call';
-        $arrColumn[]='Transfer';
-        $arrColumn[]='Type Contact'; 
+        $arrColumn[]=_tr('Picture');
+        $arrColumn[]=_tr('Name');//if($validatedfilters['table']=="internal"){
+        $arrColumn[]=_tr('Ext / Phone');
+        $arrColumn[]=_tr('Email');
+        $arrColumn[]=_tr('Call');
+        $arrColumn[]=_tr('Transfer');
+        $arrColumn[]=_tr('Type Contact'); 
     }
     
     $oGrid->setColumns($arrColumn);

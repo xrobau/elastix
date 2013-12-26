@@ -57,5 +57,8 @@ $arrLangModule=array(
 "External" => "Externos",
 "Phone Directory" => "Directorio Telefónico",
 "Filter" => "Filtro",
+"Are you sure you wish to delete the contact." => "Esta seguro que desea borrar este contacto",
+"The call couldn't be realized" => "La llamada No Puede Realizarse",
+"The transfer couldn't be realized, maybe you don't have any conversation now." => "La transferencia no puede ser realizada, puede que no tengas alguna conversacion ahora",
 );
 ?>

@@ -31,5 +31,7 @@ $arrLangModule=array(
 "Internal" => "Internal",
 "External" => "External",
 "Name" => "Name",
+"Profile" => "Profile",
+"Can't find the channel" => "Can't find the channel",
 );
 ?>

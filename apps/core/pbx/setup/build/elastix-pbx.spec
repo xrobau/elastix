@@ -357,6 +357,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Festival: update jquery.ibutton.js to 1.0.03, fix potential 
+  incompatibilities with jQuery 1.9+
+  SVN Rev[6329]
+
 * Wed Oct 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: The code for the experimental PHP-based parallel endpoint configurator
   has been removed. This functionality is now provided by the New Endpoint

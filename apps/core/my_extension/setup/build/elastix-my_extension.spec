@@ -3,7 +3,7 @@
 Summary: Elastix My Extension 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -12,6 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.2.0-18
 Requires: yum
+Requires: freePBX >= 2.11.0-1
 
 %description
 Elastix My Extension
@@ -84,6 +85,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Jan 03 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Nov 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: My Extension: remove some dead code, and mark some methods as private
   in paloSantoMyExtension.
@@ -92,6 +97,7 @@ fi
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5788]
 
 * Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATED: Correction of some mistakes in the translation file fr.lang.

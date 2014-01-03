@@ -1,7 +1,7 @@
 /*!
  * iButton jQuery Plug-in
  *
- * Copyright 2009 Giva, Inc. (http://www.givainc.com/labs/) 
+ * Copyright 2011 Giva, Inc. (http://www.givainc.com/labs/) 
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Date: 2009-08-25
- * Rev:  1.0.01
+ * Date: 2011-07-26
+ * Rev:  1.0.03
  */
 ;(function($){
 	// set default options
 	$.iButton = {
-		version: "1.0.01",
+		version: "1.0.03",
 		setDefaults: function(options){
 			$.extend(defaults, options);
 		}
@@ -66,7 +66,7 @@
 				return result || this;
 			// everything else, return the chain
 			} else return this;
-		// initializing request
+		// initializing request (only do if iButton not already initialized)
 		} else {
 			// create a new iButton for each object found
 			return this.each(function (){
@@ -78,7 +78,7 @@
 	// count instances	
 	var counter = 0;
 	// detect iPhone
-	$.browser.iphone = (navigator.userAgent.toLowerCase().indexOf("iphone") > -1);
+	//$.browser.iphone = (navigator.userAgent.toLowerCase().indexOf("iphone") > -1);
 	
 	var iButton = function (input, options){
 		var self = this
@@ -97,6 +97,8 @@
 
 		// only do for checkboxes buttons, if matches inside that node
     if( !$input.is(allow) ) return $input.find(allow).iButton(options);
+		// if iButton already exists, stop processing
+		else if($.data($input[0], "iButton") ) return;
 
 		// store a reference to this marquee
 		$.data($input[0], "iButton", self);
@@ -107,8 +109,8 @@
 		
 		// toggles the state of a button (or can turn on/off)
 		this.toggle = function (t){
-			var toggle = (arguments.length > 0) ? t : !$input.is(":checked");
-			$input.attr("checked", toggle ? "checked" : "").trigger("change");
+			var toggle = (arguments.length > 0) ? t : !$input[0].checked;
+			$input.attr("checked", toggle).trigger("change");
 		};
 		
 		// disable/enable the control
@@ -144,7 +146,7 @@
 
     $input
 			// create the wrapper code
-			.wrap('<div class="' + options.classContainer + '" />')
+			.wrap('<div class="' + $.trim(options.classContainer + ' ' + options.className) + '" />')
     	.after(
 				  '<div class="' + options.classHandle + '"><div class="' + options.classHandleRight + '"><div class="' + options.classHandleMiddle + '" /></div></div>'
       	+ '<div class="' + options.classLabelOff + '"><span><label>'+ options.labelOff + '</label></span></div>'
@@ -187,7 +189,7 @@
 		var handleRight = width.container - width.handle - 6;
     
 		var positionHandle = function (animate){
-			var checked = $input.attr("checked")
+			var checked = $input[0].checked
 				, x = (checked) ? handleRight : 0
 				, animate = (arguments.length > 0) ? arguments[0] : true;
 
@@ -260,7 +262,7 @@
 
 			// if not dragging or click time under a certain millisecond, then just toggle			
 			if( !mouse.dragging || (((new Date()).getTime() - dragStart.time) < options.clickOffset ) ){
-				var checked = $input.attr("checked");
+				var checked = $input[0].checked;
 				$input.attr("checked", !checked);
 
 				// run callback
@@ -272,7 +274,7 @@
 				var checked = (pct >= 0.5);
 				
 				// if the value is the same, don't run change event
-				if( $input.is(":checked") == checked ) changed = false;
+				if( $input[0].checked == checked ) changed = false;
 
 				$input.attr("checked", checked);
 			}
@@ -321,7 +323,7 @@
 		// if a click event is registered, we must register on the checkbox so it's fired if triggered on the checkbox itself
 		if( $.isFunction(options.click) ){
 			$input.bind("click.iButton", function (){
-				options.click.apply(self, [$input.attr("checked"), $input, options]);
+				options.click.apply(self, [$input[0].checked, $input, options]);
 			});
 		}
 
@@ -329,7 +331,7 @@
 		if( $input.is(":disabled") ) this.disable(true);
 
 		// special behaviors for IE    
-		if( $.browser.msie ){
+		if( /MSIE/.test(navigator.userAgent) ){
 			// disable text selection in IE, other browsers are controlled via CSS
 			$container.find("*").andSelf().attr("unselectable", "on");
 			// IE needs to register to the "click" event to make changes immediately (the change event only occurs on blur)
@@ -353,6 +355,7 @@
 		, clickOffset: 120                        // if millseconds between a mousedown & mouseup event this value, then considered a mouse click
 
 		// define the class statements
+		, className:         ""
 		, classContainer:    "ibutton-container"
 		, classDisabled:     "ibutton-disabled"
 		, classFocus:        "ibutton-focus"

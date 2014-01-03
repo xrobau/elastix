@@ -197,6 +197,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam, Remote SMTP: update jquery.ibutton.js to 1.0.03, fix 
+  potential incompatibilities with jQuery 1.9+
+  SVN Rev[6329]
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.

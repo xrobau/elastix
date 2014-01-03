@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Festival: update jquery.ibutton.js to 1.0.03, fix potential 
+  incompatibilities with jQuery 1.9+
+  SVN Rev[6329]
+
 * Sat Oct 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Control Panel: updated internal copy of Ember.js to version 1.1.2.
   SVN Rev[6040]

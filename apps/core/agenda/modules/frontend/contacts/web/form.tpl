@@ -1,5 +1,6 @@
 {literal}
 <link rel="stylesheet" href="web/_common/js/jquery/css/smoothness/jquery-ui-1.8.24.custom.css">
+<script type='text/javascript' src="web/_common/js/jquery.liteuploader.js"></script>
 {/literal}
 
 <div id="contsetting">

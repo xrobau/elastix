@@ -1,4 +1,5 @@
 var elx_phone = null;
+var elx_flag_changed_profile = false;
 $(document).ready(function(){
     pull = $('#pull');
     menu = $('nav.elx_nav_main_menu > ul');
@@ -215,10 +216,55 @@ $(document).ready(function(){
         removeElxUserNotifyChatMini(tabChat);
     });
     
+    //ejecuta la accion de cambio de lenguaje del usuario del popup de profile
     $(this).on('change','#languageProfile',function(){
         var language = $("select[name='languageProfile'] option:selected").val();
         changeLanguageProfile(language);
     });
+    
+    //ejecuta la accion de eliminar la imagen que contiene el popup de profile del usuario
+    $(this).on('click','#deleteImageProfile',function(){
+            deleteImageProfile();
+    });
+    
+    //ejecuta la funcion de cambio de imagen del popup de profile del usuario
+    $(this).on('click','#picture',function(){
+        changeImageProfile();
+    });
+    
+    //muestra y oculta el div que contiene las cajas de textos para cambiar las contraseñas dentro del popup de profile
+    $(this).on('click','#elx_link_change_passwd',function(){
+        if($('#elx_data_change_passwd').hasClass('visible')== true){
+            $("#elx_data_change_passwd").removeClass("visible").addClass("oculto");
+        }else{
+            $("#elx_data_change_passwd").removeClass("oculto").addClass("visible");
+        }
+    });
+    
+    //manda a recagar la pagina, luego de haber hecho algun cambio en el popup de profile del usuario
+    $(this).on('click','.elx_close_popup_profile',function(){
+        if(elx_flag_changed_profile==true){
+            location.reload();
+        }
+    });
+    
+    
+    //funcionpara habilitar los campos de cambio de contraseña, luego que escriban la contraseña actual
+    $(this).on('click','#currentPasswordProfile',function(){
+        $('#currentPasswordProfile').keyup(function(){
+            if($('#currentPasswordProfile').val() != ''){
+                $('#newPasswordProfile').removeAttr('disabled');
+                $('#repeatPasswordProfile').removeAttr('disabled');
+                $('#elx_save_change_passwd').removeAttr('disabled');
+            }else{
+                $('#newPasswordProfile').attr('disabled','disabled');
+                $('#repeatPasswordProfile').attr('disabled','disabled');
+                $('#elx_save_change_passwd').attr('disabled','disabled');
+            }
+        });
+    });
+    
+ 
 });
 function elxTitleAlert(message){
      $.titleAlert(message, {
@@ -868,7 +914,7 @@ function saveNewPasswordProfile(){
     request("index.php", arrAction, false,
         function(arrData,statusResponse,error){
             if(error != ''){
-                alert("Error");
+                alert(error);
             }else{
                 //alert("Changed");
             }
@@ -888,8 +934,67 @@ function changeLanguageProfile(language){
             if(error != ''){
                 alert(error);
             }else{
+                elx_flag_changed_profile = true;
                 //alert(arrData);
             }
         }
     );       
+}
+
+/*funcion para eliminar imagen del perfil de usuario*/
+function deleteImageProfile(){
+    var arrAction = new Array();
+    arrAction["menu"]="_elastixutils";
+    arrAction["action"]="deleteImageProfile";
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert(error);
+            }else{
+                elx_flag_changed_profile = true;
+                resetImage(arrData);
+            }
+        }
+    );    
+}
+
+/*funcion para cambiar la imagen del perfil de usuario*/
+function changeImageProfile(){
+    
+    $('.fileUpload').liteUploader(
+    {
+        script: '?menu=_elastixutils&action=changeImageProfile&rawmode=yes',
+        allowedFileTypes: null,
+        maxSizeInBytes: null,
+        customParams: {
+            'custom': 'tester'
+        },
+        before: function (files)
+        {
+            $('#previews').empty();
+        },
+        success: function (response)
+        {   
+            var response = $.parseJSON(response);
+            if(response.error !== ''){
+                alert(response.error);
+            }else{
+                elx_flag_changed_profile = true;
+                resetImage(response.message);
+            }
+        }
+    });   
+}
+
+
+function resetImage(url)
+{
+    $('#previews').empty();
+    $('#previews').append($('<img>', {
+        'id':'preview',
+        'class':'img-responsive',
+        'src': url  + '#' + new Date().getTime(),
+        'width': 159
+        }));
 }

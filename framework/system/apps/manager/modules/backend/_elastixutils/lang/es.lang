@@ -29,6 +29,16 @@
 global $arrLangModule;
 $arrLangModule = array(
 "My Profile " => "Mi Perfil ",
-"Profile " => "Perfil",
+"New Password" => "Nueva Contraseña",
+"Repeat New Password" => "Repita la Nueva Contraseña",
+"Language" => "Idioma",
+"Delete image" => "Borrar Imagen",
+"My Profile " => "Mi Perfil ",
+"Close"=> "Cerrar",
+"User"=> "Usuario",
+"Save Changes" => "Guardar Cambios",
+"Extension" => "Extensión",
+"Change Password" => "Cambiar Contraseña",
+"Invalid file extension.- It must be png or jpg or jpeg" => "Archivo de Extensión Invalida - Debe utilizar .png/.jpg/.jpeg",
 );
 ?>

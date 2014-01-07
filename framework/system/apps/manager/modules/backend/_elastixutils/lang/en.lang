@@ -25,8 +25,15 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2008-10-30 09:10:15 Bruno Macias bmacias@elastix.org Exp $ */
+  $Id: en.lang,v 1.1 2008-10-30 09:10:15 Bruno Macias bmacias@elastix.org Exp $ 
+  $Id: en.lang,v 1.1 2013-12-26 10:57:18 Armando Chuto achuto@elastix.org Exp $*/
 global $arrLangModule;
 $arrLangModule = array(
+"My Profile " => "My Profile ",
+"Language" => "Language",
+"Current Password" => "Current Password",
+"New Password" => "New Password",
+"Repeat New Password" => "Repeat New Password",
+"Delete image" => "Delete image",
 );
 ?>

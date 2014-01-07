@@ -350,9 +350,7 @@ function handleJSON_getUserProfile($smarty, $module_name){
         return $jsonObject->createJSON();
     }
     
-    //verificar que no sea false
     $smarty->assign("TITLE_POPUP",_tr("My Profile "));
-    $smarty->assign("CLOSE_POPUP",_tr("Close"));
     $smarty->assign("SAVE_POPUP",_tr("Save changes"));
     $smarty->assign("CHANGE_PASSWD_POPUP",_tr("Change Password"));
     $smarty->assign("userProfile_label",_tr("User"));
@@ -399,56 +397,75 @@ function handleJSON_changeLanguageProfile($smarty, $module_name){
     return $jsonObject->createJSON();
 }
 
-function handleJSON_uploadImageProfile($smarty, $module_name){
+function handleJSON_deleteImageProfile($smarty, $module_name){
     global $arrConf;
-    
     $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
-    
-    $ERROR='';
     $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
     $pACL = new paloACL($pDB);
-    
     $jsonObject = new PaloSantoJSON();
-    
-    
-    
-    global $arrCredentials;
-
-    $domain = $arrCredentials['domain'];
-
-    foreach ($_FILES['picture']['error'] as $key => $error)
+    $ERROR='';
+    $idUser = $arrCredentials['idUser'];
+    $result = deleteImgProfile($pDB, $ERROR);
+    if($result === FALSE)
     {
-        if ($error == UPLOAD_ERR_OK)
-        {  
-            $pictureUpload = $_FILES['picture']['name'][$key];
-            $uploadedUrl = $coreContact->checkRequirementsForUpload($domain, $pictureUpload, $nameTmp);
-            
-            if($uploadedUrl===false){
-                $jsonObject->set_error(_tr("Error uploading your file"));
-                return $jsonObject->createJSON();
-            }
-            
-            if(move_uploaded_file( $_FILES['picture']['tmp_name'][$key], $uploadedUrl)===false){
-                $jsonObject->set_error(_tr("Failed to move file"));
-                return $jsonObject->createJSON();
-            }else{
-                /*
-                $urls[] = $uploadedUrl;
-                $jsonObject->set_message($nameTmp);*/
-                $src="index.php?menu=$module_name&action=getImageTmp&image=$nameTmp&rawmode=yes";
-                $imgData = array();
-                $imgData['name']= $nameTmp;
-                $imgData['url']= $src;
-                $jsonObject->set_message($imgData);
-            }
-        }else{
-            $jsonObject->set_error(_tr("Error uploading your file"));
-        }
+        $jsonObject->set_error($ERROR);
+        return $jsonObject->createJSON();
     }
+    $url="index.php?menu=_elastixutils&action=getImage&ID=$idUser&rawmode=yes";
+    $jsonObject->set_message($url);
     return $jsonObject->createJSON();
 }
 
-
+function handleJSON_changeImageProfile($smarty, $module_name){
+    global $arrConf;
+    $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL = new paloACL($pDB);
+    $jsonObject = new PaloSantoJSON();
+    
+    $idUser = $arrCredentials['idUser'];
+    
+    foreach ($_FILES['picture']['error'] as $key => $error)
+    {
+        if ($error == UPLOAD_ERR_OK)
+        { 
+            $pictureUpload = $_FILES['picture']['name'][$key];
+            if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(png|PNG|JPG|jpg|JPEG|jpeg)$/",$pictureUpload)) {
+                $jsonObject->set_error(_tr("Invalid file extension.- It must be png or jpg or jpeg"));
+                return $jsonObject->createJSON();
+            }elseif(preg_match("/(\.php)/",$pictureUpload)){
+                $jsonObject->set_error(_tr("Possible file upload attack."));
+                return $jsonObject->createJSON();
+            }else{
+                
+                if(is_uploaded_file($_FILES['picture']['tmp_name'][$key])){
+                    $ancho = 159;
+                    $alto = 159;
+                    redimensionarImagen($_FILES['picture']['tmp_name'][$key],$_FILES['picture']['tmp_name'][$key],$ancho,$alto);
+                    
+                    $picture_type=$_FILES['picture']['type'][$key];
+                    
+                    $picture_content=file_get_contents($_FILES['picture']['tmp_name'][$key]);
+                    
+                    $Exito=$pACL->setUserPicture($idUser,$picture_type,$picture_content);
+                    
+                    if($Exito===false){
+                       $jsonObject->set_error(_tr("Image couldn't be upload."));
+                       return $jsonObject->createJSON();
+                    }
+                }else {
+                    $jsonObject->set_error(_tr("Possible file upload attack. Filename")." : ". $pictureUpload);
+                    return $jsonObject->createJSON();
+                }
+            }
+            $url="index.php?menu=_elastixutils&action=getImage&ID=$idUser&rawmode=yes";
+            $jsonObject->set_message($url);
+            return $jsonObject->createJSON();
+        }
+    }
+    return $jsonObject->createJSON();
+    
+}
 
 
 function createProfileForm($langElastix)
@@ -464,25 +481,25 @@ function createProfileForm($langElastix)
             "currentPasswordProfile"   => array("LABEL"              => _tr("Current Password"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "PASSWORD",
-                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "id" => "currentPasswordProfile"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""),
             "newPasswordProfile"   => array("LABEL"                  => _tr("Password"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "PASSWORD",
-                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "id" => "newPasswordProfile", "disabled" => "disabled"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""),
             "repeatPasswordProfile"   => array("LABEL"               => _tr("Repeat Password"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "PASSWORD",
-                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "id" => "repeatPasswordProfile", "disabled" => "disabled"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""),
             "deleteImageProfile"   => array("LABEL"                  => _tr("Delete image"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "CHECKBOX",
-                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm"),
+                                            "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""),
             "picture"   => array("LABEL"               => _tr("Picture:"),

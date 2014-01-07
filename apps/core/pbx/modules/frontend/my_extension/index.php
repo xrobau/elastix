@@ -285,6 +285,7 @@ function createForm(){
                                                 "REQUIRED"               => "no",
                                                 "INPUT_TYPE"             => "SELECT",
                                                 "INPUT_EXTRA_PARAM"      => $arrLang,
+                                                "INPUT_EXTRA_PARAM_OPTIONS" => array("class" => "form-control input-sm"),
                                                 "VALIDATION_TYPE"        => "text",
                                                 "VALIDATION_EXTRA_PARAM" => ""),
                         "emailAttachment_vm"   => array("LABEL"               => _tr("Email Attachment:"),

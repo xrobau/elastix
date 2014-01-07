@@ -1,8 +1,6 @@
 var frmvalidator = null;
 $( document ).ready(function() {
 
-      $('#language_vm').addClass("form-control");
-
 // config callforward
       if($('input[name=callForwardOpt]:checked').val()=='no'){
         //alert($('input[name=callForwardOpt]:checked').val()); 

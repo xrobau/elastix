@@ -35,7 +35,6 @@ body {
 
 
 /* Clearfix */
-	
 .cf:before, .cf:after{
  content:"";
  display:table;
@@ -99,67 +98,15 @@ body {
  float:left;
 }
 
- nav {
- height: 25px;
- width: 100%;
- font-size: 10pt;
- font-weight: bold;
- position: relative;
- float:left;	
-}
-	
- nav ul {
- //background-color:blue;
- padding: 0;
- margin: 0px 8px;
- width: 660px;
- height: 25px;
- list-style: none;
- list-style-image: none;		
-}
-	
- nav ul li {
- display: inline;
- float: left;
-}
-	
- nav ul li a {
- font-family:Arial;
- color: #8c99a4;
- display: inline-block;
- width: 100px;
- text-align: center;
- text-decoration: none;
- line-height: 25px;
-}
-	
-nav ul li a {
- box-sizing:border-box;
- -moz-box-sizing:border-box;
- -webkit-box-sizing:border-box;
-}
-	
-nav ul li:last-child a {
- border-right: 0;
+nav.elx_nav_main_menu{
+    margin-bottom:0px;
+    color:white;
 }
 
-nav a:hover, nav a:active{
- color:white;
+nav.elx_nav_main_menu ul li a {
+    color: #ffffff;
 }
-	
- nav a#pull {
- display: none;
- text-align:left;
- background-color: #283744;
- height: 30px;
- text-decoration: none;
- color: #8c99a4;
-}
-	 
-nav a#pull:hover{
- color:white;
-}
-	
+
 .font{
  font-family:entypo;
  font-size:20pt;
@@ -167,38 +114,10 @@ nav a#pull:hover{
  font-weight: bold;
 }
 
-
-
-nav ul li:hover > ul {
+.li_nav_main_menu_1:hover > ul {
  display:block;
  opacity: 1;
  visibility: visible; 
-}
-
-.submenu{
- top:0px;
- background-color:#132531;
- text-align: center;
- display:none;
- margin: 0;
- list-style: none;
- position:relative;
- left:10px;
- width: 40px;
- z-index:2;
- color:black;
-}
-
-nav li ul li{
- background-color: #132531;
- font-size: 10pt;
- font-weight: bold;
- display: block;
- position: relative;
- padding-top: 8px;
- cursor: pointer;
- width:100px;
- left:-10px;
 }
 
 /* Basic Styles */
@@ -218,7 +137,7 @@ img {
  height:40px;
  width: 100%;
  position: absolute;
- top:25px;
+ top:50px;
  z-index:90;
 }
 
@@ -398,7 +317,7 @@ img {
 #main_content_elastix{
  position: absolute;
  overflow: auto; 
- top: 65px;
+ top: 90px;
  bottom: 0px;
  height: auto;
  width: 100%;
@@ -408,7 +327,7 @@ img {
 #rightdiv{
  background-color:#F3F3F3;
  position:absolute;
- top:65px;
+ top:90px;
  right:0;
  bottom: 0px;
  z-index:80;
@@ -775,14 +694,51 @@ a.boxclose{
 .elx_msg_oculto{
     display:none;
 }
+
+#elx_link_change_passwd{
+    cursor:pointer;
+}
+
+#elx_profile_content .row{
+    margin-top: 7px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+#elx_profile_content .modal-header{
+    padding:0px 15px 0px 15px !important; 
+}
+
+.oculto{
+    display:none;
+}
+
+.visible{
+    display:block;
+}
+
+/* css tool tip de los formularios*/
+.hidden-tooltip{
+    display:none;
+}
+
+.visible-tooltip{
+    display:inline;
+    color: red;
+}
+
+.my_settings a:hover{
+    color: red;
+    text-decoration: none;
+}
+
+/*fin css tooltip*/
+
 /*****************************************************/
 /*    Styles for screen 960px and lower             */
 /*****************************************************/
 @media screen and (max-width: 960px) {
 
-.submenu{
- display:none;
-}
 
 }
 
@@ -791,47 +747,8 @@ a.boxclose{
 /*    Styles for screen 700px and lower             */
 /*****************************************************/
 @media screen and (max-width: 700px) {
-nav { 
- height: 30px;	
-}
-	
-nav ul {
- padding: 0;
- margin: 0 auto;
- width: 100%;
- display: block;	
-}
-	
-nav li {
- width: 33.3333%;
- float: left;
- position: relative;
-}
-	
-nav li a {
- text-align:center;
- height:30px;
-	}
-	
-nav a {
- display: inline-block;
- width: 100px;
- line-height: 25px;
- width: 100%;
-}
-
-nav a:hover, nav a:active{
- background: #8c99a4;
-}
     
-.submenu{
- display:none;
 }
-}
-
-
-
-
 
 /*****************************************************/
 /*    Styles for screen 450px and lower             */
@@ -839,40 +756,8 @@ nav a:hover, nav a:active{
 
 @media only screen and (max-width : 450px) {
 
-nav {
-height: auto;
-border-bottom: 0;
-}
-nav li {
-display: block;
-float: none;
-width: 100%;
-}
-nav ul {
-display: none;
-height: auto;
-}
-nav a#pull {
-display: block;
-width: 100%;
-position: relative;
-text-indent:40px;
-}
-nav a#pull:after {
-content:"";
-background: url('../../apps/home/images/nav-icon.png') no-repeat;
-width: 30px;
-height: 30px;
-display: inline-block;
-position: absolute;
-right: 15px;
-top: 5px;		
-}
-.submenu{
-    display:none;
-}
 #tooldiv{
-    top:30px;
+    top:50px;
     height: 80px;
 }
 #cont_logo{
@@ -895,11 +780,11 @@ top: 5px;
     text-align:center;
 }
 #main_content_elastix{
-    top:110px; /*esto porque la barra de tooldiv se hace mas ancha por lo tanto
+    top:135px; /*esto porque la barra de tooldiv se hace mas ancha por lo tanto
                  esta barra debe bajar*/
 }
 #rightdiv{
-    top:110px;
+    top:135px;
 }
 #photo{
  display:none;
@@ -915,14 +800,6 @@ top: 5px;
 /*****************************************************/
 @media only screen and (max-width : 260px) {
 
-nav li {
-    display: block;
-    float: none;
-    width: 100%;
-}   
-.submenu{
-    display:none;
-}
 #icn_prof{
     width:auto;
     max-width:60%;   

@@ -24,38 +24,6 @@ font-size: 17px;
 font-weight: bold;
 }
 
-.oculto{
-display:none;
-}
-
-.visible{
-display:block;
-}
-
-.alert{
-margin-bottom: 0px;
-}
-
 .name-label, #num_days{
 font-weight: bold !important;
 }
-
-label{
-font-weight: normal !important;
-}
-
-/* css tool tip*/
-.hidden-tooltip{
-display:none;
-}
-
-.visible-tooltip{
-display:inline;
-color: red;
-}
-
-.my_settings a:hover{
-color: red;
-text-decoration: none;
-}
-/*fin css tooltip*/

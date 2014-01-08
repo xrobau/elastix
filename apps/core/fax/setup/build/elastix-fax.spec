@@ -192,6 +192,12 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Virtual Fax List, New Virtual Fax, Send Fax, Fax Queue, Fax Master, 
+  Fax Clients, Fax Viewer, Email Template: For each module listed here the english 
+  help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6344]
+
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
   history. Changed Release in specfile.

@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Softphones, Fax Utilities, Instant Messaging: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6350]
+
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Instant Messaging: fix references to uninitialized variables.
   SVN Rev[5811]

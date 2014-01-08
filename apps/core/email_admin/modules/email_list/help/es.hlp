@@ -1,0 +1,40 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p>El módulo "Listas de Correo" permite crear una lista de correos electrónicos por medio del software Mailman. Debe tener al menos un dominio creado en el servidor.</p>
+	<p>Inicialmente se muestran las listas de correo ya existentes en caso de haber y aquí usted puede eliminarlas o crear una nueva. Puede usar el filtro de búsqueda para encontrar listas de un dominio determinado.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_list.png" border="0" />
+        <p>Figura 1</p></div>
+        <br />
+	<h2>Crear una lista de correo</h2>
+	<p>Para crear una nueva lista de correo haga click en el botón "Nueva Lista de Correo". Si no hay un usuario administrador de Mailman entonces es necesario configurarlo para que el servicio de mailman funcione. Debe ingresar un usuario y una contraseña para la administración de Mailman y los datos para la nueva lista de correo como dominio, nombre de la lista, el administrador y una contraseña. Cuando termine haga click en el botón "Guardar". El administrador recibirá un correo con la contraseña de la lista.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_new_email_list1.png" border="0" />
+        <p>Figura 2</p></div>
+	<br />
+	<p><b>Nota: </b>Si ya hay un administrador de Mailman entonces sólo es necesario introducir los datos para la nueva lista de correo.</p>
+	<h2>Eliminar una lista de correo</h2>	
+	<p>Para eliminar una lista primero debe seleccionarla y luego hacer click en el botón "Eliminar". <i>(Ver Figura 1)</i></p>
+<h2>Agregar miembros a la lista</h2>	
+	<p>Para agregar nuevos miembros a una lista existente haga click en el enlace "Agregar miembros" correspondiente a la lista  <i>(Ver Figura 1)</i>. En el área de texto ingrese los correos electrónicos que desea agregar. Los correos deben ser ingresados uno por línea usando uno de dos formatos disponibles <i>(Ver ejemplos en la Figura 3)</i>. Es posible ingresar dos nombres y dos apellidos.
+	<p>Para finalizar haga click en el botón "Agregar".</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_new_list_member.png" border="0" />
+        <p>Figura 3</p></div>
+        <br />
+	<h2>Eliminar miembros de una lista</h2>
+	<p>Para eliminar a un miembro de la lista haga click en el enlace "Eliminar miembros" <i>(Ver Figura 1)</i> correspondiente a la lista. En el área de texto ingrese los correos electrónicos que desea remover de la lista, uno por línea.</p>
+	<p>Para finalizar haga click en el botón "Remover".</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_remove_list_member.png" border="0" />
+        <p>Figura 4</p></div>
+        <br />
+	<h2>Ver miembros de la lista</h2>
+	<p>Para ver los miembros de la lista haga click en el enlace "Ver miembros" <i>(Ver Figura 1)</i> correspondiente a la lista. Se mostrarán todos los miembros de la lista seleccionada y para mayor comodidad podrá ser filtrada por nombre o por dominio.</p>
+	<p>También puede exportar la lista haciendo click en el botón "Exportar Miembros" el cual generará un archivo txt con todos los miembros que la conforman.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_list_member.png" border="0" />
+        <p>Figura 5</p></div>
+        <br />
+    </body>
+</html>

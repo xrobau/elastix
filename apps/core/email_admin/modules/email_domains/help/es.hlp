@@ -1,0 +1,30 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>La opción "Dominios" del menú "Correo Electrónico" en Elastix permite crear dominios para el servidor de correo.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_domains.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+<h3>Crear Dominio</h3>
+
+<p>Para agregar un dominio usted debe hacer click en el botón "Crear Dominio" y escribir el nombre del nuevo dominio.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_domains_create.png" border="0" />
+<p>Figura 2</p></div>
+<br />
+<h3>Eliminar un Dominio</h3>
+
+<p>Para borrar un dominio, desde la lista usted debe hacer click en el nombre del dominio y luego en el botón "Eliminar".</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_domains_view_del.png" border="0" />
+<p>Figura 3</p></div>
+<br />
+</body>
+</html>

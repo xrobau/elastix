@@ -1,0 +1,17 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+	<p>El módulo "Estadísticas" muestra gráficos estadísticos de la cantidad de correos entrantes.</p>
+	<p>El primer gráfico muestra la cantidad de correos entrantes de las últimas 26 horas y se actualiza cada hora. Este gráfico estará disponible 3 horas después de haber instalado Elastix.</p>
+	<p>El segundo gráfico muestra las cantidad de correo entrante de los últimos 7 días y es actualizado cada 6 horas. Este gráfico estará disponible 13 horas después de haber instalado Elastix.</p>
+	<p>El tercer gráfico muestra la cantidad de correos entrantes de los últimos 12 meses y se actualiza cada 15 días. Este gráfico estará disponible 1 mes después de haber instalado Elastix.</p>
+        <p>El mensaje "Nada que mostrar todavía" significa que Elastix no cuenta aún con la suficiente información para mostrar estos datos.</p>
+	<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_stats.png" border="0" />
+        <p>Figura 1</p></div>
+	<br />
+    </body>
+</html>

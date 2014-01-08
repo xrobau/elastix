@@ -1,0 +1,20 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p>El módulo "Vacaciones" permite configurar el envío automático de respuestas por correo mientras no estamos disponibles.</p>
+	<p>Este módulo puede usarse en caso de:</p>
+	<ul>
+	    <li>Vacaciones</li>
+	    <li>Hora de almuerzo</li>
+	    <li>Fines de semana</li>
+	</ul>
+	<br />
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_vacations.png" border="0" />
+	<p>Figura 1</p></div>
+	<br/>
+    </body>
+</html>

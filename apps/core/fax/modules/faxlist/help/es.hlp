@@ -1,0 +1,25 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>La opción "Lista de Fax Virtual" del menú "Fax" en Elastix permite ver información sobre estos dispositivos virtuales incluyendo el estado en el que se encuentran.</p>
+
+<div class="hlp_figureS"><img src="../modules/{$node_id}/images/es_hlp_fax_virtual_list.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+<p>También puede ver la información de cada fax virtual haciendo click sobre el nombre correspondiente. (Ver figura 2)</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_fax_virtual_view.png" border="0" />
+<p>Figura 2</p></div>
+<br />
+
+<p>Puede también modificar los parámetros del fax virtual o eliminarlo.</p>
+
+</body>
+</html>

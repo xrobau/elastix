@@ -1,0 +1,21 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>La opción "Clientes de Fax" permite ingresar las direcciones IP que están autorizadas a enviar faxes a través de Elastix.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_fax_clients.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+<p>Las direcciones IP deben ser ingresadas una por línea. Para guardar los cambios usted debe hacer click en el botón "Guardar".</p>
+
+<p>Es recomendable dejar las direcciones 127.0.0.1 y localhost en la configuración ya que son necesarios para algunos procesos.</p>
+
+</body>
+</html>

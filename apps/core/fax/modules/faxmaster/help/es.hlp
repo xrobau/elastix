@@ -1,0 +1,17 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>La opción "Fax Maestro" permite ingresar un correo electrónico que recibirá las notificaciones de mensajes recibidos, errores y resumen de actividad del Servidor de Faxes.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_fax_master.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+</body>
+</html>

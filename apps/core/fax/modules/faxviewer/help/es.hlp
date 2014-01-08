@@ -1,0 +1,21 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>La opción "Visor de Fax" muesta todos los faxes que han sido enviados y recibidos en un fax virtual. Usted puede descargar los faxes haciendo click en el nomnbre del archivo.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_fax_viewer.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+<p>Por defecto todos los faxes son mostrados aquí pero usted puede filtrar los resultados de acuerdo a diferentes campos (Ver Figura 2).</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_fax_viewer_filter.png" border="0" />
+<p>Figura 2</p></div>
+<br />
+</body>
+</html>

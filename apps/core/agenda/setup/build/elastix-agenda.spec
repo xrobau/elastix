@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Calendar, Address Book: For each module listed here the english help
+  file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6340]
+
 * Mon Oct 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: the agenda record field expansion renamed phone to work_phone,
   which breaks the SOAP API. Copy the field back to its old name to keep the

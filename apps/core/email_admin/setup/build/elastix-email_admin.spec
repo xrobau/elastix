@@ -197,6 +197,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Domains, Accounts, Relay, Antispam, Remote SMTP, Email list, Email stats,
+  Vacations: For each module listed here the english help file was renamed to en.hlp
+  and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6342]
+
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam, Remote SMTP: update jquery.ibutton.js to 1.0.03, fix 
   potential incompatibilities with jQuery 1.9+

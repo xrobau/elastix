@@ -92,6 +92,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: CDR Report, Channels Usage, Rates, Billing Report, Destination 
+  Distribution, Billing Setup, Asterisk Logs, Graphic Report, Summary,
+  Missed Calls: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6348]
+
 * Tue Oct 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: CDR Report: make empty-parameter check more strict to prevent removing
   a single zero from filter parameters.

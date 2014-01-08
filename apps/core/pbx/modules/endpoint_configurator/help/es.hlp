@@ -1,0 +1,20 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>La opción "Configurador de Endpoint" permite configurar automáticamente los endpoints para su funcionamiento en el servidor Elastix.</p>
+
+<p>Actualmente existen varios modelos de teléfono que soportan la configuración automática por medio de Elastix. Esta lista de dispositivos se encuentra constantemente en crecimiento.</p>
+<p>Para hacer una búsqueda en la red de todos los endpoints que soportan la configuración automática por medio de Elastix, ingrese el rango de IP deseado y haga click en el botón "Descubrir Endpoints en esta Red". Si desea configurar el endpoint debe seleccionarlo, escoger el modelo y la extensión que se le va a asignar y luego hacer click en el botón "Configurar". Esto creará un archivo de configuración alojado en Elastix el cual será leído por el endpoint para su autoprovisionamiento.</p>
+<p>Si desea configurar el endpoint manualmente haga click sobre la dirección IP del dispositivo. Esto lo llevará hacia la interfaz web de administración del mismo.</p>
+
+<p>Para eliminar el archivo de configuración del servidor Elastix seleccione el endpoint y haga click en el botón "Desconfigurar". Esta acción no eliminará la configuración actual del endpoint.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_endpoint_configurator.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+

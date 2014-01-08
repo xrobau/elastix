@@ -298,6 +298,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: PBX Configuration, Operator Panel, Voicemails, Recordings, 
+  Endpoint Configurator, Batch of Endpoints, Batch of Extensions, Conference,
+  Asterisk-Cli, Asterisk File Editor, Text to Wav, Festival, Recordings: For 
+  each module listed here the english help file was renamed to en.hlp and a 
+  spanish help file called es.hlp was ADDED.
+  SVN Rev[6346]
+
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Festival: update jquery.ibutton.js to 1.0.03, fix potential 
   incompatibilities with jQuery 1.9+

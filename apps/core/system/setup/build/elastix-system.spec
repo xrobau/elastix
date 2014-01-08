@@ -134,6 +134,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Dashboard, Applet Admin, Network Parameters, DHCP Server, DHCP Client List, Assign IP Address to Host, Users, Shutdown, Hardware Detector, Repositories, Packages, Backup/Restore, Date/Time, Currency: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6338]
+
 * Thu Dec 26 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: replace deprecated .live and .die with .on and .off
   SVN Rev[6327]

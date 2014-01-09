@@ -357,6 +357,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jan 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Fix cronjob that removes temporary TTS files by checking whether tts
+  directory exists. Also simplify by using the native -delete action of find
+  instead of piping to xargs and rm.
+  SVN Rev[6353]
+
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Festival: update jquery.ibutton.js to 1.0.03, fix potential 
   incompatibilities with jQuery 1.9+

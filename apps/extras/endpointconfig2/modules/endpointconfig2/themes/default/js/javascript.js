@@ -512,6 +512,7 @@ $(document).ready(function() {
 				switch (respuesta.endpointchanges[i][0]) {
 				case 'insert':
 					// Se ha descubierto un nuevo endpoint
+					epinfo.modelos = this.modelos;
 					this.completeList.addObject(App.Endpoint.create(epinfo));
 					break;
 				case 'update':

@@ -133,6 +133,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jan 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Endpoint Configurator: fix regression introduced by moving models
+  inside App.EndpointController that left a newly inserted App.Endpoint without
+  a reference to the models array.
+  SVN Rev[6352]
+
 * Sat Dec 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: New Endpoint Configurator: provide a "loading" template for the main
   endpoint listing using the loading view support of Ember.js 1.2.0.

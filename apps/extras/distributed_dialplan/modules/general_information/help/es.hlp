@@ -1,0 +1,14 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">En este módulo usted debe ingresar información general de su servidor el cual es necesario para poder solicitar conexión a otros servidores. Esta información permite identificar nuestro servidor hacia otros.</p>
+	<br /><br />
+        <!-- Form to add images -->
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_general_inf.png" border="0" />
+	<p>Figura 1</p></div>
+    </body>
+</html>

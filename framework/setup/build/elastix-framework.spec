@@ -329,6 +329,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Groups, Group Permissions, Language, Themes: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6366]
+
 * Thu Dec 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: patch colResizable to stop using deprecated $.browser .
   SVN Rev[6326]

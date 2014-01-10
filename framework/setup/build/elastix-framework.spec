@@ -330,7 +330,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
-- CHANGED: Groups, Group Permissions, Language, Themes: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+- CHANGED: Webmail, Flash Operator Panel, Openfire, vTigerCRM, Calling Cards: 
+  For each module listed here the english help file was renamed with the 
+  prefix "en_" and a spanish help file with the prefix "es_" was ADDED. 
+  Some unnecessary help related files were deleted.
+  SVN Rev[6372]
+
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Groups, Group Permissions, Language, Themes: For each module listed 
+  here the english help file was renamed to en.hlp and a spanish help file called 
+  es.hlp was ADDED.
   SVN Rev[6366]
 
 * Thu Dec 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>

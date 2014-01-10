@@ -97,6 +97,17 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Agent Console, Campaigns, Do not Call List, External URLs, Queues,
+  Clients, Ingoing Campaigns, Agents, ECCP Users, Callback Extensions, Breaks,
+  Form Designer, Form Preview, Reports Break, Calls Detail, Calls per hour, 
+  Calls per Agent, Hold time, Login Logout, Ingoing Calls Success, Graphic Calls 
+  per hour, Agent Information, Agents Monitoring, Trunks used per hour, 
+  Incoming calls monitoring, Campaign monitoring, Configuration: For each module 
+  listed here the english help file was renamed to en.hlp and a spanish help file 
+  called es.hlp was ADDED.
+  SVN Rev[6354]
+
 * Thu Dec 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fix corner case in which an incorrect JSON encoding in
   non-SSE mode of the logged-out event right at the start of status checking

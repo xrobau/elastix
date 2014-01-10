@@ -70,6 +70,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Build Module, Delete Module, Language Admin: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6358]
+
 * Wed Aug  8 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Language Admin: (jbriones) relax strict validation on language 
   translation in order to allow an empty arrLangModule.

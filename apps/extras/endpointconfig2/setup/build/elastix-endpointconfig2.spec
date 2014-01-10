@@ -133,6 +133,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: New Endpoint Configurator: The english help file was renamed to 
+  en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6370]
+
 * Thu Jan 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Endpoint Configurator: fix regression introduced by moving models
   inside App.EndpointController that left a newly inserted App.Endpoint without

@@ -124,6 +124,12 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Addons: For each module listed here the english help file 
+  was renamed to en.hlp and a spanish help file called es.hlp was ADDED. 
+  Some help related files were deleted.
+  SVN Rev[6356]
+
 * Tue Nov 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.

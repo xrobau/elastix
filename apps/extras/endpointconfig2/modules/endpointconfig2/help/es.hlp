@@ -1,0 +1,382 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+{literal}
+<style type="text/css">
+
+dt {
+    font-weight: bold;
+}
+pre {
+    margin-left: 20px;
+    background-color: #dddddd;
+}
+
+</style>
+{/literal}
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+<p>El módulo "Nuevo Configurador de Endpoint"  permite la configuración automática de manera remota de los endpoints soportados. Este módulo combina la funcionalidad de los módulos antiguos "Configurador de Endpoints" y "Lote de Endpoints" en una sola interfaz completamente reescrita. Con este módulo el administrador puede apuntar los endpoints soportados hacia ELastix como su servidor de telefonía.</p>
+
+<h3>Tabla de contenido</h3>
+<ol>
+<li><a href="#terms">Definición de términos</a></li>
+<li><a href="#interface">Descripción de la interfaz</a></li>
+<li><a href="#workflow_manual">Flujo de la configuración manual de Endpoints</a></li>
+<li><a href="#workflow_file">Flujo de la configuración de Endpoints por carga de archivo</a></li>
+<li><a href="#file_formats">Formato de archivos para lista de endpoints</a></li>
+<li><a href="#supported">Fabricantes de endpoints soportados</a></li>
+</ol>
+
+<h3><a id="terms">Definición de términos</a></h3>
+<p>Los siguientes términos son utilizados a lo largo de este documento:</p>
+<dl>
+<dt>Endpoint</dt>
+<dd>Un endpoint es un dispositivo de hardware o software que implementa al menos una tecnología de telefonía (SIP o IAX2) y es capaz de realizar y recibir llamadas VoIP a favor de un usuario final. Esto es comúnmente un teléfono IP. Con el fin de realizar y recibir llamadas, el endpoint debe estar configurado con un servidor proxy de telefonía, y al menos una cuenta en este servidor. Un endpoint puede soportar más de una cuenta y posiblemente más de una tecnología VoIP.</dd>
+
+<dt>Cuenta</dt>
+<dd>Una cuenta es un registro de autenticación/autorización creado en un servidor de telefonía para propósitos de enrutamiento de llamadas. La información mínima para configurar una cuenta es la tecnología VoIP usada para hablar, un nombre para la cuenta, y una clave secreta compartida. Con frecuencia la cuenta también tiene un nombre para mostrar y una breve descripción de la misma. En configuraciones de propietario simple el nombre de la cuenta puede ser el mismo que la extensión que se debe marcar para alcanzar esta cuenta. En configuraciones multi-propietario (como Elastix 3), necesariamente el nombre de la cuenta no debe contener información ambigua a la extensión a marcar.</dd>
+
+<dt>Servidor de telefonía</dt>
+<dd>Un servidor de telefonía es una computadora que corre un PBX telefónico o un software de conmutación (como Asterisk). El servidor de telefonía es responsable de enrutar las llamadas entre extensiones y hacia fuentes externas (como VoIP y troncales PSTN). Este enrutamiento involucra resolver un número marcado desde un endpoint, o ingresado a través de un IVR, a una cuenta existente a la cual la llamada debe ser puenteada. Para propósitos de este módulo, el servidor Elastix juega el rol de servidor de telefonía.</dd>
+
+<dt>Tecnología VoIP (o "tech")</dt>
+<dd>Una tecnología VoIP es un protocolo de red particular que codifica la interacción requerida entre el endpoint y el servidor de telefonía, tales como señalización, llamadas entrantes, llamadas salientes, negociación de codecs y abandono de llamadas. Actualmente las tecnologías VoIP soportadas en este módulo son SIP e IAX2.</dd>
+
+<dt>Extensión</dt>
+<dd>Una extensión es una cadena fija compuesta de dígitos (0-9) más los caracteres especiales numeral (#) y asterisco (*), que pueden ser marcados a través del teclado de un endpoint, y pueden ser interpretados por el servidor de telefonía como un recurso particular. Este recurso particular de telefonía puede ser una cuenta, una cola, un IVR, un cuarto de conferencia, o algún otro comportamiento. En Asterisk/Elastix, el mapeo entre extensiones y recursos de telefonía son definidos por el plan de marcado configurado en extensions.conf y sus archivos incluidos. En las configuraciones de PBX simple, hay un solo mapeo entre una extensión y un recurso de telefonía, frecuentemente una cuenta a la cual la llamada debe ser enlazada. En configuraciones multi-propietario (como Elastix 3), cada dominio define su propio espacio de nombre de extensiones con extensiones únicas dentro de cada dominio.</dd>
+
+<dt>Provisionamiento estático</dt>
+<dd>La configuración predeterminada de fábrica de la mayoría de los endpoints soportados usan DHCP para obtener una dirección IP en la red local. El protocolo DHCP soporta el envío de parámetros además de una dirección IP disponible, tal como la dirección de un servidor TFTP desde el cual pueden ser descargados archivos de configuracion. Si el servidor Elastix es el mismo servidor DHCP para la red, apuntará el servidor TFTP hacia él mismo. Sin embargo frecuentemente el servidor DHCP es un servidor diferente y no está bajo el control de Elastix. Esto conlleva a que la configuración del directorio TFTP esté ausente, o esté siendo usada para otros propósitos que no son el provisionamiento de endpoints. Un endpoint soporta provisionamiento estático si la manera en que este es configurado permite ignorar la ausencia o una configuración inválida del servidor DHCP, y siempre buscar los archivos de configuración en el servidor Elastix. Esta propiedad simplifica el desarrollo de endpoints en redes donde el servidor DHCP es reacio o incapaz de apuntar la dirección TFTP al servidor Elastix.</dd>
+
+</dl>
+
+<h3><a id="interface">Descripción de la interfaz</a></h3>
+
+<p>La interfaz principal del módulo es la siguiente:</p>
+
+<img src="../modules/{$node_id}/images/es_hlp_mainscreen.png" />
+
+<dl>
+<dt>Listado principal</dt>
+<dd>Este es el listado de todos los endpoints que han sido detectados o ingresados. A diferencia de la antigua implementación, cualquiera de los endpoints detectados o cargados en sesiones pasadas se mantendrán y serán mostrados hasta que sean explícitamente eliminados. La lista principal contiene las siguientes columnas:
+<ul>
+<li>Caja de selección. Seleccionando la caja, el endpoint es marcado para su configuración o para removerlo de la lista. La cabecera contiene una caja de selección global que permite marcar/desmarcar todos los endpoints.</li>
+<li>Status. Esto muestra el estado del endpoint con uno o mas íconos. Los íconos disponibles son:
+    <ul>
+        <li>Ícono de desplazamiento: el endpoint no ha sido escaneado, pero definido en la carga de un archivo.</li>
+        <li>Ícono de disco: la configuración del endpoint ha sido actualizada en la base de datos pero no aplicada aún a sus archivos de configuración.</li>
+        <li>Ícono de persona: el endpoint tiene al menos una cuenta asignada.</li>
+    </ul>
+</li>
+<li>Dirección MAC. Este es el principal identificador del endpoint. Las configuraciones en la base de datos y en los archivos apuntan al mismo endpoint si hacen referencia a la misma dirección MAC.</li>
+<li>IP Actual. Si el endpoint fue detectado a través de un escaneo, este campo muestra la IP en que el endpoint fue detectado. Este campo es un enlace a la interfaz de configuración HTTP (si soporta) del endpoint.</li>
+<li>Fabricante. Esto muestra el fabricante detectado del endpoint.</li>
+<li>Modelo. Esto muestra el modelo del endpoint detectado. Ya que la detección automática del modelo no está (aún) implementada para algunos fabricantes, este campo permite al usuario corregir el modelo mediante una lista desplegable. La precisión en la detección del modelo es requerida por muchas otras características (tales como asignación de cuentas) para funcionar.</li>
+<li>Opciones. Este enlace muestra un diálogo en el cual se pueden configurar manualmente opciones comunes de los endpoints.</li>
+</ul>
+</dd>
+
+<dt><img src="../../images/searchw.png"/>Botón de búsqueda de endpoints en la red</dt>
+<dd>Esta sección contiene una caja de texto con la definición de la red y su máscara, y un ícono en forma de lupa. Por defecto la definición de red será llenada con la información de red de la primera interfaz ethernet del servidor Elastix. El usuario puede cambiar esta definición para restringir la búsqueda, y entonces hacer click en la lupa para iniciarla. Cuando la búsqueda esté en proceso la barra cambiará a un ícono dando vueltas y un botón para cancelar la operación. Cuando los endpoints sean detectados serán agregados a la lista principal, junto con sus nombres de fabricante y modelo. La barra de herramientas volverá a su estado normal al terminar la búsqueda o cancelar la misma.</dd>
+
+<dt><img src="../../images/endpoint.png"/>Botón de configuración de endpoint</dt>
+<dd>Al hacer click en este botón se aplicará la configuración en todos los endpoints seleccionados. Cuando se esté aplicando la configuración la barra de herramientas cambiará a una barra de progreso hasta que termine el proceso. Durante la configuración se genera un log que puede ser visto haciendo click en el botón de log de configuración.</dd>
+
+<dt><img src="../../images/list.png"/>Botón de Log de configuración</dt>
+<dd>Al hacer click en este ícono se abrirá una ventana de diálogo en el que se mostrará información de la última configuración ejecutada. Esto es útil para diagnosticar problemas de fallas de configuración en el módulo.</dd>
+
+<dt><img src="../../images/delete5.png"/>Botón para remover configuración</dt>
+<dd>Al hacer click en este botón se eliminarán (después de un diálogo de confirmación) los registros de la base de datos correspondientes a los endpoints seleccionados, así como también cualquier archivo de configuración generado para estos endpoints. Sin embargo, esta acción NO modifica nada en los endpoints en sí.</dd>
+
+
+<dt><img src="../../images/download2.png"/>Botón de Descarga de configuración</dt>
+<dd>Al hacer click en este ícono se mostrará una serie de enlaces para descargar la lista de endpoints almacenada en la base de datos, en tres diferentes formatos. Los formatos soportados son:
+<ul>
+<li>CSV (Antiguo). Este es el formato usado por el módulo de Endpoint Configurator antiguo.</li>
+<li>XML. Este formato permite la definición de endpoints con múltiples cuentas y propiedades, como un documento XML.</li>
+<li>CSV (Anidado). Este formato puede ser generado editandolo cuidadosamente en una hoja de cálculo, y utiliza sangría para agrupar múltiples cuentas y propiedades por endpoint.</li>
+</ul></dd>
+
+<dt><img src="../modules/{$node_id}/images/upload.png" border="0" />Botón de carga de configuración</dt>
+<dd>Al hacer click en este ícono se mostrará una ventana de diálogo en donde el usuario puede especificar un archivo que contenga una lista de endpoints a configurar para subirla al servidor. El formato de archivo es detectado automáticamente.</dd>
+
+</dl>
+
+<p>El diálogo de configuración contiene las siguientes pantallas:</p>
+
+<img src="../modules/{$node_id}/images/es_hlp_dialog_information.png" />
+
+<p>La pantalla de Información muestra detalles del endpoint seleccionado. Estos detalles incluyen el fabricante y modelo detectado, MAC, dirección IP y el máximo número de cuentas disponibles para configurar en el endpoint según permita el modelo. También se muestran otras prestaciones del modelo.</p>
+
+<img src="../modules/{$node_id}/images/es_hlp_dialog_accounts.png" />
+
+<p>La pantalla de Cuentas permite asignar las cuentas existentes en el sistema al endpoint seleccionado. La pantalla contiene dos paneles donde se ubican las cuentas y otro panel adicional de propiedades que aparece cuando una de las cuentas es agregada al endpoint. El panel izquierdo contiene todas las cuentas que no han sido asignadas a ningún endpoint. El panel superior derecho contiene todas las cuentas asignadas al endpoint de las cuales la primera será la cuenta primaria en la pantalla del teléfono (si lo soporta). Las cuentas pueden ser asignadas arrastrándolas desde el panel izquierdo hacia el derecho, y removidas arrastrándolas en dirección contraria. Las cuentas asignadas pueden ser reordenadas para cambiar su prioridad en el endpoint. Algunos modelos de teléfonos soportan la asignación de propiedades para cuentas específicas. Si ese es el caso estas propiedades pueden ser configuradas seleccionando la cuenta asignada, y escribiendo el nombre y el valor de la propiedad en el panel derecho inferior.</p>
+
+<img src="../modules/{$node_id}/images/es_hlp_dialog_network.png" />
+
+<p>La pantalla de Red permite la configuración de los parámetros de red. El endpoint puede ser configurado tanto como DHCP o con dirección IP estática (si lo soporta).</p>
+
+<img src="../modules/{$node_id}/images/es_hlp_dialog_auth.png" />
+
+<p>La pantalla de Accesos Personalizados permite la configuración de credenciales de autenticación que pueden ser requeridos para configurar un teléfono con contraseñas diferentes a las predeterminadas.</p>
+
+<img src="../modules/{$node_id}/images/es_hlp_dialog_custom.png" />
+
+<p>La pantalla de Propiedades Adicionales de Endpoint permite configurar parámetros específicos del modelo del endpoint que no están disponibles en las pantallas anteriores. A diferencia de los parámetros configurados en la pantalla de Cuentas, estos parámetros son aplicados al endpoint de manera general en lugar de sólo a una cuenta especifica.</p>
+
+<h3><a id="workflow_manual">Flujo de la configuración manual de parámetros</a></h3>
+
+<p>El siguiente es el procedimiento recomendado para configurar un pequeño número de endpoints:</p>
+<ol>
+<li>Conecte todos sus endpoints en la misma red que el servidor Elastix.</li>
+<li>En la interfaz web, revise que la especificación de la red a lado del botón de escaneo sea correcta. Luego haga click en el botón para escanear.</li>
+<li>La lista de endpoints crecerá o se actualizará en tiempo real a medida que los endpoints sean detectados. Presione el botón "Cancelar" en cualquier momento para parar el escaneo, o espere hasta que toda la red sea escaneada.</li>
+<li>Para cada endpoint que desee configurar revise que el modelo haya sido correctamente detectado. Si el modelo dice "(no detectado)", este debe ser manualmente asignado antes de configurar las cuentas en el endpoint.</li>
+<li>Abra la pantalla de configuración para cada endpoint y asigne las cuentas requeridas.</li>
+<li>Seleccione todos los endpoints con la caja de marcación ubicada en la fila de encabezado con el fin de configurar todos los endpoints. Si no desea configurar todos, marque individualmente cada endpoint a configurar.</li>
+<li>Haga click en el botón de configuración de Endpoints ubicado a lado derecho de la lupa. El proceso de configuración empezará y se mostrará una barra de progreso.</li>
+<li>Si todos los endpoints fueron configurados correctamente se mostrará un mensaje en la parte superior del módulo indicándolo así. De lo contrario, se recomienda revisar el log de configuración haciendo click en el botón de Logs de Configuración.</li>
+</ol>
+
+<h3><a id="workflow_file">Flujo de configuración de parámetros a través de la carga de un archivo</a></h3>
+
+<p>Para un número amplio de endpoints, se recomienda usar las herramientas de descarga/carga de archivos. Los pasos iniciales y finales son similares a la configuración manual:</p>
+
+<ol>
+<li>Conecte todos sus endpoints en la misma red que el servidor Elastix.</li>
+<li>En la interfaz web, revise que la especificación de la red a lado del botón de escaneo sea correcta. Luego haga click en el botón para escanear.</li>
+<li>La lista de endpoints crecerá o se actualizará en tiempo real a medida que los endpoints sean detectados. Presione el botón "Cancelar" en cualquier momento para parar el escaneo, o espere hasta que toda la red sea escaneada.</li>
+<li>Haga click en el botón de Descarga. Este mostrará un menú con posibles formatos de archivo para la lista de endpoints. Si no necesita soportar múltiples cuentas por endpoint y desea mantener la compatibilidad con el antiguo formato de endpoints, elija el formato "CSV (Antiguo)". Si tiene un editor XML adecuado, o tiene un programa que puede manejar XML, elija el formato XML. De otra manera, elija el formato CSV (Anidado).</li>
+<li>Modifique los archivos para reflejar la política requerida para los endpoints. Cualquier endpoint que aparezca con un modelo vacío debe ser eliminado o llenado con un modelo válido, de lo contrario el archivo será rechazado al momento de cargarlo.</li>
+<li>Haga click en el botón de Carga. Aparecerá un cuadro donde se debe especificar el archivo que se ha modificado.</li>
+<li>Revise si la carga se ha completado exitosamente.</li>
+<li>Seleccione todos los endpoints con la caja de marcación ubicada en la fila de encabezado con el fin de configurar todos los endpoints. Si no desea configurar todos, marque individualmente cada endpoint a configurar.</li>
+<li>Haga click en el botón de configuración de Endpoints ubicado a lado derecho de la lupa. El proceso de configuración empezará y se mostrará una barra de progreso.</li>
+<li>Si todos los endpoints fueron configurados correctamente se mostrará un mensaje en la parte superior del módulo indicándolo así. De lo contrario, se recomienda revisar el log de configuración haciendo click en el botón de Logs de Configuración.</li>
+</ol>
+
+<h3><a id="file_formats">Formato de archivo para la lista de Endpoints</a></h3>
+
+<p>La descarga de la lista de Endpoitns puede generar listas en tres formatos:</p>
+<ul>
+<li><a href="#format_csvlegacy">CSV (Antiguo)</a></li>
+<li><a href="#format_xml">XML</a></li>
+<li><a href="#format_csvnested">CSV (Anidado)</a></li>
+</ul>
+
+<h4><a id="format_csvlegacy">CSV (Antiguo)</a></h4>
+<p>Este es el formato utilizado por la implementación antigua del módulo de Endpoint configurator. A diferencia de aquella implementación, este módulo soporta la mezcla de múltiles fabricantes sin que se presenten errores. Este formato puede asignar sólo una extensión/cuenta por endpoint. Los campos listados a continuación pueden aparecer en cualquier orden. Sin embargo, le primera fila del archivo debe contener la cabecera con las palabras listadas en el orden en que serán definidas en el resto del archivo. Cualquier campo que no esté marcado como Requerido puede ser omitido.</p>
+<dl>
+<dt>Vendor</dt>
+<dd>(Requerido) El nombre del fabricante del Endpoint</dd>
+<dt>Model</dt>
+<dd>(Requerido) El nombre del modelo del Endpoint para el fabricante</dd>
+<dt>MAC</dt>
+<dd>(Requerido) La dirección MAC del endpoint. Este campo es usado para emparejar la información contra cualquier definición existente en la base de datos.</dd>
+<dt>Ext</dt>
+<dd>(Requerido) La cuenta que se va a asignar a este endpoint en particualar. En sistemas de un solo propietario este campo es frecuentemente el mismo que la exensión.</dd>
+<dt>IP</dt>
+<dd>La dirección IP que será configurada en el endpoint. Si este campo está vacío, el endpoint será configurado por DHCP.</dd>
+<dt>Mask</dt>
+<dd>La máscara de red que será configurada en el endpoint. Este campo es requerido si se especifica una dirección IP.</dd>
+<dt>GW</dt>
+<dd>La puerta de enlace predeterminada que será configurada en el endpoint. Este campo es requerido si se especifica una dirección IP.</dd>
+<dt>DNS1</dt>
+<dd>El DNS primario. Este campo es requerido si se especifica una dirección IP.</dd>
+<dt>DNS2</dt>
+<dd>El DNS secundario.</dd>
+<dt>Bridge</dt>
+<dd>Si quiere que el endpoint actúe como Bridge entonces debe configurar este campo con 1. De lo contrario configúrelo con 0. No todos los fabricantes soportan el uso de este campo.</dd>
+<dt>Time_Zone</dt>
+<dd>Especifique la zona horaria del endpoint. Si no está presente, el endpoint usará sus configuraciones por defecto. No todos los fabricantes soportan el uso de este campo.</dd>
+</dl>
+<p>El siguiente ejemplo define un archivo de configuración para un endpoint con cabeceras. Aquí el endpoint es un teléfono Grandstream GXP1405 con dirección MAC 00:0B:82:3C:47:85, con la extensión 1071 asignada.</p>
+<pre>
+Vendor,Model,MAC,Ext,IP,Mask,GW,DNS1,Bridge,Time_Zone,DNS2
+Grandstream,GXP1405,00:0B:82:3C:47:85,1071,,,,,,,
+</pre>
+
+<h4><a id="format_xml">XML</a></h4>
+
+<p>Este formato es un documento XML. El elemento más alto es "endpoints" que contiene uno o más elementos "endpoint". El elemento "endpoint" contiene los siguientes elementos:</p>
+<dl>
+<dt>mac_address</dt>
+<dd>(Requerido) La dirección MAC del endpoint. Este campo es usado para emparejar la información contra cualquier definición existente en la base de datos.</dd>
+<dt>name_manufacturer</dt>
+<dd>(Requerido) El nombre del fabricante del endpoint.</dd>
+<dt>name_model</dt>
+<dd>(Requerido) El nombre del modelo del endpoint para el fabricante</dd>
+<dt>endpoint_properties</dt>
+<dd>Contiene el conjunto de propiedades que se aplican al endpoint como un todo.</dd>
+<dt>accounts</dt>
+<dd>Contiene el conjunto de cuentas que se va a asignar al endpoint.</dd>
+</dl>
+
+<p>El elemento "endpoint_properties" contiene cero o más elementos "property". Cada elemento "property" tiene un elemento "key" para el nombre de la propiedad, y un elemento "value" para su valor. La configuración usa estas propiedades estándar:</p>
+
+<dl>
+<dt>dhcp</dt>
+<dd>Configure con 1 (por defecto) para usar DHCP, o con 0 para usar las siguientes 5 propiedades para la configuración de red.</dd>
+<dt>static_ip</dt>
+<dd>Si dhcp está configurado con 0, especifica la dirección IPv4.</dd>
+<dt>static_mask</dt>
+<dd>Si dhcp está configurado con 0, especifica la máscara de red (como por ejemplo 255.255.255.0)</dd>
+<dt>static_gw</dt>
+<dd>Si dhcp está configurado con 0, especifica la puerta de enlace.</dd>
+<dt>static_dns1</dt>
+<dd>Si dhcp está configurado con 0, especifica el DNS primario.</dd>
+<dt>static_dns2</dt>
+<dd>Si dhcp está configurado con 0, especifica el DNS secundario.</dd>
+<dt>http_username</dt>
+<dd>Para modelos que lo requieren, especifica el nombre de usuario HTTP a usar durante la configuración, si se configura otro diferente al predeterminado.</dd>
+<dt>http_password</dt>
+<dd>Para modelos que lo requieren, especifica la contraseña de HTTP a usar durante la configuración, si se configura otro diferente al predeterminado.</dd>
+<dt>telnet_username</dt>
+<dd>Para modelos que lo requieren, especifica el nombre de usuario Telnet a usar durante la configuración, si se configura otro diferente al predeterminado.</dd>
+<dt>telnet_password</dt>
+<dd>Para modelos que lo requieren, especifica la contraseña de Telnet a usar durante la configuración, si se configura otro diferente al predeterminado.</dd>
+<dt>ssh_username</dt>
+<dd>Para modelos que lo requieren, especifica el nombre de usuario de SSH a usar durante la configuración, si se configura otro diferente al predeterminado.</dd>
+<dt>ssh_password</dt>
+<dd>Para modelos que lo requieren, especifica la contraseña de SSH a usar durante la configuración, si se configura otro diferente al predeterminado.</dd>
+</dl>
+
+<p>El elemento "accounts" contiene cero o más elementos "account". Cada elemento "account" contiene los siguientes elementos:</p>
+<dl>
+<dt>tech</dt>
+<dd>(Requerido) La tecnología VoIP usada para la cuenta. Actualmente las tecnologías soportadas con 'sip' e 'iax2'.</dd>
+<dt>accountname</dt>
+<dd>(Requerido) Nombre de la cuenta para enlazar a este endpoint.</dd>
+<dt>name_model</dt>
+<dd>(Requerido) El nombre del modelo de endpoint para el fabricante</dd>
+<dt>priority</dt>
+<dd>(Requerido) Posición en la cual la cuenta será enlazada al endpoint que soporta múltiples cuentas. La cuenta con la primera prioridad será la utilizada por defecto en la pantalla del teléfono (si soporta).</dd>
+<dt>account_properties</dt>
+<dd>Contiene el conjunto de propiedades que aplican a esta cuenta.</dd>
+</dl>
+
+<p>El elemento "account_properties" contiene cero o mas elementos "property". Cada elemento "property" tiene un elemento "key" para el nombre de la propiedad, y un elemento "value" para su valor.</p>
+
+<p>El siguiente ejemplo es un documento XML completo que define un solo endpoint. Aquí el endpoint es declarado como un Grandstream GXP1405 con dirección MAC 00:0B:82:3C:47:85, asignado a las extensiones 1071 y 1072. El endpoint contiene una propiedad estándar "dhcp" configurada con "1", y también una propiedad personalizada "unusedproperty" configurada con "unusedvalue". Adicionalemnte la cuenta 1072 contiene una propiedad personalizada "unusedproperty" configurada con "unusedvalue", que no es lo mismo que la propiedad a nivel de endpoint del mismo nombre.</p>
+<pre>
+
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;endpoints&gt;
+    &lt;endpoint&gt;
+        &lt;mac_address&gt;00:0B:82:3C:47:85&lt;/mac_address&gt;
+        &lt;name_manufacturer&gt;Grandstream&lt;/name_manufacturer&gt;
+        &lt;name_model&gt;GXP1405&lt;/name_model&gt;
+        &lt;endpoint_properties&gt;
+            &lt;property&gt;
+                &lt;key&gt;dhcp&lt;/key&gt;
+                &lt;value&gt;1&lt;/value&gt;
+            &lt;/property&gt;
+            &lt;property&gt;
+                &lt;key&gt;unusedproperty&lt;/key&gt;
+                &lt;value&gt;unusedvalue&lt;/value&gt;
+            &lt;/property&gt;
+        &lt;/endpoint_properties&gt;
+        &lt;accounts&gt;
+            &lt;account&gt;
+                &lt;tech&gt;sip&lt;/tech&gt;
+                &lt;accountname&gt;1071&lt;/accountname&gt;
+                &lt;priority&gt;1&lt;/priority&gt;
+                &lt;account_properties/&gt;
+            &lt;/account&gt;
+            &lt;account&gt;
+                &lt;tech&gt;sip&lt;/tech&gt;
+                &lt;accountname&gt;1072&lt;/accountname&gt;
+                &lt;priority&gt;2&lt;/priority&gt;
+                &lt;account_properties&gt;
+                    &lt;property&gt;
+                        &lt;key&gt;unusedproperty&lt;/key&gt;
+                        &lt;value&gt;unusedvalue&lt;/value&gt;
+                    &lt;/property&gt;
+                &lt;/account_properties&gt;
+            &lt;/account&gt;
+        &lt;/accounts&gt;
+    &lt;/endpoint&gt;
+&lt;/endpoints&gt;
+
+</pre>
+
+
+<h4><a id="format_csvnested">CSV (Anidado)</a></h4>
+
+<p>Este formato está basado en CSV y puede ser generado manualmente en una hoja de cálculo si es requerido. Con el fin de representar múltiples cuentas por endpoint, este formato usa sangrías con campos vacíos para definir todos los componentes de la definición del endpoint. El uso de sangrías se detalla a continuación:</p>
+<ul>
+<li>Sin sangría: esta fila inicia una nueva definición de endpoint en el archivo. Todas las definiciones de las siguientes líneas que tengan sangría aplican a este endpoint, hasta la siguiente línea sin sangría que define al siguiente endpoint. Los campos están definidos a continuación:
+	<ul>
+	<li>Campo 1: Dirección MAC del endpoint</li>
+    <li>Campo 2: Nombre del fabricante</li>
+    <li>Campo 3: Nombre del modelo asignado/detectado para el endpoint</li>
+	</ul>
+</li>
+<li>Sangría de un campo: esta fila define una propiedad para el endpoint actual.
+    <ul>
+    <li>Campo 1: En blanco</li>
+    <li>Campo 2: Nombre de la propiedad. Por favor remítase a la definición de XML para los nombres de propiedades estándar.</li>
+    <li>Campo 3: Valor de la propiedad.</li>
+    </ul>
+</li>
+<li>Sangría de dos campos: esta fila define una cuenta para el endpoint actual. Las propiedades de la cuenta aplican para esta cuenta hasta la siguiente línea con sangría de dos campos o menos. Los campos están definidos a continuación:
+    <ul>
+    <li>Campo 1-2: En blanco</li>
+    <li>Campo 3: Tecnología de la cuenta. Tanto "sip" o "iax2".</li>
+    <li>Campo 4: Nombre de la cuenta para enlazar a este endpoint.</li>
+    <li>Campo 5: Prioridad para esta cuenta.</li>
+    </ul>
+</li>
+<li>Sangría de tres campos: esta fila define una propiedad para la cuenta actual.
+    <ul>
+    <li>Campo 1-3: En blanco</li>
+    <li>Campo 4: Nombre de la propiedad.</li>
+    <li>Campo 5: Valor de la propiedad.</li>
+    </ul>
+</li>
+</ul>
+
+<p>El siguiente ejemplo es un documento CSV anidado completo que define exactamente el mismo endpoint que en el ejemplo anterior de XML. Aquí el endpoint es declarado como Grandstream GXP1405 con dirección MAC 00:0B:82:3C:47:85, asignado a las extensiones 1071 y 1072. El endpoint contiene una propiedad estándar "dhcp" configurada con "1", y además una propiedad personalizada "unusedproperty" configurada con "unusedvalue". Adicionalmente la cuenta 1072 contiene una propiedad "unusedproperty" configurada con "unusedvalue", que no es lo mismo que la propiedad a nivel de endpoint del mismo nombre.</p>
+<pre>
+00:0B:82:3C:47:85,Grandstream,GXP1405
+,dhcp,1
+,unusedproperty,unusedvalue
+,,sip,1071,1
+,,sip,1072,2
+,,,unusedproperty,unusedvalue
+</pre>
+
+<h3><a id="supported">Fabricantes de Enpoints soportados</a></h3>
+<ul>
+<li>Aastra: 480i,480i CT,51i,53i,55i,57i,57i CT,6730i,6731i,6739i,6755i,6757i,9112i,9133i,9143i,9480i,9480i CT.
+Soporta reinicio remoto. </li>
+<li>Atcom: AT320,AT530,AT610,AT620,AT640,AT800. Parte de la familia Atcom. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: bridge, timezone.</li>
+<li>Atlinks: Temporis IP800. Parte de la familia Yealink. Soporta reinicio remoto y provisionamiento estático. Puede ser enlazado con la agenda interna y externa de Elastix. Soporta las siguientes propiedades adicionales: bridge, timezone, language.</li>
+<li>AudioCodes: 310HD,320HD. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: language, timezone.</li>
+<li>Cisco: 7690,7906,7931,7940,7960,7961,7970,7971. Soportado parcialmente - el soporte ha sido probado con el modelo 7960. El reinicio remoto está parcialmente soportado. No está soportado el direccionamiento IP estático. Puede ser enlazado con la agenda interna y externa de Elastix.  
+</li>
+<li>Damall: D-3310. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: bridge, timezone.</li>
+<li>Digium: D40,D50,D70. Soporta reinicio remoto utilizando el último firmware, y es soportado parcialmente en firmwares antiguos. No está soportado el direccionamiento IP estático. Este fabricante requiere la instalación del módulo propietario DPMA en Asterisk (no incluído con este módulo). Debido a la naturaleza de DPMA, el provisionamiento estático esta habilitado por defecto.</li>
+<li>Elastix: LXP100,LXP200. Ver detalles del soporte de Grandstream.</li>
+<li>Escene: ES620. Soporta reinicio remoto y provisionamiento estático.</li>
+<li>Fanvil: C56,C58,C60,C62. Parte de la familia Atcom. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: bridge, timezone.</li>
+<li>Grandstream: BT200,HT386,GXP280,GXP1400,GXP1405,GXP1450,GXP2000,GXP2020,GXP2100,GXP2120,GXP2200,GXV3140,GXV3175.
+ Soporta reinicio remoto. Provisionamiento estático soportado por BT200, GXP140x (y Elastix), GXP1450, y GXV series, no soportado para los demás. Puede ser enlazado con la agenda interna y externa de Elastix. Soporta las siguientes propiedades adicionales: timezone, language.</li>
+<li>LG-ERICSSON: IP8802. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: timezone.</li>
+<li>Linksys: SPA841,SPA921,SPA922,SPA941,SPA942,SPA962. No ha sido probado. Soporta reinicio remoto.</li>
+<li>Polycom: IP 301,IP 330/320,IP 430,IP 501,IP 550,IP 601,IP 650,SoundStation IP 4000,VSX7000A.
+La detección del modelo no está soportada. Direccionamiento IP estático no está soportado. Soporta reinicio remoto.
+Puede ser enlazado con la agenda interna y externa de Elastix.</li>
+<li>RCA: IP150. Provisionamiento estático soportado. Este teléfono no cuenta con reinicio remoto, pero la restauración de su archivo de configuración XML aplica los cambios inmediatamente. Nota: Si el diálogo de "no autoprovisionamiento" se muestra antes de la configuración, no hay forma conocida de sacar ese diálogo remotamente, aún despues de que se logre la configuración.</li>
+<li>Snom: 300,320,360,821,m9. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: bridge, timezone.</li>
+<li>VOPTech: VI2006,VI2007,VI2008. Parte de la familia Atcom. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: bridge, timezone.</li>
+<li>Xorcom: XP0100P,XP0120P. No ha sido probado. Soporta reinicio remoto.</li>
+<li>Yealink: SIP-T20/T20P,SIP-T22/T22P,SIP-T26/T26P,SIP-T28/T28P,SIP-T38G,VP530.
+Soporta reinicio remoto y provisionamiento estático. Puede ser enlazado con la agenda interna y externa de Elastix. Soporta las siguientes propiedades adicionales: bridge, timezone.</li>
+<li>Zultys: ZIP2x1,ZIP2x2. No ha sido probado. No soporta direccionamiento IP estático.</li>
+</ul>
+    </body>
+</html>

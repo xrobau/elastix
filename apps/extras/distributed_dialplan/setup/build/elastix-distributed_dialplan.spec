@@ -90,6 +90,10 @@ fi
 /var/www/html/elastixConnection/*
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Remote Servers, Server Key, Company Information: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6368]
+
 * Thu Oct 3 2013 Jose Briones <jbriones@elastix.com> 
 - UPDATED: Module peer_information. Translation support for a message was added
   SVN Rev[5969]

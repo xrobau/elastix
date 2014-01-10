@@ -1,0 +1,22 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Administrar Idioma" permite agregar un nuevo idioma y nuevas palabras a un idioma existente para cada uno de los módulo en Elastix. Aquí puede ver todas las palabras definidas en un módulo con su correspondiente traducción y así como tener la posibilidad de modificarlas (Ver Figura 1).</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_language.png" border="0" />
+<p>Figura 1</p></div>
+<h2>Agregar idioma</h2>
+<p align="Justify">La opción "Nuevo Idioma" permite agregar un nuevo idioma para los módulos de acuerdo al formato mostrado en la figura 2.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_language_new.png" border="0" />
+<p>Figura 2</p></div>
+<p align="Justify">La opción "Nueva Traducción" permite traducir las palabras o frases de un módulo como se puede apreciar en la figura 3. Primero debe seleccionar un módulo y un idioma, luego agregar la palabra o frase en ingles con su correspondiente traducción.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_language_translate.png" border="0" />
+<p>Figura 3</p></div>
+
+
+
+</body>
+</html>

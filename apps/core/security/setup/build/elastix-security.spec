@@ -127,6 +127,13 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Firewall Rules, Define Ports, Port Knocking Interfaces,
+  Port Knocking Users, Audit, Weak Keys, Advanced Settings: For each module
+  listed here the english help file was renamed to en.hlp and a spanish help
+  file called es.hlp was ADDED. Some help related unnecessary files were deleted.
+  SVN Rev[6364]
+
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Advanced Settings: update jquery.ibutton.js to 1.0.03, fix 
   potential incompatibilities with jQuery 1.9+

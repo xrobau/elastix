@@ -85,6 +85,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: myex_config: For each module listed here the english help file 
+  was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6362]
+
 * Thu Jan 03 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.

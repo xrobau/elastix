@@ -1,0 +1,19 @@
+<html>
+<header>
+  <link rel="stylesheet" href="../themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="../themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>vtiger CRM es una herramienta de código abierto para la administración de la relación con los clientes construida sobre LAMP/WAMP y otros paquetes de código abierto pertenecientes a terceros.</p>
+
+<div class="hlp_figures"><img src="../images/help/extras/es_vtigercrm.jpg" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+<p>Para más información visite <a href="http://vtiger.com/index.php">http://vtiger.com/index.php<a></p>
+
+</body>
+</html>

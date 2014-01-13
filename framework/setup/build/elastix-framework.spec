@@ -329,6 +329,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Jan 13 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Monitoring module: The lang files were updated due to a change in the
+  name of the Monitoring module to Calls Recordings.
+  SVN Rev[6376]
+
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Webmail, Flash Operator Panel, Openfire, vTigerCRM, Calling Cards: 
   For each module listed here the english help file was renamed with the 

@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -124,6 +124,15 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Jan 13 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Update to the changelog about the english and spanish help files in
+  the addons module.
+  SVN Rev[6357]
+
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Addons: For each module listed here the english help file 
   was renamed to en.hlp and a spanish help file called es.hlp was ADDED. 
@@ -133,6 +142,7 @@ fi
 * Tue Nov 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6066]
 
 * Wed Sep 25 2013 Daniel Paez <dpaez@palosanto.com> 
 - CHANGED: palosantoAddons.class.php, Send server architect parameter to

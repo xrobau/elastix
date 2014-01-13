@@ -167,8 +167,7 @@ $arrLang=array(
 "VoIP Provider" => "Fournisseur VoIP",
 "Voicemail" => "Boîte vocale",
 "Voicemails" => "Boîtes Vocales",
-"Monitoring" => "Contrôle
-des Conversations",
+"Calls Recordings" => "Contrôle des Conversations",
 "Endpoint Configuration" => "Configuration des Postes",
 "Conference" => "Conférence",
 "Extensions Batch" => "Extensions par lot",

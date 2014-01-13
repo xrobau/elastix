@@ -20,7 +20,7 @@
             <group id="3" name="extension" desc="extension user"></group>
         </permissions>
     </menuitem>
-    <menuitem menuid="monitoring"             desc="Monitoring"              parent="pbxconfig" module="yes" link=""      order="4">
+    <menuitem menuid="monitoring"             desc="Calls Recordings"              parent="pbxconfig" module="yes" link=""      order="4">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
             <group id="2" name="Operator" desc="Operator"></group>

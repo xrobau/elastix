@@ -298,6 +298,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jan 13 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Monitoring module: The name of the module Monitoring was changed 
+  to Calls Recordings in the field desc of the file menu.xml. The lang files 
+  were updated with these changes.
+  SVN Rev[6376]
+
 * Thu Jan 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Fix cronjob that removes temporary TTS files by checking whether tts
   directory exists. Also simplify by using the native -delete action of find

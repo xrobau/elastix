@@ -98,17 +98,21 @@ class paloSantoAddons
 		$this->getSID(), 'all', FALSE, $architect);
 
 	    // Listar los RPMS instalados en el sistema
-	    $listaRPMS = array();
+	    $packages = array();
+	    $obsolete_packages = array();
 	    foreach ($recordset as $tupla) {
-		$listaRPMS[] = escapeshellarg($tupla['name_rpm']);
-	    }
-	    if (count($listaRPMS) > 0) {
+		$packages[] = $tupla['name_rpm'];
+	    if(isset($tupla["obsolete_package"]) && !empty($tupla["obsolete_package"]))
+                        $obsolete_packages[$tupla["name_rpm"]] = $tupla["obsolete_package"];
+            }
+
+	    if (count($packages) > 0) {
 		$output = $retval = NULL;
 		exec('rpm -q --qf '.escapeshellarg(
 		    'FOUND %{NAME} %{ARCH} %{EPOCH} %{VERSION} %{RELEASE}\n').
-		    ' '.implode(' ', $listaRPMS), $output, $retval);
+		    ' '.implode(' ', $packages), $output, $retval);
 		$listaRPMS = array();
-		foreach ($output as $linea) {
+		foreach ($output as  $key => $linea) {
 		    $campos = explode(' ', $linea);
 		    if ($campos[0] == 'FOUND') {
 			// TODO: ¿Qué ocurre si un paquete se instala en múltiples arch?
@@ -121,6 +125,28 @@ class paloSantoAddons
 			    'release'   =>  $campos[5],
 			);
 		    }
+		     //Verifico si es que hay paquetes obsoletos definidos y si es que están instalados
+                    elseif(isset($obsolete_packages[$packages[$key]])){
+                         $output2 = $retval2 = NULL;
+                         exec('rpm -q --qf '.escapeshellarg(
+                             'FOUND %{NAME} %{ARCH} %{EPOCH} %{VERSION} %{RELEASE}\n').
+                         ' '.$obsolete_packages[$packages[$key]], $output2, $retval2);
+                         foreach($output2 as $linea2){
+                                $obsolete_campos = explode(' ', $linea2);
+                                if ($obsolete_campos[0] == 'FOUND') {
+                                        // TODO: ¿Qué ocurre si un paquete se stala en múltiples arch?
+                                        // TODO: Webservice no devuelve información de epoch
+                                        $listaRPMS[$packages[$key]] = array(
+                                            'name'      =>  $obsolete_campos[1],
+                                            'arch'      =>  $obsolete_campos[2],
+                                            'epoch'     =>  $obsolete_campos[3],
+                                            'version'   =>  $obsolete_campos[4],
+                                            'release'   =>  $obsolete_campos[5],
+                                        );
+                                        break;
+                                }
+                         }
+                    }
 		}
 	    }
 	    

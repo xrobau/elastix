@@ -122,8 +122,14 @@ function existeArchivoAyuda($idMenu)
 function rutaArchivoAyuda($idMenu)
 {
     $serverDir = dirname($_SERVER['SCRIPT_FILENAME']).'/..';
+    
+    $lang = get_language("$serverDir/");
+    $lang = ($lang == "es" || $lang == "en")?$lang:"en";
+    
     $listaRutas = array(
+        "$serverDir/modules/$idMenu/help/$lang.hlp",
         "$serverDir/modules/$idMenu/help/$idMenu.hlp",
+        "$serverDir/help/content/{$lang}_{$idMenu}.hlp",
         "$serverDir/help/content/$idMenu.hlp",
     );
     foreach ($listaRutas as $sRuta) {

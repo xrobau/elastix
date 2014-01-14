@@ -3,7 +3,7 @@
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-%{release}.tgz
@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Bumped release in specfile.
+
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Softphones, Fax Utilities, Instant Messaging: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
   SVN Rev[6350]
@@ -71,9 +75,10 @@ fi
 - FIXED: Instant Messaging: fix references to uninitialized variables.
   SVN Rev[5811]
 
-* Wed Aug 21 2012 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
 - CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
   SVN history. Bumped release in specfile.
+  SVN Rev[5786]
 
 * Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
 - REMOVED: Module Downloads, Help files with wrong names were deleted

@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 14
+Release: 15
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -298,11 +298,20 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-15
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Jan 13 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Monitoring module: The name of the module Monitoring was changed 
   to Calls Recordings in the field desc of the file menu.xml. The lang files 
   were updated with these changes.
   SVN Rev[6376]
+
+* Mon Jan 13 2014 Luis Abarca <labarca@palosanto.com> 
+- REMOVED: modules - voipprovider: From now on, this module officially its not
+  part of the Elastix core and its now available as an addon.
+  SVN Rev[6374]
 
 * Thu Jan 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Fix cronjob that removes temporary TTS files by checking whether tts
@@ -330,6 +339,11 @@ fi
 * Fri Oct 25 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-14
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6039]
+
+* Fri Oct 25 2013 Luis Abarca <labarca@palosanto.com> 
+- UPDATED: branches/2.4.0 - pbxadmin module, update language code.
+  SVN Rev[6038]
 
 * Thu Oct 24 2013 Luis Abarca <labarca@palosanto.com> 
 - FIXED: branches/2.4.0 module pbxadmin, fixed translate FreePBX modules.

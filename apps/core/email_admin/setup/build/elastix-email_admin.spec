@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -197,6 +197,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Domains, Accounts, Relay, Antispam, Remote SMTP, Email list, Email stats,
   Vacations: For each module listed here the english help file was renamed to en.hlp
@@ -211,6 +215,7 @@ fi
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5785]
 
 * Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATE: Correction of some mistakes in the translation file es.lang.

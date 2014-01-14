@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 12
+Release: 13
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -134,6 +134,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Dashboard, Applet Admin, Network Parameters, DHCP Server, DHCP Client List, Assign IP Address to Host, Users, Shutdown, Hardware Detector, Repositories, Packages, Backup/Restore, Date/Time, Currency: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
   SVN Rev[6338]

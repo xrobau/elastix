@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 11
+Release: 12
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -109,6 +109,10 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-12
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Calendar, Address Book: For each module listed here the english help
   file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
@@ -129,6 +133,7 @@ fi
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5783]
 
 * Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATE: Correction of some mistakes in the translation file es.lang.

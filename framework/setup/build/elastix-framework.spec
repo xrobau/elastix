@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 11
+Release: 12
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -329,6 +329,14 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-12
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Jan 13 2014 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Update to the changelog about the lang files
+  SVN Rev[6378]
+
 * Mon Jan 13 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Monitoring module: The lang files were updated due to a change in the
   name of the Monitoring module to Calls Recordings.
@@ -347,6 +355,11 @@ rm -rf $RPM_BUILD_ROOT
   es.hlp was ADDED.
   SVN Rev[6366]
 
+* Thu Dec 26 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Framework: replace deprecated jquery .live with .click. in
+  elastixneo theme. Fixed.
+  SVN Rev[6328]
+
 * Thu Dec 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: patch colResizable to stop using deprecated $.browser .
   SVN Rev[6326]
@@ -361,9 +374,20 @@ rm -rf $RPM_BUILD_ROOT
   bug #1805.
   SVN Rev[6311]
 
+* Mon Dec 16 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: BRANCHES/2.4.0 - FRAMEWORK/HTML: Was made change in file table.css
+  that belogn to theme elastixneo. Was changed in selector
+  div.neo-table-filter-controls property height: 28px to min-height: 28px. This
+  was made to fixed display error that happened when many filters are selected
+  SVN Rev[6294]
+
 * Wed Nov 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: fetch Elastix package list in alphabetical order.
   SVN Rev[6084]
+
+* Mon Oct 14 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Framework: trivial fix to two styles to use correct image reference.
+  SVN Rev[6010]
 
 * Sat Oct 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: prefer system-installed Smarty instead of bundled Smarty
@@ -385,6 +409,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5782]
 
 * Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
 - REMOVED: Module Downloads, Old help files were deleted

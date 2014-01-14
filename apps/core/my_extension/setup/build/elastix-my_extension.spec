@@ -3,7 +3,7 @@
 Summary: Elastix My Extension 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -85,6 +85,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: myex_config: For each module listed here the english help file 
   was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
@@ -93,6 +97,7 @@ fi
 * Thu Jan 03 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6330]
 
 * Thu Nov 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: My Extension: remove some dead code, and mark some methods as private

@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -127,6 +127,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Firewall Rules, Define Ports, Port Knocking Interfaces,
   Port Knocking Users, Audit, Weak Keys, Advanced Settings: For each module
@@ -142,6 +146,7 @@ fi
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5790]
 
 * Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
   ADD: Added the translation file fr.lang.

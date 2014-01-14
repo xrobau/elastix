@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -192,6 +192,10 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
+  history. Changed Release in specfile.
+
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Virtual Fax List, New Virtual Fax, Send Fax, Fax Queue, Fax Master, 
   Fax Clients, Fax Viewer, Email Template: For each module listed here the english 

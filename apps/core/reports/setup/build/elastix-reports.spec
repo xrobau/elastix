@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: CDR Report, Channels Usage, Rates, Billing Report, Destination 
   Distribution, Billing Setup, Asterisk Logs, Graphic Report, Summary,
@@ -103,9 +107,14 @@ fi
   a single zero from filter parameters.
   SVN Rev[5997]
 
+* Fri Sep 20 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: An update line in the CDR table its corrected.
+  SVN Rev[5920]
+
 * Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5913]
 
 * Wed Sep 18 2013 Luis Abarca <labarca@palosanto.com> 
 - ADDED: Some new fields has been added to the CDR table.

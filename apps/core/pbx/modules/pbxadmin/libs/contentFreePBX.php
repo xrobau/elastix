@@ -523,7 +523,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
 
         if($withList){
             $smarty->assign("Option", _tr('Option'));
-            $smarty->assign("Unembedded_freePBX", _tr('Unembedded freePBX'));
+            $smarty->assign("Unembedded_freePBX", _tr('Unembedded FreePBX®'));
             $smarty->assign("Basic", _tr('Basic'));
             $smarty->assign("Extensions", _tr('Extensions'));
             $smarty->assign("Feature_Codes", _tr('Feature Codes'));
@@ -559,7 +559,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
             $smarty->assign("Languages", _tr('Languages'));
             $smarty->assign("VoiceMail_Blasting", _tr('VoiceMail Blasting'));
 
-            $smarty->assign("INFO", _tr("Warning: Updating FreePBX through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"."));
+            $smarty->assign("INFO", _tr("Warning: Updating FreePBX® through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"."));
             $smarty->assign("htmlFPBX", $return_HTML);
             return $smarty->fetch("$local_templates_dir/main.tpl");
         }

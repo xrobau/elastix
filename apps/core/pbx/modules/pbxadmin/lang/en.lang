@@ -32,7 +32,7 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Option" => "Option",
-"Unembedded freePBX" => "Unembedded freePBX",
+"Unembedded FreePBX®" => "Unembedded FreePBX®",
 "Basic" => "Basic",
 "Extensions" => "Extensions",
 "Feature Codes" => "Feature Codes",
@@ -59,7 +59,7 @@ $arrLangModule=array(
 "Remote Access" => "Remote Access",
 "Callback" => "Callback",
 "DISA" => "DISA",
-"Warning: Updating FreePBX through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"." => "Warning: Updating FreePBX through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\".",
+"Warning: Updating FreePBX® through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\"." => "Warning: Updating FreePBX® through its web interface will cause it to install versions that may have not yet been properly integrated with Elastix. To avoid conflicts, it is always recommended to search/install updates only through the linux command \"yum update freePBX\".",
 "PBX Configuration" => "PBX Configuration"
 );
 ?>

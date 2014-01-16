@@ -228,6 +228,29 @@ class PaloValidar
                     }                    
                 }
                 break;
+            case "numeric_rang":
+                if($this->estaVacio($variable)) {
+                    if($nombre_variable!="just_test")
+                        $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_1;
+                } else if(empty($parametro_extra)) {
+                    if($nombre_variable!="just_test")
+                        $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_1;
+                } else if(!preg_match("/^[[:digit:]]+$/", $variable)) {
+                    if($nombre_variable!="just_test")
+                        $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_2;
+                } else if(!preg_match("/^[[:digit:]]+\-[[:digit:]]+$/", $parametro_extra)) {
+                    if($nombre_variable!="just_test")
+                        $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_2;
+                } else {
+                    $arrRang = explode("-",$parametro_extra);
+                    if($variable <= $arrRang[1] && $variable >= $arrRang[0])
+                        $return = true;
+                    else {
+                        if($nombre_variable!="just_test")
+                        $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_2;
+                    }
+                }                
+                break;
             case "float":
                 if($this->estaVacio($variable)) {
                     if($nombre_variable!="just_test") {

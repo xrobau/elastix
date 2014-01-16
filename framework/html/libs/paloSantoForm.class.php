@@ -254,15 +254,19 @@ class paloForm
                         $strInput = "";
                         if(is_array($arrVars['INPUT_EXTRA_PARAM'])) {
                             $listaRadio = array();
+                            $cntRadio = 1;
                             foreach($arrVars['INPUT_EXTRA_PARAM'] as $radioValue => $radioLabel) {
                                 $listaRadio[] = sprintf(
-                                    '<input type="radio" name="%s" value="%s" %s />&nbsp;%s&nbsp;',
+                                    '<input type="radio" id="%s" name="%s" value="%s" %s /><label for="%s">%s</label>',
+                                    $varName_escaped.$cntRadio,
                                     $varName_escaped,
                                     htmlentities($radioValue, ENT_COMPAT, 'UTF-8'),
                                     ($radioValue == $arrPreFilledValues[$varName]) ? 'checked="checked"' : '',
+                                    $varName_escaped.$cntRadio,
                                     htmlentities($radioLabel, ENT_COMPAT, 'UTF-8'));
+                                $cntRadio++;    
                             }
-                            $strInput = implode("\n", $listaRadio);                            
+                            $strInput = "<div class='radio_buttonset_elx'>".implode("\n", $listaRadio)."</div>"; 
                         }
                     } else {
                         $strInput = $varValue_escaped;

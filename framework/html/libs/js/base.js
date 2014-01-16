@@ -946,3 +946,10 @@ function getCurrentElastixModule()
 {
 	return $('#elastix_framework_module_id').val();
 }
+
+// En la clase paloSantoForm.class.php, a los input radio se definio
+// que tengan un estilo defaulf de jquery, para ello se declara una
+// clase global para que hereden todos los input radio el nuevo estilo.
+$(document).ready(function(){
+    $( ".radio_buttonset_elx" ).buttonset();
+});

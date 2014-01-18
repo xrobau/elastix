@@ -153,9 +153,97 @@ fi
 #/etc/init.d/elastix-synchronizerd
 
 %changelog
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Tue Jan 07 2014 Rocio Mera <rmera@palosanto.com> 
+- DELETED: TRUNK - APPS/Agenda: Was moved file "jquery.liteuploader.js" to
+  common folder.
+  SVN Rev[6334]
+
+* Thu Dec 26 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Agenda: translations columns and alert options in
+  contact list (spanish)
+  SVN Rev[6322]
+
+* Thu Dec 19 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/Agenda: Was add functions of calls and transfers in
+  contacts.
+  SVN Rev[6313]
+
+* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Frameworks/Apps: translations contacts fliter options
+  (spanish)
+  SVN Rev[6310]
+
+* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Frameworks/Apps: translations contacts options (spanish)
+  SVN Rev[6309]
+
+* Mon Dec 16 2013 Rocio Mera <rmera@palosanto.com> 
+- ADDED: TRUNK - APPS/agenda: Was added script that deletes the temporary
+  images of contacts.
+  SVN Rev[6297]
+
+* Mon Dec 16 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/Agenda: WAs added the feature: show preview of the
+  picture (new and edit contact)
+  SVN Rev[6296]
+
+* Fri Dec 13 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: TRUNK - APPS/Agenda: Was deleted report.tpl because it was moved to
+  general folder.
+  SVN Rev[6281]
+
+* Fri Dec 13 2013 Rocio Mera <rmera@palosanto.com> 
+- ADDED: TRUNK - APPS/Agenda: Was added the contacts module, in this module the
+  user can to add external contacts.
+  SVN Rev[6280]
+
+* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An error in the logic of the code was unintentionally
+  placed when saving the elastix's spec files.
+  SVN Rev[6125]
+
+* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An extra character was unintentionally placed when
+  saving the elastix's spec files.
+  SVN Rev[6116]
+
+* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfiles with the new form of use
+  elastix-menumerge for each elastix module.
+  SVN Rev[6105]
+
+* Mon Nov 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: addons, agenda, extras: According to actual svn model, it was
+  renamed the folder 'infomodules.xml' to continue a same model of
+  'infomodules' folders that exists in other elastix's modules folders.
+  SVN Rev[6076]
+
+* Mon Nov 11 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: According to actual svn model, it was renamed the folder
+  'infomodules.xml' to continue a same model of 'infomodules' folders that
+  exists in other elastix's modules folders.
+  SVN Rev[6075]
+
+* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of remove tabs in the framework for each elastix module.
+  SVN Rev[5994]
+
+* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of identify and distribute folders to the '/usr/share/elastix/'
+  path and '/var/www/html/' path.
+  SVN Rev[5945]
+
+
 * Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[5883]
 
 * Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
 - ADDED: agenda - setup/infomodules.xml/: Within this folder are placed the new

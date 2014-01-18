@@ -64,7 +64,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/php.d
 mkdir -p $RPM_BUILD_ROOT/etc/yum.repos.d
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
-mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 
 
 ## ** Step 2: Installation of files and folders ** ##
@@ -253,12 +252,15 @@ rm -f $pathModule/preversion_elastix-framework.info
 #elastix-menumerge $pathModule/setup/infomodules
 service mysqld status &>/dev/null
 res=$?
-if($res -eq 0); then
+if [ $res -eq 0 ]; then
 	#service is up
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
+		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
+		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	fi
 fi
 
 if [ $1 -eq 1 ]; then #install

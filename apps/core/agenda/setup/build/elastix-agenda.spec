@@ -22,7 +22,6 @@ Elastix Module Agenda
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p    $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 
 #Files provided by all Elastix modules
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
@@ -48,14 +47,11 @@ done
 
 # Additional (module-specific) files that can be handled by RPM
 
-mkdir -p $RPM_BUILD_ROOT/opt/elastix/
-mv setup/elastix-synchronizer $RPM_BUILD_ROOT/opt/elastix/
-mkdir -p $RPM_BUILD_ROOT/etc/init.d/
-mv $RPM_BUILD_ROOT/opt/elastix/elastix-synchronizer/elastix-synchronizerd $RPM_BUILD_ROOT/etc/init.d/
-chmod +x $RPM_BUILD_ROOT/etc/init.d/elastix-synchronizerd
-
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
 #mv setup/dialer
+
+mkdir -p $RPM_BUILD_ROOT/etc/cron.daily/
+mv setup/etc/cron.daily/elastix_contacs_cleanup $RPM_BUILD_ROOT/etc/cron.daily/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -92,12 +88,16 @@ pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 #elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
 service mysqld status &>/dev/null
 res=$?
-if($res -eq 0); then
+if [ $res -eq 0 ]; then
 	#service is up
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
+		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
+		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	fi
+
 fi
 
 pathSQLiteDB="/var/www/db"
@@ -143,13 +143,14 @@ fi
 %{_localstatedir}/www/html/*
 %defattr(-, root, root)
 /usr/share/elastix/module_installer/*
+/etc/cron.daily/elastix_contacs_cleanup
 %defattr(-, asterisk, asterisk)
 /var/lib/asterisk/sounds/custom
 /var/lib/asterisk/sounds/custom/calendarEvent.gsm
 /var/lib/asterisk/sounds/custom/*
-/opt/elastix/elastix-synchronizer
-/opt/elastix/elastix-synchronizer/*
-/etc/init.d/elastix-synchronizerd
+#/opt/elastix/elastix-synchronizer
+#/opt/elastix/elastix-synchronizer/*
+#/etc/init.d/elastix-synchronizerd
 
 %changelog
 * Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4

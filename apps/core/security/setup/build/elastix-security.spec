@@ -25,8 +25,6 @@ Elastix Security
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
-
 # Files provided by all Elastix modules
 #mkdir -p    $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
@@ -99,12 +97,15 @@ pathModule="%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}"
 
 service mysqld status &>/dev/null
 res=$?
-if($res -eq 0); then
+if [ $res -eq 0 ]; then
 	#service is up
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
+		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
+		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	fi
 fi
 
 pathSQLiteDB="%{_localstatedir}/www/db"
@@ -163,9 +164,76 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
-* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+
+* Thu Nov 28 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Security: translation in Audit module (spanish)
+  SVN Rev[6203]
+
+* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An error in the logic of the code was unintentionally
+  placed when saving the elastix's spec files.
+  SVN Rev[6125]
+
+* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An extra character was unintentionally placed when
+  saving the elastix's spec files.
+  SVN Rev[6116]
+
+* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfiles with the new form of use
+  elastix-menumerge for each elastix module.
+  SVN Rev[6105]
+
+* Fri Nov 15 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Security: language help add in sec_ports (spanish -
+  english)
+  SVN Rev[6099]
+
+* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of remove tabs in the framework for each elastix module.
+  SVN Rev[5994]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: Tunk - Apps/Security: Was deleted file menu.xml. This file was
+  divided in a set of files that are stored in setup/infomodules
+- ADDED: Tunk - Apps/Security: Was added directory infomodules. This directory
+  store a xml files that are used to create elastix resources
+  SVN Rev[5961]
+
+* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of identify and distribute folders to the '/usr/share/elastix/'
+  path and '/var/www/html/' path.
+  SVN Rev[5945]
+
+* Fri Sep 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/PBX: Was made changes in module extensions, trunk,
+  general_settings, general_settings_admin to update parameters that can be
+  configured in sip and iax device
+TRUNK - FRAMEWORK: Was made changes in theme elastixneo to fis somes minors
+  bugs. In addition was made changes in elxpbx schema to create a new menu
+  named manager. This menu is the paren menu of sysdash, organization_manager
+  and user_manager
+TRUNK - APPS/Reports: Was made changes in module CDR report. The funstion of
+  deleted rescord register now can only be performed by superadmin. The filters
+  param was explode in order to permit do more detailed searches.
+TRUNK - APPS: Search can be done using asterisk filter patterns in modules
+  where the filter accept any text
+  SVN Rev[5922]
+
+* Mon Sep 16 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: security - Build/elastix-security.spec: Correction in the current
+  version of this module.
+  SVN Rev[5888]
+
+* Mon Sep 16 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: security - Build/elastix-security.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[5887]
 
 * Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
 - ADDED: security - setup/infomodules.xml/: Within this folder are placed the

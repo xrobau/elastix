@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -27,8 +27,6 @@ Elastix Module Fax
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/faxdocs
-mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
-
 # Files provided by all Elastix modules
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
 bdir=%{_builddir}/%{modname}
@@ -146,7 +144,10 @@ if($res -eq 0); then
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
+		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
+		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	fi
 fi
 
 preversion=`cat $pathModule/preversion_%{modname}.info`
@@ -218,9 +219,173 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Jan 07 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/Fax: Were moved all the attributes of the "tooltip" to
+  the .css general file.
+  SVN Rev[6336]
+
+* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Frameworks/Apps: translations fax options (spanish)
+  SVN Rev[6305]
+
+* Fri Dec 13 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/Fax: The error manager was moved to general folder.
+  SVN Rev[6283]
+
+* Tue Dec 10 2013 Rocio Mera <rmera@palosanto.com> 
+- FIXED: TRUNK - APPS/Fax: Was fixed bug in function deletefaxbyuser. This
+  function delete the fax of a user identified bu his id
+  SVN Rev[6266]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Email: translation in Fax Viewer labels filters
+  (spanish)
+  SVN Rev[6177]
+
+* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An error in the logic of the code was unintentionally
+  placed when saving the elastix's spec files.
+  SVN Rev[6125]
+
+* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An extra character was unintentionally placed when
+  saving the elastix's spec files.
+  SVN Rev[6116]
+
+* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfiles with the new form of use
+  elastix-menumerge for each elastix module.
+  SVN Rev[6104]
+
+* Mon Nov 11 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: fax - Build/elastix-fax.spec: The absence of two directories creation
+  was a impediment for correct functionality of spec file. (recvd and sent)
+  SVN Rev[6077]
+
+* Tue Nov 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/FAX: Was modified module my_fax in order to manage
+  errors in the fields forms, to display error in field form is used tooltip
+  bootstrap plugin.
+  SVN Rev[6064]
+
+* Mon Nov 04 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - APPS/Fax: Was changed the fax table structure. Was added
+  field area_code,country_code,dev_id,port,fax_content,fax_subject also was
+  renamed fields 'callerid_name' to 'clid_name' and 'callerid_number' to
+  'clid_number'. This changes was done to permit the creation of fax that not
+  belong to any user. Also was made changes in lib paloSantoFax and privileged
+  script faxconfig
+  SVN Rev[6055]
+
+* Thu Oct 31 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/FAX: Were modified variables of error message to global
+  variables for to use in others modules.
+  SVN Rev[6047]
+
+* Thu Oct 24 2013 Rocio Mera <rmera@palosanto.com> 
+- ADDED: TRUNK - Apps/FAX: Was added module my_fax to /fax/apps/frontend. this
+  module display configuration the user's fax extension and allow modified
+  SVN Rev[6035]
+
+* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of remove tabs in the framework for each elastix module.
+  SVN Rev[5994]
+
+* Mon Oct 07 2013 Rocio Mera <rmera@palosanto.com> 
+- ADDED: Trunk - Framework,Apps: Was added to framework/setup/infomodules xml
+  files mysettings.xml and home.xml. This files create menu to frontend
+  interface. Was also added xml menu files to apps/core/pbx,
+  apps/core/email_admin, apps/core/fax, this files create menu to frontend
+  interface
+  SVN Rev[5992]
+
+* Tue Oct 01 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps/fax: Was added file fax_email_template.xml to
+  infomodules
+  SVN Rev[5964]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was renamed directory infomudules to infomodules
+  SVN Rev[5960]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: Tunk - Apps/Fax: Was deleted file menu.xml. This file was divided in
+  a set of files that are stored in setup/infomodules
+- ADDED: Tunk - Apps/Fax: Was added directory infomodules. This directory store
+  a xml files that are used to create elastix resources
+  SVN Rev[5958]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: Tunk - Apps/Fax: Was deleted file menu.xml. This file was divided in
+  a set of files that are stored in setup/infomodules
+- ADDED: Tunk - Apps/Fax: Was added directory infomodules. This directory store
+  a xml files that are used to create elastix resources
+  SVN Rev[5957]
+
+* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework: Was made change in file db.info in database
+  elxpbx. Was added attribute prefix
+- CHANGED: Trunk - Apps: Was made change in file db.info to elxpbx in module
+  pbx, fax and email_admin
+  SVN Rev[5950]
+
+* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Additional: Was made change in script elastix-dbprocess. If
+  dbprocess fail it save the sql script that fail is saved with the name
+  prefix_dbname_action in case that prefix attribute is set in db.info file. If
+  prefix attribute is not set the name will be dbname_action. It changes was
+  done to prevent rewrite script files when differents script take actions over
+  a database.
+- CHANGED: Trunk - Framework: Was made change in file db.info in database
+  elxpbx. Was added attribute prefix
+- CHANGED: Trunk - Apps: Was made change in file db.info to elxpbx in module
+  pbx, fax and email_admin
+  SVN Rev[5949]
+
+* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was made change in module faxviewer to solve bug when
+  there is not fax to show. Was made change in module trunk, general_settings
+  and extensions to solve minor bugs
+  SVN Rev[5948]
+
+* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of identify and distribute folders to the '/usr/share/elastix/'
+  path and '/var/www/html/' path.
+  SVN Rev[5945]
+
+* Tue Sep 24 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - APPS/FAX: Was made changes in module fax_email_template,
+  faxviewer to rename field COMPANY_NAME and COMPANY_NUMBER for FAX_CID_NAME
+  and FAX_CID_NUMBER. The script elastix-faxevent was also change
+  SVN Rev[5939]
+
+* Mon Sep 23 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was made changes in db.info in apps pbx, email_admin
+  and fax. Was setting to elxpbx databases the param ingore_backup=yes in order
+  to the elastix-dbprocess does not made a backup of this database and delete
+  the database elxpbx. The framework create elxpbx database
+  SVN Rev[5926]
+
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: fax - Build/elastix-fax.spec: The path of module libraries were
+  moved to /usr/share/elastix/libs/ .
+  SVN Rev[5916]
+
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: fax - Build/elastix-fax.spec: Creating faxdocs folder is handled now
+  by the spec file of this module
+  SVN Rev[5904]
+
 * Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5873]
 
 * Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
 - ADDED: fax - setup/infomodules.xml/: Within this folder are placed the new

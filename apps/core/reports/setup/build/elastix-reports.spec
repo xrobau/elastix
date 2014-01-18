@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 3.0.0
-Release: 4
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -88,12 +88,15 @@ pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 #elastix-menumerge $pathModule/setup/infomodules
 service mysqld status &>/dev/null
 res=$?
-if($res -eq 0); then
+if [ $res -eq 0 ]; then
 	#service is up
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
+		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
+		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	fi
 fi
 
 pathSQLiteDB="/var/www/db"
@@ -139,9 +142,96 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Dec 03 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Reports/Apps: translation in CDR Report-> filter (spanish)
+  SVN Rev[6244]
+
+* Tue Dec 03 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Reports/Apps: translation in CDR Report (spanish)
+  SVN Rev[6243]
+
+* Thu Nov 28 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Reports: translation in CDRs Reports label (spanish)
+  SVN Rev[6202]
+
+* Fri Nov 22 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Reports/Apps: language help add in Asterisk Log (english -
+  spanish)
+  SVN Rev[6149]
+
+* Fri Nov 22 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Reports/Apps: language help add in cdr report (english -
+  spanish)
+  SVN Rev[6148]
+
+* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An error in the logic of the code was unintentionally
+  placed when saving the elastix's spec files.
+  SVN Rev[6125]
+
+* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An extra character was unintentionally placed when
+  saving the elastix's spec files.
+  SVN Rev[6116]
+
+* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfiles with the new form of use
+  elastix-menumerge for each elastix module.
+  SVN Rev[6105]
+
+* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of remove tabs in the framework for each elastix module.
+  SVN Rev[5994]
+
+* Tue Oct 01 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: Tunk - Apps/reports: Was deleted file menu.xml. This file was
+  divided in a set of files that are stored in setup/infomodules
+- ADDED: Tunk - Apps/reports: Was added directory infomodules. This directory
+  store xml files that are used to create elastix resources
+  SVN Rev[5963]
+
+* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of identify and distribute folders to the '/usr/share/elastix/'
+  path and '/var/www/html/' path.
+  SVN Rev[5945]
+
+* Tue Sep 24 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was made changes im module trunk, extension,
+  time_group in order to solve some minors bugs
+- CHANGED: Trunk - APPS: Was made change in lib paloSantoCDR in order to
+  resolve bug related with filter param
+  SVN Rev[5941]
+
+* Fri Sep 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/PBX: Was made changes in module extensions, trunk,
+  general_settings, general_settings_admin to update parameters that can be
+  configured in sip and iax device
+TRUNK - FRAMEWORK: Was made changes in theme elastixneo to fis somes minors
+  bugs. In addition was made changes in elxpbx schema to create a new menu
+  named manager. This menu is the paren menu of sysdash, organization_manager
+  and user_manager
+TRUNK - APPS/Reports: Was made changes in module CDR report. The funstion of
+  deleted rescord register now can only be performed by superadmin. The filters
+  param was explode in order to permit do more detailed searches.
+TRUNK - APPS: Search can be done using asterisk filter patterns in modules
+  where the filter accept any text
+  SVN Rev[5922]
+
+* Fri Sep 20 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: reports - Build/elastix-reports.spec: Fixed bad positioning of code
+  that interfered with the proper installation of the package.
+  SVN Rev[5921]
+
 * Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5886]
 
 * Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
 - ADDED: reports - setup/infomodules.xml/: Within this folder are placed the

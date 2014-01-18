@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -34,8 +34,6 @@ mkdir -p    $RPM_BUILD_ROOT/usr/local/elastix/
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
 mkdir -p    $RPM_BUILD_ROOT/var/www/elastixdir/scripts/
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/libs/
-
-mkdir -p    $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 
 
 # ** libs ** #
@@ -168,7 +166,10 @@ if($res -eq 0); then
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
+		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
+		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	fi
 fi
 
 mkdir -p $pathSQLiteDB
@@ -232,18 +233,187 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam, Remote SMTP: update jquery.ibutton.js to 1.0.03, fix 
   potential incompatibilities with jQuery 1.9+
   SVN Rev[6329]
 
+* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Frameworks/apps: translations vacation options->email
+  content (spanish)
+  SVN Rev[6307]
+
+* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Frameworks/apps: translations vacation options (spanish)
+  SVN Rev[6306]
+
+* Fri Dec 13 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED : TRUNK - email_admin/Vacations: The error manager was moved to
+  general folder.
+  SVN Rev[6284]
+
+* Tue Dec 10 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/Email_admin: Was made changes in privileged script
+  email_account in function that delete all mailbox that belong to a domain
+  SVN Rev[6267]
+
+* Thu Nov 28 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Email/Apps: translation in Email list filters and column
+  names filters (spanish)
+  SVN Rev[6207]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Email: language translation add in Email List
+  labels(spanish)
+  SVN Rev[6176]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Email: language translation add in Remote SMTP
+  labels(spanish)
+  SVN Rev[6175]
+
+* Thu Nov 21 2013 Rocio Mera <rmera@palosanto.com> 
+- FIXED: TRUNK - APPS/Email_Admin: Was fixed sintax error in sql file
+  1_schema.sql in create sentence
+  SVN Rev[6142]
+
+* Thu Nov 21 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: TRUNK - Apps/Email_Admin: Was deleted from elxpbx/update sql file
+  SVN Rev[6138]
+
+* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An error in the logic of the code was unintentionally
+  placed when saving the elastix's spec files.
+  SVN Rev[6125]
+
+* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An extra character was unintentionally placed when
+  saving the elastix's spec files.
+  SVN Rev[6116]
+
+* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfiles with the new form of use
+  elastix-menumerge for each elastix module.
+  SVN Rev[6105]
+
+* Fri Nov 15 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Email: language help add in remote_smtp (spanish -
+  english)
+  SVN Rev[6098]
+
+* Thu Nov 14 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Email: was added language help in antispam (spanish -
+  english)
+  SVN Rev[6095]
+
+* Tue Nov 05 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/EMAIL_ADMIN: Was modified module vacations in order to
+  manage errors in the fields forms, to display error in field form is used
+  tooltip bootstrap plugin.
+  SVN Rev[6065]
+
+* Thu Oct 31 2013 Rocio Mera <rmera@palosanto.com> 
+- ADDED: TRUNK - Apps/email_admin: Was added module vacations to
+  /email_admin/modules/frontend. This module allow set automatic email repley
+  when configure a vacation period is on.
+- CHANGED: TRUNK - Apps/email_admin: Was modified the
+  paloSantoAntispam.class.php library
+- CHANGED: TRUNK - Apps/email_admin: Was modified and added privileged file
+  vacationconfig
+- CHANGED: TRUNK - Apps/email_admin: Was modified and added privileged file
+  spamconfig
+- ADDED: TRUNK - Apps/email_admin: Was added file .sql while drop obsoleta
+  meesage_vacations table, and create vacations table.
+  SVN Rev[6045]
+
+* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of remove tabs in the framework for each elastix module.
+  SVN Rev[5994]
+
+* Mon Oct 07 2013 Rocio Mera <rmera@palosanto.com> 
+- ADDED: Trunk - Framework,Apps: Was added to framework/setup/infomodules xml
+  files mysettings.xml and home.xml. This files create menu to frontend
+  interface. Was also added xml menu files to apps/core/pbx,
+  apps/core/email_admin, apps/core/fax, this files create menu to frontend
+  interface
+  SVN Rev[5992]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was renamed directory infomudules to infomodules
+  SVN Rev[5960]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps/Email_Admin: Was made changes in xml file to fix path
+  to xml file
+  SVN Rev[5955]
+
+* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Framework: Was made change in file db.info in database
+  elxpbx. Was added attribute prefix
+- CHANGED: Trunk - Apps: Was made change in file db.info to elxpbx in module
+  pbx, fax and email_admin
+  SVN Rev[5950]
+
+* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Additional: Was made change in script elastix-dbprocess. If
+  dbprocess fail it save the sql script that fail is saved with the name
+  prefix_dbname_action in case that prefix attribute is set in db.info file. If
+  prefix attribute is not set the name will be dbname_action. It changes was
+  done to prevent rewrite script files when differents script take actions over
+  a database.
+- CHANGED: Trunk - Framework: Was made change in file db.info in database
+  elxpbx. Was added attribute prefix
+- CHANGED: Trunk - Apps: Was made change in file db.info to elxpbx in module
+  pbx, fax and email_admin
+  SVN Rev[5949]
+
+* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of identify and distribute folders to the '/usr/share/elastix/'
+  path and '/var/www/html/' path.
+  SVN Rev[5945]
+
+* Mon Sep 23 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was made changes in db.info in apps pbx, email_admin
+  and fax. Was setting to elxpbx databases the param ingore_backup=yes in order
+  to the elastix-dbprocess does not made a backup of this database and delete
+  the database elxpbx. The framework create elxpbx database
+  SVN Rev[5926]
+
+* Fri Sep 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/PBX: Was made changes in module extensions, trunk,
+  general_settings, general_settings_admin to update parameters that can be
+  configured in sip and iax device
+TRUNK - FRAMEWORK: Was made changes in theme elastixneo to fis somes minors
+  bugs. In addition was made changes in elxpbx schema to create a new menu
+  named manager. This menu is the paren menu of sysdash, organization_manager
+  and user_manager
+TRUNK - APPS/Reports: Was made changes in module CDR report. The funstion of
+  deleted rescord register now can only be performed by superadmin. The filters
+  param was explode in order to permit do more detailed searches.
+TRUNK - APPS: Search can be done using asterisk filter patterns in modules
+  where the filter accept any text
+  SVN Rev[5922]
+
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: email_admin - elastix-email_admin.spec: The path of module libraries
+  were moved to /usr/share/elastix/libs/ .
+  SVN Rev[5915]
+
 * Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: Email_admin - Build/elastix-email_admin.spec: Was made changes in spec
-  to change path where menuxml path are saved. 
+- FIXED: email_admin - elastix-email_admin.spec: The last entry in changelog it
+  has a incorrect date value.
+  SVN Rev[5876]
 
 * Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[5872]
 
 * Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
 - ADDED: email_admin - setup/infomodules.xml/: Within this folder are placed

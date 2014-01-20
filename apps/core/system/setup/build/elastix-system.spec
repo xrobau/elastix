@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -25,8 +25,6 @@ Elastix Module System
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
-mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
 
 # Files provided by all Elastix modules
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/libs/
@@ -96,12 +94,15 @@ pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 
 service mysqld status &>/dev/null
 res=$?
-if($res -eq 0); then
+if [ $res -eq 0 ]; then
 	#service is up
 	elastix-menumerge $pathModule/setup/infomodules	
 else
 	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
+		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
+		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
+	fi
 fi
 
 pathSQLiteDB="/var/www/db"
@@ -155,6 +156,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Thu Dec 26 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: replace deprecated .live and .die with .on and .off
   SVN Rev[6327]
@@ -164,6 +169,66 @@ fi
   availability and freshness.
   SVN Rev[6257]
 
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/System: language translation add in Packages
+  labels(spanish)
+  SVN Rev[6174]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/System: language translation add in Repositories
+  labels(spanish)
+  SVN Rev[6173]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/System: language translation add in dhcp client list
+  labels(spanish)
+  SVN Rev[6172]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK -APPS/System: Was made change in module themes_system in
+  function smartyRefresh to make use of function update_theme which is
+  implemented in lib misc.lib.php
+  SVN Rev[6168]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Frameworks/Manager: language translation add in Dashboard
+  Applet Admin  label(spanish)
+  SVN Rev[6165]
+
+* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - PBX/Apps: language translation add in Dashboard 
+  label(spanish)
+  SVN Rev[6164]
+
+* Wed Nov 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - System/Apps: language help add in currency (english -
+  spanish)
+  SVN Rev[6135]
+
+* Wed Nov 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - System/Apps: language help add in Themes (english - spanish)
+  SVN Rev[6134]
+
+* Wed Nov 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - System/Apps: language help add in Language (english -
+  spanish)
+  SVN Rev[6133]
+
+* Wed Nov 20 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - System/Apps: language help add in Assign IP Address to host
+  (english - spanish)
+  SVN Rev[6132]
+
+* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An error in the logic of the code was unintentionally
+  placed when saving the elastix's spec files.
+  SVN Rev[6125]
+
+* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: build - *.spec: An extra character was unintentionally placed when
+  saving the elastix's spec files.
+  SVN Rev[6116]
+
 * Mon Nov 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Hardware Detector: with recent DAHDI versions, the configuration parser
   misparses "EC: OSLEC - INACTIVE" as having an echo canceller called
@@ -171,10 +236,25 @@ fi
   Elastix bug #1777.
   SVN Rev[6112]
 
+* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfiles with the new form of use
+  elastix-menumerge for each elastix module.
+  SVN Rev[6104]
+
+* Fri Nov 15 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: DHCP Server: comment out the Polycom-specific options from the DHCP
+  configuration template.
+  SVN Rev[6100]
+
 * Fri Nov 15 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: DHCP Server: comment out the Polycom-specific options from the DHCP
   configuration template.
   SVN Rev[6098]
+
+* Thu Nov 14 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Framework/Apps: was added language help in
+  system->Network_parameters (spanish - english)
+  SVN Rev[6094]
 
 * Thu Nov 07 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: for Asterisk 11, the astdb database can not be swapped
@@ -194,9 +274,46 @@ fi
   additional Requires: php-magpierss.
   SVN Rev[5990]
 
+* Fri Oct 04 2013 Rocio Mera <rmera@palosanto.com> 
+- MOVED: Trunk - Apps/System: Was move module userlist to framework/manager
+  SVN Rev[5979]
+
+* Fri Oct 04 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps/System: Xml files that bellow to modules that are
+  placed by framework was moved to framework/setup/infomodules
+  SVN Rev[5978]
+
+* Fri Oct 04 2013 Rocio Mera <rmera@palosanto.com> 
+- MOVED: Trunk - Apps/System: Was moved from framework modules theme_system ,
+  language, registration to apps/core/system
+  SVN Rev[5975]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was renamed directory infomudules to infomodules
+  SVN Rev[5960]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- DELETED: Tunk - Apps/System: Was deleted file menu.xml. This file was divided
+  in a set of files that are stored in setup/infomodules
+- ADDED: Tunk - Apps/System: Was added directory infomodules. This directory
+  store a xml files that are used to create elastix resources
+  SVN Rev[5956]
+
+* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: build - *.spec: Update specfile with some corrections correspondig
+  to the way of identify and distribute folders to the '/usr/share/elastix/'
+  path and '/var/www/html/' path.
+  SVN Rev[5945]
+
+* Tue Sep 24 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/System: Was made change in module system to rename
+  field CID name and Cid number to FAX CID NAME and Fax CID number
+  SVN Rev[5940]
+
 * Mon Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[5874]
 
 * Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
 - ADDED: system - setup/infomodules.xml/: Within this folder are placed the new

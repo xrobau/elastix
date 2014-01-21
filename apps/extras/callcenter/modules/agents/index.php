@@ -31,6 +31,7 @@ require_once("libs/paloSantoGrid.class.php");
 require_once("libs/Agentes.class.php");
 
 require_once "modules/agent_console/libs/elastix2.lib.php";
+require_once "modules/agent_console/libs/JSON.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -56,23 +57,21 @@ function _moduleContent(&$smarty, $module_name)
     $pDB = new paloDB($arrConf['cadena_dsn']);
 
     // Mostrar pantalla correspondiente
-    $contenidoModulo = '';
     $sAction = 'list_agents';
-    if (isset($_GET['action'])) $sAction = $_GET['action'];
+    if (isset($_REQUEST['action'])) $sAction = $_REQUEST['action'];
     switch ($sAction) {
     case 'new_agent':
-        $contenidoModulo = newAgent($pDB, $smarty, $module_name, $local_templates_dir);
-        break;
+        return newAgent($pDB, $smarty, $module_name, $local_templates_dir);
     case 'edit_agent':
-        $contenidoModulo = editAgent($pDB, $smarty, $module_name, $local_templates_dir);
-        break;
+        return editAgent($pDB, $smarty, $module_name, $local_templates_dir);
+    case 'reparar_file':
+        return repararAgente_file($pDB, $smarty, $module_name, $local_templates_dir);
+    case 'reparar_db':
+        return repararAgente_db($pDB, $smarty, $module_name, $local_templates_dir);
     case 'list_agents':
     default:
-        $contenidoModulo = listAgent($pDB, $smarty, $module_name, $local_templates_dir);
-        break;
+        return listAgent($pDB, $smarty, $module_name, $local_templates_dir);
     }
-
-    return $contenidoModulo;
 }
 
 function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
@@ -82,35 +81,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     $oAgentes = new Agentes($pDB);
 
     // Operaciones de manipulación de agentes
-    if (isset($_POST['reparar_db']) && ereg('^[[:digit:]]+$', $_POST['reparar_db'])) {
-        // Hay que agregar el agente al archivo de configuración de Asterisk
-        $infoAgente = $oAgentes->getAgents($_POST['reparar_db']);
-        if (!is_array($infoAgente)) {
-            $smarty->assign(array(
-                'mb_title'      =>  'DB Error',
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        } elseif (count($infoAgente) == 0) {
-            // Agente no existe en DB, no se hace nada
-        } elseif (!$oAgentes->addAgentFile(array(
-            $infoAgente['number'],
-            $infoAgente['password'],
-            $infoAgente['name'],
-            ))) {
-            $smarty->assign(array(
-                'mb_title'      =>  _tr("Error saving agent in file"),
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        }
-    } elseif (isset($_POST['reparar_file']) && ereg('^[[:digit:]]+$', $_POST['reparar_file'])) {
-        // Hay que remover el agente del archivo de configuración de Asterisk
-        if (!$oAgentes->deleteAgentFile($_POST['reparar_file'])) {
-            $smarty->assign(array(
-                'mb_title'      =>  _tr("Error when deleting agent in file"),
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        }
-    } elseif (isset($_POST['delete']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
+    if (isset($_POST['delete']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
         // Borrar el agente indicado de la base de datos, y del archivo
         if (!$oAgentes->deleteAgent($_POST['agent_number'])) {
             $smarty->assign(array(
@@ -219,17 +190,11 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
             $tuplaData[1] = $sImgVisto;
             break;
         case 'ASTERISK':
-            $tuplaData[1] = $sImgErrorAst.
-                "&nbsp;<a href='javascript:preguntar_por_reparacion(\"".
-                $tuplaAgente['number'].
-                "\",\"reparar_file\", pregunta_borrar_agente_conf)'>"._tr('Repair')."</a>";
+            $tuplaData[1] = $sImgErrorAst.'&nbsp;<a href="#" class="reparar_file">'._tr('Repair').'</a>';
             $tuplaData[5] = '&nbsp;';   // No mostrar opción de editar agente que no está en DB
             break;
         case 'CC':
-            $tuplaData[1] = $sImgErrorCC.
-                "&nbsp;<a href='javascript:preguntar_por_reparacion(\"".
-                $tuplaAgente['number'].
-                "\",\"reparar_db\", pregunta_agregar_agente_conf)'>"._tr('Repair')."</a>";
+            $tuplaData[1] = $sImgErrorCC.'&nbsp;<a href="#" class="reparar_db">'._tr('Repair').'</a>';
             break;
         }
         $arrData[] = $tuplaData;
@@ -281,6 +246,74 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     if (strpos($sContenido, '<form') === FALSE)
         $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
     return $sContenido;
+}
+
+function repararAgente_file($pDB, $smarty, $module_name, $local_templates_dir)
+{
+    $respuesta = array(
+        'status'    =>  'success',
+        'message'   =>  '(no message)',
+    );
+    
+    if (!isset($_REQUEST['id_agent']) || !ctype_digit($_REQUEST['id_agent'])) {
+        $respuesta = array(
+            'status'    =>  'error',
+            'message'   =>  'Invalid agent ID',
+        );
+    } else {
+        $oAgentes = new Agentes($pDB);
+        if (!$oAgentes->deleteAgentFile($_REQUEST['id_agent'])) {
+            $respuesta = array(
+                'status'    =>  'error',
+                'message'   =>  _tr("Error when deleting agent in file").' - '.$oAgentes->errMsg,
+            );
+        }
+    }
+
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode($respuesta);
+}
+
+function repararAgente_db($pDB, $smarty, $module_name, $local_templates_dir)
+{
+    $respuesta = array(
+        'status'    =>  'success',
+        'message'   =>  '(no message)',
+    );
+    
+    if (!isset($_REQUEST['id_agent']) || !ctype_digit($_REQUEST['id_agent'])) {
+        $respuesta = array(
+            'status'    =>  'error',
+            'message'   =>  'Invalid agent ID',
+        );
+    } else {
+        $oAgentes = new Agentes($pDB);
+
+        // Hay que agregar el agente al archivo de configuración de Asterisk
+        $infoAgente = $oAgentes->getAgents($_REQUEST['id_agent']);
+        if (!is_array($infoAgente)) {
+            $respuesta = array(
+                'status'    =>  'error',
+                'message'   =>  'DB Error - '.$oAgentes->errMsg,
+            );
+        } elseif (count($infoAgente) == 0) {
+            // Agente no existe en DB, no se hace nada
+        } elseif (!$oAgentes->addAgentFile(array(
+            $infoAgente['number'],
+            $infoAgente['password'],
+            $infoAgente['name'],
+            ))) {
+            $respuesta = array(
+                'status'    =>  'error',
+                'message'   =>  _tr('Error saving agent in file').' - '.$oAgentes->errMsg,
+            );
+        }
+    }
+
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode($respuesta);
 }
 
 function newAgent($pDB, $smarty, $module_name, $local_templates_dir)

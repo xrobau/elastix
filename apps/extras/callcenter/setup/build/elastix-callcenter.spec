@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Jan 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent List: small rewrite of repair action handling to unbreak previous
+  commit. Now takes advantage of jQuery.
+  SVN Rev[6397]
+
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Agent Console, Campaigns, Do not Call List, External URLs, Queues,
   Clients, Ingoing Campaigns, Agents, ECCP Users, Callback Extensions, Breaks,

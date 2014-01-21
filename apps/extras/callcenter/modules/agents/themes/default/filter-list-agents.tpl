@@ -17,19 +17,4 @@
 <script language='JavaScript' type='text/javascript'>
 var pregunta_borrar_agente_conf = "{$PREGUNTA_BORRAR_AGENTE_CONF}";
 var pregunta_agregar_agente_conf = "{$PREGUNTA_AGREGAR_AGENTE_CONF}";
-{literal}
-    function preguntar_por_reparacion(id_agente, tipo, pregunta) {
-        if (confirm(pregunta)) {
-/*
-            if (tipo != '') {
-                window.open('?menu=agents&action='+tipo+'&id='+id_agente,'_parent');
-            }
-*/
-			var reparar = document.getElementById(tipo);
-			reparar.value = id_agente;
-			document.getElementById("form_agents").submit();
-        }
-    }
-{/literal}
 </script>
-

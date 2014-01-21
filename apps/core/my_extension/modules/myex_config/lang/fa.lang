@@ -48,8 +48,15 @@ $arrLangModule=array(
 "Always" => "هميشه",
 "Never"  => "هرگز",
 "On-Demand" => "بر حسب تقاضا",
-"Record Incoming" => "ضبط تماس هاي ورودي",
-"Record Outgoing" => "ضبط تماس هاي خروجي",
+"Inbound External Calls" => "Inbound External Calls",
+"Outbound External Calls" => "Outbound External Calls",
+"Inbound Internal Calls" => "Inbound Internal Calls",
+"Outbound Internal Calls" => "Outbound Internal Calls",
+"On Demand Recording" => "On Demand Recording",
+"Record Priority Policy" => "Record Priority Policy",
+"Don't Care" => "Don't Care",
+"Disable" => "Disable",
+"Enable" => "Enable",
 "SETTINGS FOR YOUR EXTENSION:" => "تنظيمات داخلي شما:",
 "contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension"
 );

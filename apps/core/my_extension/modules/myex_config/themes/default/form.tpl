@@ -5,15 +5,6 @@
             <input class="button" type="submit" name="save_new" value="{$SAVE}">&nbsp;&nbsp;
             <input class="button" type="submit" name="cancel" value="{$CANCEL}">
         </td>
-        {elseif $mode eq 'view'}
-        <td align="left">
-            <input class="button" type="submit" name="cancel" value="{$CANCEL}">
-        </td>
-        {elseif $mode eq 'edit'}
-        <td align="left">
-            <input class="button" type="submit" name="save_edit" value="{$EDIT}">&nbsp;&nbsp;
-            <input class="button" type="submit" name="cancel" value="{$CANCEL}">
-        </td>
         {/if}
     </tr>
 </table>
@@ -22,7 +13,7 @@
         <td  align="left" colspan=2;><br /><b style ="color:#E35332; font-weigth:bold;font-size:15px;">{$EXTENSION}</b><br /><br /></td>
     </tr>
     <tr class="letra12">
-        <td align="left" width="200px"><b>{$do_not_disturb.LABEL}:</b></td>
+        <td align="left" width="300px"><b>{$do_not_disturb.LABEL}:</b></td>
         <td align="left">{$do_not_disturb.INPUT}</td>
     </tr>
     <tr class="letra12">
@@ -48,12 +39,33 @@
         <td align="left"><b style ="color:#E35332; font-weigth:bold;font-size:12px;font-family:'Lucida Console';">{$TAG_CALL_MON_SET}</b></td>
     </tr>
     <tr class="letra12">
-        <td align="left"><b>{$record_incoming.LABEL}:</b></td>
-        <td align="left">{$record_incoming.INPUT}</td>
+        <td align="left"><b>{$recording_in_external.LABEL}:</b></td>
+        <td align="left">{$recording_in_external.INPUT}</td>
     </tr>
     <tr class="letra12">
-        <td align="left"><b>{$record_outgoing.LABEL}:</b></td>
-        <td align="left">{$record_outgoing.INPUT}</td>
+        <td align="left"><b>{$recording_out_external.LABEL}:</b></td>
+        <td align="left">{$recording_out_external.INPUT}</td>
     </tr>
+    <tr class="letra12">
+        <td align="left"><b>{$recording_in_internal.LABEL}:</b></td>
+        <td align="left">{$recording_in_internal.INPUT}</td>
+    </tr>
+    <tr class="letra12">
+        <td align="left"><b>{$recording_out_internal.LABEL}:</b></td>
+        <td align="left">{$recording_out_internal.INPUT}</td>
+    </tr>
+    <tr class="letra12">
+        <td align="left"><b>{$recording_ondemand.LABEL}:</b></td>
+        <td align="left">{$recording_ondemand.INPUT}</td>
+    </tr>
+    <tr class="letra12">
+        <td align="left"><b>{$recording_priority.LABEL}:</b></td>
+        <td align="left">
+            <div style="width:270px">
+                <span id="recording_priority_amount" name="recording_priority_amount" style="border:0; color:#f6931f; font-weight:bold; float: right">{$recording_priority_value}</span>
+                <div id="slider" style="width:240px;"></div>
+                {$recording_priority.INPUT}
+            </div>    
+        </td>
+    </tr> 
 </table>
-<input class="button" type="hidden" name="id" value="{$ID}" />

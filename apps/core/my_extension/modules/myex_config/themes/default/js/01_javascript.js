@@ -1,5 +1,16 @@
 $(document).ready(
     function(){
+         $( "#slider" ).slider({
+            range: "min",
+            min: 0,
+            max: 20,
+            value: $("#recording_priority").val(),
+            slide: function(event, ui){
+                $("#recording_priority_amount").text(ui.value);
+                $("#recording_priority").val(ui.value);
+            }
+         });
+         
          $("input[name|=phone_number_CF]").focus(
             function(){
                 $(this).attr("value","");

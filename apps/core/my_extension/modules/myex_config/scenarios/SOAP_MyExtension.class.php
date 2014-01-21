@@ -83,13 +83,19 @@ class SOAP_MyExtension extends core_MyExtension
      * exists a SOAP fault is thrown
      * 
      * @param mixed request:
-     *                  recordIncoming:   (string) this option can be Always, Never or Adhoc
-     *                  recordOutgoing:   (string) this option can be Always, Never or Adhoc
+     *                  recordingIN_external  (string) this option can be Always, Never or Don't Care
+     *                  recordingIN_internal  (string) this option can be Always, Never or Don't Care
+     *                  recordingON_demand    (string) this option can be Disabled or Enabled
+     *                  recordingOUT_external (string) this option can be Always, Never or Don't Care
+     *                  recordingOUT_internal (string) this option can be Always, Never or Don't Care
+     *                  recordingPriority     (integer) this option can be a numeric value between 0 and 20
      * @return  mixed   Array with boolean data, true if was successful or false if an error exists
      */
     public function setCallMonitor($request)
     {
-        $return = parent::setCallMonitor($request->recordIncoming,$request->recordOutgoing);
+        $return = parent::setCallMonitor($request->recordingIN_external, $request->recordingIN_internal,
+                                            $request->recordingON_demand, $request->recordingOUT_external,
+                                            $request->recordingOUT_internal, $request->recordingPriority);
         if(!$return){
             $eMSG = parent::getError();
             $this->objSOAPServer->fault($eMSG['fc'],$eMSG['fm'],$eMSG['cn'],$eMSG['fd'],'fault');

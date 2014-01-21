@@ -94,8 +94,12 @@ class core_MyExtension
         );
 
         $arrData["setCallMonitor"]["params_IN"] = array(
-            "recordIncoming"      => array("type" => "string",   "required" => true),
-            "recordOutgoing"      => array("type" => "string",   "required" => true)
+            "recordingIN_external"  => array("type" => "string",   "required" => true),
+            "recordingIN_internal"  => array("type" => "string",   "required" => true),
+            "recordingON_demand"    => array("type" => "string",   "required" => true),
+            "recordingOUT_external" => array("type" => "string",   "required" => true),          
+            "recordingOUT_internal" => array("type" => "string",   "required" => true),          
+            "recordingPriority"     => array("type" => "string",   "required" => true)
         );
 
         $arrData["setCallMonitor"]["params_OUT"] = array(
@@ -229,8 +233,7 @@ class core_MyExtension
             return false;
         }
         $extension = $this->_leerExtension();
-        $pDB       = new paloDB(generarDSNSistema('asteriskuser', 'asterisk', $root."/"));
-        $pMyExtension = new paloSantoMyExtension($pDB);
+        $pMyExtension = new paloSantoMyExtension();
         if(is_null($extension)){
             return false;
         }
@@ -238,7 +241,10 @@ class core_MyExtension
             $enableCW = "on";
         else
             $enableCW = "off";
+        $pMyExtension->AMI_OpenConnect();
         $statusCW = $pMyExtension->setConfig_CallWaiting($enableCW,$extension);
+        $pMyExtension->AMI_CloseConnect();
+        
         if(!$statusCW){
             $this->errMsg["fc"] = 'ERROR';
             $this->errMsg["fm"] = 'Error processing CallWaiting';
@@ -252,49 +258,54 @@ class core_MyExtension
     /**
      * Functional point that sets the option call monitor to the extension of the authenticated user
      *
-     * @param   string     $recordIncoming   this option can be Always, Never or Adhoc
-     * @param   string     $recordOutgoing   this option can be Always, Never or Adhoc
+     * @param   string     $recordingIN_external   this option can be Always, Never or Don't Care
+     * @param   string     $recordingIN_internal   this option can be Always, Never or Don't Care
+     * @param   string     $recordingON_demand     this option can be Disabled or Enabled
+     * @param   string     $recordingOUT_external  this option can be Always, Never or Don't Care
+     * @param   string     $recordingOUT_internal  this option can be Always, Never or Don't Care
+     * @param   integer    $recordingPriority      this option can be a numeric value between 0 and 20
      * @return  boolean   True if the call monitor was set, or false if an error exists
      */
-    public function setCallMonitor($recordIncoming, $recordOutgoing)
+    public function setCallMonitor($recordingIN_external, $recordingIN_internal, $recordingON_demand, $recordingOUT_external, $recordingOUT_internal, $recordingPriority)
     {
         global $root;
-        if(!isset($recordIncoming)){
-            $this->errMsg["fc"] = 'ERROR';
-            $this->errMsg["fm"] = 'Parameter Error';
-            $this->errMsg["fd"] = 'The parameter recordIncoming has not been sent';
-            $this->errMsg["cn"] = get_class($this);
-            return false;
+        $parameters = array(
+            "recording_in_external"  => $recordingIN_external,
+            "recording_in_internal"  => $recordingIN_internal,
+            "recording_ondemand"    => $recordingON_demand,
+            "recording_out_external" => $recordingOUT_external,
+            "recording_out_internal" => $recordingOUT_internal,
+            "recording_priority"     => $recordingPriority
+        );
+        
+        foreach($parameters as $k => $v){
+            if(!isset($v)){
+                $this->errMsg["fc"] = 'ERROR';
+                $this->errMsg["fm"] = 'Parameter Error';
+                $this->errMsg["fd"] = "The parameter {$k} has not been sent";
+                $this->errMsg["cn"] = get_class($this);
+                return false;
+            }
         }
-        if(!isset($recordOutgoing)){
-            $this->errMsg["fc"] = 'ERROR';
-            $this->errMsg["fm"] = 'Parameter Error';
-            $this->errMsg["fd"] = 'The parameter recordOutgoing has not been sent';
-            $this->errMsg["cn"] = get_class($this);
-            return false;
-        }
+        
         $extension = $this->_leerExtension();
-        $pDB       = new paloDB(generarDSNSistema('asteriskuser', 'asterisk', $root."/"));
-        $pMyExtension = new paloSantoMyExtension($pDB);
+        $pMyExtension = new paloSantoMyExtension();
         if(is_null($extension)){
             return false;
         }
-        if(($recordIncoming == "Always" || $recordIncoming == "Never" || $recordIncoming == "Adhoc") && ($recordOutgoing == "Always" || $recordOutgoing == "Never" || $recordOutgoing == "Adhoc"))
-            $statusRecording = $pMyExtension->setRecordSettings($extension,$recordIncoming,$recordOutgoing);
-        else{
-            $this->errMsg["fc"] = 'ERROR';
-            $this->errMsg["fm"] = 'Parameter Error';
-            $this->errMsg["fd"] = 'You entered a bad record Incoming or bad recordOutgoing, the options only are: Always, Never or Adhoc';
-            $this->errMsg["cn"] = get_class($this);
-            return false;
-        }
+        
+        $pMyExtension->AMI_OpenConnect();
+        $statusRecording = $pMyExtension->setRecordSettings($extension,$parameters);
+        $pMyExtension->AMI_CloseConnect();
+        
         if(!$statusRecording){
             $this->errMsg["fc"] = 'ERROR';
             $this->errMsg["fm"] = 'Error Processing Record Settings';
-            $this->errMsg["fd"] = 'The Record Settings could not be set';
+            $this->errMsg["fd"] = $pMyExtension->errMsg;
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
+
         return true;
     }
 
@@ -313,54 +324,50 @@ class core_MyExtension
     {
         global $root;
         $extension = $this->_leerExtension();
-        $pDB       = new paloDB(generarDSNSistema('asteriskuser', 'asterisk', $root."/"));
-        $pMyExtension = new paloSantoMyExtension($pDB);
+        $pMyExtension = new paloSantoMyExtension();
         $statusCF = $statusCFU = $statusCFB = true;
+        $isCF_Error = $isCFU_Error = $isCFB_Error = "";
+        
         if(is_null($extension)){
             return false;
         }
+        
+        $pMyExtension->AMI_OpenConnect();
         if(isset($callForward)){
-            if($callForward){
-                if(isset($phoneNumberCallForward))
-                    if(preg_match( "/^[0-9]+$/",$phoneNumberCallForward))
-                        $statusCF   = $pMyExtension->setConfig_CallForward("on",$phoneNumberCallForward,$extension);
-            }else
-                $statusCF  = $pMyExtension->setConfig_CallForward("off","",$extension);
+            $callForward = ($callForward)?"on":"off";
+            $statusCF    = $pMyExtension->setConfig_CallForward($callForward,$phoneNumberCallForward,$extension);  
+            $isCF_Error  = $pMyExtension->errMsg;
         }
         if(isset($callForwardUnavailable)){
-            if($callForwardUnavailable){
-                if(isset($phoneNumberCallForwardUnavailable))
-                    if(preg_match( "/^[0-9]+$/",$phoneNumberCallForwardUnavailable))
-                        $statusCFU  = $pMyExtension->setConfig_CallForwardOnUnavail("on",$phoneNumberCallForwardUnavailable,$extension);
-            }else
-                $statusCFU  = $pMyExtension->setConfig_CallForwardOnUnavail("off","",$extension);
+            $callForwardUnavailable = ($callForwardUnavailable)?"on":"off";
+            $statusCFU   = $pMyExtension->setConfig_CallForwardOnUnavail($callForwardUnavailable,$phoneNumberCallForwardUnavailable,$extension);
+            $isCFU_Error = $pMyExtension->errMsg;
         }
         if(isset($callForwardBusy)){
-            if($callForwardBusy){
-                if(isset($phoneNumberCallForwardBusy))
-                    if(preg_match( "/^[0-9]+$/",$phoneNumberCallForwardBusy))
-                        $statusCFB  = $pMyExtension->setConfig_CallForwardOnBusy("on",$phoneNumberCallForwardBusy,$extension);
-            }else
-                $statusCFB  = $pMyExtension->setConfig_CallForwardOnBusy("off","",$extension);
+            $callForwardBusy = ($callForwardBusy)?"on":"off";
+            $statusCFB   = $pMyExtension->setConfig_CallForwardOnBusy($callForwardBusy,$phoneNumberCallForwardBusy,$extension);
+            $isCFB_Error = $pMyExtension->errMsg;
         }
+        $pMyExtension->AMI_CloseConnect();
+        
         if(!$statusCF){
             $this->errMsg["fc"] = 'ERROR';
             $this->errMsg["fm"] = 'Error Processing Call Forward';
-            $this->errMsg["fd"] = 'The Call Forward could not be set';
+            $this->errMsg["fd"] = $isCF_Error;
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
         if(!$statusCFU){
             $this->errMsg["fc"] = 'ERROR';
             $this->errMsg["fm"] = 'Error Processing Call Forward on Unavailable';
-            $this->errMsg["fd"] = 'The Call Forward on Unavailable could not be set';
+            $this->errMsg["fd"] = $isCFU_Error;
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
         if(!$statusCFB){
             $this->errMsg["fc"] = 'ERROR';
             $this->errMsg["fm"] = 'Error Processing Call Forward on Busy';
-            $this->errMsg["fd"] = 'The Call Forward on Busy could not be set';
+            $this->errMsg["fd"] = $isCFB_Error;
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
@@ -383,18 +390,21 @@ class core_MyExtension
             $this->errMsg["fd"] = 'The parameter doNotDisturb has not been sent';
             $this->errMsg["cn"] = get_class($this);
             return false;
-        }
+        } 
         $extension = $this->_leerExtension();
-        $pDB       = new paloDB(generarDSNSistema('asteriskuser', 'asterisk',$root."/"));
-        $pMyExtension = new paloSantoMyExtension($pDB);
+        $pMyExtension = new paloSantoMyExtension();
         if(is_null($extension)){
             return false;
-        }
+        } 
         if($doNotDisturb)
             $enableDND = "on";
         else
             $enableDND = "off";
+         
+        $pMyExtension->AMI_OpenConnect();
         $statusDND = $pMyExtension->setConfig_DoNotDisturb($enableDND,$extension);
+        $pMyExtension->AMI_CloseConnect();
+        
         if(!$statusDND){
             $this->errMsg["fc"] = 'ERROR';
             $this->errMsg["fm"] = 'Error Processing Do Not Disturb';

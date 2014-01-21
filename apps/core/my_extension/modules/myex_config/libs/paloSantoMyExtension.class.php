@@ -30,126 +30,46 @@
 require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 
 class paloSantoMyExtension {
-    var $_DB;
     var $errMsg;
+    var $astman;
 
-    function paloSantoMyExtension(&$pDB)
+    function paloSantoMyExtension()
     {
-        // Se recibe como parámetro una referencia a una conexión paloDB
-        if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        } else {
-            $dsn = (string)$pDB;
-            $this->_DB = new paloDB($dsn);
-
-            if (!$this->_DB->connStatus) {
-                $this->errMsg = $this->_DB->errMsg;
-                // debo llenar alguna variable de error
-            } else {
-                // debo llenar alguna variable de error
-            }
-        }
+        $this->astman = null;
     }
 
-    /*HERE YOUR FUNCTIONS*/
-    private function updateDatabaseAsterisk($technology,$extension,$recordSettingsType)//$recordSettingsType is an array i.e: $recordSettingsIn["record_in"]  = $state_in;
-    {
-        if($technology != null){
-            if(isset($recordSettingsType["record_in"])){
-                $record_value  = $recordSettingsType["record_in"];
-                $record_type = 'record_in';
-            }
-            else if(isset($recordSettingsType["record_out"])){
-                $record_value = $recordSettingsType["record_out"];
-                $record_type = 'record_out';
-            }
-
-            // Se actualiza la tabla correspondiente a la tecnología
-            $query1 = "SELECT count(*) exists FROM $technology WHERE id = '$extension' AND keyword = '$record_type';";
-            
-            $result=$this->_DB->getFirstRowQuery($query1,true);
-            if(is_array($result) && $result["exists"]==0){
-            //not exist keyword
-                  $query2 = "SELECT flags FROM $technology WHERE id = '$extension' order by flags desc limit 1;";
-                  $result     = $this->_DB->getFirstRowQuery($query2,true);
-                  $flag       = $result['flags'] + 1;
-                  $query3 = "INSERT INTO $technology VALUES('$extension','$record_type','$record_value',$flag);";
-                  $result=$this->_DB->genQuery($query3);
-                  if($result==FALSE)
-                  {
-                        $this->errMsg = $this->_DB->errMsg;
-                        return false;
-                  }
-            }else{
-                $query4 = "UPDATE $technology SET data ='$record_value' WHERE id='$extension' AND keyword='$record_type';";
-                $result=$this->_DB->genQuery($query4);
-                if($result==FALSE)
-                {
-                    $this->errMsg = $this->_DB->errMsg;
-                    return false;
-                }
-            }
-            
-            // Se actualiza la tabla users
-            $sPeticion = 'SELECT recording FROM users WHERE extension = ?';
-            $result = $this->_DB->getFirstRowQuery($sPeticion, TRUE, array($extension));
-            if (is_array($result) && isset($result['recording'])) {
-                $regs = NULL;
-                if (preg_match('/^out=(\w+)\|in=(\w+)$/', $result['recording'], $regs)) {
-                    $sValorOut = $regs[1]; $sValorIn = $regs[2];
-                } else {
-                    $sValorOut = $sValorIn = 'Adhoc';
-                }
-                if ($record_type == 'record_in') $sValorIn = $record_value;
-                if ($record_type == 'record_out') $sValorOut = $record_value;
-                $sRecNuevo = "out=$sValorOut|in=$sValorIn";
-                if ($sRecNuevo != $result['recording']) {
-                    $sPeticion = 'UPDATE users SET recording = ? WHERE extension = ?';
-                    $result = $this->_DB->genQuery($sPeticion, array($sRecNuevo, $extension));
-                    if($result==FALSE)
-                    {
-                        $this->errMsg = $this->_DB->errMsg;
-                        return false;
-                    }
-                }
-            }
-            
-            return true;
-        }
-        return false;
-    }
-
-    private function AMI_Command($command)
+    public function AMI_OpenConnect()
     {
         $astman = new AGI_AsteriskManager();
-        $return = false;
-      
-        if(!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin())){
+        $root   = $_SERVER["DOCUMENT_ROOT"];     
+        if(!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin("$root/"))){
             $this->errMsg = "Error connect AGI_AsteriskManager";
-            $return = false;
+            $this->astman = null;
+            return null;
         }
-        else{
-            $r = $astman->command($command);
-            $return = $r["data"];
-            $astman->disconnect();
-        }
-        return $return;
+        
+        $this->astman = $astman;
+        return $astman;
     }
-
+    
+    public function AMI_CloseConnect()
+    {
+        $this->astman->disconnect();
+    }
+    
     function setConfig_CallWaiting($enableCW,$extension)
     {
         $enableCW = trim(strtolower($enableCW));
         $return = false;
 
-        if(eregi("^on", $enableCW)){
-            $r = $this->AMI_Command("database put CW $extension \"ENABLED\"");
-            if($r) $return = (bool)strstr($r, "success");
-        }
-        else{
-            $r = $this->AMI_Command("database del CW $extension");
-            if($r) $return = (bool)strstr($r, "removed") || (bool)strstr($r, "not exist");
-        }
+        if(preg_match("/^on$/", $enableCW))
+            $return = $this->astman->database_put("CW",$extension,"\"ENABLED\"");
+        else
+            $return = $this->astman->database_del("CW",$extension);
+        
+        if($return === false)
+            $this->errMsg = "Error processing CallWaiting";
+        
         return $return;
     }
 
@@ -158,13 +78,14 @@ class paloSantoMyExtension {
         $enableDND = trim(strtolower($enableDND));
         $return = false;
 
-        if (eregi("^on", $enableDND)) {
-            $r = $this->AMI_Command("database put DND $extension \"YES\"");
-            if($r) $return = (bool)strstr($r, "success");
-        } else {
-            $r = $this->AMI_Command("database del DND $extension");
-            if($r) $return = (bool)strstr($r, "removed") || (bool)strstr($r, "not exist");
-        }
+        if (preg_match("/^on$/", $enableDND))
+            $return = $this->astman->database_put("DND",$extension,"\"YES\"");
+        else
+            $return = $this->astman->database_del("DND",$extension);
+        
+        if($return === false)
+            $this->errMsg = "Error processing Do Not Disturb";
+        
         return $return;
     }
 
@@ -172,13 +93,21 @@ class paloSantoMyExtension {
     {
         $enableCF = trim(strtolower($enableCF));
         $return = false;
-        if (eregi("^on", $enableCF)) {
-            $r = $this->AMI_Command("database put CF $extension $phoneNumberCF");
-            if($r) $return = (bool)strstr($r, "success");
-        } else {
-            $r = $this->AMI_Command("database del CF $extension");
-            if($r) $return = (bool)strstr($r, "removed") || (bool)strstr($r, "not exist");
+        
+        if (preg_match("/^on$/", $enableCF)){
+            if(!preg_match("/^[0-9]+$/",$phoneNumberCF)){
+                $this->errMsg = "Please check your phone number for Call Forward";
+                return false;
+            }
+        
+            $return = $this->astman->database_put("CF",$extension,"\"".$phoneNumberCF."\"");
         }
+        else
+            $return = $this->astman->database_del("CF",$extension);
+        
+        if($return === false)
+            $this->errMsg = "Error processing Call Forward";
+        
         return $return;
     }
     
@@ -187,13 +116,20 @@ class paloSantoMyExtension {
         $enableCFU = trim(strtolower($enableCFU));
         $return = false;
 
-        if (eregi("^on", $enableCFU)) {
-            $r = $this->AMI_Command("database put CFU $extension $phoneNumberCFU");
-            if($r) $return = (bool)strstr($r, "success");
-        } else {
-            $r = $this->AMI_Command("database del CFU $extension");
-            if($r) $return = (bool)strstr($r, "removed") || (bool)strstr($r, "not exist");
+        if (preg_match("/^on$/", $enableCFU)){
+            if(!preg_match("/^[0-9]+$/",$phoneNumberCFU)){
+                $this->errMsg = "Please check your phone number for Call Forward On Unavailable";
+                return false;
+            }
+            
+            $return = $this->astman->database_put("CFU",$extension,"\"".$phoneNumberCFU."\"");
         }
+        else
+            $return = $this->astman->database_del("CFU",$extension);
+        
+        if($return === false)
+            $this->errMsg = "Error processing Call Forward on Unavailable";
+        
         return $return;
     }
 
@@ -202,21 +138,27 @@ class paloSantoMyExtension {
         $enableCFB = trim(strtolower($enableCFB));
         $return = false;
 
-        if (eregi("^on", $enableCFB)) {
-            $r = $this->AMI_Command("database put CFB $extension $phoneNumberCFB");
-            if($r) $return = (bool)strstr($r, "success");
-        } else {
-            $r = $this->AMI_Command("database del CFB $extension");
-            if($r) $return = (bool)strstr($r, "removed") || (bool)strstr($r, "not exist");
+        if (preg_match("/^on$/", $enableCFB)){
+            if(!preg_match("/^[0-9]+$/",$phoneNumberCFB)){
+                $this->errMsg = "Please check your phone number for Call Forward On Busy";
+                return false;
+            }
+        
+            $return = $this->astman->database_put("CFB",$extension,"\"".$phoneNumberCFB."\"");
         }
+        else 
+            $return = $this->astman->database_del("CFB",$extension);
+        
+        if($return === false)
+            $this->errMsg = "Error processing Call Forward on Busy";
+        
         return $return;
     }
 
     function getConfig_CallWaiting($extension)
     {
-        $return = false;
-        $r = $this->AMI_Command("database get CW $extension");
-        if($r != false && strpos($r,"Value: ENABLED") !== false) 
+        $return = $this->astman->database_get("CW",$extension);
+        if($return != false && $return=="ENABLED") 
              $return = "on";
         else $return = "off";
         return $return;
@@ -224,9 +166,8 @@ class paloSantoMyExtension {
 
     function getConfig_DoNotDisturb($extension)
     {
-        $return = false;
-        $r = $this->AMI_Command("database get DND $extension");
-        if ($r != false && strpos($r,"Value: ") !== false) 
+        $return = $this->astman->database_get("DND",$extension);
+        if($return != false && $return=="YES") 
                 $return = "on";
         else $return = "off";
         return $return;
@@ -235,11 +176,10 @@ class paloSantoMyExtension {
     function getConfig_CallForwarding($extension)
     {
             $return = array();
-            $r = $this->AMI_Command("database get CF $extension");
-            if($r != false && strpos($r,"Value: ") !== false){ 
+            $r = $this->astman->database_get("CF",$extension);
+            if($r != false && $r!=""){ 
                $return["enable"] = "on";
-               $arrData = explode(":",$r);
-               $return["phoneNumber"] = trim($arrData[2]);
+               $return["phoneNumber"] = $r;
             }else $return["enable"] = "off";
             return $return;
     }
@@ -247,11 +187,10 @@ class paloSantoMyExtension {
     function getConfig_CallForwardingOnUnavail($extension)
     {
             $return = array();
-            $r = $this->AMI_Command("database get CFU $extension");
-            if($r != false && strpos($r,"Value: ") !== false){ 
+            $r = $this->astman->database_get("CFU",$extension);
+            if($r != false && $r!=""){ 
                $return["enable"] = "on";
-               $arrData = explode(":",$r);
-               $return["phoneNumber"] = trim($arrData[2]);
+               $return["phoneNumber"] = $r;
             }else $return["enable"] = "off";
             return $return;
     }
@@ -259,82 +198,119 @@ class paloSantoMyExtension {
     function getConfig_CallForwardingOnBusy($extension)
     {
             $return = array();
-            $r = $this->AMI_Command("database get CFB $extension");
-            if($r != false && strpos($r,"Value: ") !== false){ 
+            $r = $this->astman->database_get("CFB",$extension);
+            if($r != false && $r!=""){ 
                $return["enable"] = "on";
-               $arrData = explode(":",$r);
-               $return["phoneNumber"] = trim($arrData[2]);
+               $return["phoneNumber"] = $r;
             }else $return["enable"] = "off";
             return $return;
     }
+    
     //database get AMPUSER/10004 cidname
     function getExtensionCID($extension)
     {
         $return = false;
-        $r = $this->AMI_Command("database get AMPUSER/$extension cidname");
-         if ($r != false && strpos($r,"Value: ") !== false){
-             $arrData = explode(":",$r);
-             $return  = $cidname = trim($arrData[2]);
-        }
+        $r = $this->astman->database_get("AMPUSER","$extension/cidname");
+        if($r != false && $r!="")
+             $return  = $r;
+        
         return $return;
     }
 
     /*Recordings*/
-    function setRecordSettings($exten,$state_in,$state_out) 
+    function setRecordSettings($extension,$arrRecordingStatus) 
     {
-      $technology = $this->getTechnology($exten);
-      $return = false;
-      $rSuccess = false;
-      $value_opt= "out=".$state_out."|in=".$state_in;
-      $r = $this->AMI_Command("database put AMPUSER $exten/recording $value_opt\r\n\r\n");
-      if($r) $rSuccess = (bool)strstr($r, "success");
-      $recordSettingsTypeIn["record_in"]  = $state_in;
-      $recordSettingsTypeOut["record_out"] = $state_out;
-      $statusIN = $this->updateDatabaseAsterisk($technology,$exten,$recordSettingsTypeIn);
-      $stateOut = $this->updateDatabaseAsterisk($technology,$exten,$recordSettingsTypeOut);
-      if($statusIN && $stateOut && $rSuccess)
-        $return = true;
-      return $return;
+        if(!in_array($arrRecordingStatus['recording_in_external'],array("always","dontcare","never"))){
+            $this->errMsg = "Inbound External Calls option is not valid";
+            return false;
+        }
+        
+        if(!in_array($arrRecordingStatus['recording_out_external'],array("always","dontcare","never"))){
+            $this->errMsg = "Outbound External Calls option is not valid";
+            return false;
+        }
+        
+        if(!in_array($arrRecordingStatus['recording_in_internal'],array("always","dontcare","never"))){
+            $this->errMsg = "Inbound Internal Calls option is not valid";
+            return false;
+        }
+        
+        if(!in_array($arrRecordingStatus['recording_out_internal'],array("always","dontcare","never"))){
+            $this->errMsg = "Outbound Internal Calls option is not valid";
+            return false;
+        }
+        
+        if(!in_array($arrRecordingStatus['recording_ondemand'],array("disabled","enabled"))){
+            $this->errMsg = "On Demand Recording  option is not valid";
+            return false;
+        }
+        
+        if(!preg_match("/^[0-9]+$/",$arrRecordingStatus['recording_priority'])){
+            $this->errMsg = "Record Priority Policy is not numeric";
+            return false;
+        }
+        else if(!($arrRecordingStatus['recording_priority'] >=0 && $arrRecordingStatus['recording_priority'] <=20)){
+            $this->errMsg = "Record Priority Policy must be a value between 0 and 20";
+            return false;
+        }
+        
+        $r1 = $this->astman->database_put("AMPUSER",$extension."/recording/in/external","\"".$arrRecordingStatus['recording_in_external']."\"");
+        $r2 = $this->astman->database_put("AMPUSER",$extension."/recording/out/external","\"".$arrRecordingStatus['recording_out_external']."\"");
+        $r3 = $this->astman->database_put("AMPUSER",$extension."/recording/in/internal","\"".$arrRecordingStatus['recording_in_internal']."\"");
+        $r4 = $this->astman->database_put("AMPUSER",$extension."/recording/out/internal","\"".$arrRecordingStatus['recording_out_internal']."\"");
+        $r5 = $this->astman->database_put("AMPUSER",$extension."/recording/ondemand","\"".$arrRecordingStatus['recording_ondemand']."\"");
+        $r6 = $this->astman->database_put("AMPUSER",$extension."/recording/priority","\"".$arrRecordingStatus['recording_priority']."\"");
 
+        if($r1 && $r2 && $r3 && $r4 && $r5 && $r6)
+            return true;
+        else{
+            $this->errMsg = "Error processing Recording options";
+            return false;
+        }
     }
 
     private function getTechnology($extension)
     {    $technology = null;
-         $r = $this->AMI_Command("database get DEVICE/$extension dial\r\n\r\n");
-         if($r != false && strpos($r,"Value: ") !== false){
-            $arrData              = explode(":",$r);//i.e: Value: SIP/408
-            $type_Extension       = trim($arrData[2]);//i.e: SIP/408
-            $arrDataTech          = explode("/",$type_Extension);
-            $technology           = strtolower(trim($arrDataTech[0]));//i.e: SIP/408
+         $r = $this->astman->database_get("DEVICE","$extension/dial");
+         if($r != false && $r!=""){
+            $arrDataTech          = explode("/",$r);
+            $technology           = strtolower(trim($arrDataTech[0]));//i.e: sip
          }
          return $technology;
     }
 
     function getRecordSettings($extension)
     {
-      $return = array();
-      $r = $this->AMI_Command("database get AMPUSER $extension/recording");
-      if($r != false && strpos($r,"in=Always") !== false){
-        $return['record_in'] = 'Always';
-      }
-      else if($r != false && strpos($r,"in=Never") !== false){
-        $return['record_in'] = 'Never';
-      }
-      else if($r != false && strpos($r,"in=Adhoc") !== false){
-        $return['record_in'] = 'Adhoc';
-      }
-      if($r != false && strpos($r,"out=Always") !== false){
-        $return['record_out'] = 'Always';
-      }
-      else if($r != false && strpos($r,"out=Never") !== false){
-        $return['record_out'] = 'Never';
-      }
-      else if($r != false && strpos($r,"out=Adhoc") !== false){
-        $return['record_out'] = 'Adhoc';
+      $return = array(
+          "recording_in_external"  => "dontcare",
+          "recording_in_internal"  => "dontcare",
+          "recording_ondemand"     => "disabled",
+          "recording_out_external" => "dontcare",          
+          "recording_out_internal" => "dontcare",          
+          "recording_priority"     => "10"
+      );
+      
+      $r = $this->astman->database_show("AMPUSER/$extension/recording");
+      if(is_array($r) && count($r)>0){
+        if(isset($r["/AMPUSER/$extension/recording/in/external"]))
+            $return['recording_in_external']  = $r["/AMPUSER/$extension/recording/in/external"];
+      
+        if(isset($r["/AMPUSER/$extension/recording/in/internal"]))
+            $return['recording_in_internal']  = $r["/AMPUSER/$extension/recording/in/internal"];
+        
+        if(isset($r["/AMPUSER/$extension/recording/ondemand"]))
+            $return['recording_ondemand']     = $r["/AMPUSER/$extension/recording/ondemand"];
+        
+        if(isset($r["/AMPUSER/$extension/recording/out/external"]))
+            $return['recording_out_external'] = $r["/AMPUSER/$extension/recording/out/external"];
+        
+        if(isset($r["/AMPUSER/$extension/recording/out/internal"]))
+            $return['recording_out_internal'] = $r["/AMPUSER/$extension/recording/out/internal"];
+        
+        if(isset($r["/AMPUSER/$extension/recording/priority"]))
+            $return['recording_priority']     = $r["/AMPUSER/$extension/recording/priority"];
       }
       return $return;
     }
-
-/**********/
 }
 ?>

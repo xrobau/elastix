@@ -48,9 +48,24 @@ $arrLangModule=array(
 "Always" => "Always",
 "Never"  => "Never",
 "On-Demand" => "On-Demand",
-"Record Incoming" => "Record Incoming",
-"Record Outgoing" => "Record Outgoing",
+"Inbound External Calls" => "Inbound External Calls",
+"Outbound External Calls" => "Outbound External Calls",
+"Inbound Internal Calls" => "Inbound Internal Calls",
+"Outbound Internal Calls" => "Outbound Internal Calls",
+"On Demand Recording" => "On Demand Recording",
+"Record Priority Policy" => "Record Priority Policy",
+"Don't Care" => "Don't Care",
+"Disable" => "Disable",
+"Enable" => "Enable",    
 "SETTINGS FOR YOUR EXTENSION:" => "SETTINGS FOR YOUR EXTENSION:",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension"
+"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
+"Inbound External Calls option is not valid" => "Inbound External Calls option is not valid",
+"Outbound External Calls option is not valid" => "Outbound External Calls option is not valid",
+"Inbound Internal Calls option is not valid" => "Inbound Internal Calls option is not valid",
+"Outbound Internal Calls option is not valid" => "Outbound Internal Calls option is not valid",
+"On Demand Recording  option is not valid" => "On Demand Recording  option is not valid",
+"Record Priority Policy is not numeric" => "Record Priority Policy is not numeric",
+"Record Priority Policy must be a value between 0 and 20" => "Record Priority Policy must be a value between 0 and 20",
+"Error processing Recording options" => "Error processing Recording options"
 );
 ?>

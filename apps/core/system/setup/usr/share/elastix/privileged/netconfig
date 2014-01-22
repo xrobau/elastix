@@ -249,6 +249,11 @@ function setHostname($sHostname)
     if (!$bClavePresente) $contenidoNuevo[] = "HOSTNAME=$sHostname\n";
     file_put_contents('/etc/sysconfig/network', $contenidoNuevo);
 
+    // Create or overwrite /etc/hostname with the new hostname as content.
+    // This is a noop in CentOS 5 but required in Fedora for hostname to persist
+    file_put_contents('/etc/hostname', "$sHostname\n");
+    chmod('/etc/hostname', 0644);
+
     // In /etc/hosts, replace hostname for 127.0.0.1
     $bClavePresente = FALSE;
     $contenidoNuevo = array();

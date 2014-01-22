@@ -134,6 +134,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Jan 22 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Network: Fedora requires the /etc/hostname file to be created/updated
+  when changing the system hostname.
+  SVN Rev[6399]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

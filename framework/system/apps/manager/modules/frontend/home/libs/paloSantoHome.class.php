@@ -72,13 +72,16 @@ class paloImap {
     public function getMailbox(){
         return $this->mailbox;
     }
-    
     public function setDefaultFolders($arrFolders){
         $this->$default_folders=$arrFolders;
     }
     
     public function getConnection(){
         return $this->connection;
+    }
+    
+    public function getImapref(){
+        return $this->imap_ref;
     }
     
     public function getMessageByPage(){
@@ -101,6 +104,9 @@ class paloImap {
         return $this->$message_by_page;
     }
     
+    public function getErrorMsg(){
+        return $this->errMsg;
+    }
     public function login($user, $pass, $use_ssl=null, $validate_cert=false){
         //validamos la cuenta del usuario
         if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/",$user)){
@@ -392,44 +398,58 @@ class paloImap {
     
     function readEmailMsg($uid){
         $message=array();
-        //primero leemos la cabecera del mensaje
-        // usamos la funcion imap_rfc822_parse_headers en lugar de imap_headerinfo porque
-        // la funcion imap_header_info solo acepta message number en ludar de uid
-        // como la function imap_rfc822_parse_headers recive un header a parsear
-        // primero leemos el header con la funcion imap_fetchheader y luego
-        // parseamos el mismo
         
-        $overview=imap_fetchheader($this->connection,$uid,FT_UID);
-        if($overview!==false && $overview!=''){
-            $header=imap_rfc822_parse_headers ($overview);
-            //devuelvo solo la parte del header que me interesa
-            $message['header']['to']=$header->to;
-            $message['header']['toaddress']['tag']=_tr('To');
-            $message['header']['toaddress']['content']=$header->toaddress;
-            $message['header']['from']=$header->from;
-            $message['header']['fromaddress']['tag']=_tr('From');
-            $message['header']['fromaddress']['content']=$header->fromaddress;
+        //obtenemos el message number dado su id
+        $msg_num=imap_msgno($this->connection,$uid);
+        //$msg_num no puede ser igual a 0
+        if(empty($msg_num)){
+            $this->errMsg=_tr('Messages does not exist');
+            return false;
+        }
+        
+        //leemos la cabecera del mensaje
+        try{
+            $header=imap_headerinfo($this->connection,imap_msgno($this->connection,$uid));
+        }catch(Exception $e){
+             //no exist un mensaje con dicho uid
+            $this->errMsg="imap_headerinfo failed: " . imap_last_error();
+            return false;
+        }
+        
+        //TODO: parsear el arreglo de las etiquetas to, from, cc , bcc y replay_to 
+        // y reemplazar con ese valor las etiquetas toaddress, fromaddress, ccaddress, bccaddress, reply_toaddress
+        if(!empty($header)){
+            //$message['header']['to']=$header->to;
+            $message['header']['to']['tag']=_tr('To');
+            $message['header']['to']['content']=trim(htmlentities($header->toaddress,ENT_COMPAT,'UTF-8'));
+            //$message['header']['from']=$header->from;
+            $message['header']['from']['tag']=_tr('From');
+            $message['header']['from']['content']=trim(htmlentities($header->fromaddress,ENT_COMPAT,'UTF-8'));
             
-            if(isset($header->cc)){
-                $message['header']['cc']=$header->cc;
-                $message['header']['ccaddress']['tag']=_tr('CC');
-                $message['header']['ccaddress']['content']=$header->ccaddress;
+            $message['header']['subject']=isset($header->subject)?trim(htmlentities($header->subject,ENT_COMPAT,'UTF-8')):_tr('No Subject');
+            if($message['header']['subject']===''){
+                $message['header']['subject']=_tr('No Subject');
             }
-            if(isset($header->bcc)){
-                $message['header']['bcc']=$header->bcc;
-                $message['header']['bccaddress']['tag']=_tr('BCC');
-                $message['header']['bccaddress']['content']=$header->bccaddress;
-            }
+            
             if(isset($header->date)){
                 $message['header']['date']['tag']=_tr('Date');
                 $message['header']['date']['content']=$header->date;
             }
-            //$message['header']['reply_to']=isset($header->reply_to)?$header->reply_to:'';
-            //$message['header']['sender']=isset($header->sender)?$header->sender:'';
-            //$message['header']['return_path']=isset($header->return_path)?$header->return_path:'';
-            $message['header']['subject']=isset($header->subject)?$header->subject:_tr('No Subject');
-            if($message['header']['subject']===''){
-                $message['header']['subject']=_tr('No Subject');
+            
+            if(isset($header->cc)){
+                //$message['header']['cc']=$header->cc;
+                $message['header']['cc']['tag']=_tr('CC');
+                $message['header']['cc']['content']=trim(htmlentities($header->ccaddress,ENT_COMPAT,'UTF-8'));
+            }
+            
+            if(isset($header->bcc)){
+                //$message['header']['bcc']=$header->bcc;
+                $message['header']['bcc']['tag']=_tr('BCC');
+                $message['header']['bcc']['content']=trim(htmlentities($header->bccaddress,ENT_COMPAT,'UTF-8'));
+            }
+            
+            if(isset($header->reply_to)){
+                $message['header']['reply_to']=$header->reply_toaddress;
             }
         }else{
             //no exist un mensaje con dicho uid
@@ -438,7 +458,7 @@ class paloImap {
         }
         
         //leemos el mensaje en si
-        $pMessage=new paloImapMessage($this->connection,$uid);
+        $pMessage=new paloImapMessage($this->connection,$uid,$this->mailbox);
         $pMessage->imapReadMesg();
         
         $message['attachment']=$pMessage->getAttachments();
@@ -462,6 +482,23 @@ class paloImap {
         //procedemos a subscribir los mailboxs
         imap_subscribe($this->connection ,imap_utf7_encode($this->imap_ref.$mailbox));
         return true;
+    }
+    
+    public function appendMessage($mailbox,$string_msg,$options=''){
+        if($mailbox!='' && is_string($mailbox)){
+            if($string_msg!=''){
+                if(!imap_append($this->connection, $this->imap_ref.$mailbox, $string_msg,$options)){
+                    $this->errMsg="Imap_append failed: " . imap_last_error();
+                }else{
+                    return true;
+                }
+            }else{
+                $this->errMsg=_tr("Message Content can not be empty");
+            }
+        }else{
+            $this->errMsg=_tr("Invalid Folder");
+        }
+        return false;
     }
 }
 
@@ -589,8 +626,9 @@ class paloImap {
 */
 class paloImapMessage{
     private $app;
-    private $paloImap;
+    private $paloImap; // connection open by imap_open
     private $uid = null;
+    private $mailbox = null;
     //private $headers;
     private $structure;
     private $attachments = array();
@@ -608,9 +646,10 @@ class paloImapMessage{
     public $mime_parts = array();
     public $is_safe = false;*/
     
-    function paloImapMessage($imap,$uid){
+    function paloImapMessage($imap,$uid,$mailbox){
         $this->paloImap=$imap;
         $this->uid=$uid;
+        $this->mailbox=$mailbox;
     }
     
     function getAttachments(){
@@ -628,7 +667,7 @@ class paloImapMessage{
     function imapReadMesg(){
         //get msg structure
         $this->structure = imap_fetchstructure($this->paloImap, $this->uid, FT_UID);
-        
+        //print_r($this->structure);
         if (!isset($this->structure->parts))  // simple
             $this->getpart($this->structure,0);  // pass 0 as part-number
         else {  // multipart: cycle through each part
@@ -642,31 +681,54 @@ class paloImapMessage{
         if(isset($this->inline_parts['html'])){
             if(count($this->inline_parts['html'])>0){
                 foreach($this->inline_parts['html'] as $data){
-                    $body=$data;
                     $result=preg_match_all("/src=[\"|']cid:(.*)[\"|']/Uims", $data, $matches);
+                    /*print_r($matches);
+                    print_r($this->inline_attachs);*/
                     if(count($matches)){
-                        foreach($matches[1] as $match) {
-                            $search1 = "src=\"cid:$match\"";
-                            $search2 = "src='cid:$match'";
+                        foreach($matches[1] as $key => $match) {
+                            $search=$matches[0][$key];
                             if(isset($this->inline_attachs[$match])){
+                                //print($match);
                                 //TODO:current_mailbox
-                                $replace = "src=index.php?menu=home&action=get_inline_attach&rawmode=yes&uid=".$this->uid."&enc=".$this->inline_attachs[$match]['enc']."&partnum=".$this->inline_attachs[$match]['partNum']."&current_folder=INBOX";
+                                $replace = "src=index.php?menu=home&action=get_inline_attach&rawmode=yes&uid=".$this->uid."&enc=".$this->inline_attachs[$match]['enc']."&partnum=".$this->inline_attachs[$match]['partNum']."&current_folder=INBOX";//.htmlspecialchars(urlencode($this->mailbox));
                                 //$body = preg_replace ( "/$search/" , $replace ,$data );
-                                $body = str_replace($search1, $replace, $data);
-                                $body = str_replace($search2, $replace, $body);
+                                $data = str_replace($search, $replace, $data);
                             }
                         }
                     }
-                    $this->body .=$body;
+                    $this->body .=$data;
                 }
             }
+            $this->body=$this->parseHTMLdocument($this->body);
         }elseif(isset($this->inline_parts['plaintext'])){
             //TODO:si el contenido es texto plano, entonces debemos hacer la conversion de cierto caracteres como
             //salto de linea, regreso de carro entre otros
             foreach($this->inline_parts['plaintext'] as $data){
                 $this->body .=$data;
             }
+            $this->body=nl2br(strip_tags($this->body));
         }
+    }
+    
+    private function parseHTMLdocument($html){
+        libxml_use_internal_errors(true);
+        $doc = new DOMDocument();
+
+        // load the HTML string we want to strip
+        $doc->loadHTML($html);
+
+        // get all the script tags
+        $script_tags = $doc->getElementsByTagName('script');
+
+        $length = $script_tags->length;
+
+        // for each tag, remove it from the DOM
+        for ($i = 0; $i < $length; $i++) {
+            $script_tags->item($i)->parentNode->removeChild($script_tags->item($i));
+        }
+
+        // get the HTML string back
+        return $doc->saveHTML();
     }
     
     private function getpart($p,$partno) {
@@ -687,18 +749,19 @@ class paloImapMessage{
         if ($p->ifdisposition){
             if ($p->disposition == "ATTACHMENT") {
                 $attachmentDetails = array(
-                    "name"    => ($params['filename'])? $params['filename'] : $params['name'],
-                    "partNum" => $partno,
-                    "enc"     => $p->encoding
+                    "name"    => ($params['filename'])? htmlspecialchars(urlencode($params['filename'])) : htmlspecialchars(urlencode($params['name'])),
+                    "partNum" => htmlspecialchars(urlencode($partno)),
+                    "enc"     => htmlspecialchars(urlencode($p->encoding))
                 );
                 array_push($this->attachments,$attachmentDetails);
             }elseif ($p->disposition == "INLINE") {
                 //TODO:imagenes embebidas u otra clase de contenido embebido
-                //no se como interpretar esto. hacer funciones que llamen a este contenido
+                //no se como interpretar esto. 
+                //hacer funciones que llamen a este contenido
                 $inline_attachs = array(
-                    "name"    => ($params['filename'])? $params['filename'] : $params['name'],
-                    "partNum" => $partno,
-                    "enc"     => $p->encoding
+                    "name"    => ($params['filename'])? htmlspecialchars(urlencode($params['filename'])) : htmlspecialchars(urlencode($params['name'])),
+                    "partNum" => htmlspecialchars(urlencode($partno)),
+                    "enc"     => htmlspecialchars(urlencode($p->encoding))
                 );
                 //TODO:note que a veces el id del elemento esta entr <>, lo cual hace que este no 
                 //coincida con el identificador de la imagen, para reparar esto debemos eliminar esos simbolos
@@ -708,33 +771,32 @@ class paloImapMessage{
                 }
                 $this->inline_attachs[$p->id]=$inline_attachs;
             }
-        }
-        
-
-        // TEXT
-        if ($p->type==0) {
-            $data = $this->decodeData($p,$partno);
-            if($data){
-                $data=$this->changeCharset($params['charset'],$data);
-                // Messages may be split in different parts because of inline attachments,
-                // so append parts together with blank row.
-                if (strtolower($p->subtype)=='plain')
-                    $this->inline_parts['plaintext'][]= trim($data)."\n\n";
-                else
-                    $this->inline_parts['html'][]= trim($data)."<br><br>";
+        }else{
+            // TEXT
+            if ($p->type==0 && !$p->ifdisposition) {
+                $data = $this->decodeData($p,$partno);
+                if($data){
+                    $data=$this->changeCharset($params['charset'],$data);
+                    // Messages may be split in different parts because of inline attachments,
+                    // so append parts together with blank row.
+                    if (strtolower($p->subtype)=='plain')
+                        $this->inline_parts['plaintext'][]= trim($data)."\n\n";
+                    else
+                        $this->inline_parts['html'][]= trim($data)."<br><br>";
+                }
             }
-        }
 
-        // EMBEDDED MESSAGE
-        // Many bounce notifications embed the original message as type 2,
-        // but AOL uses type 1 (multipart), which is not handled here.
-        // There are no PHP functions to parse embedded messages,
-        // so this just appends the raw source to the main message.
-        elseif ($p->type==2) {
-            $data = $this->decodeData($p,$partno);
-            if($data){
-                $this->inline_parts['plaintext'][]= trim($data)."\n\n";
-                $this->inline_parts['html'][]= trim($data)."\n\n";
+            // EMBEDDED MESSAGE
+            // Many bounce notifications embed the original message as type 2,
+            // but AOL uses type 1 (multipart), which is not handled here.
+            // There are no PHP functions to parse embedded messages,
+            // so this just appends the raw source to the main message.
+            elseif ($p->type==2) {
+                $data = $this->decodeData($p,$partno);
+                if($data){
+                    $this->inline_parts['plaintext'][]= trim($data)."\n\n";
+                    $this->inline_parts['html'][]= trim($data)."\n\n";
+                }
             }
         }
 
@@ -807,10 +869,11 @@ class paloImapMessage{
     
     function getInlineAttach($partNum, $encoding) {
         $this->structure = imap_bodystruct($this->paloImap, imap_msgno($this->paloImap, $this->uid), $partNum);
-    
+        
         $filename = $this->structure->dparameters[0]->value;
         $message = imap_fetchbody($this->paloImap, $this->uid, $partNum, FT_UID);
-    
+                   
+        //print(1);
         switch ($encoding) {
             case 0:
             case 1:
@@ -826,14 +889,9 @@ class paloImapMessage{
                 $message = quoted_printable_decode($message);
                 break;
         }
-    
-        header("Content-Description: File Transfer");
+        
         header("Content-Type: application/octet-stream");
-        header("Content-Disposition: attachment; filename=" . $filename);
-        header("Content-Transfer-Encoding: binary");
-        header("Expires: 0");
-        header("Cache-Control: must-revalidate");
-        header("Pragma: public");
+        header("Content-Disposition: inline; filename=" . $filename);
         echo $message;
     }
 }

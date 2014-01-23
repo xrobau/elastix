@@ -54,8 +54,8 @@ $arrLangModule=array(
 "Flag as Important" => "Flag as important",
 "Delete" => "Delete",
 "Forward" => "Forward",
-"Replay All"=> "Replay All",
-"Replay" => "Replay",
+"Reply All"=> "Reply All",
+"Reply" => "Reply",
 "Actions" => "Actions",
 "Profile" => "Profile",
 );

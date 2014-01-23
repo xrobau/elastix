@@ -1,22 +1,10 @@
 /* Basic Styles */
-.icn_m{
-    display:inline-block;
-    font-size:18pt;
-    font-weight: bold;
-    cursor:pointer;
-    color: white;
-}
 .ml10{
     margin-left:10px;
     margin-left:5px;
 }   
 .lp{
     position:relative;
-}
-#filterdiv{
-    display:none;
-    height:50px;
-    border-bottom: #dd271d;
 }
 #paneldiv{
     position:relative;
@@ -33,19 +21,21 @@
 }
 #display1{
     position:absolute;
-    height:40px;
+    height:30px;
     margin-left:0;
     margin-top:0;
     width:30px;
     top: 0;
 }
 #icn_disp1{
-    background-color: #E8E8E8;
+    background-color: #F3F3F3;
     border-left:none;
     height:40px;
     float:left;
     cursor:pointer;
-    width:30px;    
+    width:40px; 
+    font-size: 25px;
+    padding:2px;
 }
 #leftdiv{
     background-color: #F3F3F3;
@@ -64,8 +54,8 @@
     bottom:0;
     display:block;
 }
-#paginationdiv{
-    margin-left:50px;
+#mail_toolbar{
+    margin-left:0px;
     min-height:50px;
 }
 #b1_1{
@@ -84,10 +74,20 @@
     font-weight: bold;
     white-space: nowrap;
     text-overflow: ellipsis;
+    overflow: hidden;
 }
 .folder-item:hover{
     color:white;
     background: #8c99a4;
+}
+#folder_list_title{
+    height: 40px;
+    vertical-align: middle;
+    margin-top: 0px;
+    padding-top: 10px;
+    font-size: 14px;
+    font-weight: normal;
+    color: black;
 }
 .ra_disp1_10{
     border: none;
@@ -100,74 +100,8 @@
     -o-border-bottom-right-radius:      10px;
     -webkit-border-bottom-right-radius: 10px;
 }
-.ra_disp2_10{
-    border: none;
-    border-top-left-radius:         10px;
-    -moz-border-top-left-radius:    10px;
-    -o-border-top-left-radius:      10px;
-    -webkit-border-top-left-radius: 10px;
-    border-bottom-left-radius:         10px;
-    -moz-border-bottom-left-radius:    10px;
-    -o-border-bottom-left-radius:      10px;
-    -webkit-border-bottom-left-radius: 10px;
-}
-#filterform {  
-    height: 38px;
-    width:100%;
-    display: block;
-    margin: 5px auto 5px;
-    float:left;
-}
-#filterform input[type="search"] {
-    background: url("../../_common/images/searchw.png") no-repeat scroll 9px center rgb(237, 237, 237);
-    border: 1px solid rgba(110,0,0,1);
-    padding: 9px 10px 9px 32px;
-    transition: all 0.5s ease 0s;
-    width: 80px;
-    margin-left:10%;
-    -webkit-border-radius:10em;
-    -moz-border-radius:10em;
-    border-radius:10em;
-    -webkit-transition:all .5s;
-    -moz-transition:all .5s;   
-}
-#filterform input[type="search"]:focus {
-    width:200px;
-    background-color:#fff;
-    border-color:#dd271d;
-    -webkit-box-shadow:0 0 5px #dd271d;
-    -moz-box-shadow:0 0 5px #dd271d;
-    box-shadow:0 0 5px #dd271d;
-}
-#filterform input[type="search"] {
-    font-family: inherit;
-    font-size: 100%;
-}
-#filterform input {
-    outline: medium none;
-}
-.filter{
-    border-style:solid;
-    border: 1px solid #dd271d;
-    color:black;
-    display: inline-block;
-    margin-top:9px;
-    float:left;
-}
-.filter:focus{
-    border-color:#dd271d;
-    -webkit-box-shadow:0 0 5px #dd271d;
-    -moz-box-shadow:0 0 5px #dd271d;
-    box-shadow:0 0 5px #dd271d;
-}
-.filter1{
-    margin-left:20%;
-}
-.filter2{
-    margin-left:10%;
-}
 #icn_disp1:hover span{
-    color:rgb(110,0,0);
+    opacity: 1;
 }
 #footer{
     position:absolute;
@@ -181,64 +115,72 @@
 #elx_bodymail{
     float:left;
     width:100%;
-    display:none;
     padding:10px
 }
-#email_contentdiv{
+.email_contentdiv{
     margin-top:3px;
     float:left;
     width:100%;
     overflow-y: auto!important;
+    overflow-x: auto!important;
     border-top: 1px solid rgb(204, 204, 204);
+    display: block!important;
 }
-#elx_mail_messages{
+#elx_list_mail_messages{
     float:left;
     width:100%;
-    /*height: 510px;*/
-    /*border-bottom: 1px solid rgb(204, 204, 204);*/
 }
 .elx_unseen_email{
     font-weight:bold;
     background-color:white;
 }
 .elx_seen_email{
-    background-color:#E8E8E8;
+    background-color:white;
 }
 .elx_row{
     float:left;
     width:100%;
-    height:27px;
+    min-height:27px;
     border: 1px solid rgb(204, 204, 204);
     border-top:none;
     border-left:none;
     border-right:none;
     padding-left: 5px
 }
-.sel{
-    float:left;
-    width:30px;
-    height:27px;
-}
 .ic{
     float:left;
-    width:auto;
-    height:27px;
+    display:inline-block;
+    width:60px;
+    min-height:27px;
     border-right: 1px solid rgb(204, 204, 204);
 }
+.sel{
+    display:inline-block;
+    width:16px;
+    height:25px;
+}
 .icon{
-    float:left;
+    display:inline-block;
     width:30px;
 }
 .star{
-    float:left;
-    width:30px;
-    cursor:pointer;
+    display:inline-block;
+    font-size:18px;
+    width:25px;
+    height:25px;
 }
 .elx_flagged_email{
     color:#ffe800!important;
+    cursor:pointer;
 }
 .elx_unflagged_email{
-    color:grey!important;
+    color:#D8D8D8!important;
+    cursor:pointer;
+}
+.elx_row_email_msg{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .from{
     font-size:10pt;
@@ -272,46 +214,24 @@
 .icn_buz, .inp1{
     margin-top:4px;
     margin-left:5px;
-    width:20px;
-    height:20px;
+    width:15px;
+    height:15px;
 }
 .inp1{
     cursor:pointer;
 }
-.st{
-    position:relative;
-    top:0px;
-    left:4px;
-    font-family:sosa;
-    font-size:16pt;
-    color: grey;
-    font-weight: bold;	
-}
-.st:hover{
-    color:rgba(110,0,0,1);	
-}
 .elx_email_pag_bar{
     display:inline-block;
-    padding:10px 5px 10px 0px;
+    padding:5px 5px 5px 0px;
 }
-.elx_email_pag_btn > .btn > .glyphicon{
-    height: 18px!important;
-    width: 18px!important;
+.elx_email_pag_btn {
+    height: 30px!important;
+    font-size:18px;
+    padding-right: 5px;
+    vertical-align: middle;
 }
 #elx_email_mv_wtag{
     display:inline;
-}
-#elx_email_mv_itag{
-    display:none;
-}
-#elx_email_mark_wtag{
-    display:inline;
-}
-#elx_email_mark_itag{
-    display:none;
-}
-#elx_email_msg_arrows{
-    float:right;
 }
 #elx_bodymsg_subject{
     font-weight: normal;
@@ -363,104 +283,180 @@ td.elx_bodymsg_tdheader:first-child{
 #elx_mail_pager > ul{
     margin:0;
 }
+.elx_compose_textarea{
+    resize: none;
+    width: 100%;
+    border: 1px solid #999;
+}
+.elx-del-compose-header{
+    vertical-align:top;
+}
+.elx_compose_htd{
+    width: 100%;
+}
+.btn-bodymsg-tools{
+    height:30px;
+}
+.btn-bodymsg-tools span.glyphicon{
+    top:0px;
+}
+#elx_mail_pagingbar{
+    height: 22px;
+    background-color: rgb(65, 65, 65);
+    font-size:15px;
+    color:#D0D0D0;
+    width:100%;
+    float: right;
+    padding:0 20px;
+}
+#elx_mail_pagingbar_icons{
+    width:320px;
+    float: right;
+    text-align: right;
+}
+.elx_mail_pagingbar_icon{
+    width: 20px!important;
+    height: 20px;
+    font-size: 15px;
+}
+.elx_mail_pagingbar_icon:hover{
+    color:white;
+}
+#elx_mail_pagingbar_nummails{
+    float:left;
+}
+#elx_mail_pagingbar_currentpg{
+    display:inline-block; 
+    height: 20px;
+    position: relative;
+    top: -2px;
+}
+#elx-compose-msg-attach{
+    background-color: #FFFFFF;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    position: relative;
+    float: none;
+}
+.elx-compose-msg-attachitem{
+    margin: 3px 1px 2px 3px;
+    padding: 2px 5px 2px 5px;
+    border: 1px solid #aaa;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    position: relative;
+    display: inline-block;
+}
+.elx-compose-msg-attachitem img{
+    width:18px;
+    height:16px;
+    padding-left: 2px;
+    border:0;
+    display:inline-block;
+    float:none;
+}
+#elx_attachButton{
+    position:relative;
+    overflow:hidden;
+    max-width:60px;
+}
+#attachFileButton{
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    opacity: 0;
+    -ms-filter: 'alpha(opacity=0)';
+    font-size: 200px;
+    direction: ltr;
+    cursor: pointer;
+}
+
 /*****************************************************/
 /*    Styles for screen 960px and lower             */
 /*****************************************************/
 @media screen and (max-width: 960px) {
 .elx_row{
-    height:70px;
+    min-height:50px;
 }
 .ic{
-    position:relative;
-    top:-25px;
+    min-height:50px;
+    width:30px;
+    /*top:-25px;
     width:100%;
-    border-right:none;	
-}
-.icon{
-    float:left;
-    margin-left:30px;
-}
-.star{
-    float:left;
+    border-right:none;	*/
 }
 .sel{
-    position:relative;
-    top:23px;
+    height:20px;
+}
+.star{
+    height:20px;
 }
 .from{
-    position:relative;
-    top:-25px;
+    /*position:relative;
+    top:0px;*/
     font-size:11pt;
     border-right: none;
-    width:90%;
-    height:12px;
-    margin-left:30px;
+    width:70%;
+    height:20px;
+    /*margin-left:30px;*/
     padding-top:2px;
 }
 .subject{
-    position:relative;
-    top:-25px;
+    /*position:relative;
+    top:-25px;*/
     font-size:11pt;
     border-right: none;
     border-left: none;
     float:left;
-    width:90%;
-    height:12px;
-    margin-left:30px;
+    width:70%;
+    height:20px;
+    /*margin-left:30px;*/
     padding-top:2px;
 }
 .date{
-    position:relative;
-    top:-65px;
+/*    position:relative;
+    top:-40px;*/
     text-align:right;
     font-size:11pt;
     float:right;
-    width:150px;
-    height:18px;
+    width:25%;
+    height:20px;
     margin-right: 5px;
 }
 }
 /*****************************************************/
 /*    Styles for screen 700px and lower             */
 /*****************************************************/
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 720px) {
 #menu_name{
     width:40%;
-}	
-#filterdiv{
-    height:80px;
-}	
-#filterform {       
-    height: 55px;
-}
-#filterform input[type="search"] {
-    width:60%;  
-    margin-left:15%;
-}
-#filterform input[type="search"]:focus {
-    width:80%;
-    margin-left:5%;
-}
-.filter1{
-    margin-left:25%;
-}
-.filter2{
-    margin-left:14%;
 }
 .elx_email_pag_btn > .btn > .glyphicon{
     display: inline-block!important;
 }
-#elx_email_mv_wtag{
-    display:none;
+.elx_row{
+    min-height:70px;
 }
-#elx_email_mv_itag{
-    display:inline;
+.ic{
+    min-height:70px;
+    width:30px;
 }
-#elx_email_mark_wtag{
-    display:none;
+.from{
+    width:85%;
 }
-#elx_email_mark_itag{
-    display:inline;
+.subject{
+    width:85%;
+}
+.date{
+    width:85%;
+    height:20px;
+    text-align:left;
+    float:left;
+    padding-top:2px;
+    margin:0px;
 }
 }
 /*****************************************************/
@@ -481,55 +477,31 @@ td.elx_bodymsg_tdheader:first-child{
 #icn_pc{	
     width:240px;	
 }
-.elx_row{
-    height:90px;
+#elx_mail_pagingbar_nummails{
+    display:none;
 }
-.date{
-    position:relative;
-    top:-25px;
-    font-size:11pt;
-    float:left;
-    width:90%;
-    height:12px;
-    margin-left:30px;
-    padding-top:2px;
-    text-align:left;
-}
-.sel{
+/*.sel{
     position:relative;
     top:30px;
-}
-#filterform input[type="search"]:focus {
-    width:78%;
-    margin-left:2%;
-}
-.filter1{
-    margin-left:16%;
-}
-.filter2{
-    margin-left:14%;
-}
-}
+}*/
 /*****************************************************/
 /*    Styles for screen 260px and lower             */
 /*****************************************************/
-@media only screen and (max-width : 260px) {
+@media only screen and (max-width : 320px) {
 #icn_conf{
     width:40%;
 }
 #tools{
     margin-left:40%;
 }	
-#filterform input[type="search"]:focus {
-    width:80%;
-    margin-left:2%;
+.from{
+    width:85%;
 }
-.filter1{
-    margin-left:10%;
+.subject{
+    width:85%;
 }
-.filter2{
-    margin-left:10%;
-}
+.date{
+    width:85%;
 }
 
 

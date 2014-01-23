@@ -53,15 +53,15 @@ $arrLangModule=array(
 "Flag as Unimportant" => "Marcar como no importante",
 "Flag as Important" => "Marcar como importante",
 "Delete" => "Borrar",
-"Forward" => "Desvio llamadas",
-"Replay All"=> "Repetir todos",
-"Replay" => "Repetir",
+"Forward" => "Reenviar",
+"Reply All"=> "Responder a todos",
+"Reply" => "Responder",
 "Actions" => "Acciones",
 "Profile" => "Mi Perfil",
 "Contacts List" => "Lista de Contactos",
 "Contact Type:" => "Tipo de Contacto",
 "Mark message as" => "Marcar mensaje como",
 "Move to" => "Mover hacia",
-
+"User" => "Usuario",
 );
 ?>

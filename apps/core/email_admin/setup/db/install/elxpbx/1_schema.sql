@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS vacations (
     end_date DATE,
     vacation varchar(5) DEFAULT 'no',
     PRIMARY KEY (id),
-    FOREIGN KEY (id_user) REFERENCES acl_user (id),
-    FOREIGN KEY (id_recording) REFERENCES recordings (uniqueid)
+    FOREIGN KEY (id_user) REFERENCES acl_user (id) ON DELETE CASCADE, 
+    FOREIGN KEY (id_recording) REFERENCES recordings (uniqueid) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS email_statistics(

@@ -237,7 +237,12 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
     $dominio=$chatConfig['elastix_chat_server'];
     
     //3) obtenemos la informacion de las cuentas de los usuarios
-    $result=$pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"]);
+    $searchFilter = getParameter('searchFilter');
+    $name= null;
+    if(!empty($searchFilter))
+        $name= $searchFilter;
+    
+    $result=$pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"], $name);
     if($result===false){
         //hubo un error de la base de datos ahi que desactivar la columna lateral
         $jsonObject->set_error("An error has ocurred to retrieved Contacts Info. ".$pACL->errMsg);
@@ -258,25 +263,25 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
             16 = On Hold
             */
             if($value['extension']!='' && isset($value['extension'])){
-                if($value['id']!=$arrCredentials['idUser']){
-                    $result=$astMang->send_request('ExtensionState',array('Exten'=>"{$value['extension']}", 'Context'=>"$pbxCode-ext-local"));
-                    if($result['Response']=='Success'){
-                        $status=getStatusContactFromCode($result['Status']);
-                        $st_code=$result['Status'];
-                        if($result['Status']=='-1'){
-                            $index_st='not_found';
-                        }elseif($result['Status']=='4'){
-                            $index_st='unava';
-                        }else{
-                            $index_st='ava';
-                        }
+                 $result=$astMang->send_request('ExtensionState',array('Exten'=>"{$value['extension']}", 'Context'=>"$pbxCode-ext-local"));
+                if($result['Response']=='Success'){
+                    $status=getStatusContactFromCode($result['Status']);
+                    $st_code=$result['Status'];
+                    if($result['Status']=='-1'){
+                        $index_st='not_found';
+                    }elseif($result['Status']=='4'){
+                        $index_st='unava';
                     }else{
-                        //TODO:ahi un error con el manager y nopuede determinar le estado de los
-                        //contactos por lo tanto dejo a todas como disponibles
                         $index_st='ava';
-                        $st_code=0;
-                        $status=_tr('Idle');
                     }
+                }else{
+                    //TODO:ahi un error con el manager y nopuede determinar le estado de los
+                    //contactos por lo tanto dejo a todas como disponibles
+                    $index_st='ava';
+                    $st_code=0;
+                    $status=_tr('Idle');
+                }
+                if($value['id']!=$arrCredentials['idUser']){   
                     $arrContacts[$index_st][$key]['idUser']=$value['id'];
                     $arrContacts[$index_st][$key]['display_name']=$value['name'];
                     $arrContacts[$index_st][$key]['username']=$value['username'];
@@ -292,12 +297,16 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
                     $arrContacts['my_info']['elxuser_username']=$value['username'];
                     $arrContacts['my_info']['elxuser_exten']=$value['extension'];
                     $arrContacts['my_info']['elxuser_faxexten']=$value['fax_extension'];
+                    $arrContacts['my_info']['st_code']=$st_code;
                     foreach($chatConfig as $key => $value){
                         $arrContacts['my_info'][$key] = $value;
                     }
                 }
             }
         }
+            $session = getSession();
+            $session['chatlistStatus'] = $arrContacts;
+            putSession($session);
         $jsonObject->set_message($arrContacts);
     }
     $astMang->disconnect();
@@ -467,6 +476,29 @@ function handleJSON_changeImageProfile($smarty, $module_name){
     
 }
 
+function handleJSON_checkChatContactsStatus($smarty, $module_name){
+    $searchFilter = getParameter('searchFilter');
+    
+    $executed_time = 5; //en segundos
+    $max_time_wait = 30; //en segundos
+    $event_flag    = false;
+    $data          = null;
+
+    $i = 1;
+    //con estos parámetros esta configurado para que muestre el cambio cada 30 segundos
+    //(y en sese tiempo se ejecuta 6 veces la petición)
+    while(($i*$executed_time) <= $max_time_wait){
+        $return = getChatContactsStatus($searchFilter);
+        $data   = $return['data'];
+        if($return['there_was_change']){
+            $event_flag = true;
+            break;
+        }
+        $i++;
+        sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
+    }
+return $data;
+}
 
 function createProfileForm($langElastix)
 {   
@@ -502,16 +534,15 @@ function createProfileForm($langElastix)
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""),
-            "picture"   => array("LABEL"               => _tr("Picture:"),
+            "picture"                 => array("LABEL"               => _tr("Picture:"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "FILE",
-                                            "INPUT_EXTRA_PARAM"      => array("id" => "picture", "class"=>"fileUpload"),
+                                            "INPUT_EXTRA_PARAM"      => array("id" => "picture", "class"=>"picturePopupProfile"),
                                             "VALIDATION_TYPE"        => "",
                                             "VALIDATION_EXTRA_PARAM" => ""),
                                                 
                             );
     return $arrFields;
 }
-
 
 ?>

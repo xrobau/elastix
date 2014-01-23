@@ -787,5 +787,173 @@ function redimensionarImagen($ruta1,$ruta2,$ancho,$alto){
     return true;
 }
 
+function getNewListElastixAccounts($searchFilter){
+    global $arrConf;
+    $error='';
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL = new paloACL($pDB);
+    
+    $astMang=AsteriskManagerConnect($errorM);
+    if($astMang==false){
+        $this->errMsg=$errorM;
+        return false;
+    }
+    
+    $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
+    
+    //obtenemos el codigo pbx de la organizacion
+    $query="SELECT code from organization where id=?";
+    $result=$pDB->getFirstRowQuery($query,false,array($arrCredentials["id_organization"]));
+    if($result==false){
+        return false;
+    }else
+        $pbxCode=$result[0];
+    
+    //1) obtenemos los parametros generales de configuracion para asterisk websocket y el cliente de chat de elastix
+    $chatConfig=getChatClientConfig($pDB,$error);
+    if($chatConfig==false){
+        return false;
+    }
+    
+    //2) TODO:obtener el dominio sip de la organizacion si no se encuentra configurado utilizar
+    //   el ws_server
+    $dominio=$chatConfig['elastix_chat_server'];
+    
+    //3) obtenemos la informacion de las cuentas de los usuarios
+    $name= null;
+    if(!empty($searchFilter))
+        $name= $searchFilter;
+    
+    $result=$pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"], $name);
+    if($result===false){
+        //hubo un error de la base de datos ahi que desactivar la columna lateral
+        return false;
+    }else{
+        $arrContacts=array();
+        foreach($result as $key => $value){
+            //TODO: por el momento se obtine la presencia del usuario al
+            // travès de AMI con la función que extension_state
+            // en el futuro esto debe ser manejado con la libreria jssip
+            // actualmente este libreria no tiene esa funcion implementada
+            /*
+            -1 = Extension not found
+            0 = Idle
+            1 = In Use
+            2 = Busy
+            4 = Unavailable
+            8 = Ringing
+            16 = On Hold
+            */
+            if($value['extension']!='' && isset($value['extension'])){
+                 $result=$astMang->send_request('ExtensionState',array('Exten'=>"{$value['extension']}", 'Context'=>"$pbxCode-ext-local"));
+                if($result['Response']=='Success'){
+                    $status=getStatusContactFromCode($result['Status']);
+                    $st_code=$result['Status'];
+                    if($result['Status']=='-1'){
+                        $index_st='not_found';
+                    }elseif($result['Status']=='4'){
+                        $index_st='unava';
+                    }else{
+                        $index_st='ava';
+                    }
+                }else{
+                    //TODO:ahi un error con el manager y nopuede determinar le estado de los
+                    //contactos por lo tanto dejo a todas como disponibles
+                    $index_st='ava';
+                    $st_code=0;
+                    $status=_tr('Idle');
+                }
+                if($value['id']!=$arrCredentials['idUser']){   
+                    $arrContacts[$index_st][$key]['idUser']=$value['id'];
+                    $arrContacts[$index_st][$key]['display_name']=$value['name'];
+                    $arrContacts[$index_st][$key]['username']=$value['username'];
+                    $arrContacts[$index_st][$key]['presence']=$status;
+                    $arrContacts[$index_st][$key]['st_code']=$st_code;
+                    $arrContacts[$index_st][$key]['uri']="{$value['elxweb_device']}@$dominio";
+                    $arrContacts[$index_st][$key]['alias']="{$value['alias']}@$dominio";
+                }else{
+                    $arrContacts['my_info']['uri']="{$value['elxweb_device']}@$dominio";
+                    $arrContacts['my_info']['ws_servers']=$chatConfig['ws_servers'];
+                    $arrContacts['my_info']['password']=$_SESSION['elastix_pass2'];
+                    $arrContacts['my_info']['display_name']=$value['name'];
+                    $arrContacts['my_info']['elxuser_username']=$value['username'];
+                    $arrContacts['my_info']['elxuser_exten']=$value['extension'];
+                    $arrContacts['my_info']['elxuser_faxexten']=$value['fax_extension'];
+                    $arrContacts['my_info']['st_code']=$st_code;
+                    foreach($chatConfig as $key => $value){
+                        $arrContacts['my_info'][$key] = $value;
+                    }
+                }
+            }
+        }
+        $resultado = $arrContacts;
+    }
+    $astMang->disconnect();
+    return $resultado;
+    
+}
+
+
+function getChatContactsStatus($searchFilter)
+{
+    $jsonObject = new PaloSantoJSON();    
+    $newListContacts=getNewListElastixAccounts($searchFilter);
+    
+    if($newListContacts===false){   
+        $status = FALSE;
+    }else{       
+        // 1 COMPARA EL VALOR DEVUELTO CON EL VALOR QUE ESTA EN SESION
+        //SI HUBO UN CAMBIO
+        // si hay cambio status true
+        // poner el nuevo valor el seesion
+        $session = getSession();
+        //var_dump($session['chatlistStatus']);
+        //print_r("---------------------------------------------------------------------------------------");
+        //var_dump($newListContacts);
+        //file_put_contents("/tmp/testchat",);
+        if($session['chatlistStatus']!= $newListContacts)
+        {
+            $msgResponse = $newListContacts;
+            $status = true;
+        }else{
+            $status = false;
+        }
+
+        if($status){ //hubo un cambio
+            $jsonObject->set_status("CHANGED");
+            $jsonObject->set_message($msgResponse); //el valor del status actual
+        }else{
+            $jsonObject->set_status("NOCHANGED");
+        }
+    }
+    
+    $session['chatlistStatus'] = $newListContacts;
+    putSession($session);
+    
+    return array("there_was_change" => $status,
+                "data" => $jsonObject->createJSON());
+}
+
+function getSession()
+{
+    session_commit();
+    ini_set("session.use_cookies","0");
+    if(session_start()){
+        $tmp = $_SESSION;
+        session_commit();
+    }
+    return $tmp;
+}
+
+function putSession($data)//data es un arreglo
+{
+    session_commit();
+    ini_set("session.use_cookies","0");
+    if(session_start()){
+        $_SESSION = $data;
+        session_commit();
+    }
+}
+
 
 ?>

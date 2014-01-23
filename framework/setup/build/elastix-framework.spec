@@ -45,6 +45,7 @@ mkdir -p $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/var/www/db
 mkdir -p $RPM_BUILD_ROOT/var/www/html
 mkdir -p $RPM_BUILD_ROOT/var/www/backup
+mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/uploadAttachs
 mkdir -p $RPM_BUILD_ROOT/var/lib/php/session-asterisk
 
 # ** /usr path ** #
@@ -366,6 +367,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/*.php
 /var/www/html/robots.txt
 /usr/share/elastix/apps/*
+/var/www/elastixdir/uploadAttachs
 %defattr(644, asterisk, asterisk)
 /usr/share/elastix/libs/*
 # %config(noreplace) /var/www/db/

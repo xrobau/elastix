@@ -298,6 +298,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jan 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Festival: check alternate route for festival.scm in Fedora in addition
+  to the one checked in CentOS.
+  SVN Rev[6400]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-15
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

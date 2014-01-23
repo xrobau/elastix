@@ -358,6 +358,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jan 23 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Festival: introduce check for systemd-style status report in order to
+  detect whether festival is running.
+  SVN Rev[6415]
+
 * Wed Jan 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Festival: check alternate route for festival.scm in Fedora in addition
   to the one checked in CentOS.

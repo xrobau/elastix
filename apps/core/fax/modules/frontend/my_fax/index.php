@@ -31,6 +31,7 @@ $Id: index.php,v 1.1 20013-08-26 15:24:01 wreyes wreyes@palosanto.com Exp $ */
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoDB.class.php";
 include_once "libs/paloSantoJSON.class.php";
+include_once "libs/paloSantoFax.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -56,6 +57,15 @@ function _moduleContent(&$smarty, $module_name)
         case 'checkFaxStatus':
             $content = checkFaxStatus('getFaxStatus', $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
+        case 'showSendFax':
+            $content = showSendFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            break;
+        case 'sendNewFax':
+            $content = sendNewFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            break; 
+        case 'faxAttachmentUpload':
+            $content = faxAttachmentUpload($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            break; 
         default:
             $content = showExtensionSettings($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
@@ -69,7 +79,6 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
 
     $pMyFax=new paloMyFax($pDB,$arrCredentials['idUser']);
 
-    
     if(getParameter('action')=='save'){
         $my_fax=$_POST;
     }else{
@@ -218,6 +227,141 @@ function putSession($data)//data es un arreglo
     }
 }
 
+/*funcion que mouestra el popup de para enviar fax (send fax)*/
+function showSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf){
+    global $arrCredentials;
+    $jsonObject = new PaloSantoJSON();
+    $pMyFax=new paloMyFax($pDB,$arrCredentials['idUser']);
+    $my_fax=$pMyFax->getMyFaxExtension();
+     
+    if($my_fax==false){
+        $smarty->assign("MSG_ERROR_FIELD",$pMyFax->getErrorMsg());
+    } 
+    //$my_fax['MODEM']
+    $device=$my_fax['CID_NAME']." / ".$my_fax['CID_NUMBER'];
+    $dataFax=array();
+    
+    $smarty->assign("FAX_DEV",$my_fax['MODEM']);
+    $smarty->assign("TITLE_POPUP",_tr("Send Fax"));
+    $smarty->assign("file_upload",_tr("File Upload"));
+    $smarty->assign("note",_tr("Note: Types of files supported: pdf, tiff, txt"));
+    $smarty->assign("SEND_FAX",_tr("Send"));
+    $smarty->assign("CANCEL",_tr("Cancel"));
+    $smarty->assign("faxDeviceLabel",_tr("Fax Device to use:"));
+    $smarty->assign("faxDevice",$device);//CID_NAME / CID_NUMBER
+    $smarty->assign("FAX_DEV",$my_fax['MODEM']);//ttyIAX
+    
+    $arrFormFilter = createSendFaxForm();
+    $oFilterForm = new paloForm($smarty, $arrFormFilter);
+    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/sendfax.tpl",_tr('Send Fax'), $dataFax);
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_message($htmlFilter);
+    return $jsonObject->createJSON();
+}
+
+function sendNewFax($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
+{
+    global $arrCredentials;
+    $jsonObject = new PaloSantoJSON();
+    $pSendFax = new paloMyFax($pDB,$arrCredentials['idUser']);
+    $my_fax=$pSendFax->getMyFaxExtension();
+    
+    if($my_fax==false){
+        $smarty->assign("MSG_ERROR_FIELD",$pSendFax->getErrorMsg());
+    } 
+    
+    $faxDev = $my_fax['MODEM'];
+    $destine = getParameter('to');
+    $data_content = getParameter('body');
+    $checked = getParameter('checked');
+    $ruta_archivo = "";
+    
+    if(empty($destine)){
+        $jsonObject->set_error(_tr('Destination fax numbers is empty'));
+        return $jsonObject->createJSON();
+    }
+    
+    if($checked=="true"){
+        if(!empty($_SESSION['faxFileAattached'])){
+        $ruta_archivo = $_SESSION['faxFileAattached'];
+        }
+    }else{
+        if (!empty($data_content)) {
+            /* Las siguientes operaciones son necesarias para lidiar con el
+                * bug Elastix #446. El programa sendfax es incapaz de detectar
+                * un archivo como un archivo de texto si contiene caracteres 
+                * fuera del rango ASCII.*/ 
+            $ruta_archivo = $pSendFax->generarArchivoTextoPS($data_content);
+            if (is_null($ruta_archivo)) {
+                $jsonObject->set_error(_tr('Failed to convert text'));
+                return $jsonObject->createJSON();
+            }
+        } else {
+            $jsonObject->set_error(_tr('Text to send is empty'));
+            return $jsonObject->createJSON();
+        } 
+    }
+
+    $jobid = $pSendFax->sendFax($faxDev, $destine, $ruta_archivo);
+    if (is_null($jobid)) {
+        $jsonObject->set_error(_tr('Failed to submit job'));
+        return $jsonObject->createJSON();
+    } else {
+        $jsonObject->set_message(_tr('Fax has been sent correctly'));
+    }
+    
+    if (file_exists($ruta_archivo)) unlink($ruta_archivo);
+    if(!empty($_SESSION['faxFileAattached'])){
+        unset($_SESSION['faxFileAattached']);
+    }
+    
+    return $jsonObject->createJSON();
+
+}
+
+function faxAttachmentUpload($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
+{ 
+    $jsonObject = new PaloSantoJSON();
+    $tmpfaxdocs= "/var/www/elastixdir/tmpfaxdocs/";
+    
+    if (!file_exists($tmpfaxdocs)) {
+        $jsonObject->set_error(_tr("Error uploading your file"));
+        return $jsonObject->createJSON();
+    }
+    
+    foreach ($_FILES['faxFile']['error'] as $key => $error)
+    {
+        if ($error == UPLOAD_ERR_OK)
+        {   
+            $tmpFileName = tempnam($tmpfaxdocs,"");
+            if ($tmpFileName==false){
+                $jsonObject->set_error(_tr("Error uploading your file"));
+                return $jsonObject->createJSON();
+            }
+            
+            if(move_uploaded_file( $_FILES['faxFile']['tmp_name'][$key], $tmpFileName)===false){
+                $jsonObject->set_error(_tr("Failed to move file"));
+                return $jsonObject->createJSON();
+            }
+            
+            if(empty($_SESSION['faxFileAattached'])){
+                $_SESSION['faxFileAattached'] = $tmpFileName;
+            }else{
+                if(!empty($_SESSION['faxFileAattached'])){
+                    unlink($_SESSION['faxFileAattached']);
+                    unset($_SESSION['faxFileAattached']);
+                    $_SESSION['faxFileAattached'] = $tmpFileName;
+                }
+            }  
+            $jsonObject->set_message($_SESSION['faxFileAattached']);
+        }else{
+            $jsonObject->set_error(_tr("Error uploading your file"));
+        }
+    }
+    return $jsonObject->createJSON();
+}
+
+
 function createForm(){
     $arrForm = array("CID_NAME"        => array("LABEL"                  => _tr("CID NAME:"),
                                                 "REQUIRED"               => "no",
@@ -259,12 +403,47 @@ function createForm(){
     );
     return $arrForm;
 }
+
+function createSendFaxForm()
+{   
+    $arrFields = array(
+                                                  
+            "destinationFaxNumber"   => array("LABEL"                  => _tr("Destination fax numbers:"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "TEXT",
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "id" => "newPasswordProfile"),
+                                            "VALIDATION_TYPE"        => "text",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+            "faxContent"              => array("LABEL"               => _tr("Email content:"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "TEXTAREA",
+                                            "INPUT_EXTRA_PARAM"      => array("class" => "form-control input-sm", "placeholder" => "Fax content"),
+                                            "VALIDATION_TYPE"        => "text",
+                                            "ROWS"                   => "8",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+            "faxFile"                 =>   array("LABEL"             => _tr("Upload File:"),
+                                            "REQUIRED"               => "no",
+                                            "INPUT_TYPE"             => "FILE",
+                                            "INPUT_EXTRA_PARAM"      => array("id" => "faxFile", "class"=>"faxFileUpload"),
+                                            "VALIDATION_TYPE"        => "",
+                                            "VALIDATION_EXTRA_PARAM" => ""),
+                                                
+                            );
+    return $arrFields;
+}
+
 function getAction()
 {
     if(getParameter('action')=='editFaxExten'){
         return 'save';
     }elseif (getParameter('action')=='checkFaxStatus'){
         return 'checkFaxStatus';
+    }elseif (getParameter('action')=='showSendFax'){
+        return 'showSendFax';
+    }elseif (getParameter('action')=='sendNewFax'){
+        return 'sendNewFax';
+    }elseif (getParameter('action')=='faxAttachmentUpload'){
+        return 'faxAttachmentUpload';
     }else{
         return "show";
     }

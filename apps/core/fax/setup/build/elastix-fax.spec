@@ -27,6 +27,8 @@ Elastix Module Fax
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/faxdocs
+mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/tmpfaxdocs
+
 # Files provided by all Elastix modules
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
 bdir=%{_builddir}/%{modname}
@@ -56,6 +58,8 @@ mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
 mkdir -p $RPM_BUILD_ROOT/etc/init
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
+mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
+
 #mv setup/hylafax/bin/includes                 $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/elastix-faxevent	      $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/faxrcvd-elastix.php      $RPM_BUILD_ROOT/var/spool/hylafax/bin/
@@ -69,9 +73,12 @@ mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
 mv setup/etc/init/faxgetty.conf               $RPM_BUILD_ROOT/etc/init/
 mv setup/etc/logrotate.d/elastixfax	      $RPM_BUILD_ROOT/etc/logrotate.d/
+mv setup/etc/cron.daily/elastix_tmpfax_cleanup		$RPM_BUILD_ROOT/etc/cron.daily/
 rm -rf setup/hylafax
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
 rmdir setup/etc/init setup/etc/logrotate.d setup/etc
+
+chmod	 755 $RPM_BUILD_ROOT/etc/cron.daily/elastix_tmpfax_cleanup
 
 #chmod -R 755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/includes
 chmod	 755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/elastix-faxevent
@@ -214,6 +221,8 @@ fi
 /var/www/faxes/sent
 %dir
 /var/log/iaxmodem
+%defattr(755, asterisk, uucp)
+/var/www/elastixdir/tmpfaxdocs
 %defattr(-, uucp, uucp)
 %config(noreplace) /var/spool/hylafax/etc/FaxDictionary
 %config(noreplace) /var/spool/hylafax/etc/config

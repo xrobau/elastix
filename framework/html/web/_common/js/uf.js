@@ -56,8 +56,16 @@ $(document).ready(function(){
         if(rightdiv.is(':hidden') == false){
             adjustHeightElxListUser();
         }
-    });
         
+        //se calcula el alto del contenido del modulo y se resta del alto del navegador cada
+        //que se haga un resize, para que aparezca el scroll cuando sea necesario
+        scrollContentModule()
+    });
+
+    //se calcula el alto del contenido del modulo y se resta del alto del navegador cada
+    //que se haga un resize, para que aparezca el scroll cuando sea necesario
+    scrollContentModule();
+    
     /* evento que modifica el estilo de todos los paneles, al pulsar el icono para desplegar u ocultar 
     el panel lateral derecho (rightpanel)*/         
     $(this).on('click','#icn_disp2',function(e){
@@ -165,6 +173,7 @@ $(document).ready(function(){
         $(this).find('.elx_text_area_chat > textarea').focus();
     });
     getElastixContacts();
+    
     //motificaciones en pestañas de chat minimizadas por falta de espacio
     $('#elx_notify_min_chat_box').on("click",function(event){
         var hidMinList=$('#elx_hide_min_list').val();
@@ -264,8 +273,58 @@ $(document).ready(function(){
         });
     });
     
- 
+    //despliega en efecto slider el menu oculto, en tamño < 480px;
+    $(this).on('click','#elx-navbar-min',function(){
+        if ($("#elx-slide-menu-mini").is(":hidden") ) {
+            $("#elx-slide-menu-mini").slideDown("slow");
+            setTimeout(function() { $("#elx-slide-menu-mini").css('overflow','visible'); }, 600);
+            $("#rightdiv").animate({
+                top: "88px"
+            }, 600 );
+        } else {
+            $("#elx-slide-menu-mini").slideUp("slow");
+            $("#rightdiv").animate({
+                top: "55px"
+            }, 600 );
+        }
+        
+    });
+    
+    //oculta o muestra la opcion de subir archivo para la opción "sendfax"
+    $(this).on('click','#elx-chk-attachment-file',function(){
+        if($(this).is(':checked')) {
+            $("#elx-body-fax-label").removeClass("visible").addClass("oculto");
+            $("#elx-body-fax-content").removeClass("visible").addClass("oculto");
+            $("#elx-attached-fax-file").removeClass("oculto").addClass("visible");
+            $("#elx-notice-fax-file").removeClass("oculto").addClass("visible");
+            $("textarea[name='faxContent']").val("")
+        }else{
+            $("#elx-body-fax-label").removeClass("oculto").addClass("visible");
+            $("#elx-body-fax-content").removeClass("oculto").addClass("visible");
+            $("#elx-attached-fax-file").removeClass("visible").addClass("oculto");
+            $("#elx-notice-fax-file").removeClass("visible").addClass("oculto");
+        }
+    });
+    
+    //captura ingresado por el teclado y manda a consultar a la base los contactos del chat
+    $(this).on('keyup','#im_search_filter',function(){
+        searchElastixContacts();
+    });
+    
+    // invocamos la funcion recursiva para chequear el estado de los contactos 
+    checkChatContactsStatus();
+    
 });
+//se calcula el alto del contenido del modulo y se resta del alto del navegador cada
+//que se haga un resize, para que aparezca el scroll cuando sea necesario
+function scrollContentModule(){
+    if( $('.elx-modules-content').length )
+    {
+        var height_browser = $(window).height();
+        var offElement=$(".elx-modules-content").offset();
+        $(".elx-modules-content").css("height",height_browser-offElement.top +"px");
+    }  
+}
 function elxTitleAlert(message){
      $.titleAlert(message, {
         requireBlur:true,
@@ -339,6 +398,7 @@ function getElastixContacts(){
     var arrAction = new Array();
     arrAction["action"]  = "getElastixAccounts";
     arrAction["menu"] = "_elastixutils";
+    visibility="visible";
     request("index.php",arrAction,false,
         function(arrData,statusResponse,error){
             if(error!=''){
@@ -351,6 +411,9 @@ function getElastixContacts(){
                         //argumentos faltantes
                         return false;
                     }
+                    //setear el color de la presencia del usuario
+                    var color_ps_user=getColorPresence(arrData['my_info']['st_code']);
+                    $(".elx-content-photo").attr('border-color', color_ps_user);
                 }else{
                     //error porque no tenemos los datos del configuración del usuario
                     errorRegisterChatBar('Missing Configurations..');
@@ -362,11 +425,13 @@ function getElastixContacts(){
                 
                 //contactos disponibles
                 var arrType = new Array('ava','unava','not_found');
+                //eliminamos el contenido del div, para poner el nuevo contenido (de la busqueda)
+                $("#elx_ul_list_contacts").empty();
                 for( var i=0; i<arrType.length; i++){
                     typeAcc=arrType[i];
                     if( typeof arrData[typeAcc] !== 'undefined'){
                         for( var x in arrData[typeAcc]){
-                            var div=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['alias'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code']);
+                            var div=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['alias'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code'], visibility);
                             $("#elx_ul_list_contacts").append(div);
                         }
                     }
@@ -375,9 +440,29 @@ function getElastixContacts(){
         }
     );
 }
-function createDivContact(idUser,display_name,uri,alias,presence,presence_code){
+/******************************************************************************************
+* función que muestra el listado de los contactos del chat, segun el criterio de busqueda
+******************************************************************************************/
+function searchElastixContacts(){
+    var pattern = $("input[name='im_search_filter']").val();
+    
+    $(".elx_contact .elx_im_name_user").each(function ()
+    {
+        var str = $(this).html();
+        if (str.match(pattern)) {
+            ($(this).parent()).parent().removeClass("oculto");
+            ($(this).parent()).parent().addClass("visible");
+        }else{
+            ($(this).parent()).parent().removeClass("visible");
+            ($(this).parent()).parent().addClass("oculto");
+        }
+        
+    });
+}
+
+function createDivContact(idUser,display_name,uri,alias,presence,presence_code, visibility){
     var color=getColorPresence(presence_code);
-    var divContact ='<li id="elx_li_contact" class="margin_padding_0" data-uri="'+uri+'" data-alias="'+alias+'" data-name="'+display_name+'" data-idUser="'+idUser+'"><div class="elx_contact">';
+    var divContact ='<li id="elx_li_contact" class="margin_padding_0" data-uri="'+uri+'" data-alias="'+alias+'" data-name="'+display_name+'" data-idUser="'+idUser+'"><div class="elx_contact '+visibility+'">';
     divContact +="<div id='elx_im_status_user' class='elx_im_status_user'><div class='box_status_contact' style='background-color:"+color+"'></div></div>";
     divContact +="<div class='elx_contact_div'>"
     divContact +="<div class='elx_im_name_user'>"+display_name+"</div>";
@@ -386,6 +471,7 @@ function createDivContact(idUser,display_name,uri,alias,presence,presence_code){
     divContact +="</div></li>";
     return divContact; 
 }
+/*
 function createDivPersonal(){
     var divContact ="<div class='elx_personal_info'>";
     divContact +="<div class='elx_im_name_user'>"+display_name+"</div>";
@@ -393,6 +479,7 @@ function createDivPersonal(){
     divContact +="</div>";
     return divContact;
 }
+*/
 function getColorPresence(presence_code){
     /*-1 = Extension not found
     0 = Idle
@@ -406,7 +493,7 @@ function getColorPresence(presence_code){
     if(presence_code=='-1'){
        color='';
     }else if(presence_code=='0'){
-       color='green';
+       color='#8cbe29';
     }else if(presence_code=='1'){
         color='red';
     }else if(presence_code=='2'){
@@ -889,11 +976,11 @@ function showProfile(){
             if(error != ''){
                 alert(error);
             }else{
-                $("#elx_profile_content").html(arrData);
+                $("#elx_popup_content").html(arrData);
                 var options = {
                     show: true
                     }
-                $('#elx_popup_profile').modal(options);
+                $('#elx_general_popup').modal(options);
             }
         }
     );       
@@ -962,7 +1049,7 @@ function deleteImageProfile(){
 /*funcion para cambiar la imagen del perfil de usuario*/
 function changeImageProfile(){
     
-    $('.fileUpload').liteUploader(
+    $('.picturePopupProfile').liteUploader(
     {
         script: '?menu=_elastixutils&action=changeImageProfile&rawmode=yes',
         allowedFileTypes: null,
@@ -997,4 +1084,128 @@ function resetImage(url)
         'src': url  + '#' + new Date().getTime(),
         'width': 159
         }));
+}
+
+//llama a la función "showSendFax" que muestra la ventana del popup para enviar fax
+//la función se encuentra dentro del módulo "my_fax"
+function showSendFax(){
+    var arrAction = new Array();
+    arrAction["menu"]="my_fax";
+    arrAction["action"]="showSendFax";
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert(error);
+            }else{
+                $("#elx_popup_content").html(arrData);
+                var options = {
+                    show: true
+                    }
+                $('#elx_general_popup').modal(options);
+                formSendFax();
+            }
+        }
+    );       
+}
+
+/*llama a la función "sendFax dentro del módulo "my_fax""*/
+
+function sendNewFax(){
+    var arrAction = new Array();
+    arrAction["menu"]="my_fax";
+    arrAction["action"]="sendNewFax";
+    arrAction["to"]=$("input[name='destinationFaxNumber']").val();
+    if($('#elx-chk-attachment-file').is(':checked')) {
+        arrAction["checked"]="true";
+    }else{
+        arrAction["body"]=$("textarea[name='faxContent']").val();
+        arrAction["checked"]="false";
+    }
+    
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if (error != '' ){
+                alert(error);
+            }else{
+                alert(arrData);
+                $('#elx_general_popup').modal('hide');
+            }
+    });      
+}
+
+/*función para subir el archivo en el popup de "sendFax"*/
+function formSendFax(){
+
+    $('#faxFile').liteUploader(
+    {
+        script: '?menu=my_fax&action=faxAttachmentUpload&rawmode=yes',
+        allowedFileTypes: null,
+        maxSizeInBytes: null,
+        customParams: {
+            'custom': 'tester'
+        },
+        each: function (file, errors)
+        {
+            if (errors.length > 0)
+            {
+                alert('Error uploading your file');
+            }
+
+        },
+        success: function (response)
+        {
+            var response = $.parseJSON(response);
+            if(response.error !== ''){
+                alert(response.error);
+            }else{
+                //alert(response.message);
+            }
+        }
+    });
+}
+
+
+function checkChatContactsStatus()
+{
+    var hDiv=$('#rightdiv').height();
+    var arrAction = new Array();
+    arrAction["action"]  = "checkChatContactsStatus";
+    arrAction["menu"] = "_elastixutils";
+    arrAction["rawmode"] = "yes";
+
+    request("index.php",arrAction,true,
+        function(arrData,statusResponse,error){
+            if(statusResponse=="CHANGED"){
+                //contactos disponibles
+                var arrType = new Array('ava','unava','not_found');
+                
+                var div='';
+                for( var i=0; i<arrType.length; i++){
+                    typeAcc=arrType[i];
+                    if( typeof arrData[typeAcc] !== 'undefined'){
+                        for( var x in arrData[typeAcc]){
+                            div +=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['alias'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code']);
+                            $("#elx_ul_list_contacts").html(div);
+                        }
+                    } 
+                }
+                //una vez teniendo el nuevo listado, verificamos si existe un criterio de busqueda.
+                var pattern = $("input[name='im_search_filter']").val();  
+                $(".elx_contact .elx_im_name_user").each(function ()
+                {
+                    var str = $(this).html();
+                    if (str.match(pattern)) {
+                        ($(this).parent()).parent().removeClass("oculto");
+                        ($(this).parent()).parent().addClass("visible");
+                    }else{
+                        ($(this).parent()).parent().removeClass("visible");
+                        ($(this).parent()).parent().addClass("oculto");
+                    }
+                    
+                });
+            }
+    
+        });
 }

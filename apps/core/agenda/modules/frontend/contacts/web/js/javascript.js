@@ -19,8 +19,8 @@ $( document ).ready(function() {
             $("#elx_row_upload_file").removeClass("visible").addClass("oculto");
         }
     });
-    
     uploadFile();
+    scrollContentModule();
 });
 
 function formContact(){
@@ -183,6 +183,7 @@ function newContact(){
             }else{
                 $("#module_content_framework_data").html(arrData);
                 formContact();
+                scrollContentModule();
             }
         }
     );       
@@ -203,6 +204,7 @@ function editContact(idContact){
             }else{
                 $("#module_content_framework_data").html(arrData);
                 formContact();
+                scrollContentModule();
             }
         }
     );       

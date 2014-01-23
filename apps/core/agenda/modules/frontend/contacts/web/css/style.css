@@ -4,10 +4,6 @@
     margin-right: 0px;
 }
 
-.mandatory{
-    color: red;
-}
-
 select[name=ftype_contacto], select[name=filter]{
 width: 110px;
 display:inline;
@@ -18,17 +14,13 @@ width: 175px !important;
 display:inline;
 }
 
-#inputFrom, #inputTo{
-width: 140px !important;
-}
-
 .subtitle p{
 color: #E35332;
 font-size: 17px;
 font-weight: bold;
 }
 
-.name-label, #num_days{
+.name-label{
 font-weight: bold !important;
 }
 
@@ -42,11 +34,5 @@ font-weight: bold !important;
 #img-users{
     width:25px !important;
     height:25px !important;
-}
-
-
-#img-users{
-    width:200px;
-    height:150px;
 }
 /* fin de css cada user foto*/

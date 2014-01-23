@@ -1,7 +1,5 @@
-{literal}
 <link rel="stylesheet" href="web/_common/js/jquery/css/smoothness/jquery-ui-1.8.24.custom.css">
 <script type='text/javascript' src="web/_common/js/jquery.liteuploader.js"></script>
-{/literal}
 
 <div id="contsetting">
     
@@ -23,115 +21,116 @@
         </div>
 
 
+        <div class="row elx-modules-content">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$contact_type.LABEL}</label></div>
+                        <div class="col-lg-6 contact_type" id="contact_type">{$contact_type.INPUT}</div>
+                    </div>
 
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$contact_type.LABEL}</p></div>
-                    <div class="col-lg-6 contact_type" id="contact_type">{$contact_type.INPUT}</div>
-                </div>
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$first_name.LABEL} <span class="glyphicon-asterisk mandatory"></span></label></div>
+                        <div class="col-lg-6">
+                            {$first_name.INPUT}
+                            <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_FIRS_NAME}"></a>
+                        </div>
+                    </div>
 
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$first_name.LABEL} <span class="glyphicon-asterisk mandatory"></span> </p></div>
-                    <div class="col-lg-6">
-                        {$first_name.INPUT}
-                        <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_FIRS_NAME}"></a>
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$last_name.LABEL} <span class="glyphicon-asterisk mandatory"></span></label></div>
+                        <div class="col-lg-6">
+                            {$last_name.INPUT}
+                            <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_LAST_NAME}"></a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$work_phone_number.LABEL} <span class="glyphicon-asterisk mandatory"></span></label></div>
+                        <div class="col-lg-6">
+                            {$work_phone_number.INPUT}
+                            <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_POHNE}"></a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$cell_phone_number.LABEL}</label></div>
+                        <div class="col-lg-6">{$cell_phone_number.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$home_phone_number.LABEL}</label></div>
+                        <div class="col-lg-6">{$home_phone_number.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$fax_number_1.LABEL}</label></div>
+                        <div class="col-lg-6">{$fax_number_1.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$fax_number_2.LABEL}</label></div>
+                        <div class="col-lg-6">{$fax_number_2.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$email.LABEL}</label></div>
+                        <div class="col-lg-6 input-group">
+                            <span class="input-group-addon">@</span>
+                            {$email.INPUT}
+                            <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_EMAIL}"></a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$province.LABEL}</label></div>
+                        <div class="col-lg-6">{$province.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$city.LABEL}</label></div>
+                        <div class="col-lg-6">{$city.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$address.LABEL}</label></div>
+                        <div class="col-lg-6">{$address.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$company.LABEL}</label></div>
+                        <div class="col-lg-6">{$company.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$contact_person.LABEL}</label></div>
+                        <div class="col-lg-6">{$contact_person.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$contact_person_position.LABEL}</label></div>
+                        <div class="col-lg-6">{$contact_person_position.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$notes.LABEL}</label></div>
+                        <div class="col-lg-6">{$notes.INPUT}</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5"><label>{$picture.LABEL}</label></div>
+                        <div class="col-lg-6">{$picture.INPUT}<input type="hidden" name="image" value=""></div>
                     </div>
                 </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$last_name.LABEL} <span class="glyphicon-asterisk mandatory"></span></p></div>
-                    <div class="col-lg-6">
-                        {$last_name.INPUT}
-                        <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_LAST_NAME}"></a>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$work_phone_number.LABEL} <span class="glyphicon-asterisk mandatory"></span></p></div>
-                    <div class="col-lg-6">
-                        {$work_phone_number.INPUT}
-                        <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_POHNE}"></a>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$cell_phone_number.LABEL}</p></div>
-                    <div class="col-lg-6">{$cell_phone_number.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$home_phone_number.LABEL}</p></div>
-                    <div class="col-lg-6">{$home_phone_number.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$fax_number_1.LABEL}</p></div>
-                    <div class="col-lg-6">{$fax_number_1.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$fax_number_2.LABEL}</p></div>
-                    <div class="col-lg-6">{$fax_number_2.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$email.LABEL}</p></div>
-                    <div class="col-lg-6 input-group">
-                        <span class="input-group-addon">@</span>
-                        {$email.INPUT}
-                        <a href="#" class="glyphicon glyphicon-exclamation-sign hidden-tooltip" data-toggle="tooltip" data-placement="auto" title="" data-original-title="{$TOOLTIP_EMAIL}"></a>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$province.LABEL}</p></div>
-                    <div class="col-lg-6">{$province.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$city.LABEL}</p></div>
-                    <div class="col-lg-6">{$city.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$address.LABEL}</p></div>
-                    <div class="col-lg-6">{$address.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$company.LABEL}</p></div>
-                    <div class="col-lg-6">{$company.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$contact_person.LABEL}</p></div>
-                    <div class="col-lg-6">{$contact_person.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$contact_person_position.LABEL}</p></div>
-                    <div class="col-lg-6">{$contact_person_position.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$notes.LABEL}</p></div>
-                    <div class="col-lg-6">{$notes.INPUT}</div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-5 name-label"><p>{$picture.LABEL}</p></div>
-                    <div class="col-lg-6">{$picture.INPUT}<input type="hidden" name="image" value=""></div>
+                <div class="col-lg-5" id="previews">
+                    <img id='preview' class="img-responsive" alt='image' src='index.php?menu=contacts&action=getImageExtContact&image={$ID_PICTURE}&rawmode=yes'/>
                 </div>
             </div>
-            <div class="col-lg-5" id="previews">
-                <img id='preview' class="img-responsive" alt='image' src='index.php?menu=contacts&action=getImageExtContact&image={$ID_PICTURE}&rawmode=yes'/>
+
+            <div class="row" >
+                <div class="col-md-6"><p> </p></div>
             </div>
         </div>
-
-         <div class="row" >
-            <div class="col-md-6"><p> </p></div>
-        </div>
-
+            
     </div>
 </div>

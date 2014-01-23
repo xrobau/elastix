@@ -301,7 +301,7 @@ function actionsReport($arrDatosGrid, $oGrid){
         $jsonObject->set_message($contenidoModulo);
         return $jsonObject->createJSON();
     }else
-        return $contenidoModulo;
+        return $contenidoModulo."<script type='text/javascript' src='web/_common/js/jquery.liteuploader.js'></script>";
 }
 
 function templateContact($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)

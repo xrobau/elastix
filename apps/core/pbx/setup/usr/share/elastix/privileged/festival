@@ -107,7 +107,11 @@ function action_disableFestival($opt)
     // Return immediately if service is not running 
     $retval = NULL; $output = NULL;
     exec('/sbin/service festival status', $output, $retval);
-    if ($retval == 0 && count($output) > 0 && FALSE === strpos($output[0], 'pid '))
+    if (FALSE !== strpos($output[0], 'festival.service')) {
+        // $output has a systemd report
+        if (FALSE === strpos(implode("\n", $output), '(running)'))
+            return TRUE;
+    } elseif ($retval == 0 && count($output) > 0 && FALSE === strpos($output[0], 'pid '))
         return TRUE;
 
     // Stop current instance of service

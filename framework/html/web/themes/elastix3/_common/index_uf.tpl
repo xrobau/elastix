@@ -14,14 +14,18 @@
         <script type='text/javascript' src="{$WEBCOMMON}js/jquery-title-alert.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/base.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/uf.js"></script>
+        <script type="text/javascript" src="web/apps/home/tinymce/js/tinymce/tinymce.min.js"></script>
         {$HEADER}
         {$HEADER_MODULES}
     </head>
     <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="mainBody" {$BODYPARAMS}>
+    <input type="hidden" id="elastix_framework_module_id" value="">
+    <input type="hidden" id="elastix_framework_webCommon" value="">
+    
         <div id='elastix_app_body' class='elx_app_body'>
             {$MENU} <!-- Viene del tpl menu.tlp-->   
             <div id='main_content_elastix'>
-                <div id='notify_change_elastix'>
+                <div id='notify_change_elastix' style='height: 20px;'>
                     <div class="progress progress-striped active">
                         <div class="progress-bar progress-bar-warning progress-bar-elastix" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100% ">
                             Loading...
@@ -40,11 +44,13 @@
         <div id="rightdiv"> <!--Este es el Div que se usa para el chat-->
             <div id="b3_1" style='display:none'>
                 <div id='head_rightdiv'>
+                    <!--
                     <div id='elx_im_personal_info'>
                         
                     </div>
+                    -->
                     <div id='elx_im_contact_search'>
-                        <input type='text' maxlength='50' id='im_search_filter' name='im_search_filter' class='im_search_filter' >
+                        <input type='text' maxlength='50' id='im_search_filter' name='im_search_filter' class='im_search_filter form-control input-sm' >
                         <div class='contactSearchResult' class='contactSearchResult'>
                         </div>
                     </div>

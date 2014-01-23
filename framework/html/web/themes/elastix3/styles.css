@@ -75,7 +75,7 @@ body {
 
 .elx_app_body{
     position: absolute;
-    overflow: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     width: 100%;
     height: 100%;
@@ -133,34 +133,36 @@ img {
 
 #tooldiv{
  background-color: #dd271d;
- float: left;
- height:40px;
+ /*float: left;*/
+ height:55px;
  width: 100%;
- position: absolute;
- top:50px;
- z-index:90;
+ position: relative;
+ /*top:52px;*/
+ /*z-index:90;*/
 }
 
 #cont_logo{
- height: 40px;
- width:10%;
+ height: 46px;
+ width:142px;
  float:left;
+ margin-top:5px;
+  margin-left:15px;
 }
 
 	
 #logo{
  background-image:url("../../_common/images/elastix_logo_total.png");
- height:40px;
- width:40px;
+ height:46px;
+ width:142px;
  float:left;
 }
 
 #name{
  font-size:15px;
- margin:8px 0px 0 0px;
- float:left;
- width:150px;
- text-align: right;
+ margin:28px 5px 0 0px;
+ float:right;
+ width:125px;
+ text-align: left;
  font-weight: bold;
  height:0px;
  font-family:Arial;
@@ -170,15 +172,15 @@ img {
  height:36px;
  width:38px;
  float:right;
- margin-top:2px;
+ /*margin-top:2px;
  margin-right:5px;
  -webkit-border-radius:4px;
  -moz-border-radius:4px;
- border-radius:4px;		
+ border-radius:4px;*/
 }
 
 .tooldivicons{
- height:40px;
+ height:55px;
  float:right;   
  color: white;
  cursor:pointer; 
@@ -186,11 +188,42 @@ img {
 }
 
 .tooldivicons:hover{
- background-color: #ff6600;   
+/* background-color: #ff6600;   */
+}
+
+.icn_m{
+    display:inline-block;
+    font-size:18pt;
+    font-weight: bold;
+    cursor:pointer;
+    color: white;
+    /*width:45px;
+    padding-top:25px;*/
+}
+
+#elx-nav-buttons{
+    float: right;
+    width: 270px;
+    margin-top: 14px;
+}
+
+#elx-nav-buttons img{
+    margin-right: 15px;
+    float: right;
+}
+
+#elx-nav-buttons .dropdown-menu{
+    left:-129px !important;
+}
+
+#elx-button-setup{
+    float:right;
+    cursor:pointer;
 }
 
 #icn_prof{	
- width:200px; 	
+ width:180px; 	
+ border-left: 1px solid grey;
 }
 
 #icn_prof:hover > ul {
@@ -198,10 +231,11 @@ img {
 }
 
 #icn_prof ul {
- top:30px;
+ top:0px;
  background-color: white;
  text-align: left;
  display:none;
+ /*display:block; */
  margin: 0;
  list-style: none;
  position:relative;
@@ -285,9 +319,9 @@ img {
  margin-top:8px;
  margin-left:6px;
 }
-	
+
 #icn_disp2{
- width:30px;    
+ /*width:30px;    */
 }
 
 .icn_d{
@@ -315,9 +349,9 @@ img {
  color:black;
 }
 #main_content_elastix{
- position: absolute;
+ position: relative;
  overflow: auto; 
- top: 90px;
+ /*top: 60px;*/
  bottom: 0px;
  height: auto;
  width: 100%;
@@ -327,12 +361,13 @@ img {
 #rightdiv{
  background-color:#F3F3F3;
  position:absolute;
- top:90px;
+ top:60px;
  right:0;
  bottom: 0px;
  z-index:80;
  width:180px;
  display:none;
+ border-left: 1px solid grey;
 }
 #b3_1{
     margin: 0px;
@@ -402,6 +437,7 @@ img {
     overflow-x: hidden;
     overflow-y: hidden;
     text-overflow: ellipsis;
+    width: 135px;
 }
 .elx_im_name_user{
     display:inline;
@@ -699,14 +735,22 @@ a.boxclose{
     cursor:pointer;
 }
 
-#elx_profile_content .row{
+#elx_general_popup .row, #elx_popup_sendfax .row{
     margin-top: 7px;
     margin-left: 0px;
     margin-right: 0px;
 }
 
-#elx_profile_content .modal-header{
+#elx_general_popup .modal-header, #elx_popup_sendfax .modal-header{
     padding:0px 15px 0px 15px !important; 
+}
+
+.elx-content-photo{
+    border-left: 4px solid;
+    border-color: #8cbe29;
+    float: right;
+    margin-top: 15px;
+    margin-right: 3px;
 }
 
 .oculto{
@@ -734,80 +778,111 @@ a.boxclose{
 
 /*fin css tooltip*/
 
-/*****************************************************/
-/*    Styles for screen 960px and lower             */
-/*****************************************************/
-@media screen and (max-width: 960px) {
-
-
+#elx-navbar-min{
+    float:right;
+    margin-top: 15px;
+    margin-right: 10px;
 }
 
+#elx-slide-menu-mini{
+    position:relative;
+    width:100%;
+    /*top: 60px;*/
+    height:33px;
+    background-color: #dd271d;
+}
 
-/*****************************************************/
-/*    Styles for screen 700px and lower             */
-/*****************************************************/
-@media screen and (max-width: 700px) {
-    
+#elx-username{
+    width: 125px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.elx-modules-content{
+    overflow-y: auto;
+}
+
+.mandatory{
+    color: red;
+}
+
+.elx_contact_div:hover{
+    background: #f2dede;
+    cursor: pointer;
 }
 
 /*****************************************************/
-/*    Styles for screen 450px and lower             */
+/*    Styles for screen 480px and lower   XS         */
 /*****************************************************/
 
-@media only screen and (max-width : 450px) {
-
-#tooldiv{
-    top:50px;
-    height: 80px;
-}
-#cont_logo{
-    width:20%;
-    float:left;
-}
-#logo{
-    margin:0 auto;
-}
-#main_opc{
+@media (max-width: 480px) {
+#elx-nav-buttons{
     float:none;
-    margin:40px auto;
+    margin: 0 auto;
 }
-#icn_disp2{
-    float:right;
+
+#elx-button-setup{
+    padding-bottom: 0px;
 }
-#icn_prof{
-    width:170px;
-    float:right;
-    text-align:center;
-}
-#main_content_elastix{
-    top:135px; /*esto porque la barra de tooldiv se hace mas ancha por lo tanto
-                 esta barra debe bajar*/
-}
-#rightdiv{
-    top:135px;
-}
-#photo{
- display:none;
-}
-#name{
- font-size:12px;
- text-align:center;
-}
+
 }
 
 /*****************************************************/
-/*    Styles for screen 260px and lower             */
+/*    Styles for screen 481px  - 640px    SM         */
 /*****************************************************/
-@media only screen and (max-width : 260px) {
-
+@media (min-width: 481px) and (max-width: 640px) {
 #icn_prof{
-    width:auto;
-    max-width:60%;   
+    border-left: none;
+    width: auto;
 }
-/*#icn_disp2{
-    display:none;
+
+.elx-slide-menu-mini{
+    display: none !important;
 }
+
 #rightdiv{
-    display:none;
-}*/
+    top:55px !important;
 }
+
+#elx-button-setup{
+    padding-bottom: 7px;
+}
+    
+} 
+
+/*****************************************************/
+/*    Styles for screen 641px  - 768px        MD     */
+/*****************************************************/
+@media (min-width: 641px) and (max-width: 768px) {
+.elx-slide-menu-mini{
+    display: none !important;
+}
+
+#rightdiv{
+    top:55px !important;
+}
+
+#elx-button-setup{
+    padding-bottom: 7px;
+}
+    
+} 
+
+/*****************************************************/
+/*    Styles for screen 769px              LG        */
+/*****************************************************/
+@media (min-width: 769px) {
+.elx-slide-menu-mini{
+    display: none !important;
+}
+
+#rightdiv{
+    top:55px !important;
+}
+
+#elx-button-setup{
+    padding-bottom: 7px;
+}
+    
+} 

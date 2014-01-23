@@ -49,7 +49,7 @@
             {/if}
         {/foreach}
         
-        <div class="row">
+        <div class="row elx-modules-content">
             <div id='elx_data_grid' class="col-lg-12 table-responsive">
                 <table class="table table-condensed table-hover table-bordered">
                     <thead>

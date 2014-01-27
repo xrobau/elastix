@@ -228,7 +228,7 @@ class PaloValidar
                     }                    
                 }
                 break;
-            case "numeric_rang":
+            case "numeric_range":
                 if($this->estaVacio($variable)) {
                     if($nombre_variable!="just_test")
                         $this->arrErrores[$nombre_variable]['mensaje'] = PALOVALIDAR_MSG_ERROR_1;

@@ -116,11 +116,11 @@ function updateStatusFreePBXFrontend($arrConf)
 	$word = "disabled";
     if($result){
 	$arrData['message_title'] = _tr("Information").":<br/>";
-	$arrData['message']       = _tr("Access direct to FreePBX has been $word.");
+	$arrData['message']       = _tr("Access direct to FreePBX® has been $word.");
     }
     else{
 	$arrData['message_title'] = _tr("Error").":<br/>";
-	$arrData['message']       = _tr("Access direct to FreePBX has not been $word.");
+	$arrData['message']       = _tr("Access direct to FreePBX® has not been $word.");
     }
     $jsonObject->set_message($arrData);
     Header('Content-Type: application/json');
@@ -169,7 +169,7 @@ function updateAdvancedSecuritySettings($smarty, $module_name, $local_templates_
 
     //VALIDATION OF EMPTY FIELDS
     if($fpbx_password == '')
-      $msgValidationEmptyFields .= _tr("Database and Web Administration FreePBX Password")."<br/>";
+      $msgValidationEmptyFields .= _tr("Database and Web Administration FreePBX® Password")."<br/>";
     if($fpbx_confir_password == '')
       $msgValidationEmptyFields .= _tr("Password Confirmation")."<br/>";
     
@@ -242,7 +242,7 @@ function validateConfirmationPassword($fpbx_password, $fpbx_confir_password){
 function createFieldForm()
 {
     $arrFields = array(
-	     "status_fpbx_frontend"    => array ("LABEL"                  => _tr('Enable direct access (Non-embedded) to FreePBX'),
+	     "status_fpbx_frontend"    => array ("LABEL"                  => _tr('Enable direct access (Non-embedded) to FreePBX®'),
 						"REQUIRED"               => "no",
 						"INPUT_TYPE"             => "CHECKBOX",
 						"INPUT_EXTRA_PARAM"      => "",
@@ -256,7 +256,7 @@ function createFieldForm()
                         "VALIDATION_TYPE"        => "text",
                         "VALIDATION_EXTRA_PARAM" => "",
                            ),
-            "fpbx_password"	      => array ("LABEL"                  => _tr("Database and Web Administration FreePBX Password"),
+            "fpbx_password"	      => array ("LABEL"                  => _tr("Database and Web Administration FreePBX® Password"),
 						"REQUIRED"               => "no",
 						"INPUT_TYPE"             => "PASSWORD",
 						"INPUT_EXTRA_PARAM"      => "",

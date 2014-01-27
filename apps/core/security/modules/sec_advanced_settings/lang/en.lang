@@ -29,10 +29,10 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Advanced Security Settings"                       => "Advanced Settings",
-"Enable direct access (Non-embedded) to FreePBX"   => "Enable direct access (Non-embedded) to FreePBX",
+"Enable direct access (Non-embedded) to FreePBX®"   => "Enable direct access (Non-embedded) to FreePBX®",
 "Change Password"                                  => "Change Password",
 "Enable access"                                    => "Enable access",
-"Database and Web Administration FreePBX Password" => "Database and Web Administration FreePBX Password",
+"Database and Web Administration FreePBX® Password" => "Database and Web Administration FreePBX® Password",
 "Password Confirmation"                            => "Password Confirmation",
 "Password and confirmation do not match!"          => "Password and confirmation do not match!",
 "The following fields are required"                => "The following fields are required",
@@ -40,18 +40,18 @@ $arrLangModule=array(
 "Information"                                      => "Information",
 "Password has been updated."                       => "Password has been updated.",
 "Password has not been updated."                   => "Password has not been updated.",
-"Access direct to FreePBX has been enabled."       => "Access direct to FreePBX has been enabled.",
-"Access direct to FreePBX has not been enabled."   => "Access direct to FreePBX has not been enabled",
-"Access direct to FreePBX has been disabled."      => "Access direct to FreePBX has been disabled.",
-"Access direct to FreePBX has not been disabled."  => "Access direct to FreePBX has not been disabled.",
+"Access direct to FreePBX® has been enabled."       => "Access direct to FreePBX® has been enabled.",
+"Access direct to FreePBX® has not been enabled."   => "Access direct to FreePBX® has not been enabled",
+"Access direct to FreePBX® has been disabled."      => "Access direct to FreePBX® has been disabled.",
+"Access direct to FreePBX® has not been disabled."  => "Access direct to FreePBX® has not been disabled.",
 " But the following files have been modified: "    => " But the following files have been modified: ",
 "Password may only contain alphanumeric characters, spaces, or the following: .&-@=_!<>." => 
 "Password may only contain alphanumeric characters, spaces, or the following: .&-@=_!<>.",
 "Advice"                                           => "Advice",
 "Unauthorized"                                     => "Unauthorized",
 "You are not authorized to access this page."      => "You are not authorized to access this page.",
-"Enable direct access (Non-embedded) to FreePBX in \"Security >> Advanced Security Settings\" menu." 
-						   => "Enable direct access (Non-embedded) to FreePBX in \"Security >> Advanced Security Settings\" menu.",
+"Enable direct access (Non-embedded) to FreePBX® in \"Security >> Advanced Security Settings\" menu." 
+						   => "Enable direct access (Non-embedded) to FreePBX® in \"Security >> Advanced Security Settings\" menu.",
 'Enable anonymous SIP calls' => 'Enable anonymous SIP calls',
 'Anonymous SIP calls are now enabled.' => 'Anonymous SIP calls are now enabled',
 'Anonymous SIP calls are now disabled.' => 'Anonymous SIP calls are now disabled',

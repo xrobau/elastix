@@ -286,7 +286,7 @@ function createFieldForm()
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "HIDDEN",
                                             "INPUT_EXTRA_PARAM"      => array("id" => "recording_priority"),
-                                            "VALIDATION_TYPE"        => "numeric_rang",
+                                            "VALIDATION_TYPE"        => "numeric_range",
                                             "VALIDATION_EXTRA_PARAM" => '0-20'
                                         )
             );

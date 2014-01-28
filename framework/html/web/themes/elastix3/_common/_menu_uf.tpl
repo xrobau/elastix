@@ -41,7 +41,7 @@
                 <a href="index.php?menu={$idMenu}"><img src="web/_common/images/elastix3_icon-mail.png" alt="Mail"></a>
             {/if}
         {/foreach}
-        <a href="javascript:showSendFax()"><img id="elx-button-fax" src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
+        <a href="javascript:showSendFax(false)"><img id="elx-button-fax" src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
         <a href="#"><img id="icn_disp2" src="web/_common/images/elastix3_icon-chat.png" alt="Chat"></a>
     </div>
     
@@ -82,7 +82,7 @@
                 <a href="index.php?menu={$idMenu}"><img src="web/_common/images/elastix3_icon-mail.png" alt="Mail"></a>
             {/if}
         {/foreach}
-        <a href="javascript:showSendFax()"><img id="elx-button-fax" src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
+        <a href="javascript:showSendFax(false)"><img id="elx-button-fax" src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
         <a href="#"><img id="icn_disp2" src="web/_common/images/elastix3_icon-chat.png" alt="Chat"></a>
     </div>
 </div>

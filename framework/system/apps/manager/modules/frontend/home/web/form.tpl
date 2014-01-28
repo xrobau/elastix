@@ -30,7 +30,7 @@
                             <span class="glyphicon glyphicon-refresh" style='color:blue'></span>
                         </div>
                         <div class="elx_email_pag_bar elx_email_pag_btn">
-                            <img src='web/apps/home/images/new.png' onclick="elx_newEmail()" class='elx-toolmail1-img'></img>
+                            <img src='web/apps/home/images/new.png' onclick="elx_newEmail(false)" class='elx-toolmail1-img'></img>
                         </div>
                         <div class="elx_email_pag_bar elx_email_pag_btn">
                             <img src='web/apps/home/images/delete.png' id="email_trash" class='elx-toolmail1-img'></img>
@@ -109,7 +109,7 @@
                     </div>
                     <div id='elx-bodymsg-tools-sent' style='display:none;overflow: visible!important;'>
                         <div class="elx_email_pag_bar">
-                            <button type="button" class="btn btn-default btn-sm btn-bodymsg-tools" onclick='composeEmail()'>
+                            <button type="button" class="btn btn-default btn-sm btn-bodymsg-tools" onclick='composeEmail("mailmodule")'>
                                 <span>{$SEND_MAIL_LABEL}</span> 
                             </button>
                         </div>
@@ -158,3 +158,13 @@
     </div>
 </div>
 <input type='hidden' name='current_mailbox' value='{$CURRENT_MAILBOX}'>
+{if $IMAP_ALERTS || $ERROR_FIELD}
+    {literal}
+        <script type="text/Javascript">
+    {/literal}
+        var strimap_alert = '{$IMAP_ALERTS}'+'{$ERROR_FIELD}';
+    {literal}
+        showElxUFMsgBar('error',strimap_alert);
+        </script>
+    {/literal}
+{/if}

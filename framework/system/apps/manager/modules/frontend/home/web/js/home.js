@@ -69,7 +69,7 @@ $(document).ready(function(){
     
     $("#email_refresh").click(function() {
         $("input[name='elx_sel_view_filter_h']").val('all');
-        show_email_msg(false)
+        show_email_msg(false);
     });
     
     $("#email_trash").click(function() {
@@ -166,7 +166,8 @@ $(document).ready(function(){
         }
     });
     
-    emailAttachFile();
+    //funcion que pregunta si ahi mensajes nuevos
+    refreshMessage();
 });
 
 //necesario setear la altura maxima del div que contine la data del home
@@ -250,6 +251,15 @@ function show_email_msg(paging){
         }
         arrAction["page"]=page;
         arrAction["nav"]='bypage';
+    }else{
+        var currentPage=$("input[name=elx_currentpage]").val();
+        if(isNaN(currentPage)){
+            currentPage=1;
+        }else{
+            currentPage=parseInt(currentPage);
+        }
+        arrAction["page"]=currentPage;
+        arrAction["nav"]='bypage';
     }
     
     request("index.php", arrAction, false,
@@ -258,36 +268,12 @@ function show_email_msg(paging){
             if(error!=""){
                 alert(error);
             }else{
-                var mailMsg=arrData['email_content'];
-                if(mailMsg.length>0){
-                    var messaje_list='';
-                    for( var i=0; i<mailMsg.length; i++){
-                        for( var j=0; j<mailMsg[i].length; j++){
-                            messaje_list +=mailMsg[i][j];
-                        }
-                    }
-                }else{
-                    //no ahi mensaje para mostrar mostramos un mensaje
-                    messaje_list='<div class="elx_row elx_unseen_email" style="text-align:center">Not message</div>';
-                }
-                
                 //este es para marcar por el valor correcto en el filtro1 (seen,unseen, ...)
                 $("input[name='elx_sel_view_filter_h']").val(arrData['email_filter1']);
                 var name_tag=$("#elx_email_vsel_"+arrData['email_filter1']).html();
                 $("#elx_sel_view_filter").html(name_tag);
                 
-                //modificar los datos del pagineo
-                $("#elx_mail_pagingbar_nummails > span").html(arrData['paging']['total']);
-                $("input[name=elx_currentpage]").val(arrData['paging']['currentPage']);
-                $("#elx_mail_pagingbar_currentpg > span").html(arrData['paging']['currentPage']);
-                $("input[name=elx_numpages]").val(arrData['paging']['numPages']);
-                
-                //mostar el div de los mensajes
-                div_list_msg.html(messaje_list);
-                wrap_elx_elx_viewcmpmsg.hide(10);
-                $("#elx-bodymsg-tools").hide(10);
-                $("#tools-mail_toolbar").show(11);
-                wrap_list_messages.show(10);
+                createListEmailMsg(arrData);
             }     
     });
 }
@@ -306,37 +292,71 @@ function show_messages_folder(folder,element){
                 alert(error);
             }else{
                 $("input[name='current_mailbox']").val(folder);
-                var mailMsg=arrData['email_content'];
-                if(mailMsg.length>0){
-                    var messaje_list='';
-                    for( var i=0; i<mailMsg.length; i++){
-                        for( var j=0; j<mailMsg[i].length; j++){
-                            messaje_list +=mailMsg[i][j];
-                        }
-                    }
-                }else{
-                    //no ahi mensaje para mostrar mostramos un mensaje
-                    messaje_list='<div class="elx_row elx_unseen_email" style="text-align:center">There is not message</div>';
-                }
                 
                 $(".folder-item").css('color',"rgb(68, 68, 68)");
                 element.css('color','#dd271d');
                 
-                //actualizamos el listado de carpetas a las que podemos mover los mensajes seleccionados
-                var li_mailbox_mv='';
-                var listMailboxMv=arrData['move_folders'];
-                for( var x in listMailboxMv){
-                    li_mailbox_mv +="<li><a href='#' data-nameFolder='"+x+"' class='elx_amvfolder'>"+listMailboxMv[x]+"</a></li>";
-                }
-                $("#elx_email_mv_ul").html(li_mailbox_mv);
-                
-                div_list_msg.html(messaje_list);
-                wrap_elx_elx_viewcmpmsg.hide(10);
-                $("#elx-bodymsg-tools").hide(10);
-                $("#tools-mail_toolbar").show(11);
-                wrap_list_messages.show(10);
-            }     
+                createListEmailMsg(arrData);
+            }
     });
+}
+function refreshMessage(){
+    var arrAction = new Array();
+    arrAction["menu"]="home";
+    arrAction["action"]="refreshMail";
+    arrAction["folder"]=$("input[name='current_mailbox']").val();
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, true,
+        function(arrData,statusResponse,error){
+            if(error!=""){
+                alert(error);
+                return true; //paramos recursividad
+            }else{
+                if(statusResponse=='CHANGED'){
+                    show_email_msg(false);
+                }
+            }
+    });
+}
+function createListEmailMsg(arrData){
+    var mailMsg=arrData['email_content'];
+    if(mailMsg.length>0){
+        var messaje_list='';
+        for( var i=0; i<mailMsg.length; i++){
+            for( var j=0; j<mailMsg[i].length; j++){
+                messaje_list +=mailMsg[i][j];
+            }
+        }
+    }else{
+        //no ahi mensaje para mostrar mostramos un mensaje
+        messaje_list='<div class="elx_row elx_unseen_email" style="text-align:center">There is not message</div>';
+    }
+    
+    if(arrData['imap_alerts']!=''){
+        //se produjeron alertas por parte de las funciones imap
+        //posibles errores. Debemos mostrar estos errores en pantalla
+        showElxUFMsgBar('error',arrData['imap_alerts']);
+    }
+    
+    //actualizamos el listado de carpetas a las que podemos mover los mensajes seleccionados
+    var li_mailbox_mv='';
+    var listMailboxMv=arrData['move_folders'];
+    for( var x in listMailboxMv){
+        li_mailbox_mv +="<li><a href='#' data-nameFolder='"+x+"' class='elx_amvfolder'>"+listMailboxMv[x]+"</a></li>";
+    }
+    $("#elx_email_mv_ul").html(li_mailbox_mv);
+    
+    //modificar los datos del pagineo
+    $("#elx_mail_pagingbar_nummails > span").html(arrData['paging']['total']);
+    $("input[name=elx_currentpage]").val(arrData['paging']['currentPage']);
+    $("#elx_mail_pagingbar_currentpg > span").html(arrData['paging']['currentPage']);
+    $("input[name=elx_numpages]").val(arrData['paging']['numPages']);
+    
+    div_list_msg.html(messaje_list);
+    wrap_elx_elx_viewcmpmsg.hide(10);
+    $("#elx-bodymsg-tools").hide(10);
+    $("#tools-mail_toolbar").show(11);
+    wrap_list_messages.show(10);
 }
 function search_email_message_view(id_tag){
     $("input[name='elx_sel_view_filter_h']").val(id_tag);
@@ -591,6 +611,11 @@ function actions_email_msg(action){
                         //mostrar la barra de acciones al mandar un menu
                         $("#elx-bodymsg-tools-view").hide(10);
                         $("#elx-bodymsg-tools-sent").show(10);
+                        
+                        //esto es importante hacer para asegurarmos que no haya 
+                        //oculto otro elemente con el mismo id
+                        $("#elx-compose-email").remove();
+                        
                         formComposeMsg(action,arrData);
                     }   
         });
@@ -614,26 +639,27 @@ function actions_email_msg(action){
  * que estamos reenviando obtengamos de este sus archivos adjuntos
  * para adjuntarlos al nuevo correo
  */
-function forwardGetAttachments(){
+function forwardGetAttachments(UID){
     //mostrar que se esta cargando los archivos adjuntos
     $("#login_loading_attach").show();
     var arrAction = new Array();
     arrAction["menu"]="home";
     arrAction["action"]="forwardGetAttachs";
     arrAction["uid"]=UID;
+    arrAction["current_folder"]=$("input[name='current_mailbox']").val();
     arrAction["rawmode"]="yes";
     request("index.php", arrAction, false,
         function(arrData,statusResponse,error){
+            $("#login_loading_attach").hide();
             if(error!=""){
                 //mostrar error de que no se pudieron obtener los archivos adjuntos
-                showElxUFMsgBar('error',error);
+                alert(error);
             }else{
-                $("#login_loading_attach").hide();
                 //crear el div para cada archivo adjunto
                 for(var x in arrData){
-                    var attachFile_item="<div class='elx-compose-msg-attachitem' id='"+arrData[x]['idAttach']+"'>";
-                    attachFile_item +=response.message['name'];
-                    attachFile_item +="<a href='#' onclick='emailDetachFile(\""+arrData[x]['idAttach']+"\")'><img src='admin/web/themes/elastixneo/images/bookmarks_equis.png' width='18' height='16' align='absmiddle' border='0'></a>";
+                    var attachFile_item="<div class='elx-compose-msg-attachitem'>";
+                    attachFile_item +=arrData[x]['name'];
+                    attachFile_item +="<a href='#' id='"+arrData[x]['idAttach']+"' onclick='emailDetachFile(\""+arrData[x]['idAttach']+"\")'><img src='admin/web/themes/elastixneo/images/bookmarks_equis.png' width='18' height='16' align='absmiddle' border='0'></a>";
                     attachFile_item +="</div>";
                     $("#elx-compose-msg-attach").append(attachFile_item);
                 }
@@ -694,9 +720,10 @@ function formComposeMsg(action,compose_template){
     
     elx_bodymail.html('');
     elx_bodymail.html(compose_template);
-    
+           
     $("input[name='compose-subject']").val(subject);
     if(action=='forward'){
+        forwardGetAttachments(UID);
         $("#elx-compose-msg").append("<div id='compose_n_msg_content' style='min-height:20px;'></div>");
         $("#elx-compose-msg").append("<hr>");
         $("#elx-compose-msg").append(oldHeaderdiv);
@@ -725,153 +752,9 @@ function formComposeMsg(action,compose_template){
         elx_bodymail.append(oldContent);
     }
     
-    user_language=$("input[name='elx_language']").val();
-    tinymce.init({
-        selector: "#elx-compose-msg",
-        plugins: [
-            "advlist autolink lists link image charmap print anchor",
-            "searchreplace visualblocks code ",
-            "insertdatetime media contextmenu paste textcolor emoticons"
-        ],
-        toolbar: " undo redo | fontselect | fontsizeselect | bold italic underline textcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | emoticons link image",
-        language : user_language,
-        resize: true,
-        menubar : false,
-        auto_focus: "elx-compose-msg",
-        /**
-         * Pendiente de implementar la funcion usada para subir imagenes 
-        file_browser_callback: function(field_name, url, type, win) {
-            win.document.getElementById(field_name).value = 'my browser value';
-        }
-        **/
-    });
-}
-//mustra extra header al momento de componer un emial
-function showComposeHeader(header_field){
-    $("#compose-"+header_field).show();
-    //ocultar el link que muestra el extra header
-    $("#elx_link_"+header_field).hide();
-    if(header_field=='reply_to'){
-        if($("#elx_link_bcc").is(':hidden')==false){
-            $("#elx_link_bcc").next('span').hide();
-        }else if($("#elx_link_cc").is(':hidden')==false && $("#elx_link_bcc").is(':hidden')==true){
-            $("#elx_link_cc").next('span').hide();
-        }
-    }else{
-        $("#elx_link_"+header_field).next('span').hide();
-    }
-}
-
-function emailAttachFile(){
-    var txtUploading=$("input[name='elx_txtuploading']").val();
-    var divAttach=null;
-    $('#attachFileButton').liteUploader(
-    {
-        script: '?menu=home&action=attach_file&rawmode=yes',
-        allowedFileTypes: null,
-        maxSizeInBytes: null,
-        before: function (files)
-        {   //mostrar que se esta cargando el archivo adjunto
-            var div_itemattach="<div class='elx-compose-msg-attachitem' id='login_loading_attach'>";
-            div_itemattach +="<img src='web/_common/images/loading.gif'/>"+txtUploading;
-            div_itemattach +="</div>";
-            $("#elx-compose-msg-attach").append(div_itemattach);
-            divAttach=$("#elx-compose-msg-attach").children(':last');
-        },
-        success: function (response)
-        {
-            $("#login_loading_attach").hide();
-            var response = $.parseJSON(response);
-            if(response.error !== ''){
-                showElxUFMsgBar('error',response.error);
-                divAttach.remove();
-            }else{
-                //reemplazo en el div creado anteriormente el contenido por la informacion
-                //del archivo subido
-                var attachInfo =response.message['name'];
-                attachInfo +="<a href='#' id='"+response.message['idAttach']+"'  onclick='emailDetachFile(\""+response.message['idAttach']+"\")'><img src='admin/web/themes/elastixneo/images/bookmarks_equis.png'></a>";
-                divAttach.html(attachInfo);
-            }
-        }
-    });
-}
-function emailDetachFile(idAttach){
-    var arrAction = new Array();
-    arrAction["menu"]="home";
-    arrAction["action"]="deattach_file";
-    arrAction["idAttach"]=idAttach;
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-        function(arrData,statusResponse,error){
-            if(error!=""){
-                alert(error);
-            }else{
-                $("#"+idAttach).parent(':first').remove();
-            }   
-    });
-}
-function composeEmail(){
-    //verificar que el campo to no este vacio
-    //verificar si el subject esta vacio, si esta vacio preguntar si realmente lo quiere mandar asi
-    //verificar si el contenido del mail esta vacio, si está vacío y no existe ningún
-    //archivo adjunto preguntar si realmente se lo quiere mandar asi
-    
-    //cabeceras
-    var headers=new Array();
-    composeTo=$("textarea[name='compose_to']").val();
-    if(typeof composeTo!=="string" || composeTo==''){
-        alert($("input[name=msg_emptyto]").val());
-        return false;
-    }
-    
-    //la cabeceras reply_to, bcc y cc solo deben ser agregadas si los campos estan visibles
-    if($("#compose-cc").is(":visible")){
-        var composeCC = $("textarea[name='compose_cc']").val();
-    }
-    
-    if($("#compose-bcc").is(":visible")){
-        var composeBCC = $("textarea[name='compose_bcc']").val();
-    }
-    
-    if($("#compose-reply_to").is(":visible")){
-        var composeReplayTo = $("textarea[name='compose_replay_to']").val();
-    }
-    
-    var subject = $("input[name=compose-subject]").val();
-    if(subject==''){
-        if(!confirm($("input[name=msg_emptysubject]")).val())
-            return false;
-    }
-    
-    //pendiente revisar que hacer cuando el email contiene imágenes
-    //la imágenes que contiene en email deben haber sido previamente obtenenidas y 
-    //estar subidas en el servidor
-    //deben ser enviado como attachment inline
-    var bodyMsg = tinyMCE.get('elx-compose-msg').getContent();        
-    
-    showElastixUFStatusBar("Sending...");
-    var arrAction = new Array();
-    arrAction["menu"]="home";
-    arrAction["action"]="compose_email";
-    arrAction["to"]=composeTo;
-    arrAction["cc"]=composeCC;
-    arrAction["bcc"]=composeBCC;
-    arrAction["reply_to"]=composeReplayTo;
-    arrAction["subject"]=subject;
-    arrAction["bodyMsg"]=escape(bodyMsg);
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-        function(arrData,statusResponse,error){
-            hideElastixUFStatusBar();
-            if(error!=""){
-                alert(error);
-            }else{
-                return_mailbox();
-            }   
-    }); 
-}
-function elx_newEmail(){
-    
+    $('#attachFileButton').replaceWith("<input type='file' name='attachFileButton' id='attachFileButton'>");
+    emailAttachFile();
+    richTextInit();
 }
 
  

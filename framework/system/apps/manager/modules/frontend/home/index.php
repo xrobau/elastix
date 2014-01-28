@@ -32,9 +32,11 @@ include_once "libs/paloSantoJSON.class.php";
 include_once "libs/paloSantoGrid.class.php";
 require_once "libs/paloComposeEmail.php";
 
+define('PATH_UPLOAD_ATTACHS','/var/www/elastixdir/uploadAttachs');
 /*
   @author: index.php,v 1 2013/05/09 01:07:03 Washington Reyes wreyes@palosanto.com Exp $
   @author: index.php,v 2 2013/09/10 01:07:03 Rocio Mera rmera@palosanto.com Exp $ */
+
 function _moduleContent(&$smarty, $module_name)
 {
     //global variables
@@ -46,10 +48,6 @@ function _moduleContent(&$smarty, $module_name)
     //folder path for custom templates
     $local_templates_dir=getWebDirModule($module_name);
 
-    //conexion resource
-    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
-   	$pACL = new paloACL($pDB);
-
     $pImap = new paloImap();
     
     //actions
@@ -57,49 +55,55 @@ function _moduleContent(&$smarty, $module_name)
     
     switch($accion){
         case "view_bodymail":
-            $content = viewMail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = viewMail($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "download_attach":
-            $content = download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = download_attach($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "get_inline_attach":
-            $content = inline_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = inline_attach($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "mv_msg_to_folder":
-            $content = moveMsgsToFolder($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = moveMsgsToFolder($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "mark_msg_as":
-            $content = markMsgAs($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = markMsgAs($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "delete_msg_trash":
-            $content = deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = deleteMsgTrash($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "toggle_important":
-            $content = toogle_important_msg($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = toogle_important_msg($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "create_mailbox":
-            $content = create_mailbox($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = create_mailbox($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "get_templateEmail":
-            $content = get_templateEmail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = get_templateEmail($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "compose_email":
-            $content = compose_email($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = compose_email($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "attach_file":
-            $content = attachFile($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = attachFile($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         case "deattach_file":
-            $content = dettachFile($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = dettachFile($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
+            break;
+        case "forwardGetAttachs":
+            $content = forwardGetAttachs($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
+            break;
+        case "refreshMail":
+            $content = refreshMail('checkmail',$smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
         default:
-            $content = reportMail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap);
+            $content = reportMail($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
             break;
     }
     return $content;
 }
 
-function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
+function reportMail($smarty, $module_name, $local_templates_dir, & $arrConf, &$pImap)
 {
     $jsonObject = new PaloSantoJSON();
     $arrFilter=array();
@@ -127,6 +131,7 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     if($result===false){
         $jsonObject->set_error($pImap->errMsg);
         $smarty->assign("ERROR_FIELD",$pImap->errMsg);
+        return '';
     }else{
         $smarty->assign('MAILBOX_FOLDER_LIST',$listMailbox);
         $smarty->assign('NEW_FOLDER',_tr('New Folder'));
@@ -219,6 +224,8 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     }
 
     $pImap->close_mail_connection();
+    $imapAlertErros=cleanAlertsImap();
+    
     $listMailbox=array_diff($listMailbox,array($pImap->getMailbox()));
     $move_folder=array();
     foreach($listMailbox as $value){
@@ -230,6 +237,7 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         $message['email_content']=$arrData;
         $message['email_filter1']=$filter_view;
         $message['move_folders']=$move_folder;
+        $message['imap_alerts']=$imapAlertErros;
         $message['paging']['total']=$total;
         $message['paging']['currentPage']=$currentPage;
         $message['paging']['numPages']=$numPage;
@@ -237,6 +245,7 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         return $jsonObject->createJSON();
     }
     
+    $smarty->assign("IMAP_ALERTS",$imapAlertErros);
     $smarty->assign("ICON_TYPE","web/apps/$module_name/images/mail2.png");
     $smarty->assign("FOLDER_LIST_TITLE",_tr("Folders"));
     
@@ -267,21 +276,31 @@ function reportMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
     $contenidoModulo = "<div>".$html."</div>";
     return $contenidoModulo;
 }
-function moveMsgsToFolder($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap){
+//si ocurre algun error o alguna excepcion al invocar una funcion de la
+//libreria imap de php esta se agrega al arreglo imap_errors e imap_alerts 
+//Si no se invoca a las funciones imap_alerts y imap_errors php muestra estos
+//como e_notice lo que daña el ajax
+function cleanAlertsImap(){
+    $alerts=$errors='';
+    
+    $arrAlerts=imap_alerts();
+    if(is_array($arrAlerts))
+        $alerts=implode("<br>",$arrAlerts);
+        
+    $arrErrors=imap_errors();
+    if(is_array($arrErrors))
+        $errors=implode("<br>",$arrErrors);
+        
+    if($alerts!='' && $errors!=''){
+        $text=$alerts."<br>".$errors;
+    }else{
+        $text=$alerts.$errors;
+    }
+    return $text;
+}
+function moveMsgsToFolder($smarty, $module_name, $local_templates_dir, & $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
    
-    //current mailbox
-    $mailbox=getParameter('current_folder');
-    
-    //creamos la connección al mailbox
-    $pImap->setMailbox($mailbox);
-
-    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
-    if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
-    }
-    
     //lista de UIDs de mensajes a mover
     $lisUIDs=getParameter('UIDs');
     if(empty($lisUIDs)){
@@ -298,17 +317,6 @@ function moveMsgsToFolder($smarty, $module_name, $local_templates_dir, &$pDB, $a
     //carpetas a la que queremos mover los mensajes seleccionados
     $new_folder=getParameter('new_folder');
     
-    if(!$pImap->moveMsgToFolder($mailbox,$new_folder,$arrUID)){
-        $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
-    }else{
-        $jsonObject->set_message(_tr("Success_mv"));
-        return $jsonObject->createJSON();
-    }
-}
-function markMsgAs($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap){
-    $jsonObject = new PaloSantoJSON();
-   
     //current mailbox
     $mailbox=getParameter('current_folder');
     
@@ -318,9 +326,27 @@ function markMsgAs($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
     if($result===false){
         $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
+    }else{
+        if(!$pImap->moveMsgToFolder($mailbox,$new_folder,$arrUID)){
+            $jsonObject->set_error($pImap->errMsg);
+        }else{
+            $jsonObject->set_message(_tr("Success_mv"));
+        }
     }
     
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return $jsonObject->createJSON();
+}
+function markMsgAs($smarty, $module_name, $local_templates_dir, & $arrConf, &$pImap){
+    $jsonObject = new PaloSantoJSON();
+   
+    //current mailbox
+    $mailbox=getParameter('current_folder');
+    
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+
     //lista de UIDs de mensajes a mover
     $lisUIDs=getParameter('UIDs');
     if(empty($lisUIDs)){
@@ -337,15 +363,22 @@ function markMsgAs($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
     //carpetas a la que queremos mover los mensajes seleccionados
     $tag=getParameter('tag');
     
-    if(!$pImap->markMsgFolder($tag,$arrUID)){
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
         $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
     }else{
-        $jsonObject->set_message(_tr("Success_tag"));
-        return $jsonObject->createJSON();
+        if(!$pImap->markMsgFolder($tag,$arrUID)){
+            $jsonObject->set_error($pImap->errMsg);
+        }else{
+            $jsonObject->set_message(_tr("Success_tag"));
+        }
     }
+    
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return $jsonObject->createJSON();
 }
-function toogle_important_msg($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $pImap){
+function toogle_important_msg($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap){
     $jsonObject = new PaloSantoJSON();
    
     //current mailbox
@@ -354,12 +387,6 @@ function toogle_important_msg($smarty, $module_name, $local_templates_dir, $pDB,
     //creamos la connección al mailbox
     $pImap->setMailbox($mailbox);
 
-    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
-    if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
-    }
-    
     //uid del mensaje que vamos a marcar
     $uid=getParameter("uid");
     if(is_null($uid) || $uid=='' || $uid===false){
@@ -376,26 +403,28 @@ function toogle_important_msg($smarty, $module_name, $local_templates_dir, $pDB,
     
     $arrUID[]=$uid;
     
-    if(!$pImap->markMsgFolder($tag,$arrUID)){
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
         $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
     }else{
-        $jsonObject->set_message(_tr("Success_tag"));
-        return $jsonObject->createJSON();
+        if(!$pImap->markMsgFolder($tag,$arrUID)){
+            $jsonObject->set_error($pImap->errMsg);
+        }else{
+            $jsonObject->set_message(_tr("Success_tag"));
+        }
     }
+    
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return $jsonObject->createJSON();
 }
-function deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $pImap){
+
+function deleteMsgTrash($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap){
     $jsonObject = new PaloSantoJSON();
        
     //creamos la connección al mailbox
     $pImap->setMailbox("Trash");
 
-    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
-    if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
-    }
-    
     //lista de UIDs de mensajes a mover
     $lisUIDs=getParameter('UIDs');
     if(empty($lisUIDs)){
@@ -409,26 +438,27 @@ function deleteMsgTrash($smarty, $module_name, $local_templates_dir, $pDB, $arrC
         return $jsonObject->createJSON();
     }
     
-    if(!$pImap->deleteMsgTrash($arrUID)){
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
         $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
     }else{
-        $jsonObject->set_message(_tr("Success_del"));
-        return $jsonObject->createJSON();
+        if(!$pImap->deleteMsgTrash($arrUID)){
+            $jsonObject->set_error($pImap->errMsg);
+        }else{
+            $jsonObject->set_message(_tr("Success_del"));
+        }
     }
+    
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return $jsonObject->createJSON();
 }
-function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pImap)
+function viewMail($smarty, $module_name, $local_templates_dir, & $arrConf, &$pImap)
 {
     $jsonObject = new PaloSantoJSON();
 
     $mailbox=getParameter('current_folder');
     $pImap->setMailbox($mailbox);
-    
-    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
-    if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
-    }
     
     $uid=getParameter("uid");
     if(is_null($uid) || $uid=='' || $uid===false || $uid=='undefined'){
@@ -436,46 +466,50 @@ function viewMail($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, 
         return $jsonObject->createJSON();
     }
     
-    $result=$pImap->readEmailMsg($uid);
-    if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-    }else{
-        $jsonObject->set_message($result);
-    }
-    return $jsonObject->createJSON();
-}
-function create_mailbox($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
-    $jsonObject = new PaloSantoJSON();
-
     $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
     if($result===false){
         $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
+    }else{
+        $result=$pImap->readEmailMsg($uid);
+        if($result===false){
+            $jsonObject->set_error($pImap->errMsg);
+        }else{
+            $jsonObject->set_message($result);
+        }
     }
     
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return $jsonObject->createJSON();
+}
+function create_mailbox($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
+    $jsonObject = new PaloSantoJSON();
+
     $new_mailbox=getParameter("new_folder");
     if(is_null($new_mailbox) || $new_mailbox=='' || $new_mailbox===false){
         $jsonObject->set_error('Invalid Mailbox');
         return $jsonObject->createJSON();
     }
     
-    $result=$pImap->createMailbox($new_mailbox);
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
     if($result===false){
         $jsonObject->set_error($pImap->errMsg);
+    }else{
+        $result=$pImap->createMailbox($new_mailbox);
+        if($result===false){
+            $jsonObject->set_error($pImap->errMsg);
+        }
     }
+    
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
     return $jsonObject->createJSON();
 }
-function download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+function download_attach($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
 
     $mailbox=getParameter('current_folder');
     $pImap->setMailbox($mailbox);
-    
-    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
-    if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
-        return $jsonObject->createJSON();
-    }
     
     $uid=getParameter("uid");
     if(is_null($uid) || $uid=='' || $uid===false){
@@ -483,21 +517,21 @@ function download_attach($smarty, $module_name, $local_templates_dir, $pDB, $arr
         return $jsonObject->createJSON();
     }
     
-    $partNum=getParameter('partnum');
-    $encoding=getParameter('enc');
-    
-    $pMessage=new paloImapMessage($pImap->getConnection(),$uid,$mailbox);
-    $result=$pMessage->downloadAttachment($partNum, $encoding);
-    
-    return;
-    /*if($result===false){
-        $jsonObject->set_error($pImap->errMsg);
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        return '';
     }else{
-        $jsonObject->set_message($result);
+        $partNum=getParameter('partnum');
+        $encoding=getParameter('enc');
+        
+        $pMessage=new paloImapMessage($pImap->getConnection(),$uid,$mailbox);
+        $result=$pMessage->downloadAttachment($partNum, $encoding);
     }
-    return $jsonObject->createJSON();*/
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return;
 }
-function inline_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+function inline_attach($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
     //$jsonObject = new PaloSantoJSON();
 
     $mailbox=getParameter('current_folder');
@@ -518,10 +552,22 @@ function inline_attach($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
     
     $pMessage=new paloImapMessage($pImap->getConnection(),$uid,$pImap->getMailbox());
     $pMessage->getInlineAttach($partNum, $encoding);
+    
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
     return;
 }
-function get_templateEmail($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+function get_templateEmail($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
+    global $arrCredentials;
+    
+    $alias=getParameter('destination');
+    if(!empty($alias)){
+        $username = explode("@", $alias);
+        $destination=$username[0]."@".$arrCredentials['domain'];
+        $smarty->assign("USERNAME",$destination);
+    }
+    
     $smarty->assign("TO", _tr('To'));
     $smarty->assign("CC", _tr('CC'));
     $smarty->assign("BCC", _tr('BCC'));
@@ -544,6 +590,8 @@ function get_templateEmail($smarty, $module_name, $local_templates_dir, $pDB, $a
     if($defLang==false)
         $lang=$defLang;
     unset($_SESSION['elastix_emailAttachs']);
+    //unset($_POST['?menu=home&action=attach_file&rawmode=yes']);
+    //unset($_FILES['attachFileButton']);
     
     $smarty->assign("USER_LANG",$lang);
     $smarty->assign("MSG_EMPTYTO",_tr("Field 'To' can not be empty"));
@@ -555,9 +603,23 @@ function get_templateEmail($smarty, $module_name, $local_templates_dir, $pDB, $a
     $jsonObject->set_message($contenidoModulo);
     return $jsonObject->createJSON();
 }
-function compose_email($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+function compose_email($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
-    $pCompose = new paloComposeEmail($_SESSION['elastix_user'], $_SESSION['elastix_pass2'], $pImap);
+    global $arrCredentials;
+    $idUser = $arrCredentials['idUser'];
+    
+    //obtenemos el name del usuario
+    $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+    $pACL = new paloACL($pDB);
+    $result=$pACL->getUsers2($idUser);
+    if($result==false){
+        $jsonObject->set_error("Error to get user info");
+        return $jsonObject->createJSON();
+    }else{
+        $name=$result[0]['name'];
+    }
+    
+    $pCompose = new paloComposeEmail($_SESSION['elastix_user'], $_SESSION['elastix_pass2'], $name, $pImap);
     
     $headers['to']=getParameter("to");
     $headers['cc']=getParameter("cc");
@@ -566,19 +628,50 @@ function compose_email($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
     $subject=getParameter("subject");
     $content=getParameter("bodyMsg");
     $attachments=null;
-    if(isset($_SESSION['elastix_emailAttachs']))
-        $attachments = $_SESSION['elastix_emailAttachs'];
+    if(isset($_SESSION['elastix_emailAttachs'])){
+        $pCompose->setAttachments($_SESSION['elastix_emailAttachs']);
+    }
     
-    if($pCompose->sendEmail($headers,$subject,$content,$attachments)){
+    if($pCompose->sendEmail($headers,$subject,$content)){
         $strError=$pCompose->getErrorMsg();
         $jsonObject->set_message(_tr("Message was sent successfully.")." $strError");
         unset($_SESSION['elastix_emailAttachs']);
     }else{
         $jsonObject->set_error($pCompose->getErrorMsg());
     }
+    
     return $jsonObject->createJSON();
 }
-function attachFile($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+function forwardGetAttachs($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
+    $jsonObject = new PaloSantoJSON();
+
+    $mailbox=getParameter('current_folder');
+    $pImap->setMailbox($mailbox);
+    
+    $uid=getParameter("uid");
+    if(is_null($uid) || $uid=='' || $uid===false || $uid=='undefined'){
+        $jsonObject->set_error('Invalid Email Message');
+        return $jsonObject->createJSON();
+    }
+    
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result===false){
+        $jsonObject->set_error($pImap->errMsg);
+    }else{
+        $pMessage=new paloImapMessage($pImap->getConnection(),$uid,$pImap->getMailbox());
+        $attachments=$pMessage->createAttachmentsToForward();
+        if($attachments===false){
+            $jsonObject->set_error($pMessage->errMsg);
+        }else{
+            $jsonObject->set_message($attachments);
+        }
+    }
+    
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return $jsonObject->createJSON();
+}
+function attachFile($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
     
     try {
@@ -592,7 +685,6 @@ function attachFile($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
         
         // Undefined | Multiple Files | $_FILES Corruption Attack
         // If this request falls under any of them, treat it invalid.
-        
         if ( !isset($_FILES['attachFileButton']['error'][0])) {
             throw new RuntimeException('Invalid parameters.');
         }
@@ -613,7 +705,7 @@ function attachFile($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
         // You should also check filesize here. 
         // TODO:definir cual debe ser el máximo tamaño de los archivos adjuntos 
         // o sacarlo de lagun archivo de ocnfiguracion
-        $uploadSize='2000000'; //2Mega Bytes
+        $uploadSize='10000000'; //10Mega Bytes
         if ($_FILES['attachFileButton']['size'][0] > $uploadSize) {
             throw new RuntimeException('Exceeded filesize limit.');
         }
@@ -731,7 +823,7 @@ function addInlineImage(){
 
     }
 }*/
-function dettachFile($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, &$pImap){
+function dettachFile($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
     $idAttach=getParameter('idAttach');
     try {
@@ -755,6 +847,84 @@ function dettachFile($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
         $jsonObject->set_error($e->getMessage());
     }
     return $jsonObject->createJSON();
+}
+function refreshMail($function,$smarty, $module_name, $local_templates_dir,  $arrConf, $pImap){
+    $executed_time = 30; //en segundos
+    $max_time_wait = 120; //en segundos
+    $event_flag    = false;
+    $data          = null;
+
+    $i = 1;
+    while(($i*$executed_time) <= $max_time_wait){
+        $return = $function($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap);
+        $data   = $return['data'];
+        if($return['there_was_change']){
+            $event_flag = true;
+            break;
+        }
+        $i++;
+        sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
+    }
+    return $data;
+}
+function checkmail($smarty, $module_name, $local_templates_dir,  $arrConf, $pImap){
+    $jsonObject = new PaloSantoJSON();
+    $flag=false;
+    
+    //obtenemos la lista de mails y vemos si ahi algun cambio
+    //obtenemos el mailbox que deseamos leer
+    $mailbox=getParameter('folder');
+    $action=getParameter('action');
+    
+    session_commit();
+    ini_set("session.use_cookies","0");
+    
+    //creamos la connección al mailbox
+    $pImap->setMailbox($mailbox);
+    
+    $result=$pImap->login($_SESSION['elastix_user'], $_SESSION['elastix_pass2']);
+    if($result==false){
+        $jsonObject->set_status("ERROR");
+        $jsonObject->set_error($pImap->errMsg);
+        $flag=true;
+    }else{
+        $result=$pImap->getRecentMessage();
+        if($result===false){
+            $jsonObject->set_status("ERROR");
+            $jsonObject->set_error($pImap->errMsg);
+            $flag=true;
+        }else{
+            if($result==0){
+                $jsonObject->set_status("NOCHANGED");
+            }else{
+                $jsonObject->set_status("CHANGED");
+                $flag=true;
+            }
+        }
+    }
+    
+    cleanAlertsImap();
+    $pImap->close_mail_connection();
+    return array('there_was_change'=>$flag,'data'=>$jsonObject->createJSON());
+}
+function getSession()
+{
+    session_commit();
+    ini_set("session.use_cookies","0");
+    if(session_start()){
+        $tmp = $_SESSION;
+        session_commit();
+    }
+    return $tmp;
+}
+function putSession($data)//data es un arreglo
+{
+    session_commit();
+    ini_set("session.use_cookies","0");
+    if(session_start()){
+        $_SESSION = $data;
+        session_commit();
+    }
 }
 function getAction()
 {
@@ -782,6 +952,10 @@ function getAction()
       return "attach_file";
     }elseif(getParameter("action")=="deattach_file"){
       return "deattach_file";
+    }elseif(getParameter("action")=="forwardGetAttachs"){
+      return "forwardGetAttachs";
+    }elseif(getParameter("action")=="refreshMail"){
+      return "refreshMail";
     }else
       return "report";
 }

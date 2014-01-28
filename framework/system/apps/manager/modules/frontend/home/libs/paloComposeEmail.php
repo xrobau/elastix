@@ -32,8 +32,6 @@ require_once "apps/home/libs/emailaddress.php";
 require_once "apps/home/libs/paloSantoHome.class.php";
 require_once "libs/phpmailer/class.phpmailer.php";
 
-define('PATH_UPLOAD_ATTACHS','/var/www/elastixdir/uploadAttachs');
-
 class paloComposeEmail{
     //email address that send the email
     protected $username;
@@ -47,9 +45,10 @@ class paloComposeEmail{
     protected $phpMailer;
     protected $useSMTP = false;
     protected $errMsg = '';
+    protected $attachments = '';
     
     
-    function __construct($user, $pass, &$pImap){
+    function __construct($user, $pass, $name, &$pImap){
         //validate user
         if (filter_var($user, FILTER_VALIDATE_EMAIL)){
             //revisamos que el usuario exista en elastix y obtenemos el nombre
@@ -59,6 +58,8 @@ class paloComposeEmail{
         }
         
         $this->pass=$pass;
+        
+        $this->name=$name;
         
         //TODO: read email configuration user
         // set if user use smt to send email and other security issue
@@ -70,16 +71,22 @@ class paloComposeEmail{
             $this->paloImap=new paloImap();
         }
     }
-    
+        
     function getErrorMsg(){
         return $this->errMsg;
     }
     
-    function sendEmail($headers,$subject,$body,$attachments=null,$draft=false){
+    function setAttachments($attachments){
+        if(is_array($attachments)){
+            $this->attachments=$attachments;
+        }
+    }
+    
+    function sendEmail($headers,$subject,$body,$draft=false){
         //check de headers
         //to
         try{
-            $this->phpMailer = new PHPMailer(true);
+            $this->phpMailer = new PHPMailerMime(true);
             
             //Elastix usa codificacion UTF8
             $this->phpMailer->CharSet = 'UTF-8';
@@ -141,12 +148,12 @@ class paloComposeEmail{
         
             //esta funcion ademas de enviar el mensaje como html
             //también setea la priedad altBody que corresponde a la parte de mensaje en texto plano
-            $this->phpMailer->MsgHTML($body);
+            $this->phpMailer->paloMsgHTML($body,'/var/www/html',$this->attachments);
             
             $uploadedFiles=array();
             //attachments
-            If(is_array($attachments)){
-                foreach($attachments as $attach){
+            If(is_array($this->attachments)){
+                foreach($this->attachments as $key => $attach){
                     if($attach['type']=='file'){
                         if(is_string($attach['filename']) && $attach['filename']!=''){
                             $filename=basename($attach['filename']);
@@ -159,12 +166,9 @@ class paloComposeEmail{
                             
                             if(is_file(PATH_UPLOAD_ATTACHS."/$filename")){
                                 $uploadedFiles[]=PATH_UPLOAD_ATTACHS."/$filename";
-                                //$this->phpMailer->AddAttachment(PATH_UPLOAD_ATTACHS."/$filename", $name, 'base64', $attach['mime']);
-                                $this->phpMailer->AddAttachment(PATH_UPLOAD_ATTACHS."/$filename", $name);
+                                $this->phpMailer->AddAttachment(PATH_UPLOAD_ATTACHS."/$filename", $name, 'base64', $attach['mime']);
                             }
                         }
-                    }else{
-                        
                     }
                 }
             }
@@ -172,6 +176,8 @@ class paloComposeEmail{
             //si draft==true significa que se debe guardar una copia del archivo 
             //en borradores y no debe ser enviado
             if($draft){
+                cleanAlertsImap();
+                $pImap->close_mail_connection();
                 return true;
             }
             
@@ -194,19 +200,25 @@ class paloComposeEmail{
             //1.- comprobamos que la carpeta Sent exista y sí no existe la creamos
             //2.- procedemos a crear la coneccion a dicha carpeta
             //3.- procedemo a agregar el archivo a la carpeta
-            $this->paloImap->login($this->username, $this->pass);
-            $sentFolder='Sent';
-            $arrFolders=$this->paloImap->getMailboxList($sentFolder);
-            if(isset($arrFolders[$sentFolder])){
-                if(!$this->paloImap->createMailbox($sentFolder)){
+            if($this->paloImap->login($this->username, $this->pass)){;
+                $sentFolder='Sent';
+                $arrFolders=$this->paloImap->getMailboxList($sentFolder);
+                if(isset($arrFolders[$sentFolder])){
+                    if(!$this->paloImap->createMailbox($sentFolder)){
+                        $this->errMsg=$this->paloImap->getErrorMsg();
+                    }
+                }
+                
+                $this->paloImap->setMailbox('Sent');
+                if(!$this->paloImap->appendMessage($sentFolder,$this->phpMailer->getMiMeStringToAppendImap(),"\\Seen")){
                     $this->errMsg=$this->paloImap->getErrorMsg();
                 }
-            }
-            
-            $this->paloImap->setMailbox('Sent');
-            if(!$this->paloImap->appendMessage($sentFolder,str_replace("\n","\r\n",trim($this->phpMailer->getSentMIMEMessage())."\r\n"),"\\Seen")){
+            }else{
                 $this->errMsg=$this->paloImap->getErrorMsg();
             }
+            
+            cleanAlertsImap();
+            $this->paloImap->close_mail_connection();
             return true;
         } catch(phpmailerException $e){
             $this->errMsg=$e->errorMessage();
@@ -217,8 +229,109 @@ class paloComposeEmail{
         }
         
     }
+}
+
+class PHPMailerMime extends PHPMailer{
+    public function getMiMeStringToAppendImap(){
+        return str_replace("\n","\r\n",$this->MIMEHeader.$this->mailHeader)."\r\n\r\n".str_replace("\n","\r\n",$this->MIMEBody);
+    }
     
-    function uploadAttach(){
+    /**
+     * Create a message from an HTML string.
+     * Automatically makes modifications for inline images and backgrounds
+     * and creates a plain-text version by converting the HTML.
+     * Overwrites any existing values in $this->Body and $this->AltBody
+     * @access public
+     * @param string $message HTML message string
+     * @param string $basedir baseline directory for path
+     * @param bool $advanced Whether to use the advanced HTML to text converter
+     * @return string $message
+     */
+    public function paloMsgHTML($message, $basedir = '', $attachments, $advanced=FALSE)
+    {
+        //path directo solo cuando son imágenes de los emoticones 
+        //otras referencias a paths directos deben ser ignorados
+        //revisar los urls por si las peticiones corresponden a inline attachments
+        //al momento de reenviar un archivo
         
+        preg_match_all("/(src|background)=[\"'](.*)[\"']/Ui", $message, $images);
+        if (isset($images[2])) {
+            foreach ($images[2] as $i => $url) {
+                // do not change urls for absolute images (thanks to corvuscorax)
+                if (!preg_match('#^[A-z]+://#', $url)) {
+                    //inline attachment la hacer forward
+                    if(preg_match("/^index.php\\?(.*)/",$url,$parts)){
+                        parse_str($parts[1], $query);
+                        if(isset($query['amp;cid'])){
+                            if(isset($attachments[$query['amp;cid']])){
+                                if($attachments[$query['amp;cid']]['type']=='inline'){
+                                    $attach=$attachments[$query['amp;cid']];
+                                    if(is_string($attach['filename']) && $attach['filename']!=''){
+                                        $filename=basename($attach['filename']);
+                                        $name=$filename;
+                                        if(isset($attach['name'])){
+                                            if(is_string($attach['name']) && $attach['name']!=''){
+                                                $name=$attach['name'];
+                                            }
+                                        }
+                                        $cid = md5($url) . '@phpmailer.0'; //RFC2392 S 2
+                                        if($this->addEmbeddedImage(
+                                            PATH_UPLOAD_ATTACHS."/$filename",
+                                            $cid,
+                                            $filename,
+                                            'base64',
+                                            $attach['mime'])){
+                                            $message = preg_replace(
+                                                "/" . $images[1][$i] . "=[\"']" . preg_quote($url, '/') . "[\"']/Ui",
+                                                $images[1][$i] . "=\"cid:" . $cid . "\"",
+                                                $message
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        $filename = basename($url);
+                        $directory = dirname($url);
+                        //solo permitimos imágenes que corresponde a emoticones
+                        //del editor
+                        if (strlen($basedir) > 1 && substr($basedir, -1) != '/') {
+                            $basedir .= '/';
+                        }
+                        if (strlen($directory) > 1 && substr($directory, -1) != '/') {
+                            $directory .= '/';
+                        }
+                        if ( $basedir . $directory == '/var/www/html/web/apps/home/tinymce/js/tinymce/plugins/emoticons/img' ){
+                            $cid = md5($url) . '@phpmailer.0'; //RFC2392 S 2
+                            if ($this->addEmbeddedImage(
+                                $basedir . $directory . $filename,
+                                $cid,
+                                $filename,
+                                'base64',
+                                self::_mime_types(self::mb_pathinfo($filename, PATHINFO_EXTENSION))
+                            )
+                            ) {
+                                $message = preg_replace(
+                                    "/" . $images[1][$i] . "=[\"']" . preg_quote($url, '/') . "[\"']/Ui",
+                                    $images[1][$i] . "=\"cid:" . $cid . "\"",
+                                    $message
+                                );
+                            }
+                        }else{
+                            //se trata de incluir un archivo no válido
+                        }
+                    }
+                }
+            }
+        }
+        $this->isHTML(true);
+        if (empty($this->AltBody)) {
+            $this->AltBody = 'To view this email message, open it in a program that understands HTML!' . "\n\n";
+        }
+        //Convert all message body line breaks to CRLF, makes quoted-printable encoding work much better
+        $this->Body = $this->normalizeBreaks($message);
+        $this->AltBody = $this->normalizeBreaks($this->html2text($message, $advanced));
+        return $this->Body;
     }
 }

@@ -56,7 +56,7 @@
 }
 #mail_toolbar{
     margin-left:0px;
-    min-height:50px;
+    min-height:40px;
 }
 #b1_1{
     border-right: 1px solid rgb(204, 204, 204);			
@@ -283,17 +283,6 @@ td.elx_bodymsg_tdheader:first-child{
 #elx_mail_pager > ul{
     margin:0;
 }
-.elx_compose_textarea{
-    resize: none;
-    width: 100%;
-    border: 1px solid #999;
-}
-.elx-del-compose-header{
-    vertical-align:top;
-}
-.elx_compose_htd{
-    width: 100%;
-}
 .btn-bodymsg-tools{
     height:30px;
 }
@@ -330,48 +319,6 @@ td.elx_bodymsg_tdheader:first-child{
     height: 20px;
     position: relative;
     top: -2px;
-}
-#elx-compose-msg-attach{
-    background-color: #FFFFFF;
-    margin: 0px;
-    padding: 0px;
-    border: 0px;
-    position: relative;
-    float: none;
-}
-.elx-compose-msg-attachitem{
-    margin: 3px 1px 2px 3px;
-    padding: 2px 5px 2px 5px;
-    border: 1px solid #aaa;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    position: relative;
-    display: inline-block;
-}
-.elx-compose-msg-attachitem img{
-    width:18px;
-    height:16px;
-    padding-left: 2px;
-    border:0;
-    display:inline-block;
-    float:none;
-}
-#elx_attachButton{
-    position:relative;
-    overflow:hidden;
-    max-width:60px;
-}
-#attachFileButton{
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    opacity: 0;
-    -ms-filter: 'alpha(opacity=0)';
-    font-size: 200px;
-    direction: ltr;
-    cursor: pointer;
 }
 
 /*****************************************************/

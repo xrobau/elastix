@@ -61,6 +61,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%
 
 # ** /etc path ** #
 mkdir -p $RPM_BUILD_ROOT/etc/cron.d
+mkdir -p $RPM_BUILD_ROOT/etc/cron.hourly
 mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/php.d
 mkdir -p $RPM_BUILD_ROOT/etc/yum.repos.d
@@ -140,6 +141,7 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/php.d/elastix.ini           
 # ** crons config ** #
 mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/cron.d/elastix.cron              $RPM_BUILD_ROOT/etc/cron.d/
 chmod 644 $RPM_BUILD_ROOT/etc/cron.d/*
+mv $RPM_BUILD_DIR/elastix-framework/framework/setup/etc/cron.hourly/elastix_emailattach_cleanup	$RPM_BUILD_ROOT/etc/cron.hourly/	
 
 # ** Repos config ** #
 mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/yum.repos.d/CentOS-Base.repo     $RPM_BUILD_ROOT/usr/share/elastix/
@@ -395,6 +397,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/generic-cloexec
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
+/etc/cron.hourly/elastix_emailattach_cleanup
 %defattr(770, root, asterisk, 770)
 /var/lib/php/session-asterisk
 

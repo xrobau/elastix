@@ -657,9 +657,9 @@ function startChatUser(uri,name,alias,action){
         elx_im_cabecera +="</div>"
         
         var elx_im_cabecera2="<div class='elx_header2_tab_chat'>";
-        elx_im_cabecera2 +="<span class='glyphicon glyphicon-earphone elx_icon_chat elx_icon_chat2' alt='Call' data-tooltip='Call' aria-label='Call'></span>";
-        elx_im_cabecera2 +="<span class='glyphicon glyphicon-envelope elx_icon_chat elx_icon_chat2' alt='Send E-Mail' data-tooltip='Send E-Mail' aria-label='Send E-Mail'></span>";
-        elx_im_cabecera2 +="<span class='glyphicon glyphicon-print elx_icon_chat elx_icon_chat2' alt='Send Fax' data-tooltip='Send Fax' aria-label='Send Fax'></span>";
+        //elx_im_cabecera2 +="<span class='glyphicon glyphicon-earphone elx_icon_chat elx_icon_chat2' alt='Call' data-tooltip='Call' aria-label='Call'></span>";
+        elx_im_cabecera2 +="<span class='glyphicon glyphicon-envelope elx_icon_chat elx_icon_chat2' onclick='elx_newEmail(\""+alias+"\")' alt='Send E-Mail' data-tooltip='Send E-Mail' aria-label='Send E-Mail'></span>";
+        elx_im_cabecera2 +="<span class='glyphicon glyphicon-print elx_icon_chat elx_icon_chat2' onclick='showSendFax(\""+alias+"\")' alt='Send Fax' data-tooltip='Send Fax' aria-label='Send Fax'></span>";
         elx_im_cabecera2 +="</div>";
         
         var conversation="<div class='elx_content_chat'>";
@@ -1088,10 +1088,13 @@ function resetImage(url)
 
 //llama a la función "showSendFax" que muestra la ventana del popup para enviar fax
 //la función se encuentra dentro del módulo "my_fax"
-function showSendFax(){
+function showSendFax(alias){
     var arrAction = new Array();
     arrAction["menu"]="my_fax";
     arrAction["action"]="showSendFax";
+    if(alias){
+        arrAction["alias"]=alias;
+    }
     arrAction["rawmode"]="yes";
     request("index.php", arrAction, false,
         function(arrData,statusResponse,error){
@@ -1193,6 +1196,7 @@ function checkChatContactsStatus()
                 }
                 //una vez teniendo el nuevo listado, verificamos si existe un criterio de busqueda.
                 var pattern = $("input[name='im_search_filter']").val();  
+                
                 $(".elx_contact .elx_im_name_user").each(function ()
                 {
                     var str = $(this).html();
@@ -1208,4 +1212,36 @@ function checkChatContactsStatus()
             }
     
         });
+}
+
+function elx_newEmail(alias){
+    var arrAction = new Array();
+    arrAction["menu"]="home";
+    arrAction["action"]="get_templateEmail";
+    if(alias){
+        arrAction["destination"]=alias;
+    }
+    arrAction["rawmode"]="yes";
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert(error);
+            }else{
+                //esto es importante hacer para asegurarmos que no haya 
+                //oculto otro elemente con el mismo id
+                $("#elx-compose-email").remove();
+                $("#elx_popup_content").html(arrData);
+                $("#elx-compose-email").addClass("modal-content");
+                $("#elx-compose-email").prepend("<div class='modal-header'><button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button><h3 id='myModalLabel'>Send Mail</h3></div>");
+                $("#elx-compose-email").append("<div class='modal-footer'><button type='button' class='btn btn-primary' id='elx_attachButton'>Attach<input type='file' name='attachFileButton' id='attachFileButton'></button><button type='button' class='btn btn-primary' onclick='composeEmail(\"popup\")'>Send</button></div>");    
+                emailAttachFile();
+                var options = {
+                    show: true
+                    }
+                $('#elx_general_popup').modal(options);
+                richTextInit();
+            }
+        }
+    );
+
 }

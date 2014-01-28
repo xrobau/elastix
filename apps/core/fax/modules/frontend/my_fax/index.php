@@ -231,7 +231,24 @@ function putSession($data)//data es un arreglo
 function showSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf){
     global $arrCredentials;
     $jsonObject = new PaloSantoJSON();
+    $dataFax=array();
     $pMyFax=new paloMyFax($pDB,$arrCredentials['idUser']);
+    
+    // si la variable tiene $alias tiene un valor diferente de null, es 
+    // porque se abrio el fax desde la ventana del chat, del cual se  obtendrá el número de fax del destinatario
+    $alias=getParameter('alias');
+    if(!empty($alias)){
+        $username = explode("@", $alias);
+        $mail=$username[0]."@".$arrCredentials['domain'];
+        $destinationFax = $pMyFax->getFaxExtensionUserByUsername($mail);
+        
+        if($destinationFax==false){
+            $jsonObject->set_error($pMyFax->getErrorMsg());
+            return $jsonObject->createJSON();
+        }
+        $dataFax['destinationFaxNumber']= htmlentities($destinationFax,ENT_QUOTES, "UTF-8");
+    }
+    
     $my_fax=$pMyFax->getMyFaxExtension();
      
     if($my_fax==false){
@@ -239,7 +256,6 @@ function showSendFax($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
     } 
     //$my_fax['MODEM']
     $device=$my_fax['CID_NAME']." / ".$my_fax['CID_NUMBER'];
-    $dataFax=array();
     
     $smarty->assign("FAX_DEV",$my_fax['MODEM']);
     $smarty->assign("TITLE_POPUP",_tr("Send Fax"));

@@ -207,6 +207,28 @@ class paloMyFax{
         return true;
     }
     
+    //funcion para obtener el número de fax por medio de la direccion de correo (username)
+    function getFaxExtensionUserByUsername($username){
+        $query="SELECT fax_extension FROM acl_user WHERE username=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,array($username));
+        if($result===false){
+            $this->errMsg=_tr("DATABASE ERROR").' '.$this->_DB->errMsg;
+            return false;
+        }elseif(count($result)==0){
+            $this->errMsg=_tr("User does not exist").' '.$this->_DB->errMsg;
+            return false;
+        }else{
+            if($result['fax_extension']=='' || is_null($result['fax_extension'])){
+                $this->errMsg=_tr("User does not have an fax extension");
+                return false;                
+            }else{
+                return $result['fax_extension'];
+            }            
+        }    
+    }
+    
+    
+    
     /************** funciones utilizadas en el popup de "sendfax"******************************/
     
     function generarArchivoTextoPS(&$data_content)

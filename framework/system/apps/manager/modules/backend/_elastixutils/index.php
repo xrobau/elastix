@@ -304,9 +304,6 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
                 }
             }
         }
-            $session = getSession();
-            $session['chatlistStatus'] = $arrContacts;
-            putSession($session);
         $jsonObject->set_message($arrContacts);
     }
     $astMang->disconnect();

@@ -90,7 +90,7 @@
 
 <!-- The overlay and the box general popup -->
 <div class="overlay" id="overlay" style="display:none;"></div>
-<div class="modal fade" id="elx_general_popup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="elx_general_popup" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" id='elx_popup_content'>
         <!-- se llama al profile_uf.tpl -->
     </div><!-- /.modal-dialog -->

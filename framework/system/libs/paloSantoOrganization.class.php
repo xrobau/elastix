@@ -1619,9 +1619,12 @@ class paloSantoOrganization{
             if($pACL->addToGroup($idUser, $idGrupo)){
 
                 $old_quota=$pACL->getUserProp($idUser,"email_quota");
+                if($old_quota===false){
+                    $old_quota=1;
+                }
                 //actualizamos la quota de correo
                 if(isset($quota) && $quota!="" && $continuar){
-                    if($pEmail->updateQuota($old_quota,$quota,$username)){
+                    if($pEmail->updateQuota($old_quota*1024,$quota*1024,$username)){
                         if(!$pACL->setUserProp($idUser,"email_quota",$quota,"email")){
                             $error= _tr("Error setting email quota").$pACL->errMsg;
                             $pEmail->updateQuota($quota,$old_quota);

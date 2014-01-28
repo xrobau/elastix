@@ -1222,18 +1222,22 @@ INFO_AUTH_MODULO;
      * Funcion que devuelve una lista 
      */
     function getUsersAccountsInfoByDomain($idOrganization,$name=null){
-        $query="SELECT u.id, u.name, u.username, u.extension, u.fax_extension, e.elxweb_device, e.alias
-                FROM acl_user u JOIN acl_group g ON u.id_group=g.id JOIN extension e ON u.extension=e.exten WHERE g.id_organization=? and e.organization_domain=(SELECT domain from organization where id=?)";
+        $query="SELECT u.id, u.name, u.username, u.extension, ".
+                    "u.fax_extension, e.elxweb_device, e.alias ".
+                        "FROM acl_user u JOIN acl_group g ON u.id_group=g.id ".
+                            "JOIN extension e ON u.extension=e.exten WHERE g.id_organization=? ".
+                                "and e.organization_domain=(SELECT domain from organization where id=?)";
         $param[]=$idOrganization;
         $param[]=$idOrganization;
         if($name!='' && isset($name)){
-            $query .=' and name LIKE ?';
+            $query .=' and u.name LIKE ?';
             $param[]="%$name%";
         }
         $query .=" order by name ASC";
         $result=$this->_DB->fetchTable($query,true,$param);
         if($result===false){
-            $this->errMsg=_tr("DATABASE ERROR");
+            //$this->errMsg=_tr("DATABASE ERROR");
+            $this->errMsg = $this->_DB->errMsg;
         }
         return $result;
     }

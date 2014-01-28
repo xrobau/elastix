@@ -1240,6 +1240,9 @@ function elx_newEmail(alias){
                     }
                 $('#elx_general_popup').modal(options);
                 richTextInit();
+                /*$('#elx_general_popup').on('shown', function() {
+                    $(document).off('focusin.modal');
+                });*/
             }
         }
     );

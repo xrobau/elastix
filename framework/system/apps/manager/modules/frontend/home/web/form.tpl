@@ -1,4 +1,3 @@
-<script type='text/javascript' src="web/_common/js/jquery.liteuploader.js"></script>
 <div id="paneldiv">  
     <div id='list_folders'>
         <div id="leftdiv">
@@ -41,9 +40,9 @@
                         <div id='elx_email_mark_as' class='elx_email_pag_bar elx_email_pag_btn'>
                             <div class="btn-group">
                                 <img src='web/apps/home/images/tag.png' class='elx-toolmail1-img dropdown-toggle' data-toggle="dropdown"></img>
-                                <ul id='elx_email_mv_ul' class="dropdown-menu" role="menu">
-                                {foreach from=$MOVE_FOLDERS key=k item=mv_folder}
-                                    <li><a href="#" data-nameFolder="{$k}" class='elx_amvfolder'>{$mv_folder}</a></li>
+                                <ul class="dropdown-menu" role="menu">
+                                {foreach from=$ELX_MAIL_MARK_OPT key=k item=opt}
+                                    <li><a href="#" onclick='mark_email_msg_as("{$k}")'>{$opt}</a></li>
                                 {/foreach}
                                 </ul>
                             </div>

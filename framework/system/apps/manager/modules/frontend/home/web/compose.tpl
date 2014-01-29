@@ -1,3 +1,4 @@
+<script type='text/javascript' src="web/_common/js/jquery.liteuploader.js"></script>
 <div id='elx-compose-email'>
     <div id='compose-headers-div' class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -48,6 +49,8 @@
 <input type='hidden' name='msg_emptysubject' value="{$MSG_SUBJECT}">
 <input type='hidden' name='msg_emptycontent' value="{$MSG_CONTENT}">
 <input type='hidden' name='elx_txtuploading' value='{$TEXT_UPLOADING}'>
+<input type='hidden' name='elx_txtattach' value='{$TEXT_attach}'>
+<input type='hidden' name='elx_txtsend' value='{$TEXT_send}'>
 {literal}
     <style type="text/css">
         .mce-widget button {

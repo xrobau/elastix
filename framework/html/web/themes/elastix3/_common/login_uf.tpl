@@ -29,7 +29,7 @@
 				<a target="_blank" style="text-decoration: none;" href="http://www.opensource.org/licenses/gpl-license.php">GPL</a>
 				by
 				<a target="_blank" style="text-decoration: none;" href="http://www.palosanto.com">PaloSanto Solutions</a>
-				. 2006 - 2013.
+				. 2006 - {$currentyear}.
 		  </footer>
 	</div>
 	

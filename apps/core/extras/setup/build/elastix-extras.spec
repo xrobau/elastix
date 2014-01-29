@@ -11,7 +11,6 @@ Source0: %{modname}_2.0.4-4.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.2.0-18
-Requires: yum
 
 %description
 Elastix EXTRA 
@@ -30,7 +29,6 @@ mv modules/                $RPM_BUILD_ROOT/var/www/html/
 # that cannot be handled by RPM.
 mkdir -p                   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv -f setup/static/        $RPM_BUILD_ROOT/var/www/html/
-mv -f setup/xmlservices/   $RPM_BUILD_ROOT/var/www/html/
 mv setup/                  $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml                $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -63,6 +61,14 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: xmlservices: Remove unused xmlservices directory. This code is Cisco
+  specific, has a very poor implementation and exposes the external addressbook
+  without authentication. This functionality is now better implemented in the
+  new Endpoint Configurator.
+- CHANGED: remove unexplained yum dependency.
+  SVN Rev[6447]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
   SVN history. Bumped release in specfile.

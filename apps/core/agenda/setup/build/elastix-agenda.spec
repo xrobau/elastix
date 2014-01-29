@@ -53,6 +53,8 @@ done
 mkdir -p $RPM_BUILD_ROOT/etc/cron.daily/
 mv setup/etc/cron.daily/elastix_contacs_cleanup $RPM_BUILD_ROOT/etc/cron.daily/
 
+mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/contacts_images
+
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -148,6 +150,7 @@ fi
 /var/lib/asterisk/sounds/custom
 /var/lib/asterisk/sounds/custom/calendarEvent.gsm
 /var/lib/asterisk/sounds/custom/*
+/var/www/elastixdir/contacts_images
 #/opt/elastix/elastix-synchronizer
 #/opt/elastix/elastix-synchronizer/*
 #/etc/init.d/elastix-synchronizerd

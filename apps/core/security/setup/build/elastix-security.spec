@@ -131,6 +131,7 @@ fi
 - FIXED: Advanced Settings: fix the setadminpwd privileged script to modify
   /etc/freepbx.conf in addition to other known FreePBX files, if it exists.
   Fixes item 6 of Elastix bug #1831.
+  SVN Rev[6439]
 
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest

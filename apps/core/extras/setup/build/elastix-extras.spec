@@ -67,7 +67,7 @@ fi
   without authentication. This functionality is now better implemented in the
   new Endpoint Configurator.
 - CHANGED: remove unexplained yum dependency.
-  SVN Rev[6447]
+  SVN Rev[6448]
 
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 

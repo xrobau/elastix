@@ -275,5 +275,47 @@ class paloControlPanelUtils
 
         return array($dialchan, $cidname);
     }
+    
+    /**
+     * Procedimiento que inicia una llamada desde la cuenta que corresponde a
+     * $source, a la extensión de voicemail. La extensión a marcar para el 
+     * voicemail se recupera a través de una consulta a la base de datos 
+     * FreePBX.
+     * 
+     * @param   string  $source Extensión de la cuenta fuente de la llamada
+     * 
+     * @return  bool    VERDADERO en éxito, FALSO en error
+     */
+    function callExtensionVoicemail($source)
+    {
+        // Abrir conexión a la base de datos de FreePBX
+        $dsn = generarDSNSistema('asteriskuser', 'asterisk');
+        $db = new paloDB($dsn);
+        if ($db->errMsg != '') {
+            $this->errMsg = $db->errMsg;
+            $db->disconnect();
+            $db = NULL;
+            return FALSE;            
+        }
+        
+        // Consulta del código correspondiente al voicemail
+        $target = '*97';   // Valor por omisión de la extensión de voicemail
+        $sql =
+            'SELECT defaultcode, customcode FROM featurecodes '.
+            'WHERE modulename = "voicemail" AND featurename = "myvoicemail"';
+        $tupla = $db->getFirstRowQuery($sql, TRUE);
+        if (!is_array($tupla)) {
+            $this->errMsg = $db->errMsg;
+            $db->disconnect();
+            $db = NULL;
+            return FALSE;
+        }
+        if (isset($tupla['customcode']) && !is_null($tupla['customcode']))
+            $target = $tupla['customcode'];
+        elseif (isset($tupla['defaultcode']) && !is_null($tupla['defaultcode']))
+            $target = $tupla['defaultcode'];
+
+        return $this->callExtension($source, $target);
+    }
 }
 ?>

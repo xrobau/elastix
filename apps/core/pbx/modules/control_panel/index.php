@@ -271,7 +271,7 @@ function handleJSON_voicemailExtension($smarty, $module_name, $local_templates_d
         $respuesta['message'] = _tr('Invalid or missing parameters');
     } else {
         $pUtils = new paloControlPanelUtils();
-        if (!$pUtils->callExtension($_REQUEST['source'], '*98')) {
+        if (!$pUtils->callExtensionVoicemail($_REQUEST['source'])) {
             $respuesta['status'] = 'error';
             $respuesta['message'] = $pUtils->errMsg;
         }

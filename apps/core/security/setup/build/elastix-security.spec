@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -127,15 +127,41 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Wed Jan 29 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Wed Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Advanced Settings: fix the setadminpwd privileged script to modify
   /etc/freepbx.conf in addition to other known FreePBX files, if it exists.
   Fixes item 6 of Elastix bug #1831.
   SVN Rev[6439]
 
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: sec_advanced_settings module, Message copy right FreePBX was
+  changed.
+  SVN Rev[6423]
+
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: sec_advanced_settings module, Message copy right FreePBX was
+  changed.
+  SVN Rev[6422]
+
+* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: security - sec_advanced_settings-index.html,en.lang,es.lang: A
+  correction in the use of trademark FreePBX has made it within the code of
+  this module.
+  SVN Rev[6417]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6379]
+
+* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Update to the changelog about the english and spanish help files in
+  the security modules.
+  SVN Rev[6365]
 
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Firewall Rules, Define Ports, Port Knocking Interfaces,

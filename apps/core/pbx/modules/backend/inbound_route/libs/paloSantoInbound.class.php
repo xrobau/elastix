@@ -611,12 +611,12 @@ class paloSantoInbound extends paloAsteriskDB{
     
     function getFaxExtesion(){
         $fax=array();
-        $query="SELECT exten,callerid_name from fax where organization_domain=?";
+        $query="SELECT exten,clid_name from fax where organization_domain=?";
         $result=$this->_DB->fetchTable($query,true,array($this->domain));
         if($result!=false){
             $fax["any"]="any fax exten";
             foreach($result as $value){
-                $fax[$value["exten"]]=$value["exten"]." (".$value["callerid_name"].")";
+                $fax[$value["exten"]]=$value["exten"]." (".$value["clid_name"].")";
             }
         }
         return $fax;

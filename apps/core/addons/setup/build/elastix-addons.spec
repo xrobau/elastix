@@ -125,6 +125,12 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Jan 29 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: handle case in which transaction summary report includes a 
+  line of a package that is being obsoleted by another package, and do not choke
+  on this.
+  SVN Rev[6444]
+
 * Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.

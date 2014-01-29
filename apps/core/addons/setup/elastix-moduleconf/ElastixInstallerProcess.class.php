@@ -707,9 +707,12 @@ Installing for dependencies:
             } elseif (strpos($sLinea, "Transaction Summary") !== FALSE) {
                 $bReporte = FALSE;
             } elseif ($bReporte) {
+                /* Si el nombre de paquete es muy largo, puede que el resto de la 
+                   información haya sido desplazada a la línea siguiente. Sin
+                   embargo, no se espera que hayan más de dos líneas. */
                 $regs = NULL;
                 $sLineaCompleta = ' '.$sLineaPrevia.$sLinea;
-                if (preg_match('/^\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+[kM]?/', $sLineaCompleta, $regs)) {
+                if (preg_match('/^\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+([0-9\.\,]+)\s+[kM]?/', $sLineaCompleta, $regs)) {
                     $this->_estadoPaquete['progreso'][] = array(
                         'pkgaction' =>  $sOperacion,
                         'nombre'    =>  $regs[1],
@@ -734,7 +737,9 @@ Installing for dependencies:
                     $sOperacion = 'remove';
                     $sLineaPrevia = '';
                 } else {
-                    $sLineaPrevia .= $sLinea;
+                    if (preg_match('/^\s+(\S+)\s*$/', $sLinea))
+                        $sLineaPrevia = $sLinea;
+                    else $sLineaPrevia = '';
                 }
             } 
             if (preg_match('/No package (\S+) available/', $sLinea, $regs)) {

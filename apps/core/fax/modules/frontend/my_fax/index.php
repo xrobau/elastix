@@ -137,11 +137,9 @@ function saveExtensionSettings($smarty, $module_name, $local_templates_dir, $pDB
     if(!$pMyFax->editFaxExten($myFax)){
         $pMyFax->_DB->rollBack();
         $jsonObject->set_error($pMyFax->getErrorMsg());
-        //$jsonObject->set_error($myFax);
     }else{
         $pMyFax->_DB->commit();
-        //$jsonObject->set_message($myFax);
-        $jsonObject->set_message("Changes were saved succefully");
+        $jsonObject->set_message(_tr("Changes were saved succefully")." ".$pMyFax->getErrorMsg());
     }
     return $jsonObject->createJSON();
 }

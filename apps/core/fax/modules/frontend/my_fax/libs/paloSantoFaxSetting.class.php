@@ -150,6 +150,7 @@ class paloMyFax{
         $errorData=array();
         $errorBoolean= false;
 
+        $arrProp['idUser']=$this->idUser;
         if($arrProp['clid_name']==''){
             $errorData['field'][] = "CID_NAME";
             $errorBoolean= true;
@@ -197,11 +198,12 @@ class paloMyFax{
               
         $pMyFax = new paloFax($this->_DB);
         if(!$pMyFax->editFaxToUser($arrProp)){
+            $this->errMsg = array('stringError'=>$pMyFax->errMsg);
             return false;
         }
 
         if(!$pMyFax->restartService()){
-            return false;
+            $this->errMsg = $pMyFax->errMsg;
         }
 
         return true;

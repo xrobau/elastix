@@ -105,7 +105,6 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
         header("Location: index.php");
         writeLOG("audit.log", "LOGIN $_POST[input_user]: Web Interface login successful. Accepted password for $_POST[input_user] from $_SERVER[REMOTE_ADDR].");
         update_theme();
-
         exit;
     } else {
         $user = urlencode(substr($_POST['input_user'],0,20));
@@ -233,9 +232,9 @@ if (isset($_SESSION['elastix_user']) &&
             if(isset($sModuleContent['JS_CSS_HEAD'])){
                 //es necesario cargar los css y js que el modulo pone
                 //$smarty->assign("HEADER_MODULES",$sModuleContent['JS_CSS_HEAD']);
-                $smarty->assign("CONTENT", $sModuleContent['JS_CSS_HEAD'].$sModuleContent['data']);
+                $smarty->assign("CONTENT", $sModuleContent['JS_CSS_HEAD']."<div id='module_content_framework_data'>".$sModuleContent['data']."</div>");
             }else{
-                $smarty->assign("CONTENT", $sModuleContent['data']);
+                $smarty->assign("CONTENT", "<div id='module_content_framework_data'>".$sModuleContent['data']."<div>");
             }
             
             $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 

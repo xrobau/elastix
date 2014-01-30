@@ -1,9 +1,3 @@
-[endpoint]
-ignore_backup = no
-engine = sqlite3
-path   = /var/www/db
-deletable = yes
-
 [control_panel_design]
 ignore_backup = no
 engine = sqlite3

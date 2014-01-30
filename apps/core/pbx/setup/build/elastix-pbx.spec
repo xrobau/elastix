@@ -7,17 +7,18 @@ Release: 15
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
-#Source0: %{modname}_%{version}-20.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-9
 Prereq: elastix-my_extension >= 2.0.4-5
-#Prereq: freePBX >= 2.11.0-1
 Prereq: elastix-system >= 2.3.0-10
-Prereq: tftp-server, vsftpd
+Prereq: vsftpd
 Prereq: asterisk >= 1.8
 Requires: festival >= 1.95
 Requires: freePBX >= 2.11.0-1
+
+Conflicts: elastix-endpointconfig2 <= 0.0.7
+Requires: elastix-endpointconfig2 >= 2.4.0-0
 
 %description
 Elastix Module PBX
@@ -43,9 +44,6 @@ mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # ** files ftp ** #
 #mkdir -p $RPM_BUILD_ROOT/var/ftp/config
-
-# ** /tftpboot path ** #
-mkdir -p $RPM_BUILD_ROOT/tftpboot
 
 # ** /asterisk path ** #
 mkdir -p $RPM_BUILD_ROOT/etc/asterisk/
@@ -86,20 +84,7 @@ rmdir setup/etc/init.d
 rmdir setup/etc/asterisk
 rmdir setup/usr/share/elastix/privileged
 
-# Archivos tftp and ftp
-mv setup/etc/xinetd.d/tftp                     $RPM_BUILD_ROOT/usr/share/elastix/
-rmdir setup/etc/xinetd.d
-
-# ** files tftpboot for endpoints configurator ** #
-unzip setup/tftpboot/P0S3-08-8-00.zip  -d     $RPM_BUILD_ROOT/tftpboot/
-mv setup/tftpboot/*                           $RPM_BUILD_ROOT/tftpboot/
-
-# Install new endpoint configurator
-mkdir -p $RPM_BUILD_ROOT/usr/bin/
-mv setup/usr/bin/fix-model-duplicates-bug1618 $RPM_BUILD_ROOT/usr/bin/
-chmod 755 $RPM_BUILD_ROOT/usr/bin/fix-model-duplicates-bug1618
-
-rmdir setup/usr/share/elastix setup/usr/share setup/usr/bin setup/usr
+rmdir setup/usr/share/elastix setup/usr/share setup/usr
 
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -126,18 +111,6 @@ if [ $1 -eq 2 ]; then
 fi
 
 %post
-# Tareas de TFTP
-chmod 777 /tftpboot/
-
-# TODO: TAREA DE POST-INSTALACIÓN
-# Tareas de VSFTPD
-#chkconfig --level 2345 vsftpd on
-#chmod 777 /var/ftp/config
-
-# TODO: TAREA DE POST-INSTALACIÓN
-# Reemplazo archivos de otros paquetes: tftp, vsftp
-cat /usr/share/elastix/tftp   > /etc/xinetd.d/tftp
-
 ######### Para ejecucion del migrationFilesMonitor.php ##############
 
 #/usr/share/elastix/migration_version_monitor.info
@@ -221,9 +194,6 @@ if [ $1 -eq 1 ]; then #install
 elif [ $1 -eq 2 ]; then #update
   # The installer database
    elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
-
-  # Elastix bug #1618 - need to scan and fix model duplicates
-  /usr/bin/fix-model-duplicates-bug1618
 fi
 
 #verificando si existe el menu en pbx
@@ -263,6 +233,8 @@ if [ -e /tmp/vsftpd.user_list ] ; then
     rm -f /tmp/vsftpd.user_list
 fi
 
+# Remove old endpoints_batch menu item
+elastix-menuremove endpoints_batch
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -287,10 +259,7 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-/tftpboot/*
-/usr/share/elastix/tftp
 %defattr(755, root, root)
-/usr/bin/fix-model-duplicates-bug1618
 /etc/init.d/festival
 /bin/asterisk.reload
 /usr/share/elastix/privileged/*
@@ -298,6 +267,18 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Remove the old endpoint configurator implementation. Along with this,
+  transfer all TFTP configuration to the new endpoint configurator package.
+  Also remove the implementation for Batch of Endpoints, which makes use of the
+  old implementation, and is also replaced by the new implementation.
+  SVN Rev[6450]
+
+* Wed Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Control Panel: read out voicemail feature code from the database 
+  instead of hardcoding the value inside code.
+  SVN Rev[6446]
+
 * Thu Jan 23 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Festival: introduce check for systemd-style status report in order to
   detect whether festival is running.
@@ -689,7 +670,7 @@ fi
 
 * Mon Jul 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Extensions Batch: fix invalid SQL query that gets executed when an 
-  extension requires a direct DID.
+  extension requires a direct DID. Fixes Elastix bug #1804.
   SVN Rev[5387]
 
 * Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8

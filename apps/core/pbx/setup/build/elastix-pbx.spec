@@ -268,6 +268,7 @@ fi
 
 %changelog
 * Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Control Panel: update Ember.js to 1.3.1, Handlebars to 1.2.1.
 - CHANGED: Remove the old endpoint configurator implementation. Along with this,
   transfer all TFTP configuration to the new endpoint configurator package.
   Also remove the implementation for Batch of Endpoints, which makes use of the

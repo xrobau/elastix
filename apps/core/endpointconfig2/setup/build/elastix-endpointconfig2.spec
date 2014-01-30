@@ -156,6 +156,8 @@ fi
 
 %changelog
 * Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
+- CHANGED: Endpoint Configurator: update Ember.js to 1.3.1, Handlebars to
+  1.2.1.
 - CHANGED: Endpoint Configurator: promotion to main configurator. Transfer of
   ownership of tftpboot files and configuration to this module from elastix-pbx.
   Dropped zipped Cisco firmware files, since package will provide unpacked files.

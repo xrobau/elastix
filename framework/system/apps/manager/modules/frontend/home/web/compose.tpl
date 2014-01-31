@@ -1,3 +1,6 @@
+{literal}
+<link rel="stylesheet" href="web/_common/js/jquery/css/blitzer/jquery-ui-1.8.24.custom.css">
+{/literal}
 <script type='text/javascript' src="web/_common/js/jquery.liteuploader.js"></script>
 <div id='elx-compose-email'>
     <div id='compose-headers-div' class="row">
@@ -188,7 +191,7 @@
                 language : user_language,
                 resize: true,
                 menubar : false,
-                auto_focus: "elx-compose-msg",
+                //auto_focus: "elx-compose-msg",
                 /**
                 * Pendiente de implementar la funcion usada para subir imagenes 
                 file_browser_callback: function(field_name, url, type, win) {
@@ -196,6 +199,7 @@
                 }
                 **/
             });
+            $('textarea[name=compose_to]').focus();
         }
         /**
         * esta funcion es invocada cuando se quiere responder o reenviar un mensaje

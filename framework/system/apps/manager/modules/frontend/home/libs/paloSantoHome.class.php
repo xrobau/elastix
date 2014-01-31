@@ -509,6 +509,49 @@ class paloImap {
         }
         return $recent;
     }
+    
+    function getListInternalContacts() {
+        global $arrCredentials,$arrConf;
+        $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+
+        $data = array($arrCredentials['id_organization']);
+        $query="select acu.name, acu.username from acl_user acu ".
+                    "join acl_group acg on acu.id_group = acg.id ".
+                    "join organization org on acg.id_organization = org.id ".
+                        "where org.id=? ORDER BY acu.name ASC";
+
+        $result=$pDB->fetchTable($query,true,$data);
+        if($result===FALSE){
+            $this->errMsg = $pDB->errMsg;
+            return false;
+        }else{
+            return $result;
+        }
+    }
+    
+    function getListExternalContacts() {
+        global $arrCredentials,$arrConf;
+        $pDB = new paloDB($arrConf['elastix_dsn']['elastix']);
+        
+        $data = array($arrCredentials['idUser'], $arrCredentials['id_organization'], $arrCredentials['idUser']);
+
+        $query="(select concat (name,' ',last_name) as name, ".
+                    "email as username from contacts where iduser=? AND email!='' AND email IS NOT NULL) ".
+                "UNION (select concat (c.name,' ',c.last_name) as name, ".
+                    "c.email as username from contacts c where c.iduser IN ".
+                        "(select acu.id from acl_user acu ".
+                            "join acl_group acg on acu.id_group = acg.id ".
+                                "WHERE acg.id_organization = ? AND acu.id!=?) ".
+                        " AND c.email!='' AND c.email IS NOT NULL AND c.status='isPublic') ORDER BY name ASC";
+
+        $result=$pDB->fetchTable($query,true,$data);
+        if($result===FALSE){
+            $this->errMsg = $pDB->errMsg;
+            return false;
+        }else{
+            return $result;
+        }
+    }
 }
 
 /**

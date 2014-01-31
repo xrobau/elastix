@@ -616,7 +616,8 @@ function actions_email_msg(action){
                         //oculto otro elemente con el mismo id
                         $("#elx-compose-email").remove();
                         
-                        formComposeMsg(action,arrData);
+                        formComposeMsg(action,arrData['modulo']);
+                        mailList(arrData['contacts']); 
                     }   
         });
     }else if(action=='delete'){

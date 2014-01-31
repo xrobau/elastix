@@ -599,8 +599,29 @@ function get_templateEmail($smarty, $module_name, $local_templates_dir,  $arrCon
     $smarty->assign("MSG_CONTENT",_tr("Do you wish send this message with empty body"));
     $smarty->assign("TEXT_UPLOADING", _tr("Uploading.."));
     
+    $internalContacts = $pImap->getListInternalContacts();
+    $externalContacts = $pImap->getListExternalContacts();
+    
+    $arrContacts=array();
+    
+    if (is_array($internalContacts)){
+        foreach($internalContacts as $contact){
+            $arrContacts[]=htmlentities($contact['name'],ENT_COMPAT,'UTF-8')." <".htmlentities($contact['username'],ENT_COMPAT,'UTF-8').">";
+        }
+    }
+    
+    if (is_array($externalContacts)){
+        foreach($externalContacts as $contact){
+            $arrContacts[]=htmlentities($contact['name'],ENT_COMPAT,'UTF-8')." <".htmlentities($contact['username'],ENT_COMPAT,'UTF-8').">";
+        }
+    }
+    
     $contenidoModulo = $smarty->fetch("file:$local_templates_dir/compose.tpl");
-    $jsonObject->set_message($contenidoModulo);
+    $arrData=array();
+    $arrData['modulo']=$contenidoModulo;
+    $arrData['contacts']=$arrContacts;
+
+    $jsonObject->set_message($arrData);
     return $jsonObject->createJSON();
 }
 function compose_email($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){

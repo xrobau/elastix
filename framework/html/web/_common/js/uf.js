@@ -314,6 +314,8 @@ $(document).ready(function(){
     // invocamos la funcion recursiva para chequear el estado de los contactos 
     checkChatContactsStatus();
     
+
+    
 });
 //se calcula el alto del contenido del modulo y se resta del alto del navegador cada
 //que se haga un resize, para que aparezca el scroll cuando sea necesario
@@ -1230,7 +1232,7 @@ function elx_newEmail(alias){
                 //esto es importante hacer para asegurarmos que no haya 
                 //oculto otro elemente con el mismo id
                 $("#elx-compose-email").remove();
-                $("#elx_popup_content").html(arrData);
+                $("#elx_popup_content").html(arrData['modulo']);
                 $("#elx-compose-email").addClass("modal-content");
                 $("#elx-compose-email").prepend("<div class='modal-header'><button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button><h3 id='myModalLabel'>Send Mail</h3></div>");
                 $("#elx-compose-email").append("<div class='modal-footer'><button type='button' class='btn btn-primary' id='elx_attachButton'>Attach<input type='file' name='attachFileButton' id='attachFileButton'></button><button type='button' class='btn btn-primary' onclick='composeEmail(\"popup\")'>Send</button></div>");    
@@ -1240,11 +1242,68 @@ function elx_newEmail(alias){
                     }
                 $('#elx_general_popup').modal(options);
                 richTextInit();
-                /*$('#elx_general_popup').on('shown', function() {
-                    $(document).off('focusin.modal');
-                });*/
+                
+                //autocomplete mail list
+                mailList(arrData['contacts']); 
             }
         }
     );
-
 }
+
+//funcion autocomplete para listar los contactos en la ventana popup de enviar email
+function mailList(contacts){
+    
+    $('textarea[name=compose_to]')
+      // don't navigate away from the field on tab when selecting an item
+      .bind( "keydown", function( event ) {
+        if ( event.keyCode === $.ui.keyCode.TAB &&
+            $( this ).data( "ui-autocomplete" ).menu.active ) {
+          event.preventDefault();
+        }
+      })
+      .autocomplete({
+        minLength: 0,
+        source: function( request, response ) {
+          // delegate back to autocomplete, but extract the last term
+          response( $.ui.autocomplete.filter(
+            contacts, extractLast( request.term ) ) );
+        },
+        focus: function() {
+          // prevent value inserted on focus
+          return false;
+        },
+        select: function( event, ui ) {
+          var terms = split( this.value );
+          // remove the current input
+          terms.pop();
+          // add the selected item
+          terms.push( ui.item.value );
+          // add placeholder to get the comma-and-space at the end
+          terms.push( "" );
+          this.value = terms.join( ", " );
+          return false;
+        },
+        appendTo: '#compose-to',
+      });
+      
+    setTimeout(function(){ 
+        var ancho = $('textarea[name=compose_to]').width();
+        ancho = ancho +"px";
+        $('.ui-autocomplete').width(ancho);    
+    }, 3000);
+    
+}
+
+function split( val ) {
+    return val.split( /,\s*/ );
+}
+function extractLast( term ) {
+    return split( term ).pop();
+}
+
+$(window).resize(function(){
+        var ancho = $('textarea[name=compose_to]').width();
+        ancho = ancho +"px"; 
+        $('.ui-autocomplete').width(ancho);
+});
+ 

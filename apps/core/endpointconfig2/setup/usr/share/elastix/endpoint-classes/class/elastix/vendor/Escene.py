@@ -29,7 +29,7 @@
 import logging
 from elastix.BaseEndpoint import BaseEndpoint
 import eventlet
-from eventlet.green import socket, os
+from eventlet.green import socket, os, urllib2
 import errno
 import re
 from xml.dom.minidom import parse
@@ -93,9 +93,39 @@ class Endpoint(BaseEndpoint):
                 (self._vendorname, self._ip, str(e)))
             return False
         
+        # If the model was not identified, this might be a RCA phone with the
+        # Escene MAC prefix
+        if sModel == None:
+            http_username = 'root'
+            http_password = 'root'
+            password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            password_manager.add_password(None, 'http://' + self._ip + '/',
+                http_username, http_password)
+            basic_auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
+            opener = urllib2.build_opener(basic_auth_handler)
+            try:
+                response = opener.open('http://' + self._ip + '/overview.asp')
+                htmlbody = response.read()
+                #<tr><td align="center" valign="middle" height="80"><p class="BB"><strong><span class="style16"><font face="Arial">
+                #
+                #IP115
+                #
+                # </font></span></strong><br>
+                m = re.search(r'<font face="\w+">\s+(\w+)\s+</font>', htmlbody, re.IGNORECASE | re.DOTALL)
+                if m != None:
+                    self._saveVendor('RCA')
+                    sModel = m.group(1)
+            except Exception, e:
+                pass
+        
         if sModel != None: self._saveModel(sModel)
     
     def updateLocalConfig(self):
+        return self._updateLocalConfig_Escene(
+                self._endpointdir + '/tpl/Escene_template.xml',
+                self._endpointdir + '/tpl/Escene_Extern_template.xml')
+    
+    def _updateLocalConfig_Escene(self, templatepath, extrtemplatepath):
         '''Configuration for Escene endpoints (local)
         
         The file XXXXXXXXXXXX.xml contains the plaintext SIP configuration. Here
@@ -114,11 +144,70 @@ class Endpoint(BaseEndpoint):
             return False
 
         # Need to calculate lowercase version of MAC address without colons
+        # Generate main configuration file
         sConfigFile = (self._mac.replace(':', '').lower()) + '.xml'
+        if not self._replaceXMLConfigVariables(templatepath, sConfigFile):
+            return False
+        sExternFile = (self._mac.replace(':', '').lower()) + '_Extern.xml'
+        if not self._replaceXMLExternVariables(extrtemplatepath, sExternFile):
+            return False
+
+        try:
+            telnet = telnetlib.Telnet()
+            telnet.open(self._ip)
+            telnet.get_socket().settimeout(5)
+        except socket.timeout, e:
+            logging.error('Endpoint %s@%s failed to telnet - timeout (%s)' %
+                (self._vendorname, self._ip, str(e)))
+            return
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to telnet - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return
+
+        # Attempt to login into admin telnet
+        try:
+            telnet.read_until('login:', 10)
+            if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
+            telnet.read_until('Password:', 10)
+            if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
+
+            # Wait for either prompt or login prompt
+            idx, m, text = telnet.expect([r'login:', r'# '], 10)
+            if idx == 0:
+                telnet.close()
+                logging.error('Endpoint %s@%s detected ACCESS DENIED on telnet connect')
+                return False
+            else:
+                # Write all of the commands
+                telnetQueue = [
+                    'cd /mnt/sip',
+                    'tftp -g ' + self._serverip + ' -r ' + sConfigFile,
+                    'mv ' + sConfigFile + ' ESConfig.xml',
+                    'tftp -g ' + self._serverip + ' -r ' + sExternFile,
+                    'mv ' + sExternFile + ' Extern.xml',
+                    'reboot'
+                ]
+                for cmd in telnetQueue:
+                    telnet.write(cmd.encode() + '\r\n')
+                    idx, m, text = telnet.expect([r'# '], 10)
+                telnet.close()
+        except socket.error, e:
+            logging.error('Endpoint %s@%s connection failure - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        
+        # Reboot the phone.
+        self._amireboot('reboot-yealink')
+        self._unregister()
+        self._setConfigured()
+        return True
+
+    def _replaceXMLConfigVariables(self, templatepath, sConfigFile):
         sConfigPath = self._tftpdir + '/' + sConfigFile
         
         # Load DOM and substitute the relevant variables
-        dom = parse(self._endpointdir + '/tpl/Escene_template.xml')
+        dom = parse(templatepath)
         for network in dom.getElementsByTagName('network'):
             network.setAttribute('NetConfigType', '2')
             network.setAttribute('IPAddress', '')
@@ -166,51 +255,30 @@ class Endpoint(BaseEndpoint):
             return False
         dom.unlink()
         dom = None
+        
+        return True
 
+    def _replaceXMLExternVariables(self, templatepath, sConfigFile):
+        sConfigPath = self._tftpdir + '/' + sConfigFile
+        
+        # Load DOM and substitute the relevant variables
+        dom = parse(templatepath)
+        for programbutton in dom.getElementsByTagName('Programbutton'):
+            idx = int(programbutton.getAttribute('id'))
+            programbutton.setAttribute('Num', '')
+            programbutton.setAttribute('Name', '')
+            programbutton.setAttribute('SipAccounts', '0')
+            programbutton.setAttribute('Type', '0')
+            if idx < len(self._accounts):
+                programbutton.setAttribute('SipAccounts', str(idx))
+        
         try:
-            telnet = telnetlib.Telnet()
-            telnet.open(self._ip)
-            telnet.get_socket().settimeout(5)
-        except socket.timeout, e:
-            logging.error('Endpoint %s@%s failed to telnet - timeout (%s)' %
-                (self._vendorname, self._ip, str(e)))
-            return
-        except socket.error, e:
-            logging.error('Endpoint %s@%s failed to telnet - %s' %
-                (self._vendorname, self._ip, str(e)))
-            return
-
-        # Attempt to login into admin telnet
-        try:
-            telnet.read_until('login:', 10)
-            if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
-            telnet.read_until('Password:', 10)
-            if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
-
-            # Wait for either prompt or login prompt
-            idx, m, text = telnet.expect([r'login:', r'# '], 10)
-            if idx == 0:
-                telnet.close()
-                logging.error('Endpoint %s@%s detected ACCESS DENIED on telnet connect')
-                return False
-            else:
-                # Write all of the commands
-                telnetQueue = [
-                    'cd /mnt/sip',
-                    'tftp -g ' + self._serverip + ' -r ' + sConfigFile,
-                    'mv ' + sConfigFile + ' ESConfig.xml',
-                ]
-                for cmd in telnetQueue:
-                    telnet.write(cmd.encode() + '\r\n')
-                    idx, m, text = telnet.expect([r'# '], 10)
-                telnet.close()
-        except socket.error, e:
-            logging.error('Endpoint %s@%s connection failure - %s' %
+            self._writeContent(sConfigPath, dom.toxml())
+        except IOError, e:
+            logging.error('Endpoint %s@%s failed to write configuration file - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
+        dom.unlink()
+        dom = None
         
-        # Reboot the phone.
-        self._amireboot('reboot-yealink')
-        self._unregister()
-        self._setConfigured()
         return True

@@ -28,6 +28,7 @@
 # $Id: dialerd,v 1.2 2008/09/08 18:29:36 alex Exp $
 import logging
 from elastix.BaseEndpoint import BaseEndpoint
+import elastix.vendor.Escene
 import eventlet
 from eventlet.green import socket, urllib2, urllib, os
 import errno
@@ -35,12 +36,14 @@ import re
 import xml.dom.minidom
 paramiko = eventlet.import_patched('paramiko')
 
-class Endpoint(BaseEndpoint):
+class Endpoint(elastix.vendor.Escene.Endpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'RCA', amipool, dbpool, sServerIP, sIP, mac)
+        self._bridge = False
+        self._timeZone = 12
 
     def probeModel(self):
-        ''' Probe specific model of RCA phone
+        ''' Probe specific model of RCA phone (which is not a rebranded Escene)
         
         An HTTP request is issued to the phone. The welcome screen exposes the
         phone model. 
@@ -59,7 +62,16 @@ class Endpoint(BaseEndpoint):
         if sModel != None: self._saveModel(sModel)
 
     def updateLocalConfig(self):
-        '''Configuration for RCA endpoints (local)
+        if self._model in ('IP150'):
+            return self._updateLocalConfig_IP150()
+        else:
+            return self._updateLocalConfig_Escene(
+                        self._endpointdir + '/tpl/RCA_template.xml',
+                        self._endpointdir + '/tpl/RCA_Extern_template.xml')
+        
+    
+    def _updateLocalConfig_IP150(self):
+        '''Configuration for RCA IP150 endpoints (local)
         
         The file voip-XXXXXXXXXXXX.xml contains the plaintext SIP configuration. 
         Here XXXXXXXXXXXX is replaced by the lowercase MAC address of the phone. 

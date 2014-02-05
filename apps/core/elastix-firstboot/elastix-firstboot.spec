@@ -102,6 +102,15 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Wed Feb 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-firstboot: Fixed error message for insufficiently strong 
+  password. Fixes Elastix bug #1836. Additionally, WSS setup was rewritten to
+  not use sed, and menu initialization has been shortened with the use of glob
+  instead of handcoded directory listing. Also, WSS setup and menu 
+  initialization were moved inside the first-boot check to prevent running them
+  on every system startup.
+  SVN Rev[6460]
+
 * Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: elastix-firstboot: fix script to update password in mysql database
   instead of sqlite.

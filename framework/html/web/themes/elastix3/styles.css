@@ -155,7 +155,7 @@ img {
 
 #name{
  font-size:15px;
- margin:28px 5px 0 0px;
+ margin:18px 5px 0 0px;
  float:right;
  width:125px;
  text-align: left;
@@ -173,9 +173,7 @@ img {
 .tooldivicons{
  height:55px;
  float:right;   
- color: white;
- cursor:pointer; 
- cursor: hand;   
+ color: white;  
 }
 
 .icn_m{
@@ -407,7 +405,13 @@ img {
     height: 8px;
     width: 8px;
     margin-top: 6px;
-    margin-right: 5px;
+    margin-right: 5px; 
+    /*para Firefox*/
+    -moz-border-radius: 15px 15px 15px 15px;
+    /*para Safari y Chrome*/
+    -webkit-border-radius: 15px 15px 15px 15px;
+    /* para Opera */
+    border-radius: 15px 15px 15px 15px;
 }
 .elx_contact_div{
     height:28px;
@@ -654,7 +658,7 @@ img {
 
 /* Style for overlay and box */
 .overlay{
- background:transparent url("../../_common/images/overlay.png") repeat top left;
+ /*background:transparent url("../../_common/images/overlay.png") repeat top left;*/
  position:fixed;
  top:0px;
  bottom:0px;
@@ -732,6 +736,7 @@ a.boxclose{
     float: right;
     margin-top: 15px;
     margin-right: 3px;
+    background: #808080;
 }
 
 .oculto{

@@ -3,7 +3,7 @@
         <div id="logo"></div>
     </div>
     <div id="icn_prof" class='tooldivicons hidden-xs'>
-        <div id="name" class="hidden-xs hidden-sm"><p id="elx-username">{$USER_NAME}</p></div>
+        <div id="name" class="hidden-xs hidden-sm"><p id="elx-username">{$USER_NAME}<br/>{$USER_ESTENSION}</p></div>
         <div class="elx-content-photo"><img id="photo" alt="image" src="index.php?menu=_elastixutils&action=getImage&ID={$ID_ELX_USER}&rawmode=yes"/></div>
     </div>
     <div id="elx-navbar-min" class="visible-xs"><a href="#"><img src="web/_common/images/elastix3_icon-mini-menu.png"></a></div>

@@ -133,9 +133,11 @@ if (isset($_SESSION['elastix_user']) &&
     foreach($arrUser as $value){
         $arrFill["username"]=$value[1];
         $arrFill["name"]=$value[2];
+	$arrFill["extension"]=$value[5];
     }
     $smarty->assign("ID_ELX_USER",$idUser);
     $smarty->assign("USER_NAME", $arrFill["name"]);
+    $smarty->assign("USER_ESTENSION", $arrFill["extension"]);
     
     //obtenemos los menu a los que el usuario tiene acceso
     $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);

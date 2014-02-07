@@ -766,8 +766,8 @@ function formComposeMsg(action,compose_template){
 function heightListMails(){
     //calculamos la distancia para el div que contiene los correos electronicos
     var height_browser = $(window).height();
-    distancia=div_list_msg.offset();
+    distancia=$("#elx_list_mail_messages").offset();
     posy=distancia.top;
     var result= height_browser - posy - 55;
-    div_list_msg.css("height",result +"px");
+    $("#elx_list_mail_messages").css("height",result +"px");
 }

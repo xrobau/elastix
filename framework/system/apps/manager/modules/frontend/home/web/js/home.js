@@ -53,6 +53,7 @@ $(document).ready(function(){
             centerdiv.css('margin-left',0);
         }
         resizedivmails();
+        heightListMails();
     });
     
     resizedivmails();
@@ -168,6 +169,10 @@ $(document).ready(function(){
     
     //funcion que pregunta si ahi mensajes nuevos
     refreshMessage();
+    
+    //llamamos a la funcion que le dará el alto al div que contiene la lista de correos
+    heightListMails();
+    
 });
 
 //necesario setear la altura maxima del div que contine la data del home
@@ -758,6 +763,11 @@ function formComposeMsg(action,compose_template){
     richTextInit();
 }
 
- 
-
-
+function heightListMails(){
+    //calculamos la distancia para el div que contiene los correos electronicos
+    var height_browser = $(window).height();
+    distancia=div_list_msg.offset();
+    posy=distancia.top;
+    var result= height_browser - posy - 55;
+    div_list_msg.css("height",result +"px");
+}

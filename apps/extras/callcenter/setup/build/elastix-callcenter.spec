@@ -97,8 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
+- CHANGED: Campaign Monitoring: update Ember.js to 1.3.2
+
 * Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Control Panel: update Ember.js to 1.3.1, Handlebars to 1.2.1.
+- CHANGED: Campaign Monitoring: update Ember.js to 1.3.1, Handlebars to 1.2.1.
   SVN Rev[6453]
 
 * Tue Jan 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>

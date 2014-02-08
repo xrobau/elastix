@@ -155,7 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Mon Feb 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
+* Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
+- CHANGED: Endpoint Configurator: update Ember.js to 1.3.2
+
+* Mon Feb 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: add support for new Escene models IP115, IP125
   SVN Rev[6456]
 

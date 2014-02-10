@@ -358,6 +358,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Feb 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Extension Batch: re-enable account password strength check which was
+  disabled without explanation on last rewrite
+  SVN Rev[6469] 
+
 * Thu Jan 23 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Festival: introduce check for systemd-style status report in order to
   detect whether festival is running.

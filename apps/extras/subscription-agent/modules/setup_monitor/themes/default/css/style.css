@@ -1,0 +1,71 @@
+/*
+    Document   : style
+    Created on : 17/01/2012, 11:47:35 AM
+    Author     : molvera
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/*
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+form#setup_monitor{
+    margin-bottom:0;
+}
+
+form#setup_monitor table.setupbuttons{
+    width:80%;
+    border:0;
+    border-spacing: 0;
+    padding: 4px;
+    margin: 0 auto;
+}
+
+form#setup_monitor table.setupbuttons tbody td{
+    text-align:left;
+}
+
+form#setup_monitor table.setupbuttons td.moduleTitle{
+    vertical-align:middle;
+}
+
+form#setup_monitor table.setupbuttons td.moduleTitle img{
+    border:0;
+    vertical-align: middle;
+}
+
+form#setup_monitor table.setupbuttons tbody tr:last-child td:last-child{
+    text-align: right;
+    white-space: nowrap;
+}
+
+form#setup_monitor table.data{
+    width:80%;
+    font-size: 16px;
+    margin: 0 auto;
+    padding-bottom: 25px;
+}
+
+form#setup_monitor table.data tbody tr td:first-child{
+    font-weight: bold;
+    padding-left: 20px;
+    width: 150px;
+}
+
+span.status_not_running,
+span.status_running,
+span.status_not_installed{
+    font-weight: bold;
+}
+
+span.status_not_running{
+    color: #F00;
+}
+span.status_running{
+    color: #0A0;
+}
+span.status_not_installed{
+    color:#AAA;
+}

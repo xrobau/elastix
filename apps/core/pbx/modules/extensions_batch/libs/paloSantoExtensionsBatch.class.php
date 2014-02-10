@@ -381,7 +381,7 @@ class paloSantoExtensionsBatch
             $this->errMsg = _tr("Can't exist a technology empty. Line").": $numLinea";
             return FALSE;
         }
-        if (!isset($extension['secret']) /*|| !$this->_valida_password($extension['secret'])*/) {
+        if (!isset($extension['secret']) || !$this->_valida_password($extension['secret'])) {
             $this->errMsg = _tr("Secret weak. Line").": $numLinea";
             return FALSE;
         }

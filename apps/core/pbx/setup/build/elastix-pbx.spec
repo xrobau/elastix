@@ -267,6 +267,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Feb 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Extension Batch: re-enable account password strength check which was
+  disabled without explanation on last rewrite
+  SVN Rev[6469] 
+
 * Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: update Ember.js to 1.3.2
 

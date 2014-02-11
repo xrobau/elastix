@@ -155,11 +155,15 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
+* Tue Feb 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
+- CHANGED: Endpoint Configurator: add support for new RCA model IP160s
+  SVN Rev[6472]
+
+* Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: update Ember.js to 1.3.2
 
 * Mon Feb 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Endpoint Configurator: add support for new Escene models IP115, IP125
+- CHANGED: Endpoint Configurator: add support for new RCA models IP115, IP125
   SVN Rev[6456]
 
 * Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>

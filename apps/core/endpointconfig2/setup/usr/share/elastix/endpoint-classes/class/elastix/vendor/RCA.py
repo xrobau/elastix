@@ -56,6 +56,11 @@ class Endpoint(elastix.vendor.Escene.Endpoint):
                 # RCA IP150 (Glass.GB.2.0/4085) Settings
                 m = re.search(r'RCA (\w+)', htmlbody)
                 if m != None: sModel = m.group(1)
+        except urllib2.HTTPError, e:
+            if e.code == 401 and 'WWW-Authenticate' in e.headers:
+                m = re.search(r'realm="RCA (\w+)"', e.headers['WWW-Authenticate'])
+                if m != None:
+                    sModel = m.group(1)
         except Exception, e:
             pass
 
@@ -64,6 +69,8 @@ class Endpoint(elastix.vendor.Escene.Endpoint):
     def updateLocalConfig(self):
         if self._model in ('IP150'):
             return self._updateLocalConfig_IP150()
+        elif self._model in ('IP160s'):
+            return self._updateLocalConfig_IP160s()
         else:
             return self._updateLocalConfig_Escene(
                         self._endpointdir + '/tpl/RCA_template.xml',
@@ -255,4 +262,146 @@ class Endpoint(elastix.vendor.Escene.Endpoint):
                 (self._vendorname, self._ip, str(e)))
             return False
 
+    def _updateLocalConfig_IP160s(self):
+        # This phone configuration is verbose on the network. 
         
+        # Not because it requires Digest authentication...
+        # ...but because nowhere in sight is a way to send the entire 
+        # configuration at once, such as a configuration file. Therefore
+        # the following code needs to send each bit of configuration, on a
+        # separate request:
+        
+        # Delete each of the existing account configurations, one by one:
+        for idx in range(self._max_sip_accounts, -1, -1):
+            if not self._doAuthGet('/cgi-bin/cgiwebgen.cgi?PageId=5&account_id=%d' % (idx,)):
+                return False
+        
+        # Now, send the new account configurations again, one by one:
+        stdvars = self._prepareVarList()
+        postvars = [
+            ('PageId', '55'),
+            ('h_account_id', None),
+            ('o_AccountActive', '1'),
+            ('t_AccountName', None),
+            ('t_SipServer', stdvars['server_ip']),
+            ('t_SipServerPort', '5060'),
+            ('t_UserName', None),
+            ('t_RegisteredName', None),
+            ('t_Password', None),
+            ('o_EnableOutProxyServer', '0'),
+            ('t_OutProxyServer', ''),
+            ('t_OutProxyServerPort', '5060'),
+            ('t_NetVoiceMailAccessNum', ''),
+            ('o_Codec0', '9'),
+            ('o_Codec1', '0'),
+            ('o_Codec2', '8'),
+            ('o_Codec3', '18'),
+            ('o_Codec4', '2'),
+            ('o_Codec5', '98'),
+            ('o_Codec6', '99'),
+            ('o_Codec7', '-1'),
+            ('o_Transport', '0'),
+            ('t_UdpPort', '5060'),
+            ('t_TcpPort', '5060'),
+            ('t_TlsPort', '5060'),
+            ('o_DtmfMode', '2'),
+            ('o_FwdAlways', '0'),
+            ('t_FwdAlwaysTarget', ''),
+            ('t_FwdAlwaysOn', ''),
+            ('t_FwdAlwaysOff', ''),
+            ('o_FwdNoAns', '0'),
+            ('t_FwdNoAnsAfterRingTime', '5'),
+            ('t_FwdNoAnsTarget', ''),
+            ('t_FwdNoAnsOn', ''),
+            ('t_FwdNoAnsOff', ''),
+            ('o_FwdBusy', '0'),
+            ('t_FwdBusyTarget', ''),
+            ('t_FwdBusyOn', ''),
+            ('t_FwdBusyOff', ''),
+            ('o_EnableDnd', '0'),
+            ('t_DndOn', ''),
+            ('t_DndOff', ''),
+            ('o_ConferenceType', '0'),
+            ('t_ConferenceURI', ''),
+            ('o_EnableStun', '0'),
+            ('t_StunAddr', ''),
+            ('t_StunPort', '3478'),
+            ('o_VoiceEncrypt', '0'),
+            ('o_Unreg_Single_Contact', '0'),
+            ('t_LoginExpireSeconds', '3600'),
+            ('o_SubscribeForMwi', '1'),
+            ('t_MWI_Subscribe_Expiry', '3600'),
+            ('o_UseNaptr', '0'),
+            ('o_UsePrack', '0'),
+            ('o_Update', '0'),
+            ('o_UseSessionTimer', '0'),
+            ('o_broadsoft_profile', '0'),
+            ('o_Callee_ID', '1'),
+            ('t_SiteIp', '0.0.0.0'),
+            ('o_udpKeepAliveEnable', '1'),
+            ('t_udpKeepAliveTimeout', '30'),
+            ('o_featureKeySyncEnable', '0'),
+        ]
+        for idx in range(len(stdvars['sip'])):
+            self._updateList(postvars, {
+                'h_account_id': idx,
+                't_AccountName': stdvars['sip'][idx].description,
+                't_UserName': stdvars['sip'][idx].account,
+                't_RegisteredName': stdvars['sip'][idx].account,
+                't_Password': stdvars['sip'][idx].secret,
+            })
+            if not self._doAuthPostIP160s('/cgi-bin/cgiwebgen.cgi', postvars):
+                return False
+        
+        # Send the network configuration LAST
+        if self._dhcp:
+            postvars = [
+                ('PageId', '54'),
+                ('r_dhcp', 'wantype_dhcp'),
+            ]
+        else:
+            postvars = [
+                ('PageId', '54'),
+                ('r_static_ip', 'wantype_static_ip'),
+                ('t_wan_ip', stdvars['static_ip']),
+                ('t_subnet_mask', stdvars['static_mask']),
+                ('t_gateway', stdvars['static_gateway']),
+                ('t_pri_dns', stdvars['static_dns1']),
+                ('t_sec_dns', ''),
+            ]
+            if stdvars['static_dns2'] != None:
+                self._updateList(postvars, { 't_sec_dns': stdvars['static_dns2'] })
+        if not self._doAuthPostIP160s('/cgi-bin/cgiwebgen.cgi', postvars):
+            return False
+        
+        self._unregister()
+        self._setConfigured()
+        return True
+
+    def _updateList(self, postvars, updatevars):
+        for i in range(len(postvars)):
+            if postvars[i][0] in updatevars:
+                postvars[i] = (postvars[i][0], updatevars[postvars[i][0]])
+    
+    def _doAuthPostIP160s(self, urlpath, postvars):
+        '''Send a POST request to the IP160s phone, in the special way required.
+        
+        The IP160s firmware has a shoddy implementation for processing of POST
+        requests. When processing a POST request, the firmware expects each of
+        the form variables to appear in a specific position in the encoding
+        string sent by the browser, rather than relying on the key/value 
+        structure that is implied by the encoding protocol. This firmware happens
+        to work with ordinary web browsers because they, by lucky chance, send
+        the variables in form order. However, if urllib is used to encode an
+        ordinary dictionary of variables, there is no ordering guarantee (in 
+        Python 2.4) and the variables get sent out of order. The firwmare will
+        then set the variables according to the received position, which results
+        in a broken setup.
+        
+        An OrderedDict would be ideal for this, but for now I will manually build
+        an array of 2-tuples and use that to encode the POST data.
+        '''
+        postdata = []
+        for tuple in postvars:
+            postdata.append(urllib.quote_plus(tuple[0]) + '=' + urllib.quote_plus(str(tuple[1])))
+        return self._doAuthPost(urlpath, '&'.join(postdata))

@@ -329,6 +329,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Feb 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework - tweak blackmin theme to make module menu interaction 
+  easier.
+  SVN Rev[6428]
+
 * Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

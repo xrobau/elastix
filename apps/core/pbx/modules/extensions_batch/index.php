@@ -80,10 +80,10 @@ function display_form($smarty, $module_name, $local_templates_dir)
 
 function download_csv($smarty)
 {
-    header("Cache-Control: private");
-    header("Pragma: cache");
-    header('Content-Type: text/csv; charset=iso-8859-1; header=present');
-    header("Content-disposition: attachment; filename=extensions.csv");
+    header('Cache-Control: private');
+    header('Pragma: cache');
+    header('Content-Type: text/csv; charset=utf-8; header=present');
+    header('Content-disposition: attachment; filename=extensions.csv');
 
     $pLoadExtension = build_extensionsBatch($smarty);
     $r = $pLoadExtension->queryExtensions();
@@ -93,70 +93,17 @@ function download_csv($smarty)
         return;
     }
     
-    $keyOrder = array(
-        'name'                  =>  'Display Name',
-        'extension'             =>  'User Extension',
-        'directdid'             =>  'Direct DID',
-        'outboundcid'           =>  'Outbound CID',
-        'callwaiting'           =>  'Call Waiting',
-        'secret'                =>  'Secret',
-        'voicemail'             =>  'Voicemail Status',
-        'vm_secret'             =>  'Voicemail Password',
-        'email_address'         =>  'VM Email Address',
-        'pager_email_address'   =>  'VM Pager Email Address',
-        'vm_options'            =>  'VM Options',
-        'email_attachment'      =>  'VM Email Attachment',
-        'play_cid'              =>  'VM Play CID',
-        'play_envelope'         =>  'VM Play Envelope',
-        'delete_vmail'          =>  'VM Delete Vmail',
-        'context'               =>  'Context',
-        'tech'                  =>  'Tech',
-        'callgroup'             =>  'Callgroup',
-        'pickupgroup'           =>  'Pickupgroup',
-        'disallow'              =>  'Disallow',
-        'allow'                 =>  'Allow',
-        'deny'                  =>  'Deny',
-        'permit'                =>  'Permit',
-        'record_in'             =>  'Record Incoming',
-        'record_out'            =>  'Record Outgoing',
-        );
+    $keyOrder = $pLoadExtension->getFieldTitles();
     print '"'.implode('","', $keyOrder)."\"\n";
     
     
     foreach ($r as $tupla) {
     
         $t = array();
-        foreach (array_keys($keyOrder) as $k) switch ($k) {
-        
-            case 'name':                    $t[] = $tupla['name']; break;
-            case 'extension':               $t[] = $tupla['extension']; break;
-            case 'directdid':               $t[] = $tupla['directdid']; break;
-            case 'outboundcid':             $t[] = $tupla['outboundcid']; break;
-            case 'callwaiting':             $t[] = $tupla['callwaiting']; break;
-            case 'voicemail':               $t[] = $tupla['voicemail']; break;
-            case 'vm_secret':               $t[] = $tupla['vm_secret']; break;
-            case 'email_address':           $t[] = $tupla['email_address']; break;
-            case 'pager_email_address':     $t[] = $tupla['pager_email_address']; break;
-            case 'vm_options':              $t[] = $tupla['vm_options']; break;
-            case 'email_attachment':        $t[] = $tupla['email_attachment']; break;
-            case 'play_cid':                $t[] = $tupla['play_cid']; break;
-            case 'play_envelope':           $t[] = $tupla['play_envelope']; break;
-            case 'delete_vmail':            $t[] = $tupla['delete_vmail']; break;
-            case 'tech':                    $t[] = $tupla['tech']; break;
-            
-            default:
-            if (isset($tupla['parameters'][$k])){                             
-                if ($tupla['parameters'][$k] == "Adhoc"){
-                    $tupla['parameters'][$k] = "On Demand";
-                    $t[] = $tupla['parameters'][$k];
-                }
-                else
-                    $t[] = $tupla['parameters'][$k];
-            }else
-                $t[] = '';
-            
-        }
-        
+        foreach (array_keys($keyOrder) as $k)
+            $t[] = isset($tupla[$k]) 
+                ? $tupla[$k] 
+                : (isset($tupla['parameters'][$k]) ? $tupla['parameters'][$k] : '');
         print '"'.implode('","', $t)."\"\n";
     }
 }

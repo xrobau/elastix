@@ -267,6 +267,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Feb 13 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Extension Batch: update recording parameter handling for FreePBX 2.11
+  SVN Rev[6474]
+
 * Mon Feb 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Extension Batch: re-enable account password strength check which was
   disabled without explanation on last rewrite

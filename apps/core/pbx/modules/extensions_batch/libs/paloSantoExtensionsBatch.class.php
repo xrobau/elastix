@@ -40,6 +40,53 @@ class paloSantoExtensionsBatch
     private $_colRequeridas = array('name', 'extension', 'secret', 'tech');
     private $_batch = array();
 
+    /**
+     * Procedimiento para reunir en un solo lugar el título a asignar a cada
+     * etiqueta interna
+     * 
+     * @return  arreglo tag=>título
+     */
+    function getFieldTitles()
+    {
+        return array(
+            'name'                  =>  'Display Name',
+            'extension'             =>  'User Extension',
+            'directdid'             =>  'Direct DID',
+            'outboundcid'           =>  'Outbound CID',
+            'callwaiting'           =>  'Call Waiting',
+            'secret'                =>  'Secret',
+            'voicemail'             =>  'Voicemail Status',
+            'vm_secret'             =>  'Voicemail Password',
+            'email_address'         =>  'VM Email Address',
+            'pager_email_address'   =>  'VM Pager Email Address',
+            'vm_options'            =>  'VM Options',
+            'email_attachment'      =>  'VM Email Attachment',
+            'play_cid'              =>  'VM Play CID',
+            'play_envelope'         =>  'VM Play Envelope',
+            'delete_vmail'          =>  'VM Delete Vmail',
+            'context'               =>  'Context',
+            'tech'                  =>  'Tech',
+            'callgroup'             =>  'Callgroup',
+            'pickupgroup'           =>  'Pickupgroup',
+            'disallow'              =>  'Disallow',
+            'allow'                 =>  'Allow',
+            'deny'                  =>  'Deny',
+            'permit'                =>  'Permit',
+            // FreePBX 2.11: campos obsoletos
+            /*
+            'record_in'             =>  'Record Incoming',
+            'record_out'            =>  'Record Outgoing',
+            */
+            // FreePBX 2.11: campos nuevos
+            'recording_in_external' =>  'Record Incoming External',
+            'recording_out_external'=>  'Record Outgoing External',
+            'recording_in_internal' =>  'Record Incoming Internal',
+            'recording_out_internal'=>  'Record Outgoing Internal',
+            'recording_ondemand'    =>  'Record On Demand',
+            'recording_priority'    =>  'Record Priority',
+        );
+    }
+
     function __construct(&$pDB, $arrAST, $arrAMP)
     {
         $this->_amportal = $arrAMP;
@@ -93,8 +140,12 @@ class paloSantoExtensionsBatch
                     [permit] => 0.0.0.0/0.0.0.0
                     [account] => 1086
                     [callerid] => device <1086>
-                    [record_in] => Adhoc
-                    [record_out] => Adhoc
+                    [recording_in_external] => enabled|dontcare|disabled
+                    [recording_out_external] => enabled|dontcare|disabled
+                    [recording_in_internal] => enabled|dontcare|disabled
+                    [recording_out_internal] => enabled|dontcare|disabled
+                    [recording_ondemand] => enabled|disabled
+                    [recording_priority] => 10
                 )
 
             [callwaiting] => DISABLED
@@ -112,6 +163,12 @@ class paloSantoExtensionsBatch
      */
     function queryExtensions()
     {
+        $astman = new AGI_AsteriskManager();
+        if (!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin())) {
+            $this->errMsg = "Error connect AGI_AsteriskManager";
+            return NULL;
+        }       
+        
         // Lista básica de extensiones
     	$sql = 'SELECT u.extension, u.name, u.outboundcid, d.tech '.
             'FROM users u, devices d WHERE u.extension = d.id';
@@ -137,12 +194,43 @@ class paloSantoExtensionsBatch
         
         // Parámetros de llamada en espera
         $callwait = array();
-        foreach ($this->_databaseCallWaiting() as $linea) {
+        foreach ($astman->database_show('CW') as $cw_key => $status) {
+        	// [/CW/5011] => ENABLED
             $regs = NULL;
-        	if (preg_match("/^\/CW\/([[:alnum:]]*)[ |:]*([[:alnum:]]*)/", $linea, $regs))
-                $callwait[$regs[1]] = $regs[2];
+            if (preg_match('|^/CW/(\w+)|', $cw_key, $regs)) $callwait[$regs[1]] = $status;
         }
         
+        // FreePBX 2.11: ahora los parámetros de recording están en astdb
+        $recording = array();
+        foreach ($astman->database_show('AMPUSER') as $ampuser_key => $status) {
+        	$regs = NULL;
+            if (trim($status) != '' && 
+                preg_match('|^/AMPUSER/(\w+)/recording(/(\w+)(/(\w+))?)?|', $ampuser_key, $regs)) {
+            	if (!isset($recording[$regs[1]])) {
+            		// Valores por omisión para extensión
+                    $recording[$regs[1]] = array(
+                        'recording_in_external'     =>  'dontcare',
+                        'recording_out_external'    =>  'dontcare',
+                        'recording_in_internal'     =>  'dontcare',
+                        'recording_out_internal'    =>  'dontcare',
+                        'recording_ondemand'        =>  'disabled',
+                        'recording_priority'        =>  10,
+                    );
+            	}
+                if (!isset($regs[2])) {
+                	// Formato de recording anterior a FreePBX 2.11
+                    // out=Adhoc|in=Adhoc
+                    // TODO: implementar mapeo no trivial
+                } else {
+                	// Formato de recording de FreePBX 2.11
+                    $key = 'recording_'.$regs[3].(isset($regs[5]) ? '_'.$regs[5] : '');
+                    if (isset($recording[$regs[1]][$key])) {
+                        $recording[$regs[1]][$key] = $status;
+                    }
+                }
+            }
+        }
+
         // Se carga la totalidad de voicemail.conf
         $voicemailData = array();
         foreach (file(VOICEMAIL_CONFIG) as $s) {
@@ -185,7 +273,9 @@ class paloSantoExtensionsBatch
                 'delete_vmail'          => 'no',
                 'parameters'            =>  array(),
             ));
-        	if (isset($prop[$tech][$ext]))  $recordset[$i]['parameters'] = $prop[$tech][$ext];
+            if (isset($prop[$tech][$ext]))  $recordset[$i]['parameters'] = $prop[$tech][$ext];
+            if (isset($recording[$ext])) 
+                $recordset[$i]['parameters'] = array_merge($recordset[$i]['parameters'], $recording[$ext]);
 
             if (isset($voicemailData[$ext])) {
                 $recordset[$i]['voicemail'] = 'enabled';
@@ -209,22 +299,8 @@ class paloSantoExtensionsBatch
                 $recordset[$i]['vm_options'] = implode('|', $vmoptions);
             }
         }
-        
+        $astman->disconnect();
         return $recordset;
-    }
-    
-    private function _databaseCallWaiting()
-    {
-        $astman = new AGI_AsteriskManager();
-        if (!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin()))
-            $this->errMsg = "Error connect AGI_AsteriskManager";
-        else {
-            $salida = $astman->command("database show CW");
-            $astman->disconnect();
-            if (strtoupper($salida["Response"]) != "ERROR") {
-                return explode("\n", $salida["data"]);
-            }else return false;
-        }
     }
     
     private function _queryDIDByExt($extension)
@@ -259,33 +335,7 @@ class paloSantoExtensionsBatch
         }
 
     	// Lista de cabeceras y el campo correspondiente de propiedad
-        $fieldTags = array(
-            'Display Name'              =>  'name',
-            'User Extension'            =>  'extension',
-            'Direct DID'                =>  'directdid',
-            'Outbound CID'              =>  'outboundcid',
-            'Call Waiting'              =>  'callwaiting',
-            'Secret'                    =>  'secret',
-            'Voicemail Status'          =>  'voicemail',
-            'Voicemail Password'        =>  'vm_secret',
-            'VM Email Address'          =>  'email_address',
-            'VM Pager Email Address'    =>  'pager_email_address',
-            'VM Options'                =>  'vm_options',
-            'VM Email Attachment'       =>  'email_attachment',
-            'VM Play CID'               =>  'play_cid',
-            'VM Play Envelope'          =>  'play_envelope',
-            'VM Delete Vmail'           =>  'delete_vmail',
-            'Context'                   =>  'context',
-            'Tech'                      =>  'tech',
-            'Callgroup'                 =>  'callgroup',
-            'Pickupgroup'               =>  'pickupgroup',
-            'Disallow'                  =>  'disallow',
-            'Allow'                     =>  'allow',
-            'Deny'                      =>  'deny',
-            'Permit'                    =>  'permit',
-            'Record Incoming'           =>  'record_in',
-            'Record Outgoing'           =>  'record_out',
-        );
+        $fieldTags = array_flip($this->getFieldTitles());
 
         // Construir mapa de posición de columna a clave correspondiente
         $mapaCol = array();
@@ -344,18 +394,27 @@ class paloSantoExtensionsBatch
         if (!isset($extension['deny'])) $extension['deny'] = '0.0.0.0/0.0.0.0';
         if (!isset($extension['permit'])) $extension['permit'] = '0.0.0.0/0.0.0.0';
         if (!isset($extension['context'])) $extension['context'] = 'from-internal';
-        foreach (array('record_in', 'record_out') as $k) {
-            if (!isset($extension[$k])) $extension[$k] = 'Adhoc';
-            if (stripos($extension[$k], 'Adhoc') !== FALSE || stripos($extension[$k], 'On Demand') !== FALSE)
-                $extension[$k] = 'Adhoc';
-            if (stripos($extension[$k], 'Always') !== FALSE)
-                $extension[$k] = 'Always';
-            if (stripos($extension[$k], 'Never') !== FALSE)
-                $extension[$k] = 'Never';
-                
-            if (!in_array($extension[$k], array('Adhoc', 'Always', 'Never')))
-                 $extension[$k] = 'Adhoc';
+
+        // FreePBX 2.11: Validar nuevos parámetros de grabación de llamadas
+        foreach (array('recording_in_external', 'recording_out_external',
+            'recording_in_internal', 'recording_out_internal') as $k) {
+            if (!isset($extension[$k])) $extension[$k] = 'dontcare';
+            $extension[$k] = strtolower($extension[$k]);
+            if (!in_array($extension[$k], array('enabled', 'dontcare', 'disabled')))
+                $extension[$k] = 'dontcare';
         }
+        if (!isset($extension['recording_ondemand'])) $extension['recording_ondemand'] = 'disabled';
+        $extension['recording_ondemand'] = strtolower($extension['recording_ondemand']);
+        if (!in_array($extension['recording_ondemand'], array('enabled', 'disabled')))
+            $extension[$k] = 'disabled';
+        if (!isset($extension['recording_priority']) || 
+            !ctype_digit($extension['recording_priority']))
+            $extension['recording_priority'] = 10;
+        if ($extension['recording_priority'] < 0 || $extension['recording_priority'] > 20)
+            $extension['recording_priority'] = 10;
+
+        // TODO: mapear parámetros antiguos 'record_in', 'record_out' Adhoc|Always|Never
+
         $extension['voicemail'] = (isset($extension['voicemail']) && 
             stripos($extension['voicemail'], 'enable') === 0)
             ? 'enable' : 'disable';
@@ -520,8 +579,6 @@ class paloSantoExtensionsBatch
         
         // Las propiedades a insertar o actualizar para la extensión
         $prop = array(
-            'record_out'    =>  $extension['record_out'],
-            'record_in'     =>  $extension['record_in'],
             'callerid'      =>  'device <'.$extension['extension'].'>',
             'account'       =>  $extension['extension'],
             'mailbox'       =>  $extension['extension'].(($extension['voicemail'] == 'enable') ? '@default' : '@device'),
@@ -535,14 +592,23 @@ class paloSantoExtensionsBatch
             'secret'        =>  $extension['secret'],
             'deny'          =>  $extension['deny'],
             'permit'        =>  $extension['permit'],
+
+            //FreePBX 2.11: recording ya no se usa en mysql sino en astdb
+            //'record_out'    =>  $extension['record_out'],
+            //'record_in'     =>  $extension['record_in'],
         );
         if ($extension['tech'] == 'iax2') {
         	$prop = array_merge($prop, array(
                 'dial'              =>  'IAX2/'.$extension['extension'],
                 'port'              =>  4569,
-                'requirecalltoken'  =>  '',
-                'notransfer'        =>  'yes',
+                'requirecalltoken'  =>  'yes',
                 'setvar'            =>  'REALCALLERIDNUM='.$extension['extension'],
+
+                // FreePBX 2.11: parámetro ya no aparece
+                //'notransfer'        =>  'yes',
+                
+                // FreePBX 2.11: nuevos parámetros IAX2
+                'transfer'  =>  'yes',
             ));
         } elseif ($extension['tech'] == 'sip') {
             $prop = array_merge($prop, array(
@@ -553,6 +619,15 @@ class paloSantoExtensionsBatch
                 'nat'               =>  'yes',
                 'canreinvite'       =>  'no',
                 'dtmfmode'          =>  'rfc2833',
+                
+                // FreePBX 2.11: nuevos parámetros SIP
+                'encryption'        =>  'no',
+                'qualifyfreq'       =>  '60',
+                'transport'         =>  'udp',
+                'trustrpid'         =>  'yes',
+                'avpf'              =>  'no',
+                'icesupport'        =>  'no',
+                'sendrpid'          =>  'no',
             ));
         }
         
@@ -592,7 +667,9 @@ class paloSantoExtensionsBatch
         $params = array(
             $extension['name'],
             ($extension['voicemail'] == 'enable') ? 'default' : 'novm',
-            'out='.$extension['record_out'].'|in='.$extension['record_in'],
+            //FreePBX 2.11: recording ya no se usa en mysql sino en astdb
+            //'out='.$extension['record_out'].'|in='.$extension['record_in'],
+            '',
             isset($extension['outboundcid']) ? $extension['outboundcid'] : '',
             $extension['extension']);
         if (!$this->_DB->genQuery($sql, $params)) {
@@ -669,13 +746,9 @@ class paloSantoExtensionsBatch
 
     private function _updateCallWaiting($extension, $astman)
     {
-    	if ($extension['callwaiting'] == 'ENABLED') {
-            $r = $astman->command("database put CW {$extension['extension']} \"ENABLED\"");
-            return (bool)strstr($r["data"], "success");
-    	} else {
-            $r = $astman->command("database del CW {$extension['extension']}");
-            return (bool)strstr($r["data"], "removed") || (bool)strstr($r["data"], "not exist");
-    	}
+        return ($extension['callwaiting'] == 'ENABLED')
+            ? $astman->database_put('CW', $extension['extension'], 'ENABLED')
+            : $astman->database_del('CW', $extension['extension']);
     }
 
     private function _updateAsteriskDB($extension, $astman)
@@ -693,9 +766,27 @@ class paloSantoExtensionsBatch
                                         array('"', ' '), array("'", ''),
                                         isset($extension['outboundcid']) ? $extension['outboundcid'] : ''),
                 'password'      =>  '',
-                'recording'     =>  'out='.$extension['record_out'].'|in='.$extension['record_in'],
                 'ringtimer'     =>  0,
                 'voicemail'     =>  ($extension['voicemail'] == 'enable') ? 'default' : 'novm',
+
+                // Parámetros obsoletos en FreePBX 2.11
+                //'recording'     =>  'out='.$extension['record_out'].'|in='.$extension['record_in'],
+                'recording'     =>  '',
+                
+                // FreePBX 2.11: nuevos parámetros (dontcare|always|never)
+                'recording/in/external' =>  $extension['recording_in_external'],
+                'recording/in/internal' =>  $extension['recording_in_internal'],
+                'recording/out/external'=>  $extension['recording_out_external'],
+                'recording/out/internal'=>  $extension['recording_out_internal'],
+                'recording/ondemand'    =>  $extension['recording_ondemand'],
+                'recording/priority'    =>  $extension['recording_priority'], // 1..20 default 10
+
+                // FreePBX 2.11: por ahora las siguientes propiedades no se setean desde archivo
+                'answermode'            =>  'disabled',
+                'cfringtimer'           =>  0,
+                'concurrency_limit'     =>  0,
+                'language'              =>  '',
+                'queues/qnostate'       =>  'usestate',
             ),
             'DEVICE'    => array(
                 'default_user'  =>  $extension['extension'],
@@ -705,9 +796,7 @@ class paloSantoExtensionsBatch
             ), 
         );
         foreach ($dbprops as $family => $keyvals) foreach ($keyvals as $key => $value) {
-        	$r = $astman->command(trim("database put $family {$extension['extension']}/$key $value"));
-            if (!isset($r['Response'])) $r['Response'] = '';
-            if (strtoupper($r['Response']) == 'ERROR') {
+            if (!$astman->database_put($family, $extension['extension'].'/'.$key, $value)) {
                 $this->errMsg = "Ext: {$extension['extension']} - "._tr('Error processing Database Family');
                 return FALSE;
             }
@@ -782,12 +871,7 @@ class paloSantoExtensionsBatch
         foreach ($extlist as $ext) {
         	// Borrar propiedades en base de datos de Asterisk
             foreach (array('AMPUSER', 'DEVICE', 'CW', 'CF', 'CFB', 'CFU') as $family) {
-                $r = $astman->command("database deltree $family/$ext");
-                if (!isset($r['Response'])) $r['Response'] = '';
-                if (strtoupper($r['Response']) == 'ERROR') {
-                    $this->errMsg = _tr('Could not delete the ASTERISK database');
-                    $exito = FALSE; break;
-                }
+                $astman->database_deltree($family.'/'.$ext);
             }
             if (!$exito) break;
         }

@@ -278,9 +278,17 @@ $BACKUP_PLAN = array(
         'ep_db'             =>  array(
             'desc'          =>  'Database',
             'components'    =>  array(
+                // The database endpoint.db is now obsolete
+                /*
                 array(
                     'type'          =>  'sqlitedb',
                     'path'          =>  '/var/www/db/endpoint.db',
+                ),
+                */
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'endpointconfig',
+                    'backupfile'=>  'endpointconfig_mysql.tgz',
                 ),
             ),
         ),

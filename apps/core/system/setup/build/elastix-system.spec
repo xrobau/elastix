@@ -15,6 +15,7 @@ Prereq: elastix-fax >= 2.2.0-4
 Prereq: php-soap
 Prereq: dahdi
 Conflicts: elastix-agenda < 2.2.0-1
+Conflicts: elastix-pbx <= 2.4.0-15
 Requires: dhcp
 
 %description
@@ -134,6 +135,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Feb 14 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: backup and restore the new endpointconfig database
+  instead of the old endpoint.db sqlite file.
+  SVN Rev[6475]
+
 * Wed Jan 22 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Network: Fedora requires the /etc/hostname file to be created/updated
   when changing the system hostname.

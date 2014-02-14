@@ -136,6 +136,9 @@ fi
 
 %changelog
 * Fri Feb 14 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: DHCP Server: privileged script now uses endpointconfig database 
+  instead of endpoint.db for --phonesonly option.
+  SVN Rev[6476]
 - CHANGED: Backup/Restore: backup and restore the new endpointconfig database
   instead of the old endpoint.db sqlite file.
   SVN Rev[6475]

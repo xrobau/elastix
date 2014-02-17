@@ -54,7 +54,7 @@ class paloSantoCalendar {
 
     /*HERE YOUR FUNCTIONS*/
 
-    function getNumCalendar($filter_field, $filter_value)
+    private function getNumCalendar($filter_field, $filter_value)
     {
         $where = "";
         if(isset($filter_field) & $filter_field !="")
@@ -71,7 +71,7 @@ class paloSantoCalendar {
         return $result[0];
     }
 
-    function getCalendar($limit, $offset, $filter_field, $filter_value)
+    private function getCalendar($limit, $offset, $filter_field, $filter_value)
     {
         $where = "";
         if(isset($filter_field) & $filter_field !="")
@@ -101,7 +101,7 @@ class paloSantoCalendar {
         return $result;
     }
 
-    function get_events_by_date($day, $month, $year)
+    private function get_events_by_date($day, $month, $year)
     {
         /* event types:
         1 - Normal event
@@ -202,7 +202,7 @@ class paloSantoCalendar {
         return $result;
     }
 
-    function Obtain_UID_From_User($user)
+    private function Obtain_UID_From_User($user)
     {
         global $pACL;
         $uid = $pACL->getIdUser($user);
@@ -331,7 +331,7 @@ class paloSantoCalendar {
         return $result;
     }
 
-    function getContactByEmail($db, $tag, $userid)
+    private function getContactByEmail($db, $tag, $userid)
     {
         $query = "SELECT  email AS caption,id AS value FROM contact WHERE (iduser = ? or status='isPublic')";
         $data = array($userid);
@@ -354,7 +354,7 @@ class paloSantoCalendar {
         return $result;
     }
 
-    function getLastInsertIdEvent(){
+    private function getLastInsertIdEvent(){
         $query = "SELECT id FROM events order by id desc";
         $result = $this->_DB->getFirstRowQuery($query, TRUE);
         if($result != FALSE || $result != "")
@@ -363,7 +363,7 @@ class paloSantoCalendar {
             return false;
     }
 
-    function getAllEvents(){
+    private function getAllEvents(){
         $query = "SELECT * FROM events";
         $result = $this->_DB->fetchTable($query,true);
         if($result==FALSE){
@@ -415,7 +415,7 @@ class paloSantoCalendar {
             return $username1;
     }
 
-    function existPassword($pass){
+    private function existPassword($pass){
         $query = "SELECT password FROM share_calendar WHERE password = '$pass'";
         $result = $this->_DB->getFirstRowQuery($query,true);
         if($result==FALSE || $result==null || $result==""){
@@ -425,7 +425,7 @@ class paloSantoCalendar {
         return true; // existe
     }
 
-    function createShareCalendar($uid_from, $user, $password){
+    private function createShareCalendar($uid_from, $user, $password){
         $query = "INSERT INTO share_calendar(uid_from,uid_to,user,password,confirm) VALUES('$uid_from','','$user','$password','FALSE')";
 
         $result = $this->_DB->genQuery($query);
@@ -436,7 +436,7 @@ class paloSantoCalendar {
         return true; 
     }
 
-    function getUidFrom($userEXT,$passEXT){
+    private function getUidFrom($userEXT,$passEXT){
         $query = "SELECT uid_from FROM share_calendar WHERE user='$userEXT' and password='$passEXT'";
         $result = $this->_DB->getFirstRowQuery($query,true);
         if($result==FALSE){
@@ -446,7 +446,7 @@ class paloSantoCalendar {
         return $result['uid_from'];
     }
 
-    function getUserNameFromById()
+    private function getUserNameFromById()
     {
         global $pACL;
         global $arrConf;
@@ -457,7 +457,7 @@ class paloSantoCalendar {
 
     /*************************************************  new  ***************************************************************/
 
-    function AsteriskManagerAPI($action, $parameters, $return_data=false) 
+    private function AsteriskManagerAPI($action, $parameters, $return_data=false) 
     {
         global $arrLang;
         $astman_host = "127.0.0.1";
@@ -489,7 +489,7 @@ class paloSantoCalendar {
         return $this->AsteriskManagerAPI("Originate",$parameters);
     }
 
-    function Originate($origen, $destino, $channel="", $description="", $context="", $variables="", $aplication="", $data="")
+    private function Originate($origen, $destino, $channel="", $description="", $context="", $variables="", $aplication="", $data="")
     {
         $parameters = array();
         $parameters['Channel']      = $channel;
@@ -504,7 +504,7 @@ class paloSantoCalendar {
         return $parameters;
     }
 
-    function getDataExt($ext)
+    private function getDataExt($ext)
     {
         $parameters = array('Command'=>"database show AMPUSER $ext/cidname");
         $data = $this->AsteriskManagerAPI("Command",$parameters,true);

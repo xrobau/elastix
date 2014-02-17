@@ -97,7 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
+* Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Hold Time: fix construction of SQL query from previous rewrite. Fixes
+  Elastix bug #1858.
+  SVN Rev[6480]
+
+* Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Monitoring: update Ember.js to 1.3.2
 
 * Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>

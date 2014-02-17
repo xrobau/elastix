@@ -97,16 +97,19 @@ class paloSantoHoldTime
         // Construir petición WHERE
         $whereCond = array('datetime_entry_queue >= ?');
         $paramSQL = array($sFechaInicio);
-        if (!is_null($sEstadoLlamada)) switch ($sEstadoLlamada) {
-        case 'Success':
-            $whereCond[] = ($sTipoLlamada == 'incoming') ? 'terminada' : 'Success';
-            break;
-        case 'NoAnswer':
-            $whereCond[] = ($sTipoLlamada == 'incoming') ? 'abandonada' : 'NoAnswer';
-            break;
-        case 'Abandoned':
-            $whereCond[] = ($sTipoLlamada == 'incoming') ? 'abandonada' : 'Abandoned';
-            break;
+        if (!is_null($sEstadoLlamada)) {
+            switch ($sEstadoLlamada) {
+            case 'Success':
+                $paramSQL[] = ($sTipoLlamada == 'incoming') ? 'terminada' : 'Success';
+                break;
+            case 'NoAnswer':
+                $paramSQL[] = ($sTipoLlamada == 'incoming') ? 'abandonada' : 'NoAnswer';
+                break;
+            case 'Abandoned':
+                $paramSQL[] = ($sTipoLlamada == 'incoming') ? 'abandonada' : 'Abandoned';
+                break;
+            }
+            $whereCond[] = 'status = ?';
         }
         $sWhereCond = implode(' AND ', $whereCond);
         

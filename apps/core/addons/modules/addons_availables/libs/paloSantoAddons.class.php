@@ -62,9 +62,14 @@ class paloSantoAddons
         
     	if (is_null($this->_soap)) {
             try {
-    		  $this->_soap = new SoapClient(
-                $arrConf['url_webservice'],
-                array('compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP));
+                /* La presencia de xdebug activo interfiere con las excepciones de
+                 * SOAP arrojadas por SoapClient, convirtiéndolas en errores 
+                 * fatales. Por lo tanto se desactiva la extensión. */
+                if (function_exists("xdebug_disable")) xdebug_disable(); 
+            
+                $this->_soap = @new SoapClient(
+                    $arrConf['url_webservice'],
+                    array('compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP));
             } catch (SoapFault $e) {
                 $this->_errMsg = $e->getMessage();
             	$this->_soap = NULL;

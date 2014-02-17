@@ -329,6 +329,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: framework - disable xdebug before creating a SoapClient in order to
+  work around xdebug generating fatal errors for SOAP exceptions on creation.
+  SVN Rev[6478]
+
 * Wed Feb 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework - tweak blackmin theme to make module menu interaction 
   easier.

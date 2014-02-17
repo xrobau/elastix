@@ -125,6 +125,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: disable xdebug before creating a SoapClient in order to
+  work around xdebug generating fatal errors for SOAP exceptions on creation.
+  SVN Rev[6478]
+
 * Wed Jan 29 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: handle case in which transaction summary report includes a 
   line of a package that is being obsoleted by another package, and do not choke

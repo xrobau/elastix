@@ -156,6 +156,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: System: disable xdebug before creating a SoapClient in order to
+  work around xdebug generating fatal errors for SOAP exceptions on creation.
+  SVN Rev[6478]
+
 * Wed Jan 22 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Network: Fedora requires the /etc/hostname file to be created/updated
   when changing the system hostname.

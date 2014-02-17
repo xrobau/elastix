@@ -73,6 +73,19 @@ class paloSantoRegistration {
         return $result;
     }
 
+    private function _getSOAP()
+    {
+        ini_set("soap.wsdl_cache_enabled", "0");
+        $url_webservices = "https://webservice.elastix.org/modules/installations/webservice/registerWSDL.wsdl";
+    	
+        /* La presencia de xdebug activo interfiere con las excepciones de
+         * SOAP arrojadas por SoapClient, convirtiéndolas en errores 
+         * fatales. Por lo tanto se desactiva la extensión. */
+        if (function_exists("xdebug_disable")) xdebug_disable(); 
+        
+        return @new SoapClient($url_webservices);
+    }
+
     function getDataServerRegistration()
     {
 		if(is_file("/etc/elastix.key"))
@@ -80,13 +93,11 @@ class paloSantoRegistration {
 		else
 	    	$serverKey = "";
 	    	
-    	ini_set("soap.wsdl_cache_enabled", "0");
-    	$url_webservices = "https://webservice.elastix.org/modules/installations/webservice/registerWSDL.wsdl";
 	    try {
-        	$client  = new SoapClient($url_webservices);
+            $client = $this->_getSOAP();
         	$content = $client->getDataServerRegistration($serverKey);
         	return $content;
-	    }catch(SoapFault $e){
+	    } catch(SoapFault $e) {
         	return null;
         }
     }
@@ -146,13 +157,11 @@ class paloSantoRegistration {
 
     function sendDataWebService($data)
     {
-        ini_set("soap.wsdl_cache_enabled", "0");
-        $url_webservices = "https://webservice.elastix.org/modules/installations/webservice/registerWSDL.wsdl";
         try {
-        	$client  = new SoapClient($url_webservices);
+            $client = $this->_getSOAP();
            	$content = $client->saveInstallation($data);
         	return $content;
-        }catch(SoapFault $e){
+        } catch(SoapFault $e) {
         	return null;
         }
     }

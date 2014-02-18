@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework - add proper Content-Type header to JSON response when 
+  failing a rawmode request due to invalid session.
+  SVN Rev[6482]
+
 * Wed Feb 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework - tweak blackmin theme to make module menu interaction 
   easier.

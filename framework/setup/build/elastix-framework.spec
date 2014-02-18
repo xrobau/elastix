@@ -329,6 +329,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: framework - add proper Content-Type header to JSON response when 
+  failing a rawmode request due to invalid session.
+  SVN Rev[6482]
+
 * Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: framework - disable xdebug before creating a SoapClient in order to
   work around xdebug generating fatal errors for SOAP exceptions on creation.

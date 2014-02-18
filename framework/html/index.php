@@ -233,6 +233,7 @@ if (isset($_SESSION['elastix_user']) &&
         $jsonObject->set_status("ERROR_SESSION");
         $jsonObject->set_error(_tr("Your session has expired. If you want to do a login please press the button 'Accept'."));
         $jsonObject->set_message(null);
+        Header('Content-Type: application/json');
         echo $jsonObject->createJSON();
     }
     else{

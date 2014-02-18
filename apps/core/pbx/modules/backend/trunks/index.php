@@ -563,10 +563,6 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
             }
         }elseif($tech=="sip" || $tech=="iax2"){
             $arrProp["secret"]=getParameter("secret");
-            if(!isStrongPassword($arrProp["secret"])){
-                $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
-                $continuar=false;
-            }
             $arrProp=array_merge(getSipIaxParam($tech),$arrProp);
         }
 
@@ -668,12 +664,6 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
                 }
             }elseif($tech=="sip" || $tech=="iax2"){
                 $arrProp["secret"]=getParameter("secret");
-                if($arrProp["secret"]!=""){
-                    if(!isStrongPassword($arrProp["secret"])){
-                        $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
-                        $continuar=false;
-                    }
-                }
                 $arrProp=array_merge(getSipIaxParam($tech,true),$arrProp);
             }
 

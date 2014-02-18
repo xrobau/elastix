@@ -421,11 +421,6 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        if(!isStrongPassword($arrProp["secret"])){
-            $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
-            return false;
-        }
-        
         if($tech=="sip"){
             $arrProp['md5secret']=$this->type->hashMd5Secret($arrProp['name'],$arrProp['secret']);
             $arrProp['secret']="";
@@ -728,10 +723,6 @@ class paloSantoTrunk extends paloAsteriskDB{
         }
         
         if(isset($arrProp["secret"]) && $arrProp["secret"]!=""){
-            if(!isStrongPassword($arrProp["secret"])){
-                $error=_tr("Secret can not be empty, must be at least 10 characters, contain digits, uppers and little case letters");
-                return false;
-            }
             if($tech=="sip"){
                 $arrProp['md5secret']=$this->type->hashMd5Secret($arrProp['name'],$arrProp['secret']);
                 $arrProp['secret']=null;

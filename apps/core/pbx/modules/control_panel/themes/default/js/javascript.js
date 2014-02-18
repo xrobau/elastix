@@ -40,6 +40,16 @@ $.extend($.ui.draggable.prototype, (function (orig) {
 var module_name = 'control_panel';
 var App = null;
 
+//Redireccionar la página entera en caso de que la sesión se haya perdido
+function verificar_error_session(respuesta)
+{
+	if (respuesta['statusResponse'] == 'ERROR_SESSION') {
+		if (respuesta['error'] != null && respuesta['error'] != '')
+			alert(respuesta['error']);
+		window.open('index.php', '_self');
+	}
+}
+
 $(document).ready(function() {
 	// Inicialización de Ember.js
 	App = Ember.Application.create({
@@ -171,10 +181,11 @@ $(document).ready(function() {
 				extension:	this.get('extension')
 			},
 			function(respuesta) {
+				verificar_error_session(respuesta);
 				if (respuesta.status == 'error') {
 					alert(respuesta.message);
 				}
-			}.bind(this));
+			}.bind(this), 'json');
 		}.observes('current_area')
 	});
 	
@@ -408,10 +419,11 @@ $(document).ready(function() {
 					description:this.get('description')
 				},
 				function(respuesta) {
+					verificar_error_session(respuesta);
 					if (respuesta.status == 'error') {
 						alert(respuesta.message);
 					}
-				}.bind(this));
+				}.bind(this), 'json');
 				this.set('editing', false);
 			},
 			dialvoicemail: function(sourceExtension) {
@@ -422,10 +434,11 @@ $(document).ready(function() {
 					source:		sourceExtension.get('extension')
 				},
 				function(respuesta) {
+					verificar_error_session(respuesta);
 					if (respuesta.status == 'error') {
 						alert(respuesta.message);
 					}
-				}.bind(this));
+				}.bind(this), 'json');
 			}
 		},
 		findIndexBy: function(key, value) {
@@ -693,13 +706,14 @@ $(document).ready(function() {
 				target:		targetExtension.get('extension')
 			},
 			function(respuesta) {
+				verificar_error_session(respuesta);
 				/*
 				if (respuesta.status == 'error') {
 					mostrar_mensaje_error(respuesta.message);
 				}
 				*/
 				console.debug(respuesta);
-			}.bind(this));
+			}.bind(this), 'json');
 		}
 	});
 	
@@ -722,10 +736,11 @@ $(document).ready(function() {
 				target:		targetExtension.get('extension')
 			},
 			function(respuesta) {
+				verificar_error_session(respuesta);
 				if (respuesta.status == 'error') {
 					alert(respuesta.message);
 				}
-			}.bind(this));
+			}.bind(this), 'json');
 		}
 	});
 	
@@ -802,12 +817,13 @@ $(document).ready(function() {
 			} else {
 				this.longPoll = $.get('index.php', params,
 				function (respuesta) {
+					verificar_error_session(respuesta);
 					this.set('connected', true);
 					if (this.manejarRespuestaStatus(respuesta)) {
 						// Lanzar el método de inmediato
 						setTimeout(this.pbxStatus.bind(this), 1);
 					}
-				}.bind(this));
+				}.bind(this), 'json');
 			}
 			
 			// Apagar el SSE al cerrar la ventana
@@ -834,8 +850,9 @@ $(document).ready(function() {
 				action:		'pbxStatusShutdown'
 			},
 			function(respuesta) {
+				verificar_error_session(respuesta);
 				console.debug(respuesta);
-			}.bind(this));
+			}.bind(this), 'json');
 		},
 		
 		localizarControladorExtension: function(key, value) {
@@ -1040,10 +1057,11 @@ $(document).ready(function() {
 				panelgroup:		pgroup
 			},
 			function(respuesta) {
+				verificar_error_session(respuesta);
 				if (respuesta.status == 'error') {
 					alert(respuesta.message);
 				}
-			}.bind(this));
+			}.bind(this), 'json');
 		}
 
 	});

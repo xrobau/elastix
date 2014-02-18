@@ -267,6 +267,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Control Panel: the Elastix framework sends an error in a JSON response
+  if a rawmode request is made with an invalid/expired session. Check for this
+  response and alert/redirect to Elastix login page if received.
+  SVN Rev[6484]
+
 * Thu Feb 13 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Extension Batch: update recording parameter handling for FreePBX 2.11
   SVN Rev[6474]

@@ -26,6 +26,16 @@ if (!Function.prototype.bind) {
 var module_name = 'campaign_monitoring';
 var App = null;
 
+//Redireccionar la página entera en caso de que la sesión se haya perdido
+function verificar_error_session(respuesta)
+{
+	if (respuesta['statusResponse'] == 'ERROR_SESSION') {
+		if (respuesta['error'] != null && respuesta['error'] != '')
+			alert(respuesta['error']);
+		window.open('index.php', '_self');
+	}
+}
+
 $(document).ready(function() {
 	$('#elastix-callcenter-error-message').hide();
 	
@@ -51,7 +61,8 @@ $(document).ready(function() {
 				menu:		module_name, 
 				rawmode:	'yes',
 				action:		'getCampaigns'
-			}).then(function(respuesta) {
+			}, 'json').then(function(respuesta) {
+				verificar_error_session(respuesta);
 				if (respuesta.status == 'error') {
 					mostrar_mensaje_error(respuesta.message);
 					return;
@@ -71,7 +82,8 @@ $(document).ready(function() {
 				action:			'getCampaignDetail',
 				campaigntype:	params.type,
 				campaignid:		params.id_campaign
-			}).then(function(respuesta) {
+			}, 'json').then(function(respuesta) {
+				verificar_error_session(respuesta);
 				if (respuesta.status == 'error') {
 					mostrar_mensaje_error(respuesta.message);
 					return null;
@@ -252,11 +264,12 @@ $(document).ready(function() {
 				}.bind(this);
 			} else {
 				this.longPoll = $.get('index.php', params, function (respuesta) {
+					verificar_error_session(respuesta);
 					if (this.manejarRespuestaStatus(respuesta)) {
 						// Lanzar el método de inmediato
 						setTimeout(this.do_checkstatus.bind(this), 1);
 					}
-				}.bind(this));
+				}.bind(this), 'json');
 			}
 		},
 		manejarRespuestaStatus: function(respuesta) {
@@ -426,6 +439,7 @@ $(document).ready(function() {
 				campaignid:		campaign.get('id_campaign'),
 				beforeid:		(this.registro.length > 0) ? this.registro[0].id : null
 			}, function(respuesta) {
+				verificar_error_session(respuesta);
 				if (respuesta.status == 'error') {
 					mostrar_mensaje_error(respuesta.message);
 					return;
@@ -438,7 +452,7 @@ $(document).ready(function() {
 						mensaje: 	registro.mensaje
 					});
 				}
-			}.bind(this));
+			}.bind(this), 'json');
 		}
 	});
 

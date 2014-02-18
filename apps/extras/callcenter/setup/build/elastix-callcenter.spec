@@ -97,6 +97,13 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Feb 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console, Campaign Monitoring, Agent Monitoring: the Elastix 
+  framework sends an error in a JSON response if a rawmode request is made with 
+  an invalid/expired session. Check for this response and alert/redirect to 
+  Elastix login page if received.
+  SVN Rev[6483]
+
 * Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Hold Time: fix construction of SQL query from previous rewrite. Fixes
   Elastix bug #1858.

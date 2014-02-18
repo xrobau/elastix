@@ -14,6 +14,16 @@ var timer = null;
 //Objeto EventSource, si está soportado por el navegador
 var evtSource = null;
 
+//Redireccionar la página entera en caso de que la sesión se haya perdido
+function verificar_error_session(respuesta)
+{
+	if (respuesta['statusResponse'] == 'ERROR_SESSION') {
+		if (respuesta['error'] != null && respuesta['error'] != '')
+			alert(respuesta['error']);
+		window.open('index.php', '_self');
+	}
+}
+
 //Inicializar estado del cliente al refrescar la página
 function initialize_client_state(nuevoEstado, nuevoEstadoHash)
 {
@@ -153,11 +163,12 @@ function do_checkstatus()
 	} else {
 		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,
 		function (respuesta) {
+			verificar_error_session(respuesta);
 			manejarRespuestaStatus(respuesta);
 			
 			// Lanzar el método de inmediato
 			setTimeout(do_checkstatus, 1);
-		});
+		}, 'json');
 	}
 }
 

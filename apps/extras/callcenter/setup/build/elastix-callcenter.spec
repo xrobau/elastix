@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -97,7 +97,8 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
-* Tue Feb 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-6
+- Bump version for release.
 - CHANGED: Agent Console, Campaign Monitoring, Agent Monitoring: the Elastix 
   framework sends an error in a JSON response if a rawmode request is made with 
   an invalid/expired session. Check for this response and alert/redirect to 

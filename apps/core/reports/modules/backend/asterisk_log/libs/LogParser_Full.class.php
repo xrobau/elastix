@@ -74,16 +74,8 @@ class LogParser_Full
 						while (is_null($sFechaPuntoInicial) && !feof($hArchivo)) {
 							$porcion[0] = ftell($hArchivo);
 							$sLinea = fgets($hArchivo);
-							// La línea esperada tiene el formato siguiente: 
-							// [Jun  6 04:02:01] VERBOSE[3708] logger.c: Asterisk Event Logger restarted
-                            $regs = NULL;
-                            if (preg_match('/^\[(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\]/', $sLinea, $regs)) {
-                                $sPosibleFecha = $regs[1];
-								$iTimestamp = strtotime($sPosibleFecha);
-								if ($iTimestamp !== FALSE) {
-									$sFechaPuntoInicial = date('Y-m-d', $iTimestamp);
-								}
-							}
+							
+                            $sFechaPuntoInicial = $this->_obtenerFechaPrefijoLinea($sLinea);
 						}
 
 						// Leer la fecha en el punto medio. Si la línea leída no empieza con
@@ -96,17 +88,9 @@ class LogParser_Full
 							$iPuntoMedio = ftell($hArchivo);
 							$sLinea = fgets($hArchivo);
 
-							// La línea esperada tiene el formato siguiente: 
-							// [Jun  6 04:02:01] VERBOSE[3708] logger.c: Asterisk Event Logger restarted
-                            $regs = NULL;
-                            if (preg_match('/^\[(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\]/', $sLinea, $regs)) {
-                                $sPosibleFecha = $regs[1];
-								$iTimestamp = strtotime($sPosibleFecha);
-								if ($iTimestamp !== FALSE) {
-									$sFechaPuntoMedio = date('Y-m-d', $iTimestamp);
-									$iLuegoPuntoMedio = ftell($hArchivo);
-								}
-							}
+                            $sFechaPuntoMedio = $this->_obtenerFechaPrefijoLinea($sLinea);
+                            if (!is_null($sFechaPuntoMedio))
+                                $iLuegoPuntoMedio = ftell($hArchivo);
 						}
 
 						// Si las fechas inicial y media son iguales, el punto indicado por $iPuntoMedio
@@ -152,26 +136,17 @@ class LogParser_Full
 									$iPunto = ftell($hArchivo);
 									$sLinea = fgets($hArchivo);
 
-									// La línea esperada tiene el formato siguiente: 
-									// [Jun  6 04:02:01] VERBOSE[3708] logger.c: Asterisk Event Logger restarted
-                                    $regs = NULL;
-                                    if (preg_match('/^\[(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\]/', $sLinea, $regs)) {
-                                        $sPosibleFecha = $regs[1];
-										$iTimestamp = strtotime($sPosibleFecha);
-										if ($iTimestamp !== FALSE) {
-											$sFecha = date('Y-m-d', $iTimestamp);
-											
-											if (!isset($infoLog['fechas'][$sFecha])) {
-												$infoLog['fechas'][$sFecha] = array(
-													'offset_inicio'	=>	$iPunto,
-													'offset_final'  =>  ftell($hArchivo),
-												);
-											} else {
-												$infoLog['fechas'][$sFecha]['offset_final'] = ftell($hArchivo);
-											}
-											
-										}
-									}
+                                    $sFecha = $this->_obtenerFechaPrefijoLinea($sLinea);
+                                    if (!is_null($sFecha)) {
+                                        if (!isset($infoLog['fechas'][$sFecha])) {
+                                            $infoLog['fechas'][$sFecha] = array(
+                                                'offset_inicio' =>  $iPunto,
+                                                'offset_final'  =>  ftell($hArchivo),
+                                            );
+                                        } else {
+                                            $infoLog['fechas'][$sFecha]['offset_final'] = ftell($hArchivo);
+                                        }
+                                    }
 								}
 							} else {
 								$listaPorciones[] = $mitades[0];
@@ -197,6 +172,22 @@ class LogParser_Full
 			//print_r($this->_infoFechas);
 		}
 	}
+
+    private function _obtenerFechaPrefijoLinea($sLinea)
+    {
+        $listaRegexp = array(
+            '/^\[(\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})\]/',         // [Jun  6 04:02:01] VERBOSE[3708] logger.c: Asterisk Event Logger restarted
+            '/^\[(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\]/',   // [2014-01-02 14:40:15] VERBOSE[4443] config.c:   == Parsing '/etc/asterisk/asterisk.conf': Found
+        );
+        foreach ($listaRegexp as $rx) {
+            $regs = NULL;
+        	if (preg_match($rx, $sLinea, $regs)) {
+        		$iTimestamp = strtotime($regs[1]);
+                if ($iTimestamp !== FALSE) return date('Y-m-d', $iTimestamp);
+        	}
+        }
+        return NULL;
+    }
 	
 	/**
 	 * Procedimiento que lista las fechas para los cuales hay mensajes en 

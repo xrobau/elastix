@@ -142,6 +142,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Asterisk Logs: update log parsing for changed date format resulting 
+  from update to FreePBX 2.11.
+  SVN Rev[6487]
+
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump Release in specfile.

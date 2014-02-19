@@ -267,6 +267,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Extension Batch: fix up dialog to match standard dialogs under
+  blackmin theme.
+  SVN Rev[6486]
+
 * Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Control Panel: the Elastix framework sends an error in a JSON response
   if a rawmode request is made with an invalid/expired session. Check for this

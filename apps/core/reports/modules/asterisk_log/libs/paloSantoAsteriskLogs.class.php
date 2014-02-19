@@ -56,7 +56,7 @@ class paloSantoAsteriskLogs {
             // Se desactiva la condición porque ya no todas las líneas empiezan con corchete
             if (!(count($lineas) == 0 && !is_null($s) && $s{0} != '[')) {
                 $regs = NULL;
-                if (preg_match('/^\[([\w\s:]+)\]\s+((\w+)(\[\d+\]\s+\S+\.c:)\s+)?(.*)/', $s, $regs)) {
+                if (preg_match('/^\[([\w\s:-]+)\]\s+((\w+)(\[\d+\]\s+\S+\.c:)\s+)?(.*)/', $s, $regs)) {
                     $l = array(
                         'offset'=> $pos[1],
                         'fecha' => $regs[1],

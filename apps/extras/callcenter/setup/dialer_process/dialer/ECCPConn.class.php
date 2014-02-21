@@ -1540,6 +1540,7 @@ LEER_CAMPANIA;
             $dbConn = new PDO("mysql:host={$dbParams['AMPDBHOST']};dbname=asterisk", 
                 $dbParams['AMPDBUSER'], $dbParams['AMPDBPASS']);
             $dbConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $dbConn->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
             return $dbConn;
         } catch (PDOException $e) {
             $this->_log->output("ERR: no se puede conectar a DB de FreePBX - ".

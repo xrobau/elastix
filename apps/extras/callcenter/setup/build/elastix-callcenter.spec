@@ -97,6 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Feb 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: disable PDO::ATTR_EMULATE_PREPARES on all MySQL PDO connections
+  in order to use native prepared statements instead of the default PHP emulation.
+  Workaround for PHP bug #44639. Might fix Elastix bug #1844.
+  SVN Rev[6489] 
+
 * Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-6
 - Bump version for release.
 - CHANGED: Agent Console, Campaign Monitoring, Agent Monitoring: the Elastix 

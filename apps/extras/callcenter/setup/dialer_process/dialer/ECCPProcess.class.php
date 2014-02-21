@@ -118,6 +118,7 @@ class ECCPProcess extends TuberiaProcess
         try {
             $this->_db = new PDO($this->_dsn[0], $this->_dsn[1], $this->_dsn[2]);
             $this->_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->_db->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
             return TRUE;
         } catch (PDOException $e) {
             $this->_db = NULL;

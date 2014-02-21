@@ -163,6 +163,7 @@ class CampaignProcess extends TuberiaProcess
     	try {
     		$this->_db = new PDO($this->_dsn[0], $this->_dsn[1], $this->_dsn[2]);
             $this->_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->_db->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
             return TRUE;
     	} catch (PDOException $e) {
             $this->_db = NULL;
@@ -1297,6 +1298,7 @@ PETICION_LLAMADAS_AGENTE;
             $dbConn = new PDO("mysql:host={$dbParams['AMPDBHOST']};dbname=asterisk", 
                 $dbParams['AMPDBUSER'], $dbParams['AMPDBPASS']);
             $dbConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $dbConn->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
             return $dbConn;
         } catch (PDOException $e) {
             $this->_log->output("ERR: no se puede conectar a DB de FreePBX - ".

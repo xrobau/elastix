@@ -156,6 +156,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Feb 24 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: DHCP Server: fix redirect that assumes index.php is located at document
+  root. This is a noop in Elastix 2 but fixes an invalid redirect after DHCP
+  parameter updates in Elastix 3.
+  SVN Rev[6490]
+
 * Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: System: disable xdebug before creating a SoapClient in order to
   work around xdebug generating fatal errors for SOAP exceptions on creation.

@@ -281,7 +281,7 @@ function serviceStartDHCP($smarty, $module_name, $local_templates_dir, &$oForm)
         $smarty->assign("DHCP_STATUS","<font color='#FF0000'>"._tr('Inactive'). "</font>");
         $smarty->assign("SERVICE_STARING",false);
     }
-    header("Location: /?menu=$module_name");
+    header("Location: ?menu=$module_name");
 }
 
 function serviceStopDHCP($smarty, $module_name, $local_templates_dir, &$oForm)
@@ -303,7 +303,7 @@ function serviceStopDHCP($smarty, $module_name, $local_templates_dir, &$oForm)
         $smarty->assign("DHCP_STATUS","<font color='#FF0000'>"._tr('Inactive')."</font>");
         $smarty->assign("SERVICE_STARING",false);
     }
-    header("Location: /?menu=$module_name");
+    header("Location: ?menu=$module_name");
 }
 
 function serviceShowDHCP($smarty, $module_name, $local_templates_dir, &$oForm)
@@ -469,6 +469,6 @@ function serviceUpdateDHCP($smarty, $module_name, $local_templates_dir, &$oForm)
         }
         return $oForm->fetchForm("$local_templates_dir/dhcp.tpl",_tr("DHCP Configuration"), $_POST);
     }
-    header("Location: /?menu=$module_name");
+    header("Location: ?menu=$module_name");
 }
 ?>

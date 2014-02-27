@@ -1301,7 +1301,8 @@ class paloSantoOrganization{
         $arrProp["fullname"]=$fullname;
         //$arrProp["elastix_user"]=strstr($email, '@', true);
         //en un futuro se tiene pensado usar como name para el dispositivo de usario su username
-        $arrProp["name"]=$exten;
+        //$arrProp["name"]=$exten;
+        $arrProp["name"]=strstr($email, '@', true);
         $arrProp["exten"]=$exten;
         $arrProp['secret']= $secret;
         $arrProp["vmpassword"]= $exten;
@@ -1320,6 +1321,7 @@ class paloSantoOrganization{
             
         $arrOpt["create_elxweb_device"]="yes"; //a esto se le agrega el codigo de la organizacion
         $arrOpt["alias"]=strstr($email, '@', true);
+        //$arrOpt["alias"]=$exten;
         return $arrOpt;
     }
 
@@ -1358,7 +1360,7 @@ class paloSantoOrganization{
             $emailUser = $username;
             $username = $username."@".$arrOrgz["domain"];
             //$peer_extension=$arrOrgz["code"]."_".$extension;
-            $peer_extension=$extension."@".$arrOrgz["domain"];
+            $peer_name=$username."@".$arrOrgz["domain"];
             $peer_fax=$arrOrgz["code"]."_".$fax_extension;
             //validamos que no exista otro usuario con la misma sip_extension
             //validamos que no exista otro usuario con la misma fax_extension
@@ -1370,7 +1372,8 @@ class paloSantoOrganization{
             }
 
             $pDevice=new paloDevice($arrOrgz["domain"],"sip",$this->_DB);
-            if($pDevice->existDevice($extension,$peer_extension,"sip")==true){
+            //if($pDevice->existDevice($extension,$peer_extension,"sip")==true){
+            if($pDevice->existDevice($extension,$peer_name,"sip")==true){
                 $this->errMsg="Error Extension Number. ".$pDevice->errMsg;
                 return false;
             }

@@ -764,9 +764,15 @@ class paloSip extends paloAsteriskDB {
     }
     
     //esto es para los numeros de extensiones internas
+    //Valida en name del peer
     function validateName($deviceName)
     {
-        $arrDevName = explode("@",$deviceName);
+        if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/",$deviceName))
+            return false;
+        else
+            return true;
+        
+        /*$arrDevName = explode("@",$deviceName);
         if(!preg_match("/^[[:alnum:]]+[IM]*$/", $arrDevName[0])){
             $this->errMsg="Invalid extension format";
             return false;
@@ -774,7 +780,7 @@ class paloSip extends paloAsteriskDB {
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $arrDevName[1])){
             $this->errMsg="Invalid domain format";
             return false;
-        }
+        }*/
         
         return true;
         /*if(preg_match("/^[[:alnum:]_]+$/", $deviceName)){
@@ -1881,7 +1887,8 @@ class paloDevice{
         }
         
         //seteamos el callerid del equipo
-        $arrProp['callerid']="device <".$arrProp['exten'].">";
+        //$arrProp['callerid']="device <".$arrProp['exten'].">";
+        $arrProp['callerid']="device <".$device.">";
 
         if($arrProp['create_vm']=="yes"){
             $arrVoicemail['organization_domain']=$this->domain;
@@ -1916,7 +1923,7 @@ class paloDevice{
 
         if($arrProp['create_vm']=="yes"){
             //$arrProp['mailbox']=$arrProp['exten']."@".$this->code."-".$pVM->context;
-            $arrProp['mailbox']=$arrProp['exten']."@".$this->domain."-".$pVM->context;
+            $arrProp['mailbox']=$device."-".$pVM->context;
             $arrProp["voicemail_context"]=$this->code."-".$pVM->context;
         }else
             $arrProp["voicemail_context"]="novm";
@@ -1967,7 +1974,7 @@ class paloDevice{
                 if((bool)$arrProp["create_elxweb_device"]){
                     $arrProp["enable_chat"]='yes';
                     //$arrProp["elxweb_device"]=$this->code."_IM{$arrProp['name']}";
-                    $arrProp["elxweb_device"]="{$arrProp['name']}IM@".$this->domain;
+                    $arrProp["elxweb_device"]="{$arrProp['name']}_im@".$this->domain;
                 }
             }
         }
@@ -2000,7 +2007,7 @@ class paloDevice{
             //creamos el peer sip y registramos que existe una cuenta para chatear en la tabla elx-im 
             $IM=$arrProp;
             //$IM['name'] = "IM{$arrProp['name']}";
-            $IM['name'] = "{$arrProp['name']}IM";
+            $IM['name'] = "{$arrProp['name']}_im";
             $IM['secret'] = $secret;
             $IM["outofcall_message_context"] = 'im-sip';
             $IM["subscribecontext"] = 'im-sip';
@@ -2545,7 +2552,9 @@ class paloDevice{
 
         $exist=true;
         if(!preg_match("/^[[:alnum:]]+$/", $extension)){
+        //if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*$/", $nameUsername)){
             $this->errMsg="Invalid extension format";
+            //$this->errMsg="Invalid name username format";
             return true;
         }elseif(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $this->domain)){
             $this->errMsg="Invalid domain format";

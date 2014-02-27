@@ -112,7 +112,8 @@ class paloIM extends paloAsteriskDB{
         }
         
         $arrProp["organization_domain"]=$this->domain;
-        $arrProp['callerid']="device <".$arrProp['name'].">";
+        //$arrProp['callerid']="device <".$arrProp['name'].">";
+        $arrProp['callerid']="device <".$device.">";
         $arrProp['md5secret']=$pSip->hashMd5Secret($device,$arrProp['secret']);
         $arrProp['secret']="";
         $arrProp["outofcall_message_context"] = empty($arrProp["outofcall_message_context"])?'im-sip':$arrProp["outofcall_message_context"];

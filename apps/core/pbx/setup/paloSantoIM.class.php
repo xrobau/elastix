@@ -58,7 +58,8 @@ class paloIM extends paloAsteriskDB{
     //soporte para cuentas que no sean solamente numero 
     //las cuentas de chat simepre son de tipo sip
     function createIMAccount($arrProp){
-        $device=$this->code."_".$arrProp['name'];
+        //$device=$this->code."_".$arrProp['name'];
+        $device=$arrProp['name']."@".$this->domain;
         if(!isset($arrProp["id_exten"])){
             $arrProp["id_exten"]=NULL;
         }
@@ -86,7 +87,7 @@ class paloIM extends paloAsteriskDB{
         $result=$this->_DB->genQuery($query,array($device,$this->domain,$arrProp['display_name'],$arrProp['alias'],$arrProp['id_exten']));
         
         if($result==false){
-            $this->errMsg=_tr("DATABASE ERROR");
+            $this->errMsg=_tr("DATABASE ERROR").": ".$this->_DB->errMsg;
             return false;
         }
         return true;
@@ -100,7 +101,8 @@ class paloIM extends paloAsteriskDB{
      * Supuestamente esto sera resuelto en asterisk 12
      */
     private function createSipAccount($arrProp){
-        $device=$this->code."_".$arrProp['name'];
+        //$device=$this->code."_".$arrProp['name'];
+        $device=$arrProp['name']."@".$this->domain;
         $pSip=new paloSip($this->_DB);
         
         //validamos que no exista un dispositvo con ese nombre

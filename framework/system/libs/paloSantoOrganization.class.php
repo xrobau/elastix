@@ -1357,7 +1357,8 @@ class paloSantoOrganization{
         if(is_array($arrOrgz) && count($arrOrgz)>0){ // 1)
             $emailUser = $username;
             $username = $username."@".$arrOrgz["domain"];
-            $peer_extension=$arrOrgz["code"]."_".$extension;
+            //$peer_extension=$arrOrgz["code"]."_".$extension;
+            $peer_extension=$extension."@".$arrOrgz["domain"];
             $peer_fax=$arrOrgz["code"]."_".$fax_extension;
             //validamos que no exista otro usuario con la misma sip_extension
             //validamos que no exista otro usuario con la misma fax_extension

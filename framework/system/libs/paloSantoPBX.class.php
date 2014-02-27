@@ -752,7 +752,7 @@ class paloSip extends paloAsteriskDB {
             }else
                 $this->errMsg="Already exist a sip peer with same name"." : $deviceName";
         }else{
-            $this->errMsg=tr("Invalid SIP name")." : $deviceName";
+            $this->errMsg=_tr("Invalid SIP name")." : $deviceName";
         }
         return true;
     }
@@ -766,11 +766,22 @@ class paloSip extends paloAsteriskDB {
     //esto es para los numeros de extensiones internas
     function validateName($deviceName)
     {
-        if(preg_match("/^[[:alnum:]_]+$/", $deviceName)){
+        $arrDevName = explode("@",$deviceName);
+        if(!preg_match("/^[[:alnum:]]+[IM]*$/", $arrDevName[0])){
+            $this->errMsg="Invalid extension format";
+            return false;
+        }
+        if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $arrDevName[1])){
+            $this->errMsg="Invalid domain format";
+            return false;
+        }
+        
+        return true;
+        /*if(preg_match("/^[[:alnum:]_]+$/", $deviceName)){
             return true;
         }else{
             return false;
-        }
+        }*/
     }
 
     function insertDB()
@@ -785,7 +796,8 @@ class paloSip extends paloAsteriskDB {
         //valido que no exista otro dispositivo sip creado con el mismo nombre y que los cambios obligatorios esten seteados
         if(!isset($this->name) || !isset($this->md5secret) || !isset($this->context)){
             $this->errMsg="Field name, secret, context can't be empty";
-        }elseif(!$this->existPeer($code."_".$this->name)){
+        //}elseif(!$this->existPeer($code."_".$this->name)){
+            }elseif(!$this->existPeer($this->name."@".$this->organization_domain)){
             $arrValues=array();
             $question="(";
             $Prop="(";
@@ -812,7 +824,8 @@ class paloSip extends paloAsteriskDB {
                             break;
                         case "name":
                             $Prop .=$key.",";
-                            $value = $code."_".$value;
+                            //$value = $code."_".$value;
+                            $value = $value."@".$this->organization_domain;
                             break;
                         case "namedpickupgroup":
                             $Prop .=$key.",";
@@ -1822,7 +1835,11 @@ class paloDevice{
             return false;
         }
         
-        $device=$this->code."_".$arrProp['name'];
+        if($type=="iax2")
+            $device=$this->code."_".$arrProp['name'];
+        else //sip
+            $device=$arrProp['name']."@".$this->domain;
+        
         $arrProp['device']=$device;
         
         if($this->existDevice($arrProp['exten'],$device,$this->domain)){
@@ -1898,7 +1915,8 @@ class paloDevice{
         }
 
         if($arrProp['create_vm']=="yes"){
-            $arrProp['mailbox']=$arrProp['exten']."@".$this->code."-".$pVM->context;
+            //$arrProp['mailbox']=$arrProp['exten']."@".$this->code."-".$pVM->context;
+            $arrProp['mailbox']=$arrProp['exten']."@".$this->domain."-".$pVM->context;
             $arrProp["voicemail_context"]=$this->code."-".$pVM->context;
         }else
             $arrProp["voicemail_context"]="novm";
@@ -1948,7 +1966,8 @@ class paloDevice{
             if(isset($arrProp["create_elxweb_device"])){
                 if((bool)$arrProp["create_elxweb_device"]){
                     $arrProp["enable_chat"]='yes';
-                    $arrProp["elxweb_device"]=$this->code."_IM{$arrProp['name']}";
+                    //$arrProp["elxweb_device"]=$this->code."_IM{$arrProp['name']}";
+                    $arrProp["elxweb_device"]="{$arrProp['name']}IM@".$this->domain;
                 }
             }
         }
@@ -1980,7 +1999,8 @@ class paloDevice{
             $idExten=$this->tecnologia->_DB->getLastInsertId();
             //creamos el peer sip y registramos que existe una cuenta para chatear en la tabla elx-im 
             $IM=$arrProp;
-            $IM['name'] = "IM{$arrProp['name']}";
+            //$IM['name'] = "IM{$arrProp['name']}";
+            $IM['name'] = "{$arrProp['name']}IM";
             $IM['secret'] = $secret;
             $IM["outofcall_message_context"] = 'im-sip';
             $IM["subscribecontext"] = 'im-sip';

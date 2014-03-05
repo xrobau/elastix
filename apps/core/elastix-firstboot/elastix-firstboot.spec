@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-firstboot: Fix missing parameter to file_put_contents() 
+  resulting from previous update.
+  SVN Rev[6496]
+
 * Wed Feb 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: elastix-firstboot: Fixed error message for insufficiently strong 
   password. Fixes Elastix bug #1836. Additionally, WSS setup was rewritten to

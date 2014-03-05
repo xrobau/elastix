@@ -44,15 +44,6 @@ $json = new paloSantoJSON();
 header('Content-Type: application/json');
 
 /***********************User authentication********************************/
-if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] == '') {
-    header('HTTP/1.1 401 Unauthorized');
-    header('WWW-Authenticate: Basic realm="ElastixWebService"');
-    $json->set_status("ERROR");
-    $json->set_error("This method requires authentication");
-    echo $json->createJSON();
-    exit;
-}
-
 $pACL = new paloACL($arrConf['elastix_dsn']['acl']);
 if(!empty($pACL->errMsg)){
     header("HTTP/1.1 500 Internal Server Error");
@@ -62,7 +53,25 @@ if(!empty($pACL->errMsg)){
     exit;
 }
 
-if(!$pACL->authenticateUser($_SERVER['PHP_AUTH_USER'], md5($_SERVER['PHP_AUTH_PW']))){
+session_name("elastixSession");
+session_start();
+if (isset($_SESSION['elastix_user']) && isset($_SESSION['elastix_pass'])) {
+    $auth_user = $_SESSION['elastix_user'];
+    $auth_md5pass = $_SESSION['elastix_pass'];    
+    $_SERVER['PHP_AUTH_USER'] = $_SESSION['elastix_user'];
+} elseif (isset($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER'] != '') {
+    $auth_user = $_SERVER['PHP_AUTH_USER'];
+    $auth_md5pass = md5($_SERVER['PHP_AUTH_PW']);
+} else {
+    header('HTTP/1.1 401 Unauthorized');
+    header('WWW-Authenticate: Basic realm="ElastixWebService"');
+    $json->set_status("ERROR");
+    $json->set_error("This method requires authentication");
+    echo $json->createJSON();
+    exit;
+}
+
+if(!$pACL->authenticateUser($auth_user, $auth_md5pass)){
     header('HTTP/1.1 401 Unauthorized');
     header('WWW-Authenticate: Basic realm="ElastixWebService"');
     $json->set_status("ERROR");

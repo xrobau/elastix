@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: rest.php: accept ordinary cookie-based Elastix session in addition to
+  the Basic HTTP authentication.
+  SVN Rev[6500]
+
 * Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework - add proper Content-Type header to JSON response when 
   failing a rawmode request due to invalid session.

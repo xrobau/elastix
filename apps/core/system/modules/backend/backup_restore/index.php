@@ -432,7 +432,7 @@ function Array_Options($disabled="")
             "as_monitor"        =>  array("desc"=>_tr('Monitors')."  "._tr('(Heavy Content)')),
             "as_voicemail"      =>  array("desc"=>_tr('Voicemails')."  "._tr('(Heavy Content)')),
             "as_sounds"         =>  array("desc"=>_tr('Sounds')),
-            "as_mohmp3"         =>  array("desc"=>_tr('MOH')),
+            "as_moh"            =>  array("desc"=>_tr('MOH')),
             "as_dahdi"          =>  array("desc"=>_tr('DAHDI Configuration')),
         ),
         "fax"           =>  array(

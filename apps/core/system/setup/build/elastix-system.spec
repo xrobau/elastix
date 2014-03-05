@@ -156,6 +156,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Mar 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: switch the MOH directory from mohmp3 to moh (the 
+  Asterisk default). Update all code accordingly.
+  SVN Rev[6495]
+
 * Mon Feb 24 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: DHCP Server: fix redirect that assumes index.php is located at document
   root. This is a noop in Elastix 2 but fixes an invalid redirect after DHCP

@@ -163,15 +163,9 @@ $BACKUP_PLAN = array(
                 ),
             ),
         ),
-        'as_mohmp3'         =>  array(
+        'as_moh'            =>  array(
             'desc'          =>  'MOH',
             'components'    =>  array(
-                array(
-                    'type'          =>  'dir',
-                    'parentdir'     =>  '/var/lib/asterisk',
-                    'dirname'       =>  'mohmp3',
-                    'backupfile'    =>  'var.lib.asterisk.mohmp3.tgz',
-                ),
                 array(
                     'type'          =>  'dir',
                     'parentdir'     =>  '/var/lib/asterisk',

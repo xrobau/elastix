@@ -360,6 +360,9 @@ fi
 
 %changelog
 * Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: asterisk.elastix: added cdr.conf for the sole purpose of disabling
+  flat-file CDR accounting. Part of fix for Elastix bug #1871.
+  SVN Rev[6499]
 - CHANGED: asterisk.elastix: modified configuration files as follows: 
   res_odbc.conf: all passwords removed, now relies on passwords in 
   /etc/odbc.ini, and added new section asteriskcdrdb.

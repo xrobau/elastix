@@ -360,6 +360,16 @@ fi
 
 %changelog
 * Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: asterisk.elastix: modified configuration files as follows: 
+  res_odbc.conf: all passwords removed, now relies on passwords in 
+  /etc/odbc.ini, and added new section asteriskcdrdb.
+  cdr_mysql.conf: removed.
+  cdr_adaptive_odbc.conf: added. References asteriskcdrdb from res_odbc.conf.
+  This relies on cdr_mysql being not-present or disabled (see Elastix bug #1871,
+  and #1886).
+  Part of changes required for addressing Elastix bug #1872.
+  SVN Rev[6498]
+ 
 - CHANGED: MOH: switch the MOH directory from mohmp3 to moh (the Asterisk 
   default). Update all code accordingly.
   SVN Rev[6494]

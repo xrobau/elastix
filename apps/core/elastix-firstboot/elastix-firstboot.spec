@@ -103,6 +103,13 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-admin-passwords: The program has been modified to initialize
+  a second ODBC connector. This connector will be used to write CDRs to the
+  asteriskcdrdb database, instead of cdr_mysql. Also, the program will not
+  bother to update passwords inside /etc/asterisk anymore, as all such passwords
+  have been collected in /etc/odbc.ini. Part of changes required for addressing
+  Elastix bug #1872.
+  SVN Rev[6497]
 - FIXED: elastix-firstboot: Fix missing parameter to file_put_contents() 
   resulting from previous update.
   SVN Rev[6496]

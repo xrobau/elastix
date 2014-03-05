@@ -34,10 +34,12 @@
 class paloSantoMoH extends paloAsteriskDB{
     protected $code;
     protected $domain;
+    private $_mohdir;
 
     function paloSantoMoH(&$pDB,$domain)
     {
-       parent::__construct($pDB);
+        parent::__construct($pDB);
+        $this->_mohdir = '/var/lib/asterisk/moh/';  // TODO: leer de musiconhold.conf
         
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
            // $this->errMsg="Invalid domain format";
@@ -51,6 +53,11 @@ class paloSantoMoH extends paloAsteriskDB{
                 $this->code=$result["code"];
             }
         }
+    }
+
+    private function _buildMoHDirectory()
+    {
+    	return $this->_mohdir.(($this->domain == '') ? '' : $this->domain.'/');
     }
 
     function getNumMoH($domain=null,$name=null){
@@ -119,14 +126,10 @@ class paloSantoMoH extends paloAsteriskDB{
             return false;
         }
 
-        if($this->domain!=""){
-            $arrParam[]=$this->domain;
-            $where=" and organization_domain=?";
-            $directory="/var/lib/asterisk/moh/".$this->domain."/";
-        }else{
-            $this->domain="";
-            $directory="/var/lib/asterisk/mohmp3/";
-        
+        $directory = $this->_buildMoHDirectory();
+        if ($this->domain != '') {
+            $arrParam[] = $this->domain;
+            $where = ' and organization_domain = ?';
         }
 
         $query="SELECT name as class, description as name, mode as mode_moh,directory, application, sort, format from musiconhold where name=? $where";
@@ -200,10 +203,7 @@ class paloSantoMoH extends paloAsteriskDB{
             $application="";
             $format="";
             $sort=$arrProp["sort"];
-            if($this->domain=="")
-                $directory="/var/lib/asterisk/mohmp3/".$arrProp["name"];
-            else
-                $directory="/var/lib/asterisk/moh/".$this->domain."/".$arrProp["name"];
+            $directory = $this->_buildMoHDirectory().$arrProp['name'];
         }else{
             $mode="custom";
             if($arrProp["application"]==""){
@@ -257,13 +257,10 @@ class paloSantoMoH extends paloAsteriskDB{
             return false;
         }
         
-        if($this->domain!=""){
-            $param[]=$this->domain;
-            $where=" and organization_domain=?";
-            $directory="/var/lib/asterisk/moh/".$this->domain."/$name";
-        }else{
-            $this->domain="";
-            $directory="/var/lib/asterisk/mohmp3/$name";
+        $directory = $this->_buildMoHDirectory().$name;
+        if ($this->domain != '') {
+            $param[] = $this->domain;
+            $where = ' and organization_domain = ?';
         }
                 
         $query="SELECT directory from musiconhold where description=? and mode=? $where";
@@ -408,10 +405,7 @@ class paloSantoMoH extends paloAsteriskDB{
             return false;
         }else{
             //revisamos los archivos a ver si ahi alguno que el usuario desse eliminar de la clase
-            if($this->domain!=""){
-                $directory="/var/lib/asterisk/moh/".$this->domain."/".$arrMoH["name"];
-            }else
-                $directory="/var/lib/asterisk/mohmp3/".$arrMoH["name"];
+            $directory = $this->_buildMoHDirectory().$arrMoH['name'];
             
             $arrFiles=$arrMoH["listFiles"];
             $act_files=$arrProp["remain_files"];
@@ -440,10 +434,7 @@ class paloSantoMoH extends paloAsteriskDB{
         $query="DELETE from musiconhold where name=?";
         if($this->executeQuery($query,array($class))){
             //eliminamos los archivos de audio y la carpeta correspondientes a la clase
-            if($this->domain!=""){
-                $directory="/var/lib/asterisk/moh/".$this->domain."/".$arrMoH["name"];
-            }else
-                $directory="/var/lib/asterisk/mohmp3/".$arrMoH["name"];
+            $directory = $this->_buildMoHDirectory().$arrMoH['name'];
                 
             if(is_dir($directory)){
                 foreach($arrMoH["listFiles"] as $file){

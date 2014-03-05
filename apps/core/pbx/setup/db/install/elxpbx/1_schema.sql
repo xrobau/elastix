@@ -895,8 +895,8 @@ CREATE TABLE musiconhold ( -- Name of the MOH class
     INDEX organization_domain (organization_domain),
     UNIQUE KEY description_moh (description,organization_domain)
 ) ENGINE = INNODB;
-insert into musiconhold (name,description,mode,directory,sort,organization_domain) values('default','default','files','/var/lib/asterisk/mohmp3/','random',"");
-insert into musiconhold (name,description,mode,directory,sort,organization_domain) values('none','none','files','/var/lib/asterisk/mohmp3/none/','random',"");
+insert into musiconhold (name,description,mode,directory,sort,organization_domain) values('default','default','files','/var/lib/asterisk/moh/','random',"");
+insert into musiconhold (name,description,mode,directory,sort,organization_domain) values('none','none','files','/var/lib/asterisk/moh/none/','random',"");
 
 DROP TABLE IF EXISTS recordings;
 CREATE TABLE recordings (

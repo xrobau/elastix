@@ -33,7 +33,7 @@ rm -rf $RPM_BUILD_ROOT
 
 # Asterisk files
 mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/agi-bin
-mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/mohmp3
+#mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/mohmp3
 
 mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
 
@@ -119,7 +119,7 @@ rmdir setup/bin
 # ** files asterisk for agi-bin and mohmp3 ** #
 mv setup/asterisk/agi-bin/*                   $RPM_BUILD_ROOT/var/lib/asterisk/agi-bin/
 chmod 755 $RPM_BUILD_ROOT/var/lib/asterisk/agi-bin/*
-mv setup/asterisk/mohmp3/*                    $RPM_BUILD_ROOT/var/lib/asterisk/mohmp3/
+mv setup/asterisk/mohmp3/*                    $RPM_BUILD_ROOT/var/lib/asterisk/moh/
 
 # Moviendo archivos festival y sip_notify_custom_elastix.conf
 chmod +x setup/etc/asterisk/sip_notify_custom_elastix.conf
@@ -306,15 +306,16 @@ if [ ! -e /var/lib/asterisk/sounds/tss/ ] ; then
 fi
 
 # Copy any unaccounted files from moh to mohmp3
-mkdir -p /var/lib/asterisk/mohmp3/none
-for i in /var/lib/asterisk/moh/* ; do
-    if [ -e $i ] ; then
-        BN=`basename "$i"`
-        if [ ! -e "/var/lib/asterisk/mohmp3/$BN" ] ; then
-            cp $i /var/lib/asterisk/mohmp3/
-        fi
-    fi
-done
+#mkdir -p /var/lib/asterisk/mohmp3/none
+mkdir -p /var/lib/asterisk/moh/none
+#for i in /var/lib/asterisk/moh/* ; do
+#    if [ -e $i ] ; then
+#        BN=`basename "$i"`
+#        if [ ! -e "/var/lib/asterisk/mohmp3/$BN" ] ; then
+#            cp $i /var/lib/asterisk/mohmp3/
+#        fi
+#    fi
+#done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -358,6 +359,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: MOH: switch the MOH directory from mohmp3 to moh (the Asterisk 
+  default). Update all code accordingly.
+  SVN Rev[6494]
+
 * Mon Feb 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Extension Batch: re-enable account password strength check which was
   disabled without explanation on last rewrite

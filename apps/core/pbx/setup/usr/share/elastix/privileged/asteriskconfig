@@ -487,14 +487,13 @@ function createMoHDir($class,$domain=null){
         return false;
     }
     
+    $base = '/var/lib/asterisk/moh'
     if(isset($domain)){
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
             fprintf(STDERR, "Invalid domain format");
             return false;
         }
-        $base="/var/lib/asterisk/moh/".$domain;
-    }else{
-        $base="/var/lib/asterisk/mohmp3";
+        $base .= '/'.$domain;
     }
     
     if(!is_dir($base)){

@@ -359,6 +359,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Mar 06 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: asteriskconfig: fixed typo in privileged script.
+  SVN Rev[6502]
+
 * Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: asterisk.elastix: added cdr.conf for the sole purpose of disabling
   flat-file CDR accounting. Part of fix for Elastix bug #1871.

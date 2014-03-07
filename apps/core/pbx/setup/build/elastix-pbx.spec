@@ -360,6 +360,8 @@ fi
 
 %changelog
 * Fri Mar 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: sip.conf: restrict Asterisk to listen on localhost only for SIP.
+  SVN Rev[6504]
 - CHANGED: Start of Kamailio integration into Elastix. Create column 
   sip.sippasswd on database elxpbx. All instances of MD5 hashing in elastix-pbx
   are reverted to plaintext passwords written to sippasswd.

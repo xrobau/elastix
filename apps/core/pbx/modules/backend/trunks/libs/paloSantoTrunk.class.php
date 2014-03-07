@@ -421,11 +421,6 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        if($tech=="sip"){
-            $arrProp['md5secret']=$this->type->hashMd5Secret($arrProp['name'],$arrProp['secret']);
-            $arrProp['secret']="";
-        }
-        
         //los campos deny y permit no pueden ser vacios en caso que se use tecnologia iax2
         if(!$this->validateIP($arrProp['deny'])){
             $arrProp['deny']="0.0.0.0/0.0.0.0";
@@ -723,10 +718,6 @@ class paloSantoTrunk extends paloAsteriskDB{
         }
         
         if(isset($arrProp["secret"]) && $arrProp["secret"]!=""){
-            if($tech=="sip"){
-                $arrProp['md5secret']=$this->type->hashMd5Secret($arrProp['name'],$arrProp['secret']);
-                $arrProp['secret']=null;
-            }
         }else{
             $arrProp["secret"]=null;
         }

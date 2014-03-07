@@ -648,7 +648,7 @@ class paloSip extends paloAsteriskDB {
     public $permit; //="0.0.0.0/0.0.0.0";
     public $deny; //="0.0.0.0/0.0.0.0";
     public $acl; // a named acl define in acl.conf
-    public $secret;
+    public $secret; // plaintext secret checked by Asterisk, should be empty/null
     public $md5secret;
     public $remotesecret; // secret used in outbound resgistration if it is not set then use secret field
     public $dial;
@@ -757,12 +757,6 @@ class paloSip extends paloAsteriskDB {
         return true;
     }
 
-    function hashMd5Secret($name,$secret)
-    {
-        $cadena=$name.":asterisk:".$secret;
-        return md5($cadena);
-    }
-    
     //esto es para los numeros de extensiones internas
     //Valida en name del peer
     function validateName($deviceName)
@@ -790,6 +784,40 @@ class paloSip extends paloAsteriskDB {
         }*/
     }
 
+    private function _getFieldValuesSQL($code, $prop)
+    {
+        $sqlFields = array();
+        foreach ($prop as $key => $value) {
+            if (!property_exists($this, $key)) continue;
+            if (in_array($key, array('_DB', 'errMsg'))) continue;
+            if (!isset($value)) continue;
+            if ($value == '' || $value == 'noset') $value = NULL;
+            
+            if (in_array($key, array('session_timers', 'session_expires',
+                'session_minse', 'session_refresher'))) {
+                $key = str_replace('_', '-', $key);
+            }
+            if (in_array($key, array('context', 'subscribecontext', 'outofcall_message_context'))) {
+                if (!is_null($value)) $value = $code.'-'.$value;
+            }
+            if (in_array($key, array('namedpickupgroup', 'namedcallgroup'))) {
+                if (!is_null($value)) $value = $code.'_'.$value;
+            }
+            if (in_array($key, array('name'))) {
+                $value .= '@'.$this->organization_domain;
+            }
+            
+            // Redirigir el secret a sippasswd para Kamailio
+            if ($key == 'sippasswd') continue;
+            if ($key == 'secret' && !is_null($value)) {
+                $key = 'sippasswd';
+            }
+            
+            $sqlFields[$key] = $value;
+        }
+        return $sqlFields;
+    }
+
     function insertDB()
     {
         //valido que el dispositivo tenga seteado el parametro organization_domain y que este exista como dominio de alguna organizacion
@@ -800,78 +828,17 @@ class paloSip extends paloAsteriskDB {
         }
         $code=$result["code"];
         //valido que no exista otro dispositivo sip creado con el mismo nombre y que los cambios obligatorios esten seteados
-        if(!isset($this->name) || !isset($this->md5secret) || !isset($this->context)){
+        if(!isset($this->name) || !isset($this->secret) || !isset($this->context)){
             $this->errMsg="Field name, secret, context can't be empty";
         //}elseif(!$this->existPeer($code."_".$this->name)){
-            }elseif(!$this->existPeer($this->name."@".$this->organization_domain)){
-            $arrValues=array();
-            $question="(";
-            $Prop="(";
-            $i=0;
-            $arrPropertyes=get_object_vars($this);
-            foreach($arrPropertyes as $key => $value){
-                if(isset($value) && $key!="_DB" && $key!="errMsg" && $value!="noset"){
-                    switch ($key){
-                        case "session_timers":
-                            $Prop .="session-timers,";
-                            break;
-                        case "session_expires":
-                            $Prop .="session-expires,";
-                            break;
-                        case "session_minse":
-                            $Prop .="session-minse,";
-                            break;
-                        case "session_refresher":
-                            $Prop .="session-refresher,";
-                            break;
-                        case "context":
-                            $Prop .=$key.",";
-                            $value = $code."-".$value;
-                            break;
-                        case "name":
-                            $Prop .=$key.",";
-                            //$value = $code."_".$value;
-                            $value = $value."@".$this->organization_domain;
-                            break;
-                        case "namedpickupgroup":
-                            $Prop .=$key.",";
-                            if($value!=''){
-                                $value = $code."_".$value;
-                            }
-                            break;
-                        case "namedcallgroup":
-                            $Prop .=$key.",";
-                            if($value!=''){
-                                $value = $code."_".$value;
-                            }
-                            break;
-                        case "subscribecontext":
-                            $Prop .=$key.",";
-                            if($value!=''){
-                                $value = $code."-".$value;
-                            }
-                            break;
-                        case "outofcall_message_context":
-                            $Prop .=$key.",";
-                            if($value!=''){
-                                $value = $code."-".$value;
-                            }
-                            break;
-                        default:
-                            $Prop .=$key.",";
-                            break;
-                    }
-                    $arrValues[$i]=$value;
-                    $question .="?,";
-                    $i++;
-                }
-            }
+        } elseif (!$this->existPeer($this->name."@".$this->organization_domain)) {
+            $sqlFields = $this->_getFieldValuesSQL($code, get_object_vars($this));
+            $query =
+                'INSERT INTO sip ('.implode(', ', array_keys($sqlFields)).') '.
+                'VALUES ('.implode(', ', array_fill(0, count($sqlFields), '?')).')';
+            $arrValues = array_values($sqlFields);
 
-            $question=substr($question,0,-1).")";
-            $Prop=substr($Prop,0,-1).")";
-
-            $query="INSERT INTO sip $Prop value $question";
-            if($this->executeQuery($query,$arrValues)){
+            if ($this->executeQuery($query, $arrValues)) {
                 return true;
             }
         }
@@ -907,63 +874,14 @@ class paloSip extends paloAsteriskDB {
         }
         $code=$result["code"];
         if($this->existPeer($arrProp["name"])){
-            foreach($arrProp as $name => $value){
-                if(property_exists($this,$name)){
-                    if(isset($value)){
-                        if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
-                            if($value=="" || $value=="noset"){
-                                $value=NULL;
-                            }
-                            switch ($name){
-                                case "session_timers":
-                                    $arrQuery[]="session-timers=?";
-                                    break;
-                                case "session_expires":
-                                    $arrQuery[]="session-expires=?";
-                                    break;
-                                case "session_minse":
-                                    $arrQuery[]="session-minse=?";
-                                    break;
-                                case "session_refresher":
-                                    $arrQuery[]="session-refresher=?";
-                                    break;
-                                case "context":
-                                    $arrQuery[]="context=?";
-                                    $value = $code."-".$value;
-                                    break;
-                                case "namedpickupgroup":
-                                    $arrQuery[]="namedpickupgroup=?";
-                                    if($value!=NULL){
-                                        $value = $code."_".$value;
-                                    }
-                                    break;
-                                case "namedcallgroup":
-                                    $arrQuery[]="namedcallgroup=?";
-                                    if($value!=NULL){
-                                        $value = $code."_".$value;
-                                    }
-                                    break;
-                                case "subscribecontext":
-                                    $arrQuery[]="subscribecontext=?";
-                                    if($value!=NULL){
-                                        $value = $code."-".$value;
-                                    }
-                                    break;
-                                case "outofcall_message_context":
-                                    $arrQuery[]="outofcall_message_context=?";
-                                    if($value!=NULL){
-                                        $value = $code."-".$value;
-                                    }
-                                    break;
-                                default:
-                                    $arrQuery[]="$name=?";
-                                    break;
-                            }
-                            $arrParam[]=$value;
-                        }
-                    }
-                }
-            }
+            $sqlFields = $this->_getFieldValuesSQL($code, $arrProp);
+            unset($sqlFields['name']);
+            unset($sqlFields['organization_domain']);
+            $arrQuery = array();
+            foreach (array_keys($sqlFields) as $name)
+                $arrQuery[] = "$name = ?";
+            $arrParam = array_values($sqlFields);
+
             if(count($arrQuery)>0){
                 $query ="Update sip set ".implode(",",$arrQuery);
                 $query .=" where name=? and organization_domain=?";
@@ -1111,8 +1029,7 @@ class paloSip extends paloAsteriskDB {
     }
 
 	function setSecret($device,$secret,$organization){
-		$query="update sip set md5secret=? where name=? and organization_domain=?";
-		$secret=$this->hashMd5Secret($device,$secret);
+        $query = 'UPDATE sip SET secret = NULL, md5secret = NULL, sippasswd = ? WHERE name = ? AND organization_domain = ?';
 		if(is_null($secret))
 			$this->errMsg="Error setting secret for sip channel.";
 		else{
@@ -1200,21 +1117,6 @@ class paloIax extends paloAsteriskDB {
 			$this->errMsg="Invalid peer name"." : $deviceName";
 		}
 		return true;
-	}
-
-	function hashMd5Secret($name,$secret)
-	{
-		/*$cadena=$name.":asterisk:".$secret;
-		exec("echo -n '$cadena' | md5sum",$opt,$ret);
-		if($ret!=0)
-		{
-			$this->errMsg="Error setting secret for device";
-			return null;
-		}else{
-			$md5secret=trim(substr($opt[0],0,strpos($opt[0],'-')));
-			return $md5secret;
-		}*/
-		return $secret;
 	}
 
 	function insertDB()
@@ -1857,12 +1759,9 @@ class paloDevice{
 
         //validamos que se haya ingresado un secret para el dispositivo
         $secret=$arrProp['secret']; //guardamos el valor dle secret sin encriptar
-        if(isset($arrProp['secret']) && $arrProp['secret']!=""){
-            if($type=="sip"){
-                $arrProp['md5secret']=$this->tecnologia->hashMd5Secret($device,$arrProp['secret']);
-                $arrProp['secret']="";
-            }
-        }else{
+        if (isset($arrProp['secret']) && $arrProp['secret']!="") {
+            // secret is set
+        } else{
             $this->errMsg="Field secret can't be empty";
             return false;
         }
@@ -2353,11 +2252,9 @@ class paloDevice{
             
             //si ingreso un nuevo secret lo actualizamos
             $secret='';
-            if(isset($arrProp['secret']) && $arrProp['secret']!=""){
-                if($tech=="sip"){
-                    $secret=$arrProp['secret']; //guardamos el valor sin encriptar 
-                    $arrProp['md5secret']=$this->tecnologia->hashMd5Secret($arrProp['device'],$arrProp['secret']);
-                    $arrProp['secret']=null;
+            if (isset($arrProp['secret']) && $arrProp['secret']!="") {
+                if ($tech=="sip") {
+                    $secret = $arrProp['secret']; //guardamos el valor sin encriptar 
                 }
             }
 

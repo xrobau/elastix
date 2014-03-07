@@ -402,6 +402,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Mar 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework - Start of Kamailio integration into Elastix. Removed 
+  methods for MD5 hashing. Redirect assignments to 'secret' into 'sippasswd'. 
+  Optimize and factor out field and value transformations for SQL.
+  SVN Rev[6505]
+
 * Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: rest.php: accept ordinary cookie-based Elastix session in addition to
   the Basic HTTP authentication.

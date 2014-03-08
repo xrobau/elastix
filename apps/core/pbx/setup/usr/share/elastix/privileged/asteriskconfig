@@ -41,6 +41,8 @@ require_once "libs/paloSantoOrganization.class.php";
 
 global $arrConf;
 
+load_default_timezone();
+
 if(!isset($argv[1]))
     exit(1);
     
@@ -831,94 +833,36 @@ function generateDialPlan($domain,$reload=false){
             return false;
         }
     }
-    
-    //genero plan de marcado relacionado con los irvs
-    $pIVR=new paloIvrPBX($pDB,$domain);
-    $arrContextIVR=$pIVR->createDialPlanIvr($arrFromInt);
-    if($arrContextIVR===false || !is_array($arrContextIVR))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pIVR->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextIVR);
 
-    //genero plan de marcado relacionado a rutas de entrada
-    $pInbound=new paloSantoInbound($pDB,$domain);
-    $arrContextIN=$pInbound->createDialplanIndbound($arrFromInt);
-    if($arrContextIN===false || !is_array($arrContextIN))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pInbound->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextIN);
-        
-     //genero plan de marcado relacionado a rutas de salida
-    $pOutbound=new paloSantoOutbound($pDB,$domain);
-    $arrContextOut=$pOutbound->createDialPlanOutbound($arrFromInt);
-    if($arrContextOut===false || !is_array($arrContextOut))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pOutbound->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextOut);
-    
-    //genero el plan de marcado relacionado con las extension internas
-    $pDevice=new paloDevice($domain,"sip",$pDB);
-    $arrContextExtLocal=$pDevice->createDialPlanLocalExtension($arrFromInt);
-    if($arrContextExtLocal===false || !is_array($arrContextExtLocal))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pDevice->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextExtLocal);
+    // Generar los contextos para todos los objetos de plan de marcado
+    $dialplanObjects = array(
+        array('paloIvrPBX',         'createDialPlanIvr'),
+        array('paloSantoInbound',   'createDialplanIndbound'), // typo
+        array('paloSantoOutbound',  'createDialPlanOutbound'),
+        array(
+            (new paloDevice($domain, 'sip', $pDB)),
+            array('createDialPlanLocalExtension', 'createDialPlanFaxExtension')
+        ),
+        array('paloIM',             'createDialPlanIM'),
+        array('paloQueuePBX',       'createDialPlanQueue'),
+        array('paloSantoRG',        'createDialplanRG'),
+        array('paloConference',     'createDialplanConf'),
+        array('paloSantoTC',        'createDialplanTC'),
+        array('paloFeatureCodePBX', 'createDialPlanFeaturesCode'),
+    );
+    foreach ($dialplanObjects as $tuplaCallback) {
+        $pObjDialplan = is_object($tuplaCallback[0]) ? $tuplaCallback[0] : (new $tuplaCallback[0]($pDB, $domain));
+        if (!is_array($tuplaCallback[1])) $tuplaCallback[1] = array($tuplaCallback[1]);
+        foreach ($tuplaCallback[1] as $methodname) {
+            $arrObjContexts = call_user_func(array($pObjDialplan, $methodname), &$arrFromInt);
+            if (!is_array($arrObjContexts)) {
+                fprintf(STDERR, "ERR: Error written dialplan - %s\n", $pObjDialplan->errMsg);
+            } else {
+                $arrContext = array_merge($arrContext, $arrObjContexts);
+            }
+        }
+    }
 
-    //genero el plan de marcado de los faxes
-    $arrContextExtFax=$pDevice->createDialPlanFaxExtension($arrFromInt);
-    if($arrContextExtFax===false || !is_array($arrContextExtFax))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pDevice->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextExtFax);
-        
-    //genero el plan de marcado para IM elastix
-    $pIM=new paloIM($pDB,$domain);
-    $arrContextIM=$pIM->createDialPlanIM();
-    if($arrContextIM===false || !is_array($arrContextIM))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pIM->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextIM);
-        
-    //genero plan de marcado relacionado con las colas
-    $pQueue=new paloQueuePBX($pDB,$domain);
-    $arrContextQueue=$pQueue->createDialPlanQueue($arrFromInt);
-    if($arrContextQueue===false || !is_array($arrContextQueue))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pQueue->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextQueue);
-        
-    //genero plan de marcado relacionado con los ring-groups
-    $pRG=new paloSantoRG($pDB,$domain);
-    $arrRG=$pRG->createDialplanRG($arrFromInt);
-    if($arrRG===false || !is_array($arrRG))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pRG->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrRG);
-        
-    //genero plan de marcado relacionado con los ring-groups
-    $pConf=new paloConference($pDB,$domain);
-    $Conferences=$pConf->createDialplanConf($arrFromInt);
-    if($Conferences===false || !is_array($Conferences))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pConf->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$Conferences);
-
-    //genero plan de marcado relacionado con los time_conditions
-    $pTC=new paloSantoTC($pDB,$domain);
-    $arrTC=$pTC->createDialplanTC($arrFromInt);
-    if($arrTC===false || !is_array($arrTC))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pTC->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrTC);
-        
-    //genero el plan marcado relacionado con los features codes
-    $pFC=new paloFeatureCodePBX($pDB,$domain);
-    $arrContextFeaturesCode=$pFC->createDialPlanFeaturesCode($arrFromInt);
-    if($arrContextFeaturesCode===false || !is_array($arrContextFeaturesCode))
-        fprintf(STDERR, "ERR: Error written dialplan - %s\n",$pFC->errMsg);
-    else
-        $arrContext=array_merge($arrContext,$arrContextFeaturesCode);
-        
     //incluimos los contextos dentro de from-internal-additional
     $fromInternal=new paloContexto($code,"from-internal-additional");
     $fromInternal->arrInclude=$arrFromInt;

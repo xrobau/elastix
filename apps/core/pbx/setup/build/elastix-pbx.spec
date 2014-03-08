@@ -359,6 +359,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sat Mar 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: asteriskconfig: collapse a series of method calls on various dialplan
+  classes into a loop that exploits the commonalities. Also include a call to
+  load_default_timezone().
+  SVN Rev[6506]
+
 * Fri Mar 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: sip.conf: restrict Asterisk to listen on localhost only for SIP.
   SVN Rev[6504]

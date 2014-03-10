@@ -652,13 +652,19 @@ class paloSantoOrganization{
             //obtenemos el idcode de la organizacion. Este es unico en el sistema y no puede existir o haber 
             //existido otra organizacion dentro del sistema con el mismo codgo
             $idcode=$this->getNewIDCode();
+
             //creamos la organizacion dentro del sistema
-            $query="INSERT INTO organization (name,domain,code,idcode,country,city,address,email_contact,state) values(?,?,?,?,?,?,?,?,?);";
-            $arr_params = array($name,$domain,$pbxcode,$idcode,$country,$city,$address,$email_contact,"active");
-            $result=$this->_DB->genQuery($query,$arr_params);
-            if($result==FALSE){
+            if (!$this->_DB->genQuery(
+                'INSERT INTO organization (name,domain,code,idcode,country,city,address,email_contact,state) '.
+                'VALUES (?,?,?,?,?,?,?,?,?)',
+                array($name, $domain, $pbxcode, $idcode, $country, $city, $address, $email_contact, 'active'))) {
                 $this->_DB->rollBack();
-                $this->errMsg=$this->_DB->errMsg;    
+                $this->errMsg = $this->_DB->errMsg;
+            } elseif (!$this->_DB->genQuery(
+                'REPLACE INTO kamailio.domain (domain, last_modified) VALUES (?, NOW())',
+                array($domain))) {
+                $this->_DB->rollBack();
+                $this->errMsg = $this->_DB->errMsg;
             }else{
                 if(!$this->orgHistoryRegister("create",$idcode))
                     return false;
@@ -1028,6 +1034,16 @@ class paloSantoOrganization{
                 //poder restaurar estos valores en caso de que algo salga mal
                 if(!$pAstConf->deleteOrganizationPBX($domain,$code)){
                     $this->errMsg .=$error.$pAstConf->errMsg." ".$this->errMsg;
+                    $this->_DB->rollBack();
+                    return false;
+                }
+                
+                // se borra la organización en kamailio
+                if (!$this->_DB->genQuery(
+                    'DELETE FROM kamailio.domain WHERE domain = ?',
+                    array($domain))) {
+                	
+                    $this->errMsg =$error.$this->_DB->errMsg;
                     $this->_DB->rollBack();
                     return false;
                 }

@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework - Update kamailio database in order to insert and remove 
+  organization domains in kamailio.domain table.
+  SVN Rev[6516]
 - CHANGED: Framework - Grant access to kamailio database for asteriskuser.
   SVN Rev[6514]
 - FIXED: Framework - Fix grammar errors in default email templates on organization

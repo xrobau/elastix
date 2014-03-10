@@ -58,8 +58,6 @@ class paloIM extends paloAsteriskDB{
     //soporte para cuentas que no sean solamente numero 
     //las cuentas de chat simepre son de tipo sip
     function createIMAccount($arrProp){
-        $device=$arrProp['name']."_".$this->code;
-        
         if(!isset($arrProp["id_exten"])){
             $arrProp["id_exten"]=NULL;
         }
@@ -67,7 +65,7 @@ class paloIM extends paloAsteriskDB{
             $arrProp["alias"]='';
         }
         if(empty($arrProp["display_name"])){
-            $arrProp["display_name"]=$device;
+            $arrProp["display_name"]=$arrProp['name'];
         }
         
          if($arrProp['create_device']){
@@ -77,14 +75,14 @@ class paloIM extends paloAsteriskDB{
         }else{
             //en caso de que se indique que no es necesario crear el dispositivo verificamos que el mismo exista
             $pSip=new paloSip($this->_DB);
-            if(!$pSip->existPeer($device)){
-                $this->errMsg="Peer: $device does not exist";
+            if(!$pSip->existPeer($arrProp['device'])){
+                $this->errMsg="Peer: {$arrProp['device']} does not exist";
                 return false;
             }
         }
         
         $query="INSERT INTO im (device,organization_domain,display_name,alias,id_exten) VALUES (?,?,?,?,?)";
-        $result=$this->_DB->genQuery($query,array($device,$this->domain,$arrProp['display_name'],$arrProp['alias'],$arrProp['id_exten']));
+        $result=$this->_DB->genQuery($query,array($arrProp['device'],$this->domain,$arrProp['display_name'],$arrProp['alias'],$arrProp['id_exten']));
         
         if($result==false){
             $this->errMsg=_tr("DATABASE ERROR").": ".$this->_DB->errMsg;
@@ -112,8 +110,7 @@ class paloIM extends paloAsteriskDB{
         }
         
         $arrProp["organization_domain"]=$this->domain;
-        //$arrProp['callerid']="device <".$arrProp['name'].">";
-        $arrProp['callerid']="device <".$device.">";
+        $arrProp['callerid']="device <".$arrProp['name'].">";
         $arrProp["outofcall_message_context"] = empty($arrProp["outofcall_message_context"])?'im-sip':$arrProp["outofcall_message_context"];
         $arrProp["context"] = empty($arrProp["context"])?'default':$arrProp["context"]; 
         $arrProp["transport"] = "ws,wss,udp";

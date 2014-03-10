@@ -761,7 +761,7 @@ class paloSip extends paloAsteriskDB {
     //Valida en name del peer
     function validateName($deviceName)
     {
-        if(preg_match("/^[[:alnum:]_]+$/", $deviceName)){
+        if(preg_match("/^[[:alnum:]_\.]+$/", $deviceName)){
             return true;
         }else{
             return false;
@@ -814,7 +814,7 @@ class paloSip extends paloAsteriskDB {
         //valido que no exista otro dispositivo sip creado con el mismo nombre y que los cambios obligatorios esten seteados
         if(!isset($this->name) || !isset($this->secret) || !isset($this->context)){
             $this->errMsg="Field name, secret, context can't be empty";
-        }elseif(!$this->existPeer($this-name."_".$code)){
+        }elseif(!$this->existPeer($this->name."_".$code)){
             $sqlFields = $this->_getFieldValuesSQL($code, get_object_vars($this));
             $query =
                 'INSERT INTO sip ('.implode(', ', array_keys($sqlFields)).') '.
@@ -1115,7 +1115,7 @@ class paloIax extends paloAsteriskDB {
 		//valido que no exista otro dispositivo iax creado con el mismo nombre
 		if(!isset($this->name) || !isset($this->secret) || !isset($this->context)){
 			$this->errMsg="Field name, secret, context can't be empty";
-		}elseif(!$this->existPeer($code."_".$this->name)){
+		}elseif(!$this->existPeer($this->name."_".$code)){
 			$arrValues=array();
 			$question="(";
 			$Prop="(";
@@ -1126,7 +1126,7 @@ class paloIax extends paloAsteriskDB {
 					if($key=="context")
 						$value = $code."-".$value;
 					if($key=="name")
-						$value = $code."_".$value;
+						$value = $value."_".$code;
 					$Prop .=$key.",";
 					$arrValues[$i]=$value;
 					$question .="?,";
@@ -1326,7 +1326,7 @@ class paloIax extends paloAsteriskDB {
 	//esto es para los numeros de extensiones internas
 	function validateName($deviceName)
 	{
-		if(preg_match("/^[[:alnum:]_]+$/", $deviceName)){
+		if(preg_match("/^[[:alnum:]_\.]+$/", $deviceName)){
 			return true;
 		}else{
 			return false;
@@ -1930,7 +1930,7 @@ class paloDevice{
         if(!$this->validatePaloDevice())
             return false;
         
-        if(!preg_match("/^[[:alnum:]_]+$/", $this->code)){
+        if(!preg_match("/^[[:alnum:]_\.]+$/", $this->code)){
             $this->errMsg="Invalid code format";
             return false;
         }

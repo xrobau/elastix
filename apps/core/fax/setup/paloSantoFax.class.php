@@ -201,7 +201,7 @@ class paloFax {
         $user=$arrUser[0]; 
         //cuando de crea un fax para un usario el nombre del peer usado para el fax 
         //es igual code_username. Donde username es el useraname sin la parte del @dominio
-        $peername=strstr($user['username'], '@', true);
+        $username=strstr($user['username'], '@', true);
         
         $domain=$this->getDomainOrganization($user["id_organization"]);
         
@@ -215,7 +215,7 @@ class paloFax {
         
         $orgCode=$pDevice->getCode();
         $extension=$user["fax_extension"];
-        $device="{$orgCode}_{$peername}";
+        $device="{$username}FX_{$orgCode}";
         
         if($pDevice->existDevice($extension,$device,$tech)==true){
             $this->errMsg="Error Fax Number. ".$pDevice->errMsg;
@@ -233,7 +233,7 @@ class paloFax {
         
         //creamos el peer
         $arrPeer=$arrProp;
-        $arrPeer["name"]=$peername;
+        $arrPeer["name"]="{$username}FX";
         $arrPeer["defaultip"]="127.0.0.1";
         $arrPeer['secret']= $user["md5_password"];
         $arrPeer["fullname"]=$clid_name;

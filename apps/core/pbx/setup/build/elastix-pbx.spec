@@ -359,6 +359,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: add sip parameters to make asterisk contact Kamailio for outgoing SIP
+  trunks. Add new columns sippasswd and kamailioname to elxpbx.sip table.
+- CHANGED: asteriskconfig: reload kamailio on dialplan reload.
+  SVN Rev[6518]
+
 * Sat Mar 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: asteriskconfig: collapse a series of method calls on various dialplan
   classes into a loop that exploits the commonalities. Also include a call to

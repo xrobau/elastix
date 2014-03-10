@@ -205,6 +205,10 @@ function createOrganizationAsterisk($domain){
     if(createExtensionFile("add",$domain)==false){
         return false;
     }
+
+    // Recargar Kamailio para que cargue el nuevo dominio
+    exec('/sbin/service kamailio restart');
+    
     return true;
 }
 

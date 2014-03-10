@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-admin-passwords: program modified to initialize and update
+  the Kamailio ODBC connector credentials.
+  SVN Rev[6515]
+
 * Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-admin-passwords: The program has been modified to initialize
   a second ODBC connector. This connector will be used to write CDRs to the

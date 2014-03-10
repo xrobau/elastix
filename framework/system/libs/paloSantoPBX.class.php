@@ -788,7 +788,7 @@ class paloSip extends paloAsteriskDB {
                 if (!is_null($value)) $value = $code.'_'.$value;
             }
             if (in_array($key, array('name'))) {
-                $value .= '@'.$this->organization_domain;
+                $value .= '_'.$code;
             }
             
             // Redirigir el secret a sippasswd para Kamailio

@@ -58,8 +58,8 @@ class paloIM extends paloAsteriskDB{
     //soporte para cuentas que no sean solamente numero 
     //las cuentas de chat simepre son de tipo sip
     function createIMAccount($arrProp){
-        //$device=$this->code."_".$arrProp['name'];
-        $device=$arrProp['name']."@".$this->domain;
+        $device=$arrProp['name']."_".$this->code;
+        
         if(!isset($arrProp["id_exten"])){
             $arrProp["id_exten"]=NULL;
         }

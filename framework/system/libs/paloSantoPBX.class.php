@@ -787,7 +787,11 @@ class paloSip extends paloAsteriskDB {
             if (in_array($key, array('namedpickupgroup', 'namedcallgroup'))) {
                 if (!is_null($value)) $value = $code.'_'.$value;
             }
+            
+            // Mandar el nombre original (sin dominio) a kamailioname
+            if ($key == 'kamailioname') continue;
             if (in_array($key, array('name'))) {
+                $sqlFields['kamailioname'] = $value;
                 $value .= '_'.$code;
             }
             

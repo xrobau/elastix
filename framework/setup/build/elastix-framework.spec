@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework - Each SIP account creation also requires an update to the
+  sip.kamailioname column with the plain name (no domain).
+  SVN Rev[6517]
 - CHANGED: Framework - Update kamailio database in order to insert and remove 
   organization domains in kamailio.domain table.
   SVN Rev[6516]

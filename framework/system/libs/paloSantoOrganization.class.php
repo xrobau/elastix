@@ -208,7 +208,7 @@ class paloSantoOrganization{
     function getOrganizationByDomain_Name($domain_name)
     {
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain_name)){
-            $error=_tr("Invalid domain format");
+            $this->errMsg = _tr("Invalid domain format");
             return false;
         }
         
@@ -317,51 +317,29 @@ class paloSantoOrganization{
     private function getNewPBXCode($domain)
     {
         if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
-            $error=_tr("Invalid domain format");
+            $this->errMsg = _tr("Invalid domain format");
             return false;
         }
         
-        //el code esta fromado por el dominio de la prganizacion sin caracteres especiales 
-        //y debe tener una longitud de 15 caracteres. En caso de que el dominio tenga menos de 
-        //15 caracteres a este se le agrega un codigo para completar dicha longitud
-        $chars = "abcdefghijkmnpqrstuvwxyz23456789";
-        $existCode=false;
-        $inicode=str_replace(array("-","."),"",$domain);
-        $len=strlen($inicode);
-        do{
-            srand((double)microtime()*1000000);
-            //la primera vez esto es falso. Si llega a ser verdad 
-            //la variable code estaria seteada y tendria 15 caracteres
-            if($existCode){
-                $code=substr($code, 1, 10);
-                $len=10;
-            }else{
-                $code=$inicode;
-            }
-            
-            if($len>=15){
-                $code=substr($inicode, 0, 15);
-            }else{        
-                // Genero los caracteres faltantes
-                while (strlen($code) < 15) {
-                        $num = rand() % 33;
-                        $tmp = substr($chars, $num, 1);
-                        $code .= $tmp;
-                }
-            }
-            $existCode = $this->existPBXCode($code);
-        }while ($existCode);
-
+        $code=str_replace(array("-","."),"",$domain);
+        
+        $existCode = $this->existPBXCode($code);
+        
+        if($existCode){
+            $this->errMsg = _tr("New domain ($domain) is similar a $existCode, please use another domain name.");
+            return false;
+        }
+        
         return $code;
     }
     
     private function existPBXCode($org_code){
-        $query="select 1 from organizacion where code=?";
+        $query="select domain from organizacion where code=?";
         $result=$this->_DB->getFirstRowQuery($query, false, array($org_code));
         if($result==false){
             return false;
         }else{
-            return true;
+            return $result[0];
         }
     }
     
@@ -664,9 +642,12 @@ class paloSantoOrganization{
             $this->_DB->beginTransaction();
             //obtenemos el pbxcode de la organizacion que sera usado como unico identificador dentro de asterisk
             //se valida que el dominio de la organizacion tenga un formato valido dentro de la funcion getNewPBXCode
-            $pbxcode=$this->getNewPBXCode($domain);
-            if($pbxcode==false)
+            $pbxcode = $domain;
+            /*$pbxcode=$this->getNewPBXCode($domain);
+            if(!$pbxcode){
+                // El error fue escrito dentro de la función getNewPBXCode
                 return false;
+            }*/
             
             //obtenemos el idcode de la organizacion. Este es unico en el sistema y no puede existir o haber 
             //existido otra organizacion dentro del sistema con el mismo codgo
@@ -757,7 +738,7 @@ class paloSantoOrganization{
         $md5password=md5($password);
         $pACL=new paloACL($this->_DB);
         $idGrupo=$pACL->getIdGroup("administrator",$idOrg);
-        $exito=$this->createUserOrganization($idOrg,"admin", "admin", $md5password, $password, $idGrupo, "100", "200",$country_code, $area_code, "200", "admin", $quota, $lastid,false);
+        $exito=$this->createUserOrganization($idOrg,"admin", "Administrator", $md5password, $password, $idGrupo, "100", "200",$country_code, $area_code, "200", "admin", $quota, $lastid,false);
         if($exito){
             //mostramos el mensaje para crear los archivos de configuracion dentro de asterisk
             $pAstConf=new paloSantoASteriskConfig($this->_DB);
@@ -1348,10 +1329,10 @@ class paloSantoOrganization{
         $arrOrgz=$this->getOrganizationById($idOrganization);
         if(is_array($arrOrgz) && count($arrOrgz)>0){ // 1)
             $emailUser = $username;
-            $username = $username."@".$arrOrgz["domain"];
-            //$peer_extension=$arrOrgz["code"]."_".$extension;
-            $peer_name=$username."@".$arrOrgz["domain"];
-            $peer_fax=$arrOrgz["code"]."_".$fax_extension;
+            $username  = $emailUser."@".$arrOrgz["domain"];
+            $peer_name = $emailUser."_".$arrOrgz["code"];
+            $peer_fax  = $fax_extension."_".$arrOrgz["code"];
+            
             //validamos que no exista otro usuario con la misma sip_extension
             //validamos que no exista otro usuario con la misma fax_extension
             //TODO: en un futuro las extensiones podran ser sip o iax, eso lo define el administrador entre las
@@ -1362,7 +1343,6 @@ class paloSantoOrganization{
             }
 
             $pDevice=new paloDevice($arrOrgz["domain"],"sip",$this->_DB);
-            //if($pDevice->existDevice($extension,$peer_extension,"sip")==true){
             if($pDevice->existDevice($extension,$peer_name,"sip")==true){
                 $this->errMsg="Error Extension Number. ".$pDevice->errMsg;
                 return false;

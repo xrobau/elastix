@@ -814,8 +814,7 @@ class paloSip extends paloAsteriskDB {
         //valido que no exista otro dispositivo sip creado con el mismo nombre y que los cambios obligatorios esten seteados
         if(!isset($this->name) || !isset($this->secret) || !isset($this->context)){
             $this->errMsg="Field name, secret, context can't be empty";
-        //}elseif(!$this->existPeer($code."_".$this->name)){
-        } elseif (!$this->existPeer($this->name."@".$this->organization_domain)) {
+        }elseif(!$this->existPeer($this-name."_".$code)){
             $sqlFields = $this->_getFieldValuesSQL($code, get_object_vars($this));
             $query =
                 'INSERT INTO sip ('.implode(', ', array_keys($sqlFields)).') '.

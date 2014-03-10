@@ -1198,93 +1198,83 @@ class paloSantoOrganization{
     //funcion usada para enviar un email de respuesta desde el servidor elastix 
     //al email_contact de una organizacion, al momento de que la organizacion es creada, 
     //suspendida o terminada
-    function sendEmail($password="",$org_name,$org_domain,$email_contact,$category,&$error){
+    private function sendEmail($password ,$org_name, $org_domain, $email_contact, $category, &$error)
+    {
         global $arrConf;
         require_once("{$arrConf['elxPath']}/libs/phpmailer/class.phpmailer.php");
-        
-        if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/",$email_contact)){
-            $error="No has been sent the email address to which send the email";
+
+        if (!preg_match(
+            '/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+$/',
+            $email_contact)) {
+            $error = 'Email address for notification is invalid or not set';
+            return false;
+        }
+        if ($category == 'create' && empty($password)){
+            $error = _tr("User Password can't be empty");
             return false;
         }
         
-        $subject = "Elastix Notification"; //
-        $from = "elastix@example.com"; //quien envia el email
-        $fromName = "Elastix Admin"; //nombre de quien envia el email
-        switch ($category){
-            case "create":
-                //password no puede ser vacio
-                if(empty($password)){
-                    $error=_tr("User Password can't be empty");
-                    return false;
-                }
-                //default content
-                $content = "Welcome to Elastix Server.\nYour company {COMPANY_NAME} with domain {DOMAIN} has been created.\nTo start to configurate you elastix server go to {HOST_IP} and login into elastix as:\nUsername: admin@{DOMAIN}\nPassword: {USER_PASSWORD}";
-                break;
-            case "suspend":
-                $content = "Your company {COMPANY_NAME} with domain {DOMAIN} has been suspend.\n";
-                break;
-            case "delete":
-                $content = "Your company {COMPANY_NAME} with domain {DOMAIN} has been deleted.\n";
-                break;
-            default:
-                $error=_tr("Invalid category");
-                return false;
+        // Configuración por omisión de parámetros del envío de email
+        $default_content = array(
+            'create'    =>  "Your entity {COMPANY_NAME}, associated with the domain {DOMAIN} has been created.\n".
+                            "To configure you Elastix server, please go to https://{HOST_IP} and login into Elastix with the following credentials:\n".
+                            "Username: admin@{DOMAIN}\n".
+                            "Password: {USER_PASSWORD}",
+            'suspend'   =>  "Your entity {COMPANY_NAME}, associated with the domain {DOMAIN} has been suspended.\n",
+            'delete'    =>  "Your entity {COMPANY_NAME}, associated with the domain {DOMAIN} has been deleted.\n",
+        );
+        if (!isset($default_content[$category])) {
+            $error = _tr("Invalid category");
+            return false;
+        }
+        $default_conf_email = array(
+            'subject'       =>  'Elastix Notification',
+            'from_email'    =>  'elastix@example.com',  //quien envia el email
+            'from_name'     =>  'Elastix Admin',        //nombre de quien envia el email
+            'content'       =>  $default_content[$category],
+            'host_ip'       =>  '',
+            'host_domain'   =>  '', // no se usa ahora
+            'host_name'     =>  '', // no se usa ahora
+        );
+
+        // obtenemos los parametros de configuracion para mandar mail de acuredo a la categoria
+        $conf_email = $this->_DB->getFirstRowQuery(
+            'SELECT * FROM org_email_template where category = ?',
+            true, array($category));
+        foreach (array_keys($default_conf_email) as $k) {
+        	if (empty($conf_email[$k])) $conf_email[$k] = $default_conf_email[$k];
         }
 
-        //obtenemos los parametros de configuracion para mandar mail de acuredo a la categoria
-        $query="SELECT * FROM org_email_template where category=?";
-        $conf_email=$this->_DB->getFirstRowQuery($query, true, array($category));
-        if($conf_email!=false){
-            $from=empty($conf_email["from_email"])?$from:$conf_email["from_email"];
-            $fromName=empty($conf_email["from_name"])?$from:$conf_email["from_name"];
-            $subject=empty($conf_email["subject"])?$subject:$conf_email["subject"];
-            $content=empty($conf_email["content"])?$content:$conf_email["content"];
-            $hostip=empty($conf_email["host_ip"])?"":$conf_email["host_ip"];
-            $hostdomain=empty($conf_email["host_domain"])?"":$conf_email["host_domain"];
-            $hostname=empty($conf_email["host_name"])?"":$conf_email["host_name"];
+        // El siguiente código obtiene la IP pública para este servidor
+        if (empty($conf_email['host_ip'])){
+            $output = NULL;
+            exec("curl ifconfig.me", $output);
+            if (isset($output[0])) $conf_email['host_ip'] = $output[0];
         }
-        
-        if(empty($hostip)){
-            exec("curl ifconfig.me",$output);
-            if(isset($output[0]))
-                $hostip=$output[0];
-        }
-        
-        $content=str_replace(array("{COMPANY_NAME}","{DOMAIN}","{USER_PASSWORD}","{HOST_IP}"),array($org_name,$org_domain,$password,$hostip),$content);
-        
-        $message = $this->linewrap($content, 70, "<br />");
         
         $mail = new PHPMailer();
-        $mail->From = $from;
-        $mail->FromName = utf8_decode($fromName);
+        $mail->CharSet = 'UTF-8';
+        $mail->From = $conf_email['from_email'];
+        $mail->FromName = $conf_email['from_name'];
         $mail->AddAddress($email_contact);
         $mail->WordWrap = 70;                                 // set word wrap to 70 characters
         $mail->IsHTML(false);                                  // set email format to TEXT
                 
-        $mail->Subject = utf8_decode($subject);
-        $mail->Body    = utf8_decode($message);
-        $mail->AltBody = "This is the body in plain text for non-HTML mail clients";
+        $mail->Subject = $conf_email['subject'];
+        $mail->Body    = str_replace(
+            array('{COMPANY_NAME}', '{DOMAIN}', '{USER_PASSWORD}', '{HOST_IP}'),
+            array($org_name, $org_domain, $password, $conf_email['host_ip']),
+            $conf_email['content']);
                 
         // envio del mensaje
-        if($mail->Send()){
-            $error="Se envio correctamenete el mail";
+        if ($mail->Send()){
+            $error = "Se envio correctamenete el mail";
             return true;
         }else{ 
-            $error="Error al enviar el mail".$mail->ErrorInfo;
+            $error = "Error al enviar el mail".$mail->ErrorInfo;
             return false;
         }
     }
-
-    private function linewrap($string, $width, $break) {
-        $array = explode('\n', $string);
-        $string = "";
-        foreach($array as $key => $val) {
-            $string .= wordwrap($val, $width, $break);
-            $string .= "<br />";
-        }
-        return $string;
-    }
-
 
     function setParameterUserExtension($domain,$type,$exten,$secret,$fullname,$email)
     {

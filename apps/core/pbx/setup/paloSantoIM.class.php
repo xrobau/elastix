@@ -101,8 +101,8 @@ class paloIM extends paloAsteriskDB{
      * Supuestamente esto sera resuelto en asterisk 12
      */
     private function createSipAccount($arrProp){
-        //$device=$this->code."_".$arrProp['name'];
-        $device=$arrProp['name']."@".$this->domain;
+        $device=$arrProp['name']."_".$this->code;
+        
         $pSip=new paloSip($this->_DB);
         
         //validamos que no exista un dispositvo con ese nombre

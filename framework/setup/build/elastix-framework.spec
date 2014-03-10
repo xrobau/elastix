@@ -403,6 +403,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework - Grant access to kamailio database for asteriskuser.
+  SVN Rev[6514]
 - FIXED: Framework - Fix grammar errors in default email templates on organization
   creation. Remove inconsistencies in message handling and standarize as plaintext.
   Set UTF-8 as default encoding for email message, so templates outside ISO-8895-1

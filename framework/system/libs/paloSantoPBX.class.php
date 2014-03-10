@@ -2003,7 +2003,7 @@ class paloDevice{
 
         $error=false;
         $code=$this->code;
-        $username = strstr($arrProp['device'], '@', true);
+        $username = $arrProp['name'];
         $familia="EXTUSER/$code/$username";
         $arrInsert=array();
 
@@ -2136,7 +2136,7 @@ class paloDevice{
         $context=($context==false)?"":$context;
         $vmx_opts_timeout=($vmx_opts_timeout==false)?"":$vmx_opts_timeout;
         
-        $username = strstr($arrProp['device'], '@', true);
+        $username = $arrProp['name'];
         $familia="EXTUSER/".$this->code."/$username/vmx";
         $pri="1";
         

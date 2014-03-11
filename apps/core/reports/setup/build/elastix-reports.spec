@@ -143,6 +143,9 @@ fi
 
 %changelog
 * Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Added definition for asteriskcdrdb.queue_log table for realtime
+  queue logging.
+  SVN Rev[6521]
 - CHANGED: SQL definitions for asteriskcdrdb were moved from elastix-firstboot
   to elastix-reports.
   SVN Rev[6520]

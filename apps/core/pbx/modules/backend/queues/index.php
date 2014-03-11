@@ -166,10 +166,7 @@ function reportQueue($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
                             
             $arrTmp[]=htmlentities($queue["description"],ENT_QUOTES,"UTF-8");
             $arrTmp[]=$queue["password_detail"];
-            $arrTmp[]="yes";
-            if(!isset($queue["monitor_format"])){
-                $arrTmp[]="no";
-            }
+            $arrTmp[]=isset($queue["monitor_format"])?"yes":"no";
             $arrTmp[]=$queue["strategy"];
             $arrTmp[]=($queue["timeout_detail"]=="0")?"unlimited":$queue["timeout_detail"];
             $arrTmp[]=$queue["timeout"];

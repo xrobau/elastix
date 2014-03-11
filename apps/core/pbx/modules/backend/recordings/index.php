@@ -577,7 +577,7 @@ function new_recording($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         }
         $result = $pRecording->Obtain_Protocol_Current_User($domain,$extension);
         if($result != FALSE) {
-            $result = $pRecording->Call2Phone($dsn_agi_manager, $result['device'], $result['dial'], $result['exten'],$recording_name,$domain);
+            $result = $pRecording->Call2Phone($dsn_agi_manager, $result['exten'], $result['dial'], $result['clid_name'],$recording_name,$domain);
             if($result) {
                 $result["filename"] = $recording_name;
                 $result["msg"] = _tr("Recording...") ;

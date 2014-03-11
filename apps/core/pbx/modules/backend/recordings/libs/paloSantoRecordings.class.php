@@ -172,7 +172,7 @@ class paloSantoRecordings extends paloAsteriskDB{
 
     function  Obtain_Protocol_Current_User($domain,$extension){
         $arr_result2=array();
-        $query2="SELECT id, exten, organization_domain, tech, dial, voicemail, device FROM extension where exten=? and  organization_domain=?";
+        $query2="SELECT id, exten, organization_domain, tech, dial, voicemail, device, clid_name, clid_number FROM extension where exten=? and  organization_domain=?";
         $arr_result2 = $this->_DB->getFirstRowQuery($query2,true,array($extension,$domain));
         if (!is_array($arr_result2) || count($arr_result2)==0) {
             $this->errMsg = _tr("Can't get extension user").$this->_DB->errMsg;

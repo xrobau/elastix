@@ -787,11 +787,7 @@ class paloSip extends paloAsteriskDB {
             if (in_array($key, array('namedpickupgroup', 'namedcallgroup'))) {
                 if (!is_null($value)) $value = $code.'_'.$value;
             }
-            
-            // Mandar el nombre original (sin dominio) a kamailioname
-            if ($key == 'kamailioname') continue;
             if (in_array($key, array('name'))) {
-                $sqlFields['kamailioname'] = $value;
                 $value .= '_'.$code;
             }
             
@@ -1769,7 +1765,7 @@ class paloDevice{
         }
         
         //seteamos el callerid del equipo
-        $arrProp['callerid']="device <".$arrProp['name'].">";
+        $arrProp['callerid']="device <".$arrProp['exten'].">";
         
         if($arrProp['create_vm']=="yes"){
             $arrVoicemail['organization_domain']=$this->domain;
@@ -2003,8 +1999,10 @@ class paloDevice{
 
         $error=false;
         $code=$this->code;
-        $username = $arrProp['name'];
-        $familia="EXTUSER/$code/$username";
+        $familia_extuser  = "EXTUSER/$code/{$arrProp['exten']}";
+        $family_device    = "DEVICE/$code/{$arrProp["exten"]}_{$code}";
+        $family_device_us = "DEVICE/$code/{$arrProp["device"]}";
+        $family_device_im = "DEVICE/$code/{$arrSetting["elxweb_device"]}";
         $arrInsert=array();
 
         $errorM="";
@@ -2014,7 +2012,7 @@ class paloDevice{
             return false;
         }else{ //seteo las propiedades en la base ASTDB de asterisk
             foreach($arrSetting as $key => $value){
-                $result=$astMang->database_put($familia,$key,$value);
+                $result=$astMang->database_put($familia_extuser,$key,$value);
                 if(strtoupper($result["Response"]) == "ERROR"){
                     $error=true;
                     break;
@@ -2023,8 +2021,7 @@ class paloDevice{
         }
 
         //se guardan los datos del dispositivo, esto realmente sirvecuando a un dispositivo se le ha asociado
-        //varias extensiones, por el momento esto no esta soportado
-        $family="DEVICE/{$code}/{$arrProp['device']}";
+        //varias extensiones, por el momento esto no esta soportado;
         $arrKeyDevice["default_exten"]=$arrProp['exten'];
         $arrKeyDevice["dial"]=$arrProp['dial'];
         $arrKeyDevice["type"]="fixed";
@@ -2034,22 +2031,24 @@ class paloDevice{
                 $arrKeyDevice['alias']=$arrProp['alias'];
             }
         }
+        
         foreach($arrKeyDevice as $key => $value){
-            $result=$astMang->database_put($family,$key,$value);
+            $result=$astMang->database_put($family_device,$key,$value);
             if(strtoupper($result["Response"]) == "ERROR"){
                 $error=true;
                 break;
             }
         }
+
+        $result=$astMang->database_put($family_device_us,"dial",$arrProp['dial']);
         
         if($arrSetting["elxweb_device"]!=''){ 
             //este es el segundo dispositivo que se crea para la cuenta del usuario hasta resolver el asunto 
             //de la multipresencia en sip con asterisk
-            //esta es la cuenta con el que el usuario se registra en la interfaz web
-            $family="DEVICE/$code/".$arrSetting["elxweb_device"];            
+            //esta es la cuenta con el que el usuario se registra en la interfaz web            
             $arrKeyDevice["dial"]="SIP/{$arrSetting["elxweb_device"]}";
             foreach($arrKeyDevice as $key => $value){
-                $result=$astMang->database_put($family,$key,$value);
+                $result=$astMang->database_put($family_device_im,$key,$value);
                 if(strtoupper($result["Response"]) == "ERROR"){
                     $error=true;
                     break;
@@ -2060,11 +2059,11 @@ class paloDevice{
         //si se habilito el callwaiting ingresa ese dato a la base ASTDB
         if(isset($arrProp['callwaiting'])){
             if($arrProp['callwaiting']=="yes")
-                $result=$astMang->database_put("CW/",$username,"ENABLED");                
+                $result=$astMang->database_put("CW/",$arrProp['exten'],"ENABLED");                
             else
-                $result=$astMang->database_del("CW/$code",$username);
+                $result=$astMang->database_del("CW/$code",$arrProp['exten']);
         }else
-            $result=$astMang->database_del("CW/$code",$username);
+            $result=$astMang->database_del("CW/$code",$arrProp['exten']);
         if(strtoupper($result["Response"]) == "ERROR"){
             $error=true;
         }
@@ -2073,13 +2072,13 @@ class paloDevice{
         if(isset($arrProp['screen'])){
             switch($arrProp['screen']){
                 case "memory":
-                    $result=$astMang->database_put("EXTUSER/$code/$username","screen","memory");
+                    $result=$astMang->database_put("EXTUSER/$code/{$arrProp['exten']}","screen","memory");
                     break;
                 case "nomemory":
-                    $result=$astMang->database_put("EXTUSER/$code/$username","screen","nomemory");
+                    $result=$astMang->database_put("EXTUSER/$code/{$arrProp['exten']}","screen","nomemory");
                     break;
                 default:
-                    $result=$astMang->database_del("EXTUSER/$code/$username","screen");
+                    $result=$astMang->database_del("EXTUSER/$code/{$arrProp['exten']}","screen");
                     break;
             }
         }
@@ -2090,20 +2089,20 @@ class paloDevice{
         //si se activo el servicio de dictation
         if(isset($arrProp['dictate'])){
             if($arrProp['dictate']=="yes"){
-                $result=$astMang->database_put("EXTUSER/$code/$username/dictate","enabled","enabled");
+                $result=$astMang->database_put("$familia_extuser/dictate","enabled","enabled");
                 switch($arrProp['dictformat']){
                     case "gsm":
-                        $astMang->database_put("EXTUSER/$code/$username/dictate","format","gsm");
+                        $astMang->database_put("$familia_extuser/dictate","format","gsm");
                         break;
                     case "wav":
-                        $astMang->database_put("EXTUSER/$code/$username/dictate","format","wav");
+                        $astMang->database_put("$familia_extuser/dictate","format","wav");
                         break;
                     default:
-                        $astMang->database_put("EXTUSER/$code/$username/dictate","format","ogg");
+                        $astMang->database_put("$familia_extuser/dictate","format","ogg");
                         break;
                 }
                 if(isset($arrProp['dictemail'])){
-                    $astMang->database_put("EXTUSER/$code/$username/dictate","email",$arrProp['dictemail']);
+                    $astMang->database_put("$familia_extuser/dictate","email",$arrProp['dictemail']);
                 }
             }
         }
@@ -2116,9 +2115,10 @@ class paloDevice{
         //si hubo algun error eliminar los datos que fueron insertados antes del error
         if($error){
             $this->errMsg = _tr("Couldn't be inserted data in ASTDB");
-            $result=$astMang->database_delTree("EXTUSER/$code/$username");
-            $result=$astMang->database_delTree("DEVICE/$code/{$arrProp['device']}");
-            $result=$astMang->database_del("CW","$code/$username");
+            $result=$astMang->database_delTree($familia_extuser);
+            $result=$astMang->database_delTree($familia_device);
+            $result=$astMang->database_delTree($familia_device_im);
+            $result=$astMang->database_del("CW","$code/{$arrProp['exten']}");
             $astMang->disconnect();
             return false;
         }else{
@@ -2136,8 +2136,7 @@ class paloDevice{
         $context=($context==false)?"":$context;
         $vmx_opts_timeout=($vmx_opts_timeout==false)?"":$vmx_opts_timeout;
         
-        $username = $arrProp['name'];
-        $familia="EXTUSER/".$this->code."/$username/vmx";
+        $familia="EXTUSER/".$this->code."/{$arrProp['exten']}/vmx";
         $pri="1";
         
         $astMang=AsteriskManagerConnect($errorM);
@@ -2524,13 +2523,12 @@ class paloDevice{
         $arrBackup=array();
         $arrBackup["exten"]=$exten;
         
-        $username = strstr($arrBackup['device'], '@', true);
-        $arrFamily[]="EXTUSER/{$this->code}/$username";
+        $arrFamily[]="EXTUSER/{$this->code}/$exten";
         //se obtine los dispositivos a los cuales la extension esta asociada para respaldarlos tambien
-        $deviceDB=$astMang->database_get("EXTUSER",$this->code."/$username/device");
+        $deviceDB=$astMang->database_get("EXTUSER",$this->code."/$exten/device");
         $device_arr = explode('&',$deviceDB);
         foreach($device_arr as $device){
-            $arrFamily[]="DEVICE/{$this->code}/$username_{$this->code}";
+            $arrFamily[]="DEVICE/{$this->code}/$device";
         }
         $arrFamily[]="DEVICE/".$this->code."/$device";
         $arrFamily[]="DND/".$this->code."/$exten";
@@ -2708,7 +2706,7 @@ class paloDevice{
                         $voicemail="novm";
                     else*/
                         $voicemail=$exten;
-
+ 
                     if($value["rt"]!=0 && isset($value["rt"])){
                         $arrExtensionLocal[] = new paloExtensions($exten,new ext_setvar($this->code."_RINGTIMER",$value["rt"]),1);
                         $arrExtensionLocal[] = new paloExtensions($exten,new ext_macro($this->code.'-exten-vm',$voicemail.",".$exten));

@@ -27,14 +27,9 @@ package.
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/etc/init.d/
 mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-mysqldbscripts/
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix-firstboot/
-mkdir -p $RPM_BUILD_ROOT/usr/bin/
-mkdir -p $RPM_BUILD_ROOT/usr/sbin/
-cp elastix-firstboot $RPM_BUILD_ROOT/etc/init.d/
-cp change-passwords elastix-admin-passwords $RPM_BUILD_ROOT/usr/bin/
-mv compat-dbscripts/ $RPM_BUILD_ROOT/usr/share/elastix-firstboot/
+cp -r setup/etc/ $RPM_BUILD_ROOT/
+cp -r setup/usr/ $RPM_BUILD_ROOT/
 
 %post
 
@@ -87,13 +82,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
-%attr(755, root, root) /etc/init.d/*
+%attr(755, root, root) /etc/rc.d/init.d/*
 %dir %{_localstatedir}/spool/elastix-mysqldbscripts/
 /usr/bin/change-passwords
 /usr/bin/elastix-admin-passwords
 
 %changelog
 * Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Reorganize directory structure to resemble other Elastix modules.
+  SVN Rev[6525]
 - CHANGED: SQL definitions for asteriskcdrdb were moved from elastix-firstboot
   to elastix-reports.
   SVN Rev[6520]

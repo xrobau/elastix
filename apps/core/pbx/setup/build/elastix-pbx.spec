@@ -359,6 +359,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: disable queue logging to /var/log/asterisk/queue_log, and enable it
+  on asteriskcdrdb.queue_log table.
+  SVN Rev[6522]
+
 * Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: add sip parameters to make asterisk contact Kamailio for outgoing SIP
   trunks. Add new columns sippasswd and kamailioname to elxpbx.sip table.

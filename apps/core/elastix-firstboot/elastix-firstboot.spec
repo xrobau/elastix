@@ -42,13 +42,6 @@ chkconfig --del elastix-firstboot
 chkconfig --add elastix-firstboot
 chkconfig --level 2345 elastix-firstboot on
 
-# The following scripts are placed in the spool directory if the corresponding
-# database does not exist. This is only temporary and should be removed when the
-# corresponding package does this by itself.
-if [ ! -d /var/lib/mysql/asteriskcdrdb ] ; then
-	cp /usr/share/elastix-firstboot/compat-dbscripts/01-asteriskcdrdb.sql /usr/share/elastix-firstboot/compat-dbscripts/02-asteriskuser-password.sql /var/spool/elastix-mysqldbscripts/
-fi
-
 # If installing, the system might have mysql running (upgrading from a RC). 
 # The default password is written to the configuration file. 
 if [ $1 -eq 1 ] ; then
@@ -96,12 +89,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %attr(755, root, root) /etc/init.d/*
 %dir %{_localstatedir}/spool/elastix-mysqldbscripts/
-/usr/share/elastix-firstboot/compat-dbscripts/01-asteriskcdrdb.sql
-/usr/share/elastix-firstboot/compat-dbscripts/02-asteriskuser-password.sql
 /usr/bin/change-passwords
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: SQL definitions for asteriskcdrdb were moved from elastix-firstboot
+  to elastix-reports.
+  SVN Rev[6520]
+
 * Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-admin-passwords: program modified to initialize and update
   the Kamailio ODBC connector credentials.

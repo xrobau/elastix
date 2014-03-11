@@ -142,6 +142,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: SQL definitions for asteriskcdrdb were moved from elastix-firstboot
+  to elastix-reports.
+  SVN Rev[6520]
+
 * Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: update log parsing for changed date format resulting 
   from update to FreePBX 2.11.

@@ -12,6 +12,8 @@ Requires: sed, grep
 Requires: coreutils
 Conflicts: elastix-mysqldbdata
 Requires(post): chkconfig, /bin/cp
+Requires: kamailio
+Requires: rtpproxy
 
 %description
 This module contains (or should contain) utilities and configurations that
@@ -36,6 +38,14 @@ cp -r setup/usr/ $RPM_BUILD_ROOT/
 chkconfig --del elastix-firstboot
 chkconfig --add elastix-firstboot
 chkconfig --level 2345 elastix-firstboot on
+
+# Kamailio and rtpproxy setup
+chkconfig --del kamailio
+chkconfig --del rtpproxy-multi
+chkconfig --add kamailio
+chkconfig --add rtpproxy-multi
+chkconfig kamailio on
+chkconfig rtpproxy-multi on
 
 # If installing, the system might have mysql running (upgrading from a RC). 
 # The default password is written to the configuration file. 
@@ -84,11 +94,14 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %attr(755, root, root) /etc/rc.d/init.d/*
 %dir %{_localstatedir}/spool/elastix-mysqldbscripts/
-/usr/bin/change-passwords
-/usr/bin/elastix-admin-passwords
+%{_bindir}/change-passwords
+%{_bindir}/elastix-admin-passwords
+%{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
 * Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Add and update scripts for Kamailio and rtpproxy setup.
+  SVN Rev[6526]
 - CHANGED: Reorganize directory structure to resemble other Elastix modules.
   SVN Rev[6525]
 - CHANGED: SQL definitions for asteriskcdrdb were moved from elastix-firstboot

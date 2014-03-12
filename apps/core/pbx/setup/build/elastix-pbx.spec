@@ -132,6 +132,7 @@ mv setup/asterisk/astetc/*                                $RPM_BUILD_ROOT/etc/as
 mv setup/kamailio/kamailioetc/*                           $RPM_BUILD_ROOT/etc/kamailio.elastix/
 mv setup/etc/init.d/festival                              $RPM_BUILD_ROOT/etc/init.d/
 mv setup/usr/share/elastix/privileged/*                   $RPM_BUILD_ROOT/usr/share/elastix/privileged/
+mv setup/usr/share/elastix/asteriskconfig/                $RPM_BUILD_ROOT/usr/share/elastix/
 rmdir setup/etc/init.d
 rmdir setup/etc/asterisk
 rmdir setup/usr/share/elastix/privileged
@@ -362,6 +363,7 @@ fi
 /etc/init.d/festival
 /bin/asterisk.reload
 /usr/share/elastix/privileged/*
+/usr/share/elastix/asteriskconfig/*
 /etc/cron.daily/asterisk_cleanup
 
 %changelog

@@ -365,6 +365,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Mar 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: asteriskconfig: add support for pluggable dialplan generators. With
+  this support, an Elastix 3 addon may insert itself into the dialplan generation
+  process without asteriskconfig having to know about this addon.
+  SVN Rev[6533]
+
 * Tue Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: add schema and grant for Kamailio database. Add Requires. Add 
   Kamailio configuration file.

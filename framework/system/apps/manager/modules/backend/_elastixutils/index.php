@@ -287,12 +287,10 @@ function handleJSON_getElastixAccounts($smarty, $module_name){
                     $arrContacts[$index_st][$key]['username']=$value['username'];
                     $arrContacts[$index_st][$key]['presence']=$status;
                     $arrContacts[$index_st][$key]['st_code']=$st_code;
-                    //$arrContacts[$index_st][$key]['uri']="{$value['elxweb_device']}@$dominio";
-                    $arrContacts[$index_st][$key]['uri']=$value['elxweb_device'];
+                    $arrContacts[$index_st][$key]['uri']="{$value['elxweb_device']}@$dominio";
                     $arrContacts[$index_st][$key]['alias']="{$value['alias']}@$dominio";
                 }else{
-                    //$arrContacts['my_info']['uri']="{$value['elxweb_device']}@$dominio";
-                    $arrContacts['my_info']['uri']=$value['elxweb_device'];
+                    $arrContacts['my_info']['uri']="{$value['elxweb_device']}@$dominio";
                     $arrContacts['my_info']['ws_servers']=$chatConfig['ws_servers'];
                     $arrContacts['my_info']['password']=$_SESSION['elastix_pass2'];
                     $arrContacts['my_info']['display_name']=$value['name'];

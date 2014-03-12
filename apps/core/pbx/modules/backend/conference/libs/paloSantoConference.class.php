@@ -510,21 +510,23 @@ class paloConference extends paloAsteriskDB{
             return false;
         }
         
-        // User #: 01         1064 device               Channel: SIP/1064-00000001     (unmonitored) 00:00:11
-        $regexp = '!^User #:[[:space:]]*([[:digit:]]+)[[:space:]]*([[:digit:]]+[[:alnum:]| |<|>]*)Channel: ([[:alnum:]]+/[[:alnum:]|_|-]+)[[:space:]]*(\(Admin\)){0,1}[[:space:]]*([[:alnum:]|\(|\)| ]+\))[[:space:]]*([[:digit:]|\:]+)$!i';
-        
-        $command = "meetme list $room";
+        // 2!408!User Name!SIP/user_domain-00000028!!!yyyyy!!xxxxx!00:01:34
+        // 10 records
+        // if xxxxx is -1 then (unmonitored)
+        // if yyyyy is  1 then (Admin Muted) 
+        $command = "meetme list $room concise";
         $arrResult = $this->AsteriskManager_Command($command);
         
         if(is_array($arrResult) && count($arrResult)>0) {
             foreach($arrResult as $Key => $linea) {
-                if (preg_match($regexp, $linea, $arrReg)) {
+                if(preg_match("/^[0-9]+![0-9]+!/", $linea)){
+                    $arrReg = explode("!",$linea);               
                     $arrCallers[] = array(
-                        'userId'    => $arrReg[1],
-                        'callerId'  => $arrReg[2],
+                        'userId'    => $arrReg[0],
+                        'callerId'  => "$arrReg[2] <{$arrReg[1]}>",
                         'mode'      => $arrReg[4], //se setea en caso de que el usuario sea de tipo admin (admin/user)
-                        'status'    => $arrReg[5], //muted|no muted
-                        'duration'  => $arrReg[6]
+                        'status'    => ($arrReg[6]==1)?"Admin Muted":"", //muted|no muted
+                        'duration'  => $arrReg[9]
                     );
                 }
             }

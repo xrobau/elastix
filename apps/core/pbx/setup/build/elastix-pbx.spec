@@ -19,6 +19,7 @@ Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
 Prereq: mysql-connector-odbc
 Requires: festival >= 1.95
+Requires: kamailio, kamailio-odbc, kamailio-mysql, kamailio-utils, kamailio-presence
 
 %description
 Elastix Module PBX
@@ -86,6 +87,8 @@ mkdir -p $RPM_BUILD_ROOT/tftpboot
 mkdir -p $RPM_BUILD_ROOT/etc/asterisk/
 mkdir -p $RPM_BUILD_ROOT/etc/asterisk.elastix/
 
+mkdir -p $RPM_BUILD_ROOT/etc/kamailio.elastix/
+
 # ** service festival ** #
 mkdir -p $RPM_BUILD_ROOT/etc/init.d/
 mkdir -p $RPM_BUILD_ROOT/var/log/festival/
@@ -126,6 +129,7 @@ chmod +x setup/etc/asterisk/sip_notify_custom_elastix.conf
 chmod +x setup/etc/init.d/festival
 mv setup/etc/asterisk/sip_notify_custom_elastix.conf      $RPM_BUILD_ROOT/etc/asterisk/
 mv setup/asterisk/astetc/*                                $RPM_BUILD_ROOT/etc/asterisk.elastix/
+mv setup/kamailio/kamailioetc/*                           $RPM_BUILD_ROOT/etc/kamailio.elastix/
 mv setup/etc/init.d/festival                              $RPM_BUILD_ROOT/etc/init.d/
 mv setup/usr/share/elastix/privileged/*                   $RPM_BUILD_ROOT/usr/share/elastix/privileged/
 rmdir setup/etc/init.d
@@ -244,6 +248,8 @@ if [ $1 -eq 1 ]; then #install
 
   # Cambio carpeta de archivos de configuración de Asterisk
   mv -f /etc/asterisk.elastix/* /etc/asterisk/
+
+  mv -f /etc/kamailio.elastix/* /etc/kamailio/
 elif [ $1 -eq 2 ]; then #update
   # The installer database
    elastix-dbprocess "update" "$pathModule/setup/db" "$preversion"
@@ -360,6 +366,9 @@ fi
 
 %changelog
 * Tue Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: add schema and grant for Kamailio database. Add Requires. Add 
+  Kamailio configuration file.
+  SVN Rev[6530]
 - CHANGED: disable queue logging to /var/log/asterisk/queue_log, and enable it
   on asteriskcdrdb.queue_log table.
   SVN Rev[6522]

@@ -824,7 +824,7 @@ function getNewListElastixAccounts($searchFilter){
     if(!empty($searchFilter))
         $name= $searchFilter;
     
-    $result=$pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"], $name); exec("echo '".print_r($result,true)."' >> /tmp/bb.x");
+    $result=$pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"], $name);
     if($result===false){
         //hubo un error de la base de datos ahi que desactivar la columna lateral
         return false;
@@ -906,8 +906,7 @@ function getChatContactsStatus($searchFilter)
         //SI HUBO UN CAMBIO
         // si hay cambio status true
         // poner el nuevo valor el seesion
-        $session = getSession();
-        exec("echo 'getChatContactsStatus' >> /tmp/bb.x");
+        $session = getSession();        
         //var_dump($session['chatlistStatus']);
         //print_r("---------------------------------------------------------------------------------------");
         //var_dump($newListContacts);

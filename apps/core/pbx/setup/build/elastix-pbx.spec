@@ -367,6 +367,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Mar 13 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: improve kamailio mangling of domain accounts. Instead of
+  performing the mangling manually, we can rely on uac module to do it for us.
+  Create required database view for mapping.
+  SVN Rev[6535]
+
 * Wed Mar 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: asteriskconfig: add support for pluggable dialplan generators. With
   this support, an Elastix 3 addon may insert itself into the dialplan generation

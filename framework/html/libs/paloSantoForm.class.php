@@ -283,7 +283,7 @@ class paloForm
                                 $listaOpts[] = sprintf(
                                     '<option value="%s" %s>%s</option>',
                                     htmlentities($idSeleccion, ENT_COMPAT, 'UTF-8'),
-                                    in_array($idSeleccion, $keyVals) ? 'selected="selected"' : '',
+                                    in_array((string)$idSeleccion, $keyVals) ? 'selected="selected"' : '',
                                     htmlentities($nombreSeleccion, ENT_COMPAT, 'UTF-8'));
                             }
                         }

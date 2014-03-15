@@ -791,6 +791,11 @@ class paloSip extends paloAsteriskDB {
             // Mandar el nombre original (sin dominio) a kamailioname
             if ($key == 'kamailioname') continue;
             if (in_array($key, array('name'))) {
+                // Quitar el sufijo de prefijo de dominio
+                if (strlen($value) > strlen($code) + 1 && substr($value, strlen($code) + 1) == '_'.$code) {
+                	$value = substr($value, 0, strlen($value) - strlen($code) - 1);
+                }
+                
                 $sqlFields['kamailioname'] = $value;
                 $value .= '_'.$code;
             }

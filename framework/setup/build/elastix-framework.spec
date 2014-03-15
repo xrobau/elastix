@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Sat Mar 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework - Remove any domain suffix from kamailioname when saving
+  a SIP account.
+  SVN Rev[6537]
+
 * Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework - Each SIP account creation also requires an update to the
   sip.kamailioname column with the plain name (no domain).

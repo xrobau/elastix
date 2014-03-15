@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>	
 <module>
-	<menu id="ring_group" name="Ring Groups" idParent="pbxapplications" type="module" link=""  order_no="3">
+	<menu id="ring_group" name="Ring Groups" idParent="pbxapplications" type="module" link=""  order_no="4">
 		<permissions administrative="yes" organization_access="yes" >
 			<actions>
 				<action name="access">

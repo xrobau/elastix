@@ -367,6 +367,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sat Mar 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: define elxpbx.subscriber view for kamailio authentication.
+  SVN Rev[6541]
+
 * Thu Mar 13 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: improve kamailio mangling of domain accounts. Instead of
   performing the mangling manually, we can rely on uac module to do it for us.

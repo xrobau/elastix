@@ -15,3 +15,8 @@ SELECT name AS l_uuid, kamailioname AS l_username, organization_domain AS l_doma
     name AS auth_username, sippasswd AS auth_password, 'sip:127.0.0.1:5080' AS auth_proxy,
     90 AS expires
 FROM sip;
+
+/* The following view allows Kamailio to authenticate incoming REGISTERs */
+CREATE VIEW subscriber AS
+SELECT kamailioname AS username, organization_domain AS domain, sippasswd AS ha1, NULL AS ha1b
+FROM sip;

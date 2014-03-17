@@ -205,6 +205,10 @@ function createOrganizationAsterisk($domain){
     if(createExtensionFile("add",$domain)==false){
         return false;
     }
+    
+    // Recargar Kamailio para que cargue el nuevo dominio
+    exec('/sbin/service kamailio restart');
+
     return true;
 }
 
@@ -836,6 +840,7 @@ function generateDialPlan($domain,$reload=false){
     }
 
     // Generar los contextos para todos los objetos de plan de marcado
+    // TODO: migrar todos los generadores al directorio /usr/share/elastix/asteriskconfig/bydomain
     $dialplanObjects = array(
         array('paloIvrPBX',            'createDialPlanIvr'),
         array('paloSantoInbound',      'createDialplanIndbound'), // typo
@@ -865,13 +870,54 @@ function generateDialPlan($domain,$reload=false){
         }
     }
 
+    // Generar todos los contextos a través de los generadores bydomain
+    $contenido_dyngen = '';
+    foreach (glob('/usr/share/elastix/asteriskconfig/bydomain/*') as $dialplanObjectDir) {
+        $sClassName = 'DialplanGenerator_'.basename($dialplanObjectDir);
+        $sClassFile = $dialplanObjectDir.'/'.$sClassName.'.class.php';
+        if (is_dir($dialplanObjectDir)) {
+            if (!file_exists($sClassFile)) {
+                fprintf(STDERR, "ERR: expected dialplan generator file not found: $sClassFile\n");
+            } else {
+                require_once $sClassFile;
+
+                if (!class_exists($sClassName)) {
+                    fprintf(STDERR, "ERR: class $sClassName not defined in generator file: $sClassFile\n");
+                } elseif (!method_exists($sClassName, 'createDialplanContexts')) {
+                    fprintf(STDERR, "ERR: class $sClassName does not implement method createDialplanContexts()\n");
+                } else {
+                    $pObjDialplan = new $sClassName($domain, $pDB);
+                    $arrObjContexts = $pObjDialplan->createDialplanContexts();
+                    if (!is_array($arrObjContexts)) {
+                        fprintf(STDERR, "ERR: method $sClassName::createDialplanContexts() returned invalid format (not an array)\n");
+                    } else {
+                        $bValidFormat = TRUE;
+                        if (isset($arrObjContexts['error_message'])) {
+                            fprintf(STDERR, "ERR: $sClassName::createDialplanContexts() reports failure: {$arrObjContexts['error_message']}\n");
+                        } elseif (isset($arrObjContexts['dialplan_text']) && isset($arrObjContexts['dialplan_includes'])) {
+                            $contenido_dyngen .= $arrObjContexts['dialplan_text'];
+                            
+                            // Para compatibilidad temporal con el esquema (name,extra)
+                            $dialplanIncludes = array();
+                            foreach ($arrObjContexts['dialplan_includes'] as $tuplaInclude) {
+                                $dialplanIncludes[] = is_array($tuplaInclude) ? $tuplaInclude : array('name' => $tuplaInclude);
+                            }
+                            $arrFromInt = array_merge($arrFromInt, $dialplanIncludes);
+                        } else {
+                            fprintf(STDERR, "ERR: method $sClassName::createDialplanContexts() returned invalid format (missing keys error_message or dialplan_text/dialplan_includes)\n");
+                        }
+                    }
+                }
+            }
+        }
+    }
     //incluimos los contextos dentro de from-internal-additional
     $fromInternal=new paloContexto($code,"from-internal-additional");
     $fromInternal->arrInclude=$arrFromInt;
     $fromInternal->arrExtensions=array(new paloExtensions("h",new ext_hangup(),"1"));
     $arrContext[]=$fromInternal;
 
-    $contenido="";
+    $contenido = $contenido_dyngen;
     
     foreach($arrContext as $value){
         if(isset($value)){

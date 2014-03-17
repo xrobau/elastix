@@ -327,7 +327,7 @@ class paloAsteriskDB {
                 $qQueues="SELECT name,queue_number,description from queue where organization_domain=?";
                 $result=$this->getResultQuery($qQueues,array($domain),true);
                 foreach($result as $value){
-                    $arrDestine["queues,".$value["name"]]=$value["queue_number"]." (".$value["description"].")";
+                    $arrDestine["queues,".$value["queue_number"]]=$value["queue_number"]." (".$value["description"].")";
                 }
                 break;
             case "ring_group":
@@ -396,7 +396,7 @@ class paloAsteriskDB {
                 }
                 break;*/
             case "queues":
-                $query="SELECT count(name) from queue where organization_domain=? and name=?";
+                $query="SELECT count(queue_number) from queue where organization_domain=? and queue_number=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
                 if($result[0]!="1"){
                     return false;
@@ -473,7 +473,7 @@ class paloAsteriskDB {
                 }
                 break;*/
             case "queues":
-                $query="SELECT queue_number from queue where organization_domain=? and name=?";
+                $query="SELECT queue_number from queue where organization_domain=? and queue_number=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
                 if($result!=false){
                     return "$code-ext-queues,".$result["queue_number"].",1";

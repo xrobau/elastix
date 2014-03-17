@@ -368,6 +368,9 @@ fi
 
 %changelog
 * Mon Mar 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: expand elxpbx.subscriber view to allow authentication for
+  incoming SIP trunks. Create a table for global domains/IP addresses.
+  SVN Rev[6549]
 - CHANGED: kamailio: relax check that enforced From: username to match 
   authentication username, in order to allow incoming SIP trunks to work.
   SVN Rev[6548]

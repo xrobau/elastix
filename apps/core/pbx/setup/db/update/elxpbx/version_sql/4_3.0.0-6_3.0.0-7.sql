@@ -33,7 +33,23 @@ SELECT name AS l_uuid, kamailioname AS l_username, organization_domain AS l_doma
     90 AS expires
 FROM sip;
 
+/* The following table stores IPs and domains from which incoming calls from 
+ * global SIP trunks should be accepted */
+CREATE TABLE global_domains
+(
+    domain  VARCHAR(100) NOT NULL UNIQUE
+);
+
 /* The following view allows Kamailio to authenticate incoming REGISTERs */
 CREATE VIEW subscriber AS
-SELECT kamailioname AS username, organization_domain AS domain, sippasswd AS ha1, NULL AS ha1b
-FROM sip;
+(SELECT kamailioname AS username, organization_domain AS domain, sippasswd AS ha1, NULL AS ha1b 
+FROM sip
+WHERE organization_domain <> '')
+UNION
+(SELECT kamailioname AS username, domain, sippasswd AS ha1, NULL AS ha1b
+FROM sip, organization
+WHERE sip.organization_domain = '' AND domain <> '')
+UNION
+(SELECT kamailioname AS username, domain, sippasswd AS ha1, NULL AS ha1b
+FROM sip, global_domains
+WHERE sip.organization_domain = '');

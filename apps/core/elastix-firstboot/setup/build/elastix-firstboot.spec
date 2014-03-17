@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Mon Mar 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Update kamailio mhomed setup to check in To: domain for rtpproxy.
+  SVN Rev[6544]
+
 * Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Add and update scripts for Kamailio and rtpproxy setup.
   SVN Rev[6526]

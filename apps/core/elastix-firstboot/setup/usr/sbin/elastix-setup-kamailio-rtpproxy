@@ -138,7 +138,7 @@ foreach ($if_list as $if_entry) {
     if ($if_entry['ip_addr'] != $kamailio_ip) {
         $rtpproxy_sock .= "modparam(\"rtpproxy\", \"rtpproxy_sock\", \"$i == udp:127.0.0.1:{$rtpproxy_port}\")\n";
         $route_mhomed_elastix .= <<<ROUTE_CONDITION
-if (\$Ri=="{$if_entry['ip_addr']}" || $(hdr(Record-Route)[1]{nameaddr.uri}{uri.host}) == "{$if_entry['ip_addr']}" || is_in_subnet($(du{uri.host}), "{$if_entry['net_addr']}/{$if_entry['mask']}") || is_in_subnet(\$sel(via[2].host), "{$if_entry['net_addr']}/{$if_entry['mask']}")) {
+if (\$Ri=="{$if_entry['ip_addr']}" || $(hdr(Record-Route)[1]{nameaddr.uri}{uri.host}) == "{$if_entry['ip_addr']}" || is_in_subnet($(du{uri.host}), "{$if_entry['net_addr']}/{$if_entry['mask']}") || is_in_subnet(\$sel(via[2].host), "{$if_entry['net_addr']}/{$if_entry['mask']}") || is_in_subnet(\$td, "{$if_entry['net_addr']}/{$if_entry['mask']}")) {
         set_rtp_proxy_set("{$i}");
         rtpproxy_manage("co", "{$if_entry['ip_addr']}");
     } else 

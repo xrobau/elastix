@@ -330,6 +330,13 @@ class paloAsteriskDB {
                     $arrDestine["queues,".$value["queue_number"]]=$value["queue_number"]." (".$value["description"].")";
                 }
                 break;
+            case "announcement":
+                $query="SELECT description,id from announcement where organization_domain=?";
+                $result=$this->getResultQuery($query,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["announcement,".$value["id"]]=$value["description"];
+                }
+                break;
             case "ring_group":
                 $query="SELECT rg_name,rg_number from ring_group where organization_domain=?";
                 $result=$this->getResultQuery($query,array($domain),true);
@@ -397,6 +404,13 @@ class paloAsteriskDB {
                 break;*/
             case "queues":
                 $query="SELECT count(queue_number) from queue where organization_domain=? and queue_number=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+            case "announcement":
+                $query="SELECT count(id) from announcement where organization_domain=? and id=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
                 if($result[0]!="1"){
                     return false;
@@ -479,6 +493,13 @@ class paloAsteriskDB {
                     return "$code-ext-queues,".$result["queue_number"].",1";
                 }
                 break;
+            case "announcement":
+                $query="SELECT id from announcement where organization_domain=? and id=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-app-announcement-{$result["id"]},s,1";
+                }
+                break;
             case "ring_group":
                 $query="SELECT rg_number from ring_group where organization_domain=? and rg_number=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
@@ -532,6 +553,11 @@ class paloAsteriskDB {
         $result=$this->getFirstResultQuery($query,array($domain));
         if($result!=false){
             $arrCat["queues"]=_tr("Queues");
+        }
+        $query="select id from announcement where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["announcement"]=_tr("Announcements");
         }
         $query="select rg_number from ring_group where organization_domain=?";
         $result=$this->getFirstResultQuery($query,array($domain));

@@ -399,7 +399,6 @@ class paloSantoAnnouncement extends paloAsteriskDB{
                     $context->errMsg = "ext-announcement. Error: ".$context->errMsg;
                 else{
                     $context->arrExtensions = $arrExt;
-                    $arrFromInt[]["name"]   = "app-announcement-{$value['id']}";
                     $arrContext[]           = $context;
                     $arrExt                 = array();
                 }

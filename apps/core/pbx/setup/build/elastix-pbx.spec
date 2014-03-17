@@ -368,6 +368,9 @@ fi
 
 %changelog
 * Mon Mar 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: relax check that enforced From: username to match 
+  authentication username, in order to allow incoming SIP trunks to work.
+  SVN Rev[6548]
 - CHANGED: kamailio: relax checks that prevent rtpproxy from being negotiated
   when asterisk routes a SIP call through Kamailio for an outgoing SIP trunk.
   SVN Rev[6543]

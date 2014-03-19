@@ -10,7 +10,7 @@ Source: elastix-framework_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: /sbin/chkconfig, /etc/sudoers, sudo
-Prereq: php, php-sqlite3, php-gd, php-pear, php-xml, php-mysql, php-pdo, php-imap, php-soap, php-process
+Prereq: php, php-gd, php-pear, php-xml, php-mysql, php-pdo, php-imap, php-soap, php-process
 Prereq: httpd, mysql-server, ntp, nmap, mod_ssl
 Prereq: perl
 Prereq: elastix-firstboot >= 3.0.0-1

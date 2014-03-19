@@ -367,6 +367,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Mar 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: incoming SIP requests for which the From username differs
+  from the authentication username are assumed to be requests from SIP trunks
+  which are exempt from domain mangling.
+  SVN Rev[6549]
+
 * Mon Mar 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: expand elxpbx.subscriber view to allow authentication for
   incoming SIP trunks. Create a table for global domains/IP addresses.

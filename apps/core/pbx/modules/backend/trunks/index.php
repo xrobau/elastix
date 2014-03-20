@@ -704,66 +704,26 @@ function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrCo
 }
 
 function getSipIaxParam($tech,$edit=false){
-    $arrProp=array();
-    $arrProp["context"]=getParameter("context");
-    $arrProp["name"]=getParameter("name");
-    $arrProp["register"]=getParameter("register");
-    $arrProp["type"]=getParameter("type");
-    $arrProp["username"]=getParameter("username");
-    $arrProp["host"]=getParameter("host");
-    $arrProp["qualify"]=getParameter("qualify");
-    $arrProp["disallow"]=getParameter("disallow");
-    $arrProp["allow"]=getParameter("allow");
-    $arrProp["amaflags"]=getParameter("amaflags");
-    $arrProp["deny"]=getParameter("deny");
-    $arrProp["permit"]=getParameter("permit");
-    $arrProp["acl"]=getParameter("acl");
-    if($tech=="sip"){
-        $arrProp["insecure"]=getParameter("insecure");
-        $arrProp["nat"]=getParameter("nat");
-        $arrProp["dtmfmode"]=getParameter("dtmfmode");
-        $arrProp["fromuser"]=getParameter("fromuser");
-        $arrProp["fromdomain"]=getParameter("fromdomain");
-        $arrProp["sendrpid"]=getParameter("sendrpid");
-        $arrProp["directmedia"]=getParameter("directmedia");
-        $arrProp["videosupport"]=getParameter("videosupport");
-        $arrProp["maxcallbitrate"]=getParameter("maxcallbitrate");
-        $arrProp["qualifyfreq"]=getParameter("qualifyfreq");
-        $arrProp["rtptimeout"]=getParameter("rtptimeout");
-        $arrProp["rtpholdtimeout"]=getParameter("rtpholdtimeout");
-        $arrProp["keepalive"]=getParameter("keepalive");
-        $arrProp["contactdeny"]=getParameter("contactdeny");
-        $arrProp["contactpermit"]=getParameter("contactpermit");
-        $arrProp["contactacl"]=getParameter("contactacl");
-        $arrProp["callcounter"]=getParameter("callcounter");
-        $arrProp["busylevel"]=getParameter("busylevel");
-        $arrProp["allowoverlap"]=getParameter("allowoverlap");
-        $arrProp["allowsubscribe"]=getParameter("allowsubscribe");
-        $arrProp["allowtransfer"]=getParameter("allowtransfer");
-        $arrProp["defaultip"]=getParameter("defaultip");
-        $arrProp["defaultuser"]=getParameter("defaultuser");
-        $arrProp["transport"]=getParameter("transport");
-        $arrProp["outboundproxy"]=getParameter("outboundproxy");
-    }elseif($tech=="iax2"){
-        $arrProp["auth"]=getParameter("auth");
-        $arrProp["trunk"]=getParameter("trunk");
-        $arrProp["trunkfreq"]=getParameter("trunkfreq");
-        $arrProp["trunktimestamps"]=getParameter("trunktimestamps");
-        $arrProp["sendani"]=getParameter("sendani");
-        $arrProp["adsi"]=getParameter("adsi");
-        $arrProp["requirecalltoken"]=getParameter("requirecalltoken");
-        $arrProp["encryption"]=getParameter("encryption");
-        $arrProp["jitterbuffer"]=getParameter("jitterbuffer");
-        $arrProp["forcejitterbuffer"]=getParameter("forcejitterbuffer");
-        $arrProp["codecpriority"]=getParameter("codecpriority");
-        $arrProp["qualifysmoothing"]=getParameter("qualifysmoothing");
-        $arrProp["qualifyfreqok"]=getParameter("qualifyfreqok");
-        $arrProp["qualifyfreqnotok"]=getParameter("qualifyfreqnotok");
-        $arrProp["transfer"]=getParameter("transfer");
-        $arrProp["defaultip"]=getParameter("defaultip");
-        $arrProp["maxcallnumbers"]=getParameter("defaultip");
-        $arrProp["inkeys"]=getParameter("inkeys");
-    }
+    $arrProp = array();
+    
+    $formKeys = array('context', 'name', 'register', 'type', 'username', 'host',
+        'qualify', 'disallow', 'allow', 'amaflags', 'deny', 'permit', 'acl');
+    if ($tech == 'sip')
+        $formKeys = array_merge($formKeys, array('insecure', 'nat', 'dtmfmode',
+            'fromuser', 'fromdomain', 'sendrpid', 'directmedia', 'videosupport',
+            'maxcallbitrate', 'qualifyfreq', 'rtptimeout', 'rtpholdtimeout',
+            'keepalive', 'contactdeny', 'contactpermit', 'contactacl',
+            'callcounter', 'busylevel', 'allowoverlap', 'allowsubscribe',
+            'allowtransfer', 'defaultip', 'defaultuser', 'transport',
+            'outboundproxy'));
+    if ($tech == 'iax2')
+        $formKeys = array_merge($formKeys, array('auth', 'trunk', 'trunkfreq',
+            'trunktimestamps', 'sendani', 'adsi', 'requirecalltoken',
+            'encryption', 'jitterbuffer', 'forcejitterbuffer', 'codecpriority',
+            'qualifysmoothing', 'qualifyfreqok', 'qualifyfreqnotok', 'transfer',
+            'defaultip', 'maxcallnumbers', 'inkeys'));
+    foreach ($formKeys as $k) $arrProp[$k] = getParameter($k);
+
     return $arrProp;
 }
 
@@ -858,7 +818,7 @@ function createFieldForm($tech,$arrOrgz)
     $arrAmaflag=array("noset"=>"","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
     $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
     $arrNat=array(""=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
-    $arrType=array(_tr("friend")=>_tr("friend"),"peer"=>"peer");
+    $arrType=array("friend"=>_tr("friend"),"peer"=>"peer");
     $arrPeriod=array(5=>"5 min",10=>"10 min",15=>"15 min",30=>"30 min",45=>"45",60=>"1 hora",120=>"2 horas",180=>"3 horas",240=>"4 horas",300=>"5 horas",360=>"6 horas",600=>"10 horas",720=>"12 horas",900=>"15 horas",1200=>"20 horas",1440=>"1 dia");
     
     $arrStatus=array('off'=>_tr('Enabled'),'on'=>_tr('Disabled'));

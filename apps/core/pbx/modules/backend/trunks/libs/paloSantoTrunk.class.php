@@ -154,6 +154,15 @@ class paloSantoTrunk extends paloAsteriskDB{
                     $this->errMsg=_tr("Error getting peer details. ").$this->_DB->errMsg;
                     return false;
                 }else{
+                    // TODO: encapsular lectura de propiedades
+                    if ($tech == 'sip') {
+                        /* Transformación necesaria porque Asterisk no debe de 
+                         * consultar secreto alguno en 'secret', y 'sippasswd'
+                         * contiene el verdadero secreto consultado por 
+                         * Kamailio. */
+                    	$result['secret'] = $result['sippasswd'];
+                        unset($result['sippasswd']);
+                    }
                     $arrTrunk=array_merge($result,$arrTrunk);
                 }
             }
@@ -345,8 +354,14 @@ class paloSantoTrunk extends paloAsteriskDB{
             }
         }
         
-        $query="INSERT INTO trunk (name,tech,outcid,keepcid,maxchans,dialoutprefix,channelid,disabled,string_register) values (?,?,?,?,?,?,?,?,?)";
-        $exito=$this->executeQuery($query,array($arrProp["trunk_name"],$arrProp["tech"],$arrProp["outcid"],$arrProp["keepcid"],$arrProp["max_chans"],$arrProp["dialout_prefix"],$arrProp["channelid"],$arrProp["disabled"],$arrProp["register"]));
+        $query =
+            'INSERT INTO trunk (name, tech, outcid, keepcid, maxchans, '.
+                'dialoutprefix, channelid, disabled, string_register) '.
+            'VALUES (?,?,?,?,?,?,?,?,?)';
+        $exito=$this->executeQuery($query, array($arrProp["trunk_name"],
+            $arrProp["tech"], $arrProp["outcid"], $arrProp["keepcid"],
+            $arrProp["max_chans"], $arrProp["dialout_prefix"],
+            $arrProp["channelid"], $arrProp["disabled"], $arrProp["register"]));
         
         if($exito==true){
             //si ahi dialpatterns se los procesa
@@ -434,45 +449,14 @@ class paloSantoTrunk extends paloAsteriskDB{
             $arrProp['host']="dynamic";
         }
         
-        $arrValues=array();
-        $question="(";
-        $Prop="(";
-        $i=0;
-        foreach($arrProp as $key => $value){
-            if(property_exists($this->type,$key)){
-                if($value!="noset"){
-                    switch ($key){
-                        case "session_timers":
-                            $Prop .="session-timers,";
-                            break;
-                        case "session_expires":
-                            $Prop .="session-expires,";
-                            break;
-                        case "session_minse":
-                            $Prop .="session-minse,";
-                            break;
-                        case "session_refresher":
-                            $Prop .="session-refresher,";
-                            break;
-                        case "call_limit":
-                            $Prop .="call-limit,";
-                            break;
-                        default:
-                            $Prop .=$key.",";
-                            break;
-                    }
-                    $arrValues[$i]=$value;
-                    $question .="?,";
-                    $i++;
-                }
-            }
-        }
+        // TODO: encapsular correctamente la creación de una cuenta voip
+        $sqlFields = $this->type->_getFieldValuesSQL($arrProp);
+        $query =
+            'INSERT INTO '.$tech.' ('.implode(', ', array_keys($sqlFields)).') '.
+            'VALUES ('.implode(', ', array_fill(0, count($sqlFields), '?')).')';
+        $arrValues = array_values($sqlFields);
         
-        $question=substr($question,0,-1).")";
-        $Prop=substr($Prop,0,-1).")";
-
-        $query="INSERT INTO $tech $Prop value $question";
-        if($this->executeQuery($query,$arrValues)){
+        if ($this->executeQuery($query,$arrValues)) {
             return true;
         }else
             return false;
@@ -735,38 +719,14 @@ class paloSantoTrunk extends paloAsteriskDB{
             $arrProp['host']="dynamic";
         }
         
-        $arrQuery=array();
-        $arrParam=array();
-        foreach($arrProp as $name => $value){
-            if(property_exists($this->type,$name)){
-                if(isset($value)){
-                    if($value=="" || $value=="noset"){
-                        $value=NULL;
-                    }
-                    switch ($name){
-                        case "session_timers":
-                            $arrQuery[]="session-timers=?";
-                            break;
-                        case "session_expires":
-                            $arrQuery[]="session-expires=?";
-                            break;
-                        case "session_minse":
-                            $arrQuery[]="session-minse=?";
-                            break;
-                        case "session_refresher":
-                            $arrQuery[]="session-refresher=?";
-                            break;
-                        case "call_limit":
-                            $arrQuery[]="call-limit=?";
-                            break;
-                        default:
-                            $arrQuery[]="$name=?";
-                            break;
-                    }
-                    $arrParam[]=$value;
-                }
-            }
-        }
+        // TODO: encapsular correctamente la actualización de una cuenta voip
+        $sqlFields = $this->type->_getFieldValuesSQL($arrProp);
+        unset($sqlFields['name']);
+        $arrQuery = array();
+        foreach (array_keys($sqlFields) as $name)
+            $arrQuery[] = "$name = ?";
+        $arrParam = array_values($sqlFields);
+
         if(count($arrQuery)>0){
             $query ="Update $tech set ".implode(",",$arrQuery);
             $query .=" where name=?";

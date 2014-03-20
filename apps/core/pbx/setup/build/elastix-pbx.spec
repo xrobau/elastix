@@ -367,6 +367,16 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Mar 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Trunks: delegate transformation of form fields into SQL fields to the
+  relevant voip objects (paloSIP and paloIAX) instead of reimplementing the 
+  transformation. This makes use of the _getFieldValuesSQL() method made public
+  by a previous commit. The purpose of this delegation is to reuse the password
+  mapping (secret->sippasswd, name->kamailioname) for Kamailio. Map SIP property
+ 'sippasswd' into 'secret' on property read, in order for it to be preserved 
+  across updates. Some minimal code cleanup.
+  SVN Rev[6554]
+
 * Wed Mar 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: incoming SIP requests for which the From username differs
   from the authentication username are assumed to be requests from SIP trunks

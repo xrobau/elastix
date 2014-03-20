@@ -402,6 +402,14 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Mar 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: rework paloIAX in order to factor out a method 
+  _getFieldValuesSQL(), as done for paloSIP. Make _getFieldValuesSQL() public
+  in both paloIAX and paloSIP in order to make use of it on trunk creation.
+- FIXED: Framework: Add missing property 'username' to paloSIP to fix said 
+  property not being saved through SQL fields.
+  SVN Rev[6553]
+
 * Sat Mar 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework - Remove any domain suffix from kamailioname when saving
   a SIP account.

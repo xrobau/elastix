@@ -719,7 +719,7 @@ class paloSip extends paloAsteriskDB {
     public $t38pt_usertpsource;
     public $regexten;
     public $fromdomain;
-    public $fromuser;
+    public $fromuser;       // Si se setea, reemplaza a USERNAME en From: USERNAME@ip en INVITE
     public $host; //="dynamic";
     public $port; //="5060";
     public $qualify; //="yes";
@@ -736,6 +736,7 @@ class paloSip extends paloAsteriskDB {
     public $timerb;
     public $fullcontact;
     public $ipaddr;
+    public $username;   // Nombre de usuario para autenticación frente a equipo remoto
     public $qualifyfreq;
     public $vmexten;
     public $contactpermit;
@@ -794,7 +795,8 @@ class paloSip extends paloAsteriskDB {
         }
     }
 
-    private function _getFieldValuesSQL($code, $prop)
+    // Este método es público sólo para poderlo invocar desde paloSantoTrunk
+    function _getFieldValuesSQL($prop, $code = NULL)
     {
         $sqlFields = array();
         foreach ($prop as $key => $value) {
@@ -808,22 +810,24 @@ class paloSip extends paloAsteriskDB {
                 $key = str_replace('_', '-', $key);
             }
             if (in_array($key, array('context', 'subscribecontext', 'outofcall_message_context'))) {
-                if (!is_null($value)) $value = $code.'-'.$value;
+                if (!is_null($code) && !is_null($value)) $value = $code.'-'.$value;
             }
             if (in_array($key, array('namedpickupgroup', 'namedcallgroup'))) {
-                if (!is_null($value)) $value = $code.'_'.$value;
+                if (!is_null($code) && !is_null($value)) $value = $code.'_'.$value;
             }
             
             // Mandar el nombre original (sin dominio) a kamailioname
             if ($key == 'kamailioname') continue;
             if (in_array($key, array('name'))) {
                 // Quitar el sufijo de prefijo de dominio
-                if (strlen($value) > strlen($code) + 1 && substr($value, -1 * (strlen($code) + 1)) == '_'.$code) {
+                if (!is_null($code) && 
+                    strlen($value) > strlen($code) + 1 && 
+                    substr($value, -1 * (strlen($code) + 1)) == '_'.$code) {
                 	$value = substr($value, 0, strlen($value) - strlen($code) - 1);
                 }
                 
                 $sqlFields['kamailioname'] = $value;
-                $value .= '_'.$code;
+                if (!is_null($code)) $value .= '_'.$code;
             }
             
             // Redirigir el secret a sippasswd para Kamailio
@@ -850,7 +854,7 @@ class paloSip extends paloAsteriskDB {
         if(!isset($this->name) || !isset($this->secret) || !isset($this->context)){
             $this->errMsg="Field name, secret, context can't be empty";
         }elseif(!$this->existPeer($this->name."_".$code)){
-            $sqlFields = $this->_getFieldValuesSQL($code, get_object_vars($this));
+            $sqlFields = $this->_getFieldValuesSQL(get_object_vars($this), $code);
             $query =
                 'INSERT INTO sip ('.implode(', ', array_keys($sqlFields)).') '.
                 'VALUES ('.implode(', ', array_fill(0, count($sqlFields), '?')).')';
@@ -892,7 +896,7 @@ class paloSip extends paloAsteriskDB {
         }
         $code=$result["code"];
         if($this->existPeer($arrProp["name"])){
-            $sqlFields = $this->_getFieldValuesSQL($code, $arrProp);
+            $sqlFields = $this->_getFieldValuesSQL($arrProp, $code);
             unset($sqlFields['name']);
             unset($sqlFields['organization_domain']);
             $arrQuery = array();
@@ -1137,9 +1141,39 @@ class paloIax extends paloAsteriskDB {
 		return true;
 	}
 
+    // Este método es público sólo para poderlo invocar desde paloSantoTrunk
+    function _getFieldValuesSQL($prop, $code = NULL)
+    {
+        $sqlFields = array();
+        foreach ($prop as $key => $value) {
+            if (!property_exists($this, $key)) continue;
+            if (in_array($key, array('_DB', 'errMsg'))) continue;
+            if (!isset($value)) continue;
+            if ($value == '' || $value == 'noset') $value = NULL;
+            
+            if (in_array($key, array('context'))) {
+                if (!is_null($code) && !is_null($value)) $value = $code.'-'.$value;
+            }
+            
+            if (in_array($key, array('name'))) {
+                // Quitar el sufijo de prefijo de dominio
+                if (!is_null($code) && 
+                    strlen($value) > strlen($code) + 1 && 
+                    substr($value, -1 * (strlen($code) + 1)) == '_'.$code) {
+                    $value = substr($value, 0, strlen($value) - strlen($code) - 1);
+                }
+                
+                if (!is_null($code)) $value .= '_'.$code;
+            }
+            
+            $sqlFields[$key] = $value;
+        }
+        return $sqlFields;
+    }
+
 	function insertDB()
 	{
-		//valido que el dispositivo tenga seteado el parametro organization_domain y que este exista como dominio de algunaç
+		//valido que el dispositivo tenga seteado el parametro organization_domain y que este exista como dominio de alguna
 		//organizacion
 		$result=$this->getCodeByDomain($this->organization_domain);
 		if($result==false){
@@ -1148,32 +1182,15 @@ class paloIax extends paloAsteriskDB {
 		}
 		$code=$result["code"];
 		//valido que no exista otro dispositivo iax creado con el mismo nombre
-		if(!isset($this->name) || !isset($this->secret) || !isset($this->context)){
+		if (!isset($this->name) || !isset($this->secret) || !isset($this->context)) {
 			$this->errMsg="Field name, secret, context can't be empty";
-		}elseif(!$this->existPeer($this->name."_".$code)){
-			$arrValues=array();
-			$question="(";
-			$Prop="(";
-			$i=0;
-			$arrPropertyes=get_object_vars($this);
-			foreach($arrPropertyes as $key => $value){
-				if(isset($value) && $key!="_DB" && $key!="errMsg" && $value!="noset"){
-					if($key=="context")
-						$value = $code."-".$value;
-					if($key=="name")
-						$value = $value."_".$code;
-					$Prop .=$key.",";
-					$arrValues[$i]=$value;
-					$question .="?,";
-					$i++;
-				}
-			}
-
-			$question=substr($question,0,-1).")";
-			$Prop=substr($Prop,0,-1).")";
-
-			$query="INSERT INTO iax $Prop value $question";
-			if($this->executeQuery($query,$arrValues)){
+		} elseif(!$this->existPeer($this->name."_".$code)) {
+            $sqlFields = $this->_getFieldValuesSQL(get_object_vars($this), $code);
+            $query =
+                'INSERT INTO iax ('.implode(', ', array_keys($sqlFields)).') '.
+                'VALUES ('.implode(', ', array_fill(0, count($sqlFields), '?')).')';
+            $arrValues = array_values($sqlFields);
+			if ($this->executeQuery($query,$arrValues)) {
 				return true;
 			}
 		}
@@ -1190,27 +1207,14 @@ class paloIax extends paloAsteriskDB {
         }
         $code=$result["code"];
         if($this->existPeer($arrProp["name"])){
-            foreach($arrProp as $name => $value){
-                if(property_exists($this,$name)){
-                    if(isset($value)){
-                        if($name!="name" && $name!="_DB" && $name!="errMsg" && $name!="organization_domain"){
-                            if($value=="" || $value=="noset"){
-                                $value=NULL;
-                            }
-                            switch ($name){
-                                case "context":
-                                    $arrQuery[]="$name=?";
-                                    $value = $code."-".$value;
-                                    break;
-                                default:
-                                    $arrQuery[]="$name=?";
-                                    break;
-                            }
-                            $arrParam[]=$value;
-                        }
-                    }
-                }
-            }
+            $sqlFields = $this->_getFieldValuesSQL($arrProp, $code);
+            unset($sqlFields['name']);
+            unset($sqlFields['organization_domain']);
+            $arrQuery = array();
+            foreach (array_keys($sqlFields) as $name)
+                $arrQuery[] = "$name = ?";
+            $arrParam = array_values($sqlFields);
+
             if(count($arrQuery)>0){
                 $query ="Update iax set ".implode(",",$arrQuery);
                 $query .=" where name=? and organization_domain=?";

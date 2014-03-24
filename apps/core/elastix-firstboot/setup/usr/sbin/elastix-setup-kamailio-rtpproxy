@@ -34,6 +34,8 @@
  * _NOT_ restart any services.
  ****************************************************************************/
 
+define('PASSWD_PATH', '/etc/elastix.conf');
+
 function ip2octet($ip)
 {
     foreach (explode('.', $ip) as $i => $o) $oct[$i] = (int)$o;
@@ -44,6 +46,19 @@ function network_from_ip($ip_octet, $mask_octet)
 {
     foreach ($ip_octet as $i => $o) $net_octet[$i] = $o & $mask_octet[$i];
     return $net_octet;
+}
+
+// Need custom function to load conf file, odd characters choke parse_ini_file()
+function load_keys()
+{
+    $keys = array();
+    if (file_exists(PASSWD_PATH)) foreach (file(PASSWD_PATH) as $s) {
+        $s = rtrim($s, "\r\n");
+        $regs = NULL;
+        if (preg_match('/^(\w+)=(.*)$/', $s, $regs))
+            $keys[$regs[1]] = $regs[2];
+    }
+    return $keys;
 }
 
 // Get IP of Asterisk instance, assumes localhost by default
@@ -97,6 +112,22 @@ foreach ($output as $s) {
 }
 
 //print "DEBUG: detected IPv4 addresses: "; print_r($if_list);
+
+// Save non-localhost IPs into database
+$passwords = load_keys();
+try {
+    $db = new PDO('mysql:host=localhost', 'root', $passwords['mysqlrootpwd']);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $sth = $db->prepare('REPLACE INTO elxpbx.global_domains (domain) VALUES (?)');
+    foreach ($if_list as $if_entry) {
+        if ($if_entry['ip_addr'] != '127.0.0.1') $sth->execute(array($if_entry['ip_addr']));
+    }
+
+    $db = NULL;
+} catch (PDOException $e) {
+    fputs(STDERR, "ERR: unable to save current IPs to database - ".$e->getMessage()."\n");
+}
 
 // Find out which interface will be used to contact the Asterisk instance. This
 // will be labeled the Kamailio interface. If no address matches (non-local 

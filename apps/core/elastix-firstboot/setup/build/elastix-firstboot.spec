@@ -99,6 +99,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Mon Mar 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: the rtpproxy setup script now has to write the IPs of current 
+  interfaces to the database. The first invocation of the rtpproxy script in
+  password setup is moved to a point where the root password is guaranteed to
+  exist.
+  SVN Rev[6556]
+
 * Mon Mar 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Update kamailio mhomed setup to check in To: domain for rtpproxy.
   SVN Rev[6544]

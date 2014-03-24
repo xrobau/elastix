@@ -11,7 +11,7 @@
         {/if}
         {$HEADER_LIBS_JQUERY}
         <script src="{$path}libs/js/base.js"></script>
-        <script src="{$path}modules/{$MODULE_NAME}/themes/default/js/javascript.js"></script>
+        <script src="{$path}modules/{$module_name}/themes/default/js/javascript.js"></script>
     </head>
     <body>
         {if $THEMENAME eq "elastixneo"}

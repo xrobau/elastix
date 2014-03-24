@@ -46,8 +46,8 @@ class SOAP_Calendar extends core_Calendar
      */
     public function SOAP_Calendar($objSOAPServer)
     {
-         parent::core_Calendar();
-         $this->objSOAPServer = $objSOAPServer;
+        parent::core_Calendar();
+        $this->objSOAPServer = $objSOAPServer;
     }
 
     /**
@@ -61,8 +61,9 @@ class SOAP_Calendar extends core_Calendar
     }
 
     /**
-     * Function that implements the SOAP call to see the events on the calendar of the registered user, by date range. If an
-     * error exists a SOAP fault is thrown
+     * Function that implements the SOAP call to see the events on the calendar
+     * of the registered user, by date range. If an error exists a SOAP fault is
+     * thrown
      * 
      * @param mixed request:
      *                  startdate:  (date)  Starting date of event
@@ -71,7 +72,7 @@ class SOAP_Calendar extends core_Calendar
      */
     public function listCalendarEvents($request)
     {
-        $return = parent::listCalendarEvents($request->startdate,$request->enddate);
+        $return = parent::listCalendarEvents($request->startdate, $request->enddate);
         if(!$return){
             $eMSG = parent::getError();
             $this->objSOAPServer->fault($eMSG['fc'],$eMSG['fm'],$eMSG['cn'],$eMSG['fd'],'fault');
@@ -79,9 +80,20 @@ class SOAP_Calendar extends core_Calendar
         return $return;
     }
 
+    private function _fillNullParam($request)
+    {
+        foreach (array('id', 'startdate', 'enddate', 'subject', 'description',
+            'asterisk_call', 'recording', 'call_to', 'reminder_timer',
+            'color', 'emails_notification') as $k)
+            if (!isset($request->$k)) $request->$k = NULL;
+        if (isset($request->emails_notification) && !is_array($request->emails_notification))
+            $request->emails_notification = array($request->emails_notification);
+        return $request;
+    }
+
     /**
-     * Function that implements the SOAP call to add a new one-time event in the calendar of the registered user. If an
-     * error exists a SOAP fault is thrown
+     * Function that implements the SOAP call to add a new one-time event in the 
+     * calendar of the registered user. If an error exists a SOAP fault is thrown
      * 
      * @param mixed request:
      *                  startdate:           (datetime) Starting date and time of event
@@ -104,7 +116,50 @@ class SOAP_Calendar extends core_Calendar
      */
     public function addCalendarEvent($request)
     {
-        $return = parent::addCalendarEvent($request->startdate,$request->enddate,$request->subject,$request->description,$request->asterisk_call,$request->recording,$request->call_to,$request->reminder_time,$request->emails_notification,$request->color);
+        $this->_fillNullParam($request);
+        $return = parent::addCalendarEvent($request->startdate, $request->enddate,
+            $request->subject, $request->description, $request->asterisk_call, 
+            $request->recording, $request->call_to, $request->reminder_timer,
+            $request->color, $request->emails_notification);
+        if(!$return){
+            $eMSG = parent::getError();
+            $this->objSOAPServer->fault($eMSG['fc'],$eMSG['fm'],$eMSG['cn'],$eMSG['fd'],'fault');
+        }
+        return array("return" => $return);
+    }
+
+    /**
+     * Function that implements the SOAP call to update an one-time event in the 
+     * calendar of the registered user. If an error exists a SOAP fault is thrown
+     * 
+     * @param mixed request:
+     *                  id:                  (integer)  ID of the event to update
+     *                  startdate:           (datetime) Starting date and time of event
+     *                  enddate:             (datetime) Ending date and time of event
+     *                  subject:             (string)   Subject of event
+     *                  description:         (string) Long description of event
+     *                  asterisk_call:       (bool) TRUE if must be generated reminder call
+     *                  recording:           (string,optional) Name of the recording used to call. It is required if asterisk_call
+     *                                                         is TRUE The file must exist in the recording directory for the
+     *                                                         extension associated with the user.
+     *                  call_to:             (string,optional) Extension to which call for Reminder. If omitted, assume the associated 
+     *                                                         extension registered user. Not applicable unless asterisk_call is TRUE.
+     *                  reminder_timer:      (string,optional) Number of minutes before which will make the call reminder. Applies if 
+     *                                                         Asterisk_call is TRUE. By default it is assumed 0. Normal values ​​are 
+     *                                                         10/30/60 minutes.
+     *                  emails_notification: (array(string)) Zero or more emails will be notified with a message when creating the 
+     *                                                       event.
+     *                  color:               (string,optional) Color for the event
+     * @return mixed    Array with boolean data, true if was successful or false if an error exists
+     */
+    public function editCalendarEvent($request)
+    {
+        $this->_fillNullParam($request);
+        $return = parent::editCalendarEvent($request->id,
+            $request->startdate, $request->enddate,
+            $request->subject, $request->description, $request->asterisk_call, 
+            $request->recording, $request->call_to, $request->reminder_timer,
+            $request->color, $request->emails_notification);
         if(!$return){
             $eMSG = parent::getError();
             $this->objSOAPServer->fault($eMSG['fc'],$eMSG['fm'],$eMSG['cn'],$eMSG['fd'],'fault');

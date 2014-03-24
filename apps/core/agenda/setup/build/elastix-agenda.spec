@@ -13,7 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: asterisk
 Prereq: freePBX >= 2.8.1-1
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 2.4.0-14
 
 %description
 Elastix Module Agenda
@@ -109,6 +109,21 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Mon Mar 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar - complete rewrite. The Calendar module has been rewritten,
+  starting with the definition of classes paloSantoCalendar and 
+  paloSantoCalendarEvent as the single implementation of the Calendar code. The
+  core.class.php file now directly delegates to this implementation instead of
+  partially implementing functionality duplicated in the old index.php. The new
+  core.class.php now has a method for updating an event, which is now exposed
+  via SOAP and REST. The Calendar GUI has been rewritten to make exclusive use
+  of REST to load and save calendar information. Also, the javascript 
+  implementation has been restructured to take full advantage of utilities
+  provided by jQuery and jQueryUI. All of this adds up to remove almost all the
+  implementation code from index.php, which now forwards requests not directly
+  related to loading and updating the calendar.
+  SVN Rev[6555]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-12
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

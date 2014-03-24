@@ -16,14 +16,6 @@
 
 {literal}
     <script type="text/javascript">
-        function return_phone_number(number, type, id)
-        {
-            window.opener.document.getElementById("call_to").value = number;
-            window.opener.document.getElementById("phone_type").value = type;
-            window.opener.document.getElementById("phone_id").value = id;
-            window.close();
-        }
-
         function report_by_directory_type()
         {
             var forms = document.getElementsByTagName('form');

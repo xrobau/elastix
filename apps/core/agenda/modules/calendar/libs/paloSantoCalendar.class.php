@@ -25,16 +25,57 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: paloSantoCalendar.class.php,v 1.1 2010-01-05 11:01:26 Bruno Macias V. bmacias@elastix.org Exp $ */
-if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
-require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
-}
-class paloSantoCalendar {
-    var $_DB;
-    var $errMsg;
+*/
 
-    function paloSantoCalendar(&$pDB)
+define ('EVENTO_UNICO', 1);     // Evento se realiza una sola vez
+define ('EVENTO_SEMANAL', 5);   // Evento se repite semanalmente
+define ('EVENTO_MENSUAL', 6);   // Evento se repite mensualmente
+
+define ('COLOR_EVENTO_OMISION', '#3366CC');  // Color a usar para mostrar el recordatorio
+define ('CALENDAR_DATE_FORMAT', 'Y-m-dP');
+define ('CALENDAR_DATETIME_FORMAT', 'Y-m-d\TH:i:sP');
+define ('PALOCALENDAR_EMAIL_REGEXP', '/^("?([^"]*)"?\s*)?<?([a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+)>?$/');
+
+class InvalidCalendarReminderException extends Exception {}
+class InvalidCalendarPropertyException extends Exception {}
+class FailedEventUpdateException extends Exception {}
+class FailedEventReadException extends Exception {}
+
+
+class paloSantoCalendar
+{
+    private $_DB;
+    var $errMsg;
+    private $_userid;
+    private $_tpldir;
+    private $_calldir;
+    
+    /**
+     * Constructor del objeto fábrica de eventos de calendario. Se requiere,
+     * además de una conexión a la base de datos calendar.db, el ID de usuario
+     * para el cual se están manipulando eventos de calendario.
+     * 
+     * @param   object  $pDB    Objeto paloDB o cadena de conexión
+     * @param   int     $uid    ID del usuario para el cual consultar eventos
+     * @param    string    $tpldir    Ruta a plantillas para correo y para iCal
+     * 
+     * @throws    InvalidCalendarPropertyException
+     */
+    function __construct($pDB, $uid, $tpldir, $calldir)
     {
+        if (is_null($uid) || $uid == 0) {
+            throw new InvalidCalendarPropertyException(_tr('Invalid user ID'));
+        }
+        if (!is_dir($tpldir)) {
+            throw new InvalidCalendarPropertyException(_tr('Invalid template directory'));
+        }
+        if (!is_dir($calldir)) {
+            throw new InvalidCalendarPropertyException(_tr('Invalid callfile directory'));
+        }
+        $this->_userid = (int)$uid;
+        $this->_tpldir = $tpldir;
+        $this->_calldir = $calldir;
+        
         // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
             $this->_DB =& $pDB;
@@ -51,485 +92,604 @@ class paloSantoCalendar {
             }
         }
     }
-
-    /*HERE YOUR FUNCTIONS*/
-
-    private function getNumCalendar($filter_field, $filter_value)
-    {
-        $where = "";
-        if(isset($filter_field) & $filter_field !="")
-            $where = "where $filter_field like '$filter_value%'";
-
-        $query   = "SELECT COUNT(*) FROM table $where";
-
-        $result=$this->_DB->getFirstRowQuery($query);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result[0];
-    }
-
-    private function getCalendar($limit, $offset, $filter_field, $filter_value)
-    {
-        $where = "";
-        if(isset($filter_field) & $filter_field !="")
-            $where = "where $filter_field like '$filter_value%'";
-
-        $query   = "SELECT * FROM table $where LIMIT $limit OFFSET $offset";
-
-        $result=$this->_DB->fetchTable($query, true);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-        return $result;
-    }
-
-    function getEventById($id, $id_user)
-    {
-        $query = "SELECT * FROM events WHERE id=$id and uid=$id_user";
-
-        $result=$this->_DB->getFirstRowQuery($query,true);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
-
-    private function get_events_by_date($day, $month, $year)
-    {
-        /* event types:
-        1 - Normal event
-        2 - full day event
-        3 - unknown time event
-        4 - reserved
-        5 - weekly event
-        6 - monthly event
-        */
-
-        $startdate = "strftime('%Y-%m-%d', startdate)";
-        $enddate = "strftime('%Y-%m-%d', enddate)";
-        $date = "'" . date('Y-m-d', mktime(0, 0, 0, $month, $day, $year))
-                . "'";
-
-        // day of week
-        $dow_startdate = "strftime('%w', startdate)";
-        $dow_date = "strftime('%w', $date)";
-
-        // day of month
-        $dom_startdate = "strftime('%d', startdate)";
-        $dom_date = "strftime('%d', $date)";
-
-        $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        $uid  = $this->Obtain_UID_From_User($user);
-
-        $query = "SELECT * FROM events\n"
-            ."WHERE $date >= $startdate AND $date <= $enddate\n"
-                    // find normal events
-                    ."AND (eventtype = 1 OR eventtype = 2 OR eventtype = 3 "
-                    ."OR eventtype = 4\n"
-                    // find weekly events
-            ."OR (eventtype = 5 AND $dow_startdate = $dow_date)\n"
-                    // find monthly events
-            ."OR (eventtype = 6 AND $dom_startdate = $dom_date)\n"
-                    .")\n"
-            ."AND uid = $uid "
-            ."ORDER BY starttime";
-
-        $result = $this->_DB->fetchTable($query, true);
-        if($result == FALSE) {
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-        return $result;
-    }
-
-    // returns the event that corresponds to $id
-    function get_event_by_id($id)
-    {
-        $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        $uid  = $this->Obtain_UID_From_User($user); 
-
-        $query = "SELECT 
-                    id,
-                    uid,
-                    subject event, 
-                    startdate date, 
-                    enddate `to`, 
-                    description, 
-                    asterisk_call asterisk_call_me, 
-                    recording, 
-                    starttime,
-                    endtime,
-                    call_to, 
-                    notification, 
-                    emails_notification, 
-                    each_repeat as repeat,
-                    days_repeat,
-                    color,
-                    eventtype as it_repeat,
-					reminderTimer as reminderTimer,
-                    strftime('%H', starttime) hora1, 
-                    strftime('%M', starttime) minuto1,
-                    strftime('%H', endtime) hora2, 
-                    strftime('%M', endtime) minuto2,
-                    strftime('%Y', startdate) AS year,\n"
-                    ."strftime('%m', startdate) AS month,\n"
-                    ."strftime('%d', startdate) AS day,\n"
-                    ."strftime('%Y', enddate) AS end_year,\n"
-                    ."strftime('%m', enddate) AS end_month,\n"
-                    ."strftime('%d', enddate) AS end_day\n"
-            ."FROM 
-                events\n"
-            ."WHERE 
-                id = '$id'\n"
-                ."AND uid=$uid";
-        $result = $this->_DB->getFirstRowQuery($query, true);
-        if($result == FALSE) {
-            $this->errMsg = $this->_DB->errMsg;
-            return array();
-        }
-
-        if(!is_array($result) || count($result) == 0) {
-            $this->errMsg = "item doesn't exist!";
-            return array();
-        }
-        return $result;
-    }
-
-    private function Obtain_UID_From_User($user)
-    {
-        global $pACL;
-        $uid = $pACL->getIdUser($user);
-        if($uid!=FALSE)
-            return $uid;
-        else return -1;
-    }
-
-    function obtainExtension($db,$id){
-        $query = "SELECT extension FROM acl_user WHERE id=$id";
-
-        $result = $db->getFirstRowQuery($query,true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result['extension'];
-    }
-
-    function Obtain_Recordings_Current_User()
-    {
-        global $pACL;
-        global $arrConf;
-        $archivos = array();
-
-        $username = $_SESSION["elastix_user"];
-        $ext = $pACL->getUserExtension($username);
-        if($ext){
-            $folder_path = "/var/lib/asterisk/sounds/custom";
-            $path = "$folder_path/$ext";
-
-            $retval = 0;
-            if(!file_exists($path)){
-                $comando = "mkdir -p $path";
-                exec($comando, $output, $retval);
-                if ($retval==0){
-                    $comando = "ln -s $folder_path/calendarEvent.gsm $path/calendarEvent.gsm";
-                    exec($comando, $output, $retval);
-                }
-            }
-
-            if(!$retval){
-                if ($handle = opendir($path)) {
-                    while (false !== ($dir = readdir($handle))) {
-                        if (ereg("(.*)\.[gsm$|wav$]", $dir, $regs)) {
-                            $archivos[$regs[1]] = $regs[1];
-                        }
-                    }
-                }
-            }
-        }
-        return $archivos;
-    }
-
-    function Obtain_Protocol($extension)
-    {
-        if($extension)
-        {
-            $dsnAsterisk = generarDSNSistema('asteriskuser', 'asterisk');                            
     
-            $pDB = new paloDB($dsnAsterisk);
+    /**
+     * Construir un nuevo evento que hereda el ID de usuario y la conexión DB
+     * 
+     * @return object paloSantoCalendarEvent
+     * @throws FailedEventReadException
+     */
+    function nuevoEvento()
+    {
+        return new paloSantoCalendarEvent($this->_DB, $this->_userid, $this->_tpldir, $this->_calldir); 
+    }
     
-            $query = "SELECT dial, description, id FROM devices WHERE id=$extension";
-            $result = $pDB->getFirstRowQuery($query, TRUE);
-            if($result != FALSE)
-                return $result;
-            else return FALSE;
-        }else return FALSE;
-    }
-
-    function insertEvent($uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification, $endtime, $each_repeat,  $checkbox_days, $reminderTimer, $color){
-        $data = array($uid,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification,$endtime,$each_repeat,$checkbox_days,$reminderTimer,$color);
-        $query = "INSERT INTO events(uid,startdate,enddate,starttime,eventtype,subject,description,asterisk_call,recording,call_to,notification,emails_notification,endtime,each_repeat,days_repeat,reminderTimer,color) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-        $result = $this->_DB->genQuery($query, $data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
+    /**
+     * Procedimiento para leer un evento, dado su ID.
+     * 
+     * @return object paloSantoCalendarEvent
+     * @throws FailedEventReadException
+     */
+    function leerEvento($id)
+    {
+        $sql = 'SELECT * FROM events WHERE uid = ? AND id = ?';
+        $paramSQL = array($this->_userid, $id);
+        $recordset = $this->_DB->fetchTable($sql, TRUE, $paramSQL);
+        if (!is_array($recordset)) {
+            /* Aquí lo mejor sería dejar propagar la excepción PDO, pero paloDB
+             * se la traga, así que se crea una nueva. */
+            throw new FailedEventReadException($this->_DB->errMsg);
         }
-        return true; 
-    }
-
-    function updateEvent($id_event,$startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification, $endtime ,$each_repeat,$checkbox_days,$reminderTimer, $color){
-        $data = array($startdate,$enddate,$starttime,$eventtype,$subject,$description,$asterisk_call,$recording,$call_to,$notification,$email_notification,$endtime,$each_repeat,$checkbox_days,$reminderTimer,$color,$id_event);
-        $query = "UPDATE events SET  startdate=?,enddate=?,starttime=?,eventtype=?,subject=?,description=?,asterisk_call=?,recording=?,call_to=?,notification=?,emails_notification=?,endtime=?,each_repeat=?,days_repeat=?,reminderTimer=?,color=? WHERE id=?";
         
-        $result = $this->_DB->genQuery($query, $data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true; 
+        $ev = $this->_construirEventos($recordset);
+        return (count($ev) > 0) ? $ev[0] : NULL;
     }
 
-    function updateDateEvent($id_event,$startdate,$enddate,$starttime,$endtime,$day_repeat){
-        $data = array($startdate, $enddate, $starttime, $endtime, $day_repeat, $id_event);
-        $query = "UPDATE events SET  startdate=?,enddate=?,starttime=?,endtime=?,days_repeat=? WHERE id=?";
-
-        $result = $this->_DB->genQuery($query, $data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true; 
-    }
-
-    function deleteEvent($id_event, $id_user){
-        $query = "DELETE FROM events WHERE id=? and uid=?";
-        $data = array($id_event,$id_user);
-        $result = $this->_DB->genQuery($query, $data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true; 
-    }
-
-    function getContactByTag($db, $tag, $userid)
+    /**
+     * Procedimiento para leer todos los eventos del usuario asociado que estén
+     * activos en el intervalo semicerrado [$sFechaInicial, $sFechaFinal) 
+     * indicado como cadenas yyyy-mm-dd hh:mm:ss. Este método también devolverá
+     * registros para los eventos que se encuentren parcialmente fuera del 
+     * intervalo. Este comportamiento es adecuado para la implementación del
+     * visor de calendario del GUI de Elastix.
+     * 
+     * @param    string    $sFechaInicial    Fecha inicial del intervalo
+     * @param    string    $sFechaFinal    Fecha final del intervalo (opcional)
+     * 
+     * @return    array    Arreglo de objetos paloSantoCalendarEvent
+     * @throws FailedEventReadException
+     */
+    function leerEventosActivosIntervalo($sFechaInicial = NULL, $sFechaFinal = NULL)
     {
-        $query = "SELECT  (lower(name)||' '||lower(last_name)||' '||'&lt;'||email||'&gt;') AS caption,id AS value FROM contact WHERE (iduser = ? or status='isPublic') and (name like ? or last_name like ? or email like ?) and email <> ''";
-        $data = array($userid, "%$tag%", "%$tag%", "%$tag%");
-        $result = $db->fetchTable($query,true, $data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
+        $sql = 'SELECT * FROM events WHERE uid = ?';
+        $paramSQL = array($this->_userid);
+        if (!is_null($sFechaInicial)) {
+            $sql .= ' AND endtime >= ?';
+            $paramSQL[] = $sFechaInicial;
         }
-        return $result;
+        if (!is_null($sFechaFinal)) {
+            $sql .= ' AND starttime < ?';
+            $paramSQL[] = $sFechaFinal;
+        }
+        $sql .= ' ORDER BY starttime';
+        $recordset = $this->_DB->fetchTable($sql, TRUE, $paramSQL);
+        if (!is_array($recordset)) {
+            /* Aquí lo mejor sería dejar propagar la excepción PDO, pero paloDB
+             * se la traga, así que se crea una nueva. */
+            throw new FailedEventReadException($this->_DB->errMsg);
+        }
+        
+        return $this->_construirEventos($recordset);
     }
 
-    private function getContactByEmail($db, $tag, $userid)
+    private function _construirEventos(&$recordset)
     {
-        $query = "SELECT  email AS caption,id AS value FROM contact WHERE (iduser = ? or status='isPublic')";
-        $data = array($userid);
-        $result = $db->fetchTable($query,true,$data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
+        $objlist = array();
+        foreach ($recordset as $tupla) {
+            $objlist[] = new paloSantoCalendarEvent($this->_DB, $this->_userid,
+                $this->_tpldir, $this->_calldir, $tupla);
         }
-        return $result;
+        return $objlist;
     }
+}
 
-    function getEventByDate($startdate, $enddate, $uid){
-        $query = "SELECT * FROM events WHERE uid = $uid AND ((startdate <= '$startdate' AND enddate >= '$enddate') OR (startdate >= '$startdate' AND enddate <= '$enddate') OR (startdate <= '$startdate' AND enddate >= '$startdate') OR (startdate >= '$startdate' AND enddate >= '$enddate'))";
+class paloSantoCalendarEvent
+{
+    private $_DB;
+    var $errMsg = NULL;
 
-        $result = $this->_DB->fetchTable($query,true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
-
-    private function getLastInsertIdEvent(){
-        $query = "SELECT id FROM events order by id desc";
-        $result = $this->_DB->getFirstRowQuery($query, TRUE);
-        if($result != FALSE || $result != "")
-            return $result['id'];
-        else
-            return false;
-    }
-
-    private function getAllEvents(){
-        $query = "SELECT * FROM events";
-        $result = $this->_DB->fetchTable($query,true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
-
-    function getAllEventsByUid($uid){
-        $query = "SELECT * FROM events WHERE uid = $uid";
-        $result = $this->_DB->fetchTable($query,true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
-
-    function getEventIdByUid($uid, $idEvent){
-        $query = "SELECT * FROM events WHERE uid = $uid and id=$idEvent";
-        $result = $this->_DB->fetchTable($query,true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
-
-    function getNameUsers($id_user,$db)
+    // Las siguientes son variables de la base de datos
+    /*
+    id;            // ID en la base de datos del evento, o NULL si no se ha guardado
+    uid;           // ID del usuario para el cual se ha creado el evento
+    starttime;     // Fecha de inicio del evento de calendario, yyyy-mm-dd hh:mm
+    // startdate se deriva de starttime
+    endtime;       // Fecha de final del evento de calendario, yyyy-mm-dd hh:mm
+    // enddate se deriva de endtime
+    eventtype;     // Tipo de regularidad de evento, véase EVENTO_*
+    subject;       // Nombre del evento
+    description;   // Descripción del evento
+    
+    asterisk_call; // booleano, se guarda como 'on' u 'off'
+    recording;     // Texto usado para sintetizar mensaje de recordatorio, o cadena vacía
+    call_to;       // Número al cual enviar la llamada de recordatorio
+    reminderTimer;     // Minutos antes del evento en que hay que llamar
+    
+    notification;  // booleano, se guarda como 'on' u 'off'
+    emails_notification;   // Lista de correos a notificar
+    
+    each_repeat = 1;   // TODO: averiguar qué hace
+    days_repeat;       // TODO: averiguar qué hace (lista "Sa," para Saturday)
+    color = COLOR_EVENTO_OMISION; // Color a usar para mostrar el recordatorio
+    */
+    private $_id = NULL;
+    private $_userid = NULL;
+    private $_timestamp_start;  // timestamp de unix, entero
+    private $_timestamp_end;    // timestamp de unix, entero
+    private $_title = NULL;
+    private $_description = NULL;
+    private $_event_color = COLOR_EVENTO_OMISION;
+    private $_event_type = EVENTO_UNICO;
+    
+    /* Los siguientes 3 campos definen el recordatorio. Deben de setearse todos
+     * a NULL, o todos con valores válidos. */ 
+    private $_reminder_callnum = NULL;
+    private $_reminder_tts = NULL;
+    private $_reminder_minutes = NULL;
+    
+    private $_notify_emails = array();
+    
+    private $_tpldir = NULL;
+    private $_calldir = NULL;
+    
+    /**
+     * Constructor de un evento de calendario. Este constructor sólo debería ser
+     * invocado desde los métodos de la clase paloSantoCalendar. El valor de
+     * $dbcampos se asume que es una tupla con los valores de las columnas de
+     * la tabla events de calendar.db .
+     * 
+     * @throws InvalidCalendarPropertyException
+     */
+    function __construct($pDB, $userid, $tpldir, $calldir, $dbcampos = NULL)
     {
-        $query = "SELECT name FROM acl_user WHERE id=$id_user";
-    	$username = $_SESSION["elastix_user"];
-        $result = $db->getFirstRowQuery($query,true);
-        if($result != FALSE || $result != "")
-            return $result['name'];
-        else
-            return $username;
+        $this->_DB =& $pDB;
+        $this->_timestamp_start = time();
+        $this->_timestamp_end = time();
+        
+        if (is_null($userid) || $userid == 0) {
+            throw new InvalidCalendarPropertyException(_tr('Invalid user ID'));
+        }
+        if (!is_dir($tpldir)) {
+            throw new InvalidCalendarPropertyException(_tr('Invalid template directory'));
+        }
+        if (!is_dir($calldir)) {
+            throw new InvalidCalendarPropertyException(_tr('Invalid callfile directory'));
+        }
+        $this->_userid = (int)$userid;
+        $this->_tpldir = $tpldir;
+        $this->_calldir = $calldir;
+        
+        if (is_null($dbcampos)) return;
+        
+        // Asignar los valores desde la tupla de la base de datos
+        $this->_id = (int)$dbcampos['id'];
+        $this->_userid = (int)$dbcampos['uid'];
+        $this->_timestamp_start = strtotime($dbcampos['starttime']);
+        $this->_timestamp_end = strtotime($dbcampos['endtime']);
+        $this->_title = $dbcampos['subject'];
+        $this->_description = $dbcampos['description'];
+        $this->_event_color = $dbcampos['color'];
+        $this->_event_type = (int)$dbcampos['eventtype'];
+        if (!in_array($this->_event_type, array(EVENTO_UNICO, EVENTO_SEMANAL, EVENTO_MENSUAL)))
+            $this->_event_type = EVENTO_UNICO;
+        if ($dbcampos['asterisk_call'] == 'on') {
+            $this->_reminder_callnum = $dbcampos['call_to'];
+            $this->_reminder_tts = $dbcampos['recording'];
+            $this->_reminder_minutes = (int)$dbcampos['reminderTimer'];
+        }
+        if ($dbcampos['notification'] == 'on') {
+            $this->_notify_emails = array_filter(
+                array_map('trim', explode(',', $dbcampos['emails_notification'])),
+                array($this, '_rechazar_correo_vacio'));
+        }
     }
-
-    function getDescUsers($id_user,$db)
+    
+    private function _rechazar_correo_vacio($email)
     {
-        $query = "SELECT description FROM acl_user WHERE id=$id_user";
-    	$username1 = $_SESSION["elastix_user"];
-        $result = $db->getFirstRowQuery($query,true);
-        if($result != FALSE || $result != "")
-            return $result['description'];
-        else
-            return $username1;
+        return (0 != preg_match(PALOCALENDAR_EMAIL_REGEXP, trim($email)));
     }
-
-    private function existPassword($pass){
-        $query = "SELECT password FROM share_calendar WHERE password = '$pass'";
-        $result = $this->_DB->getFirstRowQuery($query,true);
-        if($result==FALSE || $result==null || $result==""){
-            $this->errMsg = $this->_DB->errMsg;
-            return false; //no existe
-        }
-        return true; // existe
-    }
-
-    private function createShareCalendar($uid_from, $user, $password){
-        $query = "INSERT INTO share_calendar(uid_from,uid_to,user,password,confirm) VALUES('$uid_from','','$user','$password','FALSE')";
-
-        $result = $this->_DB->genQuery($query);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true; 
-    }
-
-    private function getUidFrom($userEXT,$passEXT){
-        $query = "SELECT uid_from FROM share_calendar WHERE user='$userEXT' and password='$passEXT'";
-        $result = $this->_DB->getFirstRowQuery($query,true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return $result['uid_from'];
-    }
-
-    private function getUserNameFromById()
+    
+    public function __get($s)
     {
-        global $pACL;
+        // Campos base
+        if (in_array($s, array(
+            'id', 'userid', 'timestamp_start', 'timestamp_end',
+            'title', 'description', 'event_color', 'event_type',
+            'reminder_callnum', 'reminder_tts', 'reminder_minutes',
+            'notify_emails'))) {
+            $s = '_'.$s;
+            return $this->$s;
+        }
+        
+        // Campos derivados para transformaciones
+        if (in_array($s, array('datetime_start', 'datetime_end'))) {
+            $s = str_replace('datetime_', '_timestamp_', $s);
+            return date(CALENDAR_DATETIME_FORMAT, $this->$s);
+        }
+        if (in_array($s, array('date_start', 'date_end'))) {
+            $s = str_replace('date_', '_timestamp_', $s);
+            return date(CALENDAR_DATE_FORMAT, $this->$s);
+        }
+        if (in_array($s, array('icalstart', 'icalend'))) {
+            $s = str_replace('ical', '_timestamp_', $s);
+            return gmdate('Ymd\THis\Z', $this->$s);
+        }
+        
+        die(__METHOD__.' - propiedad no implementada: '.$s."\n");
+    }
+    
+    /**
+     * Implementación de asignación de varias propiedades del evento
+     * 
+     * @throws InvalidCalendarPropertyException
+     */
+    public function __set($s, $v)
+    {
+        switch ($s) {
+        case 'timestamp_start':     $this->_timestamp_start = (int)$v; break;
+        case 'timestamp_end':       $this->_timestamp_end = (int)$v; break;
+        case 'datetime_start':
+        case 'datetime_end':
+            $k = str_replace('datetime_', '_timestamp_', $s);
+            $v = strtotime($v);
+            if ($v === FALSE)
+                throw new InvalidCalendarPropertyException(_tr('Unrecognized date format'));
+            $this->$k = $v;
+            break;
+        case 'title':
+            if (trim("$v") == '')
+                throw new InvalidCalendarPropertyException(_tr('Subject must be specified and nonempty'));
+            $this->_title = trim("$v");
+            break;
+        case 'description':
+            if (trim("$v") == '')
+                throw new InvalidCalendarPropertyException(_tr('Description must be specified and nonempty'));
+            $this->_description = trim("$v");
+            break;
+        case 'event_color':
+            if (!preg_match('/^#[[:xdigit:]]{6}$/', $v))
+                throw new InvalidCalendarPropertyException(_tr('Invalid CSS color, expected #rrggbb'));
+            $this->_event_color = strtoupper($v);
+            break;
+        case 'event_type':
+            if (!in_array($this->_event_type, array(EVENTO_UNICO, EVENTO_SEMANAL, EVENTO_MENSUAL)))
+                throw new InvalidCalendarPropertyException(_tr('Invalid event type, expected oneshot/weekly/monthly'));
+            $this->_event_type = (int)$v;
+            break;
+        case 'notify_emails':
+            if (!is_array($v))
+                throw new InvalidCalendarPropertyException(_tr('Invalid email list, expected array'));
+            $email_list = array();
+            foreach ($v as $email) {
+               if (!preg_match(PALOCALENDAR_EMAIL_REGEXP, $email))
+                   throw new InvalidCalendarPropertyException(_tr('Invalid email in list'));
+                $regs = NULL;
+                if (preg_match('/^\s*"?([^"]*)"?\s*<(\S*)>\s*$/', $email, $regs)) {
+                    $sNombre = '';
+                    if (trim($regs[1]) != '') $sNombre = '"'.trim($regs[1]).'" ';
+                    $email_list[] = "$sNombre<{$regs[2]}>";
+                } else {
+                    $email_list[] = "<$email>";
+                }
+            }
+            $this->_notify_emails = $email_list;
+            break;
+        default:
+            die(__METHOD__.' - propiedad no implementada: '.$s."\n");
+        }
+    }
+    
+    /**
+     * Método para quitar el recordatorio de llamada, antes de guardar cambios.
+     * El método NO QUITA archivos de llamada existentes producto de 
+     * recordatorios definidos anteriormente. La actualización del estado de los
+     * archivos de llamada se realizará al momento de guardar el estado del 
+     * evento.
+     * 
+     * @return void
+     */
+    function quitarRecordatorio()
+    {
+        $this->_reminder_callnum = NULL;
+        $this->_reminder_tts = NULL;
+        $this->_reminder_minutes = NULL;
+    }
+    
+    /**
+     * Método para asignar el recordatorio de llamada, antes de guardar cambios.
+     * El método NO CREA archivos de llamada nuevos al momento de ser invocado.
+     * La actualización del estado de los archivos de llamada se realizará al
+     * momento de guardar el estado del evento.
+     * 
+     * @param   string  $callnum    Número que se debe marcar para notificar
+     * @param   string  $tts        Texto a usar para Text2Speech con Festival
+     * @param   int     $minutes    Número de minutos antes de evento para recordatorio
+     * 
+     * @return  void
+     * @throws  InvalidCalendarReminderException
+     */
+    function asignarRecordatorio($callnum, $tts, $minutes)
+    {
+        // Número a marcar debe ser no-vacío y consistir sólo de dígitos
+        if (!preg_match('/^\d+$/', $callnum))
+            throw new InvalidCalendarReminderException(_tr('Invalid extension to call for reminder'));
+        
+        // Texto a generar no debe contener saltos de línea
+        if (FALSE !== strpbrk($tts, "\r\n"))
+            throw new InvalidCalendarReminderException(_tr('Reminder text may not have newlines'));
+        
+        $minutes = (int)$minutes;
+        if ($minutes <= 0)
+            throw new InvalidCalendarReminderException(_tr('Invalid interval for remainder timer'));
+        
+        $this->_reminder_callnum = "$callnum";
+        $this->_reminder_tts = "$tts";
+        $this->_reminder_minutes = $minutes;
+    }
+
+    /**
+     * Método que ejecuta el guardado del evento en la base de datos, creando o
+     * actualizando el registro en caso necesario, y ejecutando la creación o
+     * borrado de archivos de llamada, además del envío de correo.
+     * 
+     * @return void
+     * @throws FailedEventUpdateException
+     */
+    function guardarEvento()
+    {
+        // Establecer orden correcto de fechas
+        if ($this->_timestamp_start > $this->_timestamp_end) {
+            $t = $this->_timestamp_start;
+            $this->_timestamp_start = $this->_timestamp_end;
+            $this->_timestamp_end = $t;
+        }
+        
+        // Elegir SQL correcto para insertar o actualizar evento
+        $paramSQL = array(
+            $this->_userid,
+            date('Y-m-d', $this->_timestamp_start),
+            date('Y-m-d', $this->_timestamp_end),
+            date('Y-m-d H:i', $this->_timestamp_start),
+            $this->_event_type,
+            $this->_title,
+            $this->_description,
+            (is_null($this->_reminder_callnum) ? 'off' : 'on'),
+            (is_null($this->_reminder_tts) ? '' : $this->_reminder_tts),
+            (is_null($this->_reminder_callnum) ? '' : $this->_reminder_callnum),
+            (count($this->_notify_emails) > 0 ? 'on' : 'off'),
+            (count($this->_notify_emails) > 0 ? implode(', ', $this->_notify_emails).', ' : ''),
+            date('Y-m-d H:i', $this->_timestamp_end),
+            1,                              // 1 es audio de una sola vez
+            substr(date('D', $this->_timestamp_start), 0, 2).',', // Primeras 2 letras de día semana, con coma
+            (is_null($this->_reminder_minutes) ? '' : $this->_reminder_minutes),
+            $this->_event_color,
+        );
+        if (is_null($this->_id)) {
+            $sMailEvento = 'CREATE';
+            $sql = <<<SQL_INSERT_EVENT
+INSERT INTO events (uid, startdate, enddate, starttime, eventtype, subject, 
+    description, asterisk_call, recording, call_to, notification,
+    emails_notification, endtime, each_repeat, days_repeat, reminderTimer, color)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+SQL_INSERT_EVENT;
+        } else {
+            $sMailEvento = 'UPDATE';
+            $paramSQL[] = $this->_id;
+            $sql = <<<SQL_UPDATE_EVENT
+UPDATE events SET uid = ?, startdate = ?, enddate = ?, starttime = ?, eventtype = ?,
+    subject = ?, description = ?, asterisk_call = ?, recording = ?, call_to = ?,
+    notification = ?, emails_notification = ?, endtime = ?, each_repeat = ?,
+    days_repeat = ?, reminderTimer = ?, color = ?
+WHERE id = ?
+SQL_UPDATE_EVENT;
+        }
+        $r = $this->_DB->genQuery($sql, $paramSQL);
+        if ($r === FALSE) {
+            /* Aquí lo mejor sería dejar propagar la excepción PDO, pero paloDB
+             * se la traga, así que se crea una nueva. */
+            throw new FailedEventUpdateException($this->_DB->errMsg);
+        }
+        if (is_null($this->_id)) $this->_id = $this->_DB->getLastInsertId();
+        
+        // Archivos de llamada de evento
+        $this->_borrarArchivosLlamadaEvento();
+        $this->_crearArchivosLlamadaEventoPeriodico();
+        
+        // Enviar correo de notificación CREATE/UPDATE
+        $this->_enviarCorreosNotificacionEvento($sMailEvento);
+    }
+    
+    /**
+     * Método que ejecuta el borrado del evento previamente guardado. Este método
+     * también se encarga de borrar todos los archivos de llamadas de notificación
+     * pendientes, y también de enviar los correos que notifican que el evento
+     * ha sido borrado.
+     * 
+     * @throws FailedEventUpdateException
+     */
+    function borrarEvento()
+    {
+        if (is_null($this->_id)) return;
+        
+        // Enviar correo de notificación DELETE
+        $this->_enviarCorreosNotificacionEvento('DELETE');
+        
+        $this->_borrarArchivosLlamadaEvento();
+        $r = $this->_DB->genQuery('DELETE FROM events WHERE id = ?', array($this->_id));
+        if ($r === FALSE) {
+            /* Aquí lo mejor sería dejar propagar la excepción PDO, pero paloDB
+             * se la traga, así que se crea una nueva. */
+            throw new FailedEventUpdateException($this->_DB->errMsg);
+        }
+        $this->_id = NULL;
+    }
+
+    // Procedimiento para borrar todos los archivos de llamada pendientes
+    private function _borrarArchivosLlamadaEvento()
+    {
+        array_map(
+            'unlink',
+            glob($this->_calldir."/event_{$this->_id}_*.call"));
+    }
+
+    // Procedimiento para crear los archivos de llamada con la periodicidad requerida
+    // TODO: debería verificarse no crear archivos con fecha creación en el pasado?
+    // TODO: extraer el bucle de periodicidad como un método público
+    private function _crearArchivosLlamadaEventoPeriodico()
+    {
+        if (is_null($this->_reminder_callnum)) return;
+        
+        $horasNotificacion = $this->generarIntervalosEventoPeriodico();
+        foreach ($horasNotificacion as $i => $t) {
+            $this->_crearArchivoLlamadaEvento($i, _tr('Calendar Event'), 2,
+                $t[0] - 60 * $this->_reminder_minutes);
+        }
+    }
+
+    /**
+     * Procedimiento para generar el conjuntos de intervalos diarios para un
+     * evento semanal o mensual. Si el evento es único, se devuelve una lista de
+     * un solo elemento. Para eventos semanales o mensuales, se calcula la lista
+     * de intervalos apropiados dentro de un solo día.
+     * 
+     * @return    array    Lista de intervalos, como tuplas de 2 timestamp UNIX.
+     */
+    function generarIntervalosEventoPeriodico()
+    {
+        $horasNotificacion = array();
+        if ($this->_event_type == EVENTO_UNICO) {
+            $horasNotificacion[] = array($this->_timestamp_start, $this->_timestamp_end);
+        } else {
+            // Calcular diferencia entre porciones de hora para timestamps inicio y final
+            $intervaloDiario = 
+                ($this->_timestamp_end - strtotime(date('Y-m-d', $this->_timestamp_end))) 
+                - ($this->_timestamp_start - strtotime(date('Y-m-d', $this->_timestamp_start)));
+            if ($intervaloDiario < 0) $intervaloDiario = 0;
+            
+            switch ($this->_event_type) {
+            case EVENTO_SEMANAL:
+                $strtotime_increment = '+ 1 week';
+                break;
+            case EVENTO_MENSUAL:
+                $strtotime_increment = '+ 1 month';
+                break;
+            }
+            $t = $this->_timestamp_start;
+            while ($t <= $this->_timestamp_end) {
+                $horasNotificacion[] = array($t, $t + $intervaloDiario);
+                
+                $t = strtotime(date('Y-m-d H:i:s', $t).$strtotime_increment);
+            }
+        }
+        
+        return $horasNotificacion;
+    }
+
+    /**
+     * Procedimiento para crear el archivo de llamada para un nuevo evento. El
+     * archivo de llamada se crea con la fecha de creación y modificación 
+     * adecuados para que Asterisk realice la llamada en el momento requerido.
+     *
+     * @param   integer    $sCallerID              Texto para CallerID
+     * @param   integer    $iRetries               Máximo número de reintentos
+     * @param   date       $iCallTimestamp         Timestamp UNIX de llamada
+     */
+    private function _crearArchivoLlamadaEvento($idx, $sCallerID, $iRetries, $iCallTimestamp)
+    {
+        $sContenido = <<<CONTENIDO_ARCHIVO_AUDIO
+Channel: Local/{$this->_reminder_callnum}@from-internal
+CallerID: $sCallerID
+MaxRetries: $iRetries
+RetryTime: 60
+WaitTime: 30
+Application: Festival
+Data: {$this->_reminder_tts}
+Set: TTS={$this->_reminder_tts}
+CONTENIDO_ARCHIVO_AUDIO;
+        $sNombreTemp = tempnam('/tmp', 'callfile_');
+        $r = file_put_contents($sNombreTemp, $sContenido);
+        if ($r === FALSE) {
+            throw new FailedEventUpdateException(_tr('Unable to create callfile for event in calendar'));
+        }
+        touch($sNombreTemp, $iCallTimestamp, $iCallTimestamp);
+        
+        // La función rename() de PHP no preserva atime o mtime. Grrrr...
+        $sRutaArchivo = $this->_calldir."/event_{$this->_id}_{$idx}.call";
+        system("mv $sNombreTemp $sRutaArchivo");
+    }
+
+    // Ejecutar el envío del correo de notificación del evento. El valor de
+    // $sMailEvento puede ser CREATE|UPDATE|DELETE
+    private function _enviarCorreosNotificacionEvento($sMailEvento)
+    {
+        $map_tipoEvento = array(
+            'CREATE'    =>    _tr('New_Event'),
+            'UPDATE'    =>    _tr('Change_Event'),
+            'DELETE'    =>    _tr('Delete_Event'),
+        );
+        if (count($this->_notify_emails) <= 0) return;
+        
+        require_once 'libs/phpmailer/class.phpmailer.php';
+        
+        $sNombreUsuario = $this->_leerNombreUsuario();
+        $sHostname = `hostname`; // TODO: mejorar petición de nombre de host
+        $sRemitente = 'noreply@'.$sHostname;
+        $sTema = _tr($map_tipoEvento[$sMailEvento]);
+        $sContenidoCorreo = $this->_generarContenidoCorreoEvento($sTema, $sMailEvento, $sNombreUsuario);
+        $sContenidoIcal = $this->_generarContenidoIcal();
+
+        $oMail = new PHPMailer();
+        $oMail->CharSet = 'UTF-8';
+        $oMail->Host = 'localhost';
+        $oMail->Body = $sContenidoCorreo;
+        $oMail->IsHTML(true); // Correo HTML
+        $oMail->WordWrap = 50; 
+        $oMail->From = $sRemitente; 
+        $oMail->FromName = $sNombreUsuario;
+        // Depende de carga de idiomas hecha por _generarContenidoCorreoEvento()
+        $oMail->Subject = _tr($sTema).': '.$this->title; 
+        $oMail->AddStringAttachment($sContenidoIcal, 'icalout.ics', 'base64', 'text/calendar');
+        foreach ($this->_notify_emails as $sDireccionEmail) {
+            $sNombre = '';
+            $sEmail = $sDireccionEmail;
+            $regs = NULL;
+            if (preg_match('/"?(.*?)"?\s+<(\S+)>/', $sDireccionEmail, $regs)) {
+                $sNombre = $regs[1];
+                $sEmail = $regs[2];
+            }
+
+            $oMail->ClearAddresses();
+            $oMail->AddAddress($sEmail, $sNombre);
+            $oMail->Send();
+        } 
+    }
+    
+    // Procedimiento para leer el nombre del usuario a partir del ACL
+    private function _leerNombreUsuario()
+    {
         global $arrConf;
-        $idUser = $_SESSION["elastix_userFromUid"];
-        $name = $pACL->getNameFromIdUser($idUser);
-        return $name;
+
+        $pDB_acl = new paloDB($arrConf['elastix_dsn']['acl']);
+        $pACL = new paloACL($pDB_acl);
+        $tuplaUser = $pACL->getUsers($this->_userid);
+        if (count($tuplaUser) < 1)
+            throw new FailedEventUpdateException(_tr('Invalid user'));
+        return $tuplaUser[0][1];
     }
 
-    /*************************************************  new  ***************************************************************/
-
-    private function AsteriskManagerAPI($action, $parameters, $return_data=false) 
+    private function _generarContenidoCorreoEvento($sTema, $sMailEvento, $sNombreUsuario)
     {
-        global $arrLang;
-        $astman_host = "127.0.0.1";
-        $astman_user = 'admin';
-        $astman_pwrd = obtenerClaveAMIAdmin();
-
-        $astman = new AGI_AsteriskManager();
-
-        if (!$astman->connect("$astman_host", "$astman_user" , "$astman_pwrd")) {
-            $this->errMsg = _tr("Error when connecting to Asterisk Manager");
-        } else{
-            $salida = $astman->send_request($action, $parameters);
-            $astman->disconnect();
-            if (strtoupper($salida["Response"]) != "ERROR") {
-                if($return_data) return $salida;
-                else return explode("\n", $salida["Response"]);
-            }else return false;
-        }
-        return false;
+        $smarty = getSmarty('default');
+        $smarty->assign(array(
+            'event'                =>    $this,
+            'TAG_EVENTTYPE'        =>    $sTema,
+            'TAG_EVENT'            =>    _tr('Event'),
+            'TAG_DATE_START'    =>    _tr('Date'),
+            'TAG_DATE_END'        =>    _tr('To'),
+            'TAG_TIME_INTERVAL'    =>    _tr('time'),
+            'TAG_DESCRIPTION'    =>    _tr('Description'),
+            'TAG_ORGANIZER'        =>    _tr('Organizer'),
+            'USER_NAME'            =>    $sNombreUsuario,
+            'MSG_FOOTER'        =>    _tr('footer'),
+        ));
+        return $smarty->fetch($this->_tpldir.'/emailbody.tpl');
     }
-
-    function makeCalled($number_org, $number_dst, $textToSpeach)
+    
+    private function _generarContenidoIcal()
     {
-        $dataExt    = $this->getDataExt($number_org);
-        $variables  = "TTS=\"$textToSpeach\"";
-        //$parameters = $this->Originate($number_org, $number_dst, $dataExt['dial'], $dataExt['cidname'], "festival-event", $variables, "Festival", "hello");
-        $parameters = $this->Originate($number_org, $number_dst, $dataExt['dial'], $dataExt['cidname'], "from-internal", $variables, "Festival", $textToSpeach);
-
-        return $this->AsteriskManagerAPI("Originate",$parameters);
-    }
-
-    private function Originate($origen, $destino, $channel="", $description="", $context="", $variables="", $aplication="", $data="")
-    {
-        $parameters = array();
-        $parameters['Channel']      = $channel;
-        $parameters['CallerID']     = "$description <$origen>";
-        $parameters['Exten']        = $destino;
-        $parameters['Context']      = $context;
-        $parameters['Priority']     = 1;
-        $parameters['Application']  = $aplication;
-        $parameters['Data']         = $data;
-        $parameters['Variable']     = $variables;
-
-        return $parameters;
-    }
-
-    private function getDataExt($ext)
-    {
-        $parameters = array('Command'=>"database show AMPUSER $ext/cidname");
-        $data = $this->AsteriskManagerAPI("Command",$parameters,true);
-        $arrData = explode("\n",$data['data']);
-        $arrData = isset($arrData[1])?$arrData[1]:"";
-        $arrData = explode(":",$arrData);
-        $salida['cidname'] = isset($arrData[1])?trim($arrData[1]):"";
-
-        $parameters = array('Command'=>"database show DEVICE  $ext/dial");
-        $data = $this->AsteriskManagerAPI("Command",$parameters,true);
-        $arrData = explode("\n",$data['data']);
-        $arrData = isset($arrData[1])?$arrData[1]:"";
-        $arrData = explode(":",$arrData);
-        $salida['dial'] = isset($arrData[1])?trim($arrData[1]):"";
-
-        return $salida;
-    }
-
-    function festivalUp()
-    {
-        exec("service festival status", $flag, $status);
-        if($status == 0){
-            return true;
-        }
-        return false;
+        $smarty = getSmarty('default');
+        $smarty->assign('eventlist', array($this));
+        return $smarty->fetch($this->_tpldir.'/icalout.tpl');
     }
 }
 ?>

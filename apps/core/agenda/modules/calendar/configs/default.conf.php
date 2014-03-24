@@ -32,11 +32,6 @@
     $arrConfModule['module_name']        = 'calendar';
     $arrConfModule['templates_dir']      = 'themes';
     $arrConfModule['dsn_conn_database']  = "sqlite3:///$arrConf[elastix_dbdir]/calendar.db";
-    $arrConfModule['dsn_conn_database1'] = "sqlite3:///$arrConf[elastix_dbdir]/acl.db";
     $arrConfModule['dsn_conn_database3'] = "sqlite3:///$arrConf[elastix_dbdir]/address_book.db";
-    //ex2: $arrConfModule['dsn_conn_database'] = "mysql://user:password@ip_host_sever_mysql/base_name";
-    $arrConfModule['start_year'] = '2008';
-    $arrConfModule['end_year']   = '2060';
-    $arrConfModule['sDirectorioBase'] = '/tmp';
-    $arrConfModule['dir_outgoing'] = "/var/spool/asterisk/outgoing";
+    $arrConfModule['dir_outgoing'] = '/var/spool/asterisk/outgoing';
 ?>

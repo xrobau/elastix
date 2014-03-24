@@ -13,11 +13,11 @@
   | http://www.palosanto.com                                             |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
-  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | (GPL) Version 2 (the 'License'); you may not use this file except in |
   | compliance with the License. You may obtain a copy of the License at |
   | http://www.opensource.org/licenses/gpl-license.php                   |
   |                                                                      |
-  | Software distributed under the License is distributed on an "AS IS"  |
+  | Software distributed under the License is distributed on an 'AS IS'  |
   | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
   | the License for the specific language governing rights and           |
   | limitations under the License.                                       |
@@ -25,18 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: puntosF_Calendar.class.php,v 1.0 2011-03-31 10:15:00 Alberto Santos F.  asantos@palosanto.com Exp $*/
+*/
 
 define('ROOT', $_SERVER["DOCUMENT_ROOT"]);
-define('SOAP_DATE_FORMAT', 'Y-m-dP');
-define('SOAP_DATETIME_FORMAT', 'Y-m-d\TH:i:sP');
+ini_set('include_path', ini_get('include_path').':'.$_SERVER["DOCUMENT_ROOT"]);
 
-require_once(ROOT."/libs/misc.lib.php");
-require_once(ROOT."/configs/default.conf.php");
-require_once(ROOT."/modules/calendar/libs/paloSantoCalendar.class.php");
-require_once(ROOT."/modules/calendar/configs/default.conf.php");
-require_once(ROOT."/libs/paloSantoACL.class.php");
-require_once(ROOT."/libs/paloSantoDB.class.php");
+require_once("libs/misc.lib.php");
+require_once("configs/default.conf.php");
+require_once("libs/paloSantoACL.class.php");
+require_once("libs/paloSantoDB.class.php");
+require_once("modules/calendar/configs/default.conf.php");
+
+$arrConf = array_merge($arrConf,$arrConfModule);
+
+require_once("modules/{$arrConf['module_name']}/libs/paloSantoCalendar.class.php");
 
 $arrConf = array_merge($arrConf,$arrConfModule);
 
@@ -74,73 +76,101 @@ class core_Calendar
      * Constructor
      *
      */
-    public function core_Calendar()
+    function core_Calendar()
     {
+        global $arrConf;
+
         $this->_dbCache = array();
         $this->_id_user = NULL;
         $this->errMsg   = NULL;
         $this->_pACL    = NULL;
+
+        load_language(ROOT.'/');
+        load_language_module($arrConf['module_name'], ROOT.'/');
     }
 
     /**
-     * Static function that creates an array with all the functional points with the parameters IN and OUT
+     * Static function that creates an array with all the functional points with
+     * the parameters IN and OUT
      *
      * @return  array     Array with the definition of the function points.
      */
     public static function getFP()
     {
-        $arrData["listCalendarEvents"]["params_IN"] = array(
-            "startdate"       => array("type" => "date",     "required" => true),
-            "enddate"         => array("type" => "date",     "required" => true)
-        );
-
-        $arrData["listCalendarEvents"]["params_OUT"] = array(
-            "events"         => array("type" => "array",   "required" => true, "minOccurs"=>"0", "maxOccurs"=>"unbounded",
-                "params" => array(
-                    "id"                     => array("type" => "positiveInteger",  "required" => true),
-                    "startdate"              => array("type" => "date",             "required" => true),
-                    "enddate"                => array("type" => "date",             "required" => true),
-                    "starttime"              => array("type" => "dateTime",         "required" => true),
-                    "endtime"                => array("type" => "dateTime",         "required" => true),
-                    "subject"                => array("type" => "string",           "required" => true),
-                    "description"            => array("type" => "string",           "required" => true),
-                    "asterisk_call"          => array("type" => "boolean",          "required" => true),
-                    "recording"              => array("type" => "string",           "required" => false),
-                    "call_to"                => array("type" => "string",           "required" => false),
-                    "reminder_timer"         => array("type" => "positiveInteger",  "required" => false),
-                    "emails_notification"    => array("type" => "string",           "required" => true, "minOccurs"=>"0", "maxOccurs"=>"unbounded")
+        return array(
+            'listCalendarEvents'    =>    array(
+                'params_IN'        =>    array(
+                    'startdate'       => array('type' => 'date',     'required' => true),
+                    'enddate'         => array('type' => 'date',     'required' => true)
+                ),
+                'params_OUT'    =>    array(
+                    'events'         => array('type' => 'array',   'required' => true, 'minOccurs'=>'0', 'maxOccurs'=>'unbounded',
+                        'params' => array(
+                            'id'                     => array('type' => 'positiveInteger',  'required' => true),
+                            'startdate'              => array('type' => 'date',             'required' => true),
+                            'enddate'                => array('type' => 'date',             'required' => true),
+                            'starttime'              => array('type' => 'dateTime',         'required' => true),
+                            'endtime'                => array('type' => 'dateTime',         'required' => true),
+                            'subject'                => array('type' => 'string',           'required' => true),
+                            'description'            => array('type' => 'string',           'required' => true),
+                            'asterisk_call'          => array('type' => 'boolean',          'required' => true),
+                            'recording'              => array('type' => 'string',           'required' => false),
+                            'call_to'                => array('type' => 'string',           'required' => false),
+                            'reminder_timer'         => array('type' => 'positiveInteger',  'required' => false),
+                            'color'                  => array('type' => 'string',           'required' => true),
+                            'emails_notification'    => array('type' => 'string',           'required' => true, 'minOccurs'=>'0', 'maxOccurs'=>'unbounded')
                         )
                     )
-            );
-
-        $arrData["addCalendarEvent"]["params_IN"] = array(
-            "startdate"            => array("type" => "dateTime",         "required" => true),
-            "enddate"              => array("type" => "dateTime",         "required" => true),
-            "subject"              => array("type" => "string",           "required" => true),
-            "description"          => array("type" => "string",           "required" => true),
-            "asterisk_call"        => array("type" => "boolean",          "required" => true),
-            "recording"            => array("type" => "string",           "required" => false),
-            "call_to"              => array("type" => "string",           "required" => false),
-            "reminder_timer"       => array("type" => "positiveInteger",  "required" => false),
-            "color"                => array("type" => "string",           "required" => false),
-            "emails_notification"  => array("type" => "string",           "required" => true, "minOccurs"=>"0", "maxOccurs"=>"unbounded")
+                ),
+            ),
+            'addCalendarEvent'    =>    array(
+                'params_IN'        =>    array(
+                    'startdate'                =>    array('required' => TRUE, 'type' => 'dateTime',),
+                    'enddate'                =>    array('required' => TRUE, 'type' => 'dateTime',),
+                    'subject'                =>    array('required' => TRUE, 'type' => 'string',),
+                    'description'            =>    array('required' => TRUE, 'type' => 'string',),
+                    'asterisk_call'            =>    array('required' => TRUE, 'type' => 'boolean',),
+                    'recording'                =>    array('required' =>    FALSE,'type' => 'string',),
+                    'call_to'                =>    array('required' => FALSE,'type' =>    'string',),
+                    'reminder_timer'        =>    array('required' => FALSE,'type' => 'positiveInteger',),
+                    'color'                    =>    array('required' => FALSE,'type' => 'string',),
+                    'emails_notification'    =>    array('required' => TRUE, 'type' => 'string', 'minOccurs' => '0', 'maxOccurs' => 'unbounded', 
+                    ),
+                ),
+                'params_OUT'    =>    array(
+                    'return'    =>    array('required' => TRUE, 'type' =>    'boolean',),
+                ),
+            ),
+            'editCalendarEvent'  =>  array(
+                'params_IN'     =>  array(
+                    'id'                    =>  array('required' => TRUE, 'type' => 'positiveInteger',),
+                    'startdate'             =>  array('required' => FALSE, 'type' => 'dateTime',),
+                    'enddate'               =>  array('required' => FALSE, 'type' => 'dateTime',),
+                    'subject'               =>  array('required' => FALSE, 'type' => 'string',),
+                    'description'           =>  array('required' => FALSE, 'type' => 'string',),
+                    'asterisk_call'         =>  array('required' => FALSE, 'type' => 'boolean',),
+                    'recording'             =>  array('required' => FALSE,'type' => 'string',),
+                    'call_to'               =>  array('required' => FALSE,'type' => 'string',),
+                    'reminder_timer'        =>  array('required' => FALSE,'type' => 'positiveInteger',),
+                    'color'                 =>  array('required' => FALSE,'type' => 'string',),
+                    'emails_notification'   =>  array('required' => FALSE, 'type' => 'string', 'minOccurs' => '0', 'maxOccurs' => 'unbounded', 
+                    ),
+                ),
+                'params_OUT'    =>  array(
+                    'return'    =>  array('required' => TRUE, 'type' => 'boolean',),
+                ),
+            ),
+            'delCalendarEvent'    =>    array(
+                'params_IN'        =>    array(
+                    'id'        =>    array('required' => TRUE, 'type' =>    'positiveInteger',),
+                ),
+                'params_OUT'    =>    array(
+                    'return'    =>    array('required' => TRUE, 'type' => 'boolean',),
+                ),
+            ),
         );
-
-        $arrData["addCalendarEvent"]["params_OUT"] = array(
-            "return"        => array("type" => "boolean",   "required" => true)
-        );
-
-        $arrData["delCalendarEvent"]["params_IN"] = array(
-            "id"            => array("type" => "positiveInteger",    "required" => true)
-        );
-
-        $arrData["delCalendarEvent"]["params_OUT"] = array(
-            "return"        => array("type" => "boolean",   "required" => true)
-        );
-
-        return $arrData;
     }
-
+    
     /**
      * Function that creates, if do not exist in the attribute dbCache, a new paloDB object for the given DSN
      *
@@ -169,6 +199,17 @@ class core_Calendar
             $this->_pACL = new paloACL($pDB_acl);
         }
         return $this->_pACL;
+    }
+
+    private function _getCalendar()
+    {
+        global $arrConf;
+
+        return new paloSantoCalendar(
+            $this->_getDB($arrConf['dsn_conn_database']),
+            $this->_leerIdUser(), 
+            ROOT.'/modules/'.$arrConf['module_name'].'/themes/default',
+            $arrConf['dir_outgoing']);
     }
 
     /**
@@ -214,26 +255,6 @@ class core_Calendar
     }
 
     /**
-     * Function that verifies if the authenticated user is authorized to the passed module.
-     *
-     * @param   string   $sModuleName   name of the module to check if the user is authorized
-     * @return  boolean    true if the user is authorized, or false if not
-     */ 
-    private function _checkUserAuthorized($sModuleName)
-    {
-        $pACL = $this->_getACL();        
-        $id_user = $this->_leerIdUser();
-        if (!$pACL->isUserAuthorizedById($id_user, "access", $sModuleName)) { 
-            $this->errMsg["fc"] = 'UNAUTHORIZED';
-            $this->errMsg["fm"] = 'Not authorized for this module: '.$sModuleName;
-            $this->errMsg["fd"] = 'Your user login is not authorized for this functionality. Please contact your system administrator.';
-            $this->errMsg["cn"] = get_class($this);
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-    /**
      * Function that verifies if the parameter can be parsed as a date, and returns the canonic value of the date
      * like yyyy-mm-dd hh:mm:ss in local time.
      *
@@ -254,261 +275,23 @@ class core_Calendar
     }
 
     /**
-     * Procedure starts sending emails to an event.
+     * Function that verifies if the authenticated user is authorized to the passed module.
      *
-     * @param   integer   $idEvento              ID of the Event
-     * @param   date      $sFechaInicio          Starting date of event
-     * @param   date      $sFechaFinal           Ending date of event
-     * @param   string    $subject               Subject of event
-     * @param   array     $emails_notification   Array with the direction emails
-     * @param   string    $description           Description of event
-     * @param   integer   $sTema                 Theme of the event
-     */
-    private function _enviarCorreosNotificacionEvento($idEvento, $sFechaInicio, $sFechaFinal, $subject, $emails_notification, $description, $sTema)
+     * @param   string   $sModuleName   name of the module to check if the user is authorized
+     * @return  boolean    true if the user is authorized, or false if not
+     */ 
+    private function _checkUserAuthorized($sModuleName)
     {
-        // El siguiente archivo define la clase PHPMailer
-        include_once('/var/www/html/libs/phpmailer/class.phpmailer.php');
-
-        /* Leer el nombre del usuario. 
-         * TODO: si se repite varias veces el acto de averiguar el nombre del 
-         * usuario, es mejor si se lo envía a un método. */
-        $pACL =& $this->_getACL();
-        $tuplaUser = $pACL->getUsers($this->_id_user);
-        $sNombreUsuario = $tuplaUser[0][1];
-        $sDescUsuario = $tuplaUser[0][2];
-        
-        $sContenidoCorreo = $this->_generarContenidoCorreoEvento($subject, $description, $sNombreUsuario, $sFechaInicio, $sFechaFinal, $sTema);
-        $sContenidoIcal = $this->_generarContenidoIcal($idEvento, $subject, 
-            $sFechaInicio, $sFechaFinal);
-        $sHostname = `hostname`; // TODO: mejorar petición de nombre de host
-        $sRemitente = 'noreply@'.$sHostname;
-        
-        $oMail = new PHPMailer();
-        $oMail->Host = 'localhost';
-        $oMail->Body = $sContenidoCorreo;
-        $oMail->IsHTML(true); // Correo HTML
-        $oMail->WordWrap = 50; 
-        $oMail->From = $sRemitente; 
-        $oMail->FromName = $sNombreUsuario;
-        // Depende de carga de idiomas hecha por _generarContenidoCorreoEvento()
-        $oMail->Subject = _tr($sTema).': '.$subject; 
-        $oMail->AddStringAttachment($sContenidoIcal, 'icalout.ics', 'base64', 'text/calendar');
-        foreach ($emails_notification as $sDireccionEmail) {
-            $regs = NULL;
-            if (preg_match('/<(\S+)>/', $sDireccionEmail, $regs)) {
-                $sEmail = $regs[1];
-            } else {
-                $sEmail = $sDireccionEmail;
-            }
-            $oMail->ClearAddresses();
-            $oMail->AddAddress($sEmail, $sDireccionEmail);
-            $oMail->Send();
-        } 
-    }
-
-    /**
-     * Function that joins the iCalendar to attach to an email
-     *
-     * @param   integer   $idEvento              ID of the Event
-     * @param   date      $sFechaInicio          Starting date of event
-     * @param   date      $sFechaFinal           Ending date of event
-     * @param   string    $subject               Subject of event
-     * @return  string    string with the content of iCalendar
-     */
-    private function _generarContenidoIcal($idEvento, $subject, $sFechaInicio, $sFechaFinal)
-    {
-        $sFechaInicio_ical = gmdate('Ymd\THis\Z', strtotime($sFechaInicio));
-        $sFechaFinal_ical = gmdate('Ymd\THis\Z', strtotime($sFechaFinal));
-        $sContenido = <<<CONTENIDO_ICAL
-BEGIN:VCALENDAR
-PRODID:-//Elastix Development Department// Elastix 2.0 //EN
-VERSION:2.0
-
-BEGIN:VEVENT
-DTSTAMP:{$sFechaInicio_ical}
-CREATED:{$sFechaInicio_ical}
-UID:0-{$idEvento}
-SUMMARY:{$subject}
-CLASS:PUBLIC
-PRIORITY:5
-DTSTART:{$sFechaInicio_ical}
-DTEND:{$sFechaFinal_ical}
-TRANSP:OPAQUE
-SEQUENCE=0
-END:VEVENT
-
-END:VCALENDAR
-CONTENIDO_ICAL;
-        return $sContenido;
-    }
-
-    /**
-     * Function to join the email message sent to an event.
-     *
-     * @param   string    $subject            Subject of event
-     * @param   string    $description        Description of event
-     * @param   string    $sNombreUsuario     Name of user
-     * @param   date      $sFechaInicio       Starting date of event
-     * @param   date      $sFechaFinal        Ending date of event
-     * @param   string    $sTema              Theme of the event
-     * @return  string    content of email event
-     */
-    private function _generarContenidoCorreoEvento($subject, $description, $sNombreUsuario, $sFechaInicio, $sFechaFinal, $sTema)
-    {
-        load_language_module('calendar', ROOT.'/');
-
-        $sTemaMensaje = _tr($sTema); // Uno de New_Event, Delete_Event
-        
-        $sContenidoCorreo = <<<CONTENIDO_CORREO
-<html>
-    <head>
-        <title>%s</title>
-    </head>
-    <body>
-        <style>
-            .title{
-                background-color:#D1E6FA;
-                color:#000000;
-            }
-            .tr{
-                background-color:#F1F8FF;
-            }
-            .td1{
-                font-weight: bold;
-                color:#b9b2b2; 
-                font-size: large;
-                width:165px;
-            }
-            .footer{
-                background-color:#EBF5FF;
-                color:#b9b2b2;
-                font-weight:bolder;
-                font-size:12px;
-            }
-        </style>
-        <div>
-            <table width='600px'>
-                <tr class='title'><td colspan='2'><center><h1>%s</h1></center></td></tr>
-                <tr class='tr'><td class='td1'>%s: </td><td>%s.</td></tr>
-                <tr class='tr'><td class='td1'>%s: </td><td>%s.</td></tr>
-                <tr class='tr'><td class='td1'>%s: </td><td>%s.</td></tr>
-                <tr class='tr'><td class='td1'>%s:</td><td>%s.</td></tr>
-                <tr class='tr'><td class='td1'>%s: </td><td>%s.</td></tr>
-                <tr class='tr'><td class='td1'>%s: </td><td><span>%s.</span></td></tr>
-                <tr class='footer'><td colspan='2'><center><span>%s</span></center></td></tr>
-            </table>
-        </div>
-    </body>
-</html>
-CONTENIDO_CORREO;
-
-        // La manipulación de fechas asume yyyy-mm-dd hh:mm:ss
-        return sprintf($sContenidoCorreo, 
-            htmlentities($sTemaMensaje, ENT_COMPAT, 'UTF-8'),
-            htmlentities($sTemaMensaje, ENT_COMPAT, 'UTF-8'),
-            htmlentities(_tr('Event'), ENT_COMPAT, 'UTF-8'),
-                htmlentities($subject, ENT_COMPAT, 'UTF-8'),
-            htmlentities(_tr('Date'), ENT_COMPAT, 'UTF-8'),
-                htmlentities(date('d M Y', strtotime($sFechaInicio)), ENT_COMPAT, 'UTF-8'),
-            htmlentities(_tr('To'), ENT_COMPAT, 'UTF-8'),
-                htmlentities(date('d M Y', strtotime($sFechaFinal)), ENT_COMPAT, 'UTF-8'),
-            htmlentities(_tr('time'), ENT_COMPAT, 'UTF-8'),
-                htmlentities(substr($sFechaInicio, 11).' - '.substr($sFechaFinal, 11), ENT_COMPAT, 'UTF-8'),
-            htmlentities(_tr('Description'), ENT_COMPAT, 'UTF-8'),
-                htmlentities($description, ENT_COMPAT, 'UTF-8'),
-            htmlentities(_tr('Organizer'), ENT_COMPAT, 'UTF-8'),
-                htmlentities($sNombreUsuario, ENT_COMPAT, 'UTF-8'),
-            htmlentities(_tr('footer'), ENT_COMPAT, 'UTF-8')
-            );
-    }
-
-    /**
-     * Procedure to create the call file for a new event is being created. It is assumed that the recording file itself referenced     * exists. We assume that establishing a single audio file for one-time event. The file ends in the directory called Asterisk,     * with the date and time of atime and mtime to initiate appropriate the call at the moment required
-     *
-     * @param   integer    $idEvento           ID of event
-     * @param   integer    $sExtUsuario        Extension of user
-     * @param   integer    $sNumDestino        Destiny number
-     * @param   string     $sRecording         Recording name file
-     * @param   integer    $iRetries           Maximum number of retries
-     * @param   date       $iCallTimestamp     Call time stamp
-     */
-    private function _crearArchivoLlamadaAsterisk($idEvento, $sExtUsuario, 
-        $sNumDestino, $sRecording, $iRetries, $iCallTimestamp)
-    {
-        global $arrConf;
-        
-        $sContenido = <<<CONTENIDO_ARCHIVO_AUDIO
-Channel: Local/{$sNumDestino}@from-internal
-CallerID: Calendar Event <{$sExtUsuario}>
-MaxRetries: $iRetries
-RetryTime: 60
-WaitTime: 30
-Context: calendar-event
-Extension: *7899
-Priority: 1
-Set: FILE_CALL={$sRecording}
-Set: ID_EVENT_CALL={$idEvento}
-CONTENIDO_ARCHIVO_AUDIO;
-        $sNombreArchivo = "event_{$idEvento}_0.call";
-        $sRutaArchivo = $arrConf['output_callfile_base']."/$sNombreArchivo";
-        $sNombreTemp = tempnam('/tmp', 'callfile_');
-        $r = file_put_contents($sNombreTemp, $sContenido);
-        if ($r === FALSE) {
-            $this->errMsg["fc"] = 'INTERNALERROR';
-            $this->errMsg["fm"] = 'Filesystem operation failed';
-            $this->errMsg["fd"] = 'Unable to create callfile for event in calendar';
+        $pACL = $this->_getACL();        
+        $id_user = $this->_leerIdUser();
+        if (!$pACL->isUserAuthorizedById($id_user, "access", $sModuleName)) { 
+            $this->errMsg["fc"] = 'UNAUTHORIZED';
+            $this->errMsg["fm"] = 'Not authorized for this module: '.$sModuleName;
+            $this->errMsg["fd"] = 'Your user login is not authorized for this functionality. Please contact your system administrator.';
             $this->errMsg["cn"] = get_class($this);
-            return NULL;
+            return FALSE;
         }
-        touch($sNombreTemp, $iCallTimestamp, $iCallTimestamp);
-        
-        // La función rename() de PHP no preserva atime o mtime. Grrrr...
-        system("mv $sNombreTemp $sRutaArchivo");
-    }
-
-    /**
-     * Function for listing audio files associated with the extension indicated by the parameter. It returns an associative array     * whose key Is the short name of the audio, and the value is the audio path on / var / lib / asterisk / sounds /
-     *
-     * @param   integer    $sExt           Extension to search its audio files
-     * @return  array      array with the path of the audio for the associated extension
-     */
-    private function _listarAudiosExtension($sExt)
-    {
-        global $arrConf;
-
-        $listaAudios = array();
-
-        // Se listan todos los audios compartidos entre todas las extensiones,
-        // y luego los audios de la extensión requerida.
-        $listaDir = array($arrConf['custom_audiofile_base']);
-        if (is_dir($arrConf['custom_audiofile_base']."/$sExt"))
-            $listaDir[] = $arrConf['custom_audiofile_base']."/$sExt";
-        foreach ($listaDir as $sDir) {
-            $sRelPath = substr($sDir, strlen($arrConf['audiofile_base'].'/'));
-
-            if (!is_dir($sDir)) {
-                $this->errMsg["fc"] = 'INTERNALERROR';
-                $this->errMsg["fm"] = 'Internal error';
-                $this->errMsg["fd"] = 'Invalid path '.$sDir;
-                $this->errMsg["cn"] = get_class($this);
-                return NULL;
-            }
-            $hDir = opendir($sDir);
-            if (!$hDir) {
-                $this->errMsg["fc"] = 'INTERNALERROR';
-                $this->errMsg["fm"] = 'Internal error';
-                $this->errMsg["fd"] = 'Unable to open path '.$sDir;
-                $this->errMsg["cn"] = get_class($this);
-                return NULL;
-            }
-            while (false !== ($sNombre = readdir($hDir))) {
-                $regs = NULL;
-                if (preg_match('/^(.*)\.(gsm|wav)$/', $sNombre, $regs))
-                    $listaAudios[$regs[1]] = $sRelPath.'/'.$regs[1];
-            }
-            closedir($hDir);
-        }
-        return $listaAudios;
+        return TRUE;
     }
 
     /**
@@ -544,273 +327,6 @@ CONTENIDO_ARCHIVO_AUDIO;
         return $extension;        
     }
 
-    private function _rechazar_correo_vacio($email)
-    {
-        if(preg_match("/^<?[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,4})+>?$/",trim($email)))
-            return TRUE;
-        else
-            return FALSE;
-    }
-
-/*
-    public function getFunction()
-    {
-        return array(
-            "newEvent" => array(
-                "params" => array(
-                    "user",
-                    "name",
-                    "description",
-                    "date_ini",
-                    "date_end",
-                    "call_to",
-                    "reminder",
-                    "reminderTime",
-                    "notification",
-                    "emails",
-                    "color",
-                    "recording"
-                ),
-                "return" => ""),
-            "editEvent" => array(
-                "params" => array(
-                    "id_event",
-                    "user",
-                    "name",
-                    "description",
-                    "date_ini",
-                    "date_end",
-                    "call_to",
-                    "reminder",
-                    "reminderTime",
-                    "notification",
-                    "emails",
-                    "color",
-                    "recording"
-                ),
-                "return" => ""),
-            "showEventById" => array(
-                "params" => array(
-                    "id_event",
-                    "user"
-                ),
-                "return" => ""),
-            "showEventByDate" => array(
-                "params" => array(
-                    "user",
-                    "start_time",
-                    "end_time"
-                ),
-                "return" => ""),
-            "removeEvent" => array(
-                "params" => array(
-                    "id_event",
-                    "user"
-                ),
-                "return" => "")
-        );
-    }
-
-    public function newEvent($user, $name, $description, $date_ini, $date_end, $call_to, $reminder, $remainerTime, $notification, $emails, $color, $recording)
-    {
-        return $this->saveEvent("new",null,$user,$name,$description,$date_ini,$date_end,$call_to,$reminder,$remainerTime,$notification,$emails,$color,$recording);
-    }
-
-    public function editEvent($id_event, $user, $name, $description, $date_ini, $date_end, $call_to, $reminder, $remainerTime, $notification, $emails, $color, $recording)
-    {
-        return $this->saveEvent("edit",$id_event,$user,$name,$description,$date_ini,$date_end,$call_to,$reminder,$remainerTime,$notification,$emails,$color,$recording);
-    }
-
-    public function showEventById($id_event, $user)
-    {
-        $pDB       = new paloDB($this->arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($pDB);
-
-        $pDBACL    = new paloDB($this->arrConf['dsn_conn_database1']);
-        $pACL      = new paloACL($pDBACL);
-        $id_user   = $pACL->getIdUser($user);
-        if(!$id_user){
-            $this->errorMSG = "Error user, no existe";
-            return false;
-        }
-
-        $arrData   = $pCalendar->getEventIdByUid($id_user, $id);
-
-        if(is_null($arrData)){
-            $this->errorMSG = "Error data,".$pCalendar-errMsg;
-            return null;
-        }
-        return $arrData;
-    }
-
-    public function showEventByDate($user, $start, $end)
-    {
-        $pDB       = new paloDB($this->arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($pDB);
-
-        $pDBACL    = new paloDB($this->arrConf['dsn_conn_database1']);
-        $pACL      = new paloACL($pDBACL);
-        $id_user   = $pACL->getIdUser($user);
-
-        $start_time = date('Y-m-d', $start);
-        $end_time   = date('Y-m-d', $end);
-
-        if(!$id_user){
-            $this->errorMSG = "Error user, no existe";
-            return false;
-        }
-
-        $year  = date('Y');
-        $month = date('m');
-        $day   = date('d');
-
-        $arrData = $pCalendar->getEventByDate($start_time, $end_time, $id_user);
-        if(is_null($arrData)){
-            $this->errorMSG = "Error data,".$pCalendar-errMsg;
-            return null;
-        }
-        return $arrData;
-    }
-
-    public function removeEvent($id_event, $user)
-    {
-        $pDB       = new paloDB($this->arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($pDB);
-
-        $pDBACL    = new paloDB($this->arrConf['dsn_conn_database1']);
-        $pACL      = new paloACL($pDBACL);
-
-        $id_user   = $pACL->getIdUser($user);
-        if(!$id_user){
-            $this->errorMSG = "Error user, no existe";
-            return false;
-        }
-
-        $data = $pCalendar->getEventById($id, $id_user);
-
-        if($data!="" && isset($data)){
-            if($pCalendar->deleteEvent($id, $id_user))
-                return true;
-            else{
-                $this->errorMSG = "Error delete,".$pCalendar-errMsg;
-                return false;
-            }
-        }
-        else{
-            $this->errorMSG = "Error delete, no se puede eliminar el evento";
-            return false;
-        }
-    }
-
-    private function saveEvent($action, $id_event, $user, $name, $description, $date_ini, $date_end, $call_to, $reminder, $remainerTime, $notification, $emails, $color, $recording)
-    {
-        $pDB       = new paloDB($this->arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($pDB);
-
-        $pDBACL    = new paloDB($this->arrConf['dsn_conn_database1']);
-        $pACL      = new paloACL($pDBACL);
-        $id_user   = $pACL->getIdUser($user);
-        if(!$id_user){
-            $this->errorMSG = "Error user, no existe";
-            return false;
-        }
-
-        $ext       = $pACL->getUserExtension($user);
-
-        if(!preg_match("/^#\w{3,6}$/",$color))
-            $color = "#3366CC";
-
-        $start_event   = strtotime($date_ini);
-        $end_event     = strtotime($date_end);
-
-        if($name == ""){
-            $this->errorMSG = "Error campo esta vacio";
-            return false;
-        }
-
-        if($start_event <= $end_event){
-            if($reminder == "on"){ //Configure a phone call reminder
-                if($call_to==null || $call_to==""){
-                    $link = "<a href='?menu=userlist'>user_list</a>";
-                    $this->errorMSG = 'error_ext'.$link;
-                    return false;
-                }
-            }
-            else{
-                $call_to   = "";
-                $recording = "";
-            }
-        }
-
-        if($notification == "on") // si ingresa emails o contactos
-            $emails = htmlspecialchars_decode($emails); // codifica los caracteres especiales 
-        else
-            $emails = "";
-
-
-        $hora      = date('H',strtotime($date_ini));
-        $minuto    = date('i',strtotime($date_ini));
-
-        $hora2     = date('H',strtotime($date_end));
-        $minuto2   = date('i',strtotime($date_end));
-
-        $start = date('Y-m-d',$start_event);
-        $end   = date('Y-m-d',$end_event);
-        $starttime = date('Y-m-d',$start_event)." ".$hora.":".$minuto;
-        $endtime   = date('Y-m-d',$end_event)." ".$hora2.":".$minuto2;
-
-        $event_type  = 1;
-        $num_frec    = 0;
-        $each_repeat = 1;
-
-
-        $isok=false;
-        if($action=="new"){
-            $isok = $pCalendar->insertEvent($id_user,$start,$end,$starttime,$event_type,$name,$description,$reminder,$recording,$call_to,
-                    $notification,$emails,$endtime,$each_repeat,"", $remainerTime, $color);
-        }
-        else if($action=="edit"){
-            $dataUp = $pCalendar->getEventById($id_event,$id_user);
-            if($dataUp!="" && isset($dataUp)){
-                $isok = $pCalendar->updateEvent($id_event,$start,$end,$starttime,$event_type,$name,$description,$reminder,$recording,$call_to,
-                    $notification,$emails,$endtime,$each_repeat,"", $remainerTime, $color);
-            }
-            else{
-                $this->errorMSG = "Error edit, no existe el evento asociado a $id_event";
-                return false;
-            }
-        }
-
-        if($isok){
-            $id = $pDB->getLastInsertId();
-            /*if($emails != ""){
-                $data_Send['emails_notification'] = $emails;
-                $data_Send['subject']             = $name;
-                $data_Send['description']         = $description;
-                $data_Send['startdate']           = $start;
-                $data_Send['enddate']             = $end;
-                $data_Send['starttime']           = $starttime;
-                $data_Send['endtime']             = $endtime;
-                $data_Send['eventtype']           = $event_type;
-                sendMails($data_Send, $arrLang, "NEW", $this->arrConf,$pDB,$module_name, $id);
-            }
-            TODO: tener en cuenta la eliminación de los archivos en que escenarios debe de ser necesario
-            if($reminder == "on"){
-                createRepeatAudioFile($each_repeat,$day_repeat,$starttime,$endtime,$num_frec,$asterisk_calls,$ext,$call_to,$pDB,$id,$arrLang,$this->arrConf,$recording,$remainerTime);
-            }
-            else{ //borra los .call que existan asociados a este evento
-                $dir_outgoing = $arrConf['dir_outgoing'];
-                system("rm -f $dir_outgoing/event_{$id}_*.call"); // si existen lo archivos los elimina
-            }
-            *//*
-            return true;
-        }
-        else{
-            $this->errorMSG = "Error save,".$pCalendar->errMsg;
-            return false;
-        }
-    }*/
-
     /**
      * Functional point that returns the calendar events for the authenticated user
      *
@@ -832,95 +348,84 @@ CONTENIDO_ARCHIVO_AUDIO;
      *                                                           event.
      *                   or false if an error exists
      */
-    function listCalendarEvents($startdate, $enddate=NULL, $id_event = NULL)
+    function listCalendarEvents($startdate = NULL, $enddate = NULL,
+        $id_event = NULL, $bRawObjects = FALSE)
     {
-        global $arrConf;
-
         if (!$this->_checkUserAuthorized('calendar')) return false;
 
         // Validación de fechas
-	if(is_null($id_event)){
-	    $sFechaInicio = $this->_checkDateFormat(isset($startdate) ? $startdate : NULL);
-	    if (is_null($sFechaInicio)) return false;
-	    if(isset($enddate)){
-		$sFechaFinal  = $this->_checkDateFormat($enddate);
-		if (is_null($sFechaFinal)) return false;
-		if ($sFechaFinal < $sFechaInicio) {
-		    $t = $sFechaFinal; $sFechaFinal = $sFechaInicio; $sFechaInicio = $t;
-		}
-	    }
-	}
+        $sFechaInicio = $sFechaFinal = NULL;
+        if (is_null($id_event)) {
+            if (isset($startdate)) {
+                $sFechaInicio = $this->_checkDateFormat($startdate);
+                if (is_null($sFechaInicio)) return false;
+            }
+            if (isset($enddate)) {
+                $sFechaFinal  = $this->_checkDateFormat($enddate);
+                if (is_null($sFechaFinal)) return false;
+            }
+            if (!is_null($sFechaInicio) && !is_null($sFechaFinal)) {
+                if ($sFechaFinal < $sFechaInicio) {
+                    $t = $sFechaFinal; $sFechaFinal = $sFechaInicio; $sFechaInicio = $t;
+                }
+            }
+        }
 
-        // Identificar el usuario para averiguar el ID de usuario en calendario
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
-        // Base de datos del calendario
-        $pDB_calendar = $this->_getDB($arrConf['dsn_conn_database']);
+        try {
+            $pCalendar = $this->_getCalendar();
+    
+            // Elegir manera de leer en base a presencia de $id_event
+            if (is_null($id_event)) {
+                $r = $pCalendar->leerEventosActivosIntervalo($sFechaInicio, $sFechaFinal);
+            } else {
+                $r = $pCalendar->leerEvento($id_event);
+                $r = is_null($r) ? array() : array($r);
+            }
 
-	if(isset($id_event)){
-	    $arrParam = array($id_user, $id_event);
-	    $sql = <<<LEER_EVENTOS
-SELECT * FROM events
-WHERE uid = ? AND id = ?
-LEER_EVENTOS;
-	}
-	elseif(isset($enddate)){
-	    $arrParam = array($sFechaFinal, $sFechaInicio, $id_user);
-	    $sql = <<<LEER_EVENTOS
-SELECT * FROM events
-WHERE   ? >= strftime('%Y-%m-%d', startdate)
-    AND ? <= strftime('%Y-%m-%d', enddate)
-    AND uid = ?
-ORDER BY starttime
-LEER_EVENTOS;
-	}
-	else{  // Se devuelven todos los eventos cuyo fecha de inicio es mayor o igual a la fecha inicio pasada como parámetro
-	    $arrParam = array($sFechaInicio, $id_user);
-	    $sql = <<<LEER_EVENTOS
-SELECT * FROM events
-WHERE   ? <= strftime('%Y-%m-%d', startdate)
-    AND uid = ?
-ORDER BY starttime
-LEER_EVENTOS;
-	}
-        
-        $recordset = $pDB_calendar->fetchTable($sql, TRUE, $arrParam);
-        if (!is_array($recordset)) {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to read data from calendar - '.$pDB_calendar->errMsg;
-            $this->errMsg["cn"] = get_class($this);
+            if ($bRawObjects) return $r;
+            
+            $events = array();
+            foreach ($r as $event) {
+                $events[] = array(
+                    'id'            =>  $event->id,
+    
+                    // Las siguientes 4 son fechas
+                    'startdate'     =>  $event->date_start,
+                    'enddate'       =>  $event->date_end,
+                    'starttime'     =>  $event->datetime_start,
+                    'endtime'       =>  $event->datetime_end,
+    
+                    'subject'       =>  $event->title,
+                    'description'   =>  $event->description,
+                    'asterisk_call' =>  (!is_null($event->reminder_callnum)),
+                    
+                    // Los siguientes 3 campos dependen de asterisk_call
+                    'recording'     =>  (!is_null($event->reminder_callnum)) ? $event->reminder_tts : NULL,
+                    'call_to'       =>  (!is_null($event->reminder_callnum)) ? $event->reminder_callnum : NULL,
+                    'reminder_timer' => (!is_null($event->reminder_callnum)) ? $event->reminder_minutes : NULL,
+                    
+                    'emails_notification' => $event->notify_emails,
+                    'color'         =>  $event->event_color,
+                );
+            }
+            return array('events' => $events);
+        } catch (InvalidCalendarPropertyException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'PARAMERROR';
+                $this->errMsg["fm"] = 'Server configuration error';
+                $this->errMsg["fd"] = 'Configuration error - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($this);
+            }
+            return false;
+        } catch (FailedEventReadException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'DBERROR';
+                $this->errMsg["fm"] = 'Database operation failed';
+                $this->errMsg["fd"] = 'Unable to read data from calendar - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($this);
+            }
             return false;
         }
-
-        $events = array();
-        foreach ($recordset as $tupla) {
-            $events[] = array(
-                'id'            =>  (int)$tupla['id'],
-
-                // Las siguientes 3 son fechas
-                'startdate'     =>  date(SOAP_DATE_FORMAT, strtotime($tupla['startdate'])),
-                'enddate'       =>  date(SOAP_DATE_FORMAT, strtotime($tupla['enddate'])),
-                'starttime'     =>  $tupla['starttime'],
-                'endtime'       =>  $tupla['endtime'],
-
-                'subject'       =>  $tupla['subject'],
-                'description'   =>  $tupla['description'],
-                'asterisk_call' =>  ($tupla['asterisk_call'] == 'on'),
-                // Los siguientes 2 campos dependen de asterisk_call
-                'recording'     =>  ($tupla['asterisk_call'] == 'on') ? $tupla['recording'] : NULL,
-                'call_to'       =>  ($tupla['asterisk_call'] == 'on') ? $tupla['call_to'] : NULL,
-                'reminder_timer' => ($tupla['asterisk_call'] == 'on') 
-                    ? ((!is_null($tupla['reminderTimer']) && $tupla['reminderTimer'] != '') 
-                        ? $tupla['reminderTimer'] 
-                        : 0)
-                    : NULL,
-                'emails_notification' => ($tupla['notification'] == 'on') 
-                    ? array_filter(explode(',', $tupla['emails_notification']), array($this, '_rechazar_correo_vacio')) 
-                    : array(),
-            );
-        }
-        return array('events' => $events);
     }
 
     /**
@@ -936,17 +441,14 @@ LEER_EVENTOS;
      * @param   string    $reminder_timer            (Optional) Number of minutes before which will make the call reminder
      * @param   array     $emails_notification       Zero or more emails will be notified with a message when creating the event.
      * @param   string    $color                     (Optional) Color for the event
+     * 
      * @return  boolean   True if the event was successfully created, or false if an error exists
      */
-    function addCalendarEvent($startdate,$enddate,$subject,$description,$asterisk_call,$recording,$call_to,$reminder_timer,$emails_notification, $color, $getIdInserted=FALSE)
+    function addCalendarEvent($startdate, $enddate, $subject, $description,
+        $asterisk_call, $recording, $call_to, $reminder_timer,
+        $color, $emails_notification, $getIdInserted = FALSE)
     {
-        global $arrConf;
-
         if (!$this->_checkUserAuthorized('calendar')) return false;
-
-        // Identificar el usuario para averiguar el ID de usuario en calendario
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
 
         // Validación de instantes de inicio y final
         $sFechaInicio = $this->_checkDateTimeFormat(isset($startdate) ? $startdate : NULL);
@@ -981,134 +483,65 @@ LEER_EVENTOS;
             $this->errMsg["cn"] = get_class($this);
             return false;
         }
-        $listaAudios = array();
-        $sExtUsuario = $this->_leerExtension();
-        if (!$asterisk_call) {
-            // Ninguno de estos valores se usa cuando no hay llamada
-            $recording = NULL;
-            $call_to = NULL;
-            $reminder_timer = NULL;
-        } else {
-            // Si reminder_timer no es entero positivo, se asume 0
-            if (!isset($reminder_timer) || !preg_match('/^\d+$/', $reminder_timer))
-                $reminder_timer = 0;
 
-            // Número a marcar debería ser cadena numérica
-            if (!isset($call_to)) {
-                $call_to = $sExtUsuario;
+        if (!isset($emails_notification)) $emails_notification = array();
+        if (!is_array($emails_notification)) $emails_notification = array($emails_notification);
+
+        try {
+            $pCalendar = $this->_getCalendar();
+            $event = $pCalendar->nuevoEvento();
+            
+            $event->title = trim($subject);
+            $event->description = trim($description);
+            $event->event_type = EVENTO_UNICO;
+            $event->datetime_start = $sFechaInicio;
+            $event->datetime_end = $sFechaFinal;
+            if (!is_null($color)&& trim($color) != '') $event->event_color = $color;
+            $event->notify_emails = $emails_notification;
+            if ($asterisk_call) {
+                $event->asignarRecordatorio(
+                    (is_null($call_to) || trim($call_to) == '') ? $this->_leerExtension() : trim($call_to),
+                    $recording,
+                    $reminder_timer);
+            } else {
+                $event->quitarRecordatorio();
             }
-            if (!preg_match('/^\d+$/', $call_to)) {
+            
+            $event->guardarEvento();
+            return $getIdInserted ? $event->id : TRUE;
+        } catch (InvalidCalendarPropertyException $e) {
+            if (is_null($this->errMsg)) {
                 $this->errMsg["fc"] = 'PARAMERROR';
-                $this->errMsg["fm"] = 'Invalid reminder dialout number';
-                $this->errMsg["fd"] = 'Reminder dialout number (call_to) must be specified and be a numeric string';
+                $this->errMsg["fm"] = 'Invalid property';
+                $this->errMsg["fd"] = 'Unable to set property - '.$e->getMessage();
                 $this->errMsg["cn"] = get_class($this);
-                return false;
             }
-
-            // Verificar que la grabación se ha especificado y existe
-            $listaAudios = $this->_listarAudiosExtension($sExtUsuario);
-            if (!is_array($listaAudios)) return NULL;
-            if (!isset($listaAudios[$recording])) {
+            return false;
+        } catch (InvalidCalendarReminderException $e) {
+            if (is_null($this->errMsg)) {
                 $this->errMsg["fc"] = 'PARAMERROR';
-                $this->errMsg["fm"] = 'Invalid recording';
-                $this->errMsg["fd"] = 'Specified recording not found.';
+                $this->errMsg["fm"] = 'Invalid reminder';
+                $this->errMsg["fd"] = 'Unable to set reminder - '.$e->getMessage();
                 $this->errMsg["cn"] = get_class($this);
-                return false;
             }
-        }
-
-        if (!isset($emails_notification))
-            $emails_notification = array();
-        if (!is_array($emails_notification))
-            $emails_notification = array($emails_notification);
-
-        /* Construir cadena de correos en 1era forma ANORMAL. Se requiere la 
-         * coma al final porque la interfaz web se come el último elemento al
-         * mostrar la lista de correos. Además, los nombres descriptivos deben
-         * estar encerrados en comillas dobles, y los correos tienen que estar
-         * encerrados entre mayor y menor que. Todo esto se requiere para que
-         * la interfaz funcione correctamente al mostrar los correos al editar. 
-         */
-        if (count($emails_notification) == 0) {
-            $sCadenaCorreo = '';
-        } else {
-            function canonicalizar_correo($x)
-            {
-                $regs = NULL;
-                if (preg_match('/^\s*"?([^"]*)"?\s*<(\S*)>\s*$/', $x, $regs)) {
-                    $sNombre = '';
-                    if (trim($regs[1]) != '') $sNombre = "\"{$regs[1]}\" ";
-                    return "$sNombre<{$regs[2]}>";
-                } else {
-                    return "<$x>";
-                }
+            return false;
+        } catch (FailedEventUpdateException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'DBERROR';
+                $this->errMsg["fm"] = 'Database operation failed';
+                $this->errMsg["fd"] = 'Unable to create event in calendar - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($pCalendar);
             }
-            $sCadenaCorreo = implode(', ', array_map('canonicalizar_correo', $emails_notification)).',';
-        }
-
-        $color = isset($color)? $color : "#3366CC";
-        /* Insertar el registro del nuevo evento. */
-	$dbCalendar = $this->_getDB($arrConf['dsn_conn_database']);
-        $pCalendar = new paloSantoCalendar($dbCalendar);
-        $r = $pCalendar->insertEvent(
-            $id_user,
-            substr($sFechaInicio, 0, 10),   // asume yyyy-mm-dd al inicio
-            substr($sFechaFinal, 0, 10),    // asume yyyy-mm-dd al inicio
-            substr($sFechaInicio, 0, 16),   // asume yyyy-mm-dd hh:mm al inicio
-            1,                              // 1 es evento de una sola vez
-            $subject,
-            $description,
-            $asterisk_call ? 'on' : 'off',
-            $asterisk_call ? $recording : '',
-            $asterisk_call ? $call_to : '',
-            (count($emails_notification) > 0) ? 'on' : 'off',
-            $sCadenaCorreo,   // 1era forma ANORMAL
-            substr($sFechaFinal, 0, 16),    // asume yyyy-mm-dd hh:mm al inicio,
-            1,                              // 1 es audio de una sola vez
-            substr(date("D", strtotime("2010-11-04 12:54:00")), 0, 2).",", // Primeras 2 letras de día semana, con coma
-            $asterisk_call ? $reminder_timer : '',
-            $color);
-        if (!$r) {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to create event in calendar - '.$pCalendar->errMsg;
-            $this->errMsg["cn"] = get_class($pCalendar);
             return false;
         }
-        $idEvento = $pCalendar->_DB->getLastInsertId();
-
-        // Crear el archivo de llamada, en caso necesario
-        if ($asterisk_call) {
-            $this->_crearArchivoLlamadaAsterisk($idEvento, $sExtUsuario, 
-                $call_to, $listaAudios[$recording], 2, 
-                strtotime($sFechaInicio.(($reminder_timer > 0) ? " - {$reminder_timer} second" : '')));
-        }
-
-        // Enviar los correos de notificación, en caso necesario
-        if (count($emails_notification) > 0) {
-            $this->_enviarCorreosNotificacionEvento($idEvento, $sFechaInicio, $sFechaFinal, $subject, $emails_notification, $description, 'New_Event');
-        }
-        if($getIdInserted)
-	    return $dbCalendar->getLastInsertId();
-	else
-	    return true;
     }
 
-    /**
-     * Functional point that deletes an existing event in the calendar of the authenticated user
-     *
-     * @param   integer      $id        ID of the event to be deleted
-     * @return  boolean      True if the event was successfully deleted, or false if an error exists
-     */
-    function delCalendarEvent($id)
+    function editCalendarEvent($id, $startdate = NULL, $enddate = NULL, 
+        $subject = NULL, $description = NULL, $asterisk_call = NULL, 
+        $recording = NULL, $call_to = NULL, $reminder_timer = NULL,
+        $color = NULL, $emails_notification = NULL)
     {
-        global $arrConf;
-
         if (!$this->_checkUserAuthorized('calendar')) return false;
-
-        // Identificar el usuario para averiguar el ID de usuario en calendario
-        $id_user = $this->_leerIdUser();
-        if (is_null($id_user)) return false;
 
         // Verificar presencia de ID del evento
         if (!isset($id) || !preg_match('/^\d+$/', $id)) {
@@ -1120,49 +553,140 @@ LEER_EVENTOS;
         }
         $id = (int)$id;
 
-        // Leer los datos del evento del usuario
-        $pCalendar = new paloSantoCalendar($this->_getDB($arrConf['dsn_conn_database']));
-        $infoEvento = $pCalendar->getEventById($id, $id_user);
-        if (!is_array($infoEvento) && $pCalendar->errMsg != '') {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to read event in calendar - '.$pCalendar->errMsg;
-            $this->errMsg["cn"] = get_class($pCalendar);
+        try {
+            $pCalendar = $this->_getCalendar();
+            $event = $pCalendar->leerEvento($id);
+            if (is_null($event)) {
+                $this->errMsg["fc"] = 'CALENDAR';
+                $this->errMsg["fm"] = 'Event lookup failed';
+                $this->errMsg["fd"] = 'No event was found for user '.$_SERVER['PHP_AUTH_USER'];
+                $this->errMsg["cn"] = get_class($pCalendar);
+                return false;
+            }
+            
+            // Validación de instantes de inicio y final
+            $sFechaInicio = NULL; $sFechaFinal = NULL;
+            if (!is_null($startdate)) {
+                $sFechaInicio = $this->_checkDateTimeFormat($startdate);
+                if (is_null($sFechaInicio)) return false;
+                $event->datetime_start = $sFechaInicio;
+            }
+            if (!is_null($enddate)) {
+                $sFechaFinal = $this->_checkDateTimeFormat($enddate);
+                if (is_null($sFechaFinal)) return false;
+                $event->datetime_end = $sFechaFinal;
+            }
+            if ($event->timestamp_end < $event->timestamp_start) {
+                $t = $event->timestamp_end;
+                $event->timestamp_end = $event->timestamp_start;
+                $event->timestamp_start = $t;
+            }
+
+            if (!is_null($subject)) $event->title = trim($subject);
+            if (!is_null($description)) $event->description = trim($description);
+            if (!is_null($color)&& trim($color) != '') $event->event_color = $color;
+            if (!is_null($emails_notification)) $event->notify_emails = $emails_notification;
+            if (!is_null($asterisk_call)) {
+                if ($asterisk_call) {
+                    if (is_null($call_to)) $call_to = $event->reminder_callnum;
+                    if (is_null($recording)) $recording = $event->reminder_tts;
+                    if (is_null($reminder_timer)) $reminder_timer = $event->reminder_minutes;
+                    $event->asignarRecordatorio(
+                        (is_null($call_to) || trim($call_to) == '') ? $this->_leerExtension() : trim($call_to),
+                        $recording,
+                        $reminder_timer);
+                } else {
+                    $event->quitarRecordatorio();
+                }
+            }
+            
+            $event->guardarEvento();
+            return TRUE;
+        } catch (FailedEventReadException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'DBERROR';
+                $this->errMsg["fm"] = 'Database operation failed';
+                $this->errMsg["fd"] = 'Unable to read data from calendar - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($this);
+            }
+            return false;
+        } catch (InvalidCalendarPropertyException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'PARAMERROR';
+                $this->errMsg["fm"] = 'Invalid property';
+                $this->errMsg["fd"] = 'Unable to set property - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($this);
+            }
+            return false;
+        } catch (InvalidCalendarReminderException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'PARAMERROR';
+                $this->errMsg["fm"] = 'Invalid reminder';
+                $this->errMsg["fd"] = 'Unable to set reminder - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($this);
+            }
+            return false;
+        } catch (FailedEventUpdateException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'DBERROR';
+                $this->errMsg["fm"] = 'Database operation failed';
+                $this->errMsg["fd"] = 'Unable to update event in calendar - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($pCalendar);
+            }
             return false;
         }
-        if (count($infoEvento) <= 0 || $infoEvento['uid'] != $id_user) {
-            $this->errMsg["fc"] = 'CALENDAR';
-            $this->errMsg["fm"] = 'Event lookup failed';
-            $this->errMsg["fd"] = 'No event was found for user '.$_SERVER['PHP_AUTH_USER'];
-            $this->errMsg["cn"] = get_class($pCalendar);
+    }
+
+    /**
+     * Functional point that deletes an existing event in the calendar of the authenticated user
+     *
+     * @param   integer      $id        ID of the event to be deleted
+     * @return  boolean      True if the event was successfully deleted, or false if an error exists
+     */
+    function delCalendarEvent($id)
+    {
+        if (!$this->_checkUserAuthorized('calendar')) return false;
+
+        // Verificar presencia de ID del evento
+        if (!isset($id) || !preg_match('/^\d+$/', $id)) {
+            $this->errMsg["fc"] = 'PARAMERROR';
+            $this->errMsg["fm"] = 'Invalid ID';
+            $this->errMsg["fd"] = 'Event ID must be nonnegative integer';
+            $this->errMsg["cn"] = get_class($this);
             return false;
         }
+        $id = (int)$id;
 
-        // Borrar los archivos de audio para el ID indicado
-        array_map(
-            'unlink',
-            glob($arrConf['output_callfile_base']."/event_{$id}_*.call"));
-
-        // Si había notificación de correo, se envía mensaje a lista de usuarios
-        if ($infoEvento['emails_notification'] != '') {
-            $r = (object)$infoEvento; // subject description emails_notification
-            $r->emails_notification = array_filter(
-                preg_split('/[\s,]+/', $infoEvento['emails_notification']), 
-                array($this, '_rechazar_correo_vacio')); 
-            $this->_enviarCorreosNotificacionEvento($id, 
-                $infoEvento['starttime'].':00', $infoEvento['endtime'].':00', 
-                $r->subject,$r->emails_notification,$r->description, 'Delete_Event');
-        }
-
-        // Borrar el evento
-        if (!$pCalendar->deleteEvent($id, $id_user)) {
-            $this->errMsg["fc"] = 'DBERROR';
-            $this->errMsg["fm"] = 'Database operation failed';
-            $this->errMsg["fd"] = 'Unable to delete event in calendar - '.$pCalendar->errMsg;
-            $this->errMsg["cn"] = get_class($pCalendar);
+        try {
+            $pCalendar = $this->_getCalendar();
+            $event = $pCalendar->leerEvento($id);
+            if (is_null($event)) {
+                $this->errMsg["fc"] = 'CALENDAR';
+                $this->errMsg["fm"] = 'Event lookup failed';
+                $this->errMsg["fd"] = 'No event was found for user '.$_SERVER['PHP_AUTH_USER'];
+                $this->errMsg["cn"] = get_class($pCalendar);
+                return false;
+            }
+            
+            $event->borrarEvento();
+            return TRUE;
+        } catch (FailedEventReadException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'DBERROR';
+                $this->errMsg["fm"] = 'Database operation failed';
+                $this->errMsg["fd"] = 'Unable to read data from calendar - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($this);
+            }
+            return false;
+        } catch (FailedEventUpdateException $e) {
+            if (is_null($this->errMsg)) {
+                $this->errMsg["fc"] = 'DBERROR';
+                $this->errMsg["fm"] = 'Database operation failed';
+                $this->errMsg["fd"] = 'Unable to delete event in calendar - '.$e->getMessage();
+                $this->errMsg["cn"] = get_class($pCalendar);
+            }
             return false;
         }
-        return true;
     }
 
     /**

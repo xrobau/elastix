@@ -523,16 +523,19 @@ SQL_UPDATE_EVENT;
     }
 
     // Procedimiento para crear los archivos de llamada con la periodicidad requerida
-    // TODO: debería verificarse no crear archivos con fecha creación en el pasado?
     // TODO: extraer el bucle de periodicidad como un método público
     private function _crearArchivosLlamadaEventoPeriodico()
     {
         if (is_null($this->_reminder_callnum)) return;
         
         $horasNotificacion = $this->generarIntervalosEventoPeriodico();
+        $timestampHoy = time();
         foreach ($horasNotificacion as $i => $t) {
-            $this->_crearArchivoLlamadaEvento($i, _tr('Calendar Event'), 2,
-                $t[0] - 60 * $this->_reminder_minutes);
+            $timestampLlamada = $t[0] - 60 * $this->_reminder_minutes;
+            if ($timestampLlamada > $timestampHoy) {
+                $this->_crearArchivoLlamadaEvento($i, _tr('Calendar Event'), 2,
+                    $timestampLlamada);
+            }
         }
     }
 

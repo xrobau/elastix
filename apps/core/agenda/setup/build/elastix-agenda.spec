@@ -109,6 +109,11 @@ fi
 /var/lib/asterisk/sounds/custom/*
 
 %changelog
+* Tue Mar 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar - do not create callfiles with timestamps in the past. Fixes
+  Elastix bug #784.
+  SVN Rev[6557]
+
 * Mon Mar 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar - complete rewrite. The Calendar module has been rewritten,
   starting with the definition of classes paloSantoCalendar and 

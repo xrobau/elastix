@@ -7,8 +7,6 @@ Release: 12
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
-#Source0: %{modname}_%{version}-6.tgz
-Source1: calendarEvent.gsm
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: asterisk
@@ -28,20 +26,11 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
-# Additional (module-specific) files that can be handled by RPM
-#mkdir -p $RPM_BUILD_ROOT/opt/elastix/
-#mv setup/dialer
-
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-
-# Copy required sound file
-mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/sounds/custom/
-#chown -R asterisk.asterisk /var/lib/asterisk/sounds/custom
-cp %{SOURCE1} $RPM_BUILD_ROOT/var/lib/asterisk/sounds/custom/
 
 %pre
 #se crea el directorio address_book_images para contener imagenes de contactos
@@ -103,13 +92,12 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-%defattr(-, asterisk, asterisk)
-/var/lib/asterisk/sounds/custom
-/var/lib/asterisk/sounds/custom/calendarEvent.gsm
-/var/lib/asterisk/sounds/custom/*
 
 %changelog
 * Tue Mar 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Calendar - remove calendarEvent.gsm. This file is no longer used in
+  any scenario.
+  SVN Rev[6558]
 - FIXED: Calendar - do not create callfiles with timestamps in the past. Fixes
   Elastix bug #784.
   SVN Rev[6557]

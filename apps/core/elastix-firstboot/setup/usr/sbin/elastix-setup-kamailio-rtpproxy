@@ -129,21 +129,43 @@ try {
     fputs(STDERR, "ERR: unable to save current IPs to database - ".$e->getMessage()."\n");
 }
 
+// Run route -n to figure out current gateway
+$gateway = NULL;
+$output = $retval = NULL;
+exec('/sbin/route -n', $output, $retval);
+foreach ($output as $s) {
+    $f = preg_split('/\s+/', $s);
+    if ($f[2] == '0.0.0.0' && $f[3] == 'UG') {
+        $gateway = $f[1];
+    }
+}
+
 // Find out which interface will be used to contact the Asterisk instance. This
 // will be labeled the Kamailio interface. If no address matches (non-local 
 // Asterisk), bail out.
 $asterisk_octet = ip2octet($asterisk_ip);
 $kamailio_idx = NULL;
+$gateway_octet = is_null($gateway) ? NULL : ip2octet($gateway);
+$gateway_idx = NULL;
 foreach ($if_list as $idx => $if_entry) {
     // Check if Asterisk IP belongs to this network
     if ($if_entry['net_octet'] == network_from_ip($asterisk_octet, $if_entry['mask_octet'])) {
         if (is_null($kamailio_idx) || $if_list[$kamailio_idx]['mask_octet'] < $if_entry['mask_octet'])
             $kamailio_idx = $idx;
     }
+
+    // Check if gateway IP belongs to this network
+    if (!is_null($gateway) && $if_entry['net_octet'] == network_from_ip($gateway_octet, $if_entry['mask_octet'])) {
+        if (is_null($gateway_idx) || $if_list[$gateway_idx]['mask_octet'] < $if_entry['mask_octet'])
+            $gateway_idx = $idx;
+    }
 }
 if (is_null($kamailio_idx)) {
     fputs(STDERR, "FATAL: Asterisk IP {$asterisk_ip} does not belong to any of the networks for current interfaces!\n");
     exit(1);
+}
+if (!is_null($gateway) && is_null($gateway_idx)) {
+    fputs(STDERR, "WARN: could not figure out which interface leads to gateway $gateway !\n");
 }
 $kamailio_ip = $if_list[$kamailio_idx]['ip_addr'];
 //print "DEBUG: Configuring for Kamailio instance at {$kamailio_ip}\n";
@@ -177,11 +199,25 @@ ROUTE_CONDITION;
         $i++; $rtpproxy_port++;
     }
 }
-$route_mhomed_elastix .= <<<ROUTE_FAILURE
+
+if (is_null($gateway_idx)) {
+	$route_mhomed_elastix .= <<<ROUTE_FAILURE
 {
         xlog("L_ALERT", "ALERT: no matching set: du=\$du Ri=\$Ri Record-Route[0]=\$(hdr(Record-Route)[0]) Record-Route[1]=\$(hdr(Record-Route)[1]) Via[0]=\$(hdr(Via)[0]) Via[1]=\$(hdr(Via)[1]) via[2].host=\$sel(via[2].host)\\n");
     }
 ROUTE_FAILURE;
+} else {
+	$gw_if = $if_list[$gateway_idx]['ip_addr'];
+	$i = $gateway_idx + 1;
+	$route_mhomed_elastix .= <<<ROUTE_DEFAULT
+{
+        # Apparently no match, sending to interface leading to gateway
+        #xlog("L_ALERT", "ALERT: no matching set (sending to gateway): du=\$du Ri=\$Ri Record-Route[0]=\$(hdr(Record-Route)[0]) Record-Route[1]=\$(hdr(Record-Route)[1]) Via[0]=\$(hdr(Via)[0]) Via[1]=\$(hdr(Via)[1]) via[2].host=\$sel(via[2].host)\\n");
+        set_rtp_proxy_set("{$i}");
+        rtpproxy_manage("co", "{$gw_if}");
+    }
+ROUTE_DEFAULT;
+}
 
 $route_mhomed_elastix = <<<ROUTE_MHOMED_ELASTIX
 #!ifdef WITH_ASTERISK

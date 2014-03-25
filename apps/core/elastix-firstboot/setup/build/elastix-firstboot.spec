@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Tue Mar 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: the rtpproxy setup script will now send non-matching packets to the
+  interface leading to the gateway, if one is successfully detected.
+  SVN Rev[6559]
+
 * Mon Mar 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: the rtpproxy setup script now has to write the IPs of current 
   interfaces to the database. The first invocation of the rtpproxy script in

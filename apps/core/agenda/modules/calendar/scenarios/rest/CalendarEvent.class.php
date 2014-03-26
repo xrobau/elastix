@@ -133,7 +133,7 @@ class CalendarEventBase extends REST_Resource
 
         $postkeys = array_keys($_POST);
         if (in_array('asterisk_call', $postkeys)) {
-            $_POST['asterisk_call'] = !(empty($_POST['asterisk_call']) || $_POST['asterisk_call'] == 'false' || $_POST['asterisk_call'] == 0);
+            $_POST['asterisk_call'] = !(empty($_POST['asterisk_call']) || $_POST['asterisk_call'] == 'false' || $_POST['asterisk_call'] == "0");
         }
         foreach (array('startdate', 'enddate', 'subject', 'description',
             'asterisk_call', 'recording', 'call_to', 'reminder_timer',
@@ -213,7 +213,7 @@ class CalendarEventById extends REST_Resource
 
         $postkeys = array_keys($_POST);
         if (in_array('asterisk_call', $postkeys)) {
-            $_POST['asterisk_call'] = !(empty($_POST['asterisk_call']) || $_POST['asterisk_call'] == 'false' || $_POST['asterisk_call'] == 0);
+            $_POST['asterisk_call'] = !(empty($_POST['asterisk_call']) || $_POST['asterisk_call'] == 'false' || $_POST['asterisk_call'] == "0");
         }
         foreach (array('startdate', 'enddate', 'subject', 'description',
             'asterisk_call', 'recording', 'call_to', 'reminder_timer', 'color',

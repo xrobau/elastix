@@ -95,6 +95,9 @@ fi
 
 %changelog
 * Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar - in PHP, ('true' == 0) evaluates to TRUE, so callfiles are
+  never saved or created. Fixed.
+  SVN Rev[6562]
 - CHANGED: Calendar - reproduce old behavior of initializing the calendar with
   the server date, instead of using the default of the browser date.
   SVN Rev[6561]

@@ -467,11 +467,7 @@ class core_Calendar
             return false;
         }
         if (!isset($description) || trim($description) == '') {
-            $this->errMsg["fc"] = 'PARAMERROR';
-            $this->errMsg["fm"] = 'Invalid description';
-            $this->errMsg["fd"] = 'Description must be specified and nonempty';
-            $this->errMsg["cn"] = get_class($this);
-            return false;
+            $description = '';
         }
 
         // Validaciones dependientes de asterisk_call

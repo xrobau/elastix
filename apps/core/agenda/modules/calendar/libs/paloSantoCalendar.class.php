@@ -207,7 +207,7 @@ class paloSantoCalendarEvent
     private $_timestamp_start;  // timestamp de unix, entero
     private $_timestamp_end;    // timestamp de unix, entero
     private $_title = NULL;
-    private $_description = NULL;
+    private $_description = '';
     private $_event_color = COLOR_EVENTO_OMISION;
     private $_event_type = EVENTO_UNICO;
     
@@ -332,8 +332,6 @@ class paloSantoCalendarEvent
             $this->_title = trim("$v");
             break;
         case 'description':
-            if (trim("$v") == '')
-                throw new InvalidCalendarPropertyException(_tr('Description must be specified and nonempty'));
             $this->_description = trim("$v");
             break;
         case 'event_color':

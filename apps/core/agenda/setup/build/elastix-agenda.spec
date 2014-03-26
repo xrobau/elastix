@@ -95,6 +95,9 @@ fi
 
 %changelog
 * Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar - restore old behavior of allowing empty event descriptions.
+  Previously this was allowed through the GUI but not through REST/SOAP.
+  SVN Rev[6563]
 - FIXED: Calendar - in PHP, ('true' == 0) evaluates to TRUE, so callfiles are
   never saved or created. Fixed.
   SVN Rev[6562]

@@ -367,6 +367,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: guard against missing authuser by requiring all external 
+  SIP requests to be authenticated, not just REGISTER. This prevents an INVITE
+  from an unregistered client from being routed without authentication.
+  SVN Rev[6560]
+
 * Thu Mar 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Trunks: delegate transformation of form fields into SQL fields to the
   relevant voip objects (paloSIP and paloIAX) instead of reimplementing the 

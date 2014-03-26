@@ -94,6 +94,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar - reproduce old behavior of initializing the calendar with
+  the server date, instead of using the default of the browser date.
+  SVN Rev[6561]
+
 * Tue Mar 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: Calendar - remove calendarEvent.gsm. This file is no longer used in
   any scenario.

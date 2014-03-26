@@ -20,6 +20,9 @@
 	   <div id="calendar_main"></div>
 	</td>
 </tr></table>
+{* Los siguientes campos de formulario definen la fecha de inicio del calendario *}
+<input type="hidden" name="server_year" value="{$SERVER_YEAR}" />
+<input type="hidden" name="server_month" value="{$SERVER_MONTH}" />
 {* El siguiente campo de formulario sólo se asigna al pedir action=display *}
 <input type="hidden" name="event_id" value="{$EVENT_ID}" />
 </form>

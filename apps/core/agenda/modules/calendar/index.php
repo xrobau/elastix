@@ -192,6 +192,8 @@ function handleHTML_mainReport($smarty, $module_name, $local_templates_dir)
         'LBL_LINK_ICAL'             =>  _tr('Download ical calendar'),
         'LBL_CONTACT_NAME'          =>  _tr('Contact'),
         'LBL_CONTACT_EMAIL'         =>  _tr('Email'),
+        'SERVER_YEAR'               =>  date('Y'),
+        'SERVER_MONTH'              =>  date('m') - 1,
         
         'ARRLANG_MAIN'              =>  $json->encode(array(
             'LBL_SAVE'              =>  _tr('Save'),

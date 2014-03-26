@@ -125,6 +125,8 @@ $(document).ready(function() {
             right:  'month,agendaWeek,agendaDay'
         },
         firstDay: 1,        // Calendario usa lunes como primer día de semana
+        year: $('input[name="server_year"]').val(),
+        month: $('input[name="server_month"]').val(),
         /*
         loading: function(isLoading, view) {
             console.debug("fullCalendar.loading: " + (isLoading ? 'TRUE' : 'FALSE'));

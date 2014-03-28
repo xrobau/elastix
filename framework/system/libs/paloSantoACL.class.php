@@ -1221,24 +1221,42 @@ INFO_AUTH_MODULO;
     /**
      * Funcion que devuelve una lista 
      */
-    function getUsersAccountsInfoByDomain($idOrganization,$name=null){
-        $query="SELECT u.id, u.name, u.username, u.extension, ".
-                    "u.fax_extension, e.elxweb_device, e.alias ".
-                        "FROM acl_user u JOIN acl_group g ON u.id_group=g.id ".
-                            "JOIN extension e ON u.extension=e.exten WHERE g.id_organization=? ".
-                                "and e.organization_domain=(SELECT domain from organization where id=?)";
-        $param[]=$idOrganization;
-        $param[]=$idOrganization;
-        if($name!='' && isset($name)){
-            $query .=' and u.name LIKE ?';
-            $param[]="%$name%";
+    function getUsersAccountsInfoByDomain($idOrganization, $name=null)
+    {
+        $param = array($idOrganization);
+        $search_condition = '';
+        if (!empty($name)) {
+        	$search_condition = ' AND u.name LIKE ?';
+            $param[] = "%$name%";
         }
-        $query .=" order by name ASC";
-        $result=$this->_DB->fetchTable($query,true,$param);
-        if($result===false){
-            //$this->errMsg=_tr("DATABASE ERROR");
+        $query = <<<SQL_ACCOUNTS_INFO
+SELECT u.id, u.name, u.username, u.extension, u.fax_extension, e.elxweb_device,
+    e.alias, e.organization_domain
+FROM acl_user u, acl_group g, extension e, organization
+WHERE u.id_group = g.id
+    AND u.extension = e.exten
+    AND e.organization_domain = organization.domain
+    AND g.id_organization = organization.id
+    AND g.id_organization = ? $search_condition
+ORDER BY name ASC;
+SQL_ACCOUNTS_INFO;
+        $result = $this->_DB->fetchTable($query,true,$param);
+        if($result === false){
             $this->errMsg = $this->_DB->errMsg;
         }
+        
+        /* El siguiente código es un arreglo temporal hasta corregir el lugar
+         * donde se escribe la columna extension.elxweb_device. Esta columna
+         * debe contener el valor sin la cadena adjuntada '_dominio.com' para
+         * poder funcionar con Kamailio. */
+        for ($i = 0; $i < count($result); $i++) {
+        	if (substr($result[$i]['elxweb_device'], -1 * (strlen($result[$i]['organization_domain']) + 1)) 
+                == '_'.$result[$i]['organization_domain']) {
+                $result[$i]['elxweb_device'] = substr($result[$i]['elxweb_device'], 0,
+                    strlen($result[$i]['elxweb_device']) - strlen($result[$i]['organization_domain']) - 1);
+            }
+        }
+        
         return $result;
     }
     

@@ -454,138 +454,87 @@ function saveNeoToggleTabByUser($menu, $action_status)
     }
     return $arrResult;
 }
-function getChatClientConfig($pDB,&$error){
-    $query="SELECT property_name,property_val from elx_chat_config";
-    $result=$pDB->fetchTable($query,true);
-    if($result===false){
+
+function getChatClientConfig($pDB,&$error)
+{
+    $query = 'SELECT property_name,property_val from elx_chat_config';
+    $result = $pDB->fetchTable($query,true);
+    if ($result===false) {
         //error de conexion a la base no podemos determinar los parametros de configuracion del chat
         //mostramos un error
-        $error='Error to obtain elastix chat configurations';
+        $error = 'Error to obtain elastix chat configurations';
         return false;
     }
-    $chat_conf=array();
-    $type_connection="ws";
-    foreach($result as $value){
-        switch($value['property_name']){
-            case 'type_connection':
-                if($value['property_val']=='ws' || $value['property_val']=='wss')
-                    $type_connection=$value['property_val'];
-                else{
-                    $type_connection='ws';
-                }
-                break;
-            case 'register':
-            //Indicate if JsSIP User Agent should register automatically when starting. Valid values are true and false (Boolean). Default value is true.
-                if($value['property_val']=='no'){
-                    $chat_conf[$value['property_name']]=false;
-                }else{
-                    $chat_conf[$value['property_name']]=true;
-                }
-                break;
-            case 'register_expires':
-            //Registration expiry time (in seconds) (Integer). Default value is 600.
-                if($value['property_val']==''){
-                    if(ctype_digit($value['property_val'])){
-                        $chat_conf[$value['property_name']]=$value['property_val'];
-                    }
-                }
-                break;    
-            case 'no_answer_timeout':
-            //Time (in seconds) (Integer) after which an incoming call is rejected if not answered. Default value is 60.
-                if($value['property_val']==''){
-                    if(ctype_digit($value['property_val'])){
-                        $chat_conf[$value['property_name']]=$value['property_val'];
-                    }
-                }
-                break;  
-            case 'trace_sip':
-            //Indicate whether incoming and outgoing SIP request/responses must be logged in the browser console (Boolean). Default value is false
-                if($value['property_val']=='yes'){
-                    $chat_conf[$value['property_name']]=true;
-                }else{
-                    $chat_conf[$value['property_name']]=false;
-                }
-                $chat_conf[$value['property_name']]=true;
-                break;
-            case 'use_preloaded_route':
-            //If set to true every SIP initial request sent by JsSIP includes a Route header with the SIP URI associated to the WebSocket server as value. Some SIP Outbound Proxies require such a header. Valid values are true and false (Boolean). Default value is false.
-                if($value['property_val']=='yes'){
-                    $chat_conf[$value['property_name']]=true;
-                }else{
-                    $chat_conf[$value['property_name']]=false;
-                }
-                break;    
-            case 'connection_recovery_min_interval':
-            //Minimum interval (Number) in seconds between WebSocket reconnection attempts. Default value is 2
-                if($value['property_val']==''){
-                    if(ctype_digit($value['property_val'])){
-                        $chat_conf[$value['property_name']]=$value['property_val'];
-                    }
-                }
-                break; 
-            case 'connection_recovery_max_interval':
-            //Minimum interval (Number) in seconds between WebSocket reconnection attempts. Default value is 2
-                if($value['property_val']==''){
-                    if(ctype_digit($value['property_val'])){
-                        $chat_conf[$value['property_name']]=$value['property_val'];
-                    }
-                }
-                break; 
-            case 'hack_via_tcp':
-            //Set Via transport parameter in outgoing SIP requests to “TCP”, Valid values are true and false (Boolean). Default value is false.
-                if($value['property_val']=='yes'){
-                    $chat_conf[$value['property_name']]=true;
-                }else{
-                    $chat_conf[$value['property_name']]=false;
-                }
-                break; 
-            case 'hack_ip_in_contact':
-            //Set a random IP address as the host value in the Contact header field and Via sent-by parameter. Valid values are true and false (Boolean). Default value is a false.
-                if($value['property_val']=='yes'){
-                    $chat_conf[$value['property_name']]=true;
-                }else{
-                    $chat_conf[$value['property_name']]=false;
-                }
-                break;
-            default:
-                $chat_conf[$value['property_name']]=$value['property_val'];
-                break;
-        }
+    
+    $chat_conf = array();
+    $type_connection = 'ws';
+    foreach($result as $value) switch($value['property_name']) {
+    // Caso especial: wss se usa para construir URLs más abajo
+    case 'type_connection':
+        if (in_array($value['property_val'], array('ws', 'wss')))
+            $type_connection = $value['property_val'];
+        break;
+
+    // Enteros
+
+    // Registration expiry time (in seconds) (Integer). Default value is 600.
+    case 'register_expires':
+    /* Time (in seconds) (Integer) after which an incoming call is rejected if 
+     * not answered. Default value is 60. */
+    case 'no_answer_timeout':
+    /* Minimum interval (Number) in seconds between WebSocket reconnection 
+     * attempts. Default value is 2 */
+    case 'connection_recovery_min_interval':
+    /* Minimum interval (Number) in seconds between WebSocket reconnection 
+     * attempts. Default value is 2 */
+    case 'connection_recovery_max_interval':
+        if ($value['property_val'] != '' && ctype_digit($value['property_val']))
+            $chat_conf[$value['property_name']] = (int)$value['property_val'];
+        break;
+
+    // Booleanos            
+             
+    /* Indicate if JsSIP User Agent should register automatically when starting.
+     * Valid values are true and false (Boolean). Default value is true. */
+    case 'register':
+    /* Indicate whether incoming and outgoing SIP request/responses must be 
+     * logged in the browser console (Boolean). Default value is false */
+    case 'trace_sip':
+    /* If set to true every SIP initial request sent by JsSIP includes a Route 
+     * header with the SIP URI associated to the WebSocket server as value. Some
+     * SIP Outbound Proxies require such a header. Valid values are true and 
+     * false (Boolean). Default value is false. */
+    case 'use_preloaded_route':
+    /* Set Via transport parameter in outgoing SIP requests to “TCP”, Valid 
+     * values are true and false (Boolean). Default value is false. */
+    case 'hack_via_tcp':
+    /* Set a random IP address as the host value in the Contact header field and
+     * Via sent-by parameter. Valid values are true and false (Boolean). Default
+     * value is a false. */
+    case 'hack_ip_in_contact':
+        $chat_conf[$value['property_name']] = ($value['property_val'] == 'yes');
+        break;
+
+    // Cadenas de texto
+    default:
+        $chat_conf[$value['property_name']] = $value['property_val'];
+        break;
     }
     
     //obtenemos las configuraciones de asterisk del module http para web_socket support
-    $http=getAsteriskHttpModuleConfig($pDB,$error);
-    if($http===false){
-        return false;
-    }
+    $http = getAsteriskHttpModuleConfig($pDB,$error);
+    if($http === false) return false;
     
     //se quiere usar wss debe estar habilitado soporte tls
     //si no está habilitado se debe usar ws en su lugar
-    if(!isset($http['tlsenable'])){
-        $type_connection='ws';
-    }elseif($http['tlsenable']=='no'){
-        $type_connection='ws';
+    if (!isset($http['tlsenable']) || $http['tlsenable']=='no') {
+        $type_connection = 'ws';
     }
-    
-    if($type_connection=='ws'){
-        if(!empty($http['bindport'])){
-            $puerto=$http['bindport'];
-        }else{
-            $puerto=8088; //no esta configurado usamos los valores por default de asterisk
-        }
-    }else{
-        if(!empty($http['tlsbindport'])){
-            $puerto=$http['tlsbindport'];
-        }else{
-            $puerto=8089; //no esta configurado usamos los valores por default de asterisk
-        }
-    }
-    $prefix='';
-    if(isset($http['prefix'])){
-        if($http['prefix']!='' && $http['prefix']!==false){
-            $prefix="{$http['prefix']}";
-        }
-    }
+
+    // Llenar valores por omisión si no están presentes, y elegir en base a wss
+    if (empty($http['bindport'])) $http['bindport'] = 8088;
+    if (empty($http['tlsbindport'])) $http['tlsbindport'] = 8089;
+    $puerto = $http[($type_connection == 'wss') ? 'tlsbindport' : 'bindport'];
     
     //"ws://192.168.5.110:8088/asterisk/ws"
     //ws -> transport, puede ser ws o wss
@@ -593,14 +542,10 @@ function getChatClientConfig($pDB,&$error){
     //8088 -> puerto usado para la comunicacion definido en /etc/asterisk/http.conf 
     //asterisk -> prefix usado para la coneccion definido en http.conf
     //el ultimo ws simpre va, esto es una especificacion de asterisk
-    
-    //TODO: el valor para el parametro server se obtiene de la direccion web a la cual estamoas accediendo
-    //No se si esto este bien, se debe probar haber si debe ser o deberia poder ser configurable y estatico
-    //print($_SERVER['SERVER_ADDR']);
-    //print($_SERVER['SERVER_NAME']);
-    $server=$_SERVER['SERVER_ADDR'];
-    $chat_conf['ws_servers']="$type_connection://$server:$puerto/".( ($prefix!='')?"$prefix/":'')."ws";
-    $chat_conf['elastix_chat_server']=$server;
+    $http['prefix'] = (isset($http['prefix']) && !empty($http['prefix']))
+        ? '/'.$http['prefix'] : '';
+    $chat_conf['elastix_chat_server'] = $_SERVER['SERVER_NAME'];
+    $chat_conf['ws_servers'] = "{$type_connection}://{$chat_conf['elastix_chat_server']}:{$puerto}{$http['prefix']}/ws";
     return $chat_conf;
 }
 function getAsteriskHttpModuleConfig($pDB,&$error){
@@ -787,15 +732,17 @@ function redimensionarImagen($ruta1,$ruta2,$ancho,$alto){
     return true;
 }
 
-function getNewListElastixAccounts($searchFilter){
+function getNewListElastixAccounts($searchFilter, &$errmsg)
+{
     global $arrConf;
-    $error='';
+
+    $error = '';
     $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
     $pACL = new paloACL($pDB);
     
-    $astMang=AsteriskManagerConnect($errorM);
+    $astMang=AsteriskManagerConnect($error);
     if($astMang==false){
-        $this->errMsg=$errorM;
+        $this->errMsg = $error;
         return false;
     }
     
@@ -804,20 +751,22 @@ function getNewListElastixAccounts($searchFilter){
     //obtenemos el codigo pbx de la organizacion
     $query="SELECT code from organization where id=?";
     $result=$pDB->getFirstRowQuery($query,false,array($arrCredentials["id_organization"]));
-    if($result==false){
+    if ($result==false) {
+        $errmsg = "An error has ocurred to retrieved organization data. ";
         return false;
-    }else
+    } else
         $pbxCode=$result[0];
     
     //1) obtenemos los parametros generales de configuracion para asterisk websocket y el cliente de chat de elastix
     $chatConfig=getChatClientConfig($pDB,$error);
-    if($chatConfig==false){
+    if ($chatConfig==false) {
+        $errmsg = "An error has ocurred to retrieved server configuration params. ".$error;
         return false;
     }
     
     //2) TODO:obtener el dominio sip de la organizacion si no se encuentra configurado utilizar
     //   el ws_server
-    $dominio=$chatConfig['elastix_chat_server'];
+    $dominio = $chatConfig['elastix_chat_server'];
     
     //3) obtenemos la informacion de las cuentas de los usuarios
     $name= null;
@@ -827,6 +776,7 @@ function getNewListElastixAccounts($searchFilter){
     $result=$pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"], $name);
     if($result===false){
         //hubo un error de la base de datos ahi que desactivar la columna lateral
+        $errmsg = "An error has ocurred to retrieved Contacts Info. ".$pACL->errMsg;
         return false;
     }else{
         $arrContacts=array();
@@ -844,8 +794,11 @@ function getNewListElastixAccounts($searchFilter){
             8 = Ringing
             16 = On Hold
             */
-            if($value['extension']!='' && isset($value['extension'])){
-                 $result=$astMang->send_request('ExtensionState',array('Exten'=>"{$value['extension']}", 'Context'=>"$pbxCode-ext-local"));
+            if ($value['extension'] != '' && isset($value['extension'])) {
+                $result = $astMang->send_request('ExtensionState',array(
+                    'Exten'=>"{$value['extension']}",
+                    'Context'=>"$pbxCode-ext-local"
+                ));
                 if($result['Response']=='Success'){
                     $status=getStatusContactFromCode($result['Status']);
                     $st_code=$result['Status'];
@@ -863,7 +816,7 @@ function getNewListElastixAccounts($searchFilter){
                     $st_code=0;
                     $status=_tr('Idle');
                 }
-                if($value['id']!=$arrCredentials['idUser']){   
+                if ($value['id'] != $arrCredentials['idUser']) {   
                     $arrContacts[$index_st][$key]['idUser']=$value['id'];
                     $arrContacts[$index_st][$key]['display_name']=$value['name'];
                     $arrContacts[$index_st][$key]['username']=$value['username'];
@@ -896,8 +849,9 @@ function getNewListElastixAccounts($searchFilter){
 
 function getChatContactsStatus($searchFilter)
 {
-    $jsonObject = new PaloSantoJSON();    
-    $newListContacts=getNewListElastixAccounts($searchFilter);
+    $jsonObject = new PaloSantoJSON();
+    $dummy = NULL;    
+    $newListContacts=getNewListElastixAccounts($searchFilter, $dummy);
     
     if($newListContacts===false){   
         $status = FALSE;

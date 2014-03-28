@@ -402,6 +402,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Mar 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove domain suffix from IM account returned to end user.
+  For future integration with Kamailio, the REGISTER through WebSocket must be
+  done with the natural account. Also, remove blatant code duplication and make
+  some code simplifications.
+  SVN Rev[6564]
+
 * Thu Mar 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: rework paloIAX in order to factor out a method 
   _getFieldValuesSQL(), as done for paloSIP. Make _getFieldValuesSQL() public

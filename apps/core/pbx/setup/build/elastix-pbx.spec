@@ -250,6 +250,11 @@ if [ $1 -eq 1 ]; then #install
   # Cambio carpeta de archivos de configuración de Asterisk
   mv -f /etc/asterisk.elastix/* /etc/asterisk/
 
+  # Corregir la arquitectura en kamailio.cfg
+  if [ `uname -m` != 'x86_64' ] ; then
+    sed -i 's|/usr/lib64|/usr/lib|' /etc/kamailio.elastix/kamailio.cfg
+  fi
+
   mv -f /etc/kamailio.elastix/* /etc/kamailio/
 elif [ $1 -eq 2 ]; then #update
   # The installer database
@@ -367,6 +372,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Mar 31 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: fix architecture directory to ensure kamailio modules are 
+  loaded properly.
+  SVN Rev[6565]
+
 * Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: guard against missing authuser by requiring all external 
   SIP requests to be authenticated, not just REGISTER. This prevents an INVITE

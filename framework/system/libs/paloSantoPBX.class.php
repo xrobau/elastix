@@ -140,8 +140,15 @@ class paloAsteriskDB {
                         $result=$this->getFirstResultQuery($query,array($extension,$domain));
                         if(count($result)>0 || $result===false){
                             $this->errMsg=_tr("Already exits a ring group with same pattern").$this->errMsg;
-                        }else
-                            $exist=false;
+                        }else{
+                            //valido que el patron de marcado no este siendo usado por un ring_group
+                            $query="SELECT 1 from meetme where ext_conf=? and organization_domain=?";
+                            $result=$this->getFirstResultQuery($query,array($extension,$domain));
+                            if(count($result)>0 || $result===false){
+                                $this->errMsg=_tr("Already exits a conference with same pattern").$this->errMsg;
+                            }else
+                                $exist=false;
+                        }                            
                     }
                 }
             }
@@ -303,10 +310,26 @@ class paloAsteriskDB {
         
         switch($categoria){
             case "extensions":
-                $qExt="SELECT dial,exten from extension where organization_domain=?";
+                $qExt="SELECT clid_name,exten,tech from extension where organization_domain=? order by exten asc";
                 $result=$this->getResultQuery($qExt,array($domain),true);
                 foreach($result as $value){
-                    $arrDestine["extensions,".$value["exten"]]=$value["exten"]." (".$value["dial"].")";
+                    $arrDestine["extensions,".$value["exten"]]=$value["exten"].": ".$value["clid_name"]." (".strtoupper($value["tech"]).")";
+                }
+                break;
+            case "faxes":
+                $qExt="SELECT clid_name,exten,tech from fax where organization_domain=? order by exten asc";
+                $result=$this->getResultQuery($qExt,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["faxes,".$value["exten"]]=$value["exten"].": ".$value["clid_name"]." (IAX2)";
+                }
+                break;
+            case "voicemails":
+                $qExt="SELECT clid_name,exten from extension where organization_domain=?  order by exten asc";
+                $result=$this->getResultQuery($qExt,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["voicemails,{$value["exten"]}-busy"]=$value["exten"].": ".$value["clid_name"]." (busy)";
+                    $arrDestine["voicemails,{$value["exten"]}-unavail"]=$value["exten"].": ".$value["clid_name"]." (unavail)";
+                    $arrDestine["voicemails,{$value["exten"]}-no_msg"]=$value["exten"].": ".$value["clid_name"]." (no-msg)";
                 }
                 break;
             case "ivrs":
@@ -314,6 +337,13 @@ class paloAsteriskDB {
                 $result=$this->getResultQuery($qIvr,array($domain),true);
                 foreach($result as $value){
                     $arrDestine["ivrs,".$value["id"]]=$value["name"];
+                }
+                break;
+            case "meetme":
+                $qIvr="SELECT name,ext_conf from meetme where organization_domain=?";
+                $result=$this->getResultQuery($qIvr,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["meetme,".$value["ext_conf"]]=$value["ext_conf"]." (".$value["name"].")";
                 }
                 break;
             /*case "trunks":
@@ -381,6 +411,9 @@ class paloAsteriskDB {
         $select=$result[1];
         
         switch($categoria){
+            case "voicemails":
+                $result = explode("-",$result[1]);
+                $select = $result[0];
             case "extensions":
                 $query="SELECT count(exten) from extension where organization_domain=? and exten=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
@@ -388,8 +421,22 @@ class paloAsteriskDB {
                     return false;
                 }
                 break;
+            case "faxes":
+                $query="SELECT count(exten) from fax where organization_domain=? and exten=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
             case "ivrs":
                 $query="SELECT count(id) from ivr where organization_domain=? and id=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+            case "meetme":
+                $query="SELECT count(ext_conf) from meetme where organization_domain=? and ext_conf=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
                 if($result[0]!="1"){
                     return false;
@@ -472,11 +519,39 @@ class paloAsteriskDB {
                     return "$code-from-did-direct,".$result["exten"].",1";
                 }
                 break;
+            case "voicemails":
+                $result  = explode("-",$result[1]);
+                $destino = $result[0];
+                $query="SELECT exten from extension where organization_domain=? and exten=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    $vmopt = isset($result[1])?$result[1]:"s";
+                    if($vmopt == "unavail") $vmopt="vmu";
+                    else if($vmopt == "busy") $vmopt="vmb";
+                    else $vmopt="vms";
+                    
+                    return "$code-ext-local,$vmopt".$result["exten"].",1";
+                }
+                break;
+            case "faxes":
+                $query="SELECT exten from fax where organization_domain=? and exten=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-ext-fax,".$result["exten"].",1";
+                }
+                break;
             case "ivrs":
                 $query="SELECT id from ivr where organization_domain=? and id=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
                 if($result!=false){
                     return "$code-ivr-".$result["id"].",s,1";
+                }
+                break;
+            case "meetme":
+                $query="SELECT ext_conf from meetme where organization_domain=? and ext_conf=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-ext-meetme,".$result["ext_conf"].",1";
                 }
                 break;
             /*case "trunks":
@@ -538,11 +613,22 @@ class paloAsteriskDB {
         $result=$this->getFirstResultQuery($query,array($domain));
         if($result!=false){
             $arrCat["extensions"]=_tr("Extensions");
+            $arrCat["voicemails"]=_tr("VoicelMails");
+        }
+        $query="select id from fax where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["faxes"]=_tr("FAXes");
         }
         $query="select id from ivr where organization_domain=?";
         $result=$this->getFirstResultQuery($query,array($domain));
         if($result!=false){
-            $arrCat["ivrs"]=_tr("Ivrs");
+            $arrCat["ivrs"]=_tr("IVRs");
+        }
+        $query="select bookid from meetme where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["meetme"]=_tr("Conferences");
         }
         /*$query="select trunkid from trunk where organization_domain=?";
         $result=$this->getFirstResultQuery($query,array($domain));

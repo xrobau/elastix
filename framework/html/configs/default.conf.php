@@ -28,14 +28,15 @@
   $Id: default.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
 global $arrConf;
-$arrConf['elastix_dbdir'] = '/var/www/db';
+
+$arrConf['basePath'] = $_SERVER['DOCUMENT_ROOT'];
+$arrConf['elastix_dbdir'] = $arrConf['basePath'].'/../db';
 $arrConf['elastix_dsn'] = array(
                                 "acl"       =>  "sqlite3:///$arrConf[elastix_dbdir]/acl.db",
                                 "settings"  =>  "sqlite3:///$arrConf[elastix_dbdir]/settings.db",
                                 "menu"      =>  "sqlite3:///$arrConf[elastix_dbdir]/menu.db",
                                 "samples"   =>  "sqlite3:///$arrConf[elastix_dbdir]/samples.db",
                             );
-$arrConf['basePath'] = '/var/www/html';
 $arrConf['theme'] = 'default'; //theme personal para los modulos esencialmente
 
 // Verifico si las bases del framework están, debido a la migración de dichas bases como archivos .db a archivos .sql

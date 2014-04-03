@@ -473,7 +473,14 @@ function obtenerClaveCyrusAdmin($ruta_base='')
  */
 function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
 {
-    require_once $ruta_base.'libs/paloSantoConfig.class.php';
+    if(file_exists($ruta_base.'libs/paloSantoConfig.class.php'))
+    	require_once $ruta_base.'libs/paloSantoConfig.class.php';
+    else{
+        global $arrConf;
+        $ruta_base = $arrConf['basePath'];
+        require_once $ruta_base.'/libs/paloSantoConfig.class.php';
+    }
+
     switch ($sNombreUsuario) {
     case 'root':
         $pConfig = new paloConfig("/etc", "elastix.conf", "=", "[[:space:]]*=[[:space:]]*");
@@ -791,7 +798,14 @@ function getSmarty($mainTheme, $basedir = '/var/www/html')
 {
     if (file_exists('/usr/share/php/Smarty/Smarty.class.php'))
         require_once('Smarty/Smarty.class.php');
-    else require_once("$basedir/libs/smarty/libs/Smarty.class.php");
+    else if(file_exists('$basedir/libs/smarty/libs/Smarty.class.php'))
+	require_once("$basedir/libs/smarty/libs/Smarty.class.php");
+    else{
+        global $arrConf;
+        $basedir = $arrConf['basePath'];
+        require_once("$basedir/libs/smarty/libs/Smarty.class.php");
+    }
+       
     $smarty = new Smarty();
     
     $smarty->template_dir = "$basedir/themes/$mainTheme";

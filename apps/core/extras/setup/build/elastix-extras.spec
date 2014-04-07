@@ -6,8 +6,8 @@ Version: 2.4.0
 Release: 3
 License: GPL
 Group:   Applications/System
-#Source0: %{modname}_%{version}-%{release}.tgz
-Source0: %{modname}_2.0.4-4.tgz
+Source0: %{modname}_%{version}-%{release}.tgz
+#Source0: %{modname}_2.0.4-4.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.2.0-18
@@ -28,7 +28,6 @@ mv modules/                $RPM_BUILD_ROOT/var/www/html/
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p                   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv -f setup/static/        $RPM_BUILD_ROOT/var/www/html/
 mv setup/                  $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml                $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 

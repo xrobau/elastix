@@ -65,6 +65,7 @@ $arrLangModule=array(
 "Queue Priorities" => "Prioridades de Cola",
 "Time Groups" => "Grupos Horarios",
 "Languages" => "Idiomas",
-"VoiceMail Blasting" => "Correo de Voz Masivo"
+"VoiceMail Blasting" => "Correo de Voz Masivo",
+" is a register trademark of " => "es una marca registrada de"
 );
 ?>

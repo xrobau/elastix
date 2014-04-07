@@ -22,8 +22,6 @@
         <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=timeconditions"  >{$Time_Conditions}</a></li>
         <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=timegroups"  >{$Time_Groups}</a></li>
         <li>{$Internal_Options_Configuration}</li>
-
-
         <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=conferences"  >{$Conferences}</a></li>
         <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=languages"  >{$Languages}</a></li>
         <li><a href="/?menu=pbxconfig&amp;type=setup&amp;display=miscapps"  >{$Misc_Applications}</a></li>
@@ -44,6 +42,17 @@
         </div>
       </ul>
         <br /> <br /> <br /> <br />
-<td valign="top">{$htmlFPBX}</td>
+    </td>
+<td id="content_pbx" valign="top">{$htmlFPBX}</td>
+</tr>
+<tr>
+	<td></td>
+	<td valign="bottom">
+		<div align="center">
+			<a href="http://www.freepbx.org" target="_blank" style="color: #444; text-decoration: none;">FreePBX®</a>
+			<a style="color: #444; text-decoration: none;">{$footer_FreePBX}</a>
+			<a href="http://www.schmoozecom.com/" target="_blank" style="color: #444; text-decoration: none;">Schmooze Com, Inc.</a>
+		</div>
+	</td>
 </tr>
 </table>

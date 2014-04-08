@@ -1542,7 +1542,7 @@ class paloFeatureCodePBX extends paloAsteriskDB{
             return false;
         }
         
-        $query="SELECT f.name,fg.default_code,f.code,f.estado from features_code f join features_code_settings fg
+        $query="SELECT f.name, fg.description, fg.default_code,f.code,f.estado from features_code f join features_code_settings fg
         on f.name=fg.name where organization_domain=?";
         $result=$this->_DB->fetchTable($query,true,array($domain));
         if($result===false){

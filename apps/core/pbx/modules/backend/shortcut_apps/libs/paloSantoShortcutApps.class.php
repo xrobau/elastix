@@ -25,13 +25,13 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: paloSantoAnnouncement.class.php,v 1.1 2014-03-12 Bruno Macias bmacias@elastix.org Exp $ */
+  $Id: paloSantoShortcutApps.class.php,v 1.1 2014-03-12 Bruno Macias bmacias@elastix.org Exp $ */
 
-class paloSantoAnnouncement extends paloAsteriskDB{
+class paloSantoShortcutApps extends paloAsteriskDB{
     protected $code;
     protected $domain;
 
-    function paloSantoAnnouncement(&$pDB,$domain)
+    function paloSantoShortcutApps(&$pDB,$domain)
     {
        parent::__construct($pDB);
         
@@ -42,7 +42,7 @@ class paloSantoAnnouncement extends paloAsteriskDB{
 
             $result=$this->getCodeByDomain($domain);
             if($result==false){
-                $this->errMsg .=_tr("Can't create a new instace of paloSantoAnnouncement").$this->errMsg;
+                $this->errMsg .=_tr("Can't create a new instace of paloSantoShortcutApps").$this->errMsg;
             }else{
                 $this->code=$result["code"];
             }
@@ -56,7 +56,7 @@ class paloSantoAnnouncement extends paloAsteriskDB{
             $this->domain=$domain;
             $result=$this->getCodeByDomain($domain);
             if($result==false){
-                $this->errMsg .=_tr("Can't create a new instace of paloSantoAnnouncement").$this->errMsg;
+                $this->errMsg .=_tr("Can't create a new instace of paloSantoShortcutApps").$this->errMsg;
             }else{
                 $this->code=$result["code"];
             }
@@ -73,18 +73,18 @@ class paloSantoAnnouncement extends paloAsteriskDB{
         return true;
     }
     
-    function getNumAnnouncement($domain=null,$announcement_name=null){
+    function getNumShortcutApps($domain=null,$ShortcutApps_name=null){
         $where=array();
         $arrParam=null;
 
-        $query="SELECT count(id) from announcement";
+        $query="SELECT count(id) from shortcut_apps";
         if(isset($domain) && $domain!='all'){
             $where[]=" organization_domain=?";
             $arrParam[]=$domain;
         }
-        if(isset($announcement_name) && $announcement_name!=''){
+        if(isset($ShortcutApps_name) && $ShortcutApps_name!=''){
             $where[]=" UPPER(description) like ?";
-            $arrParam[]="%".strtoupper($announcement_name)."%";
+            $arrParam[]="%".strtoupper($ShortcutApps_name)."%";
         }
         if(count($where)>0){
             $query .=" WHERE ".implode(" AND ",$where);
@@ -99,18 +99,18 @@ class paloSantoAnnouncement extends paloAsteriskDB{
     }
 
     
-    function getAnnouncement($domain=null,$announcement_name=null,$limit=null,$offset=null){
+    function getShortcutApps($domain=null,$shortcut_apps_name=null,$limit=null,$offset=null){
         $where=array();
         $arrParam=null;
 
-        $query="SELECT *, (SELECT name from recordings where uniqueid=recording_id) recording_name from announcement";
+        $query="SELECT * from shortcut_apps";
         if(isset($domain) && $domain!='all'){
             $where[]=" organization_domain=?";
             $arrParam[]=$domain;
         }
-        if(isset($announcement_name) && $announcement_name!=''){
+        if(isset($shortcut_apps_name) && $shortcut_apps_name!=''){
             $where[]=" UPPER(description) like ?";
-            $arrParam[]="%".strtoupper($announcement_name)."%";
+            $arrParam[]="%".strtoupper($shortcut_apps_name)."%";
         }
         if(count($where)>0){
             $query .=" WHERE ".implode(" AND ",$where);
@@ -130,13 +130,13 @@ class paloSantoAnnouncement extends paloAsteriskDB{
             return $result;
     }
 
-    function getAnnouncementById($id){
+    function getShortcutAppsById($id){
         if (!preg_match('/^[[:digit:]]+$/', "$id")) {
-            $this->errMsg = _tr("Invalid Announcement ID");
+            $this->errMsg = _tr("Invalid ShortcutApps ID");
             return false;
         }
 
-        $query="SELECT * from announcement where id=? and organization_domain=?";
+        $query="SELECT * from shortcut_apps where id=? and organization_domain=?";
         $result=$this->_DB->getFirstRowQuery($query,true,array($id,$this->domain));
         
         if($result===false){
@@ -148,13 +148,13 @@ class paloSantoAnnouncement extends paloAsteriskDB{
               return false;
     }
     
-    function createNewAnnouncement($arrProp){
+    function createNewShortcutApps($arrProp){
         if(!$this->validateDomainPBX()){
             $this->errMsg=_tr("Invalid Organization");
             return false;
         }
     
-        $query="INSERT INTO announcement (";
+        $query="INSERT INTO shortcut_apps (";
         $arrOpt=array();
         
         $query .="organization_domain,";
@@ -169,37 +169,12 @@ class paloSantoAnnouncement extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["description"];
         }
         
-        if(isset($arrProp["allow_skip"])){
-            $query .="allow_skip,";
-            $arrOpt[count($arrOpt)]=$arrProp["allow_skip"];
+        if(isset($arrProp["exten"])){
+            $query .="exten,";
+            $arrOpt[count($arrOpt)]=$arrProp["exten"];
         }
 
-        if(isset($arrProp["return_ivr"])){
-            $query .="return_ivr,";
-            $arrOpt[count($arrOpt)]=$arrProp["return_ivr"];
-        }
-        
-        if(isset($arrProp["noanswer"])){
-            $query .="noanswer,";
-            $arrOpt[count($arrOpt)]=$arrProp["noanswer"];
-        }
-        
-        if(isset($arrProp["repeat_msg"])){
-            $query .="repeat_msg,";
-            $arrOpt[count($arrOpt)]=$arrProp["repeat_msg"];
-        }
-
-        if(isset($arrProp["recording_id"])){
-            if($arrProp["recording_id"]!="none"){
-                if($this->getFileRecordings($this->domain,$arrProp["recording_id"])==false){
-                    $arrProp["recording_id"]="none";
-                }
-            }
-            $query .="recording_id,";
-            $arrOpt[count($arrOpt)]=$arrProp["recording_id"];
-        }
-        
-       if(isset($arrProp["destination"])){
+        if(isset($arrProp["destination"])){
             if($this->validateDestine($this->domain,$arrProp["destination"])!=false){
                 $query .="destination,goto";
                 $arrOpt[count($arrOpt)]=$arrProp["destination"];
@@ -225,16 +200,16 @@ class paloSantoAnnouncement extends paloAsteriskDB{
         return $result; 
     }
 
-    function updateAnnouncementPBX($arrProp){
-        $query="UPDATE announcement SET ";
+    function updateShortcutAppsPBX($arrProp){
+        $query="UPDATE shortcut_apps SET ";
         $arrOpt=array();
 
-        $result=$this->getAnnouncementById($arrProp["id"]);
+        $result=$this->getShortcutAppsById($arrProp["id"]);
         if($result==false){
-            $this->errMsg=_tr("Announcement doesn't exist").$this->errMsg;
+            $this->errMsg=_tr("ShortcutApps doesn't exist").$this->errMsg;
             return false;
         }
-        $idAnnouncement=$result["id"];
+        $idShortcutApps=$result["id"];
         
         //debe haberse seteado description
         if(!isset($arrProp["description"]) || $arrProp["description"]==""){
@@ -245,37 +220,12 @@ class paloSantoAnnouncement extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["description"];
         }
         
-        if(isset($arrProp["allow_skip"])){
-            $query .="allow_skip=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["allow_skip"];
+        if(isset($arrProp["exten"])){
+            $query .="exten=?,";
+            $arrOpt[count($arrOpt)]=$arrProp["exten"];
         }
-
-        if(isset($arrProp["return_ivr"])){
-            $query .="return_ivr=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["return_ivr"];
-        }
-        
-        if(isset($arrProp["noanswer"])){
-            $query .="noanswer=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["noanswer"];
-        }
-        
-        if(isset($arrProp["repeat_msg"])){
-            $query .="repeat_msg=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["repeat_msg"];
-        }
-
-        if(isset($arrProp["recording_id"])){
-            if($arrProp["recording_id"]!="none"){
-                if($this->getFileRecordings($this->domain,$arrProp["recording_id"])==false){
-                    $arrProp["recording_id"]="none";
-                }
-            }
-            $query .="recording_id=?,";
-            $arrOpt[count($arrOpt)]=$arrProp["recording_id"];
-        }
-        
-       if(isset($arrProp["destination"])){
+               
+        if(isset($arrProp["destination"])){
             if($this->validateDestine($this->domain,$arrProp["destination"])!=false){
                 $query .="destination=?,goto=?";
                 $arrOpt[count($arrOpt)]=$arrProp["destination"];
@@ -289,7 +239,7 @@ class paloSantoAnnouncement extends paloAsteriskDB{
         
         //caller id options                
         $query = $query." WHERE id=?"; 
-        $arrOpt[count($arrOpt)]=$idAnnouncement;
+        $arrOpt[count($arrOpt)]=$idShortcutApps;
         $result=$this->executeQuery($query,$arrOpt);
         if($result==false)
             $this->errMsg=$this->errMsg;
@@ -298,41 +248,37 @@ class paloSantoAnnouncement extends paloAsteriskDB{
     }
 
 
-    function deleteAnnouncement($id){
-        $result=$this->getAnnouncementById($id);
+    function deleteShortcutApps($id){
+        $result=$this->getShortcutAppsById($id);
         if($result==false){
-            $this->errMsg=_tr("Announcement doesn't exist").$this->errMsg;
+            $this->errMsg=_tr("ShortcutApps doesn't exist").$this->errMsg;
             return false;
         }
         
-        $query="DELETE from announcement where id=?";
+        $query="DELETE from shortcut_apps where id=?";
         if($this->executeQuery($query,array($id))){
             return true;
         }else{
-            $this->errMsg = _tr("Announcement can't be deleted.").$this->errMsg;
+            $this->errMsg = _tr("ShortcutApps can't be deleted.").$this->errMsg;
             return false;
         } 
     }
     
-    function createDialplanAnnouncement(&$arrFromInt){
+    function createDialplanShortcutApps(&$arrFromInt){
         if(is_null($this->code) || is_null($this->domain))
             return false;
             
-        $arrAnnouncement = $this->getAnnouncement($this->domain);
-        if($arrAnnouncement===false){
-            $this->errMsg=_tr("Error creating dialplan for Announcement. ").$this->errMsg; 
+        $arrShortcutApps = $this->getShortcutApps($this->domain);
+        if($arrShortcutApps===false){
+            $this->errMsg=_tr("Error creating dialplan for ShortcutApps. ").$this->errMsg; 
             return false;
         }
         else{
             $arrContext = array();
             
-            foreach($arrAnnouncement as $value){
-                $recording_file = $this->getFileRecordings($this->domain,$value["recording_id"]);
-                $repeat_msg     = ($value['repeat_msg']=="no") || ($value['repeat_msg']==0)?false:$value['repeat_msg'];
-                $allow_skip     = ($value['allow_skip']=="no")?false:$value['allow_skip'];
-                $return_ivr     = ($value['return_ivr']=="no")?false:$value['return_ivr'];
-                $noanswer       = ($value['noanswer']=="no")?false:$value['noanswer'];
-                $exten          = "s";
+            foreach($arrShortcutApps as $value){
+                $exten = $value['exten'];
+                $id    = $value['id'];
                 
                 if(isset($value["destination"])){
                     $goto = $this->getGotoDestine($this->domain,$value["destination"]);
@@ -340,65 +286,18 @@ class paloSantoAnnouncement extends paloAsteriskDB{
                         $goto = "h,1";
                 }
                     
-                if(!$noanswer){
-                    $arrExt[]=new paloExtensions($exten, new ext_gotoif('$["${CDR(disposition)}" = "ANSWERED"]','begin'),1);
-                    $arrExt[]=new paloExtensions($exten, new ext_answer(''));
-                    $arrExt[]=new paloExtensions($exten, new ext_wait('1'));
-                }
-                $arrExt[]=new paloExtensions($exten, new ext_noop('Playing announcement '.$value['description']),($noanswer)?"1":"n","begin");
+                $arrExt[]=new paloExtensions($exten, new ext_noop("Running shortcut apps {$id}: {$value['description']}"),"1");
+                $arrExt[]=new paloExtensions($exten, new ext_macro($this->code."-user-callerid"),"n");
+                $arrExt[]=new paloExtensions($exten, new extension("Goto(".$goto.")"),"n");
+                  
             
-                if(!($allow_skip || $repeat_msg))
-                    $arrExt[]=new paloExtensions($exten, new ext_playback($recording_file.',noanswer'));
-                
-                if($repeat_msg)
-                    $arrExt[]=new paloExtensions($exten, new ext_responsetimeout(1));
-                
-                if($allow_skip || $repeat_msg)
-                    $arrExt[]=new paloExtensions($exten, new ext_background($recording_file.',nm'),"n","play");
-                
-                if($repeat_msg)
-                    $arrExt[]=new paloExtensions($exten, new ext_waitexten(''));
-                
-                if($return_ivr){
-                    if(!$repeat_msg)
-                        $arrExt[]=new paloExtensions($exten, new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'));
-                } 
-                else{
-                    if(!$repeat_msg)
-                        $arrExt[]=new paloExtensions($exten, new extension("Goto(".$goto.")"));
-                }
-                
-                if($allow_skip){
-                    $arrExt[]=new paloExtensions("_X", new ext_noop('User skipped announcement'),"1");
-                    if ($return_ivr)
-                        $arrExt[]=new paloExtensions("_X", new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'));
-                    else 
-                        $arrExt[]=new paloExtensions("_X", new extension("Goto(".$goto.")"));
-                }
-                
-                if($repeat_msg)
-                    $arrExt[]=new paloExtensions($repeat_msg,new ext_goto('s,play'),"1");
-                
-                // if repeat_msg enabled then set exten to t to allow for the key to be pressed, otherwise play message and go
-                if($return_ivr){
-                    if($repeat_msg)
-                        $arrExt[]=new paloExtensions("t", new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'),"1");
-                    if($allow_skip || $repeat_msg)
-                        $arrExt[]=new paloExtensions('i', new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'),"1");
-                } 
-                else{
-                    if($repeat_msg)
-                        $arrExt[]=new paloExtensions("t", new extension("Goto(".$goto.")"),"1");
-                    if($allow_skip || $repeat_msg)
-                        $arrExt[]=new paloExtensions('i', new extension("Goto(".$goto.")"),"1");
-                }
-            
-                //creamos context app-announcement
-                $context = new paloContexto($this->code,"app-announcement-{$value['id']}");
+                //creamos context app-shortcut_apps
+                $context = new paloContexto($this->code,"app-shortcut-{$value['id']}");
                 if($context === false)
-                    $context->errMsg = "ext-announcement. Error: ".$context->errMsg;
+                    $context->errMsg = "app-shortcut. Error: ".$context->errMsg;
                 else{
                     $context->arrExtensions = $arrExt;
+                    $arrFromInt[]["name"]   = "app-shortcut-{$value['id']}";
                     $arrContext[]           = $context;
                     $arrExt                 = array();
                 }

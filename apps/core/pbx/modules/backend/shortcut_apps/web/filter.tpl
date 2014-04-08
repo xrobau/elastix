@@ -5,6 +5,6 @@
         </tr>
     {/if}
     <tr class="letra12">
-        <td width="10%">{$announcement_name.LABEL}: </td><td>{$announcement_name.INPUT} {$SEARCH}</td>
+        <td width="10%">{$shortcut_apps_name.LABEL}: </td><td>{$shortcut_apps_name.INPUT} {$SEARCH}</td>
     </tr>
 </table>

@@ -367,6 +367,13 @@ class paloAsteriskDB {
                     $arrDestine["announcement,".$value["id"]]=$value["description"];
                 }
                 break;
+             case "other_destinations":
+                $query="SELECT description,id from other_destinations where organization_domain=?";
+                $result=$this->getResultQuery($query,array($domain),true);
+                foreach($result as $value){
+                    $arrDestine["other_destinations,".$value["id"]]=$value["description"];
+                }
+                break;
             case "ring_group":
                 $query="SELECT rg_name,rg_number from ring_group where organization_domain=?";
                 $result=$this->getResultQuery($query,array($domain),true);
@@ -458,6 +465,13 @@ class paloAsteriskDB {
                 break;
             case "announcement":
                 $query="SELECT count(id) from announcement where organization_domain=? and id=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$select));
+                if($result[0]!="1"){
+                    return false;
+                }
+                break;
+            case "other_destinations":
+                $query="SELECT count(id) from other_destinations where organization_domain=? and id=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$select));
                 if($result[0]!="1"){
                     return false;
@@ -575,6 +589,13 @@ class paloAsteriskDB {
                     return "$code-app-announcement-{$result["id"]},s,1";
                 }
                 break;
+            case "other_destinations":
+                $query="SELECT id from other_destinations where organization_domain=? and id=?";
+                $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
+                if($result!=false){
+                    return "$code-ext-otherdestine,{$result["id"]},1";
+                }
+                break;
             case "ring_group":
                 $query="SELECT rg_number from ring_group where organization_domain=? and rg_number=?";
                 $result=$this->getFirstResultQuery($query,array($domain,$destino),true);
@@ -644,6 +665,11 @@ class paloAsteriskDB {
         $result=$this->getFirstResultQuery($query,array($domain));
         if($result!=false){
             $arrCat["announcement"]=_tr("Announcements");
+        }
+        $query="select id from other_destinations where organization_domain=?";
+        $result=$this->getFirstResultQuery($query,array($domain));
+        if($result!=false){
+            $arrCat["other_destinations"]=_tr("Other Destinations");
         }
         $query="select rg_number from ring_group where organization_domain=?";
         $result=$this->getFirstResultQuery($query,array($domain));

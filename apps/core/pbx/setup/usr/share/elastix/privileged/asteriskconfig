@@ -781,6 +781,8 @@ function generateDialPlan($domain,$reload=false){
     require_once "apps/conference/libs/paloSantoConference.class.php";
     require_once "apps/features_code/libs/paloSantoFeaturesCode.class.php";
     require_once "apps/announcement/libs/paloSantoAnnouncement.class.php";
+    require_once "apps/shortcut_apps/libs/paloSantoShortcutApps.class.php";
+    require_once "apps/other_destinations/libs/paloSantoOtherDestinations.class.php";
     require_once "libs/paloSantoIM.class.php";
     
     if(!preg_match("/^(([[:alnum:]-]+)\.)+([[:alnum:]])+$/", $domain)){
@@ -856,6 +858,8 @@ function generateDialPlan($domain,$reload=false){
         array('paloSantoTC',           'createDialplanTC'),
         array('paloFeatureCodePBX',    'createDialPlanFeaturesCode'),
         array('paloSantoAnnouncement', 'createDialPlanAnnouncement'),
+        array('paloSantoShortcutApps', 'createDialPlanShortcutApps'),
+        array('paloSantoOtherDestinations', 'createDialplanOtherDestinations'),
     );
     foreach ($dialplanObjects as $tuplaCallback) {
         $pObjDialplan = is_object($tuplaCallback[0]) ? $tuplaCallback[0] : (new $tuplaCallback[0]($pDB, $domain));

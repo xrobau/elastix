@@ -160,7 +160,7 @@ class paloSantoInbound extends paloAsteriskDB{
 
     private function isRepeatDidCid($did,$cid){
         if(isset($cid)){
-            if(!preg_match("/^[0-9]*$/",$cid)){
+            if(!preg_match("/^[0-9_XZN\-\[\]\.#]*$/",$cid)){
                 $this->errMsg=_tr("Invalid Caller ID number");
                 return true;
             }
@@ -214,7 +214,7 @@ class paloSantoInbound extends paloAsteriskDB{
         }
 
         if(isset($arrProp["cid_number"])){
-            if(!preg_match("/^[0-9]*$/",$arrProp["cid_number"])){
+            if(!preg_match("/^[0-9_XZN\-\[\]\.#]*$/",$arrProp["cid_number"])){
                 $this->errMsg=_tr("Invalid Caller ID number");
                 return false;
             }
@@ -343,7 +343,7 @@ class paloSantoInbound extends paloAsteriskDB{
             $arrProp["did_number"]="";
             
         if(isset($arrProp["cid_number"])){
-            if(!preg_match("/^[0-9]*$/",$arrProp["cid_number"])){
+            if(!preg_match("/^[0-9_XZN\-\[\]\.#]*$/",$arrProp["cid_number"])){
                 $this->errMsg=_tr("Invalid Caller ID number");
                 return false;
             }

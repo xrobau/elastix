@@ -53,3 +53,27 @@ UNION
 (SELECT kamailioname AS username, domain, sippasswd AS ha1, NULL AS ha1b
 FROM sip, global_domains
 WHERE sip.organization_domain = '');
+
+/* This table is for shortcut_apps module */
+CREATE TABLE shortcut_apps(
+  id                  INT(11)      NOT NULL AUTO_INCREMENT,
+  description         VARCHAR(50)  DEFAULT NULL,
+  exten               VARCHAR(50)  DEFAULT NULL,
+  goto                VARCHAR(50)  NOT NULL,
+  destination         VARCHAR(255) DEFAULT NULL,
+  organization_domain VARCHAR(100) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
+  INDEX organization_domain (organization_domain)
+) ENGINE=INNODB;
+
+/* This table is for shortcut_apps module */
+CREATE TABLE other_destinations(
+  id                  INT(11)      NOT NULL AUTO_INCREMENT,
+  description         VARCHAR(50)  NOT NULL,
+  destdial            VARCHAR(100) NOT NULL,
+  organization_domain VARCHAR(100) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
+  INDEX organization_domain (organization_domain)
+) ENGINE=INNODB;

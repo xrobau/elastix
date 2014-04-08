@@ -29,8 +29,7 @@
 
 global $arrConf;
 
-#$arrConf['basePath'] = isset($_SERVER['DOCUMENT_ROOT'])?$_SERVER['DOCUMENT_ROOT']:"/var/www/html";
-$arrConf['basePath'] = "/var/local/dpt-desarrollo/elxdev_elastix_com/web";
+$arrConf['basePath'] = isset($_SERVER['DOCUMENT_ROOT'])?$_SERVER['DOCUMENT_ROOT']:"/var/www/html";
 $arrConf['elastix_dbdir'] = $arrConf['basePath'].'/../db';
 $arrConf['elastix_dsn'] = array(
                                 "acl"       =>  "sqlite3:///$arrConf[elastix_dbdir]/acl.db",

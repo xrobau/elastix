@@ -34,6 +34,7 @@ rm -rf $RPM_BUILD_ROOT
 
 # Asterisk files
 mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/agi-bin
+mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/moh
 #mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/mohmp3
 
 mkdir -p $RPM_BUILD_ROOT/etc/cron.daily

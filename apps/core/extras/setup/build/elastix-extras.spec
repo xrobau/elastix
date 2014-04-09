@@ -3,7 +3,7 @@
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -60,6 +60,17 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Bumped release in specfile.
+
+* Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com> 
+- REMOVED: extras - elastix-extras.spec: Due to SVN commit 5723, the static
+  folder is not part of this module anymore, making unnecessary the creation
+  and its corresponding directory change in the spec file. Uncommenting the
+  source0 %{modname}_%{version}-%{release}.tgz.
+  SVN Rev[6569]
+
 * Wed Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - DELETED: xmlservices: Remove unused xmlservices directory. This code is Cisco
   specific, has a very poor implementation and exposes the external addressbook
@@ -71,6 +82,7 @@ fi
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
   SVN history. Bumped release in specfile.
+  SVN Rev[6379]
 
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Softphones, Fax Utilities, Instant Messaging: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.

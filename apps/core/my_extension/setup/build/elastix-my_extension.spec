@@ -3,7 +3,7 @@
 Summary: Elastix My Extension 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -85,9 +85,29 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: framework,my_extension - index.html,paloSantoValidar.class.php: A
+  correction in the name of variable numeric_rang has been made it.
+  SVN Rev[6420]
+
+* Tue Jan 21 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: module myex_config, [#1788] bugs.elastix.org. Fixed bugs related with
+  FreePBX 2.11 integrated with elastix.
+  SVN Rev[6398]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6379]
+
+* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Update to the changelog about the english and spanish help files in
+  the myex_config module.
+  SVN Rev[6363]
 
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: myex_config: For each module listed here the english help file 

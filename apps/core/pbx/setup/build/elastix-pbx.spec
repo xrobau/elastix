@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 15
+Release: 16
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -267,6 +267,15 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-16
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com> 
+- ADDED: pbx - pbxadmin: A suitable footnote was added in the bottom of the PBX
+  tab indicating the brand and the rights of FreePBX.
+  SVN Rev[6568]
+
 * Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Extension Batch: fix up dialog to match standard dialogs under
   blackmin theme.
@@ -289,6 +298,7 @@ fi
 
 * Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: update Ember.js to 1.3.2
+  SVN Rev[6467]
 
 * Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Control Panel: update Ember.js to 1.3.1, Handlebars to 1.2.1.
@@ -303,6 +313,14 @@ fi
   instead of hardcoding the value inside code.
   SVN Rev[6446]
 
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: pbxadmin module, Message copy right FreePBX was changed.
+  SVN Rev[6421]
+
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: pbxadmin module, Message copy right FreePBX was changed.
+  SVN Rev[6418]
+
 * Thu Jan 23 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Festival: introduce check for systemd-style status report in order to
   detect whether festival is running.
@@ -313,9 +331,20 @@ fi
   to the one checked in CentOS.
   SVN Rev[6400]
 
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: pbx - pbxadmin/contentFreePBX.php,en.lang,es.lang: Reference to the
+  trademark 'FreePBX' now are under the correct format of their policy claimed
+  in his web page(tied to more changes until further notice).
+  SVN Rev[6382]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-15
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6379]
+
+* Mon Jan 13 2014 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Update to the changelog about the new name of the module Monitoring
+  SVN Rev[6377]
 
 * Mon Jan 13 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Monitoring module: The name of the module Monitoring was changed 

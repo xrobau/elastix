@@ -94,6 +94,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar - restore old behavior of allowing empty event descriptions.
   Previously this was allowed through the GUI but not through REST/SOAP.
@@ -128,9 +132,14 @@ fi
   related to loading and updating the calendar.
   SVN Rev[6555]
 
+* Sun Feb 16 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Calendar: mark some library functions as private
+  SVN Rev[6477]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-12
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6379]
 
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Calendar, Address Book: For each module listed here the english help

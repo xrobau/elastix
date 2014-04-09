@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 13
+Release: 14
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -329,6 +329,43 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-14
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Apr 09 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- FIXED: framework elastix 2, empty validation for document root now is denied.
+  SVN Rev[6578]
+
+* Wed Apr 09 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- FIXED: framework, document root validation  changed by empty field.x
+  SVN Rev[6577]
+
+* Tue Apr 08 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- FIXED: framework elastix, document root line now is not comment
+  SVN Rev[6572]
+
+* Mon Apr 07 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- FIXED: framework elastix, global variable document root assigned as default
+  /var/www/html when key in $_SERVER dont exists.
+  SVN Rev[6571]
+
+* Thu Apr 03 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- UPDATED: framework elastix, now document root is automatic value from
+  $_SERVER variable. This only web enviroment.
+  SVN Rev[6567]
+
+* Wed Mar 19 2014 Luis Abarca <labarca@palosanto.com> 
+- REMOVED: framework - elastix-framework.spec: The prereq: php-sqlite3 its no
+  longer necesary because now the package php-pdo provides the dependencies
+  that formerly provides php-sqlite3 package.
+  SVN Rev[6550]
+
+* Sat Mar 15 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: paloSantoForm.class.php, SELECT input when option value was cero
+  number always compare is true for selected state option.
+  SVN Rev[6540]
+
 * Wed Mar 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: rest.php: accept ordinary cookie-based Elastix session in addition to
   the Basic HTTP authentication.
@@ -349,9 +386,15 @@ rm -rf $RPM_BUILD_ROOT
   easier.
   SVN Rev[6428]
 
+* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: framework,my_extension - index.html,paloSantoValidar.class.php: A
+  correction in the name of variable numeric_rang has been made it.
+  SVN Rev[6419]
+
 * Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6416]
 
 * Thu Jan 16 2014 Bruno Macias <bmacias@palosanto.com> 
 - ADDED: framework - paloSantoValidar.class.php, new type validation,

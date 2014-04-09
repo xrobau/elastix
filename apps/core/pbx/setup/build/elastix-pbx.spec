@@ -373,6 +373,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Apr 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: add preliminary websocket support, non-SSL.
+  SVN Rev[6581]
+
 * Mon Mar 31 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: fix architecture directory to ensure kamailio modules are 
   loaded properly.

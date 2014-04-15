@@ -373,6 +373,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Apr 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: change keepalive mechanism to work around disconnection
+  timeout under Firefox.
+  SVN Rev[6582]
+
 * Wed Apr 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: add preliminary websocket support, non-SSL.
   SVN Rev[6581]

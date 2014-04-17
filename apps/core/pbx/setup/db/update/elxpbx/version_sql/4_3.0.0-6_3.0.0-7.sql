@@ -77,3 +77,8 @@ CREATE TABLE other_destinations(
   FOREIGN KEY (organization_domain) REFERENCES organization(domain) ON DELETE CASCADE,
   INDEX organization_domain (organization_domain)
 ) ENGINE=INNODB;
+
+
+/* Updates for using kamailio instead of asterisk for websocket support */
+UPDATE http_ast SET property_val = '5060' WHERE property_name = 'bindport';
+UPDATE http_ast SET property_val = '5061' WHERE property_name = 'tlsbindport';

@@ -376,6 +376,8 @@ fi
 
 %changelog
 * Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: update SQL to change default websocket WSS port for Kamailio
+  SVN Rev[6584]
 - CHANGED: kamailio: add SSL support for SIP and websockets in Kamailio 
   configuration files.
   SVN Rev[6583]

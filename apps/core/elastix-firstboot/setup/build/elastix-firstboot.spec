@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: disable modification of http.conf for asterisk, since kamailio now 
+  handles wss.
+  SVN Rev[6586]
+
 * Tue Mar 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: the rtpproxy setup script will now send non-matching packets to the
   interface leading to the gateway, if one is successfully detected.

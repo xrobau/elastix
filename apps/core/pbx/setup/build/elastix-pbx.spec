@@ -365,6 +365,8 @@ fi
 /usr/share/elastix/module_installer/*
 /tftpboot/*
 /usr/share/elastix/tftp
+%defattr(644, root, root)
+/etc/kamailio/*
 %defattr(755, root, root)
 /etc/init.d/festival
 /bin/asterisk.reload
@@ -373,6 +375,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: add SSL support for SIP and websockets in Kamailio 
+  configuration files.
+  SVN Rev[6583]
+
 * Tue Apr 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: change keepalive mechanism to work around disconnection
   timeout under Firefox.

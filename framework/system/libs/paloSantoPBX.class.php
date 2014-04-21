@@ -914,7 +914,7 @@ class paloSip extends paloAsteriskDB {
         foreach ($prop as $key => $value) {
             if (!property_exists($this, $key)) continue;
             if (in_array($key, array('_DB', 'errMsg'))) continue;
-            if (!isset($value)) continue;
+            //if (!isset($value)) continue;
             if ($value == '' || $value == 'noset') $value = NULL;
             
             if (in_array($key, array('session_timers', 'session_expires',
@@ -944,7 +944,7 @@ class paloSip extends paloAsteriskDB {
             
             // Redirigir el secret a sippasswd para Kamailio
             if ($key == 'sippasswd') continue;
-            if ($key == 'secret' && !is_null($value)) {
+            if ($key == 'secret') { echo $key;
                 $key = 'sippasswd';
             }
             

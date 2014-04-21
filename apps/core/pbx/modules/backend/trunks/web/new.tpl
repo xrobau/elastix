@@ -5,14 +5,23 @@
 </div>
 <div class="neo-table-header-row">
     <div  class="neo-table-header-row-filter tab">
-        <input type="radio" id="tab-1" name="tab-group-1" onclick="radio('tab-1');" checked>
-        <label for="tab-1">{$GENERAL}</label>
+        <input type="radio" id="tab-general" name="tab-group-general" onclick="radio('tab-general');" checked>
+        <label for="tab-general">{$GENERAL}</label>
     </div>
     {if $TECH eq 'SIP' or $TECH eq 'IAX2'}
-    <div  class="neo-table-header-row-filter tab">
-        <input type="radio" id="tab-3" name="tab-group-3" onclick="radio('tab-3');">
-        <label for="tab-3">{$SETTINGS}</label>
-    </div>
+        <div  class="neo-table-header-row-filter tab">
+            <input type="radio" id="tab-peer" name="tab-group-peer" onclick="radio('tab-peer');" checked>
+            <label for="tab-peer">{$SETTINGS}</label>
+        </div>
+
+        <div  class="neo-table-header-row-filter tab">
+            <input type="radio" id="tab-user" name="tab-group-user" onclick="radio('tab-user');">
+            <label for="tab-user">User Settings</label>
+        </div>
+        <div  class="neo-table-header-row-filter tab">
+            <input type="radio" id="tab-register" name="tab-group-register" onclick="radio('tab-register');">
+            <label for="tab-register">Registration</label>
+        </div>
     {/if}
     <div class="neo-table-header-row-navigation" align="right" style="display: inline-block;">
         {if $mode eq 'input'}
@@ -28,58 +37,58 @@
 </div>
 <div class="tabs">
     <div class="tab" >
-       <div class="content" id="content_tab-1">
+       <div class="content" id="content_tab-general">
           <div id="div_body_tab">
             <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
                 <tr class="tech">
-                    <td width="20%" nowrap>{$trunk_name.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
-                    <td width="30%">{$trunk_name.INPUT}</td>
+                    <td width="20%" nowrap>{$general_trunk_name.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
+                    <td width="30%">{$general_trunk_name.INPUT}</td>
                 </tr>
                 <tr class="tech">
-                    <td width="20%" nowrap>{$outcid.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
-                    <td width="30%">{$outcid.INPUT}</td>
-                    <td width="20%" nowrap>{$keepcid.LABEL}</td>
-                    <td width="30%">{$keepcid.INPUT}</td>
+                    <td width="20%" nowrap>{$general_outcid.LABEL}: {if $mode ne 'view'}<span class="required">*</span>{/if}</td>
+                    <td width="30%">{$general_outcid.INPUT}</td>
+                    <td width="20%" nowrap>{$general_keepcid.LABEL}</td>
+                    <td width="30%">{$general_keepcid.INPUT}</td>
                 </tr>
                 <tr class="tech">
-                    <td nowrap>{$disabled.LABEL}</td>
-                    <td>{$disabled.INPUT}</td>
+                    <td nowrap>{$general_disabled.LABEL}</td>
+                    <td>{$general_disabled.INPUT}</td>
                 </tr>
                 <tr><th>{$SEC_SETTINGS}</th></tr>
                 <tr class="tech">
-                    <td nowrap>{$maxchans.LABEL}</td>
-                    <td>{$maxchans.INPUT}</td>
+                    <td nowrap>{$general_maxchans.LABEL}</td>
+                    <td>{$general_maxchans.INPUT}</td>
                 </tr>
                 <tr class="tech">
-                    <td nowrap>{$sec_call_time.LABEL}</td>
-                    <td>{$sec_call_time.INPUT}</td>
+                    <td nowrap>{$general_sec_call_time.LABEL}</td>
+                    <td>{$general_sec_call_time.INPUT}</td>
                 </tr>
                 {if $mode ne 'view' || $SEC_TIME eq 'yes' }
-                <tr class="tech sec_call_time">
-                    <td nowrap>{$maxcalls_time.LABEL}</td>
-                    <td>{$maxcalls_time.INPUT}</td>
-                    <td nowrap>{$period_time.LABEL}</td>
-                    <td>{$period_time.INPUT}</td>
+                <tr class="tech general_sec_call_time">
+                    <td nowrap>{$general_maxcalls_time.LABEL}</td>
+                    <td>{$general_maxcalls_time.INPUT}</td>
+                    <td nowrap>{$general_period_time.LABEL}</td>
+                    <td>{$general_period_time.INPUT}</td>
                 </tr>
                 {/if}
                 {if $TECH eq 'DAHDI' | $TECH eq 'CUSTOM'}
                     <tr><th>{$NAME_CHANNEL}</th></tr>
                     <tr class="tech">
-                        <td nowrap>{$channelid.LABEL}:</td>
-                        <td >{$channelid.INPUT}</td>
+                        <td nowrap>{$general_channelid.LABEL}:</td>
+                        <td >{$general_channelid.INPUT}</td>
                     </tr>
                 {/if}
                 <tr><th>{$ORGANIZATION_PERM}</th></tr>
                 {if $mode eq 'view'}
                     <tr class="tech">
-                        <td width="15%" nowrap>{$org.LABEL}: </td>
+                        <td width="15%" nowrap>{$general_org.LABEL}: </td>
                         <td width="20%"> {$ORGS} </td>
                         <td ></td>
                     </tr>
                 {else}
                     <tr class="tech">
-                        <td width="15%" valign="top" nowrap>{$org.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
-                        <td width="10%" valign="top">{$org.INPUT}</td>
+                        <td width="15%" valign="top" nowrap>{$general_org.LABEL}: {if $mode ne 'view'}<span  class="required">*</span>{/if}</td>
+                        <td width="10%" valign="top">{$general_org.INPUT}</td>
                         <td rowspan="2">
                             <input class="button" name="remove" id="remove" value="<<" onclick="javascript:quitar_org();" type="button">
                             <select name="arr_org" size="4" id="arr_org" style="width: 120px;">
@@ -90,7 +99,7 @@
                 {/if}
             </table>
             <p style="margin-top: 0px; padding-left: 4px; color: #E35332; font-weight: bold;" colspan=4>{$RULES}</td>
-            <p style="margin-top: 0px; padding-left: 12px;">{$dialoutprefix.LABEL}: {$dialoutprefix.INPUT} </p>
+            <p style="margin-top: 0px; padding-left: 12px;">{$general_dialout_prefix.LABEL}: {$general_dialout_prefix.INPUT} </p>
             <table width="80%" border="0" cellspacing="0" cellpadding="5px" class="tabForm" id="destine">
             <thead>
                 <tr>
@@ -113,11 +122,11 @@
                 {/foreach}
             {else}
             <tr id="test" style="display:none;">
-                <td align="center">({$prepend_digit__.INPUT})</td>
+                <td align="center">({$general_prepend_digit__.INPUT})</td>
                 <td align="center">+</td>
-                <td align="center">{$pattern_prefix__.INPUT}</td>
+                <td align="center">{$general_pattern_prefix__.INPUT}</td>
                 <td align="center">|</td>
-                <td align="center">{$pattern_pass__.INPUT}</td>
+                <td align="center">{$general_pattern_pass__.INPUT}</td>
                 <td width="50px">
                     <div class='delete' style='float:left; cursor:pointer;'><img src='web/apps/ivr/images/remove1.png' title='Remove'/></div>     
                 </td>
@@ -125,11 +134,11 @@
             {foreach from=$items key=myId item=i}
                 <input type="hidden" value"{$j++}" />
                 <tr class="content-destine" id="{$j}">
-                    <td align="center" >(<input type="text" name="prepend_digit{$j}" value="{$i.3}" style="width:60px;text-align:center;">)</td>
+                    <td align="center" >(<input type="text" name="general_prepend_digit{$j}" value="{$i.3}" style="width:60px;text-align:center;">)</td>
                     <td align="center">+</td>
-                    <td align="center" ><input type="text" name="pattern_prefix{$j}" value="{$i.1}" style="width:40px;text-align:center;"></td>
+                    <td align="center" ><input type="text" name="general_pattern_prefix{$j}" value="{$i.1}" style="width:40px;text-align:center;"></td>
                     <td align="center">|</td>
-                    <td align="center" ><input type="text" name="pattern_pass{$j}" value="{$i.2}" style="width:150px;text-align:center;"></td>
+                    <td align="center" ><input type="text" name="general_pattern_pass{$j}" value="{$i.2}" style="width:150px;text-align:center;"></td>
                     <td width="50px"><div class='delete' style='float:left; cursor:pointer;'><img src='web/apps/ivr/images/remove1.png' title='Remove'/></div></td>
                 </tr>
             {/foreach}
@@ -138,225 +147,98 @@
         </div>
        </div>       
    </div>
-   {if $TECH eq 'SIP' | $TECH eq 'IAX2'}
-   <div class="tab">
-      <div class="content" id="content_tab-3">
-       <div id="div_body_tab">
-        <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">
+   
+    {php}
+        function genHTML(&$cnt, $idattr, $attr, $arrTPL_VARs)
+        {
+            $required = "";
+            $adsettin = "";
+            $class    = "";
+            $html     = "";
+            $prefix   = substr($idattr,0,4);
+
+            if($attr['REQUIRED']=="yes") $required = ($arrTPL_VARs['mode'] == 'input' || $arrTPL_VARs['mode'] == 'edit')?"<span  class='required'>*</span>":"";
+            if($attr['IS_ADVANCED_SETTING']=="yes"){ $adsettin = $arrTPL_VARs["SHOW_MORE_".strtoupper($prefix)]; $class = "show_more_{$prefix}"; };
+
+            if($cnt%2 == 0) $html .= "<tr class='tech $class' {$adsettin}>";                
+
+            $html .= "<td width='15%' nowrap> {$arrTPL_VARs[$idattr]['LABEL']}: {$required}</td>";
+            $html .= "<td> {$arrTPL_VARs[$idattr]['INPUT']} </td>";
+
+            if($cnt%2 == 1) $html .= "</tr>";
+            $cnt++;
+
+            return $html;
+        }
+
+        $arrCNT      = array(0,0,0,0,0,0);
+        $arrHTML     = array("","","","","","");
+        $arrTPL_VARs = $this->get_template_vars();
+        foreach($arrTPL_VARs['arrAttributes'] as $idattr => $attr){
+            $prefix = substr($idattr,0,4);
+            switch($prefix){
+                case "peer":
+                    if($attr['IS_ADVANCED_SETTING']=="yes")
+                        $arrHTML[0] .= genHTML($arrCNT[0],$idattr,$attr,$arrTPL_VARs);
+                    else
+                        $arrHTML[1] .= genHTML($arrCNT[1],$idattr,$attr,$arrTPL_VARs);
+                    break;
+                case "user":
+                    if($attr['IS_ADVANCED_SETTING']=="yes")
+                        $arrHTML[2] .= genHTML($arrCNT[2],$idattr,$attr,$arrTPL_VARs);
+                    else
+                        $arrHTML[3] .= genHTML($arrCNT[3],$idattr,$attr,$arrTPL_VARs);
+                    break;
+                case "gene":
+                    $arrHTML[4] .= genHTML($arrCNT[4],$idattr,$attr,$arrTPL_VARs);
+                    break;
+                case "regi":
+                    $arrHTML[5] .= genHTML($arrCNT[5],$idattr,$attr,$arrTPL_VARs);
+                    break;
+                default: //case register                    
+                    break;
+            } 
+        }             
+    {/php}
+            
+    {if $TECH eq 'SIP' | $TECH eq 'IAX2'}    
+    <div class="tab">
+      <div class="content" id="content_tab-peer">
+        <div id="div_body_tab">
+          <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">   
+            {php} echo $arrHTML[1]; {/php}  
             <tr>
-                <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$REGISTRATION}</td>
+                <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt_peer"><b>{$ADV_OPTIONS}</b></a></td>
             </tr>
-            <tr class="tech">
-                <td width="20%" nowrap>{$register.LABEL}:</td>
-                <td colspan=3 >{$register.INPUT}</td>
-            </tr>
-            <tr>
-                <td style="padding-left: 2px; font-size: 13px; color: #E35332; font-weight: bold;" colspan=4>{$PEER_Details}</td>
-            </tr>
-            <tr class="tech">
-                <td width="15%" nowrap>{$name.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
-                {if $mode eq 'edit'}
-                    <td width="31%">{$NAME}</td>
-                {else}
-                    <td width="31%">{$name.INPUT}</td>
-                {/if}
-            </tr>
-            <tr class="tech">
-                <td nowrap>{$type.LABEL}: {if $mode eq 'input'}<span class="required">*</span>{/if}</td>
-                <td>{$type.INPUT}</td>
-                <td width="21%" nowrap>{$secret.LABEL}: {if $mode eq 'input'}<span class="required">*</span>{/if}</td>
-                <td>{$secret.INPUT}</td>
-            </tr>
-            <tr class="tech">
-                <td nowrap>{$username.LABEL}:</td>
-                <td>{$username.INPUT}</td>
-                <td nowrap>{$host.LABEL}: </td>
-                <td>{$host.INPUT}</td>
-            </tr>
-            <tr class="tech">
-                <td nowrap>{$context.LABEL}:</td>
-                <td>{$context.INPUT}</td>
-            </tr>
-            {if $TECH eq 'SIP'}
-                <tr class="tech">
-                    <td nowrap>{$transport.LABEL}: </td>
-                    <td>{$transport.INPUT}</td>
-                    <td nowrap>{$dtmfmode.LABEL}: </td>
-                    <td >{$dtmfmode.INPUT}</td>
-                </tr>
-                <tr class="tech">
-                    <td nowrap>{$directmedia.LABEL}: </td>
-                    <td>{$directmedia.INPUT}</td>
-                    <td nowrap>{$nat.LABEL}: </td>
-                    <td >{$nat.INPUT}</td>
-                </tr>
-                <tr class="tech">
-                    <td nowrap>{$insecure.LABEL}: </td>
-                    <td >{$insecure.INPUT}: </td>
-                    <td nowrap>{$qualify.LABEL}: </td>
-                    <td>{$qualify.INPUT}</td>
-                </tr>
-                <tr class="tech">
-                    <td nowrap>{$qualifyfreq.LABEL}: </td>
-                    <td>{$qualifyfreq.INPUT}</td>
-                </tr>
-            {else}
-                <tr class="tech">
-                    <td nowrap>{$trunk.LABEL}: </td>
-                    <td >{$trunk.INPUT}</td>
-                    <td nowrap>{$qualify.LABEL}: </td>
-                    <td>{$qualify.INPUT}</td>
-                </tr>
-                <tr class="tech">
-                    <td nowrap>{$auth.LABEL}: </td>
-                    <td >{$auth.INPUT}</td>
-                    <td nowrap>{$inkeys.LABEL}: </td>
-                    <td >{$inkeys.INPUT}</td>
-                </tr>
-            {/if}
-            <tr class="tech">
-                <td nowrap>{$disallow.LABEL}: </td>
-                <td>{$disallow.INPUT}</td>
-                <td nowrap>{$allow.LABEL}: </td>
-                <td>{$allow.INPUT}</td>
-            </tr>
-            <tr class="tech">
-                <td nowrap>{$deny.LABEL}: </td>
-                <td>{$deny.INPUT}</td>
-                <td nowrap>{$permit.LABEL}: </td>
-                <td>{$permit.INPUT}</td>
-            </tr>
-            <tr class="tech">
-                <td nowrap>{$acl.LABEL}: </td>
-                <td>{$acl.INPUT}</td>
-            </tr>
-            {if $TECH eq 'SIP'}
-                <tr class="tech">
-                    <td nowrap>{$callcounter.LABEL}: </td>
-                    <td>{$callcounter.INPUT}</td>
-                    <td nowrap>{$busylevel.LABEL}: </td>
-                    <td >{$busylevel.INPUT}</td>
-                </tr>
-            {else}
-                <tr class="tech">
-                    <td nowrap>{$transfer.LABEL}: </td>
-                    <td>{$transfer.INPUT}</td>
-                    <td nowrap>{$defaultip.LABEL}: </td>
-                    <td >{$defaultip.INPUT}</td>
-                </tr>
-            {/if}
-            <tr class="tech">
-                <td nowrap>{$amaflags.LABEL}: </td>
-                <td>{$amaflags.INPUT}</td>
-            </tr>
-            <tr>
-                <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt"><b>{$ADV_OPTIONS}</b></a></td>
-            </tr>
-            {if $TECH eq 'SIP'}
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$allowoverlap.LABEL}: </td>
-                    <td >{$allowoverlap.INPUT}</td>
-                    <td nowrap>{$allowsubscribe.LABEL}: </td>
-                    <td>{$allowsubscribe.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$allowtransfer.LABEL}: </td>
-                    <td >{$allowtransfer.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$fromuser.LABEL}: </td>
-                    <td >{$fromuser.INPUT}</td>
-                    <td nowrap>{$fromdomain.LABEL}: </td>
-                    <td>{$fromdomain.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$defaultip.LABEL}: </td>
-                    <td >{$defaultip.INPUT}</td>
-                    <td nowrap>{$defaultuser.LABEL}: </td>
-                    <td>{$defaultuser.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$keepalive.LABEL}: </td>
-                    <td >{$keepalive.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$rtptimeout.LABEL}: </td>
-                    <td>{$rtptimeout.INPUT}</td>
-                    <td nowrap>{$rtpholdtimeout.LABEL}: </td>
-                    <td>{$rtpholdtimeout.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td align="left">{$sendrpid.LABEL}: </td>
-                    <td >{$sendrpid.INPUT}</td>
-                    <td align="left">{$trustrpid.LABEL}: </td>
-                    <td >{$trustrpid.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td align="left">{$outboundproxy.LABEL}: </td>
-                    <td >{$outboundproxy.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$contactdeny.LABEL}: </td>
-                    <td>{$contactdeny.INPUT}</td>
-                    <td nowrap>{$contactpermit.LABEL}: </td>
-                    <td>{$contactpermit.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$contactacl.LABEL}: </td>
-                    <td>{$contactacl.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$videosupport.LABEL}: </td>
-                    <td>{$videosupport.INPUT}</td>
-                    <td nowrap>{$maxcallbitrate.LABEL}: </td>
-                    <td>{$maxcallbitrate.INPUT}</td>
-                </tr>
-            {else}
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$trunkfreq.LABEL}: </td>
-                    <td>{$trunkfreq.INPUT}</td>
-                    <td nowrap>{$trunktimestamps.LABEL}: </td>
-                    <td>{$trunktimestamps.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$sendani.LABEL}: </td>
-                    <td>{$sendani.INPUT}</td>
-                    <td nowrap>{$adsi.LABEL}: </td>
-                    <td>{$adsi.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$requirecalltoken.LABEL}: </td>
-                    <td>{$requirecalltoken.INPUT}</td>
-                    <td nowrap>{$maxcallnumbers.LABEL}: </td>
-                    <td>{$maxcallnumbers.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$jitterbuffer.LABEL}: </td>
-                    <td>{$jitterbuffer.INPUT}</td>
-                    <td nowrap>{$forcejitterbuffer.LABEL}: </td>
-                    <td>{$forcejitterbuffer.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$codecpriority.LABEL}: </td>
-                    <td>{$codecpriority.INPUT}</td>
-                    <td nowrap>{$qualifysmoothing.LABEL}: </td>
-                    <td>{$qualifysmoothing.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$qualifyfreqok.LABEL}: </td>
-                    <td>{$qualifyfreqok.INPUT}</td>
-                    <td nowrap>{$qualifyfreqnotok.LABEL}: </td>
-                    <td>{$qualifyfreqnotok.INPUT}</td>
-                </tr>
-                <tr class="tech show_more" {$SHOW_MORE}>
-                    <td nowrap>{$encryption.LABEL}: </td>
-                    <td>{$encryption.INPUT}</td>
-                </tr>
-            {/if}
-         </table>
+            {php} echo $arrHTML[0]; {/php}  
+          </table>
         </div>
-       </div>       
+      </div>       
     </div>
+          
+    <div class="tab">
+      <div class="content" id="content_tab-user">
+        <div id="div_body_tab">
+          <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">            
+            {php} echo $arrHTML[3]; {/php}
+            <tr>
+                <td style="padding-left: 2px; font-size: 13px" colspan=4><a href="javascript:void(0);" class="adv_opt_user"><b>{$ADV_OPTIONS}</b></a></td>
+            </tr>
+            {php} echo $arrHTML[2]; {/php}
+          </table>
+        </div>
+      </div>       
+    </div>
+     
+    <div class="tab">
+      <div class="content" id="content_tab-register">
+        <div id="div_body_tab">
+          <table width="100%" border="0" cellspacing="0" cellpadding="5px" class="tabForm">            
+            {php} echo $arrHTML[5]; {/php}
+          </table>
+        </div>
+      </div>       
+    </div>       
    {/if}
 </div>
 <div style="display:none" id="terminate">
@@ -367,13 +249,14 @@
 <input type="hidden" name="mode_input" id="mode_input" value="{$mode}">
 <input type="hidden" name="id_trunk" id="id_trunk" value="{$id_trunk}">
 <input type="hidden" name="tech_trunk" id="tech_trunk" value="{$tech_trunk}">
-<input type="hidden" name="mostra_adv" id="mostra_adv" value="{$mostra_adv}">
+<input type="hidden" name="mostra_adv_peer" id="mostra_adv_peer" value="{$mostra_adv_peer}">
+<input type="hidden" name="mostra_adv_user" id="mostra_adv_user" value="{$mostra_adv_user}">
 <input type="hidden" name="arrDestine"  id="arrDestine" value="{$arrDestine}">
 <input type="hidden" name="index"  id="index" value="{$j+1}">
 {literal}
 <script type="text/javascript">
 $(document).ready(function(){
-    radio("tab-1");
+    radio("tab-general");
 });
 </script>
 <style type="text/css">

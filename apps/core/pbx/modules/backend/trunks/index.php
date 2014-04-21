@@ -49,7 +49,7 @@ function _moduleContent(&$smarty, $module_name)
     //user credentials
     global $arrCredentials;
         
-	$action = getAction();
+    $action = getAction();
     $content = "";
        
 	switch($action){
@@ -63,10 +63,10 @@ function _moduleContent(&$smarty, $module_name)
             $content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "save_new":
-            $content = saveNewTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
+            $content = saveTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "save_edit":
-            $content = saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
+            $content = saveTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
             break;
         case "delete":
             $content = deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentials);
@@ -123,7 +123,7 @@ function reportTrunks($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
     $arrColum[]=_tr("Name");
     $arrColum[]=_tr("Technology");
-    $arrColum[]=_tr("Channel / Peer Name");
+    $arrColum[]=_tr("Channel / Peer|[User]");
     $arrColum[]=_tr("Max. Channels");
     $arrColum[]=_tr("Current # of calls by period");
     $arrColum[]=_tr("Status");
@@ -343,80 +343,91 @@ function actDesactTrunk($smarty,&$pDB){
     return $jsonObject->createJSON();
 }
 
-
-function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials,$arrDialPattern=array()){
+function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials)
+{
     global $arrPermission;
-    $error = "";
+    $error  = "";
     $pTrunk = new paloSantoTrunk($pDB);
-    $pORGZ = new paloSantoOrganization($pDB);
+    $pORGZ  = new paloSantoOrganization($pDB);
 
     $arrTrunks=array();
-    $action = getParameter("action");
-    
+    $action = getParameter("action");    
     $idTrunk=getParameter("id_trunk");
+    
     if($action=="view" || $action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
         if(!isset($idTrunk)){
             $error=_tr("Invalid Trunk");
-        }else{
+        }
+        else{
             $arrTrunks = $pTrunk->getTrunkById($idTrunk);
-            if($arrTrunks===false){
+            if($arrTrunks===false)
                 $error=_tr($pTrunk->errMsg);
-            }else if(count($arrTrunks)==0){
+            else if(count($arrTrunks)==0)
                 $error=_tr("Trunk doesn't exist");
-            }else{
+            else{
                 if($error!=""){
                     $smarty->assign("mb_title", _tr("ERROR"));
                     $smarty->assign("mb_message",$error);
                     return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$credentials);
                 }
-                $tech=$arrTrunks["tech"];
-                if($tech=="sip" || $tech=="iax2")
-                    $smarty->assign('NAME',$arrTrunks["name"]);
-                
+                $tech=$arrTrunks["general_tech"];
+                                
                 $smarty->assign('j',0);
                 if($action=="view"|| getParameter("edit") ){
                     $arrDialPattern = $pTrunk->getArrDestine($idTrunk);
+                    $smarty->assign('items',$arrDialPattern);
                 }
-                $smarty->assign('items',$arrDialPattern);
+                //$smarty->assign('items',$arrDialPattern);
                 
                 if(getParameter("save_edit")){
-                    if(isset($_POST["select_orgs"]))
-                        $smarty->assign("ORGS",$_POST["select_orgs"]);
+                    if(isset($_POST["general_select_orgs"]))
+                        $smarty->assign("ORGS",$_POST["general_select_orgs"]);
                     $arrTrunks=$_POST;
                 }else{
-                    $select_orgs=implode(",",$arrTrunks["select_orgs"]);
-                    if(isset($arrTrunks["select_orgs"]))
+                    $select_orgs=implode(",",$arrTrunks["general_select_orgs"]);
+                    if(isset($arrTrunks["general_select_orgs"]))
                         $smarty->assign("ORGS",$select_orgs.",");
                 }
                 
-                if($arrTrunks["sec_call_time"]=="yes")
+                if($arrTrunks["general_sec_call_time"]=="yes")
                     $smarty->assign("SEC_TIME","yes");
                     
                 if($action=="view"){
                     $smarty->assign("ORGS",$select_orgs);
                 }
             }
-		}
-	}else{
+	}
+    }
+    else{//save_new
         $tech = getParameter("tech_trunk");
+        
+        $arrDialPattern = getParameter("arrDestine");
+        $tmpstatus      = explode(",",$arrDialPattern);
+        $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
+        $tmp_dial       = array();
+        foreach($arrDialPattern as $pattern){
+            $prepend = getParameter("general_prepend_digit".$pattern);
+            $prefix  = getParameter("general_pattern_prefix".$pattern);
+            $pattern = getParameter("general_pattern_pass".$pattern);
+            $tmp_dial[] = array(0,$prefix,$pattern,$prepend);
+        }
+    
         $smarty->assign('j',0);
-        $smarty->assign('items',$arrDialPattern);
+        $smarty->assign('items',$tmp_dial);
         
         if(getParameter("create_trunk")){
-            $arrTrunks=$pTrunk->getDefaultConfig($tech);
+            $arrTrunks1  = $pTrunk->getDefaultConfig($tech,"peer");
+            $arrTrunks2 = $pTrunk->getDefaultConfig($tech,"user");
+            $arrTrunks  = array_merge($arrTrunks1,$arrTrunks2);
         }else{
-            if(isset($_POST["select_orgs"]))
-                $smarty->assign("ORGS",$_POST["select_orgs"]);
+            if(isset($_POST["general_select_orgs"]))
+                $smarty->assign("ORGS",$_POST["general_select_orgs"]);
             $arrTrunks=$_POST;
         }
     }
     
     $smarty->assign("EDIT",in_array('edit',$arrPermission));
     $smarty->assign("DELETE",in_array('delete',$arrPermission));
-
-    /*	if(!preg_match("/^(sip|iax2|dahdi|custom){1}$/",$tech)){
-        $error=_tr("Invalid Technology");
-    }*/
 
     if($error!=""){
         $smarty->assign("mb_title", _tr("Error"));
@@ -431,28 +442,33 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     }
     $arrForm = createFieldForm($tech,$arrOrgz);
     $oForm = new paloForm($smarty,$arrForm);
+    $smarty->assign("arrAttributes",$arrForm);
 
     if($action=="view"){
         $oForm->setViewMode();
     }else if($action=="view_edit" || getParameter("edit") || getParameter("save_edit")){
         $oForm->setEditMode();
-        $mostrar=getParameter("mostra_adv");
-        if(isset($mostrar)){
-            if($mostrar=="yes"){
-                $smarty->assign("SHOW_MORE","style='visibility: visible;'");
-                $smarty->assign("mostra_adv","yes");
+        $mostra_adv["peer"] = getParameter("mostra_adv_peer");
+        $mostra_adv["user"] = getParameter("mostra_adv_peer");
+        
+        foreach($mostra_adv as $km => $vm){
+            if(isset($vm)){
+                if($vm=="yes"){
+                    $smarty->assign("SHOW_MORE_".strtoupper($km),"style='visibility: visible;'");
+                    $smarty->assign("mostra_adv_{$km}","yes");
+                }else{
+                    $smarty->assign("SHOW_MORE_".strtoupper($km),"style='display: none;'");
+                    $smarty->assign("mostra_adv_{$km}","no");
+                }
             }else{
-                $smarty->assign("SHOW_MORE","style='display: none;'");
-                $smarty->assign("mostra_adv","no");
+                $smarty->assign("SHOW_MORE_".strtoupper($km),"style='display: none;'");
+                $smarty->assign("mostra_adv_{$km}","yes");
             }
-        }else{
-            $smarty->assign("SHOW_MORE","style='display: none;'");
-            $smarty->assign("mostra_adv","yes");
         }
     }
     
     if($tech=="dahdi")
-        $smarty->assign("NAME_CHANNEL",_tr("DHADI Channel"));
+        $smarty->assign("NAME_CHANNEL",_tr("DAHDI Channel"));
     else
         $smarty->assign("NAME_CHANNEL",_tr("CUSTOM Channel"));
         
@@ -485,34 +501,23 @@ function viewFormTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     return $content;
 }
 
-function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials){
+function saveTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $credentials)
+{
     $pTrunk = new paloSantoTrunk($pDB);
-    $error = "";
-    $continue=true;
-    $successTrunk=false;
-
-    $tech  = getParameter("tech_trunk");
+    $error  = "";
+    $continue = true;
+    $successTrunk = false;
+    
+    $tech = getParameter("tech_trunk");
     if(!preg_match("/^(sip|iax2|dahdi|custom){1}$/",$tech)){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("Invalid Trunk Technology"));
-        return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+        return viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }
     
-	$arrForm = createFieldForm($tech,array());
+    $arrForm = createFieldForm($tech,array());
     $oForm = new paloForm($smarty,$arrForm);
-
-    $arrDialPattern = getParameter("arrDestine");
-    $tmpstatus = explode(",",$arrDialPattern);
-    $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
-    $tmp_dial=array();
-    foreach($arrDialPattern as $pattern){
-        $prepend = getParameter("prepend_digit".$pattern);
-        $prefix = getParameter("pattern_prefix".$pattern);
-        $pattern = getParameter("pattern_pass".$pattern);
-        $tmp_dial[]=array(0,$prefix,$pattern,$prepend);
-    }
-    
-	if(!$oForm->validateForm($_POST)){
+    if(!$oForm->validateForm($_POST)){
         // Validation basic, not empty and VALIDATION_TYPE
         $smarty->assign("mb_title", _tr("Validation Error"));
         $arrErrores = $oForm->arrErroresValidacion;
@@ -522,209 +527,225 @@ function saveNewTrunk($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
                 $strErrorMsg .= "{$k} [{$v['mensaje']}], ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials,$tmp_dial);
-    }else{
-        $arrProp=array();
-        $arrProp["tech"]=$tech;
-        $arrProp["trunk_name"]=getParameter("trunk_name");
-        $arrProp['outcid']=getParameter("outcid");
-        $arrProp['keepcid']=getParameter("keepcid");
-        $arrProp['max_chans']=getParameter("maxchans");
-        $arrProp['disabled'] = getParameter("disabled");
-        $arrProp['dialout_prefix']=getParameter("dialoutprefix");
-        $arrProp["select_orgs"]=getParameter("select_orgs");
-        $arrProp["sec_call_time"]=getParameter("sec_call_time");
-        $arrProp["maxcalls_time"]=getParameter("maxcalls_time");
-        $arrProp["period_time"]=getParameter("period_time");
-        
-        if($arrProp["sec_call_time"]=="yes"){
-            if(!preg_match("/^[0-9]+$/",$arrProp["maxcalls_time"])){
-                $error=_tr("Field 'Max Num Calls' can't be empty");
-                $continue=false;
-            }
-            if(!preg_match("/^[0-9]+$/",$arrProp["period_time"])){
-                $error=_tr("Field 'Period of Time' can't be empty");
-                $continue=false;
-            }
-        }
-        
-        if($tech=="dahdi" || $tech=="custom"){
-            $arrProp["channelid"]=getParameter("channelid");
-            $ttt=($tech=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
-            if(empty($arrProp["channelid"])){
-                $error=_tr("Field $ttt can't be empty");
-                $continue=false;
-            }
-            if($tech=="dahdi"){
-                if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
-                    $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number")._tr(" Ex: g0");
-                    $continue=false;
-                }
-            }
-        }elseif($tech=="sip" || $tech=="iax2"){
-            $arrProp["secret"]=getParameter("secret");
-            $arrProp=array_merge(getSipIaxParam($tech),$arrProp);
-        }
-
-		if($continue){
-			$pDB->beginTransaction();
-			$successTrunk=$pTrunk->createNewTrunk($arrProp,$tmp_dial);
-			if($successTrunk)
-				$pDB->commit();
-			else
-				$pDB->rollBack();
-			$error .=$pTrunk->errMsg;
-		}
-	}
-
-	if($successTrunk){
-		$smarty->assign("mb_title", _tr("MESSAGE"));
-		if(writeAsteriskFile($error,$tech)==true)
-            $smarty->assign("mb_message",_tr("Trunk has been created successfully"));
-        else
-            $smarty->assign("mb_message",_tr("Error: Trunk has been created. ").$error);
-        $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-	}else{
-		$smarty->assign("mb_title", _tr("ERROR"));
-		$smarty->assign("mb_message",$error);
-		$content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials,$tmp_dial);
-	}
-	return $content;
-}
-
-function saveEditTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials){
-    $pTrunk = new paloSantoTrunk($pDB);
-    $error = "";
-    //conexion elastix.db
-    $continue=true;
-    $successTrunk=false;
+        return viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    }
     
-    $idTrunk=getParameter("id_trunk");
-
-    //obtenemos la informacion del usuario por el id dado, sino existe el trunk mostramos un mensaje de error
-    if(!isset($idTrunk)){
-        $error=_tr("Invalid Trunk");
-    }else{
-        $arrTrunks = $pTrunk->getTrunkById($idTrunk);
-        if($arrTrunks===false){
-            $error=_tr($pTrunk->errMsg);
-        }else if(count($arrTrunks)==0){
-            $error=_tr("Trunk doesn't exist");
-        }else{
-            if($error!=""){
-                $smarty->assign("mb_title", _tr("ERROR"));
-                $smarty->assign("mb_message",$error);
-                return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-            }
-
-            $arrDialPattern = getParameter("arrDestine");
-            $tmpstatus = explode(",",$arrDialPattern);
-            $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
-            $tmp_dial=array();
-            foreach($arrDialPattern as $pattern){
-                $prepend = getParameter("prepend_digit".$pattern);
-                $prefix = getParameter("pattern_prefix".$pattern);
-                $pattern = getParameter("pattern_pass".$pattern);
-                $tmp_dial[]=array(0,$prefix,$pattern,$prepend);
-            }
-            
-            $tech=$arrTrunks["tech"];
-            
-            $arrProp=array();
-            $arrProp["id_trunk"]=$idTrunk;
-            $arrProp["trunk_name"]=getParameter("trunk_name");
-            $arrProp['outcid']=getParameter("outcid");
-            $arrProp['keepcid']=getParameter("keepcid");
-            $arrProp['max_chans']=getParameter("maxchans");
-            $arrProp['disabled'] = getParameter("disabled");
-            $arrProp['dialout_prefix']=getParameter("dialoutprefix");
-            $arrProp["select_orgs"]=getParameter("select_orgs");
-            $arrProp["sec_call_time"]=getParameter("sec_call_time");
-            $arrProp["maxcalls_time"]=getParameter("maxcalls_time");
-            $arrProp["period_time"]=getParameter("period_time");
-            
-            if($arrProp["sec_call_time"]=="yes"){
-                if(!preg_match("/^[0-9]+$/",$arrProp["maxcalls_time"])){
-                    $error=_tr("Field 'Max Num Calls' can't be empty");
-                    $continue=false;
-                }
-                if(!preg_match("/^[0-9]+$/",$arrProp["period_time"])){
-                    $error=_tr("Field 'Period of Time' can't be empty");
-                    $continue=false;
-                }
-            }
-            
-            if($tech=="dahdi" || $tech=="custom"){
-                $arrProp["channelid"]=getParameter("channelid");
-                if($tech=="dahdi"){
-                    if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["channelid"])){
-                        $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number");
-                        $continue=false;
-                    }
-                }
-            }elseif($tech=="sip" || $tech=="iax2"){
-                $arrProp["secret"]=getParameter("secret");
-                $arrProp=array_merge(getSipIaxParam($tech,true),$arrProp);
-            }
-
-            if($continue){
-                $pDB->beginTransaction();
-                $successTrunk=$pTrunk->updateTrunkPBX($arrProp,$tmp_dial);
-                
-                if($successTrunk)
-                    $pDB->commit();
-                else
-                    $pDB->rollBack();
-            }
-            $error .=$pTrunk->errMsg;
+    $arrProp = getAttibutesValue($arrForm);
+    $arrProp["general"]["tech"] = $tech;
+    
+    if(getParameter("save_edit")){   
+        $idTrunk = getParameter("id_trunk");
+        //obtenemos la informacion del usuario por el id dado, sino existe el trunk mostramos un mensaje de error
+        if(!isset($idTrunk)){
+            $smarty->assign("mb_title", _tr("ERROR"));
+            $smarty->assign("mb_message",_tr("Invalid Trunk"));
+            return viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
         }
-	}
+        else{
+            $arrProp["general"]["id_trunk"] = $idTrunk;
+            $smarty->assign("id_trunk", $idTrunk);
+        }
+    }
+    
+    if($arrProp["general"]["sec_call_time"]=="yes"){
+        if(!preg_match("/^[0-9]+$/",$arrProp["general"]["maxcalls_time"])){
+            $error=_tr("Field 'Max Num Calls' can't be empty");
+            $continue=false;
+        }
+        if(!preg_match("/^[0-9]+$/",$arrProp["general"]["period_time"])){
+            $error=_tr("Field 'Period of Time' can't be empty");
+            $continue=false;
+        }
+    }
 
-    //$smarty->assign("mostra_adv",getParameter("mostra_adv"));
-    $smarty->assign("id_trunk", $idTrunk);
+    if($tech=="dahdi" || $tech=="custom"){
+        $tlabel=($tech=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
+        if(empty($arrProp["general"]["channelid"])){
+            $error=_tr("Field $tlabel can't be empty");
+            $continue=false;
+        }
+        if($tech=="dahdi"){
+            if(!preg_match("/^(g|r){0,1}[0-9]+$/",$arrProp["general"]["channelid"])){
+                $error=_tr("Field DAHDI Identifier can't be empty and must be a dahdi number or channel number")._tr(" Ex: g0");
+                $continue=false;
+            }
+        }
+    }
+    
+    if($continue){
+        $pDB->beginTransaction();
+        
+        if(getParameter("save_edit"))
+            $successTrunk = $pTrunk->updateTrunkPBX($arrProp);
+        else // save_new 
+            $successTrunk = $pTrunk->createNewTrunk($arrProp);
+
+        if($successTrunk)
+            $pDB->commit();
+        else{
+            $pDB->rollBack();
+            $error .= $pTrunk->errMsg;
+        }
+    }
 
     if($successTrunk){
         $smarty->assign("mb_title", _tr("MESSAGE"));
-        //recargamos la configuracion del peer en caso que la truncal haya sido iax o sip
-        if($arrTrunks["tech"]=="sip" || $arrTrunks["tech"]=="iax2"){
-            $pTrunk->prunePeer($arrTrunks["name"],$arrTrunks["tech"]);
-            $pTrunk->loadPeer($arrTrunks["name"],$arrTrunks["tech"]);
-        }
         if(writeAsteriskFile($error,$tech)==true)
-            $smarty->assign("mb_message",_tr("Trunk has been edited successfully"));
+            $smarty->assign("mb_message",_tr("Trunk has been created successfully"));
         else
-            $smarty->assign("mb_message",_tr("Error: Trunk has been edited. ").$error);
+            $smarty->assign("mb_message",_tr("Error: Trunk has been created. ").$error);
+        
         $content = reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-    }else{
+    }
+    else{
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",$error);
-        $content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials,$tmp_dial);
+        $content = viewFormTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }
-	return $content;
+    return $content;
 }
 
-function getSipIaxParam($tech,$edit=false){
-    $arrProp = array();
+function getAttibutesValue($arrAttibutes)
+{
+    $arrExclude = array(
+        "general_prepend_digit__",
+        "general_pattern_prefix__",
+        "general_pattern_pass__",
+        "general_org");
     
-    $formKeys = array('context', 'name', 'register', 'type', 'username', 'host',
-        'qualify', 'disallow', 'allow', 'amaflags', 'deny', 'permit', 'acl');
-    if ($tech == 'sip')
-        $formKeys = array_merge($formKeys, array('insecure', 'nat', 'dtmfmode',
-            'fromuser', 'fromdomain', 'sendrpid', 'directmedia', 'videosupport',
-            'maxcallbitrate', 'qualifyfreq', 'rtptimeout', 'rtpholdtimeout',
-            'keepalive', 'contactdeny', 'contactpermit', 'contactacl',
-            'callcounter', 'busylevel', 'allowoverlap', 'allowsubscribe',
-            'allowtransfer', 'defaultip', 'defaultuser', 'transport',
-            'outboundproxy'));
-    if ($tech == 'iax2')
-        $formKeys = array_merge($formKeys, array('auth', 'trunk', 'trunkfreq',
-            'trunktimestamps', 'sendani', 'adsi', 'requirecalltoken',
-            'encryption', 'jitterbuffer', 'forcejitterbuffer', 'codecpriority',
-            'qualifysmoothing', 'qualifyfreqok', 'qualifyfreqnotok', 'transfer',
-            'defaultip', 'maxcallnumbers', 'inkeys'));
-    foreach ($formKeys as $k) $arrProp[$k] = getParameter($k);
-
+    $arrProp = array();
+    foreach($arrAttibutes as $idattr => $attr){
+        if(!in_array($idattr,$arrExclude)){
+            list($prefix,$param) = explode("_",$idattr,2);
+            $arrProp[$prefix][$param] = getParameter($idattr);
+        }
+    }
+    
+    $arrDialPattern = getParameter("arrDestine");
+    $tmpstatus      = explode(",",$arrDialPattern);
+    $arrDialPattern = array_values(array_diff($tmpstatus, array('')));
+    $tmp_dial       = array();
+    foreach($arrDialPattern as $pattern){
+        $prepend = getParameter("general_prepend_digit".$pattern);
+        $prefix  = getParameter("general_pattern_prefix".$pattern);
+        $pattern = getParameter("general_pattern_pass".$pattern);
+        $tmp_dial[] = array(0,$prefix,$pattern,$prepend);
+    }
+    $arrProp["general"]["dial_rules"]  = $tmp_dial;
+    $arrProp["general"]["select_orgs"] = getParameter("select_orgs");
+    
     return $arrProp;
+}
+
+function getSIP_IAX_Attributes($tech, $prefix_attribute)
+{
+    $arrAttributes = array();
+    $arrTypes      = array("friend"=>_tr("friend"), "peer"=>_tr("peer"), "user"=>_tr("user"));
+    $arrYesNo1     = array("noset"=>"", "yes"=>_tr("Yes"), "no"=>_tr("No"));
+    $arrYesNo2     = array("never"=>_tr("Never"), "yes"=>_tr("Yes"), "no"=>_tr("No"));
+    $arrYesNo3     = array("yes"=>_tr("Yes"), "no"=>_tr("No"));
+    $arrYesNo4     = array("yes"=>_tr("Yes"), "no"=>_tr("No"), "auto"=>_tr("auto"));
+    $arrDtmfs      = array('rfc2833'=>'rfc2833', 'info'=>"info", 'shortinfo'=>'shortinfo', 'inband'=>'inband', 'auto'=>'auto');
+    $arrMedia      = array(""=>"", 'yes'=>'yes', 'no'=>'no', 'nonat'=>'nonat', 'update'=>'update', "update,nonat"=>"update,nonat", "outgoing"=>"outgoing");
+    $arrAmaflag    = array("noset"=>"", "default"=>"default", "omit"=>"omit", "billing"=>"billing", "documentation"=>"documentation");
+    $arrAuth       = array("md5"=>"md5", "plaintext"=>"plaintext", "rsa"=>"rsa");
+    $arrCodecPrio  = array("noset"=>"", "host"=>"host", "caller"=>"caller", "disabled"=>"disabled", "reqonly"=>"reqonly");
+    $arrEncryption = array("noset"=>"", "aes128"=>"aes128", "yes"=>"yes", "no"=>"no");
+    $arrTransfer   = array("yes"=>"Yes", "no"=>"No", "mediaonly"=>"mediaonly");
+    
+    // Commun attributes between sip and iax2 tech.
+    $required_field = (substr($prefix_attribute,0,4)=="peer")?"yes":"no";
+    addArray_Attribute($arrAttributes,$prefix_attribute,"name",$required_field,null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"type",$required_field,$arrTypes,"ereg","^(friend|peer|user){1}$","no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"secret","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"username",$required_field,null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"host","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"context",$required_field,null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"disallow","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"allow","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"deny","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"permit","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"qualify","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"acl","no",null,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"amaflags","no",$arrAmaflag,"text",null,"no");
+    addArray_Attribute($arrAttributes,$prefix_attribute,"defaultip","no",null,"text",null,"yes");
+
+    addArray_Attribute($arrAttributes,"registration","register","no",null,"text",null,"no");
+    $arrAttributes["registration_register"]['INPUT_EXTRA_PARAM'] = array("style" => "width:600px");
+    
+    if($tech == "sip"){
+        addArray_Attribute($arrAttributes,$prefix_attribute,"transport","no",null,"text",null,"no");    
+        addArray_Attribute($arrAttributes,$prefix_attribute,"dtmfmode",$required_field,$arrDtmfs,"text",null,"no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"directmedia","no",$arrMedia,"text",null,"no");   
+        addArray_Attribute($arrAttributes,$prefix_attribute,"nat","no",null,"text",null,"no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"insecure",$required_field,null,"text",null,"no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"qualifyfreq","no",null,"numeric",null,"no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"callcounter","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","no");   
+        addArray_Attribute($arrAttributes,$prefix_attribute,"busylevel","no",null,"text",null,"no");           
+        addArray_Attribute($arrAttributes,$prefix_attribute,"allowoverlap","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"allowsubscribe","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"allowtransfer","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"fromuser","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"fromdomain","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"defaultuser","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"keepalive","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"rtptimeout","no",null,"numeric",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"rtpholdtimeout","no",null,"numeric",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"sendrpid","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"trustrpid","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"outboundproxy","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"contactdeny","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"contactpermit","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"contactacl","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"videosupport","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"maxcallbitrate","no",null,"numeric",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"progressinband","no",$arrYesNo2,"ereg","^(yes|no|never){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"g726nonstandard","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","yes");
+
+    }
+    else if($tech == "iax2"){
+        addArray_Attribute($arrAttributes,$prefix_attribute,"trunk",$required_field,$arrYesNo3,"ereg","^(yes|no){1}$","no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"auth",$required_field,$arrAuth,"ereg","^(md5|plaintext|rsa){1}$","no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"inkeys","no",null,"text",null,"no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"transfer","no",$arrTransfer,"text",null,"no");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"trunkfreq","no",null,"numeric",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"trunktimestamps","no",$arrYesNo3,"ereg","^(yes|no){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"sendani","no",$arrYesNo3,"ereg","^(yes|no){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"adsi","no",$arrYesNo3,"ereg","^(yes|no){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"requirecalltoken","no",$arrYesNo4,"ereg","^(yes|no|auto){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"maxcallnumbers","no",null,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"jitterbuffer","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"forcejitterbuffer","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"codecpriority","no",$arrCodecPrio,"text",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"qualifysmoothing","no",$arrYesNo1,"ereg","^(yes|no|noset){1}$","yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"qualifyfreqok","no",null,"numeric",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"qualifyfreqnotok","no",null,"numeric",null,"yes");
+        addArray_Attribute($arrAttributes,$prefix_attribute,"encryption","no",$arrEncryption,"text",null,"yes");
+    }
+    
+    return $arrAttributes;
+}
+
+function addArray_Attribute(&$arrAttributes, $prefix_attribute, $name_attribute, $required,
+        $arrParams, $validation_type, $validation_extra=null, $is_advanced_settings=null)
+{
+    // SHOW_IN_TECH and IS_ADVANCED_SETTING are only use in tpl
+    // by smarty foreach. Framework -> paloSantoForm don't known
+    // about key or parameter.
+    
+    $key_array = isset($prefix_attribute)?"{$prefix_attribute}_{$name_attribute}":$name_attribute;
+    
+    $arrAttributes[$key_array] = array(
+        "LABEL"                  => _tr($name_attribute),
+        "DESCRIPTION"            => _tr("PBXT_{$name_attribute}"),  
+        "REQUIRED"               => $required,
+        "INPUT_TYPE"             => isset($arrParams)?"SELECT":"TEXT",
+        "INPUT_EXTRA_PARAM"      => isset($arrParams)?$arrParams:array("style" => "width:200px"),
+        "VALIDATION_TYPE"        => $validation_type,
+        "VALIDATION_EXTRA_PARAM" => $validation_extra,
+        "IS_ADVANCED_SETTING"    => $is_advanced_settings);
+        
+   
 }
 
 function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials){
@@ -759,15 +780,18 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
                 $pDB->rollBack();
             $error .=$pTrunk->errMsg;
         }
-	}
+    }
 
     if($successTrunk){
         $smarty->assign("mb_title", _tr("MESSAGE"));
         //quitamos al peer de cache en caso que la truncal haya sido iax o sip
-        if($arrTrunks["tech"]=="sip" || $arrTrunks["tech"]=="iax2"){
-            $pTrunk->prunePeer($arrTrunks["name"],$arrTrunks["tech"]);
+        if($arrTrunks["general_tech"]=="sip" || $arrTrunks["general_tech"]=="iax2"){
+            $pTrunk->prunePeer($arrTrunks["peer_name"],$arrTrunks["general_tech"]);
+            
+            if(!empty($arrTrunks["user_name"]))
+                $pTrunk->prunePeer($arrTrunks["user_name"],$arrTrunks["general_tech"]);
         }
-        if(writeAsteriskFile($error,$arrTrunks["tech"])==true)
+        if(writeAsteriskFile($error,$arrTrunks["general_tech"])==true)
             $smarty->assign("mb_message",_tr("Trunk was deleted successfully"));
         else
             $smarty->assign("mb_message",_tr("Error: Trunk was deleted. ").$error);
@@ -776,7 +800,7 @@ function deleteTrunk($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
         $smarty->assign("mb_message",_tr($error));
     }
 
-	return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);;
+    return reportTrunks($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);;
 }
 
 function writeAsteriskFile(&$error,$tech){
@@ -809,546 +833,43 @@ function writeAsteriskFile(&$error,$tech){
     return true;
 }
 
-
-
 function createFieldForm($tech,$arrOrgz)
 {
-    $arrCid=array("off"=>_tr("Allow Any CID"), "on"=>_tr("Block Foreign CIDs"), "cnum"=>_tr("Remove CNAM"), "all"=>_tr("Force Trunk CID"));
-    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrAmaflag=array("noset"=>"","default"=>"default","omit"=>"omit","billing"=>"billing","documentation"=>"documentation");
-    $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
-    $arrNat=array(""=>"","no"=>"no","force_rport"=>"force_rport","yes"=>"yes","comedia"=>"comedia");
-    $arrType=array("friend"=>_tr("friend"),"peer"=>"peer");
-    $arrPeriod=array(5=>"5 min",10=>"10 min",15=>"15 min",30=>"30 min",45=>"45",60=>"1 hora",120=>"2 horas",180=>"3 horas",240=>"4 horas",300=>"5 horas",360=>"6 horas",600=>"10 horas",720=>"12 horas",900=>"15 horas",1200=>"20 horas",1440=>"1 dia");
+    $arrFields = array();
+    $arrCid    = array("off"=>_tr("Allow Any CID"), "on"=>_tr("Block Foreign CIDs"), "cnum"=>_tr("Remove CNAM"), "all"=>_tr("Force Trunk CID"));
+    $arrYesNo  = array("yes"=>_tr("Yes"),"no"=>_tr("No"));
+    $arrPeriod = array(5=>"5 min",10=>"10 min",15=>"15 min",30=>"30 min",45=>"45",60=>"1 hora",120=>"2 horas",180=>"3 horas",240=>"4 horas",300=>"5 horas",360=>"6 horas",600=>"10 horas",720=>"12 horas",900=>"15 horas",1200=>"20 horas",1440=>"1 dia");
+    $arrStatus = array('off'=>_tr('Enabled'),'on'=>_tr('Disabled'));
     
-    $arrStatus=array('off'=>_tr('Enabled'),'on'=>_tr('Disabled'));
-
-    $arrFormElements = array("trunk_name"	=> array("LABEL"                  => _tr('Descriptive Name'),
-                                                    "DESCRIPTION"            => _tr("PBXT_descriptive"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                             "keepcid" 	=> array("LABEL"                => _tr("CID Options"),
-                                                    "DESCRIPTION"            => _tr("PBXT_cioptions"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrCid,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),//accion en javascript
-                             "outcid"   => array("LABEL"                  => _tr("Outbound Caller ID"),
-                                                    "DESCRIPTION"            => _tr("PBXT_outboundcaller"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                             "maxchans" => array("LABEL"                   => _tr("Max # Current Calls"),
-                                                    "DESCRIPTION"            => _tr("PBXT_maxcalls"),    
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:100px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "dialoutprefix" => array("LABEL"         => _tr("Outbound Dial Prefix"),
-                                                    "DESCRIPTION"            => _tr("PBXT_outbounddilaprefix"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:100px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "disabled" => array("LABEL"         => _tr("Status"),
-                                                    "DESCRIPTION"            => _tr("PBXT_status"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrStatus,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "prepend_digit__" => array("LABEL"               => _tr("prepend digit"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:60px;text-align:center;"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "pattern_prefix__" => array("LABEL"               => _tr("pattern prefix"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:40px;text-align:center;"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "pattern_pass__" => array("LABEL"               => _tr("pattern pass"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:150px;text-align:center;"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "org"            => array("LABEL"                => _tr("Organization"),
-                                                    "DESCRIPTION"            => _tr("PBXT_organizations"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrOrgz,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "period_time"    => array("LABEL"                => _tr("Period of Time"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrPeriod,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "maxcalls_time"  => array("LABEL"                => _tr("Max # Calls"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "sec_call_time"  => array("LABEL"                => _tr("Set Max # Calls By time"),
-                                                    "DESCRIPTION"            => _tr("PBXT_setmaxcalls"),    
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            );
+    $prefix_attribute = "general";
+    addArray_Attribute($arrFields,$prefix_attribute,"trunk_name","yes",null,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"keepcid","no",$arrCid,"text"); //accion en javascript
+    addArray_Attribute($arrFields,$prefix_attribute,"outcid","no",null,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"max_chans","no",null,"numeric");
+    addArray_Attribute($arrFields,$prefix_attribute,"dialout_prefix","no",null,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"disabled","yes",$arrStatus,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"prepend_digit__","no",null,"text");    
+    addArray_Attribute($arrFields,$prefix_attribute,"pattern_prefix__","no",null,"text");    
+    addArray_Attribute($arrFields,$prefix_attribute,"pattern_pass__","no",null,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"org","yes",$arrOrgz,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"period_time","no",$arrPeriod,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"maxcalls_time","no",null,"text");
+    addArray_Attribute($arrFields,$prefix_attribute,"sec_call_time","yes",$arrYesNo,"text");
+    
+    $arrFields["{$prefix_attribute}_prepend_digit__"]['INPUT_EXTRA_PARAM']  = array("style" => "width:60px;text-align:center;");
+    $arrFields["{$prefix_attribute}_pattern_prefix__"]['INPUT_EXTRA_PARAM'] = array("style" => "width:40px;text-align:center;");
+    $arrFields["{$prefix_attribute}_pattern_pass__"]['INPUT_EXTRA_PARAM']   = array("style" => "width:150px;text-align:center;");
+    
     if($tech=="dahdi" || $tech=="custom"){
-        $ttt=($tech=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
-        $arrFormElements["channelid"] = array("LABEL"                  => $ttt,
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-    }else{
-        $arrFormElements["name"] =  array("LABEL"                 => _tr("Name Peer"),
-                                                    "DESCRIPTION"            => _tr("PBXT_namepeer"),  
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["register"] =  array("LABEL"                 => _tr("Register String"),
-                                                    "DESCRIPTION"            => _tr("PBXT_register_string"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:400px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["type"] =  array("LABEL"                       => _tr("type"),
-                                                    "DESCRIPTION"            => _tr("PBXT_type"),  
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrType,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(friend|peer){1}$");
-        $arrFormElements["secret"] =  array("LABEL"                  => _tr("secret"),
-                                                    "DESCRIPTION"            => _tr("PBXT_secret"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["username"] =  array("LABEL"                  => _tr("username"),
-                                                    "DESCRIPTION"            => _tr("PBXT_username"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["host"] =  array("LABEL"                  => _tr("host"),
-                                                    "DESCRIPTION"            => _tr("PBXT_host"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["qualify"] =  array("LABEL"                  => _tr("qualify"),
-                                                    "DESCRIPTION"            => _tr("PBXT_quality"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["context"] =  array("LABEL"                  => _tr("context"),
-                                                    "DESCRIPTION"            => _tr("PBXT_content"),  
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");     
-        $arrFormElements["allow"] =  array("LABEL"                  => _tr("allow"),
-                                                    "DESCRIPTION"            => _tr("PBXT_allow"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["disallow"] =  array("LABEL"                  => _tr("disallow"),
-                                                    "DESCRIPTION"            => _tr("PBXT_disallow"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["deny"] =  array("LABEL"                  => _tr("deny"),
-                                                    "DESCRIPTION"            => _tr("PBXT_deny"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["permit"] =  array("LABEL"                  => _tr("permit"),
-                                                    "DESCRIPTION"            => _tr("PBXT_permit"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["acl"] =  array("LABEL"                  => _tr("acl"),
-                                                    "DESCRIPTION"            => _tr("PBXT_acl"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        $arrFormElements["amaflags"] =  array("LABEL"                  => _tr("amaflags"),
-                                                    "DESCRIPTION"            => _tr("PBXT_amaflags"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrAmaflag,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "");
-        if($tech=="sip"){
-            $arrFormElements=array_merge($arrFormElements,createSipFrom());
-        }elseif($tech=="iax2"){
-            $arrFormElements=array_merge($arrFormElements,createIaxFrom());
-        }
+        addArray_Attribute($arrFields,$prefix_attribute,"channelid","yes",null,"text");
+        $arrFields["{$prefix_attribute}_channelid"]['LABEL'] = ($tech=="dahdi")?_tr("DAHDI Identifier"):_tr("Dial String");
     }
-	
-	return $arrFormElements;
-}
-
-function createSipFrom(){
-    $arrDtmf=array('rfc2833'=>'rfc2833','info'=>"info",'shortinfo'=>'shortinfo','inband'=>'inband',_tr('auto')=>_tr('auto'));
-    $arrYesNod=array(""=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrMedia=array(""=>"",'yes'=>'yes','no'=>'no','nonat'=>'nonat','update'=>'update',"update,nonat"=>"update,nonat","outgoing"=>"outgoing");
-    $arrFormElements = array("insecure" =>  array("LABEL"                  => _tr("insecure"),
-                                                    "DESCRIPTION"            => _tr("PBXT_insecure"),  
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      =>array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                             "nat"  =>  array("LABEL"                  => _tr("nat"),
-                                                    "DESCRIPTION"            => _tr("PBXT_nat"),  
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "dtmfmode" =>  array("LABEL"                  => _tr("dtmfmode"),
-                                                    "DESCRIPTION"            => _tr("PBXT_dtmfmode"),  
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrDtmf,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "fromuser" => array("LABEL"             => _tr("fromuser"),
-                                                    "DESCRIPTION"            => _tr("PBXT_fromuser"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "fromdomain" => array("LABEL"             => _tr("fromdomain"),
-                                                    "DESCRIPTION"            => _tr("PBXT_fromdomain"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "sendrpid" => array("LABEL"             => _tr("sendrpid"),
-                                                    "DESCRIPTION"            => _tr("If Remote-Party-ID should be sent"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "trustrpid" => array("LABEL"             => _tr("trustrpid"),
-                                                    "DESCRIPTION"            => _tr("If Remote-Party-ID should be trusted"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "directmedia"   => array( "LABEL"              => _tr("directmedia"),
-                                                    "DESCRIPTION"            => _tr("PBXT_directmedia"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrMedia,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "videosupport"   => array( "LABEL"              => _tr("videosupport"),
-                                                    "DESCRIPTION"            => _tr("PBXT_videosupport"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "maxcallbitrate" => array("LABEL"             => _tr("maxcallbitrate"),
-                                                    "DESCRIPTION"            => _tr("PBXT_maxcallbitrate"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "qualifyfreq" => array("LABEL"             => _tr("qualifyfreq"),
-                                                    "DESCRIPTION"            => _tr("PBXT_qualityfrec"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "rtptimeout" => array("LABEL"             => _tr("rtptimeout"),
-                                                    "DESCRIPTION"            => _tr("PBXT_rtptimeout"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "rtpholdtimeout" => array("LABEL"             => _tr("rtpholdtimeout"),
-                                                    "DESCRIPTION"            => _tr("PBXT_rtpholdtimeout"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "progressinband" => array("LABEL"             => _tr("progressinband"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "g726nonstandard" => array("LABEL"             => _tr("g726nonstandard"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "contactdeny" => array("LABEL"             => _tr("contactdeny"),
-                                                    "DESCRIPTION"            => _tr("PBXT_contactdeny"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "contactpermit" => array("LABEL"             => _tr("contactpermit"),
-                                                    "DESCRIPTION"            => _tr("PBXT_contactpermit"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "contactacl" => array("LABEL"             => _tr("contactacl"),
-                                                    "DESCRIPTION"            => _tr("PBXT_contactacl"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "callcounter" => array("LABEL"             => _tr("callcounter"),
-                                                    "DESCRIPTION"            => _tr("PBXT_callcounter"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "busylevel" => array("LABEL"             => _tr("busylevel"),
-                                                    "DESCRIPTION"            => _tr("PBXT_busylevel"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "allowoverlap" => array("LABEL"             => _tr("allowoverlap"),
-                                                    "DESCRIPTION"            => _tr("PBXT_allowoverlap"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "allowsubscribe" => array("LABEL"             => _tr("allowsubscribe"),
-                                                    "DESCRIPTION"            => _tr("PBXT_allowsuscribe"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "allowtransfer" => array("LABEL"             => _tr("allowtransfer"),
-                                                    "DESCRIPTION"            => _tr("PBXT_allowtransfer"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "defaultip" => array("LABEL"             => _tr("defaultip"),
-                                                    "DESCRIPTION"            => _tr("PBXT_defaultip"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "defaultuser" => array("LABEL"             => _tr("defaultuser"),
-                                                    "DESCRIPTION"            => _tr("PBXT_defaultuser"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "keepalive" => array("LABEL"             => _tr("keepalive"),
-                                                    "DESCRIPTION"            => _tr("PBXT_keepalive"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "transport" => array("LABEL"             => _tr("transport"),
-                                                    "DESCRIPTION"            => _tr("PBXT_transport"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "outboundproxy" => array("LABEL"             => _tr("outboundproxy"),
-                                                    "DESCRIPTION"            => _tr("PBXT_outboundproxy"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            
-    );
-    return $arrFormElements;
-}
-
-function createIaxFrom(){
-    $auth=array("md5"=>"md5","plaintext"=>"plaintext","rsa"=>"rsa");
-    $arrYesNo=array("yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrYesNod=array("noset"=>"","yes"=>_tr("Yes"),"no"=>_tr("No"));
-    $arrCallTok=array("yes"=>"yes","no"=>"no","auto"=>"auto");
-    $arrCodecPrio=array("noset"=>"","host"=>"host","caller"=>"caller","disabled"=>"disabled","reqonly"=>"reqonly");
-    $encryption=array("noset"=>"","aes128"=>"aes128","yes"=>"yes","no"=>"no");
-    $arrFormElements = array("auth"   =>      array("LABEL"                  => _tr("auth"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $auth,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(md5|plaintext|rsa){1}$"),
-                             "trunk"   =>      array("LABEL"                  => _tr("trunk"),
-                                                    "REQUIRED"               => "yes",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNo,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
-                        
-                            "requirecalltoken" => array("LABEL"             => _tr("requirecalltoken"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrCallTok,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "encryption" => array("LABEL"             => _tr("encryption"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $encryption,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "jitterbuffer" => array("LABEL"             => _tr("jitterbuffer"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
-                            "forcejitterbuffer" => array("LABEL"             => _tr("forcejitterbuffer"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
-                            "codecpriority" => array("LABEL"             => _tr("codecpriority"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrCodecPrio,
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "qualifysmoothing" => array("LABEL"             => _tr("qualifysmoothing"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => $arrYesNod,
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no|noset){1}$"),
-                            "qualifyfreqok" => array("LABEL"             => _tr("qualifyfreqok"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "qualifyfreqnotok" => array("LABEL"             => _tr("qualifyfreqnotok"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "sendani" => array("LABEL"             => _tr("sendani"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
-                                                    "VALIDATION_TYPE"        => "ereg",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
-                            "adsi" => array("LABEL"             => _tr("adsi"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => "^(yes|no){1}$"),
-                            "trunkfreq" => array("LABEL"             => _tr("trunkfreq"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "numeric",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "trunktimestamps" => array("LABEL"             => _tr("trunktimestamps"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "transfer" => array("LABEL"             => _tr("transfer"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("yes"=>"Yes","no"=>"No","mediaonly"=>"mediaonly"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "defaultip" => array("LABEL"             => _tr("defaultip"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "maxcallnumbers" => array("LABEL"             => _tr("maxcallnumbers"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-                            "inkeys" => array("LABEL"             => _tr("inkeys"),
-                                                    "REQUIRED"               => "no",
-                                                    "INPUT_TYPE"             => "TEXT",
-                                                    "INPUT_EXTRA_PARAM"      => array("style" => "width:200px"),
-                                                    "VALIDATION_TYPE"        => "text",
-                                                    "VALIDATION_EXTRA_PARAM" => ""),
-    );
-    return $arrFormElements;
+    else{
+        $arrFields = array_merge($arrFields,getSIP_IAX_Attributes($tech,"peer"));
+        $arrFields = array_merge($arrFields,getSIP_IAX_Attributes($tech,"user"));
+    }
+    
+    return $arrFields;
 }
 
 function createFieldFilter($arrOrgz,$arrTech,$arrStatus)

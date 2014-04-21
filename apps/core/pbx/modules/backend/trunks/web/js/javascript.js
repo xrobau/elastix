@@ -1,47 +1,49 @@
 var trunk_flag=false;
 $(document).ready(function(){
-	$("#arrDestine").val(getArrRows()); 
-    $(".adv_opt").click(function(){
-        if($("#mostra_adv").val()=="no"){
-            $("#mostra_adv").val("yes");
-            $(".show_more").attr("style","visibility: visible;");
+    $("#arrDestine").val(getArrRows()); 
+    $("a[class^='adv_opt_']").click(function(){
+        var type = $(this).attr("class").substring(8);
+        
+        if($("#mostra_adv_" + type).val()=="no"){
+            $("#mostra_adv_" + type).val("yes");
+            $(".show_more_"  + type).attr("style","visibility: visible;");
         }else{
-            $("#mostra_adv").val("no");
-            $(".show_more").attr("style","display: none;");
+            $("#mostra_adv_" + type).val("no");
+            $(".show_more_" + type).attr("style","display: none;");
         }
-        radio('tab-3');
+        radio('tab-' + type);
     });
     
-    $("td select[name=org]").change(function(){
-        var org=$("select[name=org] option:selected").val();
+    $("td select[name=general_org]").change(function(){
+        var org=$("select[name=general_org] option:selected").val();
         if(org!="none" && org!=""){
             var act_orgs=$("#select_orgs").val();
             //se agrega el elemento a la lista
             $("select[name='arr_org']").append("<option value="+org+">"+org+"</option>");
             //se quita el elemento de la lista de seleccion
-            $("select[name=org] option:selected").remove();
+            $("select[name=general_org] option:selected").remove();
             
             $("#select_orgs").val(act_orgs+org+",");
-            $("select[name=org]").val("none");
+            $("select[name=general_org]").val("none");
         }
     });
     if($("#mode_input").val()=="edit" || $("#mode_input").val()=="input")
         mostrar_select_orgs();
     
-    $("#sec_call_time").change(function(){
-        if($("#sec_call_time option:selected").val()=="yes"){
-            $(".sec_call_time").css("display","table-row");
-            var alt=$("#content_tab-1").children("#div_body_tab").height();
-            var alt_tab=alt+10;
+    $("#general_sec_call_time").change(function(){
+        if($("#general_sec_call_time option:selected").val()=="yes"){
+            $(".general_sec_call_time").css("display","table-row");
+            var alt=$("#content_tab-general").children("#div_body_tab").height();
+            var alt_tab=alt+16;
             $(".tabs").css({'height':alt_tab});
         }else{
-            $(".sec_call_time").css("display","none");
-            var alt=$("#content_tab-1").children("#div_body_tab").height();
+            $(".general_sec_call_time").css("display","none");
+            var alt=$("#content_tab-general").children("#div_body_tab").height();
             $(".tabs").css({'height':alt});
         }
     });
-    if($("#sec_call_time option:selected").val()=="no") 
-        $(".sec_call_time").css("display","none");
+    if($("#general_sec_call_time option:selected").val()=="no") 
+        $(".general_sec_call_time").css("display","none");
     
     $('td select[class=state_trunk]').change(function(){
         if(trunk_flag==false){
@@ -57,10 +59,9 @@ $(document).ready(function(){
             request("index.php",arrAction,false,
             function(arrData,statusResponse,error)
             {
+                var tmp="off";
                 if(action=="on")
-                    var tmp="on";
-                else
-                    var tmp="off";
+                    tmp="on";
                 
                 if(error!=""){
                     trunk_flag=false;
@@ -139,7 +140,7 @@ var add = function() {
 
 $('.add').live('click', this, function(event) {
     add();
-    radio("tab-1");
+    radio("tab-general");
 });
 
 $('.delete').live('click', this, function(event) {
@@ -153,13 +154,13 @@ $('.delete').live('click', this, function(event) {
 	$(this).closest('tr').remove();
 	$("#arrDestine").val(arrDestine);
     // }
-    radio("tab-1"); 
+    radio("tab-general"); 
 });
 
 function radio(id_radio){
     var alt=$("#content_"+id_radio).children("#div_body_tab").height();
-    var alt_tab=alt+10;
-    if(id_radio=="tab-2")
+    var alt_tab=alt+16;
+    if(id_radio=="tab-peer")
         var alt_tab=alt+45;
     $(".tabs").css({'height':alt_tab});
     $(".content").css({"z-index":"0"});
@@ -182,7 +183,7 @@ function quitar_org(){
     //se quita el elemento de la lista de seleccionados
     $("select[name=arr_org] option:selected").remove();
     //se agrega el elemento de la lista de canales disponibles
-    $("select[name='org']").append("<option value="+org+">"+org+"</option>");
+    $("select[name='general_org']").append("<option value="+org+">"+org+"</option>");
     var val=$("#select_orgs").val();
     var arrVal=val.split(",");
     var option="";
@@ -203,11 +204,11 @@ function mostrar_select_orgs(){
         }
     }
     
-    var chann=$("select[name='org']");
+    var chann=$("select[name='general_org']");
     var options = $('option', chann);
         options.each(function() {
             if(arrVal.indexOf($(this).text())!=-1){
-                $("select[name=org] option[value='"+$(this).text()+"']").remove();
+                $("select[name=general_org] option[value='"+$(this).text()+"']").remove();
             }
         });
 }

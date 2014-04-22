@@ -376,6 +376,12 @@ fi
 
 %changelog
 * Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: enable IP authentication. Fix user authentication so that
+  INVITEs actually check the authentication, instead of just checking that an
+  user is specified. Attempt to load an authentication user if request has been
+  authenticated through IP and no authentication user is specifed, so that
+  Asterisk can identify the trunk.
+  SVN Rev[6590]
 - CHANGED: asterisk: disable asterisk HTTP support since kamailio now handles wss
   SVN Rev[6585]
 - CHANGED: kamailio: update SQL to change default websocket WSS port for Kamailio

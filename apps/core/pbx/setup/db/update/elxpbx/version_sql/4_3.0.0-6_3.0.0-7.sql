@@ -25,14 +25,6 @@ CREATE TABLE announcement (
     INDEX organization_domain (organization_domain)
 ) ENGINE = INNODB;
 
-/* The following view allows Kamailio to perform the mapping from mangled to demangled accounts */
-CREATE VIEW uacreg AS
-SELECT name AS l_uuid, kamailioname AS l_username, organization_domain AS l_domain,
-    name AS r_username, '127.0.0.1:5080' AS r_domain, 'asterisk' AS realm,
-    name AS auth_username, sippasswd AS auth_password, 'sip:127.0.0.1:5080' AS auth_proxy,
-    90 AS expires
-FROM sip;
-
 /* The following table stores IPs and domains from which incoming calls from 
  * global SIP trunks should be accepted */
 CREATE TABLE global_domains

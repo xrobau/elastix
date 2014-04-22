@@ -74,3 +74,7 @@ CREATE TABLE other_destinations(
 /* Updates for using kamailio instead of asterisk for websocket support */
 UPDATE http_ast SET property_val = '5060' WHERE property_name = 'bindport';
 UPDATE http_ast SET property_val = '5061' WHERE property_name = 'tlsbindport';
+
+
+/* Added new column ani_prefix, it is used for module ANI */
+ALTER TABLE trunk_organization ADD COLUMN ani_prefix INT(11) NULL;

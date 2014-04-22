@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>	
 <module>
-	<menu id="did" name="DID (Inbound Numbers)" idParent="outconnection" type="module" link=""  order_no="3">
+	<menu id="ani" name="ANI (Outbound Prefixes)" idParent="outconnection" type="module" link=""  order_no="2">
 		<permissions administrative="yes" organization_access="no" >
 			<actions>
 				<action name="access">

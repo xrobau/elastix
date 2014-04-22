@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>	
 <module>
-	<menu id="ivr" name="IVR" idParent="outconnection" type="module" link=""  order_no="5">
+	<menu id="ivr" name="IVR" idParent="outconnection" type="module" link=""  order_no="6">
 		<permissions administrative="yes" organization_access="yes" >
 			<actions>
 				<action name="access">

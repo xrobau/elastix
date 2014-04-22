@@ -944,7 +944,7 @@ class paloSip extends paloAsteriskDB {
             
             // Redirigir el secret a sippasswd para Kamailio
             if ($key == 'sippasswd') continue;
-            if ($key == 'secret') { echo $key;
+            if ($key == 'secret') {
                 $key = 'sippasswd';
             }
             

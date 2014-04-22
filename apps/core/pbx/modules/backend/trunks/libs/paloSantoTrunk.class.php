@@ -507,10 +507,19 @@ class paloSantoTrunk extends paloAsteriskDB{
             'VALUES ('.implode(', ', array_fill(0, count($sqlFields), '?')).')';
         $arrValues = array_values($sqlFields);
         
-        if ($this->executeQuery($query,$arrValues)) {
-            return true;
-        }else
-            return false;
+        if (!$this->executeQuery($query,$arrValues))
+            return FALSE;
+        
+        /* Si la troncal tiene IP y no tiene clave, las llamadas entrantes deben
+         * validarse por IP */
+        if ($tech == 'sip' && $arrProp['host'] != 'dynamic' && empty($arrProp['secret'])) {
+        	$query = 'INSERT INTO kamailio.address (grp, ip_addr, mask, port, tag) VALUES (1, ?, 32, 0, NULL)';
+            $arrValues = array($arrProp['host']);
+            if (!$this->executeQuery($query, $arrValues))
+                return FALSE;
+        }
+        
+        return TRUE;
     }
 
     private function setTrunkASTDB($trunkid,$arrProp){
@@ -827,6 +836,19 @@ class paloSantoTrunk extends paloAsteriskDB{
         if(empty($arrProp['host'])){
             $arrProp['host']="dynamic";
         }
+
+        // Eliminar dirección de kamailio.address en caso de cuenta SIP
+        $oldhost = 'dynamic';
+        if ($tech == 'sip') {
+        	$result = $this->_DB->getFirstRowQuery(
+                'SELECT host, sippasswd FROM sip WHERE name = ?', TRUE, array($oldname));
+            if (is_array($result) && count($result) > 0 && $result['host'] != 'dynamic') {
+                if (is_null($result['sippasswd'])) $oldhost = $result['host'];
+            	$this->executeQuery(
+                    'DELETE FROM kamailio.address WHERE ip_addr = ?',
+                    array($result['host']));
+            }
+        }
         
         // TODO: encapsular correctamente la actualización de una cuenta voip
         $sqlFields = $this->type->_getFieldValuesSQL($arrProp);
@@ -839,7 +861,18 @@ class paloSantoTrunk extends paloAsteriskDB{
         if(count($arrQuery)>0){
             $query ="Update $tech set ".implode(",",$arrQuery);
             $query .=" where name=?";
-            return $this->executeQuery($query,$arrParam);
+            if (!$this->executeQuery($query,$arrParam)) return FALSE;
+            
+            if ($tech == 'sip') {
+                if (!isset($arrProp['host'])) $arrProp['host'] = $oldhost;
+                if ($tech == 'sip' && $arrProp['host'] != 'dynamic' && empty($arrProp['secret'])) {
+                    $query = 'INSERT INTO kamailio.address (grp, ip_addr, mask, port, tag) VALUES (1, ?, 32, 0, NULL)';
+                    $arrValues = array($arrProp['host']);
+                    if (!$this->executeQuery($query, $arrValues))
+                        return FALSE;
+                }
+            }
+            return TRUE;
         }else
             return true;
     }
@@ -935,6 +968,17 @@ class paloSantoTrunk extends paloAsteriskDB{
                 $tech="iax";
                 
             list($peer,$user) = explode("|",$result["channelid"]);
+
+            // Eliminar la dirección de la troncal en caso de cuenta SIP
+            if ($tech == 'sip') {
+                $result = $this->_DB->getFirstRowQuery(
+                    'SELECT host FROM sip WHERE name = ?', TRUE, array($peer));
+                if (is_array($result) && count($result) > 0 && $result['host'] != 'dynamic') {
+                    $this->executeQuery(
+                        'DELETE FROM kamailio.address WHERE ip_addr = ?',
+                        array($result['host']));
+                }
+            }
             
             $query="DELETE from $tech where name=?";
             if($this->_DB->genQuery($query,array($peer))==false){

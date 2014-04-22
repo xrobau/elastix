@@ -376,6 +376,8 @@ fi
 
 %changelog
 * Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: trunks: update kamailio.address table as needed for trunks
+  SVN Rev[6592]
 - CHANGED: kamailio: enable IP authentication. Fix user authentication so that
   INVITEs actually check the authentication, instead of just checking that an
   user is specified. Attempt to load an authentication user if request has been

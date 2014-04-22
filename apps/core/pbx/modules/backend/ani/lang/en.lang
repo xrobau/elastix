@@ -37,14 +37,10 @@ $arrLangModule=array(
 "Filter applied " => "Filter applied ",
 "Organization" => "Organization",
 "ANI Prefix" => "ANI Prefix",
-"Other Destination has been created successfully" => "Other Destination has been created successfully",
-"Field 'Description' can't be empty" => "Field 'Description' can't be empty",
-"Field 'Dial Destination' can't be empty" => "Field 'Dial Destination' can't be empty",
-"Other Destination has been edited successfully" => "Other Destination has been edited successfully",
-"Other Destination can't be deleted." => "Other Destination can't be deleted.",
-"Other Destination was deleted successfully" => "Other Destination was deleted successfully",
-"Error creating dialplan for Other Destinations. " => "Error creating dialplan for Other Destinations. ",
-"Feature Codes" => "Feature Codes",
-"Shortcut Apps" => "Shortcut Apps"
+"Prefix ANI was saved successfully." => "Prefix ANI was saved successfully.",
+"Can't create a new instace of paloSantoANI" => "Can't create a new instace of paloSantoANI",
+"Invalid Trunk ID" => "Invalid Trunk ID",
+"Prefix ANI doesn't exist" => "Prefix ANI doesn't exist",
+"Prefix ANI Invalid, it must be a number maximum 5 digits" => "Prefix ANI Invalid, it must be a number maximum 5 digits",
 );
 ?>

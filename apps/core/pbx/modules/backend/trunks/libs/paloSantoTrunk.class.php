@@ -452,7 +452,7 @@ class paloSantoTrunk extends paloAsteriskDB{
                 $arrOrgz[$value["domain"]]=$value["domain"];
         }
         
-        $query="INSERT into trunk_organization values (?,?)";
+        $query="INSERT into trunk_organization(trunkid,organization_domain) values (?,?)";
         //obtenemos las oraganizacion seleccionadas
         $orgs=explode(",",$arrOrg);
         foreach($orgs as $value){

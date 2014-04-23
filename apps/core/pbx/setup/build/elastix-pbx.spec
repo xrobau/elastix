@@ -366,7 +366,7 @@ fi
 /tftpboot/*
 /usr/share/elastix/tftp
 %defattr(644, root, root)
-/etc/kamailio/*
+/etc/kamailio.elastix/*
 %defattr(755, root, root)
 /etc/init.d/festival
 /bin/asterisk.reload

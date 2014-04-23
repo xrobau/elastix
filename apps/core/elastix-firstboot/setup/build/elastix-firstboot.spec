@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Wed Apr 23 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: disable modification of http.conf for asterisk, since kamailio now 
   handles wss.
@@ -155,14 +159,46 @@ rm -rf $RPM_BUILD_ROOT
   on every system startup.
   SVN Rev[6460]
 
+* Wed Feb 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  elastix-firstboot: (trivial) remove use of PHP_EOL, remove some extra
+  whitespace
+  SVN Rev[6459]
+
+* Wed Feb 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  elastix-firstboot: (trivial) replace tabs with spaces
+  SVN Rev[6458]
+
+* Wed Feb 05 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: elastix-firstboot - elastix-admin-passawords: Implementation of new
+  functions used for validate the correct use of scripts like elastix-menumerge
+  and correctly setup wss feature are now included in the currently code.
+  SVN Rev[6457]
+
+* Wed Nov 06 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: It was corrected the size of msgbox corresponding to password
+  validation for elx web administration. Furthermore it was added some part of
+  code that was accidentaly suppressed in a previous commit to this file,
+  correcting in that way an unusual behavior.
+  SVN Rev[6069]
+
+* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: Trunk - Apps: Was renamed directory infomudules to infomodules
+  SVN Rev[5960]
+
 * Thu Jul 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: elastix-firstboot: fix script to update password in mysql database
   instead of sqlite.
   SVN Rev[5345]
 
+* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 
+- FIXED: This script now handle the correct configuration of odbc.ini for
+  Elastix
+  SVN Rev[4825]
+
 * Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[4811]
 
 * Tue Apr 09 2013 Rocio Mera <rmera@palosanto.com>
 - CHANGED: Apps - elastix-firstboot: Was edited file elastix-admin-passwords in

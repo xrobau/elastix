@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -233,9 +233,28 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
+- FIXED: TRUNK - APPS/Email admin: Was modified resposive style.
+  SVN Rev[6442]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+* CHANGED : TRUNK - APPS/Email admin: Was added scroll option in .css file. Was
+  added "deleted cascade option" to the vacations table.
+  SVN Rev[6404]
+
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6389]
+
+* Tue Jan 07 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/Email admin: Were moved all the attributes of the
+  "tooltip" to the .css general file.
+  SVN Rev[6335]
 
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam, Remote SMTP: update jquery.ibutton.js to 1.0.03, fix 

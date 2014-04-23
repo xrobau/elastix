@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -76,7 +76,7 @@ mv setup/etc/logrotate.d/elastixfax	      $RPM_BUILD_ROOT/etc/logrotate.d/
 mv setup/etc/cron.daily/elastix_tmpfax_cleanup		$RPM_BUILD_ROOT/etc/cron.daily/
 rm -rf setup/hylafax
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
-rmdir setup/etc/init setup/etc/logrotate.d setup/etc
+rmdir setup/etc/init setup/etc/logrotate.d setup/etc/cron.daily
 
 chmod	 755 $RPM_BUILD_ROOT/etc/cron.daily/elastix_tmpfax_cleanup
 
@@ -214,6 +214,7 @@ fi
 /etc/logrotate.d/elastixfax
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
+/etc/cron.daily/elastix_tmpfax_cleanup
 %defattr(644, root, root)
 /etc/init/faxgetty.conf
 %defattr(775, asterisk, uucp)
@@ -228,9 +229,39 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: code of the organization is the same as the domain.
+  SVN Rev[6513]
+
+* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
+- FIXED: TRUNK - APPS/Fax: Was fixed function editFax. Was added missing
+  argument idUser at moment to call paloFax function editFaxToUser
+  SVN Rev[6436]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/Fax: The function "showSendFax" was modified to send
+  fax from the chat window.
+  SVN Rev[6427]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+- ADDED : TRUNK - APPS/Fax: Was added scroll option in .css file. Was added to
+  the "send fax" option and was created a "cron" that delete the temporal files
+  of the upload fax.
+  SVN Rev[6403]
+
+* Thu Jan 23 2014 Luis Abarca <labarca@palosanto.com> 
+- ADDED: fax - Build/elastix-fax.spec: A new dir that contains the temporal
+  messages of fax that will be sent, it has been created.
+  SVN Rev[6402]
+
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6390]
 
 * Tue Jan 07 2014 Rocio Mera <rmera@palosanto.com> 
 - CHANGED: TRUNK - APPS/Fax: Were moved all the attributes of the "tooltip" to

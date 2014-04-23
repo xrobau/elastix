@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 4
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -156,6 +156,45 @@ fi
 #/etc/init.d/elastix-synchronizerd
 
 %changelog
+* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
+- FIXED: TRUNK - APPS/Agenda: Was modified resposive style.
+  SVN Rev[6441]
+
+* Wed Jan 29 2014 Luis Abarca <labarca@palosanto.com> 
+- ADDED: agenda - Build/elastix-agenda.spec: A folder where the images of all
+  contacts separated by organization 'contacts_images' has been made it.
+  SVN Rev[6437]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+ADDED : TRUNK - APPS/Agenda: Was added "agenda.xml" file.
+  SVN Rev[6429]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+ADDED : TRUNK - APPS/Agenda: Was added the "contacts" table.
+  SVN Rev[6412]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+- DELETED: Was deleted from agenda appsxml menu agenda.
+  SVN Rev[6410]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+CHANGED : TRUNK - APPS/Agenda: Was added scroll option in .css file.
+  SVN Rev[6405]
+
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: agenda - Build/elastix-agenda.spec: Update specfile with latest SVN
+  history. Bump Release in specfile.
+  SVN Rev[6386]
+
+* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: agenda - Build/elastix-agenda.spec: Update specfile with latest SVN
+  history. Bump Release in specfile.
+  SVN Rev[6385]
+
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

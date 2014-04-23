@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -156,6 +156,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Wed Mar 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: switch the MOH directory from mohmp3 to moh (the 
   Asterisk default). Update all code accordingly.
@@ -180,6 +184,7 @@ fi
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6394]
 
 * Thu Dec 26 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: replace deprecated .live and .die with .on and .off

@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 3.0.0
-Release: 5
+Release: 6
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -402,6 +402,26 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Apr 22 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  Framework: remove stray echo
+  SVN Rev[6589]
+
+* Mon Apr 21 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: framework, secret field on sip tech, now accept NULL value.
+  SVN Rev[6587]
+
+* Tue Apr 08 2014 Bruno Macias <bmacias@palosanto.com> 
+- ADDED: new modules, shortcut_apps and other_destinations.
+  SVN Rev[6573]
+
+* Wed Apr 02 2014 Bruno Macias <bmacias@palosanto.com> 
+- ADDED: goto distination were added new destines.
+  SVN Rev[6566]
+
 * Fri Mar 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove domain suffix from IM account returned to end user.
   For future integration with Kamailio, the REGISTER through WebSocket must be
@@ -417,10 +437,62 @@ rm -rf $RPM_BUILD_ROOT
   property not being saved through SQL fields.
   SVN Rev[6553]
 
+* Wed Mar 19 2014 Luis Abarca <labarca@palosanto.com> 
+- REMOVED: framework - elastix-framework.spec: The prereq: php-sqlite3 its no
+  longer necesary because now the package php-pdo provides the dependencies
+  that formerly provides php-sqlite3 package.
+  SVN Rev[6550]
+
+* Mon Mar 17 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: module announcement was update its dialplan.
+  SVN Rev[6547]
+
+* Mon Mar 17 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: module announcement was update its dialplan.
+  SVN Rev[6545]
+
+* Sat Mar 15 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: paloSantoForm.class.php, SELECT input when option value was cero
+  number always compare is true for selected state option.
+  SVN Rev[6539]
+
+* Sat Mar 15 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- FIXED: Framework - Remove any domain suffix from kamailioname when saving a
+  SIP account. Try 2.
+  SVN Rev[6538]
+
 * Sat Mar 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework - Remove any domain suffix from kamailioname when saving
   a SIP account.
   SVN Rev[6537]
+
+* Wed Mar 12 2014 Bruno Macias <bmacias@palosanto.com> 
+- DELETED: temporaly file for debuging, module elastixutils
+  SVN Rev[6532]
+
+* Wed Mar 12 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: module conference, regular expresion was changed explode function.
+  SVN Rev[6531]
+
+* Tue Mar 11 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  SVN Rev[6528]
+
+* Tue Mar 11 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: Information about callerid and device were changed, module
+  recordings.
+  SVN Rev[6527]
+
+* Tue Mar 11 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Reapply commit 6517 overwritten by previous update.
+  SVN Rev[6524]
+
+* Tue Mar 11 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: code of the organization is the same as the domain.
+  SVN Rev[6523]
+
+* Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: code of the organization is the same as the domain.
+  SVN Rev[6519]
 
 * Mon Mar 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework - Each SIP account creation also requires an update to the
@@ -437,6 +509,22 @@ rm -rf $RPM_BUILD_ROOT
   are handled correctly.
   SVN Rev[6507]
 
+* Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: code of the organization is the same as the domain.
+  SVN Rev[6513]
+
+* Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: code of the organization is the same as the domain.
+  SVN Rev[6511]
+
+* Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: code of the organization is the same as the domain.
+  SVN Rev[6510]
+
+* Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: code of the organization is the same as the domain.
+  SVN Rev[6508]
+
 * Fri Mar 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework - Start of Kamailio integration into Elastix. Removed 
   methods for MD5 hashing. Redirect assignments to 'secret' into 'sippasswd'. 
@@ -448,19 +536,176 @@ rm -rf $RPM_BUILD_ROOT
   the Basic HTTP authentication.
   SVN Rev[6500]
 
+* Fri Feb 28 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: asterisk db was changed format data
+  SVN Rev[6493]
+
+* Thu Feb 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: second changes about name peer as user@domain
+  SVN Rev[6492]
+
+* Thu Feb 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: fisrt changed about name peer as user@domain.
+  SVN Rev[6491]
+
 * Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: framework - add proper Content-Type header to JSON response when 
   failing a rawmode request due to invalid session.
   SVN Rev[6482]
 
-* Wed Feb 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: framework - tweak blackmin theme to make module menu interaction 
+* Mon Feb 17 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK: Was Modified the framework.
+  SVN Rev[6478]
+
+* Wed Feb 12 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: framework - tweak blackmin theme to make module menu interaction
   easier.
+  SVN Rev[6473]
+
+* Fri Feb 07 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK: Was modified the .css file in the pagination
+  module "home".
+  SVN Rev[6465]
+
+* Fri Feb 07 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK: Was modified the .css file in the pagination
+  module "home".
+  SVN Rev[6464]
+
+* Thu Feb 06 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK: Was deleted overflow in home.
+  SVN Rev[6463]
+
+* Thu Feb 06 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK/Themes: Was added extension number in final user
+  and background gray.
+  SVN Rev[6462]
+
+* Thu Feb 06 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK/Html: Was added extension number in final user and
+  background gray.
+  SVN Rev[6461]
+
+* Fri Jan 31 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - APPS/System: Was added autocomplete to send mail in the "to"
+  field.
+  SVN Rev[6455]
+
+* Fri Jan 31 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK: Was added autocomplete to send mail in the "to"
+  field.
+  SVN Rev[6454]
+
+* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK: The year was updated at the end-user login.
+  SVN Rev[6447]
+
+* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Framework/HTML: Was added a div container to modules
+  content. This div has as 'module_content_framework_data'
+  SVN Rev[6435]
+
+* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
+- FIXED: TRUNK - FRAMEWORK/Apps: Was fixed error in mail tag button. It
+  displayed bad options
+  SVN Rev[6434]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK/Themes: Was deleted the "tabindex" attribute of
+  the popup.
+  SVN Rev[6433]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK/Common: Was deleted the "tabindex" attribute of
+  the popup.
+  SVN Rev[6432]
+
+* Tue Jan 28 2014 Luis Abarca <labarca@palosanto.com> 
+- ADDED: framework - elastix-framework.spec: A new script
+  'elastix_emailattach_cleanup' has been added.
+  SVN Rev[6431]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - Apps/Manager: Was implemented in home module function to
+  forward message that contain inline images. Was fixed problem when attach a
+  file
+  SVN Rev[6430]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- FIXED: TRUNK - FRAMEWORK/System: Fixed edit email quota.
   SVN Rev[6428]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK/System: The session variable created in the
+  function "getElastixAccounts" was removed.
+  SVN Rev[6426]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK/Themes: Were modified styles of the chat window.
+  SVN Rev[6425]
+
+* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
+- CHANGED: TRUNK - FRAMEWORK: Functions were added to send mail and fax from
+  the chat window.
+  SVN Rev[6424]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+- ADDED: Was added cron hourly that clean old attach from directory
+  /var/www/elastixdir/uploadAttachs. This cron delete file that were modified
+  more than 12 hours ago
+  SVN Rev[6414]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+- ADDED: Was added tpl file compose.tpl. This tpl is used to compose new emails
+- ADDED: Was added js lib tinymce. This lib is used to create rich text in
+  email module
+  SVN Rev[6413]
+
+* Thu Jan 23 2014 Luis Abarca <labarca@palosanto.com> 
+- ADDED: framework - elastix-framework.spec: A new dir that contains temporal
+  file attachments, it has been created.
+  SVN Rev[6411]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+CHANGED : TRUNK - FRAMEWORK/System: Was added automatic refresh of
+  login/logout to chat list. Was added the "contact search" in the chat list.
+  SVN Rev[6409]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+- ADDED: Was added to home lib paloComposeEmail.php. This function perform the
+  action of send a new email.
+- ADDED: Was added to home lib emailaddress.php. This lib is used to parse
+  email address and print this in a secure way.
+- CHANGED: Was done changes home interface. Also was implemented functions to
+  forward and reply a email, to create a new mailbox, paging mails.
+- ADDED: Was added some images used in home interface
+  SVN Rev[6408]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+CHANGED : TRUNK - FRAMEWORK/Themes: Were modified the ".tpl" files for new
+  look elastix.
+  SVN Rev[6407]
+
+* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
+CHANGED : TRUNK - FRAMEWORK/Web: Were added new images for elastix menu. Was
+  changed the elastix logo. Were modified the css and js files for new look of
+  elastix.
+  SVN Rev[6406]
+
+* Tue Jan 21 2014 Rocio Mera <rmera@palosanto.com> 
+- ADDED: TRUNK - FRAMEWORK/Libs: Was added to PHPMailer lib file
+  PHPMailerAutoload.php
+  SVN Rev[6396]
+
+* Tue Jan 21 2014 Rocio Mera <rmera@palosanto.com> 
+- UPDATED: TRUNK - FRAMEWORK/Libs: Was updated PHPMailer lib to the last
+  version 5.2.7
+  SVN Rev[6395]
 
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6387]
 
 * Tue Jan 07 2014 Rocio Mera <rmera@palosanto.com> 
 - ADDED: TRUNK - FRAMEWORK: Was added file "jquery.liteuploader.js" it's used

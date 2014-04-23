@@ -99,7 +99,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
-* Wed Apr 23 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.
 

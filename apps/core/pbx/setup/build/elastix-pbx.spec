@@ -19,7 +19,7 @@ Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
 Prereq: mysql-connector-odbc
 Requires: festival >= 1.95
-Requires: kamailio, kamailio-odbc, kamailio-mysql, kamailio-utils, kamailio-presence
+Requires: kamailio, kamailio-unixodbc, kamailio-mysql, kamailio-utils, kamailio-presence
 
 %description
 Elastix Module PBX

@@ -100,6 +100,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: the rtpproxy setup script now handles the case of multiple gateways
+  set up for telephony trunks connected to dedicated net interfaces.
+  SVN Rev[6603]
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.
 

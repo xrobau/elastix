@@ -48,6 +48,30 @@ function network_from_ip($ip_octet, $mask_octet)
     return $net_octet;
 }
 
+function octet2mask($oct)
+{
+    $mask = 0;
+    foreach ($oct as $o) {
+        for (; $o != 0; $o = (($o << 1) & 0xFF)) $mask++;
+    }
+    return $mask;
+}
+
+function lookup_closest_interface(&$if_list, $oct)
+{
+    $closest_idx = NULL;
+
+    foreach ($if_list as $idx => $if_entry) {
+        // Check if specified IP belongs to this network
+        if ($if_entry['net_octet'] == network_from_ip($oct, $if_entry['mask_octet'])) {
+            if (is_null($closest_idx) || $if_list[$closest_idx]['mask_octet'] < $if_entry['mask_octet'])
+                $closest_idx = $idx;
+        }
+    }
+    
+    return $closest_idx;
+}
+
 // Need custom function to load conf file, odd characters choke parse_ini_file()
 function load_keys()
 {
@@ -100,12 +124,11 @@ foreach ($output as $s) {
             'mask_octet' => ip2octet($regs[2]),
             'ip_octet'   => ip2octet($regs[1]),
             'net_octet'  => array(0, 0, 0, 0),
+            'gwroute'    => array(),
         );
         $if_entry['net_octet'] = network_from_ip($if_entry['ip_octet'], $if_entry['mask_octet']);
         $if_entry['net_addr'] = implode('.', $if_entry['net_octet']);
-        foreach ($if_entry['mask_octet'] as $o) {
-            for (; $o != 0; $o = (($o << 1) & 0xFF)) $if_entry['mask']++;
-        }
+        $if_entry['mask'] = octet2mask($if_entry['mask_octet']);
 
         $if_list[] = $if_entry;
     }
@@ -136,7 +159,24 @@ exec('/sbin/route -n', $output, $retval);
 foreach ($output as $s) {
     $f = preg_split('/\s+/', $s);
     if ($f[2] == '0.0.0.0' && $f[3] == 'UG') {
+        // Found default gateway
         $gateway = $f[1];
+    } elseif (strpos($f[3], 'UG') !== FALSE) {
+        // Found a non-default gateway, look up which interface ($f[1]) links to this gateway
+        $gwroute = array(
+            'net_addr'  => $f[0],
+            'net_octet' => ip2octet($f[0]),
+            'mask_addr' => $f[2],
+            'mask_octet'=> ip2octet($f[2]),
+            'mask'      =>  0,
+        );
+        $gwroute['mask'] = octet2mask($gwroute['mask_octet']);
+        
+        $idx = lookup_closest_interface($if_list, ip2octet($f[1]));
+        if (!is_null($idx))
+            $if_list[$idx]['gwroute'][] = $gwroute;
+        else
+            fputs(STDERR, "WARN: could not figure out inteface that links to gateway: $s\n");
     }
 }
 
@@ -144,22 +184,10 @@ foreach ($output as $s) {
 // will be labeled the Kamailio interface. If no address matches (non-local 
 // Asterisk), bail out.
 $asterisk_octet = ip2octet($asterisk_ip);
-$kamailio_idx = NULL;
 $gateway_octet = is_null($gateway) ? NULL : ip2octet($gateway);
-$gateway_idx = NULL;
-foreach ($if_list as $idx => $if_entry) {
-    // Check if Asterisk IP belongs to this network
-    if ($if_entry['net_octet'] == network_from_ip($asterisk_octet, $if_entry['mask_octet'])) {
-        if (is_null($kamailio_idx) || $if_list[$kamailio_idx]['mask_octet'] < $if_entry['mask_octet'])
-            $kamailio_idx = $idx;
-    }
+$kamailio_idx = lookup_closest_interface($if_list, $asterisk_octet);
+$gateway_idx = is_null($gateway) ? NULL : lookup_closest_interface($if_list, $gateway_octet);
 
-    // Check if gateway IP belongs to this network
-    if (!is_null($gateway) && $if_entry['net_octet'] == network_from_ip($gateway_octet, $if_entry['mask_octet'])) {
-        if (is_null($gateway_idx) || $if_list[$gateway_idx]['mask_octet'] < $if_entry['mask_octet'])
-            $gateway_idx = $idx;
-    }
-}
 if (is_null($kamailio_idx)) {
     fputs(STDERR, "FATAL: Asterisk IP {$asterisk_ip} does not belong to any of the networks for current interfaces!\n");
     exit(1);
@@ -191,11 +219,32 @@ foreach ($if_list as $if_entry) {
     if ($if_entry['ip_addr'] != $kamailio_ip) {
         $rtpproxy_sock .= "modparam(\"rtpproxy\", \"rtpproxy_sock\", \"$i == udp:127.0.0.1:{$rtpproxy_port}\")\n";
         $route_mhomed_elastix .= <<<ROUTE_CONDITION
-if (\$Ri=="{$if_entry['ip_addr']}" || $(hdr(Record-Route)[1]{nameaddr.uri}{uri.host}) == "{$if_entry['ip_addr']}" || is_in_subnet($(du{uri.host}), "{$if_entry['net_addr']}/{$if_entry['mask']}") || is_in_subnet(\$sel(via[2].host), "{$if_entry['net_addr']}/{$if_entry['mask']}") || is_in_subnet(\$td, "{$if_entry['net_addr']}/{$if_entry['mask']}")) {
+if (\$Ri=="{$if_entry['ip_addr']}" || 
+        $(hdr(Record-Route)[1]{nameaddr.uri}{uri.host}) == "{$if_entry['ip_addr']}" ||
+        is_in_subnet($(du{uri.host}), "{$if_entry['net_addr']}/{$if_entry['mask']}") ||
+        is_in_subnet(\$sel(via[2].host), "{$if_entry['net_addr']}/{$if_entry['mask']}") ||
+        is_in_subnet(\$td, "{$if_entry['net_addr']}/{$if_entry['mask']}")) {
+
         set_rtp_proxy_set("{$i}");
         rtpproxy_manage("co", "{$if_entry['ip_addr']}");
+
     } else 
 ROUTE_CONDITION;
+
+        // Write out redirections using gateways through this interface
+        foreach ($if_entry['gwroute'] as $gwroute) {
+            $route_mhomed_elastix .= <<<ROUTE_GW_CONDITION
+if (is_in_subnet($(du{uri.host}), "{$gwroute['net_addr']}/{$gwroute['mask']}") ||
+        is_in_subnet(\$sel(via[2].host), "{$gwroute['net_addr']}/{$gwroute['mask']}") ||
+        is_in_subnet(\$td, "{$gwroute['net_addr']}/{$gwroute['mask']}")) {
+
+        set_rtp_proxy_set("{$i}");
+        rtpproxy_manage("co", "{$if_entry['ip_addr']}");
+
+    } else 
+ROUTE_GW_CONDITION;
+        }
+
         $i++; $rtpproxy_port++;
     }
 }

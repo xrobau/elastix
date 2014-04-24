@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Thu Apr 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: move around invocation of rtpproxy setup script in elastix-admin-passwords
+  so that it is invoked *after* databases have been initialized.
+  SVN Rev[6604]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-3
 - CHANGED: the rtpproxy setup script now handles the case of multiple gateways
   set up for telephony trunks connected to dedicated net interfaces.

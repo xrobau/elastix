@@ -375,6 +375,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Apr 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: kamailio: restore scrubbing of credentials on INVITEs. Fixes failure to
+  recognize SIP peer (regression).
+  SVN Rev[6605]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

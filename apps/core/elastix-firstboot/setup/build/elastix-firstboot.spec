@@ -99,6 +99,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Fri Apr 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-admin-passwords: fix regexp to match odbc.ini sections that 
+  include dashes. Remove commented-out code relevant for Elastix 2 only. Do a 
+  full Asterisk restart instead of just a module reload, to make Asterisk use
+  the new database connections, and also add a Kamailio restart. Remove a large
+  copy-paste error that made all password modifications to be done twice.
+  SVN Rev[6607] 
+
 * Thu Apr 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: move around invocation of rtpproxy setup script in elastix-admin-passwords
   so that it is invoked *after* databases have been initialized.

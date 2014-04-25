@@ -25,20 +25,22 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.1 2013-11-27 09:55:49 Armando archuto Exp $ */
+  $Id: es.lang,v 1.1 2013-11-27 09:55:49 Armando archuto Exp $ 
+  $Id: es.lang,v 1.2 2014-04-05 13:56:49 Armando Chuto achuto@elastix.com Exp $ */
+
 global $arrLangModule;
 $arrLangModule=array(
 "Dashboard Applet Admin" => "Tablero Componentes del Administrador",
 "Applet" => "Componente",
 "Activated" => "Activado",
 "System Resources" => "Recursos del Sistema",
-"Processes Status" => "Estados de los procesos",
+"Processes Status" => "Estados de los Procesos",
 "Hard Drives" => "Discos Duros",
 "Performance Graphic" => "Rendimiento Gráfico",
 "News" => "Noticias",
 "Communication Activity" => "Actividades de Comunicación",
 "Telephony Hardware" => "Hardware de Telefonía",
-"You must have at least one applet activated" => "Tu deberias tener al menos una aplicación activada",
+"You must have at least one applet activated" => "Deberia tener al menos un componente activado",
 
 );
 

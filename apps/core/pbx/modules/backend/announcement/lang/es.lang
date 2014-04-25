@@ -25,32 +25,34 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.1 2014-03-12 Bruno Macias bmacias@elastix.org Exp $ */
+  $Id: es.lang,v 1.1 2014-03-12 Bruno Macias bmacias@elastix.org Exp $
+  $Id: es.lang,v 1.2 2014-04-25 Armando Chuto achuto@elastix.org Exp $  
+*/
 global $arrLangModule;
 $arrLangModule=array(
-"Announcement Name"   => "Announcement Name",
-"Destination after playback" => "Destination after playback",
-"Recording" => "Recording",
-"Repeat" => "Repeat",
-"Allow Skip" => "Allow Skip",
-"Return to IVR" => "Return to IVR",
-"Don't answer channel" => "Don't answer channel",
-"Announcement List" => "Announcement List",
-"Error to obtain Announcement" => "Error to obtain Announcement",
-"ADD Announcement" => "ADD Announcement",
-"Invalid Announcement ID" => "Invalid Announcement ID",
-"Announcement doesn't exist" => "Announcement doesn't exist",
-"Announcement" => "Announcement",
-"Announcement recording" => "Announcement recording",
-"Name" => "Name",
-"Repeat Message" => "Repeat Message",
-"Destination" => "Destination",
-"Announcement has been created successfully" => "Announcement has been created successfully",
-"You must select a default destination." => "You must select a default destination.",
-"Field 'Description' can't be empty" => "Field 'Description' can't be empty",
-"Announcement has been edited successfully" => "Announcement has been edited successfully",
-"Announcement can't be deleted." => "Announcement can't be deleted.",
-"Announcement was deleted successfully" => "Announcement was deleted successfully",
-"Error creating dialplan for Announcement. " => "Error creating dialplan for Announcement. ",    
+"Announcement Name"   => "Nombre del Aviso",
+"Destination after playback" => "Destino despues de la reproducción",
+"Recording" => "Grabacion",
+"Repeat" => "Repetir",
+"Allow Skip" => "Permitir Saltos",
+"Return to IVR" => "Retornar a IVR",
+"Don't answer channel" => "No contestar el canal",
+"Announcement List" => "Lista de Avisos",
+"Error to obtain Announcement" => "Error obtencion de Aviso",
+"ADD Announcement" => "Agregar Aviso",
+"Invalid Announcement ID" => "Identificador de Anuncio Invalido",
+"Announcement doesn't exist" => "Aviso no existe",
+"Announcement" => "Aviso",
+"Announcement recording" => "Grabación de Aviso",
+"Name" => "Nombre",
+"Repeat Message" => "Repetir Mensaje",
+"Destination" => "Destino",
+"Announcement has been created successfully" => "Aviso fue creado exitosamente",
+"You must select a default destination." => "Debe seleccionar un destino predeterminado.",
+"Field 'Description' can't be empty" => "Campo 'Description' no puede ser vacío",
+"Announcement has been edited successfully" => "El aviso fue editado exitosamente",
+"Announcement can't be deleted." => "Aviso no puede ser eliminado.",
+"Announcement was deleted successfully" => "Aviso fue borrado exitosamente",
+"Error creating dialplan for Announcement. " => "Error al crear un plan de marcado para un aviso. ",    
 );
 ?>

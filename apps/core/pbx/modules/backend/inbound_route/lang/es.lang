@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule=array(
 "Create New User" => "Crear Nuevo Usuario",
 "Name" => "Nombre",
-"Login" => "Login",
+"Login" => "Inicio de Sesión",
 "Password" => "Contraseña",
 "Retype password" => "Confirmar Contraseña",
 "New User" => "Nuevo Usuario",

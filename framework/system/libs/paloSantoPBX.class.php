@@ -914,7 +914,7 @@ class paloSip extends paloAsteriskDB {
         foreach ($prop as $key => $value) {
             if (!property_exists($this, $key)) continue;
             if (in_array($key, array('_DB', 'errMsg'))) continue;
-            //if (!isset($value)) continue;
+            if (!isset($value)) continue;
             if ($value == '' || $value == 'noset') $value = NULL;
             
             if (in_array($key, array('session_timers', 'session_expires',
@@ -968,7 +968,7 @@ class paloSip extends paloAsteriskDB {
         }elseif(!$this->existPeer($this->name."_".$code)){
             $sqlFields = $this->_getFieldValuesSQL(get_object_vars($this), $code);
             $query =
-                'INSERT INTO sip ('.implode(', ', array_keys($sqlFields)).') '.
+                'INSERT INTO sip (`'.implode('`, `', array_keys($sqlFields)).'`) '.
                 'VALUES ('.implode(', ', array_fill(0, count($sqlFields), '?')).')';
             $arrValues = array_values($sqlFields);
 

@@ -25,10 +25,12 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ 
+  $Id: es.lang,v 1.8 2014/04/14 14:04:42 achuto@elastix.com Exp $ 
+  $Id: es.lang,v 1.9 2014/04/25 14:45:40 achuto@elastix.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Are you sure you wish to delete backup (s)?" => "Esta seguro de eliminar el correo el(los) backup(s)?",
+"Are you sure you wish to delete backup (s)?" => "Esta seguro que desea eliminar el (los) respaldos(?)",
 "Database" => "Base de Datos",
 "PDF" => "PDF",
 "Endpoint" => "Endpoint",
@@ -97,8 +99,8 @@ $arrLangModule=array(
 "User" => "Usuario",
 "Password" => "Contraseña",
 "Local" => "Local",
-"Upload" => "Upload",
-"Download" => "Download",
+"Upload" => "Subir",
+"Download" => "Descargar",
 "Path Server FTP" => "Ruta en servidor FTP",
 "Error to connect" => "Por favor llene todos los campos para contactar al servidor",
 "Error Connection" => "No se puede conectar al servidor",
@@ -141,7 +143,7 @@ $arrLangModule=array(
 "elastix-a2billing" => "Elastix A2billing",
 "elastix-sugarcrm-addon" => "Elastix SugarCRM",
 "Package not installed" => "No instalado",
-"Version" => "Version",
+"Version" => "Versión",
 "Please verify if the mysql password is the correct in /etc/elastix.conf (mysqlrootpwd)" => "Por favor verfique la clave de mysql si esta correcta en /etc/elastix.conf (mysqlrootpwd)",
 );
 ?>

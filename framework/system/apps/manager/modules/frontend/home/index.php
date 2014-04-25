@@ -485,7 +485,7 @@ function viewMail($smarty, $module_name, $local_templates_dir, & $arrConf, &$pIm
 function create_mailbox($smarty, $module_name, $local_templates_dir,  $arrConf, &$pImap){
     $jsonObject = new PaloSantoJSON();
 
-    $new_mailbox=getParameter("new_folder");
+    $new_mailbox=getParameter("new_folder"); 
     if(is_null($new_mailbox) || $new_mailbox=='' || $new_mailbox===false){
         $jsonObject->set_error('Invalid Mailbox');
         return $jsonObject->createJSON();

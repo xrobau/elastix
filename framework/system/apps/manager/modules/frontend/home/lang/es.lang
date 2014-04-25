@@ -25,10 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
+  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ 
+  $Id: en.lang,v 1.2 2014-04-25 15:38:01 achuto achuto@elastix.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"INBOX"=>"Recibidos",
+"INBOX"=>"Bandeja Entrada",
 "Sent"=>"Enviados",
 "Drafts"=>"Borradores",
 "Trash"=>"Eliminados",
@@ -38,7 +39,7 @@ $arrLangModule=array(
 "Unseen"=>"No vistos",
 "Important"=>"Destacados",
 "No Important"=>"No Destacados",
-"There is not message"=>"No hay mensaje alguno",
+"There is not message"=>"No existe mensaje",
 "All"=>"Todos",
 "At_least_one"=>"Usted debe seleccionar al menos un mensaje válido",
 "Success_mv"=>"Los mensajes fueron movidos exitosamente",
@@ -56,6 +57,7 @@ $arrLangModule=array(
 "Forward" => "Reenviar",
 "Reply All"=> "Responder a todos",
 "Reply" => "Responder",
+"Reply to" => "Responder a",
 "Actions" => "Acciones",
 "Profile" => "Mi Perfil",
 "Contacts List" => "Lista de Contactos",
@@ -63,5 +65,15 @@ $arrLangModule=array(
 "Mark message as" => "Marcar mensaje como",
 "Move to" => "Mover hacia",
 "User" => "Usuario",
+"Subject" => "Tema",
+"To" => "A:",
+"SEND MAIL" => "Envio de Email",
+"Send" => "Enviar",
+"new_folder" => "Nueva carpeta",
+"Attach" => "Adjuntar",
+"Not messages" => "No tiene mensajes",
+"Messages"=> "Mensajes",
+"folders" => "Mensaje Nuevo",
+"Delete Image" => "Borrar Imagen"
 );
 ?>

@@ -25,7 +25,9 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.1 2014-03-12 Bruno Macias bmacias@elastix.org Exp $ */
+  $Id: es.lang,v 1.1 2014-03-12 Bruno Macias bmacias@elastix.org Exp $
+  $Id: es.lang,v 1.2 2014-04-25 Armando Chuto achuto@elastix.org Exp $  
+*/
 global $arrLangModule;
 $arrLangModule=array(
 "ANI List"   => "Lista de ANI",

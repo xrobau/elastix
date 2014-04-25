@@ -302,12 +302,12 @@ fi
 
 # Actualizacion About Version Release
 # Verificar si en la base ya existe algo
-if [ "`sqlite3 /var/www/db/elastix.db "select count(key) from settings where property='elastix_version_release';"`" = "0" ]; then
-    `sqlite3 /var/www/db/elastix.db "insert into settings (property, value) values('elastix_version_release','%{version}-%{release}');"`
-else
+#if [ "`sqlite3 /var/www/db/elastix.db "select count(key) from settings where property='elastix_version_release';"`" = "0" ]; then
+#    `sqlite3 /var/www/db/elastix.db "insert into settings (property, value) values('elastix_version_release','%{version}-%{release}');"`
+#else
     #Actualizar
-    `sqlite3 /var/www/db/elastix.db "update settings set value='%{version}-%{release}' where property='elastix_version_release';"`
-fi
+#    `sqlite3 /var/www/db/elastix.db "update settings set value='%{version}-%{release}' where property='elastix_version_release';"`
+#fi
 
 # Para que agrege el contenido de /etc/motd
 /bin/grep -r '/usr/local/sbin/motd.sh > /etc/motd' /etc/rc.local

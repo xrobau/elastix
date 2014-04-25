@@ -172,7 +172,7 @@ else
 	fi
 fi
 
-mkdir -p $pathSQLiteDB
+#mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
 rm -f $pathModule/preversion_%{modname}.info
 

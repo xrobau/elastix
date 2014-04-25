@@ -112,7 +112,7 @@ if [ $1 -eq 1 ]; then #install
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
     # restart daemon
-    /sbin/service elastix-synchronizerd restart
+    #/sbin/service elastix-synchronizerd restart
 fi
 
 # The installer script expects to be in /tmp/new_module
@@ -123,8 +123,8 @@ chown -R asterisk.asterisk /tmp/new_module/%{modname}
 php /tmp/new_module/%{modname}/setup/installer.php
 rm -rf /tmp/new_module
 
-chkconfig --add elastix-synchronizerd
-chkconfig --level 2345 elastix-synchronizerd on
+#chkconfig --add elastix-synchronizerd
+#chkconfig --level 2345 elastix-synchronizerd on
 
 %clean
 rm -rf $RPM_BUILD_ROOT

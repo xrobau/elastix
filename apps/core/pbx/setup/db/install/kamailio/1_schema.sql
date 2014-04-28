@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS kamailio;
+
 USE kamailio;
 
 -- MySQL dump 10.13  Distrib 5.1.73, for redhat-linux-gnu (x86_64)

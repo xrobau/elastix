@@ -46,6 +46,7 @@ $arrLangModule=array(
 "Area Code:" => "Código de Area",
 "Fax email settings" => "Configuración de email de Fax",
 "Fax Subject:" => "Tema de Fax",
-"Fax content:" => "Contenido de Fax",
+"Fax content:" => "Contenido de Fax"
+
 );
 ?>

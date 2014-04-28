@@ -234,7 +234,18 @@ function createDirOrganization($domain){
     $astlibsound = $pathlib."/sounds";
     $arrDir=array($astmonitor,$astmeetme,$astlibsound,$astspooltmp,$pathDial);
     $date=date("YMd_His");
+
     foreach($arrDir as $dir){
+        if(!is_dir($dir)){
+            if(mkdir("$dir"))
+                changeFilePermission("$dir", 0770);
+            else{
+                fprintf(STDERR, "ERR: failed to create $dir main directory - %s\n", $output[0]);
+                $exito=false;
+                break;
+            }
+        }
+
         if(is_dir("$dir/$domain")){
             rename("$dir/$domain","$dir/$domain"."_".$date);
         }

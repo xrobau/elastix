@@ -108,7 +108,7 @@
                     </div>
                     <div id='elx-bodymsg-tools-sent' style='display:none;overflow: visible!important;'>
                         <div class="elx_email_pag_bar">
-                            <button type="button" class="btn btn-default btn-sm btn-bodymsg-tools" onclick='composeEmail("mailmodule")'>
+                            <button type="button" class="btn btn-default btn-sm btn-bodymsg-tools" onclick='composeEmail("mailmodule")' >
                                 <span>{$SEND_MAIL_LABEL}</span> 
                             </button>
                         </div>

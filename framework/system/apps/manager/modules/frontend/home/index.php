@@ -599,6 +599,7 @@ function get_templateEmail($smarty, $module_name, $local_templates_dir,  $arrCon
     $smarty->assign("MSG_CONTENT",_tr("Do you wish send this message with empty body"));
     $smarty->assign("TEXT_UPLOADING", _tr("Uploading.."));
     
+    
     $internalContacts = $pImap->getListInternalContacts();
     $externalContacts = $pImap->getListExternalContacts();
     

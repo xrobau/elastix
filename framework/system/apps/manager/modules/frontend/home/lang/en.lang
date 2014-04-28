@@ -28,7 +28,7 @@
   $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"INBOX"=>"Inbox",
+"INBOX"=>"INBOX",
 "Sent"=>"Sent",
 "Drafts"=>"Drafts",
 "Trash"=>"Trash",
@@ -59,10 +59,10 @@ $arrLangModule=array(
 "Actions" => "Actions",
 "Profile" => "Profile",
 "Attach" => "Attach",
-"ATTACH_LABEL" => "Attach",
-"new_folder" => "new_folder",
+"New Folder" => "New Folder",
 "send" => "send",
-"folders"=>"folders",
-"Delete Image" => "Delete Image"
+"Folders"=>"Folders",
+"Delete Image" => "Delete Image",
+
 );
 ?>

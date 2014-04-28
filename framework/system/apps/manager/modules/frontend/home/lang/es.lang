@@ -29,7 +29,7 @@
   $Id: en.lang,v 1.2 2014-04-25 15:38:01 achuto achuto@elastix.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"INBOX"=>"Bandeja Entrada",
+"INBOX"=>"Bandeja",
 "Sent"=>"Enviados",
 "Drafts"=>"Borradores",
 "Trash"=>"Eliminados",
@@ -66,14 +66,15 @@ $arrLangModule=array(
 "Move to" => "Mover hacia",
 "User" => "Usuario",
 "Subject" => "Tema",
-"To" => "A:",
+"To" => "A",
 "SEND MAIL" => "Envio de Email",
 "Send" => "Enviar",
-"new_folder" => "Nueva carpeta",
-"Attach" => "Adjuntar",
+"New Folder" => "Nueva carpeta",
+"Attachx" => "Adjuntar",
 "Not messages" => "No tiene mensajes",
 "Messages"=> "Mensajes",
-"folders" => "Mensaje Nuevo",
-"Delete Image" => "Borrar Imagen"
+"Folders" => "Carpetas",
+"Delete Image" => "Borrar Imagen",
+"All"=>"Todos"
 );
 ?>

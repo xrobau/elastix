@@ -19,6 +19,7 @@ Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
 Prereq: mysql-connector-odbc
 Requires: festival >= 1.95
+Requires: asterisk, asterisk-chan-allogsm, asterisk-chan-extra, asterisk-dahdi, asterisk-festival, asterisk-odbc, asterisk-voicemail
 Requires: kamailio, kamailio-unixodbc, kamailio-mysql, kamailio-utils, kamailio-presence
 
 %description

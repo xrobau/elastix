@@ -376,6 +376,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Apr 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: kamailio: specify default registration timeout value to match asterisk
+  default. This fixes issue with Aastra phones not specifying a registration
+  timeout, and then asterisk revokes registration while kamailio keeps it 
+  active.
+  SVN Rev[6613]
+
 * Thu Apr 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: kamailio: restore scrubbing of credentials on INVITEs. Fixes failure to
   recognize SIP peer (regression).

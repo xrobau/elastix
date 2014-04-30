@@ -394,7 +394,7 @@ class paloIvrPBX extends paloAsteriskDB{
                         if(preg_match("/^(([0-9\#\*]+)|(i|t){1})$/",$value["key_option"]))
                             $key=$value["key_option"];
                             
-                        if($goto!=false && $key!=false){
+                        if($goto!=false && $key!==false && $key!==""){
                             $arrIvr[]=new paloExtensions($key, new ext_dbdel('${BLKVM_OVERRIDE}'),"1");
                             $arrIvr[]=new paloExtensions($key, new extension("Goto(".$goto.")"));
                             $arrIvr[]=new paloExtensions($key, new ext_setvar('__NODEST', ''));

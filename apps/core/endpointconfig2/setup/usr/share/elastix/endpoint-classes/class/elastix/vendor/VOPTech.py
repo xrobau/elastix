@@ -37,12 +37,6 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
         self._bridge = True
         self._timeZone = 12
 
-    def setModel(self, sModel):
-        if sModel in ('VI2006', 'VI2007', 'VI2008'):
-            self._model = sModel
-            return True
-        return False
-    
     def probeModel(self):
         '''Probe specific model of the VOPTech phone
         

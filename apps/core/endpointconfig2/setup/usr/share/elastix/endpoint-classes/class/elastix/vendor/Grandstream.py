@@ -53,20 +53,6 @@ class Endpoint(BaseEndpoint):
         if 'language' in param: self._language = param['language']
         return True
 
-    def setModel(self, sModel):
-        if sModel in (
-            # Tested models
-            'GXP280', 'GXV3140', 'GXV3175', 'GXP2120', 'BT200', 'GXP1400',
-            # Tested by Sergio
-            'GXP2100', 'GXP1405',
-            # These expose admin console in ssh, not telnet
-            'GXP1450', 'GXP2200',            
-            # Untested models 
-            'GXP2000', 'GXP2020','HT386'):
-            self._model = sModel
-            return True
-        return False
-    
     def probeModel(self):
         '''Probe specific model of the Grandstream phone
         

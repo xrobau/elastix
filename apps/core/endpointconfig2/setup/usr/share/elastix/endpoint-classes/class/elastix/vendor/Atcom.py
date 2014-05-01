@@ -47,12 +47,6 @@ class Endpoint(BaseEndpoint):
         if 'timezone' in param: self._timeZone = param['timezone']
         return True
 
-    def setModel(self, sModel):
-        if sModel in ('AT320', 'AT530', 'AT610', 'AT620', 'AT640', 'AT800'):
-            self._model = sModel
-            return True
-        return False
-    
     def probeModel(self):
         '''Probe specific model of the Atcom phone
         

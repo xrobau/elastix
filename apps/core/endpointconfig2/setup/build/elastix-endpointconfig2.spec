@@ -156,6 +156,10 @@ fi
 
 %changelog
 * Thu May 01 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: remove useless checks on setModel 
+  implementations. The source value is the database, which is assumed to be
+  trusted.
+  SVN Rev[6616]
 - CHANGED: Endpoint Configurator: remove copy of jQuery 1.8. This module will
   always use the framework copy of jQuery.
   SVN Rev[6615]

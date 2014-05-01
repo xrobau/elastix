@@ -36,8 +36,3 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
         self._timeZone = 'auto'
         self._language = 'es'
 
-    def setModel(self, sModel):
-        if sModel in ('LXP100', 'LXP200'):
-            self._model = sModel
-            return True
-        return False

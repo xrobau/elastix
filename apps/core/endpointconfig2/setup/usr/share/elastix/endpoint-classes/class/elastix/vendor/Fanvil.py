@@ -37,12 +37,6 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
         self._bridge = True
         self._timeZone = 12
 
-    def setModel(self, sModel):
-        if sModel in ('C56', 'C58', 'C60', 'C62'):
-            self._model = sModel
-            return True
-        return False
-    
     def probeModel(self):
         '''Probe specific model of the Fanvil phone
         

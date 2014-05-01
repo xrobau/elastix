@@ -156,6 +156,8 @@ fi
 
 %changelog
 * Thu May 01 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: update Ember.js to 1.5.1, Handlebars to 1.3.0
+  SVN Rev[6618]
 - CHANGED: Endpoint Configurator: refactor Grandstream static provisioning
   dispatcher as a loop to select a method based on the existence of an URL.
   SVN Rev[6617]

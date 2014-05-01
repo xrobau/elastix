@@ -621,19 +621,15 @@ function subMask($ip)
 
 function modificarReferenciasLibreriasJS($smarty, $module_name, $dlglist)
 {
-    $listaLibsJS_framework = explode("\n", $smarty->get_template_vars('HEADER_LIBS_JQUERY'));
     $listaLibsJS_modulo = explode("\n", $smarty->get_template_vars('HEADER_MODULES'));
 
     /* Se busca la referencia a jQuery (se asume que sólo hay una biblioteca que
      * empieza con "jquery-") y se la quita. Las referencias a Ember.js y 
      * Handlebars se reordenan para que Handlebars aparezca antes que Ember.js 
      */ 
-    $sEmberRef = $sHandleBarsRef = $sjQueryRef = NULL;
+    $sEmberRef = $sHandleBarsRef = NULL;
     foreach (array_keys($listaLibsJS_modulo) as $k) {
-        if (strpos($listaLibsJS_modulo[$k], 'themes/default/js/jquery-') !== FALSE) {
-            $sjQueryRef = $listaLibsJS_modulo[$k];
-            unset($listaLibsJS_modulo[$k]);
-        } elseif (strpos($listaLibsJS_modulo[$k], 'themes/default/js/handlebars-') !== FALSE) {
+        if (strpos($listaLibsJS_modulo[$k], 'themes/default/js/handlebars-') !== FALSE) {
             $sHandleBarsRef = $listaLibsJS_modulo[$k];
             unset($listaLibsJS_modulo[$k]);
         } elseif (strpos($listaLibsJS_modulo[$k], 'themes/default/js/ember-') !== FALSE) {
@@ -652,26 +648,6 @@ function modificarReferenciasLibreriasJS($smarty, $module_name, $dlglist)
     	}
     }    
     $smarty->assign('HEADER_MODULES', implode("\n", $listaLibsJS_modulo));
-
-    /* Se busca la referencia original al jQuery del framework, y se reemplaza
-     * si es más vieja que el jQuery del módulo */
-    $sRegexp = '/jquery-(\d.+?)(\.min)?\.js/'; $regs = NULL;
-    preg_match($sRegexp, $sjQueryRef, $regs);
-    $sVersionModulo = $regs[1];
-    $sVersionFramework = NULL;
-    foreach (array_keys($listaLibsJS_framework) as $k) {
-        if (preg_match($sRegexp, $listaLibsJS_framework[$k], $regs)) {
-            $sVersionFramework = $regs[1];
-            
-            // Se asume que la versión sólo consiste de números y puntos
-            $verFramework = explode('.', $sVersionFramework);
-            $verModulo = explode('.', $sVersionModulo);
-            while (count($verFramework) < count($verModulo)) $verFramework[] = "0";
-            while (count($verFramework) > count($verModulo)) $verModulo[] = "0";
-            if ($verModulo > $verFramework) $listaLibsJS_framework[$k] = $sjQueryRef;
-        }
-    }
-    $smarty->assign('HEADER_LIBS_JQUERY', implode("\n", $listaLibsJS_framework));
 }
 
 ?>

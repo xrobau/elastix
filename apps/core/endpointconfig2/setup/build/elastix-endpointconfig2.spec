@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu May 01 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: remove copy of jQuery 1.8. This module will
+  always use the framework copy of jQuery.
+  SVN Rev[6615]
+
 * Tue Feb 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.4.0-0
 - CHANGED: Endpoint Configurator: add support for new RCA model IP160s
   SVN Rev[6472]

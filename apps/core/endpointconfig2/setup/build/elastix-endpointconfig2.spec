@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Thu May 01 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: refactor Grandstream static provisioning
+  dispatcher as a loop to select a method based on the existence of an URL.
+  SVN Rev[6617]
 - CHANGED: Endpoint Configurator: remove useless checks on setModel 
   implementations. The source value is the database, which is assumed to be
   trusted.

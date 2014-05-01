@@ -183,72 +183,35 @@ class Endpoint(BaseEndpoint):
 
     def _enableStaticProvisioning(self, vars):
         # Detect what kind of HTTP interface is required
-        try:
+        staticProvImpls = [
             # Interface for newer GXP140x firmware - JSON based
-            response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/api.values.post')
-            body = response.read()
-            logging.info('Endpoint %s@%s appears to have GXP140x JSON interface...' %
-                        (self._vendorname, self._ip))
-            return self._enableStaticProvisioning_GXP140x(vars)
-        except urllib2.HTTPError, e:
-            if e.code != 404:
-                logging.error('Endpoint %s@%s failed to detect GXP140x - %s' %
-                    (self._vendorname, self._ip, str(e)))
-                return False
-        except socket.error, e:
-            logging.error('Endpoint %s@%s failed to connect - %s' %
-                (self._vendorname, self._ip, str(e)))
-            return False
-        try:
+            ('GXP140x JSON', '/cgi-bin/api.values.post', self._enableStaticProvisioning_GXP140x),
+            
             # Interface for old BT200 firmware or similar
-            response = urllib2.urlopen('http://' + self._ip + '/update.htm')
-            body = response.read()
-            logging.info('Endpoint %s@%s appears to have BT200 interface...' %
-                        (self._vendorname, self._ip))
-            return self._enableStaticProvisioning_BT200(vars)
-        except urllib2.HTTPError, e:
-            if e.code != 404:
-                logging.error('Endpoint %s@%s failed to detect BT200 - %s' %
-                    (self._vendorname, self._ip, str(e)))
-                return False
-        except socket.error, e:
-            logging.error('Endpoint %s@%s failed to connect - %s' %
-                (self._vendorname, self._ip, str(e)))
-            return False
-        try:
+            ('BT200',        '/update.htm',              self._enableStaticProvisioning_BT200),
+            
             # Interface for GXVxxxx firmware or similar
-            response = urllib2.urlopen('http://' + self._ip + '/manager')
-            body = response.read()
-            logging.info('Endpoint %s@%s appears to have GXVxxxx interface...' %
-                        (self._vendorname, self._ip))
-            return self._enableStaticProvisioning_GXV(vars)
-        except urllib2.HTTPError, e:
-            if e.code != 404:
-                logging.error('Endpoint %s@%s failed to detect GXV - %s' %
-                    (self._vendorname, self._ip, str(e)))
-                return False
-        except socket.error, e:
-            logging.error('Endpoint %s@%s failed to connect - %s' %
-                (self._vendorname, self._ip, str(e)))
-            return False
-        try:
+            ('GXVxxxx',      '/manager',                 self._enableStaticProvisioning_GXV),
+            
             # Interface for GXP1450 firmware or similar
-            response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/update')
-            body = response.read()
-            logging.info('Endpoint %s@%s appears to have GXP1450 interface...' %
-                        (self._vendorname, self._ip))
-            return self._enableStaticProvisioning_GXP1450(vars)
-        except urllib2.HTTPError, e:
-            if e.code != 404:
-                logging.error('Endpoint %s@%s failed to detect GXP1450 - %s' %
+            ('GXP1450',      '/cgi-bin/update',          self._enableStaticProvisioning_GXP1450),
+        ]
+        for impl in staticProvImpls:
+            try:
+                response = urllib2.urlopen('http://' + self._ip + impl[1])
+                body = response.read()
+                logging.info('Endpoint %s@%s appears to have %s interface...' %
+                            (self._vendorname, self._ip, impl[0]))
+                return impl[2](vars)
+            except urllib2.HTTPError, e:
+                if e.code != 404:
+                    logging.error('Endpoint %s@%s failed to detect %s - %s' %
+                        (self._vendorname, self._ip, impl[0], str(e)))
+                    return False
+            except socket.error, e:
+                logging.error('Endpoint %s@%s failed to connect - %s' %
                     (self._vendorname, self._ip, str(e)))
                 return False
-        except socket.error, e:
-            logging.error('Endpoint %s@%s failed to connect - %s' %
-                (self._vendorname, self._ip, str(e)))
-            return False
-
-
         
         logging.warning('Endpoint %s@%s cannot identify HTTP interface, static provisioning might not work.' %
                     (self._vendorname, self._ip))

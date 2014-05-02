@@ -376,6 +376,15 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri May 02 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: kamailio: add P-Asserted-Identity header to INVITE for the scenario of
+  incoming calls with IP authentication. This restores the Caller-ID that was
+  overwritten in the From header in an attempt to force asterisk to recognize 
+  the incoming trunk without an authentication username/password. In order for
+  this to work, the trunk MUST be configured with trustrpid=yes in the asterisk
+  side.
+  SVN Rev[6620]
+
 * Wed Apr 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: kamailio: specify default registration timeout value to match asterisk
   default. This fixes issue with Aastra phones not specifying a registration

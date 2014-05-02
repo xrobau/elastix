@@ -91,5 +91,17 @@ $arrLangModule=array(
 "Call Forward on Unavailable:" => "Desvío de Llamada Modo no disponible:",
 "Call Forward on Busy:" => "Desvío de llamada Modo Ocupado:",
 "Play CID:" => "Reproducción CID:",
+"Send Mail" => "Enviar Mail",
+"Send Fax"=> "Enviar Fax",
+"Fax Device to use" => "Uso del Dispotivo de Fax",
+"Destination fax numbers" => "Números destinatarios de Fax",
+"File Upload" => "Subir Archivo",
+"Email content" => "Contenido de mail",
+"Send" => "Enviar",
+"Profile" => "Perfil",
+"Changes were saved succefully" => "Cambios Fueron Guardados Exitosamente",
+"Save Configuration" => "Guardar Configuracion",
+"Cancel" => "Cancelar",
+
 );
 ?>

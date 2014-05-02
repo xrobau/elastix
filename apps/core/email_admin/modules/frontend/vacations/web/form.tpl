@@ -6,7 +6,7 @@
     <div class="my_settings">
 
         <div class="row">
-            <div class="col-xs-4 col-sm-4 col-md-3 col-lg-3"><button class="button btn btn-default btn-sm" type="button" name="save_new" onclick='saveVacation()'> <span class="glyphicon glyphicon-ok"></span> Enable vacation Message</div>
+            <div class="col-xs-4 col-sm-4 col-md-3 col-lg-3"><button class="button btn btn-default btn-sm" type="button" name="save_new" onclick='saveVacation()'> <span class="glyphicon glyphicon-ok"></span> {$ENABLE_VACATION_MESS_BTN}</div>
         </div>        
         
         <div class="row" >
@@ -23,7 +23,9 @@
                     <label>{$TO.LABEL}</label>
                     {$TO.INPUT}
                 
-                    <label id="num_days"> 0 Days </label>
+                    <label id="num_days"> 0 </label> <label><strong>{$LABEL_DAYS}</strong></label>
+
+
                 </div>
             
             </div>

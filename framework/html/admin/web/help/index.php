@@ -27,8 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.2 2007/09/07 23:05:29 gcarrillo Exp $ */
 
-include_once("../libs/misc.lib.php");
-include_once "../configs/default.conf.php";
+include_once("../../../../../../../libs/misc.lib.php");
+include_once ("../configs/default.conf.php");
 
 load_default_timezone();
 

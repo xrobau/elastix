@@ -25,7 +25,8 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
+  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ 
+  $Id: en.lang,v 1.2 2014-04-29 12:13:04 achuto achuto@elastix.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
 "SV_periodo" => "Define el periodo de tiempo",
@@ -39,5 +40,9 @@ $arrLangModule=array(
 "From:" => "Desde:",
 "To:" => "Hasta:",
 "Days" => "Días",
+"Auto-Reply: Out of the office" => "Resp. Automatica: Fuera de Oficina",
+"I will be out of the office until {END_DATE}. \n\n----\nBest Regards." =>  "Estare fuera de la oficina hasta {END_DATE}. \n\n---\nSaludos Cordiales.",
+"Enable vacation Message" => "Habilitar Msj Vacacion"
+
 );
 ?>

@@ -70,11 +70,14 @@ $arrLangModule=array(
 "SEND MAIL" => "Envio de Email",
 "Send" => "Enviar",
 "New Folder" => "Nueva carpeta",
-"Attachx" => "Adjuntar",
+"Attach" => "Adjuntar",
 "Not messages" => "No tiene mensajes",
 "Messages"=> "Mensajes",
 "Folders" => "Carpetas",
 "Delete Image" => "Borrar Imagen",
-"All"=>"Todos"
+"All"=>"Todos",
+"Invalid Field 'TO'" => "Invalido el campo 'A:'",
+"Sent"=>"Envios",
+"Drafts" => "Borradores"
 );
 ?>

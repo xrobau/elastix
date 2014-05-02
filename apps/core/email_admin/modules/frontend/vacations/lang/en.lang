@@ -32,5 +32,6 @@ $arrLangModule=array(
 "SV_emailaddress" => "Show your email address (not edit)",
 "SV_emailsubject" => "Defines the subject that will have the message",
 "SV_emailcontent" => "Defines the content",
+"Days"=>"Days",
 );
 ?>

@@ -268,6 +268,7 @@ if (isset($_SESSION['elastix_user']) &&
         $smarty->assign("USERNAME", _tr('Usernam'));
         $smarty->assign("PASSWORD", _tr('Password'));
         $smarty->assign("SUBMIT", _tr('Submit'));
+        
         $smarty->display("_common/login_uf.tpl");
 
     }

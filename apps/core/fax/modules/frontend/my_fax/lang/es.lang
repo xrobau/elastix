@@ -25,7 +25,8 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ */
+  $Id: en.lang,v 1.1 2008-08-25 05:08:01 jvega jvega@palosanto.com Exp $ 
+  $Id: en.lang,v 1.1 2014-05-02 10:24:05 achuto achuto@elastix.com Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
 "MF_faxextension" => "Muestra tu numero de extension",
@@ -46,7 +47,13 @@ $arrLangModule=array(
 "Area Code:" => "Código de Area",
 "Fax email settings" => "Configuración de email de Fax",
 "Fax Subject:" => "Tema de Fax",
-"Fax content:" => "Contenido de Fax"
+"Fax content:" => "Contenido de Fax",
+"Destination fax numbers is empty" => "Número destinatario de fax esta vacio",
+"Text to send is empty" => "Texto a enviar esta vacio",
+"Error uploading your file" => "Error mientras se subia el archivo",
+"File Upload" => "Subir Archivo",
+"Fax Device to use:" => "Dispositivo de Fax de usar",
+"Destination fax numbers:" => "Números destinatarios de Fax",
 
 );
 ?>

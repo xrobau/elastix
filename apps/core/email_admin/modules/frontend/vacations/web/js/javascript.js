@@ -41,7 +41,7 @@ $(function() {
             var diferencia = strDate2.getTime() - strDate1.getTime();
             var dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
             var segundos = Math.floor(diferencia / 1000);
-            $('#num_days').text(" "+ dias + "  Days");
+            $('#num_days').text(" "+ dias + "  ");
     });
 
     $(document).ready(function(){
@@ -55,7 +55,7 @@ $(function() {
             var diferencia = strDate2.getTime() - strDate1.getTime();
             var dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
             var segundos = Math.floor(diferencia / 1000);
-            $('#num_days').text(" "+ dias + "  Days");
+            $('#num_days').text(" "+ dias + "  ");
         });
 
     });

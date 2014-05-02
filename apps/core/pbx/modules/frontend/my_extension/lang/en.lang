@@ -61,7 +61,14 @@ $arrLangModule=array(
 "Delete Vmail" => "Delete Vmail",
 "Enable/Disable the play CID Option" => "Enable/Disable the play CID Option",
 "Save Configuration" => "Save Configuration",
-
+"Send Mail" => "Send Mail",
+"Send Fax" => "Send Fax",
+"Fax Device to use" => "Fax Device to use",
+"Destination fax numbers" => "Destination fax numbers",
+"File Upload" => "File Upload",
+"Email content" => "Email content",
+"Send" => "Send",
+"Cancel" => "Cancel"
 );
 
 ?>

@@ -350,5 +350,7 @@ $arrLang=array(
 "Port Knocking Interfaces" => "Interfaces protegidas por Knocking",
 "Port Knocking Users" => "Usuarios protegidas por Knocking",
 
+
+
 );
 ?>

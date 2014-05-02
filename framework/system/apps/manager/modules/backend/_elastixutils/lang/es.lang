@@ -25,14 +25,14 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2013-12-24 16:23:15 Armando Chuto achuto@elastix.org Exp $ */
+  $Id: es.lang,v 1.1 2013-12-24 16:23:15 Armando Chuto achuto@elastix.org Exp $
+  $Id: es.lang,v 1.2 2014-04-29 15:24:45 Armando Chuto achuto@elastix.org Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-"My Profile " => "Mi Perfil ",
 "New Password" => "Nueva Contraseña",
 "Repeat New Password" => "Repita la Nueva Contraseña",
 "Language" => "Idioma",
-"Delete image" => "Borrar Imagen",
+"Delete Image" => "Borrar Imagen",
 "My Profile " => "Mi Perfil ",
 "Close"=> "Cerrar",
 "User"=> "Usuario",
@@ -40,5 +40,14 @@ $arrLangModule = array(
 "Extension" => "Extensión",
 "Change Password" => "Cambiar Contraseña",
 "Invalid file extension.- It must be png or jpg or jpeg" => "Archivo de Extensión Invalida - Debe utilizar .png/.jpg/.jpeg",
+"Elastix password has been changed." => "Clave Elastix ha sido cambiada",
+"Impossible to change your Elastix password." => "Imposible cambiar tu clave Elastix",
+"Current Password" => "Contraseña Actual",
+"Repeat Password" => "Repita la contraseña",
+"Save changes" => "Guardar Cambios",
+"Delete Image" => "Borrar Imagen",
+"Send Mail" => "Enviar Correo",
+"Attach" => "Adjuntar",
+"Send" => "Enviar"
 );
 ?>

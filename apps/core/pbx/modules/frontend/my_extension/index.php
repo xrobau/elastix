@@ -88,6 +88,8 @@ function showExtensionSettings($smarty, $module_name, $local_templates_dir, &$pD
     $smarty->assign("DISPLAY_CFC_LABEL",_tr("Call Forward Configuration"));
     $smarty->assign("DISPLAY_CMS_LABEL",_tr("Call Monitor Settings"));
     $smarty->assign("DISPLAY_VOICEMAIL_LABEL",_tr("Voicemail Configuration"));
+   //$smarty->assign("SAVE_CONF_BTN",_tr("Save Configuration"));
+   // $smarty->assign("CANCEL_BTN",_tr("Cancel"));
 
     //contiene los elementos del formulario    
     $arrForm = createForm();

@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Endpoint Configurator: add support for Grandstream GXP2160, based on
+  work by Lenin Loaza.
+  SVN Rev[6623]
+
 * Thu May 01 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: update Ember.js to 1.5.1, Handlebars to 1.3.0
   SVN Rev[6618]

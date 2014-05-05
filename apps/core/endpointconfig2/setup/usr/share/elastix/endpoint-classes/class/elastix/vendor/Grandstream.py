@@ -37,6 +37,7 @@ from elastix.BaseEndpoint import BaseEndpoint
 telnetlib = eventlet.import_patched('telnetlib')
 import cookielib
 import time
+paramiko = eventlet.import_patched('paramiko')
 
 class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
@@ -488,9 +489,34 @@ class Endpoint(BaseEndpoint):
         return True        
 
     def _rebootbyssh(self):
-        logging.error('Endpoint %s@%s unimplemented ssh reboot - %s' %
-            (self._vendorname, self._ip, str(e)))
-        return False
+        '''Start reboot of Grandstream phone by ssh'''
+        oldtimeout = socket.getdefaulttimeout()
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.WarningPolicy())
+            ssh.connect(self._ip, username=self._ssh_username, password=self._ssh_password, timeout=5)
+            stdin, stdout, stderr = ssh.exec_command('reboot')            
+            logging.info('Endpoint %s@%s - about to set timeout of %d on stdout' % (self._vendorname, self._ip, oldtimeout,))            
+            stdout.channel.settimeout(5)
+            try:
+                s = stdout.read()
+                logging.info('Endpoint %s@%s - answer follows:\n%s' % (self._vendorname, self._ip, s,))
+            except socket.error, e:
+                pass
+            ssh.close()
+            return True
+        except paramiko.AuthenticationException, e:
+            logging.error('Endpoint %s@%s failed to authenticate ssh - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        except urllib2.URLError, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
 
     def _hashTableGrandstreamConfig(self):
         stdvars = self._prepareVarList()

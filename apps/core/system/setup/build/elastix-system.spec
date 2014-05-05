@@ -156,6 +156,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon May 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Network Configuration: reconfigure and restart kamailio/rtpproxy after
+  performing changes to network configuration or interfaces.
+  SVN Rev[6624]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

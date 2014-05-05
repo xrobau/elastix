@@ -165,6 +165,7 @@ function action_generalConfiguration($opt)
         if ($ret != 0) $bExito = FALSE;
         exec("/sbin/service postfix restart 2>&1", $output, $ret);
         if ($ret != 0) $bExito = FALSE;
+        if (!refreshKamailioConfiguration()) $bExito = FALSE;
     }
 
 	return $bExito;
@@ -389,6 +390,8 @@ function action_interfaceConfiguration($opt)
         $output = $ret = NULL;
         exec("/sbin/service network restart 2>&1", $output, $ret);
         if ($ret != 0) $bExito = FALSE;
+
+        if (!refreshKamailioConfiguration()) $bExito = FALSE;
     }
     return $bExito;
 }
@@ -409,4 +412,28 @@ function construir_ip_red($ip, $mascara)
     return implode(".", $ip); 
 }
 
+function refreshKamailioConfiguration()
+{
+    $output = $ret = NULL;
+    
+    // Run detection of new network configuration
+    exec('/usr/sbin/elastix-setup-kamailio-rtpproxy 2>&1', $output, $ret);
+    if ($ret != 0) {
+        fputs(STDERR, "ERR: failed to setup Kamailio. Output follows:\n\n".implode("\n", $output));
+        return FALSE;
+    }
+    
+    // Restart Kamailio and rtpproxy services
+    exec("/sbin/service rtpproxy-multi restart 2>&1", $output, $ret);
+    if ($ret != 0) {
+        fputs(STDERR, "ERR: failed to restart rtpproxy. Output follows:\n\n".implode("\n", $output));
+        return FALSE;
+    }
+    exec("/sbin/service kamailio restart 2>&1", $output, $ret);
+    if ($ret != 0) {
+        fputs(STDERR, "ERR: failed to restart kamailio. Output follows:\n\n".implode("\n", $output));
+        return FALSE;
+    }
+    return TRUE;
+}
 ?>

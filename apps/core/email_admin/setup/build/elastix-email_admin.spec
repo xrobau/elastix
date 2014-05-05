@@ -161,7 +161,7 @@ pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 #elastix-menumerge $pathModule/setup/infomodules
 service mysqld status &>/dev/null
 res=$?
-if($res -eq 0); then
+if [ $res -eq 0 ]; then
 	#service is up
 	elastix-menumerge $pathModule/setup/infomodules	
 else
@@ -233,6 +233,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Email_admin: fix incorrect shell syntax in postinstall scriptlet.
+  SVN Rev[6621]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.

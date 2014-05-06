@@ -207,6 +207,7 @@ $rtpproxy_multi = '"'.implode('" "', $rtpproxy_list).'"';
 $rtpproxy_config = <<<RTPPROXY_CONFIG
 BASE_PORT=7722
 OPTIONS_BRIDGE=($rtpproxy_multi)
+OPTIONS='-m 10000 -M 20000'
 
 RTPPROXY_CONFIG;
 file_put_contents('/etc/sysconfig/rtpproxy-multi', $rtpproxy_config);

@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Mon May 06 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: now rtpproxy configuration will explicitly specify RTP UDP port range
+  of 10000 to 20000 for media negotiation.
+  SVN Rev[6625]
+
 * Fri Apr 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: elastix-admin-passwords: fix regexp to match odbc.ini sections that 
   include dashes. Remove commented-out code relevant for Elastix 2 only. Do a 

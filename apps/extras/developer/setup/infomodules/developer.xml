@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+        <menu id="developer" name="Developer" idParent="" type="" link=""  order_no="10">
+                <permissions administrative="yes" organization_access="no" >
+
+                </permissions>
+        </menu>
+        <version>       </version>
+        <description>   </description>
+</module>

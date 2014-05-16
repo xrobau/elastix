@@ -376,6 +376,17 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri May 16 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: kamailio: for the IP authorization scenario, do not just overwrite the
+  From: user for trunk identification. Instead, save it to a temporary variable
+  that is used in a later uac_replace_from call. This allows restoring the From:
+  user in the response, fixing interaction with stricter SIP peers that reject
+  responses with From: users leaked from the database.
+- FIXED: kamailio: check on database whether routed request user is actually
+  a global trunk. This fixes the scenario where the From: user and authorization
+  user match for a trunk, which incorrectly triggered the domain mangling logic.
+  SVN Rev[6627]
+
 * Fri May 02 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: kamailio: add P-Asserted-Identity header to INVITE for the scenario of
   incoming calls with IP authentication. This restores the Caller-ID that was

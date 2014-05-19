@@ -155,6 +155,13 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: factor out mapping of P-vars to account settings
+  to a separate function. In addition to improving readability, this allows
+  subclasses to override the mapping. This is in preparation to the integration
+  of Hanlong support.
+  SVN Rev[6628]
+
 * Mon May 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Endpoint Configurator: add support for Grandstream GXP2160, based on
   work by Lenin Loaza.

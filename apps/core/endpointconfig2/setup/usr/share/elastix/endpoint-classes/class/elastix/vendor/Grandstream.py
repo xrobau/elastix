@@ -574,7 +574,31 @@ class Endpoint(BaseEndpoint):
                 # IP Address
                 o = stdvars['static_dns2'].split('.')
                 vars.update({'P25': o[0], 'P26': o[1], 'P27': o[2], 'P28': o[3],})
+        
+        varmap = self._grandstreamvarmap()
 
+        # Blank out all variables prior to assignment
+        for i in range(0, min(len(varmap), stdvars['max_sip_accounts'])):
+            vars[varmap[i]['enable']] = 0
+            vars[varmap[i]['sipserver']] = stdvars['server_ip']
+            vars[varmap[i]['outboundproxy']] = stdvars['server_ip']
+            vars[varmap[i]['accountname']] = ''
+            vars[varmap[i]['displayname']] = ''
+            vars[varmap[i]['sipid']] = ''
+            vars[varmap[i]['authid']] = ''
+            vars[varmap[i]['secret']] = ''
+            vars[varmap[i]['autoanswercallinfo']] = 1
+        
+        for i in range(0, min(len(varmap), len(stdvars['sip']))):
+            vars[varmap[i]['enable']] = 1
+            vars[varmap[i]['accountname']] = stdvars['sip'][i].description
+            vars[varmap[i]['displayname']] = stdvars['sip'][i].description
+            vars[varmap[i]['sipid']] = stdvars['sip'][i].extension
+            vars[varmap[i]['authid']] = stdvars['sip'][i].account
+            vars[varmap[i]['secret']] = stdvars['sip'][i].secret
+        return vars
+
+    def _grandstreamvarmap(self): 
         varmap = [
             {'enable'               :   'P271', # Enable account
              'accountname'          :   'P270', # Account Name
@@ -637,28 +661,9 @@ class Endpoint(BaseEndpoint):
              'autoanswercallinfo'   :   'P1838',# Enable auto-answer by Call-Info
             },
         ]
-
-        # Blank out all variables prior to assignment
-        for i in range(0, min(len(varmap), stdvars['max_sip_accounts'])):
-            vars[varmap[i]['enable']] = 0
-            vars[varmap[i]['sipserver']] = stdvars['server_ip']
-            vars[varmap[i]['outboundproxy']] = stdvars['server_ip']
-            vars[varmap[i]['accountname']] = ''
-            vars[varmap[i]['displayname']] = ''
-            vars[varmap[i]['sipid']] = ''
-            vars[varmap[i]['authid']] = ''
-            vars[varmap[i]['secret']] = ''
-            vars[varmap[i]['autoanswercallinfo']] = 1
         
-        for i in range(0, min(len(varmap), len(stdvars['sip']))):
-            vars[varmap[i]['enable']] = 1
-            vars[varmap[i]['accountname']] = stdvars['sip'][i].description
-            vars[varmap[i]['displayname']] = stdvars['sip'][i].description
-            vars[varmap[i]['sipid']] = stdvars['sip'][i].extension
-            vars[varmap[i]['authid']] = stdvars['sip'][i].account
-            vars[varmap[i]['secret']] = stdvars['sip'][i].secret
-        return vars
-            
+        return varmap
+
     def _encodeGrandstreamConfig(self, vars):
         # Encode configuration variables. The gnkey must be the last item in
         # order to prevent other variables from being followed by a null byte.

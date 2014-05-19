@@ -177,6 +177,8 @@ class Endpoint(BaseEndpoint):
             return False            
         elif self._ssh_password != None and not self._rebootbyssh():
             return False
+        elif self._http_password != None and not self._rebootbyhttp():
+            return False
         
         self._unregister()
         self._setConfigured()
@@ -517,6 +519,11 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s failed to connect - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
+
+    def _rebootbyhttp(self):
+        logging.error('Endpoint %s@%s unimplemented reboot by HTTP' %
+            (self._vendorname, self._ip))
+        return False
 
     def _hashTableGrandstreamConfig(self):
         stdvars = self._prepareVarList()

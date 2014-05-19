@@ -156,6 +156,10 @@ fi
 
 %changelog
 * Mon May 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce a Grandstream HTTP reboot hook and
+  leave it unimplemented. This is in preparation to the integration of Hanlong 
+  support.
+  SVN Rev[6630]
 - CHANGED: Endpoint Configurator: factor out Grandstream per-model variable
   tweaking to a separate function. This allows subclasses to override this
   tweaking for their own implemented models. This is in preparation to the

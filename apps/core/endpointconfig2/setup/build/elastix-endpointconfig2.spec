@@ -156,6 +156,8 @@ fi
 
 %changelog
 * Mon May 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce new manufacturer Hanlong.
+  SVN Rev[6631]
 - CHANGED: Endpoint Configurator: introduce a Grandstream HTTP reboot hook and
   leave it unimplemented. This is in preparation to the integration of Hanlong 
   support.

@@ -156,10 +156,15 @@ fi
 
 %changelog
 * Mon May 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Endpoint Configurator: factor out mapping of P-vars to account settings
-  to a separate function. In addition to improving readability, this allows
-  subclasses to override the mapping. This is in preparation to the integration
-  of Hanlong support.
+- CHANGED: Endpoint Configurator: factor out Grandstream per-model variable
+  tweaking to a separate function. This allows subclasses to override this
+  tweaking for their own implemented models. This is in preparation to the
+  integration of Hanlong support.
+  SVN Rev[6629]
+- CHANGED: Endpoint Configurator: factor out mapping of Grandstream P-vars to 
+  account settings to a separate function. In addition to improving readability, 
+  this allows subclasses to override the mapping. This is in preparation to the 
+  integration of Hanlong support.
   SVN Rev[6628]
 
 * Mon May 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>

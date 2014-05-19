@@ -548,8 +548,10 @@ class Endpoint(BaseEndpoint):
             # TODO: inherit server language
             'P1362' :   self._language, # Phone display language
         }
-        if self._model in ('GXP280',):
-            vars.update({'P73' : '1'})  # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO
+        
+        # Do per-model variable adjustments
+        self._updateVarsByModel(stdvars, vars)
+        
         if not self._dhcp:
             vars.update({
                 'P8'     :  '1',    # DHCP=0 o static=1
@@ -597,6 +599,12 @@ class Endpoint(BaseEndpoint):
             vars[varmap[i]['authid']] = stdvars['sip'][i].account
             vars[varmap[i]['secret']] = stdvars['sip'][i].secret
         return vars
+
+    # Should override this method if the model for the new vendor requires
+    # additional variable modification.
+    def _updateVarsByModel(self, stdvars, vars):
+        if self._model in ('GXP280',):
+            vars.update({'P73' : '1'})  # Send DTMF. 8 - in audio, 1 - via RTP, 2 - via SIP INFO
 
     def _grandstreamvarmap(self): 
         varmap = [

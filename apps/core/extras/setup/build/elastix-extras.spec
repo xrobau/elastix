@@ -3,7 +3,7 @@
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -60,6 +60,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon May 26 2014 Bruno Macias <bmacias@palosanto.com> 2.4.0-5
+- DELETED: extras - framed menu, vtigerCRM was deleted. Now VtigerCRM is a
+  Addons.
+
 * Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
   SVN history. Bumped release in specfile.

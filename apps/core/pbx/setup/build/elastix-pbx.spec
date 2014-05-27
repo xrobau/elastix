@@ -376,6 +376,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue May 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: separate selection of required rtpproxy from actual 
+  application of selection. This allows consolidation of the same choosing logic
+  for both rtpproxy and gateway detection. Comment out unused forwarding block.
+  Do not handle SUBSCRIBE "Dialog" events, and instead route them to Asterisk,
+  in order to fix phone BLF support.
+  SVN Rev[6636]
+
 * Fri May 16 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: kamailio: for the IP authorization scenario, do not just overwrite the
   From: user for trunk identification. Instead, save it to a temporary variable

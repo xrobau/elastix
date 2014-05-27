@@ -214,58 +214,49 @@ file_put_contents('/etc/sysconfig/rtpproxy-multi', $rtpproxy_config);
 
 // Write out the kamailio configuration
 $rtpproxy_sock = '';
-$route_mhomed_elastix = '    ';
+$route_mhomed_elastix_choose = '';
 $i = 1; $rtpproxy_port = 7722;
+
 foreach ($if_list as $if_entry) {
     if ($if_entry['ip_addr'] != $kamailio_ip) {
         $rtpproxy_sock .= "modparam(\"rtpproxy\", \"rtpproxy_sock\", \"$i == udp:127.0.0.1:{$rtpproxy_port}\")\n";
-        $route_mhomed_elastix .= <<<ROUTE_CONDITION
-if (\$Ri=="{$if_entry['ip_addr']}" || 
-        $(hdr(Record-Route)[1]{nameaddr.uri}{uri.host}) == "{$if_entry['ip_addr']}" ||
-        is_in_subnet($(du{uri.host}), "{$if_entry['net_addr']}/{$if_entry['mask']}") ||
-        is_in_subnet(\$sel(via[2].host), "{$if_entry['net_addr']}/{$if_entry['mask']}") ||
-        is_in_subnet(\$td, "{$if_entry['net_addr']}/{$if_entry['mask']}")) {
 
-        set_rtp_proxy_set("{$i}");
-        rtpproxy_manage("co", "{$if_entry['ip_addr']}");
+		// Internal network for interface
+		$subnet_list = array("{$if_entry['net_addr']}/{$if_entry['mask']}");
+		
+		// Gateways through interface
+		foreach ($if_entry['gwroute'] as $gwroute) {
+			array_push($subnet_list, "{$gwroute['net_addr']}/{$gwroute['mask']}");
+		}
+		$subnet_cond = "is_in_subnet(\$var(target_remote_ip), \"".
+			implode("\") ||\n\t\tis_in_subnet(\$var(target_remote_ip), \"", $subnet_list).
+			"\")";
 
-    } else 
+		$route_mhomed_elastix_choose .= <<<ROUTE_CONDITION
+	if ($subnet_cond) {
+
+		\$var(rtpproxy_set) = {$i};
+		\$var(rtpproxy_if) = "{$if_entry['ip_addr']}";
+		return 1;
+	}
+
 ROUTE_CONDITION;
-
-        // Write out redirections using gateways through this interface
-        foreach ($if_entry['gwroute'] as $gwroute) {
-            $route_mhomed_elastix .= <<<ROUTE_GW_CONDITION
-if (is_in_subnet($(du{uri.host}), "{$gwroute['net_addr']}/{$gwroute['mask']}") ||
-        is_in_subnet(\$sel(via[2].host), "{$gwroute['net_addr']}/{$gwroute['mask']}") ||
-        is_in_subnet(\$td, "{$gwroute['net_addr']}/{$gwroute['mask']}")) {
-
-        set_rtp_proxy_set("{$i}");
-        rtpproxy_manage("co", "{$if_entry['ip_addr']}");
-
-    } else 
-ROUTE_GW_CONDITION;
-        }
 
         $i++; $rtpproxy_port++;
     }
 }
 
+$route_mhomed_elastix_gateway = '';
 if (is_null($gateway_idx)) {
-	$route_mhomed_elastix .= <<<ROUTE_FAILURE
-{
-        xlog("L_ALERT", "ALERT: no matching set: du=\$du Ri=\$Ri Record-Route[0]=\$(hdr(Record-Route)[0]) Record-Route[1]=\$(hdr(Record-Route)[1]) Via[0]=\$(hdr(Via)[0]) Via[1]=\$(hdr(Via)[1]) via[2].host=\$sel(via[2].host)\\n");
-    }
+	$route_mhomed_elastix_gateway .= <<<ROUTE_FAILURE
+	xlog("L_ALERT", "ALERT: no matching set: si=\$si du=\$du Ri=\$Ri td=\$td Record-Route[0]=\$(hdr(Record-Route)[0]) Record-Route[1]=\$(hdr(Record-Route)[1]) Via[0]=\$(hdr(Via)[0]) Via[1]=\$(hdr(Via)[1]) via[2].host=\$sel(via[2].host)\\n");
 ROUTE_FAILURE;
 } else {
 	$gw_if = $if_list[$gateway_idx]['ip_addr'];
 	$i = $gateway_idx + 1;
-	$route_mhomed_elastix .= <<<ROUTE_DEFAULT
-{
-        # Apparently no match, sending to interface leading to gateway
-        #xlog("L_ALERT", "ALERT: no matching set (sending to gateway): du=\$du Ri=\$Ri Record-Route[0]=\$(hdr(Record-Route)[0]) Record-Route[1]=\$(hdr(Record-Route)[1]) Via[0]=\$(hdr(Via)[0]) Via[1]=\$(hdr(Via)[1]) via[2].host=\$sel(via[2].host)\\n");
-        set_rtp_proxy_set("{$i}");
-        rtpproxy_manage("co", "{$gw_if}");
-    }
+	$route_mhomed_elastix_gateway .= <<<ROUTE_DEFAULT
+	\$var(rtpproxy_set) = {$i};
+	\$var(rtpproxy_if) = "{$gw_if}";
 ROUTE_DEFAULT;
 }
 
@@ -280,9 +271,85 @@ kamailio.bindport = "5060" desc "Kamailio Port"
 mhomed = 1
 
 $rtpproxy_sock
-route[MHOMED_ELASTIX] {
-$route_mhomed_elastix
+# Define \$var(target_remote_ip) before invoking this block
+route[MHOMED_ELASTIX_CHOOSE] {
+	# Do not choose if value not available
+	if (\$var(target_remote_ip) == \$null)
+		return -1;
+	if (\$var(target_remote_ip) == \$sel(cfg_get.asterisk.bindip))
+		return -1;
+
+	# Resolve IP if given hostname
+	if (!is_ip(\$var(target_remote_ip))) {
+		if (dns_query(\$var(target_remote_ip), "target_remote_ip")) {
+			if (\$dns(target_remote_ip=>ipv4) > 0) {
+				# Might trip up on IPv6
+				\$var(i) = 0;
+				while (\$var(i) < \$dns(target_remote_ip=>count)) {
+					\$var(target_remote_ip) = \$dns(target_remote_ip=>addr[\$var(i)]);
+					\$var(i) = \$var(i) + 1;
+				}
+			} else {
+				return -1;
+			}
+		} else {
+			return -1;
+		}
+	}
+
+	# Choose based on subnet or gateway
+$route_mhomed_elastix_choose
+	return -1;
 }
+
+route[MHOMED_ELASTIX] {
+
+	\$var(rr_advertise_address) = \$null;
+	\$var(rtpproxy_set) = \$null;
+	\$var(rtpproxy_if) = \$null;
+
+	\$var(target_remote_ip) = \$si;
+	if (route(MHOMED_ELASTIX_CHOOSE)) {
+		return;
+	}
+
+	\$var(target_remote_ip) = \$Ri;
+	if (route(MHOMED_ELASTIX_CHOOSE)) {
+		return;
+	}
+
+	if (\$du != \$null) {
+		\$var(target_remote_ip) = \$(du{uri.host});
+		if (route(MHOMED_ELASTIX_CHOOSE)) {
+			return;
+		}
+	}
+
+	\$var(target_remote_ip) = \$td;
+	if (route(MHOMED_ELASTIX_CHOOSE)) {
+		return;
+	}
+
+	if (\$(hdr(Record-Route)[1]) != \$null) {
+		\$var(target_remote_ip) = \$(hdr(Record-Route)[1]{nameaddr.uri}{uri.host});
+		if (route(MHOMED_ELASTIX_CHOOSE)) {
+			return;
+		}
+	}
+
+	if (\$sel(via[2].host) != \$null) {
+		\$var(target_remote_ip) = \$sel(via[2].host);
+		if (route(MHOMED_ELASTIX_CHOOSE)) {
+			return;
+		}
+	}
+
+$route_mhomed_elastix_gateway
+
+	# TODO: auto-insert advertised public address here	
+	\$var(rr_advertise_address) = \$null;
+}
+
 
 ROUTE_MHOMED_ELASTIX;
 

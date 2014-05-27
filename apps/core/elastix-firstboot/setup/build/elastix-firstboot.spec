@@ -99,6 +99,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Tue May 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: rework generated Kamailio configuration so that separation between
+  networks and packet conditions is easier to see. Include attempt to resolve
+  host names for non-IP hosts.
+  SVN Rev[6635]
+
 * Mon May 06 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: now rtpproxy configuration will explicitly specify RTP UDP port range
   of 10000 to 20000 for media negotiation.

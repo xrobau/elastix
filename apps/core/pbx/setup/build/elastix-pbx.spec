@@ -376,6 +376,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri May 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: switch all BLOB columns that (commonly?) store text to
+  a corresponding TEXT type. This fixes issues with Kamailio receiving hexdumps
+  through ODBC instead of character data when fetching XCAP.
+  SVN Rev[6637]
+
 * Tue May 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: separate selection of required rtpproxy from actual 
   application of selection. This allows consolidation of the same choosing logic

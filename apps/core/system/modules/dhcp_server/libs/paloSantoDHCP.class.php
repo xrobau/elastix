@@ -48,7 +48,7 @@ class PaloSantoDHCP
                 $patron = "^[[:space:]]*range dynamic-bootp[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]+([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?;";
-                if(ereg($patron, $linea_archivo, $arrReg)) {
+                if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
                     $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_1"] = $arrReg[1]; 
                     $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_2"] = $arrReg[2];
                     $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_3"] = $arrReg[3]; 
@@ -61,14 +61,14 @@ class PaloSantoDHCP
     
                 // LEASE TIME
                 $patron = "^[[:space:]]*default-lease-time[[:space:]]([[:digit:]]{1,8})[[:space:]]?;";
-                if(ereg($patron, $linea_archivo, $arrReg)) {
+                if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
                     $arrConfigurationDHCP["LEASE_TIME"]["in_lease_time"] = $arrReg[1];
                 } 
     
                 // GATEWAY
                 $patron = "^[[:space:]]*option routers[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?";
-                if(ereg($patron, $linea_archivo, $arrReg)) {
+                if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
                     $arrConfigurationDHCP["GATEWAY"]["in_gw_1"] = $arrReg[1]; 
                     $arrConfigurationDHCP["GATEWAY"]["in_gw_2"] = $arrReg[2];
                     $arrConfigurationDHCP["GATEWAY"]["in_gw_3"] = $arrReg[3]; 
@@ -78,7 +78,7 @@ class PaloSantoDHCP
                 // GATEWAY NETMASK
                 $patron = "^[[:space:]]*option subnet-mask[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?";
-                if(ereg($patron, $linea_archivo, $arrReg)) {
+                if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
                     $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_1"] = $arrReg[1]; 
                     $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_2"] = $arrReg[2];
                     $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_3"] = $arrReg[3]; 
@@ -88,7 +88,7 @@ class PaloSantoDHCP
                 // WINS
                 $patron = "^[[:space:]]*option netbios-name-servers[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?";
-                if(ereg($patron, $linea_archivo, $arrReg)) {
+                if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
                     $arrConfigurationDHCP["WINS"]["in_wins_1"] = $arrReg[1]; 
                     $arrConfigurationDHCP["WINS"]["in_wins_2"] = $arrReg[2];
                     $arrConfigurationDHCP["WINS"]["in_wins_3"] = $arrReg[3]; 

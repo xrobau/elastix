@@ -257,7 +257,7 @@ function leerDatosGrafico($type_graph, $date_start, $date_end)
 
     if ($total>0){
         foreach($arrCDR['Data'] as $cdr) {
-            if (eregi("^DAHDI/([[:digit:]]+)",$cdr[4],$regs3)) $trunk='DAHDI/g'.$grupos[$regs3[1]];
+            if (preg_match("/^DAHDI/([[:digit:]]+)/i",$cdr[4],$regs3)) $trunk='DAHDI/g'.$grupos[$regs3[1]];
             else $trunk=str_replace(strstr($cdr[4],'-'),'',$cdr[4]);
         //tengo que buscar la tarifa para el numero de telefono
             $numero=$cdr[2];

@@ -411,7 +411,7 @@ a array with the field "total" containing the total of records.
         $lines = file($path);
         foreach($lines as $line)
         {
-            if(eregi("([[:alnum:]]*) => ",$line, $regs))
+            if(preg_match("/([[:alnum:]]*) => /i",$line, $regs))
             {
                 $arrVal = explode(",", $line);
                 $result[$regs[1]] = $arrVal[2];

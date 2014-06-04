@@ -353,7 +353,7 @@ class paloTree {
       while($file=readdir($dir)){
          $path=$directorio."/".$file;   
       
-         if(is_readable($path) && $file!="." && $file!=".." && !preg_match("/~/",$file) && !preg_match("/^\.*$/",$file) && !eregi("CVS",$file)){
+         if(is_readable($path) && $file!="." && $file!=".." && !preg_match("/~/",$file) && !preg_match("/^\.*$/",$file) && !preg_match("/CVS/i",$file)){
             if(is_dir($path) )
                $tipo="C";  
             else
@@ -366,9 +366,9 @@ class paloTree {
 
           $nombre=$file;   
                
-             if(eregi("html",$file))
+             if(preg_match("/html/i",$file))
                 $nombre=basename($file, ".html");
-             elseif(eregi("htm",$file))
+             elseif(preg_match("/htm/i",$file))
                    $nombre=basename($file, ".htm");
                    
                                                
@@ -413,7 +413,7 @@ class paloTree {
                 $html=file_get_contents($url);
                 //<META NAME="keywords" CONTENT="introduccion, test, solo, palosanto, palo, santo, solutions, test">
                 $patron="<META[[:space:]]+NAME[[:space:]]*=[[:space:]]*\"keywords\"[[:space:]]+CONTENT[[:space:]]*=[[:space:]]*\"([^\"]*)";
-                  if(eregi("$patron",$html,$regs)){
+                  if(preg_match("/$patron/i",$html,$regs)){
                         $keywords=$regs[1];
                         $sQuery="UPDATE help_nodo SET keywords=\"$keywords\" WHERE id_nodo=$id_nodo";
                         $bValido=$db->genQuery($sQuery);
@@ -421,7 +421,7 @@ class paloTree {
                   }
                   
                 $patron2="<META[[:space:]]+modulo[[:space:]]*=[[:space:]]*\"([^\"]*)";
-                   if(eregi("$patron2",$html,$regs)){
+                   if(preg_match("/$patron2/i",$html,$regs)){
                       $modulo=$regs[1];
                       //print_r($regs);
                       $sQuery="UPDATE help_nodo SET modulo=\"$modulo\" WHERE id_nodo=$id_nodo";

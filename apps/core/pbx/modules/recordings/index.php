@@ -110,7 +110,7 @@ function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $
             $file_ext = "";
             if ($handle = opendir($path)) {
                 while (false !== ($dir = readdir($handle))) {
-                    if (ereg("({$extension}-.*)\.([gsm|wav]*)$", $dir, $regs)) {
+                    if (preg_match("/({$extension}-.*)\.([gsm|wav]*)$/", $dir, $regs)) {
                         $archivo = $regs[1];
                         $file_ext = $regs[2];
                         break;

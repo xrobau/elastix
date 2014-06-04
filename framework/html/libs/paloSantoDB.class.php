@@ -371,8 +371,8 @@ class paloDB {
     function DBCAMPO($sVal)
     {
 //        if (get_magic_quotes_gpc()) $sVal = stripslashes($sVal);
-        $sVal = ereg_replace("\\\\", "\\\\", "$sVal");
-        $sVal = ereg_replace("'", "\\'", "$sVal");
+        $sVal = preg_replace("/\\\\/", "\\\\", "$sVal");
+        $sVal = preg_replace("/'/", "\\'", "$sVal");
         return "'$sVal'";
     }
 

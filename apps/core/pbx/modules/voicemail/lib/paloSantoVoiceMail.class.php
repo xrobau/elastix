@@ -91,7 +91,7 @@ class paloSantoVoiceMail {
         $grep = exec("grep '^$extension => ' $path");
 
         if( $grep != '' && $grep != null ){
-            eregi("^$extension => ([[:alnum:]]*),([[:alnum:]| ]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |=]*)attach=(yes|no)\|saycid=(yes|no)\|envelope=(yes|no)\|delete=(yes|no)",$grep, $arrResult);
+            preg_match("/^$extension => ([[:alnum:]]*),([[:alnum:]| ]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |@|\.]*),([[:alnum:]| |=]*)attach=(yes|no)\|saycid=(yes|no)\|envelope=(yes|no)\|delete=(yes|no)/i",$grep, $arrResult);
             return $arrResult;
         }
         //[0] => 408 => 1234,Desarrollo Elastix,bomv.27@gmail.com,,attach=no|saycid=no|envelope=no|delete=no

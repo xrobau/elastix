@@ -320,7 +320,7 @@ function getAction()
 // Generación de todos los gráficos a partir de este punto
 function grafic($du, $totIn, $totOut, $tot, $ext)
 {
-	if(ereg("^([[:digit:]]{1,3})%", trim($du), $arrReg)) {
+	if(preg_match("/^([[:digit:]]{1,3})%/", trim($du), $arrReg)) {
 		$usoDisco = $arrReg[1];
 	} else {
 		$usoDisco = $du;

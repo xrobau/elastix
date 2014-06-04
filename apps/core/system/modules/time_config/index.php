@@ -99,7 +99,7 @@ function _moduleContent(&$smarty, $module_name)
 		while (!feof($hArchivo)) {
 			$s = fgets($hArchivo);
 			$regs = NULL;
-			if (ereg('^ZONE="(.*)"', $s, $regs))
+			if (preg_match('/^ZONE="(.*)"/', $s, $regs))
 				$sZonaActual = $regs[1];
 			else $infoZona[] = $s;
 		}
@@ -133,15 +133,15 @@ function _moduleContent(&$smarty, $module_name)
 		);
 		$bValido = TRUE;
 		foreach ($listaVars as $sVar => $sReg) {
-			if (!ereg($sReg, $_POST[$sVar])) {
+			if (!preg_match("/$sReg/", $_POST[$sVar])) {
 				$bValido = FALSE;
 			}
 		}
-        if(!ereg('^[[:digit:]]{4}$',$year))
+        if(!preg_match('/^[[:digit:]]{4}$/',$year))
             $bValido = FALSE;
-        if(!ereg('^[[:digit:]]{1,2}$',$month))
+        if(!preg_match('/^[[:digit:]]{1,2}$/',$month))
             $bValido = FALSE;
-        if(!ereg('^[[:digit:]]{1,2}$',$day))
+        if(!preg_match('/^[[:digit:]]{1,2}$/',$day))
             $bValido = FALSE;
 		if ($bValido && !checkdate($month, $day, $year)) $bValido = FALSE;
 

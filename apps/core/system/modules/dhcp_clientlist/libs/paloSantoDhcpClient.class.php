@@ -107,23 +107,23 @@ class paloSantoDhcpClienList {
             // Saltarse los comentarios
             if (preg_match('/^\s*#/', $line)) continue;
 
-	        if(eregi("lease", $line)) {
-		        if(ereg("([0-9.]+)", $line, $arrReg)){
+	        if(preg_match("/lease/i", $line)) {
+		        if(preg_match("/([0-9.]+)/", $line, $arrReg)){
 		            //$data[$count]['iphost'] = $pDB->DBCAMPO($arrReg[1]);
 		            $data[$count]['iphost'] = $arrReg[1];
 		        }
-	        }elseif(eregi("starts", $line)) {
-		        if(ereg("^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:digit:]]+)[[:space:]]([0-9/]+)[[:space:]]([0-9:]+)", $line, $arrReg)){
+	        }elseif(preg_match("/starts/i", $line)) {
+		        if(preg_match("/^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:digit:]]+)[[:space:]]([0-9/]+)[[:space:]]([0-9:]+)/", $line, $arrReg)){
 		            //$data[$count]['date_starts'] = $pDB->DBCAMPO($arrReg[3]." ".$arrReg[4]);
 		            $data[$count]['date_starts'] = $arrReg[3]." ".$arrReg[4];
 		        }
-	        }elseif(eregi("ends", $line)) {
-		        if(ereg("^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:digit:]]+)[[:space:]]([0-9/]+)[[:space:]]([0-9:]+)", $line, $arrReg)){
+	        }elseif(preg_match("/ends/i", $line)) {
+		        if(preg_match("/^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:digit:]]+)[[:space:]]([0-9/]+)[[:space:]]([0-9:]+)/", $line, $arrReg)){
 		            //$data[$count]['date_ends'] = $pDB->DBCAMPO($arrReg[3]." ".$arrReg[4]);
 		            $data[$count]['date_ends'] = $arrReg[3]." ".$arrReg[4];
 		        }else $data[$count]['date_ends'] = "";
-	        }elseif(eregi("hardware", $line)) {
-		        if(ereg("^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:alnum:]]+)[[:space:]]([a-z0-9:]+)", $line, $arrReg)){
+	        }elseif(preg_match("/hardware/i", $line)) {
+		        if(preg_match("/^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:alnum:]]+)[[:space:]]([a-z0-9:]+)/", $line, $arrReg)){
 		            //$data[$count]['macaddress'] = $pDB->DBCAMPO($arrReg[3]);
 		            $data[$count]['macaddress'] = $arrReg[3];
 		        }

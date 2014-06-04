@@ -83,12 +83,12 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
 
     /* Última búsqueda, si existe */
     if (is_null($sUltimaBusqueda) || $sUltimaBusqueda == '' ||
-        is_null($iUltimoOffset) || !ereg('^[[:digit:]]+$', $iUltimoOffset)) {
+        is_null($iUltimoOffset) || !preg_match('/^[[:digit:]]+$/', $iUltimoOffset)) {
         $sUltimaBusqueda = NULL;
         $iUltimoOffset   = NULL;
     }
 
-    if (!ereg($arrFormElements['filter']['VALIDATION_EXTRA_PARAM'], $field_pattern))
+    if (!preg_match("/".$arrFormElements['filter']['VALIDATION_EXTRA_PARAM']."/", $field_pattern))
         $field_pattern = $listaFechas[count($listaFechas) - 1];
 
     $_POST['filter']   = $field_pattern;
@@ -108,7 +108,7 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     $iEstimadoBytesPagina = $iNumLineasPorPagina * 128;
 
     $iOffsetVerdadero = getParameter('offset');
-    if (is_null($iOffsetVerdadero) || !ereg('^[[:digit:]]+$', $iOffsetVerdadero))
+    iif (is_null($iOffsetVerdadero) || !preg_match('/^[[:digit:]]+$/', $iOffsetVerdadero))
         $iOffsetVerdadero = 0;
 
     if ($iOffsetVerdadero >= $totalBytes) $iOffsetVerdadero = 0;

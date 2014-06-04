@@ -327,7 +327,7 @@ contenido;
         {
             if ($handle = opendir($path)) {
                 while (false !== ($dir = readdir($handle))) {
-                    if ($dir != "." && $dir != ".." && ereg($extension, $dir, $regs) && is_dir($path."/".$dir)) {
+                    if ($dir != "." && $dir != ".." && preg_match("/$extension/", $dir, $regs) && is_dir($path."/".$dir)) {
                         $directorios[] = $dir;
                     }
                 }
@@ -344,7 +344,7 @@ contenido;
                     while (false !== ($file = readdir($handle))) {
                         //no tomar en cuenta . y ..
                         //buscar los archivos de texto (txt) que son los que contienen los datos de las llamadas
-                        if ($file!="." && $file!=".." && ereg("(.+)\.[txt|TXT]",$file,$regs)) {
+                        if ($file!="." && $file!=".." && ereg("/(.+)\.[txt|TXT]/",$file,$regs)) {
                             //leer la info del archivo
                             $pConfig = new paloConfig($voicemailPath, $file, "=", "[[:space:]]*=[[:space:]]*");
                             $arrVoiceMailDes=array();

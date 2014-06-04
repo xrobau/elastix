@@ -379,6 +379,9 @@ fi
 * Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+- FIXED: kamailio: enable SQL quoting for ODBC, which is disabled by default.
+- CHANGED: kamailio: add partial support for XCAP documents (storage).
+  SVN Rev[6640]
 
 * Fri May 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: switch all BLOB columns that (commonly?) store text to

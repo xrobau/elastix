@@ -108,7 +108,7 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     $iEstimadoBytesPagina = $iNumLineasPorPagina * 128;
 
     $iOffsetVerdadero = getParameter('offset');
-    iif (is_null($iOffsetVerdadero) || !preg_match('/^[[:digit:]]+$/', $iOffsetVerdadero))
+    if (is_null($iOffsetVerdadero) || !preg_match('/^[[:digit:]]+$/', $iOffsetVerdadero))
         $iOffsetVerdadero = 0;
 
     if ($iOffsetVerdadero >= $totalBytes) $iOffsetVerdadero = 0;

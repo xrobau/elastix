@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -376,6 +376,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri May 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: switch all BLOB columns that (commonly?) store text to
   a corresponding TEXT type. This fixes issues with Kamailio receiving hexdumps
@@ -410,12 +414,43 @@ fi
   side.
   SVN Rev[6620]
 
+* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: languages modules were updated.
+  SVN Rev[6619]
+
+* Wed Apr 30 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: app pbx, Option zero on module ivr now is accepted.
+  SVN Rev[6614]
+
 * Wed Apr 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: kamailio: specify default registration timeout value to match asterisk
   default. This fixes issue with Aastra phones not specifying a registration
   timeout, and then asterisk revokes registration while kamailio keeps it 
   active.
   SVN Rev[6613]
+
+* Tue Apr 29 2014 Luis Abarca <labarca@palosanto.com> 
+- ADDED: pbx - Build/elastix-pbx.spec: Some requirements were added in order to
+  correct some overwritten files.
+  SVN Rev[6612]
+
+* Mon Apr 28 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: apps pbx, privileged/asteriskconfig created main dir not exists on
+  /var/spool/asterisk.
+  SVN Rev[6611]
+
+* Mon Apr 28 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: apps pbx, kamailio database now is created/
+  SVN Rev[6610]
+
+* Mon Apr 28 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: module reports, database asteriskcdrdv wasn't creating. SQLs files
+  names were changed in folder db/install/asteriskcdrdb
+  SVN Rev[6609]
+
+* Fri Apr 25 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: framework, paloSantoPBX.class, updated SQL.
+  SVN Rev[6606]
 
 * Thu Apr 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: kamailio: restore scrubbing of credentials on INVITEs. Fixes failure to
@@ -425,6 +460,32 @@ fi
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6600]
+
+* Wed Apr 23 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- FIXED: elastix-pbx: fix RPM requires specification for kamailio-unixodbc
+  SVN Rev[6598]
+
+* Wed Apr 23 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- FIXED: elastix-pbx: fix RPM file specification for kamailio
+  SVN Rev[6597]
+
+* Tue Apr 22 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: module trunk, table trunk_organization now have a new column, SQL
+  expression was changed.
+  SVN Rev[6596]
+
+* Tue Apr 22 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: module ANI, column ani_prefix now is varchar.
+  SVN Rev[6595]
+
+* Tue Apr 22 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: module ani, updated language en and es.
+  SVN Rev[6594]
+
+* Tue Apr 22 2014 Bruno Macias <bmacias@palosanto.com> 
+  NEW: module ANI, new module ANI.
+  SVN Rev[6593]
 
 * Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: trunks: update kamailio.address table as needed for trunks
@@ -574,6 +635,7 @@ fi
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6391]
 
 * Thu Jan 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Fix cronjob that removes temporary TTS files by checking whether tts

@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 3.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Tue May 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: rework generated Kamailio configuration so that separation between
   networks and packet conditions is easier to see. Include attempt to resolve
@@ -129,6 +133,7 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[6603]
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6601]
 
 * Thu Apr 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: disable modification of http.conf for asterisk, since kamailio now 

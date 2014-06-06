@@ -377,6 +377,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jun 06 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: load topoh module to work around alleged inability of some
+  phones (Audiocodes) to handle 127.0.0.1 in a Via header.
+  SVN Rev[6644]
+
 * Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

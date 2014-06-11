@@ -114,7 +114,7 @@ class paloSantoConfiguration {
         if (file_exists($pd)) {
             $pid = file_get_contents($pd);
             $regs = NULL;
-            if (ereg('^([[:digit:]]+)', $pid, $regs)) {
+            if (preg_match('/^([[:digit:]]+)/', $pid, $regs)) {
                 if (file_exists("/proc/$regs[1]")) {
                     $bDialerActivo = TRUE;
                 }

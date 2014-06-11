@@ -60,7 +60,7 @@ $statusOpenfire = 'on';
 
 exec("echo 'salida:".print_r($arrSalida,true)."' >> /tmp/webmin");
 foreach($arrSalida as $linea) { //obtengo el estado de webmin
-    if(ereg("stopped", $linea)) {
+    if(preg_match("/stopped/", $linea)) {
         $statusOpenfire = 'off';
         break;
     }

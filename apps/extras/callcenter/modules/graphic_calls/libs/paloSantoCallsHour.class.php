@@ -85,8 +85,8 @@ class paloSantoCallsHour
             $this->errMsg = '(internal) Invalid call status N for incoming calls';
             return NULL;
         }
-        if (!ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $sFechaInicio) ||
-            !ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $sFechaFin)) {
+        if (!preg_match('/^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$/', $sFechaInicio) ||
+            !preg_match('/^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$/', $sFechaFin)) {
             $this->errMsg = '(internal) Invalid date format, must be YYYY-MM-DD';
             return NULL;
         }

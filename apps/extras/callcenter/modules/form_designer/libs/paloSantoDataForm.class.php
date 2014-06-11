@@ -69,7 +69,7 @@ class paloSantoDataForm
         if(!is_null($id_formulario))
             $where .= " and f.id = $id_formulario";
 
-        if (!is_null($id_formulario) && !ereg('^[[:digit:]]+$', "$id_formulario")) {
+        if (!is_null($id_formulario) && !preg_match('/^[[:digit:]]+$/', "$id_formulario")) {
             $this->errMsg = _tr("Form ID is not valid");
         } 
         else {

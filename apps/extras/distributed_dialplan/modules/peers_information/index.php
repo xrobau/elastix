@@ -218,7 +218,7 @@ function AcceptPeerRequest($smarty, $module_name, $local_templates_dir, $pDB, $a
       $action = 2;
       $sent = socketConnection($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $local_ip, $ip_ask , $local_mac, $local_key, $company, $comment, $action);
 
-      if(ereg( "^BEGIN[[:space:]](.*)[[:space:]]END", $sent, $regs ))
+      if(preg_match( "/^BEGIN[[:space:]](.*)[[:space:]]END/", $sent, $regs ))
       {
           if($regs[1] == "accept"){
             $smarty->assign("mb_title", $arrLang["Message"]);
@@ -653,7 +653,7 @@ function rejectPeerRequest($smarty, $module_name, $local_templates_dir, $pDB, $a
     $ip_ask = $dataPeer['host'];
     $mac_ask = $dataPeer['mac'];
     $reject = socketReject($ip_ask, $local_ip, $action);
-    if(ereg( "^BEGIN[[:space:]](.*)[[:space:]]END", $reject, $regs ))
+    if(preg_match( "/^BEGIN[[:space:]](.*)[[:space:]]END/", $reject, $regs ))
       {
           if($regs[1] == "reject"){
              $result = $pPeersInformation->deleteInformationPeer($idPeer);
@@ -707,7 +707,7 @@ function deletePeersInformation($smarty, $module_name, $local_templates_dir, $pD
             $ip_ask = $dataPeer['host'];
             $mac_ask = $dataPeer['mac'];
             $delete = socketReject($ip_ask, $local_ip, $action);
-	    if(ereg( "^BEGIN[[:space:]](.*)[[:space:]]END", $delete, $regs ))
+	    if(preg_match( "/^BEGIN[[:space:]](.*)[[:space:]]END/", $delete, $regs ))
 	    {
 		if($regs[1] == "reject")
 		{
@@ -826,7 +826,7 @@ function sendConnectionRequest($smarty, $module_name, $local_templates_dir, $pDB
             {
                 $result = socketRequest($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $ip_remote, $ip_request, $company_request, $comment_request,$mac_request, $macCertificate, $key_answer, $action, $secret);
 
-                if(ereg( "^BEGIN[[:space:]](.*)[[:space:]]END", $result, $regs ))
+                if(preg_match( "/^BEGIN[[:space:]](.*)[[:space:]]END/", $result, $regs ))
                 {
                     if($regs[1] == "request"){
                         $smarty->assign("mb_title", $arrLang["Message sent"]);

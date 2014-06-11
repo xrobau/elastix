@@ -717,7 +717,7 @@ function caller_invite($smarty, $module_name, $local_templates_dir, $pDB, $arrLa
 
     if($device != null)
     {
-        if(eregi('^[0-9]+$', $device))
+        if(preg_match('/^[0-9]+$/i', $device))
         {
             $callerId = $arrLang['Conference']. "<$room>";
             $result = $pConference->InviteCaller($dsn_agi_manager, $room, $device, $callerId);

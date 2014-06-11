@@ -83,7 +83,7 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 
     // Recoger ID de campaña para operación
     $id_campaign = NULL;
-    if (isset($_POST['id_campaign']) && ereg('^[[:digit:]]+$', $_POST['id_campaign']))
+    if (isset($_POST['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_POST['id_campaign']))
         $id_campaign = $_POST['id_campaign'];
 
     // Revisar si se debe de borrar una campaña elegida
@@ -661,7 +661,7 @@ function displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir)
     $sDatosCSV = '';
             
     $id_campaign = NULL;
-    if (isset($_GET['id_campaign']) && ereg('^[[:digit:]]+$', $_GET['id_campaign']))
+    if (isset($_GET['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_GET['id_campaign']))
         $id_campaign = $_GET['id_campaign'];
     if (is_null($id_campaign)) {
         Header("Location: ?menu=$module_name");

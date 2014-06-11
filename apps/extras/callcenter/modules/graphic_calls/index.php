@@ -315,8 +315,8 @@ function graphHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     if (!isset($_GET['fecha_fin'])) return '';
     $sFechaInicial = $_GET['fecha_ini']; $sFechaFinal = $_GET['fecha_fin'];
     $sFormatoFecha = '^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$';
-    if (!ereg($sFormatoFecha, $sFechaInicial)) return '';
-    if (!ereg($sFormatoFecha, $sFechaFinal)) return '';
+    if (!preg_match("/".$sFormatoFecha."/", $sFechaInicial)) return '';
+    if (!preg_match("/".$sFormatoFecha."/", $sFechaFinal)) return '';
 
     // Recuperar la lista de llamadas
     $arrCalls = array();

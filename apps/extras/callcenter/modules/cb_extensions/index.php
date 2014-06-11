@@ -82,7 +82,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     $oAgentes = new Agentes($pDB);
 
     // Operaciones de manipulación de agentes
-    if (isset($_POST['delete']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
+    if (isset($_POST['delete']) && isset($_POST['agent_number']) && preg_match('/^[[:digit:]]+$/', $_POST['agent_number'])) {
         // Borrar el agente indicado de la base de datos, y del archivo
         if (!$oAgentes->deleteAgent($_POST['agent_number'])) {
             $smarty->assign(array(
@@ -90,7 +90,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
                 'mb_message'    =>  $oAgentes->errMsg,
             ));
         }
-    } elseif (isset($_POST['disconnect']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
+    } elseif (isset($_POST['disconnect']) && isset($_POST['agent_number']) && preg_match('/^[[:digit:]]+$/', $_POST['agent_number'])) {
         // Desconectar agentes. El código en Agentes.class.php puede desconectar
         // varios agentes a la vez, pero aquí sólo se desconecta uno.
         $infoAgent = $oAgentes->getAgents($_POST['agent_number']);
@@ -216,9 +216,9 @@ function newAgent($pDB, $smarty, $module_name, $local_templates_dir)
 function editAgent($pDB, $smarty, $module_name, $local_templates_dir)
 {
     $id_agent = NULL;
-    if (isset($_GET['id_agent']) && ereg('^[[:digit:]]+$', $_GET['id_agent']))
+    if (isset($_GET['id_agent']) && preg_match('/^[[:digit:]]+$/', $_GET['id_agent']))
         $id_agent = $_GET['id_agent'];
-    if (isset($_POST['id_campaign']) && ereg('^[[:digit:]]+$', $_POST['id_agent']))
+    if (isset($_POST['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_POST['id_agent']))
         $id_agent = $_POST['id_agent'];
     if (is_null($id_agent)) {
         Header("Location: ?menu=$module_name");
@@ -305,12 +305,12 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
             } elseif ($_POST['eccpwd1'] != $_POST['eccpwd2']) {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("ECCP passwords don't match"));
-            } elseif (!ereg('^[[:digit:]]+$', $_POST['password1'])) {
+            } elseif (!preg_match('/^[[:digit:]]+$/', $_POST['password1'])) {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("The passwords aren't numeric values"));
             } 
 	      /* Se asume que esta validación no es necesaria.
-		elseif (!ereg('^[[:digit:]]+$', $_POST['extension'])) {
+		elseif (!preg_match('/^[[:digit:]]+$/', $_POST['extension'])) {
 		
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("Error Agent Number"));

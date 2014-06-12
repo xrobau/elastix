@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: use LOG_LOCAL6 for logging of messages in Kamailio 
+  configuration. This change, in addition to suitable logrotate/rsyslog
+  configuration, is required to move log messages to a separate file.
+  SVN Rev[6647]
+
 * Fri Jun 06 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: load topoh module to work around alleged inability of some
   phones (Audiocodes) to handle 127.0.0.1 in a Via header.

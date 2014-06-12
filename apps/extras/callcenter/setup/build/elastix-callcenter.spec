@@ -97,6 +97,10 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: update Ember.js to 1.5.1, Handlebars to 1.3.0.
+  SVN Rev[6648]
+
 * Fri Feb 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: disable PDO::ATTR_EMULATE_PREPARES on all MySQL PDO connections
   in order to use native prepared statements instead of the default PHP emulation.

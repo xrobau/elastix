@@ -267,6 +267,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Control Panel: update Ember.js to 1.5.1, Handlebars to 1.3.0.
+  SVN Rev[6649]
+
 * Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-16
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

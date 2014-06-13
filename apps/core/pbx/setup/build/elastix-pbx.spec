@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -377,6 +377,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: use LOG_LOCAL6 for logging of messages in Kamailio 
   configuration. This change, in addition to suitable logrotate/rsyslog
@@ -391,6 +395,7 @@ fi
 * Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6641]
 - FIXED: kamailio: enable SQL quoting for ODBC, which is disabled by default.
 - CHANGED: kamailio: add partial support for XCAP documents (storage).
   SVN Rev[6640]

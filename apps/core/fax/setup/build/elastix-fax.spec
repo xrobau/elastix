@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -229,13 +229,26 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
+- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon May 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: fax: fix incorrect shell syntax in postinstall scriptlet.
   SVN Rev[6622]
 
+* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: languages modules were updated.
+  SVN Rev[6619]
+
+* Mon Apr 28 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: apps pbx, kamailio database now is created/
+  SVN Rev[6610]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6601]
 
 * Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
 - CHANGED: code of the organization is the same as the domain.

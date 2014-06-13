@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -233,13 +233,30 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon May 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Email_admin: fix incorrect shell syntax in postinstall scriptlet.
   SVN Rev[6621]
 
+* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: languages modules were updated.
+  SVN Rev[6619]
+
+* Fri Apr 25 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: apps - Build/spec's: Commented some code that actually its not used.
+  SVN Rev[6608]
+
+* Fri Apr 25 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: framework, paloSantoPBX.class, updated SQL.
+  SVN Rev[6606]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6601]
 
 * Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
 - FIXED: TRUNK - APPS/Email admin: Was modified resposive style.

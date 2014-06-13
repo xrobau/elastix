@@ -156,9 +156,22 @@ fi
 #/etc/init.d/elastix-synchronizerd
 
 %changelog
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: languages modules were updated.
+  SVN Rev[6619]
+
+* Fri Apr 25 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: apps - Build/spec's: Commented some code that actually its not used.
+  SVN Rev[6608]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6600]
 
 * Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
 - FIXED: TRUNK - APPS/Agenda: Was modified resposive style.

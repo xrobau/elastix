@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -156,14 +156,23 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Mon May 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Network Configuration: reconfigure and restart kamailio/rtpproxy after
   performing changes to network configuration or interfaces.
   SVN Rev[6624]
 
+* Fri Apr 25 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: framework, paloSantoPBX.class, updated SQL.
+  SVN Rev[6606]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6600]
 
 * Wed Mar 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: switch the MOH directory from mohmp3 to moh (the 

@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 3.0.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -142,9 +142,19 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Apr 28 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: module reports, database asteriskcdrdv wasn't creating. SQLs files
+  names were changed in folder db/install/asteriskcdrdb
+  SVN Rev[6609]
+
 * Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6600]
 
 * Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Added definition for asteriskcdrdb.queue_log table for realtime

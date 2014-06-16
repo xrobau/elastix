@@ -74,6 +74,7 @@ class paloSantoExtensions{
             $query .=" WHERE ".implode(" AND ",$where);
         }
         
+        $query .= " order by cast(exten as UNSIGNED) asc ";
         $result=$this->_DB->getFirstRowQuery($query,false,$arrParam);
         if($result==false){
             $this->errMsg=$this->_DB->errMsg;
@@ -102,7 +103,8 @@ class paloSantoExtensions{
         if(count($where)>0){
             $query .=" WHERE ".implode(" AND ",$where);
         }
-        
+       
+        $query .= " order by cast(exten as UNSIGNED) asc "; 
         if(isset($limit) && isset($offset)){
             $query .=" limit ? offset ?";
             $arrParam[]=$limit;

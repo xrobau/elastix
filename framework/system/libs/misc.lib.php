@@ -307,8 +307,8 @@ function load_theme()
     //si no se encuentra setear el tema por default
     if (empty($theme) || $theme==false){
         if($user!=""){
-            setUserProp($user,'theme',"elastixneo","system",$pDB);}
-        return "elastixneo";
+            setUserProp($user,'theme',"tenant","system",$pDB);}
+        return "tenant";
     }else{
         return $theme;
     }

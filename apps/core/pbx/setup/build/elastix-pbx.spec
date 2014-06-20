@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jun 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: TOASTERISK routing should handle the case where auth_check
+  function allowed through a credential with username USERNAME@DOMAIN and 
+  IP realm, and use appropriate segments for domain mangling.
+  SVN Rev[6657]
+
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

@@ -157,7 +157,10 @@ fi
 
 %changelog
 * Fri Jun 20 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Network Configuration: ignore IP and mask fields when using DHCP.
+  SVN Rev[6656]
 - FIXED: Network Configuration: fix typo in translation string in error path.
+  SVN Rev[6655]
 
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest

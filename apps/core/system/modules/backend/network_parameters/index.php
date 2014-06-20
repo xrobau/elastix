@@ -263,6 +263,11 @@ function saveInterface($smarty, $module_name, $local_templates_dir,$pNet) {
         $arrFormInterface = createFormInterface();
         $oForm = new paloForm($smarty,$arrFormInterface);
 
+        // Ignorar valores de IP y máscara en caso de DHCP
+        if ($_POST['type'] == 'dhcp') {
+            $_POST['ip'] = $_POST['mask'] = '255.0.0.0';
+        }
+
         if($oForm->validateForm($_POST)) {
         $smarty->assign("icon","web/apps/$module_name/images/system_network_network_parameters.png");
             if($pNet->escribirConfiguracionInterfaseRed($_POST['dev_id'], $_POST['type'], $_POST['ip'], $_POST['mask'])) {

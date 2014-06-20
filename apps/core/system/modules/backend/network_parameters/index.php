@@ -286,7 +286,7 @@ function saveInterface($smarty, $module_name, $local_templates_dir,$pNet) {
             $smarty->assign("EDIT_PARAMETERS", _tr("Edit Network Parameters"));
 	        $smarty->assign("icon","web/apps/$module_name/images/system_hardware_detector.png");
             $smarty->assign("CONFIRM_EDIT", _tr("Are you sure you want to edit network parameters?"));
-            $strReturn=$oForm->fetchForm("$local_templates_dir/network_edit_interfase.tpl", tr('Edit Interface'). "\"Ethernet ??\"", $_POST);
+            $strReturn=$oForm->fetchForm("$local_templates_dir/network_edit_interfase.tpl", _tr('Edit Interface'). "\"Ethernet ??\"", $_POST);
            }
           return $strReturn;
 }

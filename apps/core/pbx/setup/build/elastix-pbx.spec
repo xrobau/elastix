@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jun 23 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: merge processing for ordinary NAT and websocket into a 
+  single code block, to avoid calling both add_contact_alias() and 
+  set_contact_alias() on the same websocket request.
+  SVN Rev[6658]
+
 * Fri Jun 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: TOASTERISK routing should handle the case where auth_check
   function allowed through a credential with username USERNAME@DOMAIN and 

@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Jun 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: fix regression on contact alias for NAT.
+- CHANGED: now INVITEs with SDP of media=message are routed by Kamailio instead
+  of being relayed to Asterisk. This is required to properly handle MSRP.
+  SVN Rev[6659]
+
 * Mon Jun 23 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: merge processing for ordinary NAT and websocket into a 
   single code block, to avoid calling both add_contact_alias() and 

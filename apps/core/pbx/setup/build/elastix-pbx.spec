@@ -377,6 +377,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jun 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: queues: introduce field queue_member.member_order and modify keys to
+  include this field. This hack force MySQL to use member_order as a sort 
+  parameter for the realtime query used in queue loads. This is part of a fix
+  for undefined ordering of queue members that messes up linear strategy.
+  SVN Rev[6661]
+
 * Tue Jun 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: fix regression on contact alias for NAT.
 - CHANGED: now INVITEs with SDP of media=message are routed by Kamailio instead
